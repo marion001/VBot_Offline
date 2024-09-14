@@ -1,0 +1,342 @@
+{
+    "contact_info": {
+        "full_name": "Vũ Tuyển",
+        "email": "zxcvbnm@gmail.com",
+        "avata": "dasdsa.jpg",
+        "address": {
+            "wards": null,
+            "district": null,
+            "province": null,
+            "country": "Việt Nam"
+        },
+        "location": {
+            "latitude": null,
+            "longitude": null
+        },
+        "user_login": {
+            "active": false,
+            "user_password": "123456789",
+            "notes": "Mật khẩu dùng cho đăng nhập web ui"
+        }
+    },
+    "ssh_server": {
+        "ssh_host": "192.168.14.113",
+        "ssh_port": 22,
+        "ssh_username": "pi",
+        "ssh_password": "vietbot"
+    },
+    "api": {
+        "active": true,
+        "show_log": {
+            "active": false,
+            "log_lever": true
+        },
+        "port": 5002
+    },
+    "home_assistant": {
+        "minimum_threshold": 0.6,
+        "time_out": 15,
+        "internal_url": "http://192.168.14.17:8123",
+        "external_url": "https://domainhass.duckdns.org",
+        "long_token": "gdfgregreR5cCI6IkpXVCJ9..rAgP-"
+    },
+    "virtual_assistant": {
+        "prioritize_virtual_assistants": [
+            "default_assistant",
+            "google_gemini",
+            "chat_gpt"
+        ],
+        "default_assistant": {
+            "time_out": 10,
+            "convert_audio_to_text": {
+                "used_for_chatbox": true,
+                "used_for_display_and_logs": false
+            },
+            "api_key": "dùng chung với giá trị podcast->access_token, không cần thay đổi gì ở đây"
+        },
+        "google_gemini": {
+            "time_out": 25,
+            "api_key": "fdsfdsfdsfvsdfdsvr3rewf"
+        },
+        "chat_gpt": {
+            "time_out": 15,
+            "key_chat_gpt": ""
+        }
+    },
+    "openweathermap": {
+        "key_openweathermap": "53453453f53f534f5345f3"
+    },
+    "media_player": {
+        "time_out": 30,
+        "media_sync_ui": {
+            "active": true,
+            "delay_time": 2
+        },
+        "prioritize_music_source": [
+            "music_local",
+            "zing_mp3",
+            "youtube"
+        ],
+        "youtube": {
+            "google_apis_key": "AIzaSyAuWeVnyM3ijao5XPD62zrMXuBj0JgLYAw"
+        },
+        "zing_mp3": {
+            "authentication_zmp3_rqid": "MHwxMTYdUngMTAxLjIyNC41Nnx2MS4xMC40N3wxNzI2MzA2NjM2ODmUsIC1",
+            "expire_time": 1726310236
+        },
+        "podcast": {
+            "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
+            "password": "VmlldGJvdEAx",
+            "time_out": 7,
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MjYyODcwOTksIm5iZiI6MTcyNjI4NzA5OSwianRpIjoiNTYzNWQyNmYtMDVmYy00NjFiLTg0ODUtMTM4NGM4Y2I4N2JkIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.vBzqqndokOG04rwRaAwvWKF-Z754q_QgdtbyCbLRGw0",
+            "expire_time": 1726351899
+        },
+        "radio_data": [
+            {
+                "name": "vov2",
+                "link": "https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8"
+            },
+            {
+                "name": "vov giao thông hà nội",
+                "link": "https://str.vov.gov.vn/vovlive/vovGTHN.sdp_aac/playlist.m3u8"
+            }
+        ],
+        "music_local": {
+            "path": "Media/Music_Local",
+            "minimum_threshold": 0.6,
+            "allowed_formats": [
+                "mp3",
+                "wav",
+                "flac"
+            ]
+        }
+    },
+    "smart_config": {
+        "backlist_file_name": "BackList.json",
+        "read_information_startup": {
+            "active": false,
+            "read_number": 3
+        },
+        "show_log": {
+            "active": true,
+            "log_display_style": "both"
+        },
+        "mic": {
+            "id": 14
+        },
+        "speaker": {
+            "system": {
+                "alsamixer_name": "Speaker",
+                "id": 0
+            },
+            "volume": 60,
+            "volume_min": 0,
+            "volume_max": 95,
+            "volume_step": 10
+        },
+        "led": {
+            "active": true,
+            "led_gpio": 10,
+            "led_type": "ws281x",
+            "number_led": 12,
+            "brightness": 255,
+            "led_invert": false,
+            "effect": {
+                "led_think": "0000FF",
+                "led_mute": "FF0000"
+            }
+        },
+        "button": {
+            "down": {
+                "gpio": 25,
+                "pulled_high": false,
+                "active": true,
+                "bounce_time": 100,
+                "long_press": {
+                    "active": true,
+                    "duration": 4
+                }
+            },
+            "up": {
+                "gpio": 5,
+                "pulled_high": false,
+                "active": true,
+                "bounce_time": 100,
+                "long_press": {
+                    "active": true,
+                    "duration": 4
+                }
+            },
+            "wakeup": {
+                "gpio": 26,
+                "pulled_high": false,
+                "active": true,
+                "bounce_time": 100,
+                "long_press": {
+                    "active": true,
+                    "duration": 4
+                }
+            },
+            "mic": {
+                "gpio": 6,
+                "pulled_high": false,
+                "active": true,
+                "bounce_time": 100,
+                "long_press": {
+                    "active": true,
+                    "duration": 4
+                }
+            }
+        },
+        "smart_wakeup": {
+            "speak_to_text": {
+                "stt_select": "stt_default",
+                "duration_recording": 6,
+                "silence_duration": 3,
+                "min_amplitude_threshold": 370,
+                "stt_default": {
+                    "notes": "Không cần cấu hình gì cả ở đây"
+                },
+                "stt_viettel": {
+                    "api_key": [
+                        "5435fg345f345f34534"
+                    ]
+                },
+                "stt_ggcloud": {
+                    "authentication_json_file": "stt_token_google_cloud.json",
+                    "rate": 16000,
+                    "channels": 1,
+                    "chunk": 4096,
+                    "language_code": "vi-VN"
+                }
+            },
+            "conversation_mode": true,
+            "sound": {
+                "default": {
+                    "start": "resource/sound/default/ding.mp3",
+                    "finish": "resource/sound/default/dong.mp3",
+                    "mic_on": "resource/sound/default/mic_on.mp3",
+                    "mic_off": "resource/sound/default/mic_off.mp3",
+                    "volume_change": "resource/sound/default/tut_tut.mp3",
+                    "wakeup_reply_on": "resource/sound/default/wakeup_reply_on.mp3",
+                    "wakeup_reply_off": "resource/sound/default/wakeup_reply_off.mp3",
+                    "conversation_mode_on": "resource/sound/default/conversation_mode_on.mp3",
+                    "conversation_mode_off": "resource/sound/default/conversation_mode_off.mp3",
+                    "keys_tts_in_backlist": "resource/sound/default/keys_tts_in_backlist.mp3",
+                    "tts_select_error": "resource/sound/default/tts_select_error.mp3",
+                    "stt_select_error": "resource/sound/default/stt_select_error.mp3",
+                    "all_virtual_assistants_no_response": "resource/sound/default/all_virtual_assistants_no_response.mp3"
+                },
+                "welcome": {
+                    "active": true,
+                    "welcome_file": "resource/sound/welcome/computer-startup.mp3"
+                }
+            },
+            "wakeup_reply": {
+                "active": false,
+                "sound_file": [
+                    {
+                        "file_name": "resource/sound/wakeup_reply/da.mp3",
+                        "active": true
+                    },
+                    {
+                        "file_name": "resource/sound/wakeup_reply/bao_gi_the.mp3",
+                        "active": true
+                    },
+                    {
+                        "file_name": "resource/sound/wakeup_reply/cai_gi.mp3",
+                        "active": true
+                    },
+                    {
+                        "file_name": "resource/sound/wakeup_reply/cu_noi_di.mp3",
+                        "active": true
+                    },
+                    {
+                        "file_name": "resource/sound/wakeup_reply/co_em.mp3",
+                        "active": true
+                    }
+                ]
+            },
+            "hotword_engine": {
+                "key": "/+TGsdTNolucA=="
+            },
+            "hotword": {
+                "lang": "vi",
+                "library": {
+                    "vi": {
+                        "modelFilePath": "porcupine_params_vn.pv"
+                    },
+                    "eng": {
+                        "modelFilePath": "porcupine_params.pv"
+                    }
+                },
+                "hotword_language_error": "Ngôn ngữ Hotword không được hỗ trợ, chỉ hỗ trợ giá trị 'lang' là 'eng hoặc vi'",
+                "porcupine": {
+                    "vi": [
+                        {
+                            "active": true,
+                            "file_name": "e-cu_vn_raspberry-pi_v3_0_0.ppn",
+                            "sensitive": 0.5
+                        },
+                        {
+                            "active": true,
+                            "file_name": "ê-cu_vn_raspberry-pi_v3_0_0.ppn",
+                            "sensitive": 0.5
+                        }
+                    ],
+                    "eng": [
+                        {
+                            "active": true,
+                            "file_name": "hey siri_raspberry-pi.ppn",
+                            "sensitive": 0.5
+                        }
+                    ]
+                }
+            }
+        },
+        "smart_answer": {
+            "cache_tts": {
+                "active": true
+            },
+            "text_to_speak": {
+                "tts_select": "tts_default",
+                "tts_ggcloud": {
+                    "language_code": "vi-VN",
+                    "voice_name": "vi-VN-Wavenet-A",
+                    "speaking_speed": 1,
+                    "authentication_json_file": "tts_token_google_cloud.json"
+                },
+                "tts_default": {
+                    "speaking_speed": 0.9,
+                    "quality": 1,
+                    "voice_name": 1,
+                    "authentication_zai_did": "8k9uAj3FNiTevcSSryzXoYYo6Kh1nc7CARqUIJWo",
+                    "expires_zai_did": "2025-09-09T09:34:30+00:00",
+                    "authentication_zai_sid": "jl-hHjj6LdEl_gb6t498SgtdqHEbBqj9lfRY2wLnPZQNpzC7bIOkEgV3aq-C2Gyiz_gl7lKz9cxRuRCcrZizTS3LtoBIDM8UvupBNFCaVZZPyC9KP0",
+                    "expires_zai_sid": "2025-09-07T08:16:53.866Z"
+                },
+                "tts_zalo": {
+                    "api_key": [
+                        "gfdgdvg4t345"
+                    ],
+                    "voice_name": 1,
+                    "speaking_speed": 0.9
+                },
+                "tts_viettel": {
+                    "api_key": [
+                        "gb546b54tvf45t45"
+                    ],
+                    "voice_name": "hn-phuongtrang",
+                    "speaking_speed": 1,
+                    "without_filter": false
+                },
+                "tts_edge": {
+                    "notes": "Comback Soon",
+                    "voice_name": "vi-VN-HoaiMyNeural",
+                    "speaking_speed": 1
+                },
+                "directory_tts": "TTS_Audio"
+            }
+        }
+    }
+}

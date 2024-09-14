@@ -1,0 +1,45 @@
+{
+    "what_time": [
+        "mấy giờ",
+        "mấy dờ",
+        "mấy rờ"
+    ],
+    "weather": [
+        "thời tiết"
+    ],
+    "news": [
+        "tin tức",
+        "báo",
+        "thời sự"
+    ],
+    "podcast": [
+        "kể truyện",
+        "kể chuyện",
+        "câu chuyện",
+        "câu truyện"
+    ],
+    "radio": [
+        "radio",
+        "phát thanh",
+        "đài"
+    ],
+    "lunar_day": [
+        "lịch âm",
+        "âm lịch",
+        "mồng mấy",
+        "mùng mấy"
+    ],
+    "solar_day": [
+        "lịch dương",
+        "dương lịch"
+    ],
+    "play_music": [
+		"nhạc",
+		"bài"
+    ],
+    "volume": [
+		"volume",
+		"âm lượng"
+    ]
+
+}

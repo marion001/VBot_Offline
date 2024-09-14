@@ -1,0 +1,119 @@
+{
+    "on": [
+        "bật"
+    ],
+    "off": [
+        "tắt"
+    ],
+    "open": [
+        "mở"
+    ],
+    "close": [
+        "đóng"
+    ],
+    "enable": [
+        "kích hoạt"
+    ],
+    "disable": [
+        "vô hiệu"
+    ],
+	
+    "script": [
+        "thực thi",
+		"thi hành"
+    ],
+	
+    "display": [
+        "hiển thị"
+    ],
+    "check": [
+        "kiểm tra"
+    ],
+    "tell": [
+        "kể"
+    ],
+    "listen": [
+        "nghe"
+    ],
+    "read": [
+        "đọc"
+    ],
+    "adjust": [
+        "điều chỉnh"
+    ],
+    "change": [
+        "thay đổi"
+    ],
+    "continue": [
+        "tiếp tục"
+    ],
+    "incrase": [
+        "tăng"
+    ],
+    "decrase": [
+        "giảm"
+    ],
+    "up": [
+        "lên"
+    ],
+    "down": [
+        "xuống"
+    ],
+    "connect": [
+        "nối"
+    ],
+    "disconnect": [
+        "ngắt"
+    ],
+    "sing": [
+        "hát"
+    ],
+    "download": [
+        "download"
+    ],
+    "upload": [
+        "upload"
+    ],
+    "bigger": [
+        "to hơn",
+        "lớn hơn"
+    ],
+    "smaller": [
+        "bé đi",
+        "nhỏ đi"
+    ],
+    "play": [
+        "chơi"
+    ],
+    "pause": [
+        "tạm dừng",
+        "tạm ngừng"
+    ],
+    "stop": [
+        "stop",
+        "dừng phát",
+        "dừng lại",
+        "ngừng phát"
+    ],
+    "send": [
+		"gửi",
+        "chuyển"
+    ],
+    "notice": [
+      "cảnh cáo",
+	  "cảnh báo",
+	  "nhắc"
+    ],
+    "schedule": [
+        "lập lịch",
+        "đặt lịch",
+        "lịch hẹn",
+        "hẹn giờ"
+    ],
+    "setup": [
+        "cài đặt"
+    ],
+    "execute": [
+        "thực hiện"
+    ]
+}

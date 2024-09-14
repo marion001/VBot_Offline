@@ -1,0 +1,61 @@
+{
+    "conversation": [
+        "hội thoại",
+		"trò chuyện",
+		"liên tục"
+    ],
+	"mic": [
+		"mic",
+		"microphone",
+		"mích"
+	],
+    "wakeup_reply": [
+		"phản hồi",
+		"lời đáp"
+
+    ],
+    "automation": [
+       "tự động hóa"
+    ],
+	"air_conditioner": [
+		"điều hòa",
+		"máy lạnh"
+	],
+	"zingmp3_unwanted_words_when_searching": [
+		"phát",
+		"nhạc",
+		"bài",
+		"hát"
+	],
+	"increase": [
+		"tăng"
+	],
+	"decrease": [
+		"giảm"
+	],
+	"maximum":[
+		"tối đa",
+		"full"
+	],
+	"minimum":[
+		"tối thiểu"
+	],
+    "bigger": [
+		"to hơn",
+		"lớn hơn",
+		"lớn nhất",
+		"to nhất"
+    ],
+    "smaller": [
+		"bé đi",
+		"nhỏ đi",
+		"nhỏ nhất"
+    ],
+	"lower": [
+		"thấp"
+	],
+	"high": [
+		"cao"
+	]
+	
+}
