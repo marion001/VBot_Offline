@@ -1,0 +1,168 @@
+<!--
+Code By: Vũ Tuyển
+Designed by: BootstrapMade
+Facebook: https://www.facebook.com/TWFyaW9uMDAx
+-->
+<head>
+  <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+
+  <title>VBot Assistant</title>
+  <meta content="" name="description">
+  <meta content="" name="keywords">
+
+  <!-- Favicons -->
+  <link href="assets/img/favicon.png" rel="icon">
+  <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Nunito:300,300i,400,400i,600,600i,700,700i|Poppins:300,300i,400,400i,500,500i,600,600i,700,700i" rel="stylesheet">
+
+  <!-- Vendor CSS Files -->
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
+  <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
+  
+  
+
+  <!-- Template Main CSS File -->
+  <link href="assets/css/style.css" rel="stylesheet">
+
+  <!-- =======================================================
+  * Template Name: NiceAdmin
+  * Template URL: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/
+  * Updated: Apr 20 2024 with Bootstrap v5.3.3
+  * Author: BootstrapMade.com
+  * License: https://bootstrapmade.com/license/
+  ======================================================== -->
+  <style>
+          .overlay_loading {
+            display: none; /* Ẩn overlay theo mặc định */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Nền tối */
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+  </style>
+    <style>
+        /* CSS hiển thời gian */
+        #container_time {
+			background:#f1f1f1;
+			border:2px solid #999;
+			border-radius:10px;
+			padding: 2px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        #day-date-container_time {
+            display: flex;
+            justify-content: center;
+    
+        }
+        /* Ẩn phần ngày tháng khi trên giao diện mobile */
+        @media (max-width: 768px) {
+            #day-date-container_time {
+                display: none;
+            }
+
+            #times {
+                font-size: 20px; /* Tăng kích thước chữ cho thời gian */
+            }
+        }
+    </style>
+<!-- Css hiển thị thông báo cho code php -->
+    <style>
+        #toast {
+            visibility: hidden;
+            position: fixed;
+            bottom: 10px;
+            right:55px;
+            background: #333;
+            color: #fff;
+            padding: 15px;
+            border-radius: 5px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        #toast button {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 20px;
+            cursor: pointer;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+        }
+        #toastMessage {
+            margin-right: 20px; /* Tạo khoảng trống cho nút đóng */
+        }
+    </style>
+<!-- Css hiển thị media player -->
+    <style>
+
+        #media-container {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        #media-cover {
+            width: 150px;
+            height: 150px;
+            border-radius: 10px;
+        }
+        #progress-container {
+            width: 100%;
+        }
+        #progress-bar {
+            width: 100%;
+        }
+        #time-info {
+            text-align: right;
+            margin-top: 5px;
+        }
+		
+    </style>
+	
+	<!--script Hiển thị thông báo Mesage php -->
+    <script>
+        function showMessagePHP(message, timeout=15) {
+            var toast = document.getElementById('toast');
+            var toastMessage = document.getElementById('toastMessage');
+            toastMessage.innerText = message;
+            toast.style.visibility = 'visible';
+            
+            // Ẩn thông báo sau 30 giây
+            setTimeout(function() {
+                toast.style.visibility = 'hidden';
+            }, timeout * 1000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').style.visibility = 'hidden';
+        }
+    </script>
+	
+
+</head>
+<div id="toast"><span id="toastMessage"></span><button onclick="hideToast()">×</button></div>

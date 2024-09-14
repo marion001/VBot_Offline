@@ -1,0 +1,1557 @@
+<?php 
+#Code By: Vũ Tuyển
+#Designed by: BootstrapMade
+#Facebook: https://www.facebook.com/TWFyaW9uMDAx
+include 'Configuration.php';
+$URL_Address = dirname($Current_URL);
+?>
+  <!-- Vendor JS Files -->
+  <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <script src="assets/vendor/chart.js/chart.umd.js"></script>
+  <script src="assets/vendor/echarts/echarts.min.js"></script>
+  <script src="assets/vendor/quill/quill.js"></script>
+  <script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
+  <script src="assets/vendor/tinymce/tinymce.min.js"></script>
+  <script src="assets/vendor/php-email-form/validate.js"></script>
+  <!-- Thông báo -->
+  <script src="assets/vendor/jquery/jquery-3.5.1.min.js"></script>
+  <script src="assets/vendor/popper/popper.min.js"></script>
+  <script src="assets/vendor/hls/hls.js"></script>
+  <!--END Thông báo -->
+
+  <!-- Template Main JS File -->
+  <script src="assets/js/main.js"></script>
+<script>
+//Hiển thị thời gian
+window.onload = setInterval(updateTime, 1000);
+
+function updateTime() {
+	
+    var d = new Date();
+    var hour = d.getHours();
+    var min = d.getMinutes();
+    var sec = d.getSeconds();
+    document.getElementById("times").innerHTML = formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec);
+	//console.log(formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec))
+}
+
+function formatTime(unit) {
+    return unit < 10 ? "0" + unit : unit;
+}
+
+// Cập nhật ngày và thứ chỉ một lần khi trang tải
+function updateDate() {
+    var d = new Date();
+    var date = d.getDate();
+    var month = d.getMonth();
+    var montharr = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+    var year = d.getFullYear();
+    var day = d.getDay();
+    var dayarr = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
+    document.getElementById("days").innerHTML = dayarr[day];
+    document.getElementById("dates").innerHTML = date + " " + montharr[month] + " " + year;
+    //console.log(date + " " + montharr[month] + " " + year);
+}
+//Cập nhật ngày tháng khi trang tải xong
+document.addEventListener('DOMContentLoaded', function() {
+    // Lần cập nhật đầu tiên sau 1 giây
+    updateDate();
+    // Lần cập nhật thứ hai sau 3 giây (cách lần đầu tiên 2 giây)
+    setTimeout(updateDate, 2000);
+});
+
+
+//Hiển thị và đóng thông báo Message
+function show_message(message) {
+    document.querySelector('#notificationModal .modal-body').innerHTML = message;
+    $('#notificationModal').modal('show');
+}
+
+function close_message() {
+    $('#notificationModal').modal('hide');
+}
+
+// Hàm để hiển thị hoặc ẩn overlay
+function loading(action) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (action === 'show') {
+        overlay.style.display = 'flex';
+    } else if (action === 'hide') {
+        overlay.style.display = 'none';
+    }
+}
+loading("hide");
+</script>
+<script>
+//Xóa File theo path
+function deleteFile(filePath, langg = "No") {
+    if (!confirm("Bạn có chắc chắn muốn xóa file: '" + filePath.substring(filePath.lastIndexOf('/') + 1) + "' này không?")) {
+        return;
+    }
+    loading("show");
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'includes/php_ajax/Del_file_path.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onload = function() {
+        loading("hide");
+        if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.status === 'success') {
+                showMessagePHP(response.message, 3);
+            } else {
+                show_message("<center>" + response.message + "</center>");
+            }
+            //Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
+            if (langg === "vi") {
+                loadConfigHotword("vi")
+            } else if (langg === "eng") {
+                loadConfigHotword("eng")
+            } else if (langg === "scan_Music_Local") {
+                list_audio_show_path('scan_Music_Local')
+            } else if (langg === "scan_Audio_Startup") {
+                list_audio_show_path('scan_Audio_Startup')
+            } else if (langg === "media_player_search") {
+                if (document.getElementById("local-tab")) {
+					//Nếu trong Dom có ID local-tab thì sẽ chạy
+                    media_player_search();
+                } else if (document.getElementById("select_cache_media")) {
+                    //Hoặc nếu có id "select_cache_media"trong DOM thì sẽ chạy
+                    media_player_search("Local");
+                }
+            }
+        } else {
+            show_message("<center>Có lỗi xảy ra khi xóa file.</center>");
+        }
+    };
+    xhr.send('filePath=' + encodeURIComponent(filePath));
+}
+//Hàm tải xuống file theo đường dẫn
+function downloadFile(filePath) {
+    var link = document.createElement('a');
+    link.href = 'includes/php_ajax/Download_file_path.php?file=' + encodeURIComponent(filePath);
+    link.target = '_blank';
+    link.download = filePath.substring(filePath.lastIndexOf('/') + 1); // Lấy tên file từ đường dẫn
+    link.style.display = 'none'; // Ẩn liên kết
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+}
+
+//tìm lại mật khẩu
+function forgotPassword() {
+    loading("show");
+    var email = document.getElementById("forgotPassword_email").value;
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "Login.php?forgot_password&mail=" + encodeURIComponent(email), true);
+    xhr.onreadystatechange = function() {
+        loading("hide");
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                show_message("Thành công, mật khẩu của bạn là: <b>" + response.message + "</b>");
+            } else {
+                show_message("Lỗi: " + response.message + "<hr/>- Bạn có thể thay đổi/tìm lại mật khẩu thủ công bằng cách truy cập giá trị <b>Config.json->contact_info->user_login->user_password</b>");
+            }
+        }
+    };
+    xhr.send();
+}
+
+//Tải lên file âm thanh theo giấ trị được chỉ định key_path
+function upload_File(key_path) {
+    loading("show");
+    var fileInput = document.getElementById(key_path);
+    var files = fileInput.files; // Lấy tất cả các file
+    var formData = new FormData();
+    if (files.length > 0) {
+        // Thêm tất cả các file vào FormData
+        for (var i = 0; i < files.length; i++) {
+            formData.append('fileUpload[]', files[i]);
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?' + encodeURIComponent(key_path), true);
+        xhr.onload = function() {
+            loading("hide");
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (document.getElementById("local-tab")) {
+						//nếu có id local-tab trong DOM  thì sẽ chạy
+                        if (typeof media_player_search === 'function') {
+							//Tab MediaPlayer.php
+                            media_player_search();
+                        }
+                    } else if (document.getElementById("select_cache_media")) {
+						//Hoặc nếu có id "select_cache_media"trong DOM thì sẽ chạy
+						//Tab index.php
+                        media_player_search("Local");
+                    } else if (document.getElementById("show_mp3_music_local")) {
+						//Tab Config.php
+                        list_audio_show_path('scan_Music_Local')
+                    }
+                    show_message(response.messages.join('<br/>'));
+                } catch (e) {
+                    show_message('Lỗi phân tích JSON: ' + e.message);
+                }
+            } else {
+                show_message('Lỗi: ' + xhr.status);
+            }
+        };
+
+        xhr.onerror = function() {
+            show_message('Có lỗi xảy ra khi gửi yêu cầu');
+        };
+        xhr.send(formData);
+    } else {
+        loading("hide");
+        show_message('Vui lòng chọn ít nhất một file');
+    }
+}
+//Điều khiển volume
+function control_volume(action) {
+    loading("show");
+    var data = JSON.stringify({
+        "type": 2,
+        "data": "volume",
+        "action": action
+    });
+    var xhr = new XMLHttpRequest();
+    //xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            loading("hide");
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+
+                    if (response.success) {
+                        showMessagePHP(response.message, 5);
+                    } else {
+                        show_message("Error: " + response.message);
+                    }
+                } catch (e) {
+                    show_message("Lỗi phân tích phản hồi JSON: " + e.message);
+                }
+            } else {
+                show_message("Lỗi kết nối, Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API: http status" + xhr.status);
+            }
+        }
+    });
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+}
+
+//Điều khiển media player
+function control_media(action) {
+    loading("show");
+    var data = JSON.stringify({
+        "type": 1,
+        "data": "media_control",
+        "action": action
+    });
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            loading("hide");
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        showMessagePHP(response.message, 5);
+                    } else {
+                        show_message("Lỗi: " + response.message);
+                    }
+                } catch (e) {
+                    show_message("Lỗi phân tích phản hồi JSON: " + e.message);
+                }
+            } else {
+                show_message("Lỗi kết nối, Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API: http status" + xhr.status);
+            }
+        }
+    });
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+}
+
+//Phát nhạc Media Player
+function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
+    loading("show");
+    var data = JSON.stringify({
+        "type": 1,
+        "data": "media_control",
+        "action": "play",
+        "media_link": url_media,
+        "media_cover": url_cover,
+        "media_name": name_media,
+        "media_player_source": media_source
+    });
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === XMLHttpRequest.DONE) {
+            loading("hide");
+            if (this.status === 200) {
+                try {
+                    var data = JSON.parse(this.responseText);
+                    //console.log(data);  // Hiển thị dữ liệu trong console
+                    showMessagePHP(data.message, 7);
+                } catch (e) {
+                    show_message("Lỗi phân tích JSON: " + e);
+                }
+            } else {
+                show_message("Lỗi HTTP: " + this.status, this.statusText);
+            }
+        }
+    });
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+}
+
+//Get link Zingmp3
+function get_ZingMP3_Link(zing_id, zing_name, zing_cover, zing_artist) {
+	loading("show");
+    var xhr = new XMLHttpRequest();
+    var url = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_GetLink&Zing_ID='+zing_id;
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                //console.log(data);
+                if (data.success == true) {
+					send_Media_Play_API(data.url, zing_name+' - '+zing_artist, zing_cover, 'ZingMP3');
+                } else {
+					loading("hide");
+                    show_message('Yêu cầu không thành công, Không lấy được link Player hoặc bạn có thể thử lại');
+                }
+            } catch (e) {
+				loading("hide");
+                show_message('Lỗi phân tích cú pháp JSON:' + e);
+            }
+        } else if (xhr.readyState === 4) {
+			loading("hide");
+            show_message('Lỗi tìm nạp dữ liệu:' + xhr.status);
+        }
+    };
+    xhr.send();
+}
+
+//Get link play Youtube
+function get_Youtube_Link(youtube_id, youtube_name=null, youtube_cover=null) {
+	
+	if (youtube_id === null || youtube_id === "N/A") {
+    // Trả về hoặc xử lý khi giá trị là null hoặc "N/A"
+	show_message("Lỗi, không lấy được ID hoặc ID của Video Youtube này không hợp lệ");
+	return;
+	}
+	loading("show");
+    // Tạo một đối tượng XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    // URL API mà bạn muốn lấy dữ liệu
+    var url = 'includes/php_ajax/Media_Player_Search.php?GetLink_Youtube&Youtube_ID='+youtube_id;
+    // Mở kết nối đến URL với phương thức GET
+    xhr.open('GET', url, true);
+    // Thiết lập hàm sẽ được gọi khi trạng thái của XMLHttpRequest thay đổi
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                // Chuyển đổi phản hồi JSON thành đối tượng JavaScript
+                var data = JSON.parse(xhr.responseText);
+                //console.log(data);
+                // Kiểm tra nếu `success` là true
+                if (data.success == true) {
+					if (youtube_name == null) {
+						youtube_name = data.data.title;
+					}
+					send_Media_Play_API(data.data.dlink, youtube_name, youtube_cover, 'Youtube');
+                } else {
+					loading("hide");
+                    show_message('Yêu cầu không thành công, Không lấy được link Player hoặc bạn có thể thử lại');
+                }
+            } catch (e) {
+				loading("hide");
+				console.log(xhr.responseText);
+                show_message('Lỗi phân tích cú pháp JSON: ' + e);
+            }
+        } else if (xhr.readyState === 4) {
+			loading("hide");
+            // Xử lý trường hợp yêu cầu không thành công
+            show_message('Lỗi tìm nạp dữ liệu:' + xhr.status);
+        }
+    };
+    xhr.send();
+}
+
+//Thay đổi kiểu hiển thị Log đầu ra và xóa Log API
+function change_og_display_style(action, dataKey, actionValue = false) {
+    // Chỉ thực hiện nếu radio button được checked
+    if (actionValue) {
+        //console.log("Giá trị đã chọn:", dataKey);
+        // Tạo dữ liệu JSON cho yêu cầu POST
+        var data = JSON.stringify({
+            "type": 2,
+            "data": "logs",
+            "action": action,
+            "value": dataKey
+        });
+        var xhr = new XMLHttpRequest();
+        xhr.addEventListener("readystatechange", function() {
+            if (this.readyState === 4) {
+                try {
+                    if (this.status === 0) {
+                        show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                        return;
+                    } else if (this.status !== 200) {
+                        show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
+                        return;
+                    }
+                    var response = JSON.parse(this.responseText);
+                    if (response.success) {
+                        showMessagePHP(response.message, 5);
+                    } else {
+                        show_message('Lỗi: ' + response.message);
+                    }
+                    //document.getElementById('delete_log_api').checked = false;
+                    const deleteLogCheckbox = document.getElementById('delete_log_api');
+                    if (deleteLogCheckbox) {
+                        // Nếu phần tử tồn tại, đặt giá trị checked thành false
+                        deleteLogCheckbox.checked = false;
+                    }
+                } catch (error) {
+                    show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
+                }
+            }
+        });
+        xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+        xhr.setRequestHeader("Content-Type", "application/json");
+        // Gửi dữ liệu
+        xhr.send(data);
+    }
+}
+
+// Hàm kiểm tra và thay đổi nút tìm kiếm trong tab Media Player
+function checkInput_MediaPlayer() {
+    const inputField = document.getElementById('song_name_value');
+    const actionButton = document.getElementById('actionButton_Media');
+    const inputValue = inputField.value.trim();
+
+    if (inputValue.startsWith('http')) {
+        // Thay đổi biểu tượng của nút thành biểu tượng Play URL
+        actionButton.innerHTML = '<i class="bi bi-play-circle" title="Phát bằng địa chỉ URL"></i>';
+        actionButton.setAttribute('onclick', 'media_player_url()');
+    } else {
+        // Đặt lại biểu tượng của nút thành biểu tượng Tìm Kiếm
+        actionButton.innerHTML = '<i class="bi bi-search" title="Tìm kiếm"></i>';
+        actionButton.setAttribute('onclick', 'media_player_search()');
+        if (document.getElementById('select_cache_media')) {
+            // Lấy giá trị của thẻ <select>
+            const selectedValue = document.getElementById('select_cache_media').value;
+            // Cập nhật onclick dựa trên giá trị của thẻ <select>
+            if (selectedValue === 'Youtube') {
+                actionButton.setAttribute('onclick', 'media_player_search("Youtube")');
+            } else if (selectedValue === 'ZingMP3') {
+                actionButton.setAttribute('onclick', 'media_player_search("ZingMP3")');
+            } else if (selectedValue === 'PodCast') {
+                actionButton.setAttribute('onclick', 'media_player_search("PodCast")');
+            } else {
+                actionButton.setAttribute('onclick', 'media_player_search()'); // Giá trị mặc định nếu không khớp
+            }
+
+        }
+    }
+}
+		
+// Hàm trích xuất ID video từ URL YouTube
+function extractYouTubeId(url) {
+    const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|v\/|.+\?v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(youtubeRegex);
+    return match ? match[1] : null;
+}
+
+// Hàm xử lý phát URL http từ tab Media Player
+function media_player_url() {
+    // Danh sách các đuôi âm thanh phổ biến
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.flac', '.aac'];
+    const inputField = document.getElementById('song_name_value');
+    const url = inputField.value.trim();
+    // Chuyển URL về chữ thường
+    link_url = url.toLowerCase();
+    // Kiểm tra xem URL có phải là một tệp âm thanh
+    var isAudio = audioExtensions.some(function(ext) {
+        return link_url.endsWith(ext);
+    });
+    //Xử lý URL Youtube
+    if (link_url.startsWith('https://www.youtube.com') || link_url.startsWith('https://youtu.be')) {
+        // Lấy ID từ URL YouTube
+        const videoId = extractYouTubeId(url);
+        if (videoId) {
+            //alert('ID YouTube: ' + videoId);
+            get_Youtube_Link(videoId, null, null);
+        } else {
+            show_message('URL YouTube không hợp lệ.');
+        }
+    }
+    //Xử lý URL Zingmp3
+    /*
+	else if (url.startsWith('https://zingmp3.vn')) {
+                // Lấy ID từ URL Zing MP3
+                const zingId = extractZingMp3Id(url);
+                if (zingId) {
+                    alert('ID Zing MP3: ' + zingId);
+                    // Xử lý ID Zing MP3 ở đây
+                    // window.open(url, '_blank');
+                } else {
+                    show_message('URL Zing MP3 không hợp lệ.');
+                }
+            }
+			*/
+    //Nếu đường link, url có đuôi tệp cuối dùng
+    else if (isAudio) {
+        // Biến để lưu thông tin tệp
+        var fileName = "";
+        var fileExtension = "";
+        // Kiểm tra đuôi tệp âm thanh
+        for (var i = 0; i < audioExtensions.length; i++) {
+            if (link_url.endsWith(audioExtensions[i])) {
+                fileExtension = audioExtensions[i];
+                // Lấy tên bài hát (tên tệp mà không có đuôi)
+                fileName = link_url.substring(link_url.lastIndexOf('/') + 1, link_url.lastIndexOf(fileExtension));
+                break; // Thoát khỏi vòng lặp khi đã tìm thấy đuôi
+            }
+        }
+        // Kiểm tra và hiển thị thông tin
+        if (fileExtension) {
+            send_Media_Play_API(url, fileName + '' + fileExtension, 'assets/img/icon_audio_local.png', 'Local');
+        } else {
+            send_Media_Play_API(url, null, 'assets/img/icon_audio_local.png', 'Local');
+        }
+    } else {
+        show_message('URL không hợp lệ hoặc không phải là nguồn nhạc được hỗ trợ.');
+    }
+}
+
+//Hiển thị dữ liệu cache Zingmp3
+function cacheZingMP3() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_ZingMP3', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var zingDataDiv = document.getElementById('show_list_ZingMP3');
+            // Nếu không tìm thấy phần tử 'show_list_ZingMP3'
+            if (!zingDataDiv) {
+                // Sử dụng phần tử với ID 'tableContainer'
+                zingDataDiv = document.getElementById('tableContainer');
+            }
+            try {
+                zingDataDiv.innerHTML = '';
+                if (!document.getElementById("song_name_value")) {
+                    zingDataDiv.innerHTML += '<div class="input-group mb-3">' +
+                        '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">' +
+                        '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+                        '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'ZingMP3\')"><i class="bi bi-search"></i></button>' +
+                        '<button type="button" class="btn btn-primary border-success" onclick="cacheZingMP3()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+                    // Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
+                    setTimeout(function() {
+                        if (document.getElementById('song_name_value')) {
+                            document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
+                        }
+                    }, 0);
+                }
+                var data = JSON.parse(xhr.responseText);
+                // Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
+                if (Array.isArray(data) && data.length > 0) {
+                    zingDataDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache ZingMP3" onclick="cache_delete(\'ZingMP3\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
+                    // Duyệt qua dữ liệu và tạo danh sách các bài hát
+                    data.forEach(function(cache_ZING) {
+                        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+                        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+                        fileInfo += '<img src="' + cache_ZING.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + cache_ZING.name + '</font></p>';
+                        fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + cache_ZING.artist + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (cache_ZING.duration || 'N/A') + '</font></p>';
+                        fileInfo += '<button class="btn btn-success" title="Phát: ' + cache_ZING.name + '" onclick="get_ZingMP3_Link(\'' + cache_ZING.id + '\', \'' + cache_ZING.name + '\', \'' + cache_ZING.thumb + '\', \'' + cache_ZING.artist + '\')"><i class="bi bi-play-circle"></i></button>';
+                        fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + cache_ZING.name + '" onclick="addToPlaylist(\'' + cache_ZING.name + '\', \'' + cache_ZING.thumb + '\', null, \'' + (cache_ZING.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + cache_ZING.id + '\', null, \'' + cache_ZING.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
+                        fileInfo += '</div></div>';
+                        zingDataDiv.innerHTML += fileInfo;
+                        adjustContainerStyle_tableContainer();
+                    });
+                } else {
+                    zingDataDiv.innerHTML += '<center>Không có dữ liệu ZingMP3 từ bộ nhớ cache</center>';
+                }
+            } catch (e) {
+                show_message('Lỗi phân tích cache ZingMP3 JSON: ' + e);
+            }
+        } else {
+            show_message('Không thể tải dữ liệu cache ZingMP3. Trạng thái: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        show_message('Lỗi khi thực hiện yêu cầu cache ZingMP3');
+    };
+    xhr.send();
+}
+
+//Hiển thị dữ liệu cache PodCast nếu có
+function cachePodCast() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PodCast', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var fileListDiv = document.getElementById('show_list_PodCast');
+            // Nếu không tìm thấy phần tử 'show_list_PodCast'
+            if (!fileListDiv) {
+                // Sử dụng phần tử với ID 'tableContainer'
+                fileListDiv = document.getElementById('tableContainer');
+            }
+            try {
+                fileListDiv.innerHTML = '';
+                if (!document.getElementById("song_name_value")) {
+                    fileListDiv.innerHTML += '<div class="input-group mb-3">' +
+                        '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">' +
+                        '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+                        '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'PodCast\')"><i class="bi bi-search"></i></button>' +
+                        '<button type="button" class="btn btn-primary border-success" onclick="cachePodCast()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+                    // Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
+                    setTimeout(function() {
+                        if (document.getElementById('song_name_value')) {
+                            document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
+                        }
+                    }, 0);
+                }
+                // Parse dữ liệu JSON
+                var data = JSON.parse(xhr.responseText);
+                // Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
+                if (Array.isArray(data.data) && data.data.length > 0) {
+                    fileListDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache PodCast" onclick="cache_delete(\'PodCast\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
+                    // Xử lý và hiển thị từng podcast
+                    data.data.forEach(function(podcast) {
+                        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+                        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+                        fileInfo += '<img src="' + podcast.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + podcast.title + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (podcast.duration || 'N/A') + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
+                        fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="send_Media_Play_API(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                        fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
+                        fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                        fileInfo += '</div></div>';
+                        fileListDiv.innerHTML += fileInfo;
+                        adjustContainerStyle_tableContainer();
+                    });
+                } else {
+                    fileListDiv.innerHTML += '<center>Không có dữ liệu PodCast từ bộ nhớ cache</center>';
+                }
+            } catch (e) {
+                show_message('Lỗi phân tích cache PodCast JSON: ' + e);
+            }
+        } else {
+            show_message('Không thể tải dữ liệu cache PodCast. Trạng thái: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        show_message('Lỗi khi thực hiện yêu cầu cache PodCast');
+    };
+    xhr.send();
+}
+
+//hiển thị dữ liệu cache Youtube
+function cacheYoutube() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_Youtube', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var fileListDiv = document.getElementById('show_list_Youtube');
+            if (!fileListDiv) {
+                // Sử dụng phần tử với ID 'show_list_Youtube'
+                fileListDiv = document.getElementById('tableContainer');
+            }
+            try {
+                fileListDiv.innerHTML = '';
+                if (!document.getElementById("song_name_value")) {
+                    fileListDiv.innerHTML += '<div class="input-group mb-3">' +
+                        '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát hoặc nhập url/link Youtube" title="Nhập tên bài hát cần tìm kiếm hoặc nhập url/link Youtube" value="">' +
+                        '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+                        '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'Youtube\')"><i class="bi bi-search"></i></button>' +
+                        '<button type="button" class="btn btn-primary border-success" onclick="cacheYoutube()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+                    // Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
+                    setTimeout(function() {
+                        if (document.getElementById('song_name_value')) {
+                            document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
+                        }
+                    }, 0);
+                }
+                var data = JSON.parse(xhr.responseText);
+                // Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
+                if (Array.isArray(data.data) && data.data.length > 0) {
+                    fileListDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache Youtube" onclick="cache_delete(\'Youtube\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
+                    // Xử lý và hiển thị từng podcast
+                    data.data.forEach(function(youtube) {
+                        var description = youtube.description.length > 70 ? youtube.description.substring(0, 70) + '...' : youtube.description;
+                        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+                        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+                        fileInfo += '<img src="' + youtube.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + youtube.title + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + (youtube.channelTitle || 'N/A') + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Mô tả: <font color=green>' + (description || 'N/A') + '</font></p>';
+                        fileInfo += '<button class="btn btn-success" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                        fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', null, \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
+                        fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                        fileInfo += '</div></div>';
+                        // Thêm thông tin vào phần tử danh sách
+                        fileListDiv.innerHTML += fileInfo;
+                        adjustContainerStyle_tableContainer();
+                    });
+                } else {
+                    fileListDiv.innerHTML += '<center>Không có dữ liệu Youtube từ bộ nhớ cache</center>';
+                }
+            } catch (e) {
+                show_message('Lỗi phân tích cache Youtube JSON: ' + e);
+            }
+        } else {
+            show_message('Không thể tải dữ liệu cache Youtube. Trạng thái: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        show_message('Lỗi khi thực hiện yêu cầu cache Youtube');
+    };
+    xhr.send();
+}
+
+//Thêm bài hát vào danh sách phát playlist
+function addToPlaylist(title, cover, audio, duration, description, source, id, channelTitle, artist) {
+	loading("show");
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Media_Player_Search.php?playlist_ADD";
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+				loading("hide");
+				//console.log(xhr.responseText);
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    showMessagePHP("Đã thêm " +title+ " vào PlayList thành công!");
+                } else {
+                    show_message("Lỗi: " + response.message);
+                }
+            } else {
+				loading("hide");
+                show_message("Lỗi kết nối với server.");
+            }
+        }
+    };
+    var params = "title=" + encodeURIComponent(title) +
+                 "&cover=" + encodeURIComponent(cover) +
+                 "&audio=" + encodeURIComponent(audio) +
+                 "&duration=" + encodeURIComponent(duration) +
+                 "&description=" + encodeURIComponent(description) +
+                 "&source=" + encodeURIComponent(source) +
+                 "&id=" + encodeURIComponent(id) +
+                 "&channelTitle=" + encodeURIComponent(channelTitle) +
+                 "&artist=" + encodeURIComponent(artist);
+    xhr.send(params);
+}
+
+//Xóa toàn bộ playlist hoặc 1 số bài
+function deleteFromPlaylist(action, idsList) {
+    if (action === "delete_all") {
+        if (!confirm("Bạn có chắc chắn muốn xóa tất cả bài hát trong PlayList?")) {
+            return;
+        }
+    }
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Media_Player_Search.php?playlist_DELETE", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    const data = 'action=' + encodeURIComponent(action) + '&ids_list=' + encodeURIComponent(idsList);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            loadPlayList()
+        }
+    };
+    xhr.send(data);
+    /*
+    // Xóa toàn bộ playlist
+    deleteFromPlaylist('delete_all');
+    // Xóa các bài hát theo danh sách ID
+    deleteFromPlaylist('delete_some', 'ID1,ID2,ID3');
+    */
+}
+
+//Tìm kiếm Media theo Nguồn phát được chọn
+function media_player_search(select_name = null) {
+    loading("show");
+    // Lấy phần tử theo ID
+    var searchInputElement = document.getElementById('song_name_value');
+    let searchInput = null;
+    // Kiểm tra nếu phần tử tồn tại
+    if (searchInputElement) {
+        // Nếu phần tử tồn tại, lấy giá trị và loại bỏ khoảng trắng
+        searchInput = searchInputElement.value.trim();
+    } else {
+        searchInput = null;
+    }
+    // Kiểm tra nếu select_name không có giá trị, thì tìm nút đang được chọn
+    if (!select_name) {
+        // Lấy tất cả các thẻ <button> trong danh sách
+        const buttons = document.querySelectorAll('#select_source_media_music .nav-link');
+        buttons.forEach(button => {
+            if (button.classList.contains('active')) {
+                // Lấy giá trị của thuộc tính name của thẻ <button> đang được chọn
+                select_name = button.getAttribute('name');
+            }
+        });
+    }
+    // Kiểm tra xem select_name có giá trị hợp lệ không
+    if (!select_name) {
+        loading("hide");
+        show_message('Chọn nguồn nhạc không hợp lệ, vui lòng chọn nguồn khác.');
+        return;
+    }
+    if (select_name === "PlayList") {
+        loading("hide");
+        show_message('Chưa cập nhật chức năng tìm kiếm bài hát ở PlayList');
+        return;
+    }
+    // Kiểm tra nếu trường nhập liệu rỗng và nguồn không phải là Local hoặc Radio
+    if (searchInput === '' && (select_name !== 'Local' && select_name !== 'Radio')) {
+        loading("hide");
+        show_message('Cần nhập tên bài hát để tìm kiếm.');
+        return;
+    }
+    var xhr = new XMLHttpRequest();
+    // Cấu hình URL dựa trên giá trị select_name
+    var url;
+    switch (select_name) {
+        case 'Local':
+            url = 'includes/php_ajax/Media_Player_Search.php?Local';
+            break;
+        case 'ZingMP3':
+            url = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_Search&SongName=' + searchInput;
+            break;
+        case 'PodCast':
+            url = 'includes/php_ajax/Media_Player_Search.php?podcast_Search&PodCastName=' + searchInput + '&Limit=1';
+            break;
+        case 'Youtube':
+            url = 'includes/php_ajax/Media_Player_Search.php?Youtube_Search&Name=' + searchInput + '&Limit=20';
+            break;
+        case 'Radio':
+            url = 'includes/php_ajax/Media_Player_Search.php?Radio';
+            break;
+        default:
+            loading("hide");
+            show_message('Chọn nguồn nhạc không hợp lệ, nguồn nhạc ' + select_name + ' không cho phép tìm kiếm');
+            return;
+    }
+    xhr.open('GET', url, true);
+    xhr.onload = function() {
+        loading("hide");
+        if (xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                //console.log(data);
+                // Xử lý dữ liệu theo từng giá trị select_name
+                switch (select_name) {
+                    case 'Local':
+                        processLocalData(data);
+                        break;
+                    case 'ZingMP3':
+                        processZingMP3Data(data);
+                        break;
+                    case 'PodCast':
+                        processPodCastData(data);
+                        break;
+                    case 'Youtube':
+                        processYoutubeData(data);
+                        break;
+                    case 'Radio':
+                        processRadioData(data);
+                        break;
+                }
+            } catch (e) {
+                loading("hide");
+                show_message('Lỗi phân tích JSON: ' + e);
+            }
+        } else {
+            loading("hide");
+            show_message('Lỗi yêu cầu: ' + xhr.status);
+        }
+    };
+    // Xử lý lỗi mạng
+    xhr.onerror = function() {
+        loading("hide");
+        show_message('Lỗi mạng');
+    };
+    // Gửi yêu cầu
+    xhr.send();
+}
+
+
+// Hàm xử lý dữ liệu ZingMP3
+function processZingMP3Data(data_media_ZingMP3) {
+    var fileListDiv = document.getElementById('show_list_ZingMP3');
+    if (!fileListDiv) {
+        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+        fileListDiv = document.getElementById('tableContainer');
+    }
+    // Kiểm tra xem dữ liệu có rỗng không
+    if (!data_media_ZingMP3 || !Array.isArray(data_media_ZingMP3.results) || data_media_ZingMP3.results.length === 0) {
+        show_message('<p>Không có dữ liệu bài hát tương ứng với từ khóa trên ZingMP3</p>');
+    } else {
+        fileListDiv.innerHTML = '';
+        // Kiểm tra và thêm phần tử input và button nếu chưa tồn tại
+        if (!document.getElementById("song_name_value")) {
+            fileListDiv.innerHTML += '<div class="input-group mb-3">' +
+                '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">' +
+                '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+                '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'ZingMP3\')"><i class="bi bi-search"></i></button>' +
+                '<button type="button" class="btn btn-primary border-success" onclick="cacheZingMP3()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+        }
+        data_media_ZingMP3.results.forEach(function(zing) {
+            var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+            fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+            fileInfo += '<img src="' + zing.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + zing.name + '</font></p>';
+            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + zing.artist + '</font></p>';
+            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (zing.duration || 'N/A') + '</font></p>';
+            fileInfo += '<button class="btn btn-success" title="Phát: ' + zing.name + '" onclick="get_ZingMP3_Link(\'' + zing.id + '\', \'' + zing.name + '\', \'' + zing.thumb + '\', \'' + zing.artist + '\')"><i class="bi bi-play-circle"></i></button>';
+            fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + zing.name + '" onclick="addToPlaylist(\'' + zing.name + '\', \'' + zing.thumb + '\', null, \'' + (zing.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + zing.id + '\', null, \'' + zing.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
+            fileInfo += '</div></div>';
+            fileListDiv.innerHTML += fileInfo;
+        });
+    }
+}
+
+// Hàm xử lý dữ liệu hiển thị kết quả tìm kiếm Youtube
+function processYoutubeData(data_media_Youtube) {
+    // Thay đổi cách hiển thị dữ liệu Youtube
+    //console.log('Dữ liệu Youtube:', data);
+    // Kiểm tra xem dữ liệu có hợp lệ không
+    if (!data_media_Youtube || !Array.isArray(data_media_Youtube.data) || data_media_Youtube.data.length === 0) {
+        show_message('<p>Không có dữ liệu bài hát từ Youtube</p>');
+        return; // Kết thúc hàm nếu không có dữ liệu
+    }
+    // Lấy phần tử DOM để hiển thị danh sách youtube
+    var fileListDiv = document.getElementById('show_list_Youtube');
+    if (!fileListDiv) {
+        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+        fileListDiv = document.getElementById('tableContainer');
+        //fileListDiv.innerHTML = '';
+    }
+    // Xóa nội dung cũ
+    fileListDiv.innerHTML = '';
+    // Kiểm tra và thêm phần tử input và button nếu chưa tồn tại
+    if (!document.getElementById("song_name_value")) {
+        fileListDiv.innerHTML += '<div class="input-group mb-3">' +
+            '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát hoặc nhập url/link Youtube" title="Nhập tên bài hát cần tìm kiếm hoặc nhập url/link Youtube" value="">' +
+            '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+            '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'Youtube\')"><i class="bi bi-search"></i></button>' +
+            '<button type="button" class="btn btn-primary border-success" onclick="cacheYoutube()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+    }
+    // Xử lý và hiển thị từng youtube
+    data_media_Youtube.data.forEach(function(youtube) {
+        var description = youtube.description.length > 70 ? youtube.description.substring(0, 70) + '...' : youtube.description;
+        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+        fileInfo += '<img src="' + youtube.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + youtube.title + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + (youtube.channelTitle || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Mô tả: <font color=green>' + (description || 'N/A') + '</font></p>';
+        fileInfo += ' <button class="btn btn-success" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+        fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', null, \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
+        fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+        fileInfo += '</div></div>';
+        // Thêm thông tin vào phần tử danh sách
+        fileListDiv.innerHTML += fileInfo;
+    });
+}
+
+function processPodCastData(data_media_PodCast) {
+    //console.log(data);
+    // Kiểm tra xem dữ liệu có hợp lệ không
+    if (!data_media_PodCast || !Array.isArray(data_media_PodCast.data) || data_media_PodCast.data.length === 0) {
+        show_message('<p>Không có dữ liệu bài hát từ PodCast</p>');
+        return;
+    }
+    // Lấy phần tử DOM để hiển thị danh sách podcast
+    var fileListDiv = document.getElementById('show_list_PodCast');
+    if (!fileListDiv) {
+        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+        fileListDiv = document.getElementById('tableContainer');
+    }
+    fileListDiv.innerHTML = '';
+    // Kiểm tra và thêm phần tử input và button nếu chưa tồn tại
+    if (!document.getElementById("song_name_value")) {
+        fileListDiv.innerHTML += '<div class="input-group mb-3">' +
+            '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">' +
+            '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+            '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'PodCast\')"><i class="bi bi-search"></i></button>' +
+            '<button type="button" class="btn btn-primary border-success" onclick="cachePodCast()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+    }
+    // Xử lý và hiển thị từng podcast
+    data_media_PodCast.data.forEach(function(podcast) {
+        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+        fileInfo += '<img src="' + podcast.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + podcast.title + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (podcast.duration || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
+        fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="send_Media_Play_API(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+        fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
+        fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+        fileInfo += '</div></div>';
+        // Thêm thông tin vào phần tử danh sách
+        fileListDiv.innerHTML += fileInfo;
+    });
+}
+
+// Hàm xử lý dữ liệu media Local
+function processLocalData(data_media_local) {
+    var fileListDiv = document.getElementById('show_list_media_local');
+    // Kiểm tra nếu phần tử với ID 'show_list_media_local' tồn tại
+    if (!fileListDiv) {
+        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+        fileListDiv = document.getElementById('tableContainer');
+    }
+    //console.log(data)
+    // Kiểm tra xem dữ liệu có rỗng không
+    if (!data_media_local || data_media_local.length === 0) {
+        //fileListDiv.innerHTML = '';
+        //fileListDiv.innerHTML = '<p>Không có dữ liệu bài hát Local</p>';
+        show_message('<p>Không có dữ liệu bài hát Local</p>');
+    } else {
+
+        fileListDiv.innerHTML = '';
+        if (!document.getElementById('upload_Music_Local')) {
+
+            fileListDiv.innerHTML = '<form enctype="multipart/form-data" method="POST" action="">' +
+                '<div class="input-group">' +
+                '<input class="form-control border-success" type="file" id="upload_Music_Local" multiple="">' +
+                '<button class="btn btn-success border-success" type="button" onclick="upload_File(\'upload_Music_Local\')">Tải Lên</button>' +
+                '<button type="button" class="btn btn-primary border-success" onclick="media_player_search(\'Local\')" title="Tải lại dữ liệu bài hát trong thư mục Local"><i class="bi bi-arrow-repeat"></i></button></div></form>';
+        }
+        data_media_local.forEach(function(file) {
+            var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+            fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+            fileInfo += '<img src="' + file.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: ' + file.name + '</p>';
+            fileInfo += '<p style="margin: 0;">Kích thước: ' + file.size + ' MB</p>';
+            fileInfo += '<button class="btn btn-success" title="Phát: ' + file.name + '" onclick="send_Media_Play_API(\'' + file.full_path + '\', \'' + file.name + '\', \'' + file.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button> ';
+            fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + file.name + '" onclick="addToPlaylist(\'' + file.name + '\', \'' + file.cover + '\', \'' + file.full_path + '\', \'' + file.size + ' MB\', null, \'Local\', \'' + file.full_path + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
+            fileInfo += ' <button class="btn btn-warning" title="Tải Xuống File: ' + file.name + '" onclick="downloadFile(\'' + file.full_path + '\')"><i class="bi bi-download"></i></button>';
+            fileInfo += ' <button class="btn btn-danger" title="Xóa File: ' + file.name + '" onclick="deleteFile(\'' + file.full_path + '\', \'media_player_search\')"><i class="bi bi-trash"></i></button>';
+            fileInfo += '</div></div>';
+            fileListDiv.innerHTML += fileInfo;
+            adjustContainerStyle_tableContainer();
+        });
+    }
+}
+
+
+// Hàm xử lý dữ liệu Radio
+function processRadioData(data_media_Radio) {
+    var fileListDiv = document.getElementById('show_list_Radio');
+    // Kiểm tra nếu phần tử với ID 'show_list_media_local' tồn tại
+    if (!fileListDiv) {
+        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+        fileListDiv = document.getElementById('tableContainer');
+    }
+    fileListDiv.innerHTML = '';
+    // Kiểm tra xem dữ liệu có tồn tại và là một mảng không
+    if (Array.isArray(data_media_Radio)) {
+        data_media_Radio.forEach(function(radio) {
+            // Lấy thông tin từ từng đối tượng radio
+            var name = radio.name;
+            var cover = "<?php echo $URL_Address; ?>/assets/img/radio_icon.png";
+            var size = radio.size;
+            var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+            fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+            fileInfo += '<img src="' + cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên đài: <font color=green>' + radio.name + '</font></p>';
+            fileInfo += '<button class="btn btn-success" title="Phát đài radio: ' + radio.name + '" onclick="send_Media_Play_API(\'' + radio.full_path + '\', \'' + radio.name + '\', \'' + cover + '\', \'Radio\')"><i class="bi bi-play-circle"></i></button>';
+            //fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + radio.artist + '</font></p>';
+            fileInfo += '</div></div>';
+            fileListDiv.innerHTML += fileInfo;
+            adjustContainerStyle_tableContainer();
+        });
+    } else {
+        show_message('Dữ liệu trả về không hợp lệ.');
+    }
+}
+
+//Xóa dữ liệu cache bài hát theo nguồn nhạc
+function cache_delete(source_cache) {
+    // Tạo đối tượng XMLHttpRequest
+    var xhr = new XMLHttpRequest();
+    // Cấu hình yêu cầu GET tới Media_Player_Search.php với tham số cache_delete
+    xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?cache_delete=' + source_cache, true);
+    // Khi yêu cầu được hoàn thành
+    xhr.onload = function() {
+        if (xhr.status === 200) { // Nếu trạng thái là OK (200)
+            try {
+                // Parse dữ liệu JSON
+                var data = JSON.parse(xhr.responseText);
+                // Kiểm tra phản hồi 'success' và hiển thị thông báo tương ứng
+                if (data.success) {
+                    showMessagePHP(data.message, 5);
+					if (source_cache === "ZingMP3"){
+						cacheZingMP3();
+					}else if (source_cache === "Youtube"){
+						cacheYoutube();
+					}else if (source_cache === "PodCast"){
+						cachePodCast();
+					}
+                } else {
+                    show_message(data.message);
+                }
+            } catch (e) {
+                show_message('Lỗi phân tích JSON: ' + e.message);
+            }
+        } else {
+            show_message('Không thể tải dữ liệu. Trạng thái: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        show_message('Lỗi khi thực hiện yêu cầu đến máy chủ.');
+    };
+    xhr.send();
+}
+
+//xử lý Nghe thử các file âm thanh
+function playAudio(filePath) {
+    loading("show");
+    function getMimeType(extension) {
+        const mimeTypes = {
+            'mp3': 'audio/mpeg',
+            'wav': 'audio/wav',
+            'ogg': 'audio/ogg',
+            'aac': 'audio/aac',
+            'flac': 'audio/flac',
+            // Thêm các định dạng tệp âm thanh khác nếu cần
+        };
+
+        return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+    }
+    const audioPlayer = document.getElementById('audioPlayer');
+    // Kiểm tra nếu filePath bắt đầu bằng 'http'
+    if (filePath.startsWith('http')) {
+        loading("hide");
+
+        // Kiểm tra nếu filePath là '.m3u8'
+        if (filePath.endsWith('.m3u8')) {
+            //Chạy playHLS nếu là m3u8
+            playHLS(filePath);
+        } else {
+            audioPlayer.src = filePath;
+            audioPlayer.load();
+            audioPlayer.play().catch(function(error) {
+                show_message('Lỗi khi phát âm thanh: ' + error.message);
+            });
+        }
+        return; // Kết thúc hàm nếu đã phát trực tiếp
+    }
+
+    const xhr = new XMLHttpRequest();
+
+    // Gửi yêu cầu GET tới server để lấy tệp âm thanh dưới dạng base64
+    xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
+    xhr.responseType = 'text';
+    xhr.onload = function() {
+        loading("hide");
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                const base64Audio = response.data.base64Content;
+                const mimeType = getMimeType(response.data.fileExtension);
+                audioPlayer.src = 'data:' + mimeType + ';base64,' + base64Audio;
+                audioPlayer.load();
+                audioPlayer.play();
+            } else {
+                show_message('Lỗi khi tìm nạp âm thanh: ' + response.error);
+            }
+        }
+    };
+
+    xhr.onerror = function() {
+        loading("hide");
+        show_message('Yêu cầu phát âm thanh không thành công');
+    };
+
+    xhr.send();
+}
+
+//Play video hoặc m3u8 HLS
+function playHLS(url) {
+    loading("show");
+    const video = document.getElementById('videoPlayer');
+    if (Hls.isSupported()) {
+        const hls = new Hls();
+        hls.loadSource(url);
+        hls.attachMedia(video);
+        hls.on(Hls.Events.MANIFEST_PARSED, function() {
+            loading("hide");
+            video.play();
+        });
+        //loading("hide");
+    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+        video.src = url;
+        video.addEventListener('loadedmetadata', function() {
+            loading("hide");
+            video.play();
+        });
+        //loading("hide");
+    }
+}
+</script>
+	
+<!-- Chatbot -->
+<script>
+    // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện chatbox
+    function chatbot_toggleFullScreen() {
+        // Lấy thẻ div cần thay đổi class
+        var chatbotSizeSetting = document.getElementById('chatbot_size_setting');
+        // Lấy thẻ icon cần thay đổi class
+        var chatbotIcon = document.getElementById('chatbot_fullscreen');
+
+        // Kiểm tra và thay đổi class giữa modal-lg, modal-xl, và modal-fullscreen
+        if (chatbotSizeSetting.classList.contains('modal-lg')) {
+            chatbotSizeSetting.classList.remove('modal-lg');
+            chatbotSizeSetting.classList.add('modal-xl');
+        } else if (chatbotSizeSetting.classList.contains('modal-xl')) {
+            chatbotSizeSetting.classList.remove('modal-xl');
+            chatbotSizeSetting.classList.add('modal-fullscreen');
+            // Thay đổi icon thành bi-fullscreen-exit khi ở chế độ fullscreen
+            chatbotIcon.classList.remove('bi-arrows-fullscreen');
+            chatbotIcon.classList.add('bi-fullscreen-exit');
+        } else if (chatbotSizeSetting.classList.contains('modal-fullscreen')) {
+            chatbotSizeSetting.classList.remove('modal-fullscreen');
+            chatbotSizeSetting.classList.add('modal-lg');
+            // Trở lại icon fullscreen khi không ở chế độ fullscreen
+            chatbotIcon.classList.remove('bi-fullscreen-exit');
+            chatbotIcon.classList.add('bi-arrows-fullscreen');
+        }
+    }
+
+    //  hàm cuộn xuống dưới cùng tin nhắn
+    function scrollToBottom() {
+        const chatbox = document.getElementById('chatbox');
+        chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    // Hàm lấy thời gian hiện tại dưới định dạng dd/mm/yyyy hh:mm:ss
+    function getCurrentTime() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = now.getFullYear();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+        return hours + ':' + minutes + ':' + seconds + ' ' + day + '/' + month + '/' + year;
+    }
+
+    // Hàm lưu tin nhắn vào localStorage
+    function saveMessage(type, text) {
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        messages.push({
+            type: type,
+            text: text,
+            time: getCurrentTime()
+        });
+        localStorage.setItem('messages', JSON.stringify(messages));
+    }
+
+    // Hàm xóa tin nhắn khỏi localStorage và giao diện
+    function deleteMessage(index) {
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        messages.splice(index, 1);
+        localStorage.setItem('messages', JSON.stringify(messages));
+        loadMessages(); // Tải lại tin nhắn sau khi xóa
+    }
+
+// Hàm tải tin nhắn từ localStorage
+function loadMessages() {
+        const chatbox = document.getElementById('chatbox');
+        const messages = JSON.parse(localStorage.getItem('messages')) || [];
+        // Xóa nội dung hiện tại của chatbox
+        chatbox.innerHTML = '';
+
+        messages.forEach(function(message, index) {
+            var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
+                '<span class="delete_message_chatbox" data-index="' + index + '" title="Xóa tin nhắn">x</span>' +
+                '<div class="message-time">' + message.time + '</div>';
+
+            // Kiểm tra nếu tin nhắn là tệp âm thanh
+            if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
+                var audioExtension = message.text.split('.').pop(); // Lấy đuôi mở rộng của tệp
+                var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text); // URL tới PHP proxy
+
+                messageHTML +=
+                    '<div class="audio-container">' +
+                    '    <audio controls>' +
+                    '        <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
+                    '        Your browser does not support the audio element.' +
+                    '    </audio>' +
+                    '</div>';
+            } else {
+                messageHTML += '<div>' + message.text + '</div>';
+            }
+
+            messageHTML += '</div>';
+            chatbox.innerHTML += messageHTML;
+        });
+
+        // Cuộn xuống dưới cùng
+        scrollToBottom();
+
+        // Thêm sự kiện click cho dấu x
+        document.querySelectorAll('.delete_message_chatbox').forEach(function(button) {
+            button.addEventListener('click', function() {
+                const index = parseInt(this.getAttribute('data-index'), 10);
+                deleteMessage(index);
+            });
+        });
+
+        // Optionally show a message if needed
+        // showMessagePHP("Đã tải lại dữ liệu Chatbox", 5);
+    }
+    // Hàm xóa tất cả tin nhắn từ localStorage và giao diện
+function clearMessages() {
+    if (!confirm("Bạn có chắc chắn muốn xóa lịch sử chat ?")) {
+        return;
+    }
+    localStorage.removeItem('messages');
+    loadMessages(); // Tải lại chatbox sau khi xóa tất cả
+}
+
+// Hàm xóa tin nhắn khỏi localStorage và giao diện
+function deleteMessage(index) {
+    const messages = JSON.parse(localStorage.getItem('messages')) || [];
+    messages.splice(index, 1);
+    localStorage.setItem('messages', JSON.stringify(messages));
+    loadMessages(); // Tải lại tin nhắn sau khi xóa
+}
+
+
+// Hàm để dừng tất cả các phần tử audio đang phát
+function stopAllAudio() {
+	console.log("dừng audio");
+    var audios = document.querySelectorAll('audio');
+    audios.forEach(function(audio) {
+        audio.pause();
+        audio.currentTime = 0; // Đặt thời gian phát lại về 0
+    });
+}
+
+// Hàm gửi yêu cầu POST và xử lý phản hồi
+function sendRequest(message) {
+    var data = JSON.stringify({
+        "type": 3,
+        "data": "main_processing",
+        "action": "processing_api",
+        "value": message
+    });
+
+    var xhr = new XMLHttpRequest();
+    var chatbox = document.getElementById('chatbox');
+    var typingIndicator = document.createElement('div');
+    var timeout;
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.innerHTML = 'Đang xử lý...';
+    chatbox.appendChild(typingIndicator);
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            clearTimeout(timeout);
+            typingIndicator.remove();
+            if (this.status === 200) {
+                var response = JSON.parse(this.responseText);
+				 stopAllAudio();
+                var botMessageHTML = '';
+
+                if (response.success) {
+                    // Biểu thức chính quy kiểm tra chuỗi có bắt đầu bằng 'TTS_Audio' và kết thúc bằng mp3, ogg, hoặc wav
+                    var audioUrl = response.message;
+                    var audioPattern = /^TTS_Audio.*\.(mp3|ogg|wav)$/i;
+                    if (audioPattern.test(audioUrl)) {
+                        var audioExtension = audioUrl.split('.').pop(); // Lấy đuôi mở rộng của tệp
+                        var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(audioUrl); // URL tới PHP proxy
+
+                        botMessageHTML =
+                            '<div class="message bot-message">' +
+                            '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                            '    <div class="audio-container">' +
+                            //'         <audio controls autoplay>' +
+                            '         <audio controls>' +
+                            '            <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
+                            '            Your browser does not support the audio element.' +
+                            '        </audio>' +
+                            '    </div>' +
+                            '</div>';
+                    } else {
+                        botMessageHTML =
+                            '<div class="message bot-message">' +
+                            '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                            '    <div>' + response.message + '</div>' +
+                            '</div>';
+                    }
+
+                    // Thêm tin nhắn của bot vào chatbox
+                    document.getElementById('chatbox').innerHTML += botMessageHTML;
+                    // Lưu tin nhắn của bot vào localStorage
+                    saveMessage('bot', response.message);
+
+                } else {
+                    var errorMessageHTML =
+                        msg_error = "Có lỗi xảy ra. Vui lòng thử lại";
+                    /*  
+					'<div class="message">' +
+                    '    Có lỗi xảy ra. Vui lòng thử lại.' +
+                    '</div>';
+					*/
+                    '<div class="message bot-message">' +
+                    '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                        '    <div>' + msg_error + '</div>' +
+                        '</div>';
+                    // Thêm tin nhắn lỗi vào chatbox
+                    document.getElementById('chatbox').innerHTML += errorMessageHTML;
+
+                    saveMessage('bot', msg_error);
+                }
+
+                setTimeout(scrollToBottom, 100);
+            } else {
+                msg_error = "Có vẻ bot đang không phản hồi, vui lòng thử lại.";
+                var failureMessageHTML =
+                    '<div class="message bot-message">' +
+                    '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                    '    <div>' + msg_error + '</div>' +
+                    '</div>';
+                // Thêm tin nhắn thất bại vào chatbox
+                document.getElementById('chatbox').innerHTML += failureMessageHTML;
+                saveMessage('bot', msg_error);
+            }
+        }
+    });
+
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+    // Thiết lập hẹn giờ để hiển thị thông báo nếu phản hồi quá chậm
+    timeout = setTimeout(function() {
+        typingIndicator.innerHTML = 'Vui lòng chờ thêm...';
+        timeout = setTimeout(function() {
+            msg_error = "Có vẻ bot đang không phản hồi, vui lòng thử lại";
+            typingIndicator.innerHTML = msg_error;
+            saveMessage('bot', msg_error);
+        }, 13000); // 13 giây nữa để tổng cộng là 20 giây
+    }, 7000); // 7 giây
+}
+
+// Xử lý sự kiện khi nhấn nút gửi
+document.getElementById('send_button_chatbox').addEventListener('click', function() {
+    var userInput = document.getElementById('user_input_chatbox');
+    var message = userInput.value.trim();
+    if (message) {
+        // Tạo nội dung HTML cho tin nhắn của người dùng
+        const userMessageHTML =
+            '<div class="message user-message">' +
+            '    <div class="message-time">' + getCurrentTime() + '</div>' +
+            '    <div>' + message + '</div>' +
+            '</div>';
+        // Thêm tin nhắn vào chatbox
+        document.getElementById('chatbox').innerHTML += userMessageHTML;
+        // Lưu tin nhắn của người dùng vào localStorage
+        saveMessage('user', message);
+        // Gửi yêu cầu với tin nhắn của người dùng
+        sendRequest(message);
+        // Xóa trường nhập liệu sau khi gửi
+        userInput.value = '';
+        //kéo xuống cuối cùng Chatbox
+        setTimeout(scrollToBottom, 100);
+    }
+});
+
+// Xử lý sự kiện nhấn phím Enter để gửi tin nhắn
+document.getElementById('user_input_chatbox').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        document.getElementById('send_button_chatbox').click();
+    }
+});
+// Tải tin nhắn từ localStorage khi trang được tải
+loadMessages();
+
+//Khi chatbox được hiển thị hoàn toàn
+document.addEventListener('DOMContentLoaded', () => {
+    const myModal = document.getElementById('modalDialogScrollable_chatbot');
+    myModal.addEventListener('shown.bs.modal', () => {
+        scrollToBottom();
+    });
+});
+</script>
+
+<script>
+//kiểm tra nếu có thẻ id là tableContainer sẽ thay đổi kích thước chiều dọc tùy thuộc vào nội dung
+function adjustContainerStyle_tableContainer() {
+    var container = document.getElementById('tableContainer');
+    if (container) {
+        var contentHeight = container.scrollHeight;
+
+        if (contentHeight > 400) {
+            // Thêm thuộc tính CSS khi có nhiều dữ liệu
+            container.style.height = '400px';
+            container.style.overflowY = 'auto'; // Hiển thị thanh cuộn dọc
+        } else {
+            // Xóa thuộc tính CSS nếu dữ liệu không vượt quá chiều cao
+            container.style.height = 'auto';
+            container.style.overflowY = 'hidden'; // Ẩn thanh cuộn dọc
+        }
+    }
+}
+</script>
+
+<script>
+// Hàm gửi yêu cầu tới Command.php bằng XMLHttpRequest
+function command_php(command_line, reload_page = null) {
+    // Kiểm tra nếu command_line không có giá trị
+    if (!command_line) {
+        showMessagePHP('Vui lòng nhập lệnh hợp lệ để thực thi.');
+        return;
+    }
+    loading('show');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'Command.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            loading('hide');
+            if (xhr.status === 200) {
+                showMessagePHP("Thao tác thành công", 5);
+				if (reload_page === true){
+					location.reload();
+				}
+            } else {
+                show_message('Lỗi: Không thể xử lý yêu cầu. Mã trạng thái:', xhr.status);
+            }
+        }
+    };
+    xhr.onerror = function() {
+        loading('hide');
+        show_message('Lỗi: Không thể kết nối tới máy chủ.');
+    };
+    xhr.send(command_line + '=1');
+}
+</script>
+<script>
+function Recording_STT(action, duration = "6") {
+
+showMessagePHP("Chức năng này đang trong quá trình thử nghiệm, chưa dùng được", 3);
+
+}
+//PCEtLSBTVFQgLS0+DQogICAgIDxzY3JpcHQ+DQogICAgICAgIGZ1bmN0aW9uIFJlY29yZGluZ19TVFQoYWN0aW9uLCBkdXJhdGlvbiA9ICI2Iikgew0KICAgICAgICAgICAgY29uc3Qgc3RhcnRSZWNvcmRpbmdfQ2hhdGJvdCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJzdGFydFJlY29yZGluZ19DaGF0Ym90Iik7DQogICAgICAgICAgICBjb25zdCBzdG9wUmVjb3JkaW5nX0NoYXRib3QgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgic3RvcFJlY29yZGluZ19DaGF0Ym90Iik7DQogICAgICAgICAgICBjb25zdCB1c2VySW5wdXRDaGF0Ym94ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoInVzZXJfaW5wdXRfY2hhdGJveCIpOw0KDQogICAgICAgICAgICBjb25zdCBjaGFubmVsID0gW107DQogICAgICAgICAgICBsZXQgcmVjb3JkZXIgPSBudWxsOw0KICAgICAgICAgICAgbGV0IHJlY29yZGluZ0xlbmd0aCA9IDA7DQogICAgICAgICAgICBsZXQgbWVkaWFTdHJlYW0gPSBudWxsOw0KICAgICAgICAgICAgY29uc3Qgc2FtcGxlUmF0ZSA9IDE2MDAwOw0KICAgICAgICAgICAgbGV0IGNvbnRleHQgPSBudWxsOw0KICAgICAgICAgICAgbGV0IHNvY2tldCA9IG51bGw7DQogICAgICAgICAgICBjb25zdCBzb2NrZXRVcmwgPSAnd3NzOi8va2lraS1zb2NrZXQuYXNyLnphbG8uYWkvY2xpZW50L3dzL3NwZWVjaD9jb250ZW50LXR5cGU9YXVkaW8veC1yYXcsbGF5b3V0PWludGVybGVhdmVkLHJhdGU9MTYwMDAsZm9ybWF0PVMxNkxFLGNoYW5uZWxzPTEmdmVyc2lvbj0xMyZ0b2tlbj1raWtpX2lvcyZ1c2VyX2lkPTkwNjUxOTkzNTE1ODAyNTYzNyc7DQogICAgICAgICAgICBsZXQgcmVjb3JkaW5nVGltZXIgPSBudWxsOw0KDQogICAgICAgICAgICBmdW5jdGlvbiBzdGFydFJlY29yZGluZygpIHsNCiAgICAgICAgICAgICAgICBpZiAobmF2aWdhdG9yLm1lZGlhRGV2aWNlcyAmJiBuYXZpZ2F0b3IubWVkaWFEZXZpY2VzLmdldFVzZXJNZWRpYSkgew0KICAgICAgICAgICAgICAgICAgICBuYXZpZ2F0b3IubWVkaWFEZXZpY2VzLmdldFVzZXJNZWRpYSh7IGF1ZGlvOiB0cnVlIH0pDQogICAgICAgICAgICAgICAgICAgICAgICAudGhlbihmdW5jdGlvbiAoc3RyZWFtKSB7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgd2luZG93LkF1ZGlvQ29udGV4dCA9IHdpbmRvdy5BdWRpb0NvbnRleHQgfHwgd2luZG93LndlYmtpdEF1ZGlvQ29udGV4dDsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb250ZXh0ID0gbmV3IEF1ZGlvQ29udGV4dCh7IHNhbXBsZVJhdGU6IHNhbXBsZVJhdGUgfSk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgbWVkaWFTdHJlYW0gPSBjb250ZXh0LmNyZWF0ZU1lZGlhU3RyZWFtU291cmNlKHN0cmVhbSk7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBidWZmZXJTaXplID0gNDA5NjsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWNvcmRlciA9IGNvbnRleHQuY3JlYXRlU2NyaXB0UHJvY2Vzc29yKGJ1ZmZlclNpemUsIDEsIDEpOw0KDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVjb3JkZXIub25hdWRpb3Byb2Nlc3MgPSBmdW5jdGlvbiAoZSkgew0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBjaHVuayA9IG5ldyBGbG9hdDMyQXJyYXkoZS5pbnB1dEJ1ZmZlci5nZXRDaGFubmVsRGF0YSgwKSk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNoYW5uZWwucHVzaChjaHVuayk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlY29yZGluZ0xlbmd0aCArPSBjaHVuay5sZW5ndGg7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaWYgKHNvY2tldCAmJiBzb2NrZXQucmVhZHlTdGF0ZSA9PT0gV2ViU29ja2V0Lk9QRU4pIHsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlbmRBdWRpb0NodW5rVG9Tb2NrZXQoY2h1bmspOw0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgfTsNCg0KICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1lZGlhU3RyZWFtLmNvbm5lY3QocmVjb3JkZXIpOw0KICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlY29yZGVyLmNvbm5lY3QoY29udGV4dC5kZXN0aW5hdGlvbik7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQgPSBuZXcgV2ViU29ja2V0KHNvY2tldFVybCk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc29ja2V0Lm9ub3BlbiA9ICgpID0+IGNvbnNvbGUubG9nKCLEkMOjIGvhur90IG7hu5FpIFNvY2tldCBUaMOgbmggQ8O0bmciKTsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQub25lcnJvciA9IChlcnJvcikgPT4gY29uc29sZS5lcnJvcigiTOG7l2kgU29ja2V0OiIsIGVycm9yKTsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQub25jbG9zZSA9ICgpID0+IGNvbnNvbGUubG9nKCLEkMOjIMSRw7NuZyBr4bq/dCBu4buRaSBTb2NrZXQuIik7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc29ja2V0Lm9ubWVzc2FnZSA9IChldmVudCkgPT4gZGlzcGxheVNvY2tldFJlc3BvbnNlKGV2ZW50LmRhdGEpOw0KDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RhcnRSZWNvcmRpbmdfQ2hhdGJvdC5kaXNhYmxlZCA9IHRydWU7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RvcFJlY29yZGluZ19DaGF0Ym90LmRpc2FibGVkID0gZmFsc2U7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWNvcmRpbmdUaW1lciA9IHNldFRpbWVvdXQoZnVuY3Rpb24gKCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzdG9wUmVjb3JkaW5nKCk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbnNvbGUubG9nKCdI4bq/dCA2IGdpw6J5Jyk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgfSwgZHVyYXRpb24gKiAxMDAwKTsNCiAgICAgICAgICAgICAgICAgICAgICAgIH0pDQogICAgICAgICAgICAgICAgICAgICAgICAuY2F0Y2goZnVuY3Rpb24gKGUpIHsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zb2xlLmVycm9yKCJM4buXaSB0cnV5IGPhuq1wIG1pY3LDtDoiLCBlKTsNCiAgICAgICAgICAgICAgICAgICAgICAgIH0pOw0KICAgICAgICAgICAgICAgIH0gZWxzZSB7DQogICAgICAgICAgICAgICAgICAgIGNvbnNvbGUuZXJyb3IoIlRyw6xuaCBkdXnhu4d0IGtow7RuZyBo4buXIHRy4bujIGdldFVzZXJNZWRpYS4iKTsNCiAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICB9DQoNCiAgICAgICAgICAgIGZ1bmN0aW9uIHN0b3BSZWNvcmRpbmcoKSB7DQogICAgICAgICAgICAgICAgaWYgKHJlY29yZGVyKSB7DQogICAgICAgICAgICAgICAgICAgIHJlY29yZGVyLmRpc2Nvbm5lY3QoKTsNCiAgICAgICAgICAgICAgICAgICAgbWVkaWFTdHJlYW0uZGlzY29ubmVjdCgpOw0KICAgICAgICAgICAgICAgICAgICBjb250ZXh0LmNsb3NlKCk7DQoNCiAgICAgICAgICAgICAgICAgICAgc3RhcnRSZWNvcmRpbmdfQ2hhdGJvdC5kaXNhYmxlZCA9IGZhbHNlOw0KICAgICAgICAgICAgICAgICAgICBzdG9wUmVjb3JkaW5nX0NoYXRib3QuZGlzYWJsZWQgPSB0cnVlOw0KDQogICAgICAgICAgICAgICAgICAgIGlmIChzb2NrZXQgJiYgc29ja2V0LnJlYWR5U3RhdGUgPT09IFdlYlNvY2tldC5PUEVOKSB7DQogICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQuY2xvc2UoKTsNCiAgICAgICAgICAgICAgICAgICAgfQ0KDQogICAgICAgICAgICAgICAgICAgIGlmIChyZWNvcmRpbmdUaW1lcikgew0KICAgICAgICAgICAgICAgICAgICAgICAgY2xlYXJUaW1lb3V0KHJlY29yZGluZ1RpbWVyKTsNCiAgICAgICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgICAgIH0NCiAgICAgICAgICAgIH0NCg0KICAgICAgICAgICAgZnVuY3Rpb24gc2VuZEF1ZGlvQ2h1bmtUb1NvY2tldChjaHVuaykgew0KICAgICAgICAgICAgICAgIGNvbnN0IGludDE2QXJyYXkgPSBuZXcgSW50MTZBcnJheShjaHVuay5tYXAoc2FtcGxlID0+IHNhbXBsZSAqIDB4N0ZGRikpOw0KICAgICAgICAgICAgICAgIGlmIChzb2NrZXQgJiYgc29ja2V0LnJlYWR5U3RhdGUgPT09IFdlYlNvY2tldC5PUEVOKSB7DQogICAgICAgICAgICAgICAgICAgIHNvY2tldC5zZW5kKGludDE2QXJyYXkuYnVmZmVyKTsNCiAgICAgICAgICAgICAgICAgICAgLy9jb25zb2xlLmxvZygiU2VudCBjaHVuayB0byBXZWJTb2NrZXQuIik7DQogICAgICAgICAgICAgICAgfSBlbHNlIHsNCiAgICAgICAgICAgICAgICAgICAgY29uc29sZS5sb2coIldlYlNvY2tldCBjaMawYSBt4bufLiBLaMO0bmcgdGjhu4MgZ+G7rWkgY2h1bmsiKTsNCiAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICB9DQoNCiAgICAgICAgICAgIGZ1bmN0aW9uIGRpc3BsYXlTb2NrZXRSZXNwb25zZShkYXRhKSB7DQogICAgICAgICAgICAgICAgdHJ5IHsNCiAgICAgICAgICAgICAgICAgICAgY29uc3QganNvbkRhdGEgPSBKU09OLnBhcnNlKGRhdGEpOw0KICAgICAgICAgICAgICAgICAgICBjb25zdCB0cmFuc2NyaXB0Tm9ybWVkID0ganNvbkRhdGEucmVzdWx0Lmh5cG90aGVzZXNbMF0udHJhbnNjcmlwdF9ub3JtZWQ7DQogICAgICAgICAgICAgICAgICAgIHVzZXJJbnB1dENoYXRib3gudmFsdWUgPSB0cmFuc2NyaXB0Tm9ybWVkOyAvLyBVcGRhdGUgdGhlIGlucHV0IGZpZWxkDQogICAgICAgICAgICAgICAgICAgIC8vY29uc29sZS5sb2coIlBo4bqjbiBo4buTaSBXZWJTb2NrZXQ6IiwgZGF0YSk7DQogICAgICAgICAgICAgICAgfSBjYXRjaCAoZSkgew0KICAgICAgICAgICAgICAgICAgICBjb25zb2xlLmxvZygiTOG7l2kgcGjDom4gdMOtY2ggY8O6IHBow6FwIHBo4bqjbiBo4buTaSBXZWJTb2NrZXQ6IiwgZSk7DQogICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgfQ0KDQogICAgICAgICAgICBpZiAoYWN0aW9uID09PSAic3RhcnQiKSB7DQogICAgICAgICAgICAgICAgc3RhcnRSZWNvcmRpbmcoKTsNCiAgICAgICAgICAgIH0gZWxzZSBpZiAoYWN0aW9uID09PSAic3RvcCIpIHsNCiAgICAgICAgICAgICAgICBzdG9wUmVjb3JkaW5nKCk7DQogICAgICAgICAgICB9DQogICAgICAgIH0NCiAgICA8L3NjcmlwdD4=
+
+</script>

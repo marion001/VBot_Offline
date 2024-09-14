@@ -1,0 +1,2675 @@
+<?php
+#Code By: Vũ Tuyển
+#Designed by: BootstrapMade
+#Facebook: https://www.facebook.com/TWFyaW9uMDAx
+include 'Configuration.php';
+?>
+<?php
+if ($Config['contact_info']['user_login']['active']){
+session_start();
+// Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
+if (!isset($_SESSION['user_login']) ||
+    (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
+    
+    // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
+    session_unset();
+    session_destroy();
+    header('Location: Login.php');
+    exit;
+}
+// Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
+//$_SESSION['user_login']['login_time'] = time();
+}
+?>
+<?php
+
+
+
+$read_stt_token_google_cloud = null;
+
+
+if (isset($_POST['all_config_save'])) {
+
+#CẬP NHẬT CÁC GIÁ TRỊ TRONG mic
+$Config['smart_config']['mic']['id'] = intval($_POST['mic_id']);
+
+#CẬP NHẬT CÁC GIÁ TRỊ TRONG API
+
+$Config['api']['active'] = isset($_POST['api_active']) ? true : false;
+$Config['api']['port'] = intval($_POST['api_port']);
+$Config['api']['show_log']['active'] = isset($_POST['api_log_active']) ? true : false;
+$Config['api']['show_log']['log_lever'] = $_POST['api_log_active_log_lever'] ? true : false;
+
+
+#CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
+$Config['home_assistant']['minimum_threshold'] = floatval($_POST['hass_minimum_threshold']);
+$Config['home_assistant']['time_out'] = intval($_POST['hass_time_out']);
+$Config['home_assistant']['internal_url'] = $_POST['hass_internal_url'];
+$Config['home_assistant']['external_url'] = $_POST['hass_external_url'];
+$Config['home_assistant']['long_token'] = $_POST['hass_long_token'];
+
+#CẬP NHẬT CÁC GIÁ TRỊ TRONG LOG HỆ THỐNG show_log
+$Config['smart_config']['show_log']['active'] = isset($_POST['log_active']) ? true : false;
+$Config['smart_config']['show_log']['log_display_style'] = $_POST['log_display_style'];
+
+#Cập nhật bật, tắt thông tin khi trương trình khởi động thành công
+$Config['smart_config']['read_information_startup']['active'] = isset($_POST['read_information_startup']) ? true : false;
+$Config['smart_config']['read_information_startup']['read_number'] = intval($_POST['read_information_startup_read_number']);
+
+#CẬP NHẬT CÁC GIÁ TRỊ TRONG Thiết Bị Đầu Ra/Âm Lượng (Volume):
+$Config['smart_config']['speaker']['system']['alsamixer_name'] = $_POST['alsamixer_name'];
+$Config['smart_config']['speaker']['volume'] = intval($_POST['bot_volume']);
+$Config['smart_config']['speaker']['volume_min'] = intval($_POST['bot_volume_min']);
+$Config['smart_config']['speaker']['volume_max'] = intval($_POST['bot_volume_max']);
+$Config['smart_config']['speaker']['volume_step'] = intval($_POST['bot_volume_step']);
+
+#CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
+$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
+$Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
+$Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration'] = intval($_POST['silence_duration']);
+$Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold'] = intval($_POST['min_amplitude_threshold']);
+
+#Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
+$Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['conversation_mode']) ? true : false;
+
+#CẬP NHẬT CHẾ ĐỘ Hotword Engine Picovoice KEY hotword_engine:
+$Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotword_engine_key'];
+
+#CẬP NHẬT CHẾ ĐỘ Text To Speak (TTS) text_to_speak:
+$Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] = $_POST['tts_select'];
+$Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'] = $_POST['directory_tts'];
+
+#CẬP NHẬT GIÁ TRỊ TRONG tts GOOGEL CLOUD
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] = $_POST['tts_ggcloud_language_code'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] = $_POST['tts_ggcloud_voice_name'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['speaking_speed'] = floatval($_POST['tts_gcloud_speaking_speed']);
+
+#cập nhật giá trị trong tts tts_default
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['speaking_speed'] = floatval($_POST['tts_default_speaking_speed']);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] = intval($_POST['tts_default_voice_name']);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] = intval($_POST['tts_default_voice_name']);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_sid'] = $_POST['authentication_zai_sid'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_sid'] = $_POST['expires_zai_sid'];
+
+#cập nhật giá trị trong tts tts_edge
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed'] = floatval($_POST['tts_edge_speaking_speed']);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] = $_POST['tts_edge_voice_name'];
+
+#Cập nhật tts zalo
+$apiKeys_ZALO_TTS = array_map('trim', explode("\n", $_POST['tts_zalo_api_key']));
+$apiKeys_ZALO_TTS = array_filter(array_map(function($key_tts_ZL) {
+    return str_replace("\r", '', $key_tts_ZL);
+}, $apiKeys_ZALO_TTS), function($key_tts_ZL) {
+     return !empty($key_tts_ZL); // Loại bỏ các chuỗi trống
+});
+$apiKeys_ZALO_TTS = array_values($apiKeys_ZALO_TTS);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] = $apiKeys_ZALO_TTS;
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['speaking_speed'] = floatval($_POST['tts_zalo_speaking_speed']);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] = intval($_POST['tts_zalo_voice_name']);
+
+#Cập nhật TTS Viettel
+$apiKeys_VIETTEL_TTS = array_map('trim', explode("\n", $_POST['tts_viettel_api_key']));
+$apiKeys_VIETTEL_TTS = array_filter(array_map(function($key_tts_VT) {
+    return str_replace("\r", '', $key_tts_VT);
+}, $apiKeys_VIETTEL_TTS), function($key_tts_VT) {
+     return !empty($key_tts_VT); // Loại bỏ các chuỗi trống
+});
+$apiKeys_VIETTEL_TTS = array_values($apiKeys_VIETTEL_TTS);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key'] = $apiKeys_VIETTEL_TTS;
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['speaking_speed'] = floatval($_POST['tts_viettel_speaking_speed']);
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] = $_POST['tts_viettel_voice_name'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['without_filter'] = isset($_POST['tts_viettel_without_filter']) ? true : false;
+
+#Cập nhật cấu hình SSH Server:
+$Config['ssh_server']['ssh_host'] = $_POST['ssh_host'];
+$Config['ssh_server']['ssh_port'] = intval($_POST['ssh_port']);
+$Config['ssh_server']['ssh_username'] = $_POST['ssh_username'];
+$Config['ssh_server']['ssh_password'] = $_POST['ssh_password'];
+
+#CẬP NHẬT cẤU hình BUTTON NÚT NHẤN
+foreach ($_POST['button'] as $buttonName => $buttonData) {
+	$Config['smart_config']['button'][$buttonName]['gpio'] = intval($buttonData['gpio']);
+	$Config['smart_config']['button'][$buttonName]['pulled_high'] = isset($buttonData['pulled_high']) ? (bool)$buttonData['pulled_high'] : false;
+	$Config['smart_config']['button'][$buttonName]['active'] = isset($buttonData['active']) ? (bool)$buttonData['active'] : false;
+	$Config['smart_config']['button'][$buttonName]['bounce_time'] = intval($buttonData['bounce_time']);
+	$Config['smart_config']['button'][$buttonName]['long_press']['active'] = isset($buttonData['long_press']['active']) ? (bool)$buttonData['long_press']['active'] : false;
+	$Config['smart_config']['button'][$buttonName]['long_press']['duration'] = intval($buttonData['long_press']['duration']);
+	}
+
+#CẬP NHẬT CẤU HÌNH ÂM THANH HỆ THỐNG
+$Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] = isset($_POST['sound_welcome_active']) ? true : false;
+$Config['smart_config']['smart_wakeup']['sound']['welcome']['welcome_file'] = $_POST['sound_welcome_file_path'];
+
+#cập nhật cấu hình đèn LED
+$Config['smart_config']['led']['active'] = isset($_POST['led_active_on_off']) ? true : false;
+$Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
+$Config['smart_config']['led']['led_type'] = $_POST['led_type_select'];
+$Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
+$Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
+$Config['smart_config']['led']['brightness'] = intval($_POST['led_brightness']);
+$Config['smart_config']['led']['led_invert'] = isset($_POST['led_invert']) ? true : false;
+
+$Config['smart_config']['led']['effect']['led_think'] = $_POST['led_think'];
+$Config['smart_config']['led']['effect']['led_mute'] = $_POST['led_mute'];
+
+#cẬP NHẬT CẤU HÌNH Ưu tiên nguồn phát/tìm kiếm Media:
+$music_source_priority_1 = isset($_POST['music_source_priority1']) ? $_POST['music_source_priority1'] : '';
+$music_source_priority_2 = isset($_POST['music_source_priority2']) ? $_POST['music_source_priority2'] : '';
+$music_source_priority_3 = isset($_POST['music_source_priority3']) ? $_POST['music_source_priority3'] : '';
+$Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3];
+
+#cập nhật đồng bộ hóa media với web ui
+$Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
+$Config['media_player']['media_sync_ui']['delay_time'] = intval($_POST['media_sync_ui_delay_time']);
+
+#CẬP NHẬT CÁC GIÁ TRỊ TRONG music_local
+$allowed_formats_str = $_POST['music_local_allowed_formats'];
+$Config['media_player']['music_local']['path'] = $_POST['music_local_path'];
+$Config['media_player']['music_local']['minimum_threshold'] = floatval($_POST['music_local_minimum_threshold']);
+$Config['media_player']['music_local']['allowed_formats'] = array_map('trim', explode(',', $allowed_formats_str));
+
+#cẬP NHẬT GIÁ TRỊ youtube
+$Config['media_player']['youtube']['google_apis_key'] = $_POST['youtube_google_apis_key'];
+
+#cẬP NHẬT GIÁ TRỊ Trợ Lý Ảo/Assistant:
+$Config['virtual_assistant']['google_gemini']['api_key'] = $_POST['google_gemini_key'];
+$Config['virtual_assistant']['google_gemini']['time_out'] = intval($_POST['google_gemini_time_out']);
+
+#Cập nhật giá trị trợ lý ảo Default Assistant
+$Config['virtual_assistant']['default_assistant']['time_out'] = intval($_POST['default_assistant_time_out']);
+$Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_chatbox'] = isset($_POST['default_assistant_convert_audio_to_text_used_for_chatbox']) ? true : false;
+$Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_display_and_logs'] = isset($_POST['default_assistant_convert_audio_to_text_used_for_display_and_logs']) ? true : false;
+
+#Cập nhật giá trị trợ lý ảo chatgpt
+$Config['virtual_assistant']['chat_gpt']['key_chat_gpt'] = $_POST['chat_gpt_key'];
+
+#cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
+$virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
+$virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $_POST['virtual_assistant_priority2'] : '';
+$virtual_assistant_priority_3 = isset($_POST['virtual_assistant_priority3']) ? $_POST['virtual_assistant_priority3'] : '';
+$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3];
+
+// Khởi tạo mảng radio_data đã cập nhật
+// Cập nhật radio_data từ POST
+$updated_radio_data = [];
+foreach ($_POST as $key => $value) {
+    if (strpos($key, 'radio_name_') === 0) {
+        $index = str_replace('radio_name_', '', $key);
+        $link_key = 'radio_link_' . $index;
+
+        // Kiểm tra cả tên đài và link đài đều có dữ liệu
+        if (isset($_POST[$link_key]) && !empty(trim($_POST[$key])) && !empty(trim($_POST[$link_key]))) {
+            $updated_radio_data[] = [
+                "name" => $_POST[$key],
+                "link" => $_POST[$link_key]
+            ];
+        }
+    }
+}
+
+// Lưu dữ liệu radio đã cập nhật vào cấu hình
+$Config['media_player']['radio_data'] = $updated_radio_data;
+		
+##########################################
+
+#Cập nhật stt Google Cloud
+$json_data_goolge_cloud_stt = $_POST['stt_ggcloud_json_file_token'];
+json_decode($json_data_goolge_cloud_stt);
+if (json_last_error() === JSON_ERROR_NONE) {
+    // Nếu dữ liệu là null hoặc rỗng, thay thế bằng {}
+    if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
+        $json_data_goolge_cloud_stt = '{}';
+    }
+    // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
+    $json_data_goolge_cloud_stt = trim($json_data_goolge_cloud_stt);
+    // Lưu dữ liệu vào file
+    file_put_contents($stt_token_google_cloud, $json_data_goolge_cloud_stt);
+    //$messages[] = 'Dữ liệu stt_token_google_cloud đã được lưu vào file thành công.';
+} else {
+    $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
+}
+
+#Cập nhật tts Google Cloud
+$json_data_goolge_cloud_tts = $_POST['tts_ggcloud_json_file_token'];
+json_decode($json_data_goolge_cloud_tts);
+if (json_last_error() === JSON_ERROR_NONE) {
+    // Nếu dữ liệu là null hoặc rỗng, thay thế bằng {}
+    if (empty($json_data_goolge_cloud_tts) || $json_data_goolge_cloud_tts === null) {
+        $json_data_goolge_cloud_tts = '{}';
+    }
+    // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
+    $json_data_goolge_cloud_tts = trim($json_data_goolge_cloud_tts);
+    // Lưu dữ liệu vào file
+    file_put_contents($tts_token_google_cloud, $json_data_goolge_cloud_tts);
+    //$messages[] = 'Dữ liệu tts_token_google_cloud đã được lưu vào file thành công.';
+} else {
+    $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
+}	
+
+// Lưu cấu hình $Config vào file JSON
+//file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+$result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+
+if ($result_ConfigJson !== false) {
+    $messages[] = "Cấu hình đã được lưu thành công!";
+} else {
+    $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
+}
+
+
+
+}
+#########################
+
+#Lưu các giá trị cấu hình chi tiết trong hotword
+if (isset($_POST['save_hotword_theo_lang'])) {
+    $lang = $_POST['lang_hotword_get'];
+    $Lib_modelFilePath = $_POST['select_file_lib_pv'];
+    $updatedConfig = [];
+
+if (empty($Lib_modelFilePath)) {
+	$messages[] = "Lỗi, Cần chọn file thư viện Hotword .pv";
+}else{
+	
+// Kiểm tra giá trị của biến $lang
+if ($lang !== 'eng' && $lang !== 'vi') {
+    $messages[] = "Thất bại, Giá trị ngôn ngữ không có hoặc không phải là 'eng' hay 'vi'";
+}else{
+	    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'file_name_') === 0) {
+            $index = str_replace('file_name_', '', $key);
+            $active_key = 'active_' . $index;
+            $sensitive_key = 'sensitive_' . $index;
+            $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
+            $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
+            $sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
+
+            if ($file_name !== '') {
+                $updatedConfig[] = [
+                    "active" => $active,
+                    "file_name" => $file_name,
+                    "sensitive" => $sensitive
+                ];
+            }
+        }
+    }
+
+    $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = $updatedConfig;
+    $Config['smart_config']['smart_wakeup']['hotword']['library'][$lang]['modelFilePath'] = $Lib_modelFilePath;
+
+    file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    $messages[] = 'Cập nhật các giá trị trong Hotword thành công';
+}
+}
+}
+
+#Đọc File stt và tts google cloud
+ if (file_exists($stt_token_google_cloud)) {
+		$read_stt_token_google_cloud = file_get_contents($stt_token_google_cloud);
+		
+    } else {
+		$read_stt_token_google_cloud = '';
+		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
+    }
+ if (file_exists($tts_token_google_cloud)) {
+		$read_tts_token_google_cloud = file_get_contents($tts_token_google_cloud);
+		
+    } else {
+		$read_tts_token_google_cloud = '';
+		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
+    }
+#đọc file backlist tts zalo
+/*
+ if (file_exists($Backlist_File_Name)) {
+		$read_backlist_file_name = file_get_contents($Backlist_File_Name);
+		$data_backlist = json_decode($read_backlist_file_name, true);
+    } else {
+		$read_backlist_file_name = '';
+		$data_backlist = null;
+		$messages[] = 'Lỗi: File '.$Backlist_File_Name.' không tồn tại.';
+    }
+	*/
+?>
+
+<!DOCTYPE html>
+<html lang="vi">
+<?php
+include 'html_head.php';
+?>
+
+<body>
+    <?php
+	//Hiển thị thông báo php
+    if (!empty($messages)) {
+        $safeMessages = array_map(function($msg) {
+            return htmlspecialchars($msg, ENT_QUOTES, 'UTF-8');
+        }, $messages);
+        $allMessages = implode("\\n", $safeMessages);
+        echo "<script>showMessagePHP('$allMessages');</script>";
+    }
+    ?>
+<!--end Hiển thị thông báo Mesage php -->
+<!-- ======= Header ======= -->
+<?php
+include 'html_header_bar.php'; 
+?>
+<!-- End Header -->
+
+
+
+  <!-- ======= Sidebar ======= -->
+<?php
+include 'html_sidebar.php';
+?>
+<!-- End Sidebar-->
+
+
+  <main id="main" class="main">
+
+    <div class="pagetitle">
+      <h1>Cấu hình Config.json</h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
+          <li class="breadcrumb-item active">Config.json</li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
+
+
+<form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="">
+    <section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+
+          <div class="card">
+		  <div class="card accordion" id="accordion_button_ssh">
+		<div class="card-body">
+			  
+			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_ssh" aria-expanded="false" aria-controls="collapse_button_ssh">
+                 Cấu Hình Kết Nối SSH Server:</h5>
+				 
+				 <div id="collapse_button_ssh" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_ssh">
+	
+				 
+                <div class="row mb-3">
+                  <label for="ssh_host" class="col-sm-3 col-form-label">Máy chủ:</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" type="text" name="ssh_host" id="ssh_host" placeholder="<?php echo $serverIp; ?>" value="<?php echo $Config['ssh_server']['ssh_host']; ?>">
+                 <div class="invalid-feedback">Cần nhập địa chỉ ip máy chủ SSH</div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="ssh_port" class="col-sm-3 col-form-label">Cổng kết nối:</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" type="number" name="ssh_port" id="ssh_port" placeholder="<?php echo $Config['ssh_server']['ssh_port']; ?>" value="<?php echo $Config['ssh_server']['ssh_port']; ?>">
+                 <div class="invalid-feedback">Cần nhập cổng kết nối tới máy chủ SSH</div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="ssh_username" class="col-sm-3 col-form-label">Tên đăng nhập:</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" type="text" name="ssh_username" id="ssh_username" placeholder="<?php echo $Config['ssh_server']['ssh_username']; ?>" value="<?php echo $Config['ssh_server']['ssh_username']; ?>">
+                 <div class="invalid-feedback">Cần nhập tên đăng nhập của máy chủ SSH</div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="ssh_password" class="col-sm-3 col-form-label">Mật khẩu:</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" type="text" name="ssh_password" id="ssh_password" placeholder="<?php echo $Config['ssh_server']['ssh_password']; ?>" value="<?php echo $Config['ssh_server']['ssh_password']; ?>">
+                 <div class="invalid-feedback">Cần nhập mật khẩu của máy chủ SSH</div>
+                  </div>
+                </div>
+				
+				<center><button type="button" class="btn btn-success rounded-pill" onclick="checkSSHConnection()">Kiểm tra kết nối SSH</button></center>
+
+				
+                </div>
+                </div>
+                </div><hr/>
+				
+		<div class="card-body">
+              <h5 class="card-title">Cài Đặt Mic:</h5>
+                <div class="row mb-3">
+                  <label for="mic_id" class="col-sm-3 col-form-label">ID Mic:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group mb-3">
+                      <input required class="form-control border-success" type="number" name="mic_id" id="mic_id" placeholder="<?php echo $Config['smart_config']['mic']['id']; ?>" value="<?php echo $Config['smart_config']['mic']['id']; ?>">
+                 	     
+				 <div class="invalid-feedback">Cần nhập ID của Mic!</div>
+				  <button class="btn btn-success border-success" type="button" onclick="scan_Mic()">Tìm Kiếm</button>
+  
+                  </div>
+                </div>
+                </div>
+				
+				<div class="row mb-3">
+				 <div id="mic_scanner"></div>
+				</div>
+				
+                </div><hr/>
+		  
+            <div class="card-body">
+              <h5 class="card-title">Cài Đặt API:</h5>
+			  
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích Hoạt API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng và giao tiếp với VBot thông qua API')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="api_active" id="api_active" <?php echo $Config['api']['active'] ? 'checked' : ''; ?>>
+                      
+                    </div>
+                  </div>
+                </div>
+				
+                <div class="row mb-3">
+                  <label for="api_port" class="col-sm-3 col-form-label">Port API:</label>
+                  <div class="col-sm-9">
+				   <div class="input-group mb-3">
+                    <input required type="number" class="form-control border-success" name="api_port" id="api_port" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['port']) ?>">
+					<div class="invalid-feedback">Cần nhập cổng Port dành cho API!</div>
+					<button class="btn btn-success border-success" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>" target="_bank">Kiểm Tra</a></button>
+				  </div>
+				  </div>
+                </div>
+				<br/>
+		
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Hiển Thị Log API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt hiển thị log của API, Chỉ hiển thị khi Debug trực tiếp trên Console, Terminal')"></i> :</label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="api_log_active" id="api_log_active" <?php echo $Config['api']['show_log']['active'] ? 'checked' : ''; ?>>
+                      
+                    </div>
+                  </div>
+                </div>
+				
+				
+                <div class="row mb-3">
+                  <label for="api_log_active_log_lever" class="col-sm-3 col-form-label">Mức Độ Hiển Thị Log:</label>
+                  <div class="col-sm-9">
+                   <select name="api_log_active_log_lever" id="api_log_active_log_lever" class="form-select border-success" aria-label="Default select example">
+                      <option value="DEBUG" <?php echo $Config['api']['show_log']['log_lever'] === 'DEBUG' ? 'selected' : ''; ?>>DEBUG (Các thông tin gỡ lỗi)</option>
+                      <option value="INFO" <?php echo $Config['api']['show_log']['log_lever'] === 'INFO' ? 'selected' : ''; ?>>INFO (Các thông tin)</option>
+                      <option value="WARNING" <?php echo $Config['api']['show_log']['log_lever'] === 'WARNING' ? 'selected' : ''; ?>>WARNING (Các cảnh báo lỗi)</option>
+                      <option value="ERROR" <?php echo $Config['api']['show_log']['log_lever'] === 'ERROR' ? 'selected' : ''; ?>>ERROR (Lỗi nghiêm trọng)</option>
+                      <option value="CRITICAL" <?php echo $Config['api']['show_log']['log_lever'] === 'CRITICAL' ? 'selected' : ''; ?>>CRITICAL (Lỗi rất nghiêm trọng)</option>
+                    </select>
+                  </div>
+                </div>
+            </div>
+			<hr/>
+			
+			<div class="card-body">
+              <h5 class="card-title">Cài Đặt Home Assistant:</h5>
+			        <div class="row mb-3">
+                  <label for="hass_long_token" class="col-sm-3 col-form-label" title="Mã token của nhà thông minh Home Assistant">Mã Token:</label>
+                 <div class="col-sm-9">
+                      <input required class="form-control border-success" type="text" name="hass_long_token" id="hass_long_token" title="Mã token của nhà thông minh Home Assistant" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>">
+						<div class="invalid-feedback">Cần nhập mã Token của nhà thông minh!</div>
+					</div>
+                </div>
+                <div class="row mb-3">
+                  <label for="hass_internal_url" class="col-sm-3 col-form-label" title="Địa chỉ url nội bộ">URL nội bộ:</label>
+                 <div class="col-sm-9">
+				 <div class="input-group mb-3">
+                      <input required class="form-control border-success" type="text" name="hass_internal_url" id="hass_internal_url" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['internal_url']) ?>" title="Địa chỉ url nội bộ" value="<?php echo htmlspecialchars($Config['home_assistant']['internal_url']) ?>">
+						<div class="invalid-feedback">Cần nhập URL nội bộ của nhà thông minh!</div>
+						
+    <button class="btn btn-success border-success" type="button" onclick="CheckConnectionHomeAssistant('hass_internal_url')">Kiểm Tra</button>
+  
+					</div>
+					</div>
+                </div>
+                <div class="row mb-3">
+                  <label for="hass_external_url" class="col-sm-3 col-form-label" title="Địa chỉ url bên ngoài">URL bên ngoài:</label>
+                 <div class="col-sm-9">
+				 <div class="input-group mb-3">
+                      <input class="form-control border-success" type="text" name="hass_external_url" id="hass_external_url" title="Địa chỉ url bên ngoài" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['external_url']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['external_url']) ?>">
+				      <button class="btn btn-success border-success" type="button" onclick="CheckConnectionHomeAssistant('hass_external_url')">Kiểm Tra</button>
+  
+					</div>
+				   </div>
+                </div>
+          
+                <div class="row mb-3">
+                  <label for="hass_minimum_threshold" class="col-sm-3 col-form-label" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa">Ngưỡng kết quả tối thiểu <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng kết quả cho phép từ 0.1 đến 0.9 ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị')"></i> :</label>
+                 <div class="col-sm-9">
+                      <input required class="form-control border-success" type="number" step="0.1" min="0.5" max="0.9" name="hass_minimum_threshold" id="hass_minimum_threshold" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['minimum_threshold']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['minimum_threshold']) ?>">
+						<div class="invalid-feedback">Cần nhập ngưỡng tối thiểu để so sánh tên thiết bị với yêu cầu của bạn!</div>
+					</div>
+                </div>
+                <div class="row mb-3">
+                  <label for="hass_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa khi truy vấn và xử lý dữ liệu')"></i> :</label>
+                 <div class="col-sm-9">
+                      <input required class="form-control border-success" type="number" step="1" min="5" max="60" name="hass_time_out" id="hass_time_out" title="Thời gian chờ phản hồi tối đa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['time_out']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['time_out']) ?>">
+                    <div class="invalid-feedback">Cần nhập thời gian tối đa chờ phản hồi!</div>
+					</div>
+                </div>
+            </div>
+				<hr>
+			
+			<div class="card-body">
+              <h5 class="card-title">Log Hệ Thống:</h5>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Bật, Tắt logs hệ thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ trương trình khi được chạy')"></i> :</label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="log_active" id="log_active" <?php echo $Config['smart_config']['show_log']['active'] ? 'checked' : ''; ?>>
+                      
+                    </div>
+                  </div>
+                </div>
+				
+				<div class="row mb-3">
+                  <label for="log_display_style" class="col-sm-3 col-form-label">Kiểu hiển thị logs:</label>
+                  <div class="col-sm-9">
+                   <select name="log_display_style" id="log_display_style" class="form-select border-success" aria-label="Default select example">
+                      <option value="console" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'console' ? 'selected' : ''; ?>>console (Hiển thị log ra bảng điều khiển đầu cuối)</option>
+                      <option value="api" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'api' ? 'selected' : ''; ?>>api (Hiển thị log ra API, Web UI)</option>
+                      <option value="both" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'both' ? 'selected' : ''; ?>>both (Hiển thị log ra cả 2 chế độ)</option>
+					</select>
+                  </div>
+                </div>
+                </div><hr/>
+
+			<div class="card-body">
+              <h5 class="card-title">Đọc thông tin khi khởi động:</h5>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Bật, Tắt đọc thông tin <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt đọc thông tin khi Chương trình khởi động như: Địa chỉ ip của thiết bị, v..v...')"></i> :</label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="read_information_startup" id="read_information_startup" <?php echo $Config['smart_config']['read_information_startup']['active'] ? 'checked' : ''; ?>>
+                      
+                    </div>
+                  </div>
+                </div>
+				
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Số lần đọc: </label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input required class="form-control border-success" type="number" min="1" step="1" max="5" name="read_information_startup_read_number" id="read_information_startup_read_number" value="<?php echo $Config['smart_config']['read_information_startup']['read_number']; ?>">
+                      <div class="invalid-feedback">Cần nhập số lần đọc thông tin khi khởi động lần đầu tiên</div>
+                    </div>
+                  </div>
+                </div>
+				
+                </div><hr/>
+
+
+			<div class="card-body">
+              <h5 class="card-title">Thiết Bị Đầu Ra/Âm Lượng (Volume) <i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font>')"></i> :</h5>
+                <div class="row mb-3">
+                  <label for="alsamixer_name" class="col-sm-3 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer">Tên thiết bị (alsamixer):</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" type="text" name="alsamixer_name" id="alsamixer_name" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer" placeholder="<?php echo $Config['smart_config']['speaker']['system']['alsamixer_name']; ?>" value="<?php echo $Config['smart_config']['speaker']['system']['alsamixer_name']; ?>">
+                    </div>
+                  </div>
+                <div class="row mb-3">
+                  <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy trương trình')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume" id="bot_volume" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Âm lượng khi chạy lần đầu tiên" placeholder="<?php echo $Config['smart_config']['speaker']['volume']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume']; ?>">
+					<div class="invalid-feedback">Cần nhập âm lượng khi khởi động!</div>
+					</div>
+                  </div>
+				  
+                <div class="row mb-3">
+                  <label for="bot_volume_min" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Âm lượng thấp nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_min" id="bot_volume_min" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ giảm xuống thấp nhất" placeholder="<?php echo $Config['smart_config']['speaker']['volume_min']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_min']; ?>">
+                    <div class="invalid-feedback">Cần nhập âm lượng hạ xuống thấp nhất khi Bot thay đổi!</div>
+					</div>
+                  </div>
+				  
+                <div class="row mb-3">
+                  <label for="bot_volume_max" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ tăng lên cao nhất">Âm lượng cao nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_max" id="bot_volume_max" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ tăng lên cao nhất" placeholder="<?php echo $Config['smart_config']['speaker']['volume_max']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_max']; ?>">
+                    <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
+					</div>
+                  </div>
+				  
+                <div class="row mb-3">
+                  <label for="bot_volume_step" class="col-sm-3 col-form-label" title="Bước âm lượng khi được thay đổi">Bước âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Bước âm lượng thay đổi khi mỗi lần tăng hoặc giảm âm lượng')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_step" id="bot_volume_step" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Bước âm lượng khi được thay đổi" placeholder="<?php echo $Config['smart_config']['speaker']['volume_step']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_step']; ?>">
+                    <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
+					</div>
+                  </div>
+                </div><hr/>
+				
+				
+				
+			<div class="card-body">
+              <h5 class="card-title">Speak To Text (STT) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để trương trình xử lý dữ liệu')"></i> :</h5>
+                <div class="row mb-3">
+                  <label for="duration_recording" class="col-sm-3 col-form-label" title="Thời gian thu âm tối đa">Thời gian lắng nghe tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian lắng nghe tối đa khi Bot được đánh thức')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" type="number" step="1" min="4" max="10" name="duration_recording" id="duration_recording" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian thu âm tối đa" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>">
+                    </div>
+                  </div>
+                <div class="row mb-3">
+                  <label for="silence_duration" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian im lặng tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa khi phát hiện im lặng trong quá trình lắng nghe, (tham số phải nhỏ hơn thời gian lắng nghe tối đa)')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" step="1" min="1" max="10" type="number" name="silence_duration" id="silence_duration" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa khi thu âm" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>">
+                    </div>
+                  </div>
+				  
+                <div class="row mb-3">
+                  <label for="min_amplitude_threshold" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Ngưỡng biên độ tối thiểu (RMS) <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng biên độ để đánh giá đang được im lặng khi lắng nghe, (biên độ càng cao thì cần âm thanh môi trường lớn và ngược lại)')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" step="10" min="310" max="2000" type="number" name="min_amplitude_threshold" id="min_amplitude_threshold" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Ngưỡng biên độ tối thiểu để nhận biết là có âm thanh" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold']; ?>">
+                    </div>
+                  </div>
+
+
+				  
+			 <div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn STT (Speak To Text):</h5>
+			  <?php 
+			  $GET_stt_select = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select']; 
+			  if ($GET_stt_select === "stt_default"){
+				  $replace_text_stt = "Mặc Định";
+			  }else if ($GET_stt_select === "stt_ggcloud"){
+				  $replace_text_stt = "Google Cloud";
+			  }else{
+				  $replace_text_stt = "Không có dữ liệu";
+			  }
+			  ?>
+			  <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_stt; ?></font></center>
+				<div class="col-sm-9">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="stt_select" id="stt_default" value="stt_default" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_default' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="stt_default">STT Mặc Định (Free)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud</label>
+                    </div>
+                  </div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-lg-6">
+
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Cấu hình STT:</h5>
+            
+<!-- ẩn hiện cấu hình select_stt_ggcloud_html -->
+<div id="select_stt_ggcloud_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>STT Google Cloud (Authentication.json)</font></center></h4>
+                    <div class="form-floating mb-3">
+                      <input readonly type="number" class="form-control border-danger" min="0" step="1" name="stt_ggcloud_rate" id="stt_ggcloud_rate" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>">
+                      <label for="stt_ggcloud_rate">Sample Rate:</label>
+                    </div>
+					
+                    <div class="form-floating mb-3">
+                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_channels" id="stt_ggcloud_channels" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['channels']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['channels']; ?>">
+                      <label for="stt_ggcloud_channels">Số Lượng Kênh (Channels):</label>
+                    </div>
+					
+                    <div class="form-floating mb-3">
+                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_chunk" id="stt_ggcloud_chunk" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['chunk']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['chunk']; ?>">
+                      <label for="stt_ggcloud_chunk">Chunk:</label>
+                    </div>
+					
+                    <div class="form-floating mb-3">
+                      <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_json_file_token" id="stt_ggcloud_json_file_token" style="height: 150px;">
+					  <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
+					  </textarea>
+                      <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực:</label>
+                    </div>
+                  </div>
+
+<!-- ẩn hiện cấu hình select_stt_default_html -->
+<div id="select_stt_default_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>STT Default</font></center></h4>
+Không cần cấu hình</div>
+          </div>
+        </div>
+      </div>
+</div>
+				<hr/>
+<div class="card-body">
+              <h5 class="card-title">Chế Độ Hội Thoại/Trò Chuyện Liên Tục <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật Bạn chỉ cần gọi Bot 1 lần, sau khi bot trả lời xong sẽ tự động lắng nghe tiếp và lặp lại (cho tới khi Bạn không còn yêu cầu nào nữa)')"></i> :</h5>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt chế độ hội thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ hội thoại')"></i> :</label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="conversation_mode" id="conversation_mode" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
+                    </div>
+                  </div>
+                </div>
+                </div><hr/>
+							<div class="card-body">
+              <h5 class="card-title" title="Key Picovoice">Hotword Engine/Picovoice:</h5>
+<div class="card">
+<div class="card-body">
+<h5 class="card-title" title="Key Picovoice">Picovoice <i class="bi bi-question-circle-fill" onclick="show_message('Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>')"></i> :</h5>
+         <div class="row mb-3">
+                  <label for="hotword_engine_key" class="col-sm-3 col-form-label">Token Key:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group mb-3">
+                      <input required class="form-control border-success" type="text" name="hotword_engine_key" id="hotword_engine_key" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>">
+                 <div class="invalid-feedback">Cần nhập key Picovoice để gọi Hotword!</div>
+				  <button class="btn btn-success border-success" type="button" onclick="test_key_Picovoice()">Kiểm Tra</button>
+				
+                  </div>
+                  </div>
+                </div>
+            </div>
+          </div>
+		  
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Hotword <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
+
+     
+     <div class="form-floating mb-3">			
+<select name="select_hotword_lang" id="select_hotword_lang" class="form-select border-success" aria-label="Default select example">
+<option value="vi" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'vi' ? 'selected' : ''; ?>>Tiếng việt</option>
+<option value="eng" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'eng' ? 'selected' : ''; ?>>Tiếng anh</option>
+</select>
+<label for="select_hotword_lang">Chọn ngôn ngữ để gọi, đánh thức Bot:</label>
+</div>
+			
+<table class="table table-bordered border-primary">
+                <thead>
+                  <tr>
+                    <th scope="col" colspan="5">  <h5 class="card-title"><center><font color=red>Cài đặt nâng cao Hotword:</font></center></h5></th>
+                  </tr>
+				   <tr>
+                    <th scope="col" colspan="8"><center>
+					<button type="button" class="btn btn-primary rounded-pill" onclick="loadConfigHotword('vi')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Cài đặt Hotword Tiếng Việt">Tiếng Việt</button>
+					<button type="button" class="btn btn-primary rounded-pill" onclick="loadConfigHotword('eng')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Cài đặt Hotword Tiếng Anh">Tiếng Anh</button>
+					<button type="button" class="btn btn-warning rounded-pill" onclick="reload_hotword_config()" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tự động tìm scan các file Hotword có trong thư mục eng và vi để cấu hình trong Config.json">Scan Và Ghi Mới</button>
+				
+					</center>
+					<span id="language_hotwordd" value=""></span>
+					</tr>
+					</thead> 
+                
+                  <thead id="results_body_hotword1">
+                  </thead>
+				   
+                <tbody id="results_body_hotword">
+               
+
+                </tbody>
+              </table>
+
+            </div>
+          </div>
+
+			  
+       
+                </div><hr/>
+	
+							<div class="card-body">
+              <h5 class="card-title">Text To Speak (TTS) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi kết quả từ văn bản thành giọng nói để phát ra loa')"></i> :</h5>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt Cache lại TTS:</label>
+                  <div class="col-sm-9">
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="cache_tts" id="cache_tts" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="cache_tts"> (Bật hoặc Tắt sử dụng Cache)</label>
+                    </div>
+                  </div>
+                </div>
+				
+                <div class="row mb-3">
+                  <label for="directory_tts" class="col-sm-3 col-form-label">Thư Mục Chứa TTS:</label>
+                  <div class="col-sm-9">
+                      <input readonly class="form-control border-danger" type="text" name="directory_tts" id="directory_tts" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts']; ?>">
+                  </div>
+                </div>
+				
+<div class="row">
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn TTS (Text To Speak) <i class="bi bi-question-circle-fill" onclick="show_message('Cần lựa chọn TTS bên dưới để sử dụng hoặc cấu hình cài đặt cho TTS đó')"></i> :</h5>
+			  <?php 
+			  $GET_tts_select = $Config['smart_config']['smart_answer']['text_to_speak']['tts_select']; 
+			  if ($GET_tts_select === "tts_default"){
+				  $replace_text_tts = "Mặc Định";
+			  }else if ($GET_tts_select === "tts_ggcloud"){
+				  $replace_text_tts = "Google Cloud";
+			  }else if ($GET_tts_select === "tts_zalo"){
+				  $replace_text_tts = "Zalo AI";
+			  }else if ($GET_tts_select === "tts_viettel"){
+				  $replace_text_tts = "Viettel AI";
+			  }else if ($GET_tts_select === "tts_edge"){
+				  $replace_text_tts = "Microsoft edge";
+			  }else{
+				  $replace_text_tts = "Không có dữ liệu";
+			  }
+			  ?>
+			  <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_tts; ?></font></center>
+				<div class="col-sm-9">
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="tts_default">TTS Mặc Định (Free) <i class="bi bi-question-circle-fill" onclick="show_message('Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định')"></i></label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="tts_ggcloud">TTS Google Cloud (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng tệp xác thực json của Google Cloud TTS để sử dụng: <a href=\'https://cloud.google.com/text-to-speech?hl=vi\' target=\'_bank\'>SDK</a>')"></i></label>
+                    </div>
+
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tts_select" id="tts_zalo" value="tts_zalo" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_zalo' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="tts_zalo">TTS Zalo (Api Keys) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Api keys của zalo càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href=\'https://zalo.ai/account/manage-keys\' target=\'_bank\'>https://zalo.ai/account/manage-keys</a>')"></i></label>
+                    </div>
+					
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tts_select" id="tts_viettel" value="tts_viettel" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_viettel' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="tts_viettel">TTS Viettel (Api Keys) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Api keys của Viettel càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href=\'https://viettelai.vn/dashboard/token\' target=\'_bank\'>https://viettelai.vn/dashboard/token</a>')"></i></label>
+                    </div>
+
+                    <div class="form-check" disabled>
+                      <input disabled class="form-check-input" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
+                      <label disabled class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
+                    </div>
+                  </div>
+				  
+
+            </div>
+          </div>
+
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Cấu hình TTS:</h5>
+<!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
+<div id="select_tts_default_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Default</font></center></h4>
+
+<div class="form-floating mb-3">			
+<select name="tts_default_quality" id="tts_default_quality" class="form-select border-success" aria-label="Default select example">
+<option value="0" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 0 ? 'selected' : ''; ?>>Tiêu chuẩn</option>
+<option value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 1 ? 'selected' : ''; ?>>Chất lượng cao</option>
+</select>
+<label for="tts_default_quality">Chất lượng giọng đọc:</label>
+</div>
+
+<div class="form-floating mb-3">  
+<input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="tts_default_speaking_speed" id="tts_default_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['speaking_speed']; ?>">
+ <label for="tts_default_speaking_speed" class="form-label">Tốc độ đọc:</label>	
+</div>
+
+<div class="form-floating mb-3">			
+<select name="tts_default_voice_name" id="tts_default_voice_name" class="form-select border-success" aria-label="Default select example">
+<option value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] === 1 ? 'selected' : ''; ?>>Giọng Miền Nam (Nữ)</option>
+<option value="3" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] === 3 ? 'selected' : ''; ?>>Giọng Miền Nam (Nam)</option>
+<option value="2" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] === 2 ? 'selected' : ''; ?>>Giọng Miền Bắc (Nữ)</option>
+<option value="4" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] === 4 ? 'selected' : ''; ?>>Giọng Miền Bắc (Nam)</option>
+<option value="6" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] === 6 ? 'selected' : ''; ?>>Giọng Miền Trung (Nữ)</option>
+<option value="8" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] === 8 ? 'selected' : ''; ?>>Giọng Miền Trung (Nam)</option>
+</select>
+<label for="tts_default_voice_name">Giọng đọc:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input class="form-control border-danger" type="text" name="authentication_zai_sid" id="authentication_zai_sid" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_sid']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_sid']; ?>">
+<label for="authentication_zai_sid" class="form-label">Mã Token zai_sid:</label>
+</div>
+<div class="form-floating mb-3">
+<input class="form-control border-danger" type="text" name="expires_zai_sid" id="expires_zai_sid" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_sid']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_sid']; ?>">
+<label for="expires_zai_sid" class="form-label">Hết hạn zai_sid:</label>
+</div>
+<div class="form-floating mb-3">
+<center><button class="btn btn-primary rounded-pill" type="button" onclick="">Get Token zai_sid</button> <i class="bi bi-question-circle-fill" onclick="show_message('zai_sid Chỉ dùng cho trợ lý ảo Default Assistant, với chức năng: Chuyển đổi thêm kết quả thành văn bản (text), Hạn sử dụng 1 năm')"></i></center>
+</div>
+</div>
+<!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
+
+<!-- ẩn hiện cấu hình select_stt_ggcloud_html style="display: none;" -->
+<div id="select_tts_ggcloud_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển văn bản thành văn bản"><center><font color=red>TTS Google Cloud</font></center></h4>
+<div class="form-floating mb-3">			
+<select name="tts_ggcloud_language_code" id="tts_ggcloud_language_code" class="form-select border-success" aria-label="Default select example">
+<option value="vi-VN" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] === 'vi-VN' ? 'selected' : ''; ?>>Tiếng Việt</option>
+</select><label for="tts_ggcloud_language_code">Ngôn ngữ:</label></div>
+<div class="form-floating mb-3">			
+<select name="tts_ggcloud_voice_name" id="tts_ggcloud_voice_name" class="form-select border-success" aria-label="Default select example">
+<option value="vi-VN-Neural2-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Neural2-A' ? 'selected' : ''; ?>>vi-VN-Neural2-A FEMALE</option>
+<option value="vi-VN-Neural2-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Neural2-D' ? 'selected' : ''; ?>>vi-VN-Neural2-D MALE</option>
+<option value="vi-VN-Standard-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-A' ? 'selected' : ''; ?>>vi-VN-Standard-A FEMALE</option>
+<option value="vi-VN-Standard-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-B' ? 'selected' : ''; ?>>vi-VN-Standard-B MALE</option>
+<option value="vi-VN-Standard-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-C' ? 'selected' : ''; ?>>vi-VN-Standard-C FEMALE</option>
+<option value="vi-VN-Standard-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-D' ? 'selected' : ''; ?>>vi-VN-Standard-D MALE</option>
+<option value="vi-VN-Wavenet-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-A' ? 'selected' : ''; ?>>vi-VN-Wavenet-A FEMALE</option>
+<option value="vi-VN-Wavenet-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-B' ? 'selected' : ''; ?>>vi-VN-Wavenet-B MALE</option>
+<option value="vi-VN-Wavenet-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-C' ? 'selected' : ''; ?>>vi-VN-Wavenet-C FEMALE</option>
+<option value="vi-VN-Wavenet-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-D' ? 'selected' : ''; ?>>vi-VN-Wavenet-D MALE</option>
+</select>
+<label for="tts_ggcloud_voice_name">Giọng đọc:</label></div>
+<div class="form-floating mb-3">  
+<input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_gcloud_speaking_speed" id="tts_gcloud_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['speaking_speed']; ?>">
+ <label for="tts_gcloud_speaking_speed" class="form-label">Tốc độ đọc:</label>	
+</div>
+<div class="form-floating mb-3">
+<textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="tts_ggcloud_json_file_token" id="tts_ggcloud_json_file_token" style="height: 150px;">
+<?php echo htmlspecialchars(trim($read_tts_token_google_cloud)); ?>
+</textarea>
+<label for="tts_ggcloud_json_file_token">Tệp tin json xác thực:</label>
+</div>
+</div>
+
+
+<!-- ẩn hiện cấu hình select_tts_zalo_html style="display: none;" -->
+<div id="select_tts_zalo_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Zalo AI</font></center></h4>
+
+
+<div class="form-floating mb-3">  
+<input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="tts_zalo_speaking_speed" id="tts_zalo_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['speaking_speed']; ?>">
+ <label for="tts_zalo_speaking_speed" class="form-label">Tốc độ đọc:</label>	
+</div>
+
+<div class="form-floating mb-3">			
+<select name="tts_zalo_voice_name" id="tts_zalo_voice_name" class="form-select border-success" aria-label="Default select example">
+<option value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 1 ? 'selected' : ''; ?>>(Nữ) Miền Nam</option>
+<option value="3" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 3 ? 'selected' : ''; ?>>(Nam) Miền Nam</option>
+<option value="2" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 2 ? 'selected' : ''; ?>>(Nữ) Miền Bắc</option>
+<option value="4" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 4 ? 'selected' : ''; ?>>(Nam) Miền Bắc</option>
+</select>
+<label for="tts_zalo_voice_name">Giọng đọc:</label>
+</div>
+
+
+
+<div class="form-floating mb-3">
+<textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_zalo_api_key" id="tts_zalo_api_key" style="height: 150px;">
+
+<?php
+
+//Hiển thị api Key zalo theo dòng
+
+$apiKeys_tts_zalo = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key']) 
+    ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] 
+    : [];
+$textareaContent_tts_zalo = implode("\n", array_map('trim', $apiKeys_tts_zalo));
+echo htmlspecialchars($textareaContent_tts_zalo);
+
+?>
+</textarea>
+<label for="tts_zalo_api_key">Api Keys (Mỗi Keys 1 dòng):</label>
+</div>
+
+<div class="form-floating mb-3">
+<textarea readonly class="form-control border-danger" name="tts_zalo_backlist_content" id="tts_zalo_backlist_content" style="height: 150px;">
+
+
+</textarea>
+<label for="tts_zalo_api_key">Nội Dung Keys BackList Zalo | <?php echo $Config['smart_config']['backlist_file_name']; ?>:</label>
+</div>
+<center>
+<button type="button" class="btn btn-warning rounded-pill" onclick="changeBacklistValue('backlist->tts_zalo->backlist_limit', '[]')" title="Làm mới nội dung tts_zalo trong Backlist"><i class="bi bi-recycle"></i> Clear BackList</button>
+<button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content')" title="Làm mới nội dung tts_zalo trong Backlist"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
+</center>
+</div>
+<!-- ẩn hiện cấu hình select_tts_zalo_html style="display: none;" -->
+
+
+
+
+<!-- ẩn hiện cấu hình select_tts_viettel_html style="display: none;" -->
+<div id="select_tts_viettel_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Viettel AI</font></center></h4>
+
+
+<div class="form-floating mb-3">  
+<input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="tts_viettel_speaking_speed" id="tts_viettel_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['speaking_speed']; ?>">
+ <label for="tts_viettel_speaking_speed" class="form-label">Tốc độ đọc:</label>	
+</div>
+
+<div class="form-floating mb-3">			
+<select name="tts_viettel_voice_name" id="tts_viettel_voice_name" class="form-select border-success" aria-label="Default select example">
+<option value="hn-quynhanh" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-quynhanh' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Quỳnh Anh</option>
+<option value="hn-phuongtrang" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-phuongtrang' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Phương Trang</option>
+<option value="hn-thaochi" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thaochi' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Thảo Chi</option>
+<option value="hn-thanhha" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thanhha' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Thanh Hà</option>
+<option value="hn-thanhphuong" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thanhphuong' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Thanh Phương</option>
+<option value="hn-thanhtung" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thanhtung' ? 'selected' : ''; ?>>(Nam) Miền Bắc: Thanh Tùng</option>
+<option value="hn-namkhanh" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-namkhanh' ? 'selected' : ''; ?>>(Nam) Miền Bắc: Nam Khánh</option>
+<option value="hn-tienquan" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-tienquan' ? 'selected' : ''; ?>>(Nam) Miền Bắc: Tiến Quân</option>
+<option value="hue-maingoc" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hue-maingoc' ? 'selected' : ''; ?>>(Nữ) Miền Trung: Mai Ngọc</option>
+<option value="hue-baoquoc" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hue-baoquoc' ? 'selected' : ''; ?>>(Nam) Miền Trung: Bảo Quốc</option>
+<option value="hcm-diemmy" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-diemmy' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Diễm My</option>
+<option value="hcm-phuongly" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-phuongly' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Phương Ly</option>
+<option value="hcm-thuydung" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-thuydung' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Thùy Dung</option>
+<option value="hcm-thuyduyen" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-thuyduyen' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Thùy Duyên</option>
+<option value="hcm-minhquan" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-minhquan' ? 'selected' : ''; ?>>(Nam) Miền Nam: Minh Quân</option>
+</select>
+<label for="tts_viettel_voice_name">Giọng đọc:</label>
+</div>
+
+<div class="form-floating mb-3">
+<div class="form-switch">
+ <input class="form-check-input" type="checkbox" name="tts_viettel_without_filter" id="tts_viettel_without_filter" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['without_filter'] ? 'checked' : ''; ?>>
+<label class="form-check-label" for="cache_tts"> <i class="bi bi-question-circle-fill" onclick="show_message('Bật để tăng chất lượng giọng nói nhưng tốc độ sẽ xử lý chậm hơn và ngược lại')"> </i> (Bật, Tắt) Tăng chất lượng giọng nói</label>
+</div>            
+          
+</div>            
+
+
+<div class="form-floating mb-3">
+<textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_viettel_api_key" id="tts_viettel_api_key" style="height: 150px;">
+<?php
+//Hiển thị api Key Viettel theo dòng
+$apiKeys_tts_viettel = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key']) 
+    ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key'] 
+    : [];
+$textareaContent_tts_viettel = implode("\n", array_map('trim', $apiKeys_tts_viettel));
+echo htmlspecialchars($textareaContent_tts_viettel);
+?>
+</textarea>
+<label for="tts_viettel_api_key">Api Keys (Mỗi Keys 1 dòng):</label>
+</div>
+
+<div class="form-floating mb-3">
+<textarea readonly class="form-control border-danger" name="tts_viettel_backlist_content" id="tts_viettel_backlist_content" style="height: 150px;">
+</textarea>
+<label for="tts_viettel_api_key">Nội Dung Keys BackList Viettel | <?php echo $Config['smart_config']['backlist_file_name']; ?>:</label>
+</div>
+<center>
+<button type="button" class="btn btn-warning rounded-pill" onclick="changeBacklistValue('backlist->tts_viettel->backlist_limit', '[]')" title="Làm mới nội dung tts_viettel trong Backlist"><i class="bi bi-recycle"></i> Clear BackList</button>
+<button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content')" title="Làm mới nội dung tts_viettel trong Backlist"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
+</center>
+</div>
+<!-- ẩn hiện cấu hình select_tts_viettel_html style="display: none;" -->
+
+
+<!-- ẩn hiện cấu hình select_tts_edge_html style="display: none;" -->
+<div id="select_tts_edge_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Microsoft Edge</font></center></h4>
+
+<div class="form-floating mb-3">  
+<input type="number" min="0.1" step="0.1" max="2" class="form-control border-success" name="tts_edge_speaking_speed" id="tts_edge_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed']; ?>">
+ <label for="tts_edge_speaking_speed" class="form-label">Tốc độ đọc:</label>	
+</div>
+
+<div class="form-floating mb-3">			
+<select name="tts_edge_voice_name" id="tts_edge_voice_name" class="form-select border-success" aria-label="Default select example">
+<option value="vi-VN-HoaiMyNeural" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] === 'vi-VN-HoaiMyNeural' ? 'selected' : ''; ?>>Giọng Nữ, vi-VN-HoaiMyNeural</option>
+<option value="vi-VN-NamMinhNeural" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] === 'vi-VN-NamMinhNeural' ? 'selected' : ''; ?>>Giọng Nam, vi-VN-NamMinhNeural</option>
+
+</select>
+<label for="tts_edge_voice_name">Giọng đọc:</label>
+</div>
+</div>
+<!-- ẩn hiện cấu hình select_tts_edge_html style="display: none;" -->
+</div>
+</div>
+        </div>
+      </div>
+				
+                </div><hr/>
+
+
+                <div class="card accordion" id="accordion_button_setting_led">
+               <div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_led" aria-expanded="false" aria-controls="collapse_button_setting_led">
+                 Cấu Hình Đèn Led:</h5>
+                  <div id="collapse_button_setting_led" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_led">
+
+
+<div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt đèn Led <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng đèn led trạng thái')"></i> :</label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="led_active_on_off" id="led_active_on_off" <?php echo $Config['smart_config']['led']['active'] ? 'checked' : ''; ?>>
+                    </div>
+                  </div>
+                </div>
+
+<div class="row mb-3">
+                  <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led:</label>
+                  <div class="col-sm-9">
+                   <select name="led_type_select" id="led_type_select" class="form-select border-success" aria-label="Default select example">
+                      <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>ws281x</option>
+					  
+					</select>
+                  </div>
+                </div>
+
+
+<div class="row mb-3">
+                  <label for="led_gpio" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Led Pin GPIO: <i class="bi bi-question-circle-fill" onclick="show_message('Chân Data của led sẽ được gán và điều khiển bởi chân GPIO')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" step="1" min="1" max="30" type="number" name="led_gpio" id="led_gpio" value="<?php echo $Config['smart_config']['led']['led_gpio']; ?>">
+                    </div>
+                  </div>
+
+
+
+				
+
+<div class="row mb-3">
+                  <label for="number_led" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Số lượng Led: <i class="bi bi-question-circle-fill" onclick="show_message('Số lượng đèn Led bạn sử dụng (Mỗi mắt led sẽ là 1)')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" step="1" min="1" max="150" type="number" name="number_led" id="number_led" value="<?php echo $Config['smart_config']['led']['number_led']; ?>">
+                    </div>
+                  </div>
+				
+<div class="row mb-3">
+                  <label for="led_brightness" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Độ sáng đèn Led: <i class="bi bi-question-circle-fill" onclick="show_message('Độ sáng của Led sẽ từ 0 đến 255, tương ứng với 0 -> 100%')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" step="0" min="1" max="255" type="number" name="led_brightness" id="led_brightness" value="<?php echo $Config['smart_config']['led']['brightness']; ?>">
+                    </div>
+                  </div>
+				  
+<div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Đảo ngược đầu Led <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược đầu (Bắt Đầu) sáng của đèn led')"></i> :</label>
+                  <div class="col-sm-9">
+				  
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="led_invert" id="led_invert" <?php echo $Config['smart_config']['led']['led_invert'] ? 'checked' : ''; ?>>
+                    </div>
+                  </div>
+                </div>
+<h5 class="card-title">Hiệu Ứng, Màu Sắc:</h5>
+
+<div class="row mb-3">
+                  <label for="led_think" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Led Think: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input class="form-control border-success" type="text" name="led_think" id="led_think" value="<?php echo $Config['smart_config']['led']['effect']['led_think']; ?>">
+					<input class="form-control-color border-success" type="color" id="color_led_think" onchange="updateColorCode_input('color_led_think', 'led_think')" title="Thay đổi màu Led khi được đánh thức">                   
+				   <button class="btn btn-success border-success" type="button" onclick="test_led('led_think')">Test Led</button>
+				   </div>
+				   </div>
+                  </div>
+
+<div class="row mb-3">
+                  <label for="led_mute" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Led Mute: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input class="form-control border-success" type="text" name="led_mute" id="led_mute" value="<?php echo $Config['smart_config']['led']['effect']['led_mute']; ?>">
+					<input class="form-control-color border-success" type="color" id="color_led_mutex" onchange="updateColorCode_input('color_led_mutex', 'led_mute')" title="Thay đổi màu LED khi Mic bị tắt">
+				   <button class="btn btn-success border-success" type="button" onclick="test_led('led_mute')">Test Led</button>
+				   </div>
+				   </div>
+                  </div>
+<center><button type="button" class="btn btn-danger rounded-pill" name="led_off" id="led_off" value="led_off" onclick="test_led('led_off')">Dừng Test LED</button></center>
+</div>
+</div>
+</div>
+<hr/>
+
+
+             
+              
+                <div class="card accordion" id="accordion_button_setting_bton">
+               <div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_bton" aria-expanded="false" aria-controls="collapse_button_setting_bton">
+                 Cấu Hình Nút Nhấn:</h5>
+                  <div id="collapse_button_setting_bton" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_bton" style="">
+	
+
+			  
+<table class="table table-bordered border-primary">
+                <thead>
+					<tr>
+					 <th scope="col" colspan="3"><center><font color=red>Cấu Hình Chung</font></center></th>
+					 <th scope="col" colspan="2"><center><font color=red>Nhấn Nhả</font></center></th>
+					 <th scope="col" colspan="2"><center><font color=red>Nhấn Giữ</font></center></th>
+					</tr>
+                  <tr>
+                    <th scope="col"><center><font color=blue>Nút Nhấn</font></center></th>
+                    <th scope="col"><center><font color=blue>GPIO</font></center></th>
+					<th scope="col"><center><font color=blue>Kéo mức thấp</font></center></th>
+                    <th scope="col"><center><font color=blue>Kích hoạt</font></center></th>
+                    
+                    <th scope="col"><center><font color=blue>Thời gian nhấn (ms)</font></center></th>
+                    <th scope="col"><center><font color=blue>Kích Hoạt</font></center></th>
+                    <th scope="col"><center><font color=blue>Thời Gian Giữ (s)</font></center></th>
+                  </tr>
+                </thead>
+                <tbody>
+<?php
+    foreach ($Config['smart_config']['button'] as $buttonName => $buttonData) {
+		echo '<tr>';
+        echo '<th scope="row" style="text-align: center; vertical-align: middle;"><center>' . $buttonName . ':</center></th>';
+        echo '<td style="text-align: center; vertical-align: middle;"><!-- GPIO --><input required type="number" style="width: 90px;" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+		echo '<td style="text-align: center; vertical-align: middle;"><!-- Pulled High --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][pulled_high]"' . ($buttonData['pulled_high'] ? ' checked' : '') . '></div></td>';
+		
+		echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn nhả --> <div class="form-switch"><center><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
+
+		echo '<td><center><!-- bounce_time --><input required type="number" min="20" max="500" step="10" style="width: 100px;" class="form-control border-success" title="" name="button[' . $buttonName . '][bounce_time]" value="' . $buttonData['bounce_time'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+		
+		echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
+		echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="3" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+		
+		echo '</tr>';
+	}
+?>
+</tbody></table>
+</div>
+</div>
+</div>
+
+<hr/>
+
+<div class="card-body">
+<h5 class="card-title">Âm Thanh Hệ Thống:</h5>
+				
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi trương trình khởi chạy thành công')"></i> :</h5>
+
+				                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi trương trình khởi động')"></i> :</label>
+                  <div class="col-sm-9">
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="sound_welcome_active" id="sound_welcome_active" <?php echo $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] ? 'checked' : ''; ?>>
+
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_welcome_file_path" class="col-sm-3 col-form-label">File âm thanh:</label>
+                  <div class="col-sm-9">
+				     <div class="input-group">
+				  
+				  
+<?php
+// so sánh file đánh dấu checked
+$Audio_welcome_file = $Config['smart_config']['smart_wakeup']['sound']['welcome']['welcome_file'];
+
+// Mở thư mục
+if ($handle = opendir($VBot_Offline.'resource/sound/welcome')) {
+    // Khởi tạo mảng lưu trữ các tệp âm thanh
+    $audio_files = [];
+
+    // Đọc các tệp trong thư mục
+    while (false !== ($entry = readdir($handle))) {
+        // Lấy phần mở rộng của tệp
+        $file_parts = pathinfo($entry);
+        $extension = isset($file_parts['extension']) ? strtolower($file_parts['extension']) : '';
+
+        // Kiểm tra xem tệp có phải là tệp âm thanh hợp lệ không
+        if (in_array($extension, $Allowed_Extensions_Audio)) {
+            $audio_files[] = $entry;
+        }
+    }
+    // Đóng thư mục
+    closedir($handle);
+    // Hiển thị các tệp âm thanh dưới dạng thẻ <select>
+    echo '<select name="sound_welcome_file_path" id="sound_welcome_file_path" class="form-select border-success">';
+    foreach ($audio_files as $file) {
+		 $selected = ($Audio_welcome_file === 'resource/sound/welcome/'.$file) ? ' selected' : ''; 
+	echo '<option value="' . htmlspecialchars('resource/sound/welcome/'.$file) . '"' . $selected . '>' . htmlspecialchars($file) . '</option>';
+    }
+    echo '</select>';
+} else {
+    //echo 'Không thể mở thư mục welcome';
+	echo "<script>showMessagePHP('Không thể mở thư mục welcome');</script>";
+}
+?>
+<button class="btn btn-warning border-success"  id="play_Audio_Welcome" type="button">Nghe Thử</button>
+				  </div>
+				  </div>
+                </div>
+				
+				
+<div class="row mb-3">
+    <label class="col-sm-3 col-form-label">Tải lên file âm thanh khởi động:</label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <input class="form-control border-success" type="file" id="upload_Sound_Welcome" multiple> <!-- Thêm thuộc tính multiple -->
+			<button class="btn btn-success border-success" type="button" onclick="upload_File('upload_Sound_Welcome')">Tải Lên</button>
+			<button type="button" name="list_music_startup" id="list_music_startup" class="btn btn-warning border-success" title="Hiển thị danh sách bài hát trên hệ thống Local" onclick="list_audio_show_path('scan_Audio_Startup')">Danh Sách File Âm Thanh</button>
+        </div>
+		
+    </div>
+</div>
+<div class="row mb-3">
+    <table id="show_mp3_sound_welcome" class="table table-bordered border-primary">
+        <thead>
+	
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+                </div>
+            </div>
+          </div>
+		  
+
+                <div class="card accordion" id="accordion_button_setting">
+               <div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting" aria-expanded="false" aria-controls="collapse_button_setting">
+                 Âm Thanh Khác/Mặc Định:</h5>
+                  <div id="collapse_button_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting" style="">
+	
+              <div class="row mb-3">
+                  <label for="sound_start_file_path" class="col-sm-3 col-form-label">Start:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_start_file_path" id="sound_start_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['start']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['start']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['start']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+				
+                <div class="row mb-3">
+                  <label for="sound_finish_file_path" class="col-sm-3 col-form-label">Finish:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_finish_file_path" id="sound_finish_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['finish']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['finish']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['finish']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_mic_on_file_path" class="col-sm-3 col-form-label">Mic On:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_mic_on_file_path" id="sound_mic_on_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_on']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_on']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['mic_on']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_mic_off_file_path" class="col-sm-3 col-form-label">Mic Off:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_mic_off_file_path" id="sound_mic_off_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_off']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_off']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['mic_off']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_volume_change_file_path" class="col-sm-3 col-form-label">Volume Change:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_volume_change_file_path" id="sound_volume_change_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['volume_change']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['volume_change']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['volume_change']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_wakeup_reply_on_file_path" class="col-sm-3 col-form-label">Wakeup Reply On:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_wakeup_reply_on_file_path" id="sound_wakeup_reply_on_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_on']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_on']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_on']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_wakeup_reply_off_file_path" class="col-sm-3 col-form-label">Wakeup Reply Off:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_wakeup_reply_off_file_path" id="sound_wakeup_reply_off_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_off']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_off']; ?>">
+                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_off']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_conversation_mode_on_file_path" class="col-sm-3 col-form-label">Conversation Mode On:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_conversation_mode_on_file_path" id="sound_conversation_mode_on_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_on']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_on']; ?>">
+                   <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_on']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label for="sound_conversation_mode_off_file_path" class="col-sm-3 col-form-label">Conversation Mode Off:</label>
+                  <div class="col-sm-9">
+				  <div class="input-group">
+                      <input readonly class="form-control border-danger" type="text" name="sound_conversation_mode_off_file_path" id="sound_conversation_mode_off_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_off']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_off']; ?>">
+                   <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_off']; ?>')" type="button">Nghe Thử</button>
+				  </div>
+                  </div>
+                </div>
+	
+                  </div>
+                  </div>
+                </div>
+              
+				<hr/>
+<div class="card-body">
+<h5 class="card-title">Cấu Hình Media Player:</h5>
+	
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Đồng bộ trạng thái Media với Web UI <i class="bi bi-question-circle-fill" onclick="show_message('Chế độ đồng bộ này sẽ sử dụng giao tiếp qua API, nếu bạn tắt Kích Hoạt APi thì sẽ không đồng bộ được nhé')"></i> :</h5>
+
+
+<div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt tự động đồng bộ khi truy cập vào Web UI')"></i> :</label>
+                  <div class="col-sm-9">
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="media_sync_ui" id="media_sync_ui" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
+                    
+                    </div>
+                  </div>
+</div>
+
+<div class="row mb-3">
+<label for="media_sync_ui_delay_time" class="col-sm-3 col-form-label">Thời gian trễ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian mỗi lần đồng bộ (thường sẽ là 1, mỗi 1 giây sẽ tự động đồng bộ 1 lần)')"></i> : </label>
+<div class="col-sm-9">
+<input required class="form-control border-success" type="number" min="1" max="5" step="1" name="media_sync_ui_delay_time" id="media_sync_ui_delay_time" placeholder="<?php echo $Config['media_player']['media_sync_ui']['delay_time']; ?>" value="<?php echo $Config['media_player']['media_sync_ui']['delay_time']; ?>">
+<div class="invalid-feedback">Cần nhập ngưỡng kết quả tối thiểu khi tìm kiếm bài hát</div>
+</div>
+</div>
+
+            </div>
+          </div>
+
+
+	
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
+<?php
+	//Get Ưu tiên Nguồn Phát
+	$music_source_priority = $Config['media_player']['prioritize_music_source'];
+?>
+<div class="row mb-3">
+    <label for="music_source_priority1" class="col-sm-3 col-form-label">Top 1:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="music_source_priority1" id="music_source_priority1">
+            <option value="">-- Chọn Nguồn Phát --</option>
+            <option value="music_local" <?php if ($music_source_priority[0] === "music_local") echo "selected"; ?>>Music Local</option>
+            <option value="zing_mp3" <?php if ($music_source_priority[0] === "zing_mp3") echo "selected"; ?>>ZingMP3</option>
+            <option value="youtube" <?php if ($music_source_priority[0] === "youtube") echo "selected"; ?>>Youtube</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="music_source_priority2" class="col-sm-3 col-form-label">Top 2:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="music_source_priority2" id="music_source_priority2">
+            <option value="">-- Chọn Nguồn Phát --</option>
+            <option value="music_local" <?php if ($music_source_priority[1] === "music_local") echo "selected"; ?>>Music Local</option>
+            <option value="zing_mp3" <?php if ($music_source_priority[1] === "zing_mp3") echo "selected"; ?>>ZingMP3</option>
+            <option value="youtube" <?php if ($music_source_priority[1] === "youtube") echo "selected"; ?>>Youtube</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="music_source_priority3" class="col-sm-3 col-form-label">Top 3:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="music_source_priority3" id="music_source_priority3">
+            <option value="">-- Chọn Nguồn Phát --</option>
+            <option value="music_local" <?php if ($music_source_priority[2] === "music_local") echo "selected"; ?>>Music Local</option>
+            <option value="zing_mp3" <?php if ($music_source_priority[2] === "zing_mp3") echo "selected"; ?>>ZingMP3</option>
+            <option value="youtube" <?php if ($music_source_priority[2] === "youtube") echo "selected"; ?>>Youtube</option>
+        </select>
+    </div>
+</div>
+  
+
+            </div>
+          </div>
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Music Local:</h5>
+
+<div class="row mb-3">
+<label for="music_local_path" class="col-sm-3 col-form-label">Đường dẫn thư mục:</label>
+<div class="col-sm-9">
+<input readonly class="form-control border-danger" type="text" name="music_local_path" id="music_local_path" placeholder="<?php echo $Config['media_player']['music_local']['path']; ?>" value="<?php echo $Config['media_player']['music_local']['path']; ?>">
+</div>
+</div>
+<div class="row mb-3">
+<label for="music_local_minimum_threshold" class="col-sm-3 col-form-label">Ngưỡng kết quả tối thiểu:</label>
+<div class="col-sm-9">
+<input required class="form-control border-success" type="number" min="0.4" max="0.9" step="0.1" name="music_local_minimum_threshold" id="music_local_minimum_threshold" placeholder="<?php echo $Config['media_player']['music_local']['minimum_threshold']; ?>" value="<?php echo $Config['media_player']['music_local']['minimum_threshold']; ?>">
+<div class="invalid-feedback">Cần nhập ngưỡng kết quả tối thiểu khi tìm kiếm bài hát</div>
+</div>
+</div>
+
+<?php
+    // Get Định dạng được phép từ cấu hình
+    // Chuyển mảng thành chuỗi, mỗi phần tử cách nhau bởi dấu phẩy
+    $allowed_formats_str = implode(", ", $Config['media_player']['music_local']['allowed_formats']);
+?>
+<div class="row mb-3">
+    <label for="music_local_allowed_formats" class="col-sm-3 col-form-label" title="Định dạng âm thanh cho phép Bot tìm kiếm">Định dạng âm thanh được phép: </label>
+    <div class="col-sm-9">
+        <input required type="text" class="form-control border-success" name="music_local_allowed_formats" id="music_local_allowed_formats" value="<?php echo htmlspecialchars($allowed_formats_str); ?>">
+<div class="invalid-feedback">Cần nhập các dạng đuôi tệp âm thanh để cho phép tìm kiếm</div>
+	</div>
+</div>
+
+
+
+<div class="row mb-3">
+    <label class="col-sm-3 col-form-label">Tải lên bài hát:</label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <input class="form-control border-success" type="file" id="upload_Music_Local" multiple> <!-- Thêm thuộc tính multiple -->
+            <button class="btn btn-success border-success" type="button" onclick="upload_File('upload_Music_Local')">Tải Lên</button>
+<button type="button" name="list_music_local" id="list_music_local" class="btn btn-warning border-success" title="Hiển thị danh sách bài hát trên hệ thống Local" onclick="list_audio_show_path('scan_Music_Local')">Danh Sách Bài Hát</button>
+
+        </div>
+		
+    </div>
+</div>
+
+<div class="row mb-3">
+    <table id="show_mp3_music_local" class="table table-bordered border-primary">
+        <thead>
+	
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+                </div>
+                </div>
+
+
+ </div>
+          </div>
+		  
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Youtube:</h5>
+<div class="row mb-3">
+<label for="youtube_google_apis_key" class="col-sm-3 col-form-label">Youtube Google Apis Key:</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input readonly class="form-control border-danger" type="text" name="youtube_google_apis_key" id="youtube_google_apis_key" placeholder="<?php echo $Config['media_player']['youtube']['google_apis_key']; ?>" value="<?php echo $Config['media_player']['youtube']['google_apis_key']; ?>">
+<button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+</div>
+</div>
+</div>
+ </div>
+</div>
+</div>
+<hr/>
+				
+<div class="card-body">
+<h5 class="card-title">Trợ Lý Ảo/Assistant:</h5>
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i> :</h5>
+<div class="row mb-3">
+<label for="google_gemini_key" class="col-sm-3 col-form-label">Api Keys:</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input  class="form-control border-success" type="text" name="google_gemini_key" id="google_gemini_key" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['api_key']; ?>">
+<button class="btn btn-success border-success" type="button" onclick="test_key_Gemini('xin chào')">Kiểm Tra</button>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input  class="form-control border-success" type="number" min="5" step="1" max="30" name="google_gemini_time_out" id="google_gemini_time_out" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>">
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i> :</h5>
+
+<div class="row mb-3">
+<label for="default_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input  class="form-control border-success" type="number" min="5" step="1" max="90" name="default_assistant_time_out" id="default_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['default_assistant']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['default_assistant']['time_out']; ?>">
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Chuyển đổi thêm kết quả từ âm thanh thành văn bản (text) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi này chỉ áp dụng với trợ lý ảo Default Assistant')"></i> :</h5>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Áp dụng với Chatbot <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="default_assistant_convert_audio_to_text_used_for_chatbox" id="default_assistant_convert_audio_to_text_used_for_chatbox" <?php echo $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_chatbox'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Áp dụng với Hệ thống, Console, Logs, Logs API <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="default_assistant_convert_audio_to_text_used_for_display_and_logs" id="default_assistant_convert_audio_to_text_used_for_display_and_logs" <?php echo $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_display_and_logs'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+
+
+
+</div>
+</div>
+
+
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Chat GPT:</h5>
+<div class="row mb-3">
+<label for="chat_gpt_key" class="col-sm-3 col-form-label">Api Keys:</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<input  class="form-control border-success" type="text" name="chat_gpt_key" id="chat_gpt_key" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>">
+<button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+		
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Ưu tiên trợ lý ảo:</h5>
+<?php
+	//Get Ưu tiên Nguồn Phát
+	$virtual_assistant_priority = $Config['virtual_assistant']['prioritize_virtual_assistants'];
+?>
+<div class="row mb-3">
+    <label for="virtual_assistant_priority1" class="col-sm-3 col-form-label">Top 1:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="virtual_assistant_priority1" id="virtual_assistant_priority1">
+            <option value="">-- Chọn Trợ Lý --</option>
+            <option value="default_assistant" <?php if ($virtual_assistant_priority[0] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+            <option value="google_gemini" <?php if ($virtual_assistant_priority[0] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+            <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="virtual_assistant_priority2" class="col-sm-3 col-form-label">Top 2:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="virtual_assistant_priority2" id="virtual_assistant_priority2">
+            <option value="">-- Chọn Trợ Lý --</option>
+            <option value="default_assistant" <?php if ($virtual_assistant_priority[1] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+            <option value="google_gemini" <?php if ($virtual_assistant_priority[1] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+            <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="virtual_assistant_priority3" class="col-sm-3 col-form-label">Top 3:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="virtual_assistant_priority3" id="virtual_assistant_priority3">
+            <option value="">-- Chọn Trợ Lý --</option>
+            <option value="default_assistant" <?php if ($virtual_assistant_priority[2] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+            <option value="google_gemini" <?php if ($virtual_assistant_priority[2] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+            <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+        </select>
+    </div>
+</div>
+            </div>
+          </div>
+                </div><hr/>
+				
+<div class="card-body">
+<h5 class="card-title">Đài, Radio:</h5>
+<?php
+    // Get Dữ liệu radio từ cấu hình
+    $radio_data = $Config['media_player']['radio_data'];
+?>
+    <table class="table table-bordered border-primary"  id="radio-table">
+        <thead>
+            <tr>
+                <th scope="col"><center><font color="red">Tên Đài</font></center></th>
+                <th scope="col"><center><font color="red">Link Đài</font></center></th>
+                <th scope="col"><center><font color="red">Hành Động</font></center></th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($radio_data as $index => $radio) { ?>
+                 <tr id="radio-row-<?php echo $index; ?>">
+                    <td>
+                        <input type="text" class="form-control border-success" name="radio_name_<?php echo $index; ?>" id="radio_name_<?php echo $index; ?>" value="<?php echo htmlspecialchars($radio['name']); ?>">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control border-success" name="radio_link_<?php echo $index; ?>" id="radio_link_<?php echo $index; ?>" value="<?php echo htmlspecialchars($radio['link']); ?>">
+                    </td>
+<td><center>
+<button type="button" class="btn btn-danger" onclick="delete_Dai_bao_Radio('<?php echo $index; ?>', '<?php echo htmlspecialchars($radio['name']); ?>')">
+    <i class="bi bi-trash" type="button" title="Xóa đài"></i>
+</button>
+</center></td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+	 <center> <button type="button" class="btn btn-success rounded-pill" id="add-radio" onclick="addRadio()">Thêm Đài Mới</button></center>
+</div>
+
+
+<hr/>
+
+<div class="row mb-3">
+             
+                
+                   <center> <button type="submit" name="all_config_save" class="btn btn-primary rounded-pill">Lưu Cấu Hình Config</button>
+				   
+				   </center>
+                
+                
+                </div>
+
+          </div>
+
+        </div>
+
+
+      </div>
+    </section>
+	
+	
+    </form>
+
+  </main><!-- End #main -->
+
+<!-- ======= Footer ======= -->
+<?php
+include 'html_footer.php';
+?>
+<!-- End Footer -->
+
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Nghe thử file âm thanh -->
+<!-- <audio id="audioPlayer" style="display: none;" controls></audio> -->
+
+  <!-- Template Main JS File -->
+  
+
+  
+<?php
+include 'html_js.php';
+?>
+
+<script>
+    //ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
+    document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const div_select_stt_ggcloud_html = document.getElementById('select_stt_ggcloud_html');
+            const div_select_stt_default_html = document.getElementById('select_stt_default_html');
+            if (document.getElementById('stt_ggcloud').checked) {
+                div_select_stt_ggcloud_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_stt_ggcloud_html.style.display = 'none'; // Ẩn div
+            }
+            if (document.getElementById('stt_default').checked) {
+                div_select_stt_default_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_stt_default_html.style.display = 'none'; // Ẩn div
+            }
+        });
+    });
+    //ẩn hiện cấu hình tts khi được lựa chọn
+    document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            const div_select_tts_ggcloud_html = document.getElementById('select_tts_ggcloud_html');
+            const div_select_tts_default_html = document.getElementById('select_tts_default_html');
+            const div_select_tts_edge_html = document.getElementById('select_tts_edge_html');
+            const div_select_tts_zalo_html = document.getElementById('select_tts_zalo_html');
+            const div_select_tts_viettel_html = document.getElementById('select_tts_viettel_html');
+            if (document.getElementById('tts_ggcloud').checked) {
+                div_select_tts_ggcloud_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_tts_ggcloud_html.style.display = 'none'; // Ẩn div
+            }
+            if (document.getElementById('tts_default').checked) {
+                div_select_tts_default_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_tts_default_html.style.display = 'none'; // Ẩn div
+            }
+            if (document.getElementById('tts_zalo').checked) {
+				getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
+                div_select_tts_zalo_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_tts_zalo_html.style.display = 'none'; // Ẩn div
+            }
+			if (document.getElementById('tts_viettel').checked) {
+				getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
+                div_select_tts_viettel_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_tts_viettel_html.style.display = 'none'; // Ẩn div
+            }
+            if (document.getElementById('tts_edge').checked) {
+                div_select_tts_edge_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_tts_edge_html.style.display = 'none'; // Ẩn div
+            }
+        });
+    });
+
+
+    //Hiển thị list hotword khi được scan
+    function loadConfigHotword(lang) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?hotword&lang=' + lang, true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                const data = JSON.parse(xhr.responseText);
+
+                displayResults_Hotword_dataa(data);
+
+            }
+        };
+        xhr.send();
+
+    }
+
+    function displayResults_Hotword_dataa(data) {
+        const resultsDiv = document.getElementById('results_body_hotword');
+        const resultsDiv1 = document.getElementById('results_body_hotword1');
+        // Xóa nội dung hiện tại
+        resultsDiv.innerHTML = '';
+        resultsDiv1.innerHTML = '';
+        // Hiển thị ngôn ngữ đang được truy vấn
+        let reponse_lang = data.lang === "vi" ? "Tiếng Việt" : "Tiếng Anh";
+        const langDiv = document.getElementById('language_hotwordd');
+        langDiv.innerHTML = '<strong>- Ngôn ngữ: </strong> <font color="red" id="data_lang_shows" value=' + data.lang + '>' + reponse_lang + '</font><br/>- File Thư Viện Đang Dùng: <font color="red">' + data.config_lib_pv_to_lang + '</font>';
+        const fileList = data.files_lib_pv;
+        // Tạo thẻ <select> một lần với tất cả các tùy chọn
+        var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
+        selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
+        fileList.forEach(function(file) {
+            var isSelected_lib = (file === data.config_lib_pv_to_lang) ? ' selected' : '';
+            selectHtml += '<option value="' + file + '"' + isSelected_lib + '>' + file + '</option>';
+        });
+        selectHtml += '</select><div class="invalid-feedback">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</div> <label for="select_file_lib_pv">Chọn file thư viện Hotword: ' + reponse_lang + '</label></div></td>';
+        selectHtml += '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" id="deleteFilePV" title="Xóa file: "><i class="bi bi-trash"></i></button>  <button type="button" class="btn btn-success" id="downloadFilePV" title="Tải xuống file: "><i class="bi bi-download"></i></button> </center></td></tr>';
+
+        if (Array.isArray(data.config) && data.config.length > 0) {
+            let i_up = 0;
+            let tableContent = '';
+
+            data.config.forEach((item, index) => {
+                i_up++;
+
+                tableContent +=
+                    '<tr>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + i_up + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;"><div  class="form-switch"><input class="form-check-input" type="checkbox" name="active_' + index + '" ' + (item.active ? 'checked' : '') + '></div></td>' +
+                    '<td><input readonly class="form-control" type="text" name="file_name_' + index + '" value="' + item.file_name + '"></td>' +
+                    '<td><input class="form-control" type="number" name="sensitive_' + index + '" value="' + item.sensitive + '" step="0.1" min="0.1" max="1.0"></td>' +
+                    '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" title="Xóa file: ' + item.file_name + '" onclick="deleteFile(\'' + data.path_ppn + item.file_name + '\', \'' + data.lang + '\')"><i class="bi bi-trash"></i></button> ' +
+                    '  <button type="button" class="btn btn-success" title="Tải xuống file: ' + item.file_name + '"  onclick="downloadFile(\'' + data.path_ppn + item.file_name + '\')"><i class="bi bi-download"></i></button></center></td>' +
+                    '</tr>';
+            });
+            // Thêm nút tải lên và nút lưu vào thẻ <tr>
+            tableContent +=
+                '<tr>' +
+                '<td colspan="5" style="text-align: center;">' +
+                '<input type="hidden" name="lang_hotword_get" id="lang_hotword_get" value="' + data.lang + '">' +
+                '<label for="upload_files"><font color=blue>Tải lên file hotword .ppn hoặc file thư viện .pv cho <b>'+reponse_lang+'</b></font></label>' +
+                '<div class="input-group">' +
+                '<input class="form-control" type="file" name="upload_files_ppn_pv[]" id="upload_files_ppn_pv" accept=".ppn,.pv" multiple>' +
+                ' <button class="btn btn-primary"  type="button" onclick="uploadFilesHotwordPPNandPV()">Tải Lên</button>' +
+                '</div>' +
+                '<br/><button type="submit" name="save_hotword_theo_lang" class="btn btn-success rounded-pill" title="Lưu cài đặt hotword">Lưu Cài Đặt Hotword</button>' +
+                '</td>' +
+                '</tr>';
+
+            resultsDiv1.innerHTML +=
+                selectHtml +
+                '<tr><th><center>STT</center></th>' +
+                '<th><center>Kích Hoạt</center></th>' +
+                '<th><center>File Hotword</center></th>' +
+                '<th><center>Độ Nhạy</center></th>' +
+                '<th><center>Hành Động</center></th></tr>';
+            resultsDiv.innerHTML = tableContent;
+        } else {
+            resultsDiv.innerHTML = '<tr><td colspan="4">Không có dữ liệu để hiển thị.</td></tr>';
+        }
+
+
+        // Lấy giá trị mặc định của thẻ select khi tải trang
+        var selectedValuee = document.getElementById('select_file_lib_pv').value;
+        var deleteIconn = document.getElementById('deleteFilePV');
+        var downloadIcon = document.getElementById('downloadFilePV');
+
+        // Thiết lập onclick xóa file trong thẻ select với giá trị mặc định
+        deleteIconn.onclick = function() {
+            if (selectedValuee) {
+                deleteFile(data.path_pv + selectedValuee);
+                // Tải lại dữ liệu hotword ở Config.json
+                loadConfigHotword(data.lang);
+            } else {
+                show_message('Cần chọn file thư viện .pv trước khi xóa');
+            }
+        };
+
+        // Thiết lập onclick tải xuống file
+        downloadIcon.onclick = function() {
+            if (selectedValuee) {
+                downloadFile(data.path_pv + selectedValuee);
+            } else {
+                show_message('Cần chọn file thư viện .pv trước khi tải xuống');
+            }
+        };
+
+        // Lắng nghe sự kiện thay đổi trên thẻ select pv để xóa file
+        document.getElementById('select_file_lib_pv').addEventListener('change', function() {
+            var selectedValue = this.value;
+            var deleteIcon = document.getElementById('deleteFilePV');
+            var downloadIcon = document.getElementById('downloadFilePV');
+
+            deleteIcon.onclick = function() {
+                if (selectedValue) {
+                    deleteFile(data.path_pv + selectedValue);
+                    // Tải lại dữ liệu hotword ở Config.json
+                    loadConfigHotword(data.lang);
+                } else {
+                    show_message('Cần chọn file thư viện .pv trước khi xóa');
+                }
+            };
+
+            downloadIcon.onclick = function() {
+                if (selectedValue) {
+                    downloadFile(data.path_pv + selectedValue);
+                } else {
+                    show_message('Cần chọn file thư viện .pv trước khi tải xuống');
+                }
+            };
+
+            // Cập nhật title của icon
+            deleteIcon.title = 'Xóa file: ' + selectedValue;
+            downloadIcon.title = 'Tải xuống file: ' + selectedValue;
+        });
+
+    }
+
+    //Tải lên file ppv và pv
+    function uploadFilesHotwordPPNandPV() {
+        const formData = new FormData();
+        const files = document.getElementById('upload_files_ppn_pv').files;
+        const lang = document.getElementById('lang_hotword_get').value;
+        if (files.length === 0) {
+            //alert('Vui lòng chọn ít nhất một file để tải lên.');
+			show_message('Vui lòng chọn ít nhất một file để tải lên.');
+            return;
+        }
+        for (let i = 0; i < files.length; i++) {
+            formData.append('upload_files_ppn_pv[]', files[i]);
+        }
+        formData.append('lang_hotword_get', lang);
+        formData.append('action_ppn_pv', 'upload_files_ppn_pv');
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    let messages = [];
+
+                    if (response.status === 'success') {
+                        // Tổng hợp tất cả thông báo
+                        messages.push(response.messages+'<br/>');
+                    } else {
+                        messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
+                    }
+                    //Tải lại dữ liệu hotword ở Config.json
+                    loadConfigHotword(lang)
+					show_message(messages.join('<br/>'));
+                } catch (e) {
+                    //alert('Không thể phân tích phản hồi json: ' + e.message);
+					show_message('Không thể phân tích phản hồi json: ' + e.message);
+                }
+            } else {
+                //alert('Tải file lên thất bại');
+				show_message("<center>Tải file lên thất bại</center>");
+            }
+        };
+        xhr.send(formData);
+    }
+
+    //Cập nhật các file trong eng và vi để Làm mới lại cấu hình Hotword trong Config.json, 
+    function reload_hotword_config(langg = "No") {
+        if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json bao gồm cả tiếng anh và tiếng việt?")) {
+            return; // Ngừng thực hiện nếu người dùng chọn "Cancel"
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config', true);
+        // Xử lý phản hồi từ server
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.status === 'success') {
+                    //alert(response.message);
+					show_message("<center>"+response.message+"</center>");
+                } else {
+                    //alert(response.message);
+					show_message("<center>"+response.message+"</center>");
+                }
+
+                var element_data_lang_shows = document.getElementById('data_lang_shows');
+                //Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
+                // Kiểm tra nếu phần tử tồn tại
+                if (element_data_lang_shows) {
+                    // Lấy giá trị của thuộc tính 'value'
+                    var value_lang = element_data_lang_shows.getAttribute('value');
+                    // Thực hiện các hành động cần thiết với giá trị
+                    console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
+
+                    if (value_lang === "vi") {
+                        loadConfigHotword("vi")
+                    } else if (value_lang === "eng") {
+                        loadConfigHotword("eng")
+                    }
+                }
+
+
+            } else {
+                //alert('Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt');
+				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+				
+            }
+        };
+        xhr.send();
+    }
+
+    //Xóa thẻ input đài báo radio
+    function delete_Dai_bao_Radio(index_id, name_dai_radio) {
+        if (name_dai_radio !== null) {
+            if (!confirm('Bạn có chắc chắn muốn xóa đài "' + name_dai_radio + '" này không?')) {
+                return;
+            }
+        }
+        var row = document.getElementById('radio-row-' + index_id);
+        if (row) {
+            row.remove();
+        }
+    }
+
+    //Thêm mới đài báo Radio
+    let radioIndex = <?php echo count($radio_data); ?> ;
+    const maxRadios = <?php echo $Max_Radios; ?> ;
+
+    function addRadio() {
+        if (radioIndex < maxRadios) {
+            const table = document.getElementById('radio-table').getElementsByTagName('tbody')[0];
+            const newRow = document.createElement('tr');
+            newRow.id = 'radio-row-' + radioIndex;
+
+            newRow.innerHTML =
+                '<td>' +
+                '<input type="text" class="form-control border-success" placeholder="Nhập tên đài" name="radio_name_' + radioIndex + '" id="radio_name_' + radioIndex + '">' +
+                '</td>' +
+                '<td>' +
+                '<input type="text" class="form-control border-success" placeholder="Nhập link đài" name="radio_link_' + radioIndex + '" id="radio_link_' + radioIndex + '">' +
+                '</td>' +
+                '<td style="text-align: center; vertical-align: middle;"><center>' +
+                '<button type="button" class="btn btn-danger" id="delete-radio-' + radioIndex + '" onclick="delete_Dai_bao_Radio(' + radioIndex + ', null)"><i class="bi bi-trash"></i></button>'
+
+            '</center></td>';
+
+            table.appendChild(newRow);
+            radioIndex++;
+        } else {
+            //alert("Bạn chỉ có thể thêm tối đa " + maxRadios + " đài radio");
+            show_message("<center>Bạn chỉ có thể thêm tối đa " + maxRadios + " đài radio</center>");
+        }
+    }
+
+    //Kiểm tra kết nối Home Assistant
+    function CheckConnectionHomeAssistant(inputId) {
+		loading("show");
+        var url_hasss = document.getElementById(inputId).value;
+        var token_hasss = document.getElementById('hass_long_token').value;
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'includes/php_ajax/Check_Connection.php?check_hass&url_hass=' + encodeURIComponent(url_hasss) + '&token_hass=' + encodeURIComponent(token_hasss), true);
+        xhr.onreadystatechange = function() {
+			
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+				loading("hide");
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+                    //console.log(response)
+                    if (response.success) {
+                        show_message('<center><font color=green><b>' + response.message + '</b></font></center><br/><b>- Tên Nhà:</b> ' + response.response.location_name +
+                            '<br/><b>- Kinh độ:</b> ' + response.response.longitude + '<br/><b>- Vĩ độ:</b> ' + response.response.latitude + '<br/><b>- Múi giờ:</b> ' + response.response.time_zone +
+                            '<br/><b>- Quốc gia:</b> ' + response.response.country + '<br/><b>- Ngôn ngữ:</b> ' + response.response.language +
+                            '<br/><b>- Phiên bản Home Assistant:</b> ' + response.response.version + '<br/><b>- Trạng thái hoạt động:</b> ' + response.response.state +
+                            '<br/><b>- URL nội bộ:</b> <a href="' + response.response.internal_url + '" target="_bank">' + response.response.internal_url + '</a><br/><b>- URL bên ngoài:</b> <a href="' + response.response.external_url + '" target="_bank">' + response.response.external_url + '</a>');
+                    } else {
+                        show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + response.message)
+                    }
+
+                } else {
+                    console.log('Lỗi kết nối: ' + xhr.statusText);
+                }
+            }
+        };
+
+        xhr.send();
+
+    }
+	
+//Kiểm tra Kết Nối SSH
+function checkSSHConnection() {
+	loading("show");
+    var sshHost = document.getElementById('ssh_host').value;
+    var sshPort = document.getElementById('ssh_port').value;
+    var sshUser = document.getElementById('ssh_username').value;
+    var sshPass = document.getElementById('ssh_password').value;
+
+    var xhr = new XMLHttpRequest();
+
+    var url = 'includes/php_ajax/Check_Connection.php?check_ssh' +
+              '&host=' + encodeURIComponent(sshHost) +
+              '&port=' + encodeURIComponent(sshPort) +
+              '&user=' + encodeURIComponent(sshUser) +
+              '&pass=' + encodeURIComponent(sshPass);
+			  
+    xhr.open('GET', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+			loading("hide");
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        show_message(response.message); // Hiển thị thông báo thành công
+                    } else {
+                        show_message("Lỗi: " + response.message); // Hiển thị thông báo lỗi
+                    }
+                } catch (e) {
+                    show_message("Lỗi phân tích cú pháp phản hồi: " + e.message); // Hiển thị lỗi phân tích JSON
+                }
+            } else {
+                show_message("Lỗi kết nối: trạng thái HTTP " + xhr.status); // Hiển thị lỗi kết nối
+            }
+			
+        }
+    };
+
+    xhr.send();
+}
+
+    //Tets, kiểm tra Key Gemini
+    function test_key_Gemini(text) {
+        loading("show");
+        var apiKey = document.getElementById('google_gemini_key').value;
+        var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + apiKey;
+        var payload = {
+            contents: [{
+                parts: [{
+                    text: text
+                }]
+            }]
+        };
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', url, true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                loading("hide");
+                if (xhr.status === 200) {
+                    var response = JSON.parse(xhr.responseText);
+
+                    // Hiển thị dữ liệu trả về
+                    var candidates = response.candidates;
+                    if (candidates.length > 0) {
+                        var contentText = candidates[0].content.parts[0].text;
+                        show_message('<center>Kiểm Tra API KEY Thành Công</center><br/>Phản hồi: <font color=green>' + contentText + '</font>');
+                    }
+
+                } else {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.error) {
+                        show_message('Lỗi xảy ra: <font color=red>' + response.error.message + '</font>');
+                        //console.log('Status:', response.error.status);
+                        //console.log('Details:', response.error.details);
+                    } else {
+                        show_message('Có Lỗi Xảy Ra: ' + xhr.status);
+                    }
+                }
+            }
+        };
+
+        xhr.send(JSON.stringify(payload));
+    }
+
+    //tách lấy tên file và đuôi từ đường dẫn path
+    function getFileNameFromPath(filePath) {
+        // Tách đường dẫn bằng dấu '/'
+        var parts = filePath.split('/');
+        // Lấy phần cuối cùng của mảng, đó là tên tệp với phần mở rộng
+        var fileNameWithExtension = parts.pop();
+        return fileNameWithExtension;
+    }
+
+    //Hiển thị các bài hát trong thư mục Local
+    function list_audio_show_path(id_path_music) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'includes/php_ajax/Show_file_path.php?' + encodeURIComponent(id_path_music), true);
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                //console.log(xhr.responseText)
+                var data = JSON.parse(xhr.responseText);
+
+                if (id_path_music === "scan_Music_Local") {
+                    var tableBody = document.getElementById('show_mp3_music_local').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = ''; // Clear existing rows
+                    var tableHead = document.querySelector('#show_mp3_music_local thead');
+                    tableHead.innerHTML =
+                        '<tr>' +
+                        '<th colspan="3"><center>Danh Sách Bài Hát Có Trong Thư Mục Music_Local</center></th>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<th><center>STT</center></th>' +
+                        '<th><center>Tên File</center></th>' +
+                        '<th><center>Hành Động</center></th>' +
+                        '</tr>';
+                    data.forEach(function(file, index) {
+                        var fileName = getFileNameFromPath(file);
+                        var rowContent =
+                            '<tr>' +
+                            '<td style="text-align: center; vertical-align: middle;"><center>' + (index + 1) + '</center></td>' +
+                            '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + fileName + '"></td>' +
+                            '<td style="text-align: center; vertical-align: middle;"><center>' +
+                            '<button type="button" class="btn btn-danger" title="Xóa file: ' + fileName + '" onclick="deleteFile(\'' + file + '\', \'scan_Music_Local\')"><i class="bi bi-trash"></i></button>' +
+
+                            ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + fileName + '" onclick="downloadFile(\'' + file + '\')"><i class="bi bi-download"></i></button>' +
+                            '</center></td>' +
+                            '</tr>';
+                        tableBody.insertAdjacentHTML('beforeend', rowContent);
+                    });
+
+                }else if (id_path_music === "scan_Audio_Startup") {
+                    var tableBody = document.getElementById('show_mp3_sound_welcome').getElementsByTagName('tbody')[0];
+                    tableBody.innerHTML = ''; 
+                    var tableHead = document.querySelector('#show_mp3_sound_welcome thead');
+                    tableHead.innerHTML =
+                        '<tr>' +
+                        '<th colspan="3"><center>Danh Sách Âm Thanh Có Trong Thư Mục Welcome</center></th>' +
+                        '</tr>' +
+                        '<tr>' +
+                        '<th><center>STT</center></th>' +
+                        '<th><center>Tên File</center></th>' +
+                        '<th><center>Hành Động</center></th>' +
+                        '</tr>';
+                    data.forEach(function(file, index) {
+                        var fileName = getFileNameFromPath(file);
+                        var rowContent =
+                            '<tr>' +
+                            '<td style="text-align: center; vertical-align: middle;"><center>' + (index + 1) + '</center></td>' +
+                            '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + fileName + '"></td>' +
+                            '<td style="text-align: center; vertical-align: middle;"><center>' +
+                            '<button type="button" class="btn btn-danger" title="Xóa file: ' + fileName + '" onclick="deleteFile(\'' + file + '\', \'scan_Audio_Startup\')"><i class="bi bi-trash"></i></button>' +
+                            ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + fileName + '" onclick="downloadFile(\'' + file + '\')"><i class="bi bi-download"></i></button>' +
+                            '</center></td>' +
+                            '</tr>';
+                        tableBody.insertAdjacentHTML('beforeend', rowContent);
+                    });
+				
+				}
+
+
+            }
+        };
+        xhr.send();
+    }
+
+
+
+    // Cập nhật giá trị của thuộc tính onclick của nút sound_welcome_file_path vào nút nghe thử play_Audio_Welcome
+    function updateButton_Audio_Welcome() {
+        const selectElement = document.getElementById('sound_welcome_file_path');
+        const filePath = '<?php echo $VBot_Offline; ?>'+selectElement.value;
+        const button = document.getElementById('play_Audio_Welcome');
+        if (button) {
+            button.onclick = function() {
+                playAudio(filePath);
+            };
+        }
+    }
+
+    // Đặt sự kiện khi DOM đã được tải hoàn toàn và cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
+    document.addEventListener('DOMContentLoaded', function() {
+        updateButton_Audio_Welcome(); // Cập nhật thuộc tính onclick khi DOM tải xong
+        document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome); // Cập nhật khi giá trị thay đổi
+    });
+
+//Check key picovoice
+function test_key_Picovoice() {
+	loading("show");
+    var token = document.getElementById('hotword_engine_key').value;
+    var lang = document.getElementById('select_hotword_lang').value;
+    // Tạo đối tượng XMLHttpRequest mới
+    var xhr = new XMLHttpRequest();
+    
+    // Định nghĩa URL để lấy dữ liệu với token từ input
+    var url = 'includes/php_ajax/Check_Connection.php?check_key_picovoice&key='+token+'&lang='+lang;
+    console.log(url);
+    // Khởi tạo yêu cầu GET đến URL
+    xhr.open('GET', url, true);
+    
+    // Đặt kiểu phản hồi là JSON
+    xhr.responseType = 'json';
+    
+    // Định nghĩa hàm xử lý khi yêu cầu hoàn tất
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+			loading("hide");
+            // Nếu yêu cầu thành công, kiểm tra giá trị của `success`
+            var data = xhr.response;
+            if (data.success) {
+                show_message('<font color=green><center>' +data.message+'</center><br/>- Ngôn ngữ kiểm tra: <b>'+data.language_name+'</b><br/>- File Hotword kiểm tra ngẫu nhiên trong thư mục '+data.lang+': <b>'+data.hotword_random_test+'</b><br/>- File thư viện Procupine: <b>'+data.model_file_path+'</b></font>');
+            } else {
+                show_message('<font color=red><center>Lỗi</center> ' +data.message+'</font>');
+            }
+        } else {
+			loading("hide");
+            // Nếu có lỗi, in lỗi ra console
+            show_message('Lỗi: ' +xhr.statusText);
+        }
+    };
+    
+    // Định nghĩa hàm xử lý khi có lỗi xảy ra
+    xhr.onerror = function() {
+		loading("hide");
+        show_message('Yêu cầu thất bại');
+    };
+    
+    // Gửi yêu cầu
+    xhr.send();
+}
+
+
+
+
+function scan_Mic() {
+    loading("show");
+    var xhr = new XMLHttpRequest();
+    var url = 'includes/php_ajax/Scanner.php?scan_mic';
+    xhr.open('GET', url, true);
+    xhr.responseType = 'json';
+    
+    xhr.onload = function() {
+        
+        if (xhr.status >= 200 && xhr.status < 300) {
+			loading("hide");
+            var data = xhr.response;
+            var container = document.getElementById('mic_scanner');
+
+            if (data && data.success) {
+                //console.log(data.message);
+                //console.log(data.devices);
+
+                // Tạo HTML cho bảng
+                var tableHTML = '<table class="table table-bordered border-primary">';
+                tableHTML += '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color=green>'+data.message+'</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Mic</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
+                tableHTML += '<tbody>';
+
+                data.devices.forEach(function(device) {
+                    tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.ID + '</td><td>' + (device.Tên || '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_MIC(' + device.ID + ')">Chọn</button></td></td></tr>';
+                });
+
+                tableHTML += '</tbody></table>';
+
+                // Đẩy nội dung bảng vào thẻ div
+                if (container) {
+                    container.innerHTML = tableHTML;
+                } else {
+                    show_message('Không tìm thấy thẻ div với id "mic_scanner".');
+                }
+
+            } else if (data) {
+                show_message('Lỗi: ' + data.message);
+            } else {
+                show_message('Lỗi không xác định. Vui lòng thử lại sau.');
+            }
+        } else {
+			loading("hide");
+            show_message('Lỗi: ' + xhr.statusText);
+        }
+    };
+    
+    xhr.onerror = function() {
+        loading("hide");
+        show_message('Yêu cầu thất bại. Vui lòng kiểm tra kết nối mạng.');
+    };
+    
+    xhr.send();
+}
+
+//Chọn Mic để đẩy vào value của thẻ input Mic
+function selectDevice_MIC(id) {
+    var micInput = document.getElementById('mic_id');
+    if (micInput) {
+        micInput.value = id;
+		showMessagePHP('Đã chọn Mic có id là: '+id);
+    } else {
+        show_message('Không tìm thấy thẻ input với id "mic_id".');
+    }
+}
+</script>
+<script>
+    //Cập nhật bảng mã màu vào thẻ input
+    // Thiết lập giá trị ban đầu cho các thẻ input khi tải trang
+    window.onload = function() {
+        // Thiết lập màu cho thẻ đầu tiên
+        setColorPickerValue('color_led_think', 'led_think');
+        // Thiết lập màu cho thẻ thứ hai
+        setColorPickerValue('color_led_mutex', 'led_mute');
+    };
+
+    // Hàm thiết lập màu cho các thẻ colorPicker dựa trên giá trị colorCodeInput
+    function setColorPickerValue(colorPickerId, colorCodeInputId) {
+        const initialColor = document.getElementById(colorCodeInputId).value;
+        document.getElementById(colorPickerId).value = '#' + initialColor;
+    }
+
+    // Hàm cập nhật mã màu vào thẻ input
+    function updateColorCode_input(colorPickerId, colorCodeInputId) {
+        // Lấy mã màu từ input color và bỏ dấu '#' ở đầu
+        const selectedColor = document.getElementById(colorPickerId).value.substring(1);
+        // Cập nhật giá trị của thẻ input với mã màu đã chọn (không có '#')
+        document.getElementById(colorCodeInputId).value = selectedColor;
+    }
+</script>
+	
+<script>
+//Dành cho Test Led 
+function test_led(action) {
+
+    if ( <?php echo $Config['smart_config']['led']['active'] ? 'true' : 'false'; ?> === false) {
+        show_message("Chế độ sử dụng Led không được kích hoạt");
+        return;
+    }
+    const led_value = document.getElementById(action).value;
+    //console.log(led_value);
+    //console.log(action);
+    let led_action;
+    if (action === "led_think") {
+        led_action = "think";
+    } else if (action === "led_mute") {
+        led_action = "mute";
+    } else if (action === "led_off") {
+        led_action = "off";
+    } else {
+        show_message("Tham số truyền vào không hợp lệ");
+        return;
+    }
+    loading("show");
+    const data = JSON.stringify({
+        "type": 2,
+        "data": "led",
+        "action": led_action,
+        "value": led_value
+    });
+    const xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            if (this.status === 200) {
+                const response = JSON.parse(this.responseText);
+                if (response.success) {
+                    //show_message(response.message || "Yêu cầu đã được gửi thành công.");
+                    showMessagePHP(response.message, 3);
+                } else {
+                    show_message("Yêu cầu không thành công: " + (response.message || "Lỗi không xác định."));
+                }
+                loading("hide");
+            } else {
+                show_message("Có lỗi xảy ra trong quá trình gửi yêu cầu.");
+                loading("hide");
+            }
+        }
+    });
+    // Xử lý lỗi khi gửi yêu cầu
+    xhr.onerror = function() {
+        show_message("Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.");
+        loading("hide");
+    };
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+}
+
+
+//Thay đổi giá trị value của BackList.json theo đường dẫn chỉ định 
+function changeBacklistValue(path_json, value_type) {
+    // Cấu hình yêu cầu
+    var url = "includes/php_ajax/Show_file_path.php";
+    var params = "delete_data_backlist=1&path=" + path_json + "&value_type=" + value_type;
+
+    var xhr = new XMLHttpRequest();
+    // Xử lý khi trạng thái yêu cầu thay đổi
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            if (this.status === 200) {
+                try {
+                    var response = JSON.parse(this.responseText);
+                    // Kiểm tra giá trị success
+                    if (response.success) {
+                        // Cập nhật thành công
+                        //console.log("Phản hồi từ máy chủ:", response);
+                        showMessagePHP(response.message, 3);
+                        //Kiểm tra và hiển thị dữ liệu backlist zalo
+                        if (path_json === "backlist->tts_zalo->backlist_limit") {
+                            getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
+                        }
+                        else if (path_json === "backlist->tts_viettel->backlist_limit") {
+                            getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
+                        }
+
+                    } else {
+                        // Thông báo lỗi từ máy chủ
+                        //console.error("Lỗi cập nhật:", response.message);
+                        show_message("Có lỗi xảy ra khi cập nhật backlist: " + response.message);
+                    }
+                } catch (e) {
+                    show_message("Lỗi phân tích cú pháp JSON: " + e);
+                }
+            } else {
+                show_message("Có lỗi xảy ra khi gửi yêu cầu. Mã lỗi: " + this.status);
+            }
+        }
+    });
+
+    // Xử lý lỗi mạng
+    xhr.onerror = function() {
+        show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
+    };
+
+    xhr.open("GET", url + "?" + params, true);
+    // Gửi yêu cầu
+    xhr.send();
+}
+
+//Hiển thị dữ liệu BackList.json
+function getBacklistData(dataPath, textareaId) {
+    var url = "includes/php_ajax/Show_file_path.php?data_backlist";
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            if (this.status === 200) {
+                try {
+                    var response = JSON.parse(this.responseText);
+                    if (response.success) {
+                        var data = response.data;
+                        var pathParts = dataPath.split('->');
+                        var currentData = data;
+                        // Duyệt qua các phần của path để lấy dữ liệu
+                        for (var i = 0; i < pathParts.length; i++) {
+                            var part = pathParts[i].trim();
+                            currentData = currentData[part];
+                        }
+                        // Cập nhật nội dung của thẻ textarea
+                        var textarea = document.getElementById(textareaId);
+                        if (textarea) {
+                            textarea.value = JSON.stringify(currentData, null, 4); // Định dạng JSON cho dễ đọc
+                        } else {
+                            show_message("Không tìm thấy thẻ textarea với ID: " + textareaId);
+                        }
+
+                        showMessagePHP("Dữ liệu đã được tải thành công.", 3);
+                    } else {
+                        show_message("Có lỗi xảy ra: " + response.message);
+                    }
+                } catch (e) {
+                    show_message("Có lỗi xảy ra khi xử lý phản hồi từ máy chủ: " + e);
+                }
+            } else {
+                show_message("Có lỗi xảy ra khi gửi yêu cầu. Mã lỗi: " + this.status);
+            }
+        }
+    });
+
+    xhr.onerror = function() {
+        show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
+    };
+
+    xhr.open("GET", url, true);
+    xhr.send();
+}
+
+</script>
+	
+	
+	
+</body>
+
+</html>

@@ -1,0 +1,25 @@
+{
+    "version": "1.0.0",
+    "projectName": "WebUI VBot Offline",
+    "description": "Vá các lỗ hổng không thời gian",
+    "releaseDate": "2024-08-10",
+    "changes": [
+        {
+            "type": "feature",
+            "description": "Added support for multi-language."
+        },
+        {
+            "type": "fix",
+            "description": "Fixed issue with login authentication."
+        },
+        {
+            "type": "improvement",
+            "description": "Enhanced performance for data processing."
+        }
+    ],
+    "author": "Vũ Tuyển",
+    "code_by": "Vũ Tuyển",
+    "designed_by": "BootstrapMade",
+    "status": "stable",
+    "previousVersion": "1.0.0"
+}
