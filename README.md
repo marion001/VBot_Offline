@@ -1,5 +1,5 @@
 # VBot_Offline
-Trợ lý ảo VBot
+Trợ lý ảo VBot (Dùng Cá Nhân)
 
 Không hỗ trợ với: Raspberrypi Zero 1 W
 
