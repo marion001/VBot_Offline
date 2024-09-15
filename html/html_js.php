@@ -138,6 +138,54 @@ function downloadFile(filePath) {
     document.body.removeChild(link);
 }
 
+
+//Đọc dữ liệu file theo path
+function read_loadFile(path) {
+            // URL của tệp PHP với tham số đường dẫn
+            var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(path);
+            // Tạo đối tượng XMLHttpRequest
+            var xhr = new XMLHttpRequest();
+            // Cấu hình yêu cầu
+            xhr.open('GET', url, true);
+            // Đặt hàm xử lý phản hồi
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        // Phân tích phản hồi JSON
+                        var response = JSON.parse(xhr.responseText);
+                        // Hiển thị thông báo
+                        document.getElementById('message_LoadConfigJson').textContent = response.message_LoadConfigJson;
+                        // Hiển thị dữ liệu
+                        var codeElement = document.getElementById('code_config');
+                        if (response.success) {
+                            if (typeof response.data === 'object') {
+                                // Hiển thị dữ liệu JSON với cú pháp màu sắc
+                                codeElement.textContent = JSON.stringify(response.data, null, 2);
+                                Prism.highlightElement(codeElement); // Áp dụng cú pháp màu sắc
+                            } else {
+                                // Hiển thị dữ liệu văn bản
+                                codeElement.textContent = response.data;
+                                codeElement.className = 'language-txt'; // Đổi lớp để hiển thị văn bản không có màu sắc
+                            }
+                        } else {
+							show_message('Không có dữ liệu');
+                        }
+                    } catch (e) {
+                        show_message('Lỗi xử lý dữ liệu: ' +e);
+                    }
+                } else {
+                    show_message('Lỗi tải dữ liệu: ' + xhr.status);
+                }
+            };
+            // Xử lý lỗi yêu cầu
+            xhr.onerror = function() {
+                //document.getElementById('message_LoadConfigJson').textContent = 'Lỗi kết nối.';
+				show_message("Lỗi kết nối");
+            };
+            // Gửi yêu cầu
+            xhr.send();
+        }
+
 //tìm lại mật khẩu
 function forgotPassword() {
     loading("show");
@@ -1206,6 +1254,9 @@ function playHLS(url) {
         //loading("hide");
     }
 }
+
+
+
 </script>
 	
 <!-- Chatbot -->

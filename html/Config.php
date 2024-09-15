@@ -52,7 +52,7 @@ $Config['home_assistant']['long_token'] = $_POST['hass_long_token'];
 $Config['smart_config']['show_log']['active'] = isset($_POST['log_active']) ? true : false;
 $Config['smart_config']['show_log']['log_display_style'] = $_POST['log_display_style'];
 
-#Cập nhật bật, tắt thông tin khi trương trình khởi động thành công
+#Cập nhật bật, tắt thông tin khi chương trình khởi động thành công
 $Config['smart_config']['read_information_startup']['active'] = isset($_POST['read_information_startup']) ? true : false;
 $Config['smart_config']['read_information_startup']['read_number'] = intval($_POST['read_information_startup_read_number']);
 
@@ -338,7 +338,48 @@ if ($lang !== 'eng' && $lang !== 'vi') {
 <?php
 include 'html_head.php';
 ?>
+<head>
+<link href="assets/vendor/prism/prism.min.css" rel="stylesheet">
+ 
+     <style>
+        #modal_dialog_show_config {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: calc(100vw - 40px);
+        }
 
+        #modal_dialog_show_config .modal-content {
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+    </style>
+   <style>
+        .scroll-btn {
+            position: fixed;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            font-size: 24px;
+			z-index: 2; 
+        }
+
+        .scroll-to-bottom {
+            bottom: 15px;
+        }
+
+        .scroll-to-top {
+            bottom: 60px;
+        }
+
+    </style>
+ </head>
 <body>
     <?php
 	//Hiển thị thông báo php
@@ -556,7 +597,7 @@ include 'html_sidebar.php';
 			<div class="card-body">
               <h5 class="card-title">Log Hệ Thống:</h5>
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Bật, Tắt logs hệ thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ trương trình khi được chạy')"></i> :</label>
+                  <label class="col-sm-3 col-form-label">Bật, Tắt logs hệ thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ chương trình khi được chạy')"></i> :</label>
                   <div class="col-sm-9">
 				  
 					<div class="form-switch">
@@ -614,7 +655,7 @@ include 'html_sidebar.php';
                     </div>
                   </div>
                 <div class="row mb-3">
-                  <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy trương trình')"></i> :</label>
+                  <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình')"></i> :</label>
                   <div class="col-sm-9">
                       <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume" id="bot_volume" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Âm lượng khi chạy lần đầu tiên" placeholder="<?php echo $Config['smart_config']['speaker']['volume']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume']; ?>">
 					<div class="invalid-feedback">Cần nhập âm lượng khi khởi động!</div>
@@ -649,7 +690,7 @@ include 'html_sidebar.php';
 				
 				
 			<div class="card-body">
-              <h5 class="card-title">Speak To Text (STT) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để trương trình xử lý dữ liệu')"></i> :</h5>
+              <h5 class="card-title">Speak To Text (STT) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> :</h5>
                 <div class="row mb-3">
                   <label for="duration_recording" class="col-sm-3 col-form-label" title="Thời gian thu âm tối đa">Thời gian lắng nghe tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian lắng nghe tối đa khi Bot được đánh thức')"></i> :</label>
                   <div class="col-sm-9">
@@ -1275,10 +1316,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 				
 <div class="card">
 <div class="card-body">
-<h5 class="card-title">Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi trương trình khởi chạy thành công')"></i> :</h5>
+<h5 class="card-title">Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i> :</h5>
 
 				                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi trương trình khởi động')"></i> :</label>
+                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi chương trình khởi động')"></i> :</label>
                   <div class="col-sm-9">
 					<div class="form-switch">
                       <input class="form-check-input" type="checkbox" name="sound_welcome_active" id="sound_welcome_active" <?php echo $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] ? 'checked' : ''; ?>>
@@ -1782,9 +1823,29 @@ if ($handle = opendir($VBot_Offline.'resource/sound/welcome')) {
              
                 
                    <center> <button type="submit" name="all_config_save" class="btn btn-primary rounded-pill">Lưu Cấu Hình Config</button>
+                    <button type="button" class="btn btn-warning rounded-pill" id="openModalBtn_Config">Xem Config.json</button>
 				   
 				   </center>
-                
+	
+    <!-- Modal hiển thị tệp Config.json -->
+    <div class="modal fade" id="myModal_Config" tabindex="-1" role="dialog" aria-labelledby="modalLabel_Config" aria-hidden="true">
+        <div class="modal-dialog" id="modal_dialog_show_config" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close btn btn-danger" data-dismiss="modal_Config" aria-label="Close" onclick="$('#myModal_Config').modal('hide');">
+                        <i class="bi bi-x-circle-fill"></i> Đóng
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="message_LoadConfigJson"></p>
+                    <pre id="data" class="json"><code id="code_config" class="language-json"></code></pre>
+                </div>
+             <!--   <div class="modal-footer">
+                   <center> <button type="button" class="btn btn-danger" data-dismiss="modal_Config" onclick="$('#myModal_Config').modal('hide');"> <i class="bi bi-x-circle-fill"></i> Đóng</button>
+           </center>     </div> -->
+            </div>
+        </div>
+    </div>
                 
                 </div>
 
@@ -1795,7 +1856,7 @@ if ($handle = opendir($VBot_Offline.'resource/sound/welcome')) {
 
       </div>
     </section>
-	
+
 	
     </form>
 
@@ -1807,7 +1868,18 @@ include 'html_footer.php';
 ?>
 <!-- End Footer -->
 
-  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+
+
+     <!-- Nút cuộn lên -->
+    <a href="#" title="Cuộn lên trên cùng" class="scroll-btn scroll-to-top d-flex align-items-center justify-content-center" onclick="scrollToTop(event)">
+        <i class="bi bi-arrow-up-short"></i>
+    </a>
+   <!-- Nút cuộn xuống -->
+    <a href="#" title="Cuộn xuống dưới cùng" class="scroll-btn scroll-to-bottom d-flex align-items-center justify-content-center" onclick="scrollToBottom(event)">
+        <i class="bi bi-arrow-down-short"></i>
+    </a>
+	
 
 <!-- Nghe thử file âm thanh -->
 <!-- <audio id="audioPlayer" style="display: none;" controls></audio> -->
@@ -1819,8 +1891,41 @@ include 'html_footer.php';
 <?php
 include 'html_js.php';
 ?>
+<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/prism/prism-json.min.js"></script>
+
+
+    <script>
+        // Hàm để cuộn lên đầu trang
+        function scrollToTop(event) {
+            event.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
+            window.scrollTo({
+                top: 0, // Vị trí cuộn lên đầu trang
+                behavior: 'smooth' // Cuộn mượt mà
+            });
+        }
+
+        // Hàm để cuộn xuống cuối trang
+        function scrollToBottom(event) {
+            event.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
+            window.scrollTo({
+                top: document.body.scrollHeight, // Vị trí cuộn xuống cuối trang
+                behavior: 'smooth' // Cuộn mượt mà
+            });
+        }
+    </script>
 
 <script>
+
+        // Hiển thị modal xem nội dung file Config
+        document.getElementById('openModalBtn_Config').addEventListener('click', function() {
+            read_loadFile('<?php echo $Config_filePath; ?>');
+            $('#myModal_Config').modal('show');
+        });
+		
+
+		
+
     //ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
     document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
         radio.addEventListener('change', function() {
@@ -2667,8 +2772,7 @@ function getBacklistData(dataPath, textareaId) {
 }
 
 </script>
-	
-	
+
 	
 </body>
 

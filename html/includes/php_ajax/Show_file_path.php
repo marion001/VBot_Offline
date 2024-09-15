@@ -3,7 +3,10 @@
 #Designed by: BootstrapMade
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 include '../../Configuration.php';
-
+// Cấu hình tiêu đề CORS
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
 function encodeFileToBase64($filePath)
@@ -233,4 +236,53 @@ if (isset($_GET['data_backlist'])) {
     echo json_encode($response);
     exit();
 }
+
+
+
+if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file'])) {
+// Khởi tạo mảng phản hồi
+$response = [
+    'success' => false,
+    'message' => '',
+    'data' => null
+];
+    // Lấy đường dẫn tệp từ tham số GET
+    $file_path = $_GET['file'];
+
+    // Kiểm tra xem tệp có tồn tại và có thể đọc được không
+    if (file_exists($file_path) && is_readable($file_path)) {
+        // Lấy phần mở rộng của tệp
+        $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
+
+        // Kiểm tra phần mở rộng tệp
+        if ($file_extension === 'json' || $file_extension === 'txt') {
+            // Đọc nội dung của tệp
+            $content = file_get_contents($file_path);
+
+            // Thiết lập phản hồi thành công
+            $response['success'] = true;
+            $response['message'] = 'Tệp đã được đọc thành công.';
+            
+            if ($file_extension === 'json') {
+                $response['data'] = json_decode($content, true);
+                header('Content-Type: application/json');
+            } else {
+                // Đối với tệp .txt, giữ định dạng và bảo mật
+                $response['data'] = $content;
+                header('Content-Type: text/plain');
+                $response['data'] = nl2br(htmlspecialchars($content));
+            }
+        } else {
+            $response['message'] = 'Loại tệp không được phép.';
+        }
+    } else {
+        $response['message'] = 'Tệp không tồn tại hoặc không có quyền đọc.';
+    }
+	
+echo json_encode($response);
+exit();
+} 
+
+
+
 ?>

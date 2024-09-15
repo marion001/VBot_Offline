@@ -132,9 +132,14 @@ $files = array_diff($files, array('.', '..'));
                     <td>$date</td>
                     <td>$size</td>
                     <td>
-					<button type=\"button\" class=\"btn btn-danger\" title=\"Xóa file: $file\" onclick=\"deleteFile('$filePath')\"><i class=\"bi bi-trash\"></i></button>
+					<button type=\"button\" class=\"btn btn-primary\" title=\"Nghe thử: $file\" onclick=\"playAudio('$filePath')\"><i class=\"bi bi-play-circle\"></i></button>
 					<button type=\"button\" class=\"btn btn-success\" title=\"Tải xuống file: $file\" onclick=\"downloadFile('$filePath')\"><i class=\"bi bi-download\"></i></button>
-				
+
+					<button type=\"button\" class=\"btn btn-danger\" title=\"Xóa file: $file\" onclick=\"deleteFile('$filePath')\"><i class=\"bi bi-trash\"></i></button>
+					
+
+
+
 					</td>
                   </tr>";
         }
@@ -142,9 +147,9 @@ $files = array_diff($files, array('.', '..'));
 
                 </tbody>
               </table>
-			      <form method="post" action="">
-			  <center><button type="submit" onclick="loading('show')" name="delete_all_file" class="btn btn-danger rounded-pill">Xóa tất cả dữ liệu: <?php echo $i." Tệp, " .formatSizeUnits($size_all); ?></button></center>
-              <!-- End Table with stripped rows -->
+			       <form method="post" onsubmit="return confirmDeletion();">
+				   <input type="hidden" name="delete_all_file" value="1">
+			  <center><button type="submit" class="btn btn-danger rounded-pill">Xóa tất cả dữ liệu: <?php echo $i." Tệp, " .formatSizeUnits($size_all); ?></button></center>
 			</form>
             </div>
           </div>
@@ -171,6 +176,12 @@ include 'html_footer.php';
 include 'html_js.php';
 ?>
 
+<script>
+        function confirmDeletion() {
+            return confirm('Bạn có chắc chắn muốn xóa tất cả các tệp TTS, Cache không?');
+			loading('show');
+        }
+</script>
 
 </body>
 
