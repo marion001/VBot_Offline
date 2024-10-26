@@ -161,8 +161,37 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
         function hideToast() {
             document.getElementById('toast').style.visibility = 'hidden';
         }
+		
+		//Hiển thị và đóng thông báo Message
+function show_message(message) {
+    document.querySelector('#notificationModal .modal-body').innerHTML = message;
+    $('#notificationModal').modal('show');
+}
+
+function close_message() {
+    $('#notificationModal').modal('hide');
+}
+		
     </script>
 	
 
 </head>
 <div id="toast"><span id="toastMessage"></span><button onclick="hideToast()">×</button></div>
+
+<!-- Thông báo Mesage html_head.php -->
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+			<button type="button" class="btn btn-danger" onclick="close_message()" title="Tắt thông báo"><i class="bi bi-x-circle-fill"></i></button>
+ 
+            <div class="modal-body">
+			
+                <!-- Nội dung thông báo ở đây sẽ được cập nhật bởi JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger rounded-pill" onclick="close_message()">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Kết Thúc Thông báo Mesage -->

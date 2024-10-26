@@ -155,6 +155,181 @@ $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .=  stream_get_contents($stream_out);
 }
 
+
+if (isset($_POST['config_auto'])) {
+// Đường dẫn đến file service
+$serviceFilePath = "{$VBot_Offline}resource/VBot_Offline.service";
+
+// Nội dung của file service với biến
+$serviceContent = <<<EOD
+[Unit]
+Description=VBot_Offline
+
+[Service]
+ExecStart=/usr/bin/python3.9 {$VBot_Offline}Start.py
+WorkingDirectory=$VBot_Offline
+StandardOutput=append:{$VBot_Offline}resource/log/service_log.log
+StandardError=append:{$VBot_Offline}resource/log/service_error.log
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOD;
+
+// Tạo hoặc ghi đè file service
+file_put_contents($serviceFilePath, $serviceContent);
+$CMD1 = "cp {$VBot_Offline}resource/VBot_Offline.service /home/$ssh_user/.config/systemd/user/VBot_Offline.service";
+$CMD2 = "sudo chmod 0777 {$VBot_Offline}resource/VBot_Offline.service";
+$CMD3 = "ln -s /home/$ssh_user/.config/systemd/user/VBot_Offline.service /home/$ssh_user/.config/systemd/user/default.target.wants/VBot_Offline.service";
+$CMD4 = "sudo systemctl daemon-reload";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream1 = ssh2_exec($connection, $CMD1);
+$stream2 = ssh2_exec($connection, $CMD2);
+$stream3 = ssh2_exec($connection, $CMD3);
+$stream4 = ssh2_exec($connection, $CMD4);
+stream_set_blocking($stream1, true); 
+stream_set_blocking($stream2, true); 
+stream_set_blocking($stream3, true); 
+stream_set_blocking($stream4, true); 
+$stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO); 
+$stream_out2 = ssh2_fetch_stream($stream2, SSH2_STREAM_STDIO); 
+$stream_out3 = ssh2_fetch_stream($stream3, SSH2_STREAM_STDIO); 
+$stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO); 
+$output = "$GET_current_USER@$HostName:~ $ $CMD1\n";
+$output .= stream_get_contents($stream_out1);
+$output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
+$output .= stream_get_contents($stream_out2);
+$output .= "$GET_current_USER@$HostName:~ $ $CMD3\n";
+$output .= stream_get_contents($stream_out3);
+$output .= "$GET_current_USER@$HostName:~ $ $CMD4\n";
+$output .= stream_get_contents($stream_out4);
+}
+
+
+//Cài Đặt Hành Động Với LCD
+if (isset($_POST['lcd_auto_start'])) {
+$CMD = "systemctl --user start VBot_LCD_OLED.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['lcd_auto_stop'])) {
+$CMD = "systemctl --user stop VBot_LCD_OLED.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['lcd_auto_enable'])) {
+$CMD = "systemctl --user enable VBot_LCD_OLED.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['lcd_auto_disable'])) {
+$CMD = "systemctl --user disable VBot_LCD_OLED.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['lcd_auto_status'])) {
+$CMD = "systemctl --user status VBot_LCD_OLED.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['lcd_auto_restart'])) {
+$CMD = "systemctl --user restart VBot_LCD_OLED.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['lcd_config_auto'])) {
+// Đường dẫn đến file service
+$serviceFilePath = "{$VBot_Offline}resource/VBot_LCD_OLED.service";
+
+// Nội dung của file service với biến
+$serviceContent = <<<EOD
+[Unit]
+Description=VBot_LCD_OLED
+
+[Service]
+ExecStart=/usr/bin/python3.9 {$VBot_Offline}resource/screen_disp/Run.py
+Restart=always
+
+[Install]
+WantedBy=default.target
+EOD;
+
+// Tạo hoặc ghi đè file service
+file_put_contents($serviceFilePath, $serviceContent);
+$CMD1 = "cp {$VBot_Offline}resource/VBot_LCD_OLED.service /home/$ssh_user/.config/systemd/user/VBot_LCD_OLED.service";
+$CMD2 = "sudo chmod 0777 {$VBot_Offline}resource/VBot_LCD_OLED.service";
+$CMD3 = "ln -s /home/$ssh_user/.config/systemd/user/VBot_LCD_OLED.service /home/$ssh_user/.config/systemd/user/default.target.wants/VBot_LCD_OLED.service";
+$CMD4 = "sudo systemctl daemon-reload";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+$stream1 = ssh2_exec($connection, $CMD1);
+$stream2 = ssh2_exec($connection, $CMD2);
+$stream3 = ssh2_exec($connection, $CMD3);
+$stream4 = ssh2_exec($connection, $CMD4);
+stream_set_blocking($stream1, true); 
+stream_set_blocking($stream2, true); 
+stream_set_blocking($stream3, true); 
+stream_set_blocking($stream4, true); 
+$stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO); 
+$stream_out2 = ssh2_fetch_stream($stream2, SSH2_STREAM_STDIO); 
+$stream_out3 = ssh2_fetch_stream($stream3, SSH2_STREAM_STDIO); 
+$stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO); 
+$output = "$GET_current_USER@$HostName:~ $ $CMD1\n";
+$output .= stream_get_contents($stream_out1);
+$output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
+$output .= stream_get_contents($stream_out2);
+$output .= "$GET_current_USER@$HostName:~ $ $CMD3\n";
+$output .= stream_get_contents($stream_out3);
+$output .= "$GET_current_USER@$HostName:~ $ $CMD4\n";
+$output .= stream_get_contents($stream_out4);
+}
+#Kết Thúc Cài Đặt Hành Động Với LCD
+
 if (isset($_POST['apache_restart'])) {
 $CMD = "sudo systemctl restart apache2.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -314,7 +489,7 @@ $output .=  stream_get_contents($stream_out);
 
 //check_version_picovoice_porcupine
 if (isset($_POST['check_version_picovoice_porcupine'])) {
-$remotePath = "/home/pi/.local/lib/python3.9/site-packages/";
+$remotePath = "/home/$ssh_user/.local/lib/python3.9/site-packages/";
 $pattern = '/^pvporcupine-(\d+\.\d+\.\d+)\.dist-info$/m';
 // Thực hiện lệnh ls để lấy danh sách thư mục
 $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -331,7 +506,7 @@ if (preg_match($pattern, $outputhh, $matches)) {
     $output .= "Phiên bản Picovoice: $foundVersion\n";
 } else {
     //echo "Không tìm thấy thư mục pvporcupine-X.X.X.dist-info.";
-$path_picovoice = '/home/pi/.local/lib/python3.9/site-packages/picovoice/_picovoice.py';
+$path_picovoice = "/home/$ssh_user/.local/lib/python3.9/site-packages/picovoice/_picovoice.py";
 $connection = ssh2_connect($ssh_host, $ssh_port);
 if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
 if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
@@ -477,10 +652,26 @@ include 'html_sidebar.php';
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_status" type="submit" title="Tạm dừng trương trình đang chạy">Trạng thái</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_enable" type="submit" title="Tự động chạy trương trình khi hệ thống khởi động">Kích hoạt</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_disable" type="submit" title="Vô hiệu hóa trương trình, không cho tự động chạy">Vô hiệu</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="config_auto" type="submit" title="Vô hiệu hóa trương trình, không cho tự động chạy">Cài đặt cấu hình Auto</button></li>
           </ul>
 </div>
 </div>
-
+<div class="btn-group">
+<div class="dropdown">
+          <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
+            LCD OLED Auto Run
+          </button>
+          <ul class="dropdown-menu">
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_start" type="submit" title="Chạy lại trương trình">Chạy</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_restart" type="submit" title="Tạm dừng trương trình đang chạy">Khởi động lại</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_stop" type="submit" title="Tạm dừng trương trình đang chạy">Dừng</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_status" type="submit" title="Tạm dừng trương trình đang chạy">Trạng thái</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_enable" type="submit" title="Tự động chạy trương trình khi hệ thống khởi động">Kích hoạt</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_disable" type="submit" title="Vô hiệu hóa trương trình, không cho tự động chạy">Vô hiệu</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_config_auto" type="submit" title="Tự Động Cài Đặt Các File Cấu Hình LCD OLED để tự động chạy cùng hệ thống">Install Auto Start LCD on Boot</button></li>
+          </ul>
+</div>
+</div>
 <div class="btn-group">
 <div class="dropdown">
           <button class="btn btn-dark dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
@@ -512,12 +703,24 @@ include 'html_sidebar.php';
 		</ul>
 </div>
 </div>
-
-</div>
-</div>
-
-
 </form>
+<!-- 
+<div class="btn-group">
+<form method="POST" action="">
+<button class="btn btn-primary rounded-pill" name="setting_apache2" type="button" title="Cấu hình apache2">Cấu hình apache2</button><br/>
+<div class="input-group mb-3">
+<input required="" class="form-control border-success" type="text" name="setting_apache2_path" id="setting_apache2_path" placeholder="/home/pi/VBot_Offline/html" title="Ví dụ: /home/pi/VBot_Offline/html">
+<div class="invalid-feedback">Cần nhập đường dẫn path cần cấu hình apache2</div>
+<button class="btn btn-success border-success" type="submit">Cấu hình</button>
+</div>
+</form>  
+</div>
+-->
+</div>
+</div>
+
+
+
 	<hr/>
 	
   <form method="POST" action="">

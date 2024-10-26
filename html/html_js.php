@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 //Hiển thị và đóng thông báo Message
+/*
 function show_message(message) {
     document.querySelector('#notificationModal .modal-body').innerHTML = message;
     $('#notificationModal').modal('show');
@@ -71,7 +72,7 @@ function show_message(message) {
 function close_message() {
     $('#notificationModal').modal('hide');
 }
-
+*/
 // Hàm để hiển thị hoặc ẩn overlay
 function loading(action) {
     const overlay = document.getElementById('loadingOverlay');
@@ -109,6 +110,13 @@ function deleteFile(filePath, langg = "No") {
                 loadConfigHotword("eng")
             } else if (langg === "scan_Music_Local") {
                 list_audio_show_path('scan_Music_Local')
+            } else if (langg === "Vbot_Backup_Program") {
+				if (document.getElementById("show_all_file_folder_Backup_Program")) {
+                    show_all_file_in_directory('<?php echo $HTML_VBot_Offline . '/' . $Backup_Dir_Save_VBot; ?>', 'Tệp Sao Lưu Chương Trình Trên Hệ Thống', 'show_all_file_folder_Backup_Program');
+                }
+				else if (document.getElementById("show_all_file_folder_Backup_web_interface")) {
+                    show_all_file_in_directory('<?php echo $HTML_VBot_Offline . '/' . $Backup_Dir_Save_Web; ?>', 'Tệp Sao Lưu Giao Diện Trên Hệ Thống', 'show_all_file_folder_Backup_web_interface');
+                }
             } else if (langg === "scan_Audio_Startup") {
                 list_audio_show_path('scan_Audio_Startup')
             } else if (langg === "media_player_search") {
@@ -138,6 +146,184 @@ function downloadFile(filePath) {
     document.body.removeChild(link);
 }
 
+//Hiển thị tất cả các file có trong thư mục show ra tên file, đường dẫn, thời gian tạo, kích thước tệp
+function show_all_file_in_directory(directory_path, source_backup, resultDiv_Id) {
+	loading("show");
+    var xhr = new XMLHttpRequest();
+    var url = 'includes/php_ajax/Show_file_path.php?show_all_file&directory_path=' + directory_path;
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+				loading("hide");
+                var response = JSON.parse(xhr.responseText);
+                var resultDiv_show_all_File = document.getElementById(resultDiv_Id); // Sử dụng ID được truyền vào
+                if (!resultDiv_show_all_File) {
+					showMessagePHP('Không tìm thấy phần tử có id là: '+resultDiv_Id+' để hiển thị kết quả.');
+                    return;
+                }
+
+                if (response.success) {
+                    showMessagePHP(response.message);
+                    //console.log(response);
+                    
+                    // Tạo bảng để hiển thị thông tin tệp
+                    var table = '<table class="table table-bordered border-primary">';
+					table += '<tr><th colspan="5" class="text-primary" style="text-align: center; vertical-align: middle;">'+source_backup+'</th></tr>';
+                    table += '<tr><th style="text-align: center; vertical-align: middle;">STT</th><th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Thời gian tạo</th><th style="text-align: center; vertical-align: middle;">Kích thước</th><th style="text-align: center; vertical-align: middle;">Hành động</th></tr>';
+
+                    response.data.forEach(function(file, index) {
+                        table += '<tr>';
+                        table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>'; // STT
+                        table += '<td style="text-align: center; vertical-align: middle;">' + file.name + '</td>'; // Tên tệp
+                        table += '<td style="text-align: center; vertical-align: middle;">' + file.created_at + '</td>'; // Thời gian tạo
+                        table += '<td style="text-align: center; vertical-align: middle;">' + file.size + '</td>'; // Kích thước
+                        table += '<td style="text-align: center; vertical-align: middle;">';
+						table += '<form method="POST" action=""><button type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu từ bản sao lưu trên hệ thống: ' + file.name +'\')" name="Restore_Backup" value="' + file.path + '" class="btn btn-primary" title="Khôi phục dữ liệu: ' + file.name + '"><i class="bi bi-arrow-counterclockwise" title="Khôi phục dữ liệu: ' + file.name + '"></i></button> </form> ';
+						table += ' <button type="button" class="btn btn-success" title="Xem cấu trúc bên trong tệp: ' + file.name + '" onclick="read_file_backup(\'' + file.path + '\')"><i class="bi bi-eye"></i></button> ';
+						table += ' <button type="button" class="btn btn-warning" title="Tải xuống file: ' + file.name + '" onclick="downloadFile(\'' + file.path + '\')"><i class="bi bi-download"></i></button> ';
+						table += ' <button type="button" class="btn btn-danger" onclick="deleteFile(\'' + file.path + '\', \'Vbot_Backup_Program\')"><i class="bi bi-trash"></i></button></td>';
+                        table += '</tr>';
+                    });
+
+                    table += '</table>';
+                    resultDiv_show_all_File.innerHTML = table; // Hiển thị bảng
+                } else {
+                    show_message(response.message);
+                }
+            } else {
+				loading("hide");
+                show_message('Có lỗi xảy ra: ' + xhr.status);
+            }
+        }
+    };
+    // Gửi yêu cầu
+    xhr.send();
+}
+
+//Google Cloud Hiển thị tất cả các file có trong thư mục show ra tên file, đường dẫn, thời gian tạo, kích thước tệp
+function gcloud_scan(folder_name, source_backup, resultDiv_Id) {
+	loading("show");
+    var xhr = new XMLHttpRequest();
+    var url = 'includes/php_ajax/GCloud_Act.php?Scan&Folder_Name='+folder_name;
+    xhr.open('GET', url, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+				loading("hide");
+                var response = JSON.parse(xhr.responseText);
+                var resultDiv_show_all_File = document.getElementById(resultDiv_Id); // Sử dụng ID được truyền vào
+                if (!resultDiv_show_all_File) {
+					showMessagePHP('Không tìm thấy phần tử có id là: '+resultDiv_Id+' để hiển thị kết quả.');
+                    return;
+                }
+                if (response.success) {
+                    showMessagePHP(response.message, 3);
+                    //console.log(response);
+                    // Tạo bảng để hiển thị thông tin tệp
+                    var table = '<table class="table table-bordered border-primary">';
+					table += '<tr><th colspan="5" class="text-primary"><center>'+source_backup+'</center></th></tr>';
+                    table += '<tr><th><center>STT</center></th><th><center>Tên tệp</center></th><th><center>Thời gian tạo</center></th><th><center>Kích thước</center></th><th><center>Hành động</center></th></tr>';
+                    response.data.forEach(function(file, index) {
+                        table += '<tr>';
+                        table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>'; // STT
+                        table += '<td style="text-align: center; vertical-align: middle;">' + file.name + '</td>'; // Tên tệp
+                        table += '<td style="text-align: center; vertical-align: middle;">' + file.created_at + '</td>'; // Thời gian tạo
+                        table += '<td style="text-align: center; vertical-align: middle;">' + file.size + '</td>'; // Kích thước
+                        table += '<td style="text-align: center; vertical-align: middle;"><form method="POST" action=""><button type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu từ bản sao lưu trên Google Cloud Drive: ' + file.name +'\')" name="Restore_Backup" value="' + file.url_share + '" class="btn btn-success" title="Khôi phục dữ liệu: ' + file.name + '"><i class="bi bi-arrow-counterclockwise" title="Khôi phục dữ liệu: ' + file.name + '"></i></button> </form>';
+						table += '<a href="'+file.url_share+'" target="_bank" title="Mở  trong tab mới: ' + file.name + '"> <button type="button" class="btn btn-success" title="Mở trong tab mới: ' + file.name + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+						table += ' <button type="button" class="btn btn-danger" onclick="deleteFile_gcloud(\'' + file.id + '\', \''+file.name+'\', \''+folder_name+'\', \'Tệp Sao Lưu Chương Trình Trên Google Cloud Drive\', \''+resultDiv_Id+'\')"><i class="bi bi-trash"></i></button> </td>';
+                        table += '</tr>';
+                    });
+
+                    table += '</table>';
+                    resultDiv_show_all_File.innerHTML = table; // Hiển thị bảng
+                } else {
+                    show_message(response.message);
+                }
+            } else {
+				loading("hide");
+                show_message('Có lỗi xảy ra: ' + xhr.status);
+            }
+        }
+    };
+
+    // Gửi yêu cầu
+    xhr.send();
+}
+
+//Xóa tệp theo ID trên Google Cloud
+function deleteFile_gcloud(gcloud_id_file, gcloud_file_name, gcloud_folder_name, source_backup_name, div_resultDiv_Id) {
+
+    if (!confirm("Bạn có chắc chắn muốn xóa file: '" + gcloud_file_name + "' Trên Google Cloud Drive không?")) {
+        return;
+    }
+    loading("show");
+
+    var xhr = new XMLHttpRequest();
+    var url = 'includes/php_ajax/GCloud_Act.php?Delete&id_file='+gcloud_id_file;
+    xhr.open('GET', url, true);
+	
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+				loading("hide");
+                var response = JSON.parse(xhr.responseText);
+					//console.log(response);
+                if (response.success) {
+                    showMessagePHP(response.message, 3);
+					//Nếu trong Dom có ID của biến div_resultDiv_Id thì sẽ chạy
+                if (document.getElementById(div_resultDiv_Id)) {
+                   gcloud_scan(gcloud_folder_name, source_backup_name, div_resultDiv_Id);
+                }
+                } else {
+                    show_message(response.message);
+                }
+            } else {
+				loading("hide");
+                show_message('Có lỗi xảy ra: ' + xhr.status);
+            }
+        }
+    };
+
+    // Gửi yêu cầu
+    xhr.send();
+	
+}
+
+// Hiển thị thông báo xác nhận với thông tin chi tiết về backup
+function confirmRestore(backup_file_name) {
+            var result = confirm(backup_file_name);
+			if (result) {
+            loading('show');
+			}
+            // Nếu người dùng nhấn "Cancel", ngăn không cho form được submit
+            return result;
+        }
+
+//Coppy dữ liệu trong thẻ input
+function coppy_value(id_input) {
+            var input = document.getElementById(id_input);
+            input.select();
+            try {
+                document.execCommand("copy");
+                showMessagePHP("Đã Sao Chép!", 3);
+            } catch (err) {
+                //console.error('Lỗi khi sao chép nội dung: ', err);
+                show_message("Lỗi khi sao chép nội dung. Vui lòng thử lại.");
+            }
+        }
+
+//Mở đường dẫn trong tab mới
+   function openNewTab(url_link) {
+            if (url_link) {
+                // Mở đường dẫn trong tab mới nếu giá trị tồn tại
+                window.open(url_link, '_blank');
+            } else {
+                // Xử lý trường hợp không có giá trị data-url-link
+                show_message('Không có đường dẫn được cung cấp');
+            }
+        }
 
 //Đọc dữ liệu file theo path
 function read_loadFile(path) {
@@ -185,6 +371,126 @@ function read_loadFile(path) {
             // Gửi yêu cầu
             xhr.send();
         }
+
+
+//Đọc dữ liệu cấu trúc bên trong file backup theo path
+function read_file_backup(path_backup_file) {
+	loading('show');
+    // Tạo URL yêu cầu tới script PHP
+    var url = 'includes/php_ajax/Show_file_path.php?read_file_backup&file=' + encodeURIComponent(path_backup_file);
+    var xhr = new XMLHttpRequest();
+    // Mở yêu cầu GET
+    xhr.open('GET', url, true);
+    // Xử lý khi yêu cầu thành công
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+			 var fileName = path_backup_file.split('/').pop();
+            try {
+                // Phân tích cú pháp JSON
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+					loading('hide');
+                    // Tạo bảng để hiển thị thông tin tệp
+                    var table = '<table class="table table-bordered border-primary">';
+					table += '<tr><th colspan="3"  class="text-success"><center>Cấu Trúc Tệp: '+fileName+'</center></th></tr>';
+                    table += '<tr><th><center>STT</center></th><th><center>Tên tệp</center></th><th><center>Hành động</center></th></tr>';
+
+                    // Duyệt qua danh sách các tệp trong response.data
+                    response.data.forEach(function(file, index) {
+                        table += '<tr>';
+                        table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>'; // STT
+                        table += '<td style="vertical-align: middle;"><font color=blue>' + file + '</font></td>'; // Tên tệp
+                        table += '<td style="text-align: center; vertical-align: middle;">';
+                        // Hành động: Bạn có thể thêm các nút hoặc liên kết hành động tại đây
+                        table += '<button type="button" class="btn btn-success" onclick="read_files_in_backup(\''+path_backup_file+'\', \'' + file + '\')" title="Xem nội dung tệp tin: \''+file+'\'"><i class="bi bi-eye"></i> Xem</button>';
+                        table += '</td>';
+                        table += '</tr>';
+                    });
+                    table += '</table>';
+					
+				if (document.getElementById('show_all_file_folder_Backup_Program')) {
+                    document.getElementById('show_all_file_folder_Backup_Program').innerHTML = table;
+                }else if (document.getElementById('show_all_file_folder_Backup_web_interface')){
+					
+					document.getElementById('show_all_file_folder_Backup_web_interface').innerHTML = table;
+				}
+					
+                   // document.getElementById(id_inter_html).innerHTML = table; // Hiển thị bảng
+                } else {
+					loading('hide');
+                    show_message(response.message);
+                }
+            } catch (e) {
+				loading('hide');
+                // Lỗi trong quá trình phân tích JSON
+                show_message('Lỗi xử lý dữ liệu: ' + e.message);
+            }
+        } else {
+			loading('hide');
+            // Lỗi HTTP khác ngoài 200 (OK)
+            show_message('Lỗi tải dữ liệu: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        show_message("Lỗi kết nối. Vui lòng thử lại sau.");
+    };
+    xhr.send();
+}
+
+
+//Đọc dữ liệu cấu trúc bên trong file backup theo path
+function read_files_in_backup(file_path, file_name) {
+	loading('show');
+    // Tạo URL yêu cầu tới script PHP
+    var url = 'includes/php_ajax/Show_file_path.php?read_files_in_backup&file_path='+encodeURIComponent(file_path)+'&file_name='+ encodeURIComponent(file_name);
+    var xhr = new XMLHttpRequest();
+    // Mở yêu cầu GET
+    xhr.open('GET', url, true);
+    // Xử lý khi yêu cầu thành công
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                // Phân tích cú pháp JSON
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+					loading('hide');
+
+                    // Kiểm tra nếu tệp là JSON
+                    if (file_name.endsWith('.json')) {
+                        // Hiển thị nội dung JSON
+                        document.getElementById('modal-body-content').textContent = JSON.stringify(response.data, null, 2); // Hiển thị JSON với indent
+                    } else {
+                        // Làm sạch nội dung tệp khác
+                        var fileContent = response.data
+                            .replace(/\\r/g, '') // Xóa ký tự \r
+                            .replace(/\\n/g, '\n'); // Thay thế \n bằng ký tự xuống dòng thực
+                        document.getElementById('modal-body-content').textContent = fileContent; // Cập nhật nội dung
+                    }
+					
+
+                    $('#responseModal_read_files_in_backup').modal('show'); // Hiện modal
+
+                   // document.getElementById(id_inter_html).innerHTML = table; // Hiển thị bảng
+                } else {
+					loading('hide');
+                    show_message(response.message);
+                }
+            } catch (e) {
+				loading('hide');
+                // Lỗi trong quá trình phân tích JSON
+                show_message('Lỗi xử lý dữ liệu: ' + e.message);
+            }
+        } else {
+			loading('hide');
+            // Lỗi HTTP khác ngoài 200 (OK)
+            show_message('Lỗi tải dữ liệu: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        show_message("Lỗi kết nối. Vui lòng thử lại sau.");
+    };
+    xhr.send();
+}
 
 //tìm lại mật khẩu
 function forgotPassword() {

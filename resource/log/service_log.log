@@ -3710,3 +3710,1045 @@ Cung cấp thêm thông tin sẽ giúp tôi trả lời câu hỏi của bạn t
 [96m[21:16:19 14-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
  * Serving Flask app 'Api'
  * Debug mode: off
+[92m[21:17:43 16-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:17:43 16-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:17:43 16-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:17:43 16-09-2024] Đã đọc file Action.json thành công [0m
+[97m[21:17:43 16-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[21:17:43 16-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[21:19:13 16-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[21:19:14 16-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[21:19:14 16-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[21:19:14 16-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[21:19:14 16-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[21:19:14 16-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[21:19:14 16-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[21:19:14 16-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[21:19:14 16-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[21:19:14 16-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[21:19:14 16-09-2024] ID: 9, Tên: [0m
+[96m[21:19:14 16-09-2024] ID: 10, Tên: [0m
+[96m[21:19:14 16-09-2024] ID: 11, Tên: [0m
+[96m[21:19:14 16-09-2024] ID: 12, Tên: [0m
+[96m[21:19:14 16-09-2024] ID: 13, Tên: [0m
+[96m[21:19:14 16-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[18:37:14 17-09-2024] Đã đọc file Config.json thành công [0m
+[92m[18:37:14 17-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[18:37:14 17-09-2024] Đã đọc file Object.json thành công [0m
+[92m[18:37:14 17-09-2024] Đã đọc file Action.json thành công [0m
+[97m[18:37:14 17-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[18:37:14 17-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[18:37:22 17-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[18:37:23 17-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[18:37:23 17-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[18:37:23 17-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[18:37:23 17-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[18:37:23 17-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[18:37:23 17-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[18:37:23 17-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[18:37:23 17-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[18:37:23 17-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[18:37:23 17-09-2024] ID: 9, Tên: [0m
+[96m[18:37:23 17-09-2024] ID: 10, Tên: [0m
+[96m[18:37:23 17-09-2024] ID: 11, Tên: [0m
+[96m[18:37:23 17-09-2024] ID: 12, Tên: [0m
+[96m[18:37:23 17-09-2024] ID: 13, Tên: [0m
+[96m[18:37:23 17-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[18:37:33 17-09-2024] Đã khởi tạo Porcupine và PvRecorder thành công.[0m
+[1m[18:37:33 17-09-2024] Nút nhấn 'down' đã được cấu hình thành công cho: GPIO25[0m
+[1m[18:37:33 17-09-2024] Nút nhấn 'up' đã được cấu hình thành công cho: GPIO5[0m
+[1m[18:37:33 17-09-2024] Nút nhấn 'wakeup' đã được cấu hình thành công cho: GPIO26[0m
+[1m[18:37:33 17-09-2024] Nút nhấn 'mic' đã được cấu hình thành công cho: GPIO6[0m
+[92m[18:37:39 17-09-2024] KHỞI CHẠY TRƯƠNG TRÌNH THÀNH CÔNG[0m
+[92m[18:37:40 17-09-2024] Đang chờ được đánh thức[0m
+[95m[18:37:46 17-09-2024] Âm lượng Tăng tới: 70%[0m
+[92m[18:37:49 17-09-2024] Đã được đánh thức.[0m
+[95m[18:37:50 17-09-2024] [BOT] Đang thu âm...[0m
+[92m[18:37:53 17-09-2024] [HUMAN] mấy giờ rồi[0m
+[95m[18:37:53 17-09-2024] [BOT] Bây giờ là: 18 giờ, 37 phút[0m
+[94m[18:37:59 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[18:38:00 17-09-2024] Đã được đánh thức.[0m
+[95m[18:38:01 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[18:38:06 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[18:38:07 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[19:56:09 17-09-2024] Đã được đánh thức.[0m
+[95m[19:56:10 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[19:56:15 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[19:56:16 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[19:56:17 17-09-2024] Đã được đánh thức.[0m
+[95m[19:56:18 17-09-2024] [BOT] Đang thu âm...[0m
+[92m[19:56:22 17-09-2024] [HUMAN] bật qua phòng ngủ[0m
+[92m[19:56:23 17-09-2024] [BOT] Đã bật Quạt Phòng Ngủ thành công[0m
+[94m[19:56:25 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[19:56:26 17-09-2024] Đã được đánh thức.[0m
+[95m[19:56:27 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[19:56:30 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[19:56:31 17-09-2024] Đang chờ được đánh thức.[0m
+[95m[20:15:42 17-09-2024] Âm lượng Tăng tới: 80%[0m
+[92m[20:18:02 17-09-2024] Đã được đánh thức.[0m
+[95m[20:18:03 17-09-2024] [BOT] Đang thu âm...[0m
+[92m[20:18:07 17-09-2024] [HUMAN] mấy giờ rồi[0m
+[95m[20:18:07 17-09-2024] [BOT] Bây giờ là: 20 giờ, 18 phút[0m
+[94m[20:18:12 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[20:18:12 17-09-2024] Đã được đánh thức.[0m
+[95m[20:18:13 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[20:18:15 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[20:18:16 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[20:32:44 17-09-2024] Đã được đánh thức.[0m
+[95m[20:32:45 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[20:32:48 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[20:32:49 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[20:40:50 17-09-2024] Đã được đánh thức.[0m
+[95m[20:40:51 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[20:40:57 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[20:40:58 17-09-2024] Đang chờ được đánh thức.[0m
+[95m[20:52:33 17-09-2024] Đã tắt Mic[0m
+[95m[22:09:10 17-09-2024] Đã bật Mic[0m
+[92m[22:12:57 17-09-2024] Đã được đánh thức.[0m
+[95m[22:12:58 17-09-2024] [BOT] Đang thu âm...[0m
+[92m[22:13:02 17-09-2024] [HUMAN] tắt đèn phòng ngủ[0m
+[91m[22:13:02 17-09-2024] [BOT] Đèn Phòng Ngủ đã tắt sẵn[0m
+[94m[22:13:05 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[22:13:05 17-09-2024] Đã được đánh thức.[0m
+[95m[22:13:06 17-09-2024] [BOT] Đang thu âm...[0m
+[92m[22:13:09 17-09-2024] [HUMAN] tắt đèn[0m
+[92m[22:13:09 17-09-2024] [BOT] Đã tắt Đèn Ngủ thành công[0m
+[94m[22:13:12 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[22:13:12 17-09-2024] Đã được đánh thức.[0m
+[95m[22:13:13 17-09-2024] [BOT] Đang thu âm...[0m
+[95m[22:13:16 17-09-2024] Không có giọng nói được truyền vào[0m
+[94m[22:13:16 17-09-2024] Đang chờ được đánh thức.[0m
+[92m[07:31:33 18-09-2024] Đã được đánh thức.[0m
+[95m[07:31:35 18-09-2024] [BOT] Đang thu âm...[0m
+[95m[07:31:38 18-09-2024] Không có giọng nói được truyền vào[0m
+[94m[07:31:39 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[07:31:41 18-09-2024] Đã được đánh thức.[0m
+[95m[07:31:42 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[07:31:45 18-09-2024] [HUMAN] bật đèn ngủ[0m
+[92m[07:31:46 18-09-2024] [BOT] Đã bật Đèn Ngủ thành công[0m
+[94m[07:31:48 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[07:31:48 18-09-2024] Đã được đánh thức.[0m
+[95m[07:31:50 18-09-2024] [BOT] Đang thu âm...[0m
+[95m[07:31:52 18-09-2024] Không có giọng nói được truyền vào[0m
+[94m[07:31:53 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[11:14:12 18-09-2024] Đã được đánh thức.[0m
+[95m[11:14:13 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[11:14:17 18-09-2024] [HUMAN] bật đèn phòng ngủ[0m
+[92m[11:14:17 18-09-2024] [BOT] Đã bật Đèn Phòng Ngủ thành công[0m
+[94m[11:14:20 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[11:14:20 18-09-2024] Đã được đánh thức.[0m
+[95m[11:14:22 18-09-2024] [BOT] Đang thu âm...[0m
+[95m[11:14:25 18-09-2024] Không có giọng nói được truyền vào[0m
+[94m[11:14:25 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[11:16:58 18-09-2024] Đã được đánh thức.[0m
+[95m[11:16:59 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[11:17:03 18-09-2024] [HUMAN] tắt đèn phòng ngủ[0m
+[92m[11:17:03 18-09-2024] [BOT] Đã tắt Đèn Phòng Ngủ thành công[0m
+[94m[11:17:06 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[11:17:06 18-09-2024] Đã được đánh thức.[0m
+[95m[11:17:07 18-09-2024] [BOT] Đang thu âm...[0m
+[95m[11:17:10 18-09-2024] Không có giọng nói được truyền vào[0m
+[94m[11:17:11 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[17:06:08 18-09-2024] Đã được đánh thức.[0m
+[95m[17:06:09 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[17:06:13 18-09-2024] [HUMAN] mấy giờ rồi[0m
+[95m[17:06:13 18-09-2024] [BOT] Bây giờ là: 17 giờ, 06 phút[0m
+[94m[17:06:18 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[17:06:18 18-09-2024] Đã được đánh thức.[0m
+[95m[17:06:19 18-09-2024] [BOT] Đang thu âm...[0m
+[95m[17:06:23 18-09-2024] Không có giọng nói được truyền vào[0m
+[94m[17:06:24 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[17:31:14 18-09-2024] Đã được đánh thức.[0m
+[95m[17:31:15 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[17:31:19 18-09-2024] [HUMAN] bật quạt phòng ngủ[0m
+[92m[17:31:20 18-09-2024] [BOT] Đã bật Quạt Phòng Ngủ thành công[0m
+[94m[17:31:23 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[17:31:23 18-09-2024] Đã được đánh thức.[0m
+[95m[17:31:24 18-09-2024] [BOT] Đang thu âm...[0m
+[95m[17:31:29 18-09-2024] Không có giọng nói được truyền vào[0m
+[94m[17:31:30 18-09-2024] Đang chờ được đánh thức.[0m
+[92m[18:45:28 18-09-2024] Đã được đánh thức.[0m
+[95m[18:45:29 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[18:45:33 18-09-2024] [HUMAN] hôm nay[0m
+[94m[18:45:34 18-09-2024] Đang gọi trợ lý ảo: default_assistant[0m
+[91m[18:45:49 18-09-2024] Lỗi xử lý trợ lý ảo default_assistant: HTTPSConnectionPool(host='chatbot.iviet.com', port=443): Read timed out. (read timeout=10)[0m
+[91m[18:45:49 18-09-2024] Trợ lý ảo default_assistant không trả về kết quả[0m
+[94m[18:45:49 18-09-2024] Đang gọi trợ lý ảo: google_gemini[0m
+[92m[18:45:53 18-09-2024] [BOT]: Tôi xin lỗi, nhưng tôi cần biết bạn muốn biết gì về "hôm nay". Ví dụ:
+
+ Bạn muốn biết ngày hôm nay là thứ mấy?
+ Bạn muốn biết thời tiết hôm nay như thế nào?
+ Bạn muốn biết có sự kiện gì đặc biệt xảy ra hôm nay?
+
+Hãy cho tôi biết thêm thông tin để tôi có thể giúp bạn![0m[92m[21:13:27 18-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:13:27 18-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:13:27 18-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:13:27 18-09-2024] Đã đọc file Action.json thành công [0m
+[97m[21:13:27 18-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[21:13:27 18-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[21:13:32 18-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[21:13:32 18-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[21:13:32 18-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[21:13:32 18-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[21:13:32 18-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[21:13:32 18-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[21:13:32 18-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[21:13:32 18-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[21:13:32 18-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[21:13:32 18-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[21:13:32 18-09-2024] ID: 9, Tên: [0m
+[96m[21:13:32 18-09-2024] ID: 10, Tên: [0m
+[96m[21:13:32 18-09-2024] ID: 11, Tên: [0m
+[96m[21:13:32 18-09-2024] ID: 12, Tên: [0m
+[96m[21:13:32 18-09-2024] ID: 13, Tên: [0m
+[96m[21:13:32 18-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:13:43 18-09-2024] Đã khởi tạo Porcupine và PvRecorder thành công.[0m
+[1m[21:13:43 18-09-2024] Nút nhấn 'down' đã được cấu hình thành công cho: GPIO25[0m
+[1m[21:13:43 18-09-2024] Nút nhấn 'up' đã được cấu hình thành công cho: GPIO5[0m
+[1m[21:13:43 18-09-2024] Nút nhấn 'wakeup' đã được cấu hình thành công cho: GPIO26[0m
+[1m[21:13:43 18-09-2024] Nút nhấn 'mic' đã được cấu hình thành công cho: GPIO6[0m
+[92m[21:13:48 18-09-2024] KHỞI CHẠY TRƯƠNG TRÌNH THÀNH CÔNG[0m
+[92m[21:13:49 18-09-2024] Đang chờ được đánh thức[0m
+[92m[21:14:08 18-09-2024] Đã được đánh thức.[0m
+[95m[21:14:09 18-09-2024] [BOT] Đang thu âm...[0m
+[92m[21:14:14 18-09-2024] [HUMAN] mở bài hát tuyệt duyên[0m
+[93m[21:14:14 18-09-2024] Đang tìm kiếm dữ liệu ở nguồn phát: music_local[0m
+[91m[21:14:14 18-09-2024] Lỗi trong detect_hotword: module 'Lib' has no attribute 'Lib'[0m
+[92m[23:13:44 18-09-2024] Đã đọc file Config.json thành công [0m
+[92m[23:13:44 18-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:13:44 18-09-2024] Đã đọc file Object.json thành công [0m
+[92m[23:13:44 18-09-2024] Đã đọc file Action.json thành công [0m
+[97m[23:13:44 18-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[23:13:44 18-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[23:13:48 18-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[23:13:48 18-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[23:13:48 18-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[23:13:48 18-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[23:13:48 18-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[23:13:48 18-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[23:13:48 18-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[23:13:48 18-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[23:13:48 18-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[23:13:48 18-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[23:13:48 18-09-2024] ID: 9, Tên: [0m
+[96m[23:13:48 18-09-2024] ID: 10, Tên: [0m
+[96m[23:13:48 18-09-2024] ID: 11, Tên: [0m
+[96m[23:13:48 18-09-2024] ID: 12, Tên: [0m
+[96m[23:13:48 18-09-2024] ID: 13, Tên: [0m
+[96m[23:13:48 18-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[17:25:46 19-09-2024] Đã đọc file Config.json thành công [0m
+[92m[17:25:46 19-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[17:25:46 19-09-2024] Đã đọc file Object.json thành công [0m
+[92m[17:25:46 19-09-2024] Đã đọc file Action.json thành công [0m
+[97m[17:25:46 19-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[17:25:46 19-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[17:25:51 19-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[17:25:51 19-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[17:25:51 19-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[17:25:51 19-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[17:25:51 19-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[17:25:51 19-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[17:25:51 19-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[17:25:51 19-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[17:25:51 19-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[17:25:51 19-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[17:25:51 19-09-2024] ID: 9, Tên: [0m
+[96m[17:25:51 19-09-2024] ID: 10, Tên: [0m
+[96m[17:25:51 19-09-2024] ID: 11, Tên: [0m
+[96m[17:25:51 19-09-2024] ID: 12, Tên: [0m
+[96m[17:25:51 19-09-2024] ID: 13, Tên: [0m
+[96m[17:25:51 19-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[18:15:09 19-09-2024] Đã đọc file Config.json thành công [0m
+[92m[18:15:09 19-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[18:15:09 19-09-2024] Đã đọc file Object.json thành công [0m
+[92m[18:15:09 19-09-2024] Đã đọc file Action.json thành công [0m
+[97m[18:15:09 19-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[18:15:09 19-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[18:15:14 19-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[18:15:14 19-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[18:15:14 19-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[18:15:14 19-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[18:15:14 19-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[18:15:14 19-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[18:15:14 19-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[18:15:14 19-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[18:15:14 19-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[18:15:14 19-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[18:15:14 19-09-2024] ID: 9, Tên: [0m
+[96m[18:15:14 19-09-2024] ID: 10, Tên: [0m
+[96m[18:15:14 19-09-2024] ID: 11, Tên: [0m
+[96m[18:15:14 19-09-2024] ID: 12, Tên: [0m
+[96m[18:15:14 19-09-2024] ID: 13, Tên: [0m
+[96m[18:15:14 19-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[18:24:37 19-09-2024] Đã đọc file Config.json thành công [0m
+[92m[18:24:37 19-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[18:24:37 19-09-2024] Đã đọc file Object.json thành công [0m
+[92m[18:24:37 19-09-2024] Đã đọc file Action.json thành công [0m
+[97m[18:24:38 19-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[18:24:38 19-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[18:25:11 19-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[18:25:11 19-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[18:25:11 19-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[18:25:11 19-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[18:25:11 19-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[18:25:11 19-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[18:25:11 19-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[18:25:11 19-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[18:25:11 19-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[18:25:11 19-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[18:25:11 19-09-2024] ID: 9, Tên: [0m
+[96m[18:25:11 19-09-2024] ID: 10, Tên: [0m
+[96m[18:25:11 19-09-2024] ID: 11, Tên: [0m
+[96m[18:25:11 19-09-2024] ID: 12, Tên: [0m
+[96m[18:25:11 19-09-2024] ID: 13, Tên: [0m
+[96m[18:25:11 19-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:37:04 19-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:37:04 19-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:37:04 19-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:37:04 19-09-2024] Đã đọc file Action.json thành công [0m
+[97m[21:37:04 19-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[21:37:04 19-09-2024] Đang Khởi động Chương Trình...[0m
+[95m[21:37:08 19-09-2024] Danh Sách các thiết bị Micro:[0m
+[96m[21:37:09 19-09-2024] ID: 0, Tên: Discard all samples (playback) or generate zero samples (capture)[0m
+[96m[21:37:09 19-09-2024] ID: 1, Tên: Rate Converter Plugin Using Libav/FFmpeg Library[0m
+[96m[21:37:09 19-09-2024] ID: 2, Tên: Rate Converter Plugin Using Samplerate Library[0m
+[96m[21:37:09 19-09-2024] ID: 3, Tên: Rate Converter Plugin Using Speex Resampler[0m
+[96m[21:37:09 19-09-2024] ID: 4, Tên: JACK Audio Connection Kit[0m
+[96m[21:37:09 19-09-2024] ID: 5, Tên: Open Sound System[0m
+[96m[21:37:09 19-09-2024] ID: 6, Tên: PulseAudio Sound Server[0m
+[96m[21:37:09 19-09-2024] ID: 7, Tên: Plugin for channel upmix (4,6,8)[0m
+[96m[21:37:09 19-09-2024] ID: 8, Tên: Plugin for channel downmix (stereo) with a simple spacialization[0m
+[96m[21:37:09 19-09-2024] ID: 9, Tên: [0m
+[96m[21:37:09 19-09-2024] ID: 10, Tên: [0m
+[96m[21:37:09 19-09-2024] ID: 11, Tên: [0m
+[96m[21:37:09 19-09-2024] ID: 12, Tên: [0m
+[96m[21:37:09 19-09-2024] ID: 13, Tên: [0m
+[96m[21:37:09 19-09-2024] ID: 14, Tên: wm8960-soundcard, bcm2835-i2s-wm8960-hifi wm8960-hifi-0[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:40:12 19-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:40:12 19-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:40:12 19-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:40:12 19-09-2024] Đã đọc file Action.json thành công [0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:32:13 20-09-2024] Đã đọc file Config.json thành công [0m
+[92m[20:32:13 20-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:32:13 20-09-2024] Đã đọc file Object.json thành công [0m
+[92m[20:32:13 20-09-2024] Đã đọc file Action.json thành công [0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:59:00 20-09-2024] Đã đọc file Config.json thành công [0m
+[92m[20:59:00 20-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:59:00 20-09-2024] Đã đọc file Object.json thành công [0m
+[92m[20:59:00 20-09-2024] Đã đọc file Action.json thành công [0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[19:12:33 22-09-2024] Đã đọc file Config.json thành công [0m
+[92m[19:12:33 22-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[19:12:33 22-09-2024] Đã đọc file Object.json thành công [0m
+[92m[19:12:33 22-09-2024] Đã đọc file Action.json thành công [0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:08:41 24-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:08:41 24-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:08:41 24-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:08:41 24-09-2024] Đã đọc file Action.json thành công [0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:28:46 24-09-2024] Đã đọc file Config.json thành công [0m
+[92m[23:28:46 24-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:28:46 24-09-2024] Đã đọc file Object.json thành công [0m
+[92m[23:28:46 24-09-2024] Đã đọc file Action.json thành công [0m
+[92m[23:28:46 24-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[23:28:51 24-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[22:17:37 25-09-2024] Đã đọc file Config.json thành công [0m
+[92m[22:17:37 25-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[22:17:37 25-09-2024] Đã đọc file Object.json thành công [0m
+[92m[22:17:37 25-09-2024] Đã đọc file Action.json thành công [0m
+[92m[22:17:37 25-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[22:17:42 25-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[15:54:22 29-09-2024] Đã đọc file Config.json thành công [0m
+[92m[15:54:22 29-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[15:54:22 29-09-2024] Đã đọc file Object.json thành công [0m
+[92m[15:54:22 29-09-2024] Đã đọc file Action.json thành công [0m
+[91m[15:54:22 29-09-2024] Không tìm thấy thiết bị I2C nào phù hợp với màn hình OLED.[0m
+[92m[15:54:22 29-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[15:54:32 29-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:33:37 29-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:33:37 29-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:33:37 29-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:33:37 29-09-2024] Đã đọc file Action.json thành công [0m
+[92m[21:33:37 29-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[21:33:57 29-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:50:15 29-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:50:15 29-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:50:15 29-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:50:15 29-09-2024] Đã đọc file Action.json thành công [0m
+[92m[21:50:15 29-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[21:50:22 29-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:55:57 29-09-2024] Đã đọc file Config.json thành công [0m
+[92m[21:55:57 29-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:55:57 29-09-2024] Đã đọc file Object.json thành công [0m
+[92m[21:55:57 29-09-2024] Đã đọc file Action.json thành công [0m
+[92m[21:55:57 29-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[21:56:04 29-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:41:36 29-09-2024] Đã đọc file Config.json thành công [0m
+[92m[23:41:36 29-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:41:36 29-09-2024] Đã đọc file Object.json thành công [0m
+[92m[23:41:36 29-09-2024] Đã đọc file Action.json thành công [0m
+[92m[23:41:36 29-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[23:41:42 29-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:11:42 30-09-2024] Đã đọc file Config.json thành công [0m
+[92m[07:11:42 30-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[07:11:42 30-09-2024] Đã đọc file Object.json thành công [0m
+[92m[07:11:42 30-09-2024] Đã đọc file Action.json thành công [0m
+[92m[07:11:43 30-09-2024] ĐANG KHỞI CHẠY CHƯƠNG TRÌNH, VUI LÒNG ĐỢI....[0m
+[91m[07:11:47 30-09-2024] Logs hệ thống đang được tắt[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:53:19 30-09-2024] Đã đọc file Config.json thành công [0m
+[92m[23:53:19 30-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:53:19 30-09-2024] Đã đọc file Object.json thành công [0m
+[92m[23:53:19 30-09-2024] Đã đọc file Action.json thành công [0m
+[92m[23:53:19 30-09-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[91m[23:53:20 30-09-2024] Trình phát nhạc Media Player không được kích hoạt[0m
+[97m[23:53:20 30-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[23:53:20 30-09-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[93m[23:53:40 30-09-2024] Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:55:00 30-09-2024] Đã đọc file Config.json thành công [0m
+[92m[23:55:00 30-09-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:55:00 30-09-2024] Đã đọc file Object.json thành công [0m
+[92m[23:55:00 30-09-2024] Đã đọc file Action.json thành công [0m
+[92m[23:55:00 30-09-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[91m[23:55:01 30-09-2024] Trình phát nhạc Media Player không được kích hoạt[0m
+[97m[23:55:02 30-09-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[23:55:02 30-09-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[93m[23:55:37 30-09-2024] Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[02:46:05 01-10-2024] Đã đọc file Config.json thành công [0m
+[92m[02:46:05 01-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[02:46:05 01-10-2024] Đã đọc file Object.json thành công [0m
+[92m[02:46:05 01-10-2024] Đã đọc file Action.json thành công [0m
+[92m[02:46:05 01-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[91m[02:46:06 01-10-2024] Trình phát nhạc Media Player không được kích hoạt[0m
+[97m[02:46:06 01-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[02:46:06 01-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[93m[07:48:45 01-10-2024] Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[17:17:43 01-10-2024] Đã đọc file Config.json thành công [0m
+[92m[17:17:43 01-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[17:17:43 01-10-2024] Đã đọc file Object.json thành công [0m
+[92m[17:17:43 01-10-2024] Đã đọc file Action.json thành công [0m
+[92m[17:17:43 01-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[91m[17:17:44 01-10-2024] Trình phát nhạc Media Player không được kích hoạt[0m
+[97m[17:17:45 01-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[17:17:45 01-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[93m[17:18:07 01-10-2024] Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:08:08 02-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:08:08 02-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:08:08 02-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:08:08 02-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:08:08 02-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[91m[21:08:09 02-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:09:22 02-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:09:22 02-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:09:22 02-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:09:22 02-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:09:22 02-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[93m[21:09:23 02-10-2024] - Logs hệ thống đang được hiển thị ở màn hình oled_display[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:10:23 02-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:10:23 02-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:10:23 02-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:10:23 02-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:10:23 02-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[93m[21:10:23 02-10-2024] - Logs hệ thống đang được hiển thị ở màn hình oled_display[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:11:13 02-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:11:13 02-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:11:13 02-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:11:13 02-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:11:13 02-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[93m[21:11:14 02-10-2024] - Logs hệ thống đang được hiển thị ở màn hình oled_display[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:12:43 02-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:12:43 02-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:12:43 02-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:12:43 02-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:12:43 02-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[93m[21:12:44 02-10-2024] - Logs hệ thống đang được hiển thị ở màn hình oled_display[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:17:44 02-10-2024] Đã đọc file Config.json thành công [0m
+[92m[23:17:44 02-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:17:44 02-10-2024] Đã đọc file Object.json thành công [0m
+[92m[23:17:44 02-10-2024] Đã đọc file Action.json thành công [0m
+[92m[23:17:44 02-10-2024] Màn hình OLED SSD1306_128_64 đã được khởi tạo thành công. [0m
+[93m[23:17:45 02-10-2024] - Logs hệ thống đang được hiển thị ở màn hình oled_display[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:05:40 04-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:05:40 04-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:05:40 04-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:05:40 04-10-2024] Đã đọc file Action.json thành công [0m
+[91m[21:05:41 04-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:19:12 04-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:19:12 04-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:19:12 04-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:19:12 04-10-2024] Đã đọc file Action.json thành công [0m
+[91m[21:19:12 04-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:22:03 04-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:22:03 04-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:22:03 04-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:22:03 04-10-2024] Đã đọc file Action.json thành công [0m
+[91m[21:22:03 04-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:40:01 04-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:40:01 04-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:40:01 04-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:40:01 04-10-2024] Đã đọc file Action.json thành công [0m
+[91m[21:40:01 04-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[22:18:33 04-10-2024] Đã đọc file Config.json thành công [0m
+[92m[22:18:33 04-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[22:18:33 04-10-2024] Đã đọc file Object.json thành công [0m
+[92m[22:18:33 04-10-2024] Đã đọc file Action.json thành công [0m
+[91m[22:18:34 04-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[09:07:20 05-10-2024] Đã đọc file Config.json thành công [0m
+[92m[09:07:20 05-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[09:07:20 05-10-2024] Đã đọc file Object.json thành công [0m
+[92m[09:07:20 05-10-2024] Đã đọc file Action.json thành công [0m
+[91m[09:07:20 05-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:45:45 06-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:45:45 06-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:45:45 06-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:45:45 06-10-2024] Đã đọc file Action.json thành công [0m
+[93m[21:45:45 06-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[21:45:45 06-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[21:45:45 06-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[21:45:45 06-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[21:45:45 06-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[21:45:45 06-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[21:45:50 06-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:40:48 08-10-2024] Đã đọc file Config.json thành công [0m
+[92m[23:40:48 08-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:40:48 08-10-2024] Đã đọc file Object.json thành công [0m
+[92m[23:40:48 08-10-2024] Đã đọc file Action.json thành công [0m
+[92m[23:40:48 08-10-2024] Đã đọc file Home_Assistant.json thành công [0m
+[93m[23:40:48 08-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[23:40:48 08-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[23:40:48 08-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[23:40:48 08-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[23:40:48 08-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[23:40:48 08-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[23:41:39 08-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:27:27 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:27:27 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:27:27 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:27:27 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:27:27 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:27:27 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:27:27 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:27:27 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:27:27 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:27:27 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:27:27 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:27:32 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:33:20 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:33:20 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:33:20 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:33:20 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:33:20 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:33:20 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:33:20 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:33:20 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:33:20 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:33:20 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:33:20 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:33:25 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:34:26 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:34:26 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:34:26 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:34:26 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:34:26 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:34:26 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:34:26 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:34:26 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:34:26 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:34:26 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:34:26 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:34:31 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:36:19 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:36:19 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:36:19 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:36:19 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:36:19 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:36:19 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:36:19 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:36:19 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:36:19 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:36:19 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:36:19 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:36:24 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:36:55 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:36:55 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:36:55 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:36:55 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:36:55 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:36:55 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:36:55 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:36:55 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:36:55 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:36:55 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:36:55 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:37:00 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:37:30 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:37:30 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:37:30 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:37:30 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:37:30 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:37:30 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:37:30 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:37:30 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:37:30 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:37:30 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:37:30 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:37:35 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:38:04 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:38:04 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:38:04 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:38:04 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:38:04 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:38:04 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:38:04 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:38:04 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:38:04 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:38:04 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:38:04 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:38:09 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:53:31 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:53:31 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:53:31 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:53:31 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:53:31 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:53:31 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:53:31 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:53:31 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:53:31 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:53:31 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:53:31 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:53:36 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[22:27:11 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[22:27:11 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[22:27:11 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[22:27:11 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[22:27:11 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[22:27:11 09-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:40:29 09-10-2024] Đã đọc file Config.json thành công [0m
+[92m[23:40:29 09-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:40:29 09-10-2024] Đã đọc file Object.json thành công [0m
+[92m[23:40:29 09-10-2024] Đã đọc file Action.json thành công [0m
+[92m[23:40:29 09-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[23:40:29 09-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[23:40:29 09-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[23:40:29 09-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[23:40:29 09-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[23:40:29 09-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[23:40:29 09-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[23:40:34 09-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[23:08:57 10-10-2024] Đã đọc file Config.json thành công [0m
+[92m[23:08:57 10-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[23:08:57 10-10-2024] Đã đọc file Object.json thành công [0m
+[92m[23:08:57 10-10-2024] Đã đọc file Action.json thành công [0m
+[92m[23:08:57 10-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[23:08:58 10-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[23:08:58 10-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[23:08:58 10-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[23:08:58 10-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[23:08:58 10-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[23:08:58 10-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[23:08:58 10-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[23:09:11 10-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:12:30 14-10-2024] Đã đọc file Config.json thành công [0m
+[92m[07:12:31 14-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[07:12:31 14-10-2024] Đã đọc file Object.json thành công [0m
+[92m[07:12:31 14-10-2024] Đã đọc file Action.json thành công [0m
+[92m[07:12:31 14-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[07:12:31 14-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[07:12:31 14-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[07:12:31 14-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[07:12:31 14-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[07:12:31 14-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[07:12:31 14-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[07:12:31 14-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[07:13:58 14-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[11:37:24 15-10-2024] Đã đọc file Config.json thành công [0m
+[92m[11:37:24 15-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[11:37:24 15-10-2024] Đã đọc file Object.json thành công [0m
+[92m[11:37:24 15-10-2024] Đã đọc file Action.json thành công [0m
+[92m[11:37:24 15-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[11:37:24 15-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[11:37:24 15-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[11:37:24 15-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[11:37:24 15-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[11:37:24 15-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[11:37:24 15-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[11:37:24 15-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[11:37:29 15-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[11:50:04 15-10-2024] Đã đọc file Config.json thành công [0m
+[92m[11:50:04 15-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[11:50:04 15-10-2024] Đã đọc file Object.json thành công [0m
+[92m[11:50:04 15-10-2024] Đã đọc file Action.json thành công [0m
+[92m[11:50:04 15-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[11:50:05 15-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[11:50:05 15-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[11:50:05 15-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[11:50:05 15-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[11:50:05 15-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[11:50:05 15-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[11:50:05 15-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[11:50:09 15-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:17:46 16-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:17:46 16-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:17:46 16-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:17:47 16-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:17:47 16-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:17:47 16-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[20:17:47 16-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[20:17:47 16-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[20:17:47 16-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:17:47 16-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:17:47 16-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:17:47 16-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:18:40 16-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[22:46:14 17-10-2024] Đã đọc file Config.json thành công [0m
+[92m[22:46:14 17-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[22:46:14 17-10-2024] Đã đọc file Object.json thành công [0m
+[92m[22:46:14 17-10-2024] Đã đọc file Action.json thành công [0m
+[92m[22:46:14 17-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[22:46:14 17-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[22:46:14 17-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[22:46:14 17-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[22:46:14 17-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[22:46:14 17-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[22:46:14 17-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[22:46:14 17-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[22:50:31 17-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:21:59 18-10-2024] Đã đọc file Config.json thành công [0m
+[92m[07:21:59 18-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[07:21:59 18-10-2024] Đã đọc file Object.json thành công [0m
+[92m[07:21:59 18-10-2024] Đã đọc file Action.json thành công [0m
+[92m[07:21:59 18-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[07:21:59 18-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[07:21:59 18-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[07:21:59 18-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[07:21:59 18-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[07:21:59 18-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[07:21:59 18-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[07:21:59 18-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[07:35:06 18-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:42:57 18-10-2024] Đã đọc file Config.json thành công [0m
+[92m[07:42:57 18-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[07:42:57 18-10-2024] Đã đọc file Object.json thành công [0m
+[92m[07:42:57 18-10-2024] Đã đọc file Action.json thành công [0m
+[92m[07:42:57 18-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[07:42:57 18-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[07:42:57 18-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[07:42:57 18-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[07:42:57 18-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[07:42:57 18-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[07:42:57 18-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[07:42:57 18-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[07:43:04 18-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:45:39 18-10-2024] Đã đọc file Config.json thành công [0m
+[92m[07:45:39 18-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[07:45:39 18-10-2024] Đã đọc file Object.json thành công [0m
+[92m[07:45:39 18-10-2024] Đã đọc file Action.json thành công [0m
+[92m[07:45:39 18-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[07:45:39 18-10-2024] - Logs hệ thống đang được hiển thị ở tất cả các luồng hiện có[0m
+[91m[07:45:39 18-10-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[92m[07:45:39 18-10-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[92m[07:45:39 18-10-2024] - Home Asistant Custom Command được kích hoạt khi khởi chạy chương trình[0m
+[91m[07:45:39 18-10-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[07:45:39 18-10-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[07:45:39 18-10-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[07:45:47 18-10-2024] Đã khởi tạo luồng Api thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:45:47 18-10-2024] Đã khởi tạo Porcupine và PvRecorder thành công.[0m
+[1m[07:45:47 18-10-2024] Nút nhấn 'down' đã được cấu hình thành công cho: GPIO25[0m
+[1m[07:45:47 18-10-2024] Nút nhấn 'up' đã được cấu hình thành công cho: GPIO5[0m
+[1m[07:45:47 18-10-2024] Nút nhấn 'wakeup' đã được cấu hình thành công cho: GPIO26[0m
+[1m[07:45:47 18-10-2024] Nút nhấn 'mic' đã được cấu hình thành công cho: GPIO6[0m
+[92m[07:45:53 18-10-2024] KHỞI CHẠY TRƯƠNG TRÌNH VBot THÀNH CÔNG[0m
+[92m[07:45:54 18-10-2024] Đang chờ được đánh thức[0m
+[92m[15:53:57 18-10-2024] Đã được đánh thức.[0m
+[95m[15:53:58 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:54:01 18-10-2024] [HUMAN] tắt đèn[0m
+[91m[15:54:02 18-10-2024] [BOT] Đèn Ngủ đã tắt sẵn[0m
+[92m[15:54:06 18-10-2024] Đã được đánh thức.[0m
+[95m[15:54:07 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:54:10 18-10-2024] [HUMAN] tắt đèn phòng ngủ[0m
+[92m[15:54:10 18-10-2024] [BOT] Đã tắt Đèn Phòng Ngủ thành công[0m
+[92m[15:54:13 18-10-2024] Đã được đánh thức.[0m
+[95m[15:54:14 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:54:17 18-10-2024] [HUMAN] bật đèn phòng ngủ[0m
+[92m[15:54:18 18-10-2024] [BOT] Đã bật Đèn Phòng Ngủ thành công[0m
+[92m[15:54:21 18-10-2024] Đã được đánh thức.[0m
+[95m[15:54:22 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:54:24 18-10-2024] [HUMAN] bật máy tính[0m
+[92m[15:54:26 18-10-2024] [BOT] Đã bật Máy Tính thành công[0m
+[92m[15:54:28 18-10-2024] Đã được đánh thức.[0m
+[95m[15:54:30 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[15:54:32 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[15:54:33 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[15:58:17 18-10-2024] Đã được đánh thức.[0m
+[95m[15:58:18 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[15:58:22 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[15:58:23 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[15:58:32 18-10-2024] Đã được đánh thức.[0m
+[95m[15:58:33 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:58:37 18-10-2024] [HUMAN] bật[0m
+[91m[15:58:37 18-10-2024] Lỗi xảy ra khi tìm kiếm thiết bị trong Home Assistant[0m
+[91m[15:58:37 18-10-2024] Không tìm thấy thiết bị trong Home Assitant phù hợp với: '', hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập. Cần kiểm tra Logs để biết chính xác hơn[0m
+[92m[15:58:46 18-10-2024] Đã được đánh thức.[0m
+[95m[15:58:48 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:58:50 18-10-2024] [HUMAN] bật quạt phòng ngủ[0m
+[92m[15:58:50 18-10-2024] [BOT] Đã bật Quạt Phòng Ngủ thành công[0m
+[92m[15:58:53 18-10-2024] Đã được đánh thức.[0m
+[95m[15:58:55 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:58:57 18-10-2024] [HUMAN] tắt[0m
+[91m[15:58:57 18-10-2024] Lỗi xảy ra khi tìm kiếm thiết bị trong Home Assistant[0m
+[91m[15:58:57 18-10-2024] Không tìm thấy thiết bị trong Home Assitant phù hợp với: '', hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập. Cần kiểm tra Logs để biết chính xác hơn[0m
+[92m[15:59:06 18-10-2024] Đã được đánh thức.[0m
+[95m[15:59:07 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[15:59:10 18-10-2024] [HUMAN] bật quạt phòng ngủ[0m
+[92m[15:59:11 18-10-2024] [BOT] Đã bật Quạt Phòng Ngủ thành công[0m
+[92m[15:59:13 18-10-2024] Đã được đánh thức.[0m
+[95m[15:59:15 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[15:59:17 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[15:59:17 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[18:01:56 18-10-2024] Đã được đánh thức.[0m
+[95m[18:01:58 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[18:02:04 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[18:02:04 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[18:27:33 18-10-2024] Đã được đánh thức.[0m
+[95m[18:27:35 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[18:27:41 18-10-2024] [HUMAN] nhắn tin hỏi thăm vớ vẩn như kiểu bán hàng[0m
+[94m[18:27:41 18-10-2024] Đang gọi trợ lý ảo: Default Assistant[0m
+[93m[18:27:42 18-10-2024] Token PodCast đã được làm mới và lưu vào Config.json thành công.[0m
+[92m[18:27:53 18-10-2024] [BOT]: dữ liệu âm thanh TTS_Audio/default_assistant_nhan_tin_hoi_tham_vo_van_nhu_kieu_ban_hang.ogg[0m
+[92m[18:28:12 18-10-2024] Đã được đánh thức.[0m
+[95m[18:28:13 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[18:28:18 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[18:28:19 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[18:28:43 18-10-2024] Đã được đánh thức.[0m
+[95m[18:28:44 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[18:28:50 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[18:28:51 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[20:45:37 18-10-2024] Đã được đánh thức.[0m
+[95m[20:45:38 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:45:41 18-10-2024] [HUMAN] tắt đèn phòng khách[0m
+[92m[20:45:42 18-10-2024] [BOT] Đã tắt Đèn Phòng Khách 1 thành công[0m
+[92m[20:45:46 18-10-2024] Đã được đánh thức.[0m
+[95m[20:45:47 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:45:49 18-10-2024] [HUMAN] tắt quạt trần phòng khách[0m
+[92m[20:45:50 18-10-2024] [BOT] Đã tắt Quạt Trần Phòng Khách thành công[0m
+[92m[20:45:53 18-10-2024] Đã được đánh thức.[0m
+[95m[20:45:54 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:45:57 18-10-2024] [HUMAN] tắt quạt trần[0m
+[91m[20:45:57 18-10-2024] [BOT] Quạt Trần Bếp đã tắt sẵn[0m
+[92m[20:46:00 18-10-2024] Đã được đánh thức.[0m
+[95m[20:46:01 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:46:04 18-10-2024] [HUMAN] tắt đèn[0m
+[91m[20:46:04 18-10-2024] [BOT] Đèn Ngủ đã tắt sẵn[0m
+[92m[20:46:07 18-10-2024] Đã được đánh thức.[0m
+[95m[20:46:08 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:46:10 18-10-2024] [HUMAN] tắt đèn[0m
+[91m[20:46:11 18-10-2024] [BOT] Đèn Ngủ đã tắt sẵn[0m
+[92m[20:46:13 18-10-2024] Đã được đánh thức.[0m
+[95m[20:46:14 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[20:46:16 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[20:46:17 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[20:56:29 18-10-2024] Đã được đánh thức.[0m
+[95m[20:56:31 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:56:33 18-10-2024] [HUMAN] tắt máy[0m
+[91m[20:56:34 18-10-2024] Chỉ số tương đồng chưa đạt ngưỡng, thiết bị: "switch.wol_pc_tuyen", có tên là "Máy Tính", với chỉ số "0.5454545454545454", cần tối thiếu: 0.6[0m
+[91m[20:56:34 18-10-2024] Không tìm thấy thiết bị trong Home Assitant phù hợp với: 'máy', hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập. Cần kiểm tra Logs để biết chính xác hơn[0m
+[92m[20:56:43 18-10-2024] Đã được đánh thức.[0m
+[95m[20:56:44 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[20:56:46 18-10-2024] Không có giọng nói được truyền vào[0m
+[94m[20:56:47 18-10-2024] Đang chờ được đánh thức.[0m
+[92m[20:58:02 18-10-2024] Đã được đánh thức.[0m
+[95m[20:58:03 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:58:06 18-10-2024] [HUMAN] tăng âm lượng[0m
+[95m[20:58:06 18-10-2024] Âm lượng Tăng tới: 43%[0m
+[92m[20:58:08 18-10-2024] Đã được đánh thức.[0m
+[95m[20:58:09 18-10-2024] [BOT] Đang thu âm...[0m
+[92m[20:58:12 18-10-2024] [HUMAN] tăng âm lượng[0m
+[95m[20:58:12 18-10-2024] Âm lượng Tăng tới: 53%[0m
+[92m[20:58:14 18-10-2024] Đã được đánh thức.[0m
+[95m[20:58:15 18-10-2024] [BOT] Đang thu âm...[0m
+[95m[20:58:17 18-10-2024] Không có giọng nói được truyền vào[0m[92m[15:08:28 19-10-2024] Đã đọc file Config.json thành công [0m
+[92m[15:08:28 19-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[15:08:28 19-10-2024] Đã đọc file Object.json thành công [0m
+[92m[15:08:28 19-10-2024] Đã đọc file Action.json thành công [0m
+[92m[15:08:28 19-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[15:08:28 19-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[15:31:41 19-10-2024] Đã đọc file Config.json thành công [0m
+[92m[15:31:41 19-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[15:31:41 19-10-2024] Đã đọc file Object.json thành công [0m
+[92m[15:31:41 19-10-2024] Đã đọc file Action.json thành công [0m
+[92m[15:31:41 19-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[15:31:41 19-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[09:17:12 20-10-2024] Đã đọc file Config.json thành công [0m
+[92m[09:17:12 20-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[09:17:12 20-10-2024] Đã đọc file Object.json thành công [0m
+[92m[09:17:12 20-10-2024] Đã đọc file Action.json thành công [0m
+[92m[09:17:12 20-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[09:17:12 20-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:35:16 20-10-2024] Đã đọc file Config.json thành công [0m
+[92m[20:35:16 20-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:35:16 20-10-2024] Đã đọc file Object.json thành công [0m
+[92m[20:35:16 20-10-2024] Đã đọc file Action.json thành công [0m
+[92m[20:35:16 20-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[20:35:16 20-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:33:40 20-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:33:40 20-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:33:40 20-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:33:40 20-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:33:40 20-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[21:33:40 20-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[21:54:35 20-10-2024] Đã đọc file Config.json thành công [0m
+[92m[21:54:35 20-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[21:54:35 20-10-2024] Đã đọc file Object.json thành công [0m
+[92m[21:54:35 20-10-2024] Đã đọc file Action.json thành công [0m
+[92m[21:54:35 20-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[21:54:35 20-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[19:50:18 25-10-2024] Đã đọc file Config.json thành công [0m
+[92m[19:50:18 25-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[19:50:18 25-10-2024] Đã đọc file Object.json thành công [0m
+[92m[19:50:18 25-10-2024] Đã đọc file Action.json thành công [0m
+[92m[19:50:18 25-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[19:50:18 25-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[19:50:32 25-10-2024] KHỞI CHẠY TRƯƠNG TRÌNH VBot THÀNH CÔNG[0m
+[92m[09:17:38 26-10-2024] Đã đọc file Config.json thành công [0m
+[92m[09:17:38 26-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[09:17:38 26-10-2024] Đã đọc file Object.json thành công [0m
+[92m[09:17:38 26-10-2024] Đã đọc file Action.json thành công [0m
+[92m[09:17:38 26-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[09:17:38 26-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[15:14:34 26-10-2024] Đã đọc file Config.json thành công [0m
+[92m[15:14:34 26-10-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[15:14:34 26-10-2024] Đã đọc file Object.json thành công [0m
+[92m[15:14:34 26-10-2024] Đã đọc file Action.json thành công [0m
+[92m[15:14:34 26-10-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[15:14:34 26-10-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off

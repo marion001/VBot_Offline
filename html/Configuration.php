@@ -2,7 +2,12 @@
 #Code By: Vũ Tuyển
 #Designed by: BootstrapMade
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
-ini_set('memory_limit', '512M');
+
+#tăng giới hạn bộ nhớ cho PHP
+//ini_set('memory_limit', '512M');
+ini_set('memory_limit', '1G');
+ini_set('upload_max_filesize', '300M');
+ini_set('post_max_size', '300M');
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -28,11 +33,15 @@ $VBot_Offline = "/home/pi/VBot_Offline/";
 // Đường dẫn đến tệp JSON
 $Config_filePath = $VBot_Offline.'Config.json';
 
+
 // Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
 $excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt'];
 
 // Đọc và giải mã dữ liệu JSON
 $Config = null; // Khởi tạo biến để lưu dữ liệu
+
+// Khởi tạo biến để lưu dữ liệu
+#$Version_VBot_Program = null; 
 
 //biến lưu trữ thông báo php
 $messages = [];
@@ -61,6 +70,7 @@ $Path = $_SERVER['REQUEST_URI'];
 $Current_URL = $Protocol . $Domain . $Path;
 
 
+
 #Đọc nội dung file Config
 if (file_exists($Config_filePath)) {
     #$jsonString = file_get_contents($Config_filePath);
@@ -75,19 +85,33 @@ if (file_exists($Config_filePath)) {
     $Config = null; // Đặt dữ liệu thành null nếu tệp không tồn tại
 }
 
+
+
 $stt_token_google_cloud = $VBot_Offline.$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file'];
 $tts_token_google_cloud = $VBot_Offline.$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['authentication_json_file'];
 $Backlist_File_Name = $VBot_Offline.$Config['smart_config']['backlist_file_name'];
 
+#ĐƯờng dẫn lưu file backup Vbot
+$Backup_Dir_Save_VBot = $Config['backup_upgrade']['vbot_program']['backup']['backup_path'];
 
+#Đường dẫn lưu file backup Web UI
+$Backup_Dir_Save_Web = $Config['backup_upgrade']['web_interface']['backup']['backup_path'];
+
+$Download_Path = $Config['backup_upgrade']['download_path'];
+
+$Extract_Path = $Config['backup_upgrade']['extract_path'];
 
 //Thông tin kết nối SSH
 #sudo apt-get install php-ssh2
-$ssh_host = $Config['ssh_server']['ssh_host'];
+#$ssh_host = $Config['ssh_server']['ssh_host'];
+$ssh_host = $serverIp;
 $ssh_port = $Config['ssh_server']['ssh_port'];
 $ssh_user = $Config['ssh_server']['ssh_username'];
 $ssh_password = $Config['ssh_server']['ssh_password'];
 
+
+//Kiểm tra xem google cloud backup có được bật hay không:
+$google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['active'];
 
 //Cổng port của đường API
 $Port_API = $Config['api']['port'];

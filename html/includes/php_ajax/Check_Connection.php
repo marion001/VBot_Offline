@@ -62,6 +62,34 @@ if (isset($_GET['check_ssh'])) {
 }
 
 
+if (isset($_GET['restart_vbot_service'])) {
+    $CMD = "systemctl --user restart VBot_Offline.service";
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    // Khởi tạo biến để lưu kết quả
+    $result = [
+        'success' => false,
+        'message' => ''
+    ];
+    if ($connection) {
+        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+            $stream = ssh2_exec($connection, $CMD);
+            stream_set_blocking($stream, true);
+            $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+            
+            // Nếu lệnh thành công
+                $result['success'] = true;
+                $result['message'] = 'Dịch vụ VBot đã được khởi động lại thành công.';
+        } else {
+            $result['message'] = 'Xác thực SSH không thành công.';
+        }
+    } else {
+        $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
+    }
+    echo json_encode($result);
+    exit; 
+}
+
+
 
 if (isset($_GET['check_hass']))
 {
@@ -120,6 +148,125 @@ if (isset($_GET['check_hass']))
     }
     exit();
 }
+
+
+if (isset($_GET['get_hass_all']))
+{
+    // Lấy URL và token từ GET dữ liệu
+    $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
+    $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
+    // Kiểm tra nếu URL không rỗng
+    if (!empty($url))
+    {
+        // Khởi tạo cURL
+        $ch = curl_init($url . '/api/states');
+        // Cấu hình cURL
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token, 'Content-Type: application/json']);
+        // Thực hiện cURL
+        $response = curl_exec($ch);
+        // Kiểm tra lỗi cURL
+        if (curl_errno($ch))
+        {
+            $curlError = curl_error($ch);
+            // Kiểm tra lỗi kết nối cụ thể
+            if (strpos($curlError, 'Failed to connect') !== false)
+            {
+                $message = 'Không thể kết nối, Kiểm tra lại URL: ' . $curlError;
+            }
+            else
+            {
+                $message = 'Xảy ra lỗi khi tiến hành kiểm tra: ' . $curlError;
+            }
+            echo json_encode(['success' => false, 'message' => $message]);
+        }
+        else
+        {
+            // Kiểm tra mã trạng thái HTTP
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            if ($httpCode >= 200 && $httpCode < 300)
+            {
+                echo json_encode(['success' => true, 'message' => 'Kết nối thành công', 'response' => json_decode($response) ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+				$filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
+	// Kiểm tra nếu file không tồn tại
+if (!file_exists($filePath_HASS)) {
+    // Tạo file rỗng nếu không tồn tại
+    file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    // Chmod 0777 cho file
+    chmod($filePath_HASS, 0777);
+}
+
+				// Cập nhật dữ liệu vào 'get_hass_all'
+				$existingData['get_hass_all'] = json_decode($response); // Gán dữ liệu từ $response
+				// Chuyển đổi dữ liệu thành JSON
+				$jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+				// Lưu dữ liệu vào file Home_Assistant.json
+				file_put_contents($filePath_HASS, $jsonData);
+			}
+            else if ($httpCode = 401 && $httpCode = 200)
+            {
+                echo json_encode(['success' => false, 'message' => 'Kết nối thất bại, Mã token không đúng', 'response' => json_decode($response) ]);
+            }
+            else
+            {
+                echo json_encode(['success' => false, 'response' => json_decode($response) , 'message' => 'HTTP Error: ' . $httpCode]);
+            }
+        }
+        // Đóng cURL
+        curl_close($ch);
+    }
+    else
+    {
+        echo json_encode(['success' => false, 'message' => 'URL không hợp lệ']);
+    }
+    exit();
+}
+
+
+if (isset($_GET['del_get_hass_all'])) {
+
+$response = [
+    'success' => false,
+    'message' => 'Đã có lỗi xảy ra.'
+];
+    $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
+    
+    // Kiểm tra nếu file không tồn tại
+    if (!file_exists($filePath_HASS)) {
+        // Tạo file rỗng nếu không tồn tại
+        file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT));
+        chmod($filePath_HASS, 0777);
+    }
+    
+    // Đọc dữ liệu hiện tại từ file
+    $existingData = json_decode(file_get_contents($filePath_HASS), true);
+    if ($existingData === null) {
+        // Nếu dữ liệu hiện tại không đọc được, khởi tạo mảng rỗng
+        $existingData = [];
+    }
+
+    // Xóa dữ liệu get_hass_all
+    $existingData['get_hass_all'] = [];
+
+    // Chuyển đổi dữ liệu thành JSON
+    $jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    
+    // Kiểm tra nếu json_encode thành công
+    if ($jsonData !== false) {
+        // Lưu dữ liệu vào file Home_Assistant.json
+        if (file_put_contents($filePath_HASS, $jsonData)) {
+            $response['success'] = true;
+            $response['message'] = 'Dữ Liệu Đồng Bộ trước đó đã được xóa thành công.';
+        } else {
+            $response['message'] = 'Lỗi: Không thể lưu dữ liệu rỗng vào file.';
+        }
+    } else {
+        $response['message'] = 'Lỗi: Không thể chuyển đổi dữ liệu thành JSON.';
+    }
+	// Trả về phản hồi dưới dạng JSON
+echo json_encode($response);
+}
+
 
 
 if (isset($_GET['check_key_picovoice'])) {

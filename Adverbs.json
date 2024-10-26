@@ -25,6 +25,8 @@
 		"phát",
 		"nhạc",
 		"bài",
+		"mở",
+		"bật",
 		"hát"
 	],
 	"increase": [
@@ -56,6 +58,18 @@
 	],
 	"high": [
 		"cao"
+	],
+	"song": [
+		"bài"
+	],
+	"sing": [
+		"hát"
+	],
+	"open": [
+		"mở"
+	],
+	"close": [
+		"đóng"
 	]
 	
 }

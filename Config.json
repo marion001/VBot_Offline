@@ -1,29 +1,28 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "zxcvbnm@gmail.com",
+        "email": "fdsfdsfdsf@gmail.com",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": null,
-            "district": null,
-            "province": null,
+            "wards": "vhjtr gfd",
+            "district": "ferwe gfdg",
+            "province": "Hưng Yên",
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": null,
-            "longitude": null
+            "latitude": 28.5532336,
+            "longitude": 116.0633238
         },
         "user_login": {
             "active": false,
-            "user_password": "123456789",
-            "notes": "Mật khẩu dùng cho đăng nhập web ui"
+            "user_password": "123456"
         }
     },
     "ssh_server": {
-        "ssh_host": "192.168.14.113",
         "ssh_port": 22,
         "ssh_username": "pi",
-        "ssh_password": "vietbot"
+        "ssh_password": "vietbot",
+        "notes": "bắt buộc phải điền cấu hình thông tin đăng nhập ssh"
     },
     "api": {
         "active": true,
@@ -33,12 +32,30 @@
         },
         "port": 5002
     },
+    "display_screen": {
+        "active": false,
+        "connection_type": "lcd_i2c",
+        "text_display_center": "VBot Assistant",
+        "lcd_i2c": {
+            "screen_type": "SSD1306_128_64",
+            "font_ttf": "resource/screen_disp/font/Chonburi_Regular.ttf",
+            "font_size": 10
+        },
+        "lcd_spi": {
+            "screen_type": "SSD1306_128_64"
+        }
+    },
     "home_assistant": {
+        "active": true,
         "minimum_threshold": 0.6,
-        "time_out": 15,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://domainhass.duckdns.org",
-        "long_token": "gdfgregreR5cCI6IkpXVCJ9..rAgP-"
+        "external_url": "https://vfsfcsdcfe.duckdns.org",
+        "long_token": "dsadsadsad.dsadsadsad.rAgP-6435b345g43",
+        "time_out": 15,
+        "custom_commands": {
+            "active": false,
+            "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
+        }
     },
     "virtual_assistant": {
         "prioritize_virtual_assistants": [
@@ -47,27 +64,32 @@
             "chat_gpt"
         ],
         "default_assistant": {
+            "active": true,
             "time_out": 10,
             "convert_audio_to_text": {
                 "used_for_chatbox": true,
                 "used_for_display_and_logs": false
             },
-            "api_key": "dùng chung với giá trị podcast->access_token, không cần thay đổi gì ở đây"
+            "api_key": "dùng chung với giá trị podcast->access_token"
         },
         "google_gemini": {
+            "active": true,
             "time_out": 25,
-            "api_key": "fdsfdsfdsfvsdfdsvr3rewf"
+            "api_key": "888888888888888888888888888"
         },
         "chat_gpt": {
+            "active": false,
             "time_out": 15,
             "key_chat_gpt": ""
         }
     },
     "openweathermap": {
-        "key_openweathermap": "53453453f53f534f5345f3"
+        "key_openweathermap": "888888888888888888888888888"
     },
     "media_player": {
+        "active": true,
         "time_out": 30,
+        "wake_up_in_media_player": false,
         "media_sync_ui": {
             "active": true,
             "delay_time": 2
@@ -78,18 +100,24 @@
             "youtube"
         ],
         "youtube": {
+            "active": true,
             "google_apis_key": "AIzaSyAuWeVnyM3ijao5XPD62zrMXuBj0JgLYAw"
         },
         "zing_mp3": {
-            "authentication_zmp3_rqid": "MHwxMTYdUngMTAxLjIyNC41Nnx2MS4xMC40N3wxNzI2MzA2NjM2ODmUsIC1",
-            "expire_time": 1726310236
+            "active": true,
+            "authentication_zmp3_rqid": "MHwxMTYdUngMTAxLjIyNy4yM3x2MS4xMS4yfDE3MjkzMjYxOTM0NjA",
+            "expire_time": 1729329793
         },
         "podcast": {
+            "active": true,
             "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
             "password": "VmlldGJvdEAx",
             "time_out": 7,
-            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MjYyODcwOTksIm5iZiI6MTcyNjI4NzA5OSwianRpIjoiNTYzNWQyNmYtMDVmYy00NjFiLTg0ODUtMTM4NGM4Y2I4N2JkIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.vBzqqndokOG04rwRaAwvWKF-Z754q_QgdtbyCbLRGw0",
-            "expire_time": 1726351899
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mjk2ODgxNTEsIm5iZiI6MTcyOTY4ODE1MSwianRpIjoiNTIxYzNmMTQtNjVhYy00ODVlLWJmNGMtOGI1M2I1NzgzNWU3IiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.hPteK1n1Ps7GpMUrt-WtxWkRbHp-I7VbMxB0fwO0b1g",
+            "expire_time": 1729752951
+        },
+        "radio": {
+            "active": true
         },
         "radio_data": [
             {
@@ -102,6 +130,7 @@
             }
         ],
         "music_local": {
+            "active": true,
             "path": "Media/Music_Local",
             "minimum_threshold": 0.6,
             "allowed_formats": [
@@ -111,6 +140,13 @@
             ]
         }
     },
+    "developer_customization": {
+        "active": false,
+        "if_custom_skill_can_not_handle": {
+            "vbot_processing": false
+        },
+        "notes": "Chế độ Custom Skill, tùy chỉnh cho các bạn dev, lập trình viện tự code"
+    },
     "smart_config": {
         "backlist_file_name": "BackList.json",
         "read_information_startup": {
@@ -119,17 +155,19 @@
         },
         "show_log": {
             "active": true,
-            "log_display_style": "both"
+            "log_display_style": "all",
+            "notes": "display_screen, console, all, api"
         },
         "mic": {
-            "id": 14
+            "id": 14,
+            "scan_on_boot": false
         },
         "speaker": {
             "system": {
                 "alsamixer_name": "Speaker",
                 "id": 0
             },
-            "volume": 60,
+            "volume": 77,
             "volume_min": 0,
             "volume_max": 95,
             "volume_step": 10
@@ -141,56 +179,61 @@
             "number_led": 12,
             "brightness": 255,
             "led_invert": false,
+            "led_starting_up": true,
             "effect": {
                 "led_think": "0000FF",
                 "led_mute": "FF0000"
             }
         },
+        "button_active": {
+            "active": true,
+            "notes": "true hoặc false để Bật hoặc Tắt sử dụng nút nhấn"
+        },
         "button": {
             "down": {
+                "active": true,
                 "gpio": 25,
                 "pulled_high": false,
-                "active": true,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             },
             "up": {
+                "active": true,
                 "gpio": 5,
                 "pulled_high": false,
-                "active": true,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             },
             "wakeup": {
+                "active": true,
                 "gpio": 26,
                 "pulled_high": false,
-                "active": true,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             },
             "mic": {
+                "active": true,
                 "gpio": 6,
                 "pulled_high": false,
-                "active": true,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             }
         },
         "smart_wakeup": {
             "speak_to_text": {
-                "stt_select": "stt_default",
+                "stt_select": "stt_ggcloud",
                 "duration_recording": 6,
                 "silence_duration": 3,
                 "min_amplitude_threshold": 370,
@@ -199,7 +242,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "5435fg345f345f34534"
+                        "888888888888888888888888888",
+                        "777777777777777777777777777"
                     ]
                 },
                 "stt_ggcloud": {
@@ -225,7 +269,9 @@
                     "keys_tts_in_backlist": "resource/sound/default/keys_tts_in_backlist.mp3",
                     "tts_select_error": "resource/sound/default/tts_select_error.mp3",
                     "stt_select_error": "resource/sound/default/stt_select_error.mp3",
-                    "all_virtual_assistants_no_response": "resource/sound/default/all_virtual_assistants_no_response.mp3"
+                    "all_virtual_assistants_no_response": "resource/sound/default/all_virtual_assistants_no_response.mp3",
+                    "home_assistant_active_false": "resource/sound/default/home_assistant_active_false.mp3",
+                    "play_music_call_error": "resource/sound/default/play_music_call_error.mp3"
                 },
                 "welcome": {
                     "active": true,
@@ -258,7 +304,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/+TGsdTNolucA=="
+                "key": "888888888888888888888888888"
             },
             "hotword": {
                 "lang": "vi",
@@ -276,12 +322,12 @@
                         {
                             "active": true,
                             "file_name": "e-cu_vn_raspberry-pi_v3_0_0.ppn",
-                            "sensitive": 0.5
+                            "sensitive": 0.7
                         },
                         {
                             "active": true,
                             "file_name": "ê-cu_vn_raspberry-pi_v3_0_0.ppn",
-                            "sensitive": 0.5
+                            "sensitive": 0.7
                         }
                     ],
                     "eng": [
@@ -299,7 +345,7 @@
                 "active": true
             },
             "text_to_speak": {
-                "tts_select": "tts_default",
+                "tts_select": "tts_ggcloud",
                 "tts_ggcloud": {
                     "language_code": "vi-VN",
                     "voice_name": "vi-VN-Wavenet-A",
@@ -313,18 +359,20 @@
                     "authentication_zai_did": "8k9uAj3FNiTevcSSryzXoYYo6Kh1nc7CARqUIJWo",
                     "expires_zai_did": "2025-09-09T09:34:30+00:00",
                     "authentication_zai_sid": "jl-hHjj6LdEl_gb6t498SgtdqHEbBqj9lfRY2wLnPZQNpzC7bIOkEgV3aq-C2Gyiz_gl7lKz9cxRuRCcrZizTS3LtoBIDM8UvupBNFCaVZZPyC9KP0",
-                    "expires_zai_sid": "2025-09-07T08:16:53.866Z"
+                    "expires_zai_sid": ""
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "gfdgdvg4t345"
+                        "888888888888888888888888888",
+                        "888888888888888888888888888",
+                        "888888888888888888888888888"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "gb546b54tvf45t45"
+                        "888888888888888888888888888"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,
@@ -333,10 +381,84 @@
                 "tts_edge": {
                     "notes": "Comback Soon",
                     "voice_name": "vi-VN-HoaiMyNeural",
-                    "speaking_speed": 1
+                    "speaking_speed": 0.9
                 },
                 "directory_tts": "TTS_Audio"
             }
+        }
+    },
+    "backup_upgrade": {
+        "download_path": "Backup_Upgrade/Download",
+        "extract_path": "Backup_Upgrade/Extract",
+        "vbot_program": {
+            "backup": {
+                "backup_path": "Backup_Upgrade/Backup_Program",
+                "limit_backup_files": 5,
+                "exclude_files_folder": [
+                    "TTS_Audio",
+                    "__pycache__",
+                    "Music_Local",
+                    "Build_SO",
+                    ".git"
+                ],
+                "exclude_file_format": [
+                    ".mp4",
+                    ".pyc",
+                    ".tar.gz",
+                    ".git"
+                ],
+                "backup_to_cloud": {
+                    "google_drive": true
+                }
+            },
+            "upgrade": {
+                "keep_file_directory": [
+                    "Config.json",
+                    "Action.json",
+                    "Adverbs.json",
+                    "Object.json",
+                    "BackList.json",
+                    "stt_token_google_cloud.json",
+                    "tts_token_google_cloud.json",
+                    "Home_Assistant.json",
+                    "Home_Assistant_Custom.json",
+                    "hotword",
+                    "hass",
+                    "library"
+                ]
+            }
+        },
+        "web_interface": {
+            "backup": {
+                "backup_path": "Backup_Upgrade/Backup_Interface",
+                "limit_backup_files": 5,
+                "exclude_files_folder": [
+                    "Backup_Interface",
+                    "Backup_Program",
+                    ".git"
+                ],
+                "exclude_file_format": [
+                    ".mp4",
+                    ".zip",
+                    ".tar.gz",
+                    ".git"
+                ],
+                "backup_to_cloud": {
+                    "google_drive": true
+                }
+            }
+        },
+        "advanced_settings": {
+            "restart_vbot": true,
+            "sound_notification": true,
+            "refresh_page_ui": true
+        },
+        "google_cloud_drive": {
+            "active": false,
+            "backup_folder_name": "Vbot_Assistant_Backup",
+            "limit_backup_files": 5,
+            "setAccessType": "offline",
+            "setPrompt": "consent"
         }
     }
 }

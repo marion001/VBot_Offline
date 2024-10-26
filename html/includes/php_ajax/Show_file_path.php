@@ -9,6 +9,52 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json');
 
+
+
+// Hàm để quy đổi kích thước file
+function formatSize($size) {
+    if ($size >= 1073741824) {
+        return round($size / 1073741824, 2) . ' GB';
+    } elseif ($size >= 1048576) {
+        return round($size / 1048576, 2) . ' MB';
+    } elseif ($size >= 1024) {
+        return round($size / 1024, 2) . ' KB';
+    } else {
+        return $size . ' bytes';
+    }
+}
+
+// Hàm đệ quy để tìm tất cả các file trong thư mục
+function get_all_file_directory($dir) {
+    $files = [];
+	// Lấy danh sách file và thư mục trong thư mục
+    $items = scandir($dir);
+
+    foreach ($items as $item) {
+        // Bỏ qua các thư mục . và ..
+        if ($item === '.' || $item === '..') {
+            continue;
+        }
+		// Tạo đường dẫn đầy đủ
+        $path = $dir . '/' . $item; 
+
+        if (is_dir($path)) {
+            // Nếu là thư mục, gọi đệ quy
+            $files = array_merge($files, get_all_file_directory($path));
+        } else {
+            // Nếu là file, thêm thông tin vào mảng
+            $files[] = [
+                'name' => $item,
+                'path' => $path,
+                'size' => formatSize(filesize($path)),
+                'created_at' => date("d-m-Y H:i:s", filectime($path)),
+            ];
+        }
+    }
+
+    return $files;
+}
+
 function encodeFileToBase64($filePath)
 {
     if (file_exists($filePath))
@@ -282,6 +328,125 @@ $response = [
 echo json_encode($response);
 exit();
 } 
+
+if (isset($_GET['show_all_file'])) {
+    $directory = $_GET['directory_path'];
+	
+	
+// Kiểm tra xem thư mục có tồn tại không
+if (!is_dir($directory)) {
+    // Nếu thư mục không tồn tại, trả về thông báo lỗi
+    echo json_encode([
+        'success' => false,
+        'message' => "Thư mục $directory không tồn tại.",
+        'data' => []
+    ]);
+    exit;
+}
+
+// Gọi hàm và lấy danh sách file
+$fileList = get_all_file_directory($directory);
+
+// Kiểm tra xem có tệp nào không
+if (empty($fileList)) {
+    // Nếu không có tệp nào, trả về thông báo tương ứng
+    echo json_encode([
+        'success' => false,
+        'message' => 'Không có tệp nào trong thư mục.',
+        'data' => []
+    ]);
+    exit;
+}
+
+
+// Trả về dữ liệu dưới dạng JSON
+echo json_encode([
+    'success' => true,
+    'message' => 'Danh sách file đã được tìm thấy.',
+    'data' => $fileList
+]);
+
+exit();
+}
+
+//Xem cấu trúc tệp backup tar.gz
+if (isset($_GET['read_file_backup']) && isset($_GET['file']) && !empty($_GET['file'])) {
+    $filePath = escapeshellarg($_GET['file']); // Đảm bảo an toàn cho tên tệp bằng cách thoát các ký tự đặc biệt
+    $command = "tar -tzf $filePath";
+    
+    // Thực thi lệnh shell và lấy kết quả
+    $output = shell_exec($command);
+    
+    if ($output) {
+        // Chuyển kết quả thành mảng các dòng
+        $fileList = explode("\n", trim($output));
+        
+        // Tạo phản hồi JSON
+        $response = [
+            "success" => true,
+            "message" => "Đọc nội dung tệp thành công.",
+            "data" => $fileList
+        ];
+    } else {
+        $response = [
+            "success" => false,
+            "message" => "Không thể đọc nội dung của tệp .tar.gz.",
+            "data" => []
+        ];
+    }
+    // Hiển thị phản hồi dưới dạng JSON
+    header('Content-Type: application/json');
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	exit();
+}
+
+# Xem nội dung file bên trong cấu trúc tệp .tar.gz
+if (isset($_GET['read_files_in_backup']) && isset($_GET['file_path']) && !empty($_GET['file_path']) && isset($_GET['file_name']) && !empty($_GET['file_name'])) {
+    $file_path = $_GET['file_path']; // Đường dẫn đến tệp .tar.gz
+    $file_name = $_GET['file_name']; // Tên tệp bên trong .tar.gz
+    // Kiểm tra xem tệp có tồn tại không
+    if (file_exists($file_path)) {
+        // Sử dụng shell_exec để đọc nội dung của tệp bên trong .tar.gz
+        $command = "tar -O -xzf " . escapeshellarg($file_path) . " " . escapeshellarg($file_name);
+        $file_content = shell_exec($command);
+        // Kiểm tra xem nội dung đã được đọc thành công không
+        if ($file_content !== null) {
+            if (substr($file_name, -5) === '.json') {
+                $decoded_data = json_decode($file_content, true); // Chuyển đổi nội dung JSON
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    $response = [
+                        "success" => true,
+                        "message" => "Đọc nội dung tệp thành công.",
+                        "data" => $decoded_data // Dữ liệu đã giải mã
+                    ];
+                } else {
+                    $response = [
+                        "success" => false,
+                        "message" => "Nội dung tệp JSON không hợp lệ."
+                    ];
+                }
+            } else {
+                $response = [
+                    "success" => true,
+                    "message" => "Đọc nội dung tệp thành công.",
+                    "data" => $file_content // Nội dung tệp không phải JSON
+                ];
+            }
+        } else {
+            $response = [
+                "success" => false,
+                "message" => "Không thể đọc nội dung tệp."
+            ];
+        }
+    } else {
+        $response = [
+            "success" => false,
+            "message" => "Tệp không tồn tại."
+        ];
+    }
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
 
 
 

@@ -3,23 +3,7 @@ Code By: Vũ Tuyển
 Designed by: BootstrapMade
 Facebook: https://www.facebook.com/TWFyaW9uMDAx
 -->
-<!-- Thông báo Mesage html_slidebar.php -->
-<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-			<button type="button" class="btn btn-danger" onclick="close_message()" title="Tắt thông báo"><i class="bi bi-x-circle-fill"></i></button>
- 
-            <div class="modal-body">
-			
-                <!-- Nội dung thông báo ở đây sẽ được cập nhật bởi JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-danger rounded-pill" onclick="close_message()">Đóng</button>
-            </div>
-        </div>
-    </div>
-</div>
-<!--Kết Thúc Thông báo Mesage -->
+
 
 <!-- Loading Mesage-->
     <div id="loadingOverlay" class="overlay_loading">
@@ -51,10 +35,48 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
       </li><!-- End Dashboard Nav -->
 
 
-      <li class="nav-item" onclick="loading('show')">
-        <a class="nav-link collapsed" href="Media_Player.php">
-          <i class="bi bi-music-note-list"></i><span>Media Player</span>
+
+
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
+          <i class="bi bi-cloud-check"></i><span>Sao Lưu Cloud</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
+        <ul id="cloud-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li title="Thiết lập đa lệnh tùy chỉnh cho Home Assistant để điều khiển thiết bị" onclick="loading('show')">
+            <a href="GCloud_Drive.php">
+              <i class="bi bi-circle"></i><span>Google Drive</span>
+            </a>
+          </li>
+     
+        </ul>
+      </li>
+
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#hass-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
+          <i class="bi bi-code-slash"></i><span>Thiết Lập Nâng Cao </span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="hass-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li title="Thiết lập đa lệnh tùy chỉnh cho Home Assistant để điều khiển thiết bị">
+            <a href="HASS_Customize.php">
+              <i class="bi bi-circle"></i><span>Home Assistant Customize Command</span>
+            </a>
+          </li>
+     
+          <li title="Tùy chỉnh nâng cao cho DEV tự code">
+            <a href="DEV_Customization.php">
+              <i class="bi bi-circle"></i><span>DEV Customization (Custom Skill)</span>
+            </a>
+          </li>
+
+          <li title="Danh Sách API VBot">
+            <a href="API_List.php">
+              <i class="bi bi-circle"></i><span>Giao Tiếp API (API REST)</span>
+            </a>
+          </li>
+
+        </ul>
       </li>
 
 
@@ -102,13 +124,13 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
           <i class="bi bi-arrow-repeat"></i><span>Sao Lưu, Cập nhật</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a href="Upgrade_Program.php">
+          <li onclick="loading('show')">
+            <a href="_Program.php">
               <i class="bi bi-circle"></i><span>Chương Trình</span>
             </a>
-          </li>
+          </li onclick="loading('show')">
           <li>
-            <a href="Upgrade_Dashboard.php">
+            <a href="_Dashboard.php">
               <i class="bi bi-circle"></i><span>Giao Diện</span>
             </a>
           </li>
@@ -139,6 +161,12 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
         <a class="nav-link collapsed" href="Command.php">
           <i class="bi bi-terminal-fill"></i>
           <span>Command/Terminal</span>
+        </a>
+      </li>
+
+      <li class="nav-item" onclick="loading('show')">
+        <a class="nav-link collapsed" href="Media_Player.php">
+          <i class="bi bi-music-note-list"></i><span>Media Player</span>
         </a>
       </li>
 

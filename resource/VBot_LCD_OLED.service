@@ -1,0 +1,9 @@
+[Unit]
+Description=VBot_LCD_OLED
+
+[Service]
+ExecStart=/usr/bin/python3.9 /home/pi/VBot_Offline/resource/screen_disp/Run.py
+Restart=always
+
+[Install]
+WantedBy=default.target

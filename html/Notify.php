@@ -40,7 +40,7 @@ checkPermissions($VBot_Offline);
 ?>
 
 <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" title="Thông báo">
-    <i class="bi bi-bell"></i>
+    <i class="bi bi-bell text-success"></i>
     <span class="badge bg-primary badge-number"><?php if ($i_count != 0) { echo $i_count; } ?></span>
 </a>
 <!-- End Notification Icon -->

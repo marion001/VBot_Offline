@@ -333,16 +333,41 @@ include 'html_sidebar.php';
 
 
 
+            <!-- TTS -->
+            <div class="col-12">
+              <div class="card">
+
+
+                <div class="card-body">
+                 
+
+              <h5 class="card-title">Phát Thông Báo <i class="bi bi-megaphone"></i> <i class="bi bi-question-circle-fill" onclick="show_message('Phát nội dung cần thông báo ra loa')"></i> <span> | Text to Speak</span></h5>
+		
+			<div class="form-floating mb-3">  
+<textarea type="text" class="form-control border-success" style="height: 100px;"  name="tts_speaker_notify" id="tts_speaker_notify">
+</textarea>
+ <label for="tts_speaker_notify" class="form-label">Nhập nội dung cần thông báo</label>	
+ <br/>
+ <center>
+ <button type="button" class="btn btn-primary" onclick="tts_speaker_notify_send()" title="Phát nội dung thông báo ra loa"><i class="bi bi-megaphone"></i> Phát</button>
+ <button class="btn btn-danger" title="Xóa toàn bộ nội dung thông báo" onclick="tts_speaker_notify_send('delete_text_tts')" title="Xóa nội dung đã nhập trong nhập liệu thông báo"><i class="bi bi-trash"></i></button>
+ <button class="btn btn-warning" id="download_tts_audio" onclick="showMessagePHP('Không có dữ liệu để tải xuống', 5)" title="Tải xuống tệp âm thanh đã phát thông báo"><i class="bi bi-download"></i></button>
+ <button class="btn btn-success" id="playAudio_tts_audio" onclick="showMessagePHP('Không có dữ liệu để phát', 5)" title="Nghe tệp âm thanh đã phát thông báo trực tiếp trên thiết bị"><i class="bi bi-play"></i></button>
+  </center>
+</div>
+                </div>
+              </div>
+            </div><!-- End TTS -->
           </div>
         </div><!-- End Left side columns -->
 
         <!-- Right side columns -->
         <div class="col-lg-4">
 
-          <!-- Recent Activity -->
+          <!-- Chức năng chung -->
           <div class="card">
             <div class="card-body">
-              <h5 class="card-title">Chế Độ Khác:</span></h5>
+              <h5 class="card-title">Chức Năng Chung:</span></h5>
 
               <div class="activity">
 
@@ -353,10 +378,59 @@ include 'html_sidebar.php';
 </div>
 <i class="bi bi-dash-lg"></i>
     <div class="activity-content">
-<b><font color="green">Đồng bộ, Sync <i class="bi bi-question-circle-fill" onclick="show_message('Đồng bộ trạng thái và dữ liệu của Bot với Web UI theo thời gian thực')"></i></font></b>
+<b><font color="green">Đồng bộ, Sync <i class="bi bi-question-circle-fill" onclick="show_message('Đồng bộ trạng thái và dữ liệu của Bot với Web UI theo thời gian thực<br/>- Tắt hoặc thiết lập thời gian trễ trong: <b>Cấu hình Config -> Cấu Hình Media Player -> Đồng bộ trạng thái Media với Web UI</b> ')"></i></font></b>
 </div>
 </div>
 
+<div class="activity-item d-flex">
+    <div class="form-switch">
+        <input class="form-check-input" type="checkbox" id="media_player_active" name="media_player_active" onclick="change_to_another_mode('media_player_active', this.checked)" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
+    </div>
+    <i class="bi bi-dash-lg"></i>
+    <div class="activity-content">
+   <b><font color="green">Media Player <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để kích hoạt sử dụng trình phát nhạc Media Player Khi được tắt sẽ không ra lệnh phát được Bài Hát, PodCast, Radio, v..v...')"></i></font></b>
+    </div>
+</div>
+
+<div class="activity-item d-flex">
+    <div class="form-switch">
+        <input class="form-check-input" type="checkbox" id="wake_up_in_media_player" name="wake_up_in_media_player" onclick="change_to_another_mode('wake_up_in_media_player', this.checked)" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
+    </div>
+    <i class="bi bi-dash-lg"></i>
+    <div class="activity-content">
+   <b><font color="green">Wake Up in Media Player <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để Cho Phép Đánh Thức Khi Đang Phát Media player')"></i></font></b>
+    </div>
+</div>
+
+<div class="activity-item d-flex">
+    <div class="form-switch">
+        <input class="form-check-input" type="checkbox" id="cache_tts" name="cache_tts" onclick="change_to_another_mode('cache_tts', this.checked)" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
+    </div>
+    <i class="bi bi-dash-lg"></i>
+    <div class="activity-content">
+   <b><font color="green">Cache lại kết quả TTS</font></b>
+    </div>
+</div>
+
+<div class="activity-item d-flex">
+    <div class="form-switch">
+        <input class="form-check-input" type="checkbox" name="show_mic_on_off" id="show_mic_on_off" onclick="change_to_another_mode('mic_on_off', this.checked)">
+    </div>
+    <i class="bi bi-dash-lg"></i>
+    <div class="activity-content">
+        <b><font color="green">Mic, Microphone</font></b>
+    </div>
+</div>
+
+<div class="activity-item d-flex">
+    <div class="form-switch">
+        <input class="form-check-input" type="checkbox" name="show_conversation_mode" id="show_conversation_mode" onclick="change_to_another_mode('conversation_mode', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
+    </div>
+    <i class="bi bi-dash-lg"></i>
+    <div class="activity-content">
+        <b><font color="green">Chế độ hội thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sẽ hỏi đáp, lắng nghe liên tục mà không cần đánh thức Wake UP lại Bot')"></i></font></b>
+    </div>
+</div>
 
 <div class="activity-item d-flex">
     <div class="form-switch">
@@ -370,31 +444,12 @@ include 'html_sidebar.php';
 
 <div class="activity-item d-flex">
     <div class="form-switch">
-        <input class="form-check-input" type="checkbox" name="show_mic_on_off" id="show_mic_on_off" onclick="change_to_another_mode('mic_on_off', this.checked)">
+        <input disabled class="form-check-input" type="checkbox" name="show_wakeup_reply" id="show_wakeup_reply" onclick="change_to_another_mode('wakeup_reply', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
     </div>
     <i class="bi bi-dash-lg"></i>
     <div class="activity-content">
-        <b><font color="green">Bật, Tắt Mic</font></b>
-    </div>
-</div>
-
-<div class="activity-item d-flex">
-    <div class="form-switch">
-        <input class="form-check-input" type="checkbox" name="show_conversation_mode" id="show_conversation_mode" onclick="change_to_another_mode('conversation_mode', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
-    </div>
-    <i class="bi bi-dash-lg"></i>
-    <div class="activity-content">
-        <b><font color="green">Bật, Tắt Chế độ hội thoại</font></b>
-    </div>
-</div>
-
-<div class="activity-item d-flex">
-    <div class="form-switch">
-        <input class="form-check-input" type="checkbox" name="show_wakeup_reply" id="show_wakeup_reply" onclick="change_to_another_mode('wakeup_reply', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
-    </div>
-    <i class="bi bi-dash-lg"></i>
-    <div class="activity-content">
-        <b><font color="green">Bật, Tắt Chế độ câu phản hồi</font></b>
+        <i class="bi bi-ban"></i><b class="text-decoration-line-through"><font color="green" disabled> Bật, Tắt Chế độ câu phản hồi</font></b>
+		
     </div>
 </div>
 
@@ -402,9 +457,138 @@ include 'html_sidebar.php';
               </div>
 
             </div>
-          </div><!-- End Recent Activity -->
+          </div><!-- kết thúc chức năng chung -->
 
-          <!-- Budget Report -->
+
+
+
+          <!-- Chức Năng Khác -->
+          <div class="card">
+            <div class="card-body pb-0">
+              <h5 class="card-title">Chế Độ Khác:</h5>
+
+              <div id="budgetChart" class="echart">
+<ul>
+ 
+
+ 
+ 
+  <li>  <font color="blue">Home Assistant:</font>
+   
+  <div class="form-switch">
+ 
+<div class="form-check">
+  <input class="form-check-input" value="home_assistant_active" type="checkbox" name="home_assistant_active" id="home_assistant_active" onclick="change_to_another_mode('home_assistant', this.checked)" <?php if ($Config['home_assistant']['active'] === true) echo "checked"; ?>>
+ <label class="form-check-label">
+    Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để liên kết và điều khiển nhà thông minh')"></i>
+  </label>
+</div>
+
+<div class="form-check">
+ <input class="form-check-input" value="hass_custom_commands_active" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" onclick="change_to_another_mode('hass_custom_active', this.checked)" <?php if ($Config['home_assistant']['custom_commands']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Lệnh Tùy Chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt sử dụng lệnh tùy chỉnh (Custom Command) để điều khiển nhà thông minh')"></i>
+  </label>
+</div>
+
+
+
+</div>
+  </li>
+  
+  
+  <li>  <font color="blue">DEV Customization (Custom Skill):</font>
+   
+  <div class="form-switch">
+ 
+<div class="form-check">
+  <input class="form-check-input" value="developer_customization_active" type="checkbox" name="developer_customization_active" id="developer_customization_active" onclick="change_to_another_mode('dev_custom', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?> <?php if ($Config['developer_customization']['active'] === true) echo "checked"; ?>>
+ <label class="form-check-label">
+    Custom Skill <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng chế độ DEV Customization (Custom Skill)')"></i>
+  </label>
+</div>
+
+<div class="form-check">
+ <input class="form-check-input" value="developer_customization_vbot_processing" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" onclick="change_to_another_mode('dev_custom_vbot', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?><?php if ($Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Áp dụng thêm Vbot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng Vbot xử lý khi Custom Skill không thể xử lý')"></i>
+  </label>
+</div>
+
+
+
+</div>
+  </li>
+  
+  
+ 
+ 
+  <li><font color="blue">Trợ lý ảo <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng trợ lý ảo tương ứng')"></i> :</font>
+  <div class="form-switch">
+ 
+<div class="form-check">
+ <input class="form-check-input" value="default_assistant_active" type="checkbox" name="default_assistant_active" id="default_assistant_active" onclick="change_to_another_mode('default_assistant', this.checked)" <?php if ($Config['virtual_assistant']['default_assistant']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Default Assistant
+  </label>
+</div>
+
+<div class="form-check">
+ <input class="form-check-input" value="google_gemini_active" type="checkbox" name="google_gemini_active" id="google_gemini_active" onclick="change_to_another_mode('google_gemini', this.checked)" <?php if ($Config['virtual_assistant']['google_gemini']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Google Gemini
+  </label>
+</div>
+
+<div class="form-check">
+ <input class="form-check-input" value="chat_gpt_active" type="checkbox" name="chat_gpt_active" id="chat_gpt_active" onclick="change_to_another_mode('chat_gpt', this.checked)" <?php if ($Config['virtual_assistant']['chat_gpt']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Chat GPT
+  </label>
+</div>
+
+
+</div>
+  </li>
+  
+ 
+  <li><font color="blue">Nguồn Nhạc <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng nguồn Nhạc, Radio, PodCast tương ứng, khi Bot tìm kiếm dữ liệu')"></i> :</font>
+  <div class="form-switch">
+ 
+<div class="form-check">
+ <input class="form-check-input" value="music_local_active" type="checkbox" name="music_local_active" id="music_local_active" onclick="change_to_another_mode('music_local', this.checked)" <?php if ($Config['media_player']['music_local']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Music Local
+  </label>
+</div>
+
+<div class="form-check">
+ <input class="form-check-input" value="zing_mp3_active" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" onclick="change_to_another_mode('zing_mp3', this.checked)" <?php if ($Config['media_player']['zing_mp3']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Zing MP3
+  </label>
+</div>
+
+<div class="form-check">
+ <input class="form-check-input" value="youtube_active" type="checkbox" name="youtube_active" id="youtube_active" onclick="change_to_another_mode('youtube', this.checked)" <?php if ($Config['media_player']['youtube']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Youtube
+  </label>
+</div>
+
+
+</div>
+  </li>
+
+</ul>
+</div>
+            </div>
+          </div><!-- Kết Chức năng khác -->
+		  
+		  
+
+
+          <!-- Logs hệ thống -->
           <div class="card">
             <div class="card-body pb-0">
               <h5 class="card-title">Logs Hệ Thống <span id="show_log_name_log_display_style"> | N/A </span></h5>
@@ -413,7 +597,7 @@ include 'html_sidebar.php';
 <ul>
  
   <li>
-  <font color="blue">Bật, Tắt logs hệ thống</font>
+  <font color="blue">Bật, Tắt Logs hệ thống</font>
     <div class="form-switch">
        <div class="form-check">
   <input class="form-check-input" value="on_off_display_logs" type="checkbox" name="on_off_display_logs" id="on_off_display_logs" onclick="change_og_display_style('change_log', this.checked ? 'on' : 'off', true)" <?php if ($Config['smart_config']['show_log']['active'] === true) echo "checked"; ?>>
@@ -428,32 +612,38 @@ include 'html_sidebar.php';
  
  
  
-  <li><font color="blue">Thay đổi chế độ Logs <i class="bi bi-question-circle-fill" onclick="show_message('Thay đổi chế độ hiển thị Logs đầu ra trực tiếp và lấy dữ liệu theo thời gian thực')"></i> :</font>
+  <li><font color="blue">Thay đổi chế độ hiển thị Logs <i class="bi bi-question-circle-fill" onclick="show_message('Thay đổi chế độ hiển thị Logs đầu ra trực tiếp và lấy dữ liệu theo thời gian thực')"></i> :</font>
   <div class="form-switch">
  
       <div class="form-check">
   <input class="form-check-input" value="console" type="radio" name="select_log_display_style" id="log_display_style_console" onclick="change_og_display_style('change_log', 'console', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "console") echo "checked"; ?>>
   <label class="form-check-label">
-    Chỉ Console
+    Console
   </label>
 </div>
 
       <div class="form-check">
-  <input class="form-check-input" value="api" type="radio" name="select_log_display_style" id="log_display_style_api" onclick="change_og_display_style('change_log', 'api', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "api") echo "checked"; ?>>
+  <input <?php if ($Config['display_screen']['active'] === false) echo "disabled"; ?> class="form-check-input" value="display_screen" type="radio" name="select_log_display_style" id="log_display_style_oled_display" onclick="change_og_display_style('change_log', 'display_screen', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "display_screen") echo "checked"; ?>>
   <label class="form-check-label">
-    Chỉ API <a href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
-  </label>
-</div>
-     <div class="form-check">
-  <input class="form-check-input" value="both" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'both', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "both") echo "checked"; ?>>
-  <label class="form-check-label">
-    Both (Cả hai)
+    Màn Hình
   </label>
 </div>
 
-	</div>
+      <div class="form-check">
+  <input <?php if ($Config['api']['active'] === false) echo "disabled"; ?> class="form-check-input" value="api" type="radio" name="select_log_display_style" id="log_display_style_api" onclick="change_og_display_style('change_log', 'api', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "api") echo "checked"; ?>>
+  <label class="form-check-label">
+    API <a href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
+  </label>
+</div>
+     <div class="form-check">
+  <input class="form-check-input" value="all" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'all', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "all") echo "checked"; ?>>
+  <label class="form-check-label">
+    ALL (Tất Cả) <a href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
+  </label>
+</div>
+
+</div>
   </li>
-  
   <li>
   <font color="blue">Dọn dẹp Logs</font>
     <div class="form-switch">
@@ -469,31 +659,9 @@ include 'html_sidebar.php';
 </ul>
 </div>
             </div>
-          </div><!-- End Budget Report -->
+          </div><!-- Kết thúc Logs hệ thống -->
 
-          <!-- Website Traffic -->
-          <div class="card">
-            <div class="card-body pb-0">
-              <h5 class="card-title">Phát Thông Báo <i class="bi bi-megaphone"></i> <i class="bi bi-question-circle-fill" onclick="show_message('Phát nội dung cần thông báo ra loa')"></i> <span> | Text to Speak</span></h5>
 
-              <!-- <div id="trafficChart" style="min-height: 400px;" class="echart"></div> -->
-			  <div class="form-floating mb-3">  
-<textarea type="text" class="form-control border-success" style="height: 100px;"  name="tts_speaker_notify" id="tts_speaker_notify">
-</textarea>
- <label for="tts_speaker_notify" class="form-label">Nhập nội dung cần thông báo</label>	
- <br/>
- <center>
- <button type="button" class="btn btn-primary" onclick="tts_speaker_notify_send()" title="Phát nội dung thông báo ra loa"><i class="bi bi-megaphone"></i> Phát</button>
- <button class="btn btn-danger" title="Xóa toàn bộ nội dung thông báo" onclick="tts_speaker_notify_send('delete_text_tts')" title="Xóa nội dung đã nhập trong nhập liệu thông báo"><i class="bi bi-trash"></i></button>
- <button class="btn btn-warning" id="download_tts_audio" onclick="showMessagePHP('Không có dữ liệu để tải xuống', 5)" title="Tải xuống tệp âm thanh đã phát thông báo"><i class="bi bi-download"></i></button>
- <button class="btn btn-success" id="playAudio_tts_audio" onclick="showMessagePHP('Không có dữ liệu để phát', 5)" title="Nghe tệp âm thanh đã phát thông báo trực tiếp trên thiết bị"><i class="bi bi-play"></i></button>
-  </center>
-</div>
-
-  
-
-            </div>
-          </div><!-- End Website Traffic -->
 
         </div><!-- End Right side columns -->
 
@@ -598,6 +766,10 @@ include 'html_js.php';
             seconds.toString().padStart(2, '0');
 
     }
+
+
+
+
 
     //Dùng để tua bài hát
     function sendSetTime_duration(set_duration) {
@@ -856,6 +1028,19 @@ include 'html_js.php';
                     document.getElementById('show_wakeup_reply').checked = data.wakeup_reply ? true : false;
                     document.getElementById('show_mic_on_off').checked = data.mic_on_off ? true : false;
                     document.getElementById('on_off_display_logs').checked = data.log_display_active ? true : false;
+                    document.getElementById('cache_tts').checked = data.cache_tts_active ? true : false;
+                    document.getElementById('media_player_active').checked = data.media_player.media_player_active ? true : false;
+                    document.getElementById('wake_up_in_media_player').checked = data.media_player.wake_up_in_media_player ? true : false;
+                    document.getElementById('music_local_active').checked = data.media_player.music_local_active ? true : false;
+                    document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
+                    document.getElementById('youtube_active').checked = data.media_player.youtube_active ? true : false;
+                    document.getElementById('home_assistant_active').checked = data.home_assistant_active ? true : false;
+                    document.getElementById('hass_custom_commands_active').checked = data.hass_custom_commands_active ? true : false;
+                    document.getElementById('default_assistant_active').checked = data.default_assistant_active ? true : false;
+                    document.getElementById('google_gemini_active').checked = data.google_gemini_active ? true : false;
+                    document.getElementById('chat_gpt_active').checked = data.chat_gpt_active ? true : false;
+                    document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
+                    document.getElementById('developer_customization_vbot_processing').checked = data.dev_custom_vbot ? true : false;
                     //document.getElementById('show_wake_up').checked = false;
                     //Media Player
                     document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' + (data.media_player.media_name ? data.media_player.media_name : 'N/A') + '</font>';
@@ -869,13 +1054,15 @@ include 'html_js.php';
 					if (data.log_display_style === "console"){
 						document.getElementById('log_display_style_console').checked = true;
 						rlc_log_display_style = "Console";
-						
+					}else if (data.log_display_style === "display_screen"){
+						document.getElementById('log_display_style_oled_display').checked = true;
+						rlc_log_display_style = "Display Screen";
 					}else if (data.log_display_style === "api"){
 						document.getElementById('log_display_style_api').checked = true;
 						rlc_log_display_style = "API";
-					}else if (data.log_display_style === "both"){
+					}else if (data.log_display_style === "all"){
 						document.getElementById('log_display_style_both').checked = true;
-						rlc_log_display_style = "Both";
+						rlc_log_display_style = "ALL";
 					}
 					document.getElementById('show_log_name_log_display_style').innerHTML = ' | <font color=green>'+rlc_log_display_style+'</font>';
                     if (!isHovering_led_brightness) {

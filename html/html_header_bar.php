@@ -3,6 +3,9 @@
 #Designed by: BootstrapMade
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 include 'Configuration.php';
+
+
+
 ?>
 <head>
 <!-- css ChatBot -->
@@ -37,7 +40,7 @@ include 'Notify.php';
  </li><!-- End Notification Nav -->
 <!-- Chatbot Biểu tượng mở chatbox -->
 <li class="nav-item nav-icon">
-    <i class="bi bi-chat-dots" type="button" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>
+    <i class="bi bi-chat-dots text-primary" type="button" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>
 </li>
 <div class="modal fade" id="modalDialogScrollable_chatbot" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable" id="chatbot_size_setting">
@@ -72,9 +75,14 @@ include 'Notify.php';
     </div>
 </div>
 <!-- end Chatbot --> 
-			  
-
-
+		
+<!-- restart vbot -->	
+<form method="POST"	action="">
+<li class="nav-item nav-icon" title="Khởi động lại chương trình VBot" onclick="restart_vbot_service()">
+   <i class="bi bi-bootstrap-reboot text-warning" title="Khởi động lại chương trình VBot"></i>
+</li>
+</form>
+<!-- end restart vbot -->		
         <li class="nav-item dropdown pe-3">
 
           <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
@@ -136,5 +144,36 @@ include 'Notify.php';
 
       </ul>
     </nav><!-- End Icons Navigation -->
-
+<script>
+//Khởi động lại chương trình VBot html_header_bar.php
+function restart_vbot_service() {
+	
+    if (!confirm("Bạn có chắc chắn muốn khởi động lại Vbot?")) {
+        return;
+    }
+	loading('show');
+	
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Check_Connection.php?restart_vbot_service";
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+					loading('hide');
+                    showMessagePHP(response.message);
+                } else {
+					loading('hide');
+                    show_message("Lỗi: " + response.message);
+                }
+            } else {
+				loading('hide');
+                show_message("Yêu cầu thất bại với mã trạng thái: " + xhr.status);
+            }
+        }
+    };
+    xhr.open("GET", url, true);
+    xhr.send();
+}
+</script>
   </header>
