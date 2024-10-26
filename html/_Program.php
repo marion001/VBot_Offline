@@ -274,7 +274,7 @@ if ($returnCode === 0) {
 
 #Biến toàn cục $libPath_exist kiểm tra xem thư viện google Cloud Drive có tồn tại hay không
 $libPath_exist = false;
-if ($Config['backup_upgrade']['vbot_program']['backup']['backup_to_cloud']['google_drive'] === true) {
+if ($Config['backup_upgrade']['google_cloud_drive']['active'] === true) {
 $libPath = '/home/'.$GET_current_USER.'/_VBot_Library/google-api-php-client/vendor/autoload.php';
 // Kiểm tra xem thư viện có tồn tại không
 if (file_exists($libPath)) {
