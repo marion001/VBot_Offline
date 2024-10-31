@@ -314,7 +314,7 @@ $Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] = $ex
 $vbot_program_upgrade_keep_the_file_folder = $_POST['vbot_program_upgrade_keep_the_file_folder'];
 $vbot_program_upgrade_keep_the_file_folder_tuyen = array_filter(array_map('trim', explode("\n", $vbot_program_upgrade_keep_the_file_folder)));
 #Lưu dữ liệu
-$Config['backup_upgrade']['vbot_program']['upgrade']['keep_the_file_folder'] = $vbot_program_upgrade_keep_the_file_folder_tuyen;
+$Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] = $vbot_program_upgrade_keep_the_file_folder_tuyen;
 
 
 
@@ -2458,7 +2458,7 @@ Cập Nhật VBot:</h5>
 <div class="col-sm-9"><div class="input-group mb-3">
 <textarea class="form-control border-success" rows="5" name="vbot_program_upgrade_keep_the_file_folder" id="vbot_program_upgrade_keep_the_file_folder">
 <?php
-$excludeFilesFolder_Vbot_upgrade = isset($Config['backup_upgrade']['vbot_program']['upgrade']['keep_the_file_folder']) ? $Config['backup_upgrade']['vbot_program']['upgrade']['keep_the_file_folder'] : [];
+$excludeFilesFolder_Vbot_upgrade = isset($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory']) ? $Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] : [];
     if (!empty($excludeFilesFolder_Vbot_upgrade)) {
         foreach ($excludeFilesFolder_Vbot_upgrade as $index_exclude_files_folder_Vbot_UPGRADE => $item_exclude_files_folder_VBot_upgrade) {
             echo htmlspecialchars($item_exclude_files_folder_VBot_upgrade);

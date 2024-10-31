@@ -1,7 +1,7 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "",
+        "email": "888888888888888@gmail.com",
         "avata": "dasdsa.jpg",
         "address": {
             "wards": "",
@@ -50,7 +50,7 @@
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
         "external_url": "https://88888888.duckdns.org",
-        "long_token": "88888888.88888888.88888888-88888888",
+        "long_token": "88888888.88888888.rAgP-88888888",
         "time_out": 15,
         "custom_commands": {
             "active": true,
@@ -75,16 +75,16 @@
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "8888888888888888888888888"
+            "api_key": "88888888"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": "sk-proj--8888888888888888888888888"
+            "key_chat_gpt": "sk-proj-8888--88-88-88-88-88888-L89-taFeLVg2qWvsAA"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "8888888888888888888888888"
+        "key_openweathermap": "88888888"
     },
     "media_player": {
         "active": true,
@@ -242,8 +242,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "44444444444444444444444444444444",
-                        "55555555555555555555555555555555"
+                        "88888888",
+                        "88888888"
                     ]
                 },
                 "stt_ggcloud": {
@@ -304,7 +304,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/8888888888888888888888888+TGsdTNolucA=="
+                "key": "/888888+888888=="
             },
             "hotword": {
                 "lang": "vi",
@@ -363,16 +363,16 @@
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "8888888888888888888888888",
-                        "9999999999999999999999999",
-                        "7777777777777777777777777"
+                        "88888888",
+                        "88888888",
+                        "88888888"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "66666666666666666666666666"
+                        "55555555"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,
@@ -419,17 +419,13 @@
             "upgrade": {
                 "backup_before_updating": true,
                 "keep_file_directory": [
-                    "Config.json",
-                    "Action.json",
-                    "Adverbs.json",
-                    "Object.json",
                     "BackList.json",
                     "stt_token_google_cloud.json",
                     "tts_token_google_cloud.json",
                     "Home_Assistant.json",
                     "Home_Assistant_Custom.json",
-                    "hotword",
-                    "hass",
+                    "eng",
+                    "vi",
                     "library"
                 ]
             }

@@ -91,121 +91,100 @@ $Limit_Backup_Files = $Config['backup_upgrade']['vbot_program']['backup']['limit
 
 
 //Hàm để thay thế giá trị value từ old_config sang new_config
-function replace_values_json_file(&$new_data, $old_data) {
-	// Mảng lưu trữ các khóa không tồn tại trong new_data
-    $missing_keys = [];
-	// Mảng lưu trữ các khóa không thay đổi
-    $unchanged_keys = [];
-    foreach ($old_data as $key => $old_value) {
-        // Kiểm tra xem khóa có tồn tại trong new_data hay không
-        if (array_key_exists($key, $new_data)) {
-            // Nếu giá trị là mảng, gọi đệ quy
-            if (is_array($old_value)) {
-                replace_values_json_file($new_data[$key], $old_value);
-            } else {
-                // Kiểm tra xem giá trị có khác nhau không
-                if ($new_data[$key] !== $old_value) {
-                    $new_data[$key] = $old_value; // Thay thế giá trị
-                    echo "Đã thay thế giá trị của '$key': " . $old_value . "\n";
+// Hàm để thay thế giá trị từ file cũ sang file mới và lưu kết quả vào tệp đích
+function replace_values_json_file($configNewPath, $configOldPath) {
+	global $messages;
+    // Đọc và giải mã các tệp JSON
+    $configNewData = json_decode(file_get_contents($configNewPath), true);
+    $configOldData = json_decode(file_get_contents($configOldPath), true);
+
+    // Kiểm tra nếu dữ liệu JSON không đọc được
+    if ($configNewData === null || $configOldData === null) {
+        $messages[] = "Lỗi khi đọc nội dung JSON từ một trong các tệp.\n";
+        return false;
+    }
+	$messages[] = "Đang tiến hành chuyển dữ liệu cấu hình Config.json sang dữ liệu mới...";
+    // Mảng lưu trữ các khóa không tồn tại trong config mới
+    $missingKeys = [];
+    // Mảng lưu trữ các khóa có giá trị giống nhau, không thay đổi
+    $unchangedKeys = [];
+
+    // Hàm đệ quy để thay thế giá trị
+    function replace_recursive(&$newData, $oldData, &$missingKeys, &$unchangedKeys) {
+		global $messages;
+        foreach ($oldData as $key => $oldValue) {
+            if (array_key_exists($key, $newData)) {
+                if (is_array($oldValue)) {
+                    replace_recursive($newData[$key], $oldValue, $missingKeys, $unchangedKeys);
                 } else {
-                    // Ghi lại khóa không thay đổi
-                    $unchanged_keys[] = $key;
+                    if ($newData[$key] !== $oldValue) {
+                        $newData[$key] = $oldValue;
+                        $messages[] = "- Đã thay thế giá trị của '$key' thành: $oldValue\n";
+                    } else {
+                        $unchangedKeys[] = $key;
+                    }
                 }
+            } else {
+                $missingKeys[] = $key;
+                $messages[] = "- Khóa '$key' không tồn tại trong Config_new.\n";
             }
-        } else {
-            // Ghi lại khóa không tồn tại trong new_data
-            $missing_keys[] = $key;
-            echo "Khóa '$key' không tồn tại trong Config_new.\n";
         }
     }
 
-    // Hiển thị các khóa không được thay thế
-    if (!empty($unchanged_keys)) {
-        echo "Các khóa không được thay thế (giá trị giống nhau): " . implode(', ', $unchanged_keys) . "\n";
+    // Gọi hàm đệ quy để thay thế các giá trị
+    replace_recursive($configNewData, $configOldData, $missingKeys, $unchangedKeys);
+
+    // Hiển thị các khóa không thay đổi
+    if (!empty($unchangedKeys)) {
+        $messages[] = "- Các khóa có giá trị không thay đổi: " . implode(', ', $unchangedKeys) . "\n";
     }
-    
+
     // Hiển thị các khóa không tồn tại
-    if (!empty($missing_keys)) {
-        echo "Các khóa không tồn tại trong Config_new: " . implode(', ', $missing_keys) . "\n";
+    if (!empty($missingKeys)) {
+        $messages[] = "- Các khóa không tồn tại trong Config_new: " . implode(', ', $missingKeys) . "\n";
     }
-}
 
-#Tạo Thư mục
-function createDirectory($directory) {
-	global $messages;
-    if (!is_dir($directory)) {
-        if (mkdir($directory, 0777, true)) {
-			chmod($directory, 0777);
-            $messages[] = "<font color=green>- Thư mục '$directory' đã được tạo thành công và quyền truy cập đã được đặt là 0777</font>";
-        } else {
-            $messages[] = "<font color=red>- Không thể tạo thư mục '$directory'.</font>";
-        }
-    }
-}
+    // Lưu dữ liệu mới vào tệp JSON
+    file_put_contents($configNewPath, json_encode($configNewData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    $messages[] = "- Hoàn tất! Các giá trị đã được thay thế và lưu vào tệp '$configNewPath'.\n";
 
-#Giải nén tệp .tar.gz
-function extractTarGz($tarFilePath, $extractTo) {
-	global $messages;
-    // Kiểm tra xem tệp .tar.gz có tồn tại không
-    if (!file_exists($tarFilePath)) {
-		$messages[] = "<font color=red>- Tệp Sao Lưu: '$tarFilePath' không tồn tại</font>";
-		// Tệp không tồn tại
-        return false;
-    }
-    // Thực hiện lệnh giải nén
-    $command = "tar -xzf " . escapeshellarg($tarFilePath) . " -C " . escapeshellarg($extractTo);
-    exec($command, $output, $returnVar);
-    // Kiểm tra kết quả
-    if ($returnVar === 0) {
-		// Giải nén thành công
-        return true;
-    } else {
-		// Giải nén thất bại
-        return false;
-    }
-}
-
-#Sao chép file, chỉ có sao chép không có chức năng bỏ qua file hoặc thư mục dùng cho khôi phục dữ liệu
-/*
-function copyFiles($source, $destination) {
-	global $messages;
-    // Kiểm tra xem thư mục nguồn có tồn tại không
-    if (!is_dir($source)) {
-        $messages[] = "<font color=red>- Thư mục nguồn '$source' không tồn tại</font>";
-        return false;
-    }
-    // Tạo thư mục đích nếu chưa tồn tại
-    if (!is_dir($destination)) {
-        mkdir($destination, 0777, true);
-    }
-    // Mở thư mục nguồn
-    $dir = opendir($source);
-    while (($file = readdir($dir)) !== false) {
-        // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
-        if ($file != '.' && $file != '..') {
-            // Đường dẫn đầy đủ của tệp hoặc thư mục
-            $srcPath = rtrim($source, '/') . '/' . $file;
-            $destPath = rtrim($destination, '/') . '/' . $file;
-            // Nếu là thư mục, gọi đệ quy
-            if (is_dir($srcPath)) {
-                copyFiles($srcPath, $destPath);
-            } else {
-                // Sao chép tệp
-                if (copy($srcPath, $destPath)) {
-                    //$messages[] = "<font color=blue>- Đã sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font> <font color=green><b>thành công</b></font><br/>";
-                    $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>".basename($srcPath)."</b></font>";
-                } else {
-                    $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
-                }
-            }
-        }
-    }
-    closedir($dir);
     return true;
 }
-*/
+
+
+#Hàm xóa thư mục và các file, thư mục con bên trong
+function deleteDirectory($dir) {
+	global $messages;
+    // Kiểm tra xem thư mục có tồn tại không
+    if (!is_dir($dir)) {
+		$messages[] = "<font color=red>Thư mục $dir không tồn tại để xóa dữ liệu</font>";
+        return false;
+    }
+    // Mở thư mục
+    $files = scandir($dir);
+    foreach ($files as $file) {
+        // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
+        if ($file != '.' && $file != '..') {
+            //$filePath = $dir . '/' . $file;
+			$filePath = rtrim($dir, '/') . '/' . $file; // loại bỏ dấu / ở cuối
+            // Nếu là thư mục, gọi đệ quy
+            if (is_dir($filePath)) {
+                deleteDirectory($filePath);
+            } else {
+                // Xóa tệp
+                unlink($filePath);
+                $messages[] = "<font color=red>- Đã xóa tệp: </font> <font color=blue>$filePath</font>";
+            }
+        }
+    }
+    // Cuối cùng, xóa thư mục
+    rmdir($dir);
+    $messages[] = "<font color=red>- Đã xóa thư mục: </font> <font color=blue>$dir</font>";
+    return true;
+}
 
 #Sao chép tệp có lựa chọn giữ lại file hoặc thư mục
+#sao chép toàn bộ file trong thư mục
 function copyFiles($source, $destination, $keepList = []) {
     global $messages;
 	
@@ -253,35 +232,174 @@ function copyFiles($source, $destination, $keepList = []) {
 }
 
 
-function deleteDirectory($dir) {
+#Chỉ sao chép các tệp cần thiết từ thư mục nguồn sang thư mục đích
+//$files = ["Config.json", "Action.json", "Adverbs.json", "Object.json"];
+function copyFilesToDestination($sourceDir, $destinationDir, $files) {
 	global $messages;
-    // Kiểm tra xem thư mục có tồn tại không
-    if (!is_dir($dir)) {
-		$messages[] = "<font color=red>Thư mục $dir không tồn tại để xóa dữ liệu</font>";
+    // Tạo thư mục đích nếu chưa tồn tại
+    if (!is_dir($destinationDir)) {
+        mkdir($destinationDir, 0777, true);
+    }
+    // Sao chép từng file trong danh sách
+    foreach ($files as $file) {
+        $sourceFile = $sourceDir . $file;
+        $destinationFile = $destinationDir . $file;
+        // Kiểm tra nếu tệp tồn tại ở thư mục nguồn
+        if (file_exists($sourceFile)) {
+            copy($sourceFile, $destinationFile);
+			// Đặt quyền cho tệp đã sao chép
+			chmod($destinationFile, 0777);
+            $messages[] = "Đã sao chép $file thành công vào bộ nhớ tạm để chuẩn bị di chuyển dữ liệu<br>";
+        } else {
+            $messages[] = "Không tìm thấy tệp $file trong thư mục nguồn: $sourceDir<br>";
+        }
+    }
+}
+
+
+// Hàm xóa thư mục và nội dung bên trong chỉ dùng cho lúc cập nhật, không để Logs
+//Chỉ dùng cho cập nhật
+function deleteDir($dirPath) {
+    if (!is_dir($dirPath)) return;
+    $files = scandir($dirPath);
+    foreach ($files as $file) {
+        if ($file == '.' || $file == '..') continue;
+        $filePath = $dirPath . "/" . $file;
+        if (is_dir($filePath)) {
+            deleteDir($filePath);
+        } else {
+            unlink($filePath);
+        }
+    }
+    rmdir($dirPath);
+}
+
+
+#Tạo Thư mục
+function createDirectory($directory) {
+	global $messages;
+    if (!is_dir($directory)) {
+        if (mkdir($directory, 0777, true)) {
+			chmod($directory, 0777);
+            $messages[] = "<font color=green>- Thư mục '$directory' đã được tạo thành công và quyền truy cập đã được đặt là 0777</font>";
+        } else {
+            $messages[] = "<font color=red>- Không thể tạo thư mục '$directory'.</font>";
+        }
+    }
+}
+
+
+#Giải nén tệp .tar.gz
+function extractTarGz($tarFilePath, $extractTo) {
+	global $messages;
+    // Kiểm tra xem tệp .tar.gz có tồn tại không
+    if (!file_exists($tarFilePath)) {
+		$messages[] = "<font color=red>- Tệp Sao Lưu: '$tarFilePath' không tồn tại</font>";
+		// Tệp không tồn tại
         return false;
     }
-    // Mở thư mục
-    $files = scandir($dir);
-    foreach ($files as $file) {
+    // Thực hiện lệnh giải nén
+    $command = "tar -xzf " . escapeshellarg($tarFilePath) . " -C " . escapeshellarg($extractTo);
+    exec($command, $output, $returnVar);
+    // Kiểm tra kết quả
+    if ($returnVar === 0) {
+		// Giải nén thành công
+        return true;
+    } else {
+		// Giải nén thất bại
+        return false;
+    }
+}
+
+
+#Tải xuống repo git, không dùng lệnh git clone
+function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
+	global $messages;
+	$messages[] = "Đang tiến hành tải xuống bản cập nhật...";
+    // Lấy tên repository từ URL
+    $repoName = basename(parse_url($repoUrl, PHP_URL_PATH));
+    $zipFile = $destinationDir . "/" . $repoName . ".zip";
+    // URL tải file ZIP từ GitHub
+	// Hoặc thay 'main' bằng nhánh mong muốn
+    $zipUrl = rtrim($repoUrl, '/') . "/archive/refs/heads/main.zip";
+    // Tạo thư mục đích nếu chưa tồn tại
+	/*
+    if (!is_dir($destinationDir)) {
+        mkdir($destinationDir, 0777, true);
+    }
+	*/
+    // Tải tệp ZIP về và lưu với tên mới
+    file_put_contents($zipFile, fopen($zipUrl, 'r'));
+	chmod($zipFile, 0777);
+    // Giải nén tệp ZIP
+    $zip = new ZipArchive;
+	$messages[] = "Tải xuống thành công, đang tiến hành giải nén dữ liệu...";
+    if ($zip->open($zipFile) === TRUE) {
+		//Tên  Thư mục giải nén sẽ có dạng repo-main
+        $extractedFolder = $destinationDir . "/" . $repoName . "-main";
+        $zip->extractTo($destinationDir);
+        $zip->close();
+        // Xóa tệp ZIP sau khi giải nén
+        unlink($zipFile);
+		
+        // Xóa thư mục html bên trong thư mục đã giải nén, nếu tồn tại
+        $htmlFolder = $extractedFolder . "/html";
+        if (is_dir($htmlFolder)) {
+            deleteDir($htmlFolder);
+        }
+		
+        // Đặt quyền cho thư mục đã giải nén
+        chmod($extractedFolder, 0777);
+		//$messages[] = "Giải nén dữ liệu thành công, tiến hành nâng cấp...";
+        return $extractedFolder;
+    } else {
+        $messages[] = "Có Lỗi Xảy Ra, không thể giải nén được giữ liệu đã tải xuống, đã dừng tiến trình";
+        return null;
+    }
+}
+
+
+#Sao chép file, chỉ có sao chép không có chức năng bỏ qua file hoặc thư mục dùng cho khôi phục dữ liệu
+/*
+function copyFiles($source, $destination) {
+	global $messages;
+    // Kiểm tra xem thư mục nguồn có tồn tại không
+    if (!is_dir($source)) {
+        $messages[] = "<font color=red>- Thư mục nguồn '$source' không tồn tại</font>";
+        return false;
+    }
+    // Tạo thư mục đích nếu chưa tồn tại
+    if (!is_dir($destination)) {
+        mkdir($destination, 0777, true);
+    }
+    // Mở thư mục nguồn
+    $dir = opendir($source);
+    while (($file = readdir($dir)) !== false) {
         // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
         if ($file != '.' && $file != '..') {
-            //$filePath = $dir . '/' . $file;
-			$filePath = rtrim($dir, '/') . '/' . $file; // loại bỏ dấu / ở cuối
+            // Đường dẫn đầy đủ của tệp hoặc thư mục
+            $srcPath = rtrim($source, '/') . '/' . $file;
+            $destPath = rtrim($destination, '/') . '/' . $file;
             // Nếu là thư mục, gọi đệ quy
-            if (is_dir($filePath)) {
-                deleteDirectory($filePath);
+            if (is_dir($srcPath)) {
+                copyFiles($srcPath, $destPath);
             } else {
-                // Xóa tệp
-                unlink($filePath);
-                $messages[] = "<font color=red>- Đã xóa tệp: </font> <font color=blue>$filePath</font>";
+                // Sao chép tệp
+                if (copy($srcPath, $destPath)) {
+                    //$messages[] = "<font color=blue>- Đã sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font> <font color=green><b>thành công</b></font><br/>";
+                    $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>".basename($srcPath)."</b></font>";
+                } else {
+                    $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
+                }
             }
         }
     }
-    // Cuối cùng, xóa thư mục
-    rmdir($dir);
-    $messages[] = "<font color=red>- Đã xóa thư mục: </font> <font color=blue>$dir</font>";
+    closedir($dir);
     return true;
 }
+*/
+
+
 
 #function Backup Chương trình Vbot
 function backup_data($Exclude_Files_Folder, $Exclude_File_Format){
@@ -500,7 +618,7 @@ if (copyFiles($Extract_Path_OK, $VBot_Offline)) {
 elseif ($Backup_Upgrade_Program === "yes_vbot_upgrade" || $Backup_Upgrade_Program === "no_vbot_upgrade") {
 
 
-#Xử lý dữu liệu nếu nút nhấn là chỉ tạo file backup
+#Xử lý dữ liệu nếu nút nhấn là chỉ tạo file backup
 if ($Backup_Upgrade_Program === "no_vbot_upgrade"){
 
 $messages[] =  "- Đang tiến hành sao lưu dữ liệu";
@@ -730,14 +848,16 @@ elseif($Backup_Upgrade_Program === "yes_vbot_upgrade"){
 	$make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) ? true : false;
 
 #Xử lý tải xuống bản cập nhật
+$download_Git_Repo_As_Named_Zip = downloadGitRepoAsNamedZip($Github_Repo_Vbot, $Download_Path);
 
 
+if (!is_null($download_Git_Repo_As_Named_Zip)) {
+$messages[] = "<font color=green>- Tải dữ liệu và giải nén thành công: ".$download_Git_Repo_As_Named_Zip."/";
 
 
-
-#nếu được chọn sao lưu  trước khi cập nhật
+#Bắt đầu sao lưu dữ liệu trước khi ghi đè, xử lý dữ liệu mới
 if ($make_a_backup_before_updating === true){
-$messages[] = "trueee: ".$make_a_backup_before_updating;
+$messages[] = "- Đang tiến hành sao lưu dữ liệu trước khi cập nhật...";
 //Sao lưu dữ liệu trước khi cập nhật hoặc sao lưu
 $FileName_Backup_VBot = backup_data($Exclude_Files_Folder, $Exclude_File_Format);
 if (!is_null($FileName_Backup_VBot)) {
@@ -944,16 +1064,51 @@ try {
 }else{
 	$messages[] = "Có lỗi xảy ra trong quá trình tạo bản sao lưu dữ liệu chương trình Vbot";
 }
+}else{
+	$messages[] = "- Sao lưu dữ liệu trước khi cập nhật bị tắt, sẽ không có bản sao lưu nào được tạo ra";
 }
 
+#tên tập tin để chuyển dữ liệu, nội dung trong tệp tin đó sang tập tin mới ["Config.json", "Action.json"];
+$filename_transfers_data_to_new_file = ["Config.json"];
+
+copyFilesToDestination($VBot_Offline, $Download_Path.'/', $filename_transfers_data_to_new_file);
+
+$messages[] = "<font color=green><b>- Đang tiến hành cập nhật dữ liệu mới...</b></font><br/>";
+#tiến hành Sao chép ghi đè dữ liệu mới
+if (copyFiles($download_Git_Repo_As_Named_Zip.'/', $VBot_Offline)) {
+    $messages[] = "<font color=green><b>- Đã cập nhật dữ liệu mới</b></font><br/>";
+	
+
+
+// Đường dẫn đến các tệp JSON
+$config_new_path = $VBot_Offline.'Config.json';
+$config_old_path = $Download_Path.'/Config.json';
+
+// Gọi hàm để thay thế giá trị
+replace_values_json_file($config_new_path, $config_old_path);
+
+
+} else {
+    $messages[] = "<font color=red>- Lỗi xảy ra trong quá trình cập nhật dữ liệu mới</font>";
+}
 
 #tiến hành coppy dữ liệu mới từ bản cập nhật
-$messages[] = "dsdsd";
+$messages[] = "dsdsd: ".$download_Git_Repo_As_Named_Zip;
 
+
+
+
+
+
+}else{
 	
-	
-	
+	$messages[] = "<font color=red><b>- Có Lỗi trong quá trình tải xuống và giải nén dữ liệu, đã dừng quá trình cập nhật dữ liệu mới</b>";
 }
+
+}
+
+
+
 }
 
 
@@ -1291,7 +1446,7 @@ foreach ($Config['backup_upgrade']['vbot_program']['backup']['exclude_file_forma
 
 
 <div class="row mb-3">
-<label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">Giữ lại tệp, thư mục <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp, thư mục không cho cập nhật, ghi đè<br/><br/>- Thiết lập thêm bớt file và thư mục trong tab: <b>Cấu Hình Config</b>')"></i> :</label>
+<label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">Giữ lại tệp, thư mục <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp, thư mục không cho cập nhật, ghi đè. <b>Áp dụng cho những tệp, thư mục lưu trữ cấu hình, thông tin Cá Nhân (Có tính chất Riêng Tư)</b><br/><br/>- Thiết lập thêm bớt file và thư mục trong tab: <b>Cấu Hình Config</b>')"></i> :</label>
 <div class="col-sm-9">
 <div class="input-group mb-3">
 <?php

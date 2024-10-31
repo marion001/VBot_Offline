@@ -33,6 +33,8 @@ $VBot_Offline = "/home/pi/VBot_Offline/";
 // Đường dẫn đến tệp JSON
 $Config_filePath = $VBot_Offline.'Config.json';
 
+//địa chỉ URL Repo Github, địa chỉ này sẽ dùng cho cập nhật, không được chỉnh sửa
+$Github_Repo_Vbot = "https://github.com/marion001/VBot_Offline";
 
 // Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
 $excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt'];
@@ -100,6 +102,8 @@ $Backup_Dir_Save_Web = $Config['backup_upgrade']['web_interface']['backup']['bac
 $Download_Path = $Config['backup_upgrade']['download_path'];
 
 $Extract_Path = $Config['backup_upgrade']['extract_path'];
+
+
 
 //Thông tin kết nối SSH
 #sudo apt-get install php-ssh2
