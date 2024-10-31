@@ -271,7 +271,9 @@
                     "stt_select_error": "resource/sound/default/stt_select_error.mp3",
                     "all_virtual_assistants_no_response": "resource/sound/default/all_virtual_assistants_no_response.mp3",
                     "home_assistant_active_false": "resource/sound/default/home_assistant_active_false.mp3",
-                    "play_music_call_error": "resource/sound/default/play_music_call_error.mp3"
+                    "play_music_call_error": "resource/sound/default/play_music_call_error.mp3",
+                    "updated_the_program_successfully": "resource/sound/default/updated_the_program_successfully.mp3",
+                    "interface_updated_successfully": "resource/sound/default/interface_updated_successfully.mp3"
                 },
                 "welcome": {
                     "active": true,
