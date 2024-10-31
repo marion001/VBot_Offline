@@ -1,17 +1,17 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "fdsfdsfdsf@gmail.com",
+        "email": "",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": "vhjtr gfd",
-            "district": "ferwe gfdg",
-            "province": "Hưng Yên",
+            "wards": "",
+            "district": "",
+            "province": "",
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": 28.5532336,
-            "longitude": 116.0633238
+            "latitude": 20.8888888,
+            "longitude": 106.8888888
         },
         "user_login": {
             "active": false,
@@ -49,11 +49,11 @@
         "active": true,
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://vfsfcsdcfe.duckdns.org",
-        "long_token": "dsadsadsad.dsadsadsad.rAgP-6435b345g43",
+        "external_url": "https://88888888.duckdns.org",
+        "long_token": "88888888.88888888.88888888-88888888",
         "time_out": 15,
         "custom_commands": {
-            "active": false,
+            "active": true,
             "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
         }
     },
@@ -75,16 +75,16 @@
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "888888888888888888888888888"
+            "api_key": "8888888888888888888888888"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": ""
+            "key_chat_gpt": "sk-proj--8888888888888888888888888"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "888888888888888888888888888"
+        "key_openweathermap": "8888888888888888888888888"
     },
     "media_player": {
         "active": true,
@@ -113,8 +113,8 @@
             "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
             "password": "VmlldGJvdEAx",
             "time_out": 7,
-            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3Mjk2ODgxNTEsIm5iZiI6MTcyOTY4ODE1MSwianRpIjoiNTIxYzNmMTQtNjVhYy00ODVlLWJmNGMtOGI1M2I1NzgzNWU3IiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.hPteK1n1Ps7GpMUrt-WtxWkRbHp-I7VbMxB0fwO0b1g",
-            "expire_time": 1729752951
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzAzMzc2MzcsIm5iZiI6MTczMDMzNzYzNywianRpIjoiNDJlYWQ5ZjUtNjUxMS00OWEzLWJjODMtNjQ2NTYyNjBkY2RjIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.U_YzYkyKAiERd05wXmvGHw6g9b1JIFE1_HjxohDXqr8",
+            "expire_time": 1730402437
         },
         "radio": {
             "active": true
@@ -196,7 +196,7 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": false,
+                    "active": true,
                     "duration": 4
                 }
             },
@@ -206,7 +206,7 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": false,
+                    "active": true,
                     "duration": 4
                 }
             },
@@ -216,7 +216,7 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": false,
+                    "active": true,
                     "duration": 4
                 }
             },
@@ -226,14 +226,14 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": false,
+                    "active": true,
                     "duration": 4
                 }
             }
         },
         "smart_wakeup": {
             "speak_to_text": {
-                "stt_select": "stt_ggcloud",
+                "stt_select": "stt_default",
                 "duration_recording": 6,
                 "silence_duration": 3,
                 "min_amplitude_threshold": 370,
@@ -242,8 +242,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "888888888888888888888888888",
-                        "777777777777777777777777777"
+                        "44444444444444444444444444444444",
+                        "55555555555555555555555555555555"
                     ]
                 },
                 "stt_ggcloud": {
@@ -304,7 +304,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "888888888888888888888888888"
+                "key": "/8888888888888888888888888+TGsdTNolucA=="
             },
             "hotword": {
                 "lang": "vi",
@@ -345,7 +345,7 @@
                 "active": true
             },
             "text_to_speak": {
-                "tts_select": "tts_ggcloud",
+                "tts_select": "tts_default",
                 "tts_ggcloud": {
                     "language_code": "vi-VN",
                     "voice_name": "vi-VN-Wavenet-A",
@@ -363,16 +363,16 @@
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "888888888888888888888888888",
-                        "888888888888888888888888888",
-                        "888888888888888888888888888"
+                        "8888888888888888888888888",
+                        "9999999999999999999999999",
+                        "7777777777777777777777777"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "888888888888888888888888888"
+                        "66666666666666666666666666"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,
@@ -390,6 +390,11 @@
     "backup_upgrade": {
         "download_path": "Backup_Upgrade/Download",
         "extract_path": "Backup_Upgrade/Extract",
+        "config_json": {
+            "active": true,
+            "limit_backup_files": 5,
+            "backup_path": "Backup_Upgrade/Backup_Config"
+        },
         "vbot_program": {
             "backup": {
                 "backup_path": "Backup_Upgrade/Backup_Program",
@@ -412,6 +417,7 @@
                 }
             },
             "upgrade": {
+                "backup_before_updating": true,
                 "keep_file_directory": [
                     "Config.json",
                     "Action.json",
@@ -446,6 +452,9 @@
                 "backup_to_cloud": {
                     "google_drive": true
                 }
+            },
+            "upgrade": {
+                "backup_before_updating": true
             }
         },
         "advanced_settings": {
@@ -454,7 +463,7 @@
             "refresh_page_ui": true
         },
         "google_cloud_drive": {
-            "active": false,
+            "active": true,
             "backup_folder_name": "Vbot_Assistant_Backup",
             "limit_backup_files": 5,
             "setAccessType": "offline",

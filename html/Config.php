@@ -10,7 +10,6 @@ session_start();
 // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
 if (!isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-    
     // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
     session_unset();
     session_destroy();
@@ -25,11 +24,67 @@ if (!isset($_SESSION['user_login']) ||
 
 
 
+if ($Config['backup_upgrade']['config_json']['active'] === true){
+$directoryPath_Backup_Config = $Config['backup_upgrade']['config_json']['backup_path'];
+//Kiểm tra xem thư mục Backup_Config có tồn tại hay không
+if (!is_dir($directoryPath_Backup_Config)) {
+    if (mkdir($directoryPath_Backup_Config, 0777, true)) {
+		chmod($directoryPath_Backup_Config, 0777);
+    } 
+}
+
+}
 $read_stt_token_google_cloud = null;
 
+if (isset($_POST['start_recovery_config_json'])) {
+    $start_recovery_config_json = $_POST['backup_config_json_files'];
 
+    if (!empty($start_recovery_config_json)) {
+
+
+
+if (file_exists($start_recovery_config_json)) {
+    $command = 'cp ' . escapeshellarg($start_recovery_config_json) . ' ' . escapeshellarg($VBot_Offline.'Config.json');
+    exec($command, $output, $resultCode);
+	
+    if ($resultCode === 0) {
+        $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu thành công";
+    } else {
+        $messages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Config.json Mã lỗi: " . $resultCode;
+    }
+} else {
+    $messages[] = "Lỗi: Tệp nguồn không tồn tại.";
+}
+    } else {
+        $messages[] = "Không có tệp sao lưu Config nào được chọn để khôi phục!";
+    }
+}
+
+#Lưu lại các giá trị Config.json
 if (isset($_POST['all_config_save'])) {
 
+if ($Config['backup_upgrade']['config_json']['active'] === true){
+// Lấy ngày và giờ hiện tại
+$dateTime = new DateTime();
+$newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
+$destinationFile_Backup_Config = $directoryPath_Backup_Config.'/'.$newFileName;
+if (copy($Config_filePath, $destinationFile_Backup_Config)) {
+    chmod($destinationFile_Backup_Config, 0777);
+    $files_ConfigJso_BUP = glob($directoryPath_Backup_Config.'/*.json');
+    if (count($files_ConfigJso_BUP) > $Config['backup_upgrade']['config_json']['limit_backup_files']) {
+        // Sắp xếp các file theo thời gian tạo (cũ nhất trước)
+        usort($files_ConfigJso_BUP, function($a, $b) {
+            return filemtime($a) - filemtime($b);
+        });
+        // Xóa file cũ nhất
+        $oldestFile_configBaup = array_shift($files_ConfigJso_BUP);
+        if (unlink($oldestFile_configBaup)) {
+           // echo "Đã xóa file cũ nhất: $oldestFile_configBaup\n";
+		   
+        }
+    }
+}
+}
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG mic
 $Config['smart_config']['mic']['id'] = intval($_POST['mic_id']);
 $Config['smart_config']['mic']['scan_on_boot'] = isset($_POST['mic_scan_on_boot']) ? true : false;
@@ -171,7 +226,6 @@ $Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
 $Config['smart_config']['led']['brightness'] = intval($_POST['led_brightness']);
 $Config['smart_config']['led']['led_invert'] = isset($_POST['led_invert']) ? true : false;
 $Config['smart_config']['led']['led_starting_up'] = isset($_POST['led_starting_up']) ? true : false;
-
 $Config['smart_config']['led']['effect']['led_think'] = $_POST['led_think'];
 $Config['smart_config']['led']['effect']['led_mute'] = $_POST['led_mute'];
 
@@ -229,8 +283,19 @@ $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['r
 $Config['backup_upgrade']['advanced_settings']['sound_notification'] = isset($_POST['sound_notification_backup_upgrade']) ? true : false;
 $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] = isset($_POST['refresh_page_ui_backup_upgrade']) ? true : false;
 
+#Cập nhật sao lưu Vbot cài đặt Config.json
+$Config['backup_upgrade']['config_json']['active'] = isset($_POST['backup_config_json_active']) ? true : false;
+$Config['backup_upgrade']['config_json']['limit_backup_files'] = intval($_POST['limit_backup_files_config_json']);
+$Config['backup_upgrade']['config_json']['backup_path'] = $_POST['backup_path_config_json'];
 $Config['backup_upgrade']['vbot_program']['backup']['backup_to_cloud']['google_drive'] = isset($_POST['backup_vbot_google_drive']) ? true : false;
 $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files'] = intval($_POST['backup_upgrade_vbot_limit_backup_files']);
+
+#Cập nhật  Chương trình Vbot
+$Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_vbot']) ? true : false;
+
+#Cập nhật giao diện vbot
+$Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_interface']) ? true : false;
+
 
 #Cập nhật bỏ qua file, thư mục không cần sao lưu trương trình vbot
 $Backup_Upgrade_VBot_Exclude_Files_Folder = $_POST['backup_upgrade_vbot_exclude_files_folder'];
@@ -238,12 +303,19 @@ $exclude_FilesFolder_Vbot_backup_upgrade = array_filter(array_map('trim', explod
 #Lưu dữ liệu
 $Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder'] = $exclude_FilesFolder_Vbot_backup_upgrade;
 
-
 #Cập nhật bỏ qua định dạng tệp tin không cần sao lưu trương trình Vbot
 $Backup_Upgrade_VBot_exclude_file_Format = $_POST['backup_upgrade_vbot_exclude_file_format'];
 $excludefile_Format_Vbot_backup_upgrade = array_filter(array_map('trim', explode("\n", $Backup_Upgrade_VBot_exclude_file_Format)));
 #Lưu dữ liệu
 $Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] = $excludefile_Format_Vbot_backup_upgrade;
+
+
+#Cập nhật: giữ lại tệp, thư mục không cho cập nhật chương trình vbot
+$vbot_program_upgrade_keep_the_file_folder = $_POST['vbot_program_upgrade_keep_the_file_folder'];
+$vbot_program_upgrade_keep_the_file_folder_tuyen = array_filter(array_map('trim', explode("\n", $vbot_program_upgrade_keep_the_file_folder)));
+#Lưu dữ liệu
+$Config['backup_upgrade']['vbot_program']['upgrade']['keep_the_file_folder'] = $vbot_program_upgrade_keep_the_file_folder_tuyen;
+
 
 
 #Cập nhật sao lưu Giao diện Web UI
@@ -263,10 +335,8 @@ $excludefile_Format_web_interface_backup_upgrade = array_filter(array_map('trim'
 #Lưu dữ liệu
 $Config['backup_upgrade']['web_interface']['backup']['exclude_file_format'] = $excludefile_Format_web_interface_backup_upgrade;
 
-
 #Cập nhật bật tắt Kích hoạt radio
 $Config['media_player']['radio']['active'] = isset($_POST['radio_active']) ? true : false;
-
 
 #Cập nhật Custom Skill active
 $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
@@ -279,7 +349,6 @@ foreach ($_POST as $key => $value) {
     if (strpos($key, 'radio_name_') === 0) {
         $index = str_replace('radio_name_', '', $key);
         $link_key = 'radio_link_' . $index;
-
         // Kiểm tra cả tên đài và link đài đều có dữ liệu
         if (isset($_POST[$link_key]) && !empty(trim($_POST[$key])) && !empty(trim($_POST[$link_key]))) {
             $updated_radio_data[] = [
@@ -289,10 +358,8 @@ foreach ($_POST as $key => $value) {
         }
     }
 }
-
 // Lưu dữ liệu radio đã cập nhật vào cấu hình
 $Config['media_player']['radio_data'] = $updated_radio_data;
-		
 ##########################################
 
 #Cập nhật stt Google Cloud
@@ -328,10 +395,6 @@ if (json_last_error() === JSON_ERROR_NONE) {
 } else {
     $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
 }	
-
-// Lưu cấu hình $Config vào file JSON
-//file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
 $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 
 if ($result_ConfigJson !== false) {
@@ -339,9 +402,6 @@ if ($result_ConfigJson !== false) {
 } else {
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
 }
-
-
-
 }
 #########################
 
@@ -350,11 +410,9 @@ if (isset($_POST['save_hotword_theo_lang'])) {
     $lang = $_POST['lang_hotword_get'];
     $Lib_modelFilePath = $_POST['select_file_lib_pv'];
     $updatedConfig = [];
-
 if (empty($Lib_modelFilePath)) {
 	$messages[] = "Lỗi, Cần chọn file thư viện Hotword .pv";
 }else{
-	
 // Kiểm tra giá trị của biến $lang
 if ($lang !== 'eng' && $lang !== 'vi') {
     $messages[] = "Thất bại, Giá trị ngôn ngữ không có hoặc không phải là 'eng' hay 'vi'";
@@ -377,10 +435,8 @@ if ($lang !== 'eng' && $lang !== 'vi') {
             }
         }
     }
-
     $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = $updatedConfig;
     $Config['smart_config']['smart_wakeup']['hotword']['library'][$lang]['modelFilePath'] = $Lib_modelFilePath;
-
     file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     $messages[] = 'Cập nhật các giá trị trong Hotword thành công';
 }
@@ -390,7 +446,6 @@ if ($lang !== 'eng' && $lang !== 'vi') {
 #Đọc File stt và tts google cloud
  if (file_exists($stt_token_google_cloud)) {
 		$read_stt_token_google_cloud = file_get_contents($stt_token_google_cloud);
-		
     } else {
 		$read_stt_token_google_cloud = '';
 		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
@@ -402,17 +457,6 @@ if ($lang !== 'eng' && $lang !== 'vi') {
 		$read_tts_token_google_cloud = '';
 		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
     }
-#đọc file backlist tts zalo
-/*
- if (file_exists($Backlist_File_Name)) {
-		$read_backlist_file_name = file_get_contents($Backlist_File_Name);
-		$data_backlist = json_decode($read_backlist_file_name, true);
-    } else {
-		$read_backlist_file_name = '';
-		$data_backlist = null;
-		$messages[] = 'Lỗi: File '.$Backlist_File_Name.' không tồn tại.';
-    }
-	*/
 ?>
 
 <!DOCTYPE html>
@@ -431,7 +475,6 @@ include 'html_head.php';
             margin: 20px auto;
             max-width: calc(100vw - 40px);
         }
-
         #modal_dialog_show_config .modal-content {
             max-height: calc(100vh - 40px);
             overflow-y: auto;
@@ -451,15 +494,12 @@ include 'html_head.php';
             font-size: 24px;
 			z-index: 2; 
         }
-
         .scroll-to-bottom {
             bottom: 15px;
         }
-
         .scroll-to-top {
             bottom: 60px;
         }
-
     </style>
  </head>
 <body>
@@ -479,9 +519,6 @@ include 'html_head.php';
 include 'html_header_bar.php'; 
 ?>
 <!-- End Header -->
-
-
-
   <!-- ======= Sidebar ======= -->
 <?php
 include 'html_sidebar.php';
@@ -501,41 +538,24 @@ hihi Vũ Tuyển
 -->
 
   <main id="main" class="main">
-
     <div class="pagetitle">
-      <h1>Cấu hình <font color="red" id="openModalBtn_Config1">Config.json</font></h1>
+      <h1>Cấu hình <font color="red" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')">Config.json</font></h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
-          <li class="breadcrumb-item active" id="openModalBtn_Config2">Config.json</li>
+          <li class="breadcrumb-item active" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')">Config.json</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
-
-
 <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="">
     <section class="section">
       <div class="row">
         <div class="col-lg-12">
-
-		  
 		  <div class="card accordion" id="accordion_button_ssh">
 		<div class="card-body">
-			  
 			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_ssh" aria-expanded="false" aria-controls="collapse_button_ssh">
                  Cấu Hình Kết Nối SSH Server <font color="red"> (Bắt Buộc)</font>:</h5>
-				 
 				 <div id="collapse_button_ssh" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_ssh">
-	
-				 <!--
-                <div class="row mb-3">
-                  <label for="ssh_host" class="col-sm-3 col-form-label">Máy chủ:</label>
-                  <div class="col-sm-9">
-                      <input required class="form-control border-success" type="text" name="ssh_host" id="ssh_host" placeholder="<?php //echo $serverIp; ?>" value="<?php //echo $Config['ssh_server']['ssh_host']; ?>">
-                 <div class="invalid-feedback">Cần nhập địa chỉ ip máy chủ SSH</div>
-                  </div>
-                </div>
-				-->
                 <div class="row mb-3">
                   <label for="ssh_port" class="col-sm-3 col-form-label">Cổng kết nối:</label>
                   <div class="col-sm-9">
@@ -557,15 +577,10 @@ hihi Vũ Tuyển
                  <div class="invalid-feedback">Cần nhập mật khẩu của máy chủ SSH</div>
                   </div>
                 </div>
-				
 				<center><button type="button" class="btn btn-success rounded-pill" onclick="checkSSHConnection()">Kiểm tra kết nối SSH</button></center>
-
-				
                 </div>
                 </div>
                 </div>
-				
-
 
 <div class="card accordion" id="accordion_button_setting_API">
 <div class="card-body">
@@ -641,7 +656,7 @@ Cấu Hình Âm Thanh Volume/Mic:
                       <input required class="form-control border-success" type="number" name="mic_id" id="mic_id" placeholder="<?php echo $Config['smart_config']['mic']['id']; ?>" value="<?php echo $Config['smart_config']['mic']['id']; ?>">
                  	     
 				 <div class="invalid-feedback">Cần nhập ID của Mic!</div>
-				  <button class="btn btn-success border-success" type="button" onclick="scan_Mic()">Tìm Kiếm</button>
+				  <button class="btn btn-success border-success" type="button" onclick="scan_audio_devices('scan_mic')">Tìm Kiếm</button>
   
                   </div>
                 </div>
@@ -665,14 +680,18 @@ Cấu Hình Âm Thanh Volume/Mic:
 <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Âm Lượng (Volume)/Audio Out &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font>')"></i> &nbsp;:</h5>
 
                 <div class="row mb-3">
-                  <label for="alsamixer_name" class="col-sm-3 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer">Tên thiết bị (alsamixer):</label>
+                  <label for="alsamixer_name" class="col-sm-3 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer">Tên thiết bị (alsamixer) <i class="bi bi-question-circle-fill" onclick="show_message('Tên của thiết bị âm thanh đầu ra trong alsamixer, cần điền đúng tên thiết bị âm thanh đầu ra hiện tại của alsamixer<br/><br/>- nếu không biết đâu là thiết bị âm thanh đầu ra thì bạn có thể phát 1 bài nhạc bằng vlc ví dụ: <b>$: vlc 1.mp3</b> sau đó vào alsamixer bằng lệnh: <b>$: alsamixer</b> thay đổi âm lượng của các thiết bị có trong đó để xác định xem đâu là tên thiết bị đầu ra')"></i>:</label>
                   <div class="col-sm-9">
+				  <div class="input-group mb-3">
                       <input class="form-control border-success" type="text" name="alsamixer_name" id="alsamixer_name" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer" placeholder="<?php echo $Config['smart_config']['speaker']['system']['alsamixer_name']; ?>" value="<?php echo $Config['smart_config']['speaker']['system']['alsamixer_name']; ?>">
-                    </div>
+                    <button class="btn btn-success border-success" type="button" onclick="scan_audio_devices('scan_alsamixer')">Tìm Kiếm</button>
+					</div>
+					</div>
                   </div>
                 <div class="row mb-3">
                   <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình')"></i> :</label>
                   <div class="col-sm-9">
+				  
                       <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume" id="bot_volume" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Âm lượng khi chạy lần đầu tiên" placeholder="<?php echo $Config['smart_config']['speaker']['volume']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume']; ?>">
 					<div class="invalid-feedback">Cần nhập âm lượng khi khởi động!</div>
 					</div>
@@ -701,6 +720,10 @@ Cấu Hình Âm Thanh Volume/Mic:
                     <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
 					</div>
                   </div>
+				  
+				<div class="row mb-3">
+				 <div id="alsamixer_scan"></div>
+				</div>
 </div>
 </div>
 </div>
@@ -2287,6 +2310,43 @@ Sao Lưu/Cập Nhật:</h5>
 </div>
 </div>
 
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Sao Lưu Config.json</h5>
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Config.json mỗi khi lưu hoặc thay đổi cấu hình Config.json')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="backup_config_json_active" id="backup_config_json_active" <?php echo $Config['backup_upgrade']['config_json']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Tệp Config.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+<div class="col-sm-9">
+<input readonly class="form-control border-danger" type="text" name="backup_path_config_json" id="backup_path_config_json" value="<?php echo $Config['backup_upgrade']['config_json']['backup_path']; ?>">
+<div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu Config.json</div>
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Config, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_files_config_json" id="limit_backup_files_config_json" value="<?php echo $Config['backup_upgrade']['config_json']['limit_backup_files']; ?>">
+<div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</div>
+
+
 <div class="card">
 <div class="card-body">
 
@@ -2381,7 +2441,40 @@ $backup_upgrade_vbot_exclude_file = isset($Config['backup_upgrade']['vbot_progra
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cau_hinh_Cap_nhat_Vbot" aria-expanded="false" aria-controls="collapse_button_cau_hinh_Cap_nhat_Vbot">
 Cập Nhật VBot:</h5>
 <div id="collapse_button_cau_hinh_Cap_nhat_Vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cau_hinh_Cap_nhat_Vbot">
-hihi Vũ Tuyển
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu được tạo ra trước khi cập nhật sẽ được tải lên Google Drive')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="make_a_backup_before_updating_vbot" id="make_a_backup_before_updating_vbot" <?php echo $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+
+
+<div class="row mb-3">
+<label for="vbot_program_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<textarea class="form-control border-success" rows="5" name="vbot_program_upgrade_keep_the_file_folder" id="vbot_program_upgrade_keep_the_file_folder">
+<?php
+$excludeFilesFolder_Vbot_upgrade = isset($Config['backup_upgrade']['vbot_program']['upgrade']['keep_the_file_folder']) ? $Config['backup_upgrade']['vbot_program']['upgrade']['keep_the_file_folder'] : [];
+    if (!empty($excludeFilesFolder_Vbot_upgrade)) {
+        foreach ($excludeFilesFolder_Vbot_upgrade as $index_exclude_files_folder_Vbot_UPGRADE => $item_exclude_files_folder_VBot_upgrade) {
+            echo htmlspecialchars($item_exclude_files_folder_VBot_upgrade);
+            // Không thêm xuống dòng cuối cùng sau phần tử cuối
+            if ($index_exclude_files_folder_Vbot_UPGRADE < count($excludeFilesFolder_Vbot_upgrade) - 1) {
+                echo "\n";
+            }
+        }
+    }
+?>
+</textarea>
+</div>
+</div>
+</div>
+
+
 </div>
 </div>
 </div>
@@ -2468,8 +2561,6 @@ $backup_upgrade_web_interface_exclude_file = isset($Config['backup_upgrade']['we
 </div>
 </div>
 </div>
-
-
 </div>
 </div>
 </div>
@@ -2481,13 +2572,25 @@ $backup_upgrade_web_interface_exclude_file = isset($Config['backup_upgrade']['we
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cap_nhat_giao_dien" aria-expanded="false" aria-controls="collapse_button_cap_nhat_giao_dien">
 Cập Nhật Giao Diện:</h5>
 <div id="collapse_button_cap_nhat_giao_dien" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cap_nhat_giao_dien">
-hihi Vũ Tuyển
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu được tạo ra trước khi cập nhật sẽ được tải lên Google Drive')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="make_a_backup_before_updating_interface" id="make_a_backup_before_updating_interface" <?php echo $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
 </div>
 </div>
 </div>
 				
 </div>
 </div>
+
+
 </div>
 </div>
 </div>
@@ -2639,12 +2742,56 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
                 </div>
 
 
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Khôi Phục Config.json <i class="bi bi-question-circle-fill" onclick="show_message('Khôi Phục Config.json từ tệp sao lưu trên hệ thống')"></i>:</h5>
 <div class="row mb-3">
-             
-                
-                   <center> <button type="submit" name="all_config_save" class="btn btn-primary rounded-pill">Lưu Cấu Hình Config</button>
-                    <button type="button" class="btn btn-warning rounded-pill" id="openModalBtn_Config">Xem Config.json</button>
-				   
+<label class="col-sm-3 col-form-label text-primary">Chọn Tệp Khôi Phục:</label>
+<div class="col-sm-9">
+
+<?php
+$jsonFiles = glob($Config['backup_upgrade']['config_json']['backup_path'].'/*.json');
+$co_tep_BackUp_ConfigJson = true;
+if (empty($jsonFiles)) {
+	$co_tep_BackUp_ConfigJson = false;
+echo '<select class="form-select border-primary" name="backup_config_json_files" id="backup_config_json_files">';
+    echo '<option selected value="">Không có tệp khôi phục dữ liệu Config nào</option>';
+	echo '</select>';
+} else {
+	$co_tep_BackUp_ConfigJson = true;
+echo '<select class="form-select border-primary" name="backup_config_json_files" id="backup_config_json_files">';
+echo '<option selected value="">Chọn Tệp Khôi Phục Dữ Liệu Config</option>';
+foreach ($jsonFiles as $file) {
+    $fileName = basename($file);
+    echo '<option value="' . htmlspecialchars($Config['backup_upgrade']['config_json']['backup_path'].'/'.$fileName) . '">' . htmlspecialchars($fileName) . '</option>';
+}
+echo '</select>';
+}
+?>
+</div>
+</div>
+<?php 
+if ($co_tep_BackUp_ConfigJson === true){
+echo '<center>
+<button class="btn btn-success rounded-pill" name="start_recovery_config_json" type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu Config từ tệp sao lưu trên hệ thống\')">Khôi Phục</button>
+<button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path(\'get_value_backup_config\')">Xem Tệp Sao Lưu</button>
+<button type="button" class="btn btn-success rounded-pill" title="Tải Xuống Tệp Sao Lưu Config" onclick="dowlaod_file_backup_json_config(\'get_value_backup_config\')"><i class="bi bi-download"></i> Tải Xuống Tệp Sao Lưu</button>
+</center>';
+}
+?>
+</div>
+</div>
+
+
+
+
+
+<div class="row mb-3">
+<center>
+<button type="submit" name="all_config_save" class="btn btn-primary rounded-pill">Lưu Cài Đặt Config</button>
+<button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')">Xem Tệp Config</button>
+<button type="button" class="btn btn-success rounded-pill" title="Tải Xuống file: Config.json" onclick="downloadFile('<?php echo $Config_filePath; ?>')"><i class="bi bi-download"></i> Tải Xuống</button>
+
 				   </center>
 	
     <!-- Modal hiển thị tệp Config.json -->
@@ -2734,14 +2881,42 @@ include 'html_js.php';
 
 <script>
 
-// Hiển thị modal xem nội dung file Config
-['openModalBtn_Config', 'openModalBtn_Config1', 'openModalBtn_Config2'].forEach(function(id) {
-    document.getElementById(id).addEventListener('click', function() {
-        read_loadFile('<?php echo $Config_filePath; ?>');
-        $('#myModal_Config').modal('show');
-    });
-});
 
+//Tải xuống file backup Config
+function dowlaod_file_backup_json_config(filePath) {
+    if (filePath === "get_value_backup_config") {
+		//Lấy giá trị value của id: backup_config_json_files
+        var get_value_backup_config = document.getElementById('backup_config_json_files').value;
+        if (get_value_backup_config === "") {
+            showMessagePHP("Không có tệp nào được chọn để tải xuống");
+        } else {
+            filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+            downloadFile(filePath);
+        }
+    } else {
+        showMessagePHP("Không có tệp nào được chọn để tải xuống.");
+    }
+}
+
+
+
+//onclick xem nội dung file json
+function readJSON_file_path(filePath) {
+    if (filePath === "get_value_backup_config") {
+		//Lấy giá trị value của id: backup_config_json_files
+        var get_value_backup_config = document.getElementById('backup_config_json_files').value;
+        if (get_value_backup_config === "") {
+            showMessagePHP("Không có tệp nào được chọn để xem nội dung");
+        } else {
+            filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+            read_loadFile(filePath);
+            $('#myModal_Config').modal('show');
+        }
+    } else {
+        read_loadFile(filePath);
+        $('#myModal_Config').modal('show');
+    }
+}
 		
 
     //ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
@@ -3342,11 +3517,12 @@ function test_key_Picovoice() {
 
 
 
-
-function scan_Mic() {
+//scan_audio_devices('scan_Mic')
+//scan mic hoặc audio out
+function scan_audio_devices(device_name) {
     loading("show");
     var xhr = new XMLHttpRequest();
-    var url = 'includes/php_ajax/Scanner.php?scan_mic';
+    var url = 'includes/php_ajax/Scanner.php?'+device_name;
     xhr.open('GET', url, true);
     xhr.responseType = 'json';
     
@@ -3355,29 +3531,53 @@ function scan_Mic() {
         if (xhr.status >= 200 && xhr.status < 300) {
 			loading("hide");
             var data = xhr.response;
-            var container = document.getElementById('mic_scanner');
+			
+
+
 
             if (data && data.success) {
                 //console.log(data.message);
                 //console.log(data.devices);
 
-                // Tạo HTML cho bảng
+			if (device_name === "scan_mic"){
+				var container = document.getElementById('mic_scanner');
                 var tableHTML = '<table class="table table-bordered border-primary">';
                 tableHTML += '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color=green>'+data.message+'</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Mic</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
                 tableHTML += '<tbody>';
-
                 data.devices.forEach(function(device) {
-                    tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.ID + '</td><td>' + (device.Tên || '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_MIC(' + device.ID + ')">Chọn</button></td></td></tr>';
+                    tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.ID + '</td><td style="vertical-align: middle;">' + (device.Tên || '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_MIC(' + device.ID + ')">Chọn</button></td></td></tr>';
                 });
-
                 tableHTML += '</tbody></table>';
-
-                // Đẩy nội dung bảng vào thẻ div
                 if (container) {
+					showMessagePHP(data.message, 4);
                     container.innerHTML = tableHTML;
                 } else {
-                    show_message('Không tìm thấy thẻ div với id "mic_scanner".');
+                    show_message('Không tìm thấy thẻ div với id: '+container);
                 }
+			}
+			//Hiển thị thông tin khi scan_alsamixer 
+			else if (device_name === "scan_alsamixer"){
+				var container = document.getElementById('alsamixer_scan');
+                var tableHTML = '<table class="table table-bordered border-primary">';
+                tableHTML += '<thead><tr><th colspan="6" style="text-align: center; vertical-align: middle;"><font color=green>'+data.message+'</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Speaker</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Khả Năng</th><th style="text-align: center; vertical-align: middle;">Kênh Phát</th><th style="text-align: center; vertical-align: middle;">Thông Số</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
+                tableHTML += '<tbody>';
+                data.devices.forEach(function(device) {
+                    tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.id + '</td><td style="vertical-align: middle;">' + (device.name || '') + '</td><td style="vertical-align: middle;">' + (device.capabilities || '') + '</td><td style="vertical-align: middle;">' + (device.playback_channels || '') + '</td><td style="vertical-align: middle;">' + (device.values.length > 0 ? device.values.map(value => (value.channel || '') + ' ' + (value.details || '')).join('<br>') : '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_Alsamixer(\''+device.name+'\')">Chọn</button></td></td></tr>';
+                });
+                tableHTML += '</tbody></table>';
+                // Đẩy nội dung bảng vào thẻ div
+                if (container) {
+					showMessagePHP(data.message, 4);
+                    container.innerHTML = tableHTML;
+                } else {
+                    show_message('Không tìm thấy thẻ div với id: '+container);
+                }
+			}
+
+
+				
+				
+				
 
             } else if (data) {
                 show_message('Lỗi: ' + data.message);
@@ -3403,9 +3603,20 @@ function selectDevice_MIC(id) {
     var micInput = document.getElementById('mic_id');
     if (micInput) {
         micInput.value = id;
-		showMessagePHP('Đã chọn Mic có id là: '+id);
+		showMessagePHP('Đã chọn Mic có id là: '+id, 3);
     } else {
-        show_message('Không tìm thấy thẻ input với id "mic_id".');
+        show_message('Không tìm thấy thẻ input với id "mic_id".', 3);
+    }
+}
+
+//Chọn Speaker để đẩy vào value của thẻ Tên thiết bị (alsamixer):
+function selectDevice_Alsamixer(name) {
+    var alsamixerInput = document.getElementById('alsamixer_name');
+    if (alsamixerInput) {
+        alsamixerInput.value = name;
+		showMessagePHP('Đã chọn thiết bị trong alsamixer có tên là là: '+name, 3);
+    } else {
+        show_message('Không tìm thấy thẻ input với id "alsamixer_name".', 3);
     }
 }
 </script>

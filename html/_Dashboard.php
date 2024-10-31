@@ -116,7 +116,7 @@ function extractTarGz($tarFilePath, $extractTo) {
     }
 }
 
-
+/*
 function copyFiles($source, $destination) {
 	global $messages;
     // Kiểm tra xem thư mục nguồn có tồn tại không
@@ -144,6 +144,53 @@ function copyFiles($source, $destination) {
                 if (copy($srcPath, $destPath)) {
                     //$messages[] = "<font color=blue>- Đã sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font> <font color=green><b>thành công</b></font><br/>";
                     $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>".basename($srcPath)."</b></font>";
+                } else {
+                    $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
+                }
+            }
+        }
+    }
+    closedir($dir);
+    return true;
+}
+*/
+
+function copyFiles($source, $destination, $keepList = []) {
+    global $messages;
+	$messages[] = "Vào Coppy mới";
+    // Kiểm tra xem thư mục nguồn có tồn tại không
+    if (!is_dir($source)) {
+        $messages[] = "<font color=red>- Thư mục nguồn '$source' không tồn tại</font>";
+        return false;
+    }
+
+    // Tạo thư mục đích nếu chưa tồn tại
+    if (!is_dir($destination)) {
+        mkdir($destination, 0777, true);
+    }
+
+    // Mở thư mục nguồn
+    $dir = opendir($source);
+    while (($file = readdir($dir)) !== false) {
+        // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
+        if ($file != '.' && $file != '..') {
+            // Đường dẫn đầy đủ của tệp hoặc thư mục
+            $srcPath = rtrim($source, '/') . '/' . $file;
+            $destPath = rtrim($destination, '/') . '/' . $file;
+
+            // Bỏ qua nếu file hoặc thư mục nằm trong danh sách cần giữ lại
+            if (in_array($file, $keepList)) {
+                $messages[] = "<font color=orange>- Bỏ qua tệp/thư mục: </font><font color=blue><b>$file</b></font>";
+                continue;
+            }
+
+            // Nếu là thư mục, gọi đệ quy
+            if (is_dir($srcPath)) {
+                copyFiles($srcPath, $destPath, $keepList);
+            } else {
+                // Sao chép tệp
+                if (copy($srcPath, $destPath)) {
+                    $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>" . basename($srcPath) . "</b></font>";
                 } else {
                     $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
                 }
@@ -410,23 +457,23 @@ if (copyFiles($Extract_Path_OK, $directory_path.'/')) {
 	
 }
 
-elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade" || $Backup_Upgrade_Interface === "no_interface_upgrade") { 
-	$messages[] =  "- Sao Lưu dữ liệu, hoặc cập nhật Giao Diện Vbot";
+elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade" || $Backup_Upgrade_Interface === "no_interface_upgrade") {
+
+//$messages[] =  "- Sao Lưu dữ liệu, hoặc cập nhật Giao Diện Vbot";
+
+if ($Backup_Upgrade_Interface === "no_interface_upgrade"){
+$messages[] =  "Đang tiến hành sao lưu Giao Diện Web UI";
+
+
 
 
 $FileName_Backup_VBot = backup_interface($Exclude_Files_Folder, $Exclude_File_Format);
-
 if (!is_null($FileName_Backup_VBot)) {
 $messages[] = "<font color=green>- Hoàn thành Sao Lưu Giao Diện Trên Hệ Thống: <b>" .$FileName_Backup_VBot."</b></font>";
-
-	
 if ($Backup_To_Cloud === "gdrive"){
-	
 if ($google_cloud_drive_active === true){
-
 if ($libPath_exist === true) {
 $messages[] = '<br/><font color=blue>- Tiến Hành Sao Lưu Dữ Liệu Lên Google Cloud Drive</font>';
-
 // Khởi tạo client
 $client = new Client();
 $client->setAuthConfig($authConfigPath); // Đường dẫn tới tệp xác thực
@@ -451,25 +498,20 @@ if ($client->isAccessTokenExpired()) {
 		$messages[] = "<font color=red>- Không có Token Làm Mới, Hãy kiểm tra lại cấu hình Google Cloud Drive</font>";
     }
 }
-
 // Xác thực và tạo dịch vụ Drive
 $service = new Drive($client);
 // Tên thư mục cần kiểm tra hoặc tạo
 $folderName = $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'];
-
-
 //Khởi tạo để cấp quyền cho thư mục nếu được tạo
 $permission = new Google\Service\Drive\Permission();
 $permission->setType('anyone');
 $permission->setRole('reader');
-
 // Kiểm tra thư mục chính có tồn tại không
 $query = "mimeType='application/vnd.google-apps.folder' and name='$folderName' and trashed=false";
 $response = $service->files->listFiles(array(
     'q' => $query,
     'fields' => 'files(id, name)'
 ));
-
 if (count($response->files) > 0) {
 	// Lấy ID của thư mục chính
     $folderId = $response->files[0]->id;
@@ -481,7 +523,6 @@ if (count($response->files) > 0) {
         'q' => $backupQuery,
         'fields' => 'files(id, name)'
     ));
-
     if (count($backupResponse->files) > 0) {
         $backupFolderId = $backupResponse->files[0]->id;
         //$messages[] = "Thư mục $backupFolderName đã tồn tại bên trong thư mục $folderName với ID: " . $backupFolderId . ".\n";
@@ -613,20 +654,227 @@ try {
 }else{
 	$messages[] = "<font color=red>- <b>Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active), Sẽ không có file Backup nào được tải lên Google Cloud Drive</font>";
 }
-
-
 	}else{
-		
-		$messages[] =  "<font color=red>- Sao lưu dữu liệu lên Google Cloud Drive chưa được kích hoạt, Không có dữ liệu nào được tải lên</font>";
-	}
+		$messages[] =  "<font color=red>- Sao lưu dữ liệu lên Google Cloud Drive chưa được kích hoạt, Không có dữ liệu nào được tải lên</font>";
+}
+} else {
+    $messages[] =  "<font color=red>-Lỗi xảy ra trong quá trình tạo bản sao lưu dữ liệu</font>";
+}
+}
+
+elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade"){
+
+$web_interface_cloud_backup_khi_cap_nhat = $_POST['web_interface_cloud_backup_khi_cap_nhat'];
+$messages[] =  "Đang Tiến Hành Cập Nhật Giao Diện Web UI";
+
+$messages[] = "Tiến hành tải file File Cập Nhật ở đây";
+	
+	#lựa chọn có tạo bản sao lưu trước khi cập nhật không
+$make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) ? true : false;
+if ($make_a_backup_before_updating === true){
+$messages[] =  "- Đang tạo bản sao lưu giao diện trước khi cập nhật";
+
+$FileName_Backup_VBot = backup_interface($Exclude_Files_Folder, $Exclude_File_Format);
+if (!is_null($FileName_Backup_VBot)) {
+$messages[] = "<font color=green>- Hoàn thành Sao Lưu Giao Diện Trên Hệ Thống: <b>" .$FileName_Backup_VBot."</b></font>";
+if ($web_interface_cloud_backup_khi_cap_nhat === "gdrive"){
+if ($google_cloud_drive_active === true){
+if ($libPath_exist === true) {
+$messages[] = '<br/><font color=blue>- Tiến Hành Sao Lưu Dữ Liệu Lên Google Cloud Drive</font>';
+// Khởi tạo client
+$client = new Client();
+$client->setAuthConfig($authConfigPath); // Đường dẫn tới tệp xác thực
+$client->addScope(Drive::DRIVE_FILE); // Thêm quyền truy cập
+$client->setAccessToken($accessToken);
+// Nếu token đã hết hạn, lấy token mới
+if ($client->isAccessTokenExpired()) {
+    if ($client->getRefreshToken()) {
+        $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+        if (isset($token['access_token'])) {
+		// Cập nhật access token và refresh token vào verify_token.json
+		file_put_contents($tokenPath, json_encode($token, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		$libPath_exist = true;
+		$messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
+		}else {
+			$libPath_exist = false;
+			$messages[] = '<font color=green>- Xảy ra lỗi, Token Làm Mới Không Tồn Tại Để Xác Thực</font>';
+		}
+    } else {
+		$libPath_exist = false;
+        // Nếu không có refresh token, yêu cầu người dùng xác thực lại
+		$messages[] = "<font color=red>- Không có Token Làm Mới, Hãy kiểm tra lại cấu hình Google Cloud Drive</font>";
+    }
+}
+// Xác thực và tạo dịch vụ Drive
+$service = new Drive($client);
+// Tên thư mục cần kiểm tra hoặc tạo
+$folderName = $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'];
+//Khởi tạo để cấp quyền cho thư mục nếu được tạo
+$permission = new Google\Service\Drive\Permission();
+$permission->setType('anyone');
+$permission->setRole('reader');
+// Kiểm tra thư mục chính có tồn tại không
+$query = "mimeType='application/vnd.google-apps.folder' and name='$folderName' and trashed=false";
+$response = $service->files->listFiles(array(
+    'q' => $query,
+    'fields' => 'files(id, name)'
+));
+if (count($response->files) > 0) {
+	// Lấy ID của thư mục chính
+    $folderId = $response->files[0]->id;
+    //$messages[] = "Thư mục đã tồn tại với ID: " . $folderId . "\n";
+    // Kiểm tra thư mục Backup_Interface bên trong
+    $backupQuery = "mimeType='application/vnd.google-apps.folder' and name='$backupFolderName' and trashed=false and '$folderId' in parents";
+    $backupResponse = $service->files->listFiles(array(
+        'q' => $backupQuery,
+        'fields' => 'files(id, name)'
+    ));
+    if (count($backupResponse->files) > 0) {
+        $backupFolderId = $backupResponse->files[0]->id;
+        //$messages[] = "Thư mục $backupFolderName đã tồn tại bên trong thư mục $folderName với ID: " . $backupFolderId . ".\n";
+    } else {
+        // Nếu không tồn tại, tạo thư mục Backup_Interface
+        $backupFolderMetadata = new DriveFile(array(
+            'name' => $backupFolderName,
+            'mimeType' => 'application/vnd.google-apps.folder', // Định nghĩa loại MIME cho thư mục
+            'parents' => array($folderId) // Đặt thư mục cha
+        ));
+        $backupFolder = $service->files->create($backupFolderMetadata, array(
+            'fields' => 'id'
+        ));
+        $backupFolderId = $backupFolder->id;
+        $messages[] = "<font color=green>- Thư mục $backupFolderName đã được tạo với ID: " . $backupFolderId . "</font>";
+    //Cấp quyền công khai cho thư mục vừa tạo
+    $service->permissions->create(
+		// ID của thư mục vừa tạo
+        $backupFolderId,
+        $permission,
+        ['fields' => 'id']
+    );
+    $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$backupFolderName</b></font>";
+    }
+} else {
+    // Nếu không tồn tại, tạo thư mục chính
+    $folderMetadata = new DriveFile(array(
+        'name' => $folderName,
+        'mimeType' => 'application/vnd.google-apps.folder' // Định nghĩa loại MIME cho thư mục
+    ));
+    $folder = $service->files->create($folderMetadata, array(
+        'fields' => 'id'
+    ));
+    $folderId = $folder->id;
+    $messages[] = "<font color=green>- Thư mục <b>".$folderName."</b> đã được tạo với ID: " . $folderId . "</font>";
+    //Cấp quyền công khai cho thư mục vừa tạo
+    $service->permissions->create(
+		// ID của thư mục vừa tạo
+        $folderId,
+        $permission,
+        ['fields' => 'id']
+    );
+    $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$folderName</b></font>";
+    // Tạo thư mục Backup_Interface bên trong
+    $backupFolderMetadata = new DriveFile(array(
+        'name' => $backupFolderName,
+        'mimeType' => 'application/vnd.google-apps.folder',
+		// Đặt thư mục cha là thư mục vừa tạo
+        'parents' => array($folderId)
+    ));
+    $backupFolder = $service->files->create($backupFolderMetadata, array(
+        'fields' => 'id'
+    ));
+    $backupFolderId = $backupFolder->id;
+    $messages[] = "<br/><font color=green>- Thư mục con: <b>$backupFolderName</b> đã được tạo bên trong thư mục <b>$folderName</b> với ID: " . $backupFolderId . "</font>";
+    //Cấp quyền công khai cho thư mục vừa tạo
+    $service->permissions->create(
+		// ID của thư mục vừa tạo
+        $backupFolderId,
+        $permission,
+        ['fields' => 'id']
+    );
+    $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$backupFolderName</b></font>";
+}
+// Kiểm tra số lượng tệp trong thư mục Backup_Interface
+$fileQuery = "mimeType != 'application/vnd.google-apps.folder' and '$backupFolderId' in parents and trashed = false";
+$fileResponse = $service->files->listFiles(array(
+    'q' => $fileQuery,
+    'fields' => 'files(id, name, createdTime)',
+));
+$fileCount = count($fileResponse->files);
+$messages[] = "<font color=green>- Số tệp hiện tại trên Google Drive <b>$backupFolderName: $fileCount</b></font>";
+if ($fileCount >= $Config['backup_upgrade']['google_cloud_drive']['limit_backup_files']) {
+    // Nếu có 5 tệp, xóa tệp cũ nhất
+$messages[] = "<br/><font color=red>- Số lượng tệp tin sao lưu trên Google Drive vượt quá: <b>$Limit_Backup_Files</b> file</font>";
+    $oldestFile = null;
+    foreach ($fileResponse->files as $file) {
+        if ($oldestFile === null || strtotime($file->createdTime) < strtotime($oldestFile->createdTime)) {
+            $oldestFile = $file;
+        }
+    }
+    if ($oldestFile) {
+        $service->files->delete($oldestFile->id);
+        $messages[] = "<font color=red>- Đã xóa tệp cũ nhất: <b>" . $oldestFile->name . " với ID: " . $oldestFile->id . "</b></font>";
+    }
+}
+// Lấy tên tệp từ đường dẫn
+$fileName = basename($FileName_Backup_VBot);
+$fileMetadata = new DriveFile(array(
+    'name' => $fileName,
+	// Đặt thư mục cha là thư mục Backup_Interface
+    'parents' => array($backupFolderId)
+));
+// Tải tệp lên
+try {
+	// Đọc nội dung tệp
+    $content = file_get_contents($FileName_Backup_VBot); 
+    $file = $service->files->create($fileMetadata, array(
+        'data' => $content,
+		// Lấy loại MIME của tệp
+        'mimeType' => mime_content_type($FileName_Backup_VBot),
+		// Loại tải lên
+        'uploadType' => 'multipart',
+		// Lấy ID của tệp đã tải lên
+        'fields' => 'id'
+    ));
+    $messages[] = "<br/><font color=green>- Tệp <b>".$fileName."</b> đã được tải lên với ID: <b>" . $file->id . "</b></font>";
+    // Đặt quyền cho tệp để mọi người đều có thể xem
+    $permission = new \Google\Service\Drive\Permission(array(
+        'role' => 'reader',
+        'type' => 'anyone',
+    ));
+    $service->permissions->create($file->id, $permission);
+    $messages[] = "<font color=green>- Quyền công khai đã được thiết lập cho tệp: <b>".$fileName."</b> ai có liên kết cũng có thể xem và tải xuống tệp</font>";
+    $messages[] = "<br/><font color=green>- Google Cloud Drive: <a href='https://drive.google.com/file/d/".$file->id."/view?usp=drive_link' target='_bank' title='Xem, Tải xuống file ".$fileName."'><b>Tải Xuống File ".$fileName."</b></a></font>";
+} catch (Exception $e) {
+    $messages[] = '<font color=red>- Có lỗi xảy ra khi tải tệp lên: ' . $e->getMessage().'</font>';
+}
+}else {
+	$messages[] =  "<br/><font color=red>- <b>Google Cloud Drive chưa được cấu hình, sẽ không có tệp sao lưu nào được tải lên</b></font>";
+}
+}else{
+	$messages[] = "<font color=red>- <b>Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active), Sẽ không có file Backup nào được tải lên Google Cloud Drive</font>";
+}
+	}else{
+		$messages[] =  "<font color=red>- Sao lưu dữ liệu lên Google Cloud Drive chưa được kích hoạt, Không có dữ liệu nào được tải lên</font>";
+}
 } else {
     $messages[] =  "<font color=red>-Lỗi xảy ra trong quá trình tạo bản sao lưu dữ liệu</font>";
 }
 
+}
+
+//Coppy file ở đây
+$messages[] = "Tiến hành Coppy File Cập Nhật";
+}
+
+
+
+
 
 }
 
 }
+
+
 
 
 //Tải xuống tệp từ google cloud drive
@@ -923,17 +1171,40 @@ foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_file_form
   </div>
 </div>
 <hr/>
-		<h5 class="card-title">Cấu Hình Cập Nhật Giao Diện:</h5>
-<div class="card-body">
-sdf
 
-<button type="submit" name="Backup_Upgrade_Interface" value="yes_interface_upgrade" class="btn btn-primary rounded-pill" onclick="loading('show')">Cập Nhật Giao Diện</button>
-</div>
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Cấu Hình Cập Nhật Giao Diện:</h5>
 
 <div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật:</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="make_a_backup_before_updating" id="make_a_backup_before_updating" <?php if ($Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating']) echo 'checked'; ?>>
+</div>
+</div>
+</div>
+				
+
+<div class="row mb-3">
+<label for="google_gemini_time_out" class="col-sm-3 col-form-label">Tải Bản Sao Lưu Lên Cloud:</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input class="form-check-input" type="checkbox" name="web_interface_cloud_backup_khi_cap_nhat" id="web_interface_cloud_backup_khi_cap_nhat" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_cloud_backup_khi_cap_nhat">Google Drive</label>&emsp;&emsp;
+</div>
+</div>
+</div>
+<center>
+<button type="submit" name="Backup_Upgrade_Interface" value="yes_interface_upgrade" class="btn btn-primary rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản giao diện mới?')">Cập Nhật Giao Diện</button>
+</center>
+
+</div>
+</div>
 
 
-                </div>
+
+
 </div>
 </form>
 

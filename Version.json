@@ -1,8 +1,8 @@
 {
-    "version": "1.0.1",
+    "version": "1.0.2",
     "projectName": "Program VBot Offline",
     "description": "Vá lỗ hổng không thời gian",
-    "releaseDate": "2024-10-26",
+    "releaseDate": "2024-10-31",
     "changes": [
         {
             "type": "feature",
@@ -19,5 +19,5 @@
     ],
     "author": "Vũ Tuyển",
     "status": "stable",
-    "previousVersion": "1.0.0"
+    "previousVersion": "1.0.1"
 }
