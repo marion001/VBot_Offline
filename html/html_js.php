@@ -1475,6 +1475,7 @@ function cache_delete(source_cache) {
     xhr.send();
 }
 
+
 //xử lý Nghe thử các file âm thanh
 function playAudio(filePath) {
     loading("show");
@@ -1537,6 +1538,7 @@ function playAudio(filePath) {
 
     xhr.send();
 }
+
 
 //Play video hoặc m3u8 HLS
 function playHLS(url) {

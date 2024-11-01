@@ -171,7 +171,73 @@ function show_message(message) {
 function close_message() {
     $('#notificationModal').modal('hide');
 }
-		
+
+
+
+
+//xử lý Nghe thử các file âm thanh
+function playAudio_upgrade(filePath) {
+    //loading("show");
+    function getMimeType(extension) {
+        const mimeTypes = {
+            'mp3': 'audio/mpeg',
+            'wav': 'audio/wav',
+            'ogg': 'audio/ogg',
+            'aac': 'audio/aac',
+            'flac': 'audio/flac',
+            // Thêm các định dạng tệp âm thanh khác nếu cần
+        };
+
+        return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
+    }
+    const audioPlayer = document.getElementById('audioPlayer');
+    // Kiểm tra nếu filePath bắt đầu bằng 'http'
+    if (filePath.startsWith('http')) {
+        //loading("hide");
+
+        // Kiểm tra nếu filePath là '.m3u8'
+        if (filePath.endsWith('.m3u8')) {
+            //Chạy playHLS nếu là m3u8
+            playHLS(filePath);
+        } else {
+            audioPlayer.src = filePath;
+            audioPlayer.load();
+            audioPlayer.play().catch(function(error) {
+                show_message('Lỗi khi phát âm thanh: ' + error.message);
+            });
+        }
+        return; // Kết thúc hàm nếu đã phát trực tiếp
+    }
+
+    const xhr = new XMLHttpRequest();
+
+    // Gửi yêu cầu GET tới server để lấy tệp âm thanh dưới dạng base64
+    xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
+    xhr.responseType = 'text';
+    xhr.onload = function() {
+        //loading("hide");
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            const response = JSON.parse(xhr.responseText);
+            if (response.success) {
+                const base64Audio = response.data.base64Content;
+                const mimeType = getMimeType(response.data.fileExtension);
+                audioPlayer.src = 'data:' + mimeType + ';base64,' + base64Audio;
+                audioPlayer.load();
+                audioPlayer.play();
+            } else {
+                show_message('Lỗi khi tìm nạp âm thanh: ' + response.error);
+            }
+        }
+    };
+
+    xhr.onerror = function() {
+        //loading("hide");
+        show_message('Yêu cầu phát âm thanh không thành công');
+    };
+
+    xhr.send();
+}
+
     </script>
 	
 

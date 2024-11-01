@@ -1,7 +1,7 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "888888888888888@gmail.com",
+        "email": "zzzzzzzz@gmail.com",
         "avata": "dasdsa.jpg",
         "address": {
             "wards": "",
@@ -10,8 +10,8 @@
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": 20.8888888,
-            "longitude": 106.8888888
+            "latitude": 20.999999,
+            "longitude": 106.999999
         },
         "user_login": {
             "active": false,
@@ -33,7 +33,7 @@
         "port": 5002
     },
     "display_screen": {
-        "active": false,
+        "active": true,
         "connection_type": "lcd_i2c",
         "text_display_center": "VBot Assistant",
         "lcd_i2c": {
@@ -49,11 +49,11 @@
         "active": true,
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://88888888.duckdns.org",
-        "long_token": "88888888.88888888.rAgP-88888888",
+        "external_url": "https://888888.duckdns.org",
+        "long_token": "888888.888888.rAgP-888888",
         "time_out": 15,
         "custom_commands": {
-            "active": true,
+            "active": false,
             "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
         }
     },
@@ -67,7 +67,7 @@
             "active": true,
             "time_out": 10,
             "convert_audio_to_text": {
-                "used_for_chatbox": true,
+                "used_for_chatbox": false,
                 "used_for_display_and_logs": false
             },
             "api_key": "dùng chung với giá trị podcast->access_token"
@@ -75,23 +75,23 @@
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "88888888"
+            "api_key": "88888888888888"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": "sk-proj-8888--88-88-88-88-88888-L89-taFeLVg2qWvsAA"
+            "key_chat_gpt": "sk-proj-88888888888888--88888888888888-88888888888888-ChwixTZK-88888888888888-88888888888888-L89-taFeLVg2qWvsAA"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "88888888"
+        "key_openweathermap": "88888888888888"
     },
     "media_player": {
-        "active": true,
+        "active": false,
         "time_out": 30,
         "wake_up_in_media_player": false,
         "media_sync_ui": {
-            "active": true,
+            "active": false,
             "delay_time": 2
         },
         "prioritize_music_source": [
@@ -100,11 +100,11 @@
             "youtube"
         ],
         "youtube": {
-            "active": true,
+            "active": false,
             "google_apis_key": "AIzaSyAuWeVnyM3ijao5XPD62zrMXuBj0JgLYAw"
         },
         "zing_mp3": {
-            "active": true,
+            "active": false,
             "authentication_zmp3_rqid": "MHwxMTYdUngMTAxLjIyNy4yM3x2MS4xMS4yfDE3MjkzMjYxOTM0NjA",
             "expire_time": 1729329793
         },
@@ -117,7 +117,7 @@
             "expire_time": 1730402437
         },
         "radio": {
-            "active": true
+            "active": false
         },
         "radio_data": [
             {
@@ -130,7 +130,7 @@
             }
         ],
         "music_local": {
-            "active": true,
+            "active": false,
             "path": "Media/Music_Local",
             "minimum_threshold": 0.6,
             "allowed_formats": [
@@ -176,7 +176,7 @@
             "active": true,
             "led_gpio": 10,
             "led_type": "ws281x",
-            "number_led": 12,
+            "number_led": 11,
             "brightness": 255,
             "led_invert": false,
             "led_starting_up": true,
@@ -186,7 +186,7 @@
             }
         },
         "button_active": {
-            "active": true,
+            "active": false,
             "notes": "true hoặc false để Bật hoặc Tắt sử dụng nút nhấn"
         },
         "button": {
@@ -196,7 +196,7 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             },
@@ -206,7 +206,7 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             },
@@ -216,7 +216,7 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             },
@@ -226,14 +226,14 @@
                 "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
-                    "active": true,
+                    "active": false,
                     "duration": 4
                 }
             }
         },
         "smart_wakeup": {
             "speak_to_text": {
-                "stt_select": "stt_default",
+                "stt_select": "stt_ggcloud",
                 "duration_recording": 6,
                 "silence_duration": 3,
                 "min_amplitude_threshold": 370,
@@ -242,8 +242,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "88888888",
-                        "88888888"
+                        "888888888888888888888888",
+                        "777777777777777777777777"
                     ]
                 },
                 "stt_ggcloud": {
@@ -306,7 +306,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/888888+888888=="
+                "key": "/88888888888888888888888888888+TGsdTNolucA=="
             },
             "hotword": {
                 "lang": "vi",
@@ -347,7 +347,7 @@
                 "active": true
             },
             "text_to_speak": {
-                "tts_select": "tts_default",
+                "tts_select": "tts_ggcloud",
                 "tts_ggcloud": {
                     "language_code": "vi-VN",
                     "voice_name": "vi-VN-Wavenet-A",
@@ -365,16 +365,15 @@
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "88888888",
-                        "88888888",
-                        "88888888"
+                        "aaaaaaaaaaaaaaaaaaaa"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "55555555"
+                        "7777777777766666666666666",
+                        "111111111111111111111111"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,
@@ -406,7 +405,12 @@
                     "__pycache__",
                     "Music_Local",
                     "Build_SO",
-                    ".git"
+                    "html",
+                    "Download",
+                    "Extract",
+                    "VBot_Offline-main",
+                    "Backup_Program",
+                    "Backup_Interface"
                 ],
                 "exclude_file_format": [
                     ".mp4",
@@ -452,7 +456,12 @@
                 }
             },
             "upgrade": {
-                "backup_before_updating": true
+                "backup_before_updating": true,
+                "keep_file_directory": [
+                    "client_secret.json",
+                    "verify_token.json",
+                    "zxcvbn.json"
+                ]
             }
         },
         "advanced_settings": {
@@ -461,7 +470,7 @@
             "refresh_page_ui": true
         },
         "google_cloud_drive": {
-            "active": true,
+            "active": false,
             "backup_folder_name": "Vbot_Assistant_Backup",
             "limit_backup_files": 5,
             "setAccessType": "offline",

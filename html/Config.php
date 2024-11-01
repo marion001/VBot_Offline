@@ -317,6 +317,13 @@ $vbot_program_upgrade_keep_the_file_folder_tuyen = array_filter(array_map('trim'
 $Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] = $vbot_program_upgrade_keep_the_file_folder_tuyen;
 
 
+#Cập nhật: giữ lại tệp, thư mục không cho cập nhật Giao diện vbot
+$vbot_web_interface_upgrade_keep_the_file_folder = $_POST['vbot_web_interface_upgrade_keep_the_file_folder'];
+$vbot_web_interface_upgrade_keep_the_file_folder_tuyen = array_filter(array_map('trim', explode("\n", $vbot_web_interface_upgrade_keep_the_file_folder)));
+#Lưu dữ liệu
+$Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] = $vbot_web_interface_upgrade_keep_the_file_folder_tuyen;
+
+
 
 #Cập nhật sao lưu Giao diện Web UI
 $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] = isset($_POST['backup_web_interface_google_drive']) ? true : false;
@@ -2579,6 +2586,29 @@ Cập Nhật Giao Diện:</h5>
 <div class="col-sm-9">
 <div class="form-switch">
 <input class="form-check-input" type="checkbox" name="make_a_backup_before_updating_interface" id="make_a_backup_before_updating_interface" <?php echo $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+
+
+<div class="row mb-3">
+<label for="vbot_web_interface_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<textarea class="form-control border-success" rows="5" name="vbot_web_interface_upgrade_keep_the_file_folder" id="vbot_web_interface_upgrade_keep_the_file_folder">
+<?php
+$excludeFilesFolder_web_interface_upgrade = isset($Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory']) ? $Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] : [];
+    if (!empty($excludeFilesFolder_web_interface_upgrade)) {
+        foreach ($excludeFilesFolder_web_interface_upgrade as $index_exclude_files_folder_web_interface_UPGRADE => $item_exclude_files_folder_web_interface_upgrade) {
+            echo htmlspecialchars($item_exclude_files_folder_web_interface_upgrade);
+            // Không thêm xuống dòng cuối cùng sau phần tử cuối
+            if ($index_exclude_files_folder_web_interface_UPGRADE < count($excludeFilesFolder_web_interface_upgrade) - 1) {
+                echo "\n";
+            }
+        }
+    }
+?>
+</textarea>
 </div>
 </div>
 </div>

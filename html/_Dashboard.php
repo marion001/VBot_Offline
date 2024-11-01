@@ -94,6 +94,70 @@ function createDirectory($directory) {
     }
 }
 
+// Hàm xóa thư mục và nội dung bên trong chỉ dùng cho lúc cập nhật, không để Logs
+//Chỉ dùng cho cập nhật
+function deleteDir($dirPath) {
+    if (!is_dir($dirPath)) return;
+    $files = scandir($dirPath);
+    foreach ($files as $file) {
+        if ($file == '.' || $file == '..') continue;
+        $filePath = $dirPath . "/" . $file;
+        if (is_dir($filePath)) {
+            deleteDir($filePath);
+        } else {
+            unlink($filePath);
+        }
+    }
+    rmdir($dirPath);
+}
+
+#Tải xuống repo git, không dùng lệnh git clone
+function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
+	global $messages;
+	$messages[] = "<font color=green>- Đang tiến hành tải xuống bản cập nhật...</font>";
+    // Lấy tên repository từ URL
+    $repoName = basename(parse_url($repoUrl, PHP_URL_PATH));
+    $zipFile = $destinationDir . "/" . $repoName . ".zip";
+    // URL tải file ZIP từ GitHub
+	// Hoặc thay 'main' bằng nhánh mong muốn
+    $zipUrl = rtrim($repoUrl, '/') . "/archive/refs/heads/main.zip";
+    // Tạo thư mục đích nếu chưa tồn tại
+	
+    if (!is_dir($destinationDir)) {
+        mkdir($destinationDir, 0777, true);
+    }
+	
+    // Tải tệp ZIP về và lưu với tên mới
+    file_put_contents($zipFile, fopen($zipUrl, 'r'));
+	chmod($zipFile, 0777);
+    // Giải nén tệp ZIP
+    $zip = new ZipArchive;
+	$messages[] = "<font color=green>- Tải xuống thành công, đang tiến hành giải nén dữ liệu...</font>";
+    if ($zip->open($zipFile) === TRUE) {
+		//Tên  Thư mục giải nén sẽ có dạng repo-main
+        $extractedFolder = $destinationDir . "/" . $repoName . "-main";
+        $zip->extractTo($destinationDir);
+        $zip->close();
+        // Xóa tệp ZIP sau khi giải nén
+        unlink($zipFile);
+		
+        // Xóa thư mục html bên trong thư mục đã giải nén, nếu tồn tại
+		/*
+        $htmlFolder = $extractedFolder . "/html";
+        if (is_dir($htmlFolder)) {
+            deleteDir($htmlFolder);
+        }
+		*/
+        // Đặt quyền cho thư mục đã giải nén
+        chmod($extractedFolder, 0777);
+		//$messages[] = "Giải nén dữ liệu thành công, tiến hành nâng cấp...";
+        return $extractedFolder;
+    } else {
+        $messages[] = "Có Lỗi Xảy Ra, không thể giải nén được giữ liệu đã tải xuống, đã dừng tiến trình";
+        return null;
+    }
+}
+
 #Giải nén tệp .tar.gz
 function extractTarGz($tarFilePath, $extractTo) {
 	global $messages;
@@ -116,48 +180,9 @@ function extractTarGz($tarFilePath, $extractTo) {
     }
 }
 
-/*
-function copyFiles($source, $destination) {
-	global $messages;
-    // Kiểm tra xem thư mục nguồn có tồn tại không
-    if (!is_dir($source)) {
-        $messages[] = "<font color=red>- Thư mục nguồn '$source' không tồn tại</font>";
-        return false;
-    }
-    // Tạo thư mục đích nếu chưa tồn tại
-    if (!is_dir($destination)) {
-        mkdir($destination, 0777, true);
-    }
-    // Mở thư mục nguồn
-    $dir = opendir($source);
-    while (($file = readdir($dir)) !== false) {
-        // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
-        if ($file != '.' && $file != '..') {
-            // Đường dẫn đầy đủ của tệp hoặc thư mục
-            $srcPath = rtrim($source, '/') . '/' . $file;
-            $destPath = rtrim($destination, '/') . '/' . $file;
-            // Nếu là thư mục, gọi đệ quy
-            if (is_dir($srcPath)) {
-                copyFiles($srcPath, $destPath);
-            } else {
-                // Sao chép tệp
-                if (copy($srcPath, $destPath)) {
-                    //$messages[] = "<font color=blue>- Đã sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font> <font color=green><b>thành công</b></font><br/>";
-                    $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>".basename($srcPath)."</b></font>";
-                } else {
-                    $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
-                }
-            }
-        }
-    }
-    closedir($dir);
-    return true;
-}
-*/
-
+#hàm coppy file, thư mục, có lựa chọn giữ lại tệp , thư mục không cho sao chép
 function copyFiles($source, $destination, $keepList = []) {
     global $messages;
-	$messages[] = "Vào Coppy mới";
     // Kiểm tra xem thư mục nguồn có tồn tại không
     if (!is_dir($source)) {
         $messages[] = "<font color=red>- Thư mục nguồn '$source' không tồn tại</font>";
@@ -190,7 +215,7 @@ function copyFiles($source, $destination, $keepList = []) {
             } else {
                 // Sao chép tệp
                 if (copy($srcPath, $destPath)) {
-                    $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>" . basename($srcPath) . "</b></font>";
+                    $messages[] = "<font color=blue>- Đã sao chép tệp: </font><font color=blue><b>" . basename($srcPath) . "</b></font>";
                 } else {
                     $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
                 }
@@ -386,7 +411,7 @@ if ($client->isAccessTokenExpired()) {
 
 #Chỉ Sao Lưu Giao Diện
 if (isset($_POST['Backup_Upgrade_Interface'])) {
-	//global $messages;
+
 // Đặt lại mảng $messages để loại bỏ các thông báo cũ
 $messages = [];
 $Backup_Upgrade_Interface = $_POST['Backup_Upgrade_Interface'];
@@ -395,14 +420,14 @@ $Exclude_File_Format = isset($_POST['exclude_file_format']) ? $_POST['exclude_fi
 $Backup_To_Cloud = $_POST['web_interface_cloud_backup'];
 
 
-
-
-
 // Kiểm tra và tạo từng thư mục
 foreach ($directoriessss as $directory) {
     createDirectory($directory);
 }
 
+#Cấu hình kết nối SSH:
+$connection = ssh2_connect($ssh_host, $ssh_port);
+ssh2_auth_password($connection, $ssh_user, $ssh_password);
 
 //Kiểm tra xem nút nhấn nào được submit
 if ($Backup_Upgrade_Interface === "upload_and_restore"){
@@ -462,7 +487,7 @@ elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade" || $Backup_Upgrade
 //$messages[] =  "- Sao Lưu dữ liệu, hoặc cập nhật Giao Diện Vbot";
 
 if ($Backup_Upgrade_Interface === "no_interface_upgrade"){
-$messages[] =  "Đang tiến hành sao lưu Giao Diện Web UI";
+$messages[] =  "<font color=green>- Đang tiến hành sao lưu Giao Diện Web UI</font>";
 
 
 
@@ -665,12 +690,20 @@ try {
 elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade"){
 
 $web_interface_cloud_backup_khi_cap_nhat = $_POST['web_interface_cloud_backup_khi_cap_nhat'];
+$make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) ? true : false;
+#Các file và thư mục cần bỏ qua không cho cập nhật, ghi đè
+$Keep_The_File_Folder_POST = isset($_POST['keep_the_file_folder']) ? $_POST['keep_the_file_folder'] : [];
+$messages[] =  json_decode($Keep_The_File_Folder_POST);
 $messages[] =  "Đang Tiến Hành Cập Nhật Giao Diện Web UI";
 
-$messages[] = "Tiến hành tải file File Cập Nhật ở đây";
-	
-	#lựa chọn có tạo bản sao lưu trước khi cập nhật không
-$make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) ? true : false;
+
+#Xử lý tải xuống bản cập nhật
+$download_Git_Repo_As_Named_Zip = downloadGitRepoAsNamedZip($Github_Repo_Vbot, $Download_Path);
+
+if (!is_null($download_Git_Repo_As_Named_Zip)) {
+$messages[] = "<font color=green>- Tải dữ liệu và giải nén thành công vào đường dẫn: <b>".$download_Git_Repo_As_Named_Zip."/</b></font><br/>";
+
+#lựa chọn có tạo bản sao lưu trước khi cập nhật không
 if ($make_a_backup_before_updating === true){
 $messages[] =  "- Đang tạo bản sao lưu giao diện trước khi cập nhật";
 
@@ -859,11 +892,43 @@ try {
 } else {
     $messages[] =  "<font color=red>-Lỗi xảy ra trong quá trình tạo bản sao lưu dữ liệu</font>";
 }
-
+}else{
+	$messages[] = "<font color=red>- Sao lưu dữ liệu trước khi cập nhật bị tắt, sẽ không có bản sao lưu nào được tạo ra</font>";
 }
 
-//Coppy file ở đây
-$messages[] = "Tiến hành Coppy File Cập Nhật";
+$messages[] = "<font color=green><b>- Đang tiến hành cập nhật dữ liệu mới...</b></font>";
+
+#tiến hành Sao chép ghi đè dữ liệu mới và bỏ qua file được chọn
+if (copyFiles($download_Git_Repo_As_Named_Zip.'/html/', $directory_path.'/', $Keep_The_File_Folder_POST)) {
+    $messages[] = "<font color=green><b>- Đã hoàn tất cập nhật dữ liệu mới</b></font><br/>";
+
+#Xóa các file, thư mục được tải về
+deleteDirectory($Extract_Path);
+deleteDirectory($Download_Path);
+
+//Chmod lại các file và thư mục thành 0777
+ssh2_exec($connection, "sudo chmod -R 0777 $VBot_Offline");
+ssh2_exec($connection, "sudo chmod -R 0777 $directory_path");
+
+
+#Phát âm thanh thông báo nếu cập nhật thành công
+$Sound_updated_the_interface_successfully_OK = isset($_POST['sound_updated_the_interface_successfully']) ? true : false;
+if ($Sound_updated_the_interface_successfully_OK === true){
+$sound_updated_the_interface_successfully = $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['interface_updated_successfully'];
+echo "<script>playAudio_upgrade('$sound_updated_the_interface_successfully');</script>";
+
+$messages[] = "<br/><font color=green><b>- Cập nhật hoàn tất, hãy tải lại trang để áp dụng dữ liệu mới</b></font>";
+}
+
+}else{
+	$messages[] = "<font color=red>- Lỗi xảy ra trong quá trình cập nhật dữ liệu mới</font>";
+}
+
+}else{
+	$messages[] =  "<font color=red>-Lỗi xảy ra trong quá trình tải xuống bản cập nhật dữ liệu, Đã dừng quá trình cập nhật</font>";
+}
+
+
 }
 
 
@@ -1185,7 +1250,15 @@ foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_file_form
 </div>
 </div>
 </div>
-				
+
+<div class="row mb-3">
+<label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thông Báo Âm Thanh <i class="bi bi-question-circle-fill" onclick="show_message('Thông báo bằng âm thanh khi chương trình được cập nhật thành công')"></i>:</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="sound_updated_the_interface_successfully" id="sound_updated_the_interface_successfully"  <?php if ($Config['backup_upgrade']['advanced_settings']['sound_notification']) echo 'checked'; ?>>
+</div>
+</div>
+</div>
 
 <div class="row mb-3">
 <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Tải Bản Sao Lưu Lên Cloud:</label>
@@ -1195,24 +1268,30 @@ foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_file_form
 </div>
 </div>
 </div>
+
+<div class="row mb-3">
+<label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">Giữ lại tệp, thư mục <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp, thư mục không cho cập nhật, ghi đè. <b>Áp dụng cho những tệp, thư mục lưu trữ cấu hình, thông tin Cá Nhân (Có tính chất Riêng Tư)</b><br/><br/>- Thiết lập thêm bớt file và thư mục trong tab: <b>Cấu Hình Config</b>')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<?php
+foreach ($Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] as $keep_the_file_folder_tuyen) {
+    echo '<input type="checkbox" class="form-check-input" name="keep_the_file_folder[]" id="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" value="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" checked>&nbsp;<label for="' . htmlspecialchars($keep_the_file_folder_tuyen) . '">' . htmlspecialchars($keep_the_file_folder_tuyen) . '</label>&emsp;&emsp;';
+}
+?>
+</div>
+</div>
+</div>
+
 <center>
 <button type="submit" name="Backup_Upgrade_Interface" value="yes_interface_upgrade" class="btn btn-primary rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản giao diện mới?')">Cập Nhật Giao Diện</button>
 </center>
-
 </div>
 </div>
-
-
-
-
 </div>
 </form>
 
-
-
-		
-		</div>
-		</section>
+</div>
+</section>
 	
 </main>
 
