@@ -884,7 +884,7 @@ try {
 	$messages[] =  "<br/><font color=red>- <b>Google Cloud Drive chưa được cấu hình, sẽ không có tệp sao lưu nào được tải lên</b></font>";
 }
 }else{
-	$messages[] = "<font color=red>- <b>Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active), Sẽ không có file Backup nào được tải lên Google Cloud Drive</font>";
+	$messages[] = "<font color=red>- <b>Cloud Backup -> Google Cloud Drive</b> Không được Kích Hoạt Trong Config.json <b>(backup_upgrade->google_cloud_drive->active)</b>, Sẽ không có file Backup nào được tải lên Google Cloud Drive</font>";
 }
 	}else{
 		$messages[] =  "<font color=red>- Sao lưu dữ liệu lên Google Cloud Drive chưa được kích hoạt, Không có dữ liệu nào được tải lên</font>";
