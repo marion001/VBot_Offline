@@ -689,11 +689,13 @@ try {
 
 elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade"){
 
-$web_interface_cloud_backup_khi_cap_nhat = $_POST['web_interface_cloud_backup_khi_cap_nhat'];
+$web_interface_cloud_backup_khi_cap_nhat = isset($_POST['web_interface_cloud_backup_khi_cap_nhat']) ? $_POST['web_interface_cloud_backup_khi_cap_nhat'] : null;
 $make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) ? true : false;
+
+
 #Các file và thư mục cần bỏ qua không cho cập nhật, ghi đè
 $Keep_The_File_Folder_POST = isset($_POST['keep_the_file_folder']) ? $_POST['keep_the_file_folder'] : [];
-$messages[] =  json_decode($Keep_The_File_Folder_POST);
+$messages[] =  json_encode($Keep_The_File_Folder_POST);
 $messages[] =  "Đang Tiến Hành Cập Nhật Giao Diện Web UI";
 
 
