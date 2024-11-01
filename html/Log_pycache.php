@@ -96,21 +96,26 @@ include 'html_sidebar.php';
               <h5 class="card-title">Bảng dữ liệu Logs __pycache__</h5>
      
               <!-- Table with stripped rows -->
-              <table class="table datatable">
-                <thead>
-                  <tr>
-					<th>STT</th>
-                    <th>Tên</th>
-                    <th>Thời Gian Tạo</th>
-                    <th>Kích Thước</th>
-                    <th>Hành Động</th>
-                  </tr>
-                </thead>
-                <tbody>
-				
-				
-<?php
+			  <?php
 
+				
+
+
+
+if (is_dir($directory)) {
+
+
+echo '<table class="table datatable">
+<thead>
+<tr>
+<th>STT</th>
+<th>Tên</th>
+<th>Thời Gian Tạo</th>
+<th>Kích Thước</th>
+<th>Hành Động</th>
+</tr>
+</thead>
+<tbody>';
 // Mở thư mục và đọc các file
 $files = scandir($directory);
 $i = 0;
@@ -134,18 +139,30 @@ $files = array_diff($files, array('.', '..'));
                     <td>
 					<button type=\"button\" class=\"btn btn-danger\" title=\"Xóa file: $file\" onclick=\"deleteFile('$filePath')\"><i class=\"bi bi-trash\"></i></button>
 					<button type=\"button\" class=\"btn btn-success\" title=\"Tải xuống file: $file\" onclick=\"downloadFile('$filePath')\"><i class=\"bi bi-download\"></i></button>
-				
 					</td>
                   </tr>";
         }
+echo '</tbody>
+      </table>
+      <form method="post" action="">
+          <center>
+              <button type="submit" onclick="loading(\'show\')" name="delete_all_file" class="btn btn-danger rounded-pill">
+                  Xóa tất cả dữ liệu: ' . $i . ' Tệp, ' . formatSizeUnits($size_all) . '
+              </button>
+          </center>
+      </form>';
+
+} else {
+    echo "- Không có dữ liệu cho Logs <b>__pycache__</b>";
+}
 ?>
 
-                </tbody>
-              </table>
-			      <form method="post" action="">
-			  <center><button type="submit" onclick="loading('show')" name="delete_all_file" class="btn btn-danger rounded-pill">Xóa tất cả dữ liệu: <?php echo $i." Tệp, " .formatSizeUnits($size_all); ?></button></center>
-              <!-- End Table with stripped rows -->
-			</form>
+
+
+
+
+
+
             </div>
           </div>
 
