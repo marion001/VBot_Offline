@@ -1177,7 +1177,7 @@ foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_file_form
 <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Nguồn:</label>
 <div class="col-sm-9">
 <div class="input-group mb-3">
-<input class="form-check-input" type="checkbox" name="web_interface_cloud_backup" id="web_interface_gdrive_backup" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_gdrive_backup">Google Drive</label>&emsp;&emsp;
+<input <?php echo $google_cloud_drive_active ? '' : 'disabled'; ?> class="form-check-input" type="checkbox" name="web_interface_cloud_backup" id="web_interface_gdrive_backup" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_gdrive_backup">Google Drive</label>&emsp;&emsp;
 </div>
 </div>
 </div>
@@ -1264,7 +1264,7 @@ foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_file_form
 <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Tải Bản Sao Lưu Lên Cloud:</label>
 <div class="col-sm-9">
 <div class="input-group mb-3">
-<input class="form-check-input" type="checkbox" name="web_interface_cloud_backup_khi_cap_nhat" id="web_interface_cloud_backup_khi_cap_nhat" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_cloud_backup_khi_cap_nhat">Google Drive</label>&emsp;&emsp;
+<input <?php echo $google_cloud_drive_active ? '' : 'disabled'; ?> class="form-check-input" type="checkbox" name="web_interface_cloud_backup_khi_cap_nhat" id="web_interface_cloud_backup_khi_cap_nhat" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_cloud_backup_khi_cap_nhat">Google Drive</label>&emsp;&emsp;
 </div>
 </div>
 </div>
