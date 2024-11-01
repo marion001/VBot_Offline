@@ -472,6 +472,8 @@
         "google_cloud_drive": {
             "active": false,
             "backup_folder_name": "Vbot_Assistant_Backup",
+            "backup_folder_vbot_name": "Backup_Program",
+            "backup_folder_interface_name": "Backup_Interface",
             "limit_backup_files": 5,
             "setAccessType": "offline",
             "setPrompt": "consent"

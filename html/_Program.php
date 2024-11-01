@@ -30,7 +30,8 @@ $Version_VBot_Program = null;
 $Version_VBot_Program_filePath = $VBot_Offline.'Version.json';
 
 // Tên thư mục con: Backup_Program trên GCloud
-$backupFolderName = 'Backup_Program';
+//$backupFolderName = 'Backup_Program';
+$backupFolderName = $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'];
 
 // Các thư mục cần kiểm tra và tạo Download_Path và  Extract_Path
 $directoriessss = [$Download_Path, $Extract_Path];

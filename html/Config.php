@@ -167,9 +167,10 @@ $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name
 #Cập nhật giá trị trong Google Cloud Drive
 $Config['backup_upgrade']['google_cloud_drive']['active'] = isset($_POST['google_cloud_drive_active']) ? true : false;
 $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'] = $_POST['gcloud_drive_backup_folder_name'];
+$Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'] = $_POST['gcloud_drive_backup_folder_vbot_name'];
+$Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'] = $_POST['gcloud_drive_backup_folder_interface_name'];
 $Config['backup_upgrade']['google_cloud_drive']['setAccessType'] = $_POST['gcloud_drive_setAccessType'];
 $Config['backup_upgrade']['google_cloud_drive']['setPrompt'] = $_POST['gcloud_drive_setPrompt'];
-
 
 #Cập nhật tts zalo
 $apiKeys_ZALO_TTS = array_map('trim', explode("\n", $_POST['tts_zalo_api_key']));
@@ -2634,7 +2635,7 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
 
 <div class="card">
 <div class="card-body">
-<h5 class="card-title">Google Cloud Drive <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình thiết lập đồng bộ dữ liệu lên Google Cloud Drive')"></i> | <a href="GCloud_Drive.php" title="Truy Cập"> <i class="bi bi-box-arrow-up-right"></i> Truy Cập</a> :</h5>
+<h5 class="card-title">Google Cloud Drive <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình thiết lập đồng bộ dữ liệu lên Google Cloud Drive<br/>- Nếu có nhiều thiết bị cần đồng bộ lên Google Cloud Drive thì cần thay đổi tên của 3 thư mục để tránh bị trùng lặp với dữ liệu của thiết bị khác')"></i> | <a href="GCloud_Drive.php" title="Truy Cập"> <i class="bi bi-box-arrow-up-right"></i> Truy Cập</a> :</h5>
 
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu dữ liệu lê Google Cloud Drive')"></i> :</label>
@@ -2646,14 +2647,28 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
 </div>
 
 <div class="row mb-3">
-<label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Trên Google Cloud Drive, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+<label class="col-sm-3 col-form-label">Tên Thư Mục Cha Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
 <div class="col-sm-9">
 <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_name" id="gcloud_drive_backup_folder_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name']; ?>">
 <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
 </div>
 </div>
 
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Chương Trình Vbot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Chương Trình Vbot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+<div class="col-sm-9">
+<input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_vbot_name" id="gcloud_drive_backup_folder_vbot_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name']; ?>">
+<div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
+</div>
+</div>
 
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Giao Diện Vbot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Giao Diện Vbot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+<div class="col-sm-9">
+<input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_interface_name" id="gcloud_drive_backup_folder_interface_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name']; ?>">
+<div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
+</div>
+</div>
 
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Kiểu Loại Truy Cập <i class="bi bi-question-circle-fill" onclick="show_message('- Để giá trị là offline thì sẽ tự động làm mới lại mã token xác thực khi hết hạn<br/>- Để giá trị là online thì mỗi lần mã token xác thực hết hạn bạn cần lấy lại bằng thao tác thủ công')"></i> : </label>

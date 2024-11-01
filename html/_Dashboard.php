@@ -65,8 +65,6 @@ include 'html_sidebar.php';
 ?>
 <!-- End Sidebar-->
 
-
-
 <?php
 
 //$messages = [];
@@ -74,7 +72,8 @@ include 'html_sidebar.php';
 $Limit_Backup_Files_Web = $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files'];
 
 // Tên thư mục con: Backup_Interface Gdrive
-$backupFolderName = 'Backup_Interface';
+//$backupFolderName = 'Backup_Interface';
+$backupFolderName = $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'];
 
 // Các thư mục cần kiểm tra và tạo Download_Path và  Extract_Path
 $directoriessss = [$Download_Path, $Extract_Path];
