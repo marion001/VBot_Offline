@@ -695,7 +695,7 @@ $make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) 
 
 #Các file và thư mục cần bỏ qua không cho cập nhật, ghi đè
 $Keep_The_File_Folder_POST = isset($_POST['keep_the_file_folder']) ? $_POST['keep_the_file_folder'] : [];
-$messages[] =  json_encode($Keep_The_File_Folder_POST);
+//$messages[] =  json_encode($Keep_The_File_Folder_POST);
 $messages[] =  "Đang Tiến Hành Cập Nhật Giao Diện Web UI";
 
 
