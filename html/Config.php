@@ -281,6 +281,7 @@ $Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assist
 
 #Cập nhật sao lưu trương trình VBot
 $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
+$Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] = isset($_POST['automatically_check_for_updates']) ? true : false;
 $Config['backup_upgrade']['advanced_settings']['sound_notification'] = isset($_POST['sound_notification_backup_upgrade']) ? true : false;
 $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] = isset($_POST['refresh_page_ui_backup_upgrade']) ? true : false;
 
@@ -2290,6 +2291,14 @@ DEV Customization (Custom Skill) <i class="bi bi-question-circle-fill" onclick="
 Sao Lưu/Cập Nhật:</h5>
 <div id="collapse_button_sao_luu_cap_nhat" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sao_luu_cap_nhat">
 
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tự Động Kiểm Tra Bản Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ tự động kiểm tra cập nhật mới khi truy cập vào giao diện web ui')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="automatically_check_for_updates" id="automatically_check_for_updates" <?php echo $Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
 
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Khởi Động Lại VBot: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, Chương trình sẽ khởi động lại Vbot khi quá trình cập nhật Nâng Cấp Vbot thành công')"></i> :</label>

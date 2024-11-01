@@ -465,6 +465,7 @@
             }
         },
         "advanced_settings": {
+            "automatically_check_for_updates": true,
             "restart_vbot": true,
             "sound_notification": true,
             "refresh_page_ui": true

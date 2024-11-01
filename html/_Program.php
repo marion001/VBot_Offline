@@ -1214,6 +1214,89 @@ if (copyFiles($Extract_Path_OK, $VBot_Offline)) {
 }else{
  $messages[] = "<font color=red>- Dữ liệu Restore_Backup là rỗng.</font>";
 }
+}
+if (isset($_POST['Check_For_Upgrade'])) {
+    // Tách URL thành các phần
+    $parsedUrl = parse_url($Github_Repo_Vbot);
+    $pathParts = explode('/', trim($parsedUrl['path'], '/'));
+
+    // Kiểm tra và gán giá trị
+    if (count($pathParts) >= 2) {
+        $git_username = $pathParts[0];
+        $git_repository = $pathParts[1];
+
+        // Đường dẫn tới file local và URL của file trên GitHub
+        $localFile = $VBot_Offline . 'Version.json';
+        $remoteFileUrl = "https://raw.githubusercontent.com/$git_username/$git_repository/refs/heads/main/Version.json";
+
+        // Đọc nội dung file local
+        if (file_exists($localFile)) {
+            $localContent = file_get_contents($localFile);
+            $localData = json_decode($localContent, true);
+
+            // Đọc nội dung file trên GitHub
+            $remoteContent = file_get_contents($remoteFileUrl);
+            if ($remoteContent !== false) {  // Sửa điều kiện ở đây
+                $remoteData = json_decode($remoteContent, true);
+                // Lấy giá trị "releaseDate" từ cả hai file và so sánh
+                if (isset($localData['releaseDate']) && isset($remoteData['releaseDate'])) {
+                    if ($localData['releaseDate'] !== $remoteData['releaseDate']) {
+                        $messages[] = "<font color=green><b>- Có bản cập nhật chương trình VBot mới:</b></font>";
+$messages[] = "
+<font color=green><ul>
+  <li>Phiên Bản Mới:
+    <ul>
+      <li>Ngày Phát Hành: <b>{$remoteData['releaseDate']}</b></li>
+      <li>Phiên Bản: <b>{$remoteData['version']}</b></li>
+      <li>Mô Tả: <b>{$remoteData['description']}</b></li>
+	  <li>Nội Dung Thay Đổi:
+	  <ul>
+	   <li>Tính Năng: <b>{$remoteData['changes'][0]['description']}</b></li>
+	   <li>Sửa Lỗi: <b>{$remoteData['changes'][1]['description']}</b></li>
+	   <li>Cải tiến: <b>{$remoteData['changes'][2]['description']}</b></li>
+	  </ul>
+	  </li>
+    </ul>
+  </li>
+</ul></font>
+
+<font color=blue><ul>
+  <li>Phiên Bản Hiện Tại:
+    <ul>
+      <li>Ngày Phát Hành: <b>{$localData['releaseDate']}</b></li>
+      <li>Phiên Bản: <b>{$localData['version']}</b></li>
+	  <li>Mô Tả: <b>{$localData['description']}</b></li>
+    </ul>
+  </li>
+</ul></font>";
+
+$messages[] = "<font color=green><b>- Hãy cập nhật lên phiên bản mới để được hỗ trợ tốt nhất.</b></font>";
+
+} else {
+$messages[] = "<font color=red><b>- Không có bản cập nhật chương trình mới nào</b></font>";
+$messages[] = "
+<font color=blue><ul>
+  <li>Phiên Bản Hiện Tại:
+    <ul>
+      <li>Ngày Phát Hành: <b>{$localData['releaseDate']}</b></li>
+      <li>Phiên Bản: <b>{$localData['version']}</b></li>
+	  <li>Mô Tả: <b>{$localData['description']}</b></li>
+    </ul>
+  </li>
+</ul></font>";
+}
+                } else {
+                    $messages[] = "<font color=red>Không tìm thấy trường 'releaseDate' trong một hoặc cả hai file</font>";
+                }
+            } else {
+                $messages[] = "<font color=red>Không thể tải file từ URL: $remoteFileUrl</font>";
+            }
+        } else {
+            $messages[] = "<font color=red>Không tìm thấy tệp: $localFile</font>";
+        }
+    } else {
+        $messages[] = "<font color=red>Không thể lấy thông tin username và repository từ URL: $Github_Repo_Vbot</font>";
+    }
 
 
 }
@@ -1432,7 +1515,8 @@ foreach ($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directo
 </div>
 
 <center>
-<button type="submit" name="Backup_Upgrade_Program" value="yes_vbot_upgrade" class="btn btn-primary rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản chương trình Vbot mới?')">Cập Nhật Chương Trình</button>
+<button type="submit" name="Check_For_Upgrade" class="btn btn-primary rounded-pill">Kiểm Tra Bản Cập Nhật</button>
+<button type="submit" name="Backup_Upgrade_Program" value="yes_vbot_upgrade" class="btn btn-success rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản chương trình Vbot mới?')">Cập Nhật Chương Trình</button>
 </center>
 
 </div>
