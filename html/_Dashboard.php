@@ -121,11 +121,9 @@ function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
 	// Hoặc thay 'main' bằng nhánh mong muốn
     $zipUrl = rtrim($repoUrl, '/') . "/archive/refs/heads/main.zip";
     // Tạo thư mục đích nếu chưa tồn tại
-	
     if (!is_dir($destinationDir)) {
         mkdir($destinationDir, 0777, true);
     }
-	
     // Tải tệp ZIP về và lưu với tên mới
     file_put_contents($zipFile, fopen($zipUrl, 'r'));
 	chmod($zipFile, 0777);
@@ -139,14 +137,6 @@ function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
         $zip->close();
         // Xóa tệp ZIP sau khi giải nén
         unlink($zipFile);
-		
-        // Xóa thư mục html bên trong thư mục đã giải nén, nếu tồn tại
-		/*
-        $htmlFolder = $extractedFolder . "/html";
-        if (is_dir($htmlFolder)) {
-            deleteDir($htmlFolder);
-        }
-		*/
         // Đặt quyền cho thư mục đã giải nén
         chmod($extractedFolder, 0777);
 		//$messages[] = "Giải nén dữ liệu thành công, tiến hành nâng cấp...";
@@ -274,10 +264,12 @@ if (!is_dir($Backup_Dir_Save_Web)) {
     }
 } 
 
-
+//Chuyển dấu / thành dấu - ở file Version.json
+$Version_VBot_Interface_releaseDate = str_replace('/', '-', $Version_VBot_Interface['releaseDate']);
+$Version_VBot_Interface_version = str_replace('/', '-', $Version_VBot_Interface['version']);
 
 #Tên file Backup
-$Backup_File_Name_Web = $Backup_Dir_Save_Web . '/VBot_Interface_' . date('dmY_His').'_'.$Version_VBot_Interface['releaseDate'].'_'.$Version_VBot_Interface['version'].'.tar.gz'; // Đường dẫn file backup
+$Backup_File_Name_Web = $Backup_Dir_Save_Web . '/VBot_Interface_' . date('dmY_His').'_'.$Version_VBot_Interface_releaseDate.'_'.$Version_VBot_Interface_version.'.tar.gz'; // Đường dẫn file backup
 
 
 // Tạo lệnh để nén thư mục
@@ -293,7 +285,7 @@ foreach ($Exclude_File_Format as $ext) {
 }
 
 // Thêm tên thư mục cần nén (dùng dấu chấm để nén toàn bộ nội dung thư mục)
-$tarCommand .= " .";
+$tarCommand .= " . --warning=all 2>&1";
 // Thực thi lệnh tar
 exec($tarCommand, $output, $returnCode);
 // Kiểm tra kết quả

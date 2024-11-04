@@ -37,27 +37,58 @@ if (!is_dir($directoryPath_Backup_Config)) {
 $read_stt_token_google_cloud = null;
 
 if (isset($_POST['start_recovery_config_json'])) {
-    $start_recovery_config_json = $_POST['backup_config_json_files'];
 
-    if (!empty($start_recovery_config_json)) {
-
+$data_recovery_type = $_POST['start_recovery_config_json'];
 
 
+
+if ($data_recovery_type === "khoi_phuc_tu_tep_he_thong"){
+$start_recovery_config_json = $_POST['backup_config_json_files'];
+if (!empty($start_recovery_config_json)) {
 if (file_exists($start_recovery_config_json)) {
     $command = 'cp ' . escapeshellarg($start_recovery_config_json) . ' ' . escapeshellarg($VBot_Offline.'Config.json');
     exec($command, $output, $resultCode);
 	
     if ($resultCode === 0) {
-        $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu thành công";
+        $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu trên hệ thống thành công";
     } else {
         $messages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Config.json Mã lỗi: " . $resultCode;
     }
 } else {
-    $messages[] = "Lỗi: Tệp nguồn không tồn tại.";
+    $messages[] = "Lỗi: Tệp ".basename($start_recovery_config_json)." không tồn tại trên hệ thống";
 }
     } else {
         $messages[] = "Không có tệp sao lưu Config nào được chọn để khôi phục!";
+		
     }
+}else if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len"){
+    $uploadOk = 1;
+    // Kiểm tra xem tệp có được gửi không
+    if (isset($_FILES["fileToUpload_configjson_restore"])) {
+        $targetFile = $VBot_Offline.'Config.json';
+        $fileName = basename($_FILES["fileToUpload_configjson_restore"]["name"]);
+        // Kiểm tra xem tệp có phải là .json không
+		if (!preg_match('/\.json$/', $fileName) || !preg_match('/^Config/', $fileName)) {
+		$messages[] = "- Chỉ chấp nhận tệp .json, dành cho Config.json";
+		$uploadOk = 0;
+		}
+        // Kiểm tra xem $uploadOk có bằng 0 không
+        if ($uploadOk == 0) {
+            $messages[] = "- Tệp sao lưu không được tải lên";
+        } else {
+            // Di chuyển tệp vào thư mục đích
+            if (move_uploaded_file($_FILES["fileToUpload_configjson_restore"]["tmp_name"], $targetFile)) {
+                $messages[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục thành công";
+            } else {
+                $messages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
+            }
+			
+        }
+    } else {
+        $messages[] = "- Không có tệp sao lưu nào được tải lên";
+    }
+}
+
 }
 
 #Lưu lại các giá trị Config.json
@@ -163,6 +194,7 @@ $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires
 #cập nhật giá trị trong tts tts_edge
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed'] = floatval($_POST['tts_edge_speaking_speed']);
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] = $_POST['tts_edge_voice_name'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['language_code'] = $_POST['tts_edge_language_code'];
 
 #Cập nhật giá trị trong Google Cloud Drive
 $Config['backup_upgrade']['google_cloud_drive']['active'] = isset($_POST['google_cloud_drive_active']) ? true : false;
@@ -291,6 +323,12 @@ $Config['backup_upgrade']['config_json']['limit_backup_files'] = intval($_POST['
 $Config['backup_upgrade']['config_json']['backup_path'] = $_POST['backup_path_config_json'];
 $Config['backup_upgrade']['vbot_program']['backup']['backup_to_cloud']['google_drive'] = isset($_POST['backup_vbot_google_drive']) ? true : false;
 $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files'] = intval($_POST['backup_upgrade_vbot_limit_backup_files']);
+
+
+#Cập nhật sao lưu Custom Home Assistant
+$Config['backup_upgrade']['custom_home_assistant']['active'] = isset($_POST['custom_home_assistant_active']) ? true : false;
+$Config['backup_upgrade']['custom_home_assistant']['limit_backup_files'] = intval($_POST['limit_backup_custom_home_assistant']);
+$Config['backup_upgrade']['custom_home_assistant']['backup_path'] = $_POST['backup_path_custom_home_assistant'];
 
 #Cập nhật  Chương trình Vbot
 $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_vbot']) ? true : false;
@@ -867,7 +905,7 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud</label>
+                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud (Authentication.json)</label>
                     </div>
                   </div>
             </div>
@@ -986,7 +1024,7 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 
                     <div class="form-check" >
                       <input  class="form-check-input" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
-                      <label  class="form-check-label text-decoration-line-through" for="tts_edge">TTS Microsoft Edge (Free) <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
+                      <label  class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
                     </div>
                   </div>
 				  
@@ -1203,12 +1241,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 
 <!-- ẩn hiện cấu hình select_tts_edge_html style="display: none;" -->
 <div id="select_tts_edge_html" class="col-12" style="display: none;">
-<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Microsoft Edge<br/>(TTS này chưa được code, chưa sử dụng được.)</font></center></h4>
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Microsoft Edge Azure</font></center></h4>
 
 
 
 <div class="form-floating mb-3">  
-<input type="number" min="0.1" step="0.1" max="2" class="form-control border-success" name="tts_edge_speaking_speed" id="tts_edge_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed']; ?>">
+<input type="number" min="0.1" step="0.1" max="1.9" class="form-control border-success" name="tts_edge_speaking_speed" id="tts_edge_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed']; ?>">
  <label for="tts_edge_speaking_speed" class="form-label">Tốc độ đọc:</label>	
 </div>
 
@@ -1219,6 +1257,11 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 
 </select>
 <label for="tts_edge_voice_name">Giọng đọc:</label>
+</div>
+
+<div class="form-floating mb-3">  
+<input type="text" class="form-control border-danger" name="tts_edge_language_code" id="tts_edge_language_code" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['language_code']; ?>">
+ <label for="tts_edge_language_code" class="form-label">Ngôn Ngữ:</label>	
 </div>
 
 </div>
@@ -2366,6 +2409,42 @@ Sao Lưu/Cập Nhật:</h5>
 
 <div class="card">
 <div class="card-body">
+<h5 class="card-title">Sao Lưu Custom Home Assistant (Home_Assistant_Custom.json)</h5>
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Home_Assistant_Custom.json mỗi khi lưu hoặc thay đổi cấu hình Home_Assistant_Custom.json')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="custom_home_assistant_active" id="custom_home_assistant_active" <?php echo $Config['backup_upgrade']['custom_home_assistant']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Tệp Home_Assistant_Custom.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+<div class="col-sm-9">
+<input readonly class="form-control border-danger" type="text" name="backup_path_custom_home_assistant" id="backup_path_custom_home_assistant" value="<?php echo $Config['backup_upgrade']['custom_home_assistant']['backup_path']; ?>">
+<div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu Config.json</div>
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Custom_HomeAssistant, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_custom_home_assistant" id="limit_backup_custom_home_assistant" value="<?php echo $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']; ?>">
+<div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-body">
 
 <h5 class="card-title">VBot Program<i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình Cài Đặt khi Sao Lưu và Cập Nhật trương trình')"></i> :</h5>
 <div class="card accordion" id="accordion_button_cau_hinh_sao_luu_vbot">
@@ -2799,8 +2878,19 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
 <div class="card">
 <div class="card-body">
 <h5 class="card-title">Khôi Phục Config.json <i class="bi bi-question-circle-fill" onclick="show_message('Khôi Phục Config.json từ tệp sao lưu trên hệ thống')"></i>:</h5>
+
 <div class="row mb-3">
-<label class="col-sm-3 col-form-label text-primary">Chọn Tệp Khôi Phục:</label>
+    <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <input class="form-control border-success" type="file" name="fileToUpload_configjson_restore" accept=".json">
+            <button class="btn btn-warning border-success" type="submit" name="start_recovery_config_json" value="khoi_phuc_tu_tep_tai_len" onclick="return confirmRestore('Bạn có chắc chắn muốn tải lên tệp để khôi phục dữ liệu Config.json không?')">Tải Lên & Khôi Phục</button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label text-primary"><b>Hoặc Chọn Tệp Khôi Phục:</b></label>
 <div class="col-sm-9">
 
 <?php
@@ -2813,7 +2903,7 @@ echo '<select class="form-select border-primary" name="backup_config_json_files"
 	echo '</select>';
 } else {
 	$co_tep_BackUp_ConfigJson = true;
-echo '<select class="form-select border-primary" name="backup_config_json_files" id="backup_config_json_files">';
+echo '<div class="input-group"><select class="form-select border-primary" name="backup_config_json_files" id="backup_config_json_files">';
 echo '<option selected value="">Chọn Tệp Khôi Phục Dữ Liệu Config</option>';
 foreach ($jsonFiles as $file) {
     $fileName = basename($file);
@@ -2821,18 +2911,22 @@ foreach ($jsonFiles as $file) {
 }
 echo '</select>';
 }
-?>
-</div>
-</div>
-<?php 
+
 if ($co_tep_BackUp_ConfigJson === true){
-echo '<center>
-<button class="btn btn-success rounded-pill" name="start_recovery_config_json" type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu Config từ tệp sao lưu trên hệ thống\')">Khôi Phục</button>
-<button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path(\'get_value_backup_config\')">Xem Tệp Sao Lưu</button>
-<button type="button" class="btn btn-success rounded-pill" title="Tải Xuống Tệp Sao Lưu Config" onclick="dowlaod_file_backup_json_config(\'get_value_backup_config\')"><i class="bi bi-download"></i> Tải Xuống Tệp Sao Lưu</button>
-</center>';
+echo '
+<button class="btn btn-primary border-primary" name="start_recovery_config_json" value="khoi_phuc_tu_tep_he_thong" type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu Config từ tệp sao lưu trên hệ thống\')">Khôi Phục</button>
+<button type="button" class="btn btn-info border-primary" onclick="readJSON_file_path(\'get_value_backup_config\')"><i class="bi bi-eye"></i></button>
+<button type="button" class="btn btn-success border-primary" title="Tải Xuống Tệp Sao Lưu Config" onclick="dowlaod_file_backup_json_config(\'get_value_backup_config\')"><i class="bi bi-download"></i></button>
+<button type="button" class="btn btn-danger border-primary" title="Xóa Tệp Sao Lưu Config" onclick="delete_file_backup_json_config(\'get_value_backup_config\')"><i class="bi bi-trash"></i></button>
+</div>';
 }
+
 ?>
+</div>
+</div>
+
+
+
 </div>
 </div>
 
@@ -2934,6 +3028,24 @@ include 'html_js.php';
     </script>
 
 <script>
+
+
+
+//Xóa file backup Config
+function delete_file_backup_json_config(filePath) {
+    if (filePath === "get_value_backup_config") {
+		//Lấy giá trị value của id: backup_config_json_files
+        var get_value_backup_config = document.getElementById('backup_config_json_files').value;
+        if (get_value_backup_config === "") {
+            showMessagePHP("Không có tệp nào được chọn để tải xuống");
+        } else {
+            filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+            deleteFile(filePath);
+        }
+    } else {
+        showMessagePHP("Không có tệp nào được chọn để tải xuống.");
+    }
+}
 
 
 //Tải xuống file backup Config

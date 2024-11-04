@@ -118,7 +118,7 @@ echo "File $file_path không tồn tại.";
 ?></textarea>
         <br>
 		<center>
-		<button type="submit" name="run_code" class="btn btn-success rounded-pill" title="Run Code" onclick="loading('show')">Chạy Code</button>
+		<button disabled type="submit" name="run_code" class="btn btn-success rounded-pill" title="Run Code" onclick="loading('show')">Chạy Code</button>
 		<button type="submit" name="save_code" class="btn btn-primary rounded-pill" title="Lưu Code" onclick="loading('show')">Lưu Code</button>
 		</center>
     </form>

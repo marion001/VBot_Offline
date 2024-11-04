@@ -39,7 +39,6 @@ $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
 if (!file_exists($filePath_HASS)) {
     // Tạo file rỗng nếu không tồn tại
     file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT));
-    
     // Chmod 0777 cho file
     chmod($filePath_HASS, 0777);
 }
@@ -49,14 +48,44 @@ $hassData_all = $data['get_hass_all'] ?? [];
 
 ?>
 <?php
-
 // Mảng lưu thông báo lỗi
 $errorMessages = [];
+$successMessage = [];
 // Mảng để lưu những intent hợp lệ
 $valid_intents = [];
 // Kiểm tra xem có dữ liệu POST không để lưu lại thay đổi
-#if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_POST['save_custom_home_assistant'])) {
+if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
+// Đường dẫn gốc và đích
+$sourceFile = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
+$destinationDir = $directory_path . '/' . $Config['backup_upgrade']['custom_home_assistant']['backup_path'];
+$destinationFile = $destinationDir . "/Home_Assistant_Custom_" . date('dmY_His') . ".json";
+// Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
+if (!is_dir($destinationDir)) {
+    mkdir($destinationDir, 0777, true);
+    chmod($destinationDir, 0777);
+    $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
+}
+// Sao chép tệp mới
+if (copy($sourceFile, $destinationFile)) {
+    chmod($destinationFile, 0777);
+    //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
+    // Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
+    $jsonFiles = glob($destinationDir . "/*.json");
+    usort($jsonFiles, function($a, $b) {
+        return filemtime($a) - filemtime($b);
+    });
+    // Xóa các tệp cũ nhất nếu số lượng tệp vượt quá 5
+    if (count($jsonFiles) > $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) {
+        foreach (array_slice($jsonFiles, 0, count($jsonFiles) - $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) as $oldFile) {
+            unlink($oldFile);
+			$successMessage[] = "Vượt quá số lượng tệp tin Backup là <b>".$Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']."</b>, đã xóa tệp: <b>".basename($oldFile)."</b>";
+        }
+    }
+} else {
+    $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
+}
+}
     // Lấy dữ liệu từ form
     $intents = isset($_POST['intents']) ? $_POST['intents'] : null;
     // Kiểm tra nếu intents tồn tại và là mảng
@@ -87,24 +116,69 @@ if (isset($_POST['save_custom_home_assistant'])) {
         $valid_intents = [];
         $errorMessages[] = "Không có các Tác Vụ tùy chỉnh nào cho Home Assistant được lưu";
     }
-
     // Đọc nội dung file JSON hiện tại
     $fileData = json_decode(file_get_contents($Hass_Custom_Json), true);
-    
     // Cập nhật mảng intents trong dữ liệu file
     $fileData['intents'] = $valid_intents; // Cập nhật dù là mảng rỗng
-    
     // Ghi lại toàn bộ nội dung vào file JSON (lưu mảng intents mới, dù là mảng rỗng)
     file_put_contents($Hass_Custom_Json, json_encode($fileData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    
     // Thông báo thành công hoặc lỗi
     if (!empty($valid_intents)) {
-        $successMessage = "Lưu dữ liệu thành công!";
+        $successMessage[] = "Lưu dữ liệu Custom Home Assistant thành công!";
     } else {
-        $successMessage = "Không có các Tác Vụ tùy chỉnh nào cho Home Assistant được lưu";
+        $errorMessages[] = "Không có các Tác Vụ tùy chỉnh nào cho Home Assistant được lưu";
     }
 }
 
+//Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
+if (isset($_POST['start_recovery_custom_homeassistant'])) {
+$data_recovery_type = $_POST['start_recovery_custom_homeassistant'];
+if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len"){
+    $uploadOk = 1;
+    // Kiểm tra xem tệp có được gửi không
+    if (isset($_FILES["fileToUpload_custom_hass_restore"])) {
+        //$targetFile = $Hass_Custom_Json;
+        $fileName = basename($_FILES["fileToUpload_custom_hass_restore"]["name"]);
+        // Kiểm tra xem tệp có phải là .json không
+		//if (!preg_match('/\.json$/', $fileName) || !preg_match('/^Home_Assistant_Custom/', $fileName)) {
+		if (!preg_match('/\.json$/', $fileName)) {
+		$errorMessages[] = "- Chỉ chấp nhận tệp .json, dành cho Home_Assistant_Custom.json";
+		$uploadOk = 0;
+		}
+        // Kiểm tra xem $uploadOk có bằng 0 không
+        if ($uploadOk == 0) {
+            $errorMessages[] = "- Tệp sao lưu không được tải lên";
+        } else {
+            // Di chuyển tệp vào thư mục đích
+            if (move_uploaded_file($_FILES["fileToUpload_custom_hass_restore"]["tmp_name"], $Hass_Custom_Json)) {
+                $successMessage[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục dữ liệu Custom Home Assistant thành công";
+            } else {
+                $errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
+            }
+        }
+    } else {
+        $errorMessages[] = "- Không có tệp sao lưu nào được tải lên";
+    }
+}else if ($data_recovery_type === "khoi_phuc_file_he_thong"){
+	$start_recovery_custom_hass = $_POST['backup_custom_hass_json_files'];
+	//$successMessage[] = $start_recovery_custom_hass;
+if (!empty($start_recovery_custom_hass)) {
+if (file_exists($start_recovery_custom_hass)) {
+    $command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($Hass_Custom_Json);
+    exec($command, $output, $resultCode);
+    if ($resultCode === 0) {
+        $successMessage[] = "Đã khôi phục dữ liệu Custom Home Assistant từ tệp sao lưu trên hệ thống thành công";
+    } else {
+        $errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Custom Home Assistant Mã lỗi: " . $resultCode;
+    }
+} else {
+    $errorMessages[] = "Lỗi: Tệp ".basename($start_recovery_custom_hass)." không tồn tại trên hệ thống";
+}
+    } else {
+        $errorMessages[] = "Không có tệp sao lưu Custom Home Assistant nào được chọn để khôi phục!";
+    }
+}
+}
 
 // Đọc file JSON hiện tại
 $json_data_custom = file_get_contents($Hass_Custom_Json);
@@ -267,7 +341,7 @@ include 'html_sidebar.php';
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Áp dụng được với switch, script, automation, v..v...<br/><br/>- Tệp Json cấu hình nằm tại đường dẫn path: <b><?php echo $Config['home_assistant']['custom_commands']['custom_command_file']; ?></b>')"></i></h1>
+      <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Áp dụng được với switch, script, automation, v..v...<br/><br/>- Tệp Json cấu hình nằm tại đường dẫn path: <b><?php echo $Config['backup_upgrade']['custom_home_assistant']['custom_command_file']; ?></b>')"></i></h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
@@ -294,12 +368,19 @@ if (!empty($errorMessages)) {
 }
 
 // Hiển thị thông báo thành công nếu có
+
 if (!empty($successMessage)) {
-echo '<script type="text/javascript">';
-echo 'showMessagePHP("' . addslashes($successMessage) . '", 3);';
-echo '</script>';
+	echo '<div class="alert alert-success alert-dismissible fade show" id="message_error" role="alert">';
+    echo '<ul style="color: green;">';
+    foreach ($successMessage as $successMessagegg) {
+        echo '<li>' . $successMessagegg . '</li>';
+    }
+    echo '</ul>';
+    echo '</div>';
 }
 
+
+echo '<form method="POST" enctype="multipart/form-data" action="">';
 echo '<center>
 <button type="button" class="btn btn-success rounded-pill" title="Đồng bộ dữ liệu từ Home Assistant" onclick="get_hass_all()">
     <i class="bi bi-arrow-repeat"></i> Đồng Bộ và Lưu Dữ Liệu
@@ -309,13 +390,55 @@ echo '<center>
     <i class="bi bi-trash"></i> Xóa dữ liệu Đã Đồng Bộ
 </button>
 
-<button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã Đồng Bộ từ Home Assistant" id="openModalBtn_Home_Assistant">
-    <i class="bi bi-trash"></i> Xem dữ liệu Cấu Hình Json
+<button type="button" class="btn btn-info rounded-pill" title="Tải Xuống Cấu Hình Custom Home Assistant" onclick="downloadFile(\''.$Hass_Custom_Json.'\')">
+ <i class="bi bi-download"></i> Tải Xuống Cấu Hình
 </button>
-</center><br/><br/>';
+
+<button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã Đồng Bộ từ Home Assistant" id="openModalBtn_Home_Assistant">
+ <i class="bi bi-eye"></i> Xem dữ liệu Cấu Hình Json
+</button>
+</center><br/>';
+echo '
+<div class="row mb-3">
+    <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <input class="form-control border-success" type="file" name="fileToUpload_custom_hass_restore" accept=".json">
+            <button class="btn btn-warning border-success" type="submit" name="start_recovery_custom_homeassistant" value="khoi_phuc_tu_tep_tai_len" onclick="return confirmRestore(\'Bạn có chắc chắn muốn tải lên tệp để khôi phục dữ liệu Home_Assistant_Custom.json không?\')">Tải Lên & Khôi Phục</button>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label class="col-sm-3 col-form-label"><b>Hoặc Chọn Tệp Khôi Phục:</b></label>
+    <div class="col-sm-9">';
+
+$jsonFiles = glob($Config['backup_upgrade']['custom_home_assistant']['backup_path'].'/*.json');
+$co_tep_BackUp_customhass = true;
+if (empty($jsonFiles)) {
+	$co_tep_BackUp_customhass = false;
+echo '<select class="form-select border-primary" name="backup_custom_hass_json_files" id="backup_custom_hass_json_files">';
+    echo '<option selected value="">Không có tệp khôi phục dữ liệu Config nào</option>';
+	echo '</select>';
+} else {
+	$co_tep_BackUp_customhass = true;
+echo '<div class="input-group"><select class="form-select border-primary" name="backup_custom_hass_json_files" id="backup_custom_hass_json_files">';
+echo '<option selected value="">Chọn Tệp Khôi Phục Dữ Liệu Custom Home Assistant</option>';
+foreach ($jsonFiles as $file) {
+    $fileName = basename($file);
+    echo '<option value="' . htmlspecialchars($Config['backup_upgrade']['custom_home_assistant']['backup_path'].'/'.$fileName) . '">' . htmlspecialchars($fileName) . '</option>';
+}
+echo '</select>
+<button class="btn btn-warning border-primary" type="submit" name="start_recovery_custom_homeassistant" value="khoi_phuc_file_he_thong">Khôi Phục</button>
+<button type="button" class="btn btn-info border-primary" title="Tải Xuống Tệp Sao Lưu Custom Home Assistant" onclick="dowlaod_file_backup_hass_custom(\'get_value_backup_config\')"><i class="bi bi-download"></i></button>
+<button type="button" class="btn btn-success border-primary" title="Xem Tệp Sao Lưu Custom Home Assistant" onclick="readJSON_file_path(\'get_value_backup_config\')"><i class="bi bi-eye"></i></button>
+<button type="button" class="btn btn-danger border-primary" title="Xóa Tệp Sao Lưu Custom Home Assistant" onclick="delete_file_backup_hass_custom(\'get_value_backup_config\')"><i class="bi bi-trash"></i></button>
+</div>';
+}
+echo '</div></div><hr/><h5 class="card-title"><font color=green>Thiết Lập Lệnh Tùy Chỉnh:</font></h5>';
 
 // Form để chỉnh sửa các giá trị trong file JSON
-echo '<form method="POST">';
+
 echo '<div id="intents-container">';
 
 if (!empty($intents['intents'])) {
@@ -555,8 +678,6 @@ function searchAndSuggest(inputElement, newIndex) {
                     if (friendlyNameInput) { 
                         friendlyNameInput.value = item.attributes.friendly_name; // Cập nhật giá trị friendly_name
                     }
-
-					
 					// Xóa gợi ý
                     suggestionsBox.innerHTML = '';
 					// Ẩn gợi ý
@@ -592,6 +713,59 @@ document.addEventListener('click', function(event) {
         suggestionsBox.style.display = 'none'; // Ẩn gợi ý nếu nhấn ra ngoài
     }
 });
+
+
+
+//Xóa file backup Config
+function delete_file_backup_hass_custom(filePath) {
+    if (filePath === "get_value_backup_config") {
+		//Lấy giá trị value của id: backup_custom_hass_json_files
+        var get_value_backup_config = document.getElementById('backup_custom_hass_json_files').value;
+        if (get_value_backup_config === "") {
+            showMessagePHP("Không có tệp nào được chọn để tải xuống");
+        } else {
+            filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+            deleteFile(filePath);
+        }
+    } else {
+        showMessagePHP("Không có tệp nào được chọn để tải xuống.");
+    }
+}
+
+//Tải xuống file backup Config
+function dowlaod_file_backup_hass_custom(filePath) {
+    if (filePath === "get_value_backup_config") {
+		//Lấy giá trị value của id: backup_custom_hass_json_files
+        var get_value_backup_config = document.getElementById('backup_custom_hass_json_files').value;
+        if (get_value_backup_config === "") {
+            showMessagePHP("Không có tệp nào được chọn để tải xuống");
+        } else {
+            filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+            downloadFile(filePath);
+        }
+    } else {
+        showMessagePHP("Không có tệp nào được chọn để tải xuống.");
+    }
+}
+
+//onclick xem nội dung file json
+function readJSON_file_path(filePath) {
+    if (filePath === "get_value_backup_config") {
+		//Lấy giá trị value của id: backup_custom_hass_json_files
+        var get_value_backup_config = document.getElementById('backup_custom_hass_json_files').value;
+        if (get_value_backup_config === "") {
+            showMessagePHP("Không có tệp nào được chọn để xem nội dung");
+        } else {
+            filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+            read_loadFile(filePath);
+            $('#myModal_Home_Assistant').modal('show');
+        }
+    } else {
+        read_loadFile(filePath);
+        $('#myModal_Home_Assistant').modal('show');
+    }
+}
+
 </script>
 <?php
 include 'html_js.php';

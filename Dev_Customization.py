@@ -11,7 +11,7 @@ Thêm thư viện Lib
 import Led
 """
 #thêm thư viện Đèn LED
-#sử dụng thư viện Led: Led.LED("OFF") có các tham số: SPEAK, THINK, LOADING, MUTE, STARTUP, PAUSE, OFF, SOCKET_ERROR
+#sử dụng thư viện Led: Led.LED("OFF"), Led.LED("SPEAK") có các tham số: SPEAK, THINK, LOADING, MUTE, STARTUP, PAUSE, OFF, SOCKET_ERROR, OFF
 #Hiện tại chỉ hỗ trợ led WS281x nhé
 """
 
@@ -55,6 +55,15 @@ biến input_text = dữ liệu text được chuyển đổi Speak to text
 """
 def dev_skill(input_text):
 
+    
+    Lib.show_log(f"Dữ liệu STT truyền vào CUstom Skill: {input_text}", color=Lib.Color.GREEN)
+
+
+    """
+    hiển thị trực tiếp print với mã màu:
+    các tham số mã màu cho print: RED_COLOR, RESET_COLOR, GREEN_COLOR, YELLOW_COLOR
+    """
+    print(f"{Lib.GREEN_COLOR} Đây là văn bản text truyền vào: {input_text} {Lib.RESET_COLOR}")
 
     #Ví dụ Lấy và hiển thị dữ liệu trong Config.json:
     hien_thi_port_api = Lib.config['api']['port']
@@ -67,21 +76,8 @@ def dev_skill(input_text):
     Lib.show_log(f"[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
     
     
-    
-    
-    #Chỉ sử dụng print
-    print("Vào Dev Skill: " +input_text)
-    
-    
-    
-    """
-    hiển thị trực tiếp print với mã màu:
-    các tham số mã màu cho print: RED_COLOR, RESET_COLOR, GREEN_COLOR, YELLOW_COLOR
-    """
-    print(f"{Lib.GREEN_COLOR} Đây là văn bản text truyền vào: {input_text} {Lib.RESET_COLOR}")
-    
 
-
+  
 
 
     #Ví dụ sử dụng trợ lý ảo
@@ -170,6 +166,11 @@ def dev_skill(input_text):
     còn nếu developer_customization->if_custom_skill_can_not_handle->active->false 
     thì sẽ quay về trạng thái chờ đánh thức mà không dùng vbot xử lý
     """
+    """
+    return False -> thì sẽ sử dụng tiếp Vbot để xử lý dữ liệu
+    return True -> quay về trạng thái chời được đánh thức
+    """
+    Lib.show_log(f"[DEV Customization] return False => Vbot sẽ xử lý tiếp dữ liệu", color=Lib.Color.GREEN)
     return False
     #Dữ liệu trả lại về cho trương trình bắt buộc là return True hoặc False = None
     

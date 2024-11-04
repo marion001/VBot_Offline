@@ -394,8 +394,14 @@ if (!is_dir($Backup_Dir_Save_VBot)) {
     }
 }
 
-#Tên file Backup
-$Backup_File_Name = $Backup_Dir_Save_VBot . '/VBot_Program_' . date('dmY_His') . '_'.$Version_VBot_Program['releaseDate'].'_'.$Version_VBot_Program['version'].'.tar.gz'; // Đường dẫn file backup
+//Chuyển dấu / thành dấu - ở file Version.json
+$Version_VBot_Program_releaseDate = str_replace('/', '-', $Version_VBot_Program['releaseDate']);
+$Version_VBot_Program_version = str_replace('/', '-', $Version_VBot_Program['version']);
+
+// Đường dẫn file backup
+
+# Tên file Backup
+$Backup_File_Name = $Backup_Dir_Save_VBot . '/VBot_Program_' . date('dmY_His') . '_'.$Version_VBot_Program_releaseDate.'_'.$Version_VBot_Program_version.'.tar.gz';
 
 // Tạo lệnh để nén thư mục
 $tarCommand = "tar -czvf " . escapeshellarg($Backup_File_Name) . " -C " . escapeshellarg($VBot_Offline);
@@ -410,7 +416,7 @@ foreach ($Exclude_File_Format as $ext) {
 }
 
 // Thêm tên thư mục cần nén (dùng dấu chấm để nén toàn bộ nội dung thư mục)
-$tarCommand .= " .";
+$tarCommand .= " . --warning=all 2>&1";
 // Thực thi lệnh tar
 exec($tarCommand, $output, $returnCode);
 // Kiểm tra kết quả
