@@ -89,7 +89,32 @@ if (isset($_GET['restart_vbot_service'])) {
     exit; 
 }
 
-
+if (isset($_GET['reboot_os'])) {
+    $CMD = "sudo reboot";
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    // Khởi tạo biến để lưu kết quả
+    $result = [
+        'success' => false,
+        'message' => ''
+    ];
+    if ($connection) {
+        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+            $stream = ssh2_exec($connection, $CMD);
+            stream_set_blocking($stream, true);
+            $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+            
+            // Nếu lệnh thành công
+                $result['success'] = true;
+                $result['message'] = 'Đang khởi động lại toàn bộ hệ thống';
+        } else {
+            $result['message'] = 'Xác thực SSH không thành công.';
+        }
+    } else {
+        $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
+    }
+    echo json_encode($result);
+    exit; 
+}
 
 if (isset($_GET['check_hass']))
 {
@@ -322,4 +347,46 @@ if (isset($_GET['check_key_picovoice'])) {
 	exit();
 }
 
+if (isset($_GET['check_mqtt'])) {
+    // Kiểm tra xem các tham số có được cung cấp trong URL hay không
+    if (isset($_GET['host'], $_GET['port'], $_GET['user'], $_GET['pass'])) {
+        require('./phpMQTT.php');
+        $server = $_GET['host'];
+        $port = $_GET['port'];
+        $username = $_GET['user'];
+        $password = $_GET['pass'];
+
+        // Tạo client ID ngẫu nhiên
+        $client_id = 'VBot_TEST_CONNECT_MQTT_client_' . uniqid();
+
+        // Khởi tạo kết nối MQTT
+        $mqtt = new Bluerhinos\phpMQTT($server, $port, $client_id);
+
+        // Kiểm tra kết nối MQTT
+        if ($mqtt->connect(true, NULL, $username, $password)) {
+            // Trả về JSON khi kết nối thành công
+            $response = [
+                'success' => true,
+                'message' => 'Kết nối tới máy chủ MQTT thành công: '.$server.':'.$port
+            ];
+            $mqtt->close(); // Ngắt kết nối sau khi hoàn tất
+        } else {
+            // Trả về JSON khi kết nối không thành công
+            $response = [
+                'success' => false,
+                'message' => 'Không thể kết nối tới máy chủ MQTT: '.$server.':'.$port.' hãy kiểm tra lại Cổng Port, Tài Khoản,, Mật Khẩu'
+            ];
+        }
+    } else {
+        // Trả về JSON khi thiếu tham số kết nối
+        $response = [
+            'success' => false,
+            'message' => 'Thiếu thông tin kết nối MQTT, cần nhập đủ thông tin: Máy Chủ MQTT, Cổng PORT, Tài Khoản, Mật Khẩu, Hoặc máy chủ MQTT có lỗi, không hoạt động'
+        ];
+    }
+
+    // Trả về kết quả dưới dạng JSON
+    echo json_encode($response);
+    exit();
+}
 ?>

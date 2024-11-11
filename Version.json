@@ -1,8 +1,8 @@
 {
-    "version": "1.0.2",
+    "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "Vá lỗ hổng không thời gian",
-    "releaseDate": "04/11/2024",
+    "description": "Cập nhật kết nối MQTT",
+    "releaseDate": "11/11/2024",
     "changes": [
         {
             "type": "feature",
@@ -19,5 +19,5 @@
     ],
     "author": "Vũ Tuyển",
     "status": "stable",
-    "previousVersion": "1.0.1"
+    "previousVersion": "1.0.2"
 }

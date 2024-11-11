@@ -77,11 +77,37 @@ include 'Notify.php';
 <!-- end Chatbot --> 
 		
 <!-- restart vbot -->	
+
+
+
+        <li class="nav-item dropdown pe-3">
+
+          <a class="nav-item nav-icon" href="#" data-bs-toggle="dropdown">
+           <i class="bi bi-power text-danger"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow POWER_CONTROL">
 <form method="POST"	action="">
-<li class="nav-item nav-icon" title="Khởi động lại chương trình VBot" onclick="restart_vbot_service()">
-   <i class="bi bi-bootstrap-reboot text-warning" title="Khởi động lại chương trình VBot"></i>
-</li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center" onclick="power_action_service('restart_vbot_service','Bạn có chắc chắn muốn khởi động lại chương trình VBot')">
+                <i class="bi bi-arrow-repeat text-danger" title="Khởi động lại chương trình VBot"></i>
+                <span class="text-primary">Restart VBot</span>
+              </a>
+            </li>
+
+
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center" onclick="power_action_service('reboot_os','Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống')">
+                <i class="bi bi-bootstrap-reboot text-danger"></i>
+                 <span class="text-primary">Reboot OS</span>
+              </a>
+            </li>
 </form>
+          </ul>
+        </li>
+
 <!-- end restart vbot -->		
         <li class="nav-item dropdown pe-3">
 
@@ -146,15 +172,13 @@ include 'Notify.php';
     </nav><!-- End Icons Navigation -->
 <script>
 //Khởi động lại chương trình VBot html_header_bar.php
-function restart_vbot_service() {
-	
-    if (!confirm("Bạn có chắc chắn muốn khởi động lại Vbot?")) {
+function power_action_service(action_name, mess_name) {
+    if (!confirm(mess_name)) {
         return;
     }
 	loading('show');
-	
     var xhr = new XMLHttpRequest();
-    var url = "includes/php_ajax/Check_Connection.php?restart_vbot_service";
+    var url = "includes/php_ajax/Check_Connection.php?"+action_name;
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {

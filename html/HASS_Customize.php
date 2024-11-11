@@ -524,6 +524,7 @@ echo '</form>';
         <div class="modal-dialog" id="modal_dialog_show_Home_Assistant" role="document">
             <div class="modal-content">
                 <div class="modal-header">
+				<b><font color=blue><div id="name_file_showzz"></div></font></b> 
                     <button type="button" class="close btn btn-danger" data-dismiss="modal_Config" aria-label="Close" onclick="$('#myModal_Home_Assistant').modal('hide');">
                         <i class="bi bi-x-circle-fill"></i> Đóng
                     </button>
@@ -549,7 +550,9 @@ include 'html_footer.php';
 // Hiển thị modal xem nội dung file json Home_Assistant.json
 ['openModalBtn_Home_Assistant'].forEach(function(id) {
     document.getElementById(id).addEventListener('click', function() {
-        read_loadFile('<?php echo $Hass_Custom_Json; ?>');
+		var file_name_hassJSON = "<?php echo $Hass_Custom_Json; ?>";
+        read_loadFile(file_name_hassJSON);
+		document.getElementById('name_file_showzz').textContent = "Tên File: "+file_name_hassJSON.split('/').pop();
         $('#myModal_Home_Assistant').modal('show');
     });
 });
@@ -758,10 +761,12 @@ function readJSON_file_path(filePath) {
         } else {
             filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
             read_loadFile(filePath);
+			document.getElementById('name_file_showzz').textContent = "Tên File: "+filePath.split('/').pop();
             $('#myModal_Home_Assistant').modal('show');
         }
     } else {
         read_loadFile(filePath);
+		document.getElementById('name_file_showzz').textContent = "Tên File: "+filePath.split('/').pop();
         $('#myModal_Home_Assistant').modal('show');
     }
 }

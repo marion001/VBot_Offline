@@ -448,6 +448,401 @@ if (isset($_GET['read_files_in_backup']) && isset($_GET['file_path']) && !empty(
     exit;
 }
 
+if (isset($_GET['yaml'])) {
+    $File_Name = $_GET['yaml'];
+$MQTT_Client_Name = $Config['mqtt_broker']['mqtt_client_name'];
+$MQTT_Retain = $Config['mqtt_broker']['mqtt_retain'] ? 'true' : 'false';
+$MQTT_Qos = $Config['mqtt_broker']['mqtt_qos'];
+if ($File_Name === "mqtts.yaml") {
+$mqtts_yaml = '
+select:
+  - name: "'.$MQTT_Client_Name.' Kiểu Hiển Thị Logs"
+    state_topic: "'.$MQTT_Client_Name.'/select/log_display_style/state"
+    command_topic: "'.$MQTT_Client_Name.'/select/log_display_style/set"
+    icon: mdi:math-log
+    options:
+      - "console"
+      - "display_screen"
+      - "api"
+      - "all"
+
+number:
+  - name: "'.$MQTT_Client_Name.' Volume"
+    state_topic: "'.$MQTT_Client_Name.'/number/volume/state"
+    command_topic: "'.$MQTT_Client_Name.'/number/volume/set"
+    min: 0
+    max: 100
+    qos: '.$MQTT_Qos.'
+    unit_of_measurement: "%"
+    icon: "mdi:volume-high"
+
+  - name: "'.$MQTT_Client_Name.' Độ Sáng Đèn Led"
+    state_topic: "'.$MQTT_Client_Name.'/number/led_brightness/state"
+    command_topic: "'.$MQTT_Client_Name.'/number/led_brightness/set"
+    min: 0
+    max: 255
+    qos: '.$MQTT_Qos.'
+    #unit_of_measurement: "%"
+    icon: "mdi:brightness-5"
+
+switch:
+  - name: "'.$MQTT_Client_Name.' Logs Hệ Thống"
+    state_topic: "'.$MQTT_Client_Name.'/switch/log_display_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/log_display_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:math-log
+
+  - name: "'.$MQTT_Client_Name.' Chế Độ Hội Thoại"
+    state_topic: "'.$MQTT_Client_Name.'/switch/conversation_mode/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/conversation_mode/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:repeat-once
+
+  - name: "'.$MQTT_Client_Name.' Mic, Microphone"
+    state_topic: "'.$MQTT_Client_Name.'/switch/mic_on_off/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/mic_on_off/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: "mdi:microphone-settings"
+
+  - name: "'.$MQTT_Client_Name.' Media Player"
+    state_topic: "'.$MQTT_Client_Name.'/switch/media_player_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/media_player_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:multimedia
+
+  - name: "'.$MQTT_Client_Name.' Wakeup Hotword in Media Player"
+    state_topic: "'.$MQTT_Client_Name.'/switch/wake_up_in_media_player/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/wake_up_in_media_player/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:speaker-play
+
+  - name: "'.$MQTT_Client_Name.' Cache TTS"
+    state_topic: "'.$MQTT_Client_Name.'/switch/cache_tts_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/cache_tts_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:cached
+
+  - name: "'.$MQTT_Client_Name.' Wake UP"
+    state_topic: "'.$MQTT_Client_Name.'/switch/conversation_mode_flag/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/conversation_mode_flag/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:play-circle-outline
+
+  - name: "'.$MQTT_Client_Name.' Home Asistant"
+    state_topic: "'.$MQTT_Client_Name.'/switch/home_assistant_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/home_assistant_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:home-assistant
+
+  - name: "'.$MQTT_Client_Name.' Home Asistant Custom Command"
+    state_topic: "'.$MQTT_Client_Name.'/switch/hass_custom_commands_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/hass_custom_commands_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:home-plus
+
+  - name: "'.$MQTT_Client_Name.' DEV Custom"
+    state_topic: "'.$MQTT_Client_Name.'/switch/developer_customization/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/developer_customization/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:dev-to
+
+  - name: "'.$MQTT_Client_Name.' Xử Lý Tiếp Cho DEV Skill"
+    state_topic: "'.$MQTT_Client_Name.'/switch/dev_vbot_processing_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/dev_vbot_processing_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:developer-board
+
+  - name: "'.$MQTT_Client_Name.' default assistant"
+    state_topic: "'.$MQTT_Client_Name.'/switch/default_assistant_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/default_assistant_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:assistant
+
+  - name: "'.$MQTT_Client_Name.' Google Gemini"
+    state_topic: "'.$MQTT_Client_Name.'/switch/google_gemini_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/google_gemini_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:google-assistant
+
+  - name: "'.$MQTT_Client_Name.' Chat GPT"
+    state_topic: "'.$MQTT_Client_Name.'/switch/chat_gpt_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/chat_gpt_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:assistant
+
+  - name: "'.$MQTT_Client_Name.' Music Local"
+    state_topic: "'.$MQTT_Client_Name.'/switch/music_local_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/music_local_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:music-circle-outline
+
+  - name: "'.$MQTT_Client_Name.' ZingMp3"
+    state_topic: "'.$MQTT_Client_Name.'/switch/zing_mp3_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/zing_mp3_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:music-circle
+
+  - name: "'.$MQTT_Client_Name.' Youtube"
+    state_topic: "'.$MQTT_Client_Name.'/switch/youtube_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/youtube_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:youtube
+
+  - name: "'.$MQTT_Client_Name.' Logs MQTT Broker"
+    state_topic: "'.$MQTT_Client_Name.'/switch/mqtt_show_logs_reconnect/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/mqtt_show_logs_reconnect/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:math-log
+';
+echo $mqtts_yaml;	
+} else if ($File_Name === "scripts.yaml") {
+$scripts_yaml = '
+'.strtolower($MQTT_Client_Name).'_media_control_pause:
+  alias: "'.$MQTT_Client_Name.' Media Pause"
+  icon: mdi:pause-circle-outline
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/media_control/set"
+        payload: "PAUSE"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_media_control_stop:
+  alias: "'.$MQTT_Client_Name.' Media Stop"
+  icon: mdi:stop-circle-outline
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/media_control/set"
+        payload: "STOP"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_media_control_resume:
+  alias: "'.$MQTT_Client_Name.' Media Resume"
+  icon: mdi:motion-play-outline
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/media_control/set"
+        payload: "RESUME"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_media_control_play:
+  alias: "'.$MQTT_Client_Name.' Media Play"
+  icon: mdi:play-circle-outline
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/media_control/set"
+        payload: >
+          {
+            "action": "play",
+            "media_link": "http://localhost/1.mp3",
+            "media_cover": "http://localhost/1.jpg",
+            "media_name": "Thuyền Quyên",
+            "media_player_source": "MQTT"
+          }
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_volume_control_up:
+  alias: "'.$MQTT_Client_Name.' Volume UP"
+  icon: mdi:volume-plus
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/volume_control/set"
+        payload: "UP"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_volume_control_down:
+  alias: "'.$MQTT_Client_Name.' Volume DOWN"
+  icon: mdi:volume-minus
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/volume_control/set"
+        payload: "DOWN"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_volume_control_min:
+  alias: "'.$MQTT_Client_Name.' Volume MIN"
+  icon: mdi:volume-low
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/volume_control/set"
+        payload: "MIN"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_volume_control_max:
+  alias: "'.$MQTT_Client_Name.' Volume MAX"
+  icon: mdi:volume-high
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/volume_control/set"
+        payload: "MAX"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+';
+echo $scripts_yaml;
+    }
+else if ($File_Name === "lovelace_entities") {
+echo '
+type: entities
+entities:
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_cache_tts
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_chat_gpt
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_che_do_hoi_thoai
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_default_assistant
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_dev_custom
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_google_gemini
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_home_asistant
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_home_asistant_custom_command
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_logs_he_thong
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_media_player
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_mic_microphone
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_music_local
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_wake_up
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_wakeup_hotword_in_media_player
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_xu_ly_tiep_cho_dev_skill
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_youtube
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_zingmp3
+  - entity: number.'.strtolower($MQTT_Client_Name).'_do_sang_den_led
+  - entity: select.'.strtolower($MQTT_Client_Name).'_kieu_hien_thi_logs
+  - entity: number.'.strtolower($MQTT_Client_Name).'_volume
+  - entity: script.'.strtolower($MQTT_Client_Name).'_media_control_pause
+  - entity: script.'.strtolower($MQTT_Client_Name).'_media_control_play
+  - entity: script.'.strtolower($MQTT_Client_Name).'_media_control_resume
+  - entity: script.'.strtolower($MQTT_Client_Name).'_media_control_stop
+  - entity: script.'.strtolower($MQTT_Client_Name).'_volume_control_down
+  - entity: script.'.strtolower($MQTT_Client_Name).'_volume_control_max
+  - entity: script.'.strtolower($MQTT_Client_Name).'_volume_control_min
+  - entity: script.'.strtolower($MQTT_Client_Name).'_volume_control_up
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_logs_mqtt_broker
+state_color: true
+';
+
+}
+
+    exit();
+}
+
 
 
 ?>

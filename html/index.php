@@ -656,6 +656,16 @@ include 'html_sidebar.php';
 </div>
   </li>
 
+  <li>
+  <font color="blue">MQTT Broker Logs</font>
+    <div class="form-switch">
+       <div class="form-check">
+  <input class="form-check-input" value="mqtt_show_logs_reconnect" type="checkbox" name="mqtt_show_logs_reconnect" id="mqtt_show_logs_reconnect" onclick="change_og_display_style('mqtt_show_logs_reconnect', this.checked ? 'on' : 'off', true)" <?php if ($Config['mqtt_broker']['mqtt_show_logs_reconnect'] === true) echo "checked"; ?>>
+
+</div>
+</div>
+  </li>
+
 </ul>
 </div>
             </div>
@@ -1028,6 +1038,7 @@ include 'html_js.php';
                     document.getElementById('show_wakeup_reply').checked = data.wakeup_reply ? true : false;
                     document.getElementById('show_mic_on_off').checked = data.mic_on_off ? true : false;
                     document.getElementById('on_off_display_logs').checked = data.log_display_active ? true : false;
+                    document.getElementById('mqtt_show_logs_reconnect').checked = data.mqtt_show_logs_reconnect ? true : false;
                     document.getElementById('cache_tts').checked = data.cache_tts_active ? true : false;
                     document.getElementById('media_player_active').checked = data.media_player.media_player_active ? true : false;
                     document.getElementById('wake_up_in_media_player').checked = data.media_player.wake_up_in_media_player ? true : false;

@@ -137,6 +137,23 @@ $Config['home_assistant']['long_token'] = $_POST['hass_long_token'];
 $Config['home_assistant']['active'] = isset($_POST['hass_active']) ? true : false;
 $Config['home_assistant']['custom_commands']['active'] = isset($_POST['hass_custom_commands_active']) ? true : false;
 
+
+#Cập nhật các giá trị trong MQTT Broker
+$Config['mqtt_broker']['mqtt_active'] = isset($_POST['mqtt_active']) ? true : false;
+$Config['mqtt_broker']['mqtt_show_logs_reconnect'] = isset($_POST['mqtt_show_logs_reconnect']) ? true : false;
+$Config['mqtt_broker']['mqtt_retain'] = isset($_POST['mqtt_retain']) ? true : false;
+$Config['mqtt_broker']['mqtt_host'] = $_POST['mqtt_host'];
+$Config['mqtt_broker']['mqtt_port'] = intval($_POST['mqtt_port']);
+$Config['mqtt_broker']['mqtt_time_out'] = intval($_POST['mqtt_time_out']);
+$Config['mqtt_broker']['mqtt_connection_waiting_time'] = intval($_POST['mqtt_connection_waiting_time']);
+$Config['mqtt_broker']['mqtt_qos'] = intval($_POST['mqtt_qos']);
+$Config['mqtt_broker']['mqtt_username'] = $_POST['mqtt_username'];
+$Config['mqtt_broker']['mqtt_password'] = $_POST['mqtt_password'];
+$Config['mqtt_broker']['mqtt_client_name'] = $_POST['mqtt_client_name'];
+
+
+
+
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG LOG HỆ THỐNG show_log
 $Config['smart_config']['show_log']['active'] = isset($_POST['log_active']) ? true : false;
 $Config['smart_config']['show_log']['log_display_style'] = $_POST['log_display_style'];
@@ -1139,17 +1156,11 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 
 <div class="form-floating mb-3">
 <textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_zalo_api_key" id="tts_zalo_api_key" style="height: 150px;">
-
 <?php
-
 //Hiển thị api Key zalo theo dòng
-
-$apiKeys_tts_zalo = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key']) 
-    ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] 
-    : [];
+$apiKeys_tts_zalo = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key']) ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] : [];
 $textareaContent_tts_zalo = implode("\n", array_map('trim', $apiKeys_tts_zalo));
 echo htmlspecialchars($textareaContent_tts_zalo);
-
 ?>
 </textarea>
 <label for="tts_zalo_api_key">Api Keys (Mỗi Keys 1 dòng):</label>
@@ -1157,8 +1168,6 @@ echo htmlspecialchars($textareaContent_tts_zalo);
 
 <div class="form-floating mb-3">
 <textarea readonly class="form-control border-danger" name="tts_zalo_backlist_content" id="tts_zalo_backlist_content" style="height: 150px;">
-
-
 </textarea>
 <label for="tts_zalo_api_key">Nội Dung Keys BackList Zalo | <?php echo $Config['smart_config']['backlist_file_name']; ?>:</label>
 </div>
@@ -1353,6 +1362,125 @@ Cấu Hình Home Assistant:</h5>
 </div>
 </div>
 </div>
+
+
+<div class="card accordion" id="accordion_button_mqtt_tuyen">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_mqtt_tuyen" aria-expanded="false" aria-controls="collapse_button_mqtt_tuyen">
+Cấu Hình MQTT Broker:</h5>
+<div id="collapse_button_mqtt_tuyen" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mqtt_tuyen">
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt sử dụng giao thức MQTT')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="mqtt_active" id="mqtt_active" <?php echo $Config['mqtt_broker']['mqtt_active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Logs MQTT <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để hiển thị logs khi kết nối, mất kết nối MQTT')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="mqtt_show_logs_reconnect" id="mqtt_show_logs_reconnect" <?php echo $Config['mqtt_broker']['mqtt_show_logs_reconnect'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_host" class="col-sm-3 col-form-label" title="MQTT Host, máy chủ của MQTT cần kết nối tới">Máy Chủ MQTT: </label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input class="form-control border-success" type="text" name="mqtt_host" id="mqtt_host" title="Địa chỉ Link/Url/Host của MQTT Broker" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_host']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_host']) ?>">
+<button class="btn btn-success border-success" type="button" title="Kiểm tra kết nối tới MQTT" onclick="checkMQTTConnection()">Kiểm Tra</button>
+
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_port" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Cổng PORT: </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="number" name="mqtt_port" id="mqtt_port" title="Cổng Port của MQTT Broker" placeholder="1883" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_port']) ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_username" class="col-sm-3 col-form-label" title="Tài Khoản Kết Nối MQTT">Tài Khoản: </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="text" name="mqtt_username" id="mqtt_username" title="Tài khoản kết nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_username']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_username']) ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_password" class="col-sm-3 col-form-label" title="Mật Khẩu Kết Nối MQTT">Mật Khẩu: </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="text" name="mqtt_password" id="mqtt_password" title="Mật khẩu kết nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_password']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_password']) ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_client_name" class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tên Client <i class="bi bi-question-circle-fill" onclick="show_message('Nếu có nhiều hơn 1 thiết bị trong Mạng, bạn cần thay đổi Tên Client cho khác nhau và là duy nhất, ví dụ: <b>VBot1</b> hoặc <b>VBot2</b><br/>Tên Client này sẽ được gắn với <b>state_topic</b> và <b>command_topic</b> trong cấu hình <b>mqtts.yaml</b><br/><br/>Ví dụ tên Client là <b>Vbot1</b>:<br/><b>- state_topic: \'VBot1/switch/mic_on_off/state\'</b> <br/><b>- command_topic: \'VBot1/switch/mic_on_off/set\'</b>')"></i> : </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="text" name="mqtt_client_name" id="mqtt_client_name" title="Đặt Tên Client Cho Kết Nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']) ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ (Time Out) (giây)">Thời gian chờ (Time Out) (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="number" min="20" max="120" step="1" name="mqtt_time_out" id="mqtt_time_out" title="Thời gian chờ (Time Out) (giây)" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_time_out']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_time_out']) ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="mqtt_connection_waiting_time" class="col-sm-3 col-form-label" title="Thời gian chờ kết nối lại (giây)">Thời gian chờ kết nối lại (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="number" min="10" max="9999" step="1" name="mqtt_connection_waiting_time" id="mqtt_connection_waiting_time" title="Thời gian chờ kết nối lại (giây)" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time']) ?>">
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">QoS <i class="bi bi-question-circle-fill" onclick="show_message('- QoS 0 (At most once): Tin nhắn được gửi một lần duy nhất mà không có sự xác nhận. Điều này có thể dẫn đến việc mất tin nhắn nếu có sự cố kết nối<br/><br/>- QoS 1 (At least once): Tin nhắn được gửi ít nhất một lần và sẽ có xác nhận từ phía người nhận. Điều này đảm bảo rằng tin nhắn sẽ đến nơi, nhưng có thể nhận được tin nhắn trùng lặp.<br/><br/>- QoS 2 (Exactly once): Tin nhắn sẽ được gửi một lần duy nhất, không trùng lặp và không bị mất. Đây là mức độ bảo mật cao nhất, nhưng cũng đòi hỏi nhiều tài nguyên hơn và độ trễ cao hơn')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group">
+<select name="mqtt_qos" id="mqtt_qos" class="form-select border-success">
+<option value="0" <?php echo $Config['mqtt_broker']['mqtt_qos'] === 0 ? 'selected' : ''; ?>>0</option>
+<option value="1" <?php echo $Config['mqtt_broker']['mqtt_qos'] === 1 ? 'selected' : ''; ?>>1</option>
+<option value="2" <?php echo $Config['mqtt_broker']['mqtt_qos'] === 2 ? 'selected' : ''; ?>>2</option>
+</select>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Retain <i class="bi bi-question-circle-fill" onclick="show_message('- retain=True: Khi bạn gửi một tin nhắn với retain=True, MQTT broker sẽ giữ lại tin nhắn đó và gửi lại cho bất kỳ client nào kết nối vào MQTT đó sau này, ngay cả khi client đó đã không nhận dữ liệu ban đầu.<br/><br/>- retain=False: Tin nhắn sẽ không được lưu trữ. Khi client kết nối vào MQTT, nó sẽ không nhận lại tin nhắn cũ')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="mqtt_retain" id="mqtt_retain" <?php echo $Config['mqtt_broker']['mqtt_retain'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label for="mqtt_client_name" class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tạo File Cấu Hình <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<button class="btn btn-primary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('mqtts.yaml')">mqtts.yaml</button>
+<button class="btn btn-success border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('scripts.yaml')">scripts.yaml</button>
+<button class="btn btn-info border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('lovelace_entities')">lovelace</button>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
 
 
                 <div class="card accordion" id="accordion_button_setting_led">
@@ -2947,7 +3075,8 @@ echo '
         <div class="modal-dialog" id="modal_dialog_show_config" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close btn btn-danger" data-dismiss="modal_Config" aria-label="Close" onclick="$('#myModal_Config').modal('hide');">
+                <b><font color=blue><div id="name_file_showzz"></div></font></b> 
+				<button type="button" class="close btn btn-danger" data-dismiss="modal_Config" aria-label="Close" onclick="$('#myModal_Config').modal('hide');">
                         <i class="bi bi-x-circle-fill"></i> Đóng
                     </button>
                 </div>
@@ -3064,6 +3193,63 @@ function dowlaod_file_backup_json_config(filePath) {
     }
 }
 
+//Kiểm tra kết nối MQTT
+function checkMQTTConnection() {
+	loading('show');
+    var host = document.getElementById('mqtt_host').value;
+    var port = document.getElementById('mqtt_port').value;
+    var user = document.getElementById('mqtt_username').value;
+    var pass = document.getElementById('mqtt_password').value;
+    var url = 'includes/php_ajax/Check_Connection.php?check_mqtt&host=' + host + '&port=' + port + '&user=' + user + '&pass=' + pass;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+			loading('hide');
+            try {
+                var response = JSON.parse(xhr.responseText);
+				show_message(response.message)
+            } catch (e) {
+				show_message('Lỗi khi phân tích cú pháp JSON: ' +e)
+            }
+        } else {
+			loading('hide');
+			show_message('Yêu cầu thất bại. Mã lỗi: '+xhr.status)
+        }
+    };
+    xhr.onerror = function() {
+		loading('hide');
+		show_message('Yêu cầu bị lỗi.')
+    };
+    xhr.send();
+}
+
+
+//Đọc nội dung các file yaml MQTT
+function read_YAML_file_path(fileName) {
+	loading('show');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Show_file_path.php?yaml=' + fileName, true);
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+			loading('hide');
+            var codeElement = document.getElementById('code_config');
+            codeElement.textContent = xhr.responseText;
+            codeElement.className = 'language-txt';
+            showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
+            document.getElementById('name_file_showzz').textContent = "Tên File: " + fileName.split('/').pop();
+            $('#myModal_Config').modal('show');
+        } else {
+			loading('hide');
+            show_message('Thất bại, Mã lỗi:' + xhr.status)
+        }
+    };
+    xhr.onerror = function() {
+		loading('hide');
+        show_message('Lỗi xảy ra, Truy vấn thất bại')
+    };
+    xhr.send();
+}
 
 
 //onclick xem nội dung file json
@@ -3076,10 +3262,12 @@ function readJSON_file_path(filePath) {
         } else {
             filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
             read_loadFile(filePath);
+			document.getElementById('name_file_showzz').textContent = "Tên File: "+filePath.split('/').pop();
             $('#myModal_Config').modal('show');
         }
     } else {
         read_loadFile(filePath);
+		document.getElementById('name_file_showzz').textContent = "Tên File: "+filePath.split('/').pop();
         $('#myModal_Config').modal('show');
     }
 }
