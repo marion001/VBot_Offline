@@ -87,21 +87,43 @@ include 'Notify.php';
           </a>
           <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow POWER_CONTROL">
 <form method="POST"	action="">
+
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" onclick="power_action_service('start_vbot_service','Khởi chạy chương trình VBot')">
+                <i class="bi bi-align-start text-success"></i>
+                 <span class="text-primary">Start VBot</span>
+              </a>
+            </li> 
+			
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+            <li>
+              <a class="dropdown-item d-flex align-items-center" onclick="power_action_service('stop_vbot_service','Bạn có chắc chắn muốn dừng chương trình VBot')">
+                <i class="bi bi-stop-btn text-danger"></i>
+                 <span class="text-primary">Stop VBot</span>
+              </a>
+            </li> 
+			
+            <li>
+              <hr class="dropdown-divider">
+            </li>
             <li>
               <a class="dropdown-item d-flex align-items-center" onclick="power_action_service('restart_vbot_service','Bạn có chắc chắn muốn khởi động lại chương trình VBot')">
-                <i class="bi bi-arrow-repeat text-danger" title="Khởi động lại chương trình VBot"></i>
+                <i class="bi bi-arrow-repeat text-warning" title="Khởi động lại chương trình VBot"></i>
                 <span class="text-primary">Restart VBot</span>
               </a>
             </li>
-
+			
 
             <li>
               <hr class="dropdown-divider">
             </li>
             <li>
               <a class="dropdown-item d-flex align-items-center" onclick="power_action_service('reboot_os','Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống')">
-                <i class="bi bi-bootstrap-reboot text-danger"></i>
-                 <span class="text-primary">Reboot OS</span>
+                <i class="bi bi-bootstrap-reboot text-primary"></i>
+                 <span class="text-danger">Reboot OS</span>
               </a>
             </li>
 </form>

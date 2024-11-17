@@ -799,6 +799,39 @@ $scripts_yaml = '
         payload: "MAX"
         qos: '.$MQTT_Qos.'
         retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_playlist_control_player:
+  alias: "'.$MQTT_Client_Name.' PlayList Player"
+  icon: mdi:play
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/playlist_control/set"
+        payload: "PLAY"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_playlist_control_next:
+  alias: "'.$MQTT_Client_Name.' PlayList Next"
+  icon: mdi:skip-forward
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/playlist_control/set"
+        payload: "NEXT"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_playlist_control_prev:
+  alias: "'.$MQTT_Client_Name.' PlayList Prev"
+  icon: mdi:skip-backward
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/playlist_control/set"
+        payload: "PREV"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
 ';
 echo $scripts_yaml;
     }
@@ -835,6 +868,9 @@ entities:
   - entity: script.'.strtolower($MQTT_Client_Name).'_volume_control_min
   - entity: script.'.strtolower($MQTT_Client_Name).'_volume_control_up
   - entity: switch.'.strtolower($MQTT_Client_Name).'_logs_mqtt_broker
+  - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_player
+  - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_prev
+  - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_next
 state_color: true
 ';
 

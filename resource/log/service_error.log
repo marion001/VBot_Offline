@@ -21046,3 +21046,83 @@ Press CTRL+C to quit
 192.168.14.165 - - [25/Aug/2024 12:45:25] "GET /?type=1&data=all_info HTTP/1.1" 200 -
 Address already in use
 Port 5002 is in use by another program. Either identify and stop that program, or start the server with a different port.
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'
+Traceback (most recent call last):
+  File "/home/pi/VBot_Offline/Start.py", line 6, in <module>
+    import VBot
+  File "/home/pi/VBot_Offline/VBot.py", line 7, in <module>
+    import Lib
+  File "/home/pi/VBot_Offline/Lib.py", line 540, in <module>
+    playlist_play_mode = config['media_player']['play_list']['play_mode']
+KeyError: 'play_list'

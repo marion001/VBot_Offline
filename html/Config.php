@@ -121,11 +121,13 @@ $Config['smart_config']['mic']['id'] = intval($_POST['mic_id']);
 $Config['smart_config']['mic']['scan_on_boot'] = isset($_POST['mic_scan_on_boot']) ? true : false;
 
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG API
-
 $Config['api']['active'] = isset($_POST['api_active']) ? true : false;
 $Config['api']['port'] = intval($_POST['api_port']);
 $Config['api']['show_log']['active'] = isset($_POST['api_log_active']) ? true : false;
 $Config['api']['show_log']['log_lever'] = $_POST['api_log_active_log_lever'] ? true : false;
+
+#Cập nhật giá trị đường dẫn path web ui
+$Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
 
 
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
@@ -284,6 +286,9 @@ $music_source_priority_1 = isset($_POST['music_source_priority1']) ? $_POST['mus
 $music_source_priority_2 = isset($_POST['music_source_priority2']) ? $_POST['music_source_priority2'] : '';
 $music_source_priority_3 = isset($_POST['music_source_priority3']) ? $_POST['music_source_priority3'] : '';
 $Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3];
+
+#Cập nhật cấu hình PlayList
+$Config['media_player']['play_list']['play_mode'] = isset($_POST['playlist_play_mode']) ? $_POST['playlist_play_mode'] : 'random';
 
 #cập nhật đồng bộ hóa media với web ui
 $Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
@@ -645,6 +650,28 @@ hihi Vũ Tuyển
                 </div>
                 </div>
                 </div>
+
+<div class="card accordion" id="accordion_button_webui_path">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
+Web Interface (Giao Diện): </h5>
+<div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
+
+<div class="row mb-3">
+<label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn):</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input required type="text" class="form-control border-success" name="webui_path" id="webui_path" placeholder="<?php echo htmlspecialchars($directory_path) ?>" value="<?php echo htmlspecialchars($directory_path) ?>">
+<div class="invalid-feedback">Cần nhập đường dẫn path hiện tại của giao diện Web UI</div>
+<button class="btn btn-success border-success" type="button" title="<?php echo $directory_path; ?>" onclick="update_webui_link()">Cập Nhật</button>
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
 
 <div class="card accordion" id="accordion_button_setting_API">
 <div class="card-body">
@@ -1990,6 +2017,27 @@ Cấu Hình Media Player:</h5>
                     </div>
                   </div>
 </div>
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
+
+<div class="row mb-3">
+    <label for="playlist_play_mode" class="col-sm-3 col-form-label">Chế độ phát:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="playlist_play_mode" id="playlist_play_mode">
+            <option value="">-- Chọn Chế Độ Phát --</option>
+            <option value="random" <?php if ($Config['media_player']['play_list']['play_mode'] === "random") echo "selected"; ?>>random (Ngẫu nhiên)</option>
+            <option value="sequential" <?php if ($Config['media_player']['play_list']['play_mode'] === "sequential") echo "selected"; ?>>sequential (Tuần tự)</option>
+        </select>
+    </div>
+</div>
+
+
 
 </div>
 </div>
@@ -4153,6 +4201,19 @@ function getBacklistData(dataPath, textareaId) {
 
     xhr.open("GET", url, true);
     xhr.send();
+}
+
+//Cập nhật đường dẫn path web ui vào thẻ input
+function update_webui_link() {
+    // Gán giá trị vào input có id là "webui_path"
+    const inputField = document.getElementById('webui_path');
+    if (inputField) {
+		path_web_ui_html = "<?php echo $directory_path; ?>";
+        inputField.value = path_web_ui_html
+		showMessagePHP("Đã cập nhật đường dẫn path Web UI: "+path_web_ui_html)
+    } else {
+		show_message('Không tìm thấy input có id "webui_path".');
+    }
 }
 
 </script>

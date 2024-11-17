@@ -98,7 +98,7 @@ include 'html_sidebar.php';
     <div id="time-info"><font color=red>00:00:00 / 00:00:00</font></div>
 </div>
 
-
+<h5 class="card-title">Media Control:</h5>
 <center>
    <button type="button" id="volumeDOWN_Button" name="volumeDOWN_Button" title="Giảm âm lượng" class="btn btn-primary" onclick="control_volume('down')"><i class="bi bi-volume-down-fill"></i>
                         </button>
@@ -112,7 +112,11 @@ include 'html_sidebar.php';
 
    <button type="button" id="volumeUP_Button" name="volumeUP_Button" title="Tăng âm lượng" class="btn btn-primary" onclick="control_volume('up')"><i class="bi bi-volume-up-fill"></i>
                         </button>
-</center>
+</center><hr/>
+<h5 class="card-title">PlayList Control:</h5>
+<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
+<button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
+<button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button></center>
                     </div>
                 </div>
 
@@ -224,14 +228,15 @@ function cachePlayList() {
     xhr.onload = function() {
         if (xhr.status === 200) {
             var fileListDiv = document.getElementById('show_list_Playlist');
-            var fileListDiv2 = document.getElementById('show_list_Playlist2');
+            //var fileListDiv2 = document.getElementById('show_list_Playlist2');
             try {
-				fileListDiv.innerHTML = 'Xóa toàn bộ danh sách phát: <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button>';
+				fileListDiv.innerHTML = '<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button></center>';
+				fileListDiv.innerHTML += '<br/>Xóa toàn bộ danh sách phát: <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button>';
                 var data = JSON.parse(xhr.responseText);
                 if (Array.isArray(data.data) && data.data.length > 0) {
 					
-					fileListDiv2.innerHTML = '';
-					
+					//fileListDiv2.innerHTML = '';
+					 
                     // Xử lý và hiển thị từng playlist
                     data.data.forEach(function(playlist) {
                         //console.log(playlist);

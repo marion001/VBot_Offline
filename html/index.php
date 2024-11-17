@@ -305,12 +305,12 @@ include 'html_sidebar.php';
    <button type="button" id="volumeUP_Button" name="volumeUP_Button" title="Tăng âm lượng" class="btn btn-primary" onclick="control_volume('up')"><i class="bi bi-volume-up-fill"></i>
 </button>
 -->
-
-
-
-</center>
- 
+</center><br/>
+ <center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
+<button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
+<button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button></center>
                 </div>
+				<hr/>
 <div class="card-body">	
 <select class="form-select border-success" title="Chọn nguồn nhạc để phát hoặc tìm kiếm" id="select_cache_media">
   <option value="" selected>Chọn nguồn nhạc</option>
@@ -1340,7 +1340,8 @@ include 'html_js.php';
 
         // Tạo cấu trúc bảng
         var tableHTML =
-            '  <h5 class="card-title">PlayList, Danh Sách Phát  <span>| Media Player</span></h5><h5>Xóa toàn bộ bài hát trong PlayList <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button></h5><table class="table table-borderless datatable" id="playlistTable">' +
+            //'<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-forward-fill"></i></button></center>' +
+			'<h5 class="card-title">PlayList, Danh Sách Phát  <span>| Media Player</span></h5><h5>Xóa toàn bộ bài hát trong PlayList <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button></h5><table class="table table-borderless datatable" id="playlistTable">' +
             '<thead>' +
             '<tr>' +
             '<th scope="col" style="text-align: center; vertical-align: middle;">STT</th>' +

@@ -1,0 +1,40 @@
+{
+    "intents": [
+        {
+            "name": "Bật đèn ngủ",
+            "friendly_name": "Đèn Ngủ",
+            "entityid": "switch.den_ngu",
+            "action": "turn_on",
+            "questions": [
+                "bật điện lên1",
+                "bật điện đèn ngủ"
+            ]
+        },
+        {
+            "name": "scripts bật quay quạt phòng ngủ",
+            "friendly_name": "Quay quạt",
+            "entityid": "script.chuyen_huong_quat_tuyen",
+            "action": "turn_on",
+            "questions": [
+                "quay quạt",
+                "xoay quạt",
+                "quay quạt phòng ngủ",
+                "xoay quạt phòng ngủ"
+            ]
+        },
+        {
+            "name": "dừng quay quạt scripts",
+            "friendly_name": "Quay quạt",
+            "entityid": "script.chuyen_huong_quat_tuyen",
+            "action": "turn_on",
+            "questions": [
+                "dừng quay quạt",
+                "dừng quay quạt phòng ngủ",
+                "ngừng xoay quạt",
+                "ngừng quay quạt",
+                "ngừng quay quạt",
+                "ngừng quay quạt phòng ngủ"
+            ]
+        }
+    ]
+}

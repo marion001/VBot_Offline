@@ -61,6 +61,59 @@ if (isset($_GET['check_ssh'])) {
     exit();
 }
 
+if (isset($_GET['start_vbot_service'])) {
+    $CMD = "systemctl --user start VBot_Offline.service";
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    // Khởi tạo biến để lưu kết quả
+    $result = [
+        'success' => false,
+        'message' => ''
+    ];
+    if ($connection) {
+        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+            $stream = ssh2_exec($connection, $CMD);
+            stream_set_blocking($stream, true);
+            $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+            
+            // Nếu lệnh thành công
+                $result['success'] = true;
+                $result['message'] = 'Dịch vụ VBot đã được khởi động lại thành công.';
+        } else {
+            $result['message'] = 'Xác thực SSH không thành công.';
+        }
+    } else {
+        $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
+    }
+    echo json_encode($result);
+    exit; 
+}
+
+if (isset($_GET['stop_vbot_service'])) {
+    $CMD = "systemctl --user stop VBot_Offline.service";
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    // Khởi tạo biến để lưu kết quả
+    $result = [
+        'success' => false,
+        'message' => ''
+    ];
+    if ($connection) {
+        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+            $stream = ssh2_exec($connection, $CMD);
+            stream_set_blocking($stream, true);
+            $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+            
+            // Nếu lệnh thành công
+                $result['success'] = true;
+                $result['message'] = 'Dịch vụ VBot đã được khởi động lại thành công.';
+        } else {
+            $result['message'] = 'Xác thực SSH không thành công.';
+        }
+    } else {
+        $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
+    }
+    echo json_encode($result);
+    exit; 
+}
 
 if (isset($_GET['restart_vbot_service'])) {
     $CMD = "systemctl --user restart VBot_Offline.service";
