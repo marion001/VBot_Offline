@@ -2,7 +2,7 @@
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
     "description": "Cập nhật kết nối MQTT",
-    "releaseDate": "11/11/2024",
+    "releaseDate": "17/11/2024",
     "changes": [
         {
             "type": "feature",
