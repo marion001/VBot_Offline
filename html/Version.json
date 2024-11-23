@@ -2,7 +2,7 @@
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
     "description": "Vá các lỗ hổng không thời gian",
-    "releaseDate": "17/11/2024",
+    "releaseDate": "23/11/2024",
     "changes": [
         {
             "type": "feature",

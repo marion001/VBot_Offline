@@ -276,7 +276,7 @@ include 'html_sidebar.php';
     <div id="media-info">
         <p id="media-name">Tên bài hát: <font color="blue">N/A</font></p>
         <p id="audio-playing">Trạng thái: <font color="blue">N/A</font></p>
-        <p id="audio-source">Nguồn nhạc: <font color="blue">N/A</font></p>
+        <p id="audio-source">Nguồn Media: <font color="blue">N/A</font></p>
     </div>
 </div>
 
@@ -319,11 +319,38 @@ include 'html_sidebar.php';
   <option value="ZingMP3">ZingMP3</option>
   <option value="PodCast">PodCast</option>
   <option value="Radio">Đài, Radio</option>
+  <option value="NewsPaper">Báo, Tin Tức</option>
 </select>
 </div>
      <div class="card-body">
           
            <!--  <div id="show_list_ZingMP3"></div> -->
+		   
+            <div id="NewsPaper_Select" style="display: none;">
+			
+
+<?php
+
+// Kiểm tra nếu mảng news_paper_data tồn tại
+if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media_player']['news_paper_data'])) {
+    // Bắt đầu thẻ <select>
+    echo '<div class="input-group form-floating mb-3">	<select class="form-select border-success" name="news_paper" id="news_paper">';
+    echo '<option value="">-- Chọn Báo, Tin Tức --</option>';
+    foreach ($Config['media_player']['news_paper_data'] as $newsPaper) {
+        // Kiểm tra và lấy các trường `name` và `link`
+        $name = isset($newsPaper['name']) ? htmlspecialchars($newsPaper['name']) : 'Không rõ tên';
+        $link = isset($newsPaper['link']) ? htmlspecialchars($newsPaper['link']) : '#';
+        echo '<option value="'.$link.'" title="Báo: '.$name.'">'.$name.'</option>';
+    }
+    echo '</select><label for="news_paper">Chọn Trang Báo, Tin Tức:</label><button class="btn btn-success border-success" type="button" onclick="get_data_newspaper()"><i class="bi bi-search"></i></button></div>';
+} else {
+    echo 'Không tìm thấy dữ liệu báo/tin tức trong tệp JSON.';
+}
+?>
+
+			
+			</div>
+			
             <div id="tableContainer"></div>
 			
         </div>
@@ -575,6 +602,19 @@ include 'html_sidebar.php';
     Youtube
   </label>
 </div>
+
+
+</div>
+  </li>
+
+ 
+  <li><font color="blue">Đọc Báo, Tin Tức <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng tính năng đọc báo, tin tức trong ngày')"></i> :</font>
+  <div class="form-switch">
+ 
+<div class="form-check">
+ <input class="form-check-input" value="news_paper_active" type="checkbox" name="news_paper_active" id="news_paper_active" onclick="change_to_another_mode('news_paper', this.checked)" <?php if ($Config['media_player']['news_paper']['active'] === true) echo "checked"; ?>>
+</div>
+
 
 
 </div>
@@ -1045,6 +1085,7 @@ include 'html_js.php';
                     document.getElementById('music_local_active').checked = data.media_player.music_local_active ? true : false;
                     document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
                     document.getElementById('youtube_active').checked = data.media_player.youtube_active ? true : false;
+                    document.getElementById('news_paper_active').checked = data.news_paper_active ? true : false;
                     document.getElementById('home_assistant_active').checked = data.home_assistant_active ? true : false;
                     document.getElementById('hass_custom_commands_active').checked = data.hass_custom_commands_active ? true : false;
                     document.getElementById('default_assistant_active').checked = data.default_assistant_active ? true : false;
@@ -1056,7 +1097,7 @@ include 'html_js.php';
                     //Media Player
                     document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' + (data.media_player.media_name ? data.media_player.media_name : 'N/A') + '</font>';
                     document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.media_player.audio_playing ? 'Có' : 'Không') + '</font>';
-                    document.getElementById('audio-source').innerHTML = 'Nguồn nhạc: <font color=blue>' + data.media_player.media_player_source + '</font>';
+                    document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + data.media_player.media_player_source + '</font>';
                     // Cập nhật ảnh cover bài hát
                     document.getElementById('media-cover').src = data.media_player.media_cover ? data.media_player.media_cover : 'assets/img/Error_Null_Media_Player.png';
                     // Cập nhật giá trị full time
@@ -1244,7 +1285,6 @@ include 'html_js.php';
 					//console.log(xhr.responseText);
                     try {
                         var response = JSON.parse(xhr.responseText);
-						
                         if (response.success) {
                             //console.log('Dữ liệu Wi-Fi:' +xhr.responseText);
                             document.getElementById('show_wifi_name').textContent = response.data.ESSID;
@@ -1306,7 +1346,6 @@ include 'html_js.php';
             const percentage = Math.max(0, Math.min(100, ((height - offsetY) / height) * 100));
             const value = Math.round((percentage / 100) * 255);
             updateBrightness(value);
-            // Không gửi dữ liệu ở đây
         }
 
         function handleTouchEnd_bright(e) {
@@ -1337,8 +1376,6 @@ include 'html_js.php';
     function loadPlayList() {
         loading('show');
         var tableContainer = document.getElementById('tableContainer');
-
-        // Tạo cấu trúc bảng
         var tableHTML =
             //'<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-forward-fill"></i></button></center>' +
 			'<h5 class="card-title">PlayList, Danh Sách Phát  <span>| Media Player</span></h5><h5>Xóa toàn bộ bài hát trong PlayList <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button></h5><table class="table table-borderless datatable" id="playlistTable">' +
@@ -1353,28 +1390,19 @@ include 'html_js.php';
             '<!-- Dữ liệu sẽ được thêm vào đây bởi JavaScript -->' +
             '</tbody>' +
             '</table>';
-
-        // Thêm cấu trúc bảng vào container
         tableContainer.innerHTML = tableHTML;
-
-        // Khai báo biến bảng và tbody
         var table = document.getElementById('playlistTable');
         var tableBody = document.getElementById('playlistTableBody');
         var xhr = new XMLHttpRequest();
-
-        // Cấu hình yêu cầu GET
         xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList', true);
-        // Xử lý phản hồi khi yêu cầu thành công
         xhr.onload = function() {
             if (xhr.status === 200) {
                 var data = JSON.parse(xhr.responseText);
                 var fileInfo = '';
-
                 // Kiểm tra dữ liệu
                 if (data.data && Array.isArray(data.data)) {
                     data.data.forEach(function(playlist, index) {
                         var description = playlist.description ? (playlist.description.length > 70 ? playlist.description.substring(0, 70) + '...' : playlist.description) : 'N/A';
-
                         // Tạo thông tin cho mỗi playlist dựa trên nguồn
                         fileInfo +=
                             '<tr>' +
@@ -1423,15 +1451,14 @@ include 'html_js.php';
                 } else {
                     fileInfo = '<tr><td colspan="3">Không có dữ liệu</td></tr>';
                 }
-
-                // Thêm thông tin vào tbody
                 tableBody.innerHTML = fileInfo;
-
                 // Khởi tạo DataTable
                 try {
                     new simpleDatatables.DataTable(table, {
-                        perPageSelect: [5, 10, 15, ['All', -1]], // Tùy chọn phân trang
-                        perPage: 5, // Thiết lập số lượng trang mặc định là 5
+						// Tùy chọn phân trang
+                        perPageSelect: [5, 10, 15, ['All', -1]],
+						// Thiết lập số lượng trang mặc định là 5
+                        perPage: 5,
                         columns: [{
                                 select: 0,
                                 sortSequence: ['asc', 'desc']
@@ -1445,28 +1472,20 @@ include 'html_js.php';
                 } catch (e) {
                     show_message('Lỗi khi khởi tạo DataTable: ' + e.message);
                 }
-
-                loading('hide'); // Ẩn chỉ báo tải
+                loading('hide');
             } else {
                 loading('hide');
                 show_message('Lỗi khi lấy dữ liệu: ' + xhr.statusText);
                 tableBody.innerHTML = '<tr><td colspan="3">Lỗi khi tải dữ liệu</td></tr>';
             }
         };
-
-        // Xử lý lỗi khi yêu cầu không thành công
         xhr.onerror = function() {
             loading('hide');
             show_message('Lỗi khi thực hiện yêu cầu');
             tableBody.innerHTML = '<tr><td colspan="3">Lỗi khi thực hiện yêu cầu, tải dữ liệu</td></tr>';
         };
-
-        // Gửi yêu cầu
         xhr.send();
     }
-
-    // Gọi hàm loadPlayList khi DOM đã được tải
-    //   document.addEventListener('DOMContentLoaded', loadPlayList);
 </script>
 
 <script>
@@ -1477,20 +1496,33 @@ selectElement_select_cache_media.addEventListener('change', function() {
     // Lấy giá trị được chọn
     var selectedValue_cache_media = selectElement_select_cache_media.value;
     if (selectedValue_cache_media === "Local"){
+		document.getElementById('NewsPaper_Select').style.display = 'none';
+		document.getElementById('tableContainer').style.display = '';
 		media_player_search('Local');
 	}else if (selectedValue_cache_media === "Youtube"){
+		document.getElementById('NewsPaper_Select').style.display = 'none';
+		document.getElementById('tableContainer').style.display = '';
 		cacheYoutube();
 	}else if (selectedValue_cache_media === "ZingMP3"){
+		document.getElementById('NewsPaper_Select').style.display = 'none';
+		document.getElementById('tableContainer').style.display = '';
 		cacheZingMP3();
 	}else if (selectedValue_cache_media === "PodCast"){
+		document.getElementById('NewsPaper_Select').style.display = 'none';
+		document.getElementById('tableContainer').style.display = '';
 		cachePodCast()
 	}else if (selectedValue_cache_media === "Radio"){
+		document.getElementById('NewsPaper_Select').style.display = 'none';
+		document.getElementById('tableContainer').style.display = '';
 		media_player_search('Radio');
+	}else if (selectedValue_cache_media === "NewsPaper"){
+		document.getElementById('NewsPaper_Select').style.display = '';
+		document.getElementById('tableContainer').style.display = 'none';
+		
 	}
 });
 
 </script>
-
 
 
 </body>

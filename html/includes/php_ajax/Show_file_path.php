@@ -701,6 +701,18 @@ switch:
     qos: '.$MQTT_Qos.'
     retain: '.$MQTT_Retain.'
     icon: mdi:math-log
+
+  - name: "'.$MQTT_Client_Name.' News Paper Active"
+    state_topic: "'.$MQTT_Client_Name.'/switch/news_paper_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/news_paper_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:podcast
 ';
 echo $mqtts_yaml;	
 } else if ($File_Name === "scripts.yaml") {
@@ -832,6 +844,17 @@ $scripts_yaml = '
         payload: "PREV"
         qos: '.$MQTT_Qos.'
         retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_news_paper_player:
+  alias: "'.$MQTT_Client_Name.' News Paper Player"
+  icon: mdi:podcast
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/news_paper/set"
+        payload: \'{{ states("input_text.news_paper_name") }}\'
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
 ';
 echo $scripts_yaml;
     }
@@ -871,9 +894,18 @@ entities:
   - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_player
   - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_prev
   - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_next
+  - entity: input_text.news_paper_name
+  - entity: script.'.strtolower($MQTT_Client_Name).'_news_paper_player
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_news_paper_active
 state_color: true
 ';
 
+}
+else if ($File_Name === "input_text.yaml") {
+echo '
+news_paper_name:
+  name: "Nhập Tên Báo, Tin Tức"
+';
 }
 
     exit();

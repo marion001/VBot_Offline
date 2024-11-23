@@ -889,6 +889,12 @@ function media_player_url() {
 
 //Hiển thị dữ liệu cache Zingmp3
 function cacheZingMP3() {
+	
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "";
+	}
+	
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_ZingMP3', true);
     xhr.onload = function() {
@@ -950,6 +956,11 @@ function cacheZingMP3() {
 
 //Hiển thị dữ liệu cache PodCast nếu có
 function cachePodCast() {
+	
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "";
+	}
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PodCast', true);
     xhr.onload = function() {
@@ -1013,6 +1024,12 @@ function cachePodCast() {
 
 //hiển thị dữ liệu cache Youtube
 function cacheYoutube() {
+	
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "";
+	}
+	
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_Youtube', true);
     xhr.onload = function() {
@@ -1124,16 +1141,15 @@ function deleteFromPlaylist(action, idsList) {
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
-            loadPlayList()
+    // Nếu hàm loadPlayList() tồn tại, gọi hàm đó
+if (typeof loadPlayList === "function") {
+    loadPlayList();
+} else {
+    cachePlayList();
+}
         }
     };
     xhr.send(data);
-    /*
-    // Xóa toàn bộ playlist
-    deleteFromPlaylist('delete_all');
-    // Xóa các bài hát theo danh sách ID
-    deleteFromPlaylist('delete_some', 'ID1,ID2,ID3');
-    */
 }
 
 //Tìm kiếm Media theo Nguồn phát được chọn
@@ -1374,8 +1390,6 @@ function processLocalData(data_media_local) {
     //console.log(data)
     // Kiểm tra xem dữ liệu có rỗng không
     if (!data_media_local || data_media_local.length === 0) {
-        //fileListDiv.innerHTML = '';
-        //fileListDiv.innerHTML = '<p>Không có dữ liệu bài hát Local</p>';
         show_message('<p>Không có dữ liệu bài hát Local</p>');
     } else {
 
@@ -1437,19 +1451,84 @@ function processRadioData(data_media_Radio) {
     }
 }
 
+//gán onclick để sử dụng truyền đối số vào hàm fetchData_NewsPaper lấy dữ liệu báo, tin tức
+function get_data_newspaper() {
+    var selectedValue = document.getElementById("news_paper").value;
+    // Kiểm tra nếu giá trị được chọn không rỗng
+    if (selectedValue) {
+        //console.log("Giá trị được chọn: " + selectedValue);
+		fetchData_NewsPaper(selectedValue);
+    } else {
+		showMessagePHP("Cần chọn trang Báo, Tin Tức để thực hiện", 3);
+    }
+}
+
+//Lấy dữ liệu báo, tin tức từ trung gian php
+function fetchData_NewsPaper(newspaper_link) {
+	loading('show');
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Media_Player_Search.php?newspaper&link="+newspaper_link;
+    xhr.open("GET", url, true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+			loading('hide');
+            try {
+                var response = JSON.parse(xhr.responseText);
+                if (response.success) {
+					showMessagePHP(response.message, 3);
+    // Lấy phần tử DOM để hiển thị danh sách newspaper
+    var fileListDiv = document.getElementById('show_list_news_paper');
+    if (!fileListDiv) {
+        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+        fileListDiv = document.getElementById('tableContainer');
+		document.getElementById('tableContainer').style.display = '';
+		document.getElementById('tableContainer').style.height = '400px';
+		document.getElementById('tableContainer').style.overflowY = 'auto';
+    }
+    fileListDiv.innerHTML = '';
+    // Xử lý và hiển thị từng podcast
+	fileListDiv.innerHTML += '<b>Phát tất cả:</b> <button class="btn btn-success" title="Phát toàn bộ" onclick="play_playlist_json_path(\'<?php echo $directory_path; ?>/includes/cache/<?php echo $Config['media_player']['news_paper']['newspaper_file_name']; ?>\')"><i class="bi bi-play-circle"></i></button>';
+    response.data.forEach(function(news_paper) {
+        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+        fileInfo += '<img src="' + news_paper.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tiêu Đề: <font color=green>' + news_paper.title + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + (news_paper.publish_time || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (news_paper.duration || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + (news_paper.source || 'N/A') + '</font></p>';
+        fileInfo += '<button class="btn btn-success" title="Phát: ' + news_paper.title + '" onclick="send_Media_Play_API(\'' + news_paper.audio + '\', \'' + news_paper.title + '\', \'' + news_paper.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+        //fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + news_paper.title + '" onclick="addToPlaylist(\'' + news_paper.title + '\', \'' + news_paper.cover + '\', \'' + news_paper.audio + '\', \'' + (news_paper.duration || 'N/A') + '\', \'' + (news_paper.description || 'N/A') + '\', \''+news_paper.source+'\', \'' + news_paper.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
+        fileInfo += ' <a href="' + news_paper.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + news_paper.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+        fileInfo += '</div></div>';
+        // Thêm thông tin vào phần tử danh sách
+        fileListDiv.innerHTML += fileInfo;
+    });
+                } else {
+					show_message('Lỗi: ' + response.message);
+                }
+            } catch (e) {
+				show_message('Lỗi phân tích JSON: ' +e);
+            }
+        } else {
+			loading('hide');
+			show_message('Lỗi yêu cầu API: ' +xhr.status+ ", " +xhr.statusText);
+        }
+    };
+    xhr.onerror = function () {
+		loading('hide');
+		show_message('Lỗi kết nối tới server');
+    };
+    xhr.send();
+}
+
 //Xóa dữ liệu cache bài hát theo nguồn nhạc
 function cache_delete(source_cache) {
-    // Tạo đối tượng XMLHttpRequest
     var xhr = new XMLHttpRequest();
-    // Cấu hình yêu cầu GET tới Media_Player_Search.php với tham số cache_delete
     xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?cache_delete=' + source_cache, true);
-    // Khi yêu cầu được hoàn thành
     xhr.onload = function() {
-        if (xhr.status === 200) { // Nếu trạng thái là OK (200)
+        if (xhr.status === 200) {
             try {
-                // Parse dữ liệu JSON
                 var data = JSON.parse(xhr.responseText);
-                // Kiểm tra phản hồi 'success' và hiển thị thông báo tương ứng
                 if (data.success) {
                     showMessagePHP(data.message, 5);
 					if (source_cache === "ZingMP3"){
@@ -1503,17 +1582,12 @@ function playlist_media_control(action_control = null) {
             "source_playlist": true
         });
     }
-    // Khởi tạo yêu cầu XMLHttpRequest
     const xhr = new XMLHttpRequest();
-    xhr.withCredentials = true;
-    // Xử lý sự kiện khi trạng thái yêu cầu thay đổi
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
 			loading("hide");
             try {
-                // Parse dữ liệu JSON trả về
                 const response = JSON.parse(this.responseText);
-                // Kiểm tra trường 'success' và log message nếu success = true
                 if (response.success) {
                     showMessagePHP(response.message, 3);
                 } else {
@@ -1524,20 +1598,14 @@ function playlist_media_control(action_control = null) {
             }
         }
     });
-    // Xử lý lỗi khi có sự cố kết nối
     xhr.onerror = function () {
 		loading("hide");
         show_message("Lỗi, yêu cầu thất bại.");
     };
-    // Cấu hình yêu cầu
     xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
     xhr.setRequestHeader("Content-Type", "application/json");
-    // Gửi yêu cầu với dữ liệu
     xhr.send(data);
 }
-
-
-
 
 //xử lý Nghe thử các file âm thanh
 function playAudio(filePath) {
@@ -1551,11 +1619,9 @@ function playAudio(filePath) {
             'flac': 'audio/flac',
             // Thêm các định dạng tệp âm thanh khác nếu cần
         };
-
         return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
     }
     const audioPlayer = document.getElementById('audioPlayer');
-    // Kiểm tra nếu filePath bắt đầu bằng 'http'
     if (filePath.startsWith('http')) {
         loading("hide");
 
@@ -1570,12 +1636,10 @@ function playAudio(filePath) {
                 show_message('Lỗi khi phát âm thanh: ' + error.message);
             });
         }
-        return; // Kết thúc hàm nếu đã phát trực tiếp
+        return;
     }
 
     const xhr = new XMLHttpRequest();
-
-    // Gửi yêu cầu GET tới server để lấy tệp âm thanh dưới dạng base64
     xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
     xhr.responseType = 'text';
     xhr.onload = function() {
@@ -1593,12 +1657,10 @@ function playAudio(filePath) {
             }
         }
     };
-
     xhr.onerror = function() {
         loading("hide");
         show_message('Yêu cầu phát âm thanh không thành công');
     };
-
     xhr.send();
 }
 
@@ -1615,14 +1677,12 @@ function playHLS(url) {
             loading("hide");
             video.play();
         });
-        //loading("hide");
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
         video.src = url;
         video.addEventListener('loadedmetadata', function() {
             loading("hide");
             video.play();
         });
-        //loading("hide");
     }
 }
 
@@ -1638,7 +1698,6 @@ function playHLS(url) {
         var chatbotSizeSetting = document.getElementById('chatbot_size_setting');
         // Lấy thẻ icon cần thay đổi class
         var chatbotIcon = document.getElementById('chatbot_fullscreen');
-
         // Kiểm tra và thay đổi class giữa modal-lg, modal-xl, và modal-fullscreen
         if (chatbotSizeSetting.classList.contains('modal-lg')) {
             chatbotSizeSetting.classList.remove('modal-lg');
@@ -1701,17 +1760,14 @@ function loadMessages() {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
         // Xóa nội dung hiện tại của chatbox
         chatbox.innerHTML = '';
-
         messages.forEach(function(message, index) {
             var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
                 '<span class="delete_message_chatbox" data-index="' + index + '" title="Xóa tin nhắn">x</span>' +
                 '<div class="message-time">' + message.time + '</div>';
-
             // Kiểm tra nếu tin nhắn là tệp âm thanh
             if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
                 var audioExtension = message.text.split('.').pop(); // Lấy đuôi mở rộng của tệp
                 var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text); // URL tới PHP proxy
-
                 messageHTML +=
                     '<div class="audio-container">' +
                     '    <audio controls>' +
@@ -1722,14 +1778,11 @@ function loadMessages() {
             } else {
                 messageHTML += '<div>' + message.text + '</div>';
             }
-
             messageHTML += '</div>';
             chatbox.innerHTML += messageHTML;
         });
-
         // Cuộn xuống dưới cùng
         scrollToBottom();
-
         // Thêm sự kiện click cho dấu x
         document.querySelectorAll('.delete_message_chatbox').forEach(function(button) {
             button.addEventListener('click', function() {
@@ -1737,8 +1790,6 @@ function loadMessages() {
                 deleteMessage(index);
             });
         });
-
-        // Optionally show a message if needed
         // showMessagePHP("Đã tải lại dữ liệu Chatbox", 5);
     }
     // Hàm xóa tất cả tin nhắn từ localStorage và giao diện
@@ -1747,7 +1798,8 @@ function clearMessages() {
         return;
     }
     localStorage.removeItem('messages');
-    loadMessages(); // Tải lại chatbox sau khi xóa tất cả
+	// Tải lại chatbox sau khi xóa tất cả
+    loadMessages();
 }
 
 // Hàm xóa tin nhắn khỏi localStorage và giao diện
@@ -1755,9 +1807,9 @@ function deleteMessage(index) {
     const messages = JSON.parse(localStorage.getItem('messages')) || [];
     messages.splice(index, 1);
     localStorage.setItem('messages', JSON.stringify(messages));
-    loadMessages(); // Tải lại tin nhắn sau khi xóa
+	// Tải lại tin nhắn sau khi xóa
+    loadMessages();
 }
-
 
 // Hàm để dừng tất cả các phần tử audio đang phát
 function stopAllAudio() {
@@ -1765,7 +1817,8 @@ function stopAllAudio() {
     var audios = document.querySelectorAll('audio');
     audios.forEach(function(audio) {
         audio.pause();
-        audio.currentTime = 0; // Đặt thời gian phát lại về 0
+		// Đặt thời gian phát lại về 0
+        audio.currentTime = 0;
     });
 }
 
@@ -1840,10 +1893,8 @@ function sendRequest(message) {
                         '</div>';
                     // Thêm tin nhắn lỗi vào chatbox
                     document.getElementById('chatbox').innerHTML += errorMessageHTML;
-
                     saveMessage('bot', msg_error);
                 }
-
                 setTimeout(scrollToBottom, 100);
             } else {
                 msg_error = "Có vẻ bot đang không phản hồi, vui lòng thử lại.";
@@ -1926,11 +1977,13 @@ function adjustContainerStyle_tableContainer() {
         if (contentHeight > 400) {
             // Thêm thuộc tính CSS khi có nhiều dữ liệu
             container.style.height = '400px';
-            container.style.overflowY = 'auto'; // Hiển thị thanh cuộn dọc
+			// Hiển thị thanh cuộn dọc
+            container.style.overflowY = 'auto';
         } else {
             // Xóa thuộc tính CSS nếu dữ liệu không vượt quá chiều cao
             container.style.height = 'auto';
-            container.style.overflowY = 'hidden'; // Ẩn thanh cuộn dọc
+			// Ẩn thanh cuộn dọc
+            container.style.overflowY = 'hidden';
         }
     }
 }
@@ -1967,8 +2020,77 @@ function command_php(command_line, reload_page = null) {
     };
     xhr.send(command_line + '=1');
 }
+
+
+//Gửi yêu cầu phát nhạc playlist bằng thông tin tệp json
+function play_playlist_json_path(url_json_file) {
+	loading('show');
+  var xhr = new XMLHttpRequest();
+  xhr.open("POST", "<?php echo $Protocol . $serverIp . ':' . $Port_API; ?>", true);
+  xhr.setRequestHeader("Content-Type", "application/json");
+  var data = JSON.stringify({
+    "type": 1,
+    "data": "media_control",
+    "action": "play_list",
+    "source_playlist": "json",
+    "json_file": url_json_file
+  });
+  xhr.onerror = function() {
+	  loading('hide');
+    show_message("Lỗi kết nối: Không thể thực hiện yêu cầu.");
+  };
+  xhr.addEventListener("readystatechange", function() {
+    if (this.readyState === 4) {
+		loading('hide');
+      try {
+        var response = JSON.parse(this.responseText);
+        if (response.success) {
+          showMessagePHP("Thông báo: " + response.message, 3);
+        } else {
+          show_message("Lỗi: " + response.message);
+        }
+      } catch (error) {
+        show_message("Lỗi xử lý JSON hoặc phản hồi không hợp lệ: " + error);
+      }
+    }
+  });
+  xhr.send(data);
+}
+
+
+//Nếu nhấn vào nút Nguồn nhạc Local trên tab mediaplayer hoặc ở index
+function cacheLocal(){
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "";
+    } else {
+        showMessagePHP('Không tìm thấy phần tử với id "tim_kiem_bai_hat_all"', 3);
+    }
+}
+
+//Nếu nhấn vào nút Nguồn nhạc Local trên tab mediaplayer hoặc ở index
+function cacheRadio(){
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "";
+    } else {
+        showMessagePHP('Không tìm thấy phần tử với id "tim_kiem_bai_hat_all"', 3);
+    }
+}
+
+//Nếu nhấn vào nút Báo, Tin tức trên tab mediaplayer hoặc ở index
+function cacheNewsPaper() {
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "none";
+    } else {
+		showMessagePHP('Không tìm thấy phần tử với id "tim_kiem_bai_hat_all"', 3);
+    }
+}
+
 </script>
 <script>
+
 function Recording_STT(action, duration = "6") {
 
 showMessagePHP("Chức năng này đang trong quá trình thử nghiệm, chưa dùng được", 3);

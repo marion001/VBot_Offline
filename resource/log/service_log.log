@@ -6176,3 +6176,386 @@ test: tắt máy
 [91m[23:06:04 16-11-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
  * Serving Flask app 'Api'
  * Debug mode: off
+[92m[20:11:19 17-11-2024] Đã đọc file Config.json thành công [0m
+[92m[20:11:19 17-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:11:19 17-11-2024] Đã đọc file Object.json thành công [0m
+[92m[20:11:19 17-11-2024] Đã đọc file Action.json thành công [0m
+[92m[20:11:19 17-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:11:19 17-11-2024] - Đã kiểm tra tạo/ghi tệp BackList.json[0m
+[93m[20:11:19 17-11-2024] - Logs hệ thống đang được hiển thị ở luồng console[0m
+[91m[20:11:19 17-11-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:11:19 17-11-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:11:19 17-11-2024] - Home Asistant Custom Command không được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:11:19 17-11-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:11:19 17-11-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:11:19 17-11-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:11:31 17-11-2024] Đã khởi tạo API thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:13:45 17-11-2024] Đã đọc file Config.json thành công [0m
+[92m[20:13:45 17-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:13:45 17-11-2024] Đã đọc file Object.json thành công [0m
+[92m[20:13:45 17-11-2024] Đã đọc file Action.json thành công [0m
+[92m[20:13:45 17-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[20:13:45 17-11-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:34:37 19-11-2024] Đã đọc file Config.json thành công [0m
+[92m[20:34:37 19-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:34:37 19-11-2024] Đã đọc file Object.json thành công [0m
+[92m[20:34:37 19-11-2024] Đã đọc file Action.json thành công [0m
+[92m[20:34:37 19-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:34:37 19-11-2024] - Đã kiểm tra tạo/ghi tệp BackList.json[0m
+[93m[20:34:37 19-11-2024] - Logs hệ thống đang được hiển thị ở luồng console[0m
+[91m[20:34:37 19-11-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:34:37 19-11-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:34:37 19-11-2024] - Home Asistant Custom Command không được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:34:37 19-11-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:34:37 19-11-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:34:37 19-11-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:48:42 19-11-2024] Đã khởi tạo API thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[01:51:04 20-11-2024] Đã đọc file Config.json thành công [0m
+[92m[01:51:04 20-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[01:51:04 20-11-2024] Đã đọc file Object.json thành công [0m
+[92m[01:51:04 20-11-2024] Đã đọc file Action.json thành công [0m
+[92m[01:51:04 20-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[01:51:04 20-11-2024] - Đã kiểm tra tạo/ghi tệp BackList.json[0m
+[93m[01:51:04 20-11-2024] - Logs hệ thống đang được hiển thị ở luồng console[0m
+[91m[01:51:04 20-11-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[91m[01:51:04 20-11-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[01:51:04 20-11-2024] - Home Asistant Custom Command không được kích hoạt khi khởi chạy chương trình[0m
+[91m[01:51:04 20-11-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[01:51:04 20-11-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[01:51:04 20-11-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[01:51:12 20-11-2024] Đã khởi tạo API thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[07:58:53 20-11-2024] Đã đọc file Config.json thành công [0m
+[92m[07:58:53 20-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[07:58:53 20-11-2024] Đã đọc file Object.json thành công [0m
+[92m[07:58:53 20-11-2024] Đã đọc file Action.json thành công [0m
+[92m[07:58:53 20-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[07:58:53 20-11-2024] - Đã kiểm tra tạo/ghi tệp BackList.json[0m
+[93m[07:58:53 20-11-2024] - Logs hệ thống đang được hiển thị ở luồng console[0m
+[91m[07:58:53 20-11-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[91m[07:58:53 20-11-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[07:58:53 20-11-2024] - Home Asistant Custom Command không được kích hoạt khi khởi chạy chương trình[0m
+[91m[07:58:53 20-11-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[07:58:53 20-11-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[07:58:53 20-11-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[07:59:02 20-11-2024] Đã khởi tạo API thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[12:49:41 20-11-2024] Đã đọc file Config.json thành công [0m
+[92m[12:49:41 20-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[12:49:41 20-11-2024] Đã đọc file Object.json thành công [0m
+[92m[12:49:41 20-11-2024] Đã đọc file Action.json thành công [0m
+[92m[12:49:41 20-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[12:49:41 20-11-2024] - Đã kiểm tra tạo/ghi tệp BackList.json[0m
+[93m[12:49:42 20-11-2024] - Logs hệ thống đang được hiển thị ở luồng console[0m
+[91m[12:49:42 20-11-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[91m[12:49:42 20-11-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[12:49:42 20-11-2024] - Home Asistant Custom Command không được kích hoạt khi khởi chạy chương trình[0m
+[91m[12:49:42 20-11-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[12:49:42 20-11-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[12:49:42 20-11-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[12:49:47 20-11-2024] Đã khởi tạo API thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[12:49:47 20-11-2024] Đã khởi tạo Porcupine và PvRecorder thành công.[0m
+[92m[12:49:47 20-11-2024] [MQTT] Đã khởi tạo MQTT thành công.[0m
+[1m[12:49:47 20-11-2024] Nút nhấn 'down' đã được cấu hình thành công cho: GPIO25[0m
+[1m[12:49:47 20-11-2024] Nút nhấn 'up' đã được cấu hình thành công cho: GPIO5[0m
+[1m[12:49:47 20-11-2024] Nút nhấn 'wakeup' đã được cấu hình thành công cho: GPIO26[0m
+[1m[12:49:47 20-11-2024] Nút nhấn 'mic' đã được cấu hình thành công cho: GPIO6[0m
+[92m[12:49:47 20-11-2024] [MQTT] Kết Nối Thành Công Tới Broker: 192.168.14.17:1883[0m
+[96m[12:49:47 20-11-2024] [MQTT] Đã đồng bộ dữ liệu lên MQTT Broker.[0m
+[92m[12:49:53 20-11-2024] KHỞI CHẠY TRƯƠNG TRÌNH VBot THÀNH CÔNG[0m
+[92m[12:49:53 20-11-2024] Đang chờ được đánh thức[0m
+[92m[12:51:15 20-11-2024] Đã được đánh thức.[0m
+[92m[12:51:16 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[12:51:22 20-11-2024] [HUMAN] đọc báo tuổi trẻ[0m
+[93m[12:51:23 20-11-2024] Tiến hành đọc báo, tin tức từ nguồn: Tuổi Trẻ[0m
+[96m[12:51:23 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[12:51:24 20-11-2024] Đang phát: Tên lửa tầm xa của Mỹ có trở thành cớ để Nga sử dụng vũ khí hạt nhân?[0m
+[95m[12:51:35 20-11-2024] Âm lượng Tăng tới: 43%[0m
+[95m[12:51:37 20-11-2024] Âm lượng Tăng tới: 53%[0m
+[93m[12:55:50 20-11-2024] PlayList: Đã phát xong: Tên lửa tầm xa của Mỹ có trở thành cớ để Nga sử dụng vũ khí hạt nhân?[0m
+[93m[12:55:51 20-11-2024] Đang phát: Tin tức tối 18-11: Người cung cấp giống cúc mâm xôi xin lỗi bà con Bến Tre[0m
+[93m[12:56:23 20-11-2024] Đã tạm dừng: Tin tức tối 18-11: Người cung cấp giống cúc mâm xôi xin lỗi bà con Bến Tre[0m
+[92m[12:56:23 20-11-2024] Đã được đánh thức.[0m
+[92m[12:56:24 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[12:56:29 20-11-2024] [HUMAN] giá vàng ngày hôm nay[0m
+[94m[12:56:29 20-11-2024] Đang gọi trợ lý ảo: Default_assistant[0m
+[92m[12:56:40 20-11-2024] [BOT]: dữ liệu âm thanh TTS_Audio/default_assistant_gia_vang_ngay_hom_nay.ogg[0m
+[92m[12:56:44 20-11-2024] Đã được đánh thức.[0m
+[92m[12:56:44 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[12:56:48 20-11-2024] [HUMAN] giá vàng hôm nay[0m
+[94m[12:56:49 20-11-2024] Đang gọi trợ lý ảo: Default_assistant[0m
+[92m[12:56:50 20-11-2024] [BOT]: dữ liệu âm thanh TTS_Audio/default_assistant_gia_vang_hom_nay.ogg[0m
+[92m[12:56:53 20-11-2024] Đã được đánh thức.[0m
+[92m[12:56:54 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[12:56:57 20-11-2024] Không có giọng nói được truyền vào[0m
+[93m[12:56:58 20-11-2024] Tiếp tục phát: Tin tức tối 18-11: Người cung cấp giống cúc mâm xôi xin lỗi bà con Bến Tre[0m
+[93m[12:56:58 20-11-2024] Đang phát: Tin tức tối 18-11: Người cung cấp giống cúc mâm xôi xin lỗi bà con Bến Tre[0m
+[93m[13:04:28 20-11-2024] PlayList: Đã phát xong: Tin tức tối 18-11: Người cung cấp giống cúc mâm xôi xin lỗi bà con Bến Tre[0m
+[93m[13:04:29 20-11-2024] Đang phát: Tin tức sáng 19-11: Người dân Bạc Liêu bắt cá sấu gần 100kg sống ở thiên nhiên[0m
+[93m[13:04:35 20-11-2024] Đã dừng phát Tin tức sáng 19-11: Người dân Bạc Liêu bắt cá sấu gần 100kg sống ở thiên nhiên[0m
+[92m[15:06:57 20-11-2024] Đã được đánh thức.[0m
+[92m[15:06:58 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[15:07:01 20-11-2024] [HUMAN] bật máy tính[0m
+[92m[15:07:03 20-11-2024] [BOT] Đã bật Máy Tính thành công[0m
+[92m[15:07:05 20-11-2024] Đã được đánh thức.[0m
+[92m[15:07:06 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[15:07:08 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[15:07:09 20-11-2024] Đang chờ được đánh thức.[0m
+[92m[15:24:45 20-11-2024] Đã được đánh thức.[0m
+[92m[15:24:46 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[15:24:49 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[15:24:50 20-11-2024] Đang chờ được đánh thức.[0m
+[92m[15:25:06 20-11-2024] Đã được đánh thức.[0m
+[92m[15:25:07 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[15:25:13 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[15:25:14 20-11-2024] Đang chờ được đánh thức.[0m
+[92m[15:40:38 20-11-2024] Đã được đánh thức.[0m
+[92m[15:40:39 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[15:40:45 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[15:40:46 20-11-2024] Đang chờ được đánh thức.[0m
+[92m[15:51:34 20-11-2024] Đã được đánh thức.[0m
+[92m[15:51:35 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[15:51:41 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[15:51:41 20-11-2024] Đang chờ được đánh thức.[0m
+[95m[15:54:08 20-11-2024] [Bot API] Phát nhạc Ở PlayList[0m
+[96m[15:54:08 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[15:54:08 20-11-2024] Token Zingmp3 đã được làm mới và lưu vào Config.json thành công.[0m
+[93m[15:54:10 20-11-2024] Đang phát: Hẹn Anh Khi Hoa Chưa Tàn (Remix)[0m
+[95m[15:54:17 20-11-2024] Âm lượng được đặt thành: 55%[0m
+[95m[15:54:18 20-11-2024] Âm lượng được đặt thành: 59%[0m
+[95m[15:54:20 20-11-2024] Âm lượng được đặt thành: 66%[0m
+[95m[15:54:22 20-11-2024] Âm lượng được đặt thành: 75%[0m
+[95m[15:54:26 20-11-2024] Âm lượng được đặt thành: 85%[0m
+[95m[15:54:28 20-11-2024] Âm lượng được đặt thành: 74%[0m
+[95m[15:54:31 20-11-2024] Âm lượng được đặt thành: 69%[0m
+[93m[15:57:48 20-11-2024] PlayList: Đã phát xong: Hẹn Anh Khi Hoa Chưa Tàn (Remix)[0m
+[93m[15:57:49 20-11-2024] Đang phát: Tự Em Sai[0m
+[93m[15:59:36 20-11-2024] Đã tạm dừng: Tự Em Sai[0m
+[92m[15:59:36 20-11-2024] Đã được đánh thức.[0m
+[92m[15:59:37 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[15:59:42 20-11-2024] [HUMAN] đọc báo tuổi trẻ[0m
+[93m[15:59:43 20-11-2024] Tiến hành đọc báo, tin tức từ nguồn: Tuổi Trẻ[0m
+[96m[15:59:43 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[15:59:43 20-11-2024] Đang phát: Tin tức sáng 20-11: TP.HCM tiếp tục tăng cường phòng chống bệnh sởi[0m
+[95m[16:02:00 20-11-2024] [Bot API] Phát nhạc Ở PlayList[0m
+[96m[16:02:00 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[16:02:02 20-11-2024] Đang phát: Tự Em Sai[0m
+[93m[16:06:00 20-11-2024] PlayList: Đã phát xong: Tự Em Sai[0m
+[93m[16:06:02 20-11-2024] Đang phát: Tuyệt Duyên - Thương Ly Biệt 2[0m
+[93m[16:07:32 20-11-2024] Đã tạm dừng: Tuyệt Duyên - Thương Ly Biệt 2[0m
+[93m[16:07:57 20-11-2024] Tiếp tục phát: Tuyệt Duyên - Thương Ly Biệt 2[0m
+[93m[16:07:58 20-11-2024] Đang phát: Tuyệt Duyên - Thương Ly Biệt 2[0m
+[93m[16:11:18 20-11-2024] PlayList: Đã phát xong: Tuyệt Duyên - Thương Ly Biệt 2[0m
+[92m[16:11:18 20-11-2024] PlayList: Đã phát xong toàn bộ nhạc trong PlayList[0m
+[92m[16:35:06 20-11-2024] Đã được đánh thức.[0m
+[92m[16:35:07 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[16:35:13 20-11-2024] [HUMAN] mấy giờ rồi[0m
+[95m[16:35:14 20-11-2024] [BOT] Bây giờ là: 16 giờ, 35 phút[0m
+[92m[16:35:17 20-11-2024] Đã được đánh thức.[0m
+[92m[16:35:18 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[16:35:25 20-11-2024] [HUMAN] ngày mai là thứ mấy[0m
+[94m[16:35:25 20-11-2024] Đang gọi trợ lý ảo: Default_assistant[0m
+[93m[16:35:25 20-11-2024] Token PodCast đã được làm mới và lưu vào Config.json thành công.[0m
+[92m[16:35:27 20-11-2024] [BOT]: dữ liệu âm thanh TTS_Audio/default_assistant_ngay_mai_la_thu_may.ogg[0m
+[92m[16:35:28 20-11-2024] Đã được đánh thức.[0m
+[92m[16:35:29 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[16:35:36 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[16:35:36 20-11-2024] Đang chờ được đánh thức.[0m
+[92m[17:15:06 20-11-2024] Đã được đánh thức.[0m
+[92m[17:15:07 20-11-2024] [BOT] Đang thu âm....[0m
+[95m[17:15:13 20-11-2024] Không có giọng nói được truyền vào[0m
+[94m[17:15:14 20-11-2024] Đang chờ được đánh thức.[0m
+[92m[17:32:48 20-11-2024] Đã được đánh thức.[0m
+[92m[17:32:49 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[17:32:55 20-11-2024] [HUMAN] đọc báo thanh niên chủ đề thời sự[0m
+[93m[17:32:56 20-11-2024] Tiến hành đọc báo, tin tức từ nguồn: Thanh Niên chủ đề Thời Sự[0m
+[96m[17:32:56 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[17:32:56 20-11-2024] Đang phát: Trao tặng 5 nhà đại đoàn kết cho bà con nghèo tại Quảng Trị[0m
+[93m[17:34:37 20-11-2024] PlayList: Đã phát xong: Trao tặng 5 nhà đại đoàn kết cho bà con nghèo tại Quảng Trị[0m
+[93m[17:34:38 20-11-2024] Đang phát: Xét xử đại án Xuyên Việt Oil: Tài khoản mấy trăm ngàn, báo cáo 219 tỉ đồng[0m
+[93m[17:38:39 20-11-2024] PlayList: Đã phát xong: Xét xử đại án Xuyên Việt Oil: Tài khoản mấy trăm ngàn, báo cáo 219 tỉ đồng[0m
+[93m[17:38:45 20-11-2024] Đang phát: Một mỏ đất san lấp ở Quảng Nam được đấu giá tăng hơn 54 lần[0m
+[93m[17:43:09 20-11-2024] PlayList: Đã phát xong: Một mỏ đất san lấp ở Quảng Nam được đấu giá tăng hơn 54 lần[0m
+[93m[17:43:10 20-11-2024] Đang phát: Đồng Nai: Bác đề xuất dỡ bỏ hàng rào tại Trung tâm Hội nghị và tổ chức sự kiện[0m
+[93m[17:44:30 20-11-2024] PlayList: Đã phát xong: Đồng Nai: Bác đề xuất dỡ bỏ hàng rào tại Trung tâm Hội nghị và tổ chức sự kiện[0m
+[93m[17:44:31 20-11-2024] Đang phát: Bình Dương: Khởi tố bị can đăng thông tin xuyên tạc, xúc phạm lãnh đạo[0m
+[93m[17:45:48 20-11-2024] PlayList: Đã phát xong: Bình Dương: Khởi tố bị can đăng thông tin xuyên tạc, xúc phạm lãnh đạo[0m
+[93m[17:45:50 20-11-2024] Đang phát: Chủ tịch Hà Nội: 'Nhìn đâu cũng thấy lãng phí'[0m
+[93m[17:49:05 20-11-2024] PlayList: Đã phát xong: Chủ tịch Hà Nội: 'Nhìn đâu cũng thấy lãng phí'[0m
+[93m[17:49:06 20-11-2024] Đang phát: Cựu trung úy công an dùng nhục hình làm chết người, lãnh án 13 năm tù[0m
+[93m[17:52:07 20-11-2024] PlayList: Đã phát xong: Cựu trung úy công an dùng nhục hình làm chết người, lãnh án 13 năm tù[0m
+[93m[17:52:09 20-11-2024] Đang phát: Thủ tướng Tây Ban Nha muốn hợp tác tàu điện ngầm, metro với Việt Nam[0m
+[93m[17:54:17 20-11-2024] PlayList: Đã phát xong: Thủ tướng Tây Ban Nha muốn hợp tác tàu điện ngầm, metro với Việt Nam[0m
+[93m[17:54:18 20-11-2024] Đang phát: Bình Dương: Triệt phá đường dây cho vay nặng lãi, bắt tạm giam 4 nghi can[0m
+[93m[17:55:57 20-11-2024] PlayList: Đã phát xong: Bình Dương: Triệt phá đường dây cho vay nặng lãi, bắt tạm giam 4 nghi can[0m
+[93m[17:55:58 20-11-2024] Đang phát: An Giang: Bắt Phó giám đốc Công ty Nam Hào Kiệt gây hậu quả nghiêm trọng[0m
+[93m[17:58:00 20-11-2024] Đang phát: Nhạc Remix TikTok Triệu View - BXH Nhạc Trẻ Remix Hay Nhất Hiện Nay🎼Top 20 Nhạc TikTok Hay 2024[0m
+[95m[18:00:31 20-11-2024] Âm lượng Giảm còn: 59%[0m
+[95m[18:00:31 20-11-2024] Âm lượng Giảm còn: 49%[0m
+[93m[18:22:10 20-11-2024] Đã tạm dừng: Nhạc Remix TikTok Triệu View - BXH Nhạc Trẻ Remix Hay Nhất Hiện Nay🎼Top 20 Nhạc TikTok Hay 2024[0m
+[92m[18:22:10 20-11-2024] Đã được đánh thức.[0m
+[92m[18:22:11 20-11-2024] [BOT] Đang thu âm....[0m
+[92m[18:22:16 20-11-2024] [HUMAN] đọc báo vietnam express[0m
+[93m[18:22:16 20-11-2024] Tiến hành đọc báo, tin tức từ nguồn: Việt Nam ExPress[0m
+[96m[18:22:16 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[18:22:17 20-11-2024] Đang phát: Khó thu hút lao động trở về từ Hàn, Nhật[0m
+[93m[18:35:57 20-11-2024] PlayList: Đã phát xong: Khó thu hút lao động trở về từ Hàn, Nhật[0m
+[93m[18:35:58 20-11-2024] Đang phát: Sát nhân IQ thấp lẩn trốn cảnh sát 20 năm[0m
+[93m[18:54:17 20-11-2024] PlayList: Đã phát xong: Sát nhân IQ thấp lẩn trốn cảnh sát 20 năm[0m
+[93m[18:54:18 20-11-2024] Đang phát: Lệnh dỡ rào vũ khí có giúp Ukraine chiếm được lợi thế?[0m
+[93m[19:08:43 20-11-2024] PlayList: Đã phát xong: Lệnh dỡ rào vũ khí có giúp Ukraine chiếm được lợi thế?[0m
+[93m[19:08:44 20-11-2024] Đang phát: Vụ bác sĩ thẩm mỹ phi tang xác khách hàng[0m
+[93m[19:23:23 20-11-2024] PlayList: Đã phát xong: Vụ bác sĩ thẩm mỹ phi tang xác khách hàng[0m
+[93m[19:23:24 20-11-2024] Đang phát: Chiến lược đầu tư bất động sản trong 2025[0m
+[93m[19:38:27 20-11-2024] Đang phát: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[93m[19:45:58 20-11-2024] PlayList: Đã phát xong: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[93m[19:45:59 20-11-2024] Đang phát: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[93m[19:48:31 20-11-2024] Đang phát: Bạn gái có thai khi tôi đang muốn chia tay[0m
+[93m[19:50:19 20-11-2024] Đang phát: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[93m[19:57:50 20-11-2024] PlayList: Đã phát xong: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[93m[19:57:51 20-11-2024] Đang phát: Lê Lai có thật sự đổi áo cứu chúa[0m
+[93m[20:08:24 20-11-2024] Đang phát: Kinh nghiệm đầu tư đất tỉnh[0m
+[93m[20:11:31 20-11-2024] Đang phát: Tình Khúc Vàng - Đan Trường[0m
+[93m[20:16:40 20-11-2024] PlayList: Đã phát xong: Tình Khúc Vàng - Đan Trường[0m
+[93m[20:16:41 20-11-2024] Đang phát: Con đường trở thành thư ký trẻ nhất Nhà Trắng của Karoline Levitt[0m
+[93m[20:20:18 20-11-2024] Đang phát: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[95m[20:25:03 20-11-2024] [Bot API] Phát nhạc Ở PlayList[0m
+[96m[20:25:03 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[92m[20:25:03 20-11-2024] PlayList: Đã phát xong toàn bộ nhạc trong PlayList[0m
+[93m[20:25:03 20-11-2024] Đã phát xong: Điểm tin 17h: Mỗi lượng vàng tăng thêm gần triệu đồng | Mỹ gấp rút chuyển vũ khí cho Ukraine[0m
+[95m[20:25:16 20-11-2024] [Bot API] Phát nhạc Ở PlayList[0m
+[96m[20:25:16 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[20:25:16 20-11-2024] Token Zingmp3 đã được làm mới và lưu vào Config.json thành công.[0m
+[93m[20:25:17 20-11-2024] Đang phát: Tuyệt Duyên - Thương Ly Biệt 2[0m
+[95m[20:25:20 20-11-2024] [Bot API] Phát nhạc Ở PlayList[0m
+[96m[20:25:20 20-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[20:25:20 20-11-2024] Đang phát: hen_anh_khi_hoa_Chua_tan.mp3[0m
+[95m[20:29:06 20-11-2024] [Bot API] Phát nhạc Ở Tệp Json[0m
+[91m[20:29:06 20-11-2024] PlayList: Lỗi khi đọc dữ liệu hoặc phát: [Errno 2] No such file or directory: '/home/pi/VBot_Offline/podcasts_data.json'[0m
+[95m[20:29:12 20-11-2024] [Bot API] Phát nhạc Ở Tệp Json[0m
+[91m[20:29:12 20-11-2024] PlayList: Lỗi khi đọc dữ liệu hoặc phát: [Errno 2] No such file or directory: '/home/pi/VBot_Offline/podcasts_data.json'[0m[92m[20:13:52 21-11-2024] Đã đọc file Config.json thành công [0m
+[92m[20:13:52 21-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:13:52 21-11-2024] Đã đọc file Object.json thành công [0m
+[92m[20:13:52 21-11-2024] Đã đọc file Action.json thành công [0m
+[92m[20:13:52 21-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[93m[20:13:52 21-11-2024] - Đã kiểm tra tạo/ghi tệp BackList.json[0m
+[93m[20:13:52 21-11-2024] - Logs hệ thống đang được hiển thị ở luồng console[0m
+[91m[20:13:52 21-11-2024] - Màn hình LCD không được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:13:52 21-11-2024] - Không cho phép đánh thức wake up khi Media Player đang hoạt động[0m
+[91m[20:13:52 21-11-2024] - Home Asistant Custom Command không được kích hoạt khi khởi chạy chương trình[0m
+[91m[20:13:52 21-11-2024] - Trợ lý ảo Chat GPT không được kích hoạt khi khởi chạy chương trình[0m
+[97m[20:13:52 21-11-2024] Đang sử dụng kiểu Led: ws281x[0m
+[97m[20:13:52 21-11-2024] Đang Khởi động Chương Trình, Vui Lòng Chờ...[0m
+[92m[20:13:57 21-11-2024] Đã khởi tạo API thành công.[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off
+[92m[20:13:57 21-11-2024] Đã khởi tạo Porcupine và PvRecorder thành công.[0m
+[1m[20:13:57 21-11-2024] Nút nhấn 'down' đã được cấu hình thành công cho: GPIO25[0m
+[1m[20:13:57 21-11-2024] Nút nhấn 'up' đã được cấu hình thành công cho: GPIO5[0m
+[1m[20:13:57 21-11-2024] Nút nhấn 'wakeup' đã được cấu hình thành công cho: GPIO26[0m
+[1m[20:13:57 21-11-2024] Nút nhấn 'mic' đã được cấu hình thành công cho: GPIO6[0m
+[92m[20:13:57 21-11-2024] [MQTT] Đã khởi tạo MQTT thành công.[0m
+[92m[20:13:58 21-11-2024] [MQTT] Kết Nối Thành Công Tới Broker: 192.168.14.17:1883[0m
+[96m[20:13:58 21-11-2024] [MQTT] Đã đồng bộ dữ liệu lên MQTT Broker.[0m
+[92m[20:14:03 21-11-2024] KHỞI CHẠY TRƯƠNG TRÌNH VBot THÀNH CÔNG[0m
+[92m[20:14:04 21-11-2024] Đang chờ được đánh thức[0m
+[95m[20:21:49 21-11-2024] [Bot API] Phát nhạc Ở Tệp Json[0m
+[96m[20:21:49 21-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[20:21:50 21-11-2024] Đang phát: Điểm tin 21h: Trung Quốc cảnh báo Mỹ về 4 lằn ranh đỏ | Ba loại tàu khách tốc độ cao Bắc Nam[0m
+[95m[20:21:54 21-11-2024] Âm lượng Giảm còn: 67%[0m
+[93m[20:35:38 21-11-2024] PlayList: Đã phát xong: Điểm tin 21h: Trung Quốc cảnh báo Mỹ về 4 lằn ranh đỏ | Ba loại tàu khách tốc độ cao Bắc Nam[0m
+[93m[20:35:39 21-11-2024] Đang phát: Giả thuyết về cái chết bí ẩn của Thành Cát Tư Hãn[0m
+[96m[20:43:44 21-11-2024] PlayList: Next chuyển sang bài tiếp theo[0m
+[93m[20:43:46 21-11-2024] Đang phát: Kinh nghiệm đầu tư đất tỉnh[0m
+[95m[20:43:51 21-11-2024] Âm lượng được đặt thành: 58%[0m
+[93m[20:46:18 21-11-2024] Đã dừng phát Kinh nghiệm đầu tư đất tỉnh[0m
+[92m[07:54:57 22-11-2024] Đã được đánh thức.[0m
+[95m[07:55:04 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[07:55:05 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[07:55:06 22-11-2024] Đang chờ được đánh thức.[0m
+[92m[07:55:08 22-11-2024] Đã được đánh thức.[0m
+[95m[07:55:09 22-11-2024] [BOT] Đang thu âm...[0m
+[92m[07:55:12 22-11-2024] [HUMAN] mấy giờ rồi[0m
+[95m[07:55:13 22-11-2024] [BOT] Bây giờ là: 07 giờ, 55 phút[0m
+[92m[07:55:16 22-11-2024] Đã được đánh thức.[0m
+[95m[07:55:17 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[07:55:19 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[07:55:20 22-11-2024] Đang chờ được đánh thức.[0m
+[92m[17:15:56 22-11-2024] Đã được đánh thức.[0m
+[95m[17:15:57 22-11-2024] [BOT] Đang thu âm...[0m
+[92m[17:16:01 22-11-2024] [HUMAN] bật[0m
+[91m[17:16:02 22-11-2024] Lỗi xảy ra khi tìm kiếm thiết bị trong Home Assistant[0m
+[91m[17:16:02 22-11-2024] Không tìm thấy thiết bị trong Home Assitant phù hợp với: 'bật', hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập. Cần kiểm tra Logs để biết chính xác hơn[0m
+[92m[17:16:12 22-11-2024] Đã được đánh thức.[0m
+[95m[17:16:13 22-11-2024] [BOT] Đang thu âm...[0m
+[92m[17:16:16 22-11-2024] [HUMAN] bật[0m
+[91m[17:16:16 22-11-2024] Lỗi xảy ra khi tìm kiếm thiết bị trong Home Assistant[0m
+[91m[17:16:16 22-11-2024] Không tìm thấy thiết bị trong Home Assitant phù hợp với: 'bật', hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập. Cần kiểm tra Logs để biết chính xác hơn[0m
+[92m[17:16:27 22-11-2024] Đã được đánh thức.[0m
+[95m[17:16:28 22-11-2024] [BOT] Đang thu âm...[0m
+[92m[17:16:31 22-11-2024] [HUMAN] bật máy tính[0m
+[92m[17:16:33 22-11-2024] [BOT] Đã bật Máy Tính thành công[0m
+[92m[17:16:36 22-11-2024] Đã được đánh thức.[0m
+[95m[17:16:37 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[17:16:39 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[17:16:40 22-11-2024] Đang chờ được đánh thức.[0m
+[92m[18:10:59 22-11-2024] Đã được đánh thức.[0m
+[95m[18:11:00 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[18:11:07 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[18:11:07 22-11-2024] Đang chờ được đánh thức.[0m
+[92m[18:12:46 22-11-2024] Đã được đánh thức.[0m
+[95m[18:12:47 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[18:12:53 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[18:12:54 22-11-2024] Đang chờ được đánh thức.[0m
+[92m[18:15:31 22-11-2024] Đã được đánh thức.[0m
+[95m[18:15:32 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[18:15:38 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[18:15:39 22-11-2024] Đang chờ được đánh thức.[0m
+[92m[18:32:46 22-11-2024] Đã được đánh thức.[0m
+[95m[18:32:47 22-11-2024] [BOT] Đang thu âm...[0m
+[95m[18:32:53 22-11-2024] Không có giọng nói được truyền vào[0m
+[94m[18:32:54 22-11-2024] Đang chờ được đánh thức.[0m
+[95m[18:43:58 22-11-2024] [Bot API] Phát nhạc Ở Tệp Json[0m
+[96m[18:43:58 22-11-2024] Chế Độ Phát: random Phát ngẫu nhiên[0m
+[93m[18:43:58 22-11-2024] Đang phát: Google cảnh báo hậu quả nghiêm trọng khi bị ép bán Chrome[0m
+[93m[18:45:41 22-11-2024] PlayList: Đã phát xong: Google cảnh báo hậu quả nghiêm trọng khi bị ép bán Chrome[0m
+[93m[18:45:42 22-11-2024] Đang phát: Những dấu hiệu cho thấy ổ cứng sắp hỏng[0m
+[93m[18:48:55 22-11-2024] PlayList: Đã phát xong: Những dấu hiệu cho thấy ổ cứng sắp hỏng[0m
+[93m[18:48:56 22-11-2024] Đang phát: GTA 6 sẽ tạo nên cú sốc cho game thủ trên PS5 Pro[0m
+[93m[18:50:38 22-11-2024] PlayList: Đã phát xong: GTA 6 sẽ tạo nên cú sốc cho game thủ trên PS5 Pro[0m
+[93m[18:50:39 22-11-2024] Đang phát: Dòng RTX 5000 có thể xô đổ kỷ lục về giá card đồ họa[0m
+[93m[18:52:18 22-11-2024] PlayList: Đã phát xong: Dòng RTX 5000 có thể xô đổ kỷ lục về giá card đồ họa[0m
+[93m[18:52:19 22-11-2024] Đang phát: ChatGPT Search miễn phí cho tất cả người dùng[0m
+[93m[18:53:40 22-11-2024] PlayList: Đã phát xong: ChatGPT Search miễn phí cho tất cả người dùng[0m
+[93m[18:53:41 22-11-2024] Đang phát: Tin giả trong kỷ nguyên số: Trí tuệ nhân tạo đứng ở phe nào?[0m
+[93m[18:56:09 22-11-2024] PlayList: Đã phát xong: Tin giả trong kỷ nguyên số: Trí tuệ nhân tạo đứng ở phe nào?[0m
+[93m[18:56:10 22-11-2024] Đang phát: Oppo ra mắt smartphone Find X8 Series, trang bị ống kính zoom viễn vọng AI[0m
+[93m[18:59:40 22-11-2024] PlayList: Đã phát xong: Oppo ra mắt smartphone Find X8 Series, trang bị ống kính zoom viễn vọng AI[0m
+[93m[18:59:41 22-11-2024] Đang phát: Facebook Messenger hỗ trợ gọi video chất lượng cao[0m
+[93m[19:00:56 22-11-2024] PlayList: Đã phát xong: Facebook Messenger hỗ trợ gọi video chất lượng cao[0m
+[93m[19:00:57 22-11-2024] Đang phát: Android bắt kịp iOS về khả năng sao lưu ứng dụng[0m
+[93m[19:02:34 22-11-2024] PlayList: Đã phát xong: Android bắt kịp iOS về khả năng sao lưu ứng dụng[0m
+[93m[19:02:35 22-11-2024] Đang phát: Nvidia chuẩn bị ra mắt CPU mạnh tương đương RTX 4070 Mobile[0m
+[93m[19:05:27 22-11-2024] PlayList: Đã phát xong: Nvidia chuẩn bị ra mắt CPU mạnh tương đương RTX 4070 Mobile[0m
+[93m[19:05:29 22-11-2024] Đang phát: Keysight hợp tác Siemens EDA hỗ trợ các thiết kế vô tuyến thế hệ mới[0m
+[93m[19:07:27 22-11-2024] PlayList: Đã phát xong: Keysight hợp tác Siemens EDA hỗ trợ các thiết kế vô tuyến thế hệ mới[0m
+[93m[19:07:28 22-11-2024] Đang phát: Huawei Mate 70 chưa ra mắt đã 'cháy hàng'[0m
+[93m[19:11:55 22-11-2024] PlayList: Đã phát xong: Huawei Mate 70 chưa ra mắt đã 'cháy hàng'[0m
+[93m[19:11:56 22-11-2024] Đang phát: Đã có công cụ hack thành công được iPhone chạy iOS 18?[0m[92m[20:08:36 22-11-2024] Đã đọc file Config.json thành công [0m
+[92m[20:08:36 22-11-2024] Đã đọc file Adverbs.json thành công [0m
+[92m[20:08:36 22-11-2024] Đã đọc file Object.json thành công [0m
+[92m[20:08:36 22-11-2024] Đã đọc file Action.json thành công [0m
+[92m[20:08:36 22-11-2024] Đã đọc file resource/hass/Home_Assistant_Custom.json thành công [0m
+[91m[20:08:36 22-11-2024] - Logs hệ thống không được kích hoạt khi khởi chạy chương trình[0m
+ * Serving Flask app 'Api'
+ * Debug mode: off

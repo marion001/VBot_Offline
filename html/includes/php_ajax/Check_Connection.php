@@ -77,7 +77,7 @@ if (isset($_GET['start_vbot_service'])) {
             
             // Nếu lệnh thành công
                 $result['success'] = true;
-                $result['message'] = 'Dịch vụ VBot đã được khởi động lại thành công.';
+                $result['message'] = 'Dịch vụ VBot đã được khởi chạy thành công.';
         } else {
             $result['message'] = 'Xác thực SSH không thành công.';
         }
@@ -104,7 +104,7 @@ if (isset($_GET['stop_vbot_service'])) {
             
             // Nếu lệnh thành công
                 $result['success'] = true;
-                $result['message'] = 'Dịch vụ VBot đã được khởi động lại thành công.';
+                $result['message'] = 'Dịch vụ VBot đã được dừng thành công.';
         } else {
             $result['message'] = 'Xác thực SSH không thành công.';
         }

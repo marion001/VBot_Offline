@@ -51,9 +51,11 @@ $Restricted_Extensions = ['html', 'python', 'php', 'so'];
 // Danh sách các định dạng hình ảnh hợp lệ
 $allowed_image_types = ["jpg", "png", "jpeg", "gif"];
 
-
 //Tối đa số lượng kênh đài báo radio được cho phép
-$Max_Radios = 10;
+$Max_Radios = 20;
+
+//Tối đa số lượng trang báo, tin tức
+$Max_NewsPaper = 20;
 
 //Các định dạng file âm thanh cho phép tìm kiếm, tải lên và lựa chọn khi khởi động
 $Allowed_Extensions_Audio = ['mp3', 'wav', 'ogg', 'aac'];

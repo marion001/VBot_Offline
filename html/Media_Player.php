@@ -89,7 +89,7 @@ include 'html_sidebar.php';
         <p id="media-name">Tên bài hát: <font color="blue">N/A</font></p>
         <p id="volume">Âm lượng: <font color="blue">N/A</font></p>
         <p id="audio-playing">Trạng thái: <font color="blue">N/A</font></p>
-        <p id="audio-source">Nguồn nhạc: <font color="blue">N/A</font></p>
+        <p id="audio-source">Nguồn Media: <font color="blue">N/A</font></p>
     </div>
 </div>
 
@@ -120,18 +120,15 @@ include 'html_sidebar.php';
                     </div>
                 </div>
 
-
             </div>
-
             <div class="col-lg-6">
-
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">Nguồn nhạc</h5>
+                        <h5 class="card-title">Nguồn Media: (Nhạc, Đài, Báo, Radio, PodCast)</h5>
                         <!-- Bordered Tabs Justified -->
                         <ul class="nav nav-tabs nav-tabs-bordered d-flex" id="select_source_media_music" role="tablist">
                             <li class="nav-item flex-fill" role="presentation">
-                                <button class="nav-link w-100 active" id="local-tab" name="Local" data-bs-toggle="tab" data-bs-target="#bordered-justified-local" type="button" role="tab" aria-controls="local" aria-selected="true">Local</button>
+                                <button class="nav-link w-100 active" id="local-tab" name="Local" data-bs-toggle="tab" data-bs-target="#bordered-justified-local" type="button" role="tab" aria-controls="local" aria-selected="true" onclick="cacheLocal()">Local</button>
                             </li>
                             <li class="nav-item flex-fill" role="presentation">
                                 <button class="nav-link w-100" id="zing-tab" name="ZingMP3" data-bs-toggle="tab" data-bs-target="#bordered-justified-zing" type="button" role="tab" aria-controls="zing" aria-selected="false" tabindex="-1" onclick="cacheZingMP3()">ZingMP3</button>
@@ -143,14 +140,19 @@ include 'html_sidebar.php';
                                 <button class="nav-link w-100" id="podcast-tab" name="PodCast" data-bs-toggle="tab" data-bs-target="#bordered-justified-podcast" type="button" role="tab" aria-controls="podcast" aria-selected="false" tabindex="-1" onclick="cachePodCast()">PodCast</button>
                             </li>
                             <li class="nav-item flex-fill" role="presentation">
-                                <button class="nav-link w-100" id="radio-tab" name="Radio" data-bs-toggle="tab" data-bs-target="#bordered-justified-radio" type="button" role="tab" aria-controls="radio" aria-selected="false" tabindex="-1">Radio</button>
+                                <button class="nav-link w-100" id="radio-tab" name="Radio" data-bs-toggle="tab" data-bs-target="#bordered-justified-radio" type="button" role="tab" aria-controls="radio" aria-selected="false" tabindex="-1" onclick="cacheRadio()">Radio</button>
                             </li>
                             <li class="nav-item flex-fill" role="presentation">
                                 <button class="nav-link w-100" id="playlist-tab" name="PlayList" data-bs-toggle="tab" data-bs-target="#bordered-justified-playlist" type="button" role="tab" aria-controls="playlist" aria-selected="false" tabindex="-1" onclick="cachePlayList()">PlayList</button>
                             </li>
+							
+                            <li class="nav-item flex-fill" role="presentation">
+                                <button class="nav-link w-100" id="newspaper-tab" name="NewsPaper" data-bs-toggle="tab" data-bs-target="#bordered-justified-newspaper" type="button" role="tab" aria-controls="newspaper" aria-selected="false" tabindex="-1" onclick="cacheNewsPaper()">Báo/Tin Tức</button>
+                            </li>
+							
                         </ul>
                         <br/>
-                        <div class="input-group mb-3">
+                        <div class="input-group mb-3" id="tim_kiem_bai_hat_all">
                             <input required="" class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Nhập tên bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">
                             <div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>
                             <button id="actionButton_Media" class="btn btn-success border-success" type="button" onclick="media_player_search()"><i class="bi bi-search"></i></button>
@@ -181,16 +183,40 @@ include 'html_sidebar.php';
                             </div>
                             <div class="tab-pane fade" id="bordered-justified-radio" role="tabpanel" aria-labelledby="radio-tab">
                                 <div id="show_list_Radio" style="max-height: 700px; overflow: auto;"></div>
-                               
                             </div>
 							
                             <div class="tab-pane fade" id="bordered-justified-playlist" role="tabpanel" aria-labelledby="playlist-tab">
-							
                                  <div id="show_list_Playlist2"></div>
                                  <div id="show_list_Playlist" style="max-height: 700px; overflow: auto;"></div>
                             </div>
-                        </div>
-                        <!-- End Bordered Tabs Justified -->
+							
+                            <div class="tab-pane fade" id="bordered-justified-newspaper" role="tabpanel" aria-labelledby="newspaper-tab">
+<?php
+
+// Kiểm tra nếu mảng news_paper_data tồn tại
+if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media_player']['news_paper_data'])) {
+    // Bắt đầu thẻ <select>
+    echo '<div class="input-group form-floating mb-3">	<select class="form-select border-success" name="news_paper" id="news_paper">';
+    echo '<option value="">-- Chọn Báo, Tin Tức --</option>';
+    foreach ($Config['media_player']['news_paper_data'] as $newsPaper) {
+        // Kiểm tra và lấy các trường `name` và `link`
+        $name = isset($newsPaper['name']) ? htmlspecialchars($newsPaper['name']) : 'Không rõ tên';
+        $link = isset($newsPaper['link']) ? htmlspecialchars($newsPaper['link']) : '#';
+        echo '<option value="'.$link.'" title="Báo: '.$name.'">'.$name.'</option>';
+    }
+    echo '</select><label for="news_paper">Chọn Trang Báo, Tin Tức:</label><button class="btn btn-success border-success" type="button" onclick="get_data_newspaper()"><i class="bi bi-search"></i></button></div>';
+} else {
+    echo 'Không tìm thấy dữ liệu báo/tin tức trong tệp JSON.';
+}
+?>
+<div id="show_list_news_paper" style="max-height: 700px; overflow: auto;"></div>
+</div>
+
+
+
+
+
+					</div>
                     </div>
                 </div>
             </div>
@@ -222,26 +248,25 @@ document.getElementById('song_name_value').addEventListener('input', checkInput_
 
 //Hiển thị dữ liệu PlayList
 function cachePlayList() {
+
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "none";
+	}
+
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList', true);
     // Khi yêu cầu được hoàn thành
     xhr.onload = function() {
         if (xhr.status === 200) {
             var fileListDiv = document.getElementById('show_list_Playlist');
-            //var fileListDiv2 = document.getElementById('show_list_Playlist2');
             try {
 				fileListDiv.innerHTML = '<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button></center>';
 				fileListDiv.innerHTML += '<br/>Xóa toàn bộ danh sách phát: <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button>';
                 var data = JSON.parse(xhr.responseText);
                 if (Array.isArray(data.data) && data.data.length > 0) {
-					
-					//fileListDiv2.innerHTML = '';
-					 
                     // Xử lý và hiển thị từng playlist
                     data.data.forEach(function(playlist) {
-                        //console.log(playlist);
-                        //console.log(playlist.source);
-
                         var description = playlist.description ? playlist.description.length > 70 ? playlist.description.substring(0, 70) + '...' : playlist.description : 'N/A';
                         var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                         // Xử lý theo nguồn
@@ -358,7 +383,7 @@ function fetchData_Media_Player() {
                 document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' + (data.media_name ? data.media_name : 'N/A') + '</font>';
                 document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + data.volume+'%</font>';
                 document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : 'Không') + '</font>';
-                document.getElementById('audio-source').innerHTML = 'Nguồn nhạc: <font color=blue>' + data.media_player_source + '</font>';
+                document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + data.media_player_source + '</font>';
                 // Cập nhật ảnh bìa
                 document.getElementById('media-cover').src = data.media_cover ? data.media_cover : 'assets/img/Error_Null_Media_Player.png';
 

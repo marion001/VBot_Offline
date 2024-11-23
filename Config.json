@@ -4,14 +4,14 @@
         "email": "zxczxc@gmail.com",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": "zzzzzzz",
-            "district": "xxxxxxxx",
-            "province": "ccccccccc",
+            "wards": "1111111",
+            "district": "2222222",
+            "province": "3333333333",
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": 20.3534543,
-            "longitude": 106.324234
+            "latitude": 20.111111,
+            "longitude": 106.222222
         },
         "user_login": {
             "active": false,
@@ -52,8 +52,8 @@
         "active": true,
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://xxxxxxxx.duckdns.org",
-        "long_token": "546gv54654.8j67867.rAgP-hb867867",
+        "external_url": "https://zxcvbnm.duckdns.org",
+        "long_token": "rưer3.re23.rAgP-g423",
         "time_out": 15,
         "custom_commands": {
             "active": false,
@@ -64,8 +64,8 @@
         "mqtt_active": true,
         "mqtt_host": "192.168.14.17",
         "mqtt_port": 1883,
-        "mqtt_username": "mqtt_hass",
-        "mqtt_password": "mqtt_hass",
+        "mqtt_username": "hassmqtt",
+        "mqtt_password": "hassmqtt",
         "mqtt_client_name": "VBot",
         "mqtt_retain": true,
         "mqtt_qos": 1,
@@ -92,16 +92,16 @@
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "fdsf34IzaSyBMqGXv_yv45yv4536y34f5"
+            "api_key": "vg43534543g5g3v4543gv543gv35"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": "sk-proj-g5b767bhg65--b7657-b765-b7657-b756b7-b765b7-L89-b765"
+            "key_chat_gpt": "sk-proj-----ChwixTZK--M4wEmW8ki_h5PWzL6GmCr-L89-"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "456745bh734hb8h56rnbyh54674564"
+        "key_openweathermap": "1111111111111111111111111"
     },
     "media_player": {
         "active": true,
@@ -125,16 +125,43 @@
         },
         "zing_mp3": {
             "active": true,
-            "authentication_zmp3_rqid": "MHwxMTmUsICdUngNy4xNDMdUngMjA1fHYxLjExLjd8MTmUsICzMTg0NTU4NzY1OQ",
-            "expire_time": 1731849187
+            "authentication_zmp3_rqid": "MHwxNzEdUngMjQwLjEwMS4xMTF8djEdUngMTEdUngMTF8MTmUsICzMjMzNDM1OTMzMQ",
+            "expire_time": 1732337959
         },
+        "news_paper": {
+            "active": true,
+            "path": "Media/News_Paper",
+            "newspaper_file_name": "News_Paper.json"
+        },
+        "news_paper_data": [
+            {
+                "name": "Tuổi Trẻ",
+                "link": "https://podcast.tuoitre.vn"
+            },
+            {
+                "name": "Thanh Niên chủ đề Thời Sự",
+                "link": "https://thanhnien.vn/thoi-su.htm"
+            },
+            {
+                "name": "thanh niên chủ đề công nghệ",
+                "link": "https://thanhnien.vn/cong-nghe.htm"
+            },
+            {
+                "name": "thanh niên chủ đề thế giới",
+                "link": "https://thanhnien.vn/the-gioi.htm"
+            },
+            {
+                "name": "Việt Nam ExPress",
+                "link": "https://vnexpress.net/"
+            }
+        ],
         "podcast": {
             "active": true,
             "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
             "password": "VmlldGJvdEAx",
             "time_out": 7,
-            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzE4MTY3NjksIm5iZiI6MTczMTgxNjc2OSwianRpIjoiYjgwZmUyMGQtMjYwMS00YmI1LWFjNjMtNmUwZmU4YWFjZmVlIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.msxk8OxJFg4yw_LVZGAdjcUy1s6vWhYP9e1sPww8TMk",
-            "expire_time": 1731881569
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzIyNzgzNzIsIm5iZiI6MTczMjI3ODM3MiwianRpIjoiNmE1ZGJiNTktYjI4Yy00NWNjLWI4MzQtNGZlM2ZiY2Y3MTg1IiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.XPzuyb6LkmZAU7y479xo-cvEun_JPWtViMZYdnUDigg",
+            "expire_time": 1732321572
         },
         "radio": {
             "active": true
@@ -147,6 +174,14 @@
             {
                 "name": "vov giao thông hà nội",
                 "link": "https://str.vov.gov.vn/vovlive/vovGTHN.sdp_aac/playlist.m3u8"
+            },
+            {
+                "name": "vov1",
+                "link": "https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8"
+            },
+            {
+                "name": "vov3",
+                "link": "https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8"
             }
         ],
         "music_local": {
@@ -174,7 +209,7 @@
             "read_number": 3
         },
         "show_log": {
-            "active": true,
+            "active": false,
             "log_display_style": "console",
             "notes": "display_screen, console, all, api"
         },
@@ -253,7 +288,7 @@
         },
         "smart_wakeup": {
             "speak_to_text": {
-                "stt_select": "stt_ggcloud",
+                "stt_select": "stt_default",
                 "duration_recording": 6,
                 "silence_duration": 3,
                 "min_amplitude_threshold": 370,
@@ -262,8 +297,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "666666666666666666",
-                        "555555555555555555555555"
+                        "333333333333333333",
+                        "44444444444444444"
                     ]
                 },
                 "stt_ggcloud": {
@@ -326,7 +361,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/55555555577777777766666666666+333333=="
+                "key": "/66666666666666666+4454=="
             },
             "hotword": {
                 "lang": "vi",
@@ -385,16 +420,16 @@
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "888888888888888888",
-                        "999999999999999999999990",
-                        "00000000000000000000000000"
+                        "555555555555",
+                        "666666666666666666",
+                        "77777777777777"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "111111111111111111111111"
+                        "888888888888"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,

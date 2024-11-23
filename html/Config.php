@@ -407,10 +407,14 @@ $Config['backup_upgrade']['web_interface']['backup']['exclude_file_format'] = $e
 #Cập nhật bật tắt Kích hoạt radio
 $Config['media_player']['radio']['active'] = isset($_POST['radio_active']) ? true : false;
 
+#Cập nhật bật tắt kích hoạt đọc báo, tin tức
+$Config['media_player']['news_paper']['active'] = isset($_POST['news_paper_active']) ? true : false;
+
 #Cập nhật Custom Skill active
 $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
 $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] = isset($_POST['developer_customization_vbot_processing']) ? true : false;
 
+##############################################
 // Khởi tạo mảng radio_data đã cập nhật
 // Cập nhật radio_data từ POST
 $updated_radio_data = [];
@@ -430,6 +434,27 @@ foreach ($_POST as $key => $value) {
 // Lưu dữ liệu radio đã cập nhật vào cấu hình
 $Config['media_player']['radio_data'] = $updated_radio_data;
 ##########################################
+
+
+// Khởi tạo mảng newspaper đã cập nhật
+// Cập nhật newspaper từ POST
+$updated_news_paper_data = [];
+foreach ($_POST as $key_newspaper => $value) {
+    if (strpos($key_newspaper, 'newspaper_name_') === 0) {
+        $index = str_replace('newspaper_name_', '', $key_newspaper);
+        $link_key_newspaper = 'newspaper_link_' . $index;
+        // Kiểm tra cả tên đài và link đài đều có dữ liệu
+        if (isset($_POST[$link_key_newspaper]) && !empty(trim($_POST[$key_newspaper])) && !empty(trim($_POST[$link_key_newspaper]))) {
+            $updated_news_paper_data[] = [
+                "name" => $_POST[$key_newspaper],
+                "link" => $_POST[$link_key_newspaper]
+            ];
+        }
+    }
+}
+// Lưu dữ liệu radio đã cập nhật vào cấu hình
+$Config['media_player']['news_paper_data'] = $updated_news_paper_data;
+
 
 #Cập nhật stt Google Cloud
 $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_json_file_token'];
@@ -1499,6 +1524,7 @@ Cấu Hình MQTT Broker:</h5>
 <div class="input-group mb-3">
 <button class="btn btn-primary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('mqtts.yaml')">mqtts.yaml</button>
 <button class="btn btn-success border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('scripts.yaml')">scripts.yaml</button>
+<button class="btn btn-secondary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('input_text.yaml')">input_text.yaml</button>
 <button class="btn btn-info border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('lovelace_entities')">lovelace</button>
 </div>
 </div>
@@ -2135,7 +2161,7 @@ Cấu Hình Media Player:</h5>
 		<div class="card-body">
 			  
 			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
-Nguồn Phát Media Player: Nhạc, Radio, PodCast:</h5>
+Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 				 
 				 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
 	
@@ -2244,6 +2270,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast:</h5>
 </div>
 </div>
  </div>
+ 
 <div class="card">
 <div class="card-body">
 <h5 class="card-title">Đài, Radio:</h5>
@@ -2281,7 +2308,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast:</h5>
                     </td>
 <td><center>
 <button type="button" class="btn btn-danger" onclick="delete_Dai_bao_Radio('<?php echo $index; ?>', '<?php echo htmlspecialchars($radio['name']); ?>')">
-    <i class="bi bi-trash" type="button" title="Xóa đài"></i>
+    <i class="bi bi-trash" type="button" title="Xóa đài: <?php echo htmlspecialchars($radio['name']); ?>"></i>
 </button>
 </center></td>
                 </tr>
@@ -2289,8 +2316,88 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast:</h5>
         </tbody>
     </table>
 	 <center> <button type="button" class="btn btn-success rounded-pill" id="add-radio" onclick="addRadio()">Thêm Đài Mới</button></center>
+	 
 </div>
 </div>
+
+ 
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">
+    Đọc Báo, Tin Tức 
+    <i class="bi bi-question-circle-fill" 
+       onclick="show_message('Các link/url báo được hỗ trợ:<br/><br>\
+ - https://podcast.tuoitre.vn<br>\
+ - https://vnexpress.net/<br>\
+ - https://thanhnien.vn/thoi-su.htm<br>\
+ - https://thanhnien.vn/the-gioi.htm<br>\
+ - https://thanhnien.vn/kinh-te.htm<br>\
+ - https://thanhnien.vn/doi-song.htm<br>\
+ - https://thanhnien.vn/suc-khoe.htm<br>\
+ - https://thanhnien.vn/gioi-tre.htm<br>\
+ - https://thanhnien.vn/giao-duc.htm<br>\
+ - https://thanhnien.vn/du-lich.htm<br>\
+ - https://thanhnien.vn/van-hoa.htm<br>\
+ - https://thanhnien.vn/giai-tri.htm<br>\
+ - https://thanhnien.vn/the-thao.htm<br>\
+ - https://thanhnien.vn/cong-nghe.htm<br>\
+ - https://thanhnien.vn/xe.htm<br>\
+ - https://thanhnien.vn/video.htm<br>\
+ - https://thanhnien.vn/tieu-dung-thong-minh.htm\
+')">
+    </i> 
+    :
+</h5>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng nguồn phát radio')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="news_paper_active" id="news_paper_active" <?php echo $Config['media_player']['news_paper']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+
+
+
+<?php
+    // Get Dữ liệu newspaper từ cấu hình
+    $newspaper_data = $Config['media_player']['news_paper_data'];
+?>
+    <table class="table table-bordered border-primary"  id="newspaper-table">
+        <thead>
+            <tr>
+                <th scope="col"><center><font color="red">Tên Báo</font></center></th>
+                <th scope="col"><center><font color="red">Link Báo</font></center></th>
+                <th scope="col"><center><font color="red">Hành Động</font></center></th>
+            </tr>
+        </thead>
+        <tbody>
+<?php foreach ($newspaper_data as $index_newspaper => $newspaper) { ?>
+<tr id="newspaper-row-<?php echo $index_newspaper; ?>">
+<td>
+<input type="text" class="form-control border-success" name="newspaper_name_<?php echo $index_newspaper; ?>" id="newspaper_name_<?php echo $index_newspaper; ?>" value="<?php echo htmlspecialchars($newspaper['name']); ?>">
+</td>
+<td>
+<input type="text" class="form-control border-success" name="newspaper_link_<?php echo $index_newspaper; ?>" id="newspaper_link_<?php echo $index_newspaper; ?>" value="<?php echo htmlspecialchars($newspaper['link']); ?>">
+</td>
+<td><center>
+<button type="button" class="btn btn-danger" onclick="delete_NewsPaper('<?php echo $index_newspaper; ?>', '<?php echo htmlspecialchars($newspaper['name']); ?>')">
+    <i class="bi bi-trash" type="button" title="Xóa Báo, Tin Tức: <?php echo htmlspecialchars($newspaper['name']); ?>"></i>
+</button>
+</center></td>
+                </tr>
+            <?php } ?>
+        </tbody>
+    </table>
+	 <center> <button type="button" class="btn btn-success rounded-pill" id="add-newspaper" onclick="addNewsPaper()">Thêm Báo Mới</button></center>
+
+
+</div>
+</div>
+
 
 
                 </div>
@@ -3548,11 +3655,9 @@ function readJSON_file_path(filePath) {
                     loadConfigHotword(lang)
 					show_message(messages.join('<br/>'));
                 } catch (e) {
-                    //alert('Không thể phân tích phản hồi json: ' + e.message);
 					show_message('Không thể phân tích phản hồi json: ' + e.message);
                 }
             } else {
-                //alert('Tải file lên thất bại');
 				show_message("<center>Tải file lên thất bại</center>");
             }
         };
@@ -3562,7 +3667,7 @@ function readJSON_file_path(filePath) {
     //Cập nhật các file trong eng và vi để Làm mới lại cấu hình Hotword trong Config.json, 
     function reload_hotword_config(langg = "No") {
         if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json bao gồm cả tiếng anh và tiếng việt?")) {
-            return; // Ngừng thực hiện nếu người dùng chọn "Cancel"
+            return;
         }
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config', true);
@@ -3571,13 +3676,10 @@ function readJSON_file_path(filePath) {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
-                    //alert(response.message);
 					show_message("<center>"+response.message+"</center>");
                 } else {
-                    //alert(response.message);
 					show_message("<center>"+response.message+"</center>");
                 }
-
                 var element_data_lang_shows = document.getElementById('data_lang_shows');
                 //Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
                 // Kiểm tra nếu phần tử tồn tại
@@ -3586,19 +3688,14 @@ function readJSON_file_path(filePath) {
                     var value_lang = element_data_lang_shows.getAttribute('value');
                     // Thực hiện các hành động cần thiết với giá trị
                     console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
-
                     if (value_lang === "vi") {
                         loadConfigHotword("vi")
                     } else if (value_lang === "eng") {
                         loadConfigHotword("eng")
                     }
                 }
-
-
             } else {
-                //alert('Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt');
 				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
-				
             }
         };
         xhr.send();
@@ -3617,16 +3714,14 @@ function readJSON_file_path(filePath) {
         }
     }
 
-    //Thêm mới đài báo Radio
+    //Thêm mới đài Radio
     let radioIndex = <?php echo count($radio_data); ?> ;
     const maxRadios = <?php echo $Max_Radios; ?> ;
-
     function addRadio() {
         if (radioIndex < maxRadios) {
             const table = document.getElementById('radio-table').getElementsByTagName('tbody')[0];
             const newRow = document.createElement('tr');
             newRow.id = 'radio-row-' + radioIndex;
-
             newRow.innerHTML =
                 '<td>' +
                 '<input type="text" class="form-control border-success" placeholder="Nhập tên đài" name="radio_name_' + radioIndex + '" id="radio_name_' + radioIndex + '">' +
@@ -3636,16 +3731,52 @@ function readJSON_file_path(filePath) {
                 '</td>' +
                 '<td style="text-align: center; vertical-align: middle;"><center>' +
                 '<button type="button" class="btn btn-danger" id="delete-radio-' + radioIndex + '" onclick="delete_Dai_bao_Radio(' + radioIndex + ', null)"><i class="bi bi-trash"></i></button>'
-
             '</center></td>';
-
             table.appendChild(newRow);
             radioIndex++;
         } else {
-            //alert("Bạn chỉ có thể thêm tối đa " + maxRadios + " đài radio");
-            show_message("<center>Bạn chỉ có thể thêm tối đa " + maxRadios + " đài radio</center>");
+            show_message("<center>Bạn chỉ có thể thêm tối đa <b>" + maxRadios + "</b> đài radio</center>");
         }
     }
+
+    //Thêm mới Báo, tin tức
+    let newspaperIndex = <?php echo count($newspaper_data); ?> ;
+    const maxNewsPaper = <?php echo $Max_NewsPaper; ?> ;
+    function addNewsPaper() {
+        if (newspaperIndex < maxNewsPaper) {
+            const table = document.getElementById('newspaper-table').getElementsByTagName('tbody')[0];
+            const newRow = document.createElement('tr');
+            newRow.id = 'newspaper-row-' + newspaperIndex;
+            newRow.innerHTML =
+                '<td>' +
+                '<input type="text" class="form-control border-success" placeholder="Nhập tên Báo, Tin Tức" name="newspaper_name_' + newspaperIndex + '" id="newspaper_name_' + newspaperIndex + '">' +
+                '</td>' +
+                '<td>' +
+                '<input type="text" class="form-control border-success" placeholder="Nhập link/url Báo, Tin Tức" name="newspaper_link_' + newspaperIndex + '" id="newspaper_link_' + newspaperIndex + '">' +
+                '</td>' +
+                '<td style="text-align: center; vertical-align: middle;"><center>' +
+                '<button type="button" class="btn btn-danger" id="delete-newspaper-' + newspaperIndex + '" onclick="delete_NewsPaper(' + newspaperIndex + ', null)"><i class="bi bi-trash"></i></button>'
+            '</center></td>';
+            table.appendChild(newRow);
+            newspaperIndex++;
+        } else {
+            show_message("<center>Bạn chỉ có thể thêm tối đa <b>" + maxNewsPaper + "</b> kênh báo, tin tức</center>");
+        }
+    }
+
+    //Xóa thẻ input báo, tin tức
+    function delete_NewsPaper(index_id, name_newspaper) {
+        if (name_newspaper !== null) {
+            if (!confirm('Bạn có chắc chắn muốn xóa kênh báo: "' + name_newspaper + '" này không?')) {
+                return;
+            }
+        }
+        var row = document.getElementById('newspaper-row-' + index_id);
+        if (row) {
+            row.remove();
+        }
+    }
+
 
     //Kiểm tra kết nối Home Assistant
     function CheckConnectionHomeAssistant(inputId) {
@@ -3655,12 +3786,10 @@ function readJSON_file_path(filePath) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'includes/php_ajax/Check_Connection.php?check_hass&url_hass=' + encodeURIComponent(url_hasss) + '&token_hass=' + encodeURIComponent(token_hasss), true);
         xhr.onreadystatechange = function() {
-			
             if (xhr.readyState === XMLHttpRequest.DONE) {
 				loading("hide");
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
-                    //console.log(response)
                     if (response.success) {
                         show_message('<center><font color=green><b>' + response.message + '</b></font></center><br/><b>- Tên Nhà:</b> ' + response.response.location_name +
                             '<br/><b>- Kinh độ:</b> ' + response.response.longitude + '<br/><b>- Vĩ độ:</b> ' + response.response.latitude + '<br/><b>- Múi giờ:</b> ' + response.response.time_zone +
@@ -3676,15 +3805,12 @@ function readJSON_file_path(filePath) {
                 }
             }
         };
-
         xhr.send();
-
     }
 	
 //Kiểm tra Kết Nối SSH
 function checkSSHConnection() {
 	loading("show");
-    //var sshHost = document.getElementById('ssh_host').value;
     var sshHost = "<?php echo $serverIp; ?>";
     var sshPort = document.getElementById('ssh_port').value;
     var sshUser = document.getElementById('ssh_username').value;
@@ -3697,10 +3823,8 @@ function checkSSHConnection() {
               '&port=' + encodeURIComponent(sshPort) +
               '&user=' + encodeURIComponent(sshUser) +
               '&pass=' + encodeURIComponent(sshPass);
-			  
     xhr.open('GET', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
 			loading("hide");
@@ -3708,15 +3832,15 @@ function checkSSHConnection() {
                 try {
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
-                        show_message(response.message); // Hiển thị thông báo thành công
+                        show_message(response.message);
                     } else {
-                        show_message("Lỗi: " + response.message); // Hiển thị thông báo lỗi
+                        show_message("Lỗi: " + response.message);
                     }
                 } catch (e) {
-                    show_message("Lỗi phân tích cú pháp phản hồi: " + e.message); // Hiển thị lỗi phân tích JSON
+                    show_message("Lỗi phân tích cú pháp phản hồi: " + e.message);
                 }
             } else {
-                show_message("Lỗi kết nối: trạng thái HTTP " + xhr.status); // Hiển thị lỗi kết nối
+                show_message("Lỗi kết nối: trạng thái HTTP " + xhr.status);
             }
 			
         }
@@ -3737,37 +3861,29 @@ function checkSSHConnection() {
                 }]
             }]
         };
-
         var xhr = new XMLHttpRequest();
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/json');
-
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 loading("hide");
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
-
-                    // Hiển thị dữ liệu trả về
                     var candidates = response.candidates;
                     if (candidates.length > 0) {
                         var contentText = candidates[0].content.parts[0].text;
                         show_message('<center>Kiểm Tra API KEY Thành Công</center><br/>Phản hồi: <font color=green>' + contentText + '</font>');
                     }
-
                 } else {
                     var response = JSON.parse(xhr.responseText);
                     if (response.error) {
                         show_message('Lỗi xảy ra: <font color=red>' + response.error.message + '</font>');
-                        //console.log('Status:', response.error.status);
-                        //console.log('Details:', response.error.details);
                     } else {
                         show_message('Có Lỗi Xảy Ra: ' + xhr.status);
                     }
                 }
             }
         };
-
         xhr.send(JSON.stringify(payload));
     }
 
@@ -3843,10 +3959,7 @@ function checkSSHConnection() {
                             '</tr>';
                         tableBody.insertAdjacentHTML('beforeend', rowContent);
                     });
-				
 				}
-
-
             }
         };
         xhr.send();

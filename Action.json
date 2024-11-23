@@ -17,12 +17,10 @@
     "disable": [
         "vô hiệu"
     ],
-	
     "script": [
         "thực thi",
-		"thi hành"
+        "thi hành"
     ],
-	
     "display": [
         "hiển thị"
     ],
@@ -96,13 +94,13 @@
         "ngừng phát"
     ],
     "send": [
-		"gửi",
+        "gửi",
         "chuyển"
     ],
     "notice": [
-      "cảnh cáo",
-	  "cảnh báo",
-	  "nhắc"
+        "cảnh cáo",
+        "cảnh báo",
+        "nhắc"
     ],
     "schedule": [
         "lập lịch",

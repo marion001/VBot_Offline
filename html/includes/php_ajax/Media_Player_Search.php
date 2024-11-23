@@ -1010,6 +1010,161 @@ if (isset($_GET['cache_delete']) && in_array($_GET['cache_delete'], ['ZingMP3', 
 			echo json_encode($response);
     }
 
-	exit();
+exit();
 }
+
+#Lấy Dữ liệu Báo, tin tức
+if (isset($_GET['newspaper'])) {
+    $News_Paper = isset($_GET['link']) ? $_GET['link'] : '';
+    $response = [
+        'success' => false,
+        'message' => 'Lỗi không xác định',
+        'data' => []
+    ];
+    if (empty($News_Paper)) {
+        $response['message'] = 'Cần nhập dữ liệu để tìm kiếm';
+        echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+	$filePath = "../cache/".$Config['media_player']['news_paper']['newspaper_file_name'];
+    // Kiểm tra nếu chuỗi tồn tại trong biến
+    if (strpos($News_Paper, "vnexpress.net") !== false) {
+        // URL API
+        $apiUrl = "https://api3.vnexpress.net/api/article?type=get_topstory&cate_id=1004685&site_id=1000000&showed_area=trangchu_podcast_v2&app_id=9e304d";
+        // Khởi tạo cURL
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $apiUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        // Thực thi yêu cầu cURL
+        $apiResponse = curl_exec($ch);
+        $error = curl_error($ch);
+        curl_close($ch);
+        if ($apiResponse !== false) {
+            $data = json_decode($apiResponse, true);
+            if (isset($data['error']) && $data['error'] === 0) {
+                if (isset($data['data']['trangchu_podcast']) && is_array($data['data']['trangchu_podcast'])) {
+                    $result = ["data" => []];
+                    foreach ($data['data']['trangchu_podcast'] as $podcast) {
+                        $result["data"][] = [
+                            "title" => $podcast['title'],
+                            "audio" => $podcast['podcast']['path'],
+                            "cover" => $podcast['podcast']['thumb_url'],
+                            "duration" => isset($podcast['podcast']['duration']) ? formatDuration($podcast['podcast']['duration']) : "N/A",
+							"publish_time" => isset($podcast['publish_time']) ? date("d/m/Y, H:i", $podcast['publish_time']) : "N/A",
+                            "source" => "Báo VnExpress"
+                        ];
+                    }
+                    if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+                        $response['success'] = true;
+                        $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
+                        $response['data'] = $result["data"];
+                    } else {
+                        $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
+                    }
+                } else {
+                    $response['message'] = 'Không tìm thấy dữ liệu podcast';
+                }
+            } else {
+                $response['message'] = 'Lỗi từ API hoặc không thể lấy dữ liệu';
+            }
+        } else {
+            $response['message'] = 'Lỗi cURL: ' . $error;
+        }
+    }
+
+else if (strpos($News_Paper, "thanhnien.vn") !== false){
+// Lấy nội dung HTML từ URL
+$html = file_get_contents($News_Paper);
+if ($html === false) {
+    die("Không thể lấy dữ liệu từ URL.");
+}
+// Tìm và trích xuất JSON từ thẻ <script>
+preg_match('/var\s+params\s*=\s*(\{.*?\});/is', $html, $matches);
+if (!empty($matches[1])) {
+    $params = json_decode($matches[1], true);
+    if ($params && isset($params['jsonSkinAudio']['playList'])) {
+        $playList = $params['jsonSkinAudio']['playList'];
+        $result = ["data" => []];
+        foreach ($playList as $item) {
+                        $result["data"][] = [
+                            "title" => $item['title'] ?? 'N/A',
+                            "audio" => $item['jsonpost']['fullPost'][0]['link'] ?? 'N/A',
+                            "cover" => str_replace('50_50', '150_150', $item['thumb'] ?? 'N/A'),
+                            "duration" => "N/A",
+							"publish_time" => "N/A",
+                            "source" => "Báo Thanh Niên"
+                        ];
+        }
+                    if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+                        $response['success'] = true;
+                        $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
+                        $response['data'] = $result["data"];
+                    } else {
+                        $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
+                    }
+    } else {
+        echo "Không tìm thấy danh sách phát nhạc trong JSON.\n";
+    }
+} else {
+    echo "Không tìm thấy JSON trong thẻ <script>.\n";
+}
+}
+else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
+    // Lấy nội dung HTML từ URL
+    $html = file_get_contents($News_Paper);
+    if ($html === false) {
+        die("Không thể lấy dữ liệu từ URL.");
+    }
+
+    // Định nghĩa mẫu Regex để trích xuất các thuộc tính cần thiết
+    $pattern = '/<a[^>]*data-file="([^"]+)"[^>]*data-title="([^"]+)"[^>]*data-avatar="([^"]+)"[^>]*>/';
+
+    // Kết quả trích xuất
+    $result = ["data" => []];
+    
+    // Mảng để lưu trữ các tiêu đề đã gặp
+    $titles_seen = [];
+
+    if (preg_match_all($pattern, $html, $matches, PREG_SET_ORDER)) {
+        foreach ($matches as $match) {
+            // Lấy tiêu đề và giải mã
+            $title = html_entity_decode($match[2], ENT_QUOTES, 'UTF-8');
+            
+            // Kiểm tra nếu tiêu đề đã được gặp trước đó
+            if (!in_array($title, $titles_seen)) {
+                // Nếu chưa gặp, thêm vào mảng kết quả và đánh dấu tiêu đề này là đã gặp
+                $result["data"][] = [
+                    "title" => $title,
+                    "audio" => $match[1],
+                    "cover" => $match[3],
+                    "duration" => "N/A",
+                    "publish_time" => "N/A",
+                    "source" => "Báo Tuổi Trẻ"
+                ];
+                $titles_seen[] = $title;  // Đánh dấu tiêu đề đã gặp
+            }
+        }
+
+        // Lưu dữ liệu vào tệp JSON
+        if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+            $response['success'] = true;
+            $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
+            $response['data'] = $result["data"];
+        } else {
+            $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
+        }
+    } else {
+        echo "Không tìm thấy dữ liệu phù hợp.\n";
+    }
+}
+
+	else {
+        $response['message'] = 'Trang Báo chưa được hỗ trợ';
+    }
+    echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit();
+}
+
 ?>

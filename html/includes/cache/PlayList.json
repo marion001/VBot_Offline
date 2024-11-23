@@ -3,43 +3,7 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "ADFB8C",
-            "title": "bat_hat_1.mp3",
-            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/bat_hat_1.mp3",
-            "duration": "0.04 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/bat_hat_1.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "D567DC",
-            "title": "bat_hat_2.mp3",
-            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/bat_hat_2.mp3",
-            "duration": "0.06 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/bat_hat_2.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "AF15C8",
-            "title": "bat_hat_3.mp3",
-            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/bat_hat_3.mp3",
-            "duration": "0.04 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/bat_hat_3.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "535241",
+            "ids_list": "9FD173",
             "title": "Tuyệt Duyên - Thương Ly Biệt 2",
             "cover": "https://photo-zmp3.zmdcdn.me/cover/7/9/a/6/79a68e16c6a2876ba3e5a08a9305de6d.jpg",
             "audio": "Z7ODDU7I",
@@ -51,7 +15,7 @@
             "artist": "Ngân Ngân"
         },
         {
-            "ids_list": "948963",
+            "ids_list": "2C4CA0",
             "title": "Tự Em Sai",
             "cover": "https://photo-zmp3.zmdcdn.me/cover/4/6/3/e/463efdaa10eb3142d3459d40ad15c8bb.jpg",
             "audio": "Z780BBEZ",
@@ -63,38 +27,26 @@
             "artist": "Linh Hương Luz, IC Music"
         },
         {
-            "ids_list": "65BED2",
-            "title": "Hôn Lễ Của Anh",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/5/5/d/8/55d84d3b1d8c045618ff30c35c6efe6a.jpg",
-            "audio": "Z7Z8WEF0",
-            "duration": "03:22",
+            "ids_list": "0884DC",
+            "title": "hen_anh_khi_hoa_Chua_tan.mp3",
+            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
+            "duration": "4.27 MB",
             "description": null,
-            "source": "ZingMP3",
-            "id": "Z7Z8WEF0",
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
             "channelTitle": null,
-            "artist": "Tuệ Ny"
+            "artist": null
         },
         {
-            "ids_list": "D84639",
-            "title": "Hẹn Anh Khi Hoa Chưa Tàn (Remix)",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/6/b/9/5/6b95253a90208f836c5a8477df2017cd.jpg",
-            "audio": "Z7CC7CC6",
-            "duration": "03:37",
+            "ids_list": "45D655",
+            "title": "hon_le_cua_anh.mp3",
+            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/hon_le_cua_anh.mp3",
+            "duration": "3.10 MB",
             "description": null,
-            "source": "ZingMP3",
-            "id": "Z7CC7CC6",
-            "channelTitle": null,
-            "artist": "OXI Remix, Giang Jolee"
-        },
-        {
-            "ids_list": "14DE1B",
-            "title": "Ăn Khế Trả Vàng",
-            "cover": "https://cdn-ocs.iviet.com/cover/2022/August/7b9299ed-d7ef-4986-99d0-55a2fe323252.jpeg",
-            "audio": "https://cdn-ocs.iviet.com/audio/2022/May/e8478449-b122-46b9-bbbe-8282f4f9f388.mp3",
-            "duration": "00:06:28",
-            "description": "Truyện",
-            "source": "PodCast",
-            "id": "https://cdn-ocs.iviet.com/audio/2022/May/e8478449-b122-46b9-bbbe-8282f4f9f388.mp3",
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/hon_le_cua_anh.mp3",
             "channelTitle": null,
             "artist": null
         }

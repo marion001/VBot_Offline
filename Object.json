@@ -9,6 +9,7 @@
     ],
     "news": [
         "tin tức",
+        "đọc báo",
         "báo",
         "thời sự"
     ],
@@ -34,12 +35,12 @@
         "dương lịch"
     ],
     "play_music": [
-		"nhạc",
-		"bài"
+        "nhạc",
+        "bài"
     ],
     "volume": [
-		"volume",
-		"âm lượng"
+        "volume",
+        "âm lượng"
     ]
 
 }
