@@ -25,7 +25,6 @@ $Version_VBot_Interface_filePath = 'Version.json';
 #Đọc nội dung file Version.json
 if (file_exists($Version_VBot_Interface_filePath)) {
     $Version_VBot_Interface = json_decode(file_get_contents($Version_VBot_Interface_filePath), true);
-
     if (json_last_error() !== JSON_ERROR_NONE) {
         echo 'Có lỗi xảy ra khi giải mã JSON: ' . json_last_error_msg();
         $Version_VBot_Interface = null; // Đặt dữ liệu thành null nếu có lỗi
@@ -34,7 +33,6 @@ if (file_exists($Version_VBot_Interface_filePath)) {
     echo 'Tệp JSON không tồn tại tại đường dẫn: ' . $Version_VBot_Interface_filePath;
     $Version_VBot_Interface = null; // Đặt dữ liệu thành null nếu tệp không tồn tại
 }
-
 ?>
 
 
@@ -66,8 +64,6 @@ include 'html_sidebar.php';
 <!-- End Sidebar-->
 
 <?php
-
-//$messages = [];
 #Giới hạn file backup
 $Limit_Backup_Files_Web = $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files'];
 
@@ -78,8 +74,6 @@ $backupFolderName = $Config['backup_upgrade']['google_cloud_drive']['backup_fold
 // Các thư mục cần kiểm tra và tạo Download_Path và  Extract_Path
 $directoriessss = [$Download_Path, $Extract_Path];
 
-
-#Tạo Thư mục
 #Tạo Thư mục
 function createDirectory($directory) {
 	global $messages;

@@ -45,12 +45,13 @@ function updateDate() {
     var d = new Date();
     var date = d.getDate();
     var month = d.getMonth();
-    var montharr = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+    //var montharr = ["Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6", "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12"];
+    var montharr = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"];
     var year = d.getFullYear();
     var day = d.getDay();
     var dayarr = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
     document.getElementById("days").innerHTML = dayarr[day];
-    document.getElementById("dates").innerHTML = date + " " + montharr[month] + " " + year;
+    document.getElementById("dates").innerHTML = date + "/" + montharr[month] + "/" + year;
     //console.log(date + " " + montharr[month] + " " + year);
 }
 //Cập nhật ngày tháng khi trang tải xong
@@ -62,17 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-//Hiển thị và đóng thông báo Message
-/*
-function show_message(message) {
-    document.querySelector('#notificationModal .modal-body').innerHTML = message;
-    $('#notificationModal').modal('show');
-}
-
-function close_message() {
-    $('#notificationModal').modal('hide');
-}
-*/
 // Hàm để hiển thị hoặc ẩn overlay
 function loading(action) {
     const overlay = document.getElementById('loadingOverlay');

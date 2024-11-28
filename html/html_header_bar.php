@@ -29,7 +29,7 @@ include 'Configuration.php';
 
 <div id="container_time" class="border-success pe-3">
     <div id="day-date-container_time">
-        <div id="days"></div>,  <div id="dates"></div>
+        <div id="days"></div>,&nbsp;<div id="dates"></div>
     </div>
  <font color="red">   <div id="times"></div></font>
 </div>

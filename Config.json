@@ -1,17 +1,17 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "zxczxc@gmail.com",
+        "email": "btrby54b54@gmail.com",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": "1111111",
-            "district": "2222222",
-            "province": "3333333333",
+            "wards": "zxc",
+            "district": "fsdfsd",
+            "province": "f43543",
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": 20.111111,
-            "longitude": 106.222222
+            "latitude": 20.456546,
+            "longitude": 106.423423
         },
         "user_login": {
             "active": false,
@@ -52,8 +52,8 @@
         "active": true,
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://zxcvbnm.duckdns.org",
-        "long_token": "rưer3.re23.rAgP-g423",
+        "external_url": "https://hassgvtr.duckdns.org",
+        "long_token": "g4v3tg43f43.t34tg43tg.rAgP-t5g645",
         "time_out": 15,
         "custom_commands": {
             "active": false,
@@ -64,8 +64,8 @@
         "mqtt_active": true,
         "mqtt_host": "192.168.14.17",
         "mqtt_port": 1883,
-        "mqtt_username": "hassmqtt",
-        "mqtt_password": "hassmqtt",
+        "mqtt_username": "hassio",
+        "mqtt_password": "hassio",
         "mqtt_client_name": "VBot",
         "mqtt_retain": true,
         "mqtt_qos": 1,
@@ -92,16 +92,16 @@
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "vg43534543g5g3v4543gv543gv35"
+            "api_key": "333333333333333333"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": "sk-proj-----ChwixTZK--M4wEmW8ki_h5PWzL6GmCr-L89-"
+            "key_chat_gpt": "sk-proj-nb65un65--nj65765-untyu-ChwixTZK-nuyt-nutyutyuyt-L89-nutyu"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "1111111111111111111111111"
+        "key_openweathermap": "11111111111111111111111"
     },
     "media_player": {
         "active": true,
@@ -125,8 +125,8 @@
         },
         "zing_mp3": {
             "active": true,
-            "authentication_zmp3_rqid": "MHwxNzEdUngMjQwLjEwMS4xMTF8djEdUngMTEdUngMTF8MTmUsICzMjMzNDM1OTMzMQ",
-            "expire_time": 1732337959
+            "authentication_zmp3_rqid": "MHwxNzEdUngMjMxLjgxLjEyN3x2MS4xMS4xMXwxNzMyNTQwMTMzNzMy",
+            "expire_time": 1732543733
         },
         "news_paper": {
             "active": true,
@@ -153,6 +153,26 @@
             {
                 "name": "Việt Nam ExPress",
                 "link": "https://vnexpress.net/"
+            },
+            {
+                "name": "Việt Nam Nét",
+                "link": "https://vietnamnet.vn/podcast/ban-tin-thoi-su"
+            },
+            {
+                "name": "Việt Nam Nét chủ đề góc nhìn",
+                "link": "https://vietnamnet.vn/podcast/goc-nhin"
+            },
+            {
+                "name": "Báo Mới",
+                "link": "https://baomoi.com/audio/thoi-su-3.epi"
+            },
+            {
+                "name": "Báo Mới về đời sống",
+                "link": "https://baomoi.com/audio/doi-song-6.epi"
+            },
+            {
+                "name": "Tiền Phong",
+                "link": "https://tienphong.vn/podcast/"
             }
         ],
         "podcast": {
@@ -160,8 +180,8 @@
             "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
             "password": "VmlldGJvdEAx",
             "time_out": 7,
-            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzIyNzgzNzIsIm5iZiI6MTczMjI3ODM3MiwianRpIjoiNmE1ZGJiNTktYjI4Yy00NWNjLWI4MzQtNGZlM2ZiY2Y3MTg1IiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.XPzuyb6LkmZAU7y479xo-cvEun_JPWtViMZYdnUDigg",
-            "expire_time": 1732321572
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzI1MzUzNzAsIm5iZiI6MTczMjUzNTM3MCwianRpIjoiNzZkNTcwNTktYjk4NC00NTcyLWJmZjctMmI0NWNmMWI4ZTBlIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.Xd0rjoBYfxLKdknnk8FNEHbG12UMfRfpZ9eWpmBdg8c",
+            "expire_time": 1732600171
         },
         "radio": {
             "active": true
@@ -209,7 +229,7 @@
             "read_number": 3
         },
         "show_log": {
-            "active": false,
+            "active": true,
             "log_display_style": "console",
             "notes": "display_screen, console, all, api"
         },
@@ -297,8 +317,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "333333333333333333",
-                        "44444444444444444"
+                        "111111111111111122222",
+                        "2222222222222223333"
                     ]
                 },
                 "stt_ggcloud": {
@@ -361,7 +381,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/66666666666666666+4454=="
+                "key": "/bg456hb54654654+TGsdTNolucA=="
             },
             "hotword": {
                 "lang": "vi",
@@ -420,16 +440,16 @@
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "555555555555",
-                        "666666666666666666",
-                        "77777777777777"
+                        "55555555555555555555",
+                        "6666666666666666666",
+                        "7777777777777777777"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "888888888888"
+                        "88888888888888888888"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,

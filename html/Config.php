@@ -2244,8 +2244,6 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 	</div>
 </div>
 
-
-
 <div class="row mb-3">
     <label class="col-sm-3 col-form-label">Tải lên bài hát:</label>
     <div class="col-sm-9">
@@ -2255,14 +2253,11 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <button type="button" name="list_music_local" id="list_music_local" class="btn btn-warning border-success" title="Hiển thị danh sách bài hát trên hệ thống Local" onclick="list_audio_show_path('scan_Music_Local')">Danh Sách Bài Hát</button>
 
         </div>
-		
     </div>
 </div>
-
 <div class="row mb-3">
     <table id="show_mp3_music_local" class="table table-bordered border-primary">
         <thead>
-	
         </thead>
         <tbody>
         </tbody>
@@ -2270,11 +2265,9 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 </div>
 </div>
  </div>
- 
 <div class="card">
 <div class="card-body">
 <h5 class="card-title">Đài, Radio:</h5>
-
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng nguồn phát radio')"></i> :</label>
 <div class="col-sm-9">
@@ -2283,7 +2276,6 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 </div>
 </div>
 </div>
-
 
 <?php
     // Get Dữ liệu radio từ cấu hình
@@ -2326,24 +2318,14 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <h5 class="card-title">
     Đọc Báo, Tin Tức 
     <i class="bi bi-question-circle-fill" 
-       onclick="show_message('Các link/url báo được hỗ trợ:<br/><br>\
+       onclick="show_message('Ví dụ Các link/url báo được hỗ trợ:<br/><br>\
  - https://podcast.tuoitre.vn<br>\
- - https://vnexpress.net/<br>\
  - https://thanhnien.vn/thoi-su.htm<br>\
- - https://thanhnien.vn/the-gioi.htm<br>\
- - https://thanhnien.vn/kinh-te.htm<br>\
- - https://thanhnien.vn/doi-song.htm<br>\
- - https://thanhnien.vn/suc-khoe.htm<br>\
- - https://thanhnien.vn/gioi-tre.htm<br>\
- - https://thanhnien.vn/giao-duc.htm<br>\
- - https://thanhnien.vn/du-lich.htm<br>\
- - https://thanhnien.vn/van-hoa.htm<br>\
- - https://thanhnien.vn/giai-tri.htm<br>\
- - https://thanhnien.vn/the-thao.htm<br>\
- - https://thanhnien.vn/cong-nghe.htm<br>\
- - https://thanhnien.vn/xe.htm<br>\
- - https://thanhnien.vn/video.htm<br>\
- - https://thanhnien.vn/tieu-dung-thong-minh.htm\
+ - https://vnexpress.net/podcast<br/>\
+ - https://vnexpress.net/podcast/vnexpress-hom-nay<br/>\
+ - https://vietnamnet.vn/podcast/ban-tin-thoi-su<br/>\
+ - https://baomoi.com/audio/thoi-su-3.epi<br/>\
+ - https://tienphong.vn/podcast/<br/>\
 ')">
     </i> 
     :

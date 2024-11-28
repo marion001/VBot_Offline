@@ -1,0 +1,12 @@
+{
+    "backlist": {
+        "tts_zalo": {
+            "backlist_limit": [],
+            "last_run_date": "28/11/2024"
+        },
+        "tts_viettel": {
+            "backlist_limit": [],
+            "last_run_date": "03/11/2024"
+        }
+    }
+}
