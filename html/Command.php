@@ -166,10 +166,16 @@ $serviceContent = <<<EOD
 Description=VBot_Offline
 
 [Service]
+
+# Khởi chạy ứng dụng Python VBot_Offline
 ExecStart=/usr/bin/python3.9 {$VBot_Offline}Start.py
 WorkingDirectory=$VBot_Offline
+
+# Ghi log ra các file log sau khi ứng dụng khởi chạy
 StandardOutput=append:{$VBot_Offline}resource/log/service_log.log
 StandardError=append:{$VBot_Offline}resource/log/service_error.log
+
+# Tự động khởi động lại service nếu bị lỗi
 Restart=always
 
 [Install]
@@ -197,7 +203,8 @@ $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
 $stream_out2 = ssh2_fetch_stream($stream2, SSH2_STREAM_STDIO); 
 $stream_out3 = ssh2_fetch_stream($stream3, SSH2_STREAM_STDIO); 
 $stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO); 
-$output = "$GET_current_USER@$HostName:~ $ $CMD1\n";
+$output = "$GET_current_USER@$HostName:~ $ \n$serviceContent\n\n";
+$output .= "$GET_current_USER@$HostName:~ $ $CMD1\n";
 $output .= stream_get_contents($stream_out1);
 $output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
 $output .= stream_get_contents($stream_out2);

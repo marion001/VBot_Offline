@@ -49,9 +49,10 @@ include 'html_sidebar.php';
         <h1>Trình Phát Đa Phương Tiện</h1>
         <nav>
             <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="index.php">Trang chủ</a>
-                </li>
+                <li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li>
                 <li class="breadcrumb-item active">Trình phát nhạc</li>
+&nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['media_player']['active'] ? '<p class="text-success" title="Media Player đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Media Player không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
+
             </ol>
         </nav>
     </div>

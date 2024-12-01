@@ -301,6 +301,8 @@ $data_authConfigPath = json_decode($read_authConfigPath, true);
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
           <li class="breadcrumb-item">Google Drive</li>
+&nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['backup_upgrade']['google_cloud_drive']['active'] ? '<p class="text-success" title="Google Drive đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Google Drive không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
+
         </ol>
       </nav>
     </div><!-- End Page Title -->

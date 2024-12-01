@@ -79,8 +79,8 @@ include 'html_sidebar.php';
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang Chủ</a></li>
-          <li class="breadcrumb-item active">Custom Skill</li>
 		  <li class="breadcrumb-item active">Dev_Customization.py</li>
+&nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['developer_customization']['active'] ? '<p class="text-success" title="Developers Customization đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Developers Customization không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
         </ol>
       </nav>
     </div>

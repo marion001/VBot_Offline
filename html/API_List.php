@@ -117,6 +117,7 @@ include 'html_sidebar.php';
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
           <li class="breadcrumb-item active">Yêu cầu API</li>
+&nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['api']['active'] ? '<p class="text-success" title="API đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="API không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
         </ol>
       </nav>
     </div><!-- End Page Title -->

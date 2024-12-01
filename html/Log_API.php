@@ -48,7 +48,7 @@ include 'html_sidebar.php';
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
-          <li class="breadcrumb-item active">Logs</li>
+          <li class="breadcrumb-item active">Logs API</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->

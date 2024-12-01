@@ -345,8 +345,8 @@ include 'html_sidebar.php';
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
-          <li class="breadcrumb-item">Người dùng</li>
-          <li class="breadcrumb-item active">Home Assistant Custom Command</li>
+          <li class="breadcrumb-item active">Home Assistant Custom Command</li> 
+		   &nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['home_assistant']['custom_commands']['active'] ? '<p class="text-success" title="Home Assistant Custom Command đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Home Assistant Custom Command không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
         </ol>
       </nav>
     </div><!-- End Page Title -->
