@@ -1,17 +1,17 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "btrby54b54@gmail.com",
+        "email": "zxcvbn@gmail.com",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": "zxc",
-            "district": "fsdfsd",
-            "province": "f43543",
+            "wards": "zzzzzzz",
+            "district": "xxxxxx",
+            "province": "cccccccccc",
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": 20.456546,
-            "longitude": 106.423423
+            "latitude": 20.46456546,
+            "longitude": 106.465465
         },
         "user_login": {
             "active": false,
@@ -52,8 +52,8 @@
         "active": true,
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://hassgvtr.duckdns.org",
-        "long_token": "g4v3tg43f43.t34tg43tg.rAgP-t5g645",
+        "external_url": "https://hfhthfghg.duckdns.org",
+        "long_token": "dfg.gfd.rAgP-645bg6456gv45",
         "time_out": 15,
         "custom_commands": {
             "active": false,
@@ -64,8 +64,8 @@
         "mqtt_active": true,
         "mqtt_host": "192.168.14.17",
         "mqtt_port": 1883,
-        "mqtt_username": "hassio",
-        "mqtt_password": "hassio",
+        "mqtt_username": "hassmqtt",
+        "mqtt_password": "hassmqtt",
         "mqtt_client_name": "VBot",
         "mqtt_retain": true,
         "mqtt_qos": 1,
@@ -76,6 +76,7 @@
     },
     "virtual_assistant": {
         "prioritize_virtual_assistants": [
+            "zalo_assistant",
             "default_assistant",
             "google_gemini",
             "chat_gpt"
@@ -89,19 +90,23 @@
             },
             "api_key": "dùng chung với giá trị podcast->access_token"
         },
+        "zalo_assistant": {
+            "active": true,
+            "time_out": 15
+        },
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "333333333333333333"
+            "api_key": "11111111111111111111111111111111"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": "sk-proj-nb65un65--nj65765-untyu-ChwixTZK-nuyt-nutyutyuyt-L89-nutyu"
+            "key_chat_gpt": "sk-proj-22--33-44-66-55-77-L89-88"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "11111111111111111111111"
+        "key_openweathermap": "2222222222222222222"
     },
     "media_player": {
         "active": true,
@@ -125,8 +130,8 @@
         },
         "zing_mp3": {
             "active": true,
-            "authentication_zmp3_rqid": "MHwxNzEdUngMjMxLjgxLjEyN3x2MS4xMS4xMXwxNzMyNTQwMTMzNzMy",
-            "expire_time": 1732543733
+            "authentication_zmp3_rqid": "MHwxMTYdUngMTAxLjIzOS4xOTN8djEdUngMTEdUngMTJ8MTmUsICzMzM4NDI1ODE5Mw",
+            "expire_time": 1733387858
         },
         "news_paper": {
             "active": true,
@@ -180,8 +185,8 @@
             "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
             "password": "VmlldGJvdEAx",
             "time_out": 7,
-            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzI1MzUzNzAsIm5iZiI6MTczMjUzNTM3MCwianRpIjoiNzZkNTcwNTktYjk4NC00NTcyLWJmZjctMmI0NWNmMWI4ZTBlIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.Xd0rjoBYfxLKdknnk8FNEHbG12UMfRfpZ9eWpmBdg8c",
-            "expire_time": 1732600171
+            "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE3MzMzOTQzNTUsIm5iZiI6MTczMzM5NDM1NSwianRpIjoiNGMzN2Q2Y2YtMjIzYi00ODI0LTgxMjEtYjY5NzA4MzU1N2MxIiwiaWRlbnRpdHkiOiJ7XCJzdWJcIjogNTQ4OTAsIFwibmFtZVwiOiBcIkJvdCBWaWV0XCIsIFwiZmlyc3RfbmFtZVwiOiBcIlwiLCBcImxhc3RfbmFtZVwiOiBcIlwiLCBcImNvdW50cnlcIjogXCJcIiwgXCJvY2N1cGF0aW9uXCI6IFwiXCIsIFwiY2l0eVwiOiBcIlwiLCBcImVtYWlsXCI6IFwidmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb21cIiwgXCJyb2xlXCI6IDEsIFwic3RhdHVzXCI6IDEsIFwiZGVmYXVsdF9sYW5ndWFnZVwiOiBcInZpLVZOXCIsIFwiZXhwcmlyYXRpb25cIjogODY0MDAsIFwicGhvbmVfbnVtYmVyXCI6IFwiXCIsIFwiY2FsbGluZ19uYW1lXCI6IFwiXCJ9IiwiZnJlc2giOmZhbHNlLCJ0eXBlIjoiYWNjZXNzIiwidXNlcl9jbGFpbXMiOnsiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbIm1lbWJlciJdLCJ4LWhhc3VyYS11c2VyLWlkIjo1NDg5MCwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoiZ3Vlc3QiLCJ4LWhhc3VyYS1yb2xlIjoibWVtYmVyIn19fQ.uYOf6R_uJWC7uopogGvQMuri47y8024aSMTVlZpJqHo",
+            "expire_time": 1733459155
         },
         "radio": {
             "active": true
@@ -317,8 +322,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "111111111111111122222",
-                        "2222222222222223333"
+                        "3333333333333333333333",
+                        "4444444444444444444444"
                     ]
                 },
                 "stt_ggcloud": {
@@ -348,7 +353,8 @@
                     "home_assistant_active_false": "resource/sound/default/home_assistant_active_false.mp3",
                     "play_music_call_error": "resource/sound/default/play_music_call_error.mp3",
                     "updated_the_program_successfully": "resource/sound/default/updated_the_program_successfully.mp3",
-                    "interface_updated_successfully": "resource/sound/default/interface_updated_successfully.mp3"
+                    "interface_updated_successfully": "resource/sound/default/interface_updated_successfully.mp3",
+                    "network_error": "resource/sound/default/network_error.mp3"
                 },
                 "welcome": {
                     "active": true,
@@ -381,7 +387,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/bg456hb54654654+TGsdTNolucA=="
+                "key": "/5555555+66666=="
             },
             "hotword": {
                 "lang": "vi",
@@ -422,7 +428,7 @@
                 "active": true
             },
             "text_to_speak": {
-                "tts_select": "tts_zalo",
+                "tts_select": "tts_ggcloud",
                 "tts_ggcloud": {
                     "language_code": "vi-VN",
                     "voice_name": "vi-VN-Wavenet-A",
@@ -436,20 +442,20 @@
                     "authentication_zai_did": "8k9uAj3FNiTevcSSryzXoYYo6Kh1nc7CARqUIJWo",
                     "expires_zai_did": "2025-09-09T09:34:30+00:00",
                     "authentication_zai_sid": "jl-hHjj6LdEl_gb6t498SgtdqHEbBqj9lfRY2wLnPZQNpzC7bIOkEgV3aq-C2Gyiz_gl7lKz9cxRuRCcrZizTS3LtoBIDM8UvupBNFCaVZZPyC9KP0",
-                    "expires_zai_sid": ""
+                    "expires_zai_sid": "eMKnVboyOtABOdDSO8ui4VC284DZZ2qJ-1WYNYlgScYw4IPJOl9pVwawD4LjyprLZZDsVtIuBqYTUq9xMxC-BSrZUGi7z2rUamTWVrRdRMx43ZrLUbbf"
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "55555555555555555555",
-                        "6666666666666666666",
-                        "7777777777777777777"
+                        "777777777777777",
+                        "88888888888",
+                        "9999999999999999"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "88888888888888888888"
+                        "00000000000000"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,

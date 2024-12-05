@@ -327,11 +327,16 @@ $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used
 $Config['virtual_assistant']['chat_gpt']['key_chat_gpt'] = $_POST['chat_gpt_key'];
 $Config['virtual_assistant']['chat_gpt']['active'] = isset($_POST['chat_gpt_active']) ? true : false;
 
+#Cập nhật trợ lý ảo zalo_assistant
+$Config['virtual_assistant']['zalo_assistant']['active'] = isset($_POST['zalo_assistant_active']) ? true : false;
+$Config['virtual_assistant']['zalo_assistant']['time_out'] = intval($_POST['zalo_assistant_time_out']);
+
 #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
 $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
 $virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $_POST['virtual_assistant_priority2'] : '';
 $virtual_assistant_priority_3 = isset($_POST['virtual_assistant_priority3']) ? $_POST['virtual_assistant_priority3'] : '';
-$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3];
+$virtual_assistant_priority_4 = isset($_POST['virtual_assistant_priority4']) ? $_POST['virtual_assistant_priority4'] : '';
+$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4];
 
 #Cập nhật sao lưu trương trình VBot
 $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
@@ -384,8 +389,6 @@ $vbot_web_interface_upgrade_keep_the_file_folder = $_POST['vbot_web_interface_up
 $vbot_web_interface_upgrade_keep_the_file_folder_tuyen = array_filter(array_map('trim', explode("\n", $vbot_web_interface_upgrade_keep_the_file_folder)));
 #Lưu dữ liệu
 $Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] = $vbot_web_interface_upgrade_keep_the_file_folder_tuyen;
-
-
 
 #Cập nhật sao lưu Giao diện Web UI
 $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] = isset($_POST['backup_web_interface_google_drive']) ? true : false;
@@ -2416,6 +2419,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[0] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[0] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
         </select>
     </div>
 </div>
@@ -2428,6 +2432,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[1] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[1] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
         </select>
     </div>
 </div>
@@ -2440,6 +2445,20 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[2] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[2] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="virtual_assistant_priority4" class="col-sm-3 col-form-label">Top 4:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="virtual_assistant_priority4" id="virtual_assistant_priority4">
+            <option value="">-- Chọn Trợ Lý --</option>
+            <option value="default_assistant" <?php if ($virtual_assistant_priority[3] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+            <option value="google_gemini" <?php if ($virtual_assistant_priority[3] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+            <option value="chat_gpt" <?php if ($virtual_assistant_priority[3] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+            <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
         </select>
     </div>
 </div>
@@ -2547,6 +2566,30 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <div class="col-sm-9"><div class="input-group mb-3">
 <input  class="form-control border-success" type="text" name="chat_gpt_key" id="chat_gpt_key" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>">
 <button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Zalo Assistant:</h5>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" <?php echo $Config['virtual_assistant']['zalo_assistant']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="zalo_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input  class="form-control border-success" type="number" min="5" step="1" max="30" name="zalo_assistant_time_out" id="zalo_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>">
 </div>
 </div>
 </div>

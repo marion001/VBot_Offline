@@ -301,7 +301,7 @@ $response = [
         $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
 
         // Kiểm tra phần mở rộng tệp
-        if ($file_extension === 'json' || $file_extension === 'txt') {
+        if ($file_extension === 'json' || $file_extension === 'txt' || $file_extension === 'log' || $file_extension === 'logs') {
             // Đọc nội dung của tệp
             $content = file_get_contents($file_path);
 

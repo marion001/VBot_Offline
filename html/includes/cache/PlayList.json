@@ -49,6 +49,54 @@
             "id": "/home/pi/VBot_Offline/Media/Music_Local/hon_le_cua_anh.mp3",
             "channelTitle": null,
             "artist": null
+        },
+        {
+            "ids_list": "9C2252",
+            "title": "Cảm Ơn Em (WM Remix)",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/2/f/c/d/2fcd98614479eb84a804483ae6fb5fcd.jpg",
+            "audio": "Z7EIC7UI",
+            "duration": "03:51",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z7EIC7UI",
+            "channelTitle": null,
+            "artist": "Đặng Thiên Chí"
+        },
+        {
+            "ids_list": "526F9E",
+            "title": "Cảm Ơn Em",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/a/0/6/4/a0648741356edad7c734788c84c18877.jpg",
+            "audio": "Z7EWW6IC",
+            "duration": "04:42",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z7EWW6IC",
+            "channelTitle": null,
+            "artist": "Đặng Thiên Chí"
+        },
+        {
+            "ids_list": "837527",
+            "title": "Cô Dâu Của Người Ta (Remix)",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/0/f/6/c/0f6c59891cd394223e178212929f34bf.jpg",
+            "audio": "Z7EOEDB7",
+            "duration": "06:25",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z7EOEDB7",
+            "channelTitle": null,
+            "artist": "Khả Hiệp"
+        },
+        {
+            "ids_list": "195DE8",
+            "title": "Cô Dâu Của Người Ta",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/d/3/9/8/d39882c52cce0cdcc09723537b72a02b.jpg",
+            "audio": "Z7CEUDDA",
+            "duration": "05:54",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z7CEUDDA",
+            "channelTitle": null,
+            "artist": "Khả Hiệp"
         }
     ]
 }

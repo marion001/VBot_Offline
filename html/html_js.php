@@ -818,15 +818,15 @@ function extractYouTubeId(url) {
 // Hàm xử lý phát URL http từ tab Media Player
 function media_player_url() {
     // Danh sách các đuôi âm thanh phổ biến
-    const audioExtensions = ['.mp3', '.wav', '.ogg', '.flac', '.aac'];
+    const audioExtensions = ['.mp3', '.wav', '.ogg', '.flac', '.aac', '.m3u8'];
     const inputField = document.getElementById('song_name_value');
     const url = inputField.value.trim();
     // Chuyển URL về chữ thường
     link_url = url.toLowerCase();
-    // Kiểm tra xem URL có phải là một tệp âm thanh
-    var isAudio = audioExtensions.some(function(ext) {
-        return link_url.endsWith(ext);
-    });
+	// Kiểm tra xem URL có phải là một tệp âm thanh hoặc bắt đầu bằng https://rr2
+	const isAudio = audioExtensions.some(function(ext) {
+		return link_url.endsWith(ext);
+	}) || link_url.startsWith('http');
     //Xử lý URL Youtube
     if (link_url.startsWith('https://www.youtube.com') || link_url.startsWith('https://youtu.be')) {
         // Lấy ID từ URL YouTube
@@ -838,6 +838,8 @@ function media_player_url() {
             show_message('URL YouTube không hợp lệ.');
         }
     }
+	
+
     //Xử lý URL Zingmp3
     /*
 	else if (url.startsWith('https://zingmp3.vn')) {

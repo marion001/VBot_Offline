@@ -2,7 +2,7 @@
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
     "description": "Cập nhật đọc báo, tin tức trong ngày",
-    "releaseDate": "28/11/2024",
+    "releaseDate": "05/12/2024",
     "changes": [
         {
             "type": "feature",

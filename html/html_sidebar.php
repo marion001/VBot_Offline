@@ -79,12 +79,17 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
         </ul>
       </li>
 
-
+ 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
          <i class="bi bi-journal-code"></i><span>Log, Cache</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="Log_Services.php">
+              <i class="bi bi-circle"></i><span>Log Services VBot</span>
+            </a>
+          </li>
           <li>
             <a href="Log_TTS.php">
               <i class="bi bi-circle"></i><span>Log TTS</span>

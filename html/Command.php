@@ -166,14 +166,13 @@ $serviceContent = <<<EOD
 Description=VBot_Offline
 
 [Service]
-
 # Khởi chạy ứng dụng Python VBot_Offline
 ExecStart=/usr/bin/python3.9 {$VBot_Offline}Start.py
 WorkingDirectory=$VBot_Offline
 
 # Ghi log ra các file log sau khi ứng dụng khởi chạy
-StandardOutput=append:{$VBot_Offline}resource/log/service_log.log
-StandardError=append:{$VBot_Offline}resource/log/service_error.log
+#StandardOutput=append:{$VBot_Offline}resource/log/service_log.log
+#StandardError=append:{$VBot_Offline}resource/log/service_error.log
 
 # Tự động khởi động lại service nếu bị lỗi
 Restart=always
