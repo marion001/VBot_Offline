@@ -147,7 +147,7 @@
 			"response": []
 		},
 		{
-			"name": "Play LIST Player",
+			"name": "Phát Nhạc Ở PlayList",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -175,7 +175,7 @@
 			"response": []
 		},
 		{
-			"name": "Play LIST Json Player",
+			"name": "Truyền PlayList Dạng json Để Phát",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -203,7 +203,7 @@
 			"response": []
 		},
 		{
-			"name": "Play LIST Next",
+			"name": "PlayList Qua Bài (Next)",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -231,7 +231,7 @@
 			"response": []
 		},
 		{
-			"name": "Play LIST Prev",
+			"name": "PlayList Quay Lại Bài Trước Đó (Prev)",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -259,7 +259,7 @@
 			"response": []
 		},
 		{
-			"name": "Volume Set OK",
+			"name": "Thiết Lập Âm Lượng",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -290,7 +290,7 @@
 			"response": []
 		},
 		{
-			"name": "Volume Up OK",
+			"name": "Tăng Âm Lượng",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -318,7 +318,7 @@
 			"response": []
 		},
 		{
-			"name": "Volume Down OK",
+			"name": "Giảm Âm Lượng",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -346,7 +346,7 @@
 			"response": []
 		},
 		{
-			"name": "Volume Min OK",
+			"name": "Tăng âm Lượng Tối Đa",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -374,7 +374,7 @@
 			"response": []
 		},
 		{
-			"name": "Volume Max OK",
+			"name": "Giảm Âm Lượng Tối Đa",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -402,7 +402,7 @@
 			"response": []
 		},
 		{
-			"name": "Chế độ hội thoại Bật OK",
+			"name": "Bật Chế Độ Hội Thoại",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -430,7 +430,7 @@
 			"response": []
 		},
 		{
-			"name": "Chế độ hội thoại Tắt OK",
+			"name": "Tắt Chế Độ Hội Thoại",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -458,7 +458,7 @@
 			"response": []
 		},
 		{
-			"name": "Play Báo, Tin Tức OK",
+			"name": "Phát Báo, Tin Tức",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -486,7 +486,7 @@
 			"response": []
 		},
 		{
-			"name": "Báo, Tin Tức Bật",
+			"name": "Kích Hoạt Nguồn Phát Báo, Tin Tức",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -514,7 +514,7 @@
 			"response": []
 		},
 		{
-			"name": "Báo, Tin Tức Tắt",
+			"name": "Vô Hiệu Nguồn Phát Báo, Tin Tức",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -542,7 +542,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát Youtube Bật",
+			"name": "Kích Hoạt Nguồn Phát Youtube",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -570,7 +570,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát Youtube Tắt",
+			"name": "Vô Hiệu Nguồn Phát Youtube",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -598,7 +598,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát ZingMP3 Bật",
+			"name": "Kích Hoạt Nguồn Phát Zingmp3",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -626,7 +626,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát ZingMP3 Tắt",
+			"name": "Vô Hiệu Nguồn Phát Zingmp3",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -654,7 +654,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát music_local Bật",
+			"name": "Kích Hoạt Nguồn Phát Nhạc Local",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -682,7 +682,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát music_local Tắt",
+			"name": "Vô Hiệu Nguồn Phát Nhạc Local",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -710,7 +710,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát podcast Bật",
+			"name": "Kích Hoạt Nguồn Phát PodCast",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -738,7 +738,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát podcast Tắt",
+			"name": "Vô Hiệu Nguồn Phát PodCast",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -766,7 +766,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát radio Bật",
+			"name": "Kích Hoạt Nguồn Phát Radio",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -794,7 +794,7 @@
 			"response": []
 		},
 		{
-			"name": "Nguồn Phát radio Tắt",
+			"name": "Vô Hiệu Nguồn Phát Radio",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -822,7 +822,7 @@
 			"response": []
 		},
 		{
-			"name": "media_player_active Bật",
+			"name": "Kích Hoạt Trình Phát MediaPlayer",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -850,7 +850,7 @@
 			"response": []
 		},
 		{
-			"name": "media_player_active Tắt",
+			"name": "Vô Hiệu Trình Phát MediaPlayer",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -878,7 +878,7 @@
 			"response": []
 		},
 		{
-			"name": "hass_custom_active Bật",
+			"name": "Kích Hoạt Chế Độ Custom Câu Lệnh Hass",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -906,7 +906,7 @@
 			"response": []
 		},
 		{
-			"name": "hass_custom_active Tắt",
+			"name": "Vô Hiệu Chế Độ Custom Câu Lệnh Hass",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -934,7 +934,7 @@
 			"response": []
 		},
 		{
-			"name": "dev_custom_vbot Bật",
+			"name": "Kích Hoạt Chế Độ VBot Xử Lý Cho DEV Custom Skill",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -962,7 +962,7 @@
 			"response": []
 		},
 		{
-			"name": "dev_custom_vbot Tắt",
+			"name": "Vô Hiệu Chế Độ VBot Xử Lý Cho DEV Custom Skill",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -990,7 +990,7 @@
 			"response": []
 		},
 		{
-			"name": "dev_custom Bật",
+			"name": "Kích Hoạt Chế Độ DEV Custom Skill",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1018,7 +1018,7 @@
 			"response": []
 		},
 		{
-			"name": "dev_custom Tắt",
+			"name": "Vô Hiệu Chế Độ DEV Custom Skill",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1046,7 +1046,7 @@
 			"response": []
 		},
 		{
-			"name": "home_assistant Bật",
+			"name": "Kích Hoạt Điều Khiển Hass",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1074,7 +1074,7 @@
 			"response": []
 		},
 		{
-			"name": "home_assistant Tắt",
+			"name": "Vô Hiệu Điều Khiển Hass",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1102,7 +1102,7 @@
 			"response": []
 		},
 		{
-			"name": "cache_tts Bật",
+			"name": "Kích Hoạt Chế Độ Cache Lại TTS",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1130,7 +1130,7 @@
 			"response": []
 		},
 		{
-			"name": "cache_tts Tắt",
+			"name": "Vô Hiệu Chế Độ Cache Lại TTS",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1158,7 +1158,7 @@
 			"response": []
 		},
 		{
-			"name": "Trợ Lý Ảo google_gemini Bật",
+			"name": "Kích Hoạt Trợ Lý Ảo Google Gemini",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1186,7 +1186,7 @@
 			"response": []
 		},
 		{
-			"name": "Trợ Lý Ảo google_gemini Tắt",
+			"name": "Vô Hiệu Trợ Lý Ảo Google Gemini",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1214,7 +1214,7 @@
 			"response": []
 		},
 		{
-			"name": "Trợ Lý Ảo default_assistant Bật",
+			"name": "Kích Hoạt Trợ Lý Ảo Default Assistant",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1242,7 +1242,7 @@
 			"response": []
 		},
 		{
-			"name": "Trợ Lý Ảo default_assistant Tắt",
+			"name": "Vô Hiệu Trợ Lý Ảo Default Assistant",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1270,7 +1270,7 @@
 			"response": []
 		},
 		{
-			"name": "Trợ Lý Ảo chat_gpt Bật",
+			"name": "Kích Hoạt Trợ Lý Ảo Chat GPT",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1298,7 +1298,7 @@
 			"response": []
 		},
 		{
-			"name": "Trợ Lý Ảo chat_gpt Tắt",
+			"name": "Vô Hiệu Trợ Lý Ảo Chat GPT",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1326,7 +1326,63 @@
 			"response": []
 		},
 		{
-			"name": "Chế độ câu phản hồi Bật OK",
+			"name": "Kích Hoạt Trợ Lý Ảo Zalo AI Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zalo_assistant\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Trợ Lý Ảo Zalo AI Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zalo_assistant\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kích Hoạt Chế Độ Câu Phản Hồi",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1354,7 +1410,7 @@
 			"response": []
 		},
 		{
-			"name": "Chế độ câu phản hồi Tắt OK",
+			"name": "Vô Hiệu Chế Độ Câu Phản Hồi",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1382,7 +1438,7 @@
 			"response": []
 		},
 		{
-			"name": "Mic Bật OK",
+			"name": "Bật Mic",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1410,7 +1466,7 @@
 			"response": []
 		},
 		{
-			"name": "Mic Tắt OK",
+			"name": "Tắt Mic",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1438,7 +1494,7 @@
 			"response": []
 		},
 		{
-			"name": "Wake Up OK",
+			"name": "Đánh Thức Bot (Waku Up)",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1466,7 +1522,7 @@
 			"response": []
 		},
 		{
-			"name": "Led thay đổi độ sáng",
+			"name": "Thay Đổi Độ Sáng LED",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1494,7 +1550,7 @@
 			"response": []
 		},
 		{
-			"name": "Led Tắt LED",
+			"name": "Tắt Đèn LED",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1578,13 +1634,13 @@
 			"response": []
 		},
 		{
-			"name": "Thay đổi kiểu hiển thị Log",
+			"name": "Thay Đổi Kiểu Hiển Thị Logs",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"both\"\r\n}",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"both\",\r\n    \"notes\": \"value: all, console, api, display_screen\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1606,7 +1662,7 @@
 			"response": []
 		},
 		{
-			"name": "Bật tắt logs",
+			"name": "Bật Chế Độ Hiển Thị Logs",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1634,7 +1690,35 @@
 			"response": []
 		},
 		{
-			"name": "Xóa Logs",
+			"name": "Tắt Chế Độ Hiển Thị Logs",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"off\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Xóa Logs Đường API",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1662,7 +1746,7 @@
 			"response": []
 		},
 		{
-			"name": "Phát TTS",
+			"name": "Phát Thông Báo TTS",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1718,13 +1802,13 @@
 			"response": []
 		},
 		{
-			"name": "VBot Processing",
+			"name": "VBot Xử Lý Chính (VBot Processing)",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"hôm nay là thứ mấy\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"đọc báo việt nam net\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

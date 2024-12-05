@@ -2419,7 +2419,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[0] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[0] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
+			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2432,7 +2432,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[1] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[1] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
+			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2445,7 +2445,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[2] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[2] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
+			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2458,7 +2458,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="default_assistant" <?php if ($virtual_assistant_priority[3] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[3] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[3] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-            <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo Assistant</option>
+            <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2574,7 +2574,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 
 <div class="card">
 <div class="card-body">
-<h5 class="card-title">Zalo Assistant:</h5>
+<h5 class="card-title">Zalo AI Assistant:</h5>
 
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant')"></i> :</label>

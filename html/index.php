@@ -574,6 +574,13 @@ if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media
   </label>
 </div>
 
+<div class="form-check">
+ <input class="form-check-input" value="zalo_assistant_active" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" onclick="change_to_another_mode('zalo_assistant', this.checked)" <?php if ($Config['virtual_assistant']['zalo_assistant']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Zalo AI Assistant
+  </label>
+</div>
+
 
 </div>
   </li>
@@ -1091,6 +1098,7 @@ include 'html_js.php';
                     document.getElementById('default_assistant_active').checked = data.default_assistant_active ? true : false;
                     document.getElementById('google_gemini_active').checked = data.google_gemini_active ? true : false;
                     document.getElementById('chat_gpt_active').checked = data.chat_gpt_active ? true : false;
+                    document.getElementById('zalo_assistant_active').checked = data.zalo_assistant_active ? true : false;
                     document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
                     document.getElementById('developer_customization_vbot_processing').checked = data.dev_custom_vbot ? true : false;
                     //document.getElementById('show_wake_up').checked = false;

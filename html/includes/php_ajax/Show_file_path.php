@@ -737,6 +737,18 @@ switch:
     qos: '.$MQTT_Qos.'
     retain: '.$MQTT_Retain.'
     icon: mdi:radio-tower
+
+  - name: "'.$MQTT_Client_Name.' Zalo AI Assistant"
+    state_topic: "'.$MQTT_Client_Name.'/switch/zalo_assistant_active/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/zalo_assistant_active/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:assistant
 ';
 echo $mqtts_yaml;	
 } else if ($File_Name === "scripts.yaml") {
@@ -890,6 +902,17 @@ $scripts_yaml = '
         payload: \'{{ states("input_text.'.strtolower($MQTT_Client_Name).'_main_processing") }}\'
         qos: '.$MQTT_Qos.'
         retain: '.$MQTT_Retain.'
+
+'.strtolower($MQTT_Client_Name).'_vbot_tts:
+  alias: "'.$MQTT_Client_Name.' VBot TTS"
+  icon: mdi:robot-confused-outline
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/vbot_tts/set"
+        payload: \'{{ states("input_text.'.strtolower($MQTT_Client_Name).'_vbot_tts") }}\'
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
 ';
 echo $scripts_yaml;
     }
@@ -929,13 +952,16 @@ entities:
   - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_player
   - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_prev
   - entity: script.'.strtolower($MQTT_Client_Name).'_playlist_control_next
-  - entity: input_text.news_paper_name
+  - entity: input_text.'.strtolower($MQTT_Client_Name).'_news_paper_name
   - entity: script.'.strtolower($MQTT_Client_Name).'_news_paper_player
   - entity: switch.'.strtolower($MQTT_Client_Name).'_news_paper_active
   - entity: input_text.'.strtolower($MQTT_Client_Name).'_main_processing
   - entity: script.'.strtolower($MQTT_Client_Name).'_main_processing
   - entity: switch.'.strtolower($MQTT_Client_Name).'_podcast_active
   - entity: switch.'.strtolower($MQTT_Client_Name).'_radio_active
+  - entity: switch.'.strtolower($MQTT_Client_Name).'_zalo_ai_assistant
+  - entity: input_text.'.strtolower($MQTT_Client_Name).'_vbot_tts
+  - entity: script.'.strtolower($MQTT_Client_Name).'_vbot_tts
 state_color: true
 ';
 
@@ -946,6 +972,8 @@ echo '
   name: "Nhập Tên Báo, Tin Tức"
 '.strtolower($MQTT_Client_Name).'_main_processing:
   name: "Nội Dung Cần Xử Lý"
+'.strtolower($MQTT_Client_Name).'_vbot_tts:
+  name: "Nội Dung Thông Báo TTS"
 ';
 }
 
