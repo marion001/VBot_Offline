@@ -17,7 +17,7 @@ else
     sudo systemctl stop apache2
     printf 'Bắt đầu phát AP kết nối WiFi...\n'
 
-    wifi-connect -s VBot -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
+    wifi-connect -s VBot_Assistant -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
     WIFI_CONNECT_PID=$!
 
     # Chờ 120 giây để xem có thiết bị nào kết nối hay không

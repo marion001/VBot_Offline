@@ -6,15 +6,15 @@
     "changes": [
         {
             "type": "feature",
-            "description": "Added support for multi-language."
+            "description": "Xin chào tất cả mọi người :D"
         },
         {
             "type": "fix",
-            "description": "Fixed issue with login authentication."
+            "description": "Đã sửa tất cả các lỗi, và mang tới cho các bạn thêm vài lỗi nữa"
         },
         {
             "type": "improvement",
-            "description": "Enhanced performance for data processing."
+            "description": "Cải thiện độ ổn định, tiện tay vá luôn lỗ hổng ngoài không gian"
         }
     ],
     "author": "Vũ Tuyển",

@@ -2,10 +2,15 @@
 Description=VBot_Offline
 
 [Service]
+# Khởi chạy ứng dụng Python VBot_Offline
 ExecStart=/usr/bin/python3.9 /home/pi/VBot_Offline/Start.py
 WorkingDirectory=/home/pi/VBot_Offline/
-StandardOutput=append:/home/pi/VBot_Offline/resource/log/service_log.log
-StandardError=append:/home/pi/VBot_Offline/resource/log/service_error.log
+
+# Ghi log ra các file log sau khi ứng dụng khởi chạy
+#StandardOutput=append:/home/pi/VBot_Offline/resource/log/service_log.log
+#StandardError=append:/home/pi/VBot_Offline/resource/log/service_error.log
+
+# Tự động khởi động lại service nếu bị lỗi
 Restart=always
 
 [Install]

@@ -1,25 +1,21 @@
 Chuyển đường dẫn appache2:
 
-Trên Debian/Ubuntu:
-Sửa file này: đường đẫn path
-	sudo nano /etc/apache2/sites-available/000-default.conf
+- Đăng nhập vào ssh rồi gõ lệnh sau:
 
-và file này sửa path: 
-	sudo nano  /etc/apache2/apache2.conf
- 
-Ví dụ nội dung:
-<Directory /var/www/html>
-    Options Indexes FollowSymLinks
-    AllowOverride All
-    Require all granted
-</Directory>
+$: sudo nano /etc/apache2/sites-available/000-default.conf
+- Thay dòng: DocumentRoot /home/pi/VBot_Offline/html thành đường dẫn muốn đổi, ví dụ thay thành: DocumentRoot /var/www/html
+- lưu lại file: Ctrl + x => y => Enter
 
+- Tiếp theo chạy lệnh:
+$: sudo nano /etc/apache2/apache2.conf
+- Thay dòng: Directory /home/pi/VBot_Offline/ thành: Directory /var/www/html/
 
-sau đó restart lại appache2:
-	sudo systemctl restart apache2
+- Sau đó restart lại appache2 bằng lệnh sau:
+$: sudo systemctl restart apache2
 
 
-tạo symlink file VBot_Offline.service để auto start
+##################################################################
+tạo symlink file VBot_Offline.service để auto start khi pi chạy
 
 ln -s /home/pi/VBot_Offline/resource/VBot_Offline.service /home/pi/.config/systemd/user/VBot_Offline.service
 
@@ -29,3 +25,4 @@ sudo systemctl daemon-reload
 
 Đường dẫn file services
 /home/pi/.config/systemd/user
+####################################################################

@@ -1,27 +1,27 @@
 {
     "contact_info": {
         "full_name": "Vũ Tuyển",
-        "email": "zxcvbn@gmail.com",
+        "email": "",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": "zzzzzzz",
-            "district": "xxxxxx",
-            "province": "cccccccccc",
+            "wards": "Xã, Phường Của Bạn",
+            "district": "Quận, Huyện Của Bạn",
+            "province": "Tỉnh, Thành Phố Của Bạn",
             "country": "Việt Nam"
         },
         "location": {
-            "latitude": 20.46456546,
-            "longitude": 106.465465
+            "latitude": 20.99999,
+            "longitude": 106.88888
         },
         "user_login": {
             "active": false,
-            "user_password": "123456"
+            "user_password": "vbot123"
         }
     },
     "ssh_server": {
         "ssh_port": 22,
         "ssh_username": "pi",
-        "ssh_password": "vietbot",
+        "ssh_password": "vbot123",
         "notes": "bắt buộc phải điền cấu hình thông tin đăng nhập ssh"
     },
     "api": {
@@ -33,7 +33,7 @@
         "port": 5002
     },
     "web_interface": {
-        "path": "/home/pi/vietbot_offline/html/html"
+        "path": "/home/pi/VBot_Offline/html"
     },
     "display_screen": {
         "active": false,
@@ -52,8 +52,8 @@
         "active": true,
         "minimum_threshold": 0.6,
         "internal_url": "http://192.168.14.17:8123",
-        "external_url": "https://hfhthfghg.duckdns.org",
-        "long_token": "dfg.gfd.rAgP-645bg6456gv45",
+        "external_url": "https://urlhomeassistant.duckdns.org",
+        "long_token": "ghj.nhnb.rAgP-nb6578bythtg",
         "time_out": 15,
         "custom_commands": {
             "active": false,
@@ -61,11 +61,11 @@
         }
     },
     "mqtt_broker": {
-        "mqtt_active": true,
+        "mqtt_active": false,
         "mqtt_host": "192.168.14.17",
         "mqtt_port": 1883,
-        "mqtt_username": "hassmqtt",
-        "mqtt_password": "hassmqtt",
+        "mqtt_username": "hass_mqtt_username",
+        "mqtt_password": "hass_mqtt_password",
         "mqtt_client_name": "VBot",
         "mqtt_retain": true,
         "mqtt_qos": 1,
@@ -97,16 +97,16 @@
         "google_gemini": {
             "active": true,
             "time_out": 25,
-            "api_key": "11111111111111111111111111111111"
+            "api_key": "fc3ct43cr_8888888888888888"
         },
         "chat_gpt": {
             "active": false,
             "time_out": 15,
-            "key_chat_gpt": "sk-proj-22--33-44-66-55-77-L89-88"
+            "key_chat_gpt": "sk-proj-tc--gv4g-88-ChwixTZK-55-77-L89-66"
         }
     },
     "openweathermap": {
-        "key_openweathermap": "2222222222222222222"
+        "key_openweathermap": "99999999999999999999999999999999999999"
     },
     "media_player": {
         "active": true,
@@ -130,8 +130,8 @@
         },
         "zing_mp3": {
             "active": true,
-            "authentication_zmp3_rqid": "MHwxMTYdUngMTAxLjIzOS4xOTN8djEdUngMTEdUngMTJ8MTmUsICzMzM4NDI1ODE5Mw",
-            "expire_time": 1733387858
+            "authentication_zmp3_rqid": "MHwxNzEdUngMjI0LjM0LjEyOHx2MS4xMS4xMnwxNzMzOTY0MzIxOTEw",
+            "expire_time": 1733967921
         },
         "news_paper": {
             "active": true,
@@ -247,7 +247,7 @@
                 "alsamixer_name": "Speaker",
                 "id": 0
             },
-            "volume": 77,
+            "volume": 50,
             "volume_min": 0,
             "volume_max": 95,
             "volume_step": 10
@@ -322,8 +322,8 @@
                 },
                 "stt_viettel": {
                     "api_key": [
-                        "3333333333333333333333",
-                        "4444444444444444444444"
+                        "111111111111111111111111111111111",
+                        "222222222222222222222222222222222"
                     ]
                 },
                 "stt_ggcloud": {
@@ -387,7 +387,7 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/5555555+66666=="
+                "key": "/fcfc34f34f+TGsdTNolucA=="
             },
             "hotword": {
                 "lang": "vi",
@@ -405,18 +405,38 @@
                         {
                             "active": true,
                             "file_name": "e-cu_vn_raspberry-pi_v3_0_0.ppn",
-                            "sensitive": 0.7
+                            "sensitive": 0.5
                         },
                         {
                             "active": true,
                             "file_name": "ê-cu_vn_raspberry-pi_v3_0_0.ppn",
-                            "sensitive": 0.7
+                            "sensitive": 0.5
                         }
                     ],
                     "eng": [
                         {
                             "active": true,
+                            "file_name": "computer_raspberry-pi.ppn",
+                            "sensitive": 0.5
+                        },
+                        {
+                            "active": true,
+                            "file_name": "hey google_raspberry-pi.ppn",
+                            "sensitive": 0.5
+                        },
+                        {
+                            "active": true,
                             "file_name": "hey siri_raspberry-pi.ppn",
+                            "sensitive": 0.5
+                        },
+                        {
+                            "active": true,
+                            "file_name": "jarvis_raspberry-pi.ppn",
+                            "sensitive": 0.5
+                        },
+                        {
+                            "active": true,
+                            "file_name": "ok google_raspberry-pi.ppn",
                             "sensitive": 0.5
                         }
                     ]
@@ -428,7 +448,7 @@
                 "active": true
             },
             "text_to_speak": {
-                "tts_select": "tts_ggcloud",
+                "tts_select": "tts_edge",
                 "tts_ggcloud": {
                     "language_code": "vi-VN",
                     "voice_name": "vi-VN-Wavenet-A",
@@ -446,16 +466,16 @@
                 },
                 "tts_zalo": {
                     "api_key": [
-                        "777777777777777",
-                        "88888888888",
-                        "9999999999999999"
+                        "3333333333333333333333333333333",
+                        "4444444444444444444444444444444",
+                        "5555555555555555555555555555555"
                     ],
                     "voice_name": 1,
                     "speaking_speed": 0.9
                 },
                 "tts_viettel": {
                     "api_key": [
-                        "00000000000000"
+                        "666666666666666666666666666666"
                     ],
                     "voice_name": "hn-phuongtrang",
                     "speaking_speed": 1,
@@ -501,7 +521,7 @@
                     ".git"
                 ],
                 "backup_to_cloud": {
-                    "google_drive": true
+                    "google_drive": false
                 }
             },
             "upgrade": {
@@ -537,7 +557,7 @@
                     ".git"
                 ],
                 "backup_to_cloud": {
-                    "google_drive": true
+                    "google_drive": false
                 }
             },
             "upgrade": {
@@ -549,8 +569,8 @@
             }
         },
         "advanced_settings": {
-            "automatically_check_for_updates": false,
-            "restart_vbot": true,
+            "automatically_check_for_updates": true,
+            "restart_vbot": false,
             "sound_notification": true,
             "refresh_page_ui": true
         },
@@ -560,7 +580,7 @@
             "limit_backup_files": 6
         },
         "google_cloud_drive": {
-            "active": true,
+            "active": false,
             "backup_folder_name": "Vbot_Assistant_Backup",
             "backup_folder_vbot_name": "Backup_Program",
             "backup_folder_interface_name": "Backup_Interface",

@@ -6,15 +6,15 @@
     "changes": [
         {
             "type": "feature",
-            "description": "Added support for multi-language."
+            "description": "Thêm hỗ trợ ngôn ngữ gọi hotword tienegs anh và tiếng việt"
         },
         {
             "type": "fix",
-            "description": "Fixed issue with login authentication."
+            "description": "Đã khắc phục sự cố bên ngoài rìa của vũ trụ"
         },
         {
             "type": "improvement",
-            "description": "Enhanced performance for data processing."
+            "description": "Nâng cao hiệu suất xử lý dữ liệu."
         }
     ],
     "author": "Vũ Tuyển",
