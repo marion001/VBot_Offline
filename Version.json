@@ -1,8 +1,8 @@
 {
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "Cập nhật đọc báo, tin tức trong ngày",
-    "releaseDate": "11/12/2024",
+    "description": "Fix Lỗi Hotword Tiếng Anh",
+    "releaseDate": "12/12/2024",
     "changes": [
         {
             "type": "feature",
