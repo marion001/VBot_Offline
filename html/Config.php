@@ -192,6 +192,8 @@ $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['con
 
 #CẬP NHẬT CHẾ ĐỘ Hotword Engine Picovoice KEY hotword_engine:
 $Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotword_engine_key'];
+$Config['smart_config']['smart_wakeup']['hotword']['lang'] = $_POST['select_hotword_lang'];
+
 
 #CẬP NHẬT CHẾ ĐỘ Text To Speak (TTS) text_to_speak:
 $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
@@ -1160,7 +1162,8 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 <select name="tts_ggcloud_language_code" id="tts_ggcloud_language_code" class="form-select border-success" aria-label="Default select example">
 <option value="vi-VN" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] === 'vi-VN' ? 'selected' : ''; ?>>Tiếng Việt</option>
 </select><label for="tts_ggcloud_language_code">Ngôn ngữ:</label></div>
-<div class="form-floating mb-3">			
+<div class="input-group mb-3">
+<div class="form-floating">
 <select name="tts_ggcloud_voice_name" id="tts_ggcloud_voice_name" class="form-select border-success" aria-label="Default select example">
 <option value="vi-VN-Neural2-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Neural2-A' ? 'selected' : ''; ?>>vi-VN-Neural2-A FEMALE</option>
 <option value="vi-VN-Neural2-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Neural2-D' ? 'selected' : ''; ?>>vi-VN-Neural2-D MALE</option>
@@ -1172,8 +1175,13 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 <option value="vi-VN-Wavenet-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-B' ? 'selected' : ''; ?>>vi-VN-Wavenet-B MALE</option>
 <option value="vi-VN-Wavenet-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-C' ? 'selected' : ''; ?>>vi-VN-Wavenet-C FEMALE</option>
 <option value="vi-VN-Wavenet-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-D' ? 'selected' : ''; ?>>vi-VN-Wavenet-D MALE</option>
-</select>
-<label for="tts_ggcloud_voice_name">Giọng đọc:</label></div>
+</select> 
+<label for="tts_ggcloud_voice_name">Giọng đọc:</label>
+</div>
+<button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i> Nghe Thử</button>
+</div>
+
+
 <div class="form-floating mb-3">  
 <input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_gcloud_speaking_speed" id="tts_gcloud_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['speaking_speed']; ?>">
  <label for="tts_gcloud_speaking_speed" class="form-label">Tốc độ đọc:</label>	
@@ -4113,12 +4121,6 @@ function scan_audio_devices(device_name) {
                     show_message('Không tìm thấy thẻ div với id: '+container);
                 }
 			}
-
-
-				
-				
-				
-
             } else if (data) {
                 show_message('Lỗi: ' + data.message);
             } else {
@@ -4159,6 +4161,25 @@ function selectDevice_Alsamixer(name) {
         show_message('Không tìm thấy thẻ input với id "alsamixer_name".', 3);
     }
 }
+
+//Play nghe thử âm thanh tts mẫu của google CLOUD
+function play_tts_sample_gcloud(){
+	loading('show');
+    const selectElement = document.getElementById('tts_ggcloud_voice_name');
+    if (selectElement) {
+    if (selectElement.value) {
+       playAudio('https://cloud.google.com/static/text-to-speech/docs/audio/'+selectElement.value+'.wav');
+    }else{
+		show_message('Cần chọn 1 giọng đọc để nghe thử');
+	}
+    }
+	else{
+		showMessagePHP('Không tìm thấy dữu liệu thẻ select với id=tts_ggcloud_voice_name', 3);
+	}
+	loading('hide');
+}
+
+
 </script>
 <script>
     //Cập nhật bảng mã màu vào thẻ input
