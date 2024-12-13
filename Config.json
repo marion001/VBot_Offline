@@ -354,7 +354,9 @@
                     "play_music_call_error": "resource/sound/default/play_music_call_error.mp3",
                     "updated_the_program_successfully": "resource/sound/default/updated_the_program_successfully.mp3",
                     "interface_updated_successfully": "resource/sound/default/interface_updated_successfully.mp3",
-                    "network_error": "resource/sound/default/network_error.mp3"
+                    "network_error": "resource/sound/default/network_error.mp3",
+                    "music_sound_pause": "resource/sound/default/music_pause.mp3",
+                    "music_sound_stops": "resource/sound/default/music_stops.mp3"
                 },
                 "welcome": {
                     "active": true,
