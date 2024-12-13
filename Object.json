@@ -21,7 +21,6 @@
     ],
     "radio": [
         "radio",
-        "phát thanh",
         "đài"
     ],
     "lunar_day": [
@@ -36,7 +35,8 @@
     ],
     "play_music": [
         "nhạc",
-        "bài"
+        "bài",
+        "phát"
     ],
     "volume": [
         "volume",

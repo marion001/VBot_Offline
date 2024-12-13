@@ -69,5 +69,10 @@
     ],
     "close": [
         "đóng"
-    ]
+    ],
+	"playlist": [
+		"danh sách",
+		"danh sách nhạc",
+		"playlist"
+	]
 }
