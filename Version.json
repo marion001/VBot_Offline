@@ -1,8 +1,8 @@
 {
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "Fix Lỗi Vặt",
-    "releaseDate": "13/12/2024-1",
+    "description": "Fix Lỗi Button",
+    "releaseDate": "14/12/2024",
     "changes": [
         {
             "type": "feature",

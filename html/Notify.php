@@ -6,6 +6,31 @@ include 'Configuration.php';
 $output_notify = ''; // Biến tạm để lưu nội dung
 $i_count = 0; // Khai báo biến toàn cục để đếm
 
+
+// Hàm sử dụng cURL để lấy nội dung từ URL
+function fetchContent($url) {
+    $curl = curl_init();
+
+    curl_setopt($curl, CURLOPT_URL, $url);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true); // Theo dõi redirect nếu cần
+    curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false); // Bỏ kiểm tra SSL nếu cần (không khuyến khích)
+    
+    $response = curl_exec($curl);
+    $error = curl_error($curl);
+    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
+    curl_close($curl);
+
+    // Kiểm tra lỗi và trả về
+    if ($httpCode !== 200 || $error) {
+        return false;
+    }
+
+    return $response;
+}
+
+
 function checkPermissions($dir) {
     global $output_notify, $i_count, $excluded_items_chmod; // Khai báo biến toàn cục để lưu nội dung
     $items = scandir($dir); // Mở thư mục để duyệt qua các file và thư mục con
@@ -45,77 +70,91 @@ checkPermissions($VBot_Offline);
 #kiểm tra xem có bật tự động kiểm tra cập nhật không
 if ($Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] === true){
 
-//Thông báo cập nhật chương trình VBot
+// Thông báo cập nhật chương trình VBot
 $parsedUrl = parse_url($Github_Repo_Vbot);
 $pathParts = explode('/', trim($parsedUrl['path'], '/'));
 $git_username = $pathParts[0];
 $git_repository = $pathParts[1];
-// Thông báo cập nhật phiên bản Vbot chương trình
-$localFile = $VBot_Offline.'Version.json';
+
+// Đường dẫn file local và URL file remote
+$localFile = $VBot_Offline . 'Version.json';
 $remoteFileUrl = "https://raw.githubusercontent.com/$git_username/$git_repository/refs/heads/main/Version.json";
+
+
 // Đọc nội dung file local
 if (file_exists($localFile)) {
     $localContent = file_get_contents($localFile);
     $localData = json_decode($localContent, true);
-    // Đọc nội dung file trên GitHub
-    $remoteContent = file_get_contents($remoteFileUrl);
-    if ($remoteContent !== false) {  // Sửa điều kiện ở đây để kiểm tra thành công
+
+    // Đọc nội dung file remote qua cURL
+    $remoteContent = fetchContent($remoteFileUrl);
+
+    if ($remoteContent !== false) {
         $remoteData = json_decode($remoteContent, true);
+
         // Lấy giá trị "releaseDate" từ cả hai file và so sánh
         if (isset($localData['releaseDate']) && isset($remoteData['releaseDate'])) {
             if ($localData['releaseDate'] !== $remoteData['releaseDate']) {
                 $i_count++;
-            $output_notify .= '
-			<li>
-              <hr class="dropdown-divider">
-            </li><li class="notification-item">
-              <a href="_Program.php"><font color=green><i class="bi bi-box-arrow-in-up"></i></font></a>
-              <div>
-                <h4><font color=green>Cập Nhật VBot</font></h4>
-			<p class="text-primary">Có phiên bản Chương Trình VBot mới: '.$remoteData['releaseDate'].'</p>
-			<a href="_Program.php"><p class="text-danger">Kiểm Tra</p></a>
-              </div>
-            </li>';
+                $output_notify .= '
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li class="notification-item">
+                    <a href="_Program.php"><font color="green"><i class="bi bi-box-arrow-in-up"></i></font></a>
+                    <div>
+                        <h4><font color="green">Cập Nhật VBot</font></h4>
+                        <p class="text-primary">Có phiên bản Chương Trình VBot mới: ' . htmlspecialchars($remoteData['releaseDate']) . '</p>
+                        <a href="_Program.php"><p class="text-danger">Kiểm Tra</p></a>
+                    </div>
+                </li>';
             }
         }
-    } 
+    }
 }
 
 
-//Thông báo cập nhật Giao diện VBot
+
+// Thông báo cập nhật Giao diện VBot
 $parsedUrl_ui = parse_url($Github_Repo_Vbot);
 $pathParts_ui = explode('/', trim($parsedUrl_ui['path'], '/'));
 $git_username_ui = $pathParts_ui[0];
 $git_repository_ui = $pathParts_ui[1];
-// Thông báo cập nhật phiên bản Vbot chương trình
-$localFile_ui = $directory_path.'/Version.json';
+
+// Đường dẫn file local và URL file remote
+$localFile_ui = $directory_path . '/Version.json';
 $remoteFileUrl_ui = "https://raw.githubusercontent.com/$git_username_ui/$git_repository_ui/refs/heads/main/html/Version.json";
+
 // Đọc nội dung file local
 if (file_exists($localFile_ui)) {
     $localContent_ui = file_get_contents($localFile_ui);
     $localData_ui = json_decode($localContent_ui, true);
-    // Đọc nội dung file trên GitHub
-    $remoteContent_ui = file_get_contents($remoteFileUrl_ui);
-    if ($remoteContent_ui !== false) {  // Sửa điều kiện ở đây để kiểm tra thành công
+
+    // Đọc nội dung file remote qua cURL
+    $remoteContent_ui = fetchContent($remoteFileUrl_ui);
+
+    if ($remoteContent_ui !== false) {
         $remoteData_ui = json_decode($remoteContent_ui, true);
+
         // Lấy giá trị "releaseDate" từ cả hai file và so sánh
         if (isset($localData_ui['releaseDate']) && isset($remoteData_ui['releaseDate'])) {
             if ($localData_ui['releaseDate'] !== $remoteData_ui['releaseDate']) {
                 $i_count++;
-            $output_notify .= '
-			<li>
-              <hr class="dropdown-divider">
-            </li><li class="notification-item">
-              <a href="_Dashboard.php"><font color=green><i class="bi bi-box-arrow-in-up"></i></font></a>
-              <div>
-                <h4><font color=green>Cập Nhật Web UI</font></h4>
-			<p class="text-primary">Có phiên bản Giao Diện VBot mới: '.$remoteData_ui['releaseDate'].'</p>
-			<a href="_Dashboard.php"><p class="text-danger">Kiểm Tra</p></a>
-              </div>
-            </li>';
+                $output_notify .= '
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li class="notification-item">
+                    <a href="_Dashboard.php"><font color="green"><i class="bi bi-box-arrow-in-up"></i></font></a>
+                    <div>
+                        <h4><font color="green">Cập Nhật Web UI</font></h4>
+                        <p class="text-primary">Có phiên bản Giao Diện VBot mới: ' . htmlspecialchars($remoteData_ui['releaseDate']) . '</p>
+                        <a href="_Dashboard.php"><p class="text-danger">Kiểm Tra</p></a>
+                    </div>
+                </li>';
             }
         }
-    } 
+    }
 }
 
 }

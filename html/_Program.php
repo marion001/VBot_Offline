@@ -88,6 +88,9 @@ include 'html_sidebar.php';
 #Giới hạn file backup
 $Limit_Backup_Files = $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files'];
 
+
+
+
 // Hàm để thay thế giá trị trong file json từ file cũ sang file mới và lưu kết quả vào tệp đích
 function replace_values_json_file($configNewPath, $configOldPath) {
 	//dùng: replace_values_json_file($config_new_path, $config_old_path);
@@ -1221,6 +1224,8 @@ if (copyFiles($Extract_Path_OK, $VBot_Offline)) {
  $messages[] = "<font color=red>- Dữ liệu Restore_Backup là rỗng.</font>";
 }
 }
+  
+
 if (isset($_POST['Check_For_Upgrade'])) {
     // Tách URL thành các phần
     $parsedUrl = parse_url($Github_Repo_Vbot);
@@ -1240,15 +1245,15 @@ if (isset($_POST['Check_For_Upgrade'])) {
             $localContent = file_get_contents($localFile);
             $localData = json_decode($localContent, true);
 
-            // Đọc nội dung file trên GitHub
-            $remoteContent = file_get_contents($remoteFileUrl);
-            if ($remoteContent !== false) {  // Sửa điều kiện ở đây
+            // Đọc nội dung file từ GitHub sử dụng cURL
+            $remoteContent = fetchContent($remoteFileUrl);
+            if ($remoteContent !== false) {
                 $remoteData = json_decode($remoteContent, true);
                 // Lấy giá trị "releaseDate" từ cả hai file và so sánh
                 if (isset($localData['releaseDate']) && isset($remoteData['releaseDate'])) {
                     if ($localData['releaseDate'] !== $remoteData['releaseDate']) {
                         $messages[] = "<font color=green><b>- Có bản cập nhật chương trình VBot mới:</b></font>";
-$messages[] = "
+                        $messages[] = "
 <font color=green><ul>
   <li>Phiên Bản Mới:
     <ul>
@@ -1259,7 +1264,7 @@ $messages[] = "
 	  <ul>
 	   <li>Tính Năng: <b>{$remoteData['changes'][0]['description']}</b></li>
 	   <li>Sửa Lỗi: <b>{$remoteData['changes'][1]['description']}</b></li>
-	   <li>Cải tiến: <b>{$remoteData['changes'][2]['description']}</b></li>
+	   <li>Cải Tiến: <b>{$remoteData['changes'][2]['description']}</b></li>
 	  </ul>
 	  </li>
     </ul>
@@ -1276,11 +1281,10 @@ $messages[] = "
   </li>
 </ul></font>";
 
-$messages[] = "<font color=green><b>- Hãy cập nhật lên phiên bản mới để được hỗ trợ tốt nhất.</b></font>";
-
-} else {
-$messages[] = "<font color=red><b>- Không có bản cập nhật chương trình mới nào</b></font>";
-$messages[] = "
+                        $messages[] = "<font color=green><b>- Hãy cập nhật lên phiên bản mới để được hỗ trợ tốt nhất.</b></font>";
+                    } else {
+                        $messages[] = "<font color=red><b>- Không có bản cập nhật chương trình mới nào</b></font>";
+                        $messages[] = "
 <font color=blue><ul>
   <li>Phiên Bản Hiện Tại:
     <ul>
@@ -1290,7 +1294,7 @@ $messages[] = "
     </ul>
   </li>
 </ul></font>";
-}
+                    }
                 } else {
                     $messages[] = "<font color=red>Không tìm thấy trường 'releaseDate' trong một hoặc cả hai file</font>";
                 }
@@ -1303,8 +1307,6 @@ $messages[] = "
     } else {
         $messages[] = "<font color=red>Không thể lấy thông tin username và repository từ URL: $Github_Repo_Vbot</font>";
     }
-
-
 }
 
 ?>

@@ -83,11 +83,11 @@ Thay Đổi Đường Dẫn (Path) Của Apache2:
 </h5><div id="collapse_button_2" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_2">
 - Đăng nhập vào ssh rồi gõ lệnh sau:<br/><br/>
 $: <b>sudo nano /etc/apache2/sites-available/000-default.conf</b><br/>
-- Thay dòng: <b>DocumentRoot /home/pi/vietbot_offline/html</b> thành đường dẫn muốn đổi, ví dụ thay thành: <b>DocumentRoot /var/www/html</b>
+- Thay dòng: <b>DocumentRoot /home/pi/VBot_Offline/html</b> thành đường dẫn muốn đổi, ví dụ thay thành: <b>DocumentRoot /var/www/html</b>
 <br/>- lưu lại file: <b>Ctrl + x => y => Enter</b><br/><br/>
 - Tiếp theo chạy lệnh:<br/>
 $: <b>sudo nano /etc/apache2/apache2.conf</b><br/>
-- Thay dòng: <b>Directory /home/pi/vietbot_offline/ </b> thành: <b>Directory /var/www/html/</b><br/><br/>
+- Thay dòng: <b>Directory /home/pi/VBot_Offline/ </b> thành: <b>Directory /var/www/html/</b><br/><br/>
 - Sau đó restart lại appache2 bằng lệnh sau:<br/>
 $: <b>sudo systemctl restart apache2</b>
 </div>
@@ -158,41 +158,76 @@ Nút Nhấn và Hành Động Của Nút:
     </ul>
   </li>
   <br/>
-  <li><b>Nút nhấn mic</b>
+  
+<li><b>Nút nhấn mic</b>
     <ul>
-      <li>Nhấn Nhả:
-        <ul>
-          <li>Bật, Tắt Microphone (chỉ có tác dụng khi đang ở chế độ chờ được đánh thức)</li>
-        </ul>
-        <ul>
-          <li class="text-danger">Khi Đang Phát Nhạc (Nhấn sẽ Stop/Dừng Phát Nhạc)</li>
-        </ul>
-      </li>
-      <li>Nhấn Giữ:
-        <ul>
-          <li>Bật, Tắt chế độ Câu Phản Hồi (chỉ có tác dụng khi đang ở chế độ chờ được đánh thức)</li>
-        </ul>
-      </li>
+        <li><font color="green">Ở Trạng Thái Chờ Được Đánh Thức:</font>
+            <ul><font color="blue">
+                <li>Nhấn Nhả:
+                    <ul>
+                        <li>Bật, Tắt Microphone</li>
+                    </ul>
+                </li>
+                <li>Nhấn Giữ:
+                    <ul>
+                        <li>Bật, Tắt chế độ câu phản hồi</li>
+                    </ul>
+                </li></font>
+            </ul>
+        </li>
+        <li><font color="green">Ở Trạng Thái Đang Phát Nhạc (Media Player):</font>
+            <ul><font color="blue">
+                <li>Nhấn Nhả:
+                    <ul>
+                        <li>Tạm Dừng hoặc Tiếp Tục phát nhạc</li>
+                    </ul>
+                </li>
+                <li>Nhấn Giữ:
+                    <ul>
+                        <li>Dừng phát nhạc</li>
+                    </ul>
+                </li></font>
+            </ul>
+        </li>
     </ul>
-  </li>
-  <br/>
-  <li><b>Nút nhấn wakeup</b>
+</li>
+
+
+<br/>
+
+<li><b>Nút nhấn Wake Up</b>
     <ul>
-      <li>Nhấn Nhả:
-        <ul>
-          <li>Đánh thức Bot, Wake up (chỉ có tác dụng khi đang ở chế độ chờ được đánh thức)</li>
-        </ul>
-        <ul>
-          <li class="text-danger">Khi Đang Phát Nhạc (Nhấn sẽ tạm Dừng Phát Nhạc và đồng thời kích hoạt Đánh thức bot/Wake UP để nghe lệnh)</li>
-        </ul>
-      </li>
-      <li>Nhấn Giữ:
-        <ul>
-          <li>Bật, Tắt chế độ Hội Thoại (chỉ có tác dụng khi đang ở chế độ chờ được đánh thức)</li>
-        </ul>
-      </li>
+        <li><font color="green">Ở Trạng Thái Chờ Được Đánh Thức:</font>
+            <ul><font color="blue">
+                <li>Nhấn Nhả:
+                    <ul>
+                        <li>Đánh Thức Bot, Wake Up</li>
+                    </ul>
+                </li>
+                <li>Nhấn Giữ:
+                    <ul>
+                        <li>Bật, Tắt chế độ hội thoại (hỏi đáp liên tục)</li>
+                    </ul>
+                </li></font>
+            </ul>
+        </li>
+        <li><font color="green">Ở Trạng Thái Đang Phát Nhạc (Media Player):</font>
+            <ul><font color="blue">
+                <li>Nhấn Nhả:
+                    <ul>
+                        <li>Tạm Dừng phát nhạc đồng thời đánh thức Bot (Wake Up) để nghe lệnh</li>
+                    </ul>
+                </li>
+                <li>Nhấn Giữ:
+                    <ul>
+                        <li>Dừng Phát Nhạc</li>
+                    </ul>
+                </li></font>
+            </ul>
+        </li>
     </ul>
-  </li>
+</li>
+  
 </ul>
 </div>
 </div>
