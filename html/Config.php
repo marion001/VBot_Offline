@@ -1698,7 +1698,7 @@ Cấu Hình MQTT Broker:</h5>
 		echo '<td><center><!-- bounce_time --><input required type="number" min="20" max="500" step="10" style="width: 100px;" class="form-control border-success" title="" name="button[' . $buttonName . '][bounce_time]" value="' . $buttonData['bounce_time'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
 		
 		echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
-		echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="3" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+		echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="2" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
 		
 		echo '</tr>';
 	}
