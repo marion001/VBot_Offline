@@ -1819,7 +1819,7 @@ function sendRequest(message) {
     var data = JSON.stringify({
         "type": 3,
         "data": "main_processing",
-        "action": "processing_api",
+        "action": "chatbot",
         "value": message
     });
 
