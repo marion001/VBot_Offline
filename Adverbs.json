@@ -20,6 +20,13 @@
         "điều hòa",
         "máy lạnh"
     ],
+	"temperature": [
+		"nhiệt độ",
+		"độ xê",
+		"độ",
+		"°c",
+		"°C"
+	],
     "zingmp3_unwanted_words_when_searching": [
         "phát",
         "nhạc",

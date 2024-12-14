@@ -1,8 +1,8 @@
 {
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "Fix Lỗi Button",
-    "releaseDate": "14/12/2024",
+    "description": "bật, tắt điều hòa, set nhiệt độ điều hòa, volume, v...v....",
+    "releaseDate": "14/12/2024-1",
     "changes": [
         {
             "type": "feature",

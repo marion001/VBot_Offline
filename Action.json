@@ -109,7 +109,9 @@
         "hẹn giờ"
     ],
     "setup": [
-        "cài đặt"
+		"thiết lập",
+		"cài đặt",
+		"đặt"
     ],
     "execute": [
         "thực hiện"

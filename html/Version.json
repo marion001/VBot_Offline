@@ -1,8 +1,8 @@
 {
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập Nhật Guide",
-    "releaseDate": "14/12/2024",
+    "description": "sửa lỗi vặt",
+    "releaseDate": "14/12/2024-1",
     "changes": [
         {
             "type": "feature",
