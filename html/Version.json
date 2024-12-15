@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật thời gian Button Nhấn giữ, Sửa thông báo đã dừng phát"
+    "description": "Cập nhật thời gian Button Nhấn giữ, Sửa thông báo đã dừng phát",
     "releaseDate": "14/12/2024-2",
     "changes": [
         {
