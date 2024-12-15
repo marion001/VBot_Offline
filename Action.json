@@ -8,15 +8,24 @@
     "open": [
         "mở"
     ],
+	"auto": [
+		"tự động"
+	],
     "close": [
         "đóng"
     ],
+	"closed": [
+		"đóng"
+	],
     "enable": [
         "kích hoạt"
     ],
     "disable": [
         "vô hiệu"
     ],
+	"idle": [
+		"không xác định"
+	],
     "script": [
         "thực thi",
         "thi hành"
@@ -88,8 +97,8 @@
         "tạm ngừng"
     ],
     "stop": [
-        "stop",
         "dừng",
+        "stop",
 		"rừng",
 		"rừng lại",
         "dừng lại",
@@ -117,5 +126,17 @@
     ],
     "execute": [
         "thực hiện"
-    ]
+    ],
+	"cool": [
+		"làm mát"
+	],
+	"dry": [
+		"làm khô"
+	],
+	"heat": [
+		"sưởi"
+	],
+	"fan_only": [
+		"chỉ quạt gió"
+	]
 }

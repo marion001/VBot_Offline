@@ -3,55 +3,19 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "9FD173",
-            "title": "Tuyệt Duyên - Thương Ly Biệt 2",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/7/9/a/6/79a68e16c6a2876ba3e5a08a9305de6d.jpg",
-            "audio": "Z7ODDU7I",
-            "duration": "04:50",
-            "description": null,
-            "source": "ZingMP3",
-            "id": "Z7ODDU7I",
-            "channelTitle": null,
-            "artist": "Ngân Ngân"
-        },
-        {
-            "ids_list": "2C4CA0",
-            "title": "Tự Em Sai",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/4/6/3/e/463efdaa10eb3142d3459d40ad15c8bb.jpg",
-            "audio": "Z780BBEZ",
-            "duration": "03:58",
-            "description": null,
-            "source": "ZingMP3",
-            "id": "Z780BBEZ",
-            "channelTitle": null,
-            "artist": "Linh Hương Luz, IC Music"
-        },
-        {
-            "ids_list": "0884DC",
-            "title": "hen_anh_khi_hoa_Chua_tan.mp3",
-            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
-            "duration": "4.27 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
-            "channelTitle": null,
+            "ids_list": "72A9D5",
+            "title": "CẢM ƠN EM - THIÊN CHÍ || THÁI HỌC (COVER) - em vô tư hồn nhiên …",
+            "cover": "https://i.ytimg.com/vi/3XpbfrG0cnY/hqdefault.jpg",
+            "audio": "https://www.youtube.com/watch?v=3XpbfrG0cnY",
+            "duration": null,
+            "description": "CẢM ƠN EM - THIÊN CHÍ | Thái Học Cover | Em Vô Tư Hồn Nhiên Và Cũng Ch...",
+            "source": "Youtube",
+            "id": "3XpbfrG0cnY",
+            "channelTitle": "Nguyễn Thái Học Official",
             "artist": null
         },
         {
-            "ids_list": "45D655",
-            "title": "hon_le_cua_anh.mp3",
-            "cover": "http://192.168.14.113/html/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/hon_le_cua_anh.mp3",
-            "duration": "3.10 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/hon_le_cua_anh.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "9C2252",
+            "ids_list": "FE4B61",
             "title": "Cảm Ơn Em (WM Remix)",
             "cover": "https://photo-zmp3.zmdcdn.me/cover/2/f/c/d/2fcd98614479eb84a804483ae6fb5fcd.jpg",
             "audio": "Z7EIC7UI",
@@ -63,7 +27,7 @@
             "artist": "Đặng Thiên Chí"
         },
         {
-            "ids_list": "526F9E",
+            "ids_list": "DDAB94",
             "title": "Cảm Ơn Em",
             "cover": "https://photo-zmp3.zmdcdn.me/cover/a/0/6/4/a0648741356edad7c734788c84c18877.jpg",
             "audio": "Z7EWW6IC",
@@ -75,28 +39,52 @@
             "artist": "Đặng Thiên Chí"
         },
         {
-            "ids_list": "837527",
-            "title": "Cô Dâu Của Người Ta (Remix)",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/0/f/6/c/0f6c59891cd394223e178212929f34bf.jpg",
-            "audio": "Z7EOEDB7",
-            "duration": "06:25",
+            "ids_list": "69D8ED",
+            "title": "Hon Le Cua Anh.mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Hon Le Cua Anh.mp3",
+            "duration": "3.10 MB",
             "description": null,
-            "source": "ZingMP3",
-            "id": "Z7EOEDB7",
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Hon Le Cua Anh.mp3",
             "channelTitle": null,
-            "artist": "Khả Hiệp"
+            "artist": null
         },
         {
-            "ids_list": "195DE8",
-            "title": "Cô Dâu Của Người Ta",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/d/3/9/8/d39882c52cce0cdcc09723537b72a02b.jpg",
-            "audio": "Z7CEUDDA",
-            "duration": "05:54",
+            "ids_list": "2AA747",
+            "title": "Thuyen_quyen.mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Thuyen_quyen.mp3",
+            "duration": "3.27 MB",
             "description": null,
-            "source": "ZingMP3",
-            "id": "Z7CEUDDA",
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Thuyen_quyen.mp3",
             "channelTitle": null,
-            "artist": "Khả Hiệp"
+            "artist": null
+        },
+        {
+            "ids_list": "7F8C37",
+            "title": "Tu_em_sai.mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Tu_em_sai.mp3",
+            "duration": "3.66 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Tu_em_sai.mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "EB78CE",
+            "title": "hen_anh_khi_hoa_Chua_tan.mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
+            "duration": "4.27 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
+            "channelTitle": null,
+            "artist": null
         }
     ]
 }
