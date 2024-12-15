@@ -2,7 +2,7 @@
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
     "description": "sửa lỗi thông báo cập nhật giao diện",
-    "releaseDate": "15/12/2024",
+    "releaseDate": "16/12/2024",
     "changes": [
         {
             "type": "feature",

@@ -9,7 +9,8 @@
         "mở"
     ],
 	"auto": [
-		"tự động"
+		"tự động",
+		"auto"
 	],
     "close": [
         "đóng"
@@ -30,6 +31,11 @@
         "thực thi",
         "thi hành"
     ],
+	"swing": [
+		"đảo gió",
+		"quay",
+		"xoay"
+	],
     "display": [
         "hiển thị"
     ],
@@ -45,6 +51,10 @@
     "read": [
         "đọc"
     ],
+	"mode": [
+		"chế độ",
+		"chức năng"
+	],
     "adjust": [
         "điều chỉnh"
     ],
@@ -102,7 +112,9 @@
 		"rừng",
 		"rừng lại",
         "dừng lại",
-        "ngừng lại"
+        "ngừng lại",
+        "dừng nhạc",
+        "ngừng nhạc"
     ],
     "send": [
         "gửi",
@@ -128,15 +140,21 @@
         "thực hiện"
     ],
 	"cool": [
-		"làm mát"
+		"làm mát",
+		"làm lạnh",
+		"làm nạnh"
 	],
 	"dry": [
-		"làm khô"
+		"làm khô",
+		"hút ẩm"
 	],
 	"heat": [
-		"sưởi"
+		"sưởi ấm",
+		"nóng"
 	],
 	"fan_only": [
-		"chỉ quạt gió"
+		"chỉ quạt gió",
+		"chỉ quạt",
+		"quạt gió"
 	]
 }

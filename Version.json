@@ -1,8 +1,8 @@
 {
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "cập nhật hỏi trạng thái của thiết bị",
-    "releaseDate": "15/12/2024",
+    "description": "cập nhật điều khiển các chế độ điều hòa",
+    "releaseDate": "16/12/2024",
     "changes": [
         {
             "type": "feature",

@@ -34,7 +34,6 @@
         "dương lịch"
     ],
     "play_music": [
-        "nhạc",
         "bài",
         "phát"
     ],
@@ -42,6 +41,9 @@
         "volume",
         "âm lượng"
     ],
+	"window": [
+		"cửa"
+	],
 	"curtain": [
 		"rèm",
 		"dèm"

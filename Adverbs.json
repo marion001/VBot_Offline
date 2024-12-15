@@ -20,6 +20,9 @@
         "điều hòa",
         "máy lạnh"
     ],
+	"fan": [
+		"quạt"
+	],
 	"temperature": [
 		"nhiệt độ",
 		"độ xê",
