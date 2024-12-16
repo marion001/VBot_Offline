@@ -1,8 +1,8 @@
 {
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "cập nhật điều khiển các chế độ điều hòa",
-    "releaseDate": "16/12/2024",
+    "description": "sửa lỗi vặt, Clean Vbot",
+    "releaseDate": "16/12/2024-1",
     "changes": [
         {
             "type": "feature",

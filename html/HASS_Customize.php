@@ -341,7 +341,7 @@ include 'html_sidebar.php';
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Áp dụng được với switch, script, automation, v..v...<br/><br/>- Tệp Json cấu hình nằm tại đường dẫn path: <b><?php echo $Config['backup_upgrade']['custom_home_assistant']['custom_command_file']; ?></b>')"></i></h1>
+      <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Tạm thời Hỗ Trợ, Áp dụng được với <b>switch, script, automation, fan, light, media_player, v..v...</b> các thực thế có hỗ trợ <b>turn_on</b> và <b>turn_off</b>')"></i></h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
