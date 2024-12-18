@@ -1,12 +1,12 @@
 {
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Clean Code, Sửa một số lỗi vặt",
-    "releaseDate": "16/12/2024-1",
+    "description": "Fix Lỗi Hotword Tiếng Anh",
+    "releaseDate": "11/12/2024",
     "changes": [
         {
             "type": "feature",
-            "description": "Thêm hỗ trợ ngôn ngữ gọi hotword tiếng anh và tiếng việt"
+            "description": "Thêm hỗ trợ ngôn ngữ gọi hotword tienegs anh và tiếng việt"
         },
         {
             "type": "fix",

@@ -4,6 +4,10 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 include 'Configuration.php';
 $URL_Address = dirname($Current_URL);
+$parsedUrl = parse_url($Github_Repo_Vbot);
+$pathParts = explode('/', trim($parsedUrl['path'], '/'));
+$git_username = $pathParts[0];
+$git_repository = $pathParts[1];
 ?>
   <!-- Vendor JS Files -->
   <script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
@@ -23,9 +27,8 @@ $URL_Address = dirname($Current_URL);
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
 <script>
-//Hiển thị thời gian
+//Chạy khi trang đã tải xong
 window.onload = setInterval(updateTime, 1000);
-
 function updateTime() {
 	
     var d = new Date();
@@ -2049,7 +2052,6 @@ function play_playlist_json_path(url_json_file) {
   xhr.send(data);
 }
 
-
 //Nếu nhấn vào nút Nguồn nhạc Local trên tab mediaplayer hoặc ở index
 function cacheLocal(){
     var inputElement = document.getElementById("tim_kiem_bai_hat_all");
@@ -2080,14 +2082,172 @@ function cacheNewsPaper() {
     }
 }
 
-</script>
-<script>
-
-function Recording_STT(action, duration = "6") {
-
-showMessagePHP("Chức năng này đang trong quá trình thử nghiệm, chưa dùng được", 3);
-
+//Kiểm tra và hiển thị thông báo cập nhật WEB UI
+function ui_check_update() {
+    const localFileUrl_ui = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $HTML_VBot_Offline; ?>/Version.json';
+    const remoteFileUrl_ui = 'https://raw.githubusercontent.com/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/refs/heads/main/html/Version.json';
+    function fetchRemoteData(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    callback(JSON.parse(xhr.responseText));
+                } catch (error) {
+                    console.error("Lỗi khi phân tích dữ liệu JSON từ file remote: " +error, 3);
+                }
+            } else {
+                showMessagePHP('Lỗi khi tải dữ liệu từ file remote: ' +xhr.statusText, 3);
+                callback(null);
+            }
+        };
+        xhr.onerror = function() {
+            showMessagePHP("Lỗi khi thực hiện yêu cầu XMLHttpRequest.", 3);
+            callback(null);
+        };
+        xhr.send();
+    }
+    function fetchLocalData(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    callback(data.data);
+                } catch (error) {
+					showMessagePHP('Lỗi khi phân tích dữ liệu tệp Version.json của giao diện: ' +error, 3);
+                    callback(null);
+                }
+            } else {
+				showMessagePHP('Lỗi khi tải dữ liệu từ file local: ' +xhr.statusText, 3);
+                callback(null);
+            }
+        };
+        xhr.onerror = function() {
+            showMessagePHP("Lỗi khi thực hiện yêu cầu XMLHttpRequest.");
+            callback(null);
+        };
+        xhr.send();
+    }
+    function checkForUpdate() {
+            fetchLocalData(localFileUrl_ui, function(localData_ui) {
+                fetchRemoteData(remoteFileUrl_ui, function(remoteData_ui) {
+                    if (localData_ui && remoteData_ui) {
+                        if (localData_ui.releaseDate && remoteData_ui.releaseDate) {
+                            if (localData_ui.releaseDate !== remoteData_ui.releaseDate) {
+                                var li = document.createElement("li");
+                                li.classList.add("notification-item");
+                                li.innerHTML = '<a href="#"><font color="green"><i class="bi bi-box-arrow-in-up"></i></font></a>' +
+                                    '<div>' +
+                                    '<h4><font color="green">Cập Nhật Web UI</font></h4>' +
+                                    '<p class="text-primary">Có phiên bản Giao Diện VBot mới: ' + remoteData_ui.releaseDate + '</p>' +
+                                    '<a href="_Dashboard.php"><p class="text-danger">Kiểm Tra</p></a>' +
+                                    '</div>';
+                                document.querySelector('#notification').appendChild(li);
+                                var countElement = document.querySelector('#number_notification');
+                                var countElement_1 = document.querySelector('#number_notification_1');
+                                var currentCount = parseInt(countElement.innerText) || 0;
+                                var currentCount_1 = parseInt(countElement_1.innerText.replace(/[^0-9]/g, '')) || 0;
+                                countElement.innerText = currentCount + 1;
+                                countElement_1.innerHTML = "Bạn có <b>" + (currentCount_1 + 1) + "</b> thông báo mới";
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    checkForUpdate();
 }
-//PCEtLSBTVFQgLS0+DQogICAgIDxzY3JpcHQ+DQogICAgICAgIGZ1bmN0aW9uIFJlY29yZGluZ19TVFQoYWN0aW9uLCBkdXJhdGlvbiA9ICI2Iikgew0KICAgICAgICAgICAgY29uc3Qgc3RhcnRSZWNvcmRpbmdfQ2hhdGJvdCA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCJzdGFydFJlY29yZGluZ19DaGF0Ym90Iik7DQogICAgICAgICAgICBjb25zdCBzdG9wUmVjb3JkaW5nX0NoYXRib3QgPSBkb2N1bWVudC5nZXRFbGVtZW50QnlJZCgic3RvcFJlY29yZGluZ19DaGF0Ym90Iik7DQogICAgICAgICAgICBjb25zdCB1c2VySW5wdXRDaGF0Ym94ID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoInVzZXJfaW5wdXRfY2hhdGJveCIpOw0KDQogICAgICAgICAgICBjb25zdCBjaGFubmVsID0gW107DQogICAgICAgICAgICBsZXQgcmVjb3JkZXIgPSBudWxsOw0KICAgICAgICAgICAgbGV0IHJlY29yZGluZ0xlbmd0aCA9IDA7DQogICAgICAgICAgICBsZXQgbWVkaWFTdHJlYW0gPSBudWxsOw0KICAgICAgICAgICAgY29uc3Qgc2FtcGxlUmF0ZSA9IDE2MDAwOw0KICAgICAgICAgICAgbGV0IGNvbnRleHQgPSBudWxsOw0KICAgICAgICAgICAgbGV0IHNvY2tldCA9IG51bGw7DQogICAgICAgICAgICBjb25zdCBzb2NrZXRVcmwgPSAnd3NzOi8va2lraS1zb2NrZXQuYXNyLnphbG8uYWkvY2xpZW50L3dzL3NwZWVjaD9jb250ZW50LXR5cGU9YXVkaW8veC1yYXcsbGF5b3V0PWludGVybGVhdmVkLHJhdGU9MTYwMDAsZm9ybWF0PVMxNkxFLGNoYW5uZWxzPTEmdmVyc2lvbj0xMyZ0b2tlbj1raWtpX2lvcyZ1c2VyX2lkPTkwNjUxOTkzNTE1ODAyNTYzNyc7DQogICAgICAgICAgICBsZXQgcmVjb3JkaW5nVGltZXIgPSBudWxsOw0KDQogICAgICAgICAgICBmdW5jdGlvbiBzdGFydFJlY29yZGluZygpIHsNCiAgICAgICAgICAgICAgICBpZiAobmF2aWdhdG9yLm1lZGlhRGV2aWNlcyAmJiBuYXZpZ2F0b3IubWVkaWFEZXZpY2VzLmdldFVzZXJNZWRpYSkgew0KICAgICAgICAgICAgICAgICAgICBuYXZpZ2F0b3IubWVkaWFEZXZpY2VzLmdldFVzZXJNZWRpYSh7IGF1ZGlvOiB0cnVlIH0pDQogICAgICAgICAgICAgICAgICAgICAgICAudGhlbihmdW5jdGlvbiAoc3RyZWFtKSB7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgd2luZG93LkF1ZGlvQ29udGV4dCA9IHdpbmRvdy5BdWRpb0NvbnRleHQgfHwgd2luZG93LndlYmtpdEF1ZGlvQ29udGV4dDsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb250ZXh0ID0gbmV3IEF1ZGlvQ29udGV4dCh7IHNhbXBsZVJhdGU6IHNhbXBsZVJhdGUgfSk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgbWVkaWFTdHJlYW0gPSBjb250ZXh0LmNyZWF0ZU1lZGlhU3RyZWFtU291cmNlKHN0cmVhbSk7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBidWZmZXJTaXplID0gNDA5NjsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWNvcmRlciA9IGNvbnRleHQuY3JlYXRlU2NyaXB0UHJvY2Vzc29yKGJ1ZmZlclNpemUsIDEsIDEpOw0KDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVjb3JkZXIub25hdWRpb3Byb2Nlc3MgPSBmdW5jdGlvbiAoZSkgew0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zdCBjaHVuayA9IG5ldyBGbG9hdDMyQXJyYXkoZS5pbnB1dEJ1ZmZlci5nZXRDaGFubmVsRGF0YSgwKSk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNoYW5uZWwucHVzaChjaHVuayk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlY29yZGluZ0xlbmd0aCArPSBjaHVuay5sZW5ndGg7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgaWYgKHNvY2tldCAmJiBzb2NrZXQucmVhZHlTdGF0ZSA9PT0gV2ViU29ja2V0Lk9QRU4pIHsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHNlbmRBdWRpb0NodW5rVG9Tb2NrZXQoY2h1bmspOw0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgfTsNCg0KICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1lZGlhU3RyZWFtLmNvbm5lY3QocmVjb3JkZXIpOw0KICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlY29yZGVyLmNvbm5lY3QoY29udGV4dC5kZXN0aW5hdGlvbik7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQgPSBuZXcgV2ViU29ja2V0KHNvY2tldFVybCk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc29ja2V0Lm9ub3BlbiA9ICgpID0+IGNvbnNvbGUubG9nKCLEkMOjIGvhur90IG7hu5FpIFNvY2tldCBUaMOgbmggQ8O0bmciKTsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQub25lcnJvciA9IChlcnJvcikgPT4gY29uc29sZS5lcnJvcigiTOG7l2kgU29ja2V0OiIsIGVycm9yKTsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQub25jbG9zZSA9ICgpID0+IGNvbnNvbGUubG9nKCLEkMOjIMSRw7NuZyBr4bq/dCBu4buRaSBTb2NrZXQuIik7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc29ja2V0Lm9ubWVzc2FnZSA9IChldmVudCkgPT4gZGlzcGxheVNvY2tldFJlc3BvbnNlKGV2ZW50LmRhdGEpOw0KDQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RhcnRSZWNvcmRpbmdfQ2hhdGJvdC5kaXNhYmxlZCA9IHRydWU7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgc3RvcFJlY29yZGluZ19DaGF0Ym90LmRpc2FibGVkID0gZmFsc2U7DQoNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICByZWNvcmRpbmdUaW1lciA9IHNldFRpbWVvdXQoZnVuY3Rpb24gKCkgew0KICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBzdG9wUmVjb3JkaW5nKCk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGNvbnNvbGUubG9nKCdI4bq/dCA2IGdpw6J5Jyk7DQogICAgICAgICAgICAgICAgICAgICAgICAgICAgfSwgZHVyYXRpb24gKiAxMDAwKTsNCiAgICAgICAgICAgICAgICAgICAgICAgIH0pDQogICAgICAgICAgICAgICAgICAgICAgICAuY2F0Y2goZnVuY3Rpb24gKGUpIHsNCiAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb25zb2xlLmVycm9yKCJM4buXaSB0cnV5IGPhuq1wIG1pY3LDtDoiLCBlKTsNCiAgICAgICAgICAgICAgICAgICAgICAgIH0pOw0KICAgICAgICAgICAgICAgIH0gZWxzZSB7DQogICAgICAgICAgICAgICAgICAgIGNvbnNvbGUuZXJyb3IoIlRyw6xuaCBkdXnhu4d0IGtow7RuZyBo4buXIHRy4bujIGdldFVzZXJNZWRpYS4iKTsNCiAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICB9DQoNCiAgICAgICAgICAgIGZ1bmN0aW9uIHN0b3BSZWNvcmRpbmcoKSB7DQogICAgICAgICAgICAgICAgaWYgKHJlY29yZGVyKSB7DQogICAgICAgICAgICAgICAgICAgIHJlY29yZGVyLmRpc2Nvbm5lY3QoKTsNCiAgICAgICAgICAgICAgICAgICAgbWVkaWFTdHJlYW0uZGlzY29ubmVjdCgpOw0KICAgICAgICAgICAgICAgICAgICBjb250ZXh0LmNsb3NlKCk7DQoNCiAgICAgICAgICAgICAgICAgICAgc3RhcnRSZWNvcmRpbmdfQ2hhdGJvdC5kaXNhYmxlZCA9IGZhbHNlOw0KICAgICAgICAgICAgICAgICAgICBzdG9wUmVjb3JkaW5nX0NoYXRib3QuZGlzYWJsZWQgPSB0cnVlOw0KDQogICAgICAgICAgICAgICAgICAgIGlmIChzb2NrZXQgJiYgc29ja2V0LnJlYWR5U3RhdGUgPT09IFdlYlNvY2tldC5PUEVOKSB7DQogICAgICAgICAgICAgICAgICAgICAgICBzb2NrZXQuY2xvc2UoKTsNCiAgICAgICAgICAgICAgICAgICAgfQ0KDQogICAgICAgICAgICAgICAgICAgIGlmIChyZWNvcmRpbmdUaW1lcikgew0KICAgICAgICAgICAgICAgICAgICAgICAgY2xlYXJUaW1lb3V0KHJlY29yZGluZ1RpbWVyKTsNCiAgICAgICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgICAgIH0NCiAgICAgICAgICAgIH0NCg0KICAgICAgICAgICAgZnVuY3Rpb24gc2VuZEF1ZGlvQ2h1bmtUb1NvY2tldChjaHVuaykgew0KICAgICAgICAgICAgICAgIGNvbnN0IGludDE2QXJyYXkgPSBuZXcgSW50MTZBcnJheShjaHVuay5tYXAoc2FtcGxlID0+IHNhbXBsZSAqIDB4N0ZGRikpOw0KICAgICAgICAgICAgICAgIGlmIChzb2NrZXQgJiYgc29ja2V0LnJlYWR5U3RhdGUgPT09IFdlYlNvY2tldC5PUEVOKSB7DQogICAgICAgICAgICAgICAgICAgIHNvY2tldC5zZW5kKGludDE2QXJyYXkuYnVmZmVyKTsNCiAgICAgICAgICAgICAgICAgICAgLy9jb25zb2xlLmxvZygiU2VudCBjaHVuayB0byBXZWJTb2NrZXQuIik7DQogICAgICAgICAgICAgICAgfSBlbHNlIHsNCiAgICAgICAgICAgICAgICAgICAgY29uc29sZS5sb2coIldlYlNvY2tldCBjaMawYSBt4bufLiBLaMO0bmcgdGjhu4MgZ+G7rWkgY2h1bmsiKTsNCiAgICAgICAgICAgICAgICB9DQogICAgICAgICAgICB9DQoNCiAgICAgICAgICAgIGZ1bmN0aW9uIGRpc3BsYXlTb2NrZXRSZXNwb25zZShkYXRhKSB7DQogICAgICAgICAgICAgICAgdHJ5IHsNCiAgICAgICAgICAgICAgICAgICAgY29uc3QganNvbkRhdGEgPSBKU09OLnBhcnNlKGRhdGEpOw0KICAgICAgICAgICAgICAgICAgICBjb25zdCB0cmFuc2NyaXB0Tm9ybWVkID0ganNvbkRhdGEucmVzdWx0Lmh5cG90aGVzZXNbMF0udHJhbnNjcmlwdF9ub3JtZWQ7DQogICAgICAgICAgICAgICAgICAgIHVzZXJJbnB1dENoYXRib3gudmFsdWUgPSB0cmFuc2NyaXB0Tm9ybWVkOyAvLyBVcGRhdGUgdGhlIGlucHV0IGZpZWxkDQogICAgICAgICAgICAgICAgICAgIC8vY29uc29sZS5sb2coIlBo4bqjbiBo4buTaSBXZWJTb2NrZXQ6IiwgZGF0YSk7DQogICAgICAgICAgICAgICAgfSBjYXRjaCAoZSkgew0KICAgICAgICAgICAgICAgICAgICBjb25zb2xlLmxvZygiTOG7l2kgcGjDom4gdMOtY2ggY8O6IHBow6FwIHBo4bqjbiBo4buTaSBXZWJTb2NrZXQ6IiwgZSk7DQogICAgICAgICAgICAgICAgfQ0KICAgICAgICAgICAgfQ0KDQogICAgICAgICAgICBpZiAoYWN0aW9uID09PSAic3RhcnQiKSB7DQogICAgICAgICAgICAgICAgc3RhcnRSZWNvcmRpbmcoKTsNCiAgICAgICAgICAgIH0gZWxzZSBpZiAoYWN0aW9uID09PSAic3RvcCIpIHsNCiAgICAgICAgICAgICAgICBzdG9wUmVjb3JkaW5nKCk7DQogICAgICAgICAgICB9DQogICAgICAgIH0NCiAgICA8L3NjcmlwdD4=
 
+//Kiểm tra và hiển thị thông báo cập nhật WEB UI
+function vbot_check_update() {
+    const localFileUrl_ui = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $VBot_Offline; ?>Version.json';
+    const remoteFileUrl_ui = 'https://raw.githubusercontent.com/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/refs/heads/main/Version.json';
+    function fetchRemoteData(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    callback(JSON.parse(xhr.responseText));
+                } catch (error) {
+                    showMessagePHP("Lỗi khi phân tích dữ liệu JSON từ file remote:" +error, 3);
+                }
+            } else {
+                showMessagePHP('Lỗi khi tải dữ liệu từ file remote:' +xhr.statusText, 3);
+                callback(null);
+            }
+        };
+        xhr.onerror = function() {
+            showMessagePHP("Lỗi khi thực hiện yêu cầu XMLHttpRequest.", 3);
+            callback(null);
+        };
+        xhr.send();
+    }
+    function fetchLocalData(url, callback) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    callback(data.data);
+                } catch (error) {
+                    showMessagePHP('Lỗi khi phân tích dữ liệu JSON từ file local:' +error, 3);
+                    callback(null);
+                }
+            } else {
+                showMessagePHP('Lỗi khi tải dữ liệu từ file local:' +xhr.statusText, 3);
+                callback(null);
+            }
+        };
+        xhr.onerror = function() {
+            showMessagePHP("Lỗi khi thực hiện yêu cầu XMLHttpRequest.", 3);
+            callback(null);
+        };
+        xhr.send();
+    }
+    function checkForUpdate() {
+            fetchLocalData(localFileUrl_ui, function(localData_ui) {
+                fetchRemoteData(remoteFileUrl_ui, function(remoteData_ui) {
+                    if (localData_ui && remoteData_ui) {
+                        if (localData_ui.releaseDate && remoteData_ui.releaseDate) {
+                            if (localData_ui.releaseDate !== remoteData_ui.releaseDate) {
+                                var li = document.createElement("li");
+                                li.classList.add("notification-item");
+                                li.innerHTML = '<a href="#"><font color="green"><i class="bi bi-box-arrow-in-up"></i></font></a>' +
+                                    '<div>' +
+                                    '<h4><font color="green">Cập Nhật VBot</font></h4>' +
+                                    '<p class="text-primary">Có phiên bản chương trình VBot mới: ' + remoteData_ui.releaseDate + '</p>' +
+                                    '<a href="_Program.php"><p class="text-danger">Kiểm Tra</p></a>' +
+                                    '</div>';
+                                document.querySelector('#notification').appendChild(li);
+                                var countElement = document.querySelector('#number_notification');
+                                var countElement_1 = document.querySelector('#number_notification_1');
+                                var currentCount = parseInt(countElement.innerText) || 0;
+                                var currentCount_1 = parseInt(countElement_1.innerText.replace(/[^0-9]/g, '')) || 0; // Lấy giá trị từ thẻ <font> và chuyển sang số
+                                countElement.innerText = currentCount + 1;
+                                countElement_1.innerHTML = "Bạn có <b>" + (currentCount_1 + 1) + "</b> thông báo mới";
+                            }
+                        }
+                    }
+                });
+            });
+        }
+    checkForUpdate();
+}
+
+
+
+</script>
+
+<script>
+        // Kiểm tra điều kiện và thông báo cập nhật
+        <?php if ($Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] === true) { ?>
+			window.onload = function() {
+				vbot_check_update();
+				ui_check_update();
+			};
+        <?php } ?>
 </script>
