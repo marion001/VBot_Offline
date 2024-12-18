@@ -1,8 +1,8 @@
 {
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Fix Lỗi Hotword Tiếng Anh",
-    "releaseDate": "11/12/2024",
+    "description": "Tối ưu hóa tốc độ, Thay đổi cơ chế kiểm tra cập nhật dẫn tới truy cập webui bị chậm",
+    "releaseDate": "19/12/2024",
     "changes": [
         {
             "type": "feature",
