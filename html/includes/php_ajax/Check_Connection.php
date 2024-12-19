@@ -442,4 +442,39 @@ if (isset($_GET['check_mqtt'])) {
     echo json_encode($response);
     exit();
 }
+
+if (isset($_GET['Picovoice_Version'])) {
+    $url = 'https://pypi.org/rss/project/picovoice/releases.xml';
+    // Khởi tạo cURL
+    $ch = curl_init();
+    // Cấu hình cURL
+    curl_setopt($ch, CURLOPT_URL, $url); // URL cần lấy dữ liệu
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Trả kết quả thay vì in ra màn hình
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Theo dõi chuyển hướng nếu có
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30); // Timeout kết nối (giây)
+    curl_setopt($ch, CURLOPT_TIMEOUT, 60); // Tổng thời gian timeout (giây)
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false); // Tắt kiểm tra SSL nếu server yêu cầu
+    // Thực hiện và lấy nội dung
+    $response = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE); // Lấy mã HTTP
+    // Kiểm tra lỗi
+    if ($response === false || $http_code !== 200) {
+        header('Content-Type: application/json'); // Trả lỗi dạng JSON
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối tới RSS feed.',
+            'error' => curl_error($ch)
+        ]);
+    } else {
+        // Cấu hình header và trả kết quả XML
+        header('Access-Control-Allow-Origin: *');
+        header('Content-Type: application/xml');
+        echo $response;
+    }
+    // Đóng cURL
+    curl_close($ch);
+    exit();
+}
+
+
 ?>

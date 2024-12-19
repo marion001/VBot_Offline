@@ -1,0 +1,35 @@
+Hướng dẫn cài đặt auto Wifi Manager
+
+install-wifi-connect.sh là lệnh cài đặt wifi-connect có thể chạy lệnh nếu chưa cài:
+$:> bash ./install-wifi-connect.sh
+
+- chmod tất cả các file và thưu mục thành 0777:
+$:> sudo chmod -R 0777 /home/pi/VBot_Offline/resource/wifi_manage
+
+- sao chép file wifi-connect.service vào trong system của hệ thống để khởi chạy cùng hệ thống
+$:> sudo cp /home/pi/VBot_Offline/resource/wifi_manage/wifi-connect.service /etc/systemd/system/wifi-connect.service
+
+- chạy file với quyền root:
+$:> sudo systemctl enable wifi-connect.service
+
+
+Nếu đã chỉnh sửa file auto wifi thì cần chuyển đổi các ký tự từ CRLF (Windows) sang LF (Linux)
+
+$:> dos2unix /home/pi/start-wifi-connect.sh
+
+- kiểm tra lại các ký tự sau khi sử dụng: 
+$:> cat -v /home/pi/start-wifi-connect.sh
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+- Re-load lại các services
+$:> sudo systemctl daemon-reload
+
+- Khởi động lại wifi-connect.service
+$:> sudo systemctl restart wifi-connect.service
+
+- Kiểm tra trạng thái xme wifi-connect.service khởi động thành công hay chưa:
+$:> sudo systemctl status wifi-connect.service
+
+- Xem logs xem còn lỗi nào không:
+$:> journalctl -u wifi-connect.service -e
+

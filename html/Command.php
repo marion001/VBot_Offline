@@ -733,38 +733,9 @@ include 'html_sidebar.php';
 	<div class="row g-3 d-flex justify-content-center">
 	<div class="col-auto">
 	<div class="input-group"><span class="input-group-text text-success">Nâng/Hạ Cấp Picovoice</span>
-    <select class="btn btn-success dropdown-toggle" data-toggle="dropdown" name="versions_picovoice_install">
-	<option value="" selected>Chọn Phiên Bản</option>
- <?php
-$url = 'https://pypi.org/rss/project/picovoice/releases.xml';
-// Lấy nội dung từ RSS feed
-$xml_content = file_get_contents($url);
-// Kiểm tra xem có dữ liệu hay không
-if ($xml_content) {
-    // Tìm vị trí của các thẻ <item>
-    $start_pos = strpos($xml_content, '<item>');
-    $end_pos = strpos($xml_content, '</item>');
-    // Tạo một mảng để lưu trữ các phiên bản
-    $versions = [];
-    // Lặp qua từng mục và thêm thông tin vào mảng
-    while ($start_pos !== false && $end_pos !== false) {
-        $item_xml = substr($xml_content, $start_pos, $end_pos - $start_pos + strlen('</item>'));
-        // Trích xuất thông tin từ mỗi mục
-        preg_match('/<title>(.*?)<\/title>/', $item_xml, $title_match);
-        // Thêm phiên bản vào mảng
-        $versions[] = $title_match[1];
-        // Di chuyển đến mục tiếp theo
-        $start_pos = strpos($xml_content, '<item>', $end_pos);
-        $end_pos = strpos($xml_content, '</item>', $start_pos);
-    }
-    // Hiển thị dropdown list
-    foreach ($versions as $version) {
-        echo '<option value="' . $version . '">Picovoice: ' . $version . '</option>';
-    }
-} else {
-    echo "<option value=''>Phiên bản: -----</option>";
-}
-?>
+    <select class="btn btn-success dropdown-toggle" data-toggle="dropdown" id="versions_picovoice_install" name="versions_picovoice_install">
+	<option value="" selected>Đang Lấy Dữ Liệu...</option>
+
  </select></div> 
  
  </div><div class="col-auto"> <div class="input-group-append">
@@ -779,22 +750,8 @@ if ($xml_content) {
  <div class="col-auto">
  <div class="input-group">
  <span class="input-group-text text-success">Thư Viện Porcupine (.pv)</span>
-     <select class="btn btn-success dropdown-toggle" data-toggle="dropdown" id="inputGroupSelect04" name="versions_porcupine_install">
-	<option value="" selected>Chọn Phiên Bản</option>
- <?php
- $uniqueVersions = [];
-    foreach ($versions as $versionpv) {
-    // Lấy 3 ký tự đầu tiên của chuỗi
-    $versionFirstThreeChars = substr($versionpv, 0, 3);
-    
-    // Kiểm tra xem giá trị đã xuất hiện chưa
-    if (!in_array($versionFirstThreeChars, $uniqueVersions)) {
-        // Nếu chưa xuất hiện, thêm vào mảng và hiển thị
-        $uniqueVersions[] = $versionFirstThreeChars;
-        echo '<option value="' . $versionFirstThreeChars . '">Porcupine: ' . $versionFirstThreeChars . '</option>';
-    }
-   }
-?>
+     <select class="btn btn-success dropdown-toggle" data-toggle="dropdown" id="versions_porcupine_install" name="versions_porcupine_install">
+	<option value="" selected>Đang Lấy Dữ Liệu...</option>
  </select>
  </div>
  </div>
@@ -803,17 +760,12 @@ if ($xml_content) {
  </div> 
  </div> 
  </div>
-	</form>
-	
-	
-	
-	
-	
-		<hr/>
-	<form method="POST" action="">
-				
+</form>
+
+<hr/>
+<form method="POST" action="">
 <div class="input-group mb-3">
-<span class="input-group-text border-success" id="basic-addon1"><i class="bi bi-terminal-fill"></i></span>
+<span class="input-group-text border-success" id="basic-addon1"><i class="bi bi-terminal-fill" onclick="show_message('Nhập các lệnh Linux cần thực thi, hệ thống sẽ sử dụng thông tin ssh của bạn để thực hiện lệnh như 1 user bình thường')"></i></span>
   <input type="text" class="form-control border-success" name="commandnd" placeholder="Nhập dòng lệnh cần thực hiện">
     <button class="btn btn-success border-success" onclick="loading('show')" name="commandd" type="submit">Command</button>
 </div>
@@ -832,19 +784,97 @@ if ($xml_content) {
 <?php
 include 'html_footer.php';
 ?>
-<!-- End Footer -->
-
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-<!-- Nghe thử file âm thanh -->
-<!-- <audio id="audioPlayer" style="display: none;" controls></audio> -->
-
-  <!-- Template Main JS File -->
 <?php
 include 'html_js.php';
 ?>
+<script>
+function get_picovoice_version() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?Picovoice_Version');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            const picovoiceDropdown = document.getElementById('versions_picovoice_install');
+            const porcupineDropdown = document.getElementById('versions_porcupine_install');
+            if (xhr.status === 200) {
+                const xmlContent = xhr.responseText;
+                // Tìm vị trí của các thẻ <item>
+                let startPos = xmlContent.indexOf('<item>');
+                let endPos = xmlContent.indexOf('</item>');
+				// Mảng lưu các phiên bản
+                const versions = [];
+                // Lặp qua từng mục và thêm thông tin vào mảng
+                while (startPos !== -1 && endPos !== -1) {
+                    const itemXml = xmlContent.substring(startPos, endPos + '</item>'.length);
+                    // Trích xuất tiêu đề (<title>)
+                    const titleMatch = itemXml.match(/<title>(.*?)<\/title>/);
+                    if (titleMatch && titleMatch[1]) {
+						// Thêm phiên bản vào mảng
+                        versions.push(titleMatch[1]);
+                    }
+                    // Chuyển sang mục tiếp theo
+                    startPos = xmlContent.indexOf('<item>', endPos);
+                    endPos = xmlContent.indexOf('</item>', startPos);
+                }
+                // Xóa tất cả các option cũ trong dropdowns
+                picovoiceDropdown.innerHTML = '';
+                porcupineDropdown.innerHTML = '';
+                // Thêm tùy chọn mặc định vào dropdown Picovoice
+                const defaultPicovoiceOption = document.createElement('option');
+                defaultPicovoiceOption.value = '';
+                defaultPicovoiceOption.textContent = 'Chọn phiên bản';
+                picovoiceDropdown.appendChild(defaultPicovoiceOption);
+                // Tạo mảng lưu trữ các 3 ký tự đầu tiên của phiên bản Porcupine
+                const porcupineVersions = new Set();
+                // Thêm tùy chọn mặc định vào dropdown Porcupine (Chọn phiên bản Porcupine)
+                const defaultPorcupineOption = document.createElement('option');
+                defaultPorcupineOption.value = '';
+                defaultPorcupineOption.textContent = 'Chọn phiên bản';
+                porcupineDropdown.appendChild(defaultPorcupineOption);
+                // Thêm các phiên bản vào dropdown Picovoice
+                if (versions.length > 0) {
+                    versions.forEach(version => {
+                        const picovoiceOption = document.createElement('option');
+                        picovoiceOption.value = version;
+                        picovoiceOption.textContent = `Picovoice: ${version}`;
+                        picovoiceDropdown.appendChild(picovoiceOption);
+                        // Lấy 3 ký tự đầu tiên của phiên bản
+                        const versionPrefix = version.substring(0, 3);
+                        // Nếu 3 ký tự đầu tiên chưa được thêm vào mảng Set, thì thêm vào dropdown Porcupine
+                        if (!porcupineVersions.has(versionPrefix)) {
+                            porcupineVersions.add(versionPrefix);
+                            const porcupineOption = document.createElement('option');
+                            porcupineOption.value = versionPrefix;
+                            porcupineOption.textContent = `Porcupine: ${versionPrefix}`;
+                            porcupineDropdown.appendChild(porcupineOption);
+                        }
+                    });
+                } else {
+                    // Nếu không có phiên bản nào, hiển thị option mặc định
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'Phiên bản: -----';
+                    picovoiceDropdown.appendChild(option);
+                }
+            } else {
+				showMessagePHP('Lỗi HTTP:' +xhr.status);
+                // Hiển thị lỗi trong dropdown
+                const errorOption = document.createElement('option');
+                errorOption.value = '';
+                errorOption.textContent = 'Không thể tải dữ liệu.';
+                picovoiceDropdown.appendChild(errorOption);
+                porcupineDropdown.appendChild(errorOption);
+            }
+        }
+    };
+    xhr.send();
+}
+//lấy dữ liệu phiên bản picovoice khi trang được tải toàn bộ
+window.onload = function() {
+	get_picovoice_version();
+};
 
-
+</script>
 </body>
 
 </html>

@@ -638,117 +638,89 @@ if (isset($_GET['Cache_Youtube'])) {
 	exit();
 }
 
-//Get link Youtyube
+#get Link Youtube
 if (isset($_GET['GetLink_Youtube'])) {
-$Youtube_ID = isset($_GET['Youtube_ID']) ? $_GET['Youtube_ID'] : '';
+    // Lấy ID video YouTube từ request
+    $Youtube_ID = isset($_GET['Youtube_ID']) ? $_GET['Youtube_ID'] : '';
+
+    // Kiểm tra xem ID video có được cung cấp hay không
     if (empty($Youtube_ID)) {
-        $Youtube_ID_a = array(
+        $response = array(
             'success' => false,
-            'message' => 'Cần nhập dữ liệu để tìm kiếm',
+            'message' => 'Cần nhập ID của video Youtube',
             'data' => []
         );
-        echo json_encode($Youtube_ID_a, JSON_PRETTY_PRINT);
+        echo json_encode($response, JSON_PRETTY_PRINT);
         exit;
     }
-// Chuyển đổi giây thành định dạng giờ:phút:giây
-function convertSecondsToTime($seconds)
-{
-    $hours = floor($seconds / 3600);
-    $minutes = floor(($seconds % 3600) / 60);
-    $remaining_seconds = $seconds % 60;
-    return sprintf('%02d:%02d:%02d', $hours, $minutes, $remaining_seconds);
-}
 
-// Tạo cookie
-function generateCookies()
-{
-    $time = time(); // Đảm bảo time() trả về số nguyên
-    $min = intval(1000000000); // Ép kiểu số nguyên
-    $max = intval(9999999999); // Ép kiểu số nguyên
+    // Câu lệnh gọi Python script
+    $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Get_Link_Youtube.py $Youtube_ID");
 
-    $ga_value = "GA1.1." . mt_rand($min, $max) . "." . $time;
-    $ga_k8cd_value = "GS1.1." . $time . ".7.1." . intval($time + 27) . ".0.0.0";
-    $ga_psrpb_value = "GS1.1." . $time . ".10.1." . intval($time + 17) . ".0.0.0";
-
-    return [
-        '_ga' => $ga_value,
-        '_ga_K8CD7CY0TZ' => $ga_k8cd_value,
-        '_ga_PSRPB96YVC' => $ga_psrpb_value,
-    ];
-}
-
-// Thực hiện yêu cầu cURL
-function executeCurl($url, $postFields, $cookies)
-{
-    $curl = curl_init();
-    curl_setopt_array($curl, [
-        CURLOPT_URL => $url,
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => $postFields,
-        CURLOPT_HTTPHEADER => [
-            'Host: www.y2mate.com',
-            'Cookie: ' . http_build_query($cookies, '', '; '),
-            'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36',
-            'accept-language: vi',
-            'priority: u=1, i'
-        ],
-    ]);
-
-    $responseY = curl_exec($curl);
-    curl_close($curl);
-    return $responseY;
-}
-
-$cookies = generateCookies();
-
-// Gửi yêu cầu đầu tiên
-$responseY = executeCurl(
-    'https://www.y2mate.com/mates/en1959/analyzeV2/ajax',
-    'k_query=https://www.youtube.com/watch?v=' . $Youtube_ID . '&k_page=mp3&hl=en&q_auto=0',
-    $cookies
-);
-
-$responseData = json_decode($responseY, true);
-//echo $responseY;
-// Kiểm tra kết quả và gửi yêu cầu tiếp theo
-$result = [];
-
-if (isset($responseData['c_status']) && $responseData['c_status'] === "FAILED") {
-    $result['success'] = false;
-    $result['message'] = $responseData['mess'];
-} else {
-    $Key_Data = urlencode($responseData['links']['mp3']['mp3128']['k']);
-
-    $response = executeCurl(
-        'https://www.y2mate.com/mates/convertV2/index',
-        'vid=' . $responseData['vid'] . '&k=' . $Key_Data,
-        $cookies
-    );
-
-    $responseCoverLink = json_decode($response, true);
-
-    if (isset($responseCoverLink['c_status']) && $responseCoverLink['c_status'] === "CONVERTED") {
-        $result['success'] = true;
-        $result['time'] = convertSecondsToTime($responseData['t']);
-        $result['channel'] = isset($responseData['a']) ? $responseData['a'] : 'N/A';
-        $result['data'] = $responseCoverLink;
-    } else {
-        $result['status'] = 'error';
-        $result['message'] = $responseCoverLink['mess'] ?? 'Không xác định';
+    // Kết nối SSH
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        $response = array(
+            'success' => false,
+            'message' => 'Không thể kết nối tới máy chủ SSH.',
+            'data' => []
+        );
+        echo json_encode($response, JSON_PRETTY_PRINT);
+        exit;
     }
+
+    // Xác thực thông tin SSH
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        $response = array(
+            'success' => false,
+            'message' => 'Xác thực SSH không thành công.',
+            'data' => []
+        );
+        echo json_encode($response, JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    // Thực thi câu lệnh Python trên máy chủ SSH
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        $response = array(
+            'success' => false,
+            'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
+            'data' => []
+        );
+        echo json_encode($response, JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    // Chuyển sang chế độ đồng bộ để đợi kết quả
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $output = stream_get_contents($stream_out);
+
+    // Xử lý kết quả đầu ra
+    if ($output) {
+        $response = array(
+            'success' => true,
+            'message' => 'Lấy link thành công.',
+            'data' => array(
+                'dlink' => trim($output) // Loại bỏ khoảng trắng và ký tự thừa
+            )
+        );
+    } else {
+        $response = array(
+            'success' => false,
+            'message' => 'Không nhận được dữ liệu trả về từ Python script.',
+            'data' => []
+        );
+    }
+
+    // Đóng kết nối
+    fclose($stream);
+
+    // Trả về dữ liệu dạng JSON
+    echo json_encode($response, JSON_PRETTY_PRINT);
+    exit;
 }
-
-// Trả về dữ liệu dưới dạng JSON
-echo json_encode($result, JSON_PRETTY_PRINT);
-
-exit();
-}
-
 
 
 //Hiển thị dữ liệu playlist

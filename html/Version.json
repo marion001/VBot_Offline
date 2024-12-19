@@ -1,8 +1,8 @@
 {
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Tối ưu hóa tốc độ, Thay đổi cơ chế kiểm tra cập nhật dẫn tới truy cập webui bị chậm",
-    "releaseDate": "19/12/2024",
+    "description": "Cải thiện tốc độ, Sửa lỗi phát nhạc Youtube trên UI",
+    "releaseDate": "19/12/2024-1",
     "changes": [
         {
             "type": "feature",
