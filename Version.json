@@ -1,8 +1,8 @@
 {
     "version": "1.0.3",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Thuật Toán Điều Khiển Home Assistant, Hỏi, thiết lập trạng thái",
-    "releaseDate": "19/12/2024",
+    "description": "Sửa Lỗi Thuật Toán Điều Khiển Home Assistant, Hỏi, thiết lập trạng thái, Sửa Lỗi Bật Tắt Thiết Bị",
+    "releaseDate": "19/12/2024-2",
     "changes": [
         {
             "type": "feature",
