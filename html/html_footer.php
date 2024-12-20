@@ -14,6 +14,6 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
       <!-- You can delete the links only if you purchased the pro version. -->
       <!-- Licensing information: https://bootstrapmade.com/license/ -->
       <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
-      Code by <a href="https://www.facebook.com/TWFyaW9uMDAx">(Vũ Tuyển)</a>, Designed by: <a href="https://bootstrapmade.com/">BootstrapMade</a>
+      Code by <a href="https://www.facebook.com/TWFyaW9uMDAx" target="_bank">(<i class="bi bi-facebook"></i> Vũ Tuyển)</a> <a href="https://github.com/marion001/VBot_Offline" target="_bank"><i class="bi bi-github"></i> GitHub</a>, Designed by: <a href="https://bootstrapmade.com/" target="_bank">BootstrapMade</a>
     </div>
   </footer>
