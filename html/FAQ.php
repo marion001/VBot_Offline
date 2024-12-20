@@ -253,9 +253,9 @@ Cấu Hình Auto/Tự Động Chạy VBot Cùng Hệ Thống:
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_7" aria-expanded="false">
 Cấu Hình Auto Kết Nối Wifi hoặc Tạo Điểm Truy Cập AP :
 </h5><div id="collapse_button_7" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_7">
-
--dfgdfgdfg
-
+- Nội Dung Hướng Dẫn Và Dữ Liệu Nằm Trong Thư Mục <b>VBot_Offline</b> với đường dẫn:
+<br/>
+<b>VBot_Offline/resource/wifi_manager</b>
 </div>
 </div>
 </div>

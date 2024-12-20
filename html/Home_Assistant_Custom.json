@@ -2,8 +2,8 @@
     "intents": [
         {
             "active": true,
-            "name": "Tắt Đèn Ngủ",
-            "reply": "biết rồi",
+            "name": "Tắt Đèn Ngủ 1 2",
+            "reply": "biết rồi ạ",
             "data_yaml": {
                 "action": "switch.turn_off",
                 "data": "{}",
@@ -12,13 +12,16 @@
                 }
             },
             "questions": [
-                "tắt hộ cái đèn ngủ",
-                "đèn ngủ tắt hộ đi"
+                "tắt đèn ngủ",
+                "tắt đèn ngủ đi",
+                "chào tuyển",
+                "chào biết rồi"
             ]
         },
         {
+            "active": true,
             "name": "Bật Đèn Ngủ",
-            "reply": "được rồi để bật đèn ngủ",
+            "reply": "à baatj đèn ngủ",
             "data_yaml": {
                 "action": "switch.turn_on",
                 "data": "{}",
@@ -27,15 +30,15 @@
                 }
             },
             "questions": [
-                "bật cái đèn ngủ lên",
-                "đèn ngủ bật lên đi"
-            ],
-            "active": false
+                "bật đèn ngủ",
+                "bật đèn ngủ đi",
+                "ok bạn"
+            ]
         },
         {
             "active": true,
             "name": "Tắt Đèn Phòng Ngủ",
-            "reply": "",
+            "reply": "được, tắt đèn phòng ngủ",
             "data_yaml": {
                 "action": "switch.turn_off",
                 "data": "{}",
@@ -50,21 +53,23 @@
             ]
         },
         {
+            "active": true,
             "name": "Thiết Lập Rèm Phòng Khách",
-            "reply": "",
+            "reply": "được, thiết lập rèm",
             "data_yaml": {
                 "action": "cover.set_cover_position",
                 "data": {
-                    "position": 50
+                    "position": 59
                 },
                 "target": {
                     "entity_id": "cover.virtual_cover"
                 }
             },
             "questions": [
-                "Mở rèm phòng khách một nửa"
-            ],
-            "active": false
+                "Mở rèm phòng khách 55",
+                "mở rèm phòng khách 55 nhé",
+                "đã mở rèm"
+            ]
         }
     ]
 }

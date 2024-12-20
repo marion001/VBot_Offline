@@ -21,170 +21,6 @@ if (!isset($_SESSION['user_login']) ||
 //$_SESSION['user_login']['login_time'] = time();
 }
 ?>
-<?php
-//ĐỌc Nội Dung File custom_command_file
-$Hass_Custom_Json = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
-// Kiểm tra nếu file không tồn tại
-if (!file_exists($Hass_Custom_Json)) {
-    // Tạo file rỗng nếu không tồn tại
-    file_put_contents($Hass_Custom_Json, json_encode(['intents' => []], JSON_PRETTY_PRINT));
-    // Chmod 0777 cho file
-    chmod($Hass_Custom_Json, 0777);
-}
-
-// Khởi tạo biến $hassData_all là mảng rỗng để tránh lỗi undefined variable
-$hassData_all = [];
-$filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
-// Kiểm tra nếu file không tồn tại
-if (!file_exists($filePath_HASS)) {
-    // Tạo file rỗng nếu không tồn tại
-    file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT));
-    // Chmod 0777 cho file
-    chmod($filePath_HASS, 0777);
-}
-$data = json_decode(file_get_contents($filePath_HASS), true);
-// Lấy dữ liệu từ get_hass_all
-$hassData_all = $data['get_hass_all'] ?? [];
-
-?>
-<?php
-// Mảng lưu thông báo lỗi
-$errorMessages = [];
-$successMessage = [];
-// Mảng để lưu những intent hợp lệ
-$valid_intents = [];
-// Kiểm tra xem có dữ liệu POST không để lưu lại thay đổi
-if (isset($_POST['save_custom_home_assistant'])) {
-if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
-// Đường dẫn gốc và đích
-$sourceFile = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
-$destinationDir = $directory_path . '/' . $Config['backup_upgrade']['custom_home_assistant']['backup_path'];
-$destinationFile = $destinationDir . "/Home_Assistant_Custom_" . date('dmY_His') . ".json";
-// Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
-if (!is_dir($destinationDir)) {
-    mkdir($destinationDir, 0777, true);
-    chmod($destinationDir, 0777);
-    $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
-}
-// Sao chép tệp mới
-if (copy($sourceFile, $destinationFile)) {
-    chmod($destinationFile, 0777);
-    //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
-    // Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
-    $jsonFiles = glob($destinationDir . "/*.json");
-    usort($jsonFiles, function($a, $b) {
-        return filemtime($a) - filemtime($b);
-    });
-    // Xóa các tệp cũ nhất nếu số lượng tệp vượt quá 5
-    if (count($jsonFiles) > $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) {
-        foreach (array_slice($jsonFiles, 0, count($jsonFiles) - $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) as $oldFile) {
-            unlink($oldFile);
-			$successMessage[] = "Vượt quá số lượng tệp tin Backup là <b>".$Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']."</b>, đã xóa tệp: <b>".basename($oldFile)."</b>";
-        }
-    }
-} else {
-    $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
-}
-}
-    // Lấy dữ liệu từ form
-    $intents = isset($_POST['intents']) ? $_POST['intents'] : null;
-    // Kiểm tra nếu intents tồn tại và là mảng
-    if (is_array($intents)) {
-        // Khởi tạo mảng cho intents hợp lệ
-        $valid_intents = [];
-        // Khởi tạo mảng cho thông báo lỗi
-        $errorMessages = [];
-        // Kiểm tra từng intent trước khi lưu
-        foreach ($intents as $index => $intent) {
-            $name = trim($intent['name']);
-            $entityid = trim($intent['entityid']);
-            $action = trim($intent['action']);
-            $friendly_name = trim($intent['friendly_name']);
-            $questions = trim($intent['questions']);
-            // Kiểm tra nếu có trường nào bị thiếu
-            if (empty($entityid) || empty($action) || empty($questions)) {
-                // Thêm thông báo lỗi cho intent có lỗi
-                $errorMessages[] = "Giá trị tùy chỉnh thứ <b>" . ($index + 1) . "</b> không được lưu vì điền không đủ thông tin như: Entity ID, Hành Động hoặc Câu Lệnh Thực Thi.";
-            } else {
-                // Nếu đủ dữ liệu, tách các câu hỏi thành mảng và thêm vào mảng hợp lệ
-                $intent['questions'] = array_map('trim', explode("\n", $questions));
-                $valid_intents[] = $intent; // Lưu intent hợp lệ
-            }
-        }
-    } else {
-        // Nếu intents không hợp lệ hoặc không tồn tại, khởi tạo mảng trống
-        $valid_intents = [];
-        $errorMessages[] = "Không có các Tác Vụ tùy chỉnh nào cho Home Assistant được lưu";
-    }
-    // Đọc nội dung file JSON hiện tại
-    $fileData = json_decode(file_get_contents($Hass_Custom_Json), true);
-    // Cập nhật mảng intents trong dữ liệu file
-    $fileData['intents'] = $valid_intents; // Cập nhật dù là mảng rỗng
-    // Ghi lại toàn bộ nội dung vào file JSON (lưu mảng intents mới, dù là mảng rỗng)
-    file_put_contents($Hass_Custom_Json, json_encode($fileData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-    // Thông báo thành công hoặc lỗi
-    if (!empty($valid_intents)) {
-        $successMessage[] = "Lưu dữ liệu Custom Home Assistant thành công!";
-    } else {
-        $errorMessages[] = "Không có các Tác Vụ tùy chỉnh nào cho Home Assistant được lưu";
-    }
-}
-
-//Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
-if (isset($_POST['start_recovery_custom_homeassistant'])) {
-$data_recovery_type = $_POST['start_recovery_custom_homeassistant'];
-if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len"){
-    $uploadOk = 1;
-    // Kiểm tra xem tệp có được gửi không
-    if (isset($_FILES["fileToUpload_custom_hass_restore"])) {
-        //$targetFile = $Hass_Custom_Json;
-        $fileName = basename($_FILES["fileToUpload_custom_hass_restore"]["name"]);
-        // Kiểm tra xem tệp có phải là .json không
-		//if (!preg_match('/\.json$/', $fileName) || !preg_match('/^Home_Assistant_Custom/', $fileName)) {
-		if (!preg_match('/\.json$/', $fileName)) {
-		$errorMessages[] = "- Chỉ chấp nhận tệp .json, dành cho Home_Assistant_Custom.json";
-		$uploadOk = 0;
-		}
-        // Kiểm tra xem $uploadOk có bằng 0 không
-        if ($uploadOk == 0) {
-            $errorMessages[] = "- Tệp sao lưu không được tải lên";
-        } else {
-            // Di chuyển tệp vào thư mục đích
-            if (move_uploaded_file($_FILES["fileToUpload_custom_hass_restore"]["tmp_name"], $Hass_Custom_Json)) {
-                $successMessage[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục dữ liệu Custom Home Assistant thành công";
-            } else {
-                $errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
-            }
-        }
-    } else {
-        $errorMessages[] = "- Không có tệp sao lưu nào được tải lên";
-    }
-}else if ($data_recovery_type === "khoi_phuc_file_he_thong"){
-	$start_recovery_custom_hass = $_POST['backup_custom_hass_json_files'];
-	//$successMessage[] = $start_recovery_custom_hass;
-if (!empty($start_recovery_custom_hass)) {
-if (file_exists($start_recovery_custom_hass)) {
-    $command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($Hass_Custom_Json);
-    exec($command, $output, $resultCode);
-    if ($resultCode === 0) {
-        $successMessage[] = "Đã khôi phục dữ liệu Custom Home Assistant từ tệp sao lưu trên hệ thống thành công";
-    } else {
-        $errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Custom Home Assistant Mã lỗi: " . $resultCode;
-    }
-} else {
-    $errorMessages[] = "Lỗi: Tệp ".basename($start_recovery_custom_hass)." không tồn tại trên hệ thống";
-}
-    } else {
-        $errorMessages[] = "Không có tệp sao lưu Custom Home Assistant nào được chọn để khôi phục!";
-    }
-}
-}
-
-// Đọc file JSON hiện tại
-$json_data_custom = file_get_contents($Hass_Custom_Json);
-$intents = json_decode($json_data_custom, true);
-?>
-
 
 <!DOCTYPE html>
 <html lang="vi">
@@ -216,26 +52,7 @@ include 'html_head.php';
         }
 
     </style>
-<style>
-#suggestions {
-    position: absolute;
-    border: 1px solid #ccc;
-    background: #e9e9e9;
-    z-index: 3;
-    width: 100%;
-    max-height: 200px;
-    overflow-y: auto;
-}
 
-#suggestions div {
-    padding: 10px;
-    cursor: pointer;
-}
-
-#suggestions div:hover {
-    background-color: #e1a4a4;
-}
-</style>
 <link href="assets/vendor/prism/prism.min.css" rel="stylesheet">
      <style>
         #modal_dialog_show_Home_Assistant {
@@ -251,80 +68,7 @@ include 'html_head.php';
             overflow-y: auto;
         }
     </style>
-<script>
-	
-let data_home_assistant = [];
-
-data_home_assistant = <?php echo json_encode($hassData_all); ?>;
-
-	
-// Hàm thêm intent mới
-function addNewIntent() {
-    const container = document.getElementById('intents-container');
-    const newIndex = document.querySelectorAll('.intent').length; // Số lượng hiện tại của intent
-
-    // Tạo thẻ div mới chứa các trường input
-    const newIntent = 
-        '<div class="intent" id="intent_' + newIndex + '" style="margin-bottom: 20px; padding: 10px; border: 1px solid #ccc;">' +
-		
-			'<div class="input-group mb-3">' +
-            '<span class="input-group-text border-success" for="name_' + newIndex + '">Tên Tác Vụ&nbsp;<i class="bi bi-question-circle-fill" onclick="show_message(\'Tên này chỉ là để cho bạn dễ nhận diện và hình dung, thích đặt tên là gì thì đặt nhé\')"></i> &nbsp;:</span>' +
-            '<input class="form-control border-success" placeholder="Tên định danh để phân biệt với các câu lệnh, cấu hình khác" type="text" name="intents[' + newIndex + '][name]" id="name_' + newIndex + '">' +
-			'</div>' +
-
-
-			'<div class="input-group mb-3">' +
-            '<span class="input-group-text border-danger" for="friendly_name_' + newIndex + '">Friendly Name&nbsp;<i class="bi bi-question-circle-fill" onclick="show_message(\'Không cần nhập gì ở đây, hệ thống sẽ tự động điền thông tin\')"></i>&nbsp;:</span>' +
-            '<input readonly class="form-control border-danger" placeholder="Không cần điền dữ liệu ở đây" type="text" name="intents[' + newIndex + '][friendly_name]" id="friendly_name_' + newIndex + '">' +
-			'</div>' +
-
-
-			'<div class="input-group mb-3">' +
-            '<span class="input-group-text border-success" for="entityid_' + newIndex + '">Entity ID&nbsp;<i class="bi bi-question-circle-fill" onclick="show_message(\'Cần nhập đúng Entity ID thiết bị trong Home Assistant của bạn\')"></i>&nbsp;:</span>' +
-            '<input class="form-control border-success" placeholder="Điền dữ liệu hoặc Nhập tên để tìm kiếm" type="text" name="intents[' + newIndex + '][entityid]" id="entityid_' + newIndex + '">' +
-			'</div>' +
-
-			'<div class="input-group mb-3">' +
-            '<span class="input-group-text border-success" for="action_' + newIndex + '">Hành Động:</span>' +
-			'<select class="form-select border-success" name="intents[' + newIndex + '][action]" id="action_' + newIndex + '">' +
-			'<option value="">-- Chọn Hành Động Cần Thực Hiện --</option>' +
-			'<option value="turn_on">Bật (turn_on)</option>' +
-			'<option value="turn_off">Tắt (turn_off)</option>' +
-			'</select>' +
-			'</div>' +
-
-            '<label for="questions_' + newIndex + '">Câu Lệnh Thực Thi <i class="bi bi-question-circle-fill" onclick="show_message(\'Nếu nhiều hơn 1 câu lệnh thì sẽ cần xuống dòng, Mỗi câu lệnh tương ứng với 1 dòng\')"></i> :</label><br>' +
-            '<textarea class="form-control border-success" placeholder="Nhập câu lệnh cần gán để điều khiển thiết bị, nếu nhiều hơn 1 câu lệnh thì cần xuống dòng, mỗi câu lệnh là 1 dòng" name="intents[' + newIndex + '][questions]" id="questions_' + newIndex + '" rows="5"></textarea><br>' +
-
-            '<center><button class="btn btn-danger rounded-pill" type="button" onclick="removeIntent(' + newIndex + ')"><i class="bi bi-trash" type="button"></i> Xóa</button><center>' +
-        '</div>';
-
-    // Thêm intent mới vào container
-    container.insertAdjacentHTML('beforeend', newIntent);
-	
-// Gọi lại hàm để gán sự kiện
-initializeSearchInputs();
-}
-
-
-// Hàm xóa intent và hiển thị thông báo trước khi xóa hẳn
-function removeIntent(index, intent_name) {
-	
-    if (!confirm("Bạn có chắc chắn muốn xóa tác vụ: '" + intent_name + "' này không?")) {
-        return;
-    }
-	
-    const intentDiv = document.getElementById('intent_' + index);
-    if (intentDiv) {
-		showMessagePHP("Đã xóa tạm: " +intent_name, 3)
-        intentDiv.innerHTML = '<h5 class="card-title"><font color=red>Sẽ thực thi xóa: '+intent_name+',</font> đang chờ (Lưu Thay Đổi) để áp dụng</h5>';
-    } else {
-		show_message("Không tìm thấy intent với index: " +index);
-    }
-}
-
-    </script>
-</head>
+	</head>
 <body>
 <!-- ======= Header ======= -->
 <?php
@@ -339,9 +83,8 @@ include 'html_sidebar.php';
 <!-- End Sidebar-->
 
   <main id="main" class="main">
-
     <div class="pagetitle">
-      <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Tạm thời Hỗ Trợ, Áp dụng được với <b>switch, script, automation, fan, light, media_player, v..v...</b> các thực thế có hỗ trợ <b>turn_on</b> và <b>turn_off</b>')"></i></h1>
+      <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Hỗ trợ code YAML, Có trong: <b>Công cụ nhà phát triển -> Hành Động</b><br/>- Công cụ phát triển hành động cho phép bạn thực hiện bất kỳ hành động nào có trong Home Assistant.')"></i></h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
@@ -350,11 +93,217 @@ include 'html_sidebar.php';
         </ol>
       </nav>
     </div><!-- End Page Title -->
-	    <section class="section">
-        <div class="row">
+<form class="row g-3 needs-validation" novalidate method="POST" enctype="multipart/form-data" action="">
+<?php
+// Đọc dữ liệu JSON
+$jsonFilePath = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
+
+// Mảng lưu thông báo lỗi
+$errorMessages = [];
+$successMessage = [];
+
+//**Dùng dấu nháy đôi (") cho các giá trị chứa ký tự đặc biệt hoặc không phải chữ/số (vd: dấu cách, ký tự đặc biệt khác).
+function arrayToYaml($array, $indent = 0) {
+    $yaml = '';
+    $indentation = str_repeat(' ', $indent);
+    foreach ($array as $key => $value) {
+        if (is_array($value)) {
+            if (empty($value)) {
+                $yaml .= $indentation . $key . ": {}\n"; // Mảng rỗng
+            } else {
+                $yaml .= $indentation . $key . ":\n" . arrayToYaml($value, $indent + 2);
+            }
+        } else {
+            // Xử lý giá trị "{}" mà không cần dấu nháy
+            if ($value === "{}") {
+                $yaml .= $indentation . $key . ": {}\n";
+            } elseif (is_numeric($value) || preg_match('/^[a-zA-Z0-9._-]+$/', $value)) {
+                // Giá trị đơn giản không cần dấu nháy
+                $yaml .= $indentation . $key . ": " . $value . "\n";
+            } else {
+                //Các giá trị còn lại sử dụng dấu nháy đôi
+                $yaml .= $indentation . $key . ": \"" . $value . "\"\n";
+            }
+        }
+    }
+    return $yaml;
+}
+
+//Hàm tự chuyển YAML (giả lập) thành mảng
+function yamlToArray($yaml) {
+    $lines = explode("\n", trim($yaml));
+    $result = [];
+	//Mảng để giữ key cha
+    $path = [];
+    foreach ($lines as $line) {
+		//Bỏ qua dòng trống
+        if (trim($line) === "") continue;
+        preg_match('/^(\s*)([^:]+):(.*)$/', $line, $matches);
+        if (!$matches) continue;
+		// Xác định mức độ lùi đầu dòng
+        $indent = strlen($matches[1]) / 2;
+        $key = trim($matches[2]);
+        $value = trim($matches[3]);
+        // Loại bỏ dấu ngoặc kép của value
+        $value = trim($value, "\"");
+        while (count($path) > $indent) {
+			// Thoát ra nếu lùi indent
+            array_pop($path);
+        }
+        $parent = &$result;
+        foreach ($path as $segment) {
+            $parent = &$parent[$segment];
+        }
+        if ($value === "") {
+            $parent[$key] = [];
+            $path[] = $key;
+        } else {
+            $parent[$key] = is_numeric($value) ? (float)$value : $value;
+        }
+    }
+    return $result;
+}
+
+// Xử lý dữ liệu khi form được gửi
+if (isset($_POST['save_custom_home_assistant'])) {
+
+#Sao Lưu Dữ Liệu Trước
+if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
+// Đường dẫn gốc và đích
+$sourceFile = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
+$destinationDir = $directory_path . '/' . $Config['backup_upgrade']['custom_home_assistant']['backup_path'];
+$destinationFile = $destinationDir . "/Home_Assistant_Custom_" . date('dmY_His') . ".json";
+// Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
+if (!is_dir($destinationDir)) {
+    mkdir($destinationDir, 0777, true);
+    chmod($destinationDir, 0777);
+    $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
+}
+// Sao chép tệp mới
+if (copy($sourceFile, $destinationFile)) {
+    chmod($destinationFile, 0777);
+    //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
+    // Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
+    $jsonFiles = glob($destinationDir . "/*.json");
+    usort($jsonFiles, function($a, $b) {
+        return filemtime($a) - filemtime($b);
+    });
+    // Xóa các tệp cũ nhất nếu số lượng tệp vượt quá 5
+    if (count($jsonFiles) > $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) {
+        foreach (array_slice($jsonFiles, 0, count($jsonFiles) - $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) as $oldFile) {
+            unlink($oldFile);
+			$successMessage[] = "Vượt quá số lượng tệp tin Backup là <b>".$Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']."</b>, đã xóa tệp: <b>".basename($oldFile)."</b>";
+        }
+    }
+} else {
+    $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
+}
+}
+    // Nhận danh sách phần tử bị xóa (dưới dạng mảng ID phần tử)
+    $deletedItems = json_decode($_POST['deleted_items'] ?? '[]', true);
+    // Duyệt qua dữ liệu mới nhận từ form và xử lý
+    $intents = $_POST['intents'] ?? [];
+    // Loại bỏ các intent đã bị xóa
+    foreach ($deletedItems as $deletedId) {
+        // Tạo ID từ name để kiểm tra
+        $deletedIndex = str_replace('accordion_button_custom_hass_', '', $deletedId) - 1;
+        // Nếu tìm thấy phần tử, loại bỏ nó khỏi mảng intents
+        if (isset($intents[$deletedIndex])) {
+            unset($intents[$deletedIndex]);
+        }
+    }
+    // Sắp xếp lại chỉ số mảng để giữ tính liên tục sau khi xóa
+    $intents = array_values($intents);
+    // Chuyển đổi YAML thành mảng và xử lý các dữ liệu khác (YAML, questions, active, v.v.)
+    foreach ($intents as $index => $intent) {
+        $intents[$index]['data_yaml'] = yamlToArray(trim($intent['data_yaml']));
+        $intents[$index]['questions'] = array_filter(array_map('trim', explode("\n", $intent['questions'] ?? '')));
+        // Cập nhật các trường khác
+        $intents[$index]['name'] = $intent['name'];
+        $intents[$index]['reply'] = $intent['reply'] ?? '';
+        $intents[$index]['active'] = isset($intent['active']) && $intent['active'] === 'on';
+    }
+    // Cập nhật dữ liệu sau khi xóa phần tử
+    $updatedData = ['intents' => $intents];
+    // Ghi lại dữ liệu vào tệp JSON
+    if (file_put_contents($jsonFilePath, json_encode($updatedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+        $successMessage[] = "Dữ liệu đã được lưu thành công!";
+    } else {
+        $errorMessages[] = "Không thể lưu dữ liệu. Vui lòng kiểm tra quyền truy cập tệp tin.";
+    }
+}
 
 
-<!-- Form để chỉnh sửa các giá trị trong file JSON -->
+//Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
+if (isset($_POST['start_recovery_custom_homeassistant'])) {
+$data_recovery_type = $_POST['start_recovery_custom_homeassistant'];
+if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len"){
+    $uploadOk = 1;
+    // Kiểm tra xem tệp có được gửi không
+    if (isset($_FILES["fileToUpload_custom_hass_restore"])) {
+        //$targetFile = $jsonFilePath;
+        $fileName = basename($_FILES["fileToUpload_custom_hass_restore"]["name"]);
+        // Kiểm tra xem tệp có phải là .json không
+		//if (!preg_match('/\.json$/', $fileName) || !preg_match('/^Home_Assistant_Custom/', $fileName)) {
+		if (!preg_match('/\.json$/', $fileName)) {
+		$errorMessages[] = "- Chỉ chấp nhận tệp .json, dành cho Home_Assistant_Custom.json";
+		$uploadOk = 0;
+		}
+        // Kiểm tra xem $uploadOk có bằng 0 không
+        if ($uploadOk == 0) {
+            $errorMessages[] = "- Tệp sao lưu không được tải lên";
+        } else {
+            // Di chuyển tệp vào thư mục đích
+            if (move_uploaded_file($_FILES["fileToUpload_custom_hass_restore"]["tmp_name"], $jsonFilePath)) {
+                $successMessage[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục dữ liệu Custom Home Assistant thành công";
+            } else {
+                $errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
+            }
+        }
+    } else {
+        $errorMessages[] = "- Không có tệp sao lưu nào được tải lên";
+    }
+}else if ($data_recovery_type === "khoi_phuc_file_he_thong"){
+	$start_recovery_custom_hass = $_POST['backup_custom_hass_json_files'];
+if (!empty($start_recovery_custom_hass)) {
+if (file_exists($start_recovery_custom_hass)) {
+    $command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($jsonFilePath);
+    exec($command, $output, $resultCode);
+    if ($resultCode === 0) {
+        $successMessage[] = "Đã khôi phục dữ liệu Custom Home Assistant từ tệp sao lưu trên hệ thống thành công";
+    } else {
+        $errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Custom Home Assistant Mã lỗi: " . $resultCode;
+    }
+} else {
+    $errorMessages[] = "Lỗi: Tệp ".basename($start_recovery_custom_hass)." không tồn tại trên hệ thống";
+}
+    } else {
+        $errorMessages[] = "Không có tệp sao lưu Custom Home Assistant nào được chọn để khôi phục!";
+    }
+}
+}
+
+if (file_exists($jsonFilePath)) {
+    $jsonData = file_get_contents($jsonFilePath);
+    $data = json_decode($jsonData, true);
+// Kiểm tra nếu dữ liệu JSON không hợp lệ hoặc thiếu key "intents"
+if (!is_array($data) || !isset($data['intents'])) {
+	chmod($jsonFilePath, 0777);
+    $data = ['intents' => []];
+    file_put_contents($jsonFilePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+}
+
+$intents = $data['intents'];
+
+if (empty($intents)) {
+	 echo '<center><h5 class="card-title"><font color="red">Chưa có tác vụ nào được thiết lập cho Custom Home Assistant:</font></h5></center>';
+}
+else {
+
+?>
+
+<section class="section">
+<div class="row">
 <?php
 // Hiển thị thông báo lỗi nếu có
 if (!empty($errorMessages)) {
@@ -378,27 +327,105 @@ if (!empty($successMessage)) {
     echo '</ul>';
     echo '</div>';
 }
+?>
+<h5 class="card-title"><font color="green">Thiết Lập Lệnh Tùy Chỉnh Home Assistant:</font></h5>
 
+<?php foreach ($intents as $index => $intent): ?>
 
-echo '<form method="POST" enctype="multipart/form-data" action="">';
-echo '<center>
-<button type="button" class="btn btn-success rounded-pill" title="Đồng bộ dữ liệu từ Home Assistant" onclick="get_hass_all()">
-    <i class="bi bi-arrow-repeat"></i> Đồng Bộ và Lưu Dữ Liệu
-</button>
+<div class="card accordion" id="accordion_button_custom_hass_<?= $index + 1 ?>">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_hass_<?= $index + 1 ?>" aria-expanded="false" aria-controls="collapse_button_custom_hass_<?= $index + 1 ?>">
+<font color="Fuchsia"><?= htmlspecialchars($intent['name']) ?>, &nbsp;</font> Trạng Thái: &nbsp;<?= !empty($intent['active']) ? ' <font color=green>Bật</font>' : ' <font color=red>Tắt</font>' ?></h5>
+<div id="collapse_button_custom_hass_<?= $index + 1 ?>" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_custom_hass_<?= $index + 1 ?>">
 
-<button type="button" class="btn btn-danger rounded-pill" title="Xóa dữ liệu Đã Đồng Bộ từ Home Assistant" onclick="del_get_hass_all()">
-    <i class="bi bi-trash"></i> Xóa dữ liệu Đã Đồng Bộ
-</button>
+<!-- Active trạng thái -->
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="intents[<?= $index ?>][active]" id="intents[<?= $index ?>][active]" <?= !empty($intent['active']) ? 'checked' : '' ?>>
+</div>
+</div>
+</div>
 
-<button type="button" class="btn btn-info rounded-pill" title="Tải Xuống Cấu Hình Custom Home Assistant" onclick="downloadFile(\''.$Hass_Custom_Json.'\')">
- <i class="bi bi-download"></i> Tải Xuống Cấu Hình
-</button>
+<!-- Tên Hành ĐỘng -->
+<div class="row mb-3">
+<label for="intents[<?= $index ?>][name]" class="col-sm-3 col-form-label" title="Đặt Tên Định Danh Cho Hành Động Này">Tên Tác Vụ <i class="bi bi-question-circle-fill" onclick="show_message('Tên Định Danh Để Phân Biệt Với Các Hành Động, Thao Tác Khác')"></i> : </label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input required class="form-control border-success" type="text" name="intents[<?= $index ?>][name]" id="intents[<?= $index ?>][name]" title="Đặt Tên Định Danh Cho Hành Động Này" placeholder="<?= htmlspecialchars($intent['name']) ?>" value="<?= htmlspecialchars($intent['name']) ?>">
+<div class="invalid-feedback">Cần nhập Tên Hành Động cho tác vụ này</div>
+</div>
+</div>
+</div>
 
-<button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã Đồng Bộ từ Home Assistant" id="openModalBtn_Home_Assistant">
- <i class="bi bi-eye"></i> Xem dữ liệu Cấu Hình Json
-</button>
-</center><br/>';
-echo '
+<!-- Tùy chỉnh câu phản hồi -->
+<div class="row mb-3">
+<label for="intents[<?= $index ?>][reply]" class="col-sm-3 col-form-label" title="Tùy Chỉnh Câu Phản Hồi Lại Khi Thực Hiện Thao Tác Này">Tùy Chỉnh Câu Phản Hồi <i class="bi bi-question-circle-fill" onclick="show_message('Tùy Chỉnh Câu Phản Hồi Lại Khi Thực Hiện Thao Tác Này, Không Muốn Phản Hồi Lại Theo Ý Của Bạn Thì Để Trống')"></i> : </label>
+<div class="col-sm-9">
+<input class="form-control border-success" type="text" name="intents[<?= $index ?>][reply]" id="intents[<?= $index ?>][reply]" title="Tùy Chỉnh Câu Phản Hồi Lại Khi Thực Hiện Thao Tác Này" placeholder="<?= htmlspecialchars($intent['reply'] ?? '') ?>" value="<?= htmlspecialchars($intent['reply'] ?? '') ?>">
+</div>
+</div>
+
+<!-- data_yaml: chuyển đổi mảng thành định dạng YAML -->
+<div class="row mb-3">
+<label for="intents[<?= $index ?>][data_yaml]" class="col-sm-3 col-form-label">Code YAML <i class="bi bi-question-circle-fill" onclick="show_message('Nội Dung Code YAML Cần Thực Hiện<br/>Nội dung Code YAML này được lấy ở Trong Home Assistant: <b>Công cụ nhà phát triển -> Hành Động -> Công cụ phát triển hành động cho phép bạn thực hiện bất kỳ hành động nào có trong Home Assistant.</b><br/> - Khi bạn thực hiện thành công, sẽ sao chép hết nội dung code trong ô nhập liệu đó vào đây')"></i> :</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<textarea required class="form-control border-success" rows="5" name="intents[<?= $index ?>][data_yaml]" id="intents[<?= $index ?>][data_yaml]">
+<?= htmlspecialchars(arrayToYaml($intent['data_yaml'] ?? [])) ?>
+</textarea>
+<div class="invalid-feedback">Cần nhập nội dung code YAML cho tác vụ này</div>
+</div>
+</div>
+</div>
+
+<!-- Câu Lệnh Cần Thực Thi -->
+<div class="row mb-3">
+<label for="intents[<?= $index ?>][questions]" class="col-sm-3 col-form-label">Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Câu Lệnh Để Điều Khiển, Chạy Hành Động Này, Không Giới Hạn Nhiều Câu Lệnh, Mỗi Câu Lệnh Là 1 Dòng<br/>- Khi bạn nói đúng 1 trong các câu lệnh được thiết lập, thì tác vụ sẽ được chạy')"></i> :</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<textarea required class="form-control border-success" rows="5" name="intents[<?= $index ?>][questions]" id="intents[<?= $index ?>][questions]">
+<?= htmlspecialchars(implode("\n", $intent['questions'] ?? [])) ?></textarea>
+</textarea>
+<div class="invalid-feedback">Cần nhập câu lệnh thực thi cho tác vụ này</div>
+</div>
+</div>
+</div>
+
+<center>
+<button type="button" class="btn btn-danger rounded-pill" onclick="removeIntentSection('accordion_button_custom_hass_<?= $index + 1 ?>', '<?= htmlspecialchars($intent['name']) ?>')"><i class="bi bi-trash"></i> Xóa Tác Vụ</button>
+</center>
+
+</div>
+</div>
+</div>
+<?php endforeach; ?>
+
+<?php
+
+}
+} else {
+    #echo("Không tìm thấy tệp JSON cho cấu hình Custom Home Assistant: {$jsonFilePath}");
+    $defaultContent = json_encode([
+        "intents" => []
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    // Ghi nội dung vào tệp tin
+    if (file_put_contents($jsonFilePath, $defaultContent) !== false) {
+        chmod($jsonFilePath, 0777);
+    }
+}
+
+?>
+
+ <!-- Các phần tử mới sẽ được thêm vào đây -->
+<div id="accordion-container">
+</div>
+
+<center>
+<button class="btn btn-primary  rounded-pill" type="submit" name="save_custom_home_assistant"><i class="bi bi-save"></i> Lưu thay đổi</button>
+ <button type="button" class="btn btn-success rounded-pill" onclick="addNewSection()">Thêm Mới Tác Vụ</button>
+</center>
+
+<h5 class="card-title"><font color="green">Khôi Phục Dữ Liệu:</font></h5>
 <div class="row mb-3">
     <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>
     <div class="col-sm-9">
@@ -408,11 +435,11 @@ echo '
         </div>
     </div>
 </div>
-
+ 
 <div class="row mb-3">
     <label class="col-sm-3 col-form-label"><b>Hoặc Chọn Tệp Khôi Phục:</b></label>
-    <div class="col-sm-9">';
-
+    <div class="col-sm-9">
+<?php
 $jsonFiles = glob($Config['backup_upgrade']['custom_home_assistant']['backup_path'].'/*.json');
 $co_tep_BackUp_customhass = true;
 if (empty($jsonFiles)) {
@@ -435,88 +462,17 @@ echo '</select>
 <button type="button" class="btn btn-danger border-primary" title="Xóa Tệp Sao Lưu Custom Home Assistant" onclick="delete_file_backup_hass_custom(\'get_value_backup_config\')"><i class="bi bi-trash"></i></button>
 </div>';
 }
-echo '</div></div><hr/><h5 class="card-title"><font color=green>Thiết Lập Lệnh Tùy Chỉnh:</font></h5>';
 
-// Form để chỉnh sửa các giá trị trong file JSON
-
-echo '<div id="intents-container">';
-
-if (!empty($intents['intents'])) {
-
-
-    foreach ($intents['intents'] as $index => $intent) {
-		
-$action_value = htmlspecialchars($intent['action']);
-echo '<div class="card accordion" id="accordion_button_HASS_Custom_'.$index.'">
-
-<div class="card-body">
-<div class="intent" id="intent_' . $index . '">
-<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_HASS_Custom_'.$index.'" aria-expanded="false" aria-controls="collapse_button_HASS_Custom_'.$index.'">
-' . htmlspecialchars($intent['name']) . ' (' . ($action_value === "turn_on" ? "<font color=green>Bật</font>" : "<font color=red>Tắt</font>") . '):</h5>
-<div id="collapse_button_HASS_Custom_'.$index.'" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_HASS_Custom_'.$index.'">
-
-
-<div class="input-group mb-3">
-    <span class="input-group-text border-success" for="name_' . $index . '">Tên Tác Vụ&nbsp;<i class="bi bi-question-circle-fill" onclick="show_message(\'Tên này chỉ là để cho bạn dễ nhận diện và hình dung, thích đặt tên là gì thì đặt nhé\')"></i> &nbsp;:</span>
-<input type="text" class="form-control border-success" name="intents[' . $index . '][name]" value="' . htmlspecialchars($intent['name']) . '" id="name_' . $index . '">
-</div>
-
-
-<div class="input-group mb-3">
-    <span class="input-group-text border-danger" for="friendly_name_' . $index . '">Friendly Name&nbsp;<i class="bi bi-question-circle-fill" onclick="show_message(\'Không cần nhập gì ở đây, hệ thống sẽ tự động điền thông tin\')"></i>&nbsp;:</span>
-<input readonly type="text" class="form-control border-danger" name="intents[' . $index . '][friendly_name]" value="' . htmlspecialchars($intent['friendly_name']) . '" id="friendly_name_' . $index . '">
-</div>
-
-
-<div class="input-group mb-3">
-    <span class="input-group-text border-success" for="entityid_' . $index . '">Entity ID&nbsp;<i class="bi bi-question-circle-fill" onclick="show_message(\'Cần nhập đúng Entity ID thiết bị trong Home Assistant của bạn\')"></i>&nbsp;:</span>
-<input type="text" class="form-control border-success" name="intents[' . $index . '][entityid]" value="' . htmlspecialchars($intent['entityid']) . '" id="entityid_' . $index . '">
-</div>
-
-
-<div class="input-group mb-3">
-    <span class="input-group-text border-success" for="action_' . $index . '">Hành Động:</span>
-  <select class="form-select border-success" name="intents[' . $index . '][action]" id="action_' . $index . '">
-      <option value="">-- Chọn Hành Động Cần Thực Hiện --</option>
-      <option value="turn_on" ' . ($action_value === "turn_on" ? "selected" : "") . '>Bật (turn_on)</option>
-      <option value="turn_off" ' . ($action_value === "turn_off" ? "selected" : "") . '>Tắt (turn_off)</option>
-  </select>
-</div>
-
-
-<label for="questions_' . $index . '">Câu Lệnh Thực Thi <i class="bi bi-question-circle-fill" onclick="show_message(\'Nếu nhiều hơn 1 câu lệnh thì sẽ cần xuống dòng, Mỗi câu lệnh tương ứng với 1 dòng\')"></i> :</label><br>
-<textarea class="form-control border-success" name="intents[' . $index . '][questions]" id="questions_' . $index . '" rows="5">
-'.htmlspecialchars(implode("\n", $intent['questions'])).'
-</textarea><br>
-
-
-<center>
-<button type="button" class="btn btn-danger rounded-pill" title="Xóa dữ liệu: ' . htmlspecialchars($intent['name']) . '" onclick="removeIntent(' . $index . ', \'' . htmlspecialchars($intent['name']) . '\')">
-    <i class="bi bi-trash" type="button"></i> Xóa Dữ Liệu Này
-</button>
-</center>
-
-</div>
-</div>
-</div>
-</div>';
-}
-} 
-else {
-    echo '<br/><center><p><font color=red size=5>Câu lệnh tùy chỉnh điều khiển Home Assistant chưa được thiết lập</font></p><center><br/>';
-}
-echo '</div>';
+echo '</div></div>';
 ?>
 
-<?php
-// Nút tạo mới, gọi hàm addNewIntent()
-echo '<center><button type="submit" name="save_custom_home_assistant" class="btn btn-primary rounded-pill">Lưu thay đổi</button>
-<button type="button" class="btn btn-success rounded-pill" onclick="addNewIntent()">Thêm lệnh tùy chỉnh</button></center>';
-echo '</form>';
-?>
-</div>
+</form>
 </div>
 </section>
+
+
+
+
 </main>
 
     <!-- Modal hiển thị tệp Config.json -->
@@ -537,192 +493,124 @@ echo '</form>';
         </div>
     </div>
 
-<div id="suggestions" style="display: none;"></div>
-<div class="suggestions" id="suggestions"></div>
-
-<!-- ======= Footer ======= -->
+  <!-- ======= Footer ======= -->
 <?php
 include 'html_footer.php';
 ?>
+<!-- End Footer -->
 
+  <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<!-- Nghe thử file âm thanh 
+<audio id="audioPlayer" style="display: none;" controls></audio>-->
+
+  <!-- Template Main JS File -->
 <script>
+//Mảng chứa danh sách các phần tử đã xóa
+let deletedItems = [];
+//Để lưu lại phần tử gốc khi xóa
+let removedSections = {};
 
-// Hiển thị modal xem nội dung file json Home_Assistant.json
-['openModalBtn_Home_Assistant'].forEach(function(id) {
-    document.getElementById(id).addEventListener('click', function() {
-		var file_name_hassJSON = "<?php echo $Hass_Custom_Json; ?>";
-        read_loadFile(file_name_hassJSON);
-		document.getElementById('name_file_showzz').textContent = "Tên File: "+file_name_hassJSON.split('/').pop();
-        $('#myModal_Home_Assistant').modal('show');
-    });
-});
-
-//Xóa toàn bộ Dữ liệu đã đồng bộ từ Home Assistant
-function del_get_hass_all() {
-    if (!confirm("Bạn có chắc chắn muốn xóa dữ liệu Home Assistant đã đồng bộ không")) {
-        return;
+function removeIntentSection(id, name_text) {
+    const section = document.getElementById(id);
+    if (section) {
+        // Thêm ID phần tử vào mảng deletedItems
+        deletedItems.push(id);
+        // Lưu lại phần tử gốc để khôi phục sau
+        removedSections[id] = section.innerHTML;
+        // Thay thế nội dung của phần tử bị xóa bằng thông báo và thêm nút "Hủy bỏ"
+		section.innerHTML = '<div class="alert alert-danger">' +
+			'Đã xóa tác vụ: <b>' + name_text + '</b>, Thay đổi sẽ được lưu khi bạn nhấn "Lưu thay đổi".' +
+			'<button type="button" class="btn btn-warning btn-sm rounded-pill" onclick="restoreIntentSection(\'' + id + '\')">Hủy bỏ</button>' +
+			'</div>';
+        //thêm một input ẩn vào form để gửi danh sách phần tử đã xóa sau đó
+        document.querySelector('form').addEventListener('submit', function () {
+            const deletedInput = document.createElement('input');
+            deletedInput.type = 'hidden';
+            deletedInput.name = 'deleted_items';
+            deletedInput.value = JSON.stringify(deletedItems);
+            this.appendChild(deletedInput);
+        });
     }
-	loading('show');
-    // Khởi tạo một đối tượng XMLHttpRequest
-    var xhr = new XMLHttpRequest();
-    // Đường dẫn URL cho yêu cầu GET
-    var url = "includes/php_ajax/Check_Connection.php?del_get_hass_all";
-    // Xử lý phản hồi từ server khi request được hoàn thành
-    xhr.onreadystatechange = function() {
-        // Kiểm tra trạng thái request đã hoàn thành và trả về 200 OK
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-                // Phản hồi thành công, xử lý kết quả
-                var response = JSON.parse(xhr.responseText);
-                if (response.success) {
-					loading('hide');
-                    showMessagePHP(response.message, 3);
-                } else {
-					loading('hide');
-                    show_message("Lỗi: " + response.message);
-                }
-            } else {
-				loading('hide');
-                show_message.log("Yêu cầu thất bại với mã trạng thái: " + xhr.status);
-            }
-        }
-    };
-    // Mở kết nối với phương thức GET và URL
-    xhr.open("GET", url, true);
-    // Gửi yêu cầu đến server
-    xhr.send();
 }
 
-
-//lấy và làm mới dữ liệu Home Assistant lưu vào tệp Home_Assistant.json
-function get_hass_all() {
-	loading('show');
-    var xhr = new XMLHttpRequest();
-    var token_hasss = "<?php echo $Config['home_assistant']['long_token']; ?>";
-    var url_hasss = [
-        "<?php echo $Config['home_assistant']['internal_url']; ?>",
-        "<?php echo $Config['home_assistant']['external_url']; ?>"
-    ];
-    // Biến để theo dõi chỉ số URL hiện tại
-    var currentUrlIndex = 0;
-    function sendRequest() {
-        // Định nghĩa URL
-        var url = 'includes/php_ajax/Check_Connection.php?get_hass_all&url_hass=' + encodeURIComponent(url_hasss[currentUrlIndex]) + '&token_hass=' + encodeURIComponent(token_hasss);
-        xhr.open("GET", url, true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-					loading('hide');
-					var response = JSON.parse(xhr.responseText);
-                    //console.log(response)
-                    if (response.success) {
-						showMessagePHP("Đã đồng bộ và lưu dữ liệu từ Home Assistant Thành Công", 5)
-						data_home_assistant = response.response
-					}
-					else{
-						show_message('<center><font color=red><b>Lấy dữ liệu Thất Bại</b></font></center><br/>' + response.message)
-					}
-                } else {
-					showMessagePHP("Lỗi khi gửi yêu cầu:" +xhr.status);
-                    // Chuyển sang URL thứ hai nếu hiện tại không thành công
-                    if (currentUrlIndex === 0) {
-						// Chuyển tới URL thứ hai
-                        currentUrlIndex++; 
-						// Gửi yêu cầu tới URL thứ hai
-                        sendRequest(); 
-                    } else {
-						loading('hide');
-						show_message("Tất cả URL đều không thành công.");
-                    }
-                }
-            }
-        };
-        xhr.send();
+// Hàm phục hồi phần tử
+function restoreIntentSection(id) {
+    const section = document.getElementById(id);
+    if (section && removedSections[id]) {
+        section.innerHTML = removedSections[id];
+        deletedItems = deletedItems.filter(itemId => itemId !== id);
+        delete removedSections[id];
     }
-    sendRequest();
 }
-
 </script>
 
 <script>
-// Dữ liệu từ PHP
-let searchInputs = document.querySelectorAll('[id^="entityid_"]');
-// Hàm để tìm kiếm và hiển thị gợi ý
-function searchAndSuggest(inputElement, newIndex) {
-    const query = inputElement.value.toLowerCase();
-    const suggestionsBox = document.getElementById('suggestions');
-	// Xóa gợi ý cũ
-    suggestionsBox.innerHTML = '';
-	// Ẩn gợi ý nếu không có
-    suggestionsBox.style.display = 'none';
-    // Đặt vị trí của khung gợi ý ngay bên dưới ô input
-    const rect = inputElement.getBoundingClientRect();
-    suggestionsBox.style.top = rect.bottom + window.scrollY + 'px';
-    suggestionsBox.style.left = rect.left + window.scrollX + 'px';
-	// Đặt chiều rộng giống ô input
-    suggestionsBox.style.width = rect.width + 'px';
-    if (query) {
-        const filteredData = data_home_assistant.filter(item => {
-            const entityIdMatch = item.entity_id && item.entity_id.toLowerCase().includes(query);
-            const friendlyNameMatch = item.attributes && item.attributes.friendly_name && item.attributes.friendly_name.toLowerCase().includes(query);
-            return entityIdMatch || friendlyNameMatch;
-        });
-        // Hiển thị gợi ý nếu có kết quả
-        if (filteredData.length) {
-            filteredData.forEach(item => {
-                const div = document.createElement('div');
-                div.textContent = item.entity_id + ' - ' + item.attributes.friendly_name;
-                div.onclick = function() {
-					// Cập nhật giá trị vào input
-                    inputElement.value = item.entity_id;
-					
-                    // Cập nhật friendly_name vào thẻ input tương ứng
-                    const friendlyNameInput = document.getElementById('friendly_name_' + newIndex);
-                    if (friendlyNameInput) { 
-                        friendlyNameInput.value = item.attributes.friendly_name; // Cập nhật giá trị friendly_name
-                    }
-					// Xóa gợi ý
-                    suggestionsBox.innerHTML = '';
-					// Ẩn gợi ý
-                    suggestionsBox.style.display = 'none';
-                };
-                suggestionsBox.appendChild(div);
-            });
-			// Hiển thị gợi ý
-            suggestionsBox.style.display = 'block'; 
-        }
-    }
+let sectionCounter = <?= count($intents) + 1; ?>;
+// Tạo mới HTML cho các phần tử
+function addNewSection() {
+    // Tạo ID duy nhất cho mỗi phần tử
+    const sectionID = 'section_custom_hass_' + sectionCounter;
+    const newSection = 
+        '<div class="card" id="' + sectionID + '">' +
+            '<div class="card-body">' +
+                '<h5 class="card-title">' +
+                    '<font color="green">Thêm Mới Tác Vụ:</font>' +
+                '</h5>' +
+
+                '<div class="row mb-3">' +
+                    '<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message(\'Bật hoặc Tắt để kích hoạt hành động này\')"></i>:</label>' +
+                    '<div class="col-sm-9">' +
+                        '<div class="form-switch">' +
+                            '<input class="form-check-input" type="checkbox" checked name="intents[' + (sectionCounter - 1) + '][active]" id="intents[' + (sectionCounter - 1) + '][active]">' +
+                        '</div>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="row mb-3">' +
+                    '<label class="col-sm-3 col-form-label">Tên Tác Vụ <i class="bi bi-question-circle-fill" onclick="show_message(\'Tên Định Danh Để Phân Biệt Với Các Hành Động, Thao Tác Khác\')"></i>:</label>' +
+                    '<div class="col-sm-9">' +
+                        '<input type="text" name="intents[' + (sectionCounter - 1) + '][name]" class="form-control border-success" placeholder="Nhập tên tác vụ">' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="row mb-3">' +
+                    '<label class="col-sm-3 col-form-label">Tùy Chỉnh Câu Phản Hồi <i class="bi bi-question-circle-fill" onclick="show_message(\'Tùy Chỉnh Câu Phản Hồi Lại Khi Thực Hiện Thao Tác Này, Không Muốn Phản Hồi Lại Theo Ý Của Bạn Thì Để Trống\')"></i>:</label>' +
+                    '<div class="col-sm-9">' +
+                        '<input type="text" name="intents[' + (sectionCounter - 1) + '][reply]" class="form-control border-success" placeholder="Nhập câu phản hồi tùy chỉnh nếu cần">' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="row mb-3">' +
+                    '<label class="col-sm-3 col-form-label">Code YAML <i class="bi bi-question-circle-fill" onclick="show_message(\'Nội Dung Code YAML Cần Thực Hiện<br/>Nội dung Code YAML này được lấy ở Trong Home Assistant: <b>Công cụ nhà phát triển -> Hành Động -> Công cụ phát triển hành động cho phép bạn thực hiện bất kỳ hành động nào có trong Home Assistant.</b><br/> - Khi bạn thực hiện thành công, sẽ sao chép hết nội dung code trong ô nhập liệu đó vào đây\')"></i>:</label>' +
+                    '<div class="col-sm-9">' +
+                        '<textarea name="intents[' + (sectionCounter - 1) + '][data_yaml]" class="form-control border-success" rows="5" placeholder="Nhập code YAML trong Công cụ nhà phát triển của Home Assistant"></textarea>' +
+                    '</div>' +
+                '</div>' +
+
+                '<div class="row mb-3">' +
+                    '<label class="col-sm-3 col-form-label">Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message(\'Câu Lệnh Để Điều Khiển, Chạy Hành Động Này, Không Giới Hạn Nhiều Câu Lệnh, Mỗi Câu Lệnh Là 1 Dòng<br/>- Khi bạn nói đúng 1 trong các câu lệnh được thiết lập, thì tác vụ sẽ được chạy\')"></i>:</label>' +
+                    '<div class="col-sm-9">' +
+                        '<textarea name="intents[' + (sectionCounter - 1) + '][questions]" class="form-control border-success" rows="5" placeholder="Nhập câu lệnh cần thực thi tác vụ này"></textarea>' +
+                    '</div>' +
+                '</div>' +
+
+                '<center>' +
+                    '<button type="button" class="btn btn-danger rounded-pill" onclick="removeIntentSection(\'' + sectionID + '\', \'Thêm Mới Tác Vụ\')">' +
+                        'Xóa Tác Vụ' +
+                    '</button>' +
+                '</center>' +
+            '</div>' +
+        '</div>';
+    document.getElementById('accordion-container').insertAdjacentHTML('beforeend', newSection);
+    sectionCounter++;
 }
+</script>
 
-// Hàm để gán sự kiện cho tất cả các ô input tìm kiếm
-function initializeSearchInputs() {
-    searchInputs = document.querySelectorAll('[id^="entityid_"]');
-    searchInputs.forEach((input, index) => {
-        input.addEventListener('input', function() {
-            // Gọi hàm tìm kiếm với ô input hiện tại và index
-            searchAndSuggest(this, index);
-        });
-    });
-}
-
-// Gọi hàm để gán sự kiện
-initializeSearchInputs();
-
-// Ẩn gợi ý khi nhấn ra ngoài
-document.addEventListener('click', function(event) {
-    const suggestionsBox = document.getElementById('suggestions');
-    const isClickInside = suggestionsBox.contains(event.target) || Array.from(searchInputs).some(input => input === event.target);
-    if (!isClickInside) {
-        suggestionsBox.style.display = 'none'; // Ẩn gợi ý nếu nhấn ra ngoài
-    }
-});
-
-
-
+<script>
 //Xóa file backup Config
 function delete_file_backup_hass_custom(filePath) {
     if (filePath === "get_value_backup_config") {
-		//Lấy giá trị value của id: backup_custom_hass_json_files
         var get_value_backup_config = document.getElementById('backup_custom_hass_json_files').value;
         if (get_value_backup_config === "") {
             showMessagePHP("Không có tệp nào được chọn để tải xuống");
@@ -738,7 +626,6 @@ function delete_file_backup_hass_custom(filePath) {
 //Tải xuống file backup Config
 function dowlaod_file_backup_hass_custom(filePath) {
     if (filePath === "get_value_backup_config") {
-		//Lấy giá trị value của id: backup_custom_hass_json_files
         var get_value_backup_config = document.getElementById('backup_custom_hass_json_files').value;
         if (get_value_backup_config === "") {
             showMessagePHP("Không có tệp nào được chọn để tải xuống");
@@ -754,7 +641,6 @@ function dowlaod_file_backup_hass_custom(filePath) {
 //onclick xem nội dung file json
 function readJSON_file_path(filePath) {
     if (filePath === "get_value_backup_config") {
-		//Lấy giá trị value của id: backup_custom_hass_json_files
         var get_value_backup_config = document.getElementById('backup_custom_hass_json_files').value;
         if (get_value_backup_config === "") {
             showMessagePHP("Không có tệp nào được chọn để xem nội dung");
@@ -770,12 +656,24 @@ function readJSON_file_path(filePath) {
         $('#myModal_Home_Assistant').modal('show');
     }
 }
-
 </script>
+
+<script>
+// Hiển thị modal xem nội dung file json Home_Assistant.json
+['openModalBtn_Home_Assistant'].forEach(function(id) {
+    document.getElementById(id).addEventListener('click', function() {
+		var file_name_hassJSON = "<?php echo $Hass_Custom_Json; ?>";
+        read_loadFile(file_name_hassJSON);
+		document.getElementById('name_file_showzz').textContent = "Tên File: "+file_name_hassJSON.split('/').pop();
+        $('#myModal_Home_Assistant').modal('show');
+    });
+});
+</script>
+<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/prism/prism-json.min.js"></script>
 <?php
 include 'html_js.php';
 ?>
-<script src="assets/vendor/prism/prism.min.js"></script>
-<script src="assets/vendor/prism/prism-json.min.js"></script>
+
 </body>
 </html>

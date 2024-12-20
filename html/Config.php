@@ -1366,7 +1366,7 @@ Cấu Hình Home Assistant:</h5>
 
 
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Home Assistant (Hass) -> Câu Lệnh Tùy Chỉnh</b>')"></i> :</label>
+                  <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
                   <div class="col-sm-9">
 				  
 					<div class="form-switch">
@@ -3200,7 +3200,7 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
     <div class="col-sm-9">
         <div class="input-group">
             <input class="form-control border-success" type="file" name="fileToUpload_configjson_restore" accept=".json">
-            <button class="btn btn-warning border-success" type="submit" name="start_recovery_config_json" value="khoi_phuc_tu_tep_tai_len" onclick="return confirmRestore('Bạn có chắc chắn muốn tải lên tệp để khôi phục dữ liệu Config.json không?')">Tải Lên & Khôi Phục</button>
+            <button class="btn btn-warning border-success" type="submit" name="start_recovery_config_json" value="khoi_phuc_tu_tep_tai_len" onclick="return confirmRestore('Bạn có chắc chắn muốn tải lên tệp để khôi phục dữ liệu Config.json không?')"><i class="bi bi-upload"></i> Tải Lên & Khôi Phục</button>
         </div>
     </div>
 </div>
@@ -3252,8 +3252,8 @@ echo '
 
 <div class="row mb-3">
 <center>
-<button type="submit" name="all_config_save" class="btn btn-primary rounded-pill">Lưu Cài Đặt Config</button>
-<button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')">Xem Tệp Config</button>
+<button type="submit" name="all_config_save" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
+<button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')"><i class="bi bi-eye"></i> Xem Tệp Config</button>
 <button type="button" class="btn btn-success rounded-pill" title="Tải Xuống file: Config.json" onclick="downloadFile('<?php echo $Config_filePath; ?>')"><i class="bi bi-download"></i> Tải Xuống</button>
 
 				   </center>
