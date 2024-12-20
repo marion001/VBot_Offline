@@ -2,7 +2,7 @@
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
     "description": "Tái Cơ Cấu Nhập Liệu Custom Home Assistant",
-    "releaseDate": "20/12/2024",
+    "releaseDate": "20/12/2024-1",
     "changes": [
         {
             "type": "feature",

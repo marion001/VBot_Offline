@@ -233,6 +233,72 @@ if (copy($sourceFile, $destinationFile)) {
     }
 }
 
+if (isset($_POST['delete_all_custom_home_assistant'])) {
+
+
+
+#Sao Lưu Dữ Liệu Trước
+if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
+// Đường dẫn gốc và đích
+$sourceFile = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
+$destinationDir = $directory_path . '/' . $Config['backup_upgrade']['custom_home_assistant']['backup_path'];
+$destinationFile = $destinationDir . "/Home_Assistant_Custom_" . date('dmY_His') . ".json";
+// Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
+if (!is_dir($destinationDir)) {
+    mkdir($destinationDir, 0777, true);
+    chmod($destinationDir, 0777);
+    $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
+}
+// Sao chép tệp mới
+if (copy($sourceFile, $destinationFile)) {
+    chmod($destinationFile, 0777);
+    //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
+    // Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
+    $jsonFiles = glob($destinationDir . "/*.json");
+    usort($jsonFiles, function($a, $b) {
+        return filemtime($a) - filemtime($b);
+    });
+    // Xóa các tệp cũ nhất nếu số lượng tệp vượt quá 5
+    if (count($jsonFiles) > $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) {
+        foreach (array_slice($jsonFiles, 0, count($jsonFiles) - $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']) as $oldFile) {
+            unlink($oldFile);
+			$successMessage[] = "Vượt quá số lượng tệp tin Backup là <b>".$Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']."</b>, đã xóa tệp: <b>".basename($oldFile)."</b>";
+        }
+    }
+} else {
+    $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
+}
+}
+
+
+
+// Đường dẫn thư mục
+$directory = $VBot_Offline.'resource/hass';
+
+// Kiểm tra thư mục có tồn tại không
+if (is_dir($directory)) {
+    // Lấy danh sách tất cả các file JSON trong thư mục
+    $files = glob($directory . '/*.json');
+    foreach ($files as $file) {
+        if (is_file($file)) {
+            unlink($file);
+        }
+    }
+
+    $content = json_encode([
+        "intents" => []
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+	
+    file_put_contents($jsonFilePath, $content);
+	chmod($jsonFilePath, 0777);
+    $successMessage[] = "Toàn bộ dữ liệu cấu hình đã được xóa thành công";
+} else {
+    $errorMessages[] = "Thư mục không tồn tại: " . $directory;
+}
+
+
+}
+
 
 //Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
 if (isset($_POST['start_recovery_custom_homeassistant'])) {
@@ -354,7 +420,7 @@ if (!empty($successMessage)) {
 <div class="col-sm-9">
 <div class="input-group mb-3">
 <input required class="form-control border-success" type="text" name="intents[<?= $index ?>][name]" id="intents[<?= $index ?>][name]" title="Đặt Tên Định Danh Cho Hành Động Này" placeholder="<?= htmlspecialchars($intent['name']) ?>" value="<?= htmlspecialchars($intent['name']) ?>">
-<div class="invalid-feedback">Cần nhập Tên Hành Động cho tác vụ này</div>
+<div class="invalid-feedback">Cần đặt tên cho hành động này</div>
 </div>
 </div>
 </div>
@@ -423,6 +489,10 @@ if (!empty($successMessage)) {
 <center>
 <button class="btn btn-primary  rounded-pill" type="submit" name="save_custom_home_assistant"><i class="bi bi-save"></i> Lưu thay đổi</button>
  <button type="button" class="btn btn-success rounded-pill" onclick="addNewSection()">Thêm Mới Tác Vụ</button>
+ 
+ <button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_Home_Assistant">
+ <i class="bi bi-eye"></i>Xem dữ liệu Cấu Hình</button>
+ <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_custom_home_assistant" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Custom Home Assistant không')"><i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
 </center>
 
 <h5 class="card-title"><font color="green">Khôi Phục Dữ Liệu:</font></h5>
@@ -570,8 +640,9 @@ function addNewSection() {
                 '<div class="row mb-3">' +
                     '<label class="col-sm-3 col-form-label">Tên Tác Vụ <i class="bi bi-question-circle-fill" onclick="show_message(\'Tên Định Danh Để Phân Biệt Với Các Hành Động, Thao Tác Khác\')"></i>:</label>' +
                     '<div class="col-sm-9">' +
-                        '<input type="text" name="intents[' + (sectionCounter - 1) + '][name]" class="form-control border-success" placeholder="Nhập tên tác vụ">' +
-                    '</div>' +
+                        '<input required type="text" name="intents[' + (sectionCounter - 1) + '][name]" class="form-control border-success" placeholder="Nhập tên tác vụ">' +
+                    '<div class="invalid-feedback">Cần đặt tên cho hành động này</div>' +
+					'</div>' +
                 '</div>' +
 
                 '<div class="row mb-3">' +
@@ -584,15 +655,17 @@ function addNewSection() {
                 '<div class="row mb-3">' +
                     '<label class="col-sm-3 col-form-label">Code YAML <i class="bi bi-question-circle-fill" onclick="show_message(\'Nội Dung Code YAML Cần Thực Hiện<br/>Nội dung Code YAML này được lấy ở Trong Home Assistant: <b>Công cụ nhà phát triển -> Hành Động -> Công cụ phát triển hành động cho phép bạn thực hiện bất kỳ hành động nào có trong Home Assistant.</b><br/> - Khi bạn thực hiện thành công, sẽ sao chép hết nội dung code trong ô nhập liệu đó vào đây\')"></i>:</label>' +
                     '<div class="col-sm-9">' +
-                        '<textarea name="intents[' + (sectionCounter - 1) + '][data_yaml]" class="form-control border-success" rows="5" placeholder="Nhập code YAML trong Công cụ nhà phát triển của Home Assistant"></textarea>' +
-                    '</div>' +
+                        '<textarea required name="intents[' + (sectionCounter - 1) + '][data_yaml]" class="form-control border-success" rows="5" placeholder="Nhập code YAML trong Công cụ nhà phát triển của Home Assistant"></textarea>' +
+                    '<div class="invalid-feedback">Cần nhâp Code YAML của Home Assistant</div>' +
+					'</div>' +
                 '</div>' +
 
                 '<div class="row mb-3">' +
                     '<label class="col-sm-3 col-form-label">Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message(\'Câu Lệnh Để Điều Khiển, Chạy Hành Động Này, Không Giới Hạn Nhiều Câu Lệnh, Mỗi Câu Lệnh Là 1 Dòng<br/>- Khi bạn nói đúng 1 trong các câu lệnh được thiết lập, thì tác vụ sẽ được chạy\')"></i>:</label>' +
                     '<div class="col-sm-9">' +
-                        '<textarea name="intents[' + (sectionCounter - 1) + '][questions]" class="form-control border-success" rows="5" placeholder="Nhập câu lệnh cần thực thi tác vụ này"></textarea>' +
-                    '</div>' +
+                        '<textarea required name="intents[' + (sectionCounter - 1) + '][questions]" class="form-control border-success" rows="5" placeholder="Nhập câu lệnh cần thực thi tác vụ này"></textarea>' +
+                    '<div class="invalid-feedback">Cần nhâp câu lệnh cần thực thi</div>' +
+					'</div>' +
                 '</div>' +
 
                 '<center>' +
@@ -662,7 +735,7 @@ function readJSON_file_path(filePath) {
 // Hiển thị modal xem nội dung file json Home_Assistant.json
 ['openModalBtn_Home_Assistant'].forEach(function(id) {
     document.getElementById(id).addEventListener('click', function() {
-		var file_name_hassJSON = "<?php echo $Hass_Custom_Json; ?>";
+		var file_name_hassJSON = "<?php echo $jsonFilePath; ?>";
         read_loadFile(file_name_hassJSON);
 		document.getElementById('name_file_showzz').textContent = "Tên File: "+file_name_hassJSON.split('/').pop();
         $('#myModal_Home_Assistant').modal('show');
