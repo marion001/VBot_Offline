@@ -1,5 +1,7 @@
 Hướng dẫn cài đặt auto Wifi Manager
 
+user người dùng luôn luôn mặc định phải là "pi" nhé, nếu bạn thay đổi user thì hệ thống sẽ không chạy
+
 install-wifi-connect.sh là lệnh cài đặt wifi-connect có thể chạy lệnh nếu chưa cài:
 $:> bash ./install-wifi-connect.sh
 
@@ -8,6 +10,10 @@ $:> sudo chmod -R 0777 /home/pi/VBot_Offline/resource/wifi_manage
 
 - sao chép file wifi-connect.service vào trong system của hệ thống để khởi chạy cùng hệ thống
 $:> sudo cp /home/pi/VBot_Offline/resource/wifi_manage/wifi-connect.service /etc/systemd/system/wifi-connect.service
+
+- sao chép file _VBot_IP.py vào /home/pi/_VBot_IP.py
+$:> sudo cp /home/pi/VBot_Offline/resource/wifi_manage/_VBot_IP.py /home/pi/_VBot_IP.py
+
 
 - chạy file với quyền root:
 $:> sudo systemctl enable wifi-connect.service
