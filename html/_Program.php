@@ -65,7 +65,7 @@ include 'html_head.php';
             padding: 10px;
         }
     </style>
-
+<link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
 	</head>
 <body>
 
@@ -1454,7 +1454,7 @@ foreach ($Config['backup_upgrade']['vbot_program']['backup']['exclude_file_forma
       </div>
       <div class="modal-body">
 	  <div class="card-body">
-       <pre><code id="modal-body-content"></code></pre>
+      <pre id="data" class="json"><code id="modal-body-content" class="language-json"></code></pre>
       </div>
       </div>
       <div class="modal-footer">
@@ -1552,7 +1552,9 @@ function closeModal_read_files_in_backup() {
     $('#responseModal_read_files_in_backup').modal('hide');
 }
 </script>
-
+<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/prism/prism-json.min.js"></script>
+<script src="assets/vendor/prism/prism-yaml.min.js"></script>
 <?php
 include 'html_js.php';
 ?>

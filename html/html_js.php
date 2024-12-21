@@ -457,7 +457,18 @@ function read_files_in_backup(file_path, file_name) {
                         var fileContent = response.data
                             .replace(/\\r/g, '') // Xóa ký tự \r
                             .replace(/\\n/g, '\n'); // Thay thế \n bằng ký tự xuống dòng thực
-                        document.getElementById('modal-body-content').textContent = fileContent; // Cập nhật nội dung
+							// Cập nhật nội dung
+							//document.getElementById('modal-body-content').textContent = fileContent; 
+							
+						    // Cập nhật nội dung cho modal
+							var modalContentElement = document.getElementById('modal-body-content');
+							modalContentElement.textContent = fileContent;
+							
+							// Thêm class để Prism.js làm nổi bật cú pháp JSON
+							modalContentElement.className = 'language-yaml'; 
+							
+							// Kích hoạt Prism.js để làm nổi bật cú pháp
+							Prism.highlightElement(modalContentElement);
                     }
 					
 

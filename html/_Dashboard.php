@@ -49,6 +49,7 @@ include 'html_head.php';
             padding: 10px;
         }
     </style>
+<link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
 	</head>
 <body>
 <!-- ======= Header ======= -->
@@ -1380,8 +1381,7 @@ include 'html_footer.php';
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<!-- Nghe thử file âm thanh
-<audio id="audioPlayer" style="display: none;" controls></audio> -->
+
 
   <!-- Template Main JS File -->
     <script>
@@ -1389,6 +1389,9 @@ function closeModal_read_files_in_backup() {
     $('#responseModal_read_files_in_backup').modal('hide');
 }
 </script>
+<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/prism/prism-json.min.js"></script>
+<script src="assets/vendor/prism/prism-yaml.min.js"></script>
 <?php
 include 'html_js.php';
 ?>
