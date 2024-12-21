@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ Trợ Đọc Đia Chỉ IP Khi Được Kết Nối Wifi Lần Đầu, Hoặc Địa Chỉ IP Trước Đó Bị Thay Đổi",
-    "releaseDate": "21/12/2024-2",
+    "description": "Sửa lỗi xử lý dữ liệu trợ lý ảo Zalo AI Assistant",
+    "releaseDate": "21/12/2024-3",
     "changes": [
         {
             "type": "feature",
