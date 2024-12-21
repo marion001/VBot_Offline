@@ -1,5 +1,9 @@
 Hướng dẫn cài đặt auto Wifi Manager
 
+start-wifi-connect.sh: Vừa wifi manager + đọc ip ra loa
+
+start-wifi-connect_wifi_only.sh: chỉ có wifi manager, không đọc ip ra loa
+
 user người dùng luôn luôn mặc định phải là "pi" nhé, nếu bạn thay đổi user thì hệ thống sẽ không chạy
 
 install-wifi-connect.sh là lệnh cài đặt wifi-connect có thể chạy lệnh nếu chưa cài:
