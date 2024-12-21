@@ -1,12 +1,12 @@
 {
-    "version": "1.0.0",
+    "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Fix Lỗi Hotword Tiếng Anh",
-    "releaseDate": "11/12/2024",
+    "description": "Hỗ Trợ Đọc Đia Chỉ IP Khi Được Kết Nối Wifi Lần Đầu, Hoặc Địa Chỉ IP Trước Đó Bị Thay Đổi",
+    "releaseDate": "21/12/2024-2",
     "changes": [
         {
             "type": "feature",
-            "description": "Thêm hỗ trợ ngôn ngữ gọi hotword tienegs anh và tiếng việt"
+            "description": "chạy lệnh cài thư viện sau để áp dụng đọc địa chỉ ip: 'pip install gTTS'"
         },
         {
             "type": "fix",

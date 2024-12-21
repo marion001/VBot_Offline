@@ -34,24 +34,25 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
         </a>
       </li><!-- End Dashboard Nav -->
 
-
-
-
-
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
-          <i class="bi bi-cloud-check"></i><span>Sao Lưu Cloud</span><i class="bi bi-chevron-down ms-auto"></i>
+      <li class="nav-item" onclick="loading('show')">
+        <a class="nav-link collapsed" href="Config.php">
+          <i class="bi bi-gear-fill"></i>
+          <span>Cấu hình Config</span>
         </a>
-        <ul id="cloud-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li title="Thiết lập đa lệnh tùy chỉnh cho Home Assistant để điều khiển thiết bị" onclick="loading('show')">
-            <a href="GCloud_Drive.php">
-              <i class="bi bi-circle"></i><span>Google Drive</span>
-            </a>
-          </li>
-     
-        </ul>
       </li>
 
+      <li class="nav-item" onclick="loading('show')">
+        <a class="nav-link collapsed" href="Media_Player.php">
+          <i class="bi bi-music-note-list"></i><span>Media Player</span>
+        </a>
+      </li>
+
+      <li class="nav-item" onclick="loading('show')">
+        <a class="nav-link collapsed" href="Command.php">
+          <i class="bi bi-terminal-fill"></i>
+          <span>Command/Terminal</span>
+        </a>
+      </li>
 
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#hass-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
@@ -79,6 +80,24 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
         </ul>
       </li>
 
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-arrow-repeat"></i><span>Sao Lưu, Cập nhật</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li onclick="loading('show')">
+            <a href="_Program.php">
+              <i class="bi bi-circle"></i><span>Chương Trình</span>
+            </a>
+          </li onclick="loading('show')">
+          <li>
+            <a href="_Dashboard.php">
+              <i class="bi bi-circle"></i><span>Giao Diện</span>
+            </a>
+          </li>
+          </li>
+        </ul>
+      </li>
  
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
@@ -105,75 +124,28 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
               <i class="bi bi-circle"></i><span>__pycache__</span>
             </a>
           </li>
-		  <!--
-          <li>
-            <a href="#">
-              <i class="bi bi-circle"></i><span>Cache ZingMP3</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <i class="bi bi-circle"></i><span>Cache PodCast</span>
-            </a>
-          </li>
-          <li>
-            <a href="#">
-              <i class="bi bi-circle"></i><span>Cache Youtube</span>
-            </a>
-          </li>
-		  -->
         </ul>
-      </li><!-- End Icons Nav -->
+      </li>
+
+	  
+      <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
+
       <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#charts-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-arrow-repeat"></i><span>Sao Lưu, Cập nhật</span><i class="bi bi-chevron-down ms-auto"></i>
+        <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
+          <i class="bi bi-cloud-check"></i><span>Cloud Drive</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
-        <ul id="charts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li onclick="loading('show')">
-            <a href="_Program.php">
-              <i class="bi bi-circle"></i><span>Chương Trình</span>
-            </a>
-          </li onclick="loading('show')">
-          <li>
-            <a href="_Dashboard.php">
-              <i class="bi bi-circle"></i><span>Giao Diện</span>
+        <ul id="cloud-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li title="Thiết lập đa lệnh tùy chỉnh cho Home Assistant để điều khiển thiết bị" onclick="loading('show')">
+            <a href="GCloud_Drive.php">
+              <i class="bi bi-circle"></i><span>Google Drive</span>
             </a>
           </li>
+     
         </ul>
-      </li><!-- End Charts Nav -->
-      <li class="nav-heading">Trang</li>
-
-<!--
-      <li class="nav-item">
-        <a class="nav-link collapsed" href="Users_Profile.php">
-          <i class="bi bi-person"></i>
-          <span>Cá Nhân</span>
-        </a>
-      </li>
-	  -->
-	  
-	  <!-- End Profile Page Nav -->
-
-
-      <li class="nav-item" onclick="loading('show')">
-        <a class="nav-link collapsed" href="Config.php">
-          <i class="bi bi-gear-fill"></i>
-          <span>Cấu hình Config</span>
-        </a>
-      </li>
-	  
-      <li class="nav-item" onclick="loading('show')">
-        <a class="nav-link collapsed" href="Command.php">
-          <i class="bi bi-terminal-fill"></i>
-          <span>Command/Terminal</span>
-        </a>
       </li>
 
-      <li class="nav-item" onclick="loading('show')">
-        <a class="nav-link collapsed" href="Media_Player.php">
-          <i class="bi bi-music-note-list"></i><span>Media Player</span>
-        </a>
-      </li>
+
+
 
       <li class="nav-item" onclick="loading('show')">
         <a class="nav-link collapsed" href="Wifi.php">

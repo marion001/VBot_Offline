@@ -155,7 +155,6 @@ $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .=  stream_get_contents($stream_out);
 }
 
-
 if (isset($_POST['auto_wifi_manager_only'])) {
 $file_auto_wifi_manager_only = $VBot_Offline.'resource/wifi_manager/start-wifi-connect_wifi_only.sh';
 $file_auto_service = $VBot_Offline.'resource/wifi_manager/wifi-connect.service';
@@ -163,6 +162,7 @@ $CMD = "cp $file_auto_wifi_manager_only /home/pi/start-wifi-connect.sh";
 $CMD3 = "sudo cp $file_auto_service /etc/systemd/system/wifi-connect.service";
 $CMD2 = "dos2unix /home/pi/start-wifi-connect.sh";
 $CMD4 = "sudo systemctl daemon-reload";
+$CMD5 = "sudo systemctl enable wifi-connect.service";
 $CMD1 = "sudo systemctl restart wifi-connect.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
 if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
@@ -171,26 +171,31 @@ $stream = ssh2_exec($connection, $CMD);
 $stream3 = ssh2_exec($connection, $CMD3);
 $stream2 = ssh2_exec($connection, $CMD2);
 $stream4 = ssh2_exec($connection, $CMD4);
+$stream5 = ssh2_exec($connection, $CMD5);
 $stream1 = ssh2_exec($connection, $CMD1);
 stream_set_blocking($stream, true);
 stream_set_blocking($stream3, true);
 stream_set_blocking($stream2, true);
 stream_set_blocking($stream4, true);
+stream_set_blocking($stream5, true);
 stream_set_blocking($stream1, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
 $stream_out3 = ssh2_fetch_stream($stream3, SSH2_STREAM_STDIO);
 $stream_out2 = ssh2_fetch_stream($stream2, SSH2_STREAM_STDIO);
 $stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO);
+$stream_out5 = ssh2_fetch_stream($stream5, SSH2_STREAM_STDIO);
 $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
 $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD3\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD4\n";
+$output .= "$GET_current_USER@$HostName:~ $ $CMD5\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD1\n";
 $output .=  stream_get_contents($stream_out);
 $output .=  stream_get_contents($stream_out3);
 $output .=  stream_get_contents($stream_out2);
 $output .=  stream_get_contents($stream_out4);
+$output .=  stream_get_contents($stream_out5);
 $output .=  stream_get_contents($stream_out1);
 }
 
@@ -203,6 +208,7 @@ $CMD3 = "sudo cp $file_auto_service /etc/systemd/system/wifi-connect.service";
 $CMD5 = "sudo cp $file_python_ip /home/pi/_VBot_IP.py";
 $CMD2 = "dos2unix /home/pi/start-wifi-connect.sh";
 $CMD4 = "sudo systemctl daemon-reload";
+$CMD6 = "sudo systemctl enable wifi-connect.service";
 $CMD1 = "sudo systemctl restart wifi-connect.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
 if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
@@ -212,30 +218,35 @@ $stream3 = ssh2_exec($connection, $CMD3);
 $stream5 = ssh2_exec($connection, $CMD5);
 $stream2 = ssh2_exec($connection, $CMD2);
 $stream4 = ssh2_exec($connection, $CMD4);
+$stream6 = ssh2_exec($connection, $CMD6);
 $stream1 = ssh2_exec($connection, $CMD1);
 stream_set_blocking($stream, true);
 stream_set_blocking($stream3, true);
 stream_set_blocking($stream5, true);
 stream_set_blocking($stream2, true);
 stream_set_blocking($stream4, true);
+stream_set_blocking($stream6, true);
 stream_set_blocking($stream1, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
 $stream_out3 = ssh2_fetch_stream($stream3, SSH2_STREAM_STDIO);
 $stream_out5 = ssh2_fetch_stream($stream5, SSH2_STREAM_STDIO);
 $stream_out2 = ssh2_fetch_stream($stream2, SSH2_STREAM_STDIO);
 $stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO);
+$stream_out6 = ssh2_fetch_stream($stream6, SSH2_STREAM_STDIO);
 $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
 $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD3\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD5\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD4\n";
+$output .= "$GET_current_USER@$HostName:~ $ $CMD6\n";
 $output .= "$GET_current_USER@$HostName:~ $ $CMD1\n";
 $output .=  stream_get_contents($stream_out);
 $output .=  stream_get_contents($stream_out3);
 $output .=  stream_get_contents($stream_out5);
 $output .=  stream_get_contents($stream_out2);
 $output .=  stream_get_contents($stream_out4);
+$output .=  stream_get_contents($stream_out6);
 $output .=  stream_get_contents($stream_out1);
 }
 
@@ -434,6 +445,66 @@ $output .=  stream_get_contents($stream_out);
 
 if (isset($_POST['reboot_os'])) {
 $CMD = "sudo reboot";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['reload_services'])) {
+$CMD = "sudo systemctl daemon-reload";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['restart_auto_wifi'])) {
+$CMD = "sudo systemctl restart wifi-connect.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['enable_auto_wifi'])) {
+$CMD = "sudo systemctl enable wifi-connect.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['logs_auto_wifi'])) {
+$CMD = "journalctl -u wifi-connect.service -e";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['status_auto_wifi'])) {
+$CMD = "sudo systemctl status wifi-connect.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
 if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
@@ -750,12 +821,16 @@ include 'html_sidebar.php';
 <div class="btn-group">
 <div class="dropdown">
           <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-            OS Auto
+            OS Wifi
           </button>
           <ul class="dropdown-menu">
     <li>
-	<button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_only" type="submit" title="Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP">Auto Wifi Manager</button></li>
-	<button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_and_speaker_ip" type="submit" title="Cài Đặt Auto Wifi Manager Và Đọc Địa Chỉ IP Khi Mà IP Hoặc Wifi Bị Thay Đổi">Auto Wifi Manager + Đọc IP</button></li>
+	<button onclick="loading('show')" class="dropdown-item text-danger" name="restart_auto_wifi" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto Wifi Manager</button></li>
+	<button onclick="loading('show')" class="dropdown-item text-danger" name="enable_auto_wifi" type="submit" title="Kích Hoạt Services Auto Wifi Manaager">Enable Auto Wifi Manager</button></li>
+	<button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_only" type="submit" title="Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP">Install Auto Wifi Manager</button></li>
+	<button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_and_speaker_ip" type="submit" title="Cài Đặt Auto Wifi Manager Và Đọc Địa Chỉ IP Khi Mà IP Hoặc Wifi Bị Thay Đổi">Install Auto Wifi Manager + Đọc IP</button></li>
+	<button onclick="loading('show')" class="dropdown-item text-danger" name="logs_auto_wifi" type="submit" title="Xem Logs Auto Wifi Manaager">Logs Auto Wifi Manager</button></li>
+	<button onclick="loading('show')" class="dropdown-item text-danger" name="status_auto_wifi" type="submit" title="Kiêm tra trạng thái Auto Wifi Manaager">Status Auto Wifi Manager</button></li>
 	</ul>
 </div>
 </div>
@@ -786,6 +861,7 @@ include 'html_sidebar.php';
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="reboot_os" type="submit" title="Khởi động lại hệ thống">Reboot OS</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="chmod_vbot" type="submit" title="Chmod VBot và UI HTML thành 0777">Chmod 0777</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="owner_vbot" type="submit" title="Thay đổi quyền sở hữu các file thành của người dùng SSH">Owner Change</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="reload_services" type="submit" title="Re-load lại các Services">Re-load Services</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="ifconfig_os" type="submit" title="Kiểm tra thông tin mạng">Thông tin mạng</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lscpu_os" type="submit" title="Kiểm tra thông CPU">Thông tin CPU</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="hostnamectl_os" type="submit" title="Kiểm tra thông tin hệ điều hành">Thông tin OS</button></li>

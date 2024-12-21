@@ -1,12 +1,12 @@
 {
-    "version": "1.0.3",
+    "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Tái Cơ Cấu Toàn Bộ Custom Home Asistant Theo Nhập Liệu YAML",
-    "releaseDate": "20/12/2024-1",
+    "description": "Hỗ Trợ Đọc Đia Chỉ IP Khi Được Kết Nối Wifi Lần Đầu, Hoặc Địa Chỉ IP Trước Đó Bị Thay Đổi",
+    "releaseDate": "21/12/2024-2",
     "changes": [
         {
             "type": "feature",
-            "description": "Xin chào tất cả mọi người :D"
+            "description": "chạy lệnh cài thư viện sau để áp dụng đọc địa chỉ ip: 'pip install gTTS'"
         },
         {
             "type": "fix",
