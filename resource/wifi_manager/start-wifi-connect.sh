@@ -5,11 +5,27 @@ sleep 30
 # Lưu tên SSID hiện tại nếu có
 OLD_SSID=$(iwgetid -r)
 
+# Lưu địa chỉ IP hiện tại (nếu có)
+OLD_IP=$(cat /home/pi/ip.txt 2>/dev/null)
+
+# Kiểm tra kết nối Wifi
+CURRENT_IP=$(hostname -I | awk '{print $1}')
+
 iwgetid -r
 if [ $? -eq 0 ]; then
-    sudo systemctl start apache2
-    systemctl --user enable --now VBot_Offline.service
     printf 'Wifi đã kết nối...\n'
+    # Nếu IP cũ khác với IP hiện tại, tiến hành ghi lại địa chỉ IP mới
+    if [ "$OLD_IP" != "$CURRENT_IP" ]; then
+        # Lấy và ghi địa chỉ IP vào file
+        echo $CURRENT_IP > /home/pi/ip.txt
+        sudo -u pi python3 /home/pi/_VBot_IP.py
+    fi
+    # In ra địa chỉ IP hiện tại
+    printf "Địa chỉ IP của bạn là: $CURRENT_IP\n"
+    # Khởi động Apache
+    sudo systemctl start apache2
+    # Kích hoạt và chạy dịch vụ VBot_Offline
+    systemctl --user enable --now VBot_Offline.service
 else
     systemctl --user disable --now VBot_Offline.service
     sudo systemctl stop apache2

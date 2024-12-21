@@ -70,7 +70,7 @@ if (isset($_GET['start_vbot_service'])) {
         'message' => ''
     ];
     if ($connection) {
-        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        if (@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
             $stream = ssh2_exec($connection, $CMD);
             stream_set_blocking($stream, true);
             $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
@@ -97,7 +97,7 @@ if (isset($_GET['stop_vbot_service'])) {
         'message' => ''
     ];
     if ($connection) {
-        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        if (@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
             $stream = ssh2_exec($connection, $CMD);
             stream_set_blocking($stream, true);
             $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
@@ -124,7 +124,7 @@ if (isset($_GET['restart_vbot_service'])) {
         'message' => ''
     ];
     if ($connection) {
-        if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        if (@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
             $stream = ssh2_exec($connection, $CMD);
             stream_set_blocking($stream, true);
             $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));

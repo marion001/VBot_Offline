@@ -1,12 +1,12 @@
 {
     "version": "1.0.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Tái Cơ Cấu Nhập Liệu Custom Home Assistant",
-    "releaseDate": "20/12/2024-1",
+    "description": "Fix Lỗi Hotword Tiếng Anh",
+    "releaseDate": "11/12/2024",
     "changes": [
         {
             "type": "feature",
-            "description": "Hỗ trợ ngôn ngữ gọi hotword tiếng anh và tiếng việt"
+            "description": "Thêm hỗ trợ ngôn ngữ gọi hotword tienegs anh và tiếng việt"
         },
         {
             "type": "fix",

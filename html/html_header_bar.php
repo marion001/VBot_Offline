@@ -198,22 +198,24 @@ function power_action_service(action_name, mess_name) {
     if (!confirm(mess_name)) {
         return;
     }
-	loading('show');
+    loading('show');
     var xhr = new XMLHttpRequest();
-    var url = "includes/php_ajax/Check_Connection.php?"+action_name;
+    var url = "includes/php_ajax/Check_Connection.php?" + action_name;
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
+            loading('hide');
             if (xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                if (response.success) {
-					loading('hide');
-                    showMessagePHP(response.message);
-                } else {
-					loading('hide');
-                    show_message("Lỗi: " + response.message);
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        showMessagePHP(response.message);
+                    } else {
+                        show_message("Lỗi: " + response.message);
+                    }
+                } catch (e) {
+                    show_message("<b>Lỗi định dạng phản hồi từ máy chủ:</b><br/>"+xhr.responseText);
                 }
             } else {
-				loading('hide');
                 show_message("Yêu cầu thất bại với mã trạng thái: " + xhr.status);
             }
         }
@@ -221,5 +223,6 @@ function power_action_service(action_name, mess_name) {
     xhr.open("GET", url, true);
     xhr.send();
 }
+
 </script>
   </header>

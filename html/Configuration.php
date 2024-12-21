@@ -8,9 +8,17 @@
 ini_set('memory_limit', '1G');
 ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
+
+//Bật Logs php
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
+
+//Tắt Logs PHP
+#ini_set('display_errors', 0);
+#ini_set('display_startup_errors', 0);
+#error_reporting(0);
+
 
 // Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;

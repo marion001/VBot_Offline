@@ -73,8 +73,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['commandd'])) {
         }
 else {
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $commandnd);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -86,8 +86,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['auto_start'])) {
 $CMD = "systemctl --user start VBot_Offline.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -98,8 +98,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['auto_stop'])) {
 $CMD = "systemctl --user stop VBot_Offline.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -110,8 +110,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['auto_enable'])) {
 $CMD = "systemctl --user enable VBot_Offline.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -122,8 +122,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['auto_disable'])) {
 $CMD = "systemctl --user disable VBot_Offline.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -134,8 +134,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['auto_status'])) {
 $CMD = "systemctl --user status VBot_Offline.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -146,8 +146,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['auto_restart'])) {
 $CMD = "systemctl --user restart VBot_Offline.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -188,8 +188,8 @@ $CMD2 = "sudo chmod 0777 {$VBot_Offline}resource/VBot_Offline.service";
 $CMD3 = "ln -s /home/$ssh_user/.config/systemd/user/VBot_Offline.service /home/$ssh_user/.config/systemd/user/default.target.wants/VBot_Offline.service";
 $CMD4 = "sudo systemctl daemon-reload";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream1 = ssh2_exec($connection, $CMD1);
 $stream2 = ssh2_exec($connection, $CMD2);
 $stream3 = ssh2_exec($connection, $CMD3);
@@ -218,8 +218,8 @@ $output .= stream_get_contents($stream_out4);
 if (isset($_POST['lcd_auto_start'])) {
 $CMD = "systemctl --user start VBot_LCD_OLED.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -230,8 +230,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['lcd_auto_stop'])) {
 $CMD = "systemctl --user stop VBot_LCD_OLED.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -242,8 +242,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['lcd_auto_enable'])) {
 $CMD = "systemctl --user enable VBot_LCD_OLED.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -254,8 +254,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['lcd_auto_disable'])) {
 $CMD = "systemctl --user disable VBot_LCD_OLED.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -266,8 +266,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['lcd_auto_status'])) {
 $CMD = "systemctl --user status VBot_LCD_OLED.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -278,8 +278,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['lcd_auto_restart'])) {
 $CMD = "systemctl --user restart VBot_LCD_OLED.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -311,8 +311,8 @@ $CMD2 = "sudo chmod 0777 {$VBot_Offline}resource/VBot_LCD_OLED.service";
 $CMD3 = "ln -s /home/$ssh_user/.config/systemd/user/VBot_LCD_OLED.service /home/$ssh_user/.config/systemd/user/default.target.wants/VBot_LCD_OLED.service";
 $CMD4 = "sudo systemctl daemon-reload";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream1 = ssh2_exec($connection, $CMD1);
 $stream2 = ssh2_exec($connection, $CMD2);
 $stream3 = ssh2_exec($connection, $CMD3);
@@ -339,8 +339,8 @@ $output .= stream_get_contents($stream_out4);
 if (isset($_POST['apache_restart'])) {
 $CMD = "sudo systemctl restart apache2.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -351,8 +351,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['reboot_os'])) {
 $CMD = "sudo reboot";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -364,8 +364,8 @@ if (isset($_POST['chmod_vbot'])) {
 $CMD1 = "sudo chmod -R 0777 $VBot_Offline";
 $CMD2 = "sudo chmod -R 0777 $HTML_VBot_Offline";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream1 = ssh2_exec($connection, $CMD1);
 $stream2 = ssh2_exec($connection, $CMD2);
 stream_set_blocking($stream1, true); 
@@ -382,8 +382,8 @@ if (isset($_POST['owner_vbot'])) {
 $CMD1 = "sudo chown -R $GET_current_USER:$GET_current_USER $VBot_Offline";
 $CMD2 = "sudo chown -R $GET_current_USER:$GET_current_USER $HTML_VBot_Offline";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream1 = ssh2_exec($connection, $CMD1);
 $stream2 = ssh2_exec($connection, $CMD2);
 stream_set_blocking($stream1, true); 
@@ -399,8 +399,8 @@ $output .= stream_get_contents($stream_out2);
 if (isset($_POST['ifconfig_os'])) {
 $CMD = "ifconfig";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -411,8 +411,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['lscpu_os'])) {
 $CMD = "lscpu";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -423,8 +423,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['hostnamectl_os'])) {
 $CMD = "hostnamectl";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -435,8 +435,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['kiem_tra_bo_nho'])) {
 $CMD = "df -hm";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -447,8 +447,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['kiem_tra_dung_luong'])) {
 $CMD = "free -mh";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -459,8 +459,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['pvporcupine_info'])) {
 $CMD = "pip show pvporcupine";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -471,8 +471,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['picovoice_info'])) {
 $CMD = "pip show picovoice";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -483,8 +483,8 @@ $output .=  stream_get_contents($stream_out);
 if (isset($_POST['pip_show_all_lib'])) {
 $CMD = "pip list";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -499,8 +499,8 @@ $remotePath = "/home/$ssh_user/.local/lib/python3.9/site-packages/";
 $pattern = '/^pvporcupine-(\d+\.\d+\.\d+)\.dist-info$/m';
 // Thực hiện lệnh ls để lấy danh sách thư mục
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, "ls $remotePath");
 stream_set_blocking($stream, true);
 $outputhh = stream_get_contents($stream);
@@ -514,8 +514,8 @@ if (preg_match($pattern, $outputhh, $matches)) {
     //echo "Không tìm thấy thư mục pvporcupine-X.X.X.dist-info.";
 $path_picovoice = "/home/$ssh_user/.local/lib/python3.9/site-packages/picovoice/_picovoice.py";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, "cat $path_picovoice");
 stream_set_blocking($stream, true);
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -546,8 +546,8 @@ if (empty($versions_picovoice_install)) {
 } else {
 $CMD = "pip install picovoice==$versions_picovoice_install";
 $connection = ssh2_connect($ssh_host, $ssh_port);
-if (!$connection) {die("Không thể kết nối tới máy chủ SSH");}
-if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("Xác thực SSH không thành công.");}
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
 $stream = ssh2_exec($connection, $CMD);
 stream_set_blocking($stream, true); 
 $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO); 

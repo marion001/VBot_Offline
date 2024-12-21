@@ -1,0 +1,75 @@
+{
+    "intents": [
+        {
+            "active": true,
+            "name": "Tắt Đèn Ngủ 1 2",
+            "reply": "biết rồi ạ",
+            "data_yaml": {
+                "action": "switch.turn_off",
+                "data": "{}",
+                "target": {
+                    "entity_id": "switch.den_ngu"
+                }
+            },
+            "questions": [
+                "tắt đèn ngủ",
+                "tắt đèn ngủ đi",
+                "chào tuyển",
+                "chào biết rồi"
+            ]
+        },
+        {
+            "active": true,
+            "name": "Bật Đèn Ngủ",
+            "reply": "à baatj đèn ngủ",
+            "data_yaml": {
+                "action": "switch.turn_on",
+                "data": "{}",
+                "target": {
+                    "entity_id": "switch.den_ngu"
+                }
+            },
+            "questions": [
+                "bật đèn ngủ",
+                "bật đèn ngủ đi",
+                "ok bạn"
+            ]
+        },
+        {
+            "active": true,
+            "name": "Tắt Đèn Phòng Ngủ",
+            "reply": "được, tắt đèn phòng ngủ",
+            "data_yaml": {
+                "action": "switch.turn_off",
+                "data": "{}",
+                "target": {
+                    "entity_id": "switch.den_phong_ngu"
+                }
+            },
+            "questions": [
+                "tắt đèn phòng ngủ",
+                "tắt đèn phòng ngủ lên",
+                "tắt đèn phòng ngủ nhé"
+            ]
+        },
+        {
+            "active": true,
+            "name": "Thiết Lập Rèm Phòng Khách",
+            "reply": "được, thiết lập rèm",
+            "data_yaml": {
+                "action": "cover.set_cover_position",
+                "data": {
+                    "position": 59
+                },
+                "target": {
+                    "entity_id": "cover.virtual_cover"
+                }
+            },
+            "questions": [
+                "Mở rèm phòng khách 55",
+                "mở rèm phòng khách 55 nhé",
+                "đã mở rèm"
+            ]
+        }
+    ]
+}

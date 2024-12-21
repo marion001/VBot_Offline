@@ -76,8 +76,8 @@
     },
     "virtual_assistant": {
         "prioritize_virtual_assistants": [
-            "zalo_assistant",
             "default_assistant",
+            "zalo_assistant",
             "google_gemini",
             "chat_gpt"
         ],
