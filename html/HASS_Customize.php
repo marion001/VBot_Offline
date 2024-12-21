@@ -53,7 +53,8 @@ include 'html_head.php';
 
     </style>
 
-<link href="assets/vendor/prism/prism.min.css" rel="stylesheet">
+<!-- <link href="assets/vendor/prism/prism.min.css" rel="stylesheet"> -->
+<link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
      <style>
         #modal_dialog_show_Home_Assistant {
             display: flex;

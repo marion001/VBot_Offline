@@ -564,7 +564,8 @@ if ($lang !== 'eng' && $lang !== 'vi') {
 include 'html_head.php';
 ?>
 <head>
-<link href="assets/vendor/prism/prism.min.css" rel="stylesheet">
+<!-- <link href="assets/vendor/prism/prism.min.css" rel="stylesheet"> -->
+<link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
  
      <style>
         #modal_dialog_show_config {
@@ -578,6 +579,9 @@ include 'html_head.php';
             max-height: calc(100vh - 40px);
             overflow-y: auto;
         }
+		
+
+		
     </style>
    <style>
         .scroll-btn {
@@ -600,6 +604,8 @@ include 'html_head.php';
             bottom: 60px;
         }
     </style>
+	
+	
  </head>
 <body>
     <?php
@@ -3316,12 +3322,13 @@ include 'html_footer.php';
   <!-- Template Main JS File -->
   
 
-  
+<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/prism/prism-json.min.js"></script>
+<script src="assets/vendor/prism/prism-yaml.min.js"></script>
+
 <?php
 include 'html_js.php';
 ?>
-<script src="assets/vendor/prism/prism.min.js"></script>
-<script src="assets/vendor/prism/prism-json.min.js"></script>
 
 
     <script>
@@ -3422,8 +3429,11 @@ function read_YAML_file_path(fileName) {
         if (xhr.status >= 200 && xhr.status < 300) {
 			loading('hide');
             var codeElement = document.getElementById('code_config');
-            codeElement.textContent = xhr.responseText;
-            codeElement.className = 'language-txt';
+            // Hiển thị nội dung YAML
+            codeElement.textContent = xhr.responseText.trim();
+            codeElement.className = 'language-yaml'; // Áp dụng lớp cú pháp YAML
+            // Kích hoạt Prism.js để làm nổi bật cú pháp
+            Prism.highlightElement(codeElement);
             showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
             document.getElementById('name_file_showzz').textContent = "Tên File: " + fileName.split('/').pop();
             $('#myModal_Config').modal('show');
