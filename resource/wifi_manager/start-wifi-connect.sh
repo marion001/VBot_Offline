@@ -2,11 +2,15 @@
 
 #Đợi 30s cho thiết bị khởi động xong
 sleep 30
-# Lưu tên SSID hiện tại nếu có
+
+#lấy tên SSID hiện tại nếu có
 OLD_SSID=$(iwgetid -r)
 
 # Lưu địa chỉ IP hiện tại (nếu có)
 OLD_IP=$(cat /home/pi/ip.txt 2>/dev/null)
+
+# Lưu tên Wifi hiện tại (nếu có)
+OLD_WIFI=$(cat /home/pi/wifi.txt 2>/dev/null)
 
 # Kiểm tra kết nối Wifi
 CURRENT_IP=$(hostname -I | awk '{print $1}')
@@ -14,10 +18,12 @@ CURRENT_IP=$(hostname -I | awk '{print $1}')
 iwgetid -r
 if [ $? -eq 0 ]; then
     printf 'Wifi đã kết nối...\n'
-    # Nếu IP cũ khác với IP hiện tại, tiến hành ghi lại địa chỉ IP mới
-    if [ "$OLD_IP" != "$CURRENT_IP" ]; then
+    # Nếu IP cũ khác với IP hiện tại, hoặc tên wifi khác với wifi hiện tại
+    if [ "$OLD_IP" != "$CURRENT_IP" ] || [ "$OLD_WIFI" != "$OLD_SSID" ]; then
         # Lấy và ghi địa chỉ IP vào file
         echo $CURRENT_IP > /home/pi/ip.txt
+		# Lấy và tên wifi vào file
+        echo $OLD_SSID > /home/pi/wifi.txt
         sudo -u pi python3 /home/pi/_VBot_IP.py
     fi
     # In ra địa chỉ IP hiện tại
