@@ -1257,14 +1257,14 @@ if (isset($_POST['Check_For_Upgrade'])) {
 <font color=green><ul>
   <li>Phiên Bản Mới:
     <ul>
-      <li>Ngày Phát Hành: <b>{$remoteData['releaseDate']}</b></li>
-      <li>Phiên Bản: <b>{$remoteData['version']}</b></li>
-      <li>Mô Tả: <b>{$remoteData['description']}</b></li>
+      <li>Ngày Phát Hành: <font color=red><b>{$remoteData['releaseDate']}</b></font></li>
+      <li>Phiên Bản: <font color=red><b>{$remoteData['version']}</b></font></li>
+      <li>Mô Tả: <font color=red><b>{$remoteData['description']}</b></font></li>
 	  <li>Nội Dung Thay Đổi:
 	  <ul>
-	   <li>Tính Năng: <b>{$remoteData['changes'][0]['description']}</b></li>
-	   <li>Sửa Lỗi: <b>{$remoteData['changes'][1]['description']}</b></li>
-	   <li>Cải Tiến: <b>{$remoteData['changes'][2]['description']}</b></li>
+	   <li>Tính Năng: <font color=red><b>{$remoteData['changes'][0]['description']}</b></font></li>
+	   <li>Sửa Lỗi: <font color=red><b>{$remoteData['changes'][1]['description']}</b></font></li>
+	   <li>Cải Tiến: <font color=red><b>{$remoteData['changes'][2]['description']}</b></font></li>
 	  </ul>
 	  </li>
     </ul>
@@ -1523,7 +1523,7 @@ foreach ($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directo
 </div>
 
 <center>
-<button type="submit" name="Check_For_Upgrade" class="btn btn-primary rounded-pill">Kiểm Tra Bản Cập Nhật</button>
+<button type="submit" name="Check_For_Upgrade" class="btn btn-primary rounded-pill" onclick="loading('show')">Kiểm Tra Bản Cập Nhật</button>
 <button type="submit" name="Backup_Upgrade_Program" value="yes_vbot_upgrade" class="btn btn-success rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản chương trình Vbot mới?')">Cập Nhật Chương Trình</button>
 </center>
 
