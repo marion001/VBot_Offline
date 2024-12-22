@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi xử lý dữ liệu trợ lý ảo Zalo AI Assistant",
-    "releaseDate": "21/12/2024-3",
+    "description": "Sửa lỗi MQTT publish khi chỉnh trên Volume UI",
+    "releaseDate": "22/12/2024",
     "changes": [
         {
             "type": "feature",

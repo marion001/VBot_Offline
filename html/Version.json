@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ Trợ Đọc Đia Chỉ IP Khi Được Kết Nối Wifi Lần Đầu, Hoặc Địa Chỉ IP Trước Đó Bị Thay Đổi",
-    "releaseDate": "21/12/2024-2",
+    "description": "Sửa lỗi MQTT publish Volume UI",
+    "releaseDate": "22/12/2024",
     "changes": [
         {
             "type": "feature",

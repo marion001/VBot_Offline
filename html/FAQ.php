@@ -60,7 +60,9 @@ include 'html_sidebar.php';
   <br/>
 <div class="card-body">
 
-
+<div class="alert alert-success" role="alert">
+Link Tải Xuống IMG: <a href="https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ" target="_bank">https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>
+</div>
 
 <div class="card accordion" id="accordion_button_1">
 <div class="card-body">
@@ -253,9 +255,16 @@ Cấu Hình Auto/Tự Động Chạy VBot Cùng Hệ Thống:
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_7" aria-expanded="false">
 Cấu Hình Auto Kết Nối Wifi hoặc Tạo Điểm Truy Cập AP :
 </h5><div id="collapse_button_7" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_7">
-- Nội Dung Hướng Dẫn Và Dữ Liệu Nằm Trong Thư Mục <b>VBot_Offline</b> với đường dẫn:
+- Truy Cập Tab: <b>Command/Terminal</b> -> <b>OS Wifi</b>
 <br/>
-<b>VBot_Offline/resource/wifi_manager</b>
+<b>- Restart Auto Wifi Manager:</b> Khởi động lại Services Auto Wifi Manaager đang chạy trên hệ thống<br/>
+<b>- Enable Auto Wifi Manager:</b> Kích Hoạt Services Auto Wifi Manaager trên hệ thống (Mặc định là đã kích hoạt từ trước rồi)<br/>
+<b>- Install Auto Wifi Manager:</b> Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP, Tự động kết nối lại khi mất mạng hoặc hệ thống mạng khởi động sau Vbot<br/>
+<b>- Install Auto Wifi Manager + Đọc IP:</b> Cài Đặt Auto Wifi Manager + Đọc Địa Chỉ IP Ra Loa Và Tạo Điểm truy Cập AP,
+	Tự động kết nối lại khi mất mạng hoặc hệ thống mạng khởi động sau Vbot,
+	Nếu phát hiện địa chỉ IP Local bị thay đổi hoặc mạng wifi trước đo bị thay đổi sẽ tự đọc địa chỉ ip local mới<br/>
+<b>- Logs Auto Wifi Manager:</b> Kiểm Tra Logs Quá Trình Hoạt Động<br/>
+<b>- Status Auto Wifi Manager:</b> Kiểm tra trạng thái xem là: đang hoạt động hay không<br/>
 </div>
 </div>
 </div>

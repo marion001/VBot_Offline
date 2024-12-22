@@ -332,6 +332,7 @@ $Config['virtual_assistant']['chat_gpt']['active'] = isset($_POST['chat_gpt_acti
 #Cập nhật trợ lý ảo zalo_assistant
 $Config['virtual_assistant']['zalo_assistant']['active'] = isset($_POST['zalo_assistant_active']) ? true : false;
 $Config['virtual_assistant']['zalo_assistant']['time_out'] = intval($_POST['zalo_assistant_time_out']);
+$Config['virtual_assistant']['zalo_assistant']['set_expiration_time'] = intval($_POST['zalo_assistant_set_expiration_time']);
 
 #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
 $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
@@ -2607,6 +2608,16 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 </div>
 </div>
 </div>
+
+<div class="row mb-3">
+<label for="zalo_assistant_set_expiration_time" class="col-sm-3 col-form-label">Đặt thời gian hết hạn Token (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Đặt thời gian hết hạn cho token trung bình đặt 1 ngày tham số tính bằng giây: 86400')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input  class="form-control border-success" type="number" min="21600" max="604800" step="1" name="zalo_assistant_set_expiration_time" id="zalo_assistant_set_expiration_time" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>">
+</div>
+</div>
+</div>
+
 </div>
 </div>
 

@@ -87,12 +87,14 @@
             "convert_audio_to_text": {
                 "used_for_chatbox": true,
                 "used_for_display_and_logs": false
-            },
-            "api_key": "dùng chung với giá trị podcast->access_token"
+            }
         },
         "zalo_assistant": {
             "active": true,
-            "time_out": 15
+            "time_out": 15,
+            "device_token": "586d5714b9e6c3fea9f5d71f0511dac971533e32e3480647a13a809990f53a83",
+            "expire_time": 1734880200,
+            "set_expiration_time": 86400
         },
         "google_gemini": {
             "active": true,
