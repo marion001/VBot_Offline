@@ -3,11 +3,11 @@
 #Designed by: BootstrapMade
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 include 'Configuration.php';
-
-
-
 ?>
 <head>
+
+<title>VBot Assistant - <?php echo $Config['contact_info']['full_name'] ?></title>
+
 <!-- css ChatBot -->
 <link href="assets/css/chatbot_head_bar.css" rel="stylesheet">
 </head>

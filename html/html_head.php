@@ -9,7 +9,7 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 
 
 
-  <title>VBot Assistant</title>
+  <!-- <title>VBot Assistant</title> -->
   <meta content="" name="description">
   <meta content="" name="keywords">
 
