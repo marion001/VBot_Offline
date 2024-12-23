@@ -42,8 +42,21 @@ from Media_Player import media_player
 import Assistant
 """
 #Thư viện sử dụng trợ lý ảo
-#ví dụ sử dụng trợ lý ảo: Assistant_Audio, Assistant_Text = Assistant.Call(input_text, True)
-#Assistant.Call(input_text, True) có đối số là True hoặc False để chuyển đổi dữ liệu âm thanh sang văn bản Text, True để chuyển đổi, False không chuyển đổi
+#ví dụ sử dụng trợ lý ảo: Sử Dụng Trợ Lý Ảo Theo Chế ĐỘ Ưu Tiên lần Lượt: Assistant.Call(input_text, True)
+#Assistant.Call(input_text, True) có đối số thứ 2 là True hoặc False để chuyển đổi dữ liệu âm thanh sang văn bản Text, True để chuyển đổi, False không chuyển đổi
+
+Assistant_Audio, Assistant_Text = Assistant.Call(input_text, True)
+print(f"Assistant Audio: {Assistant_Audio}")
+print(f"Assistant Text: {Assistant_Text}")
+
+
+#Gọi Trực Tiếp Tới 1 Trợ Lý Ảo Nào Đó: Các Trợ Lý Ảo: gemini_assistant, gpt_assistant, default_assistant, zalo_assistant
+#Có đối số thứ 2 là True hoặc False để chuyển đổi dữ liệu âm thanh sang văn bản Text, True để chuyển đổi, False không chuyển đổi
+#Ví Dụ Gọi Trợ Lý ảo gemini_assistant:
+Assistant_Audio, Assistant_Text = Assistant.gemini_assistant(input_text, True)
+print(f"Assistant Audio: {Assistant_Audio}")
+print(f"Assistant Text: {Assistant_Text}")
+
 """
 
 
