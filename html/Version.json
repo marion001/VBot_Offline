@@ -1,7 +1,7 @@
 {
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật phát các trang báo, tin tức còn lại. Cập nhật kiểm tra Tester, Chạy API trực tiếp trên giao diện người dùng",
+    "description": "Cập nhật và hỗ trợ Cache phát các trang báo, tin tức còn lại trên UI, Cập nhật kiểm tra Tester, Chạy API trực tiếp trên giao diện người dùng",
     "releaseDate": "23/12/2024",
     "changes": [
         {
