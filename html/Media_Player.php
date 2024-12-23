@@ -148,7 +148,7 @@ include 'html_sidebar.php';
                             </li>
 							
                             <li class="nav-item flex-fill" role="presentation">
-                                <button class="nav-link w-100" id="newspaper-tab" name="NewsPaper" data-bs-toggle="tab" data-bs-target="#bordered-justified-newspaper" type="button" role="tab" aria-controls="newspaper" aria-selected="false" tabindex="-1" onclick="cacheNewsPaper()">Báo/Tin Tức</button>
+                                <button class="nav-link w-100" id="newspaper-tab" name="NewsPaper" data-bs-toggle="tab" data-bs-target="#bordered-justified-newspaper" type="button" role="tab" aria-controls="newspaper" aria-selected="false" tabindex="-1" onclick="cache_NewsPaper()">Báo/Tin Tức</button>
                             </li>
 							
                         </ul>

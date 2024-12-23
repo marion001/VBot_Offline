@@ -25,6 +25,97 @@ if (!isset($_SESSION['user_login']) ||
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+   <style>
+        .scroll-btn {
+            position: fixed;
+            right: 5px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #007bff;
+            color: white;
+            text-align: center;
+            line-height: 40px;
+            font-size: 24px;
+			z-index: 4; 
+        }
+
+        .scroll-to-bottom {
+            bottom: 15px;
+        }
+
+        .scroll-to-top {
+            bottom: 60px;
+        }
+
+    </style>
+
+     <style>
+	 
+
+	 
+#api_test_json_sample {
+    white-space: pre-wrap; /* Giữ nguyên khoảng cách và thụt lề trong code */
+    font-family: monospace; /* Dùng font monospace để dễ đọc code */
+    background-color: #141212; /* Nền sáng để làm nổi bật code */
+    padding: 10px;
+    border: 1px solid #ccc; /* Viền thẻ */
+    border-radius: 5px; /* Bo góc mềm mại */
+    color: #00ff37; /* Màu chữ chính */
+}
+
+/* Màu cho từ khóa trong code */
+#api_test_json_sample .keyword {
+    color: #d6336c; /* Màu cho từ khóa như var, const, function... */
+    font-weight: bold;
+}
+
+/* Màu cho chuỗi */
+#api_test_json_sample .string {
+    color: #21ffe0; /* Màu cho chuỗi */
+}
+
+/* Màu cho số */
+#api_test_json_sample .number {
+    color: #fd7e14; /* Màu cho số */
+}
+
+/* Màu cho đối tượng JSON hoặc dấu ngoặc */
+#api_test_json_sample .brace {
+    color: #007bff; /* Màu cho dấu ngoặc { } */
+}
+
+/* Màu cho các bình luận */
+#api_test_json_sample .comment {
+    color: #6c757d; /* Màu xám cho bình luận */
+}
+
+#reponse_tets_code_api {
+    white-space: pre-wrap; /* Giữ nguyên khoảng trắng và thụt lề trong JSON */
+    font-family: monospace; /* Sử dụng font monospace cho code */
+    background-color: #000; /* Nền đen */
+    color: #1e90ff; /* Màu chữ xanh dương */
+    padding: 10px;
+    border: 1px solid #ccc; /* Viền sáng cho thẻ */
+    border-radius: 5px; /* Bo góc mềm mại */
+    margin-top: 10px; /* Khoảng cách phía trên */
+}
+
+	 
+        #modal_dialog_show_TEST_API {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px auto;
+            max-width: calc(100vw - 40px);
+        }
+
+        #modal_dialog_show_TEST_API .modal-content {
+            max-height: calc(100vh - 40px);
+            overflow-y: auto;
+        }
+    </style>
+	
 <style>
     .list-container {
         max-height: 100vh;
@@ -161,7 +252,7 @@ echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fa
     <div class="row">
         <!-- Sidebar (Left Column) -->
         <div class="col-md-4 list-container">
-		<p class="text-primary"><strong>Danh Sách API</strong></p>
+		<p class="text-primary"><strong>Danh Sách API:</strong></p>
             <div class="list-group" id="apiList">
                 <?php foreach ($items as $index => $item): ?>
                     <a class="list-group-item list-group-item-action" onclick="showDetails(<?php echo $index; ?>)">
@@ -170,7 +261,6 @@ echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fa
                 <?php endforeach; ?>
             </div>
         </div>
-
         <!-- Main Content (Right Column) -->
         <div class="col-md-8 details-container">
             <div id="detailsContainer">
@@ -179,9 +269,7 @@ echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fa
         </div>
     </div>
 </div>
-
 		<?php
-		
 		    }
 }
 ?>
@@ -190,33 +278,137 @@ echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fa
 	
 </main>
 
+    <!-- Modal hiển thị tệp Config.json -->
+    <div class="modal fade" id="myModal_TETS_API" tabindex="-1" role="dialog" aria-labelledby="modalLabel_Config" aria-hidden="true">
+        <div class="modal-dialog" id="modal_dialog_show_TEST_API" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+				<b><font color=blue><div id="name_file_showzz"></div></font></b> 
+                    <button type="button" class="close btn btn-danger" data-dismiss="modal_Config" aria-label="Close" onclick="$('#myModal_TETS_API').modal('hide');">
+                        <i class="bi bi-x-circle-fill"></i> Đóng
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p id="message_TETS_API"></p>
+
+<div class="row">
+        <div class="col-lg-6">
+            <div class="card-body">
+<div id="api_test_json_sample" contenteditable="true" class="form-control"></div>
+            </div>
+        </div>
+        <div class="col-lg-6">
+            <div class="card-body">
+      <center><button id="run_api_code" class="btn btn-success rounded-pill" title="Chạy Kiểm Tra Đường API">Chạy Test API (Tester)</button></center>
+	  <hr/>
+	  <h5><strong><p class="text-primary">Dữ Liệu Phản Hồi API:</p></strong></h5>
+	 <div id="reponse_tets_code_api">
+	 - Chưa có dữ liệu phản hồi
+	 </div>
+</div>
+        </div>
+      </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
   <!-- ======= Footer ======= -->
 <?php
 include 'html_footer.php';
 ?>
 <!-- End Footer -->
-
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+
+<script>
+
+// Hàm để thêm màu sắc cho chuỗi JSON
+function highlightCode(code) {
+    code = code.replace(/"(.*?)"/g, "<span class='string'>\"$1\"</span>");
+    code = code.replace(/\b(var|let|const|function|return)\b/g, "<span class='keyword'>$1</span>");
+    code = code.replace(/\b(\d+)\b/g, "<span class='number'>$1</span>");
+    code = code.replace(/{|}/g, "<span class='brace'>$&</span>");
+    code = code.replace(/\/\/(.*)/g, "<span class='comment'>//$1</span>");
+    return code;
+}
+
+// Chạy Test Code
+document.getElementById("run_api_code").onclick = function() {
+    var code = document.getElementById("code_send_api_test").textContent || document.getElementById("code_send_api_test").innerText;
+    try {
+        (function() {
+            try {
+                eval(code);
+            } catch (e) {
+                document.getElementById('reponse_tets_code_api').textContent = 'Lỗi xảy ra: ' + e;
+            }
+        })();
+    } catch (e) {
+        document.getElementById('reponse_tets_code_api').textContent = 'Lỗi Thực Thi Mã: ' + e;
+    }
+};
+
+// onclick xem nội dung file json
+function test_Code_API(json_body, method, url, name) {
+    if (!method || !url || !name || !json_body) {
+		show_message("Thiếu dữ liệu đầu vào để  kiểm tra API");
+        return;
+    }
+    let formattedJson;
+    try {
+        if (typeof json_body === 'string') {
+            formattedJson = JSON.stringify(JSON.parse(json_body), null, 4);
+        } else {
+            formattedJson = JSON.stringify(json_body, null, 4);
+        }
+    } catch (e) {
+		show_message("Phản hồi JSON không hợp lệ: " +e);
+        formattedJson = "{}";
+    }
+const apiCode = 
+  "var API_VBot = '" + url + "';\n\n" +
+  "var data = " +
+  "JSON.stringify(" + (formattedJson ? formattedJson : "{}") + ");\n" +
+  "\n" +
+  "loading('show');\n" +
+  "var xhr = new XMLHttpRequest();\n" +
+  "xhr.open('" + method + "', API_VBot);\n" +
+  "xhr.setRequestHeader('Content-Type', 'application/json');\n" +
+  "xhr.addEventListener('readystatechange', function() {\n" +
+  "  if (this.readyState === 4) {\n" +
+  "    try {\n" +
+  "      var responseData = JSON.parse(this.responseText);\n" +
+  "      document.getElementById('reponse_tets_code_api').textContent = JSON.stringify(responseData, null, 4);\n" +
+  "    } catch (e) {\n" +
+  "      document.getElementById('reponse_tets_code_api').textContent = 'Phản hồi JSON không hợp lệ: ' + e.message;\n" +
+  "    }\n" +
+  "  }\n" +
+  "loading('hide');\n" +
+  "});\n\n" +
+  "xhr.send(data);\n"+
+  "\n";
+
+    const apiFormattedCode = "<center contenteditable='false'><strong>Chỉnh Sửa Nội Dung Bên Dưới Để Test API:</strong></center><hr/><pre id='code_send_api_test'>" + apiCode + "</pre>";
+    const content = highlightCode(apiFormattedCode);
+    document.getElementById('api_test_json_sample').innerHTML = content;
+    document.getElementById('name_file_showzz').textContent = "Tên API: "+name;
+    $('#myModal_TETS_API').modal('show');
+}
+</script>
 
   <!-- Template Main JS File -->
 <script>
     const items = <?php echo json_encode($items, JSON_HEX_TAG); ?>;
 // Hàm hiển thị chi tiết API
 function showDetails(index) {
-    // Lấy tất cả các mục trong danh sách
     const listItems = document.querySelectorAll('.list-group-item');
 
-    // Loại bỏ trạng thái "active" khỏi tất cả các mục
     listItems.forEach(item => item.classList.remove('active'));
 
-    // Thêm trạng thái "active" vào mục được nhấn
     listItems[index].classList.add('active');
 
-    // Lấy thông tin chi tiết API từ danh sách items
     const item = items[index];
     const method = item.request.method;
-    //const url = item.request.url.raw;
     const urlzz = item.request.url.raw; 
 	const url = urlzz.replace(/(^https?:\/\/)[^\/]+/, '$1<?php echo $Domain . ":" . $Config["api"]["port"]; ?>');
     const body = item.request.body?.raw || '';
@@ -233,7 +425,7 @@ function showDetails(index) {
             "<pre class='bg-light p-2 rounded' id='url" + index + "'><a href='" + url + "' target='_bank'>" + url + "</a></pre>" +
             "<span class='copy-icon' title='Sao chép dữ liệu' onclick=\"copyToClipboard('url" + index + "')\">📋</span>" +
         "</div>" +
-        "<p><strong>Dữ Liệu Gửi (Body):</strong></p>" +
+       "<p><strong>Dữ Liệu Gửi (Body):</strong> <button class='btn btn-danger rounded-pill btn-sm' onclick='test_Code_API(" + body + ", \"" + method + "\", \"" + url + "\", \""+item.name+"\")'>Test API</button></p>" +
         "<div class='pre-container'>" +
             "<pre class='bg-light p-2 rounded' id='body" + index + "'>" + body + "</pre>" +
             "<span class='copy-icon' title='Sao chép dữ liệu' onclick=\"copyToClipboard('body" + index + "')\">📋</span>" +
@@ -255,13 +447,12 @@ function showDetails(index) {
 }
   
 function updateCodeDisplay(index) {
-    const codeSelector = document.getElementById('codeSelector' + index); // Chỉnh lại ID để lấy đúng phần tử của mỗi mục
+    const codeSelector = document.getElementById('codeSelector' + index);
     const selectedCode = codeSelector.value;
     const item = items[index];
     const method = item.request.method;
     const urlzz = item.request.url.raw; 
 	const url = urlzz.replace(/(^https?:\/\/)[^\/]+/, '$1<?php echo $Domain . ":" . $Config["api"]["port"]; ?>');
-    //const url = item.request.url.raw;
     const body = item.request.body?.raw || '';
     let curl = "curl -X " + method + " '" + url + "'" + (body ? " -H 'Content-Type: application/json' --data '" + body.replace(/'/g, "\\'") + "'" : "");
 

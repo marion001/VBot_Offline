@@ -323,9 +323,7 @@ include 'html_sidebar.php';
 </select>
 </div>
      <div class="card-body">
-          
            <!--  <div id="show_list_ZingMP3"></div> -->
-		   
             <div id="NewsPaper_Select" style="display: none;">
 			
 
@@ -348,7 +346,6 @@ if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media
 }
 ?>
 
-			
 			</div>
 			
             <div id="tableContainer"></div>
@@ -1525,7 +1522,8 @@ selectElement_select_cache_media.addEventListener('change', function() {
 		media_player_search('Radio');
 	}else if (selectedValue_cache_media === "NewsPaper"){
 		document.getElementById('NewsPaper_Select').style.display = '';
-		document.getElementById('tableContainer').style.display = 'none';
+		document.getElementById('tableContainer').style.display = '';
+		cache_NewsPaper()
 		
 	}
 });

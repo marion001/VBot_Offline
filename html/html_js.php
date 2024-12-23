@@ -30,7 +30,6 @@ $git_repository = $pathParts[1];
 //Chạy khi trang đã tải xong
 window.onload = setInterval(updateTime, 1000);
 function updateTime() {
-	
     var d = new Date();
     var hour = d.getHours();
     var min = d.getMinutes();
@@ -64,7 +63,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Lần cập nhật thứ hai sau 3 giây (cách lần đầu tiên 2 giây)
     setTimeout(updateDate, 2000);
 });
-
 
 // Hàm để hiển thị hoặc ẩn overlay
 function loading(action) {
@@ -634,9 +632,27 @@ function control_media(action) {
     xhr.send(data);
 }
 
+
+
 //Phát nhạc Media Player
+/*
 function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
     loading("show");
+// Kiểm tra nếu URL bắt đầu với các domain cần tìm
+if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/")) {
+	
+	getAudioLink_newspaper(url_media)
+  .then(function(audioLink) {
+    console.log("Audio Link: ", audioLink);
+	url_media = audioLink;
+	console.log("url_media: ", url_media);
+  })
+  .catch(function(error) {
+	showMessagePHP("Có lỗi: " +error);
+  });
+	
+}
+
     var data = JSON.stringify({
         "type": 1,
         "data": "media_control",
@@ -667,6 +683,97 @@ function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(data);
 }
+*/
+
+
+// Hàm lấy Audio Link
+function getAudioLink_newspaper(url_media) {
+  return new Promise(function(resolve, reject) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "includes/php_ajax/Media_Player_Search.php?Get_Link_NewsPaper&url=" + encodeURIComponent(url_media));
+    
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        try {
+          var responseData = JSON.parse(xhr.responseText);
+          if (responseData.success) {
+            // Nếu thành công, trả về đường dẫn audio
+            resolve(responseData.data.audio_link);
+          } else {
+            // Nếu thất bại, trả về lỗi
+            reject(responseData.message);
+          }
+        } catch (e) {
+          reject("Không thể phân tích dữ liệu JSON.");
+        }
+      } else {
+        reject("Có lỗi khi lấy dữ liệu. Mã trạng thái HTTP: " + xhr.status);
+      }
+    };
+    
+    xhr.onerror = function() {
+      reject("Có lỗi xảy ra trong quá trình yêu cầu.");
+    };
+    
+    xhr.send();
+  });
+}
+
+// Hàm để phát nhạc (Media Player)
+function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
+    loading("show");
+    
+    // Kiểm tra nếu URL bắt đầu với các domain cần tìm
+    if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/")) {
+    
+        getAudioLink_newspaper(url_media)
+        .then(function(audioLink) {
+            url_media = audioLink;
+            startMediaPlayer(url_media, name_media, url_cover, media_source);
+        })
+        .catch(function(error) {
+            showMessagePHP("Có lỗi: " + error);
+            loading("hide");
+        });
+        
+    } else {
+        startMediaPlayer(url_media, name_media, url_cover, media_source);
+    }
+}
+
+// Hàm khởi tạo phát nhạc
+function startMediaPlayer(url_media, name_media, url_cover, media_source) {
+    var data = JSON.stringify({
+        "type": 1,
+        "data": "media_control",
+        "action": "play",
+        "media_link": url_media,
+        "media_cover": url_cover,
+        "media_name": name_media,
+        "media_player_source": media_source
+    });
+
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === XMLHttpRequest.DONE) {
+            loading("hide");
+            if (this.status === 200) {
+                try {
+                    var data = JSON.parse(this.responseText);
+                    showMessagePHP(data.message, 7);
+                } catch (e) {
+                    show_message("Lỗi phân tích JSON: " + e);
+                }
+            } else {
+                show_message("Lỗi HTTP: " + this.status, this.statusText);
+            }
+        }
+    });
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+}
+
 
 //Get link Zingmp3
 function get_ZingMP3_Link(zing_id, zing_name, zing_cover, zing_artist) {
@@ -680,7 +787,7 @@ function get_ZingMP3_Link(zing_id, zing_name, zing_cover, zing_artist) {
                 var data = JSON.parse(xhr.responseText);
                 //console.log(data);
                 if (data.success == true) {
-					send_Media_Play_API(data.url, zing_name+' - '+zing_artist, zing_cover, 'ZingMP3');
+					startMediaPlayer(data.url, zing_name+' - '+zing_artist, zing_cover, 'ZingMP3');
                 } else {
 					loading("hide");
                     show_message('Yêu cầu không thành công, Không lấy được link Player hoặc bạn có thể thử lại');
@@ -724,7 +831,7 @@ function get_Youtube_Link(youtube_id, youtube_name=null, youtube_cover=null) {
 					if (youtube_name == null) {
 						youtube_name = data.data.title;
 					}
-					send_Media_Play_API(data.data.dlink, youtube_name, youtube_cover, 'Youtube');
+					startMediaPlayer(data.data.dlink, youtube_name, youtube_cover, 'Youtube');
                 } else {
 					loading("hide");
                     show_message('Yêu cầu không thành công, Không lấy được link Player hoặc bạn có thể thử lại');
@@ -884,9 +991,9 @@ function media_player_url() {
         }
         // Kiểm tra và hiển thị thông tin
         if (fileExtension) {
-            send_Media_Play_API(url, fileName + '' + fileExtension, 'assets/img/icon_audio_local.png', 'Local');
+            startMediaPlayer(url, fileName + '' + fileExtension, 'assets/img/icon_audio_local.png', 'Local');
         } else {
-            send_Media_Play_API(url, null, 'assets/img/icon_audio_local.png', 'Local');
+            startMediaPlayer(url, null, 'assets/img/icon_audio_local.png', 'Local');
         }
     } else {
         show_message('URL không hợp lệ hoặc không phải là nguồn nhạc được hỗ trợ.');
@@ -962,7 +1069,6 @@ function cacheZingMP3() {
 
 //Hiển thị dữ liệu cache PodCast nếu có
 function cachePodCast() {
-	
     var inputElement = document.getElementById("tim_kiem_bai_hat_all");
     if (inputElement) {
         inputElement.style.display = "";
@@ -1005,7 +1111,7 @@ function cachePodCast() {
                         fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + podcast.title + '</font></p>';
                         fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (podcast.duration || 'N/A') + '</font></p>';
                         fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
-                        fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="send_Media_Play_API(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                        fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="startMediaPlayer(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
                         fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
                         fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                         fileInfo += '</div></div>';
@@ -1028,14 +1134,75 @@ function cachePodCast() {
     xhr.send();
 }
 
+
+//Lấy và hiển thị dữ liệu cache báo, tin tức
+function cache_NewsPaper() {
+    var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+    if (inputElement) {
+        inputElement.style.display = "none";
+    }
+    loading('show');
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Media_Player_Search.php?Cache_NewsPaper";
+    xhr.open("GET", url, true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            loading('hide');
+            try {
+                var response = JSON.parse(xhr.responseText);
+                if (Array.isArray(response.data) && response.data.length > 0) {
+                    // Lấy phần tử DOM để hiển thị danh sách newspaper
+                    var fileListDiv = document.getElementById('show_list_news_paper');
+                    if (!fileListDiv) {
+                        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
+                        fileListDiv = document.getElementById('tableContainer');
+                        document.getElementById('tableContainer').style.display = '';
+                        document.getElementById('tableContainer').style.height = '400px';
+                        document.getElementById('tableContainer').style.overflowY = 'auto';
+                    }
+                    fileListDiv.innerHTML = '';
+                    // Xử lý và hiển thị từng podcast
+                    fileListDiv.innerHTML += '<b>Phát tất cả:</b> <button class="btn btn-success" title="Phát toàn bộ" onclick="play_playlist_json_path(\'<?php echo $directory_path; ?>/includes/cache/<?php echo $Config['media_player']['news_paper']['newspaper_file_name']; ?>\')"><i class="bi bi-play-circle"></i></button>';
+                    response.data.forEach(function(news_paper) {
+                        var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+                        fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+                        fileInfo += '<img src="' + news_paper.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tiêu Đề: <font color=green>' + news_paper.title + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + (news_paper.publish_time || 'N/A') + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (news_paper.duration || 'N/A') + '</font></p>';
+                        fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + (news_paper.source || 'N/A') + '</font></p>';
+                        fileInfo += '<button class="btn btn-success" title="Phát: ' + news_paper.title + '" onclick="send_Media_Play_API(\'' + news_paper.audio + '\', \'' + news_paper.title + '\', \'' + news_paper.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                        //fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + news_paper.title + '" onclick="addToPlaylist(\'' + news_paper.title + '\', \'' + news_paper.cover + '\', \'' + news_paper.audio + '\', \'' + (news_paper.duration || 'N/A') + '\', \'' + (news_paper.description || 'N/A') + '\', \''+news_paper.source+'\', \'' + news_paper.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
+                        fileInfo += ' <a href="' + news_paper.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + news_paper.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                        fileInfo += '</div></div>';
+                        // Thêm thông tin vào phần tử danh sách
+                        fileListDiv.innerHTML += fileInfo;
+                    });
+                } else {
+                    show_message('<center>Không có dữ liệu Báo, Tin Tức từ bộ nhớ cache</center>');
+                }
+            } catch (e) {
+                show_message('Lỗi phân tích JSON: ' + e);
+            }
+        } else {
+            loading('hide');
+            show_message('Lỗi yêu cầu API: ' + xhr.status + ", " + xhr.statusText);
+        }
+    };
+    xhr.onerror = function() {
+        loading('hide');
+        show_message('Lỗi kết nối tới server');
+    };
+    xhr.send();
+}
+
+
 //hiển thị dữ liệu cache Youtube
 function cacheYoutube() {
-	
     var inputElement = document.getElementById("tim_kiem_bai_hat_all");
     if (inputElement) {
         inputElement.style.display = "";
 	}
-	
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_Youtube', true);
     xhr.onload = function() {
@@ -1376,7 +1543,7 @@ function processPodCastData(data_media_PodCast) {
         fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + podcast.title + '</font></p>';
         fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (podcast.duration || 'N/A') + '</font></p>';
         fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
-        fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="send_Media_Play_API(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+        fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="startMediaPlayer(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
         fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
         fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
         fileInfo += '</div></div>';
@@ -1414,7 +1581,7 @@ function processLocalData(data_media_local) {
             fileInfo += '<img src="' + file.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
             fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: ' + file.name + '</p>';
             fileInfo += '<p style="margin: 0;">Kích thước: ' + file.size + ' MB</p>';
-            fileInfo += '<button class="btn btn-success" title="Phát: ' + file.name + '" onclick="send_Media_Play_API(\'' + file.full_path + '\', \'' + file.name + '\', \'' + file.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button> ';
+            fileInfo += '<button class="btn btn-success" title="Phát: ' + file.name + '" onclick="startMediaPlayer(\'' + file.full_path + '\', \'' + file.name + '\', \'' + file.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button> ';
             fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + file.name + '" onclick="addToPlaylist(\'' + file.name + '\', \'' + file.cover + '\', \'' + file.full_path + '\', \'' + file.size + ' MB\', null, \'Local\', \'' + file.full_path + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
             fileInfo += ' <button class="btn btn-warning" title="Tải Xuống File: ' + file.name + '" onclick="downloadFile(\'' + file.full_path + '\')"><i class="bi bi-download"></i></button>';
             fileInfo += ' <button class="btn btn-danger" title="Xóa File: ' + file.name + '" onclick="deleteFile(\'' + file.full_path + '\', \'media_player_search\')"><i class="bi bi-trash"></i></button>';
@@ -1424,7 +1591,6 @@ function processLocalData(data_media_local) {
         });
     }
 }
-
 
 // Hàm xử lý dữ liệu Radio
 function processRadioData(data_media_Radio) {
@@ -1446,7 +1612,7 @@ function processRadioData(data_media_Radio) {
             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
             fileInfo += '<img src="' + cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
             fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên đài: <font color=green>' + radio.name + '</font></p>';
-            fileInfo += '<button class="btn btn-success" title="Phát đài radio: ' + radio.name + '" onclick="send_Media_Play_API(\'' + radio.full_path + '\', \'' + radio.name + '\', \'' + cover + '\', \'Radio\')"><i class="bi bi-play-circle"></i></button>';
+            fileInfo += '<button class="btn btn-success" title="Phát đài radio: ' + radio.name + '" onclick="startMediaPlayer(\'' + radio.full_path + '\', \'' + radio.name + '\', \'' + cover + '\', \'Radio\')"><i class="bi bi-play-circle"></i></button>';
             //fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + radio.artist + '</font></p>';
             fileInfo += '</div></div>';
             fileListDiv.innerHTML += fileInfo;
@@ -1469,7 +1635,7 @@ function get_data_newspaper() {
     }
 }
 
-//Lấy dữ liệu báo, tin tức từ trung gian php
+//Lấy và hiển thị dữ liệu báo, tin tức từ trung gian php
 function fetchData_NewsPaper(newspaper_link) {
 	loading('show');
     var xhr = new XMLHttpRequest();
@@ -1502,6 +1668,7 @@ function fetchData_NewsPaper(newspaper_link) {
         fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + (news_paper.publish_time || 'N/A') + '</font></p>';
         fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (news_paper.duration || 'N/A') + '</font></p>';
         fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + (news_paper.source || 'N/A') + '</font></p>';
+		//Báo Tin Tức
         fileInfo += '<button class="btn btn-success" title="Phát: ' + news_paper.title + '" onclick="send_Media_Play_API(\'' + news_paper.audio + '\', \'' + news_paper.title + '\', \'' + news_paper.cover + '\')"><i class="bi bi-play-circle"></i></button>';
         //fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + news_paper.title + '" onclick="addToPlaylist(\'' + news_paper.title + '\', \'' + news_paper.cover + '\', \'' + news_paper.audio + '\', \'' + (news_paper.duration || 'N/A') + '\', \'' + (news_paper.description || 'N/A') + '\', \''+news_paper.source+'\', \'' + news_paper.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
         fileInfo += ' <a href="' + news_paper.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + news_paper.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
@@ -1526,6 +1693,8 @@ function fetchData_NewsPaper(newspaper_link) {
     };
     xhr.send();
 }
+
+
 
 //Xóa dữ liệu cache bài hát theo nguồn nhạc
 function cache_delete(source_cache) {

@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi MQTT publish Volume UI",
-    "releaseDate": "22/12/2024",
+    "description": "Cập nhật phát các trang báo, tin tức còn lại. Cập nhật kiểm tra Tester, Chạy API trực tiếp trên giao diện người dùng",
+    "releaseDate": "23/12/2024",
     "changes": [
         {
             "type": "feature",

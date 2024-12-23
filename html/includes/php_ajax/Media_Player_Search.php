@@ -139,9 +139,7 @@ if (isset($_GET['Local']))
 //Lấy Cookie ZingMP3
 function getZmp3RqidCookie()
 {
-    // Khởi tạo cURL
     $curl = curl_init();
-    // Cấu hình cURL để lấy cookie
     curl_setopt_array($curl, array(
         CURLOPT_URL => "https://zingmp3.vn/",
         CURLOPT_RETURNTRANSFER => true,
@@ -151,15 +149,12 @@ function getZmp3RqidCookie()
         CURLOPT_COOKIEFILE => "", // Không đọc cookie từ tệp
         CURLOPT_TIMEOUT => 30,
     ));
-    // Thực thi yêu cầu cURL
     $response = curl_exec($curl);
-    // Kiểm tra lỗi cURL
     if (curl_errno($curl))
     {
         curl_close($curl);
         return ['error' => 'Lỗi cURL: ' . curl_error($curl) ];
     }
-    // Đóng phiên cURL
     curl_close($curl);
     // Tìm giá trị của cookie zmp3_rqid trong header
     if (preg_match('/zmp3_rqid=([^;]+)/', $response, $matches))
@@ -216,13 +211,11 @@ function getLinkZingMP3($song_id, $Cookie_Zing)
         //'error_message' => "Không lấy được link bài hát từ Zingmp3. Dữ liệu phản hồi: " . print_r($response_data, true)
         'error_message' => print_r($response_data['msg'], true) ];
     }
-
 }
 
 //Get các đài báo Radio
 if (isset($_GET['Radio']))
 {
-
     // Mảng chứa thông tin radio
     $radio_info = [];
     if ($Config['media_player']['radio_data'] && isset($Config['media_player']['radio_data']))
@@ -232,25 +225,20 @@ if (isset($_GET['Radio']))
             $name = $radio['name'];
             $link = $radio['link'];
             // Thêm dữ liệu vào mảng $radio_info
-            $radio_info[] = ['name' => $name, 'cover' => null, // Thay thế bằng URL ảnh bìa thực tế nếu có
+            $radio_info[] = ['name' => $name, 'cover' => null,
             'full_path' => $link, 'size' => null
-            // Nếu bạn có thông tin kích thước, có thể thay null bằng giá trị thực tế
             ];
         }
     }
-
-    // Trả về kết quả dưới dạng JSON
     header('Content-Type: application/json');
     echo json_encode($radio_info, JSON_PRETTY_PRINT);
     exit();
-
 }
 
 //Get link mp3 thành link player
 if (isset($_GET['ZingMP3_GetLink']))
 {
     $ZingMP3_id = isset($_GET['Zing_ID']) ? urlencode($_GET['Zing_ID']) : '';
-
     $result_cookieZINGMP3 = getZmp3RqidCookie();
     if (isset($result_cookieZINGMP3['error']))
     {
@@ -271,7 +259,6 @@ if (isset($_GET['ZingMP3_GetLink']))
 if (isset($_GET['ZingMP3_Search']))
 {
     $Song_Name = isset($_GET['SongName']) ? urlencode($_GET['SongName']) : '';
-	
 // Kiểm tra nếu biến Song_Name không có dữ liệu
 if (empty($Song_Name)) {
     // Tạo mảng thông báo lỗi
@@ -280,20 +267,14 @@ if (empty($Song_Name)) {
         'message' => 'Tên bài hát không được cung cấp.'
     );
     echo json_encode($response, JSON_PRETTY_PRINT);
-    exit; // Dừng thực hiện mã còn lại
+    exit;
 }
-
-
     $zingJsonPath = '../cache/ZingMP3.json';
-    // Kiểm tra xem tệp có tồn tại không
     if (!file_exists($zingJsonPath)) {
         // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($zingJsonPath, 0777);
     }
-
-    // Khởi tạo cURL để tìm kiếm bài hát
     $curl = curl_init();
     curl_setopt_array($curl, array(
         CURLOPT_URL => "http://ac.mp3.zing.vn/complete?type=song&num=10&query=" . $Song_Name,
@@ -344,7 +325,6 @@ if (empty($Song_Name)) {
             'success' => true,
             'results' => $results
         ));
-
         //Cache Ghi đè toàn bộ nội dung vào file ZingMP3.json
         file_put_contents($zingJsonPath, json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
@@ -360,29 +340,161 @@ if (empty($Song_Name)) {
 
 // get dữ liệu cache Zing
 if (isset($_GET['Cache_ZingMP3'])) {
-    // Đường dẫn tới file JSON
 	$zingmp3JsonPath = "../cache/ZingMP3.json";
-	
     if (!file_exists($zingmp3JsonPath)) {
         // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($zingmp3JsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($zingmp3JsonPath, 0777);
     }
-	
-    // Đọc nội dung tệp JSON
     $jsonData = file_get_contents($zingmp3JsonPath);
-    // Giải mã JSON thành mảng PHP
     $data = json_decode($jsonData, true);
-    // Kiểm tra xem việc giải mã có thành công không
     if (json_last_error() === JSON_ERROR_NONE) {
-        // Mã hóa lại dữ liệu thành JSON và xuất ra
         echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
-        // Nếu giải mã không thành công, xuất lỗi
         echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 	exit();
+}
+
+
+//GetLink Các Trang Báo
+if (isset($_GET['Get_Link_NewsPaper'])) {
+$URL = isset($_GET['url']) ? $_GET['url'] : '';
+// Kiểm tra nếu biến URL không có dữ liệu
+if (empty($URL)) {
+    $response = array(
+        'success' => false,
+        'message' => 'Cần nhập URL,Link Báo',
+		'data' => []
+    );
+    echo json_encode($response, JSON_PRETTY_PRINT);
+    exit;
+}
+if (strpos($URL, "vietnamnet.vn") !== false) {
+$html = file_get_contents($URL);
+if ($html === false) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Lỗi khi lấy dữ liệu từ trang VietNamNet',
+        'data' => null
+    ]);
+    exit;
+}
+preg_match('/<div class="vnn-audio podcast-audio">.*?<source src="([^"]+)"/s', $html, $matches);
+if (!empty($matches[1])) {
+    echo json_encode([
+        'success' => true,
+        'message' => 'Thành Link từ báo VietNamNet Thành Công',
+        'data' => [
+            'audio_link' => $matches[1]
+        ]
+    ]);
+} else {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Không tìm thấy âm thanh trong trang',
+        'data' => null
+    ]);
+}
+exit();
+}else if (strpos($URL, "tienphong.vn") !== false) {
+$html = file_get_contents($URL);
+if ($html === false) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Lỗi khi lấy dữ liệu từ trang Báo Tiền Phong',
+        'data' => null
+    ]);
+    exit;
+}
+    // Sử dụng preg_match_all để tìm tất cả các thẻ div có class="hidden-player" và thuộc tính data-src
+    preg_match_all('/<div[^>]*class=["\']hidden-player["\'][^>]*data-src=["\']([^"\']+)["\'][^>]*>/i', $html, $matches);
+    if (!empty($matches[1])) {
+        $dataSrc = $matches[1][0];
+        echo json_encode([
+            'success' => true,
+            'message' => 'Lấy Link Player Từ Báo Tiền Phong Thành Công',
+            'data' => [
+            'audio_link' => $dataSrc
+        ]
+        ]);
+        return $dataSrc;
+    } else {
+        // Nếu không tìm thấy data-src, trả về null và hiển thị lỗi
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không tìm thấy dữ liệu Báo Tiền Phòng',
+            'data' => null
+        ]);
+        return null;
+    }
+exit();
+}else if (strpos($URL, "baomoi.com") !== false) {
+    if (strpos($URL, '#') !== false) {
+        $fragments = explode('#', $URL);
+        $last_fragment = end($fragments);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không tìm ID trong URL',
+            'data' => null
+        ]);
+        exit;
+    }
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://w-api.baomoi.com/api/v1/page/get/audio-detail?id=' . $last_fragment,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+    ));
+    // Gửi yêu cầu cURL
+    $response = curl_exec($curl);
+    $http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+    // Kiểm tra mã trạng thái HTTP
+    if ($http_code !== 200 || $response === false) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối tới API Báo Mới hoặc mã trạng thái HTTP không hợp lệ.',
+            'data' => null
+        ]);
+        exit;
+    }
+    // Tìm kiếm trường "streamingUrl" trong phản hồi JSON (sử dụng preg_match)
+    if (preg_match('/"streamingUrl"\s*:\s*"([^"]+)"/', $response, $matches)) {
+        $streamingUrl = $matches[1];
+        // Thành công, trả về liên kết âm thanh
+        echo json_encode([
+            'success' => true,
+            'message' => 'Lấy Link Player Từ Báo Mới Thành Công',
+            'data' => [
+                'audio_link' => $streamingUrl
+            ]
+        ]);
+    } else {
+        // Không tìm thấy dữ liệu âm thanh
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không tìm thấy dữ liệu âm thanh trong phản hồi.',
+            'data' => null
+        ]);
+    }
+
+    exit();
+}
+else{
+    echo json_encode([
+        'success' => false,
+        'message' => 'Nguồn Trang Báo, Tin Tức Này Chưa Được Hỗ Trợ',
+        'data' => null
+    ]);
+}
+exit();
 }
 
 //Tìm kiếm podcast
@@ -393,22 +505,18 @@ $podcast_Limit = isset($_GET['Limit']) ? $_GET['Limit'] : '1';
 
 // Kiểm tra nếu biến Song_Name không có dữ liệu
 if (empty($podcast_Name)) {
-    // Tạo mảng thông báo lỗi
     $response = array(
         'success' => false,
         'message' => 'Cần nhập dữ liệu để tìm kiếm',
 		'data' => []
     );
     echo json_encode($response, JSON_PRETTY_PRINT);
-    exit; // Dừng thực hiện mã còn lại
+    exit;
 }
-
     $podcastJsonPath = '../cache/PodCast.json';
-    // Kiểm tra xem tệp có tồn tại không
     if (!file_exists($podcastJsonPath)) {
         // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($podcastJsonPath, 0777);
     }
 
@@ -416,7 +524,7 @@ if (isTokenExpired_podcast($Config)) {
 	// Nếu token đã hết hạn, làm mới token
     refreshToken_podcast($Config, $VBot_Offline);
 }
-//Tìm kiếm	
+
 $curl = curl_init();
 curl_setopt_array($curl, array(
   CURLOPT_URL => 'https://core.ocs.iviet.com/v1/graphql',
@@ -445,12 +553,9 @@ curl_setopt_array($curl, array(
 ));
 
 $response_podcast = curl_exec($curl);
-
 curl_close($curl);
 //echo $response_podcast;
 $podcast_Data = json_decode($response_podcast, true);
-
-
 $result = [
     'success' => false, // Mặc định là false, sẽ cập nhật thành true nếu có dữ liệu hợp lệ
     'message' => ' không có dữ liệu', // Thông báo mặc định khi không có dữ liệu
@@ -462,12 +567,10 @@ if (isset($podcast_Data['data']['search']) && is_array($podcast_Data['data']['se
 	$baseUrl = "https://cdn-ocs.iviet.com/";
     foreach ($podcast_Data['data']['search'] as $entry) {
         if (isset($entry['episode'])) {
-			
             $audioUrl = $entry['episode']['audio'] ?? 'N/A';
 			$coverUrl = $entry['episode']['media']['cover'] ?? 'N/A';
 			$duration = $entry['episode']['duration'] ?? 'N/A';
 			$description = $entry['episode']['media']['content_type']['description'] ?? 'N/A';
-			
             // Kiểm tra nếu audio không bắt đầu bằng "http"
             if ($audioUrl !== 'N/A' && strpos($audioUrl, 'http') !== 0) {
                 $audioUrl = $baseUrl .$audioUrl;
@@ -476,10 +579,8 @@ if (isset($podcast_Data['data']['search']) && is_array($podcast_Data['data']['se
             if ($coverUrl !== 'N/A' && strpos($coverUrl, 'http') !== 0) {
                 $coverUrl = $baseUrl . $coverUrl;
             }
-			
 			// Định dạng lại duration
             $formattedDuration = formatDuration($duration);
-			
             $result['data'][] = [
                 //'title' => $entry['episode']['title'] ?? 'N/A',
                 'title' => str_replace(["'", '"'], '', $entry['episode']['title'] ?? 'N/A'),
@@ -491,12 +592,9 @@ if (isset($podcast_Data['data']['search']) && is_array($podcast_Data['data']['se
             $result['success'] = true; // Cập nhật success thành true nếu tìm thấy dữ liệu
         }
     }
-
-    // Cập nhật message nếu tìm thấy dữ liệu
     if ($result['success']) {
         $result['message'] = 'Dữ liệu được truy xuất thành công';
     }
-	
 	//Cache Ghi đè toàn bộ nội dung vào file ZingMP3.json
     file_put_contents($podcastJsonPath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 }
@@ -506,25 +604,17 @@ exit();
 
 // get dữ liệu cache PodCast
 if (isset($_GET['Cache_PodCast'])) {
-    // Đường dẫn tới file JSON
     $podcastJsonPath = '../cache/PodCast.json';
-    // Kiểm tra xem tệp có tồn tại không
     if (!file_exists($podcastJsonPath)) {
         // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($podcastJsonPath, 0777);
     }
-    // Đọc nội dung tệp JSON
     $jsonData = file_get_contents($podcastJsonPath);
-    // Giải mã JSON thành mảng PHP
     $data = json_decode($jsonData, true);
-    // Kiểm tra xem việc giải mã có thành công không
     if (json_last_error() === JSON_ERROR_NONE) {
-        // Mã hóa lại dữ liệu thành JSON và xuất ra
         echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
-        // Nếu giải mã không thành công, xuất lỗi
         echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 	exit();
@@ -534,7 +624,6 @@ if (isset($_GET['Cache_PodCast'])) {
 if (isset($_GET['Youtube_Search'])) {
     $Youtube_Name = isset($_GET['Name']) ? $_GET['Name'] : '';
     $Youtube_Limit = isset($_GET['Limit']) ? $_GET['Limit'] : '20';
-
     // Kiểm tra nếu biến Youtube_Name không có dữ liệu
     if (empty($Youtube_Name)) {
         $responseb = array(
@@ -545,19 +634,13 @@ if (isset($_GET['Youtube_Search'])) {
         echo json_encode($responseb, JSON_PRETTY_PRINT);
         exit;
     }
-
     $youtubeJsonPath = '../cache/Youtube.json';
-    // Kiểm tra xem tệp có tồn tại không
     if (!file_exists($youtubeJsonPath)) {
         // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($youtubeJsonPath, 0777);
     }
-
-
     $searchUrlYoutube = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" . urlencode($Youtube_Name) . "&maxResults=" . $Youtube_Limit . "&key=" . $Config['media_player']['youtube']['google_apis_key'];
-
     $curlYoutube = curl_init();
     curl_setopt_array($curlYoutube, array(
         CURLOPT_URL => $searchUrlYoutube,
@@ -569,7 +652,6 @@ if (isset($_GET['Youtube_Search'])) {
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'GET',
     ));
-
     $responseYoutube = curl_exec($curlYoutube);
     curl_close($curlYoutube);
 
@@ -579,7 +661,6 @@ if (isset($_GET['Youtube_Search'])) {
         echo json_encode(['error' => 'Yêu cầu cURL không thành công.']);
     } else {
         $dataYoutube = json_decode($responseYoutube, true);
-
         // Kiểm tra xem có lỗi từ API hoặc không có dữ liệu
         if (isset($dataYoutube['error'])) {
             echo json_encode(['error' => 'YouTube trả về lỗi: ' . $dataYoutube['error']['message']]);
@@ -598,7 +679,6 @@ if (isset($_GET['Youtube_Search'])) {
                     'description' => $itemYoutube['snippet']['description'] ?? ''
                 ];
             }
-
             $responsez = [
                 'success' => true,
                 'message' => 'Tìm kiếm thành công',
@@ -609,40 +689,32 @@ if (isset($_GET['Youtube_Search'])) {
 			file_put_contents($youtubeJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
     }
-
     exit();
 }
 
 if (isset($_GET['Cache_Youtube'])) {
-    // Đường dẫn tới file JSON
     $youtubeJsonPath = '../cache/Youtube.json';
-    // Kiểm tra xem tệp có tồn tại không
     if (!file_exists($youtubeJsonPath)) {
-        // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($youtubeJsonPath, 0777);
     }
-    // Đọc nội dung tệp JSON
     $jsonData = file_get_contents($youtubeJsonPath);
-    // Giải mã JSON thành mảng PHP
     $data = json_decode($jsonData, true);
-    // Kiểm tra xem việc giải mã có thành công không
     if (json_last_error() === JSON_ERROR_NONE) {
-        // Mã hóa lại dữ liệu thành JSON và xuất ra
         echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
-        // Nếu giải mã không thành công, xuất lỗi
         echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 	exit();
 }
 
+
+
+
 #get Link Youtube
 if (isset($_GET['GetLink_Youtube'])) {
     // Lấy ID video YouTube từ request
     $Youtube_ID = isset($_GET['Youtube_ID']) ? $_GET['Youtube_ID'] : '';
-
     // Kiểm tra xem ID video có được cung cấp hay không
     if (empty($Youtube_ID)) {
         $response = array(
@@ -653,10 +725,8 @@ if (isset($_GET['GetLink_Youtube'])) {
         echo json_encode($response, JSON_PRETTY_PRINT);
         exit;
     }
-
     // Câu lệnh gọi Python script
     $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Get_Link_Youtube.py $Youtube_ID");
-
     // Kết nối SSH
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
@@ -668,8 +738,6 @@ if (isset($_GET['GetLink_Youtube'])) {
         echo json_encode($response, JSON_PRETTY_PRINT);
         exit;
     }
-
-    // Xác thực thông tin SSH
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
         $response = array(
             'success' => false,
@@ -679,7 +747,6 @@ if (isset($_GET['GetLink_Youtube'])) {
         echo json_encode($response, JSON_PRETTY_PRINT);
         exit;
     }
-
     // Thực thi câu lệnh Python trên máy chủ SSH
     $stream = ssh2_exec($connection, $CMD);
     if (!$stream) {
@@ -691,19 +758,16 @@ if (isset($_GET['GetLink_Youtube'])) {
         echo json_encode($response, JSON_PRETTY_PRINT);
         exit;
     }
-
     // Chuyển sang chế độ đồng bộ để đợi kết quả
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $output = stream_get_contents($stream_out);
-
-    // Xử lý kết quả đầu ra
     if ($output) {
         $response = array(
             'success' => true,
             'message' => 'Lấy link thành công.',
             'data' => array(
-                'dlink' => trim($output) // Loại bỏ khoảng trắng và ký tự thừa
+                'dlink' => trim($output)
             )
         );
     } else {
@@ -713,23 +777,38 @@ if (isset($_GET['GetLink_Youtube'])) {
             'data' => []
         );
     }
-
-    // Đóng kết nối
     fclose($stream);
-
-    // Trả về dữ liệu dạng JSON
     echo json_encode($response, JSON_PRETTY_PRINT);
     exit;
 }
 
+//lấy dữ liệu cache báo, tin tức
+if (isset($_GET['Cache_NewsPaper'])) {
+    $newspaperJsonPath = '../cache/News_Paper.json';
+    if (!file_exists($newspaperJsonPath)) {
+		$initialData = [
+            'success' => true,
+            'message' => 'Danh sách báo, tin tức',
+            'data' => []
+        ];
+        // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
+        file_put_contents($newspaperJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        chmod($newspaperJsonPath, 0777);
+    }
+    $jsonData = file_get_contents($newspaperJsonPath);
+    $data = json_decode($jsonData, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+	exit();
+}
 
 //Hiển thị dữ liệu playlist
 if (isset($_GET['Cache_PlayList'])) {
-    // Đường dẫn tới file JSON
     $playlistJsonPath = '../cache/PlayList.json';
-    // Kiểm tra xem tệp có tồn tại không
     if (!file_exists($playlistJsonPath)) {
-		
 		        $initialData = [
             'success' => true,
             'message' => 'Danh sách phát tổng hợp',
@@ -737,19 +816,13 @@ if (isset($_GET['Cache_PlayList'])) {
         ];
         // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
         file_put_contents($playlistJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        // Thay đổi quyền truy cập của tệp thành 777
         chmod($playlistJsonPath, 0777);
     }
-    // Đọc nội dung tệp JSON
     $jsonData = file_get_contents($playlistJsonPath);
-    // Giải mã JSON thành mảng PHP
     $data = json_decode($jsonData, true);
-    // Kiểm tra xem việc giải mã có thành công không
     if (json_last_error() === JSON_ERROR_NONE) {
-        // Mã hóa lại dữ liệu thành JSON và xuất ra
         echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
-        // Nếu giải mã không thành công, xuất lỗi
         echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
 	exit();
@@ -757,52 +830,40 @@ if (isset($_GET['Cache_PlayList'])) {
 
 // Thêm bài hát vào playlist
 if (isset($_GET['playlist_ADD'])) {
-    // Đường dẫn tới file JSON
     $filePath = '../cache/PlayList.json';
-    // Khởi tạo phản hồi
     $response = [];
-    // Kiểm tra nếu file chưa tồn tại
     if (!file_exists($filePath)) {
-        // Tạo file mới với cấu trúc JSON mặc định
         $initialData = [
             'success' => true,
             'message' => 'Danh sách phát tổng hợp',
             'data' => []
         ];
-
         // Ghi dữ liệu mặc định vào file và thiết lập quyền 777
         file_put_contents($filePath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         chmod($filePath, 0777);
     }
-
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        // Kiểm tra và lấy dữ liệu từ POST request
         $requiredFields = ['title', 'cover', 'audio', 'duration', 'description', 'source', 'id', 'channelTitle', 'artist'];
         $missingFields = [];
-
         foreach ($requiredFields as $field) {
             if (!isset($_POST[$field]) || empty($_POST[$field])) {
                 $missingFields[] = $field;
             }
         }
-
         if (!empty($missingFields)) {
             $response['success'] = false;
             $response['message'] = 'Thiếu dữ liệu: ' . implode(', ', $missingFields);
             echo json_encode($response);
             exit;
         }
-
         // Tạo ID ngẫu nhiên với 6 ký tự
         function generateRandomId($length = 6) {
             return strtoupper(bin2hex(random_bytes($length / 2)));
         }
-
         // Hàm để kiểm tra và chuyển đổi các giá trị "null" và rỗng thành null
         function convertToNull($value) {
             return $value === 'null' || $value === '' ? null : $value;
         }
-
         // Lấy dữ liệu từ form và đặt giá trị "null" nếu không tồn tại hoặc rỗng
         $newEntry = [
             'ids_list' => generateRandomId(),
@@ -816,11 +877,8 @@ if (isset($_GET['playlist_ADD'])) {
             'channelTitle' => convertToNull($_POST['channelTitle']),
             'artist' => convertToNull($_POST['artist'])
         ];
-
-        // Đọc nội dung hiện có của file JSON
         $jsonData = file_get_contents($filePath);
         $data = json_decode($jsonData, true);
-
         // Kiểm tra trùng lặp
         $isDuplicate = false;
         foreach ($data['data'] as $entry) {
@@ -829,17 +887,14 @@ if (isset($_GET['playlist_ADD'])) {
                 break;
             }
         }
-
         if ($isDuplicate) {
             $response['success'] = false;
             $response['message'] = ' Bài hát '.$_POST['title'].' đã tồn tại trong danh sách phát ở nguồn '.$_POST['source'];
         } else {
             // Thêm dữ liệu mới vào mảng "data"
             $data['data'][] = $newEntry;
-
             // Chuyển đổi mảng thành JSON
             $jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
             // Ghi dữ liệu JSON vào file
             if (file_put_contents($filePath, $jsonData)) {
                 $response['success'] = true;
@@ -853,36 +908,27 @@ if (isset($_GET['playlist_ADD'])) {
         $response['success'] = false;
         $response['message'] = 'Chỉ chấp nhận các yêu cầu POST.';
     }
-
     echo json_encode($response);
     exit();
 }
 
 //Xóa playlist hoặc xóa 1 hay nhiều bài hát theo ids_list
 if (isset($_GET['playlist_DELETE'])) {
-
-    // Đường dẫn tới file JSON
     $filePath = '../cache/PlayList.json';
-
     if (file_exists($filePath)) {
         $jsonData = file_get_contents($filePath);
         $data = json_decode($jsonData, true);
-
         // Đảm bảo rằng 'data' là một mảng
         if (!isset($data['data']) || !is_array($data['data'])) {
             $data['data'] = [];
         }
-
         // Xử lý yêu cầu xóa
         $action = isset($_POST['action']) ? $_POST['action'] : null;
         $idsToDelete = isset($_POST['ids_list']) ? $_POST['ids_list'] : null;
-
         $updatedData = $data['data'];
         $idsToDelete = $idsToDelete ? explode(',', $idsToDelete) : [];
-
         $deletedIds = [];
         $idsNotFound = [];
-
         if ($action === 'delete_all') {
             // Xóa toàn bộ nội dung trong 'data'
             $updatedData = [];
@@ -891,18 +937,15 @@ if (isset($_GET['playlist_DELETE'])) {
             // Xóa các mục theo 'ids_list'
             $existingIds = array_column($updatedData, 'ids_list');
             $idsNotFound = array_diff($idsToDelete, $existingIds);
-
             // Lọc các mục không nằm trong danh sách 'idsToDelete'
             foreach ($idsToDelete as $id) {
                 if (in_array($id, $existingIds)) {
                     $deletedIds[] = $id;
                 }
             }
-
             $updatedData = array_filter($updatedData, function($entry) use ($idsToDelete) {
                 return !in_array($entry['ids_list'], $idsToDelete);
             });
-
             // Đặt lại chỉ số của mảng
             $updatedData = array_values($updatedData);
         } else {
@@ -911,18 +954,14 @@ if (isset($_GET['playlist_DELETE'])) {
                 'success' => false,
                 'message' => 'Yêu cầu không hợp lệ.',
             ];
-
             echo json_encode($response);
             exit;
         }
-
-        // Ghi dữ liệu JSON vào file với 'success' và 'message' giữ nguyên
         $fileContent = [
             'success' => true,
             'message' => "Danh sách phát tổng hợp",
             'data' => $updatedData
         ];
-
         if (file_put_contents($filePath, json_encode($fileContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
             // Phản hồi với thông tin về các mục đã xóa và các ID không tìm thấy
             $response = [
@@ -933,14 +972,12 @@ if (isset($_GET['playlist_DELETE'])) {
                     'ids_not_found' => $idsNotFound
                 ]
             ];
-
             echo json_encode($response);
         } else {
             $responsexx = [
                 'success' => false,
                 'message' => 'Lỗi: Không thể ghi dữ liệu vào file JSON.'
             ];
-
             echo json_encode($responsexx);
         }
     } else {
@@ -949,7 +986,6 @@ if (isset($_GET['playlist_DELETE'])) {
             'success' => false,
             'message' => 'File không tồn tại.'
         ];
-
         echo json_encode($responsezz);
     }
 	exit();
@@ -969,7 +1005,7 @@ if (isset($_GET['cache_delete']) && in_array($_GET['cache_delete'], ['ZingMP3', 
         if ($fileHandle) {
             // Ghi một mảng rỗng vào file
             fwrite($fileHandle, '[]');
-            fclose($fileHandle); // Đóng file
+            fclose($fileHandle);
             $response['success'] = true;
             $response['message'] = "Đã xóa cache $cacheType";
 			echo json_encode($response);
@@ -981,7 +1017,6 @@ if (isset($_GET['cache_delete']) && in_array($_GET['cache_delete'], ['ZingMP3', 
         $response['message'] = "File ".$cacheType.".json không tồn tại.";
 			echo json_encode($response);
     }
-
 exit();
 }
 
@@ -1009,7 +1044,6 @@ if (isset($_GET['newspaper'])) {
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_TIMEOUT, 10);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        // Thực thi yêu cầu cURL
         $apiResponse = curl_exec($ch);
         $error = curl_error($ch);
         curl_close($ch);
@@ -1020,7 +1054,8 @@ if (isset($_GET['newspaper'])) {
                     $result = ["data" => []];
                     foreach ($data['data']['trangchu_podcast'] as $podcast) {
                         $result["data"][] = [
-                            "title" => $podcast['title'],
+                            //"title" => $podcast['title'],
+                            "title" => str_replace(["'", "\""], "", $podcast['title']),
                             "audio" => $podcast['podcast']['path'],
                             "cover" => $podcast['podcast']['thumb_url'],
                             "duration" => isset($podcast['podcast']['duration']) ? formatDuration($podcast['podcast']['duration']) : "N/A",
@@ -1045,12 +1080,12 @@ if (isset($_GET['newspaper'])) {
             $response['message'] = 'Lỗi cURL: ' . $error;
         }
     }
-
 else if (strpos($News_Paper, "thanhnien.vn") !== false){
 // Lấy nội dung HTML từ URL
 $html = file_get_contents($News_Paper);
 if ($html === false) {
-    die("Không thể lấy dữ liệu từ URL.");
+	$response['message'] = "Không thể lấy dữ liệu từ Báo: $News_Paper";
+	exit();
 }
 // Tìm và trích xuất JSON từ thẻ <script>
 preg_match('/var\s+params\s*=\s*(\{.*?\});/is', $html, $matches);
@@ -1061,7 +1096,8 @@ if (!empty($matches[1])) {
         $result = ["data" => []];
         foreach ($playList as $item) {
                         $result["data"][] = [
-                            "title" => $item['title'] ?? 'N/A',
+                            //"title" => $item['title'] ?? 'N/A',
+                            "title" => str_replace(["'", "\""], "", $item['title'] ?? 'N/A'),
                             "audio" => $item['jsonpost']['fullPost'][0]['link'] ?? 'N/A',
                             "cover" => str_replace('50_50', '150_150', $item['thumb'] ?? 'N/A'),
                             "duration" => "N/A",
@@ -1077,48 +1113,43 @@ if (!empty($matches[1])) {
                         $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
                     }
     } else {
-        echo "Không tìm thấy danh sách phát nhạc trong JSON.\n";
+		$response['message'] = "Không tìm thấy danh sách phát nhạc trong chuỗi dữ liệu JSON";
     }
 } else {
-    echo "Không tìm thấy JSON trong thẻ <script>.\n";
+	$response['message'] = "Không tìm thấy dữ liệu trong script";
 }
 }
 else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
-    // Lấy nội dung HTML từ URL
     $html = file_get_contents($News_Paper);
     if ($html === false) {
-        die("Không thể lấy dữ liệu từ URL.");
+		$response['message'] = "Không thể lấy dữ liệu từ Báo: $News_Paper";
+		exit();
     }
-
     // Định nghĩa mẫu Regex để trích xuất các thuộc tính cần thiết
     $pattern = '/<a[^>]*data-file="([^"]+)"[^>]*data-title="([^"]+)"[^>]*data-avatar="([^"]+)"[^>]*>/';
-
     // Kết quả trích xuất
     $result = ["data" => []];
-    
     // Mảng để lưu trữ các tiêu đề đã gặp
     $titles_seen = [];
-
     if (preg_match_all($pattern, $html, $matches, PREG_SET_ORDER)) {
         foreach ($matches as $match) {
             // Lấy tiêu đề và giải mã
             $title = html_entity_decode($match[2], ENT_QUOTES, 'UTF-8');
-            
             // Kiểm tra nếu tiêu đề đã được gặp trước đó
             if (!in_array($title, $titles_seen)) {
                 // Nếu chưa gặp, thêm vào mảng kết quả và đánh dấu tiêu đề này là đã gặp
                 $result["data"][] = [
-                    "title" => $title,
+                    "title" => str_replace(["'", "\""], "", $title),
                     "audio" => $match[1],
                     "cover" => $match[3],
                     "duration" => "N/A",
                     "publish_time" => "N/A",
                     "source" => "Báo Tuổi Trẻ"
                 ];
-                $titles_seen[] = $title;  // Đánh dấu tiêu đề đã gặp
+				// Đánh dấu tiêu đề đã gặp
+                $titles_seen[] = $title;
             }
         }
-
         // Lưu dữ liệu vào tệp JSON
         if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
             $response['success'] = true;
@@ -1128,10 +1159,210 @@ else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
             $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
         }
     } else {
-        echo "Không tìm thấy dữ liệu phù hợp.\n";
+         $response['message'] = "Không tìm thấy dữ liệu phù hợp";
     }
 }
-
+else if (strpos($News_Paper, "tienphong.vn/podcast") !== false) {
+    $html = file_get_contents($News_Paper);
+    if ($html === FALSE) {
+	$response['message'] = "Không thể lấy dữ liệu từ báo: ".$News_Paper;
+	exit();
+    }
+	$result = ["data" => []];
+    $unique_hrefs = [];
+    $result_data = [];
+    // Biểu thức chính quy để tìm tất cả các liên kết <a> với class="cms-link"
+    preg_match_all('/<a\s+class="cms-link"[^>]*href="([^"]*)"[^>]*title="([^"]*)"[^>]*>.*?<\/a>/is', $html, $matches);
+    // Kiểm tra xem chúng ta có trích xuất được gì từ HTML hay không
+    if (count($matches) > 2) {
+        $links = $matches[1];
+        $titles = $matches[2];
+        foreach ($links as $index => $href) {
+            $href = trim($href);
+            $title = isset($titles[$index]) ? trim($titles[$index]) : 'N/A';
+            // Sử dụng biểu thức chính quy để tìm thẻ <img> với class="lazyload" bên trong <a>
+            preg_match('/<img\s+class="lazyload"[^>]*data-src="([^"]*)"/is', $html, $img_match);
+            // Kiểm tra nếu hình ảnh tồn tại và lấy data-src
+            $data_src = isset($img_match[1]) ? trim($img_match[1]) : 'N/A';
+            // Nếu href duy nhất và có data-src hợp lệ
+            if (!in_array($href, $unique_hrefs) && $data_src !== 'N/A') {
+                $unique_hrefs[] = $href;
+                $result_data[] = [
+                    "href" => $href,
+                    "title" => $title,
+                    "data_src" => $data_src
+                ];
+            }
+        }
+        // Lấy tối đa 3 bài viết từ dữ liệu trích xuất
+        foreach (array_slice($result_data, 0, 3) as $data) {
+            $link = $data['href'];
+            $title = $data['title'];
+            $thumb = $data['data_src'];
+            // Chỉ thêm vào nếu thông tin hợp lệ
+            if ($thumb && $title && $link) {
+                $result["data"][] = [
+                    "cover" => $thumb,
+                    "title" => str_replace(["'", "\""], "", $title),
+                    "audio" => $link,
+                    "source" => "Báo Tiền Phong"
+                ];
+            }
+        }
+        // Lưu dữ liệu vào tệp JSON
+        if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+            $response['success'] = true;
+            $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
+            $response['data'] = $result["data"];
+        } else {
+            $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
+        }
+    } else {
+        $response['message'] = "Không tìm thấy liên kết hợp lệ trong trang.";
+    }
+}
+else if (strpos($News_Paper, "baomoi.com/audio") !== false){
+$html = file_get_contents($News_Paper);
+if ($html === FALSE) {
+	$response['message'] = "Không thể lấy dữ liệu từ báo: ".$News_Paper;
+	exit();
+}
+// Tìm thẻ <script> chứa dữ liệu JSON
+preg_match('/<script\s+id="__NEXT_DATA__"\s+type="application\/json">(.*?)<\/script>/s', $html, $matches);
+if (!empty($matches[1])) {
+    // Kết quả trích xuất
+    $result = ["data" => []];
+    // Giải mã JSON từ thẻ script
+    $json_data = json_decode($matches[1], true);
+    // Kiểm tra dữ liệu có hợp lệ không
+    if (isset($json_data['props']['pageProps']['resp']['data']['content']['items'])) {
+        $items = $json_data['props']['pageProps']['resp']['data']['content']['items'];
+        // Duyệt qua từng bài viết (ở đây lấy tối đa 3 bài)
+        foreach (array_slice($items, 0, 20) as $item) {
+            // Lấy thông tin từ từng item
+            $title = isset($item['title']) ? $item['title'] : 'N/A';
+            $thumb = isset($item['thumb']) ? $item['thumb'] : 'N/A';
+            $duration = isset($item['duration']) ? $item['duration'] : 'N/A';
+            $date = isset($item['date']) ? $item['date'] : null;
+            $id_name = isset($item['id']) ? $item['id'] : 'N/A';
+            $url_item = "https://baomoi.com" . (isset($item['url']) ? $item['url'] : 'N/A');
+            $short_name = isset($item['publisher']['shortName']) ? $item['publisher']['shortName'] : 'N/A';
+            // Chuyển đổi thời gian từ timestamp (nếu có)
+            if ($date) {
+				// Chuyển đổi timestamp thành định dạng mong muốn
+                $formatted_date = date("d/m/Y, H:i", $date);
+            } else {
+				// Nếu không có ngày, gán 'N/A'
+                $formatted_date = 'N/A';
+            }
+            // Nếu có thông tin tiêu đề, id và hình ảnh, lưu vào mảng
+            if ($title && $id_name && $thumb) {
+                $result["data"][] = [
+                    "title" => str_replace(["'", "\""], "", $title),
+                    "id" => $id_name,
+                    "audio" => $url_item.'#'.$id_name,
+                    "duration" => $duration,
+                    "publish_time" => $formatted_date,
+                    "cover" => $thumb,
+                    "short_name" => $short_name,
+                    "source" => "Báo Mới"
+                ];
+            }
+        }
+        // Lưu dữ liệu vào tệp JSON
+        if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+            $response['success'] = true;
+            $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
+            $response['data'] = $result["data"];
+        } else {
+            $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
+        }
+    } else {
+        $response['message'] = "Không tìm thấy thông tin về các bài viết.";
+    }
+} else {
+    $response['message'] = "Không tìm thấy thẻ script chứa dữ liệu JSON.";
+}
+}
+else if (strpos($News_Paper, "vietnamnet.vn/podcast") !== false) {
+$html = file_get_contents($News_Paper);
+// Mảng để lưu tiêu đề đã in
+$printedTitles = [];
+// Regex để tìm tất cả các thẻ <div> có class chứa "horizontalPost__avt"
+$pattern = '/<div\s+class=["\'][^"\']*horizontalPost__avt[^"\']*["\'].*?>.*?<\/div>/s';
+preg_match_all($pattern, $html, $matches);
+// Regex để tìm tất cả các thẻ <div> có class chứa "horizontalPost__main-actions"
+$pattern1 = '/<div\s+class=["\'][^"\']*horizontalPost__main-actions[^"\']*["\'].*?>.*?<\/div>/s';
+preg_match_all($pattern1, $html, $matches1);
+if (!empty($matches[0]) && !empty($matches1[0])) {
+    // Kết quả trích xuất
+    $result = ["data" => []];
+    // Duyệt qua tất cả các thẻ đã tìm được, giả sử matches[0] và matches1[0] có cùng số lượng phần tử
+    $count = min(count($matches[0]), count($matches1[0]));
+    for ($i = 0; $i < $count; $i++) {
+        // Thẻ từ matches[0] (horizontalPost__avt)
+        $divAvt = $matches[0][$i];
+        // Lấy liên kết và tiêu đề bài viết từ thẻ <a> trong div
+        preg_match('/<a\s+href=["\'](.*?)["\'].*?title=["\'](.*?)["\']/', $divAvt, $linkMatches);
+        // Lấy hình ảnh từ thẻ <picture> hoặc <img>
+        preg_match('/<picture.*?>.*?<source[^>]+data-srcset=["\']([^"\']+)["\']/s', $divAvt, $imgMatches);
+        // Thẻ từ matches1[0] (horizontalPost__main-actions)
+        $divMain = $matches1[0][$i];
+        // Lấy thời gian và ngày đăng
+        preg_match('/<span\s+class=["\']total-timer["\']>(.*?)<\/span>/s', $divMain, $timeMatches);
+        preg_match('/<span\s+class=["\']public-date["\']>(.*?)<\/span>/s', $divMain, $dateMatches);
+        // Kiểm tra nếu tiêu đề đã được in, bỏ qua nếu có trong mảng
+        $title = htmlspecialchars(trim($linkMatches[2]));
+        if (in_array($title, $printedTitles)) {
+            continue;
+        }
+        $COVER = null;
+        // Kiểm tra hình ảnh, nếu có trong <picture> sử dụng, nếu không sẽ lấy từ <img> fallback
+        if (!empty($imgMatches)) {
+            $COVER = trim($imgMatches[1]);
+        } else {
+            // Nếu không tìm thấy trong <picture>, kiểm tra thẻ <img> với data-srcset
+            preg_match('/<img\s+[^>]*data-srcset=["\']([^"\']+)["\']/s', $divAvt, $imgFallbackMatches);
+            if (!empty($imgFallbackMatches)) {
+                $COVER = trim($imgFallbackMatches[1]);
+            } else {
+                // Nếu không tìm thấy data-srcset, kiểm tra src trong thẻ <img>
+                preg_match('/<img\s+[^>]*src=["\']([^"\']+)["\']/s', $divAvt, $imgFallbackMatches);
+                if (!empty($imgFallbackMatches)) {
+                    $COVER = trim($imgFallbackMatches[1]);
+                }
+            }
+        }
+		$Link_URL = 'https://vietnamnet.vn'.trim($linkMatches[1]);
+		if (isset($timeMatches[1])) {
+			$DURATION = trim(str_replace("-", "", $timeMatches[1]));
+			} else {
+				$DURATION = "N/A"; 
+			}
+		$publish_time = trim($dateMatches[1]);
+        $result["data"][] = [
+            "title" => str_replace(["'", "\""], "", $title),
+            "audio" => !empty($Link_URL) ? $Link_URL : "",
+            "cover" => !empty($COVER) ? $COVER : "N/A",
+            "duration" => !empty($DURATION) ? $DURATION : "N/A",
+            "publish_time" => !empty($publish_time) ? $publish_time : "N/A",
+            "source" => "Báo VietNamNet"
+        ];
+        // Thêm tiêu đề vào mảng để tránh in lại
+        $printedTitles[] = $title;
+    }
+        // Lưu dữ liệu vào tệp JSON
+        if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+            $response['success'] = true;
+            $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
+            $response['data'] = $result["data"];
+        } else {
+            $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
+        }
+} else {
+	$response['message'] = "Không tìm thấy thẻ nào với class 'horizontalPost__avt' hoặc 'horizontalPost__main-actions'.\n";
+}
+}
 	else {
         $response['message'] = 'Trang Báo chưa được hỗ trợ';
     }
