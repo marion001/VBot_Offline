@@ -7,4 +7,4 @@ VBot là loa thông minh tích hợp trợ lý ảo tiếng Việt, hỗ trợ �
 - Đầy Đủ Giao Tiếp API, MQTT
 - Kết Nối Điều Khiển Home Assistant (HASS)
 
-Link Dowload IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
+Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
