@@ -95,6 +95,7 @@ if (file_exists($start_recovery_config_json)) {
 if (isset($_POST['all_config_save'])) {
 
 if ($Config['backup_upgrade']['config_json']['active'] === true){
+
 // Lấy ngày và giờ hiện tại
 $dateTime = new DateTime();
 $newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
@@ -116,6 +117,7 @@ if (copy($Config_filePath, $destinationFile_Backup_Config)) {
     }
 }
 }
+
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG mic
 $Config['smart_config']['mic']['id'] = intval($_POST['mic_id']);
 $Config['smart_config']['mic']['scan_on_boot'] = isset($_POST['mic_scan_on_boot']) ? true : false;
@@ -204,6 +206,13 @@ $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'] = $_PO
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] = $_POST['tts_ggcloud_language_code'];
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] = $_POST['tts_ggcloud_voice_name'];
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['speaking_speed'] = floatval($_POST['tts_gcloud_speaking_speed']);
+
+#CẬP NHẬT GIÁ TRỊ TRONG tts Google CLOUD token key
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['token_key'] = $_POST['tts_ggcloud_key_token'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code'] = $_POST['tts_ggcloud_key_language_code'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] = $_POST['tts_ggcloud_key_voice_name'];
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['speaking_speed'] = floatval($_POST['tts_ggcloud_key_speaking_speed']);
+
 
 #cập nhật giá trị trong tts tts_default
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['speaking_speed'] = floatval($_POST['tts_default_speaking_speed']);
@@ -1071,26 +1080,35 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 			  if ($GET_tts_select === "tts_default"){
 				  $replace_text_tts = "Mặc Định";
 			  }else if ($GET_tts_select === "tts_ggcloud"){
-				  $replace_text_tts = "Google Cloud";
+				  $replace_text_tts = "Google Cloud Authentication.json";
 			  }else if ($GET_tts_select === "tts_zalo"){
 				  $replace_text_tts = "Zalo AI";
 			  }else if ($GET_tts_select === "tts_viettel"){
 				  $replace_text_tts = "Viettel AI";
 			  }else if ($GET_tts_select === "tts_edge"){
 				  $replace_text_tts = "Microsoft edge";
+			  }else if ($GET_tts_select === "tts_ggcloud_key"){
+				  $replace_text_tts = "Google Cloud Key";
 			  }else{
 				  $replace_text_tts = "Không có dữ liệu";
 			  }
 			  ?>
 			  <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_tts; ?></font></center>
 				<div class="col-sm-9">
+				
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
                       <label class="form-check-label" for="tts_default">TTS Mặc Định (Free) <i class="bi bi-question-circle-fill" onclick="show_message('Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định')"></i></label>
                     </div>
+					
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
                       <label class="form-check-label" for="tts_ggcloud">TTS Google Cloud (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng tệp xác thực json của Google Cloud TTS để sử dụng: <a href=\'https://cloud.google.com/text-to-speech?hl=vi\' target=\'_bank\'>SDK</a>')"></i></label>
+                    </div>
+					
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="tts_select" id="tts_ggcloud_key" value="tts_ggcloud_key" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud_key' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="tts_ggcloud_key">TTS Google Cloud (Key) hoặc (Free Key) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Key của Google Cloud để xác thực hoặc sử dụng Key miễn phí bằng cách lấy thủ công và có thời gian hết hạn')"></i></label>
                     </div>
 
                     <div class="form-check">
@@ -1333,7 +1351,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 <select name="tts_edge_voice_name" id="tts_edge_voice_name" class="form-select border-success" aria-label="Default select example">
 <option value="vi-VN-HoaiMyNeural" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] === 'vi-VN-HoaiMyNeural' ? 'selected' : ''; ?>>Giọng Nữ, vi-VN-HoaiMyNeural</option>
 <option value="vi-VN-NamMinhNeural" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] === 'vi-VN-NamMinhNeural' ? 'selected' : ''; ?>>Giọng Nam, vi-VN-NamMinhNeural</option>
-
 </select>
 <label for="tts_edge_voice_name">Giọng đọc:</label>
 </div>
@@ -1345,6 +1362,58 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 
 </div>
 <!-- ẩn hiện cấu hình select_tts_edge_html style="display: none;" -->
+
+
+
+
+<!-- ẩn hiện cấu hình select_tts_ggcloud_key style="display: none;" -->
+<div id="select_tts_ggcloud_key" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>TTS Google Cloud KEY</font></center></h4>
+
+- Lấy Key Miễn Phí: <i class="bi bi-question-circle-fill" onclick="show_message('Truy Cập: <a href=\'https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html\' target=\'_bank\'>https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html</a> <br/>- <b>Nhấn F12</b>, Chuyển Qua Tab: <b>Mạng</b> Lựa Chọn Ngôn Ngữ Tiếng Việt nhập bất kỳ văn bản vào ô rồi nhấn nút: <b>SPEAK IT</b> sau đó <b>Xác Minh Capcha.</b><br/> Nhìn vào Tab vừa nhấn F12 tìm tới giá trị bắt đầu bằng <b>proxy?url=</b> trong toàn bộ giá trị đó tìm tới chỗ: <b>&token=</b> Sau dấu = đó chính mã token hãy sao chép và dán vào ô bên dưới<br/><b>- Lưu Ý: Key Miễn Phí này sẽ có thời gian sử dụng, nếu key hết hạn bạn cần lấy key mới thủ công</b>')"></i>
+<br/>- Key Mất Phí: <i class="bi bi-question-circle-fill" onclick="show_message('Key này sẽ nằm trong Project <a href=\'https://console.cloud.google.com\' target=\'_bank\'>https://console.cloud.google.com/</a> chọn vào dự án của bạn, và được kích hoạt API: Cloud Text To Text API (Hoặc có thể tạo mới Project để lấy key, như dùng tệp .json)')"></i>
+<div class="form-floating mb-3">  
+<input type="text" class="form-control border-success" name="tts_ggcloud_key_token" id="tts_ggcloud_key_token" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['token_key']; ?>">
+ <label for="tts_ggcloud_key_token" class="form-label">Token Key:</label>	
+</div>
+
+<div class="form-floating mb-3">  
+<input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_ggcloud_key_speaking_speed" id="tts_ggcloud_key_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['speaking_speed']; ?>">
+ <label for="tts_ggcloud_key_speaking_speed" class="form-label">Tốc độ đọc:</label>	
+</div>
+
+
+<div class="input-group mb-3">
+<div class="form-floating">
+<select name="tts_ggcloud_key_voice_name" id="tts_ggcloud_key_voice_name" class="form-select border-success" aria-label="Default select example">
+<option value="vi-VN-Neural2-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Neural2-A' ? 'selected' : ''; ?>>vi-VN-Neural2-A FEMALE</option>
+<option value="vi-VN-Neural2-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Neural2-D' ? 'selected' : ''; ?>>vi-VN-Neural2-D MALE</option>
+<option value="vi-VN-Standard-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-A' ? 'selected' : ''; ?>>vi-VN-Standard-A FEMALE</option>
+<option value="vi-VN-Standard-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-B' ? 'selected' : ''; ?>>vi-VN-Standard-B MALE</option>
+<option value="vi-VN-Standard-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-C' ? 'selected' : ''; ?>>vi-VN-Standard-C FEMALE</option>
+<option value="vi-VN-Standard-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-D' ? 'selected' : ''; ?>>vi-VN-Standard-D MALE</option>
+<option value="vi-VN-Wavenet-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-A' ? 'selected' : ''; ?>>vi-VN-Wavenet-A FEMALE</option>
+<option value="vi-VN-Wavenet-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-B' ? 'selected' : ''; ?>>vi-VN-Wavenet-B MALE</option>
+<option value="vi-VN-Wavenet-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-C' ? 'selected' : ''; ?>>vi-VN-Wavenet-C FEMALE</option>
+<option value="vi-VN-Wavenet-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-D' ? 'selected' : ''; ?>>vi-VN-Wavenet-D MALE</option>
+</select> 
+<label for="tts_ggcloud_key_voice_name">Giọng đọc:</label>
+</div>
+<button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i> Nghe Thử</button>
+</div>
+
+
+
+<div class="form-floating mb-3">  
+<input type="text" class="form-control border-danger" name="tts_ggcloud_key_language_code" id="tts_ggcloud_key_language_code" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code']; ?>">
+ <label for="tts_ggcloud_key_language_code" class="form-label">Ngôn Ngữ:</label>	
+</div>
+
+
+</div>
+<!-- ẩn hiện cấu hình select_tts_ggcloud_key style="display: none;" -->
+
+
 </div>
 </div>
         </div>
@@ -3505,6 +3574,7 @@ function readJSON_file_path(filePath) {
             const div_select_tts_ggcloud_html = document.getElementById('select_tts_ggcloud_html');
             const div_select_tts_default_html = document.getElementById('select_tts_default_html');
             const div_select_tts_edge_html = document.getElementById('select_tts_edge_html');
+            const div_select_tts_ggcloud_key = document.getElementById('select_tts_ggcloud_key');
             const div_select_tts_zalo_html = document.getElementById('select_tts_zalo_html');
             const div_select_tts_viettel_html = document.getElementById('select_tts_viettel_html');
             if (document.getElementById('tts_ggcloud').checked) {
@@ -3533,6 +3603,11 @@ function readJSON_file_path(filePath) {
                 div_select_tts_edge_html.style.display = 'block'; // Hiển thị div
             } else {
                 div_select_tts_edge_html.style.display = 'none'; // Ẩn div
+            }
+            if (document.getElementById('tts_ggcloud_key').checked) {
+                div_select_tts_ggcloud_key.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_tts_ggcloud_key.style.display = 'none'; // Ẩn div
             }
         });
     });

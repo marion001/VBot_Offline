@@ -459,6 +459,12 @@
                     "speaking_speed": 1,
                     "authentication_json_file": "tts_token_google_cloud.json"
                 },
+                "tts_ggcloud_key": {
+                    "language_code": "vi-VN",
+                    "voice_name": "vi-VN-Wavenet-A",
+                    "speaking_speed": 1,
+                    "token_key": "03AFcWeA4zMLF1H0HifVhai0M5VTw1N_sv6ESC95yrmKXRqQN1hiK4gLVnyvle1q0I9cFZ6r_QZjdx7Yav5n2Vc8giHbvOnMnModr6_QJ8KKfWAN2ay7p625HTx4pn-goTdr_Lc6of4GKddU3kLFrr9LITM2hx4Adij4C3cKScOwza5w2tMXX25-GQrFLOjjSE-0ADU6hobtObszRwZSAWT23-yjrYCp8LaUHyfMMa8JKAEG2jcM-zZIOItWzG71ErQt0p4VLLxrtn5verOcqdvb4X_DCHIyQtONlm64T-MopXE-IPlctWBaGnloicvoemo-h5OSN4ilEnpLJ6SOqW0J-QcBCVdi_0YzxSe1Sv_xuSmtuY7j4ojugjEvAehhWRXVYj-qiHYBV1QZN918Wh-k7NlxMwkMHumrfc3D5cRNxd2FCM8KhV03egEdrwV4M2EoYwmn1MmKYO0_5gHoUIRpTiAmaIdaPee10Zz-b458an-1tATT62hL5xBVvwHF3BwXv6hswAZWqd2BvmBCcWJLrVKs4r9yGhiNvAtroKPOHFIFjzm-GzoP9FRm0_I-7wCokmGfw8-HfW2RQuVKGhBYid9IkH-v6Mvyh_5wfmwZHMmcTE8GkHqZ9QgwiLTvbz1NkJ7Tt_PUEmrF4LsYAd8RZ4maljf_PV9IiBQsFhUHrgP6XTOHqVjLWJqamUoIg673x3jTrhn2ONvt-ssIKpbdVBC7dwmJWPAwUszO0kiIHEzgD5StWWnZFX5wglyIndubngLnlMIQNUoLN0gtmDn6lwtNsGIXo4sy_a1DbajNygIVymUJiVdCkYsq2L0KQx1dPlVw6Fa-tmOZvwg7rbcQr9L8-ONtIa6wl00wq6BiEERFpsk2CxRsM"
+                },
                 "tts_default": {
                     "speaking_speed": 0.9,
                     "quality": 1,
