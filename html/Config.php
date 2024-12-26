@@ -172,6 +172,7 @@ $Config['smart_config']['speaker']['volume'] = intval($_POST['bot_volume']);
 $Config['smart_config']['speaker']['volume_min'] = intval($_POST['bot_volume_min']);
 $Config['smart_config']['speaker']['volume_max'] = intval($_POST['bot_volume_max']);
 $Config['smart_config']['speaker']['volume_step'] = intval($_POST['bot_volume_step']);
+$Config['smart_config']['speaker']['remember_last_volume'] = isset($_POST['remember_last_volume']) ? true : false;
 
 
 #Cập Nhật GIá Trị Màn Hình LCD OLED
@@ -429,6 +430,11 @@ $Config['media_player']['news_paper']['active'] = isset($_POST['news_paper_activ
 $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
 $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] = isset($_POST['developer_customization_vbot_processing']) ? true : false;
 
+#Cập Nhật STT Google Cloud V2
+$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id'] = $_POST['stt_ggcloud_v2_recognizer_id'];
+$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['time_out'] = intval($_POST['stt_ggcloud_v2_time_out']);
+$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['model'] = $_POST['stt_ggcloud_v2_model'];
+
 ##############################################
 // Khởi tạo mảng radio_data đã cập nhật
 // Cập nhật radio_data từ POST
@@ -471,7 +477,10 @@ foreach ($_POST as $key_newspaper => $value) {
 $Config['media_player']['news_paper_data'] = $updated_news_paper_data;
 
 
-#Cập nhật stt Google Cloud
+#Cập Nhật File JSon STT Google Cloud
+if ($_POST['stt_select'] === "stt_ggcloud"){
+
+#Cập nhật json stt Google Cloud V1
 $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_json_file_token'];
 json_decode($json_data_goolge_cloud_stt);
 if (json_last_error() === JSON_ERROR_NONE) {
@@ -487,6 +496,34 @@ if (json_last_error() === JSON_ERROR_NONE) {
 } else {
     $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
 }
+
+}else if ($_POST['stt_select'] === "stt_ggcloud_v2"){
+
+
+#Cập nhật json stt Google Cloud V2
+$json_data_goolge_cloud_stt = $_POST['stt_ggcloud_v2_json_file_token'];
+json_decode($json_data_goolge_cloud_stt);
+if (json_last_error() === JSON_ERROR_NONE) {
+    // Nếu dữ liệu là null hoặc rỗng, thay thế bằng {}
+    if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
+        $json_data_goolge_cloud_stt = '{}';
+    }
+    // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
+    $json_data_goolge_cloud_stt = trim($json_data_goolge_cloud_stt);
+    // Lưu dữ liệu vào file
+    file_put_contents($stt_token_google_cloud, $json_data_goolge_cloud_stt);
+    //$messages[] = 'Dữ liệu stt_token_google_cloud đã được lưu vào file thành công.';
+} else {
+    $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
+}
+
+
+}
+
+
+
+
+
 
 #Cập nhật tts Google Cloud
 $json_data_goolge_cloud_tts = $_POST['tts_ggcloud_json_file_token'];
@@ -857,7 +894,17 @@ Cấu Hình Âm Thanh Volume/Mic:
                     <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
 					</div>
                   </div>
-				  
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Ghi Nhớ Âm Lượng <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lưu lại giá trị âm lượng vào tệp Config.json mỗi khi được thay đổi trong quá trình Bot hoạt động')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="remember_last_volume" id="remember_last_volume" <?php echo $Config['smart_config']['speaker']['remember_last_volume'] ? 'checked' : ''; ?>>
+                      
+                    </div>
+                  </div>
+                </div>
+
 				<div class="row mb-3">
 				 <div id="alsamixer_scan"></div>
 				</div>
@@ -982,7 +1029,9 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 			  if ($GET_stt_select === "stt_default"){
 				  $replace_text_stt = "Mặc Định";
 			  }else if ($GET_stt_select === "stt_ggcloud"){
-				  $replace_text_stt = "Google Cloud";
+				  $replace_text_stt = "Google Cloud V1";
+			  }else if ($GET_stt_select === "stt_ggcloud_v2"){
+				  $replace_text_stt = "Google Cloud V2";
 			  }else{
 				  $replace_text_stt = "Không có dữ liệu";
 			  }
@@ -995,7 +1044,11 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud (Authentication.json)</label>
+                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud V1 (Authentication.json)</label>
+                    </div>
+                    <div class="form-check">
+                      <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud_v2" value="stt_ggcloud_v2" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud_v2' ? 'checked' : ''; ?>>
+                      <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json)</label>
                     </div>
                   </div>
             </div>
@@ -1011,28 +1064,73 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
             
 <!-- ẩn hiện cấu hình select_stt_ggcloud_html -->
 <div id="select_stt_ggcloud_html" class="col-12" style="display: none;">
-<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>STT Google Cloud (Authentication.json)</font></center></h4>
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>STT Google Cloud V1 (Authentication.json)</font></center></h4>
+
+<div class="form-floating mb-3">
+<textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_json_file_token" id="stt_ggcloud_json_file_token" style="height: 150px;">
+<?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
+</textarea>
+<label for="stt_ggcloud_json_file_token">Tệp tin json xác thực:</label>
+</div>
+
                     <div class="form-floating mb-3">
-                      <input readonly type="number" class="form-control border-danger" min="0" step="1" name="stt_ggcloud_rate" id="stt_ggcloud_rate" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>">
+                      <input readonly type="number" class="form-control border-danger" min="0" step="1" name="stt_ggcloud_rate" id="stt_ggcloud_rate" placeholder="16000" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>">
                       <label for="stt_ggcloud_rate">Sample Rate:</label>
                     </div>
 					
                     <div class="form-floating mb-3">
-                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_channels" id="stt_ggcloud_channels" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['channels']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['channels']; ?>">
+                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_channels" id="stt_ggcloud_channels" placeholder="1" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['channels']; ?>">
                       <label for="stt_ggcloud_channels">Số Lượng Kênh (Channels):</label>
                     </div>
 					
                     <div class="form-floating mb-3">
-                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_chunk" id="stt_ggcloud_chunk" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['chunk']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['chunk']; ?>">
+                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_chunk" id="stt_ggcloud_chunk" placeholder="1024" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['chunk']; ?>">
                       <label for="stt_ggcloud_chunk">Chunk:</label>
+                    </div>
+
+                  </div>
+
+
+<div id="select_stt_ggcloud_v2_html" class="col-12" style="display: none;">
+<h4 class="card-title" title="Chuyển giọng nói thành văn bản"><center><font color=red>STT Google Cloud V2 (Authentication.json)</font></center></h4>
+
+                    <div class="form-floating mb-3">
+                      <input required type="text" class="form-control border-success" name="stt_ggcloud_v2_recognizer_id" id="stt_ggcloud_v2_recognizer_id" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id']; ?>">
+                      <label for="stt_ggcloud_rate">Recognizer ID:</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input required type="number" class="form-control border-success" min="0" step="1" max="120" name="stt_ggcloud_v2_time_out" id="stt_ggcloud_v2_time_out" placeholder="60" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['time_out']; ?>">
+                      <label for="stt_ggcloud_rate">Time Out (giây):</label>
+                    </div>
+
+<div class="form-floating mb-3">
+<textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_v2_json_file_token" id="stt_ggcloud_v2_json_file_token" style="height: 150px;">
+<?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
+</textarea>
+<label for="stt_ggcloud_v2_json_file_token">Tệp tin json xác thực:</label>
+</div>
+
+                    <div class="form-floating mb-3">
+                      <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_v2_model" id="stt_ggcloud_v2_model" placeholder="short" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['model']; ?>">
+                      <label for="stt_ggcloud_rate">Model:</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                      <input readonly type="number" class="form-control border-danger" min="0" step="1" name="stt_ggcloud_rate" id="stt_ggcloud_rate" placeholder="16000" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>">
+                      <label for="stt_ggcloud_rate">Sample Rate:</label>
                     </div>
 					
                     <div class="form-floating mb-3">
-                      <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_json_file_token" id="stt_ggcloud_json_file_token" style="height: 150px;">
-					  <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
-					  </textarea>
-                      <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực:</label>
+                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_channels" id="stt_ggcloud_channels" placeholder="1" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['channels']; ?>">
+                      <label for="stt_ggcloud_channels">Số Lượng Kênh (Channels):</label>
                     </div>
+					
+                    <div class="form-floating mb-3">
+                      <input readonly type="number" class="form-control border-danger" name="stt_ggcloud_chunk" id="stt_ggcloud_chunk" placeholder="1024" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['chunk']; ?>">
+                      <label for="stt_ggcloud_chunk">Chunk:</label>
+                    </div>
+
                   </div>
 
 <!-- ẩn hiện cấu hình select_stt_default_html -->
@@ -3556,6 +3654,7 @@ function readJSON_file_path(filePath) {
         radio.addEventListener('change', function() {
             const div_select_stt_ggcloud_html = document.getElementById('select_stt_ggcloud_html');
             const div_select_stt_default_html = document.getElementById('select_stt_default_html');
+            const div_select_stt_ggcloud_v2_html = document.getElementById('select_stt_ggcloud_v2_html');
             if (document.getElementById('stt_ggcloud').checked) {
                 div_select_stt_ggcloud_html.style.display = 'block'; // Hiển thị div
             } else {
@@ -3565,6 +3664,11 @@ function readJSON_file_path(filePath) {
                 div_select_stt_default_html.style.display = 'block'; // Hiển thị div
             } else {
                 div_select_stt_default_html.style.display = 'none'; // Ẩn div
+            }
+            if (document.getElementById('stt_ggcloud_v2').checked) {
+                div_select_stt_ggcloud_v2_html.style.display = 'block'; // Hiển thị div
+            } else {
+                div_select_stt_ggcloud_v2_html.style.display = 'none'; // Ẩn div
             }
         });
     });

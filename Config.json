@@ -252,7 +252,8 @@
             "volume": 50,
             "volume_min": 0,
             "volume_max": 95,
-            "volume_step": 10
+            "volume_step": 10,
+            "remember_last_volume": true
         },
         "led": {
             "active": true,
@@ -333,7 +334,12 @@
                     "rate": 16000,
                     "channels": 1,
                     "chunk": 4096,
-                    "language_code": "vi-VN"
+                    "language_code": "vi-VN",
+                    "stt_ggcloud_v2": {
+                        "recognizer_id": "vbot-stt-v2",
+                        "model": "short",
+                        "time_out": 60
+                    }
                 }
             },
             "conversation_mode": true,
