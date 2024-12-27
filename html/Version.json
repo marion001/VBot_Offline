@@ -1,12 +1,12 @@
 {
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật và hỗ trợ Cache phát các trang báo, tin tức còn lại trên UI, Cập nhật kiểm tra Tester, Chạy API trực tiếp trên giao diện người dùng",
-    "releaseDate": "23/12/2024",
+    "description": "Cập Nhật STT Google Cloud V2 (Có đầy đủ guide hướng dẫn), Cập Nhật Kiểm Tra Thư Viện python pip xem có thiếu thư viện nào không, có đúng phiên bản yêu cầu tối thiểu hay không",
+    "releaseDate": "27/12/2024",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy lệnh cài thư viện sau để áp dụng đọc địa chỉ ip: 'pip install gTTS'"
+            "description": "chạy lệnh cập nhật thư viện sau để sử dụng GCloud V2: 'pip install --upgrade google-cloud-speech'"
         },
         {
             "type": "fix",

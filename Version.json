@@ -1,12 +1,12 @@
 {
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi MQTT publish khi chỉnh trên Volume UI",
-    "releaseDate": "22/12/2024",
+    "description": "Cập Nhật STT Google Cloud V2 (có đầy đủ guide hướng dẫn) Với Tốc Độ Bàn Thờ, Mang Tới Cho Bạn Một Trải Nghiệm Hoàn Toàn Mới =))))",
+    "releaseDate": "27/12/2024",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy lệnh cài thư viện sau để áp dụng đọc địa chỉ ip: 'pip install gTTS'"
+            "description": "chạy lệnh cập nhật thư viện sau để sử dụng GCloud V2: 'pip install --upgrade google-cloud-speech'"
         },
         {
             "type": "fix",

@@ -336,7 +336,7 @@
                     "chunk": 4096,
                     "language_code": "vi-VN",
                     "stt_ggcloud_v2": {
-                        "recognizer_id": "vbot-stt-v2",
+                        "recognizer_id": "điền id recogines của bạn",
                         "model": "short",
                         "time_out": 60
                     }

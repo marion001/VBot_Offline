@@ -77,6 +77,12 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
             </a>
           </li>
 
+          <li title="Danh Sách Thư Viện pip">
+            <a href="Lib_pip.php">
+              <i class="bi bi-circle"></i><span>Kiểm Tra Thư Viện python pip</span>
+            </a>
+          </li>
+
         </ul>
       </li>
 
@@ -106,7 +112,7 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
         <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
             <a href="Log_Services.php">
-              <i class="bi bi-circle"></i><span>Log Services VBot</span>
+              <i class="bi bi-circle"></i><span>Log VBot</span>
             </a>
           </li>
           <li>

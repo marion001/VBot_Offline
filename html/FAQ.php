@@ -64,6 +64,45 @@ include 'html_sidebar.php';
 Link Tải Xuống IMG: <a href="https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ" target="_bank">https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>
 </div>
 
+
+<div class="card accordion" id="accordion_button_mic_tetser">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_mic_tetser" aria-expanded="false" aria-controls="collapse_button_mic_tetser">
+Cách Cài Đặt Kiểm Tra Mic Và Scan Lấy ID Mic:</h5>
+<div id="collapse_button_mic_tetser" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mic_tetser">
+- Đầu tiên chạy lệnh sau để di chuyển tới thư mục <b>test_device</b>:<br/>
+<b>$:> cd /home/pi/VBot_Offline/resource/test_device</b><br/>
+- Chạy file <b>Scan_Mic.py</b> để tiến hành liệt kê mic và ID<br/>
+<b>$:> python3 Scan_Mic.py</b><br/>
+- Trên giao diện Terminal sẽ hiển thị các ID và Tên Tên Thiết Bị tương ứng<br/>
+- Thay lần lượt ID vừa scan đó vào trong file <b>Test_Mic.py</b> (ở dòng số 12 có giá trị <b>device_index=14</b>, hãy thay số 14 thành ID mic của bạn)<br/>
+- Sau đó chạy file <b>Test_Mic.py</b> để kiểm tra Mic có đúng và hoạt động không:<br/>
+<b>$:> python3 Test_Mic.py</b><br/>
+- File đó sẽ thu âm trong khoảng 6 giây, bạn cần nói vào Mic khi thu âm xong sẽ xuất ra file <b>Test_Microphone.wav</b><br/>
+- Bạn cần mở file đó và nghe xem có âm thanh được thu không hoặc chạy lệnh sau:<br/>
+<b>$:> vlc Test_Microphone.wav</b><br/>
+- Nếu không được bạn cần thử lần lượt các ID được scan và kiểm tra lại driver được cài tương ứng với MIC của bạn chưa<br/>
+- Nếu thành công bạn hãy điền ID Mic đó vào trong cấu hình Config rồi lưu Config lại là được
+</div>
+</div>
+</div>
+
+<div class="card accordion" id="accordion_button_media_player_source">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
+Hướng Dẫn Cài Đặt, Kiểm Tra Loa, Âm Thanh Đầu Ra:</h5>
+<div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
+- Bạn cần phát 1 file âm thanh bằng VLC, có thể tải lên file âm thanh của bạn như XXX.mp3 vào <b>/home/pi</b> chẳng hạn<br/>
+- Tiếp tới hãy chạy file âm thanh đó bằng lệnh sau:<br/>
+<b>$:> vlc XXX.mp3</b><br/>
+- Nếu có âm thanh được phát ra là xong, không cần cấu hình gì nữa cả<br/>
+- Nếu không có âm thanh được phát ra bạn cần cài cấu hình và sét đầu ra âm thanh mặc định trong  <b>alsamixer</b> (tùy mỗi thiết bị mà có cấu hình khác nhau)<br/>
+- Sau đó bạn cần chạy lệnh <b>$:> alsamixer</b> và xác định xem thiết bị đó có tên là gì<br/>
+- Khi đã xác định được tên thiết bị bạn cần điền tên đó vào trong tab <b>Cấu Hình config</b>: <b>Tên thiết bị (alsamixer)</b> (được dùng để sét âm lượng đầu tiên khi chạy chương trình, trong quá trình chạy VBot sẽ chỉ thay đổi âm lượng cửa vlc mà không ảnh hưởng gì tới âm lượng trên hệ thống của bạn)
+</div>
+</div>
+</div>
+
 <div class="card accordion" id="accordion_button_1">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_1" aria-expanded="false">

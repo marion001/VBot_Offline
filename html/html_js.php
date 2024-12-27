@@ -514,6 +514,45 @@ function forgotPassword() {
     xhr.send();
 }
 
+//Gửi lệnh và thự thi, lệnh được encode dưới dạng base64 tránh ký tự không cho phép
+function VBot_Command(b64_encode) {
+    if (!confirm("Bạn có chắc chắn muốn thực thi lệnh:\n$:> "+atob(b64_encode))) {
+        return;
+    }
+    loading('show');
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", 'includes/php_ajax/Check_Connection.php?VBot_CMD&Command=' + encodeURIComponent(b64_encode));
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    loading('hide');
+                    var result = JSON.parse(xhr.responseText);
+                    if (result.success) {
+						var formattedData = result.data.replace(/\n/g, "<br/>");
+                        show_message("<font color=blue>"+result.message+"</font><br/><center><b>Dữ Liệu Trả Về</b></center><hr/><font color=green>" +formattedData+ "</font>");
+                    } else {
+                        show_message("Yêu cầu không thành công: " +result.message);
+                    }
+                } catch (e) {
+                    loading('hide');
+                    show_message("Lỗi khi phân tích phản hồi JSON: " +e);
+                }
+            } else {
+                loading('hide');
+                show_message("Yêu cầu không thành công với mã trạng thái: " +xhr.status);
+            }
+        }
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message("Lỗi khi gửi yêu cầu tới server");
+    };
+    xhr.send();
+}
+
+
+
 //Tải lên file âm thanh theo giấ trị được chỉ định key_path
 function upload_File(key_path) {
     loading("show");
@@ -526,7 +565,7 @@ function upload_File(key_path) {
             formData.append('fileUpload[]', files[i]);
         }
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?' + encodeURIComponent(key_path), true);
+        xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?' + encodeURIComponent(key_path));
         xhr.onload = function() {
             loading("hide");
             if (xhr.status === 200) {

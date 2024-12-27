@@ -821,10 +821,10 @@ Cấu Hình Âm Thanh Volume/Mic:
 
 <div class="card">
 <div class="card-body">
-<h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font>')"></i> &nbsp;:</h5>
+<h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a>')"></i> &nbsp;:</h5>
 
                 <div class="row mb-3">
-                  <label for="mic_id" class="col-sm-3 col-form-label">ID Mic:</label>
+                  <label for="mic_id" class="col-sm-3 col-form-label">ID Mic <i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a>')"></i>:</label>
                   <div class="col-sm-9">
 				  <div class="input-group mb-3">
                       <input required class="form-control border-success" type="number" name="mic_id" id="mic_id" placeholder="<?php echo $Config['smart_config']['mic']['id']; ?>" value="<?php echo $Config['smart_config']['mic']['id']; ?>">
@@ -851,7 +851,7 @@ Cấu Hình Âm Thanh Volume/Mic:
 </div></div>
 <div class="card">
 <div class="card-body">
-<h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Âm Lượng (Volume)/Audio Out &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font>')"></i> &nbsp;:</h5>
+<h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Âm Lượng (Volume)/Audio Out &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font><br/>Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'> Hướng Dẫn</a>')"></i> &nbsp;:</h5>
 
                 <div class="row mb-3">
                   <label for="alsamixer_name" class="col-sm-3 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer">Tên thiết bị (alsamixer) <i class="bi bi-question-circle-fill" onclick="show_message('Tên của thiết bị âm thanh đầu ra trong alsamixer, cần điền đúng tên thiết bị âm thanh đầu ra hiện tại của alsamixer<br/><br/>- nếu không biết đâu là thiết bị âm thanh đầu ra thì bạn có thể phát 1 bài nhạc bằng vlc ví dụ: <b>$: vlc 1.mp3</b> sau đó vào alsamixer bằng lệnh: <b>$: alsamixer</b> thay đổi âm lượng của các thiết bị có trong đó để xác định xem đâu là tên thiết bị đầu ra')"></i>:</label>
@@ -1044,11 +1044,11 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud V1 (Authentication.json)</label>
+                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud V1 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud_v2" value="stt_ggcloud_v2" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud_v2' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json)</label>
+                      <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                     </div>
                   </div>
             </div>
@@ -1072,6 +1072,13 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 </textarea>
 <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực:</label>
 </div>
+<div class="form-floating mb-3">
+<center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
+</div>
+                    <div class="form-floating mb-3">
+                      <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_language_code" id="stt_ggcloud_language_code" placeholder="vi-VN" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code']; ?>">
+                      <label for="stt_ggcloud_language_code">Ngôn Ngữ:</label>
+                    </div>
 
                     <div class="form-floating mb-3">
                       <input readonly type="number" class="form-control border-danger" min="0" step="1" name="stt_ggcloud_rate" id="stt_ggcloud_rate" placeholder="16000" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>">
@@ -1096,12 +1103,12 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 
                     <div class="form-floating mb-3">
                       <input required type="text" class="form-control border-success" name="stt_ggcloud_v2_recognizer_id" id="stt_ggcloud_v2_recognizer_id" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id']; ?>">
-                      <label for="stt_ggcloud_rate">Recognizer ID:</label>
+                      <label for="stt_ggcloud_rate">Recognizer ID (Điền ID của bạn vào đây nhé):</label>
                     </div>
 
                     <div class="form-floating mb-3">
                       <input required type="number" class="form-control border-success" min="0" step="1" max="120" name="stt_ggcloud_v2_time_out" id="stt_ggcloud_v2_time_out" placeholder="60" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['time_out']; ?>">
-                      <label for="stt_ggcloud_rate">Time Out (giây):</label>
+                      <label for="stt_ggcloud_rate">Thời gian chờ tối đa (giây):</label>
                     </div>
 
 <div class="form-floating mb-3">
@@ -1110,6 +1117,15 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 </textarea>
 <label for="stt_ggcloud_v2_json_file_token">Tệp tin json xác thực:</label>
 </div>
+
+<div class="form-floating mb-3">
+<center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
+</div>
+
+                    <div class="form-floating mb-3">
+                      <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_language_code" id="stt_ggcloud_language_code" placeholder="vi-VN" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code']; ?>">
+                      <label for="stt_ggcloud_language_code">Ngôn Ngữ:</label>
+                    </div>
 
                     <div class="form-floating mb-3">
                       <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_v2_model" id="stt_ggcloud_v2_model" placeholder="short" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['model']; ?>">
@@ -1201,7 +1217,7 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 					
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="tts_ggcloud">TTS Google Cloud (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng tệp xác thực json của Google Cloud TTS để sử dụng: <a href=\'https://cloud.google.com/text-to-speech?hl=vi\' target=\'_bank\'>SDK</a>')"></i></label>
+                      <label class="form-check-label" for="tts_ggcloud">TTS Google Cloud (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                     </div>
 					
                     <div class="form-check">
@@ -1315,6 +1331,12 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 </textarea>
 <label for="tts_ggcloud_json_file_token">Tệp tin json xác thực:</label>
 </div>
+
+<div class="form-floating mb-3">
+<center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline.$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
+</div>
+
+
 </div>
 
 

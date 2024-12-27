@@ -61,6 +61,57 @@ if (isset($_GET['check_ssh'])) {
     exit();
 }
 
+if (isset($_GET['VBot_CMD'])) {
+    $Command = $_GET['Command'] ?? '';
+    // Nếu Command không có giá trị, sử dụng lệnh mặc định
+    if (empty($Command)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không có dữ liệu câu lệnh đầu vào',
+                'data' => null
+            ]);
+            exit();
+    }
+	$Command_decode = base64_decode($Command);
+    // Kết nối SSH
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    // Biến kết quả JSON
+    $result = [
+        'success' => false,
+        'message' => '',
+        'data' => null,
+    ];
+
+    if ($connection) {
+        if (@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+            // Thực thi lệnh qua SSH
+            $stream = ssh2_exec($connection, $Command_decode);
+
+            if ($stream) {
+                stream_set_blocking($stream, true);
+
+                // Đọc toàn bộ dữ liệu trả về từ lệnh
+                $output = stream_get_contents($stream);
+
+                // Lệnh thành công
+                $result['success'] = true;
+                $result['message'] = 'Lệnh: "' . $Command_decode . '" đã được thực thi.';
+                $result['data'] = $output;
+            } else {
+                $result['message'] = 'Không thể thực thi lệnh trên SSH.';
+            }
+        } else {
+            $result['message'] = 'Xác thực SSH không thành công.';
+        }
+    } else {
+        $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
+    }
+
+    // Xuất kết quả dưới dạng JSON
+    echo json_encode($result);
+    exit();
+}
+
 if (isset($_GET['start_vbot_service'])) {
     $CMD = "systemctl --user start VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
