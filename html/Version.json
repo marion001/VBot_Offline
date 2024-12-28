@@ -2,7 +2,7 @@
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
     "description": "Cập Nhật STT Google Cloud V2 (Có đầy đủ guide hướng dẫn), Cập Nhật Kiểm Tra Thư Viện python pip xem có thiếu thư viện nào không, có đúng phiên bản yêu cầu tối thiểu hay không",
-    "releaseDate": "27/12/2024",
+    "releaseDate": "28/12/2024",
     "changes": [
         {
             "type": "feature",
