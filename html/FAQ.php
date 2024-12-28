@@ -307,7 +307,28 @@ Cấu Hình Auto Kết Nối Wifi hoặc Tạo Điểm Truy Cập AP :
 </div>
 </div>
 </div>
-	
+
+
+<div class="card accordion" id="accordion_button_oled_i2c">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_oled_i2c" aria-expanded="false" aria-controls="collapse_button_oled_i2c">
+Kết Nối Màn Hình I2C:</h5>
+<div id="collapse_button_oled_i2c" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_oled_i2c">
+Sơ Đồ Kết Nối Chân Pin Với GPIO (Loại Giao Tiếp i2c 4 chân Pin):<br/>
+<b>
+- SDA ==> GPIO2 (Pin 3)<br/>
+- SCL ==> GPIO3 (Pin 5)<br/>
+- VCC ==> 3.3V (Pin 1)<br/>
+- GND ==> GND(Pin 14)<br/>
+</b><br/>
+Tài Liệu Tham Khảo:<br/>
+- <a href="https://github.com/adafruit/Adafruit_Python_SSD1306" target="_bank">https://github.com/adafruit/Adafruit_Python_SSD1306</a><br/>
+- <a href="https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/" target="_bank">https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/</a>
+
+</div>
+</div>
+</div>
+
 	
 		
 		</div>

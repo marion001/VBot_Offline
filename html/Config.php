@@ -125,6 +125,7 @@ $Config['smart_config']['mic']['scan_on_boot'] = isset($_POST['mic_scan_on_boot'
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG API
 $Config['api']['active'] = isset($_POST['api_active']) ? true : false;
 $Config['api']['port'] = intval($_POST['api_port']);
+$Config['api']['show_log']['max_log'] = intval($_POST['max_logs_api']);
 $Config['api']['show_log']['active'] = isset($_POST['api_log_active']) ? true : false;
 $Config['api']['show_log']['log_lever'] = $_POST['api_log_active_log_lever'] ? true : false;
 
@@ -781,7 +782,7 @@ Cấu Hình API:</h5>
 				  </div>
 				  </div>
                 </div>
-				<br/>
+				
 		
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Hiển Thị Log API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt hiển thị log của API, Chỉ hiển thị khi Debug trực tiếp trên Console, Terminal')"></i> :</label>
@@ -793,8 +794,15 @@ Cấu Hình API:</h5>
                     </div>
                   </div>
                 </div>
-				
-				
+
+                <div class="row mb-3">
+                  <label for="max_logs_api" class="col-sm-3 col-form-label">Tối Đa Dòng Logs API:</label>
+                  <div class="col-sm-9">
+                    <input required type="number" class="form-control border-success" name="max_logs_api" id="max_logs_api" max="70" step="1" min="10" placeholder="<?php echo htmlspecialchars($Config['api']['show_log']['max_log']) ?>" value="<?php echo htmlspecialchars($Config['api']['show_log']['max_log']) ?>">
+					<div class="invalid-feedback">Cần nhập tối đa dòng logs được hiển thị khi đọc qua đường API</div>
+				  </div>
+                </div>
+
                 <div class="row mb-3">
                   <label for="api_log_active_log_lever" class="col-sm-3 col-form-label">Mức Độ Hiển Thị Log:</label>
                   <div class="col-sm-9">
@@ -1945,7 +1953,7 @@ Màn Hình LCD OLED  &nbsp; <i class="bi bi-question-circle-fill" onclick="show_
 
 <div class="card">
 <div class="card-body">
-<h5 class="card-title">Cấu Hình Màn I2C:</h5>
+<h5 class="card-title">Cấu Hình Màn I2C <i class="bi bi-question-circle-fill" onclick="show_message('Sơ Đồ Kết Nối Chân Pin Với GPIO (Loại Giao Tiếp i2c 4 chân Pin):<br/><b>- SDA ==> GPIO2 (Pin 3)<br/>- SCL ==> GPIO3 (Pin 5)<br/>- VCC ==> 3.3V (Pin 1)<br/>- GND ==> GND(Pin 14)</b>')"></i>:</h5>
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Mã Màn Hình I2C:</label>
 <div class="col-sm-9">

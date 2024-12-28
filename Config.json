@@ -28,6 +28,7 @@
         "active": true,
         "show_log": {
             "active": false,
+			"max_log": 30,
             "log_lever": true
         },
         "port": 5002
