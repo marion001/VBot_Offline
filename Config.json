@@ -28,7 +28,7 @@
         "active": true,
         "show_log": {
             "active": false,
-			"max_log": 30,
+            "max_log": 30,
             "log_lever": true
         },
         "port": 5002
@@ -111,6 +111,10 @@
     "openweathermap": {
         "key_openweathermap": "99999999999999999999999999999999999999"
     },
+    "schedule": {
+        "active": false,
+        "data_json_file": "resource/schedule/Data_Schedule.json"
+    },
     "media_player": {
         "active": true,
         "time_out": 30,
@@ -125,7 +129,8 @@
             "youtube"
         ],
         "play_list": {
-            "play_mode": "random"
+            "play_mode": "random",
+            "notes": "play_mode Có các giá trị: random, sequential"
         },
         "youtube": {
             "active": true,
@@ -595,6 +600,11 @@
             "active": true,
             "backup_path": "Backup_Upgrade/Backup_Custom_HomeAssistant",
             "limit_backup_files": 6
+        },
+        "scheduler": {
+            "active": true,
+            "backup_path": "Backup_Upgrade/Backup_Scheduler",
+            "limit_backup_files": 5
         },
         "google_cloud_drive": {
             "active": false,

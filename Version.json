@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Cập Nhật STT Google Cloud V2 (có đầy đủ guide hướng dẫn) Với Tốc Độ Bàn Thờ, Mang Tới Cho Bạn Một Trải Nghiệm Hoàn Toàn Mới =))))",
-    "releaseDate": "28/12/2024",
+    "description": "Cập nhật Lên Lịch Phát Nội Dung Multiple Scheduler, Thông Báo, Ngày Cụ Thể, Các Giờ Trong Ngày, Các Ngày Trong Tuần",
+    "releaseDate": "29/12/2024",
     "changes": [
         {
             "type": "feature",

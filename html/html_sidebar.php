@@ -76,10 +76,16 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
               <i class="bi bi-circle"></i><span>Giao Tiếp API (API REST)</span>
             </a>
           </li>
-
+ 
           <li title="Danh Sách Thư Viện pip">
             <a href="Lib_pip.php">
               <i class="bi bi-circle"></i><span>Kiểm Tra Thư Viện python pip</span>
+            </a>
+          </li>
+
+          <li title="Lập Lịch, Lên Tác Vụ (Scheduler)">
+            <a href="Scheduler.php">
+              <i class="bi bi-circle"></i><span>Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</span>
             </a>
           </li>
 

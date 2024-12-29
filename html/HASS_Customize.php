@@ -236,8 +236,6 @@ if (copy($sourceFile, $destinationFile)) {
 
 if (isset($_POST['delete_all_custom_home_assistant'])) {
 
-
-
 #Sao Lưu Dữ Liệu Trước
 if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
 // Đường dẫn gốc và đích
@@ -270,8 +268,6 @@ if (copy($sourceFile, $destinationFile)) {
     $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
 }
 }
-
-
 
 // Đường dẫn thư mục
 $directory = $VBot_Offline.'resource/hass';
@@ -493,6 +489,8 @@ if (!empty($successMessage)) {
  
  <button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_Home_Assistant">
  <i class="bi bi-eye"></i>Xem dữ liệu Cấu Hình</button>
+ <button type="button" class="btn btn-info rounded-pill" title="Tải Xuống file: <?php echo $jsonFilePath; ?>" onclick="downloadFile('<?php echo $jsonFilePath; ?>')">
+<i class="bi bi-download"></i> Tải Xuống</button>
  <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_custom_home_assistant" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Custom Home Assistant không')"><i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
 </center>
 
@@ -534,8 +532,10 @@ echo '</select>
 </div>';
 }
 
-echo '</div></div>';
+
 ?>
+</div>
+</div>
 
 </form>
 </div>

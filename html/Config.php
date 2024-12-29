@@ -371,6 +371,12 @@ $Config['backup_upgrade']['custom_home_assistant']['active'] = isset($_POST['cus
 $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files'] = intval($_POST['limit_backup_custom_home_assistant']);
 $Config['backup_upgrade']['custom_home_assistant']['backup_path'] = $_POST['backup_path_custom_home_assistant'];
 
+
+#Cập nhật sao lưu lời nhắc, thông báo Scheduler
+$Config['backup_upgrade']['scheduler']['active'] = isset($_POST['backup_scheduler_active']) ? true : false;
+$Config['backup_upgrade']['scheduler']['limit_backup_files'] = intval($_POST['limit_backup_scheduler']);
+$Config['backup_upgrade']['scheduler']['backup_path'] = $_POST['backup_path_scheduler'];
+
 #Cập nhật  Chương trình Vbot
 $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_vbot']) ? true : false;
 
@@ -435,6 +441,10 @@ $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_proce
 $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id'] = $_POST['stt_ggcloud_v2_recognizer_id'];
 $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['time_out'] = intval($_POST['stt_ggcloud_v2_time_out']);
 $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['model'] = $_POST['stt_ggcloud_v2_model'];
+
+#Cập nhật lịch, lời nhắc, thông báo
+$Config['schedule']['active'] = isset($_POST['schedule_active']) ? true : false;
+
 
 ##############################################
 // Khởi tạo mảng radio_data đã cập nhật
@@ -2858,6 +2868,36 @@ DEV Customization (Custom Skill) <i class="bi bi-question-circle-fill" onclick="
 </div>
 
 
+<div class="card accordion" id="accordion_button_schedule_lich">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_schedule_lich" aria-expanded="false" aria-controls="collapse_button_schedule_lich">
+Cài Đặt Lời Nhắc, Thông báo (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo')"></i>:</h5>
+<div id="collapse_button_schedule_lich" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_lich">
+
+
+			 <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để khởi động Phát lời nhắc, Thông báo khi Vbot được khởi chạy')"></i> :</label>
+                  <div class="col-sm-9">
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="schedule_active" id="schedule_active" <?php echo $Config['schedule']['active'] ? 'checked' : ''; ?>>
+                    </div>
+                  </div>
+                </div>
+
+<div class="row mb-3">
+<label for="schedule_data_json_file" class="col-sm-3 col-form-label">Tệp Dữ Liệu Cấu Hình:</label>
+<div class="col-sm-9">
+<input readonly class="form-control border-danger" type="text" name="schedule_data_json_file" id="schedule_data_json_file" placeholder="<?php echo $Config['schedule']['data_json_file']; ?>" value="<?php echo $Config['schedule']['data_json_file']; ?>">
+
+</div>
+</div>
+
+</div>
+</div>
+</div>
+
+
+
 <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_cap_nhat" aria-expanded="false" aria-controls="collapse_button_sao_luu_cap_nhat">
@@ -2963,6 +3003,42 @@ Sao Lưu/Cập Nhật:</h5>
 <div class="col-sm-9">
 <div class="form-switch">
 <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_custom_home_assistant" id="limit_backup_custom_home_assistant" value="<?php echo $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']; ?>">
+<div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
+</div>
+</div>
+</div>
+
+
+</div>
+</div>
+
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Sao Lưu Cấu Hình Lời Nhắc, Thông Báo (Scheduler)</h5>
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Data_Schedule.json mỗi khi lưu hoặc thay đổi lưu cấu hình')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="backup_scheduler_active" id="backup_scheduler_active" <?php echo $Config['backup_upgrade']['scheduler']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Tệp Data_Schedule.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+<div class="col-sm-9">
+<input readonly class="form-control border-danger" type="text" name="backup_path_scheduler" id="backup_path_scheduler" value="<?php echo $Config['backup_upgrade']['scheduler']['backup_path']; ?>">
+<div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu Config.json</div>
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Scheduler, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_scheduler" id="limit_backup_scheduler" value="<?php echo $Config['backup_upgrade']['scheduler']['limit_backup_files']; ?>">
 <div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
 </div>
 </div>

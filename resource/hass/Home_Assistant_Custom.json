@@ -65,6 +65,25 @@
                 "Mở rèm phòng khách một nửa"
             ],
             "active": false
+        },
+        {
+            "active": true,
+            "name": "tắt quạt phòng 1",
+            "reply": "tắt quạt phòng 1",
+            "data_yaml": {
+                "action": "remote.send_command",
+                "target": {
+                    "entity_id": "remote.rm4_mini_remote"
+                },
+                "data": {
+                    "device": "quatphongtuyen",
+                    "command": "TatQuat"
+                }
+            },
+            "questions": [
+                "tắt quạt phòng 1",
+                "tắt quạt phòng 11 nhé"
+            ]
         }
     ]
 }
