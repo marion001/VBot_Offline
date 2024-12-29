@@ -444,6 +444,8 @@ $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggc
 
 #Cập nhật lịch, lời nhắc, thông báo
 $Config['schedule']['active'] = isset($_POST['schedule_active']) ? true : false;
+#Cập nhật xử lý lỗi
+$Config['smart_config']['auto_restart_program_error'] = isset($_POST['auto_restart_program_error']) ? true : false;
 
 
 ##############################################
@@ -1062,11 +1064,11 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud V1 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
+                      <label class="form-check-label" for="stt_ggcloud">STT Google Cloud V1 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b> <br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud_v2" value="stt_ggcloud_v2" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud_v2' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
+                      <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/>Lệnh Update Cập Nhật Lib: <b>$:> pip install --upgrade google-cloud-speech</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                     </div>
                   </div>
             </div>
@@ -3450,6 +3452,21 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
                 </div>
                 </div>
 				
+                </div>
+
+<div class="card">
+			<div class="card-body">
+              <h5 class="card-title">Xử Lý Lỗi:</h5>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Khởi động lại hệ thống khi gặp sự cố hoặc lỗi bất ngờ: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động khởi động lại chương trình VBot khi gặp sự cố hoặc có lỗi xảy ra bất ngờ, Sẽ chỉ hoạt động ở chế độ đang chạy Auto')"></i> :</label>
+                  <div class="col-sm-9">
+					<div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="auto_restart_program_error" id="auto_restart_program_error" <?php echo $Config['smart_config']['auto_restart_program_error'] ? 'checked' : ''; ?>>
+                      
+                    </div>
+                  </div>
+                </div>
+                </div>
                 </div>
 
 			<div class="card">

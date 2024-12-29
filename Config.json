@@ -236,6 +236,7 @@
         "notes": "Chế độ Custom Skill, tùy chỉnh cho các bạn dev, lập trình viện tự code"
     },
     "smart_config": {
+		"auto_restart_program_error": true,
         "backlist_file_name": "BackList.json",
         "read_information_startup": {
             "active": false,

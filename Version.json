@@ -2,7 +2,7 @@
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
     "description": "Cập nhật Lên Lịch Phát Nội Dung Multiple Scheduler, Thông Báo, Ngày Cụ Thể, Các Giờ Trong Ngày, Các Ngày Trong Tuần",
-    "releaseDate": "29/12/2024",
+    "releaseDate": "29/12/2024-1",
     "changes": [
         {
             "type": "feature",

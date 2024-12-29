@@ -148,6 +148,32 @@ $json_file = $VBot_Offline.$Config['schedule']['data_json_file'];
 // Mảng lưu thông báo lỗi
 $errorMessages = [];
 $successMessage = [];
+
+
+function generate_audio_select($directory, $field_name, $selected_value = '') {
+    // Kiểm tra thư mục có tồn tại không
+    if (!is_dir($directory)) {
+        echo "<p style='color: red;'>Thư mục không tồn tại.</p>";
+        return;
+    }
+    // Lọc các tệp âm thanh (mp3, wav, flac, ogg, aac)
+    $audioFiles = array_filter(scandir($directory), function($file) use ($directory) {
+        // Kiểm tra định dạng tệp
+        return preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $file) && !is_dir($directory . '/' . $file);
+    });
+    // Tạo phần HTML cho thẻ <select>
+    echo '<select class="form-control border-success" name="' . htmlspecialchars($field_name) . '">';
+    echo '<option value="">Chọn tệp âm thanh</option>';
+    
+    // Tạo các thẻ <option> cho từng tệp âm thanh
+    foreach ($audioFiles as $audioFile) {
+        $selected = ($directory.'/'.$audioFile == $selected_value) ? 'selected' : '';
+        echo '<option value="' . htmlspecialchars($directory.'/'.$audioFile) . '" ' . $selected . '>' . htmlspecialchars($audioFile) . '</option>';
+    }
+    echo '</select>';
+}
+
+
 $directory = dirname($json_file);
 if (!is_dir($directory)) {
     mkdir($directory, 0777, true);
@@ -197,6 +223,56 @@ if (isset($_POST['delete_all_Scheduler'])) {
 				
 }
 
+
+if (isset($_POST['Scheduler_Upload_Audio_Submit'])) {
+	
+    $file_save_directory = $VBot_Offline.$Config['schedule']['audio_path'];
+
+	// Kiểm tra và tạo thư mục, thiết lập quyền
+	if (!file_exists($file_save_directory)) {
+		if (!mkdir($file_save_directory, 0777, true)) {
+			$errorMessages[] = 'Không thể tạo thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền thư mục.';
+		}
+	}
+
+	if (!chmod($file_save_directory, 0777)) {
+		$errorMessages[] = 'Không thể thiết lập quyền cho thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền hệ thống.';
+	}
+
+    $data_recovery_type = $_POST['Scheduler_Upload_Audio_Submit'];
+    if ($data_recovery_type === "Scheduler_Upload_Audio") {
+        $uploadOk = 1;
+        $errorMessages = [];
+        $successMessage = [];
+
+        // Kiểm tra xem tệp có được gửi không
+        if (isset($_FILES["fileToUpload_Scheduler_Upload_Audio"])) {
+            $fileName = basename($_FILES["fileToUpload_Scheduler_Upload_Audio"]["name"]);
+            $fileTargetPath = $file_save_directory . "/" . $fileName; // Đường dẫn đầy đủ
+
+            // Kiểm tra định dạng tệp (chỉ chấp nhận tệp âm thanh như mp3, wav, etc.)
+            if (!preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $fileName)) {
+                $errorMessages[] = "- Chỉ chấp nhận các định dạng tệp âm thanh (mp3, wav, flac, ogg, aac)";
+                $uploadOk = 0;
+            }
+
+            if ($uploadOk == 0) {
+                $errorMessages[] = "- Tệp âm thanh không được tải lên.";
+            } else {
+                // Di chuyển tệp vào thư mục đích
+                if (move_uploaded_file($_FILES["fileToUpload_Scheduler_Upload_Audio"]["tmp_name"], $fileTargetPath)) {
+					chmod($fileTargetPath, 0777);
+                    $successMessage[] = "- Tệp \"" . htmlspecialchars($fileName) . "\" đã được tải lên và lưu trữ thành công.";
+                } else {
+                    $errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp của bạn. Vui lòng thử lại.";
+                }
+            }
+        } else {
+            $errorMessages[] = "- Không có tệp nào được chọn để tải lên.";
+        }
+
+    }
+}
 
 
 //Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
@@ -390,11 +466,18 @@ if (!empty($successMessage)) {
 </div>
 
 <div class="row mb-3">
-<label for="audio_file-<?= $index ?>" class="col-sm-3 col-form-label">Tệp Âm Thanh (Link,URL/PATH) <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập thông tin đường dẫn, link, url tới tệp âm thanh, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>:</label>
-<div class="col-sm-9">
-<input type="text" class="form-control border-success" id="audio_file-<?= $index ?>" name="notification_schedule[<?= $index ?>][data][audio_file]" placeholder="Hoặc đường dẫn Path, Link, Url đến âm thanh" value="<?= htmlspecialchars($notification['data']['audio_file']) ?>">
+    <label for="audio_file-<?= $index ?>" class="col-sm-3 col-form-label">
+        Tệp Âm Thanh (Link,URL/PATH) 
+        <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập thông tin đường dẫn, link, url tới tệp âm thanh, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>:
+    </label>
+    <div class="col-sm-9">
+        <?php 
+            // Gọi hàm để tạo dropdown cho trường âm thanh này
+            generate_audio_select('/home/pi/VBot_Offline/Media/Audio_Scheduler', 'notification_schedule[' . $index . '][data][audio_file]', htmlspecialchars($notification['data']['audio_file']));
+        ?>
+    </div>
 </div>
-</div>
+
 
 <div class="row mb-3">
 <label for="repeat-<?= $index ?>" class="col-sm-3 col-form-label">Số lần lặp lại <i class="bi bi-question-circle-fill" onclick="show_message('Số lần lặp lại phát thông báo khi tác vụ này được kích hoạt, để 2 lần thì đến giờ sẽ thông báo 2 lần liên tiếp')"></i>:</label>
@@ -528,8 +611,22 @@ if (!empty($successMessage)) {
 <i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
 		</center>
 		
-   
+<h5 class="card-title"><font color="green">Tải Lên Tệp Âm Thanh:</font></h5>
+<div class="row mb-3">
+    <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp:</b></label>
+    <div class="col-sm-9">
+        <div class="input-group">
+            <input class="form-control border-success" type="file" name="fileToUpload_Scheduler_Upload_Audio" accept=".mp3,.wav,.ogg,.aac">
+            <button class="btn btn-warning border-success" type="submit" name="Scheduler_Upload_Audio_Submit" value="Scheduler_Upload_Audio">Tải Lên</button>
+			<button class="btn btn-primary border-success" type="button" onclick="get_audio_schedule()"><i class="bi bi-music-note-list"></i></button>
+        </div>
+    </div>
+</div>
 
+
+<div id="du_lieu_audio_schedule"></div>
+
+<hr/>
 <h5 class="card-title"><font color="green">Khôi Phục Dữ Liệu:</font></h5>
 <div class="row mb-3">
     <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>
@@ -611,6 +708,83 @@ include 'html_footer.php';
   
   
 <script>
+
+function get_audio_schedule() {
+	loading("show");
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Media_Player_Search.php?audio_schedule";
+
+    // Mở yêu cầu GET
+    xhr.open("GET", url, true);
+
+    // Đặt kiểu trả về dữ liệu là JSON
+    xhr.responseType = "json";
+
+    // Gửi yêu cầu
+    xhr.send();
+
+    // Xử lý khi yêu cầu hoàn thành
+    xhr.onload = function() {
+        if (xhr.status == 200) { // Kiểm tra nếu yêu cầu thành công
+            var response = xhr.response;
+            if (Array.isArray(response)) {
+				loading("hide");
+                // Lấy phần tử <div> với id "du_lieu_audio_schedule"
+                var audioScheduleDiv = document.getElementById("du_lieu_audio_schedule");
+                
+                // Làm trống nội dung thẻ div trước khi thêm dữ liệu mới
+                audioScheduleDiv.innerHTML = '';
+
+                // Tạo bảng HTML để hiển thị tên và kích thước tệp
+                var table = document.createElement('table');
+                table.classList.add('table', 'table-bordered', 'border-primary'); // Thêm lớp CSS để làm đẹp bảng class="table table-bordered border-primary"
+
+                // Tạo tiêu đề bảng
+                var thead = document.createElement('thead');
+                var headerRow = document.createElement('tr');
+                headerRow.innerHTML = '<th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Kích thước (MB)</th><th style="text-align: center; vertical-align: middle;">Hành Động</th>';
+                thead.appendChild(headerRow);
+                table.appendChild(thead);
+
+                // Tạo phần thân bảng
+                var tbody = document.createElement('tbody');
+                
+                // Duyệt qua danh sách tệp âm thanh và thêm mỗi tệp vào bảng
+                response.forEach(function(audio) {
+                    var row = document.createElement('tr');
+				row.innerHTML = '<td style="text-align: center; vertical-align: middle;">' + audio.name + '</td><td style="text-align: center; vertical-align: middle;">' + audio.size + ' MB</td>' +
+                '<td style="text-align: center; vertical-align: middle;">' +
+                ' <button type="button" class="btn btn-primary" onclick="playAudio(\'' + audio.full_path + '\')"><i class="bi bi-play-circle"></i></button>' +
+                ' <button type="button" class="btn btn-success" onclick="downloadFile(\'' + audio.full_path + '\')"><i class="bi bi-download"></i></button>' +
+                ' <button type="button" class="btn btn-danger" onclick="deleteFile(\'' + audio.full_path + '\', \'du_lieu_audio_schedule\')"><i class="bi bi-trash"></i></button>' +
+                '</td>';
+
+                    tbody.appendChild(row);
+                });
+
+                // Thêm phần thân bảng vào bảng
+                table.appendChild(tbody);
+
+                // Thêm bảng vào trong <div id="du_lieu_audio_schedule">
+                audioScheduleDiv.appendChild(table);
+            } else {
+				loading("hide");
+                console.error("Dữ liệu không phải là mảng.");
+            }
+        } else {
+			loading("hide");
+            console.error("Yêu cầu không thành công: " + xhr.status);
+        }
+    };
+
+    // Xử lý lỗi
+    xhr.onerror = function() {
+		loading("hide");
+        console.error("Lỗi trong quá trình gửi yêu cầu.");
+    };
+}
+
+
 //Xóa file backup Config
 function delete_file_backup_scheduler(filePath) {
     if (filePath === "get_value_backup_config") {
