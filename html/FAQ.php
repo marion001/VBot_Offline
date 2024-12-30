@@ -122,6 +122,18 @@ $: <b>sudo raspi-config</b><br/>
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_2" aria-expanded="false">
 Thay Đổi Đường Dẫn (Path) Của Apache2:
 </h5><div id="collapse_button_2" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_2">
+<font color=red>Thay Đổi Tự Động:</font><br/>
+Di chuyển tới thư mục sau bằng lệnh:<br/>
+$:> <b>cd /home/pi/VBot_Offline/resource/test_device/</b><br/><br/>
+
+- Chạy file Change_Path_Apache2.py bằng quyền sudo bằng lệnh:<br/>
+$:> <b>sudo python3 Change_Path_Apache2.py</b><br/><br/>
+
+- Hệ thống sẽ yêu cầu nhập đường dẫn path trỏ tới WebUI mới, bạn hãy nhập dòng sau và nhấn Enter là xong:<br/>
+<b>/home/pi/VBot_Offline/html</b>
+<hr/>
+
+<font color=red>Nếu bạn muốn thay đổi bằng tay</font><br/>
 - Đăng nhập vào ssh rồi gõ lệnh sau:<br/><br/>
 $: <b>sudo nano /etc/apache2/sites-available/000-default.conf</b><br/>
 - Thay dòng: <b>DocumentRoot /home/pi/VBot_Offline/html</b> thành đường dẫn muốn đổi, ví dụ thay thành: <b>DocumentRoot /var/www/html</b>

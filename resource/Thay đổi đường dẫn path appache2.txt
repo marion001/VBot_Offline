@@ -1,5 +1,18 @@
-Chuyển đường dẫn appache2:
 
+Chuyển đường dẫn WebUI appache2:
+
+di chuyển tới thư mục sau bằng lệnh:
+$:> cd /home/pi/VBot_Offline/resource/test_device/
+
+- Chạy file Change_Path_Apache2.py bằng quyền sudo bằng lệnh:
+$:> sudo python3 Change_Path_Apache2.py
+
+- Chạy xong hệ thống yêu cầu nhập đường dẫn path trỏ tới WebUI mới, bạn hãy nhập dòng sau và nhấn Enter là xong:
+/home/pi/VBot_Offline/html
+
+
+##################################################################
+Nếu thao tác thủ công thay đổi đường dẫn Webui hãy làm theo hướng dẫn sau
 - Đăng nhập vào ssh rồi gõ lệnh sau:
 
 $: sudo nano /etc/apache2/sites-available/000-default.conf
@@ -12,6 +25,8 @@ $: sudo nano /etc/apache2/apache2.conf
 
 - Sau đó restart lại appache2 bằng lệnh sau:
 $: sudo systemctl restart apache2
+##################################################################
+
 
 
 ##################################################################
