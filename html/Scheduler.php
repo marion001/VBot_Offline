@@ -473,7 +473,7 @@ if (!empty($successMessage)) {
     <div class="col-sm-9">
         <?php 
             // Gọi hàm để tạo dropdown cho trường âm thanh này
-            generate_audio_select('/home/pi/VBot_Offline/Media/Audio_Scheduler', 'notification_schedule[' . $index . '][data][audio_file]', htmlspecialchars($notification['data']['audio_file']));
+            generate_audio_select($VBot_Offline.$Config['schedule']['audio_path'], 'notification_schedule[' . $index . '][data][audio_file]', htmlspecialchars($notification['data']['audio_file']));
         ?>
     </div>
 </div>
@@ -952,7 +952,16 @@ function addNewTask() {
     let taskHtml = 
         "<hr/><div class='card accordion'><div class='card-body'><div id='task-" + newTaskIndex + "'>" +
             "<h5 class='card-title'>Lập Lịch, Tác Vụ Thông Báo Mới:</h5>" +
-            
+
+			"<div class='row mb-3'>" +
+			"<label for='active-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Kích hoạt:</label>" +
+			"<div class='col-sm-9'>" +
+			"<div class='form-switch'>" +
+			"<input type='checkbox' class='form-check-input' id='active-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][active]' checked>" +
+			"</div>" +
+			"</div>" +
+			"</div>" +
+
 			"<div class='row mb-3'>" +
 			"<label for='name-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tên tác vụ:</label>" +
 			"<div class='col-sm-9'>" +
@@ -968,13 +977,16 @@ function addNewTask() {
 			"</div>" +
 			"</div>" +
 
-
+/*
 			"<div class='row mb-3'>" +
 			"<label for='audio_file-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tệp Âm Thanh (Link,URL/PATH):</label>" +
 			"<div class='col-sm-9'>" +
 			"<input class='form-control border-success' type='text' id='audio_file-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][audio_file]' placeholder='Hoặc đường dẫn Path, Link, Url đến âm thanh'>" +
 			"</div>" +
 			"</div>" +
+*/
+
+
 
 
 			"<div class='row mb-3'>" +
@@ -985,14 +997,7 @@ function addNewTask() {
 			"</div>" +
 			"</div>" +
 
-			"<div class='row mb-3'>" +
-			"<label for='active-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Kích hoạt:</label>" +
-			"<div class='col-sm-9'>" +
-			"<div class='form-switch'>" +
-			"<input type='checkbox' class='form-check-input' id='active-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][active]' checked>" +
-			"</div>" +
-			"</div>" +
-			"</div>" +
+
 
 			"<div class='row mb-3'>" +
             "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần:</label>" +

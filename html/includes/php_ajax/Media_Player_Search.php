@@ -130,6 +130,46 @@ if (isset($_GET['Local']))
             $files_info[] = ['name' => $item, 'cover' => $Cover_URL_Local . '/assets/img/icon_audio_local.png', 'full_path' => $path, 'size' => bytesToMB(filesize($path)) ];
         }
     }
+    echo json_encode($files_info, JSON_PRETTY_PRINT);
+    exit();
+}
+
+
+if (isset($_GET['audio_schedule']))
+{
+    // Đường dẫn đến thư mục cần tìm kiếm
+    $directory = $VBot_Offline . $Config['schedule']['audio_path'];
+    // Các phần mở rộng tệp được phép
+    $allowed_extensions = $Allowed_Extensions_Audio;
+    // Mảng để lưu trữ kết quả
+    $files_info = [];
+    // Hàm kiểm tra phần mở rộng tệp
+    function hasAllowedExtension($filename, $allowed_extensions)
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        return in_array($extension, $allowed_extensions);
+    }
+    // Hàm chuyển đổi byte sang MB
+    function bytesToMB($bytes)
+    {
+		// 1 MB = 1048576 bytes, định dạng với 2 chữ số thập phân
+        return number_format($bytes / 1048576, 2);
+    }
+    // Tìm tất cả các tệp âm thanh trong thư mục chính
+    $items = scandir($directory);
+    foreach ($items as $item)
+    {
+        if ($item === '.' || $item === '..')
+        {
+            continue;
+        }
+        $path = $directory . '/' . $item;
+        if (is_file($path) && hasAllowedExtension($item, $allowed_extensions))
+        {
+            // Nếu là tệp và có phần mở rộng được phép
+            $files_info[] = ['name' => $item, 'cover' => $Cover_URL_Local . '/assets/img/icon_audio_local.png', 'full_path' => $path, 'size' => bytesToMB(filesize($path)) ];
+        }
+    }
     // Trả về kết quả dưới dạng JSON
     //header('Content-Type: application/json');
     echo json_encode($files_info, JSON_PRETTY_PRINT);
