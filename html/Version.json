@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật Lên Lịch Phát Nội Dung Multiple Scheduler, Thông Báo, Ngày Cụ Thể, Các Giờ Trong Ngày, Các Ngày Trong Tuần",
-    "releaseDate": "29/12/2024-1",
+    "description": "Sửa Lỗi Tải Lên File Âm Thanh Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)",
+    "releaseDate": "30/12/2024",
     "changes": [
         {
             "type": "feature",
