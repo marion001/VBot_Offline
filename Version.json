@@ -1,8 +1,8 @@
 {
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Cập nhật Lên Lịch Phát Nội Dung Multiple Scheduler, Thông Báo, Ngày Cụ Thể, Các Giờ Trong Ngày, Các Ngày Trong Tuần",
-    "releaseDate": "29/12/2024-1",
+    "description": "Sửa lỗi điều khiển rèm, Cửa, Cover",
+    "releaseDate": "31/12/2024",
     "changes": [
         {
             "type": "feature",
