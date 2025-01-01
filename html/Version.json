@@ -2,7 +2,7 @@
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa Lỗi Tải Lên File Âm Thanh Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)",
-    "releaseDate": "30/12/2024",
+    "releaseDate": "01/01/2025",
     "changes": [
         {
             "type": "feature",
