@@ -162,7 +162,7 @@ function generate_audio_select($directory, $field_name, $selected_value = '') {
         return preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $file) && !is_dir($directory . '/' . $file);
     });
     // Tạo phần HTML cho thẻ <select>
-    echo '<select class="form-control border-success" name="' . htmlspecialchars($field_name) . '">';
+    echo '<select class="form-control border-success" name="' . htmlspecialchars($field_name) . '" id="' . htmlspecialchars($field_name) . '">';
     echo '<option value="">Chọn tệp âm thanh</option>';
     
     // Tạo các thẻ <option> cho từng tệp âm thanh
@@ -471,10 +471,13 @@ if (!empty($successMessage)) {
         <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập thông tin đường dẫn, link, url tới tệp âm thanh, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>:
     </label>
     <div class="col-sm-9">
+	<div class="input-group mb-3">
         <?php 
             // Gọi hàm để tạo dropdown cho trường âm thanh này
             generate_audio_select($VBot_Offline.$Config['schedule']['audio_path'], 'notification_schedule[' . $index . '][data][audio_file]', htmlspecialchars($notification['data']['audio_file']));
         ?>
+		<button class="btn btn-success border-success" onclick="playAudio_Schedule('notification_schedule[<?php echo $index; ?>][data][audio_file]')" type="button"><i class="bi bi-play-circle"></i></button>
+    </div>
     </div>
 </div>
 
@@ -701,31 +704,35 @@ include 'html_footer.php';
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<!-- Nghe thử file âm thanh 
-<audio id="audioPlayer" style="display: none;" controls></audio>-->
 
-  <!-- Template Main JS File -->
-  
-  
 <script>
+
+function playAudio_Schedule(id_select_DOM) {
+    var element = document.getElementById(id_select_DOM);
+    if (element) {
+        // Kiểm tra phần tử có thuộc tính 'value' hay không
+        if ('value' in element) {
+            playAudio(element.value);
+        } else {
+            show_message("Không lấy được giá trị value của thẻ '" + id_select_DOM + "'");
+            return null;
+        }
+    } else {
+		show_message("Không tìm thấy dữ liệu thẻ với ID: '" + id_select_DOM + "'");
+        return null;
+    }
+}
+
 
 function get_audio_schedule() {
 	loading("show");
     var xhr = new XMLHttpRequest();
     var url = "includes/php_ajax/Media_Player_Search.php?audio_schedule";
-
-    // Mở yêu cầu GET
     xhr.open("GET", url, true);
-
-    // Đặt kiểu trả về dữ liệu là JSON
     xhr.responseType = "json";
-
-    // Gửi yêu cầu
     xhr.send();
-
-    // Xử lý khi yêu cầu hoàn thành
     xhr.onload = function() {
-        if (xhr.status == 200) { // Kiểm tra nếu yêu cầu thành công
+        if (xhr.status == 200) {
             var response = xhr.response;
             if (Array.isArray(response)) {
 				loading("hide");

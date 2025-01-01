@@ -135,6 +135,7 @@ $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_p
 
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
 $Config['home_assistant']['minimum_threshold'] = floatval($_POST['hass_minimum_threshold']);
+$Config['home_assistant']['lowest_to_display_logs'] = floatval($_POST['hass_lowest_to_display_logs']);
 $Config['home_assistant']['time_out'] = intval($_POST['hass_time_out']);
 $Config['home_assistant']['internal_url'] = $_POST['hass_internal_url'];
 $Config['home_assistant']['external_url'] = $_POST['hass_external_url'];
@@ -1337,7 +1338,7 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 </select> 
 <label for="tts_ggcloud_voice_name">Giọng đọc:</label>
 </div>
-<button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i> Nghe Thử</button>
+<button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i></button>
 </div>
 
 
@@ -1539,7 +1540,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 </select> 
 <label for="tts_ggcloud_key_voice_name">Giọng đọc:</label>
 </div>
-<button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i> Nghe Thử</button>
+<button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i></button>
 </div>
 
 
@@ -1631,6 +1632,15 @@ Cấu Hình Home Assistant:</h5>
 						<div class="invalid-feedback">Cần nhập ngưỡng tối thiểu để so sánh tên thiết bị với yêu cầu của bạn!</div>
 					</div>
                 </div>
+				
+                <div class="row mb-3">
+                  <label for="hass_lowest_to_display_logs" class="col-sm-3 col-form-label" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa">Ngưỡng tối thiểu hiển thị ra logs <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng 0.35-0.39, chỉ số này cần phải thấp hơn  chỉ số <b>ngưỡng kết quả tối thiểu</b> bên trên')"></i> :</label>
+                 <div class="col-sm-9">
+                      <input required class="form-control border-danger" type="number" step="0.01" min="0" max="0.45" name="hass_lowest_to_display_logs" id="hass_lowest_to_display_logs" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['lowest_to_display_logs']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['lowest_to_display_logs']) ?>">
+						<div class="invalid-feedback">Cần nhập ngưỡng tối thiểu để hiển thị kết quả dưới ngưỡng ra logs!</div>
+					</div>
+                </div>
+				
                 <div class="row mb-3">
                   <label for="hass_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa khi truy vấn và xử lý dữ liệu')"></i> :</label>
                  <div class="col-sm-9">
@@ -2109,7 +2119,7 @@ if ($handle = opendir($VBot_Offline.'resource/sound/welcome')) {
 	echo "<script>showMessagePHP('Không thể mở thư mục welcome');</script>";
 }
 ?>
-<button class="btn btn-warning border-success"  id="play_Audio_Welcome" type="button">Nghe Thử</button>
+<button class="btn btn-success border-success"  id="play_Audio_Welcome" type="button"><i class="bi bi-play-circle"></i></button>
 				  </div>
 				  </div>
                 </div>
@@ -2138,100 +2148,32 @@ if ($handle = opendir($VBot_Offline.'resource/sound/welcome')) {
             </div>
           </div>
 		  
+		  
+		  
+		  
 
                 <div class="card accordion" id="accordion_button_setting">
                <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting" aria-expanded="false" aria-controls="collapse_button_setting">
                  Âm Thanh Khác/Mặc Định:</h5>
                   <div id="collapse_button_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting" style="">
-	
-              <div class="row mb-3">
-                  <label for="sound_start_file_path" class="col-sm-3 col-form-label">Start:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_start_file_path" id="sound_start_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['start']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['start']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['start']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-				
-                <div class="row mb-3">
-                  <label for="sound_finish_file_path" class="col-sm-3 col-form-label">Finish:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_finish_file_path" id="sound_finish_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['finish']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['finish']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['finish']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_mic_on_file_path" class="col-sm-3 col-form-label">Mic On:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_mic_on_file_path" id="sound_mic_on_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_on']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_on']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['mic_on']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_mic_off_file_path" class="col-sm-3 col-form-label">Mic Off:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_mic_off_file_path" id="sound_mic_off_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_off']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['mic_off']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['mic_off']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_volume_change_file_path" class="col-sm-3 col-form-label">Volume Change:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_volume_change_file_path" id="sound_volume_change_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['volume_change']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['volume_change']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['volume_change']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_wakeup_reply_on_file_path" class="col-sm-3 col-form-label">Wakeup Reply On:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_wakeup_reply_on_file_path" id="sound_wakeup_reply_on_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_on']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_on']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_on']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_wakeup_reply_off_file_path" class="col-sm-3 col-form-label">Wakeup Reply Off:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_wakeup_reply_off_file_path" id="sound_wakeup_reply_off_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_off']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_off']; ?>">
-                  <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['wakeup_reply_off']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_conversation_mode_on_file_path" class="col-sm-3 col-form-label">Conversation Mode On:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_conversation_mode_on_file_path" id="sound_conversation_mode_on_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_on']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_on']; ?>">
-                   <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_on']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label for="sound_conversation_mode_off_file_path" class="col-sm-3 col-form-label">Conversation Mode Off:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group">
-                      <input readonly class="form-control border-danger" type="text" name="sound_conversation_mode_off_file_path" id="sound_conversation_mode_off_file_path" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_off']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_off']; ?>">
-                   <button class="btn btn-warning border-danger" onclick="playAudio('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['sound']['default']['conversation_mode_off']; ?>')" type="button">Nghe Thử</button>
-				  </div>
-                  </div>
-                </div>
-	
-                  </div>
-                  </div>
-                </div>
-
+<?php
+foreach ($Config['smart_config']['smart_wakeup']['sound']['default'] as $key => $value) {
+    echo "
+    <div class='row mb-3'>
+        <label for='sound_{$key}' class='col-sm-3 col-form-label'>{$key}:</label>
+        <div class='col-sm-9'>
+            <div class='input-group'>
+                <input readonly class='form-control border-danger' type='text' name='sound_{$key}_file_path' id='sound_{$key}_file_path' placeholder='{$value}' value='{$value}'>
+                <button class='btn btn-success border-danger' onclick=\"playAudio('{$VBot_Offline}{$value}')\" type='button'><i class='bi bi-play-circle'></i></button>
+            </div>
+        </div>
+    </div>";
+}
+?>
+</div>
+</div>
+</div>
 
 </div>
 </div>

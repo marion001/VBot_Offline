@@ -52,6 +52,7 @@
     "home_assistant": {
         "active": true,
         "minimum_threshold": 0.6,
+        "lowest_to_display_logs": 0.39,
         "internal_url": "http://192.168.14.17:8123",
         "external_url": "https://urlhomeassistant.duckdns.org",
         "long_token": "ghj.nhnb.rAgP-nb6578bythtg",
