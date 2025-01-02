@@ -1061,7 +1061,7 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 				<div class="col-sm-9">
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_default" value="stt_default" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_default' ? 'checked' : ''; ?>>
-                      <label class="form-check-label" for="stt_default">STT Mặc Định (Free)</label>
+                      <label class="form-check-label" for="stt_default">STT Mặc Định VBot (Free)</label>
                     </div>
                     <div class="form-check">
                       <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
