@@ -1,7 +1,7 @@
 {
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi Button không tương thích với các Button diy, khác với mạch AIO Asistant V2",
+    "description": "Sửa lỗi Button không tương thích với các Button được diy, khác với mạch AIO Asistant V2",
     "releaseDate": "02/01/2025",
     "changes": [
         {
