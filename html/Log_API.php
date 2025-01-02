@@ -78,8 +78,6 @@ include 'html_sidebar.php';
 		</section>
 	
 </main>
-
-
   <!-- ======= Footer ======= -->
 <?php
 include 'html_footer.php';
@@ -95,52 +93,53 @@ include 'html_footer.php';
 <?php
 include 'html_js.php';
 ?>
-
-
     <script>
         const checkbox = document.getElementById('fetchLogsCheckbox');
         const logsOutput = document.getElementById('logsOutput');
-
         let intervalId;
-
-        // Hàm gửi yêu cầu và cập nhật textarea
-        function fetchLogs() {
-            const xhr = new XMLHttpRequest();
-            xhr.withCredentials = true;
-
-            xhr.addEventListener("readystatechange", function() {
-                if (this.readyState === 4) {
-                    try {
-                        const response = JSON.parse(this.responseText);
-                        if (response.success) {
-                            const logs = response.data.map(item => item.logs_message).join('\n');
-                            logsOutput.value = logs;
-							//cuộn xuống dưới cùng
+		function fetchLogs() {
+			const xhr = new XMLHttpRequest();
+			xhr.withCredentials = true;
+			xhr.addEventListener("readystatechange", function () {
+				if (this.readyState === 4) {
+					try {
+						if (this.status === 0) {
+							logsOutput.value = "Không thể kết nối đến VBot vui lòng kiểm tra lại, hoặc chế độ API không được bật khi khởi chạy chương trình";
+							return;
+						}
+						if (this.status !== 200) {
+							logsOutput.value = "Lỗi từ máy chủ: HTTP " +this.status;
+							return;
+						}
+						if (this.responseText.trim() === "") {
+							logsOutput.value = "Phản hồi từ server bị trống.";
+							return;
+						}
+						const response = JSON.parse(this.responseText);
+						if (response.success) {
+							const logs = response.data.map(item => item.logs_message).join('\n');
+							logsOutput.value = logs;
 							logsOutput.scrollTop = logsOutput.scrollHeight;
-							
-                        } else {
-                            logsOutput.value = 'Lỗi: ' + response.message;
-                        }
-                    } catch (e) {
-                        logsOutput.value = 'Lỗi khi phân tích dữ liệu: ' + e.message;
-                    }
-                }
-            });
-
-            xhr.open("GET", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs");
-            xhr.send();
-        }
-        // Hàm xử lý sự kiện khi checkbox thay đổi
+						} else {
+							logsOutput.value = 'Lỗi: ' + response.message;
+						}
+					} catch (e) {
+						logsOutput.value = 'Lỗi khi phân tích dữ liệu: ' + e.message;
+					}
+				}
+			});
+			xhr.onerror = function () {
+				logsOutput.value = "Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng hoặc xem máy chủ có đang chạy hay không, hoặc chế độ API không được bật khi khởi chạy chương trình";
+			};
+			xhr.open("GET", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs");
+			xhr.send();
+		}
         checkbox.addEventListener('change', function() {
             if (this.checked) {
-				showMessagePHP("Đang hiển thị Logs trên web", 5);
-                // Bắt đầu gửi yêu cầu mỗi 1 giây
+				showMessagePHP("Đang hiển thị Logs trên web", 3);
                 intervalId = setInterval(fetchLogs, 1000);
             } else {
-                // Dừng gửi yêu cầu khi checkbox không được chọn
                 clearInterval(intervalId);
-				// Xóa nội dung của textarea
-                //logsOutput.value = ''; 
             }
         });
     </script>

@@ -1756,7 +1756,7 @@ Cấu Hình MQTT Broker:</h5>
 
 
 <div class="row mb-3">
-<label for="mqtt_client_name" class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tạo File Cấu Hình <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
+<label class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tạo File Cấu Hình <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
 <div class="col-sm-9">
 <div class="input-group mb-3">
 <button class="btn btn-primary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('mqtts.yaml')">mqtts.yaml</button>

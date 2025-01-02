@@ -57,7 +57,6 @@ include 'html_sidebar.php';
 <br/>
 <center>
 <?php
-// Đường dẫn tới thư mục log
 $logDirectory = $VBot_Offline.'resource/log';
 $logFiles = glob($logDirectory . '/*.log');
 if (!empty($logFiles)) {
@@ -68,7 +67,7 @@ if (!empty($logFiles)) {
         $fileName = basename($file);
         echo '<option value="' . htmlspecialchars($file) . '">' . htmlspecialchars($fileName) . '</option>';
     }
-    echo '</select><button class="btn btn-success border-success" type="button" name="select_log_file_red" id="select_log_file_red"><i class="bi bi-eye"></i> Xem</button></div>';
+    echo '</select><button class="btn btn-success border-success" type="button" name="select_log_file_red" id="select_log_file_red"><i class="bi bi-eye"></i> Xem</button><button class="btn btn-danger border-success" type="button" onclick="delete_logs()"><i class="bi bi-trash"></i> Xóa Logs</button></div>';
 	echo '<br/><textarea class="form-control border-success text-info bg-dark" name="logsOutput" id="logsOutput" rows="17" readonly></textarea>';
 } else {
     echo '<p>Chưa Có File Log Nào Được Sinh Ra</p>';
@@ -85,10 +84,7 @@ if (!empty($logFiles)) {
 <?php
 include 'html_footer.php';
 ?>
-<!-- End Footer -->
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
-  <!-- Template Main JS File -->
 <script>
 document.getElementById('select_log_file_red').addEventListener('click', function() {
     var selectedFile = document.getElementById('logFileSelect').value;
@@ -112,12 +108,41 @@ document.getElementById('select_log_file_red').addEventListener('click', functio
             }
         };
         xhr.send();
-		
     } else {
 		document.getElementById('logsOutput').innerHTML = 'Vui lòng chọn file Logs để xem';
 		show_message('Vui lòng chọn file Logs để xem');
     }
 });
+
+//Xóa Logs
+function delete_logs() {
+  var selectElement = document.getElementById('logFileSelect');
+  var selectedValue = selectElement.value;
+  if (!selectedValue) {
+    show_message('Vui Lòng Chọn File Logs để xóa dữ liệu');
+  } else {;
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Show_file_path.php?empty_the_file&file_path=" + encodeURIComponent(selectedValue);
+    xhr.open("GET", url);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        try {
+          var response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            showMessagePHP(response.message, 3);
+          } else {
+            showMessagePHP(response.message, 3);
+          }
+        } catch (e) {
+		  show_message('Lỗi khi phân tích JSON!' +e);
+        }
+      }
+    };
+    xhr.send();
+  }
+}
+
+
 
 </script>
 <?php

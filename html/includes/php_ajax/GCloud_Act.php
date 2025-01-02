@@ -12,10 +12,7 @@ $responseData = [
     'data' => []
 ];
 
-
-
 if (!$google_cloud_drive_active === true){
-	
 $responseData['success'] = false;
 $responseData['gcloud_notification'] = "Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active)";
 $responseData['message'] = "Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active)";
@@ -30,13 +27,11 @@ $tokenPath = '../../includes/other_data/Google_Driver_PHP/verify_token.json';
 $base_directory = '/home/' . $GET_current_USER . '/_VBot_Library';
 $client_directory = $base_directory . '/google-api-php-client';
 $LIB_Google_API_PHP_CLIENT = $client_directory . '/vendor/autoload.php';
-
 $activve_show = true;
 
 
 // Kiểm tra lại nếu tệp thư viện không tồn tại
 if (!file_exists($LIB_Google_API_PHP_CLIENT)) {
-// Nếu không có dữ liệu, xử lý lỗi
 $activve_show = false;
 $responseData['success'] = false;
 $responseData['message'] = "Thư Viện Google Cloud Drive Chưa Được Cấu Hình, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình";
@@ -49,7 +44,6 @@ $activve_show = true;
 
 use Google\Client;
 use Google\Service\Drive;
-
 
 function convertSize($bytes) {
     $sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
@@ -86,7 +80,6 @@ if ($client->isAccessTokenExpired()) {
     if ($client->getRefreshToken()) {
         // Nếu đã có Refresh Token, cố gắng làm mới Access Token
         $newAccessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-
         // Kiểm tra xem có access token mới không
         if (isset($newAccessToken['access_token'])) {
 			//echo "Làm mới token thành công";
@@ -110,12 +103,10 @@ if ($client->isAccessTokenExpired()) {
         exit();
     }
 }
-
 }
 
 
 if (isset($_GET['Scan'])) {
-
 // Kiểm tra biến folderName
 if (isset($_GET['Folder_Name']) && !empty($_GET['Folder_Name'])) {
     // Lấy tên thư mục từ tham số
@@ -127,42 +118,35 @@ if (isset($_GET['Folder_Name']) && !empty($_GET['Folder_Name'])) {
     echo json_encode($responseData);
     exit();
 }
-
     // Khởi tạo Google Drive Service
     $driveService = new Drive($client);
-
     // Tìm kiếm thư mục với tên được cung cấp
     $response = $driveService->files->listFiles([
         'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s'", $folderName),
         'fields' => 'files(id, name)',
         'pageSize' => 1, // Tìm một thư mục
     ]);
-
     if (count($response->getFiles()) == 0) {
         $responseData['message'] = "Không tìm thấy thư mục: $folderName trên Google Cloud Drive";
     } else {
         // Lấy ID của thư mục
         $folderId = $response->getFiles()[0]->getId();
-
         // Tìm tất cả các tệp bên trong thư mục bằng ID của thư mục cha
         $filesResponse = $driveService->files->listFiles([
             'q' => sprintf("'%s' in parents", $folderId),
             'fields' => 'files(id, name, mimeType, size)',
             'pageSize' => 100, // Điều chỉnh số lượng kết quả cần tìm
         ]);
-
         // Kiểm tra và hiển thị danh sách tệp tìm thấy trong thư mục
         if (count($filesResponse->getFiles()) == 0) {
             $responseData['message'] = "Không tìm thấy tệp sao lưu nào trong thư mục: $folderName trên Google Cloud Drive";
         } else {
             $responseData['success'] = true;
             $responseData['message'] = "Danh sách tệp trong thư mục: $folderName trên Google Cloud Drive";
-			
             foreach ($filesResponse->getFiles() as $file) {
 				$size = isset($file->size) ? convertSize($file->size) : 'N/A';
 				$createdTime = isset($file->createdTime) ? $file->createdTime : 'N/A';
 				$formattedTime = $createdTime !== 'N/A' ? date('d-m-Y H:i:s', strtotime($createdTime)) : 'N/A';
-
                 $responseData['data'][] = [
                     'id' => $file->getId(),
                     'name' => $file->getName(),
@@ -174,7 +158,6 @@ if (isset($_GET['Folder_Name']) && !empty($_GET['Folder_Name'])) {
             }
         }
     }
-    // Trả về kết quả dạng JSON
     echo json_encode($responseData);
     exit();
 }

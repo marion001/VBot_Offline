@@ -9,27 +9,14 @@ if (isset($_GET['hotword']))
 {
     // Lấy giá trị ngôn ngữ từ GET
     $lang_get_HOTWORD = isset($_GET['lang']) ? $_GET['lang'] : '';
-
     $directory = $VBot_Offline . 'resource/picovoice/library';
-
     if ($lang_get_HOTWORD === 'vi' || $lang_get_HOTWORD === 'eng')
     {
-        // Lấy danh sách tất cả các file .pv trong thư mục
         $files = glob($directory . '/*.pv');
-        // Chuyển đổi danh sách file thành định dạng JSON
         $file_list = array_map('basename', $files);
-
-        // Lấy cấu hình hotword theo ngôn ngữ từ cấu hình của bạn
-        // Giả sử $Config là một mảng đã được định nghĩa trước đó chứa cấu hình của bạn
         $porcupineConfig = $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang_get_HOTWORD];
-
-        // Tạo đối tượng kết quả để trả về
         $response = ['lang' => $lang_get_HOTWORD, 'config' => $porcupineConfig, 'files_lib_pv' => $file_list, 'path_pv' => $directory . '/', 'path_ppn' => $VBot_Offline . 'resource/hotword/' . $lang_get_HOTWORD . '/', 'config_lib_pv_to_lang' => $Config['smart_config']['smart_wakeup']['hotword']['library'][$lang_get_HOTWORD]['modelFilePath']];
-
-        // Cấu hình header để trả về định dạng JSON
         header('Content-Type: application/json');
-
-        // Chuyển đổi đối tượng thành JSON và trả về
         echo json_encode($response);
     }
     else
@@ -45,20 +32,15 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
 {
     $uploadDirLibrary = $VBot_Offline . 'resource/picovoice/library/';
     $uploadDirHotword = $VBot_Offline . 'resource/hotword/';
-
     $lang = $_POST['lang_hotword_get'];
-
-    // Đọc tệp JSON hiện tại vào mảng PHP
     if (file_exists($Config_filePath))
     {
         $jsonContent = file_get_contents($Config_filePath);
         $configData = json_decode($jsonContent, true);
-
         if (!isset($configData['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang]))
         {
             $configData['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = [];
         }
-
         $existingFiles = array_column($configData['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang], 'file_name');
         $updatedConfig = $configData['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang];
     }
@@ -67,9 +49,7 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
         $configData = ['smart_config' => ['smart_wakeup' => ['hotword' => ['porcupine' => ['vi' => [], 'eng' => []]]]]];
         $existingFiles = [];
     }
-
     $responseMessages = [];
-
     foreach ($_FILES['upload_files_ppn_pv']['error'] as $key => $error)
     {
         if ($error == UPLOAD_ERR_OK)
@@ -77,7 +57,6 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
             $tmpName = $_FILES['upload_files_ppn_pv']['tmp_name'][$key];
             $name = basename($_FILES['upload_files_ppn_pv']['name'][$key]);
             $ext = pathinfo($name, PATHINFO_EXTENSION);
-
             if ($ext == 'pv')
             {
                 $uploadFile = $uploadDirLibrary . $name;
@@ -88,7 +67,6 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
             {
                 $uploadFile = $uploadDirHotword . $lang . '/' . $name;
                 $moveResult = move_uploaded_file($tmpName, $uploadFile);
-
                 if ($moveResult)
                 {
                     chmod($uploadFile, 0777);
@@ -119,16 +97,12 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
             $responseMessages[] = "Lỗi tải file lên, cho file $key với mã lỗi: $error.";
         }
     }
-
     // Cập nhật mảng cấu hình
     if (!empty($updatedConfig))
     {
         $configData['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = $updatedConfig;
-        // Ghi lại mảng đã cập nhật vào tệp JSON
         file_put_contents($Config_filePath, json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
-
-    // Hiển thị tất cả thông báo trong một thông báo
     echo json_encode(['status' => 'success', 'messages' => $responseMessages]);
     exit;
 }
@@ -136,32 +110,25 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
 #cập nhật lại hotword eng và vi trong Config.json tương ứng với tất cả các file .ppn trong 2 thư mục eng và vi
 if (isset($_GET['reload_hotword_config']))
 {
-
     $directories = ['/home/pi/VBot_Offline/resource/hotword/eng', '/home/pi/VBot_Offline/resource/hotword/vi'];
     // Khởi tạo cấu hình mặc định
     $newPorcupineConfig = [
 		'vi' => $config['smart_config']['smart_wakeup']['hotword']['porcupine']['vi'] ?? [],
 		'eng' => $config['smart_config']['smart_wakeup']['hotword']['porcupine']['eng'] ?? []
 		];
-
-
 	foreach ($directories as $directory)
     {
         if (!is_dir($directory))
         {
             continue;
         }
-        // Tìm tất cả các file .ppn trong thư mục
         $files = glob($directory . '/*.ppn');
         foreach ($files as $file)
         {
-            // Lấy tên tệp bằng cách sử dụng explode
             $parts = explode('/', $file);
-            $fileName = end($parts); // Lấy phần cuối cùng của mảng
+            $fileName = end($parts);
             #echo $fileName;
-            // Xác định ngôn ngữ từ đường dẫn
             $lang = strpos($directory, 'eng') !== false ? 'eng' : 'vi';
-            // Kiểm tra nếu file đã tồn tại trong cấu hình
             $exists = false;
             foreach ($newPorcupineConfig[$lang] as $item)
             {
@@ -171,27 +138,19 @@ if (isset($_GET['reload_hotword_config']))
                     break;
                 }
             }
-
-            // Nếu file chưa tồn tại, thêm vào cấu hình mới
             if (!$exists)
             {
                 $newPorcupineConfig[$lang][] = ['active' => true, 'file_name' => $fileName, 'sensitive' => 0.5];
             }
         }
     }
-
-    // Cập nhật cấu hình trong file
     $Config['smart_config']['smart_wakeup']['hotword']['porcupine'] = $newPorcupineConfig;
-
-    // Ghi lại cấu hình mới vào file
     if (file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)))
     {
-        //echo "Cập nhật cấu hình Hotword thành công.";
         echo json_encode(['status' => 'success', 'message' => 'Đã ghi cấu hình Config->Hotword tiếng anh và tiếng việt thành công.']);
     }
     else
     {
-        //echo "Cập nhật cấu hình Hotword thất bại.";
         echo json_encode(['status' => 'error', 'message' => 'Lỗi khi ghi file cấu hình Hotword tiếng anh và tiếng việt']);
     }
     exit;

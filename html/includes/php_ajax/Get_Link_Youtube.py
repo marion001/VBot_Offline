@@ -5,10 +5,10 @@ def get_link_youtube(video_id):
     # Tạo URL đầy đủ từ ID video
     video_url = f"https://www.youtube.com/watch?v={video_id}"
     ydl_opts = {
-        'format': 'bestaudio',   # Chọn âm thanh tốt nhất
-        'quiet': True,           # Tắt thông báo
-        'noplaylist': True,      # Không tải danh sách phát
-        'extract_flat': True,    # Tăng tốc bằng cách không tải thêm thông tin không cần thiết
+        'format': 'bestaudio',
+        'quiet': True,
+        'noplaylist': True,
+        'extract_flat': True,
     }
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
@@ -26,7 +26,6 @@ def get_link_youtube(video_id):
         return None
 
 if __name__ == "__main__":
-    # Kiểm tra tham số CLI
     if len(sys.argv) != 2:
         print("Sử dụng: python3 Get_Link_Youtube.py <video_id>")
     else:

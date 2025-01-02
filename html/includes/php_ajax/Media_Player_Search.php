@@ -28,20 +28,17 @@ function formatDuration($duration) {
         $seconds = $duration % 60;
         return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
     }
-    return $duration; // Nếu đã là định dạng HH:mm:ss, trả về nguyên bản
+	// Nếu đã là định dạng HH:mm:ss, trả về nguyên bản
+    return $duration;
 }
 
 // Hàm kiểm tra xem token podcast đã hết hạn chưa
 function isTokenExpired_podcast($Config) {
-    // Lấy thời gian hết hạn từ dữ liệu token
     $expire_time = $Config['media_player']['podcast']['expire_time'];
-    // Kiểm tra xem thời gian hết hạn có hợp lệ không
     if (!is_numeric($expire_time)) {
-        return false; // Nếu expire_time không phải là số hợp lệ, giả định là chưa hết hạn hoặc không có dữ liệu
+        return false;
     }
-    // Lấy thời gian hiện tại
     $current_time = time();
-    // So sánh thời gian hiện tại với thời gian hết hạn
     return $current_time > $expire_time;
 }
 
@@ -183,10 +180,10 @@ function getZmp3RqidCookie()
     curl_setopt_array($curl, array(
         CURLOPT_URL => "https://zingmp3.vn/",
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_HEADER => true, // Để nhận cả header
-        CURLOPT_NOBODY => false, // Để nhận nội dung của trang
-        CURLOPT_COOKIEJAR => "", // Không lưu cookie vào tệp
-        CURLOPT_COOKIEFILE => "", // Không đọc cookie từ tệp
+        CURLOPT_HEADER => true,
+        CURLOPT_NOBODY => false,
+        CURLOPT_COOKIEJAR => "",
+        CURLOPT_COOKIEFILE => "",
         CURLOPT_TIMEOUT => 30,
     ));
     $response = curl_exec($curl);
@@ -196,7 +193,6 @@ function getZmp3RqidCookie()
         return ['error' => 'Lỗi cURL: ' . curl_error($curl) ];
     }
     curl_close($curl);
-    // Tìm giá trị của cookie zmp3_rqid trong header
     if (preg_match('/zmp3_rqid=([^;]+)/', $response, $matches))
     {
         return ['zmp3_rqid' => $matches[1]];
