@@ -2,7 +2,7 @@
     "version": "1.0.4",
     "projectName": "Program VBot Offline",
     "description": "Cập Nhật điều khiển đa thiết bị trong Custom HomeAssistant cùng 1 hành động, Sửa Lỗi Dữ Liệu Tìm Kiếm Phát Nhạc",
-    "releaseDate": "03/01/2025",
+    "releaseDate": "03/01/2025-1",
     "changes": [
         {
             "type": "feature",
