@@ -372,7 +372,8 @@
                     "interface_updated_successfully": "resource/sound/default/interface_updated_successfully.mp3",
                     "network_error": "resource/sound/default/network_error.mp3",
                     "music_sound_pause": "resource/sound/default/music_pause.mp3",
-                    "music_sound_stops": "resource/sound/default/music_stops.mp3"
+                    "music_sound_stops": "resource/sound/default/music_stops.mp3",
+                    "start_playlist_play": "resource/sound/default/start_playlist_play.mp3"
                 },
                 "welcome": {
                     "active": true,

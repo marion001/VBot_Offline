@@ -104,6 +104,7 @@ $errorMessages = [];
 $successMessage = [];
 
 //**Dùng dấu nháy đôi (") cho các giá trị chứa ký tự đặc biệt hoặc không phải chữ/số (vd: dấu cách, ký tự đặc biệt khác).
+/*
 function arrayToYaml($array, $indent = 0) {
     $yaml = '';
     $indentation = str_repeat(' ', $indent);
@@ -129,6 +130,8 @@ function arrayToYaml($array, $indent = 0) {
     }
     return $yaml;
 }
+*/
+/*
 
 //Hàm tự chuyển YAML (giả lập) thành mảng
 function yamlToArray($yaml) {
@@ -164,6 +167,104 @@ function yamlToArray($yaml) {
     }
     return $result;
 }
+*/
+#Chuyển đổi Json Sang YAML không dùng thư viện
+function arrayToYaml($array, $indent = 0) {
+    $yaml = '';
+    $indentation = str_repeat(' ', $indent);
+    foreach ($array as $key => $value) {
+        // Xử lý mảng
+        if (is_array($value)) {
+            if (empty($value)) {
+				// Mảng rỗng
+                $yaml .= $indentation . $key . ": {}\n";
+            } elseif (isset($value[0]) && !is_array($value[0])) {
+                // Nếu là mảng đơn giản, sử dụng dấu "-"
+                $yaml .= $indentation . $key . ":\n";
+                foreach ($value as $subValue) {
+                    $yaml .= $indentation . "  - " . $subValue . "\n";
+                }
+            } else {
+                // Mảng khác (mảng phức tạp)
+                $yaml .= $indentation . $key . ":\n" . arrayToYaml($value, $indent + 2);
+            }
+        } else {
+            // Xử lý giá trị đơn
+            if ($value === "{}") {
+                $yaml .= $indentation . $key . ": {}\n";  // Xử lý rỗng
+            } elseif ($value === "" && $key === "entity_id") {
+                // Nếu là `entity_id` và có giá trị là rỗng, ghi "{}"
+                $yaml .= $indentation . $key . ": {}\n";
+            } elseif (is_numeric($value) || preg_match('/^[a-zA-Z0-9._-]+$/', $value)) {
+                // Các giá trị đơn giản không cần dấu nháy
+                $yaml .= $indentation . $key . ": " . $value . "\n";
+            } else {
+                // Các giá trị có dấu nháy đôi
+                $yaml .= $indentation . $key . ": \"" . $value . "\"\n";
+            }
+        }
+    }
+    return $yaml;
+}
+
+#Chuyển đổi Yaml Sang Json không dùng thư viện
+function yamlToArray($yaml) {
+    $lines = explode("\n", trim($yaml));
+    $result = [];
+    $path = [];
+    $lastKey = null;
+    foreach ($lines as $line) {
+        if (trim($line) === "") continue;
+        if (preg_match('/^(\s*)-(.*)$/', $line, $matches)) {
+            $indent = strlen($matches[1]) / 2;
+            $value = trim($matches[2]);
+            $parent = &$result;
+            foreach ($path as $segment) {
+                $parent = &$parent[$segment];
+            }
+            if ($lastKey !== null && isset($parent[$lastKey]) && is_array($parent[$lastKey])) {
+                $parent[$lastKey][] = $value;
+            } else {
+                $parent[$lastKey] = [$value];
+            }
+        } else {
+            preg_match('/^(\s*)([^:]+):(.*)$/', $line, $matches);
+            if (!$matches) continue;
+            $indent = strlen($matches[1]) / 2;
+            $key = trim($matches[2]);
+            $value = trim($matches[3]);
+            $value = trim($value, "\"");
+            while (count($path) > $indent) {
+                array_pop($path);
+            }
+            $parent = &$result;
+            foreach ($path as $segment) {
+                $parent = &$parent[$segment];
+            }
+            if ($key == 'entity_id') {
+                if (strpos($value, "-") === 0) {
+                    $parent[$key] = explode("\n", $value);
+                } else {
+                    $parent[$key] = $value;
+                }
+            } else {
+                if ($value === "") {
+                    $parent[$key] = [];
+                    $path[] = $key;
+                } else {
+                    $parent[$key] = is_numeric($value) ? (float)$value : $value;
+                }
+            }
+            $lastKey = $key;
+        }
+    }
+    return $result;
+}
+
+
+
+
+
 
 // Xử lý dữ liệu khi form được gửi
 if (isset($_POST['save_custom_home_assistant'])) {
@@ -391,7 +492,7 @@ if (!empty($successMessage)) {
     echo '</div>';
 }
 ?>
-<h5 class="card-title"><font color="green">Thiết Lập Lệnh Tùy Chỉnh Home Assistant:</font></h5>
+<h5 class="card-title"><font color="green">Thiết Lập Lệnh Tùy Chỉnh Home Assistant:</font> <a href="https://github.com/user-attachments/assets/eb92a617-12f6-40c9-9d00-35cdbe5cd0bb" target="_bank">(Ảnh Hướng Dẫn, Demo)</a></h5>
 
 <?php foreach ($intents as $index => $intent): ?>
 

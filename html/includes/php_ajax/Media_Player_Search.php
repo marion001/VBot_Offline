@@ -343,7 +343,7 @@ if (empty($Song_Name)) {
         {
             $ZingMP3_id = $songData['id'];
             $ZingMP3_name = $songData['name'];
-            $ZingMP3_artist = $songData['artist'];
+            $ZingMP3_artist = $songData['artist'] ?? $songData['artists'] ?? 'N/A';
             $ZingMP3_duration = $songData['duration'];
             $ZingMP3_thumb = 'https://photo-zmp3.zmdcdn.me/' . $songData['thumb'];
             // Gọi hàm getLinkZingMP3 để lấy liên kết
