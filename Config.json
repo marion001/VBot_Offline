@@ -114,7 +114,8 @@
     },
     "schedule": {
         "active": false,
-        "data_json_file": "resource/schedule/Data_Schedule.json"
+        "data_json_file": "resource/schedule/Data_Schedule.json",
+	"audio_path": "Media/Audio_Scheduler"
     },
     "media_player": {
         "active": true,
