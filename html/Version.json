@@ -1,7 +1,7 @@
 {
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập Nhật điều khiển đa thiết bị trong Custom HomeAssistant cùng 1 hành động, Sửa Lỗi Dữ Liệu Tìm Kiếm Phát Nhạc",
+    "description": "Cập nhật hỗ trợ kiểu loại LED APA102",
     "releaseDate": "03/01/2025",
     "changes": [
         {
