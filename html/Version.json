@@ -2,7 +2,7 @@
     "version": "1.0.4",
     "projectName": "WebUI VBot Offline",
     "description": "Cập nhật hỗ trợ kiểu loại LED APA102",
-    "releaseDate": "03/01/2025",
+    "releaseDate": "05/01/2025",
     "changes": [
         {
             "type": "feature",
