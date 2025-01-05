@@ -377,6 +377,27 @@ $MQTT_Retain = $Config['mqtt_broker']['mqtt_retain'] ? 'true' : 'false';
 $MQTT_Qos = $Config['mqtt_broker']['mqtt_qos'];
 if ($File_Name === "mqtts.yaml") {
 $mqtts_yaml = '
+sensor:
+  - name: "'.$MQTT_Client_Name.' Ngày Phát Hành Giao Diện"
+    state_topic: "'.$MQTT_Client_Name.'/sensor/vbot_interface_releaseDate/state"
+    value_template: "{{ value }}"
+    icon: mdi:calendar
+
+  - name: "'.$MQTT_Client_Name.' Phiên Bản Giao Diện"
+    state_topic: "'.$MQTT_Client_Name.'/sensor/vbot_interface_version/state"
+    value_template: "{{ value }}"
+    icon: mdi:calendar
+
+  - name: "'.$MQTT_Client_Name.' Phiên Bản Chương Trình"
+    state_topic: "'.$MQTT_Client_Name.'/sensor/vbot_program_version/state"
+    value_template: "{{ value }}"
+    icon: mdi:calendar
+
+  - name: "'.$MQTT_Client_Name.' Ngày Phát Hành Chương Trình"
+    state_topic: "'.$MQTT_Client_Name.'/sensor/vbot_program_releaseDate/state"
+    value_template: "{{ value }}"
+    icon: mdi:calendar
+
 select:
   - name: "'.$MQTT_Client_Name.' Kiểu Hiển Thị Logs"
     state_topic: "'.$MQTT_Client_Name.'/select/log_display_style/state"
@@ -884,6 +905,10 @@ entities:
   - entity: switch.'.strtolower($MQTT_Client_Name).'_zalo_ai_assistant
   - entity: input_text.'.strtolower($MQTT_Client_Name).'_vbot_tts
   - entity: script.'.strtolower($MQTT_Client_Name).'_vbot_tts
+  - entity: sensor.'.strtolower($MQTT_Client_Name).'_phien_ban_giao_dien
+  - entity: sensor.'.strtolower($MQTT_Client_Name).'_ngay_phat_hanh_giao_dien
+  - entity: sensor.'.strtolower($MQTT_Client_Name).'_phien_ban_chuong_trinh
+  - entity: sensor.'.strtolower($MQTT_Client_Name).'_ngay_phat_hanh_chuong_trinh
 state_color: true
 ';
 
