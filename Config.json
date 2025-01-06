@@ -115,7 +115,7 @@
     "schedule": {
         "active": false,
         "data_json_file": "resource/schedule/Data_Schedule.json",
-	"audio_path": "Media/Audio_Scheduler"
+        "audio_path": "Media/Audio_Scheduler"
     },
     "media_player": {
         "active": true,
@@ -238,7 +238,6 @@
         "notes": "Chế độ Custom Skill, tùy chỉnh cho các bạn dev, lập trình viện tự code"
     },
     "smart_config": {
-		"auto_restart_program_error": true,
         "backlist_file_name": "BackList.json",
         "read_information_startup": {
             "active": false,
@@ -514,7 +513,8 @@
                 },
                 "directory_tts": "TTS_Audio"
             }
-        }
+        },
+        "auto_restart_program_error": true
     },
     "backup_upgrade": {
         "download_path": "Backup_Upgrade/Download",
