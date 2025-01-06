@@ -1,8 +1,8 @@
 {
-    "version": "1.0.4",
+    "version": "1.0.5",
     "projectName": "Program VBot Offline",
-    "description": "Cập nhật hỗ trợ kiểu loại LED APA102",
-    "releaseDate": "05/01/2025",
+    "description": "Cập Nhật API Gửi Thông Báo Tới Hass,Có Thể Lên Lịch Thông Báo Kiểm Tra Cập Nhật VBot Tới Hass, Và một số cải tiến khác",
+    "releaseDate": "06/01/2025",
     "changes": [
         {
             "type": "feature",

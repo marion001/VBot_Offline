@@ -78,8 +78,6 @@ $Path = $_SERVER['REQUEST_URI'];
 // Kết hợp thành URL đầy đủ
 $Current_URL = $Protocol . $Domain . $Path;
 
-
-
 #Đọc nội dung file Config
 if (file_exists($Config_filePath)) {
     #$jsonString = file_get_contents($Config_filePath);

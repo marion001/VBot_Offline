@@ -10,6 +10,14 @@ include 'Configuration.php';
 
 <!-- css ChatBot -->
 <link href="assets/css/chatbot_head_bar.css" rel="stylesheet">
+<style>
+#vbot_Scan_devices {
+    max-height: 400px;
+    overflow-y: auto;
+    word-wrap: break-word;
+}
+
+</style>
 </head>
   <header id="header" class="header fixed-top d-flex align-items-center">
 
@@ -38,6 +46,30 @@ include 'Configuration.php';
 include 'Notify.php';
 ?>
  </li><!-- End Notification Nav -->
+
+
+<li class="nav-item nav-icon" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng">
+<i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="get_localStorage_vbotScanDevices()"></i>
+</li>
+<div class="modal fade" id="modalDialogScrollable_VBot_Scan_Devicde" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" id="chatbot_size_setting">
+        <div class="modal-content">
+		    <div id="welcome-message" class="welcome-message">Tìm Kiếm Các Thiết Bị VBot Trong Cùng Lớp Mạng
+			<div class="icon-group_chatbot">
+			<i class="bi bi-trash text-danger pe-3" title="Xóa Dữ Liệu Tìm Kiếm" onclick="clearAllDevices_vbotScanDevices()"></i>
+			<i class="bi bi-arrows-fullscreen pe-3" id="chatbot_fullscreen" onclick="chatbot_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
+            <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
+            </div>
+            </div><br/>
+			<button type="button" class="btn btn-warning" onclick="scan_VBot_Device()"><i class="bi bi-radar"></i> Quét Thiết Bị</button>
+<br/>
+<div id="vbot_Scan_devices">
+</div>
+		</div>
+		</div>
+		</div>
+ 
+ 
 <!-- Chatbot Biểu tượng mở chatbox -->
 <li class="nav-item nav-icon">
     <i class="bi bi-chat-dots text-primary" type="button" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>

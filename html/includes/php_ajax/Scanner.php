@@ -128,4 +128,71 @@ if (isset($_GET['scan_alsamixer'])) {
     echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit();
 }
+
+
+#get Link Youtube
+if (isset($_GET['VBot_Device_Scaner'])) {
+    $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/VBot_Device_Scaner.py");
+
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối tới máy chủ SSH.',
+            'data' => []
+        ], JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Xác thực SSH không thành công.',
+            'data' => []
+        ], JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
+            'data' => []
+        ], JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    stream_set_blocking($stream, true);
+
+    $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+
+    $output = stream_get_contents($stdout);
+    $error_output = stream_get_contents($stderr);
+
+    fclose($stream);
+
+    if (!empty($error_output)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lỗi từ script Python: ' . $error_output,
+            'data' => []
+        ], JSON_PRETTY_PRINT);
+        exit;
+    }
+
+    $json_output = json_decode($output, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        echo json_encode($json_output, JSON_PRETTY_PRINT);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Phản hồi từ script Python không hợp lệ.',
+            'data' => []
+        ], JSON_PRETTY_PRINT);
+    }
+    exit;
+}
+
 ?>
