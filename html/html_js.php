@@ -2452,6 +2452,7 @@ function get_localStorage_vbotScanDevices(){
 const savedDevices = JSON.parse(localStorage.getItem('vbotScanDevices'));
 if (savedDevices && Array.isArray(savedDevices) && savedDevices.length > 0) {
     let tableHTML = 
+		'<p class="card-title"> Dữ liệu được tìm kiếm trước đó:</b>' +
         '<table class="table table-bordered border-primary" cellspacing="0" cellpadding="5">' +
             '<thead>' +
                 '<tr>' +
