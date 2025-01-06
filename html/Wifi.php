@@ -10,7 +10,6 @@ session_start();
 // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
 if (!isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-    
     // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
     session_unset();
     session_destroy();
@@ -42,7 +41,6 @@ include 'html_sidebar.php';
 <!-- End Sidebar-->
 
   <main id="main" class="main">
-
     <div class="pagetitle">
       <h1>Thông tin, cấu hình Wifi</h1>
       <nav>
@@ -51,16 +49,15 @@ include 'html_sidebar.php';
           <li class="breadcrumb-item">Wifi</li>
         </ol>
       </nav>
-    </div><!-- End Page Title -->
+    </div>
+	<!-- End Page Title -->
 	    <section class="section">
         <div class="row">
 		<div class="col-lg-12">
 		<div class="card">
             <div class="card-body">
 			<br/>
-			<!--  <h5 class="card-title">Thông tin/Cấu hình Wifi</h5> -->
 		<center>
-<!-- <button onclick="getWifiInfo()">Lấy thông tin Wi-Fi</button> -->
 <div id="wifiInfoResult"></div><br/>
 <button id="loadWifiButton" name="loadWifiButton" class="btn btn-primary rounded-pill" onclick="Show_Wifi_List()">Danh Sách Wifi Đã Kết Nối</button>
 <button id="scanWifiButton" class="btn btn-secondary rounded-pill" onclick="fetchAndDisplayWifiList()">Quét Mạng Wifi</button>
@@ -84,9 +81,6 @@ include 'html_footer.php';
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<!-- Nghe thử file âm thanh 
-<audio id="audioPlayer" style="display: none;" controls></audio>-->
-
   <!-- Template Main JS File -->
 <?php
 include 'html_js.php';
@@ -102,11 +96,9 @@ function Show_Wifi_List() {
     xhr.addEventListener("readystatechange", function() {
         if(this.readyState === 4) {
             //console.log(this.responseText);
-
             var response = JSON.parse(this.responseText);
             var fileListDiv = document.getElementById('hienthiketqua');
             fileListDiv.innerHTML = '';
-
             // Kiểm tra xem response có thành công và có dữ liệu không
             if (response.success && Array.isArray(response.data)) {
                 var table = '<table class="table table-bordered border-primary">';
@@ -132,9 +124,7 @@ function Show_Wifi_List() {
             }
 			loading("hide");
         }
-		
     });
-
     xhr.open("GET", "includes/php_ajax/Wifi_Act.php?Show_Wifi_List");
     xhr.send();
 }
@@ -142,20 +132,13 @@ function Show_Wifi_List() {
 //Quét wifi
 function fetchAndDisplayWifiList() {
 	loading("show");
-    // Tạo XMLHttpRequest
     var xhr = new XMLHttpRequest();
-
-    // Cấu hình yêu cầu GET đến URL
     xhr.open('GET', 'includes/php_ajax/Wifi_Act.php?Scan_Wifi_List', true);
-
-    // Xử lý khi phản hồi được trả về từ server
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
             var response = JSON.parse(this.responseText);
             var fileListDiv = document.getElementById('hienthiketqua');
             fileListDiv.innerHTML = '';
-
-            // Kiểm tra xem response có thành công và có dữ liệu không
             if (response.success && Array.isArray(response.data)) {
                 // Tạo bảng để hiển thị dữ liệu
                 var tableHTML = 
@@ -176,16 +159,11 @@ function fetchAndDisplayWifiList() {
                             "</tr>" +
                         "</thead>" +
                         "<tbody>";
-
-                // Lặp qua các dữ liệu WiFi và thêm vào bảng
                 response.data.forEach(function(wifi) {
-
                     // Kiểm tra nếu tên WiFi là "Mạng ẩn"
                     var ssidDisplay = wifi.SSID === "Mạng ẩn" 
                         ? "<span style='color:red;'>" + wifi.SSID + "</span>" 
                         : wifi.SSID;
-					
-					
                     tableHTML += 
                         "<tr>" +
                             "<td><center>" + ssidDisplay + "</center></td>" +
@@ -198,12 +176,9 @@ function fetchAndDisplayWifiList() {
                             '<td><center><button onclick="connectWifiNew(\''+wifi.SSID+'\', \''+wifi.Security+'\')" class="btn btn-success rounded-pill"><i class="bi bi-arrows-angle-contract"></i> Kết Nối</button></center></td>' +
                         "</tr>";
                 });
-
                 tableHTML += 
                         "</tbody>" +
                     "</table>";
-
-                // Hiển thị bảng vào thẻ div với ID 'hienthiketqua'
                 fileListDiv.innerHTML = tableHTML;
             } else {
                 fileListDiv.innerHTML = '<p>Không có dữ liệu WiFi nào được tìm thấy.</p>';
@@ -213,31 +188,25 @@ function fetchAndDisplayWifiList() {
         }
 		loading("hide");
     };
-
-    // Xử lý khi có lỗi xảy ra trong quá trình gửi yêu cầu
     xhr.onerror = function() {
         show_message('Truy vấn thất bại');
 		loading("hide");
     };
-
-    // Gửi yêu cầu
     xhr.send();
 }
 
 // Kết nối tới WiFi
-
 function connectWifiNew(ssid, security, action) {
 	loading("show");
     var password = '';
     var hiddenSSID = '';
-
     // Nếu security rỗng hoặc null, yêu cầu xác nhận kết nối
     if (security === '' || security === null) {
         var confirmConnect = confirm('Mạng không có mật khẩu. Bạn có chắc chắn muốn kết nối?');
         if (!confirmConnect) {
             //console.log('Kết nối bị hủy');
 			loading("hide");
-            return; // Hủy kết nối nếu người dùng không xác nhận
+            return;
         }
     } else {
         // Nếu tên WiFi có chữ "Mạng ẩn", yêu cầu nhập cả SSID và mật khẩu
@@ -247,19 +216,18 @@ function connectWifiNew(ssid, security, action) {
                 if (hiddenSSID === null) {
                     //console.log('Nhập SSID bị hủy');
 					loading("hide");
-                    return; // Hủy kết nối nếu người dùng không nhập SSID
+                    return;
                 }
                 if (hiddenSSID.trim().length < 1) {
                     show_message('Tên Wifi phải có ít nhất 1 ký tự. Vui lòng nhập lại.');
                 }
             } while (hiddenSSID.trim().length < 1);
-
             do {
                 password = prompt('Nhập mật khẩu cho mạng WiFi '+ssid+' (ít nhất 8 ký tự):');
                 if (password === null) {
                     //console.log('Nhập mật khẩu bị hủy');
 					loading("hide");
-                    return; // Hủy kết nối nếu người dùng không nhập mật khẩu
+                    return;
                 }
                 if (password.trim().length < 8) {
                     show_message('Mật khẩu phải có ít nhất 8 ký tự. Vui lòng nhập lại.');
@@ -272,7 +240,7 @@ function connectWifiNew(ssid, security, action) {
                 if (password === null) {
                     //console.log('Nhập mật khẩu bị hủy');
 					loading("hide");
-                    return; // Hủy kết nối nếu người dùng không nhập mật khẩu
+                    return;
                 }
                 if (password.trim().length < 8) {
                     show_message('Mật khẩu phải có ít nhất 8 ký tự. Vui lòng nhập lại.');
@@ -280,13 +248,9 @@ function connectWifiNew(ssid, security, action) {
             } while (password.trim().length < 8);
         }
     }
-
-    // Gửi yêu cầu kết nối tới máy chủ
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Wifi_Act.php?Connect_Wifi', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-    // Xử lý phản hồi từ máy chủ
     xhr.onload = function() {
         if (xhr.status === 200) {
             var response = JSON.parse(xhr.responseText);
@@ -301,19 +265,14 @@ function connectWifiNew(ssid, security, action) {
 		loading("hide");
 		getWifiNetworkInformation();
     };
-
-    // Tạo dữ liệu gửi đi
     var data = 'action=connect_and_save_wifi' +
                '&ssid=' + encodeURIComponent(hiddenSSID || ssid) +
                '&password=' + encodeURIComponent(password);
-    
-    // Gửi dữ liệu tới máy chủ
     xhr.send(data);
 }
 
 //Xóa Wifi
 function deleteWifi(ssid) {
-	
     if (!ssid || ssid.trim() === '') {
         show_message('Tên WiFi không hợp lệ.');
         return;
@@ -321,15 +280,12 @@ function deleteWifi(ssid) {
         var confirmConnect_del = confirm('Bạn có chắc chắn muốn xóa mạng wifi: '+ssid);
         if (!confirmConnect_del) {
 			loading("hide");
-            return; // Hủy kết nối nếu người dùng không xác nhận
+            return;
         }
-	
 	loading("show");
-    // Tạo đối tượng XMLHttpRequest
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Wifi_Act.php?Delete_Wifi', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    // Xử lý phản hồi từ máy chủ
     xhr.onload = function() {
         if (xhr.status === 200) {
             try {
@@ -349,15 +305,10 @@ function deleteWifi(ssid) {
         }
 		loading("hide");
     };
-
-    // Xử lý lỗi khi yêu cầu không thành công
     xhr.onerror = function() {
 		loading("hide");
         show_message('Lỗi yêu cầu mạng.');
-		
     };
-
-    // Gửi dữ liệu tới máy chủ
     var data = 'action=delete_wifi&wifiName=' + encodeURIComponent(ssid);
     xhr.send(data);
 }
@@ -368,13 +319,10 @@ function connectWifiOld(ssid) {
         show_message('Tên WiFi không hợp lệ.');
         return;
     }
-loading("show");
-    // Tạo đối tượng XMLHttpRequest
+	loading("show");
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Wifi_Act.php?Connect_Wifi', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-
-    // Xử lý phản hồi từ máy chủ
     xhr.onload = function() {
         if (xhr.status === 200) {
             try {
@@ -393,14 +341,10 @@ loading("show");
 		loading("hide");
 		getWifiNetworkInformation();
     };
-
-    // Xử lý lỗi khi yêu cầu không thành công
     xhr.onerror = function() {
 		loading("hide");
         show_message('Lỗi yêu cầu mạng.');
     };
-
-    // Gửi dữ liệu tới máy chủ
     var data = 'action=connect_wifi&password=""&ssid=' + encodeURIComponent(ssid);
     xhr.send(data);
 }
@@ -411,16 +355,14 @@ function getWifiPassword(ssid) {
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
     xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) { // Kiểm tra xem phản hồi đã hoàn tất chưa
-            if (xhr.status === 200) { // Kiểm tra xem yêu cầu thành công hay không
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
                 try {
                     const data = JSON.parse(xhr.responseText);
                     if (data.success) {
                         console.log("Dữ liệu nhận được:", data.data);
-                        // Xử lý dữ liệu nhận được
                         data.data.forEach(function(wifiInfo) {
 							show_message("<b>Tên Wifi:</b> " +wifiInfo.ssid+"<br/><b>Mật Khẩu:</b> <font color=red>" +wifiInfo.password+"</font><br/><b>Địa Chỉ Mac:</b> " +wifiInfo['seen_bssids']+"<br/><b>UUID:</b> " +wifiInfo.uuid+"<br/><b>Timestamp:</b> "+wifiInfo.timestamp);
-							
                             loading("hide");
                         });
                     } else {
@@ -440,32 +382,20 @@ function getWifiPassword(ssid) {
     xhr.send();
 }
 
-
-	
 //Lấy thông tin mạng đang kết nối
 function getWifiNetworkInformation() {
-    // Tạo đối tượng XMLHttpRequest
     var xhr = new XMLHttpRequest();
-    
-    // Cấu hình yêu cầu HTTP
     xhr.open('GET', 'includes/php_ajax/Wifi_Act.php?Wifi_Network_Information', true);
-    
-    // Xử lý khi yêu cầu hoàn tất
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
 				var fileListDiv = document.getElementById('wifiInfoResult');
                 try {
-                    // Chuyển đổi phản hồi JSON thành đối tượng JavaScript
                     var response = JSON.parse(xhr.responseText);
-                    
-                    // Kiểm tra xem phản hồi có thành công không
                     if (response.success) {
                         //console.log('Dữ liệu Wi-Fi:' +xhr.responseText);
 						var tableHTML = "<b>Mạng Wifi Đang Kết Nối: ";
 							tableHTML += '<font color=red>'+response.data.ESSID+'</font></b>';
-
-						// Hiển thị bảng vào thẻ div với ID 'hienthiketqua'
 						fileListDiv.innerHTML = tableHTML;
                     } else {
                         show_message('Lỗi:' +response.message);
@@ -478,13 +408,9 @@ function getWifiNetworkInformation() {
             }
         }
     };
-    
-    // Xử lý lỗi khi yêu cầu không thành công
     xhr.onerror = function() {
-        console.error('Lỗi khi gửi yêu cầu.');
+        show_message('Lỗi khi gửi yêu cầu.');
     };
-    
-    // Gửi yêu cầu
     xhr.send();
 }
 

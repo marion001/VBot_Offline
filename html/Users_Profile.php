@@ -80,9 +80,8 @@ include 'html_sidebar.php';
           <li class="breadcrumb-item active">Hồ sơ</li>
         </ol>
       </nav>
-    </div><!-- End Page Title -->
-
-
+    </div>
+	<!-- End Page Title -->
 
     <section class="section profile">
       <div class="row">
@@ -126,9 +125,8 @@ include 'html_sidebar.php';
                 </li>
 
               </ul>
-			  
-              <div class="tab-content pt-2">
 
+              <div class="tab-content pt-2">
 
 
                 <div class="tab-pane fade profile-overview active show" id="profile-overview" role="tabpanel">
@@ -176,7 +174,7 @@ include 'html_sidebar.php';
 						
 						
 						<div class="input-group">
-            <input class="form-control border-success" type="file" id="avataa_fileToUpload" accept="<?php echo $accept_types; ?>"> <!-- Thêm thuộc tính multiple -->
+            <input class="form-control border-success" type="file" id="avataa_fileToUpload" accept="<?php echo $accept_types; ?>">
 			<button class="btn btn-success border-success" type="button" onclick="fileToUpload_avata()">Tải Lên</button>
 			<button type="button" name="remove_avata" id="remove_avata" class="btn btn-danger border-success" onclick="deleteFile('../../<?php echo $Avata_File; ?>')" title="Xóa Avata"><i class="bi bi-trash"></i></button>
         </div>
@@ -265,7 +263,8 @@ include 'html_sidebar.php';
                     <div class="text-center">
                       <button type="submit" name="save_change_info_name" class="btn btn-primary rounded-pill">Lưu Hồ Sơ</button>
                     </div>
-                 </form> <!-- End Profile Edit Form -->
+                 </form>
+				 <!-- End Profile Edit Form -->
 
 
 
@@ -290,7 +289,8 @@ include 'html_sidebar.php';
 <hr/>
                     <div class="text-center">
                       <button type="submit" name="save_change_user_login" class="btn btn-primary rounded-pill">Lưu Cài Đặt</button>
-                    </div><!-- End settings Form -->
+                    </div>
+					<!-- End settings Form -->
 </form>
                 </div>
 
@@ -380,20 +380,16 @@ include 'html_js.php';
                 show_message('Chưa chọn tệp nào.');
                 return;
             }
-
             var formData = new FormData();
             formData.append('fileToUpload_avata', fileInput.files[0]);
             formData.append('upload_avata', 'true');
-
             var xhr = new XMLHttpRequest();
             xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?upload_avata', true);
-
             xhr.onload = function () {
                 if (xhr.status === 200) {
                     try {
                         var response = JSON.parse(xhr.responseText);
                         console.log(response);
-                        // Xử lý phản hồi từ máy chủ
                         if (response.success) {
                             show_message(response.message+"<br/>Hãy tải lại trang để áp dụng");
                         } else {
@@ -408,15 +404,12 @@ include 'html_js.php';
                     show_message('Yêu cầu bị lỗi với mã trạng thái: ' + xhr.status);
                 }
             };
-
             xhr.onerror = function () {
                 console.error('Yêu cầu thất bại.');
                 show_message('Yêu cầu bị lỗi.');
             };
-
             xhr.send(formData);
         }
-
     </script>
 	
     <script>
@@ -425,13 +418,11 @@ include 'html_js.php';
             var currentPassword = document.getElementById("currentPassword").value;
             var newPassword = document.getElementById("newPassword").value;
             var renewPassword = document.getElementById("renewPassword").value;
-
             var xhr = new XMLHttpRequest();
             xhr.open("GET", "Login.php?change_password&currentPassword=" 
                 + encodeURIComponent(currentPassword) 
                 + "&newpassword=" + encodeURIComponent(newPassword) 
                 + "&renewpassword=" + encodeURIComponent(renewPassword), true);
-
             xhr.onreadystatechange = function () {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
@@ -445,12 +436,8 @@ include 'html_js.php';
                     }
                 }
             };
-
             xhr.send();
         }
-		
-		
-	
     </script>
 </body>
 

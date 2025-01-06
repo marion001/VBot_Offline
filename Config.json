@@ -554,13 +554,18 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "BackList.json",
+                    "service_error.log",
+                    "service_log.log",
+                    "Vbot_error.log",
                     "stt_token_google_cloud.json",
                     "tts_token_google_cloud.json",
                     "Home_Assistant.json",
                     "Home_Assistant_Custom.json",
+                    "Data_Schedule.json",
                     "eng",
                     "vi",
-                    "library"
+                    "library",
+                    "__pycache__"
                 ]
             }
         },
@@ -589,6 +594,11 @@
             "upgrade": {
                 "backup_before_updating": true,
                 "keep_file_directory": [
+                    "News_Paper.json",
+                    "PlayList.json",
+                    "PodCast.json",
+                    "Youtube.json",
+                    "ZingMP3.json",
                     "client_secret.json",
                     "verify_token.json"
                 ]

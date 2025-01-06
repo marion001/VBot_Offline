@@ -153,16 +153,13 @@ function show_all_file_in_directory(directory_path, source_backup, resultDiv_Id)
 					showMessagePHP('Không tìm thấy phần tử có id là: '+resultDiv_Id+' để hiển thị kết quả.');
                     return;
                 }
-
                 if (response.success) {
                     showMessagePHP(response.message);
                     //console.log(response);
-                    
                     // Tạo bảng để hiển thị thông tin tệp
                     var table = '<table class="table table-bordered border-primary">';
 					table += '<tr><th colspan="5" class="text-primary" style="text-align: center; vertical-align: middle;">'+source_backup+'</th></tr>';
                     table += '<tr><th style="text-align: center; vertical-align: middle;">STT</th><th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Thời gian tạo</th><th style="text-align: center; vertical-align: middle;">Kích thước</th><th style="text-align: center; vertical-align: middle;">Hành động</th></tr>';
-
                     response.data.forEach(function(file, index) {
                         table += '<tr>';
                         table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>'; // STT
@@ -188,7 +185,6 @@ function show_all_file_in_directory(directory_path, source_backup, resultDiv_Id)
             }
         }
     };
-    // Gửi yêu cầu
     xhr.send();
 }
 
@@ -245,16 +241,13 @@ function gcloud_scan(folder_name, source_backup, resultDiv_Id) {
 
 //Xóa tệp theo ID trên Google Cloud
 function deleteFile_gcloud(gcloud_id_file, gcloud_file_name, gcloud_folder_name, source_backup_name, div_resultDiv_Id) {
-
     if (!confirm("Bạn có chắc chắn muốn xóa file: '" + gcloud_file_name + "' Trên Google Cloud Drive không?")) {
         return;
     }
     loading("show");
-
     var xhr = new XMLHttpRequest();
     var url = 'includes/php_ajax/GCloud_Act.php?Delete&id_file='+gcloud_id_file;
     xhr.open('GET', url, true);
-	
     xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
@@ -276,108 +269,96 @@ function deleteFile_gcloud(gcloud_id_file, gcloud_file_name, gcloud_folder_name,
             }
         }
     };
-
-    // Gửi yêu cầu
     xhr.send();
 	
 }
 
 // Hiển thị thông báo xác nhận với thông tin chi tiết về backup
 function confirmRestore(backup_file_name) {
-            var result = confirm(backup_file_name);
-			if (result) {
-            loading('show');
-			}
-            // Nếu người dùng nhấn "Cancel", ngăn không cho form được submit
-            return result;
-        }
+    var result = confirm(backup_file_name);
+    if (result) {
+        loading('show');
+    }
+    // Nếu người dùng nhấn "Cancel", ngăn không cho form được submit
+    return result;
+}
 
 //Coppy dữ liệu trong thẻ input
 function coppy_value(id_input) {
-            var input = document.getElementById(id_input);
-            input.select();
-            try {
-                document.execCommand("copy");
-                showMessagePHP("Đã Sao Chép!", 3);
-            } catch (err) {
-                //console.error('Lỗi khi sao chép nội dung: ', err);
-                show_message("Lỗi khi sao chép nội dung. Vui lòng thử lại.");
-            }
-        }
+    var input = document.getElementById(id_input);
+    input.select();
+    try {
+        document.execCommand("copy");
+        showMessagePHP("Đã Sao Chép!", 3);
+    } catch (err) {
+        //console.error('Lỗi khi sao chép nội dung: ', err);
+        show_message("Lỗi khi sao chép nội dung. Vui lòng thử lại.");
+    }
+}
 
 //Mở đường dẫn trong tab mới
-   function openNewTab(url_link) {
-            if (url_link) {
-                // Mở đường dẫn trong tab mới nếu giá trị tồn tại
-                window.open(url_link, '_blank');
-            } else {
-                // Xử lý trường hợp không có giá trị data-url-link
-                show_message('Không có đường dẫn được cung cấp');
-            }
-        }
+function openNewTab(url_link) {
+    if (url_link) {
+        // Mở đường dẫn trong tab mới nếu giá trị tồn tại
+        window.open(url_link, '_blank');
+    } else {
+        // Xử lý trường hợp không có giá trị data-url-link
+        show_message('Không có đường dẫn được cung cấp');
+    }
+}
 
 //Đọc dữ liệu file theo path
 function read_loadFile(path) {
-            // URL của tệp PHP với tham số đường dẫn
-            var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(path);
-            // Tạo đối tượng XMLHttpRequest
-            var xhr = new XMLHttpRequest();
-            // Cấu hình yêu cầu
-            xhr.open('GET', url, true);
-            // Đặt hàm xử lý phản hồi
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        // Phân tích phản hồi JSON
-                        var response = JSON.parse(xhr.responseText);
-                        // Hiển thị thông báo
-                        document.getElementById('message_LoadConfigJson').textContent = response.message_LoadConfigJson;
-                        // Hiển thị dữ liệu
-                        var codeElement = document.getElementById('code_config');
-                        if (response.success) {
-                            if (typeof response.data === 'object') {
-                                // Hiển thị dữ liệu JSON với cú pháp màu sắc
-                                codeElement.textContent = JSON.stringify(response.data, null, 2);
-                                Prism.highlightElement(codeElement); // Áp dụng cú pháp màu sắc
-                            } else {
-                                // Hiển thị dữ liệu văn bản
-                                codeElement.textContent = response.data;
-                                codeElement.className = 'language-txt'; // Đổi lớp để hiển thị văn bản không có màu sắc
-                            }
-                        } else {
-							show_message('Không có dữ liệu');
-                        }
-                    } catch (e) {
-                        show_message('Lỗi xử lý dữ liệu: ' +e);
+    var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(path);
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', url);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                var response = JSON.parse(xhr.responseText);
+                // Hiển thị thông báo
+                document.getElementById('message_LoadConfigJson').textContent = response.message_LoadConfigJson;
+                // Hiển thị dữ liệu
+                var codeElement = document.getElementById('code_config');
+                if (response.success) {
+                    if (typeof response.data === 'object') {
+                        // Hiển thị dữ liệu JSON với cú pháp màu sắc
+                        codeElement.textContent = JSON.stringify(response.data, null, 2);
+                        // Áp dụng cú pháp màu sắc
+                        Prism.highlightElement(codeElement);
+                    } else {
+                        // Hiển thị dữ liệu văn bản
+                        codeElement.textContent = response.data;
+                        // Đổi lớp để hiển thị văn bản không có màu sắc
+                        codeElement.className = 'language-txt';
                     }
                 } else {
-                    show_message('Lỗi tải dữ liệu: ' + xhr.status);
+                    show_message('Không có dữ liệu');
                 }
-            };
-            // Xử lý lỗi yêu cầu
-            xhr.onerror = function() {
-                //document.getElementById('message_LoadConfigJson').textContent = 'Lỗi kết nối.';
-				show_message("Lỗi kết nối");
-            };
-            // Gửi yêu cầu
-            xhr.send();
+            } catch (e) {
+                show_message('Lỗi xử lý dữ liệu: ' + e);
+            }
+        } else {
+            show_message('Lỗi tải dữ liệu: ' + xhr.status);
         }
-
+    };
+    xhr.onerror = function() {
+        //document.getElementById('message_LoadConfigJson').textContent = 'Lỗi kết nối.';
+        show_message("Lỗi kết nối");
+    };
+    xhr.send();
+}
 
 //Đọc dữ liệu cấu trúc bên trong file backup theo path
 function read_file_backup(path_backup_file) {
 	loading('show');
-    // Tạo URL yêu cầu tới script PHP
     var url = 'includes/php_ajax/Show_file_path.php?read_file_backup&file=' + encodeURIComponent(path_backup_file);
     var xhr = new XMLHttpRequest();
-    // Mở yêu cầu GET
-    xhr.open('GET', url, true);
-    // Xử lý khi yêu cầu thành công
+    xhr.open('GET', url);
     xhr.onload = function() {
         if (xhr.status === 200) {
 			 var fileName = path_backup_file.split('/').pop();
             try {
-                // Phân tích cú pháp JSON
                 var response = JSON.parse(xhr.responseText);
                 if (response.success) {
 					loading('hide');
@@ -385,12 +366,11 @@ function read_file_backup(path_backup_file) {
                     var table = '<table class="table table-bordered border-primary">';
 					table += '<tr><th colspan="3"  class="text-success"><center>Cấu Trúc Tệp: '+fileName+'</center></th></tr>';
                     table += '<tr><th><center>STT</center></th><th><center>Tên tệp</center></th><th><center>Hành động</center></th></tr>';
-
                     // Duyệt qua danh sách các tệp trong response.data
                     response.data.forEach(function(file, index) {
                         table += '<tr>';
-                        table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>'; // STT
-                        table += '<td style="vertical-align: middle;"><font color=blue>' + file + '</font></td>'; // Tên tệp
+                        table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>';
+                        table += '<td style="vertical-align: middle;"><font color=blue>' + file + '</font></td>';
                         table += '<td style="text-align: center; vertical-align: middle;">';
                         // Hành động: Bạn có thể thêm các nút hoặc liên kết hành động tại đây
                         table += '<button type="button" class="btn btn-success" onclick="read_files_in_backup(\''+path_backup_file+'\', \'' + file + '\')" title="Xem nội dung tệp tin: \''+file+'\'"><i class="bi bi-eye"></i> Xem</button>';
@@ -398,14 +378,11 @@ function read_file_backup(path_backup_file) {
                         table += '</tr>';
                     });
                     table += '</table>';
-					
 				if (document.getElementById('show_all_file_folder_Backup_Program')) {
                     document.getElementById('show_all_file_folder_Backup_Program').innerHTML = table;
                 }else if (document.getElementById('show_all_file_folder_Backup_web_interface')){
-					
 					document.getElementById('show_all_file_folder_Backup_web_interface').innerHTML = table;
 				}
-					
                    // document.getElementById(id_inter_html).innerHTML = table; // Hiển thị bảng
                 } else {
 					loading('hide');
@@ -413,12 +390,10 @@ function read_file_backup(path_backup_file) {
                 }
             } catch (e) {
 				loading('hide');
-                // Lỗi trong quá trình phân tích JSON
                 show_message('Lỗi xử lý dữ liệu: ' + e.message);
             }
         } else {
 			loading('hide');
-            // Lỗi HTTP khác ngoài 200 (OK)
             show_message('Lỗi tải dữ liệu: ' + xhr.status);
         }
     };
@@ -428,28 +403,22 @@ function read_file_backup(path_backup_file) {
     xhr.send();
 }
 
-
 //Đọc dữ liệu cấu trúc bên trong file backup theo path
 function read_files_in_backup(file_path, file_name) {
 	loading('show');
-    // Tạo URL yêu cầu tới script PHP
     var url = 'includes/php_ajax/Show_file_path.php?read_files_in_backup&file_path='+encodeURIComponent(file_path)+'&file_name='+ encodeURIComponent(file_name);
     var xhr = new XMLHttpRequest();
-    // Mở yêu cầu GET
-    xhr.open('GET', url, true);
-    // Xử lý khi yêu cầu thành công
+    xhr.open('GET', url);
     xhr.onload = function() {
         if (xhr.status === 200) {
             try {
-                // Phân tích cú pháp JSON
                 var response = JSON.parse(xhr.responseText);
                 if (response.success) {
 					loading('hide');
-
                     // Kiểm tra nếu tệp là JSON
                     if (file_name.endsWith('.json')) {
-                        // Hiển thị nội dung JSON
-                        document.getElementById('modal-body-content').textContent = JSON.stringify(response.data, null, 2); // Hiển thị JSON với indent
+						// Hiển thị JSON với indent
+                        document.getElementById('modal-body-content').textContent = JSON.stringify(response.data, null, 2);
                     } else {
                         // Làm sạch nội dung tệp khác
                         var fileContent = response.data
@@ -457,21 +426,15 @@ function read_files_in_backup(file_path, file_name) {
                             .replace(/\\n/g, '\n'); // Thay thế \n bằng ký tự xuống dòng thực
 							// Cập nhật nội dung
 							//document.getElementById('modal-body-content').textContent = fileContent; 
-							
 						    // Cập nhật nội dung cho modal
 							var modalContentElement = document.getElementById('modal-body-content');
 							modalContentElement.textContent = fileContent;
-							
 							// Thêm class để Prism.js làm nổi bật cú pháp JSON
 							modalContentElement.className = 'language-yaml'; 
-							
 							// Kích hoạt Prism.js để làm nổi bật cú pháp
 							Prism.highlightElement(modalContentElement);
                     }
-					
-
                     $('#responseModal_read_files_in_backup').modal('show'); // Hiện modal
-
                    // document.getElementById(id_inter_html).innerHTML = table; // Hiển thị bảng
                 } else {
 					loading('hide');
@@ -479,12 +442,10 @@ function read_files_in_backup(file_path, file_name) {
                 }
             } catch (e) {
 				loading('hide');
-                // Lỗi trong quá trình phân tích JSON
                 show_message('Lỗi xử lý dữ liệu: ' + e.message);
             }
         } else {
 			loading('hide');
-            // Lỗi HTTP khác ngoài 200 (OK)
             show_message('Lỗi tải dữ liệu: ' + xhr.status);
         }
     };
@@ -551,13 +512,12 @@ function VBot_Command(b64_encode) {
     xhr.send();
 }
 
-
-
 //Tải lên file âm thanh theo giấ trị được chỉ định key_path
 function upload_File(key_path) {
     loading("show");
     var fileInput = document.getElementById(key_path);
-    var files = fileInput.files; // Lấy tất cả các file
+	// Lấy tất cả các file
+    var files = fileInput.files;
     var formData = new FormData();
     if (files.length > 0) {
         // Thêm tất cả các file vào FormData
@@ -612,7 +572,6 @@ function control_volume(action) {
         "action": action
     });
     var xhr = new XMLHttpRequest();
-    //xhr.withCredentials = true;
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {
             loading("hide");
@@ -730,7 +689,6 @@ function getAudioLink_newspaper(url_media) {
   return new Promise(function(resolve, reject) {
     var xhr = new XMLHttpRequest();
     xhr.open("GET", "includes/php_ajax/Media_Player_Search.php?Get_Link_NewsPaper&url=" + encodeURIComponent(url_media));
-    
     xhr.onload = function() {
       if (xhr.status === 200) {
         try {
@@ -749,11 +707,9 @@ function getAudioLink_newspaper(url_media) {
         reject("Có lỗi khi lấy dữ liệu. Mã trạng thái HTTP: " + xhr.status);
       }
     };
-    
     xhr.onerror = function() {
       reject("Có lỗi xảy ra trong quá trình yêu cầu.");
     };
-    
     xhr.send();
   });
 }
@@ -761,10 +717,8 @@ function getAudioLink_newspaper(url_media) {
 // Hàm để phát nhạc (Media Player)
 function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
     loading("show");
-    
     // Kiểm tra nếu URL bắt đầu với các domain cần tìm
     if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/")) {
-    
         getAudioLink_newspaper(url_media)
         .then(function(audioLink) {
             url_media = audioLink;
@@ -791,7 +745,6 @@ function startMediaPlayer(url_media, name_media, url_cover, media_source) {
         "media_name": name_media,
         "media_player_source": media_source
     });
-
     var xhr = new XMLHttpRequest();
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === XMLHttpRequest.DONE) {
@@ -852,20 +805,14 @@ function get_Youtube_Link(youtube_id, youtube_name=null, youtube_cover=null) {
 	return;
 	}
 	loading("show");
-    // Tạo một đối tượng XMLHttpRequest
     var xhr = new XMLHttpRequest();
-    // URL API mà bạn muốn lấy dữ liệu
     var url = 'includes/php_ajax/Media_Player_Search.php?GetLink_Youtube&Youtube_ID='+youtube_id;
-    // Mở kết nối đến URL với phương thức GET
     xhr.open('GET', url, true);
-    // Thiết lập hàm sẽ được gọi khi trạng thái của XMLHttpRequest thay đổi
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
-                // Chuyển đổi phản hồi JSON thành đối tượng JavaScript
                 var data = JSON.parse(xhr.responseText);
                 //console.log(data);
-                // Kiểm tra nếu `success` là true
                 if (data.success == true) {
 					if (youtube_name == null) {
 						youtube_name = data.data.title;
@@ -882,7 +829,6 @@ function get_Youtube_Link(youtube_id, youtube_name=null, youtube_cover=null) {
             }
         } else if (xhr.readyState === 4) {
 			loading("hide");
-            // Xử lý trường hợp yêu cầu không thành công
             show_message('Lỗi tìm nạp dữ liệu:' + xhr.status);
         }
     };
@@ -931,7 +877,6 @@ function change_og_display_style(action, dataKey, actionValue = false) {
         });
         xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
         xhr.setRequestHeader("Content-Type", "application/json");
-        // Gửi dữ liệu
         xhr.send(data);
     }
 }
@@ -941,7 +886,6 @@ function checkInput_MediaPlayer() {
     const inputField = document.getElementById('song_name_value');
     const actionButton = document.getElementById('actionButton_Media');
     const inputValue = inputField.value.trim();
-
     if (inputValue.startsWith('http')) {
         // Thay đổi biểu tượng của nút thành biểu tượng Play URL
         actionButton.innerHTML = '<i class="bi bi-play-circle" title="Phát bằng địa chỉ URL"></i>';
@@ -1594,7 +1538,6 @@ function processPodCastData(data_media_PodCast) {
 // Hàm xử lý dữ liệu media Local
 function processLocalData(data_media_local) {
     var fileListDiv = document.getElementById('show_list_media_local');
-    // Kiểm tra nếu phần tử với ID 'show_list_media_local' tồn tại
     if (!fileListDiv) {
         // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
         fileListDiv = document.getElementById('tableContainer');
@@ -1604,7 +1547,6 @@ function processLocalData(data_media_local) {
     if (!data_media_local || data_media_local.length === 0) {
         show_message('<p>Không có dữ liệu bài hát Local</p>');
     } else {
-
         fileListDiv.innerHTML = '';
         if (!document.getElementById('upload_Music_Local')) {
 
@@ -1634,16 +1576,13 @@ function processLocalData(data_media_local) {
 // Hàm xử lý dữ liệu Radio
 function processRadioData(data_media_Radio) {
     var fileListDiv = document.getElementById('show_list_Radio');
-    // Kiểm tra nếu phần tử với ID 'show_list_media_local' tồn tại
     if (!fileListDiv) {
-        // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
         fileListDiv = document.getElementById('tableContainer');
     }
     fileListDiv.innerHTML = '';
     // Kiểm tra xem dữ liệu có tồn tại và là một mảng không
     if (Array.isArray(data_media_Radio)) {
         data_media_Radio.forEach(function(radio) {
-            // Lấy thông tin từ từng đối tượng radio
             var name = radio.name;
             var cover = "<?php echo $URL_Address; ?>/assets/img/radio_icon.png";
             var size = radio.size;
@@ -1733,8 +1672,6 @@ function fetchData_NewsPaper(newspaper_link) {
     xhr.send();
 }
 
-
-
 //Xóa dữ liệu cache bài hát theo nguồn nhạc
 function cache_delete(source_cache) {
     var xhr = new XMLHttpRequest();
@@ -1768,11 +1705,10 @@ function cache_delete(source_cache) {
     xhr.send();
 }
 
-
 //Xử lý Play, next, prev phaylist
 function playlist_media_control(action_control = null) {
 	loading("show");
-    // Xác định dữ liệu JSON tùy theo action_control
+    //Xác định dữ liệu JSON tùy theo action_control
     let data;
     if (action_control === 'next') {
         data = JSON.stringify({
@@ -1831,14 +1767,12 @@ function playAudio(filePath) {
             'ogg': 'audio/ogg',
             'aac': 'audio/aac',
             'flac': 'audio/flac',
-            // Thêm các định dạng tệp âm thanh khác nếu cần
         };
         return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
     }
     const audioPlayer = document.getElementById('audioPlayer');
     if (filePath.startsWith('http')) {
         loading("hide");
-
         // Kiểm tra nếu filePath là '.m3u8'
         if (filePath.endsWith('.m3u8')) {
             //Chạy playHLS nếu là m3u8
@@ -1852,7 +1786,6 @@ function playAudio(filePath) {
         }
         return;
     }
-
     const xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
     xhr.responseType = 'text';
@@ -1878,7 +1811,6 @@ function playAudio(filePath) {
     xhr.send();
 }
 
-
 //Play video hoặc m3u8 HLS
 function playHLS(url) {
     loading("show");
@@ -1899,18 +1831,13 @@ function playHLS(url) {
         });
     }
 }
-
-
-
 </script>
 	
 <!-- Chatbot -->
 <script>
     // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện chatbox
     function chatbot_toggleFullScreen() {
-        // Lấy thẻ div cần thay đổi class
         var chatbotSizeSetting = document.getElementById('chatbot_size_setting');
-        // Lấy thẻ icon cần thay đổi class
         var chatbotIcon = document.getElementById('chatbot_fullscreen');
         // Kiểm tra và thay đổi class giữa modal-lg, modal-xl, và modal-fullscreen
         if (chatbotSizeSetting.classList.contains('modal-lg')) {
@@ -1965,14 +1892,13 @@ function playHLS(url) {
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
         messages.splice(index, 1);
         localStorage.setItem('messages', JSON.stringify(messages));
-        loadMessages(); // Tải lại tin nhắn sau khi xóa
+        loadMessages();
     }
 
 // Hàm tải tin nhắn từ localStorage
 function loadMessages() {
         const chatbox = document.getElementById('chatbox');
         const messages = JSON.parse(localStorage.getItem('messages')) || [];
-        // Xóa nội dung hiện tại của chatbox
         chatbox.innerHTML = '';
         messages.forEach(function(message, index) {
             var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
@@ -1980,8 +1906,9 @@ function loadMessages() {
                 '<div class="message-time">' + message.time + '</div>';
             // Kiểm tra nếu tin nhắn là tệp âm thanh
             if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
-                var audioExtension = message.text.split('.').pop(); // Lấy đuôi mở rộng của tệp
-                var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text); // URL tới PHP proxy
+				// Lấy đuôi mở rộng của tệp
+                var audioExtension = message.text.split('.').pop();
+                var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text);
                 messageHTML +=
                     '<div class="audio-container">' +
                     '    <audio controls>' +
@@ -1995,7 +1922,6 @@ function loadMessages() {
             messageHTML += '</div>';
             chatbox.innerHTML += messageHTML;
         });
-        // Cuộn xuống dưới cùng
         scrollToBottom();
         // Thêm sự kiện click cho dấu x
         document.querySelectorAll('.delete_message_chatbox').forEach(function(button) {
@@ -2006,13 +1932,13 @@ function loadMessages() {
         });
         // showMessagePHP("Đã tải lại dữ liệu Chatbox", 5);
     }
-    // Hàm xóa tất cả tin nhắn từ localStorage và giao diện
+
+// Hàm xóa tất cả tin nhắn từ localStorage và giao diện
 function clearMessages() {
     if (!confirm("Bạn có chắc chắn muốn xóa lịch sử chat ?")) {
         return;
     }
     localStorage.removeItem('messages');
-	// Tải lại chatbox sau khi xóa tất cả
     loadMessages();
 }
 
@@ -2021,7 +1947,6 @@ function deleteMessage(index) {
     const messages = JSON.parse(localStorage.getItem('messages')) || [];
     messages.splice(index, 1);
     localStorage.setItem('messages', JSON.stringify(messages));
-	// Tải lại tin nhắn sau khi xóa
     loadMessages();
 }
 
@@ -2031,7 +1956,6 @@ function stopAllAudio() {
     var audios = document.querySelectorAll('audio');
     audios.forEach(function(audio) {
         audio.pause();
-		// Đặt thời gian phát lại về 0
         audio.currentTime = 0;
     });
 }
@@ -2044,7 +1968,6 @@ function sendRequest(message) {
         "action": "chatbot",
         "value": message
     });
-
     var xhr = new XMLHttpRequest();
     var chatbox = document.getElementById('chatbox');
     var typingIndicator = document.createElement('div');
@@ -2060,15 +1983,14 @@ function sendRequest(message) {
                 var response = JSON.parse(this.responseText);
 				 stopAllAudio();
                 var botMessageHTML = '';
-
                 if (response.success) {
                     // Biểu thức chính quy kiểm tra chuỗi có bắt đầu bằng 'TTS_Audio' và kết thúc bằng mp3, ogg, hoặc wav
                     var audioUrl = response.message;
                     var audioPattern = /^TTS_Audio.*\.(mp3|ogg|wav)$/i;
                     if (audioPattern.test(audioUrl)) {
-                        var audioExtension = audioUrl.split('.').pop(); // Lấy đuôi mở rộng của tệp
-                        var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(audioUrl); // URL tới PHP proxy
-
+						// Lấy đuôi mở rộng của tệp
+                        var audioExtension = audioUrl.split('.').pop();
+                        var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(audioUrl);
                         botMessageHTML =
                             '<div class="message bot-message">' +
                             '    <div class="message-time">' + getCurrentTime() + '</div>' +
@@ -2087,12 +2009,10 @@ function sendRequest(message) {
                             '    <div>' + response.message + '</div>' +
                             '</div>';
                     }
-
                     // Thêm tin nhắn của bot vào chatbox
                     document.getElementById('chatbox').innerHTML += botMessageHTML;
                     // Lưu tin nhắn của bot vào localStorage
                     saveMessage('bot', response.message);
-
                 } else {
                     var errorMessageHTML =
                         msg_error = "Có lỗi xảy ra. Vui lòng thử lại";
@@ -2123,7 +2043,6 @@ function sendRequest(message) {
             }
         }
     });
-
     xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(data);
@@ -2187,16 +2106,11 @@ function adjustContainerStyle_tableContainer() {
     var container = document.getElementById('tableContainer');
     if (container) {
         var contentHeight = container.scrollHeight;
-
         if (contentHeight > 400) {
-            // Thêm thuộc tính CSS khi có nhiều dữ liệu
             container.style.height = '400px';
-			// Hiển thị thanh cuộn dọc
             container.style.overflowY = 'auto';
         } else {
-            // Xóa thuộc tính CSS nếu dữ liệu không vượt quá chiều cao
             container.style.height = 'auto';
-			// Ẩn thanh cuộn dọc
             container.style.overflowY = 'hidden';
         }
     }
@@ -2204,7 +2118,7 @@ function adjustContainerStyle_tableContainer() {
 </script>
 
 <script>
-// Hàm gửi yêu cầu tới Command.php bằng XMLHttpRequest
+// Hàm gửi yêu cầu tới Command.php
 function command_php(command_line, reload_page = null) {
     // Kiểm tra nếu command_line không có giá trị
     if (!command_line) {
@@ -2234,7 +2148,6 @@ function command_php(command_line, reload_page = null) {
     };
     xhr.send(command_line + '=1');
 }
-
 
 //Gửi yêu cầu phát nhạc playlist bằng thông tin tệp json
 function play_playlist_json_path(url_json_file) {

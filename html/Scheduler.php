@@ -365,33 +365,40 @@ if (copy($sourceFile, $destinationFile)) {
     if (isset($_POST['notification_schedule'])) {
         $updated_schedule = [];
 
-foreach ($_POST['notification_schedule'] as $task) {
-	$task['active'] = isset($task['active']) ? (bool)$task['active'] : false;
-	$task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
-    // Kiểm tra các điều kiện cơ bản của task
-    if (
-        !empty($task['name']) &&
-        isset($task['time']) && is_array($task['time']) && count($task['time']) > 0 && // Kiểm tra time có mảng không
-        !empty($task['date']) &&
-        (!empty($task['data']['message']) || !empty($task['data']['audio_file']))
-    ) {
-        // Lọc các giá trị thời gian hợp lệ (không phải chuỗi trống)
-        $task['time'] = array_filter($task['time'], function($time) {
-            return !empty($time);
-        });
-
-        // Nếu danh sách time sau khi lọc vẫn có ít nhất một giá trị
-        if (!empty($task['time'])) {
-            $updated_schedule[] = $task;
-        }
-    }
-}
-
-
+		foreach ($_POST['notification_schedule'] as $task) {
+			$task['active'] = isset($task['active']) ? (bool)$task['active'] : false;
+			$task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
+			// Kiểm tra các điều kiện cơ bản của task
+			if (
+				!empty($task['name']) &&
+				isset($task['time']) && is_array($task['time']) && count($task['time']) > 0 && // Kiểm tra time có mảng không
+				!empty($task['date']) &&
+				(!empty($task['data']['message']) || !empty($task['data']['audio_file']))
+				) {
+				// Lọc các giá trị thời gian hợp lệ (không phải chuỗi trống)
+				$task['time'] = array_filter($task['time'], function($time) {
+					return !empty($time);
+				});
+				// Nếu danh sách time sau khi lọc vẫn có ít nhất một giá trị
+				if (!empty($task['time'])) {
+					$updated_schedule[] = $task;
+				}
+			}
+		}
         $data['notification_schedule'] = $updated_schedule;
         file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $successMessage[] = "Dữ liệu đã được lưu thành công.";
+        #$successMessage[] = "Dữ liệu đã được lưu thành công.";
     }
+	
+
+	
+$data['send_notify_upgrade_vbot_home_assistant']['active'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_active']) ? true : false;
+$data['send_notify_upgrade_vbot_home_assistant']['time'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_time']) ? $_POST['send_notify_upgrade_vbot_home_assistant_time'] : '03:01';
+
+file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+$successMessage[] = "Dữ liệu đã được lưu thành công.";
+	
+	
 }
 ?>
 	    <section class="section">
@@ -575,31 +582,79 @@ if (!empty($successMessage)) {
             <?php endforeach; ?>
         </div>
 <button type="button" class="btn btn-success rounded-pill" onclick="addTimeInput(<?= $index ?>)">Thêm thời gian</button>
+</div>
+</div>
+
+<center>
+<button class="btn btn-danger rounded-pill" type="button" onclick="deleteTask(<?= $index ?>)"><i class="bi bi-trash" title="Xóa bỏ tác vụ này"></i> Xóa tác vụ này</button>
+</center>
+</div>
+
+
+</div>
+</div>
+</div>
+<?php endforeach; ?>
+<?php else : ?>
+<p class="text-danger"><center><h5>Chưa có tác vụ thông báo, lời nhắc nào được thiết lập</h5></center></p>
+<?php endif; ?>
+</div>
+
+
+<div class="card accordion" id="accordion_button_send_notify_upgrade_vbot_hass">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_send_notify_upgrade_vbot_hass" aria-expanded="false" aria-controls="collapse_button_send_notify_upgrade_vbot_hass">
+<font color="Purple">Kiểm Tra Và Thông Báo Cập Nhật VBot Tới Home Assistant,</font>&nbsp; Trạng Thái: &nbsp;
+<?php 
+echo isset($data['send_notify_upgrade_vbot_home_assistant']['active']) 
+    ? ($data['send_notify_upgrade_vbot_home_assistant']['active'] 
+        ? ' <font color=green> Bật</font>' 
+        : ' <font color=red> Tắt</font>') 
+    : '<font color=gray> Không xác định</font>'; 
+?>
+</h5>
+<div id="collapse_button_send_notify_upgrade_vbot_hass" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_send_notify_upgrade_vbot_hass">
+
+<div class="row mb-3">
+    <label class="col-sm-3 col-form-label">
+        Kích Hoạt 
+        <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này<br/><br/>Yêu Cầu:<br/> - Phải Kích Hoạt Home Assistant<br/>- Phải Kích Hoạt Thông Báo Lời Nhắc')"></i>:
+    </label>
+    <div class="col-sm-9">
+        <div class="form-switch">
+            <input 
+                type="checkbox" 
+                class="form-check-input" 
+                id="send_notify_upgrade_vbot_home_assistant_active" 
+                name="send_notify_upgrade_vbot_home_assistant_active" 
+                <?php echo (isset($data['send_notify_upgrade_vbot_home_assistant']['active']) 
+                            ? $data['send_notify_upgrade_vbot_home_assistant']['active'] 
+                            : true) ? 'checked' : ''; ?>>
+        </div>
+    </div>
+</div>
+
+
+<div class="row mb-3">
+    <label for="send_notify_upgrade_vbot_home_assistant_time" class="col-sm-3 col-form-label">
+        Thời Gian 
+        <i class="bi bi-question-circle-fill" onclick="show_message('Định dạng thời gian là 24 giờ, (giờ:phút) Ví Dụ: (03:59)')"></i>:
+    </label>
+    <div class="col-sm-9">
+        <input 
+            class="form-control border-danger" 
+            type="text" 
+            name="send_notify_upgrade_vbot_home_assistant_time" 
+            id="send_notify_upgrade_vbot_home_assistant_time" 
+            placeholder="<?php echo isset($data['send_notify_upgrade_vbot_home_assistant']['time']) ? $data['send_notify_upgrade_vbot_home_assistant']['time'] : '03:01'; ?>" 
+            value="<?php echo isset($data['send_notify_upgrade_vbot_home_assistant']['time']) ? $data['send_notify_upgrade_vbot_home_assistant']['time'] : '03:01'; ?>">
     </div>
 </div>
 
 
 
-
-<center>
-<button class="btn btn-danger rounded-pill" type="button" onclick="deleteTask(<?= $index ?>)"><i class="bi bi-trash" title="Xóa bỏ tác vụ này"></i> Xóa tác vụ này</button>
-</center>
-
-</div>
-
-
 </div>
 </div>
-</div>
-
-
-
-
-
-    <?php endforeach; ?>
-	<?php else : ?>
-    <p class="text-danger"><center><h5>Chưa có tác vụ thông báo, lời nhắc nào được thiết lập</h5></center></p>
-<?php endif; ?>
 </div>
 
 <center>

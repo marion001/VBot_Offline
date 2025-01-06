@@ -27,15 +27,20 @@ if (!isset($_SESSION['user_login']) ||
 function convertToGB($value) {
     $number = floatval($value);
     if (strpos($value, 'T') !== false) {
-        return $number * 1024; // Chuyển đổi từ TB sang GB
+		// Chuyển đổi từ TB sang GB
+        return $number * 1024;
     } elseif (strpos($value, 'G') !== false) {
-        return $number; // Giữ nguyên GB
+		// Giữ nguyên GB
+        return $number;
     } elseif (strpos($value, 'M') !== false) {
-        return $number / 1024; // Chuyển đổi từ MB sang GB
+		// Chuyển đổi từ MB sang GB
+        return $number / 1024;
     } elseif (strpos($value, 'K') !== false) {
-        return $number / (1024 * 1024); // Chuyển đổi từ KB sang GB
+		// Chuyển đổi từ KB sang GB
+        return $number / (1024 * 1024);
     } else {
-        return 0; // Trường hợp không xác định hoặc đơn vị rất nhỏ
+		// Trường hợp không xác định hoặc đơn vị rất nhỏ
+        return 0;
     }
 }
 ?>
@@ -77,23 +82,17 @@ include 'html_sidebar.php';
           <div class="row">
 
 <?php
-// Lấy thông tin filesystem
 $diskInfo = shell_exec('df -h');
-// Chuyển đổi kết quả thành mảng dòng
 $lines_disk = explode("\n", trim($diskInfo));
-// Biến để lưu trữ tổng dung lượng, dung lượng đã dùng và dung lượng còn lại
 $totalSize = 0;
 $totalUsed = 0;
 $totalAvail = 0;
 foreach ($lines_disk as $index => $line) {
-    if ($index === 0) continue; // Bỏ qua dòng đầu tiên (header)
-    // Phân tách các cột
+    if ($index === 0) continue;
     $columns = preg_split('/\s+/', $line);
-    // Chuyển đổi các giá trị thành GB để tính toán
     $sizeGB = convertToGB($columns[1]);
     $usedGB = convertToGB($columns[2]);
     $availGB = convertToGB($columns[3]);
-    // Cộng dồn vào tổng
     $totalSize += convertToGB($columns[1]);
     $totalUsed += convertToGB($columns[2]);
     $totalAvail += convertToGB($columns[3]);
@@ -122,7 +121,8 @@ foreach ($lines_disk as $index => $line) {
 <?php
 // Hàm chuyển đổi đơn vị từ KB sang GB
 function convertKBToGB($kb) {
-    return $kb / 1048576; // 1 GB = 1048576 KB
+	// 1 GB = 1048576 KB
+    return $kb / 1048576;
 }
 // Lấy thông tin RAM từ lệnh free
 $ramInfo = shell_exec('free -k');
@@ -231,7 +231,7 @@ $temperatureCelsius = intval($temperature) / 1000;
 <tr><th>Tệp tin hệ thống</th><th>Kích thước</th><th>Đã dùng</th><th>Còn lại</th><th>Sử dụng %</th><th>Gắn trên</th></tr>
 <?php
 foreach ($lines_disk as $index => $line) {
-    if ($index === 0) continue; // Bỏ qua dòng đầu tiên (header)
+    if ($index === 0) continue;
     // Phân tách các cột
     $columns = preg_split('/\s+/', $line);
     // Hiển thị chỉ các cột quan trọng

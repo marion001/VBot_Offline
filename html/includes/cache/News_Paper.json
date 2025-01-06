@@ -1,212 +1,164 @@
 {
     "data": [
         {
-            "title": "Hướng tới tòa án điện tử, người dân hưởng lợi",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222225420401.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/a1-online-17348791422612145387157-0-87-576-1009-crop-17348828066451284146316.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin sáng 6/1: Vô địch ASEAN Cup, tuyển Việt Nam được thưởng hơn 20 tỷ đồng",
+            "audio": "https://vietnamnet.vn/ban-tin-sang-6-1-vo-dich-asean-cup-tuyen-viet-nam-duoc-thuong-hon-20-ty-dong-2360433.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/6/1-vo-dich-asean-cup-tuyen-viet-nam-duoc-thuong-hon-20-ty-dong-43206.jpg?width=160&amp;s=atP0BRcCwbuMhj9dkIY3AA",
+            "duration": "8 phút",
+            "publish_time": "06/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "TP.HCM mở rộng chính sách trọng dụng người tài",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222223631131.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/a1-online-17348814219091154675804-0-0-640-1024-crop-17348814527961423645696.jpg",
+            "title": "Bản tin cuối ngày 5/1: Nghi vấn người đàn ông tẩm xăng tự thiêu ở Hòa Bình",
+            "audio": "https://vietnamnet.vn/ban-tin-cuoi-ngay-5-1-nghi-van-nguoi-dan-ong-tam-xang-tu-thieu-o-hoa-binh-2360362.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/6/1-nghi-van-nguoi-dan-ong-tam-xang-tu-thieu-o-hoa-binh-259.jpg?width=160&amp;s=4uhqT_nOlOyjr55zx38p-w",
             "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "publish_time": "05/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Sự sống nảy mầm từ cái chết ở Làng Nủ, Nậm Tông, Kho Vàng",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222223256918.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/photo-1734881498265-1734881498534174536744-0-0-1250-2000-crop-17348815174111290917142.jpeg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin chiều 5/1: Tạm giữ thanh niên",
+            "audio": "https://vietnamnet.vn/ban-tin-chieu-5-1-tam-giu-thanh-nien-di-bao-tong-gay-chan-trung-ta-cong-an-2360306.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/5/1-tam-giu-thanh-nien-di-bao-tong-gay-chan-trung-ta-cong-an-103152.jpg?width=160&amp;s=44bPxByXsSMKUH4B-xeZOw",
+            "duration": "10 phút",
+            "publish_time": "05/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Xây dựng văn hóa giao thông",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222213258079.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/a1-17348778074592038034315-0-0-576-922-crop-1734877830985323207635.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin trưa 5/1: Tạm giữ đối tượng đâm chết bạn trong cơ sở cai nghiện ma túy",
+            "audio": "https://vietnamnet.vn/ban-tin-trua-5-1-tam-giu-doi-tuong-dam-chet-ban-trong-co-so-cai-nghien-ma-tuy-2360237.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/5/1-tam-giu-doi-tuong-dam-chet-ban-trong-co-so-cai-nghien-ma-tuy-65871.jpg?width=160&amp;s=7fq5BeGNudtXdUvxyJ0wVQ",
+            "duration": "9 phút",
+            "publish_time": "05/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Giám sát sự tác động của thẩm phán đến hồ sơ",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222220303433.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/a3-online-17348791423881312254131-97-0-737-1024-crop-173487916451016736529.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin sáng 5/1: Nhận định Việt Nam đấu với Thái Lan: Nâng cúp trên đất Thái",
+            "audio": "https://vietnamnet.vn/ban-tin-sang-5-1-nhan-dinh-viet-nam-dau-voi-thai-lan-nang-cup-tren-dat-thai-2360193.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/5/1-nhan-dinh-viet-nam-dau-voi-thai-lan-nang-cup-tren-dat-thai-45600.jpg?width=160&amp;s=p9BLj5CI3e8qjNbjjcpsMA",
+            "duration": "9 phút",
+            "publish_time": "05/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Cam Xã Đoài rụng hàng loạt, người trồng đứt ruột",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222200235824.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/anh-cam-2-1734872818894767297737-63-0-1313-2000-crop-1734872829964466123696.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin cuối ngày 4/1: Khởi tố 2 phóng viên về hành vi “Cưỡng đoạt tài sản”",
+            "audio": "https://vietnamnet.vn/ban-tin-cuoi-ngay-4-1-khoi-to-2-phong-vien-ve-hanh-vi-cuong-doat-tai-san-2360132.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/4/1-khoi-to-2-phong-vien-ve-hanh-vi-cuong-doat-tai-san-131814.jpg?width=360&amp;s=aObDCp010PG5lTxLZAUzKA",
+            "duration": "10 phút",
+            "publish_time": "04/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Luôn tôn trọng đời sống tín ngưỡng của nhân dân",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222215058224.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/giang-sinh-17348845899741250130936-0-0-634-1015-crop-17348845952081230048964.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin chiều 4/1: HLV Thái Lan muốn đá luân lưu với tuyển Việt Nam",
+            "audio": "https://vietnamnet.vn/ban-tin-chieu-4-1-hlv-thai-lan-muon-da-luan-luu-voi-tuyen-viet-nam-2360083.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/4/1-hlv-thai-lan-muon-da-luan-luu-voi-tuyen-viet-nam-106538.jpg?width=360&amp;s=7aqKhAOh0bIGWJkmWG-H-A",
+            "duration": "11 phút",
+            "publish_time": "04/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Dự án du lịch dang dở suốt 19 năm",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222161022362.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/anh-1-online-17348582031401571485797-0-30-576-952-crop-1734858240604304420602.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin trưa 4/1: Cháy lớn tại cửa hàng kinh doanh xe đạp điện ở Bắc Ninh",
+            "audio": "https://vietnamnet.vn/ban-tin-trua-4-1-chay-lon-tai-cua-hang-kinh-doanh-xe-dap-dien-o-bac-ninh-2360013.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/4/1-chay-lon-tai-cua-hang-kinh-doanh-xe-dap-dien-o-bac-ninh-69245.jpg?width=360&amp;s=gTRTU29i-w3GYBCEMHVeag",
+            "duration": "9 phút",
+            "publish_time": "04/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Truy xét tài xế lái ô tô bỏ chạy sau cú đối đầu vỡ nát xe máy",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222194635818.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/base64-1734882860445218013420-33-0-833-1280-crop-1734882873170252918588.jpeg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin sáng 4/1: Phớt lờ mức phạt 6 triệu đồng, xe máy rồng rắn đi trên vỉa hè",
+            "audio": "https://vietnamnet.vn/ban-tin-sang-4-1-phot-lo-muc-phat-6-trieu-dong-xe-may-rong-ran-di-tren-via-he-2359957.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/4/1-phot-lo-muc-phat-6-trieu-dong-xe-may-rong-ran-di-tren-via-he-49090.jpg?width=360&amp;s=FMDbgxzGeztr0c3JXvYUDQ",
+            "duration": "8 phút",
+            "publish_time": "04/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "TP.HCM: Xe dù bến cóc đón khách trên quốc lộ 1 ở Bình Tân",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222213804896.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/z61559107130986c72b34988fe724092791a6b2bc80b4a-1734877422086798176678-162-328-1525-2509-crop-17348782422901948128613.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin cuối ngày 3/1: Triệt phá đường dây mua bán ma túy lớn, tấn công cảnh sát",
+            "audio": "https://vietnamnet.vn/ban-tin-cuoi-ngay-3-1-triet-pha-duong-day-mua-ban-ma-tuy-lon-tan-cong-canh-sat-2359932.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/4/1-triet-pha-duong-day-mua-ban-ma-tuy-lon-tan-cong-canh-sat-2299.jpg?width=360&amp;s=ye3L2AfETfLWrh8UWtmqmg",
+            "duration": "10 phút",
+            "publish_time": "03/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Bắt bóng ma độc hành chuyên đột nhập căn hộ",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222202620724.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/untitled-1734873781991135759554-0-104-630-1112-crop-17348739622091069740545.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin chiều 3/1: Bắt tạm giam bà Giáp Thị Sông Hương, chủ mái ấm Hoa Hồng",
+            "audio": "https://vietnamnet.vn/ban-tin-chieu-3-1-bat-tam-giam-ba-giap-thi-song-huong-chu-mai-am-hoa-hong-2359864.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/3/1-bat-tam-giam-ba-giap-thi-song-huong-chu-mai-am-hoa-hong-121660.png?width=360&amp;s=CgJLqOA-_KODzOA4khqyJg",
+            "duration": "10 phút",
+            "publish_time": "03/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Văn hóa giao thông: Đạp xe đạp cho khỏe, nhưng chạy sao cho an toàn?",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/23/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222103039221.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/e2f68f0a6122dc7c8533-1734837860711346528208-106-0-1001-1432-crop-17348381938721372731805.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin trưa 3/1: Vụ nữ nhân viên ngân hàng bị đánh ghen: Khởi tố vụ án",
+            "audio": "https://vietnamnet.vn/ban-tin-trua-3-1-vu-nu-nhan-vien-ngan-hang-bi-danh-ghen-khoi-to-vu-an-2359701.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/3/1-vu-nu-nhan-vien-ngan-hang-bi-danh-ghen-khoi-to-vu-an-78137.png?width=360&amp;s=uwtI7M0d0ef8UTO5EqVEZw",
+            "duration": "8 phút",
+            "publish_time": "03/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Vụ tàu cá mất kết nối: Lắp thêm thiết bị, yêu cầu cập nhật chương trình",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222183017893.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/ngu-dan-tuan-thu-cac-quy-dinh-nop-day-du-nhat-ky-khai-thac-thuy-san-1734866865790969359635-0-0-1126-1802-crop-1734866910569171651774.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin sáng 3/1: Việt Nam đả bại Thái Lan: Khi người Thái",
+            "audio": "https://vietnamnet.vn/ban-tin-sang-3-1-viet-nam-da-bai-thai-lan-khi-nguoi-thai-choc-gian-xuan-son-2359614.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/3/1-viet-nam-da-bai-thai-lan-khi-nguoi-thai-choc-gian-xuan-son-52572.jpg?width=360&amp;s=cmoDIB9UNZjQBLG3xqHaUA",
+            "duration": "10 phút",
+            "publish_time": "03/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Sổ sức khỏe điện tử là sự kiện nổi bật của ngành y tế TP.HCM",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222185851799.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/edit-0871bdccc2fd7fa326ec-1-1734869785915628790881-118-0-718-960-crop-17348699206081858210617.jpeg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin cuối ngày 2/1: Tạm dừng hoạt động cơ sở bánh cốm Nguyên Ninh",
+            "audio": "https://vietnamnet.vn/ban-tin-cuoi-ngay-2-1-tam-dung-hoat-dong-co-so-banh-com-nguyen-ninh-2359554.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/3/1-tam-dung-hoat-dong-co-so-banh-com-nguyen-ninh-47.jpg?width=360&amp;s=5datrKErt8_Krmjf3pqbNA",
+            "duration": "9 phút",
+            "publish_time": "03/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Áp thấp nhiệt đới sắp ảnh hưởng toàn Nam bộ",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-18524122220264197.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/q-17348738132512029509897-455-215-786-745-crop-17348739599731017074234.gif",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin chiều 2/1: Đội hình tuyển Việt Nam đấu Thái Lan: Tất tay để vô địch",
+            "audio": "https://vietnamnet.vn/ban-tin-chieu-2-1-doi-hinh-tuyen-viet-nam-dau-thai-lan-tat-tay-de-vo-dich-2359468.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/2/1-doi-hinh-tuyen-viet-nam-dau-thai-lan-tat-tay-de-vo-dich-120556.jpg?width=360&amp;s=WqAe4qh_WzJhgi35HFzD1A",
+            "duration": "10 phút",
+            "publish_time": "02/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Trình Quốc hội đường sắt Lào Cai - Hà Nội - Hải Phòng trong tháng 2.2025",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222195003382.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/img4586-1734866866686413871168-17348716395361236518057-0-0-1250-2000-crop-17348717202171836280098.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin trưa 2/1 Đề nghị truy tố kẻ hành hung dã man cô gái trên đường phố TPHCM",
+            "audio": "https://vietnamnet.vn/ban-tin-trua-2-1-de-nghi-truy-to-ke-hanh-hung-da-man-co-gai-tren-duong-pho-tphcm-2359251.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/2/1-de-nghi-truy-to-ke-hanh-hung-da-man-co-gai-tren-duong-pho-tphcm-69624.png?width=360&amp;s=II0CtkoOZ3anUatf3k6ySA",
+            "duration": "9 phút",
+            "publish_time": "02/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Tìm thấy thi thể hai mẹ con nghi nhảy cầu",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222170502235.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/nhay-cau-krana-17348614424201481114206-0-12-425-692-crop-17348616402841136426723.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin sáng 2/1: Cục CSGT chỉ ra nguyên nhân đèn tín hiệu đang xanh bất ngờ đỏ",
+            "audio": "https://vietnamnet.vn/ban-tin-sang-2-1-cuc-csgt-chi-ra-nguyen-nhan-den-tin-hieu-dang-xanh-bat-ngo-do-2359180.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/2/1-cuc-csgt-chi-ra-nguyen-nhan-den-tin-hieu-dang-xanh-bat-ngo-do-43157.jpg?width=360&amp;s=j7GxITsiffSC5AgRAImBmQ",
+            "duration": "9 phút",
+            "publish_time": "02/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Thi Chạm đến tương lai cùng metro: Cùng nhau làm một điều mới cho metro TP.HCM",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222175345062.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/cham-cung-metro-173486465424736726591-125-12-1129-1619-crop-17348647725421317124612.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin cuối ngày 1/1: Bị phạt vì bố là chủ tịch, con làm tổng giám đốc",
+            "audio": "https://vietnamnet.vn/ban-tin-cuoi-ngay-1-1-bi-phat-vi-bo-la-chu-tich-con-lam-tong-giam-doc-2359159.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/2/1-bi-phat-vi-bo-la-chu-tich-con-lam-tong-giam-doc-3451.jpg?width=360&amp;s=H_zAjpcXPTsVjbt2t94OYg",
+            "duration": "9 phút",
+            "publish_time": "01/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "286,3 triệu USD được ký kết tại Triển lãm Quốc phòng quốc tế Việt Nam 2024",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222172914592.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/dh61507-17347631106641201253603-3-0-1603-2560-crop-17348633038231600462855.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin chiều 1/1: Thanh niên bị phát hiện khi đang phi tang thi thể mẹ",
+            "audio": "https://vietnamnet.vn/ban-tin-chieu-1-1-thanh-nien-bi-phat-hien-khi-dang-phi-tang-thi-the-me-2359101.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/1/1-thanh-nien-bi-phat-hien-khi-dang-phi-tang-thi-the-me-110458.jpg?width=360&amp;s=eD5L-6QruA27Q1RJc_COZA",
+            "duration": "11 phút",
+            "publish_time": "01/01/2025",
+            "source": "Báo VietNamNet"
         },
         {
-            "title": "Công an TP.HCM triệt phá 2 nhóm cướp giật tài sản",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222165904454.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/fa8adf02df2b62753b3a-1734861070568958563290-121-0-921-1280-crop-17348612730201654268977.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
-        },
-        {
-            "title": "Bộ Công an là cơ quan T.Ư về chuyển giao người chấp hành án tù",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222141014895.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/edit-bo-cong-an-1734851161417839391506-40-0-790-1200-crop-173485127607242220982.jpeg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
-        },
-        {
-            "title": "Áp thấp nhiệt đới đột ngột tăng tốc, sắp mạnh lên thành bão số 10",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222153330897.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/dbqgxtnd202412221400-17348561617121354432112-472-281-818-835-crop-17348563615491557650386.gif",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
-        },
-        {
-            "title": "4 thanh thiếu niên bị cắt cụt bàn tay trái do pháo nổ tự chế",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222141427955.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/fbimg1734851683963-173485170363769902178-83-0-1333-2000-crop-17348518205011783070971.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
-        },
-        {
-            "title": "Nguy cơ dịch bệnh tăng cao ở TP.HCM vào dịp tết",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-18524122214132462.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/272c3e7b654ed810815f-17348511661511391446896-0-54-478-819-crop-1734851361181775058217.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
-        },
-        {
-            "title": "Tiền Giang: Mạo danh trưởng công an huyện lừa đảo tiền tỉ",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222122809061.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/lua-dao-cong-nghe-cao-17348452204771351135764-0-0-588-940-crop-17348452731831687428983.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
-        },
-        {
-            "title": "Vượt xe tải ở Bình Chánh, 2 người bị thương",
-            "audio": "https://thanhnien-audio.mediacdn.vn/2024/12/22/thanhnien-full-hn_female_ngochuyen_full_48k-fhg-185241222132408207.mp3",
-            "cover": "https://images2.thanhnien.vn/zoom/150_150/528068263637045248/2024/12/22/2212-va-cham-1734848048327129631110-0-0-598-957-crop-1734848177737520335969.jpg",
-            "duration": "N/A",
-            "publish_time": "N/A",
-            "source": "Báo Thanh Niên"
+            "title": "Bản tin trưa 1/1: FIFA gửi thông điệp đặc biệt đến tuyển Việt Nam trước chung kết với Thái Lan",
+            "audio": "https://vietnamnet.vn/ban-tin-trua-1-1-fifa-gui-thong-diep-dac-biet-den-tuyen-viet-nam-truoc-chung-ket-2359006.html",
+            "cover": "https://static-images.vnncdn.net/vps_images_publish/000001/000003/2025/1/1/1-fifa-gui-thong-diep-dac-biet-den-tuyen-viet-nam-truoc-chung-ket-voi-thai-lan-67084.jpg?width=360&amp;s=pmtco9qLtAyj_MEIJIGfbw",
+            "duration": "9 phút",
+            "publish_time": "01/01/2025",
+            "source": "Báo VietNamNet"
         }
     ]
 }

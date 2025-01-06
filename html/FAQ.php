@@ -92,6 +92,9 @@ Cách Cài Đặt Kiểm Tra Mic Và Scan Lấy ID Mic:</h5>
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
 Hướng Dẫn Cài Đặt, Kiểm Tra Loa, Âm Thanh Đầu Ra:</h5>
 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
+- Nếu Là Mạch DAC i2s có thể tham khảo cách cài Driver theo Link Sau:<br/>
+- <a href="https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU" target="_bank">https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU</a>
+<br/><br/>
 - Bạn cần phát 1 file âm thanh bằng VLC, có thể tải lên file âm thanh của bạn như XXX.mp3 vào <b>/home/pi</b> chẳng hạn<br/>
 - Tiếp tới hãy chạy file âm thanh đó bằng lệnh sau:<br/>
 <b>$:> vlc XXX.mp3</b><br/>

@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"/home/pi/VBot_Offline/Media/Music_Local/Thuyền Quyên.mp3\",\r\n    \"media_name\": \"33333.mp3\",\r\n    \"media_cover\": \"http://zxc.vn/1.jpg\",\r\n    \"media_player_source\": \"youtube\"\r\n}",
+					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://baomoi-tts-mcloud-bf-s1.bmcdn.me/kckjzh5Azvc/a061554ff69319cd4082/74d5cd3f10b9ffe7a6a8/64/4d538d7dcf62263c7f73.m4a?authen=exp=1735030923~acl=/kckjzh5Azvc/*~hmac=eb4117731eed4c9a63a6d34c2029f20b\",\r\n    \"media_name\": \"Thủ tướng Phạm Minh Chính dự Lễ khánh thành công trình tái thiết khu dân cư Làng Nủ\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"Báo Mới\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1948,7 +1948,91 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"đọc báo việt nam net\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mở rèm phòng khách 50%\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gửi Thông Báo Tới Home Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"home_assistant\",\r\n    \"title\": \"VBot Assistant\",\r\n    \"messenger\": \"Chào bạn! Mình là VBot trợ lý của bạn\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kiểm Tra Cập Nhật Giao Diện",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"check_for_updates\",\r\n    \"action\": \"interface\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kiểm Tra Cập Nhật Chương Trình",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"check_for_updates\",\r\n    \"action\": \"program\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

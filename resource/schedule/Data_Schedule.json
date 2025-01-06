@@ -24,5 +24,9 @@
                 "18:30"
             ]
         }
-    ]
+    ],
+    "send_notify_upgrade_vbot_home_assistant": {
+        "active": true,
+        "time": "03:01"
+    }
 }
