@@ -612,17 +612,22 @@ if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media
   </li>
 
  
-  <li><font color="blue">Đọc Báo, Tin Tức <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng tính năng đọc báo, tin tức trong ngày')"></i> :</font>
+<li><font color="blue">Đọc Báo, Tin Tức <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng tính năng đọc báo, tin tức trong ngày')"></i> :</font>
   <div class="form-switch">
- 
 <div class="form-check">
  <input class="form-check-input" value="news_paper_active" type="checkbox" name="news_paper_active" id="news_paper_active" onclick="change_to_another_mode('news_paper', this.checked)" <?php if ($Config['media_player']['news_paper']['active'] === true) echo "checked"; ?>>
 </div>
-
-
-
 </div>
-  </li>
+</li>
+
+
+<li><font color="blue">Màn Hình (Display Screen) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng, hiển thị dữ liệu lên màn hình')"></i> :</font>
+  <div class="form-switch">
+<div class="form-check">
+ <input class="form-check-input" value="display_screen_active" type="checkbox" name="display_screen_active" id="display_screen_active" onclick="change_to_another_mode('display_screen', this.checked)" <?php if ($Config['display_screen']['active'] === true) echo "checked"; ?>>
+</div>
+</div>
+</li>
 
 </ul>
 </div>
@@ -1090,6 +1095,7 @@ include 'html_js.php';
                     document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
                     document.getElementById('youtube_active').checked = data.media_player.youtube_active ? true : false;
                     document.getElementById('news_paper_active').checked = data.news_paper_active ? true : false;
+                    document.getElementById('display_screen_active').checked = data.display_screen_active ? true : false;
                     document.getElementById('home_assistant_active').checked = data.home_assistant_active ? true : false;
                     document.getElementById('hass_custom_commands_active').checked = data.hass_custom_commands_active ? true : false;
                     document.getElementById('default_assistant_active').checked = data.default_assistant_active ? true : false;

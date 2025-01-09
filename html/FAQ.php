@@ -346,6 +346,7 @@ Nếu nhận diện thành công sẽ có địa chỉ 3c như ảnh: <a href="h
 Tài Liệu Tham Khảo:<br/>
 - <a href="https://github.com/adafruit/Adafruit_Python_SSD1306" target="_bank">https://github.com/adafruit/Adafruit_Python_SSD1306</a><br/>
 - <a href="https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/" target="_bank">https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/</a>
+- <a href="https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/" target="_bank">https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/</a>
 
 </div>
 </div>

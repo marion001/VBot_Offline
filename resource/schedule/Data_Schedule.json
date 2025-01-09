@@ -28,5 +28,27 @@
     "send_notify_upgrade_vbot_home_assistant": {
         "active": true,
         "time": "03:01"
-    }
+    },
+	"display_screen": {
+		"active": true,
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+            "29/12/2024",
+            "30/12/2024"
+        ],
+        "time_on": [
+            "20:47",
+            "18:30"
+        ],
+        "time_off": [
+            "20:50",
+            "18:40"
+        ]
+	}
 }
