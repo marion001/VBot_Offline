@@ -1,8 +1,8 @@
 {
     "version": "1.0.5",
     "projectName": "Program VBot Offline",
-    "description": "Cập Nhật API Gửi Thông Báo Tới Hass,Có Thể Lên Lịch Thông Báo Kiểm Tra Cập Nhật VBot Tới Hass, Và một số cải tiến khác",
-    "releaseDate": "06/01/2025",
+    "description": "Sửa Lỗi Hiển Thị Màn Hình LCD, Fix STT GCloud_V2 (499, 409)",
+    "releaseDate": "10/01/2025",
     "changes": [
         {
             "type": "feature",
