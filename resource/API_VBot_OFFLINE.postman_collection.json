@@ -2054,6 +2054,90 @@
 			"response": []
 		},
 		{
+			"name": "Bật Sử Dụng Màn Hình display_screen",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"display_screen\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tắt Sử Dụng Màn Hình display_screen Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"display_screen\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Hiển Thị Văn Bản Lên Màn Hình",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"display_screen\",\r\n    \"value\": \"Chào tuyển nhé\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "?type=1&data=media_player",
 			"request": {
 				"method": "GET",
