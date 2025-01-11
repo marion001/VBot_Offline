@@ -1,8 +1,8 @@
 {
-    "version": "1.0.5",
+    "version": "1.0.6",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Hiển Thị Màn Hình LCD, Fix STT GCloud_V2 (499, 409)",
-    "releaseDate": "10/01/2025",
+    "description": "Hỗ Trợ Mic LED ReSpeaker Mic Array v2.0, Cập Nhật Bật Tắt Màn Hình Lên Lịch, API, MQTT",
+    "releaseDate": "11/01/2025",
     "changes": [
         {
             "type": "feature",

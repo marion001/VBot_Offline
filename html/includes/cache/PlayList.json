@@ -39,54 +39,6 @@
             "artist": "Đặng Thiên Chí"
         },
         {
-            "ids_list": "69D8ED",
-            "title": "Hon Le Cua Anh.mp3",
-            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Hon Le Cua Anh.mp3",
-            "duration": "3.10 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/Hon Le Cua Anh.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "2AA747",
-            "title": "Thuyen_quyen.mp3",
-            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Thuyen_quyen.mp3",
-            "duration": "3.27 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/Thuyen_quyen.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "7F8C37",
-            "title": "Tu_em_sai.mp3",
-            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Tu_em_sai.mp3",
-            "duration": "3.66 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/Tu_em_sai.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "EB78CE",
-            "title": "hen_anh_khi_hoa_Chua_tan.mp3",
-            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
-            "duration": "4.27 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/hen_anh_khi_hoa_Chua_tan.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
             "ids_list": "B0D066",
             "title": "Nợ Tình Em",
             "cover": "https://photo-zmp3.zmdcdn.me/cover/1/0/7/2/10729adc2f1b6f29f0027a8f636a0a9c.jpg",

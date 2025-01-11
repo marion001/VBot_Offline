@@ -1796,6 +1796,7 @@ Cấu Hình MQTT Broker:</h5>
                    <select name="led_type_select" id="led_type_select" class="form-select border-success" aria-label="Default select example">
                       <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>ws281x</option>
                       <option value="apa102" <?php echo $Config['smart_config']['led']['led_type'] === 'apa102' ? 'selected' : ''; ?>>apa102</option>
+                      <option value="ReSpeaker_Mic_Array_v2.0" <?php echo $Config['smart_config']['led']['led_type'] === 'ReSpeaker_Mic_Array_v2.0' ? 'selected' : ''; ?>>ReSpeaker_Mic_Array_v2.0</option>
 					  
 					</select>
                   </div>

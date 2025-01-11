@@ -2,7 +2,7 @@
     "notification_schedule": [
         {
             "active": true,
-            "name": "Test Lịch Trình Thông Báo 1",
+            "name": "Test Lịch Trình Thông Báo 2",
             "data": {
                 "message": "",
                 "audio_file": "/home/pi/VBot_Offline/Media/Audio_Scheduler/Tu_em_sai.mp3",
@@ -26,11 +26,11 @@
         }
     ],
     "send_notify_upgrade_vbot_home_assistant": {
-        "active": true,
+        "active": false,
         "time": "03:01"
     },
-	"display_screen": {
-		"active": true,
+    "display_screen": {
+        "active": true,
         "date": [
             "Monday",
             "Tuesday",
@@ -38,17 +38,13 @@
             "Thursday",
             "Friday",
             "Saturday",
-            "Sunday",
-            "29/12/2024",
-            "30/12/2024"
+            "Sunday"
         ],
         "time_on": [
-            "20:47",
-            "18:30"
+            "20:47"
         ],
         "time_off": [
-            "20:50",
             "18:40"
         ]
-	}
+    }
 }

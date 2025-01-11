@@ -9,7 +9,7 @@ import struct
 from pvrecorder import PvRecorder
 
 #ID của Mic
-device_index = 14  #Sử dụng thiết bị mặc định thì đặt là: "-1"
+device_index = -1  #Sử dụng thiết bị mặc định thì đặt là: "-1"
 
 #Thời gian ghi âm (6 giây)
 duration = 6

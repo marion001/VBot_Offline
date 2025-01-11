@@ -296,6 +296,21 @@ function deleteDir($dirPath) {
     rmdir($dirPath);
 }
 
+#Xóa nội dungtrong thư mục, không xóa thưu mục cha
+function delete_in_Dir($dirPath) {
+    if (!is_dir($dirPath)) return;
+    $files = scandir($dirPath);
+    foreach ($files as $file) {
+        if ($file == '.' || $file == '..') continue;
+        $filePath = $dirPath . "/" . $file;
+        if (is_dir($filePath)) {
+            delete_in_Dir($filePath);
+        } else {
+            unlink($filePath);
+        }
+    }
+    //rmdir($dirPath);
+}
 
 #Tạo Thư mục
 function createDirectory($directory) {
@@ -816,6 +831,7 @@ try {
 }
 //Xử lý nếu dữ liệu là nút nhấn cập nhật
 elseif($Backup_Upgrade_Program === "yes_vbot_upgrade"){
+	delete_in_Dir($Download_Path);
 	$vbot_program_cloud_backup_khi_cap_nhat = isset($_POST['vbot_program_cloud_backup_khi_cap_nhat']) ? $_POST['vbot_program_cloud_backup_khi_cap_nhat'] : null;
 	#Các file và thư mục cần bỏ qua không cho cập nhật, ghi đè
 	$Keep_The_File_Folder_POST = isset($_POST['keep_the_file_folder']) ? $_POST['keep_the_file_folder'] : [];

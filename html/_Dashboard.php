@@ -105,6 +105,22 @@ function deleteDir($dirPath) {
     rmdir($dirPath);
 }
 
+#Chỉ xóa file ,thư mục bên trong, không xóa thư mục cha
+function delete_in_Dir($dirPath) {
+    if (!is_dir($dirPath)) return;
+    $files = scandir($dirPath);
+    foreach ($files as $file) {
+        if ($file == '.' || $file == '..') continue;
+        $filePath = $dirPath . "/" . $file;
+        if (is_dir($filePath)) {
+            delete_in_Dir($filePath);
+        } else {
+            unlink($filePath);
+        }
+    }
+    #rmdir($dirPath);
+}
+
 #Tải xuống repo git, không dùng lệnh git clone
 function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
 	global $messages;
@@ -132,7 +148,6 @@ function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
         $zip->close();
         // Xóa tệp ZIP sau khi giải nén
         unlink($zipFile);
-        // Đặt quyền cho thư mục đã giải nén
         chmod($extractedFolder, 0777);
 		//$messages[] = "Giải nén dữ liệu thành công, tiến hành nâng cấp...";
         return $extractedFolder;
@@ -145,18 +160,13 @@ function downloadGitRepoAsNamedZip($repoUrl, $destinationDir) {
 #Giải nén tệp .tar.gz
 function extractTarGz($tarFilePath, $extractTo) {
 	global $messages;
-    // Kiểm tra xem tệp .tar.gz có tồn tại không
     if (!file_exists($tarFilePath)) {
 		$messages[] = "<font color=red>- Tệp Sao Lưu: '$tarFilePath' không tồn tại</font>";
-		// Tệp không tồn tại
         return false;
     }
-    // Thực hiện lệnh giải nén
     $command = "tar -xzf " . escapeshellarg($tarFilePath) . " -C " . escapeshellarg($extractTo);
     exec($command, $output, $returnVar);
-    // Kiểm tra kết quả
     if ($returnVar === 0) {
-		// Giải nén thành công
         return true;
     } else {
 		// Giải nén thất bại
@@ -674,16 +684,14 @@ try {
 }
 
 elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade"){
-
+delete_in_Dir($Download_Path);
 $web_interface_cloud_backup_khi_cap_nhat = isset($_POST['web_interface_cloud_backup_khi_cap_nhat']) ? $_POST['web_interface_cloud_backup_khi_cap_nhat'] : null;
 $make_a_backup_before_updating = isset($_POST['make_a_backup_before_updating']) ? true : false;
-
 
 #Các file và thư mục cần bỏ qua không cho cập nhật, ghi đè
 $Keep_The_File_Folder_POST = isset($_POST['keep_the_file_folder']) ? $_POST['keep_the_file_folder'] : [];
 //$messages[] =  json_encode($Keep_The_File_Folder_POST);
 $messages[] =  "Đang Tiến Hành Cập Nhật Giao Diện Web UI";
-
 
 #Xử lý tải xuống bản cập nhật
 $download_Git_Repo_As_Named_Zip = downloadGitRepoAsNamedZip($Github_Repo_Vbot, $Download_Path);
@@ -704,8 +712,8 @@ if ($libPath_exist === true) {
 $messages[] = '<br/><font color=blue>- Tiến Hành Sao Lưu Dữ Liệu Lên Google Cloud Drive</font>';
 // Khởi tạo client
 $client = new Client();
-$client->setAuthConfig($authConfigPath); // Đường dẫn tới tệp xác thực
-$client->addScope(Drive::DRIVE_FILE); // Thêm quyền truy cập
+$client->setAuthConfig($authConfigPath);
+$client->addScope(Drive::DRIVE_FILE);
 $client->setAccessToken($accessToken);
 // Nếu token đã hết hạn, lấy token mới
 if ($client->isAccessTokenExpired()) {
@@ -757,8 +765,8 @@ if (count($response->files) > 0) {
         // Nếu không tồn tại, tạo thư mục Backup_Interface
         $backupFolderMetadata = new DriveFile(array(
             'name' => $backupFolderName,
-            'mimeType' => 'application/vnd.google-apps.folder', // Định nghĩa loại MIME cho thư mục
-            'parents' => array($folderId) // Đặt thư mục cha
+            'mimeType' => 'application/vnd.google-apps.folder',
+            'parents' => array($folderId)
         ));
         $backupFolder = $service->files->create($backupFolderMetadata, array(
             'fields' => 'id'
@@ -778,7 +786,7 @@ if (count($response->files) > 0) {
     // Nếu không tồn tại, tạo thư mục chính
     $folderMetadata = new DriveFile(array(
         'name' => $folderName,
-        'mimeType' => 'application/vnd.google-apps.folder' // Định nghĩa loại MIME cho thư mục
+        'mimeType' => 'application/vnd.google-apps.folder'
     ));
     $folder = $service->files->create($folderMetadata, array(
         'fields' => 'id'

@@ -199,6 +199,17 @@ if ($data === null) {
     exit();
 }
 
+// Các ngày trong tuần
+$week_days = [
+	"Monday" => "Thứ Hai",
+	"Tuesday" => "Thứ Ba",
+	"Wednesday" => "Thứ Tư",
+	"Thursday" => "Thứ Năm",
+	"Friday" => "Thứ Sáu",
+	"Saturday" => "Thứ Bảy",
+	"Sunday" => "Chủ Nhật"
+];
+
 if (isset($_POST['delete_all_Scheduler'])) {
     if (file_exists($json_file)) {
         if (unlink($json_file)) {
@@ -360,11 +371,9 @@ if (copy($sourceFile, $destinationFile)) {
 }
 }
 
-
-
+#Lưu dữ liệu Lập Lịch, Thông Báo
     if (isset($_POST['notification_schedule'])) {
         $updated_schedule = [];
-
 		foreach ($_POST['notification_schedule'] as $task) {
 			$task['active'] = isset($task['active']) ? (bool)$task['active'] : false;
 			$task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
@@ -389,16 +398,22 @@ if (copy($sourceFile, $destinationFile)) {
         file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         #$successMessage[] = "Dữ liệu đã được lưu thành công.";
     }
-	
 
-	
+#Lưu dữ liệu Thông Báo Cập Nhật Home Assistant
 $data['send_notify_upgrade_vbot_home_assistant']['active'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_active']) ? true : false;
 $data['send_notify_upgrade_vbot_home_assistant']['time'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_time']) ? $_POST['send_notify_upgrade_vbot_home_assistant_time'] : '03:01';
 
+#Lưu dữ liệu Bật tắt màn hình
+$time_on_display_screen = isset($_POST['time_on_display_screen']) ? $_POST['time_on_display_screen'] : [];
+$time_off_display_screen = isset($_POST['time_off_display_screen']) ? $_POST['time_off_display_screen'] : [];
+$data['display_screen']['active'] = isset($_POST['display_screen_active']) ? true : false;
+$data['display_screen']['date'] = isset($_POST['dates_display_screen']) ? $_POST['dates_display_screen'] : [];
+$data['display_screen']['time_on'] = array_filter($time_on_display_screen);
+$data['display_screen']['time_off'] = array_filter($time_off_display_screen);
+
+#lưu toàn bộ dữ liệu vào file Json
 file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 $successMessage[] = "Dữ liệu đã được lưu thành công.";
-	
-	
 }
 ?>
 	    <section class="section">
@@ -416,7 +431,6 @@ if (!empty($errorMessages)) {
 }
 
 // Hiển thị thông báo thành công nếu có
-
 if (!empty($successMessage)) {
 	echo '<div class="alert alert-success alert-dismissible fade show" id="message_error" role="alert">';
     echo '<ul style="color: green;">';
@@ -498,7 +512,6 @@ if (!empty($successMessage)) {
 </div>
 
 
-
 <div class="row mb-3">
     <label for="date-<?= $index ?>" class="col-sm-3 col-form-label">
         Chọn các ngày trong tuần hoặc thiết lập ngày cụ thể (có thể thiết lập được cả 2 loại dữ liệu cùng lúc)
@@ -507,33 +520,21 @@ if (!empty($successMessage)) {
     <div class="col-sm-9">
         <div class="form-switch">
             <?php
-            // Các ngày trong tuần
-            $week_days = [
-                "Monday" => "Thứ Hai",
-                "Tuesday" => "Thứ Ba",
-                "Wednesday" => "Thứ Tư",
-                "Thursday" => "Thứ Năm",
-                "Friday" => "Thứ Sáu",
-                "Saturday" => "Thứ Bảy",
-                "Sunday" => "Chủ Nhật"
-            ];
-
-            // Lấy danh sách các ngày đã chọn từ JSON
-            $selected_days = $notification['date']; // Mảng các ngày đã chọn
-
+            // Mảng các ngày đã chọn
+            $selected_days = $notification['date']; 
             // Kiểm tra xem có ngày tháng cụ thể trong dữ liệu hay không
             $specific_dates = array_filter($selected_days, function($day) {
-                return preg_match('/\d{2}\/\d{2}\/\d{4}/', $day); // Kiểm tra xem giá trị có phải là ngày tháng (dd/mm/yyyy) không
+				// Kiểm tra xem giá trị có phải là ngày tháng (dd/mm/yyyy) không
+                return preg_match('/\d{2}\/\d{2}\/\d{4}/', $day);
             });
-            $week_days_selected = array_diff($selected_days, $specific_dates); // Lọc bỏ các ngày tháng cụ thể, chỉ lấy các ngày trong tuần
-
+			// Lọc bỏ các ngày tháng cụ thể, chỉ lấy các ngày trong tuần
+            $week_days_selected = array_diff($selected_days, $specific_dates);
             // Hiển thị checkbox cho các ngày trong tuần
             foreach ($week_days as $key => $label) {
                 $checked = in_array($key, $week_days_selected) ? 'checked' : '';
                 echo '<input type="checkbox" class="form-check-input" id="date-' . $index . '-' . $key . '" name="notification_schedule[' . $index . '][date][]" value="' . $key . '" ' . $checked . '> ';
                 echo '<label for="date-' . $index . '-' . $key . '">' . $label . '</label><br/>';
             }
-
             // Hiển thị ô input cho các ngày tháng cụ thể (dd/mm/yyyy) và nút xóa
             foreach ($specific_dates as $specific_date) {
                 echo '<div class="mt-3 input-group" id="date-group-' . $index . '-' . $specific_date . '">';
@@ -541,21 +542,13 @@ if (!empty($successMessage)) {
                 echo '<button type="button" class="btn btn-danger border-success" onclick="removeDateInput(\'' . $index . '-' . $specific_date . '\')" title="Xóa Ngày: ' . $specific_date . '"><i class="bi bi-trash"></i></button>';
                 echo '</div>';
             }
-
             ?>
 <div id="date-container-<?= $index ?>">
     <button type="button" class="mt-3 btn btn-info rounded-pill" id="button_hien_thi_ngay_<?= $index ?>" onclick="addDateInput(<?= $index ?>)">Thêm ngày cụ thể</button>
 </div>
-
-
         </div>
     </div>
 </div>
-
-
-
-
-
 
 
 <div class="row mb-3">
@@ -600,6 +593,7 @@ if (!empty($successMessage)) {
 <?php endif; ?>
 </div>
 
+<hr style="border: 2px solid #0000FF;">
 
 <div class="card accordion" id="accordion_button_send_notify_upgrade_vbot_hass">
 <div class="card-body">
@@ -650,12 +644,103 @@ echo isset($data['send_notify_upgrade_vbot_home_assistant']['active'])
             value="<?php echo isset($data['send_notify_upgrade_vbot_home_assistant']['time']) ? $data['send_notify_upgrade_vbot_home_assistant']['time'] : '03:01'; ?>">
     </div>
 </div>
+</div>
+</div>
+</div>
 
 
+<div class="card accordion" id="accordion_button_display_screen_time">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_display_screen_time" aria-expanded="false" aria-controls="collapse_button_display_screen_time">
+<font color="Blue">Lập Lịch, Bật Tắt Hiển Thị Dữ Liệu Màn Hình</font>, Trạng Thái:&nbsp;
+<?php 
+echo isset($data['display_screen']['active']) 
+    ? ($data['display_screen']['active'] 
+        ? ' <font color=green> Bật</font>' 
+        : ' <font color=red> Tắt</font>') 
+    : '<font color=gray> Không xác định</font>'; 
+?></h5>
+<div id="collapse_button_display_screen_time" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_display_screen_time">
+
+<?php
+// Kiểm tra dữ liệu display_screen và gán giá trị mặc định nếu không có
+if (!isset($data['display_screen']) || empty($data['display_screen'])) {
+    // Gán giá trị mặc định nếu không có dữ liệu display_screen
+    $data['display_screen'] = [
+        'active' => false,
+        'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        'time_on' => ["05:01"],
+        'time_off' => ["23:59"]
+    ];
+} 
+$display_screen = $data['display_screen'];
+?>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="display_screen_active" id="display_screen_active" value="<?php echo $display_screen['active']; ?>" <?= $display_screen['active'] ? 'checked' : '' ?>>
+</div>
+</div>
+</div>
+
+<!-- Checkbox ngày -->
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Màn Hình')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<?php foreach ($week_days as $date => $label): ?>
+<input class="form-check-input" type="checkbox" name="dates_display_screen[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $display_screen['date']) ? 'checked' : '' ?>>
+<label><?= htmlspecialchars($label) ?></label>
+<br/>
+<?php endforeach; ?>
+</div>
+</div>
+</div>
+
+<!-- Thời gian bật -->
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Thời Gian Bật:</label>
+<div class="col-sm-9">
+
+<div class="time-inputs_display_screen" id="time-on-container">
+<?php foreach ($display_screen['time_on'] as $index => $time_on): ?>
+<div class="time-input-container input-group mb-3" id="time-on_display_screen-<?= $index ?>">
+<input class="form-control border-success" type="text" name="time_on_display_screen[]" value="<?= htmlspecialchars($time_on) ?>" placeholder="HH:mm">
+<button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-on_display_screen-<?= $index ?>"><i class="bi bi-trash"></i></button>
+</div>
+<?php endforeach; ?>
+<button class="btn btn-success rounded-pill" type="button" id="add-time-on_display_screen">Thêm thời gian bật</button>
+</div>
+</div>
+</div>
+
+<hr/>
+
+
+<!-- Thời gian tắt -->
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Thời Gian Tắt:</label>
+<div class="col-sm-9">
+
+<div class="time-inputs_display_screen" id="time-off-container">
+<?php foreach ($display_screen['time_off'] as $index => $time_off): ?>
+<div class="time-input-container input-group mb-3" id="time-off_display_screen-<?= $index ?>">
+<input class="form-control border-success" type="text" name="time_off_display_screen[]" value="<?= htmlspecialchars($time_off) ?>" placeholder="HH:mm">
+<button class="btn btn-danger border-success" title="Xóa thời gian Tắt này" type="button" id="delete-off_display_screen-<?= $index ?>"><i class="bi bi-trash"></i></button>
+</div>
+<?php endforeach; ?>
+<button class="btn btn-warning rounded-pill" type="button" id="add-time-off_display_screen">Thêm thời gian tắt</button>
+</div>
+
+</div>
+</div>
 
 </div>
 </div>
 </div>
+
 
 <center>
 <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
@@ -1161,7 +1246,8 @@ function addTimeInput(taskIndex) {
     // Tạo danh sách phút
     function generateMinuteSuggestions() {
         const minutes = [];
-        for (let minute = 0; minute < 60; minute += 1) { // Tăng mỗi 5 phút
+		// Tăng mỗi 1 phút
+        for (let minute = 0; minute < 60; minute += 1) {
             const m = minute.toString().padStart(2, '0');
             minutes.push(m);
         }
@@ -1176,15 +1262,19 @@ function addTimeInput(taskIndex) {
         hours.forEach(hour => {
             const option = document.createElement('div');
             option.className = 'suggestion-item';
-            option.innerText = `${hour} giờ`;
+            option.innerText = hour + ' giờ';
             option.onclick = () => {
-                input.dataset.selectedHour = hour; // Lưu giờ được chọn tạm thời
-                input.value = `${hour}:--`; // Chỉ cập nhật giờ, giữ chỗ cho phút
-                showMinuteSuggestions(input); // Chuyển sang chọn phút
+				// Lưu giờ được chọn tạm thời
+                input.dataset.selectedHour = hour;
+				// Chỉ cập nhật giờ, giữ chỗ cho phút
+                input.value = hour + ':--';
+				// Chuyển sang chọn phút
+                showMinuteSuggestions(input);
             };
             container.appendChild(option);
         });
-        container.style.display = 'block'; // Hiển thị danh sách
+		// Hiển thị danh sách
+        container.style.display = 'block';
     }
 
     // Hiển thị danh sách gợi ý phút
@@ -1195,15 +1285,17 @@ function addTimeInput(taskIndex) {
         minutes.forEach(minute => {
             const option = document.createElement('div');
             option.className = 'suggestion-item';
-            option.innerText = `${minute} phút`;
+            option.innerText = minute + ' phút';
             option.onclick = () => {
                 const selectedHour = input.dataset.selectedHour || '00';
-                input.value = `${selectedHour}:${minute}`; // Cập nhật giờ và phút đầy đủ
-                container.style.display = 'none'; // Ẩn danh sách sau khi chọn phút
+                input.value = selectedHour + ':' + minute;
+				// Ẩn danh sách sau khi chọn phút
+                container.style.display = 'none';
             };
             container.appendChild(option);
         });
-        container.style.display = 'block'; // Hiển thị danh sách
+		// Hiển thị danh sách
+        container.style.display = 'block';
     }
 
     // Ẩn danh sách gợi ý khi nhấp ra ngoài
@@ -1218,6 +1310,56 @@ function addTimeInput(taskIndex) {
     });
 </script>
 
+<!-- Scripts lập Lịch Màn Hình -->
+<script>
+    let timeOnCounter_display_screen = <?= count($display_screen['time_on']) ?>;
+    let timeOffCounter_display_screen = <?= count($display_screen['time_off']) ?>;
+    // Thêm input cho Time On
+    document.getElementById('add-time-on_display_screen').addEventListener('click', function() {
+        const timeOnContainer = document.getElementById('time-on-container');
+        // Tạo id cho input mới và container
+        const inputContainerId = 'time-on_display_screen-' + timeOnCounter_display_screen;
+        // Sử dụng innerHTML để tạo input và button xóa
+        const inputContainer = document.createElement('div');
+        inputContainer.id = inputContainerId;
+		inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
+        inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_on_display_screen[]" placeholder="HH:mm (Thời gian bật)"><button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-on_display_screen-' + timeOnCounter_display_screen + '"><i class="bi bi-trash"></i></button>';
+        // Thêm container vào trong DOM
+        timeOnContainer.insertBefore(inputContainer, this);
+        // Gắn sự kiện xóa khi nhấn Delete
+        document.getElementById('delete-on_display_screen-' + timeOnCounter_display_screen).addEventListener('click', function() {
+            document.getElementById(inputContainerId).remove();
+        });
+        timeOnCounter_display_screen++;
+    });
+
+    // Thêm input cho Time Off
+    document.getElementById('add-time-off_display_screen').addEventListener('click', function() {
+        const timeOffContainer = document.getElementById('time-off-container');
+        // Tạo id cho input mới và container
+        const inputContainerId = 'time-off_display_screen-' + timeOffCounter_display_screen;
+        // Sử dụng innerHTML để tạo input và button xóa
+        const inputContainer = document.createElement('div');
+        inputContainer.id = inputContainerId;
+		inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
+        inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_off_display_screen[]" placeholder="HH:mm (Thời gian tắt)"><button class="btn btn-danger border-success" title="Xóa thời gian Tắt này" type="button" id="delete-off_display_screen-' + timeOffCounter_display_screen + '"><i class="bi bi-trash"></i></button>';
+        // Thêm container vào trong DOM
+        timeOffContainer.insertBefore(inputContainer, this);
+        // Gắn sự kiện xóa khi nhấn Delete
+        document.getElementById('delete-off_display_screen-' + timeOffCounter_display_screen).addEventListener('click', function() {
+            document.getElementById(inputContainerId).remove();
+        });
+        timeOffCounter_display_screen++;
+    });
+    // Gắn sự kiện xóa ban đầu cho các button đã có
+    document.querySelectorAll('.time-inputs_display_screen > div > button').forEach(button => {
+        button.addEventListener('click', function() {
+            const container = button.parentElement;
+            container.remove();
+        });
+    });
+</script>
+<!--END Scripts lập Lịch Màn Hình -->
 
   <script src="assets/vendor/prism/prism.min.js"></script>
 <script src="assets/vendor/prism/prism-json.min.js"></script>

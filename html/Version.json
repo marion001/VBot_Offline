@@ -1,8 +1,8 @@
 {
     "version": "1.0.5",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập Nhật API Gửi Thông Báo Tới Hass,Có Thể Lên Lịch Thông Báo Kiểm Tra Cập Nhật VBot Tới Hass, Và một số cải tiến khác",
-    "releaseDate": "06/01/2025",
+    "description": "Hỗ Trợ Mic LED ReSpeaker Mic Array v2.0, Cập Nhật Bật Tắt Màn Hình Lên Lịch, API, MQTT",
+    "releaseDate": "11/01/2025",
     "changes": [
         {
             "type": "feature",
