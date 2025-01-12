@@ -1,8 +1,8 @@
 {
     "version": "1.0.6",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ Trợ Mic LED ReSpeaker Mic Array v2.0, Cập Nhật Bật Tắt Màn Hình Lên Lịch, API, MQTT",
-    "releaseDate": "11/01/2025",
+    "description": "Sửa Lỗi Lên Lịch Bật Tắt Màn Hình LCD",
+    "releaseDate": "12/01/2025",
     "changes": [
         {
             "type": "feature",
