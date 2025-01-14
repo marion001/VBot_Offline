@@ -352,7 +352,17 @@ Tài Liệu Tham Khảo:<br/>
 </div>
 </div>
 
-	
+<div class="card accordion" id="accordion_button_tao_gcloud_driver_json">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_tao_gcloud_driver_json" aria-expanded="false" aria-controls="collapse_button_tao_gcloud_driver_json">
+Tạo Tệp Json Google Driver Backup:</h5>
+<div id="collapse_button_tao_gcloud_driver_json" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_tao_gcloud_driver_json">
+<a href="https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true" target="_bank">Nhấn Để Mở File Hướng Dẫn Tạo Json GDriver</a>
+</div>
+</div>
+</div>
+
+
 		
 		</div>
 		</div>

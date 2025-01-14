@@ -1,8 +1,8 @@
 {
-    "version": "1.0.6",
+    "version": "1.0.7",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Lên Lịch Bật Tắt Màn Hình LCD",
-    "releaseDate": "12/01/2025",
+    "description": "Cập Nhật Trợ Lý ChatGPT (có hỗ trợ trung gian bên thứ 3 ChatGPT), Sửa Đổi Phát Media Player, Báo Tin Tức",
+    "releaseDate": "14/01/2025",
     "changes": [
         {
             "type": "feature",
@@ -19,5 +19,5 @@
     ],
     "author": "Vũ Tuyển",
     "status": "stable",
-    "previousVersion": "1.0.2"
+    "previousVersion": "1.0.0"
 }

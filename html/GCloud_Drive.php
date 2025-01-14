@@ -296,7 +296,7 @@ $data_authConfigPath = json_decode($read_authConfigPath, true);
   <main id="main" class="main">
 
     <div class="pagetitle">
-      <h1>Google Cloud Drive</h1>
+      <h1>Google Cloud Drive | <a href="https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true" target="_bank">Hướng Dẫn Tạo Json</a></h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>

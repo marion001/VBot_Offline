@@ -302,7 +302,8 @@ $music_source_priority_3 = isset($_POST['music_source_priority3']) ? $_POST['mus
 $Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3];
 
 #Cập nhật cấu hình PlayList
-$Config['media_player']['play_list']['play_mode'] = isset($_POST['playlist_play_mode']) ? $_POST['playlist_play_mode'] : 'random';
+$Config['media_player']['play_list']['newspaper_play_mode'] = isset($_POST['newspaper_play_mode']) ? $_POST['newspaper_play_mode'] : 'sequential';
+$Config['media_player']['play_list']['music_play_mode'] = isset($_POST['music_play_mode']) ? $_POST['music_play_mode'] : 'random';
 
 #cập nhật đồng bộ hóa media với web ui
 $Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
@@ -339,7 +340,11 @@ $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used
 
 #Cập nhật giá trị trợ lý ảo chatgpt
 $Config['virtual_assistant']['chat_gpt']['key_chat_gpt'] = $_POST['chat_gpt_key'];
+$Config['virtual_assistant']['chat_gpt']['role_system_content'] = $_POST['chat_gpt_role_system_content'];
+$Config['virtual_assistant']['chat_gpt']['url_api'] = $_POST['chat_gpt_url_api'];
+$Config['virtual_assistant']['chat_gpt']['model'] = !empty($_POST['chat_gpt_model']) ? $_POST['chat_gpt_model'] : 'gpt-3.5-turbo';
 $Config['virtual_assistant']['chat_gpt']['active'] = isset($_POST['chat_gpt_active']) ? true : false;
+$Config['virtual_assistant']['chat_gpt']['time_out'] = intval($_POST['chat_gpt_time_out']);
 
 #Cập nhật trợ lý ảo zalo_assistant
 $Config['virtual_assistant']['zalo_assistant']['active'] = isset($_POST['zalo_assistant_active']) ? true : false;
@@ -2224,18 +2229,26 @@ Cấu Hình Media Player:</h5>
 <h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
 
 <div class="row mb-3">
-    <label for="playlist_play_mode" class="col-sm-3 col-form-label">Chế độ phát:</label>
+    <label for="newspaper_play_mode" class="col-sm-3 col-form-label">Nguồn Báo, Tin Tức:</label>
     <div class="col-sm-9">
-        <select class="form-select border-success" name="playlist_play_mode" id="playlist_play_mode">
+        <select class="form-select border-success" name="newspaper_play_mode" id="newspaper_play_mode">
             <option value="">-- Chọn Chế Độ Phát --</option>
-            <option value="random" <?php if ($Config['media_player']['play_list']['play_mode'] === "random") echo "selected"; ?>>random (Ngẫu nhiên)</option>
-            <option value="sequential" <?php if ($Config['media_player']['play_list']['play_mode'] === "sequential") echo "selected"; ?>>sequential (Tuần tự)</option>
+            <option value="random" <?php if ($Config['media_player']['play_list']['newspaper_play_mode'] === "random") echo "selected"; ?>>random (Ngẫu nhiên)</option>
+            <option value="sequential" <?php if ($Config['media_player']['play_list']['newspaper_play_mode'] === "sequential") echo "selected"; ?>>sequential (Tuần tự)</option>
         </select>
     </div>
 </div>
 
-
-
+<div class="row mb-3">
+    <label for="music_play_mode" class="col-sm-3 col-form-label">Nguồn Âm Nhạc:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="music_play_mode" id="music_play_mode">
+            <option value="">-- Chọn Chế Độ Phát --</option>
+            <option value="random" <?php if ($Config['media_player']['play_list']['music_play_mode'] === "random") echo "selected"; ?>>random (Ngẫu nhiên)</option>
+            <option value="sequential" <?php if ($Config['media_player']['play_list']['music_play_mode'] === "sequential") echo "selected"; ?>>sequential (Tuần tự)</option>
+        </select>
+    </div>
+</div>
 </div>
 </div>
 
@@ -2708,9 +2721,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <div class="row mb-3">
 <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
 <div class="col-sm-9">
-<div class="input-group mb-3">
 <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="google_gemini_time_out" id="google_gemini_time_out" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>">
-</div>
 </div>
 </div>
 </div>
@@ -2733,10 +2744,47 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <label for="chat_gpt_key" class="col-sm-3 col-form-label">Api Keys:</label>
 <div class="col-sm-9"><div class="input-group mb-3">
 <input  class="form-control border-success" type="text" name="chat_gpt_key" id="chat_gpt_key" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>">
-<button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+<button class="btn btn-success border-success" type="button"  onclick="test_key_ChatGPT('Chào bạn, bạn tên là gì')">Kiểm Tra</button>
 </div>
 </div>
 </div>
+
+<div class="row mb-3">
+<label for="chat_gpt_model" class="col-sm-3 col-form-label">Model:</label>
+<div class="col-sm-9">
+<select class="form-select border-success" name="chat_gpt_model" id="chat_gpt_model">
+<option value="">-- Chọn Model --</option>
+<option value="gpt-3.5-turbo" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-3.5-turbo") echo "selected"; ?>>GPT-3.5 Turbo (Khuyến Nghị)</option>
+<option value="gpt-4" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4") echo "selected"; ?>>GPT-4</option>
+<option value="gpt-4o" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4o") echo "selected"; ?>>GPT-4o</option>
+<option value="gpt-4o-mini" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4o-mini") echo "selected"; ?>>GPT-4o mini</option>
+<option value="gpt-4-turbo" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4-turbo") echo "selected"; ?>>GPT-4 Turbo</option>
+</select>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="chat_gpt_role_system_content" class="col-sm-3 col-form-label">Role System Content <i class="bi bi-question-circle-fill" onclick="show_message('Thiết lập hành vi mong muốn của Chat GPT trong cuộc trò chuyện, gán GPT như 1 trợ lý, người, vật, v..v...! làm cho trải nghiệm người dùng phù hợp với mục đích cụ thể của bạn.')"></i>:</label>
+<div class="col-sm-9">
+<input  class="form-control border-success" type="text" name="chat_gpt_role_system_content" id="chat_gpt_role_system_content" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['role_system_content']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['role_system_content']; ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="chat_gpt_url_api" class="col-sm-3 col-form-label">URL API <i class="bi bi-question-circle-fill" onclick="show_message('- Hỗ trợ với URL API và API KEY của bên thứ 3<br/><br/>hoặc URL Mặc Định của ChatGPT và Key của ChatGPT: <b>https://api.openai.com/v1/chat/completions</b>')"></i>:</label>
+<div class="col-sm-9">
+<input  class="form-control border-danger" type="text" name="chat_gpt_url_api" id="chat_gpt_url_api" placeholder="https://api.openai.com/v1/chat/completions" value="<?php echo $Config['virtual_assistant']['chat_gpt']['url_api']; ?>">
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label for="chat_gpt_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+<div class="col-sm-9">
+<input  class="form-control border-success" type="number" min="5" step="1" max="30" name="chat_gpt_time_out" id="chat_gpt_time_out" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['time_out']; ?>">
+</div>
+</div>
+
 </div>
 </div>
 
@@ -3275,7 +3323,7 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
 
 <div class="card">
 <div class="card-body">
-<h5 class="card-title">Google Cloud Drive <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình thiết lập đồng bộ dữ liệu lên Google Cloud Drive<br/>- Nếu có nhiều thiết bị cần đồng bộ lên Google Cloud Drive thì cần thay đổi tên của 3 thư mục để tránh bị trùng lặp với dữ liệu của thiết bị khác')"></i> | <a href="GCloud_Drive.php" title="Truy Cập"> <i class="bi bi-box-arrow-up-right"></i> Truy Cập</a> :</h5>
+<h5 class="card-title">Google Cloud Drive <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình thiết lập đồng bộ dữ liệu lên Google Cloud Drive<br/>- Nếu có nhiều thiết bị cần đồng bộ lên Google Cloud Drive thì cần thay đổi tên của 3 thư mục để tránh bị trùng lặp với dữ liệu của thiết bị khác<br/><a href=\'https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true\' target=\'_bank\'><b>Hướng dẫn tạo file json</b></a>')"></i> | <a href="GCloud_Drive.php" title="Truy Cập"> <i class="bi bi-box-arrow-up-right"></i> Truy Cập</a> :</h5>
 
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu dữ liệu lê Google Cloud Drive')"></i> :</label>
@@ -3559,10 +3607,7 @@ include 'html_footer.php';
     <a href="#" title="Cuộn xuống dưới cùng" class="scroll-btn scroll-to-bottom d-flex align-items-center justify-content-center" onclick="scrollToBottom(event)">
         <i class="bi bi-arrow-down-short"></i>
     </a>
-	
 
-<!-- Nghe thử file âm thanh -->
-<!-- <audio id="audioPlayer" style="display: none;" controls></audio> -->
 
   <!-- Template Main JS File -->
   
@@ -3575,35 +3620,30 @@ include 'html_footer.php';
 include 'html_js.php';
 ?>
 
-
     <script>
         // Hàm để cuộn lên đầu trang
         function scrollToTop(event) {
-            event.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
+            event.preventDefault();
             window.scrollTo({
-                top: 0, // Vị trí cuộn lên đầu trang
-                behavior: 'smooth' // Cuộn mượt mà
+                top: 0,
+                behavior: 'smooth'
             });
         }
 
         // Hàm để cuộn xuống cuối trang
         function scrollToBottom(event) {
-            event.preventDefault(); // Ngăn chặn hành vi mặc định của liên kết
+            event.preventDefault();
             window.scrollTo({
-                top: document.body.scrollHeight, // Vị trí cuộn xuống cuối trang
-                behavior: 'smooth' // Cuộn mượt mà
+                top: document.body.scrollHeight,
+                behavior: 'smooth'
             });
         }
     </script>
 
 <script>
-
-
-
 //Xóa file backup Config
 function delete_file_backup_json_config(filePath) {
     if (filePath === "get_value_backup_config") {
-		//Lấy giá trị value của id: backup_config_json_files
         var get_value_backup_config = document.getElementById('backup_config_json_files').value;
         if (get_value_backup_config === "") {
             showMessagePHP("Không có tệp nào được chọn để tải xuống");
@@ -3620,7 +3660,6 @@ function delete_file_backup_json_config(filePath) {
 //Tải xuống file backup Config
 function dowlaod_file_backup_json_config(filePath) {
     if (filePath === "get_value_backup_config") {
-		//Lấy giá trị value của id: backup_config_json_files
         var get_value_backup_config = document.getElementById('backup_config_json_files').value;
         if (get_value_backup_config === "") {
             showMessagePHP("Không có tệp nào được chọn để tải xuống");
@@ -3664,7 +3703,6 @@ function checkMQTTConnection() {
     xhr.send();
 }
 
-
 //Đọc nội dung các file yaml MQTT
 function read_YAML_file_path(fileName) {
 	loading('show');
@@ -3676,7 +3714,8 @@ function read_YAML_file_path(fileName) {
             var codeElement = document.getElementById('code_config');
             // Hiển thị nội dung YAML
             codeElement.textContent = xhr.responseText.trim();
-            codeElement.className = 'language-yaml'; // Áp dụng lớp cú pháp YAML
+			// Áp dụng lớp cú pháp YAML
+            codeElement.className = 'language-yaml';
             // Kích hoạt Prism.js để làm nổi bật cú pháp
             Prism.highlightElement(codeElement);
             showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
@@ -3693,7 +3732,6 @@ function read_YAML_file_path(fileName) {
     };
     xhr.send();
 }
-
 
 //onclick xem nội dung file json
 function readJSON_file_path(filePath) {
@@ -3714,7 +3752,6 @@ function readJSON_file_path(filePath) {
         $('#myModal_Config').modal('show');
     }
 }
-		
 
     //ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
     document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
@@ -3754,35 +3791,34 @@ function readJSON_file_path(filePath) {
                 div_select_tts_ggcloud_html.style.display = 'none'; // Ẩn div
             }
             if (document.getElementById('tts_default').checked) {
-                div_select_tts_default_html.style.display = 'block'; // Hiển thị div
+                div_select_tts_default_html.style.display = 'block';
             } else {
-                div_select_tts_default_html.style.display = 'none'; // Ẩn div
+                div_select_tts_default_html.style.display = 'none';
             }
             if (document.getElementById('tts_zalo').checked) {
 				getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
-                div_select_tts_zalo_html.style.display = 'block'; // Hiển thị div
+                div_select_tts_zalo_html.style.display = 'block';
             } else {
-                div_select_tts_zalo_html.style.display = 'none'; // Ẩn div
+                div_select_tts_zalo_html.style.display = 'none';
             }
 			if (document.getElementById('tts_viettel').checked) {
 				getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
-                div_select_tts_viettel_html.style.display = 'block'; // Hiển thị div
+                div_select_tts_viettel_html.style.display = 'block';
             } else {
-                div_select_tts_viettel_html.style.display = 'none'; // Ẩn div
+                div_select_tts_viettel_html.style.display = 'none';
             }
             if (document.getElementById('tts_edge').checked) {
-                div_select_tts_edge_html.style.display = 'block'; // Hiển thị div
+                div_select_tts_edge_html.style.display = 'block';
             } else {
-                div_select_tts_edge_html.style.display = 'none'; // Ẩn div
+                div_select_tts_edge_html.style.display = 'none';
             }
             if (document.getElementById('tts_ggcloud_key').checked) {
-                div_select_tts_ggcloud_key.style.display = 'block'; // Hiển thị div
+                div_select_tts_ggcloud_key.style.display = 'block';
             } else {
-                div_select_tts_ggcloud_key.style.display = 'none'; // Ẩn div
+                div_select_tts_ggcloud_key.style.display = 'none';
             }
         });
     });
-
 
     //Hiển thị list hotword khi được scan
     function loadConfigHotword(lang) {
@@ -3791,13 +3827,10 @@ function readJSON_file_path(filePath) {
         xhr.onload = function() {
             if (xhr.status === 200) {
                 const data = JSON.parse(xhr.responseText);
-
                 displayResults_Hotword_dataa(data);
-
             }
         };
         xhr.send();
-
     }
 
     function displayResults_Hotword_dataa(data) {
@@ -3820,14 +3853,11 @@ function readJSON_file_path(filePath) {
         });
         selectHtml += '</select><div class="invalid-feedback">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</div> <label for="select_file_lib_pv">Chọn file thư viện Hotword: ' + reponse_lang + '</label></div></td>';
         selectHtml += '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" id="deleteFilePV" title="Xóa file: "><i class="bi bi-trash"></i></button>  <button type="button" class="btn btn-success" id="downloadFilePV" title="Tải xuống file: "><i class="bi bi-download"></i></button> </center></td></tr>';
-
         if (Array.isArray(data.config) && data.config.length > 0) {
             let i_up = 0;
             let tableContent = '';
-
             data.config.forEach((item, index) => {
                 i_up++;
-
                 tableContent +=
                     '<tr>' +
                     '<td style="text-align: center; vertical-align: middle;">' + i_up + '</td>' +
@@ -3851,7 +3881,6 @@ function readJSON_file_path(filePath) {
                 '<br/><button type="submit" name="save_hotword_theo_lang" class="btn btn-success rounded-pill" title="Lưu cài đặt hotword">Lưu Cài Đặt Hotword</button>' +
                 '</td>' +
                 '</tr>';
-
             resultsDiv1.innerHTML +=
                 selectHtml +
                 '<tr><th><center>STT</center></th>' +
@@ -3863,13 +3892,10 @@ function readJSON_file_path(filePath) {
         } else {
             resultsDiv.innerHTML = '<tr><td colspan="4">Không có dữ liệu để hiển thị.</td></tr>';
         }
-
-
         // Lấy giá trị mặc định của thẻ select khi tải trang
         var selectedValuee = document.getElementById('select_file_lib_pv').value;
         var deleteIconn = document.getElementById('deleteFilePV');
         var downloadIcon = document.getElementById('downloadFilePV');
-
         // Thiết lập onclick xóa file trong thẻ select với giá trị mặc định
         deleteIconn.onclick = function() {
             if (selectedValuee) {
@@ -3880,7 +3906,6 @@ function readJSON_file_path(filePath) {
                 show_message('Cần chọn file thư viện .pv trước khi xóa');
             }
         };
-
         // Thiết lập onclick tải xuống file
         downloadIcon.onclick = function() {
             if (selectedValuee) {
@@ -3889,13 +3914,11 @@ function readJSON_file_path(filePath) {
                 show_message('Cần chọn file thư viện .pv trước khi tải xuống');
             }
         };
-
         // Lắng nghe sự kiện thay đổi trên thẻ select pv để xóa file
         document.getElementById('select_file_lib_pv').addEventListener('change', function() {
             var selectedValue = this.value;
             var deleteIcon = document.getElementById('deleteFilePV');
             var downloadIcon = document.getElementById('downloadFilePV');
-
             deleteIcon.onclick = function() {
                 if (selectedValue) {
                     deleteFile(data.path_pv + selectedValue);
@@ -3905,7 +3928,6 @@ function readJSON_file_path(filePath) {
                     show_message('Cần chọn file thư viện .pv trước khi xóa');
                 }
             };
-
             downloadIcon.onclick = function() {
                 if (selectedValue) {
                     downloadFile(data.path_pv + selectedValue);
@@ -3913,12 +3935,10 @@ function readJSON_file_path(filePath) {
                     show_message('Cần chọn file thư viện .pv trước khi tải xuống');
                 }
             };
-
             // Cập nhật title của icon
             deleteIcon.title = 'Xóa file: ' + selectedValue;
             downloadIcon.title = 'Tải xuống file: ' + selectedValue;
         });
-
     }
 
     //Tải lên file ppv và pv
@@ -3927,7 +3947,6 @@ function readJSON_file_path(filePath) {
         const files = document.getElementById('upload_files_ppn_pv').files;
         const lang = document.getElementById('lang_hotword_get').value;
         if (files.length === 0) {
-            //alert('Vui lòng chọn ít nhất một file để tải lên.');
 			show_message('Vui lòng chọn ít nhất một file để tải lên.');
             return;
         }
@@ -3936,7 +3955,6 @@ function readJSON_file_path(filePath) {
         }
         formData.append('lang_hotword_get', lang);
         formData.append('action_ppn_pv', 'upload_files_ppn_pv');
-
         const xhr = new XMLHttpRequest();
         xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
         xhr.onload = function() {
@@ -3944,7 +3962,6 @@ function readJSON_file_path(filePath) {
                 try {
                     const response = JSON.parse(xhr.responseText);
                     let messages = [];
-
                     if (response.status === 'success') {
                         // Tổng hợp tất cả thông báo
                         messages.push(response.messages+'<br/>');
@@ -3971,7 +3988,6 @@ function readJSON_file_path(filePath) {
         }
         var xhr = new XMLHttpRequest();
         xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config', true);
-        // Xử lý phản hồi từ server
         xhr.onload = function() {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
@@ -4077,7 +4093,6 @@ function readJSON_file_path(filePath) {
         }
     }
 
-
     //Kiểm tra kết nối Home Assistant
     function CheckConnectionHomeAssistant(inputId) {
 		loading("show");
@@ -4099,7 +4114,6 @@ function readJSON_file_path(filePath) {
                     } else {
                         show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + response.message)
                     }
-
                 } else {
                     console.log('Lỗi kết nối: ' + xhr.statusText);
                 }
@@ -4107,7 +4121,7 @@ function readJSON_file_path(filePath) {
         };
         xhr.send();
     }
-	
+
 //Kiểm tra Kết Nối SSH
 function checkSSHConnection() {
 	loading("show");
@@ -4115,9 +4129,7 @@ function checkSSHConnection() {
     var sshPort = document.getElementById('ssh_port').value;
     var sshUser = document.getElementById('ssh_username').value;
     var sshPass = document.getElementById('ssh_password').value;
-
     var xhr = new XMLHttpRequest();
-
     var url = 'includes/php_ajax/Check_Connection.php?check_ssh' +
               '&host=' + encodeURIComponent(sshHost) +
               '&port=' + encodeURIComponent(sshPort) +
@@ -4142,11 +4154,42 @@ function checkSSHConnection() {
             } else {
                 show_message("Lỗi kết nối: trạng thái HTTP " + xhr.status);
             }
-			
         }
     };
-
     xhr.send();
+}
+
+// Test key ChatGPT
+function test_key_ChatGPT(text) {
+	loading("show");
+    var apiKey = document.getElementById('chat_gpt_key').value;
+    var url_API = document.getElementById('chat_gpt_url_api').value;
+    //const url_API = "https://api.openai.com/v1/chat/completions";
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", url_API, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Authorization", 'Bearer ' + apiKey);
+    const body = JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+            { role: "system", content: "Bạn là một trợ lý thông minh" },
+            { role: "user", content: text }
+        ]
+    });
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+				loading("hide");
+                const response = JSON.parse(xhr.responseText);
+                const reply = response.choices[0].message.content;
+				show_message('<center>Kiểm Tra API KEY Thành Công</center><br/>Phản hồi: <font color=green>' + reply + '</font>');
+            } else {
+				loading("hide");
+				show_message('Lỗi xảy ra:<br/><font color=red>' + xhr.responseText + '</font>');
+            }
+        }
+    };
+    xhr.send(body);
 }
 
     //Tets, kiểm tra Key Gemini
@@ -4186,7 +4229,6 @@ function checkSSHConnection() {
         };
         xhr.send(JSON.stringify(payload));
     }
-
     //tách lấy tên file và đuôi từ đường dẫn path
     function getFileNameFromPath(filePath) {
         // Tách đường dẫn bằng dấu '/'
@@ -4204,10 +4246,9 @@ function checkSSHConnection() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 //console.log(xhr.responseText)
                 var data = JSON.parse(xhr.responseText);
-
                 if (id_path_music === "scan_Music_Local") {
                     var tableBody = document.getElementById('show_mp3_music_local').getElementsByTagName('tbody')[0];
-                    tableBody.innerHTML = ''; // Clear existing rows
+                    tableBody.innerHTML = '';
                     var tableHead = document.querySelector('#show_mp3_music_local thead');
                     tableHead.innerHTML =
                         '<tr>' +
@@ -4226,13 +4267,11 @@ function checkSSHConnection() {
                             '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + fileName + '"></td>' +
                             '<td style="text-align: center; vertical-align: middle;"><center>' +
                             '<button type="button" class="btn btn-danger" title="Xóa file: ' + fileName + '" onclick="deleteFile(\'' + file + '\', \'scan_Music_Local\')"><i class="bi bi-trash"></i></button>' +
-
                             ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + fileName + '" onclick="downloadFile(\'' + file + '\')"><i class="bi bi-download"></i></button>' +
                             '</center></td>' +
                             '</tr>';
                         tableBody.insertAdjacentHTML('beforeend', rowContent);
                     });
-
                 }else if (id_path_music === "scan_Audio_Startup") {
                     var tableBody = document.getElementById('show_mp3_sound_welcome').getElementsByTagName('tbody')[0];
                     tableBody.innerHTML = ''; 
@@ -4265,8 +4304,6 @@ function checkSSHConnection() {
         xhr.send();
     }
 
-
-
     // Cập nhật giá trị của thuộc tính onclick của nút sound_welcome_file_path vào nút nghe thử play_Audio_Welcome
     function updateButton_Audio_Welcome() {
         const selectElement = document.getElementById('sound_welcome_file_path');
@@ -4278,7 +4315,6 @@ function checkSSHConnection() {
             };
         }
     }
-
     // Đặt sự kiện khi DOM đã được tải hoàn toàn và cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
     document.addEventListener('DOMContentLoaded', function() {
         updateButton_Audio_Welcome(); // Cập nhật thuộc tính onclick khi DOM tải xong
@@ -4290,23 +4326,13 @@ function test_key_Picovoice() {
 	loading("show");
     var token = document.getElementById('hotword_engine_key').value;
     var lang = document.getElementById('select_hotword_lang').value;
-    // Tạo đối tượng XMLHttpRequest mới
     var xhr = new XMLHttpRequest();
-    
-    // Định nghĩa URL để lấy dữ liệu với token từ input
     var url = 'includes/php_ajax/Check_Connection.php?check_key_picovoice&key='+token+'&lang='+lang;
-    console.log(url);
-    // Khởi tạo yêu cầu GET đến URL
-    xhr.open('GET', url, true);
-    
-    // Đặt kiểu phản hồi là JSON
+    xhr.open('GET', url);
     xhr.responseType = 'json';
-    
-    // Định nghĩa hàm xử lý khi yêu cầu hoàn tất
     xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
 			loading("hide");
-            // Nếu yêu cầu thành công, kiểm tra giá trị của `success`
             var data = xhr.response;
             if (data.success) {
                 show_message('<font color=green><center>' +data.message+'</center><br/>- Ngôn ngữ kiểm tra: <b>'+data.language_name+'</b><br/>- File Hotword kiểm tra ngẫu nhiên trong thư mục '+data.lang+': <b>'+data.hotword_random_test+'</b><br/>- File thư viện Procupine: <b>'+data.model_file_path+'</b></font>');
@@ -4315,22 +4341,15 @@ function test_key_Picovoice() {
             }
         } else {
 			loading("hide");
-            // Nếu có lỗi, in lỗi ra console
             show_message('Lỗi: ' +xhr.statusText);
         }
     };
-    
-    // Định nghĩa hàm xử lý khi có lỗi xảy ra
     xhr.onerror = function() {
 		loading("hide");
         show_message('Yêu cầu thất bại');
     };
-    
-    // Gửi yêu cầu
     xhr.send();
 }
-
-
 
 //scan_audio_devices('scan_Mic')
 //scan mic hoặc audio out
@@ -4340,20 +4359,13 @@ function scan_audio_devices(device_name) {
     var url = 'includes/php_ajax/Scanner.php?'+device_name;
     xhr.open('GET', url, true);
     xhr.responseType = 'json';
-    
     xhr.onload = function() {
-        
         if (xhr.status >= 200 && xhr.status < 300) {
 			loading("hide");
             var data = xhr.response;
-			
-
-
-
             if (data && data.success) {
                 //console.log(data.message);
                 //console.log(data.devices);
-
 			if (device_name === "scan_mic"){
 				var container = document.getElementById('mic_scanner');
                 var tableHTML = '<table class="table table-bordered border-primary">';
@@ -4398,12 +4410,10 @@ function scan_audio_devices(device_name) {
             show_message('Lỗi: ' + xhr.statusText);
         }
     };
-    
     xhr.onerror = function() {
         loading("hide");
         show_message('Yêu cầu thất bại. Vui lòng kiểm tra kết nối mạng.');
     };
-    
     xhr.send();
 }
 
@@ -4446,7 +4456,6 @@ function play_tts_sample_gcloud(){
 	loading('hide');
 }
 
-
 </script>
 <script>
     //Cập nhật bảng mã màu vào thẻ input
@@ -4457,13 +4466,11 @@ function play_tts_sample_gcloud(){
         // Thiết lập màu cho thẻ thứ hai
         setColorPickerValue('color_led_mutex', 'led_mute');
     };
-
     // Hàm thiết lập màu cho các thẻ colorPicker dựa trên giá trị colorCodeInput
     function setColorPickerValue(colorPickerId, colorCodeInputId) {
         const initialColor = document.getElementById(colorCodeInputId).value;
         document.getElementById(colorPickerId).value = '#' + initialColor;
     }
-
     // Hàm cập nhật mã màu vào thẻ input
     function updateColorCode_input(colorPickerId, colorCodeInputId) {
         // Lấy mã màu từ input color và bỏ dấu '#' ở đầu
@@ -4476,7 +4483,6 @@ function play_tts_sample_gcloud(){
 <script>
 //Dành cho Test Led 
 function test_led(action) {
-
     if ( <?php echo $Config['smart_config']['led']['active'] ? 'true' : 'false'; ?> === false) {
         show_message("Chế độ sử dụng Led không được kích hoạt");
         return;
@@ -4521,7 +4527,6 @@ function test_led(action) {
             }
         }
     });
-    // Xử lý lỗi khi gửi yêu cầu
     xhr.onerror = function() {
         show_message("Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.");
         loading("hide");
@@ -4531,26 +4536,18 @@ function test_led(action) {
     xhr.send(data);
 }
 
-
 //Thay đổi giá trị value của BackList.json theo đường dẫn chỉ định 
 function changeBacklistValue(path_json, value_type) {
-    // Cấu hình yêu cầu
     var url = "includes/php_ajax/Show_file_path.php";
     var params = "delete_data_backlist=1&path=" + path_json + "&value_type=" + value_type;
-
     var xhr = new XMLHttpRequest();
-    // Xử lý khi trạng thái yêu cầu thay đổi
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {
             if (this.status === 200) {
                 try {
                     var response = JSON.parse(this.responseText);
-                    // Kiểm tra giá trị success
                     if (response.success) {
-                        // Cập nhật thành công
-                        //console.log("Phản hồi từ máy chủ:", response);
                         showMessagePHP(response.message, 3);
-                        //Kiểm tra và hiển thị dữ liệu backlist zalo
                         if (path_json === "backlist->tts_zalo->backlist_limit") {
                             getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
                         }
@@ -4558,9 +4555,7 @@ function changeBacklistValue(path_json, value_type) {
                             getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
                         }
 
-                    } else {
-                        // Thông báo lỗi từ máy chủ
-                        //console.error("Lỗi cập nhật:", response.message);
+                    } else {;
                         show_message("Có lỗi xảy ra khi cập nhật backlist: " + response.message);
                     }
                 } catch (e) {
@@ -4571,14 +4566,10 @@ function changeBacklistValue(path_json, value_type) {
             }
         }
     });
-
-    // Xử lý lỗi mạng
     xhr.onerror = function() {
         show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
     };
-
     xhr.open("GET", url + "?" + params, true);
-    // Gửi yêu cầu
     xhr.send();
 }
 
@@ -4603,11 +4594,10 @@ function getBacklistData(dataPath, textareaId) {
                         // Cập nhật nội dung của thẻ textarea
                         var textarea = document.getElementById(textareaId);
                         if (textarea) {
-                            textarea.value = JSON.stringify(currentData, null, 4); // Định dạng JSON cho dễ đọc
+                            textarea.value = JSON.stringify(currentData, null, 4);
                         } else {
                             show_message("Không tìm thấy thẻ textarea với ID: " + textareaId);
                         }
-
                         showMessagePHP("Dữ liệu đã được tải thành công.", 3);
                     } else {
                         show_message("Có lỗi xảy ra: " + response.message);
@@ -4620,11 +4610,9 @@ function getBacklistData(dataPath, textareaId) {
             }
         }
     });
-
     xhr.onerror = function() {
         show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
     };
-
     xhr.open("GET", url, true);
     xhr.send();
 }

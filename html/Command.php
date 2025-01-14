@@ -443,6 +443,54 @@ $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['serial_getty_ttyS0_stop'])) {
+$CMD = "sudo systemctl stop serial-getty@ttyS0.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['serial_getty_ttyS0_start'])) {
+$CMD = "sudo systemctl start serial-getty@ttyS0.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['serial_getty_ttyS0_disable'])) {
+$CMD = "sudo systemctl disable serial-getty@ttyS0.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['serial_getty_ttyS0_enable'])) {
+$CMD = "sudo systemctl enable serial-getty@ttyS0.service";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
 if (isset($_POST['reboot_os'])) {
 $CMD = "sudo reboot";
 $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -867,6 +915,10 @@ include 'html_sidebar.php';
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="hostnamectl_os" type="submit" title="Kiểm tra thông tin hệ điều hành">Thông tin OS</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="kiem_tra_bo_nho" type="submit" title="Kiểm tra thông tin bộ nhớ">Thông tin bộ nhớ</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="kiem_tra_dung_luong" type="submit" title="Kiểm tra thông tin dung lượng">Thông tin dung lượng</button></li>
+	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="serial_getty_ttyS0_start" type="submit" title="Bắt đầu một phiên đăng nhập (login shell) qua cổng UART">Start serial-getty@ttyS0.service</button></li>
+	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="serial_getty_ttyS0_stop" type="submit" title="Dừng phiên đăng nhập (login shell) qua cổng UART">Stop serial-getty@ttyS0.service</button></li>
+	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="serial_getty_ttyS0_disable" type="submit" title="Vô hiệu một phiên đăng nhập (login shell) qua cổng UART (Start UP)">Disable serial-getty@ttyS0.service</button></li>
+	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="serial_getty_ttyS0_enable" type="submit" title="Kích hoạt một phiên đăng nhập (login shell) qua cổng UART (Start UP)">Enable serial-getty@ttyS0.service</button></li>
           </ul>
 </div>
 </div>
