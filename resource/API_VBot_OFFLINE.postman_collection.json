@@ -1382,6 +1382,62 @@
 			"response": []
 		},
 		{
+			"name": "Kích Hoạt Trợ Lý Ảo Difi AI",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dify_ai\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Trợ Lý Ảo Difi AI",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dify_ai\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Kích Hoạt Chế Độ Câu Phản Hồi",
 			"request": {
 				"method": "POST",

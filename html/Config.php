@@ -4206,6 +4206,53 @@ function checkSSHConnection() {
     xhr.send();
 }
 
+
+
+function test_key_difyAI() {
+	var dify_ai_key = document.getElementById('dify_ai_key').value;
+    const url = 'https://api.dify.ai/v1/chat-messages';
+    const headers = {
+        'Authorization': 'Bearer '+dify_ai_key,
+        'Content-Type': 'application/json',
+    };
+
+    const data = {
+        "inputs": {},
+        "query": "Chào bạn",
+        "response_mode": "blocking",
+        "user": "VBot_Assistant_TestKey",
+    };
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Authorization', headers.Authorization);
+    xhr.setRequestHeader('Content-Type', headers['Content-Type']);
+
+    try {
+        xhr.send(JSON.stringify(data));
+
+        if (xhr.status === 200) {
+            try {
+                const responseData = JSON.parse(xhr.responseText);
+                const answerDifyAI = responseData.answer || null;
+
+                if (answerDifyAI) {
+                    console.log(answerDifyAI)
+                } else {
+                    return { tts: null, answer: "Không có dữ liệu phản hồi từ Dify AI" };
+					show_message("Không có dữ liệu phản hồi từ Dify AI");
+                }
+            } catch (e) {
+				show_message("[Dify AI] Lỗi phân tích dữ liệu JSON: " +e);
+            }
+        } else {
+			show_message("[Dify AI] Lỗi HTTP: " +xhr.responseText);
+        }
+    } catch (e) {
+		show_message("[Dify AI] Lỗi yêu cầu HTTP: " +e);
+    }
+}
+
+
 // Test key ChatGPT
 function test_key_ChatGPT(text) {
 	loading("show");

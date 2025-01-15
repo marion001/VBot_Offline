@@ -578,6 +578,12 @@ if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media
   </label>
 </div>
 
+<div class="form-check">
+ <input class="form-check-input" value="dify_ai_active" type="checkbox" name="dify_ai_active" id="dify_ai_active" onclick="change_to_another_mode('dify_ai', this.checked)" <?php if ($Config['virtual_assistant']['dify_ai']['active'] === true) echo "checked"; ?>>
+  <label class="form-check-label">
+    Dify AI
+  </label>
+</div>
 
 </div>
   </li>
@@ -1102,6 +1108,7 @@ include 'html_js.php';
                     document.getElementById('google_gemini_active').checked = data.google_gemini_active ? true : false;
                     document.getElementById('chat_gpt_active').checked = data.chat_gpt_active ? true : false;
                     document.getElementById('zalo_assistant_active').checked = data.zalo_assistant_active ? true : false;
+                    document.getElementById('dify_ai_active').checked = data.dify_ai_active ? true : false;
                     document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
                     document.getElementById('developer_customization_vbot_processing').checked = data.dev_custom_vbot ? true : false;
                     //document.getElementById('show_wake_up').checked = false;
