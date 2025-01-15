@@ -22,17 +22,14 @@ if (!isset($_SESSION['user_login']) ||
 ?>
 <?php
 
-
-
 if ($Config['backup_upgrade']['config_json']['active'] === true){
 $directoryPath_Backup_Config = $Config['backup_upgrade']['config_json']['backup_path'];
 //Kiểm tra xem thư mục Backup_Config có tồn tại hay không
 if (!is_dir($directoryPath_Backup_Config)) {
     if (mkdir($directoryPath_Backup_Config, 0777, true)) {
 		chmod($directoryPath_Backup_Config, 0777);
-    } 
+} 
 }
-
 }
 $read_stt_token_google_cloud = null;
 
@@ -40,15 +37,12 @@ if (isset($_POST['start_recovery_config_json'])) {
 
 $data_recovery_type = $_POST['start_recovery_config_json'];
 
-
-
 if ($data_recovery_type === "khoi_phuc_tu_tep_he_thong"){
 $start_recovery_config_json = $_POST['backup_config_json_files'];
 if (!empty($start_recovery_config_json)) {
 if (file_exists($start_recovery_config_json)) {
     $command = 'cp ' . escapeshellarg($start_recovery_config_json) . ' ' . escapeshellarg($VBot_Offline.'Config.json');
     exec($command, $output, $resultCode);
-	
     if ($resultCode === 0) {
         $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu trên hệ thống thành công";
     } else {
@@ -59,7 +53,6 @@ if (file_exists($start_recovery_config_json)) {
 }
     } else {
         $messages[] = "Không có tệp sao lưu Config nào được chọn để khôi phục!";
-		
     }
 }else if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len"){
     $uploadOk = 1;
@@ -82,13 +75,11 @@ if (file_exists($start_recovery_config_json)) {
             } else {
                 $messages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
             }
-			
         }
     } else {
         $messages[] = "- Không có tệp sao lưu nào được tải lên";
     }
 }
-
 }
 
 #Lưu lại các giá trị Config.json
@@ -112,7 +103,6 @@ if (copy($Config_filePath, $destinationFile_Backup_Config)) {
         $oldestFile_configBaup = array_shift($files_ConfigJso_BUP);
         if (unlink($oldestFile_configBaup)) {
            // echo "Đã xóa file cũ nhất: $oldestFile_configBaup\n";
-		   
         }
     }
 }
@@ -157,9 +147,6 @@ $Config['mqtt_broker']['mqtt_username'] = $_POST['mqtt_username'];
 $Config['mqtt_broker']['mqtt_password'] = $_POST['mqtt_password'];
 $Config['mqtt_broker']['mqtt_client_name'] = $_POST['mqtt_client_name'];
 
-
-
-
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG LOG HỆ THỐNG show_log
 $Config['smart_config']['show_log']['active'] = isset($_POST['log_active']) ? true : false;
 $Config['smart_config']['show_log']['log_display_style'] = $_POST['log_display_style'];
@@ -175,7 +162,6 @@ $Config['smart_config']['speaker']['volume_min'] = intval($_POST['bot_volume_min
 $Config['smart_config']['speaker']['volume_max'] = intval($_POST['bot_volume_max']);
 $Config['smart_config']['speaker']['volume_step'] = intval($_POST['bot_volume_step']);
 $Config['smart_config']['speaker']['remember_last_volume'] = isset($_POST['remember_last_volume']) ? true : false;
-
 
 #Cập Nhật GIá Trị Màn Hình LCD OLED
 $Config['display_screen']['active'] = isset($_POST['display_screen_active']) ? true : false;
@@ -199,7 +185,6 @@ $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['con
 $Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotword_engine_key'];
 $Config['smart_config']['smart_wakeup']['hotword']['lang'] = $_POST['select_hotword_lang'];
 
-
 #CẬP NHẬT CHẾ ĐỘ Text To Speak (TTS) text_to_speak:
 $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] = $_POST['tts_select'];
@@ -215,7 +200,6 @@ $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['tok
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code'] = $_POST['tts_ggcloud_key_language_code'];
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] = $_POST['tts_ggcloud_key_voice_name'];
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['speaking_speed'] = floatval($_POST['tts_ggcloud_key_speaking_speed']);
-
 
 #cập nhật giá trị trong tts tts_default
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['speaking_speed'] = floatval($_POST['tts_default_speaking_speed']);
@@ -242,7 +226,8 @@ $apiKeys_ZALO_TTS = array_map('trim', explode("\n", $_POST['tts_zalo_api_key']))
 $apiKeys_ZALO_TTS = array_filter(array_map(function($key_tts_ZL) {
     return str_replace("\r", '', $key_tts_ZL);
 }, $apiKeys_ZALO_TTS), function($key_tts_ZL) {
-     return !empty($key_tts_ZL); // Loại bỏ các chuỗi trống
+	// Loại bỏ các chuỗi trống
+     return !empty($key_tts_ZL);
 });
 $apiKeys_ZALO_TTS = array_values($apiKeys_ZALO_TTS);
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] = $apiKeys_ZALO_TTS;
@@ -254,7 +239,8 @@ $apiKeys_VIETTEL_TTS = array_map('trim', explode("\n", $_POST['tts_viettel_api_k
 $apiKeys_VIETTEL_TTS = array_filter(array_map(function($key_tts_VT) {
     return str_replace("\r", '', $key_tts_VT);
 }, $apiKeys_VIETTEL_TTS), function($key_tts_VT) {
-     return !empty($key_tts_VT); // Loại bỏ các chuỗi trống
+	// Loại bỏ các chuỗi trống
+     return !empty($key_tts_VT);
 });
 $apiKeys_VIETTEL_TTS = array_values($apiKeys_VIETTEL_TTS);
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key'] = $apiKeys_VIETTEL_TTS;
@@ -277,7 +263,7 @@ foreach ($_POST['button'] as $buttonName => $buttonData) {
 	$Config['smart_config']['button'][$buttonName]['bounce_time'] = intval($buttonData['bounce_time']);
 	$Config['smart_config']['button'][$buttonName]['long_press']['active'] = isset($buttonData['long_press']['active']) ? (bool)$buttonData['long_press']['active'] : false;
 	$Config['smart_config']['button'][$buttonName]['long_press']['duration'] = intval($buttonData['long_press']['duration']);
-	}
+}
 
 #CẬP NHẬT CẤU HÌNH ÂM THANH HỆ THỐNG
 $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] = isset($_POST['sound_welcome_active']) ? true : false;
@@ -351,12 +337,20 @@ $Config['virtual_assistant']['zalo_assistant']['active'] = isset($_POST['zalo_as
 $Config['virtual_assistant']['zalo_assistant']['time_out'] = intval($_POST['zalo_assistant_time_out']);
 $Config['virtual_assistant']['zalo_assistant']['set_expiration_time'] = intval($_POST['zalo_assistant_set_expiration_time']);
 
+#Cập nhật trợ lý ảo Difi AI
+$Config['virtual_assistant']['dify_ai']['active'] = isset($_POST['dify_ai_active']) ? true : false;
+$Config['virtual_assistant']['dify_ai']['session_chat_conversation'] = isset($_POST['dify_ai_session_chat']) ? true : false;
+$Config['virtual_assistant']['dify_ai']['time_out'] = intval($_POST['dify_ai_time_out']);
+$Config['virtual_assistant']['dify_ai']['api_key'] = $_POST['dify_ai_key'];
+$Config['virtual_assistant']['dify_ai']['user_id'] = $_POST['dify_ai_user_id'];
+
 #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
 $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
 $virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $_POST['virtual_assistant_priority2'] : '';
 $virtual_assistant_priority_3 = isset($_POST['virtual_assistant_priority3']) ? $_POST['virtual_assistant_priority3'] : '';
 $virtual_assistant_priority_4 = isset($_POST['virtual_assistant_priority4']) ? $_POST['virtual_assistant_priority4'] : '';
-$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4];
+$virtual_assistant_priority_5 = isset($_POST['virtual_assistant_priority5']) ? $_POST['virtual_assistant_priority5'] : '';
+$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5];
 
 #Cập nhật sao lưu trương trình VBot
 $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
@@ -371,12 +365,10 @@ $Config['backup_upgrade']['config_json']['backup_path'] = $_POST['backup_path_co
 $Config['backup_upgrade']['vbot_program']['backup']['backup_to_cloud']['google_drive'] = isset($_POST['backup_vbot_google_drive']) ? true : false;
 $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files'] = intval($_POST['backup_upgrade_vbot_limit_backup_files']);
 
-
 #Cập nhật sao lưu Custom Home Assistant
 $Config['backup_upgrade']['custom_home_assistant']['active'] = isset($_POST['custom_home_assistant_active']) ? true : false;
 $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files'] = intval($_POST['limit_backup_custom_home_assistant']);
 $Config['backup_upgrade']['custom_home_assistant']['backup_path'] = $_POST['backup_path_custom_home_assistant'];
-
 
 #Cập nhật sao lưu lời nhắc, thông báo Scheduler
 $Config['backup_upgrade']['scheduler']['active'] = isset($_POST['backup_scheduler_active']) ? true : false;
@@ -388,7 +380,6 @@ $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] =
 
 #Cập nhật giao diện vbot
 $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_interface']) ? true : false;
-
 
 #Cập nhật bỏ qua file, thư mục không cần sao lưu trương trình vbot
 $Backup_Upgrade_VBot_Exclude_Files_Folder = $_POST['backup_upgrade_vbot_exclude_files_folder'];
@@ -402,13 +393,11 @@ $excludefile_Format_Vbot_backup_upgrade = array_filter(array_map('trim', explode
 #Lưu dữ liệu
 $Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] = $excludefile_Format_Vbot_backup_upgrade;
 
-
 #Cập nhật: giữ lại tệp, thư mục không cho cập nhật chương trình vbot
 $vbot_program_upgrade_keep_the_file_folder = $_POST['vbot_program_upgrade_keep_the_file_folder'];
 $vbot_program_upgrade_keep_the_file_folder_tuyen = array_filter(array_map('trim', explode("\n", $vbot_program_upgrade_keep_the_file_folder)));
 #Lưu dữ liệu
 $Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] = $vbot_program_upgrade_keep_the_file_folder_tuyen;
-
 
 #Cập nhật: giữ lại tệp, thư mục không cho cập nhật Giao diện vbot
 $vbot_web_interface_upgrade_keep_the_file_folder = $_POST['vbot_web_interface_upgrade_keep_the_file_folder'];
@@ -419,7 +408,6 @@ $Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] = $
 #Cập nhật sao lưu Giao diện Web UI
 $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] = isset($_POST['backup_web_interface_google_drive']) ? true : false;
 $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files'] = intval($_POST['backup_web_interface_limit_backup_files']);
-
 
 #Cập nhật bỏ qua file, thư mục không cần sao lưu Giao diện vbot
 $Backup_Web_Interface_Exclude_Files_Folder = $_POST['backup_upgrade_web_interface_exclude_files_folder'];
@@ -475,7 +463,6 @@ foreach ($_POST as $key => $value) {
 $Config['media_player']['radio_data'] = $updated_radio_data;
 ##########################################
 
-
 // Khởi tạo mảng newspaper đã cập nhật
 // Cập nhật newspaper từ POST
 $updated_news_paper_data = [];
@@ -494,7 +481,6 @@ foreach ($_POST as $key_newspaper => $value) {
 }
 // Lưu dữ liệu radio đã cập nhật vào cấu hình
 $Config['media_player']['news_paper_data'] = $updated_news_paper_data;
-
 
 #Cập Nhật File JSon STT Google Cloud
 if ($_POST['stt_select'] === "stt_ggcloud"){
@@ -535,13 +521,7 @@ if (json_last_error() === JSON_ERROR_NONE) {
 } else {
     $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
 }
-
-
 }
-
-
-
-
 
 
 #Cập nhật tts Google Cloud
@@ -590,7 +570,6 @@ if ($lang !== 'eng' && $lang !== 'vi') {
             $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
             $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
             $sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
-
             if ($file_name !== '') {
                 $updatedConfig[] = [
                     "active" => $active,
@@ -632,7 +611,6 @@ include 'html_head.php';
 <head>
 <!-- <link href="assets/vendor/prism/prism.min.css" rel="stylesheet"> -->
 <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
- 
      <style>
         #modal_dialog_show_config {
             display: flex;
@@ -645,9 +623,6 @@ include 'html_head.php';
             max-height: calc(100vh - 40px);
             overflow-y: auto;
         }
-		
-
-		
     </style>
    <style>
         .scroll-btn {
@@ -2601,6 +2576,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[0] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
 			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+			<option value="dify_ai" <?php if ($virtual_assistant_priority[0] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2614,6 +2590,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[1] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
 			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+			<option value="dify_ai" <?php if ($virtual_assistant_priority[1] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2627,6 +2604,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[2] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
 			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+			<option value="dify_ai" <?php if ($virtual_assistant_priority[2] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
         </select>
     </div>
 </div>
@@ -2640,9 +2618,25 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="google_gemini" <?php if ($virtual_assistant_priority[3] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[3] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
             <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+			<option value="dify_ai" <?php if ($virtual_assistant_priority[3] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
         </select>
     </div>
 </div>
+
+<div class="row mb-3">
+    <label for="virtual_assistant_priority5" class="col-sm-3 col-form-label">Top 5:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="virtual_assistant_priority5" id="virtual_assistant_priority5">
+            <option value="">-- Chọn Trợ Lý --</option>
+            <option value="default_assistant" <?php if ($virtual_assistant_priority[4] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+            <option value="google_gemini" <?php if ($virtual_assistant_priority[4] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+            <option value="chat_gpt" <?php if ($virtual_assistant_priority[4] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+            <option value="zalo_assistant" <?php if ($virtual_assistant_priority[4] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+			<option value="dify_ai" <?php if ($virtual_assistant_priority[4] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+        </select>
+    </div>
+</div>
+
             </div>
           </div>
 		  
@@ -2822,6 +2816,59 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 </div>
 </div>
 
+
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">Difi.ai | <a href="https://cloud.dify.ai" target="_bank">cloud.dify.ai</a>:</h5>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="dify_ai_active" id="dify_ai_active" <?php echo $Config['virtual_assistant']['dify_ai']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Giữ Phiên Chat Session <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để lưu trữ ID phiên cho các lần hỏi đáp tiếp theo<br/><br/>- Phiên sẽ được làm mới mỗi khi chương trình VBot được khởi chạy')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="dify_ai_session_chat" id="dify_ai_session_chat" <?php echo $Config['virtual_assistant']['dify_ai']['session_chat_conversation'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="dify_ai_key" class="col-sm-3 col-form-label">Api Keys:</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<input  class="form-control border-success" type="text" name="dify_ai_key" id="dify_ai_key" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>">
+<button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="dify_ai_user_id" class="col-sm-3 col-form-label">User ID <i class="bi bi-question-circle-fill" onclick="show_message('Mã định danh người dùng, được sử dụng để xác định danh tính của người dùng cuối để truy xuất và thống kê. Phải được nhà phát triển xác định duy nhất trong ứng dụng, <br/>- Có thể thay thành bất kỳ tên nào bạn muốn')"></i>:</label>
+<div class="col-sm-9">
+<input  class="form-control border-danger" type="text" name="dify_ai_user_id" id="dify_ai_user_id" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['user_id']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['user_id']; ?>">
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="dify_ai_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+<div class="col-sm-9">
+<div class="input-group mb-3">
+<input  class="form-control border-success" type="number" min="5" step="1" max="30" name="dify_ai_time_out" id="dify_ai_time_out" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['time_out']; ?>">
+</div>
+</div>
+</div>
+
+
+
+</div>
+</div>
 
                 </div>
                 </div>

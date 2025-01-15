@@ -411,6 +411,19 @@ $data['display_screen']['date'] = isset($_POST['dates_display_screen']) ? $_POST
 $data['display_screen']['time_on'] = array_filter($time_on_display_screen);
 $data['display_screen']['time_off'] = array_filter($time_off_display_screen);
 
+#Lưu dữ liệu Restart VBot
+$time_restart_vbot = isset($_POST['time_restart_vbot']) ? $_POST['time_restart_vbot'] : [];
+$data['restart_vbot']['time'] = array_filter($time_restart_vbot);
+$data['restart_vbot']['active'] = isset($_POST['restart_vbot_service_active']) ? true : false;
+$data['restart_vbot']['date'] = isset($_POST['dates_restart_vbot']) ? $_POST['dates_restart_vbot'] : [];
+
+#Lưu dữ liệu Reboot OS
+$time_reboot_os = isset($_POST['time_reboot_os']) ? $_POST['time_reboot_os'] : [];
+$data['reboot_os']['time'] = array_filter($time_reboot_os);
+$data['reboot_os']['active'] = isset($_POST['reboot_os_active']) ? true : false;
+$data['reboot_os']['date'] = isset($_POST['dates_reboot_os']) ? $_POST['dates_reboot_os'] : [];
+
+
 #lưu toàn bộ dữ liệu vào file Json
 file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 $successMessage[] = "Dữ liệu đã được lưu thành công.";
@@ -654,11 +667,7 @@ echo isset($data['send_notify_upgrade_vbot_home_assistant']['active'])
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_display_screen_time" aria-expanded="false" aria-controls="collapse_button_display_screen_time">
 <font color="Blue">Lập Lịch, Bật Tắt Hiển Thị Dữ Liệu Màn Hình</font>, Trạng Thái:&nbsp;
 <?php 
-echo isset($data['display_screen']['active']) 
-    ? ($data['display_screen']['active'] 
-        ? ' <font color=green> Bật</font>' 
-        : ' <font color=red> Tắt</font>') 
-    : '<font color=gray> Không xác định</font>'; 
+echo isset($data['display_screen']['active']) ? ($data['display_screen']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
 ?></h5>
 <div id="collapse_button_display_screen_time" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_display_screen_time">
 
@@ -703,7 +712,6 @@ $display_screen = $data['display_screen'];
 <div class="row mb-3">
 <label class="col-sm-3 col-form-label">Thời Gian Bật:</label>
 <div class="col-sm-9">
-
 <div class="time-inputs_display_screen" id="time-on-container">
 <?php foreach ($display_screen['time_on'] as $index => $time_on): ?>
 <div class="time-input-container input-group mb-3" id="time-on_display_screen-<?= $index ?>">
@@ -736,6 +744,139 @@ $display_screen = $data['display_screen'];
 
 </div>
 </div>
+
+</div>
+</div>
+</div>
+
+
+<div class="card accordion" id="accordion_button_restart_vbot_service">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_restart_vbot_service" aria-expanded="false" aria-controls="collapse_button_restart_vbot_service">
+Lập Lịch Auto Restart VBot, &nbsp; Trạng Thái: &nbsp;
+<?php 
+echo isset($data['restart_vbot']['active']) ? ($data['restart_vbot']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
+?>
+</h5>
+
+<div id="collapse_button_restart_vbot_service" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_restart_vbot_service">
+
+<?php
+// Kiểm tra dữ liệu restart_vbot và gán giá trị mặc định nếu không có
+if (!isset($data['restart_vbot']) || empty($data['restart_vbot'])) {
+    // Gán giá trị mặc định nếu không có dữ liệu restart_vbot
+    $data['restart_vbot'] = [
+        'active' => false,
+        'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        'time' => ["03:03"]
+    ];
+}
+$restart_vbot = $data['restart_vbot'];
+?>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="restart_vbot_service_active" id="restart_vbot_service_active" value="<?php echo $restart_vbot['active']; ?>" <?= $restart_vbot['active'] ? 'checked' : '' ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Sử Dụng Khởi Động Lại Chương Trình VBot')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<?php foreach ($week_days as $date => $label): ?>
+<input class="form-check-input" type="checkbox" name="dates_restart_vbot[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $restart_vbot['date']) ? 'checked' : '' ?>>
+<label><?= htmlspecialchars($label) ?></label>
+<br/>
+<?php endforeach; ?>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Thời Gian:</label>
+<div class="col-sm-9">
+<div class="time-inputs_restart_vbot" id="time-on-restart_vbot">
+<?php foreach ($restart_vbot['time'] as $index => $time): ?>
+<div class="time-input-restart_vbot input-group mb-3" id="time-restart_vbot-<?= $index ?>">
+<input class="form-control border-success" type="text" name="time_restart_vbot[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+<button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-restart_vbot-<?= $index ?>"><i class="bi bi-trash"></i></button>
+</div>
+<?php endforeach; ?>
+<button class="btn btn-success rounded-pill" type="button" id="add-time-restart_vbot">Thêm thời gian</button>
+</div>
+</div>
+</div>
+
+
+</div>
+</div>
+</div>
+
+
+<div class="card accordion" id="accordion_button_reboot_os">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_reboot_os" aria-expanded="false" aria-controls="collapse_button_reboot_os">
+Lập Lịch Auto Reboot OS SYSTEM, &nbsp; Trạng Thái: &nbsp;
+<?php 
+echo isset($data['reboot_os']['active']) ? ($data['reboot_os']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
+?>
+</h5>
+<div id="collapse_button_reboot_os" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_reboot_os">
+<?php
+// Kiểm tra dữ liệu reboot_os và gán giá trị mặc định nếu không có
+if (!isset($data['reboot_os']) || empty($data['reboot_os'])) {
+    // Gán giá trị mặc định nếu không có dữ liệu reboot_os
+    $data['reboot_os'] = [
+        'active' => false,
+        'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        'time' => ["03:05"]
+    ];
+}
+$reboot_os = $data['reboot_os'];
+?>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="reboot_os_active" id="reboot_os_active" value="<?php echo $reboot_os['active']; ?>" <?= $reboot_os['active'] ? 'checked' : '' ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Sử Dụng Khởi Động Lại OS SYSTEM')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<?php foreach ($week_days as $date => $label): ?>
+<input class="form-check-input" type="checkbox" name="dates_reboot_os[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $reboot_os['date']) ? 'checked' : '' ?>>
+<label><?= htmlspecialchars($label) ?></label>
+<br/>
+<?php endforeach; ?>
+</div>
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Thời Gian:</label>
+<div class="col-sm-9">
+<div class="time-inputs_reboot_os" id="time-on-reboot_os">
+<?php foreach ($reboot_os['time'] as $index => $time): ?>
+<div class="time-input-reboot_os input-group mb-3" id="time-reboot_os-<?= $index ?>">
+<input class="form-control border-success" type="text" name="time_reboot_os[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+<button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-reboot_os-<?= $index ?>"><i class="bi bi-trash"></i></button>
+</div>
+<?php endforeach; ?>
+<button class="btn btn-success rounded-pill" type="button" id="add-time-reboot_os">Thêm thời gian</button>
+</div>
+</div>
+</div>
+
 
 </div>
 </div>
@@ -846,7 +987,6 @@ include 'html_footer.php';
 
 
 <script>
-
 function playAudio_Schedule(id_select_DOM) {
     var element = document.getElementById(id_select_DOM);
     if (element) {
@@ -862,7 +1002,6 @@ function playAudio_Schedule(id_select_DOM) {
         return null;
     }
 }
-
 
 function get_audio_schedule() {
 	loading("show");
@@ -884,7 +1023,8 @@ function get_audio_schedule() {
 
                 // Tạo bảng HTML để hiển thị tên và kích thước tệp
                 var table = document.createElement('table');
-                table.classList.add('table', 'table-bordered', 'border-primary'); // Thêm lớp CSS để làm đẹp bảng class="table table-bordered border-primary"
+				// Thêm lớp CSS để làm đẹp bảng class="table table-bordered border-primary"
+                table.classList.add('table', 'table-bordered', 'border-primary');
 
                 // Tạo tiêu đề bảng
                 var thead = document.createElement('thead');
@@ -893,10 +1033,7 @@ function get_audio_schedule() {
                 thead.appendChild(headerRow);
                 table.appendChild(thead);
 
-                // Tạo phần thân bảng
                 var tbody = document.createElement('tbody');
-                
-                // Duyệt qua danh sách tệp âm thanh và thêm mỗi tệp vào bảng
                 response.forEach(function(audio) {
                     var row = document.createElement('tr');
 				row.innerHTML = '<td style="text-align: center; vertical-align: middle;">' + audio.name + '</td><td style="text-align: center; vertical-align: middle;">' + audio.size + ' MB</td>' +
@@ -905,13 +1042,10 @@ function get_audio_schedule() {
                 ' <button type="button" class="btn btn-success" onclick="downloadFile(\'' + audio.full_path + '\')"><i class="bi bi-download"></i></button>' +
                 ' <button type="button" class="btn btn-danger" onclick="deleteFile(\'' + audio.full_path + '\', \'du_lieu_audio_schedule\')"><i class="bi bi-trash"></i></button>' +
                 '</td>';
-
                     tbody.appendChild(row);
                 });
-
                 // Thêm phần thân bảng vào bảng
                 table.appendChild(tbody);
-
                 // Thêm bảng vào trong <div id="du_lieu_audio_schedule">
                 audioScheduleDiv.appendChild(table);
             } else {
@@ -923,8 +1057,6 @@ function get_audio_schedule() {
             console.error("Yêu cầu không thành công: " + xhr.status);
         }
     };
-
-    // Xử lý lỗi
     xhr.onerror = function() {
 		loading("hide");
         console.error("Lỗi trong quá trình gửi yêu cầu.");
@@ -999,9 +1131,7 @@ let newTaskIndex = <?= count($data['notification_schedule']) ?>;
 // Biến lưu trữ các tác vụ đã xóa
 let deletedTasks = [];
 
-// Hàm Thêm Ngày
 // Hàm tải lại dữ liệu vào DOM (tải lại các ngày có sẵn từ server hoặc từ mảng hiện tại)
-
 function createDateElement(index, specific_date, container) {
 	// Tạo ID đặc biệt cho mỗi ngày
     const dateGroupId = index + '-' + specific_date;
@@ -1024,7 +1154,6 @@ function createDateElement(index, specific_date, container) {
     // Thêm HTML vào container
     container.innerHTML += dateElementHTML;
 }
-
 
 // Hàm thêm nút "Thêm ngày" vào cuối container
 function addAddButton(container, index) {
@@ -1052,19 +1181,18 @@ function addDateInput(index) {
     const container = document.querySelector('#date-container-' + index);
     // Tạo và thêm phần tử ngày vào container
     createDateElement(index, formattedDate, container);
-    // Đảm bảo nút "Thêm ngày" luôn nằm ở cuối cùng của container
-    addAddButton(container, index); // Thêm nút "Thêm ngày" vào cuối container sau khi thêm ngày mới
+	// Thêm nút "Thêm ngày" vào cuối container sau khi thêm ngày mới
+    addAddButton(container, index);
 }
-
 
 // Hàm xóa ngày khi người dùng nhấn nút xóa
 function removeDateInput(dateGroupId) {
     const dateGroup = document.getElementById('date-group-' + dateGroupId);
     if (dateGroup) {
-        dateGroup.remove(); // Xóa thẻ div chứa input và nút xóa
+		// Xóa thẻ div chứa input và nút xóa
+        dateGroup.remove();
     }
 }
-
 
 // Xóa một tác vụ
 function deleteTask(taskIndex) {
@@ -1088,7 +1216,8 @@ function restoreTask(taskIndex) {
     if (task) {
         // Tạo lại thẻ div cho tác vụ đã xóa và thay thế nội dung
         const taskDiv = document.getElementById("task-" + taskIndex);
-        taskDiv.innerHTML = task.content;  // Phục hồi nội dung cũ
+		// Phục hồi nội dung cũ
+        taskDiv.innerHTML = task.content;
         // Xóa tác vụ khỏi mảng deletedTasks
         deletedTasks = deletedTasks.filter(task => task.index !== taskIndex);
     }
@@ -1133,9 +1262,6 @@ function addNewTask() {
 			"</div>" +
 */
 
-
-
-
 			"<div class='row mb-3'>" +
 			"<label for='repeat-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Số lần lặp lại:</label>" +
 			"<div class='col-sm-9'>" +
@@ -1143,8 +1269,6 @@ function addNewTask() {
 			"<div class='invalid-feedback'>Cần điền số lần lặp lại thông báo</div>" +
 			"</div>" +
 			"</div>" +
-
-
 
 			"<div class='row mb-3'>" +
             "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần:</label>" +
@@ -1159,7 +1283,6 @@ function addNewTask() {
 				 "<button type='button' class='mt-3 btn btn-info rounded-pill' id='button_hien_thi_ngay_"+newTaskIndex+"' onclick='addDateInput("+newTaskIndex+")'>Thêm ngày cụ thể</button>" +
 				 "</div>" +
 				 "</div></div>" +
-
 
 			"<div class='row mb-3'>" +
             "<label class='col-sm-3 col-form-label'>Thời gian (HH:MM) <i class='bi bi-question-circle-fill' onclick='show_message(\"Thời gian theo định dạng giờ, phút phải có dấu : ở giữa, định dạng nhập là 24h: từ 00:00 tới 23:59\")'></i>:</label><br>" +
@@ -1178,18 +1301,16 @@ function addNewTask() {
 			"</div>" +
 			"</div>" +
         "</div>";
-
     taskContainer.innerHTML += taskHtml;
 	// Tăng index để tạo tác vụ mới tiếp theo
     newTaskIndex++
+	showMessagePHP("Đã Thêm Ô Nhập Liệu Tác Vụ Lập Lịch Mới, Hãy Điền Thông Tin Vào", 6);
 }
-
 
 // Xóa input thời gian
 function removeTimeInput(taskIndex, buttonElement) {
     const timeContainer = document.getElementById('time-container-' + taskIndex);
     timeContainer.removeChild(buttonElement.parentElement);
-
     // Cập nhật hiển thị nút "Xóa" sau khi xóa một input
     updateRemoveButtonVisibility(taskIndex);
 }
@@ -1199,13 +1320,11 @@ function updateRemoveButtonVisibility(taskIndex) {
     const timeContainer = document.getElementById('time-container-' + taskIndex);
     const timeInputs = timeContainer.getElementsByTagName('div');
     const removeButtons = timeContainer.getElementsByTagName('button');
-
     // Nếu chỉ còn một input thời gian, ẩn nút "Xóa", nếu có hơn một input thì hiển thị
     for (let i = 0; i < removeButtons.length; i++) {
         removeButtons[i].style.display = timeInputs.length > 1 ? 'inline' : 'none';
     }
 }
-
 // Gọi updateRemoveButtonVisibility cho mỗi tác vụ khi tải trang
 document.addEventListener("DOMContentLoaded", function() {
     <?php foreach ($data['notification_schedule'] as $index => $notification) : ?>
@@ -1215,9 +1334,7 @@ document.addEventListener("DOMContentLoaded", function() {
 </script>
 
 <script>
-
 // Thêm input thời gian mới
-
 function addTimeInput(taskIndex) {
     const timeContainer = document.getElementById('time-container-' + taskIndex);
     const timeInputHtml = 
@@ -1226,13 +1343,9 @@ function addTimeInput(taskIndex) {
             "<button type='button' class='btn btn-danger border-success' onclick='removeTimeInput(" + taskIndex + ", this)' title='Xóa Thời Gian'><i class='bi bi-trash'></i></button>" +
         "</div>";
     timeContainer.innerHTML += timeInputHtml;
-
     // Cập nhật hiển thị nút "Xóa" khi có ít nhất 2 input
     updateRemoveButtonVisibility(taskIndex);
 }
-
-
-
     // Tạo danh sách giờ
     function generateHourSuggestions() {
         const hours = [];
@@ -1242,7 +1355,6 @@ function addTimeInput(taskIndex) {
         }
         return hours;
     }
-
     // Tạo danh sách phút
     function generateMinuteSuggestions() {
         const minutes = [];
@@ -1253,7 +1365,6 @@ function addTimeInput(taskIndex) {
         }
         return minutes;
     }
-
     // Hiển thị danh sách gợi ý giờ
     function showHourSuggestions(input) {
         const container = input.nextElementSibling;
@@ -1276,7 +1387,6 @@ function addTimeInput(taskIndex) {
 		// Hiển thị danh sách
         container.style.display = 'block';
     }
-
     // Hiển thị danh sách gợi ý phút
     function showMinuteSuggestions(input) {
         const container = input.nextElementSibling;
@@ -1297,7 +1407,6 @@ function addTimeInput(taskIndex) {
 		// Hiển thị danh sách
         container.style.display = 'block';
     }
-
     // Ẩn danh sách gợi ý khi nhấp ra ngoài
     document.addEventListener('click', function(event) {
         const isInput = event.target.classList.contains('time-input');
@@ -1360,6 +1469,69 @@ function addTimeInput(taskIndex) {
     });
 </script>
 <!--END Scripts lập Lịch Màn Hình -->
+
+<!-- Scripts Restart VBot -->
+<script>
+    let time_Restart_VBot = <?= count($restart_vbot['time']) ?>;
+    // Thêm input cho Time On
+    document.getElementById('add-time-restart_vbot').addEventListener('click', function() {
+        const timeOnContainer = document.getElementById('time-on-restart_vbot');
+        // Tạo id cho input mới và container
+        const inputContainerId = 'time_restart_vbot-' + time_Restart_VBot;
+        // Sử dụng innerHTML để tạo input và button xóa
+        const inputContainer = document.createElement('div');
+        inputContainer.id = inputContainerId;
+		inputContainer.classList.add('time-input-restart_vbot', 'input-group', 'mb-3');
+        inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_restart_vbot[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-restart_vbot-' + time_Restart_VBot + '"><i class="bi bi-trash"></i></button>';
+        // Thêm container vào trong DOM
+        timeOnContainer.insertBefore(inputContainer, this);
+        // Gắn sự kiện xóa khi nhấn Delete
+        document.getElementById('delete-restart_vbot-' + time_Restart_VBot).addEventListener('click', function() {
+            document.getElementById(inputContainerId).remove();
+        });
+        time_Restart_VBot++;
+    });
+    // Gắn sự kiện xóa ban đầu cho các button đã có
+    document.querySelectorAll('.time-inputs_restart_vbot > div > button').forEach(button => {
+        button.addEventListener('click', function() {
+            const container = button.parentElement;
+            container.remove();
+        });
+    });
+</script>
+<!--END Scripts Restart VBot -->
+
+
+<!-- Scripts REBOOT OS SYSTEM -->
+<script>
+    let time_REboot_OS = <?= count($reboot_os['time']) ?>;
+    // Thêm input cho Time On
+    document.getElementById('add-time-reboot_os').addEventListener('click', function() {
+        const timeOnContainer = document.getElementById('time-on-reboot_os');
+        // Tạo id cho input mới và container
+        const inputContainerId = 'time_reboot_os-' + time_REboot_OS;
+        // Sử dụng innerHTML để tạo input và button xóa
+        const inputContainer = document.createElement('div');
+        inputContainer.id = inputContainerId;
+		inputContainer.classList.add('time-input-reboot_os', 'input-group', 'mb-3');
+        inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_reboot_os[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-reboot_os-' + time_REboot_OS + '"><i class="bi bi-trash"></i></button>';
+        // Thêm container vào trong DOM
+        timeOnContainer.insertBefore(inputContainer, this);
+        // Gắn sự kiện xóa khi nhấn Delete
+        document.getElementById('delete-reboot_os-' + time_REboot_OS).addEventListener('click', function() {
+            document.getElementById(inputContainerId).remove();
+        });
+        time_REboot_OS++;
+    });
+    // Gắn sự kiện xóa ban đầu cho các button đã có
+    document.querySelectorAll('.time-inputs_reboot_os > div > button').forEach(button => {
+        button.addEventListener('click', function() {
+            const container = button.parentElement;
+            container.remove();
+        });
+    });
+</script>
+<!--END Scripts REBOOT OS SYSTEM -->
 
   <script src="assets/vendor/prism/prism.min.js"></script>
 <script src="assets/vendor/prism/prism-json.min.js"></script>

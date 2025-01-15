@@ -46,5 +46,23 @@
         "time_off": [
             "18:40"
         ]
+    },
+    "restart_vbot": {
+        "active": false,
+        "date": [
+            "Sunday"
+        ],
+        "time": [
+            "03:05"
+        ]
+    },
+    "reboot_os": {
+        "active": false,
+        "date": [
+            "Sunday"
+        ],
+        "time": [
+            "03:07"
+        ]
     }
 }

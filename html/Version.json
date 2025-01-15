@@ -1,8 +1,8 @@
 {
-    "version": "1.0.7",
+    "version": "1.0.8",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập Nhật Trợ Lý ChatGPT (có hỗ trợ trung gian bên thứ 3 ChatGPT), Sửa Đổi Phát Media Player, Báo Tin Tức",
-    "releaseDate": "14/01/2025",
+    "description": "Cập Nhật Trợ Lý Dify AI",
+    "releaseDate": "15/01/2025",
     "changes": [
         {
             "type": "feature",

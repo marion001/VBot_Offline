@@ -1948,7 +1948,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mở rèm phòng khách 50%\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mấy giờ rồi\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -2133,6 +2133,178 @@
 						"194"
 					],
 					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RESTART VBOT (Khi Bot Đang Chạy)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"restart_vbot\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REBOOT OS SYSTEM (Khi Bot Đang Chạy)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"reboot_os\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "RESTART VBot Service",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?restart_vbot_service",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"path": [
+						"includes",
+						"php_ajax",
+						"Check_Connection.php"
+					],
+					"query": [
+						{
+							"key": "restart_vbot_service",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "REBOOT OS SYSTEM",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?reboot_os",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"path": [
+						"includes",
+						"php_ajax",
+						"Check_Connection.php"
+					],
+					"query": [
+						{
+							"key": "reboot_os",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "STOPS VBot Service",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?stop_vbot_service",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"path": [
+						"includes",
+						"php_ajax",
+						"Check_Connection.php"
+					],
+					"query": [
+						{
+							"key": "stop_vbot_service",
+							"value": null
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "START VBOT Service",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?start_vbot_service",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"path": [
+						"includes",
+						"php_ajax",
+						"Check_Connection.php"
+					],
+					"query": [
+						{
+							"key": "start_vbot_service",
+							"value": null
+						}
+					]
 				}
 			},
 			"response": []
