@@ -176,6 +176,7 @@ $Config['display_screen']['lcd_i2c']['font_ttf'] = $_POST['lcd_i2c_font_ttf'];
 $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
 $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
 $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration'] = intval($_POST['silence_duration']);
+$Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time'] = floatval($_POST['single_utterance_time']);
 $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold'] = intval($_POST['min_amplitude_threshold']);
 
 #Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
@@ -1010,7 +1011,15 @@ Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
                       <input class="form-control border-success" step="1" min="1" max="10" type="number" name="silence_duration" id="silence_duration" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa khi thu âm" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>">
                     </div>
                   </div>
-				  
+
+                <div class="row mb-3">
+                  <label for="single_utterance_time" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian tối đa dừng câu, từ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)')"></i> :</label>
+                  <div class="col-sm-9">
+                      <input class="form-control border-success" step="0.1" min="0.1" max="6" type="number" name="single_utterance_time" id="single_utterance_time" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time']; ?>">
+                    </div>
+                  </div>
+
+
                 <div class="row mb-3">
                   <label for="min_amplitude_threshold" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Ngưỡng biên độ tối thiểu (RMS) <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng biên độ để đánh giá đang được im lặng khi lắng nghe, (biên độ càng cao thì cần âm thanh môi trường lớn và ngược lại)')"></i> :</label>
                   <div class="col-sm-9">
@@ -2844,7 +2853,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <label for="dify_ai_key" class="col-sm-3 col-form-label">Api Keys:</label>
 <div class="col-sm-9"><div class="input-group mb-3">
 <input  class="form-control border-success" type="text" name="dify_ai_key" id="dify_ai_key" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>">
-<button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+<button class="btn btn-success border-success" type="button" onclick="test_key_difyAI()">Kiểm Tra</button>
 </div>
 </div>
 </div>
@@ -4209,13 +4218,13 @@ function checkSSHConnection() {
 
 
 function test_key_difyAI() {
-	var dify_ai_key = document.getElementById('dify_ai_key').value;
+	loading('show');
+    var dify_ai_key = document.getElementById('dify_ai_key').value;
     const url = 'https://api.dify.ai/v1/chat-messages';
     const headers = {
-        'Authorization': 'Bearer '+dify_ai_key,
+        'Authorization': 'Bearer ' + dify_ai_key,
         'Content-Type': 'application/json',
     };
-
     const data = {
         "inputs": {},
         "query": "Chào bạn",
@@ -4224,33 +4233,47 @@ function test_key_difyAI() {
     };
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
-    xhr.setRequestHeader('Authorization', headers.Authorization);
-    xhr.setRequestHeader('Content-Type', headers['Content-Type']);
-
+    Object.keys(headers).forEach(key => {
+        xhr.setRequestHeader(key, headers[key]);
+    });
+    xhr.onload = function () {
+        try {
+            if (xhr.status === 200) {
+                try {
+                    const responseData = JSON.parse(xhr.responseText);
+                    const answerDifyAI = responseData.answer || null;
+                    if (answerDifyAI) {
+                        loading('hide');
+						show_message("<font color='green'><center>Kiểm tra thành công</center></font><br/>-Dữ liệu trả về: "+answerDifyAI);
+                    } else {
+						loading('hide');
+                        show_message("Không có dữ liệu phản hồi từ Dify AI");
+                    }
+                } catch (e) {
+					loading('hide');
+                    show_message("[Dify AI] Lỗi phân tích dữ liệu JSON: " + e);
+                }
+            } else {
+				loading('hide');
+                show_message("[Dify AI] Lỗi HTTP (" + xhr.status + "): " + xhr.statusText);
+            }
+        } catch (e) {
+			loading('hide');
+            show_message("[Dify AI] Lỗi xử lý phản hồi: " + e);
+        }
+    };
+    xhr.onerror = function () {
+		loading('hide');
+        show_message("[Dify AI] Lỗi kết nối HTTP, vui lòng kiểm tra lại kết nối mạng.");
+    };
     try {
         xhr.send(JSON.stringify(data));
-
-        if (xhr.status === 200) {
-            try {
-                const responseData = JSON.parse(xhr.responseText);
-                const answerDifyAI = responseData.answer || null;
-
-                if (answerDifyAI) {
-                    console.log(answerDifyAI)
-                } else {
-                    return { tts: null, answer: "Không có dữ liệu phản hồi từ Dify AI" };
-					show_message("Không có dữ liệu phản hồi từ Dify AI");
-                }
-            } catch (e) {
-				show_message("[Dify AI] Lỗi phân tích dữ liệu JSON: " +e);
-            }
-        } else {
-			show_message("[Dify AI] Lỗi HTTP: " +xhr.responseText);
-        }
     } catch (e) {
-		show_message("[Dify AI] Lỗi yêu cầu HTTP: " +e);
+		loading('hide');
+        show_message("[Dify AI] Lỗi gửi yêu cầu HTTP: " + e);
     }
 }
+
 
 
 // Test key ChatGPT
