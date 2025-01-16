@@ -94,7 +94,7 @@
         },
         "dify_ai": {
             "active": true,
-            "session_chat_conversation": false,
+            "session_chat_conversation": true,
             "api_key": "app-gi44444444444444",
             "user_id": "VBot_Assistant",
             "time_out": 15
