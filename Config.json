@@ -341,7 +341,7 @@
                 "duration_recording": 6,
                 "silence_duration": 3,
                 "min_amplitude_threshold": 370,
-				"single_utterance_time": 0.9,
+                "single_utterance_time": 0.9,
                 "stt_default": {
                     "notes": "Không cần cấu hình gì cả ở đây"
                 },
