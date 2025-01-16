@@ -82,7 +82,7 @@
             "zalo_assistant",
             "google_gemini",
             "chat_gpt",
-			"dify_ai"
+            "dify_ai"
         ],
         "default_assistant": {
             "active": true,
@@ -619,7 +619,8 @@
                     "Youtube.json",
                     "ZingMP3.json",
                     "client_secret.json",
-                    "verify_token.json"
+                    "verify_token.json",
+                    "__pycache__"
                 ]
             }
         },
