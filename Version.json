@@ -1,8 +1,8 @@
 {
     "version": "1.0.8",
     "projectName": "Program VBot Offline",
-    "description": "Cập Nhật Trợ Lý Dify AI",
-    "releaseDate": "15/01/2025",
+    "description": "Tối Ưu, Tăng Tốc Độ Xử Lý Cho STT GCloud V1",
+    "releaseDate": "16/01/2025",
     "changes": [
         {
             "type": "feature",
