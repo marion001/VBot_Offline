@@ -16,7 +16,6 @@ include 'Configuration.php';
     overflow-y: auto;
     word-wrap: break-word;
 }
-
 </style>
 </head>
   <header id="header" class="header fixed-top d-flex align-items-center">
@@ -30,7 +29,7 @@ include 'Configuration.php';
     </div><!-- End Logo -->
 
 
-    <nav class="header-nav ms-auto">
+    <nav id="vbot_header_bar" class="header-nav ms-auto">
       <ul class="d-flex align-items-center">
 
 
@@ -52,12 +51,12 @@ include 'Notify.php';
 <i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="get_localStorage_vbotScanDevices()"></i>
 </li>
 <div class="modal fade" id="modalDialogScrollable_VBot_Scan_Devicde" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable" id="chatbot_size_setting">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" id="vbotScan_size_setting">
         <div class="modal-content">
 		    <div id="welcome-message" class="welcome-message">Tìm Kiếm Các Thiết Bị VBot Trong Cùng Lớp Mạng
 			<div class="icon-group_chatbot">
 			<i class="bi bi-trash text-danger pe-3" title="Xóa Dữ Liệu Tìm Kiếm" onclick="clearAllDevices_vbotScanDevices()"></i>
-			<i class="bi bi-arrows-fullscreen pe-3" id="chatbot_fullscreen" onclick="chatbot_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
+			<i class="bi bi-arrows-fullscreen pe-3" id="vbotScan_fullscreen" onclick="vbotScan_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
             <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
             </div>
             </div><br/>
@@ -65,11 +64,72 @@ include 'Notify.php';
 <br/>
 <div id="vbot_Scan_devices">
 </div>
-		</div>
-		</div>
-		</div>
+</div>
+</div>
+</div>
  
- 
+
+<?php
+if (isset($Config['bluetooth']['active']) && $Config['bluetooth']['active'] == true) {
+
+echo '<li class="nav-item dropdown">
+          <a class="nav-item nav-icon" href="#" data-bs-toggle="dropdown">
+           <i class="bi bi-bluetooth text-success"></i>
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow BLUETOOTH_POWER_CONTROL">
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" onclick="bluetooth_control(\'power\',\'on\')">
+                <i class="bi bi-toggle-on text-success"></i>
+				<span class="text-primary"> Bật Bluetooth</span>
+              </a>
+            </li> 
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" onclick="bluetooth_control(\'power\',\'off\')">
+                <i class="bi bi-toggle-off text-success"></i>
+				<span class="text-danger"> Tắt Bluetooth</span>
+              </a>
+            </li> 
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_Bluetooth_Scan_Devicde">
+                <i class="bi bi-sliders text-danger"></i>
+                 <span class="text-primary"> Nâng Cao</span>
+              </a>
+            </li> 
+          </ul>
+        </li>';
+
+echo '<div class="modal fade" id="modalDialogScrollable_Bluetooth_Scan_Devicde" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable" id="vbotBluetooth_size_setting">
+        <div class="modal-content">
+		    <div id="welcome-message" class="welcome-message"><i class="bi bi-bluetooth text-success"></i> Bluetooth
+			<div class="icon-group_chatbot">
+			<i class="bi bi-arrows-fullscreen pe-3" id="vbotBluetooth_fullscreen" onclick="vbotBluetooth_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
+            <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
+            </div>
+            </div>
+			<h5><center><font color=red>Tính Năng Này Đang Được Phát Triển</font></center></h5>
+			<button type="button" class="btn btn-info"><i class="bi bi-bluetooth text-success"></i> Tìm Kiếm Thiết Bị Bluetooth</button>
+<br/>
+<div id="Bluetooth_Scan_devices">
+</div>
+</div>
+</div>
+</div>';
+}
+
+
+
+?>
+
 <!-- Chatbot Biểu tượng mở chatbox -->
 <li class="nav-item nav-icon">
     <i class="bi bi-chat-dots text-primary" type="button" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>
@@ -77,7 +137,7 @@ include 'Notify.php';
 <div class="modal fade" id="modalDialogScrollable_chatbot" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable" id="chatbot_size_setting">
         <div class="modal-content">
-            <div id="welcome-message" class="welcome-message">ChatBot
+            <div id="welcome-message" class="welcome-message">VBot-ChatBox
 			<div class="icon-group_chatbot">
 			<i class="bi bi-arrow-repeat pe-3" onclick="loadMessages()" title="Tải lại Chatbox"></i>
 			<i class="bi bi-arrows-fullscreen pe-3" id="chatbot_fullscreen" onclick="chatbot_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện chatbox"></i>
@@ -255,6 +315,7 @@ function power_action_service(action_name, mess_name) {
     xhr.open("GET", url, true);
     xhr.send();
 }
+
 
 </script>
   </header>

@@ -76,15 +76,22 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
             justify-content: center;
     
         }
-        /* Ẩn phần ngày tháng khi trên giao diện mobile */
+        /* Ẩn phần ngày tháng, thời gian khi trên giao diện mobile */
         @media (max-width: 768px) {
-            #day-date-container_time {
+
+            #container_time {
                 display: none;
             }
-
-            #times {
-                font-size: 20px; /* Tăng kích thước chữ cho thời gian */
-            }
+			
+    #notification {
+        max-width: 100%;
+		width: auto;
+    }
+	    #number_notification_1 {
+        max-width: 100%;
+        width: auto;
+    }
+			
         }
     </style>
 <!-- Css hiển thị thông báo cho code php -->

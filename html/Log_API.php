@@ -69,8 +69,8 @@ include 'html_sidebar.php';
 </center>
 <div class="form-group">
 <br/>
-    <textarea class="form-control border-success text-info bg-dark" id="logsOutput" rows="17" readonly></textarea>
-		</div>
+<div class="form-control border-success text-info bg-dark" id="logsOutput" style="height: 500px; overflow-y: auto; white-space: pre-wrap;"></div>
+</div>
 		</div>
 		</div>
 		</div>
@@ -78,6 +78,8 @@ include 'html_sidebar.php';
 		</section>
 	
 </main>
+
+
   <!-- ======= Footer ======= -->
 <?php
 include 'html_footer.php';
@@ -93,56 +95,64 @@ include 'html_footer.php';
 <?php
 include 'html_js.php';
 ?>
-    <script>
-        const checkbox = document.getElementById('fetchLogsCheckbox');
-        const logsOutput = document.getElementById('logsOutput');
-        let intervalId;
-		function fetchLogs() {
-			const xhr = new XMLHttpRequest();
-			xhr.withCredentials = true;
-			xhr.addEventListener("readystatechange", function () {
-				if (this.readyState === 4) {
-					try {
-						if (this.status === 0) {
-							logsOutput.value = "Không thể kết nối đến VBot vui lòng kiểm tra lại, hoặc chế độ API không được bật khi khởi chạy chương trình";
-							return;
-						}
-						if (this.status !== 200) {
-							logsOutput.value = "Lỗi từ máy chủ: HTTP " +this.status;
-							return;
-						}
-						if (this.responseText.trim() === "") {
-							logsOutput.value = "Phản hồi từ server bị trống.";
-							return;
-						}
-						const response = JSON.parse(this.responseText);
-						if (response.success) {
-							const logs = response.data.map(item => item.logs_message).join('\n');
-							logsOutput.value = logs;
-							logsOutput.scrollTop = logsOutput.scrollHeight;
-						} else {
-							logsOutput.value = 'Lỗi: ' + response.message;
-						}
-					} catch (e) {
-						logsOutput.value = 'Lỗi khi phân tích dữ liệu: ' + e.message;
-					}
-				}
-			});
-			xhr.onerror = function () {
-				logsOutput.value = "Không thể kết nối đến máy chủ. Kiểm tra kết nối mạng hoặc xem máy chủ có đang chạy hay không, hoặc chế độ API không được bật khi khởi chạy chương trình";
-			};
-			xhr.open("GET", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs");
-			xhr.send();
-		}
-        checkbox.addEventListener('change', function() {
-            if (this.checked) {
-				showMessagePHP("Đang hiển thị Logs trên web", 3);
-                intervalId = setInterval(fetchLogs, 1000);
-            } else {
-                clearInterval(intervalId);
+
+<script>
+    const checkbox = document.getElementById('fetchLogsCheckbox');
+    const logsOutput = document.getElementById('logsOutput');
+    let intervalId;
+    // Hàm gửi yêu cầu và cập nhật nội dung logs
+    function fetchLogs() {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        const logs = response.data.map(item => formatLogMessage(item.logs_message)).join('');
+                        logsOutput.innerHTML = logs;
+                    } else {
+                        logsOutput.innerHTML = '<span style="color: red;">Lỗi: ' + response.message + '</span>';;
+                    }
+                } catch (e) {
+                    logsOutput.innerHTML = '<span style="color: red;">Lỗi khi phân tích dữ liệu: ' + e.message + '</span>';
+                }
+				// Cuộn xuống dưới cùng
+                logsOutput.scrollTop = logsOutput.scrollHeight;
             }
-        });
-    </script>
+        };
+        xhr.open("GET", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs");
+        xhr.send();
+    }
+
+    //Màu cho log messages
+    function formatLogMessage(message) {
+	const logStyles = [
+		{ keyword: '[BOT] Đang thu âm', style: 'color: rgb(255, 105, 97);' },
+		{ keyword: '[BOT]', style: 'color: rgb(255, 214, 10);' },
+		{ keyword: '[HUMAN]', style: 'color: rgb(0, 255, 0);' },
+		{ keyword: 'Đang chờ được đánh thức.', style: 'color: rgb(0, 255, 0);' },
+		{ keyword: 'dữ liệu âm thanh', style: 'color: rgb(144, 238, 144);' },
+		{ keyword: 'Không có giọng nói được truyền vào', style: 'color: rgb(221, 160, 221);' },
+		{ keyword: 'Đã được đánh thức.', style: 'color: rgb(255, 182, 193);' },
+		{ keyword: 'Đang phát', style: 'color: rgb(255, 165, 0);' },
+		{ keyword: '[Custom skills', style: 'color: rgb(64, 224, 208);' },
+		{ keyword: 'ERROR', style: 'color: rgb(255, 69, 58);' },
+		{ keyword: 'WARNING', style: 'color: rgb(255, 140, 0);' },
+		{ keyword: 'SUCCESS', style: 'color: rgb(50, 205, 50);' },
+	];
+        const style = logStyles.find(log => message.includes(log.keyword))?.style || 'color: white;';
+        return '<div style="' + style + '">' + message + '</div>';
+    }
+    // Xử lý khi trạng thái checkbox thay đổi
+    checkbox.addEventListener('change', function () {
+        if (this.checked) {
+            showMessagePHP("Đang hiển thị Logs trên web", 5);
+            intervalId = setInterval(fetchLogs, 1000);
+        } else {
+            clearInterval(intervalId);
+        }
+    });
+</script>
 
 </body>
 </html>

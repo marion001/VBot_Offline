@@ -345,6 +345,12 @@ $Config['virtual_assistant']['dify_ai']['time_out'] = intval($_POST['dify_ai_tim
 $Config['virtual_assistant']['dify_ai']['api_key'] = $_POST['dify_ai_key'];
 $Config['virtual_assistant']['dify_ai']['user_id'] = $_POST['dify_ai_user_id'];
 
+#Cập nhật Bluetooth
+$Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
+$Config['bluetooth']['gpio_power'] = intval($_POST['bluetooth_gpio_power']);
+$Config['bluetooth']['baud_rate'] = intval($_POST['bluetooth_baud_rate']);
+$Config['bluetooth']['serial_port'] = $_POST['bluetooth_serial_port'];
+
 #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
 $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
 $virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $_POST['virtual_assistant_priority2'] : '';
@@ -3452,11 +3458,55 @@ Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:</h5>
 </div>
 </div>
 
-
 </div>
 </div>
 </div>
 
+
+
+<div class="card accordion" id="accordion_button_bluetooth_uart_vbot">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_bluetooth_uart_vbot" aria-expanded="false" aria-controls="collapse_button_bluetooth_uart_vbot">
+Bluetooth <i class="bi bi-bluetooth"></i> <font color=red>(Chức năng chưa được phát triển)</font>:</h5>
+<div id="collapse_button_bluetooth_uart_vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_bluetooth_uart_vbot">
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để Khởi Tạo Bluetooth')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="bluetooth_active" id="bluetooth_active" <?php echo $Config['bluetooth']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="bluetooth_gpio_power" class="col-sm-3 col-form-label">GPIO Power:</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<input readonly class="form-control border-danger" type="number" step="1" min="1" max="30" name="bluetooth_gpio_power" id="bluetooth_gpio_power" placeholder="<?php echo $Config['bluetooth']['gpio_power']; ?>" value="<?php echo $Config['bluetooth']['gpio_power']; ?>">
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="bluetooth_baud_rate" class="col-sm-3 col-form-label">Baud Rate:</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<input readonly class="form-control border-danger" type="number" name="bluetooth_baud_rate" id="bluetooth_baud_rate" placeholder="<?php echo $Config['bluetooth']['baud_rate']; ?>" value="<?php echo $Config['bluetooth']['baud_rate']; ?>">
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label for="bluetooth_serial_port" class="col-sm-3 col-form-label">Serial Port:</label>
+<div class="col-sm-9"><div class="input-group mb-3">
+<input readonly class="form-control border-danger" type="text"  name="bluetooth_serial_port" id="bluetooth_serial_port" placeholder="<?php echo $Config['bluetooth']['serial_port']; ?>" value="<?php echo $Config['bluetooth']['serial_port']; ?>">
+</div>
+</div>
+</div>
+
+</div>
+</div>
+</div>
 
 <div class="card">
 <div class="card-body">

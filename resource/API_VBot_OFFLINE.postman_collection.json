@@ -2250,6 +2250,62 @@
 			"response": []
 		},
 		{
+			"name": "Bật Bluetooth GPIO_ON",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth\",\r\n    \"action\": \"power\",\r\n    \"value\": \"on\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tắt Bluetooth GPIO_OFF",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth\",\r\n    \"action\": \"power\",\r\n    \"value\": \"off\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "RESTART VBot Service",
 			"request": {
 				"method": "GET",

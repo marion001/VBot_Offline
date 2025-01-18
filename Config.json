@@ -36,6 +36,12 @@
     "web_interface": {
         "path": "/home/pi/VBot_Offline/html"
     },
+    "bluetooth": {
+        "active": false,
+        "gpio_power": 4,
+        "baud_rate": 115200,
+        "serial_port": "/dev/serial0"
+    },
     "display_screen": {
         "active": false,
         "connection_type": "lcd_i2c",

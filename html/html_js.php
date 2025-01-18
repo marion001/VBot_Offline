@@ -1857,6 +1857,53 @@ function playHLS(url) {
             chatbotIcon.classList.add('bi-arrows-fullscreen');
         }
     }
+	
+    // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện chatbox
+    function vbotScan_toggleFullScreen() {
+        var chatbotSizeSetting = document.getElementById('vbotScan_size_setting');
+        var chatbotIcon = document.getElementById('vbotScan_fullscreen');
+        // Kiểm tra và thay đổi class giữa modal-lg, modal-xl, và modal-fullscreen
+        if (chatbotSizeSetting.classList.contains('modal-lg')) {
+            chatbotSizeSetting.classList.remove('modal-lg');
+            chatbotSizeSetting.classList.add('modal-xl');
+        } else if (chatbotSizeSetting.classList.contains('modal-xl')) {
+            chatbotSizeSetting.classList.remove('modal-xl');
+            chatbotSizeSetting.classList.add('modal-fullscreen');
+            // Thay đổi icon thành bi-fullscreen-exit khi ở chế độ fullscreen
+            chatbotIcon.classList.remove('bi-arrows-fullscreen');
+            chatbotIcon.classList.add('bi-fullscreen-exit');
+        } else if (chatbotSizeSetting.classList.contains('modal-fullscreen')) {
+            chatbotSizeSetting.classList.remove('modal-fullscreen');
+            chatbotSizeSetting.classList.add('modal-lg');
+            // Trở lại icon fullscreen khi không ở chế độ fullscreen
+            chatbotIcon.classList.remove('bi-fullscreen-exit');
+            chatbotIcon.classList.add('bi-arrows-fullscreen');
+        }
+    }
+	
+
+    // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện chatbox
+    function vbotBluetooth_toggleFullScreen() {
+        var chatbotSizeSetting = document.getElementById('vbotBluetooth_size_setting');
+        var chatbotIcon = document.getElementById('vbotBluetooth_fullscreen');
+        // Kiểm tra và thay đổi class giữa modal-lg, modal-xl, và modal-fullscreen
+        if (chatbotSizeSetting.classList.contains('modal-lg')) {
+            chatbotSizeSetting.classList.remove('modal-lg');
+            chatbotSizeSetting.classList.add('modal-xl');
+        } else if (chatbotSizeSetting.classList.contains('modal-xl')) {
+            chatbotSizeSetting.classList.remove('modal-xl');
+            chatbotSizeSetting.classList.add('modal-fullscreen');
+            // Thay đổi icon thành bi-fullscreen-exit khi ở chế độ fullscreen
+            chatbotIcon.classList.remove('bi-arrows-fullscreen');
+            chatbotIcon.classList.add('bi-fullscreen-exit');
+        } else if (chatbotSizeSetting.classList.contains('modal-fullscreen')) {
+            chatbotSizeSetting.classList.remove('modal-fullscreen');
+            chatbotSizeSetting.classList.add('modal-lg');
+            // Trở lại icon fullscreen khi không ở chế độ fullscreen
+            chatbotIcon.classList.remove('bi-fullscreen-exit');
+            chatbotIcon.classList.add('bi-arrows-fullscreen');
+        }
+    }
 
     //  hàm cuộn xuống dưới cùng tin nhắn
     function scrollToBottom() {
@@ -2486,6 +2533,42 @@ function clearAllDevices_vbotScanDevices() {
     localStorage.removeItem('vbotScanDevices');
 	showMessagePHP("Đã xóa dữ liệu thành công", 3);
 	get_localStorage_vbotScanDevices();
+}
+
+
+//Bật, tắt bluetooth
+function bluetooth_control(Action, Value) {
+    var data = JSON.stringify({
+        "type": 4,
+        "data": 'bluetooth',
+        "action": Action,
+		"value": Value
+    });
+    var xhr = new XMLHttpRequest();
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            try {
+                if (this.status === 0) {
+                    show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                    return;
+                } else if (this.status !== 200) {
+                    show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
+                    return;
+                }
+                var response = JSON.parse(this.responseText);
+                if (response.success) {
+                    showMessagePHP(response.message, 5);
+                } else {
+                    show_message('Lỗi: ' + response.message);
+                }
+            } catch (error) {
+                show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
+            }
+        }
+    });
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
 }
 
 /*

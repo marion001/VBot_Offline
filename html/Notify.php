@@ -73,7 +73,7 @@ checkPermissions($VBot_Offline);
 </a>
 <!-- End Notification Icon -->
 
-<ul id="notification" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="max-height: 400px; overflow-y: auto; width: auto;">
+<ul id="notification" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="max-height:400px; overflow-y: auto; width: auto; height: auto;">
     <li class="dropdown-header">
 
         <font id="number_notification_1" color=red>Bạn có <b><?php echo $i_count; ?></b> thông báo mới.</font>
