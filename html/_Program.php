@@ -441,6 +441,7 @@ exec($tarCommand, $output, $returnCode);
 if ($returnCode === 0) {
     chmod($Backup_File_Name, 0777); // Đặt quyền cho file backup
     $messages[] = "<font color=green>- Tạo bản sao lưu chương trình Vbot thành công:</font> <font color=blue><a title='Tải Xuống file backup: ".basename($Backup_File_Name)."' onclick=\"downloadFile('".$HTML_VBot_Offline."/".$Backup_File_Name."')\">".basename($Backup_File_Name)."</a></font> <a title='Tải Xuống file backup: ".basename($Backup_File_Name)."' onclick=\"downloadFile('".$HTML_VBot_Offline."/".$Backup_File_Name."')\"><font color=green>Tải Xuống</font></a>";
+/*
     // Hiển thị các file và thư mục đã nén
     $messages[] = "<br/>- Các file và thư mục đã được sao lưu và đóng gói vào tệp <b>".basename($Backup_File_Name)."</b>";
     foreach ($output as $line) {
@@ -454,6 +455,7 @@ if ($returnCode === 0) {
     foreach ($Exclude_File_Format as $ext) {
         $messages[] = "<font color=red>- Tệp có phần mở rộng: <b>'$ext'</b> không được sao lưu</font>";
     }
+*/
     // Xóa các file cũ nếu số lượng tệp tin sao lưu vượt quá giới hạn
     $Backup_File_Names = glob($Backup_Dir_Save_VBot . '/*.tar.gz');
     $numBackupFiles = count($Backup_File_Names);

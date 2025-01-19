@@ -297,7 +297,7 @@ exec($tarCommand, $output, $returnCode);
 if ($returnCode === 0) {
     chmod($Backup_File_Name_Web, 0777); // Đặt quyền cho file backup
     $messages[] = "Tạo bản sao lưu giao diện thành công: <font color=blue><a title='Tải Xuống file backup: ".basename($Backup_File_Name_Web)."' onclick=\"downloadFile('".$HTML_VBot_Offline."/".$Backup_File_Name_Web."')\">".basename($Backup_File_Name_Web)."</a></font> <a title='Tải Xuống file backup: ".basename($Backup_File_Name_Web)."' onclick=\"downloadFile('".$HTML_VBot_Offline."/".$Backup_File_Name_Web."')\"><font color=green>Tải Xuống</font></a>";
-
+/*
     // Hiển thị các file và thư mục đã nén
     $messages[] = "<br/>Các file và thư mục đã được nén:";
     foreach ($output as $line) {
@@ -311,6 +311,7 @@ if ($returnCode === 0) {
     foreach ($Exclude_File_Format as $ext) {
         $messages[] = "<font color=red>Các file có đuôi '$ext' không được nén</font>";
     }
+*/
     // Xóa các file cũ nếu số lượng tệp tin sao lưu vượt quá giới hạn
     $Backup_File_Name_Webs = glob($Backup_Dir_Save_Web . '/*.tar.gz');
     $numBackupFiles_Web = count($Backup_File_Name_Webs);
