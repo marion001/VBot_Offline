@@ -89,7 +89,8 @@
             "zalo_assistant",
             "google_gemini",
             "chat_gpt",
-            "dify_ai"
+            "dify_ai",
+			"customize_developer_assistant"
         ],
         "default_assistant": {
             "active": true,
@@ -127,7 +128,7 @@
             "key_chat_gpt": "sk-proj-tc--gv4g-88-ChwixTZK-55-77-L89-66"
         },
         "customize_developer_assistant": {
-            "active": true
+            "active": false
         }
     },
     "openweathermap": {
