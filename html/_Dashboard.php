@@ -240,13 +240,13 @@ function deleteDirectory($dir) {
             } else {
                 // Xóa tệp
                 unlink($filePath);
-                $messages[] = "<font color=red>- Đã xóa tệp: </font> <font color=blue>$filePath</font>";
+                //$messages[] = "<font color=red>- Đã xóa tệp: </font> <font color=blue>$filePath</font>";
             }
         }
     }
     // Cuối cùng, xóa thư mục
     rmdir($dir);
-    $messages[] = "<font color=red>- Đã xóa thư mục: </font> <font color=blue>$dir</font>";
+    //$messages[] = "<font color=red>- Đã xóa thư mục: </font> <font color=blue>$dir</font>";
     return true;
 }
 
