@@ -1,8 +1,8 @@
 {
-    "version": "1.0.8",
+    "version": "1.0.9",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập Nhật Trợ Lý Dify AI",
-    "releaseDate": "15/01/2025",
+    "description": "Sửa Lỗi Trợ Lý Ảo Zalo AI, Cập Nhật DEV Custom Assistant (Mọi người có thể tự code, liên kết trợ lý ảo theo nhu cầu), Sửa thêm một số lỗi khác",
+    "releaseDate": "19/01/2025",
     "changes": [
         {
             "type": "feature",

@@ -121,6 +121,7 @@ $Config['api']['show_log']['log_lever'] = $_POST['api_log_active_log_lever'] ? t
 
 #Cập nhật giá trị đường dẫn path web ui
 $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
+$Config['web_interface']['errors_display'] = isset($_POST['webui_errors_display']) ? true : false;
 
 
 #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
@@ -345,6 +346,9 @@ $Config['virtual_assistant']['dify_ai']['time_out'] = intval($_POST['dify_ai_tim
 $Config['virtual_assistant']['dify_ai']['api_key'] = $_POST['dify_ai_key'];
 $Config['virtual_assistant']['dify_ai']['user_id'] = $_POST['dify_ai_user_id'];
 
+#Cập nhật trợ lý ảo custom assistant customize_developer_assistant_active
+$Config['virtual_assistant']['customize_developer_assistant']['active'] = isset($_POST['customize_developer_assistant_active']) ? true : false;
+
 #Cập nhật Bluetooth
 $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
 $Config['bluetooth']['gpio_power'] = intval($_POST['bluetooth_gpio_power']);
@@ -357,7 +361,8 @@ $virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $
 $virtual_assistant_priority_3 = isset($_POST['virtual_assistant_priority3']) ? $_POST['virtual_assistant_priority3'] : '';
 $virtual_assistant_priority_4 = isset($_POST['virtual_assistant_priority4']) ? $_POST['virtual_assistant_priority4'] : '';
 $virtual_assistant_priority_5 = isset($_POST['virtual_assistant_priority5']) ? $_POST['virtual_assistant_priority5'] : '';
-$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5];
+$virtual_assistant_priority_6 = isset($_POST['virtual_assistant_priority6']) ? $_POST['virtual_assistant_priority6'] : '';
+$Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5, $virtual_assistant_priority_6];
 
 #Cập nhật sao lưu trương trình VBot
 $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
@@ -740,6 +745,15 @@ hihi Vũ Tuyển
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
 Web Interface (Giao Diện): </h5>
 <div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Hiển Thị Lỗi <i class="bi bi-question-circle-fill" onclick="show_message('Chức Năng Này Chỉ Dành Cho Nhà Phát Triển DEV Debug')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="webui_errors_display" id="webui_errors_display" <?php echo $Config['web_interface']['errors_display'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
 
 <div class="row mb-3">
 <label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn):</label>
@@ -2592,6 +2606,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
 			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
 			<option value="dify_ai" <?php if ($virtual_assistant_priority[0] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+			<option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[0] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
         </select>
     </div>
 </div>
@@ -2606,6 +2621,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
 			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
 			<option value="dify_ai" <?php if ($virtual_assistant_priority[1] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+			<option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[1] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
         </select>
     </div>
 </div>
@@ -2620,6 +2636,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
 			<option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
 			<option value="dify_ai" <?php if ($virtual_assistant_priority[2] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+			<option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[2] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
         </select>
     </div>
 </div>
@@ -2634,6 +2651,7 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[3] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
             <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
 			<option value="dify_ai" <?php if ($virtual_assistant_priority[3] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+			<option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[3] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
         </select>
     </div>
 </div>
@@ -2648,6 +2666,22 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
             <option value="chat_gpt" <?php if ($virtual_assistant_priority[4] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
             <option value="zalo_assistant" <?php if ($virtual_assistant_priority[4] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
 			<option value="dify_ai" <?php if ($virtual_assistant_priority[4] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+			<option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[4] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
+        </select>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="virtual_assistant_priority6" class="col-sm-3 col-form-label">Top 6:</label>
+    <div class="col-sm-9">
+        <select class="form-select border-success" name="virtual_assistant_priority6" id="virtual_assistant_priority6">
+            <option value="">-- Chọn Trợ Lý --</option>
+            <option value="default_assistant" <?php if ($virtual_assistant_priority[5] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+            <option value="google_gemini" <?php if ($virtual_assistant_priority[5] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+            <option value="chat_gpt" <?php if ($virtual_assistant_priority[5] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+            <option value="zalo_assistant" <?php if ($virtual_assistant_priority[5] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+			<option value="dify_ai" <?php if ($virtual_assistant_priority[5] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+			<option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[5] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
         </select>
     </div>
 </div>
@@ -2879,11 +2913,29 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 </div>
 </div>
 </div>
+</div>
+</div>
 
+
+<div class="card">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_assistant" aria-expanded="false" aria-controls="collapse_button_custom_assistant">
+DEV Assistant (Custom Assistant) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:</h5>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="customize_developer_assistant_active" id="customize_developer_assistant_active" <?php echo $Config['virtual_assistant']['customize_developer_assistant']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
 
 
 </div>
 </div>
+
+
 
                 </div>
                 </div>
@@ -3523,25 +3575,24 @@ Bluetooth <i class="bi bi-bluetooth"></i> <font color=red>(Chức năng chưa đ
                 </div>
                 </div>
 
-
 <div class="card">
 			<div class="card-body">
               <h5 class="card-title">Đọc thông tin khi khởi động:</h5>
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Bật, Tắt đọc thông tin <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt đọc thông tin khi Chương trình khởi động như: Địa chỉ ip của thiết bị, v..v...')"></i> :</label>
                   <div class="col-sm-9">
-				  
+
 					<div class="form-switch">
                       <input class="form-check-input" type="checkbox" name="read_information_startup" id="read_information_startup" <?php echo $Config['smart_config']['read_information_startup']['active'] ? 'checked' : ''; ?>>
                       
                     </div>
                   </div>
                 </div>
-				
+
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Số lần đọc: </label>
                   <div class="col-sm-9">
-				  
+
 					<div class="form-switch">
                       <input required class="form-control border-success" type="number" min="1" step="1" max="5" name="read_information_startup_read_number" id="read_information_startup_read_number" value="<?php echo $Config['smart_config']['read_information_startup']['read_number']; ?>">
                       <div class="invalid-feedback">Cần nhập số lần đọc thông tin khi khởi động lần đầu tiên</div>
@@ -3646,23 +3697,16 @@ echo '
 </div>
 </div>
 
-
-
 </div>
 </div>
-
-
-
-
 
 <div class="row mb-3">
 <center>
 <button type="submit" name="all_config_save" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
 <button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')"><i class="bi bi-eye"></i> Xem Tệp Config</button>
 <button type="button" class="btn btn-success rounded-pill" title="Tải Xuống file: Config.json" onclick="downloadFile('<?php echo $Config_filePath; ?>')"><i class="bi bi-download"></i> Tải Xuống</button>
+</center>
 
-				   </center>
-	
     <!-- Modal hiển thị tệp Config.json -->
     <div class="modal fade" id="myModal_Config" tabindex="-1" role="dialog" aria-labelledby="modalLabel_Config" aria-hidden="true">
         <div class="modal-dialog" id="modal_dialog_show_config" role="document">
@@ -3682,18 +3726,11 @@ echo '
     </div>
                 
                 </div>
-
           </div>
-
         </div>
-
-
       </div>
     </section>
-
-	
     </form>
-
   </main><!-- End #main -->
 
 <!-- ======= Footer ======= -->
@@ -3714,10 +3751,7 @@ include 'html_footer.php';
         <i class="bi bi-arrow-down-short"></i>
     </a>
 
-
   <!-- Template Main JS File -->
-  
-
 <script src="assets/vendor/prism/prism.min.js"></script>
 <script src="assets/vendor/prism/prism-json.min.js"></script>
 <script src="assets/vendor/prism/prism-yaml.min.js"></script>
@@ -3726,27 +3760,25 @@ include 'html_footer.php';
 include 'html_js.php';
 ?>
 
-    <script>
-        // Hàm để cuộn lên đầu trang
-        function scrollToTop(event) {
-            event.preventDefault();
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-
-        // Hàm để cuộn xuống cuối trang
-        function scrollToBottom(event) {
-            event.preventDefault();
-            window.scrollTo({
-                top: document.body.scrollHeight,
-                behavior: 'smooth'
-            });
-        }
-    </script>
-
 <script>
+// Hàm để cuộn lên đầu trang
+function scrollToTop(event) {
+    event.preventDefault();
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+}
+
+// Hàm để cuộn xuống cuối trang
+function scrollToBottom(event) {
+    event.preventDefault();
+    window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+    });
+}
+
 //Xóa file backup Config
 function delete_file_backup_json_config(filePath) {
     if (filePath === "get_value_backup_config") {
@@ -3761,7 +3793,6 @@ function delete_file_backup_json_config(filePath) {
         showMessagePHP("Không có tệp nào được chọn để tải xuống.");
     }
 }
-
 
 //Tải xuống file backup Config
 function dowlaod_file_backup_json_config(filePath) {
@@ -3859,85 +3890,86 @@ function readJSON_file_path(filePath) {
     }
 }
 
-    //ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
-    document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const div_select_stt_ggcloud_html = document.getElementById('select_stt_ggcloud_html');
-            const div_select_stt_default_html = document.getElementById('select_stt_default_html');
-            const div_select_stt_ggcloud_v2_html = document.getElementById('select_stt_ggcloud_v2_html');
-            if (document.getElementById('stt_ggcloud').checked) {
-                div_select_stt_ggcloud_html.style.display = 'block'; // Hiển thị div
-            } else {
-                div_select_stt_ggcloud_html.style.display = 'none'; // Ẩn div
-            }
-            if (document.getElementById('stt_default').checked) {
-                div_select_stt_default_html.style.display = 'block'; // Hiển thị div
-            } else {
-                div_select_stt_default_html.style.display = 'none'; // Ẩn div
-            }
-            if (document.getElementById('stt_ggcloud_v2').checked) {
-                div_select_stt_ggcloud_v2_html.style.display = 'block'; // Hiển thị div
-            } else {
-                div_select_stt_ggcloud_v2_html.style.display = 'none'; // Ẩn div
-            }
-        });
+//ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
+document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const div_select_stt_ggcloud_html = document.getElementById('select_stt_ggcloud_html');
+        const div_select_stt_default_html = document.getElementById('select_stt_default_html');
+        const div_select_stt_ggcloud_v2_html = document.getElementById('select_stt_ggcloud_v2_html');
+        if (document.getElementById('stt_ggcloud').checked) {
+            div_select_stt_ggcloud_html.style.display = 'block'; // Hiển thị div
+        } else {
+            div_select_stt_ggcloud_html.style.display = 'none'; // Ẩn div
+        }
+        if (document.getElementById('stt_default').checked) {
+            div_select_stt_default_html.style.display = 'block';
+        } else {
+            div_select_stt_default_html.style.display = 'none';
+        }
+        if (document.getElementById('stt_ggcloud_v2').checked) {
+            div_select_stt_ggcloud_v2_html.style.display = 'block';
+        } else {
+            div_select_stt_ggcloud_v2_html.style.display = 'none';
+        }
     });
-    //ẩn hiện cấu hình tts khi được lựa chọn
-    document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
-        radio.addEventListener('change', function() {
-            const div_select_tts_ggcloud_html = document.getElementById('select_tts_ggcloud_html');
-            const div_select_tts_default_html = document.getElementById('select_tts_default_html');
-            const div_select_tts_edge_html = document.getElementById('select_tts_edge_html');
-            const div_select_tts_ggcloud_key = document.getElementById('select_tts_ggcloud_key');
-            const div_select_tts_zalo_html = document.getElementById('select_tts_zalo_html');
-            const div_select_tts_viettel_html = document.getElementById('select_tts_viettel_html');
-            if (document.getElementById('tts_ggcloud').checked) {
-                div_select_tts_ggcloud_html.style.display = 'block'; // Hiển thị div
-            } else {
-                div_select_tts_ggcloud_html.style.display = 'none'; // Ẩn div
-            }
-            if (document.getElementById('tts_default').checked) {
-                div_select_tts_default_html.style.display = 'block';
-            } else {
-                div_select_tts_default_html.style.display = 'none';
-            }
-            if (document.getElementById('tts_zalo').checked) {
-				getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
-                div_select_tts_zalo_html.style.display = 'block';
-            } else {
-                div_select_tts_zalo_html.style.display = 'none';
-            }
-			if (document.getElementById('tts_viettel').checked) {
-				getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
-                div_select_tts_viettel_html.style.display = 'block';
-            } else {
-                div_select_tts_viettel_html.style.display = 'none';
-            }
-            if (document.getElementById('tts_edge').checked) {
-                div_select_tts_edge_html.style.display = 'block';
-            } else {
-                div_select_tts_edge_html.style.display = 'none';
-            }
-            if (document.getElementById('tts_ggcloud_key').checked) {
-                div_select_tts_ggcloud_key.style.display = 'block';
-            } else {
-                div_select_tts_ggcloud_key.style.display = 'none';
-            }
-        });
-    });
+});
 
-    //Hiển thị list hotword khi được scan
-    function loadConfigHotword(lang) {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?hotword&lang=' + lang, true);
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                const data = JSON.parse(xhr.responseText);
-                displayResults_Hotword_dataa(data);
-            }
-        };
-        xhr.send();
-    }
+//ẩn hiện cấu hình tts khi được lựa chọn
+document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
+    radio.addEventListener('change', function() {
+        const div_select_tts_ggcloud_html = document.getElementById('select_tts_ggcloud_html');
+        const div_select_tts_default_html = document.getElementById('select_tts_default_html');
+        const div_select_tts_edge_html = document.getElementById('select_tts_edge_html');
+        const div_select_tts_ggcloud_key = document.getElementById('select_tts_ggcloud_key');
+        const div_select_tts_zalo_html = document.getElementById('select_tts_zalo_html');
+        const div_select_tts_viettel_html = document.getElementById('select_tts_viettel_html');
+        if (document.getElementById('tts_ggcloud').checked) {
+            div_select_tts_ggcloud_html.style.display = 'block'; // Hiển thị div
+        } else {
+            div_select_tts_ggcloud_html.style.display = 'none'; // Ẩn div
+        }
+        if (document.getElementById('tts_default').checked) {
+            div_select_tts_default_html.style.display = 'block';
+        } else {
+            div_select_tts_default_html.style.display = 'none';
+        }
+        if (document.getElementById('tts_zalo').checked) {
+            getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
+            div_select_tts_zalo_html.style.display = 'block';
+        } else {
+            div_select_tts_zalo_html.style.display = 'none';
+        }
+        if (document.getElementById('tts_viettel').checked) {
+            getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
+            div_select_tts_viettel_html.style.display = 'block';
+        } else {
+            div_select_tts_viettel_html.style.display = 'none';
+        }
+        if (document.getElementById('tts_edge').checked) {
+            div_select_tts_edge_html.style.display = 'block';
+        } else {
+            div_select_tts_edge_html.style.display = 'none';
+        }
+        if (document.getElementById('tts_ggcloud_key').checked) {
+            div_select_tts_ggcloud_key.style.display = 'block';
+        } else {
+            div_select_tts_ggcloud_key.style.display = 'none';
+        }
+    });
+});
+
+//Hiển thị list hotword khi được scan
+function loadConfigHotword(lang) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?hotword&lang=' + lang, true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            const data = JSON.parse(xhr.responseText);
+            displayResults_Hotword_dataa(data);
+        }
+    };
+    xhr.send();
+}
 
     function displayResults_Hotword_dataa(data) {
         const resultsDiv = document.getElementById('results_body_hotword');
@@ -3959,6 +3991,7 @@ function readJSON_file_path(filePath) {
         });
         selectHtml += '</select><div class="invalid-feedback">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</div> <label for="select_file_lib_pv">Chọn file thư viện Hotword: ' + reponse_lang + '</label></div></td>';
         selectHtml += '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" id="deleteFilePV" title="Xóa file: "><i class="bi bi-trash"></i></button>  <button type="button" class="btn btn-success" id="downloadFilePV" title="Tải xuống file: "><i class="bi bi-download"></i></button> </center></td></tr>';
+
         if (Array.isArray(data.config) && data.config.length > 0) {
             let i_up = 0;
             let tableContent = '';
@@ -3995,8 +4028,34 @@ function readJSON_file_path(filePath) {
                 '<th><center>Độ Nhạy</center></th>' +
                 '<th><center>Hành Động</center></th></tr>';
             resultsDiv.innerHTML = tableContent;
-        } else {
-            resultsDiv.innerHTML = '<tr><td colspan="4">Không có dữ liệu để hiển thị.</td></tr>';
+        } 
+		//Nếu không có dữ liệu hotword trong COnfig.json là rỗng: []
+		else {
+            let i_up = 0;
+            let tableContent = '';
+			var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
+			selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
+			fileList.forEach(function(file) {
+				var isSelected_lib = (file === data.config_lib_pv_to_lang) ? ' selected' : '';
+				selectHtml += '<option value="' + file + '"' + isSelected_lib + '>' + file + '</option>';
+			});
+			selectHtml += '</select><div class="invalid-feedback">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</div> <label for="select_file_lib_pv">Chọn file thư viện Hotword: ' + reponse_lang + '</label></div></td>';
+			selectHtml += '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" id="deleteFilePV" title="Xóa file: "><i class="bi bi-trash"></i></button>  <button type="button" class="btn btn-success" id="downloadFilePV" title="Tải xuống file: "><i class="bi bi-download"></i></button> </center></td></tr>';
+            resultsDiv1.innerHTML = selectHtml;
+			tableContent += '<tr><td colspan="5" class="text-danger"><center>Không có dữ liệu Hotword nào được cấu hình với ngôn ngữ '+reponse_lang+'</center></td></tr>';
+            tableContent +=
+                '<tr>' +
+                '<td colspan="5" style="text-align: center;">' +
+                '<input type="hidden" name="lang_hotword_get" id="lang_hotword_get" value="' + data.lang + '">' +
+                '<label for="upload_files"><font color=blue>Tải lên file hotword .ppn hoặc file thư viện .pv cho <b>'+reponse_lang+'</b></font></label>' +
+                '<div class="input-group">' +
+                '<input class="form-control" type="file" name="upload_files_ppn_pv[]" id="upload_files_ppn_pv" accept=".ppn,.pv" multiple>' +
+                ' <button class="btn btn-primary"  type="button" onclick="uploadFilesHotwordPPNandPV()">Tải Lên</button>' +
+                '</div>' +
+                '<br/><button type="submit" name="save_hotword_theo_lang" class="btn btn-success rounded-pill" title="Lưu cài đặt hotword">Lưu Cài Đặt Hotword</button>' +
+                '</td>' +
+                '</tr>';
+			resultsDiv.innerHTML = tableContent;
         }
         // Lấy giá trị mặc định của thẻ select khi tải trang
         var selectedValuee = document.getElementById('select_file_lib_pv').value;
@@ -4047,186 +4106,186 @@ function readJSON_file_path(filePath) {
         });
     }
 
-    //Tải lên file ppv và pv
-    function uploadFilesHotwordPPNandPV() {
-        const formData = new FormData();
-        const files = document.getElementById('upload_files_ppn_pv').files;
-        const lang = document.getElementById('lang_hotword_get').value;
-        if (files.length === 0) {
-			show_message('Vui lòng chọn ít nhất một file để tải lên.');
-            return;
-        }
-        for (let i = 0; i < files.length; i++) {
-            formData.append('upload_files_ppn_pv[]', files[i]);
-        }
-        formData.append('lang_hotword_get', lang);
-        formData.append('action_ppn_pv', 'upload_files_ppn_pv');
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
-        xhr.onload = function() {
-            if (xhr.status === 200) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    let messages = [];
-                    if (response.status === 'success') {
-                        // Tổng hợp tất cả thông báo
-                        messages.push(response.messages+'<br/>');
-                    } else {
-                        messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
-                    }
-                    //Tải lại dữ liệu hotword ở Config.json
-                    loadConfigHotword(lang)
-					show_message(messages.join('<br/>'));
-                } catch (e) {
-					show_message('Không thể phân tích phản hồi json: ' + e.message);
-                }
-            } else {
-				show_message("<center>Tải file lên thất bại</center>");
-            }
-        };
-        xhr.send(formData);
+//Tải lên file ppv và pv
+function uploadFilesHotwordPPNandPV() {
+    const formData = new FormData();
+    const files = document.getElementById('upload_files_ppn_pv').files;
+    const lang = document.getElementById('lang_hotword_get').value;
+    if (files.length === 0) {
+        show_message('Vui lòng chọn ít nhất một file để tải lên.');
+        return;
     }
+    for (let i = 0; i < files.length; i++) {
+        formData.append('upload_files_ppn_pv[]', files[i]);
+    }
+    formData.append('lang_hotword_get', lang);
+    formData.append('action_ppn_pv', 'upload_files_ppn_pv');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                let messages = [];
+                if (response.status === 'success') {
+                    // Tổng hợp tất cả thông báo
+                    messages.push(response.messages + '<br/>');
+                } else {
+                    messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
+                }
+                //Tải lại dữ liệu hotword ở Config.json
+                loadConfigHotword(lang)
+                show_message(messages.join('<br/>'));
+            } catch (e) {
+                show_message('Không thể phân tích phản hồi json: ' + e.message);
+            }
+        } else {
+            show_message("<center>Tải file lên thất bại</center>");
+        }
+    };
+    xhr.send(formData);
+}
 
-    //Cập nhật các file trong eng và vi để Làm mới lại cấu hình Hotword trong Config.json, 
-    function reload_hotword_config(langg = "No") {
-        if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json bao gồm cả tiếng anh và tiếng việt?")) {
+//Cập nhật các file trong eng và vi để Làm mới lại cấu hình Hotword trong Config.json, 
+function reload_hotword_config(langg = "No") {
+    if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json bao gồm cả tiếng anh và tiếng việt?")) {
+        return;
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.status === 'success') {
+                show_message("<center>" + response.message + "</center>");
+            } else {
+                show_message("<center>" + response.message + "</center>");
+            }
+            var element_data_lang_shows = document.getElementById('data_lang_shows');
+            //Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
+            // Kiểm tra nếu phần tử tồn tại
+            if (element_data_lang_shows) {
+                // Lấy giá trị của thuộc tính 'value'
+                var value_lang = element_data_lang_shows.getAttribute('value');
+                // Thực hiện các hành động cần thiết với giá trị
+                console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
+                if (value_lang === "vi") {
+                    loadConfigHotword("vi")
+                } else if (value_lang === "eng") {
+                    loadConfigHotword("eng")
+                }
+            }
+        } else {
+            show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+        }
+    };
+    xhr.send();
+}
+
+//Xóa thẻ input đài báo radio
+function delete_Dai_bao_Radio(index_id, name_dai_radio) {
+    if (name_dai_radio !== null) {
+        if (!confirm('Bạn có chắc chắn muốn xóa đài "' + name_dai_radio + '" này không?')) {
             return;
         }
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config', true);
-        xhr.onload = function() {
+    }
+    var row = document.getElementById('radio-row-' + index_id);
+    if (row) {
+        row.remove();
+    }
+}
+
+//Thêm mới đài Radio
+let radioIndex = <?php echo count($radio_data); ?> ;
+const maxRadios = <?php echo $Max_Radios; ?> ;
+function addRadio() {
+    if (radioIndex < maxRadios) {
+        const table = document.getElementById('radio-table').getElementsByTagName('tbody')[0];
+        const newRow = document.createElement('tr');
+        newRow.id = 'radio-row-' + radioIndex;
+        newRow.innerHTML =
+            '<td>' +
+            '<input type="text" class="form-control border-success" placeholder="Nhập tên đài" name="radio_name_' + radioIndex + '" id="radio_name_' + radioIndex + '">' +
+            '</td>' +
+            '<td>' +
+            '<input type="text" class="form-control border-success" placeholder="Nhập link đài" name="radio_link_' + radioIndex + '" id="radio_link_' + radioIndex + '">' +
+            '</td>' +
+            '<td style="text-align: center; vertical-align: middle;"><center>' +
+            '<button type="button" class="btn btn-danger" id="delete-radio-' + radioIndex + '" onclick="delete_Dai_bao_Radio(' + radioIndex + ', null)"><i class="bi bi-trash"></i></button>'
+        '</center></td>';
+        table.appendChild(newRow);
+        radioIndex++;
+    } else {
+        show_message("<center>Bạn chỉ có thể thêm tối đa <b>" + maxRadios + "</b> đài radio</center>");
+    }
+}
+
+//Thêm mới Báo, tin tức
+let newspaperIndex = <?php echo count($newspaper_data); ?> ;
+const maxNewsPaper = <?php echo $Max_NewsPaper; ?> ;
+function addNewsPaper() {
+    if (newspaperIndex < maxNewsPaper) {
+        const table = document.getElementById('newspaper-table').getElementsByTagName('tbody')[0];
+        const newRow = document.createElement('tr');
+        newRow.id = 'newspaper-row-' + newspaperIndex;
+        newRow.innerHTML =
+            '<td>' +
+            '<input type="text" class="form-control border-success" placeholder="Nhập tên Báo, Tin Tức" name="newspaper_name_' + newspaperIndex + '" id="newspaper_name_' + newspaperIndex + '">' +
+            '</td>' +
+            '<td>' +
+            '<input type="text" class="form-control border-success" placeholder="Nhập link/url Báo, Tin Tức" name="newspaper_link_' + newspaperIndex + '" id="newspaper_link_' + newspaperIndex + '">' +
+            '</td>' +
+            '<td style="text-align: center; vertical-align: middle;"><center>' +
+            '<button type="button" class="btn btn-danger" id="delete-newspaper-' + newspaperIndex + '" onclick="delete_NewsPaper(' + newspaperIndex + ', null)"><i class="bi bi-trash"></i></button>'
+        '</center></td>';
+        table.appendChild(newRow);
+        newspaperIndex++;
+    } else {
+        show_message("<center>Bạn chỉ có thể thêm tối đa <b>" + maxNewsPaper + "</b> kênh báo, tin tức</center>");
+    }
+}
+
+//Xóa thẻ input báo, tin tức
+function delete_NewsPaper(index_id, name_newspaper) {
+    if (name_newspaper !== null) {
+        if (!confirm('Bạn có chắc chắn muốn xóa kênh báo: "' + name_newspaper + '" này không?')) {
+            return;
+        }
+    }
+    var row = document.getElementById('newspaper-row-' + index_id);
+    if (row) {
+        row.remove();
+    }
+}
+
+//Kiểm tra kết nối Home Assistant
+function CheckConnectionHomeAssistant(inputId) {
+    loading("show");
+    var url_hasss = document.getElementById(inputId).value;
+    var token_hasss = document.getElementById('hass_long_token').value;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?check_hass&url_hass=' + encodeURIComponent(url_hasss) + '&token_hass=' + encodeURIComponent(token_hasss), true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            loading("hide");
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
-                if (response.status === 'success') {
-					show_message("<center>"+response.message+"</center>");
+                if (response.success) {
+                    show_message('<center><font color=green><b>' + response.message + '</b></font></center><br/><b>- Tên Nhà:</b> ' + response.response.location_name +
+                        '<br/><b>- Kinh độ:</b> ' + response.response.longitude + '<br/><b>- Vĩ độ:</b> ' + response.response.latitude + '<br/><b>- Múi giờ:</b> ' + response.response.time_zone +
+                        '<br/><b>- Quốc gia:</b> ' + response.response.country + '<br/><b>- Ngôn ngữ:</b> ' + response.response.language +
+                        '<br/><b>- Phiên bản Home Assistant:</b> ' + response.response.version + '<br/><b>- Trạng thái hoạt động:</b> ' + response.response.state +
+                        '<br/><b>- URL nội bộ:</b> <a href="' + response.response.internal_url + '" target="_bank">' + response.response.internal_url + '</a><br/><b>- URL bên ngoài:</b> <a href="' + response.response.external_url + '" target="_bank">' + response.response.external_url + '</a>');
                 } else {
-					show_message("<center>"+response.message+"</center>");
-                }
-                var element_data_lang_shows = document.getElementById('data_lang_shows');
-                //Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
-                // Kiểm tra nếu phần tử tồn tại
-                if (element_data_lang_shows) {
-                    // Lấy giá trị của thuộc tính 'value'
-                    var value_lang = element_data_lang_shows.getAttribute('value');
-                    // Thực hiện các hành động cần thiết với giá trị
-                    console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
-                    if (value_lang === "vi") {
-                        loadConfigHotword("vi")
-                    } else if (value_lang === "eng") {
-                        loadConfigHotword("eng")
-                    }
+                    show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + response.message)
                 }
             } else {
-				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
-            }
-        };
-        xhr.send();
-    }
-
-    //Xóa thẻ input đài báo radio
-    function delete_Dai_bao_Radio(index_id, name_dai_radio) {
-        if (name_dai_radio !== null) {
-            if (!confirm('Bạn có chắc chắn muốn xóa đài "' + name_dai_radio + '" này không?')) {
-                return;
+                console.log('Lỗi kết nối: ' + xhr.statusText);
             }
         }
-        var row = document.getElementById('radio-row-' + index_id);
-        if (row) {
-            row.remove();
-        }
-    }
-
-    //Thêm mới đài Radio
-    let radioIndex = <?php echo count($radio_data); ?> ;
-    const maxRadios = <?php echo $Max_Radios; ?> ;
-    function addRadio() {
-        if (radioIndex < maxRadios) {
-            const table = document.getElementById('radio-table').getElementsByTagName('tbody')[0];
-            const newRow = document.createElement('tr');
-            newRow.id = 'radio-row-' + radioIndex;
-            newRow.innerHTML =
-                '<td>' +
-                '<input type="text" class="form-control border-success" placeholder="Nhập tên đài" name="radio_name_' + radioIndex + '" id="radio_name_' + radioIndex + '">' +
-                '</td>' +
-                '<td>' +
-                '<input type="text" class="form-control border-success" placeholder="Nhập link đài" name="radio_link_' + radioIndex + '" id="radio_link_' + radioIndex + '">' +
-                '</td>' +
-                '<td style="text-align: center; vertical-align: middle;"><center>' +
-                '<button type="button" class="btn btn-danger" id="delete-radio-' + radioIndex + '" onclick="delete_Dai_bao_Radio(' + radioIndex + ', null)"><i class="bi bi-trash"></i></button>'
-            '</center></td>';
-            table.appendChild(newRow);
-            radioIndex++;
-        } else {
-            show_message("<center>Bạn chỉ có thể thêm tối đa <b>" + maxRadios + "</b> đài radio</center>");
-        }
-    }
-
-    //Thêm mới Báo, tin tức
-    let newspaperIndex = <?php echo count($newspaper_data); ?> ;
-    const maxNewsPaper = <?php echo $Max_NewsPaper; ?> ;
-    function addNewsPaper() {
-        if (newspaperIndex < maxNewsPaper) {
-            const table = document.getElementById('newspaper-table').getElementsByTagName('tbody')[0];
-            const newRow = document.createElement('tr');
-            newRow.id = 'newspaper-row-' + newspaperIndex;
-            newRow.innerHTML =
-                '<td>' +
-                '<input type="text" class="form-control border-success" placeholder="Nhập tên Báo, Tin Tức" name="newspaper_name_' + newspaperIndex + '" id="newspaper_name_' + newspaperIndex + '">' +
-                '</td>' +
-                '<td>' +
-                '<input type="text" class="form-control border-success" placeholder="Nhập link/url Báo, Tin Tức" name="newspaper_link_' + newspaperIndex + '" id="newspaper_link_' + newspaperIndex + '">' +
-                '</td>' +
-                '<td style="text-align: center; vertical-align: middle;"><center>' +
-                '<button type="button" class="btn btn-danger" id="delete-newspaper-' + newspaperIndex + '" onclick="delete_NewsPaper(' + newspaperIndex + ', null)"><i class="bi bi-trash"></i></button>'
-            '</center></td>';
-            table.appendChild(newRow);
-            newspaperIndex++;
-        } else {
-            show_message("<center>Bạn chỉ có thể thêm tối đa <b>" + maxNewsPaper + "</b> kênh báo, tin tức</center>");
-        }
-    }
-
-    //Xóa thẻ input báo, tin tức
-    function delete_NewsPaper(index_id, name_newspaper) {
-        if (name_newspaper !== null) {
-            if (!confirm('Bạn có chắc chắn muốn xóa kênh báo: "' + name_newspaper + '" này không?')) {
-                return;
-            }
-        }
-        var row = document.getElementById('newspaper-row-' + index_id);
-        if (row) {
-            row.remove();
-        }
-    }
-
-    //Kiểm tra kết nối Home Assistant
-    function CheckConnectionHomeAssistant(inputId) {
-		loading("show");
-        var url_hasss = document.getElementById(inputId).value;
-        var token_hasss = document.getElementById('hass_long_token').value;
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'includes/php_ajax/Check_Connection.php?check_hass&url_hass=' + encodeURIComponent(url_hasss) + '&token_hass=' + encodeURIComponent(token_hasss), true);
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-				loading("hide");
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        show_message('<center><font color=green><b>' + response.message + '</b></font></center><br/><b>- Tên Nhà:</b> ' + response.response.location_name +
-                            '<br/><b>- Kinh độ:</b> ' + response.response.longitude + '<br/><b>- Vĩ độ:</b> ' + response.response.latitude + '<br/><b>- Múi giờ:</b> ' + response.response.time_zone +
-                            '<br/><b>- Quốc gia:</b> ' + response.response.country + '<br/><b>- Ngôn ngữ:</b> ' + response.response.language +
-                            '<br/><b>- Phiên bản Home Assistant:</b> ' + response.response.version + '<br/><b>- Trạng thái hoạt động:</b> ' + response.response.state +
-                            '<br/><b>- URL nội bộ:</b> <a href="' + response.response.internal_url + '" target="_bank">' + response.response.internal_url + '</a><br/><b>- URL bên ngoài:</b> <a href="' + response.response.external_url + '" target="_bank">' + response.response.external_url + '</a>');
-                    } else {
-                        show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + response.message)
-                    }
-                } else {
-                    console.log('Lỗi kết nối: ' + xhr.statusText);
-                }
-            }
-        };
-        xhr.send();
-    }
+    };
+    xhr.send();
+}
 
 //Kiểm tra Kết Nối SSH
 function checkSSHConnection() {

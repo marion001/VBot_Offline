@@ -9,27 +9,24 @@ ini_set('memory_limit', '1G');
 ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
-//Bật Logs php
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-//Tắt Logs PHP
-#ini_set('display_errors', 0);
-#ini_set('display_startup_errors', 0);
-#error_reporting(0);
-
-
 // Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;
+
 // Lấy đường dẫn thư mục chứa tệp PHP
 $directory_path = dirname(__FILE__);
+
+//Lấy HostName
 $HostName = gethostname();
+
+//Lấy User Hiện Tại: pi
 $GET_current_USER = get_current_user();
+
 // Lấy địa chỉ IP của máy chủ
 $serverIp = $_SERVER['SERVER_ADDR'];
+
 // Lấy địa chỉ IP của người dùng khi truy cập
 $userIp = $_SERVER['REMOTE_ADDR'];
+
 //Đường dẫn ui html
 $HTML_VBot_Offline = getcwd();
 
@@ -41,22 +38,22 @@ $Config_filePath = $VBot_Offline.'Config.json';
 //địa chỉ URL Repo Github, địa chỉ này sẽ dùng cho cập nhật, không được chỉnh sửa
 $Github_Repo_Vbot = "https://github.com/marion001/VBot_Offline";
 
-// Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
+//Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
 $excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt'];
 
-// Đọc và giải mã dữ liệu JSON
+//Đọc và giải mã dữ liệu JSON
 $Config = null; // Khởi tạo biến để lưu dữ liệu
 
-// Khởi tạo biến để lưu dữ liệu
+//Khởi tạo biến để lưu dữ liệu
 #$Version_VBot_Program = null; 
 
 //biến lưu trữ thông báo php
 $messages = [];
 
-// Danh sách các đuôi file không cho phép tải xuống
+//Danh sách các đuôi file không cho phép tải xuống
 $Restricted_Extensions = ['html', 'python', 'php', 'so'];
 
-// Danh sách các định dạng hình ảnh hợp lệ
+//Danh sách các định dạng hình ảnh hợp lệ
 $allowed_image_types = ["jpg", "png", "jpeg", "gif"];
 
 //Tối đa số lượng kênh đài báo radio được cho phép
@@ -68,31 +65,43 @@ $Max_NewsPaper = 20;
 //Các định dạng file âm thanh cho phép tìm kiếm, tải lên và lựa chọn khi khởi động
 $Allowed_Extensions_Audio = ['mp3', 'wav', 'ogg', 'aac'];
 
-// Lấy giao thức (http hoặc https)
+//Lấy giao thức (http hoặc https)
 $Protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 
-// Lấy tên miền (ví dụ: 192.168.14.113)
+//Lấy tên miền (ví dụ: 192.168.14.113)
 $Domain = $_SERVER['HTTP_HOST'];
-// Lấy đường dẫn tới file hiện tại (ví dụ: /html/includes/php_ajax/Media_Player_Search.php)
+
+//Lấy đường dẫn tới file hiện tại (ví dụ: /html/includes/php_ajax/Media_Player_Search.php)
 $Path = $_SERVER['REQUEST_URI'];
-// Kết hợp thành URL đầy đủ
+
+//Kết hợp thành URL đầy đủ
 $Current_URL = $Protocol . $Domain . $Path;
 
 #Đọc nội dung file Config
 if (file_exists($Config_filePath)) {
-    #$jsonString = file_get_contents($Config_filePath);
     $Config = json_decode(file_get_contents($Config_filePath), true);
-
     if (json_last_error() !== JSON_ERROR_NONE) {
         echo 'Có lỗi xảy ra khi giải mã JSON: ' . json_last_error_msg();
-        $Config = null; // Đặt dữ liệu thành null nếu có lỗi
+		//Đặt dữ liệu thành null nếu có lỗi
+        $Config = null;
     }
 } else {
     echo 'Tệp JSON không tồn tại tại đường dẫn: ' . $Config_filePath;
-    $Config = null; // Đặt dữ liệu thành null nếu tệp không tồn tại
+	//Đặt dữ liệu thành null nếu tệp không tồn tại
+    $Config = null;
 }
 
-
+if (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
+//Bật Logs PHP
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+} else {
+//Tắt Logs PHP
+ini_set('display_errors', 0);
+ini_set('display_startup_errors', 0);
+error_reporting(0);
+}
 
 $stt_token_google_cloud = $VBot_Offline.$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file'];
 $tts_token_google_cloud = $VBot_Offline.$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['authentication_json_file'];
@@ -109,7 +118,6 @@ $Download_Path = $Config['backup_upgrade']['download_path'];
 $Extract_Path = $Config['backup_upgrade']['extract_path'];
 
 
-
 //Thông tin kết nối SSH
 #sudo apt-get install php-ssh2
 #$ssh_host = $Config['ssh_server']['ssh_host'];
@@ -117,7 +125,6 @@ $ssh_host = $serverIp;
 $ssh_port = $Config['ssh_server']['ssh_port'];
 $ssh_user = $Config['ssh_server']['ssh_username'];
 $ssh_password = $Config['ssh_server']['ssh_password'];
-
 
 //Kiểm tra xem google cloud backup có được bật hay không:
 $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['active'];

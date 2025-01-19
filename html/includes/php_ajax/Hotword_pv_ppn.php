@@ -84,7 +84,7 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
                 }
                 else
                 {
-                    $responseMessages[] = "Không thể tải tập tin lên '$name'";
+                    $responseMessages[] = "Không thể tải tập tin lên '$name', hoặc không có full quyền hạn 0777";
                 }
             }
             else

@@ -34,6 +34,7 @@
         "port": 5002
     },
     "web_interface": {
+        "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
     "bluetooth": {
@@ -124,6 +125,9 @@
             "model": "gpt-3.5-turbo",
             "role_system_content": "Bạn là một trợ lý thông minh",
             "key_chat_gpt": "sk-proj-tc--gv4g-88-ChwixTZK-55-77-L89-66"
+        },
+        "customize_developer_assistant": {
+            "active": true
         }
     },
     "openweathermap": {
@@ -587,6 +591,7 @@
                     "PodCast.json",
                     "Youtube.json",
                     "ZingMP3.json",
+                    "Dev_Assistant.py",
                     "eng",
                     "vi",
                     "library",
@@ -626,6 +631,7 @@
                     "ZingMP3.json",
                     "client_secret.json",
                     "verify_token.json",
+                    "Dev_Assistant.py",
                     "__pycache__"
                 ]
             }

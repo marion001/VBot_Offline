@@ -64,10 +64,16 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
               <i class="bi bi-circle"></i><span>Home Assistant Customize Command</span>
             </a>
           </li>
-     
-          <li title="Tùy chỉnh nâng cao cho DEV tự code">
+
+          <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Skill">
             <a href="DEV_Customization.php">
               <i class="bi bi-circle"></i><span>DEV Customization (Custom Skill)</span>
+            </a>
+          </li>
+
+          <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Assistant">
+            <a href="DEV_Assistant.php">
+              <i class="bi bi-circle"></i><span>DEV Assistant (Custom Assistant)</span>
             </a>
           </li>
 
