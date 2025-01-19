@@ -100,29 +100,39 @@ include 'html_js.php';
     const checkbox = document.getElementById('fetchLogsCheckbox');
     const logsOutput = document.getElementById('logsOutput');
     let intervalId;
-    // Hàm gửi yêu cầu và cập nhật nội dung logs
-    function fetchLogs() {
-        const xhr = new XMLHttpRequest();
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                try {
-                    const response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        const logs = response.data.map(item => formatLogMessage(item.logs_message)).join('');
-                        logsOutput.innerHTML = logs;
-                    } else {
-                        logsOutput.innerHTML = '<span style="color: red;">Lỗi: ' + response.message + '</span>';;
-                    }
-                } catch (e) {
-                    logsOutput.innerHTML = '<span style="color: red;">Lỗi khi phân tích dữ liệu: ' + e.message + '</span>';
-                }
+	function fetchLogs() {
+		const xhr = new XMLHttpRequest();
+		xhr.onerror = function () {
+			logsOutput.innerHTML = '<span style="color: red;">Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa</span>';
+			logsOutput.scrollTop = logsOutput.scrollHeight;
+		};
+		xhr.ontimeout = function () {
+			logsOutput.innerHTML = '<span style="color: red;">Lỗi timeout. Yêu cầu mất quá nhiều thời gian để phản hồi.</span>';
+			logsOutput.scrollTop = logsOutput.scrollHeight;
+		};
+		xhr.timeout = 10000;
+		xhr.onreadystatechange = function () {
+			if (xhr.readyState === XMLHttpRequest.DONE) {
+				try {
+					const response = JSON.parse(xhr.responseText);
+					if (response.success) {
+						const logs = response.data.map(item => formatLogMessage(item.logs_message)).join('');
+						logsOutput.innerHTML = logs;
+					} else {
+						logsOutput.innerHTML = '<span style="color: red;">Lỗi: ' + response.message + '</span>';
+					}
+				} catch (e) {
+					logsOutput.innerHTML = '<span style="color: green;">Nội dung trả về: </span><br>' + 
+										   '<pre>' + xhr.responseText + '</pre>';
+				}
 				// Cuộn xuống dưới cùng
-                logsOutput.scrollTop = logsOutput.scrollHeight;
-            }
-        };
-        xhr.open("GET", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs");
-        xhr.send();
-    }
+				logsOutput.scrollTop = logsOutput.scrollHeight;
+			}
+		};
+		xhr.open("GET", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs");
+		xhr.send();
+	}
+
 
     //Màu cho log messages
     function formatLogMessage(message) {
