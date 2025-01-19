@@ -2,7 +2,7 @@
     "version": "1.0.9",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa Lỗi Trợ Lý Ảo Zalo AI, Cập Nhật DEV Custom Assistant (Mọi người có thể tự code, liên kết trợ lý ảo theo nhu cầu), Sửa thêm một số lỗi khác",
-    "releaseDate": "19/01/2025",
+    "releaseDate": "19/01/2025-1",
     "changes": [
         {
             "type": "feature",
