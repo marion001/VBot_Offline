@@ -77,6 +77,12 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
             </a>
           </li>
 
+          <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Text To Speak">
+            <a href="DEV_TTS.php">
+              <i class="bi bi-circle"></i><span>DEV Text To Speak (Custom TTS)</span>
+            </a>
+          </li>
+
           <li title="Danh Sách API VBot">
             <a href="API_List.php">
               <i class="bi bi-circle"></i><span>Giao Tiếp API (API REST)</span>

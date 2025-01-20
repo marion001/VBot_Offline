@@ -1,0 +1,4 @@
+[12:14:56 20-01-2025] Có Lỗi Xảy Ra: Value for header {apikey: {'82EOnSah6sokqE05AEFQJsD2PdHTOTob'}} must be of type str or bytes, not <class 'set'>
+[2025-01-20 12:14:57] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[12:34:37 20-01-2025] Có Lỗi Xảy Ra: 'dict' object has no attribute 'text'
+[2025-01-20 12:34:37] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.

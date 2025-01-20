@@ -90,7 +90,7 @@
             "google_gemini",
             "chat_gpt",
             "dify_ai",
-			"customize_developer_assistant"
+            "customize_developer_assistant"
         ],
         "default_assistant": {
             "active": true,
@@ -101,7 +101,7 @@
             }
         },
         "dify_ai": {
-            "active": true,
+            "active": false,
             "session_chat_conversation": true,
             "api_key": "app-gi44444444444444",
             "user_id": "VBot_Assistant",
@@ -115,7 +115,7 @@
             "set_expiration_time": 86400
         },
         "google_gemini": {
-            "active": true,
+            "active": false,
             "time_out": 25,
             "api_key": "fc3ct43cr_8888888888888888"
         },
@@ -398,7 +398,8 @@
                     "network_error": "resource/sound/default/network_error.mp3",
                     "music_sound_pause": "resource/sound/default/music_pause.mp3",
                     "music_sound_stops": "resource/sound/default/music_stops.mp3",
-                    "start_playlist_play": "resource/sound/default/start_playlist_play.mp3"
+                    "start_playlist_play": "resource/sound/default/start_playlist_play.mp3",
+                    "play_answer_error": "resource/sound/default/play_answer_error.mp3"
                 },
                 "welcome": {
                     "active": true,
@@ -536,6 +537,9 @@
                     "language_code": "vi-VN",
                     "speaking_speed": 1.2
                 },
+                "tts_dev_customize": {
+                    "active": false
+                },
                 "directory_tts": "TTS_Audio"
             }
         },
@@ -593,6 +597,7 @@
                     "Youtube.json",
                     "ZingMP3.json",
                     "Dev_Assistant.py",
+                    "Dev_TTS.py",
                     "eng",
                     "vi",
                     "library",
@@ -632,7 +637,6 @@
                     "ZingMP3.json",
                     "client_secret.json",
                     "verify_token.json",
-                    "Dev_Assistant.py",
                     "__pycache__"
                 ]
             }

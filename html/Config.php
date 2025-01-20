@@ -192,6 +192,9 @@ $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['c
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] = $_POST['tts_select'];
 $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'] = $_POST['directory_tts'];
 
+#Cập Nhật TTS Dev Custom
+$Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] = isset($_POST['tts_dev_customize_active']) ? true : false;
+
 #CẬP NHẬT GIÁ TRỊ TRONG tts GOOGEL CLOUD
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] = $_POST['tts_ggcloud_language_code'];
 $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] = $_POST['tts_ggcloud_voice_name'];
@@ -801,7 +804,6 @@ Cấu Hình API:</h5>
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Hiển Thị Log API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt hiển thị log của API, Chỉ hiển thị khi Debug trực tiếp trên Console, Terminal')"></i> :</label>
                   <div class="col-sm-9">
-				  
 					<div class="form-switch">
                       <input class="form-check-input" type="checkbox" name="api_log_active" id="api_log_active" <?php echo $Config['api']['show_log']['active'] ? 'checked' : ''; ?>>
                       
@@ -1233,6 +1235,8 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
 				  $replace_text_tts = "Microsoft edge";
 			  }else if ($GET_tts_select === "tts_ggcloud_key"){
 				  $replace_text_tts = "Google Cloud Key";
+			  }else if ($GET_tts_select === "tts_dev_customize"){
+				  $replace_text_tts = "TTS DEV Customize";
 			  }else{
 				  $replace_text_tts = "Không có dữ liệu";
 			  }
@@ -1269,8 +1273,18 @@ Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_me
                       <input  class="form-check-input" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
                       <label  class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
                     </div>
+
+                    <div class="form-check" >
+                      <input  class="form-check-input" type="radio" name="tts_select" id="tts_dev_customize" value="tts_dev_customize" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_dev_customize' ? 'checked' : ''; ?>>
+                      <label  class="form-check-label" for="tts_dev_customize">TTS DEV Customize <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code, chuyển văn bản thành giọng nói nếu chọn tts này, dữ liệu để các bạn code sẽ nằm trong tệp: <b>Dev_TTS.py</b><br/>- Cần thêm kích hoạt bên dưới để sử dụng vào chương trình')"></i></label>
+						<div class="form-switch">
+						<label class="form-label" for="tts_dev_customize_active">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Nếu Dùng TTS DEV Custom bạn cần phải kích hoạt để được khởi tạo dữ liệu khi chạy chương trình')"></i></label>
+						<input class="form-check-input" type="checkbox" name="tts_dev_customize_active" id="tts_dev_customize_active" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] ? 'checked' : ''; ?>>
+						</div>
+
+
+					</div>
                   </div>
-				  
 
             </div>
           </div>
@@ -3930,30 +3944,38 @@ document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
         }
         if (document.getElementById('tts_default').checked) {
             div_select_tts_default_html.style.display = 'block';
+			document.getElementById("tts_dev_customize_active").checked = false;
         } else {
             div_select_tts_default_html.style.display = 'none';
         }
         if (document.getElementById('tts_zalo').checked) {
             getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
             div_select_tts_zalo_html.style.display = 'block';
+			document.getElementById("tts_dev_customize_active").checked = false;
         } else {
             div_select_tts_zalo_html.style.display = 'none';
         }
         if (document.getElementById('tts_viettel').checked) {
             getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
             div_select_tts_viettel_html.style.display = 'block';
+			document.getElementById("tts_dev_customize_active").checked = false;
         } else {
             div_select_tts_viettel_html.style.display = 'none';
         }
         if (document.getElementById('tts_edge').checked) {
             div_select_tts_edge_html.style.display = 'block';
+			document.getElementById("tts_dev_customize_active").checked = false;
         } else {
             div_select_tts_edge_html.style.display = 'none';
         }
         if (document.getElementById('tts_ggcloud_key').checked) {
             div_select_tts_ggcloud_key.style.display = 'block';
+			document.getElementById("tts_dev_customize_active").checked = false;
         } else {
             div_select_tts_ggcloud_key.style.display = 'none';
+        }
+		if (document.getElementById('tts_dev_customize').checked) {
+			document.getElementById("tts_dev_customize_active").checked = true;
         }
     });
 });
