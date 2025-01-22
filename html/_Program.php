@@ -129,7 +129,7 @@ function replace_values_json_file($configNewPath, $configOldPath) {
                         // Thay thế toàn bộ mảng
                         if ($newData[$key] !== $oldValue) {
                             $newData[$key] = $oldValue;
-                            $messages[] = "<font color=green>- Đã thay thế toàn bộ mảng của: <b>'$currentPath'</b></font>";
+                            #$messages[] = "<font color=green>- Đã thay thế toàn bộ mảng của: <b>'$currentPath'</b></font>";
                         } else {
                             $unchangedKeys[] = $currentPath;
                         }
@@ -142,14 +142,14 @@ function replace_values_json_file($configNewPath, $configOldPath) {
                     if ($newData[$key] !== $oldValue) {
                         $newData[$key] = $oldValue;
 						$displayValue = is_bool($oldValue) ? ($oldValue ? 'true' : 'false') : ($oldValue === null ? 'null' : $oldValue);
-                        $messages[] = "<font color=green>- Đã thay thế giá trị của: </font> <font color=blue>'$currentPath'</font> thành: <font color=blue>$displayValue</font>";
+                        #$messages[] = "<font color=green>- Đã thay thế giá trị của: </font> <font color=blue>'$currentPath'</font> thành: <font color=blue>$displayValue</font>";
                     } else {
                         $unchangedKeys[] = $currentPath;
                     }
                 }
             } else {
                 $missingKeys[] = $currentPath;
-                $messages[] = "<font color=red>- Khóa '$currentPath' không tồn tại trong dữ liệu mới</font><br/>";
+                #$messages[] = "<font color=red>- Khóa '$currentPath' không tồn tại trong dữ liệu mới</font><br/>";
             }
         }
     }
@@ -157,7 +157,7 @@ function replace_values_json_file($configNewPath, $configOldPath) {
     replace_recursive($configNewData, $configOldData, $missingKeys, $unchangedKeys);
     // Hiển thị các khóa không thay đổi
     if (!empty($unchangedKeys)) {
-        $messages[] = "<font color=green>- Các khóa có giá trị không thay đổi:</font> <font color=blue>" . implode(', ', $unchangedKeys) . "</font><br/>";
+        #$messages[] = "<font color=green>- Các khóa có giá trị không thay đổi:</font> <font color=blue>" . implode(', ', $unchangedKeys) . "</font><br/>";
     }
     // Hiển thị các khóa không tồn tại
     if (!empty($missingKeys)) {
