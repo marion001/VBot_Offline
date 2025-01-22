@@ -376,7 +376,13 @@ if (copy($sourceFile, $destinationFile)) {
         $updated_schedule = [];
 		foreach ($_POST['notification_schedule'] as $task) {
 			$task['active'] = isset($task['active']) ? (bool)$task['active'] : false;
+			
+			$task['create_words'] = isset($task['create_words']) && !empty($task['create_words']) ? $task['create_words'] : 'vbot_interface';
+
 			$task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
+			
+			$task['data']['audio_file'] = isset($task['data']['audio_file']) && !empty($task['data']['audio_file']) ? $task['data']['audio_file'] : "";
+
 			// Kiểm tra các điều kiện cơ bản của task
 			if (
 				!empty($task['name']) &&
@@ -491,6 +497,13 @@ if (!empty($successMessage)) {
 </div>
 </div>
 
+<div class="row mb-3">
+<label for="create_words-<?= $index ?>" class="col-sm-3 col-form-label">Nguồn tạo:</label>
+<div class="col-sm-9">
+<input readonly class="form-control border-danger" type="text" id="create_words-<?= $index ?>" name="notification_schedule[<?= $index ?>][create_words]" placeholder="<?= htmlspecialchars($notification['create_words'] ?? 'vbot_interface') ?>" value="<?= htmlspecialchars($notification['create_words'] ?? 'vbot_interface') ?>" title="Nguồn tạo tác vụ này">
+</div>
+</div>
+
 
 <div class="row mb-3">
 <label for="message-<?= $index ?>" class="col-sm-3 col-form-label">Nội Dung Thông Báo <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập nội dung thông báo, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>:</label>
@@ -507,9 +520,13 @@ if (!empty($successMessage)) {
     <div class="col-sm-9">
 	<div class="input-group mb-3">
         <?php 
+		
+			// Kiểm tra và gán giá trị mặc định nếu phần tử không tồn tại
+			$audio_file = isset($notification['data']['audio_file']) ? htmlspecialchars($notification['data']['audio_file']) : "";
             // Gọi hàm để tạo dropdown cho trường âm thanh này
-            generate_audio_select($VBot_Offline.$Config['schedule']['audio_path'], 'notification_schedule[' . $index . '][data][audio_file]', htmlspecialchars($notification['data']['audio_file']));
-        ?>
+            generate_audio_select($VBot_Offline.$Config['schedule']['audio_path'], 'notification_schedule[' . $index . '][data][audio_file]', $audio_file);
+       
+	   ?>
 		<button class="btn btn-success border-success" onclick="playAudio_Schedule('notification_schedule[<?php echo $index; ?>][data][audio_file]')" type="button"><i class="bi bi-play-circle"></i></button>
     </div>
     </div>

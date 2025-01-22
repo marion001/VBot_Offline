@@ -1,8 +1,8 @@
 {
-    "version": "1.0.9",
+    "version": "1.0.10",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập Nhật DEV Custom TTS (Mọi người có thể tự code TTS (Text To Speak) của mình), Sửa thêm một số lỗi khác",
-    "releaseDate": "20/01/2025",
+    "description": "Sửa lỗi hiển thị lập lịch, thông báo",
+    "releaseDate": "22/01/2025",
     "changes": [
         {
             "type": "feature",
