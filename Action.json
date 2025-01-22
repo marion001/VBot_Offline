@@ -122,8 +122,7 @@
     ],
     "notice": [
         "cảnh cáo",
-        "cảnh báo",
-        "nhắc"
+        "cảnh báo"
     ],
     "schedule": [
         "lập lịch",
@@ -133,8 +132,7 @@
     ],
     "setup": [
 		"thiết lập",
-		"cài đặt",
-		"đặt"
+		"cài đặt"
     ],
     "execute": [
         "thực hiện"
@@ -156,5 +154,11 @@
 		"chỉ quạt gió",
 		"chỉ quạt",
 		"quạt gió"
-	]
+	],
+    "reminder": [
+        "lời nhắc",
+        "nhắc tôi",
+        "thông báo",
+        "nhắc nhở"
+    ]
 }
