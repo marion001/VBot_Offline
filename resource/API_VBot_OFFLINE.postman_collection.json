@@ -1920,7 +1920,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"zalo_assistant\",\r\n    \"value\": \"lịch âm hôm nay\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"zalo_assistant\",\r\n    \"value\": \"nhắc tôi uống thuốc sau 2 phút nữa\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1948,7 +1948,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"default_assistant\",\r\n    \"value\": \"lịch âm hôm nay\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"default_assistant\",\r\n    \"value\": \"nhắc tôi đi ngủ sau 2 phút nữa\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1956,13 +1956,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"194"
 					],
 					"port": "5002"
 				}
@@ -1977,34 +1977,6 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"prioritize_virtual_assistants\",\r\n    \"value\": \"hôm nay là thứ mấy\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "VBot Xử Lý Chính (VBot Processing)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mấy giờ rồi\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -2299,6 +2271,62 @@
 						"168",
 						"14",
 						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "VBot Xử Lý Chính (VBot Processing)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"chào bạn\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.30:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"30"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Đặt Lời Nhắc Nhanh",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"reminder\",\r\n    \"value\": \"nhắc tôi đi ngủ sau 3 phút nữa\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
 					],
 					"port": "5002"
 				}
