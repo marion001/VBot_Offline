@@ -28,12 +28,43 @@ $accept_types = implode(", ", array_map(function($type) {
 }, $allowed_image_types));
 
 if (isset($_POST['save_change_info_name'])) {
+	
+	
+$jsonFilePath = $VBot_Offline.'resource/VietNam_Localtion.json';
+$jsonData = file_get_contents($jsonFilePath);
+$data = json_decode($jsonData, true);
+// Lấy danh sách các tỉnh và quận từ mảng data
+$provinces = isset($data['province']) ? $data['province'] : [];
+$districts = isset($data['district']) ? $data['district'] : [];
+// Lấy ID tỉnh/quận từ POST
+$provinceId = $_POST['province_name'];
+$districtId = $_POST['district_name'];
+// Tìm kiếm tên tỉnh từ ID
+$selectedProvinceName = '';
+foreach ($provinces as $province) {
+    if ($province['idProvince'] == $provinceId) {
+        $selectedProvinceName = $province['name'];
+        break;
+    }
+}
+// Tìm tên quận từ ID
+$selectedDistrictName = '';
+foreach ($districts as $district) {
+    if ($district['idDistrict'] == $districtId) {
+        $selectedDistrictName = $district['name'];
+        break;
+    }
+}
+
+// Lưu lại tên tỉnh, quận và ID vào mảng $Config
+$Config['contact_info']['address']['province'] = $selectedProvinceName;
+$Config['contact_info']['address']['district'] = $selectedDistrictName;
+$Config['contact_info']['address']['id_province'] = $provinceId;
+$Config['contact_info']['address']['id_district'] = $districtId;
+
+	
 #CẬP NHẬT Thông tin người dùng
 $Config['contact_info']['full_name'] = $_POST['full_name'];
-$Config['contact_info']['address']['wards'] = $_POST['wards_name'];
-$Config['contact_info']['address']['district'] = $_POST['district_name'];
-$Config['contact_info']['address']['province'] = $_POST['province_name'];
-$Config['contact_info']['address']['country'] = $_POST['country_name'];
 $Config['contact_info']['location']['latitude'] = floatval($_POST['latitude_name']);
 $Config['contact_info']['location']['longitude'] = floatval($_POST['longitude_name']);
 $Config['contact_info']['email'] = $_POST['email_name'];
@@ -139,13 +170,10 @@ include 'html_sidebar.php';
 
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Địa Chỉ</div>
-                    <div class="col-lg-9 col-md-8"><?php echo $Config['contact_info']['address']['wards'].", ".$Config['contact_info']['address']['district'].", ".$Config['contact_info']['address']['province']; ?></div>
+                    <div class="col-lg-9 col-md-8"><?php echo $Config['contact_info']['address']['district'].", ".$Config['contact_info']['address']['province']; ?></div>
                   </div>
 
-                  <div class="row">
-                    <div class="col-lg-3 col-md-4 label">Quốc Gia</div>
-                    <div class="col-lg-9 col-md-8"><?php echo $Config['contact_info']['address']['country']; ?></div>
-                  </div>
+
 
                   <div class="row">
                     <div class="col-lg-3 col-md-4 label">Vị Trí:</div>
@@ -167,7 +195,7 @@ include 'html_sidebar.php';
                   <!-- Profile Edit Form -->
                <form class="row g-3 needs-validation" enctype="multipart/form-data" novalidate method="POST" action="">
                     <div class="row mb-3">
-                      <label for="profileImage" class="col-md-4 col-lg-3 col-form-label">Ảnh hồ sơ cá nhân</label>
+                      <label class="col-md-4 col-lg-3 col-form-label">Ảnh hồ sơ cá nhân</label>
                       <div class="col-md-8 col-lg-9">
                         <img src="<?php echo $Avata_File; ?>" alt="Profile">
                         <div class="pt-2">
@@ -192,57 +220,53 @@ include 'html_sidebar.php';
                     </div>
 
                     <div class="row mb-3">
-                      <label for="address_name" class="col-md-4 col-lg-3 col-form-label">Địa Chỉ</label>
+                      <label class="col-md-4 col-lg-3 col-form-label">Địa Chỉ</label>
                       <div class="col-md-8 col-lg-9">
-					  
-					  <div class="input-group mb-3 border-success">
+
+
+<div class="input-group mb-3 border-success">
   <div class="input-group-prepend">
-    <span class="input-group-text border-success" id="wards_name">Xã: </span>
+    <span class="input-group-text border-success" for="province_name">Tỉnh: </span>
   </div>
-  <input type="text" name="wards_name" id="wards_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['address']['wards']; ?>" value="<?php echo $Config['contact_info']['address']['wards']; ?>">
+
+<select required id="city-province" name="province_name" class="form-select border-success">
+<option value="">-- Chọn Tỉnh/Thành Phố --</option>
+</select>
+<div class="invalid-feedback">Vui lòng chọn Tỉnh, Thành Phố của bạn</div>
 </div>
+
 					  
 <div class="input-group mb-3 border-success">
   <div class="input-group-prepend">
-    <span class="input-group-text border-success" id="district_name">Huyện: </span>
+    <span class="input-group-text border-success" for="district_name">Huyện: </span>
   </div>
-  <input type="text" name="district_name" id="district_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['address']['district']; ?>" value="<?php echo $Config['contact_info']['address']['district']; ?>">
+  <select required id="district-town" name="district_name" class="form-select border-success">
+<option value="0">-- Chọn Quận/Huyện --</option>
+</select>
+<div class="invalid-feedback">Vui lòng chọn Quận, Huyện, Thị Xã của bạn</div>
+</div>
+</div>
+</div>
+<div class="row mb-3">
+<label class="col-md-4 col-lg-3 col-form-label">Vị Trí</label>
+<div class="col-md-8 col-lg-9">
+
+<div class="input-group mb-3 border-success">
+  <div class="input-group-prepend">
+    <span class="input-group-text border-success">Kinh Độ: </span>
+  </div>
+  <input type="text" id="longitude_name" name="longitude_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['location']['longitude']; ?>" value="<?php echo $Config['contact_info']['location']['longitude']; ?>">
 </div>
 
 <div class="input-group mb-3 border-success">
   <div class="input-group-prepend">
-    <span class="input-group-text border-success" id="province_name">Tỉnh: </span>
-  </div>
-  <input type="text" name="province_name" id="province_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['address']['province']; ?>" value="<?php echo $Config['contact_info']['address']['province']; ?>">
-</div>
-					 </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="country_name" class="col-md-4 col-lg-3 col-form-label">Quốc Gia</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input name="country_name" type="text" class="form-control border-success" id="country_name" placeholder="<?php echo $Config['contact_info']['address']['country']; ?>" value="<?php echo $Config['contact_info']['address']['country']; ?>">
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="location_name" class="col-md-4 col-lg-3 col-form-label">Vị Trí</label>
-                      <div class="col-md-8 col-lg-9">
-					  
-					  
-<div class="input-group mb-3 border-success">
-  <div class="input-group-prepend">
-    <span class="input-group-text border-success" id="latitude_name">Vĩ Độ: </span>
+    <span class="input-group-text border-success">Vĩ Độ: </span>
   </div>
   <input type="text" name="latitude_name" id="latitude_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['location']['latitude']; ?>" value="<?php echo $Config['contact_info']['location']['latitude']; ?>">
 </div>
 
-<div class="input-group mb-3 border-success">
-  <div class="input-group-prepend">
-    <span class="input-group-text border-success" id="longitude_name">Kinh Độ: </span>
-  </div>
-  <input type="text" id="longitude_name" name="longitude_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['location']['longitude']; ?>" value="<?php echo $Config['contact_info']['location']['longitude']; ?>">
-</div>
+<button type="button" class="btn btn-info" onclick="getLocationData()">Lấy Vị Trí Hiện Tại</button>
+
                       </div>
                     </div>
 
@@ -283,9 +307,7 @@ include 'html_sidebar.php';
                     </div>
                   </div>
                 </div>
-				
-                     
-                   
+
 <hr/>
                     <div class="text-center">
                       <button type="submit" name="save_change_user_login" class="btn btn-primary rounded-pill">Lưu Cài Đặt</button>
@@ -439,6 +461,76 @@ include 'html_js.php';
             xhr.send();
         }
     </script>
+	
+<script>
+	const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file='+'<?php echo $VBot_Offline; ?>'+'resource/VietNam_Localtion.json';
+	$(document).ready(function () {
+		$.get(apiURL, function (response) {
+			if (response.success && response.data) {
+				const data = response.data;
+				//console.log(data);
+				const $provinceSelect = $('#city-province');
+				const provinces = data.province || [];
+				provinces.sort((a, b) => a.name.localeCompare(b.name));
+				//dropdown tỉnh
+				provinces.forEach(province => {
+					const isSelectedProvince = (province.idProvince == '<?php echo $Config['contact_info']['address']['id_province']; ?>') ? 'selected' : '';
+					$provinceSelect.append('<option value="' + province.idProvince + '" ' + isSelectedProvince + '>' + province.name + '</option>');
+				});
+				//Kiểm tra nếu đã có tỉnh được chọn thì load quận tương ứng
+				const selectedProvinceId = '<?php echo $Config['contact_info']['address']['id_province']; ?>';
+				loadDistricts(data.district || [], selectedProvinceId);
+				// Thêm sự kiện cho tỉnh được chọn
+				$provinceSelect.on('change', function () {
+					const idProvince = $(this).val();
+					loadDistricts(data.district || [], idProvince);
+				});
+			} else {
+				showMessagePHP('Dữ liệu không hợp lệ: ' + (response.message || 'Không có thông tin chi tiết.'), 5);
+			}
+		}).fail(function (error) {
+			showMessagePHP('Lỗi khi tải dữ liệu thông tin địa chỉ: '+error, 5);
+		});
+		// Load các quận/huyện cho tỉnh đã chọn
+		function loadDistricts(districtList, idProvince) {
+			const $districtSelect = $('#district-town');
+			$districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>');
+			// Lọc và sắp xếp các quận/huyện theo tỉnh
+			const filteredDistricts = districtList
+				.filter(d => d.idProvince == idProvince)
+				.sort((a, b) => a.name.localeCompare(b.name));
+			//Thêm các option cho quận, và thêm thuộc tính selected nếu quận đã chọn
+			filteredDistricts.forEach(district => {
+				const isSelectedDistrict = (district.idDistrict == '<?php echo $Config['contact_info']['address']['id_district']; ?>') ? 'selected' : '';
+				$districtSelect.append('<option value="' + district.idDistrict + '" ' + isSelectedDistrict + '>' + district.name + '</option>');
+			});
+		}
+	});
+</script>
+
+<script>
+    function getLocationData() {
+		loading('show');
+        $.ajax({
+            url: 'https://ipinfo.io/json',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data) {
+				loading('hide');
+                const loc = data.loc.split(',');
+                const latitude = loc[0];
+                const longitude = loc[1];
+                $('#latitude_name').val(latitude);
+                $('#longitude_name').val(longitude);
+				showMessagePHP('Đã cập nhật dữ liệu vị trí hiện tại', 3);
+            },
+            error: function(xhr, status, error) {
+				loading('hide');
+                show_message('Không thể lấy thông tin vị trí: ' + error);
+            }
+        });
+    }
+</script>
 </body>
 
 </html>

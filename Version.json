@@ -1,8 +1,8 @@
 {
-    "version": "1.0.11",
+    "version": "1.0.12",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ trợ đặt lịch lời nhắc bằng cách nói trực tiết trên loa, câu lệnh: (nhắc tôi, lời nhắc, thông báo, nhắc nhở) VD: (nhắc tôi đi ngủ sau 3 phút nữa) hoặc (nhắc tôi 3 lần uống thuốc sau 5 phút nữa => sẽ nhắc bạn 3 lần sau 5 phút nữa) dữ liệu được đồng bồ trên WebUI, nên dùng với stt gcloud bắt từ chuẩn xác hơn",
-    "releaseDate": "23/01/2025",
+    "description": "Sửa Lỗi Vị Trí Thời Tiết, theo địa chỉ",
+    "releaseDate": "24/01/2025",
     "changes": [
         {
             "type": "feature",

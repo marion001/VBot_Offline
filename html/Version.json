@@ -1,8 +1,8 @@
 {
-    "version": "1.0.10",
+    "version": "1.0.11",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi hiển thị lập lịch, thông báo",
-    "releaseDate": "22/01/2025",
+    "description": "Sửa Lỗi Vị Trí Thời Tiết, theo địa chỉ",
+    "releaseDate": "24/01/2025",
     "changes": [
         {
             "type": "feature",

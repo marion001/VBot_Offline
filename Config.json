@@ -4,10 +4,10 @@
         "email": "",
         "avata": "dasdsa.jpg",
         "address": {
-            "wards": "Xã, Phường Của Bạn",
-            "district": "Quận, Huyện Của Bạn",
             "province": "Tỉnh, Thành Phố Của Bạn",
-            "country": "Việt Nam"
+            "district": "Quận, Huyện Của Bạn",
+            "id_district": "326",
+            "id_province": "33"
         },
         "location": {
             "latitude": 20.99999,
