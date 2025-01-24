@@ -522,7 +522,7 @@ include 'html_js.php';
                 const longitude = loc[1];
                 $('#latitude_name').val(latitude);
                 $('#longitude_name').val(longitude);
-				showMessagePHP('Đã cập nhật dữ liệu vị trí hiện tại', 3);
+				showMessagePHP('Đã cập nhật dữ liệu vị trí hiện tại, Vị trí được phát hiện: '+data.city+', '+data.region, 10);
             },
             error: function(xhr, status, error) {
 				loading('hide');
