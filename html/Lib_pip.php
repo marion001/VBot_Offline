@@ -143,7 +143,7 @@ $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .= stream_get_contents($stream_out);
 $filePath = $VBot_Offline.'resource/pip_list_lib_user.txt';
 file_put_contents($filePath, $output);
-chmod($filePath, 0777);
+#chmod($filePath, 0777);
 //END Chạy lệnh lấy dữ liệu pip của user
 	
 $urlParts = parse_url($Github_Repo_Vbot);
