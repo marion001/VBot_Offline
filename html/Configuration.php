@@ -91,6 +91,20 @@ if (file_exists($Config_filePath)) {
     $Config = null;
 }
 
+#Đọc nội dung file Bluetooth_CMD
+if (file_exists($VBot_Offline.'resource/bluetooth/Bluetooth_CMD.json')) {
+    $BLE_CMD = json_decode(file_get_contents($VBot_Offline.'resource/bluetooth/Bluetooth_CMD.json'), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo 'Có lỗi xảy ra khi giải mã JSON: ' . json_last_error_msg();
+		//Đặt dữ liệu thành null nếu có lỗi
+        $BLE_CMD = null;
+    }
+} else {
+    echo 'Tệp JSON không tồn tại tại đường dẫn: ' . $Config_filePath;
+	//Đặt dữ liệu thành null nếu tệp không tồn tại
+    $BLE_CMD = null;
+}
+
 if (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
 //Bật Logs PHP
 ini_set('display_errors', 1);

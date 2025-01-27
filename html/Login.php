@@ -7,8 +7,6 @@ include 'Configuration.php';
 #Quên Mật Khẩu
 if (isset($_GET['forgot_password'])) {
     $my_email = $_GET['mail'];
-
- 
     if (!empty($my_email)) {
         if ($my_email === $Config['contact_info']['email']) {
             // Hiển thị mật khẩu hoặc gửi liên kết đặt lại mật khẩu
@@ -30,21 +28,16 @@ if (isset($_GET['forgot_password'])) {
             "message" => "Vui lòng nhập email!"
         ];
     }
-
-    // Trả về dữ liệu dạng JSON
     header('Content-Type: application/json');
     echo json_encode($response);
 	exit();
 }
 //Đổi mật khẩu
 if (isset($_GET['change_password'])) {
-	// Trả về dữ liệu dạng JSON
 	header('Content-Type: application/json');
     $currentPassword = $_GET['currentPassword'];
     $newPassword = $_GET['newpassword'];
     $renewPassword = $_GET['renewpassword'];
-    
-    
     // Kiểm tra xem tất cả các tham số có giá trị không
     if (!empty($currentPassword) && !empty($newPassword) && !empty($renewPassword)) {
         // Kiểm tra xem mật khẩu cũ có khớp với mật khẩu hiện tại không
@@ -53,9 +46,7 @@ if (isset($_GET['change_password'])) {
             if (strlen($newPassword) >= 6 && strlen($newPassword) <= 32) {
                 // Kiểm tra xem mật khẩu mới và nhập lại mật khẩu mới có khớp nhau không
                 if ($newPassword === $renewPassword) {
-                    // Tiến hành cập nhật mật khẩu mới tại đây
-                    // Ví dụ, lưu mật khẩu mới vào cơ sở dữ liệu
-                    // ...
+                    //Tiến hành cập nhật mật khẩu mới
 					$Config['contact_info']['user_login']['user_password'] = $renewPassword;
 
 					file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -95,7 +86,6 @@ exit();
 session_start();
 //Đăng xuất
 if (isset($_GET['logout'])) {
-// Xóa session user_login mà không cần kiểm tra mật khẩu
 unset($_SESSION['user_login']);
 header('Location: Login.php');
 exit;
@@ -119,13 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password_user = $_POST['yourPassword'];
 
     // Kiểm tra mật khẩu trực tiếp
-    if ($password_user === $Config['contact_info']['user_login']['user_password']) { // Thay 'password' bằng mật khẩu thực tế của bạn
+	// Thay 'password' bằng mật khẩu thực tế của bạn
+    if ($password_user === $Config['contact_info']['user_login']['user_password']) {
         $_SESSION['user_login'] = [
 			// Lưu mật khẩu vào session để kiểm tra khi đăng xuất
             //'password' => $password_user, 
             'login_time' => time()
         ];
-        
         header('Location: index.php');
         exit;
     } else {

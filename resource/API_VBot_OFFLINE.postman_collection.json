@@ -1858,13 +1858,13 @@
 			"response": []
 		},
 		{
-			"name": "Gọi Trợ Lý Ảo Google Gemini",
+			"name": "Chạy Câu Lệnh Custom Home Assistant",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"google_gemini\",\r\n    \"value\": \"chào bạn, bạn tên là gì\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"custom_home_assistant\",\r\n    \"value\": \"tắt hộ cái đèn ngủ.\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1872,13 +1872,41 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gọi Trợ Lý Ảo Google Gemini",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"google_gemini\",\r\n    \"value\": \"thông báo cho tôi ngày mai uống thuốc lúc 7 giờ 10 phút\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
 					],
 					"port": "5002"
 				}
@@ -2264,13 +2292,41 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.30:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"30"
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bluetooth Command",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth\",\r\n    \"action\": \"command\",\r\n    \"value\": \"AT+POWER_OFF\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
 					],
 					"port": "5002"
 				}
@@ -2284,7 +2340,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"chào bạn\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữu liệu\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"thời tiết hôm nay tại huyện văn giang\",\r\n    \"notes\": \"truyền thẳng dữ liệu dạng văn bản để bot xử lý dữ liệu\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -2292,13 +2348,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.30:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"30"
+						"194"
 					],
 					"port": "5002"
 				}

@@ -175,7 +175,7 @@ function show_all_file_in_directory(directory_path, source_backup, resultDiv_Id)
                     });
 
                     table += '</table>';
-                    resultDiv_show_all_File.innerHTML = table; // Hiển thị bảng
+                    resultDiv_show_all_File.innerHTML = table;
                 } else {
                     show_message(response.message);
                 }
@@ -224,7 +224,7 @@ function gcloud_scan(folder_name, source_backup, resultDiv_Id) {
                     });
 
                     table += '</table>';
-                    resultDiv_show_all_File.innerHTML = table; // Hiển thị bảng
+                    resultDiv_show_all_File.innerHTML = table;
                 } else {
                     show_message(response.message);
                 }
@@ -234,8 +234,6 @@ function gcloud_scan(folder_name, source_backup, resultDiv_Id) {
             }
         }
     };
-
-    // Gửi yêu cầu
     xhr.send();
 }
 
@@ -1886,13 +1884,16 @@ function playHLS(url) {
     function vbotBluetooth_toggleFullScreen() {
         var chatbotSizeSetting = document.getElementById('vbotBluetooth_size_setting');
         var chatbotIcon = document.getElementById('vbotBluetooth_fullscreen');
+		var modalContent = document.getElementById('BLT_modal-content_Style');
         // Kiểm tra và thay đổi class giữa modal-lg, modal-xl, và modal-fullscreen
         if (chatbotSizeSetting.classList.contains('modal-lg')) {
             chatbotSizeSetting.classList.remove('modal-lg');
             chatbotSizeSetting.classList.add('modal-xl');
+			modalContent.style.height = '50%'; 
         } else if (chatbotSizeSetting.classList.contains('modal-xl')) {
             chatbotSizeSetting.classList.remove('modal-xl');
             chatbotSizeSetting.classList.add('modal-fullscreen');
+			modalContent.style.height = '100%'; 
             // Thay đổi icon thành bi-fullscreen-exit khi ở chế độ fullscreen
             chatbotIcon.classList.remove('bi-arrows-fullscreen');
             chatbotIcon.classList.add('bi-fullscreen-exit');
@@ -1902,6 +1903,7 @@ function playHLS(url) {
             // Trở lại icon fullscreen khi không ở chế độ fullscreen
             chatbotIcon.classList.remove('bi-fullscreen-exit');
             chatbotIcon.classList.add('bi-arrows-fullscreen');
+			modalContent.style.height = '50%'; 
         }
     }
 
@@ -2273,7 +2275,7 @@ function ui_check_update() {
                 try {
                     callback(JSON.parse(xhr.responseText));
                 } catch (error) {
-                    console.error("Lỗi khi phân tích dữ liệu JSON từ file remote: " +error, 3);
+                    showMessagePHP("Lỗi khi phân tích dữ liệu JSON từ file remote: "+error, 3);
                 }
             } else {
                 showMessagePHP('Lỗi khi tải dữ liệu từ file remote: ' +xhr.statusText, 3);
@@ -2535,33 +2537,82 @@ function clearAllDevices_vbotScanDevices() {
 	get_localStorage_vbotScanDevices();
 }
 
+function bluetooth_command_at_input() {
+    // Bluetooth command khi được nhập lệnh thủ công ở thẻ input
+    var inputValue = document.getElementById('ble_Command_UI').value.trim();
+    if (inputValue === "") {
+        return;
+    }
+    if (!inputValue.startsWith("AT+")) {
+        showMessagePHP("Lệnh Không Đúng", 3);
+        return;
+    }
+    bluetooth_control('command', inputValue);
+}
 
-//Bật, tắt bluetooth
+//Bật, tắt, Command bluetooth
 function bluetooth_control(Action, Value) {
+    loading('show');
     var data = JSON.stringify({
         "type": 4,
         "data": 'bluetooth',
         "action": Action,
-		"value": Value
+        "value": Value
     });
     var xhr = new XMLHttpRequest();
     xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {
             try {
                 if (this.status === 0) {
+                    loading('hide');
                     show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                     return;
                 } else if (this.status !== 200) {
+                    loading('hide');
                     show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
                     return;
                 }
                 var response = JSON.parse(this.responseText);
                 if (response.success) {
-                    showMessagePHP(response.message, 5);
+                    loading('hide');
+                    if (Action === 'power') {
+                        showMessagePHP(response.message, 5);
+                    } else if (Value === 'AT+PAIR') {
+                        var data = JSON.parse(response.message);
+                        var tableHTML = '<br/><table class="table table-bordered border-primary" cellspacing="0" cellpadding="5"><tr><th style="text-align: center; vertical-align: middle;">Địa Chỉ Mac</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr>';
+                        var seenMacAddresses = [];
+                        data.forEach(function(dataItem) {
+                            var dataItemContent = dataItem.data;
+                            if (dataItemContent && dataItemContent.includes("MacAdd") && dataItemContent.includes("Name")) {
+                                var macAddMatch = dataItemContent.match(/MacAdd:([0-9a-fA-F]+)/);
+                                var nameMatch = dataItemContent.match(/Name:([^,]+)/);
+                                if (macAddMatch && nameMatch) {
+                                    var macAdd = macAddMatch[1];
+                                    if (!seenMacAddresses.includes(macAdd)) {
+                                        seenMacAddresses.push(macAdd); 
+                                        tableHTML += "<tr><td style='text-align: center; vertical-align: middle;'>" + macAdd + "</td><td style='text-align: center; vertical-align: middle;'>" + nameMatch[1] + "</td><td style='text-align: center; vertical-align: middle;'><button type='button' class='btn btn-success' onclick=\"bluetooth_control('connect', '" + macAdd + "|" + nameMatch[1] + "')\"><i class='bi bi-arrows-angle-contract'> Kết Nối</i></button></td></tr>";
+                                    }
+                                }
+                            }
+                        });
+                        tableHTML += "</table>";
+                        document.getElementById("Bluetooth_Scan_devices").innerHTML = tableHTML;
+						localStorage.setItem('bluetoothDevices_Vbot', JSON.stringify(data));
+                    } else if (Action === 'connect') {
+						var data = JSON.parse(response.message);
+						var jsonString = JSON.stringify(data, null, 2);
+                        show_message('<b><pre class="text-success">'+jsonString+'</pre></b>');
+                    } else {
+						var data = JSON.parse(response.message);
+						var jsonString = JSON.stringify(data, null, 2);
+                        show_message('<b><pre class="text-success">'+jsonString+'</pre></b>');
+                    }
                 } else {
+                    loading('hide');
                     show_message('Lỗi: ' + response.message);
                 }
             } catch (error) {
+                loading('hide');
                 show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
             }
         }
@@ -2571,8 +2622,43 @@ function bluetooth_control(Action, Value) {
     xhr.send(data);
 }
 
-/*
+function loadBluetoothDevices() {
+    // Lấy dữ liệu từ localStorage
+    var storedData = localStorage.getItem('bluetoothDevices_Vbot');
+    if (storedData) {
+        var data = JSON.parse(storedData);
+        var tableHTML = '<p class="card-title"> Dữ liệu được tìm kiếm trước đó: <i class="bi bi-trash text-danger" title="Xóa dữ liệu Tìm Kiếm" onclick="clearBluetoothDevices()"></i></p><table class="table table-bordered border-primary" cellspacing="0" cellpadding="5"><tr><th style="text-align: center; vertical-align: middle;">Địa Chỉ Mac</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr>';
+        var seenMacAddresses = [];
+        data.forEach(function(dataItem) {
+            var dataItemContent = dataItem.data;
+            if (dataItemContent && dataItemContent.includes("MacAdd") && dataItemContent.includes("Name")) {
+                var macAddMatch = dataItemContent.match(/MacAdd:([0-9a-fA-F]+)/);
+                var nameMatch = dataItemContent.match(/Name:([^,]+)/);
+                if (macAddMatch && nameMatch) {
+                    var macAdd = macAddMatch[1];
+                    if (!seenMacAddresses.includes(macAdd)) {
+                        seenMacAddresses.push(macAdd); 
+                        tableHTML += "<tr><td style='text-align: center; vertical-align: middle;'>" + macAdd + "</td><td style='text-align: center; vertical-align: middle;'>" + nameMatch[1] + "</td><td style='text-align: center; vertical-align: middle;'><button type='button' class='btn btn-success' onclick=\"bluetooth_control('connect', '" + macAdd + "|" + nameMatch[1] + "')\"><i class='bi bi-arrows-angle-contract'> Kết Nối</i></button></td></tr>";
+                    }
+                }
+            }
+        });
+        tableHTML += "</table>";
+        document.getElementById("Bluetooth_Scan_devices").innerHTML = tableHTML;
+    } else {
+        document.getElementById("Bluetooth_Scan_devices").innerHTML = "<center><h5 class='card-title text-danger'>Không có danh sách thiết bị Bluetooth nào được tìm thấy</h5></center>";
+    }
+}
 
+function clearBluetoothDevices() {
+	//Bluetooth xóa dữ liệu được lưu trong localStorage
+    localStorage.removeItem('bluetoothDevices_Vbot');
+    document.getElementById("Bluetooth_Scan_devices").innerHTML = "<center><h5 class='card-title text-danger'>Không có danh sách thiết bị Bluetooth nào được tìm thấy</h5></center>";
+}
+
+
+
+/*
 // Hàm thêm thông báo mới vào danh sách thông báo
 function addNotification(message) {
     // Tạo thẻ li mới
@@ -2606,11 +2692,14 @@ setTimeout(function() {
 </script>
 
 <script>
-        // Kiểm tra điều kiện và thông báo cập nhật
-        <?php if ($Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] === true) { ?>
-			window.onload = function() {
-				vbot_check_update();
-				ui_check_update();
-			};
-        <?php } ?>
+// Kiểm tra điều kiện và thông báo cập nhật
+<?php if ($Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] === true) { ?>
+window.onload = function() {
+    // Nếu URL không chứa "Login.php", thực hiện các hàm sau
+    if (!window.location.href.includes("Login.php")) {
+        vbot_check_update();
+        ui_check_update();
+    }
+};
+<?php } ?>
 </script>

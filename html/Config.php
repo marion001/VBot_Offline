@@ -354,6 +354,7 @@ $Config['virtual_assistant']['customize_developer_assistant']['active'] = isset(
 
 #Cập nhật Bluetooth
 $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
+$Config['bluetooth']['show_logs'] = isset($_POST['bluetooth_show_logs']) ? true : false;
 $Config['bluetooth']['gpio_power'] = intval($_POST['bluetooth_gpio_power']);
 $Config['bluetooth']['baud_rate'] = intval($_POST['bluetooth_baud_rate']);
 $Config['bluetooth']['serial_port'] = $_POST['bluetooth_serial_port'];
@@ -3542,6 +3543,15 @@ Bluetooth <i class="bi bi-bluetooth"></i> <font color=red>(Chức năng chưa đ
 <div class="col-sm-9">
 <div class="form-switch">
 <input class="form-check-input" type="checkbox" name="bluetooth_active" id="bluetooth_active" <?php echo $Config['bluetooth']['active'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Hiển thị Logs Bluetooth <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để hiển thị logs Bluetooth')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="bluetooth_show_logs" id="bluetooth_show_logs" <?php echo $Config['bluetooth']['show_logs'] ? 'checked' : ''; ?>>
 </div>
 </div>
 </div>

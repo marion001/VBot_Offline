@@ -15,7 +15,7 @@ import requests
 #https://ai.zalo.cloud/docs/api/text-to-audio-converter
 
 """
-hàm dev_assistant cần được giữ nguyên, 
+hàm dev_tts cần được giữ nguyên, 
 Mọi tùy biến và xử lý dữ liệu các bạn dev sẽ code bên trong hàm này
 """
 def dev_tts(text_input):

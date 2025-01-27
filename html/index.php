@@ -406,6 +406,17 @@ if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media
 </div>
 </div>
 
+<!--
+<div class="activity-item d-flex">
+    <div class="form-switch">
+        <input class="form-check-input" type="checkbox" id="bluetooth_power" name="bluetooth_power" onclick="bluetooth_control('power', this.checked)">
+    </div>
+    <i class="bi bi-dash-lg"></i>
+    <div class="activity-content">
+   <b><font color="green">Bluetooth Power <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt nguồn Bluetooth')"></i></font></b>
+    </div>
+</div>
+-->
 <div class="activity-item d-flex">
     <div class="form-switch">
         <input class="form-check-input" type="checkbox" id="media_player_active" name="media_player_active" onclick="change_to_another_mode('media_player_active', this.checked)" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
@@ -1096,6 +1107,7 @@ include 'html_js.php';
                     document.getElementById('mqtt_show_logs_reconnect').checked = data.mqtt_show_logs_reconnect ? true : false;
                     document.getElementById('cache_tts').checked = data.cache_tts_active ? true : false;
                     document.getElementById('media_player_active').checked = data.media_player.media_player_active ? true : false;
+                    document.getElementById('bluetooth_power').checked = data.bluetooth_power ? true : false;
                     document.getElementById('wake_up_in_media_player').checked = data.media_player.wake_up_in_media_player ? true : false;
                     document.getElementById('music_local_active').checked = data.media_player.music_local_active ? true : false;
                     document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
