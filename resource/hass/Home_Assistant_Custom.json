@@ -8,9 +8,7 @@
                 "action": "switch.turn_off",
                 "data": "{}",
                 "target": {
-                    "entity_id": [
-                        "switch.den_ngu"
-                    ]
+                    "entity_id": "switch.den_ngu"
                 }
             },
             "questions": [

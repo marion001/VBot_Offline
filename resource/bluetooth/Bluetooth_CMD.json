@@ -19,6 +19,7 @@
 		"play_pause": "AT+PAUSE",
 		"check_play_pause": "AT+PAUSE?",
 		"pair": "AT+PAIR",
+		"scan": "AT+SCAN",
 		"add_mac_auto_connect": "AT+ADDLINKADD=",
 		"add_name_auto_connect": "AT+ADDLINKNAME=",
 		"check_memory": "AT+VMLINK?",

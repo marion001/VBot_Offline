@@ -540,8 +540,13 @@ if (!empty($successMessage)) {
 </textarea>
 <div class="invalid-feedback">Cần nhập nội dung code YAML cho tác vụ này</div>
 </div>
+<center>
+<button type="button" class="btn btn-success rounded-pill" onclick="yaml_test_code_hass('intents[<?= $index ?>][data_yaml]')"><i class="bi bi-align-start"></i> Chạy Thử Code Yaml</button>
+</center>
 </div>
 </div>
+
+
 
 <!-- Câu Lệnh Cần Thực Thi -->
 <div class="row mb-3">
@@ -831,7 +836,96 @@ function readJSON_file_path(filePath) {
         $('#myModal_Home_Assistant').modal('show');
     }
 }
+
+//Test điều khiển code yaml
+function yaml_test_code_hass(id_texara) {
+    yamlInput = yamlToArrayy(document.getElementById(id_texara).value);
+    input = JSON.stringify(yamlInput, null, 2);
+    try {
+        const actionData = JSON.parse(input);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        const data = 'yaml_test_control_homeassistant=' + encodeURIComponent(JSON.stringify(actionData));
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 300) {
+                var response = JSON.parse(xhr.responseText);
+                        if (response.success) {
+							showMessagePHP(response.message, 3)
+                        } else {
+                            show_message(response.message, 3);
+                        }
+            } else {
+				show_message('Lỗi yêu cầu: ' + xhr.status);
+            }
+        };
+        xhr.onerror = function () {
+			show_message('Lỗi xảy ra khi gửi yêu cầu');
+        };
+        xhr.send(data);
+    } catch (err) {
+		show_message('Dữ liệu không hợp lệ' + err);
+    }
+}
+
+//Chuyển Yaml Sang Json
+function yamlToArrayy(yaml) {
+    const lines = yaml.trim().split("\n");
+    const result = {};
+    const path = [];
+    let lastKey = null;
+    for (let line of lines) {
+        if (line.trim() === "") continue;
+        let matches;
+        if ((matches = line.match(/^(\s*)-(.*)$/))) {
+            const indent = matches[1].length / 2;
+            const value = matches[2].trim();
+            while (path.length > indent) {
+                path.pop();
+            }
+            let parent = result;
+            for (const segment of path) {
+                parent = parent[segment];
+            }
+            if (lastKey !== null && Array.isArray(parent[lastKey])) {
+                parent[lastKey].push(value);
+            } else {
+                parent[lastKey] = [value];
+            }
+        } else if ((matches = line.match(/^(\s*)([^:]+):(.*)$/))) {
+            const indent = matches[1].length / 2;
+            const key = matches[2].trim();
+            let value = matches[3].trim().replace(/^"|"$/g, "");
+            while (path.length > indent) {
+                path.pop();
+            }
+            let parent = result;
+            for (const segment of path) {
+                parent = parent[segment];
+            }
+            if (key === "entity_id") {
+                if (value.startsWith("-")) {
+                    parent[key] = value.split("\n");
+                } else {
+                    parent[key] = value;
+                }
+            } else {
+                if (value === "") {
+                    parent[key] = {};
+                    path.push(key);
+                } else {
+                    parent[key] = isNaN(value) ? value : parseFloat(value);
+                }
+            }
+            lastKey = key;
+        }
+    }
+    return result;
+}
+
 </script>
+
+
 
 <script>
 // Hiển thị modal xem nội dung file json Home_Assistant.json

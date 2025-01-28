@@ -5,6 +5,73 @@
 include '../../Configuration.php';
 header('Content-Type: application/json');
 
+//Tets Code Yaml Hass
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_homeassistant'])) {
+    $actionData = json_decode($_POST['yaml_test_control_homeassistant'], true);
+    if (!$actionData || empty($actionData['action']) || empty($actionData['target']['entity_id'])) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu "action" hoặc "entity_id" trong dữ liệu']);
+        exit;
+    }
+    $action = $actionData['action'];
+    $data = isset($actionData['data']) ? $actionData['data'] : [];
+    $target = $actionData['target'];
+	$entity_id = $target['entity_id'];
+    list($domain, $service) = explode('.', $action);
+    if (is_string($entity_id)) {
+		#Nếu là chuỗi
+        $payload = ['entity_id' => [$entity_id]];
+    } elseif (is_array($entity_id)) {
+        //Nếu là Mảng
+        $payload = ['entity_id' => $entity_id];
+    } else {
+        // Còn lại gắn mảng rỗng
+        $payload = ['entity_id' => []];
+    }
+    $headers = [
+        "Authorization: Bearer ".$Config['home_assistant']['long_token'],
+        "Content-Type: application/json"
+    ];
+	function sendRequest($url, $headers, $payload) {
+		$ch = curl_init($url);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_POST, true);
+		curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+		$response = curl_exec($ch);
+		if ($response === false) {
+			$error = curl_error($ch);
+			curl_close($ch);
+			return ['success' => false, 'message' => $error];
+		}
+		$statusCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+		switch ($statusCode) {
+			case 200:
+				return ['success' => true, 'message' => 'Thao tác thành công'];
+			case 400:
+				return ['success' => false, 'message' => 'Lỗi: 400 - Yêu cầu không hợp lệ'];
+			case 401:
+				return ['success' => false, 'message' => 'Lỗi: 401 - Không được phép'];
+			case 404:
+				return ['success' => false, 'message' => 'Lỗi: 404 - Không tìm thấy'];
+			case 405:
+				return ['success' => false, 'message' => 'Lỗi: 405 - Phương pháp không được phép'];
+			default:
+				return ['success' => false, 'message' => 'Lỗi: ' . $statusCode];
+		}
+	}
+
+    //Chạy URL Nội Bộ
+    $response = sendRequest($Config['home_assistant']['internal_url'].'/api/services/' . $domain . '/'.$service, $headers, $payload);
+    //Chạy URL Ngoài Nếu Lỗi
+    if (!$response['success']) {
+        $response = sendRequest($Config['home_assistant']['external_url'].'/api/services/'.$domain.'/'.$service, $headers, $payload);
+    }
+    echo json_encode($response);
+    exit;
+}
+
+
 #kiểm tra kết nối tới SSH Server
 if (isset($_GET['check_ssh'])) {
     $ssh_host = $_GET['host'];
