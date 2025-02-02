@@ -132,10 +132,7 @@ include 'html_sidebar.php';
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
           <li class="breadcrumb-item active">Lên lịch, tác vụ, lời nhắc, thông báo</li>
-		  
 		   &nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['schedule']['active'] ? '<p class="text-success" title="Schedule đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Schedule không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
-       
-		  
         </ol>
       </nav>
     </div><!-- End Page Title -->
@@ -334,10 +331,9 @@ if (file_exists($start_recovery_custom_hass)) {
 echo '<script>window.location.href = "Scheduler.php";</script>';
 }
 
-
 // Xử lý dữ liệu sau khi người dùng gửi form
 if (isset($_POST['save_all_Scheduler'])) {
-	
+
 #Sao Lưu Dữ Liệu Trước
 if (isset($Config['backup_upgrade']['scheduler']['active']) && $Config['backup_upgrade']['scheduler']['active'] === true) {
 // Đường dẫn gốc và đích
@@ -416,6 +412,12 @@ $data['display_screen']['active'] = isset($_POST['display_screen_active']) ? tru
 $data['display_screen']['date'] = isset($_POST['dates_display_screen']) ? $_POST['dates_display_screen'] : [];
 $data['display_screen']['time_on'] = array_filter($time_on_display_screen);
 $data['display_screen']['time_off'] = array_filter($time_off_display_screen);
+
+#Lưu dữ liệu dừng phát media Player
+$time_stop_media_player = isset($_POST['time_stop_media_player']) ? $_POST['time_stop_media_player'] : [];
+$data['stop_media_player']['time'] = array_filter($time_stop_media_player);
+$data['stop_media_player']['active'] = isset($_POST['stop_media_player_active']) ? true : false;
+$data['stop_media_player']['date'] = isset($_POST['dates_stop_media_player']) ? $_POST['dates_stop_media_player'] : [];
 
 #Lưu dữ liệu Restart VBot
 $time_restart_vbot = isset($_POST['time_restart_vbot']) ? $_POST['time_restart_vbot'] : [];
@@ -665,11 +667,7 @@ echo isset($data['send_notify_upgrade_vbot_home_assistant']['active'])
         <i class="bi bi-question-circle-fill" onclick="show_message('Định dạng thời gian là 24 giờ, (giờ:phút) Ví Dụ: (03:59)')"></i>:
     </label>
     <div class="col-sm-9">
-        <input 
-            class="form-control border-danger" 
-            type="text" 
-            name="send_notify_upgrade_vbot_home_assistant_time" 
-            id="send_notify_upgrade_vbot_home_assistant_time" 
+<input class="form-control border-danger" type="text" name="send_notify_upgrade_vbot_home_assistant_time" id="send_notify_upgrade_vbot_home_assistant_time" 
             placeholder="<?php echo isset($data['send_notify_upgrade_vbot_home_assistant']['time']) ? $data['send_notify_upgrade_vbot_home_assistant']['time'] : '03:01'; ?>" 
             value="<?php echo isset($data['send_notify_upgrade_vbot_home_assistant']['time']) ? $data['send_notify_upgrade_vbot_home_assistant']['time'] : '03:01'; ?>">
     </div>
@@ -761,6 +759,72 @@ $display_screen = $data['display_screen'];
 
 </div>
 </div>
+
+</div>
+</div>
+</div>
+
+
+<div class="card accordion" id="accordion_button_stop_media_player">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_stop_media_player" aria-expanded="false" aria-controls="collapse_button_stop_media_player">
+Lập Lịch Dừng Phát Media Player: Nhạc, Báo, Tin Tức, &nbsp; Trạng Thái: &nbsp;
+<?php 
+echo isset($data['stop_media_player']['active']) ? ($data['stop_media_player']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
+?>
+</h5>
+<div id="collapse_button_stop_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_stop_media_player">
+<?php
+// Kiểm tra dữ liệu stop_media_player và gán giá trị mặc định nếu không có
+if (!isset($data['stop_media_player']) || empty($data['stop_media_player'])) {
+    // Gán giá trị mặc định nếu không có dữ liệu stop_media_player
+    $data['stop_media_player'] = [
+        'active' => false,
+        'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        'time' => ["03:09"]
+    ];
+}
+$stop_media_player = $data['stop_media_player'];
+?>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="stop_media_player_active" id="stop_media_player_active" value="<?php echo $stop_media_player['active']; ?>" <?= $stop_media_player['active'] ? 'checked' : '' ?>>
+</div>
+</div>
+</div>
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Có Thể Chọn Các Ngày Trong Tuần Để Lên Lịch Dừng Phát Media Player')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<?php foreach ($week_days as $date => $label): ?>
+<input class="form-check-input" type="checkbox" name="dates_stop_media_player[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $stop_media_player['date']) ? 'checked' : '' ?>>
+<label><?= htmlspecialchars($label) ?></label>
+<br/>
+<?php endforeach; ?>
+</div>
+</div>
+</div>
+
+
+<div class="row mb-3">
+<label class="col-sm-3 col-form-label">Thời Gian:</label>
+<div class="col-sm-9">
+<div class="time-inputs_stop_media_player" id="time-on-stop_media_player">
+<?php foreach ($stop_media_player['time'] as $index => $time): ?>
+<div class="time-input-stop_media_player input-group mb-3" id="time-stop_media_player-<?= $index ?>">
+<input class="form-control border-success" type="text" name="time_stop_media_player[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+<button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-stop_media_player-<?= $index ?>"><i class="bi bi-trash"></i></button>
+</div>
+<?php endforeach; ?>
+<button class="btn btn-success rounded-pill" type="button" id="add-time-stop_media_player">Thêm thời gian</button>
+</div>
+</div>
+</div>
+
 
 </div>
 </div>
@@ -1518,6 +1582,36 @@ function addTimeInput(taskIndex) {
 </script>
 <!--END Scripts Restart VBot -->
 
+<!-- Scripts stop media Player -->
+<script>
+    let time_Stop_Media_Player = <?= count($stop_media_player['time']) ?>;
+    // Thêm input cho Time On
+    document.getElementById('add-time-stop_media_player').addEventListener('click', function() {
+        const timeOnContainer = document.getElementById('time-on-stop_media_player');
+        // Tạo id cho input mới và container
+        const inputContainerId = 'time_stop_media_player-' + time_Stop_Media_Player;
+        // Sử dụng innerHTML để tạo input và button xóa
+        const inputContainer = document.createElement('div');
+        inputContainer.id = inputContainerId;
+		inputContainer.classList.add('time-input-stop_media_player', 'input-group', 'mb-3');
+        inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_stop_media_player[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-stop_media_player-' + time_Stop_Media_Player + '"><i class="bi bi-trash"></i></button>';
+        // Thêm container vào trong DOM
+        timeOnContainer.insertBefore(inputContainer, this);
+        // Gắn sự kiện xóa khi nhấn Delete
+        document.getElementById('delete-stop_media_player-' + time_Stop_Media_Player).addEventListener('click', function() {
+            document.getElementById(inputContainerId).remove();
+        });
+        time_Stop_Media_Player++;
+    });
+    // Gắn sự kiện xóa ban đầu cho các button đã có
+    document.querySelectorAll('.time-inputs_stop_media_player > div > button').forEach(button => {
+        button.addEventListener('click', function() {
+            const container = button.parentElement;
+            container.remove();
+        });
+    });
+</script>
+<!--END Scripts stop media Player -->
 
 <!-- Scripts REBOOT OS SYSTEM -->
 <script>

@@ -67,7 +67,7 @@ include 'Notify.php';
 </div>
 </div>
 </div>
- 
+
 <!-- Bluetooth -->
 <?php
 if (isset($Config['bluetooth']['active']) && $Config['bluetooth']['active'] == true) {
@@ -276,6 +276,19 @@ echo '<a class="nav-item nav-icon" data-bs-toggle="modal" data-bs-target="#modal
             <li>
               <hr class="dropdown-divider">
             </li>
+<!--
+<button id="themeToggle" class="btn btn-primary"><i class="bi bi-moon"></i></button>
+-->
+
+            <li>
+              <a class="dropdown-item d-flex align-items-center" id="themeToggle">
+                 <span>Chế độ tối</span>
+              </a>
+            </li>
+            <li>
+              <hr class="dropdown-divider">
+            </li>
+
 
             <li>
               <a class="dropdown-item d-flex align-items-center" href="FAQ.php">

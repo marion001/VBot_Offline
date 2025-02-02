@@ -24,8 +24,34 @@ $git_repository = $pathParts[1];
   <script src="assets/vendor/hls/hls.js"></script>
   <!--END Thông báo -->
 
+<script>
+  // Đổi màu giao diện
+  const themeToggle = document.getElementById('themeToggle');
+  function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('vbot_theme', theme);
+      if (theme === 'dark') {
+          themeToggle.classList.remove('bi-moon-stars-fill');
+          themeToggle.innerHTML = '<i class="bi bi-sun"></i> Chế độ sáng';
+      } else {
+          themeToggle.classList.remove('bi-sun');
+          themeToggle.innerHTML = '<i class="bi bi-moon-stars-fill"></i> Chế độ tối';
+      }
+  }
+  function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      setTheme(newTheme);
+  }
+  const savedTheme = localStorage.getItem('vbot_theme') || 'light';
+  setTheme(savedTheme);
+  themeToggle.addEventListener('click', toggleTheme);
+</script>
+
   <!-- Template Main JS File -->
   <script src="assets/js/main.js"></script>
+
+
 <script>
 //Chạy khi trang đã tải xong
 window.onload = setInterval(updateTime, 1000);

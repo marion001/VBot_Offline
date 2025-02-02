@@ -34,6 +34,7 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
+  <link href="assets/css/dark_mode.css" rel="stylesheet">
 
   <!-- =======================================================
   * Template Name: NiceAdmin
@@ -42,115 +43,122 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
-  <style>
-          .overlay_loading {
-            display: none; /* Ẩn overlay theo mặc định */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5); /* Nền tối */
-            z-index: 9999;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-  </style>
-    <style>
-        /* CSS hiển thời gian */
-        #container_time {
-			background:#f1f1f1;
-			border:2px solid #999;
-			border-radius:10px;
-			padding: 2px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-        }
 
-        #day-date-container_time {
-            display: flex;
-            justify-content: center;
+<style>
+    .overlay_loading {
+        display: none;
+        /* Ẩn overlay theo mặc định */
+        
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        /* Nền tối */
+        
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.5rem;
+    }
+</style>
+<style>
+    /* CSS hiển thời gian */
     
-        }
-        /* Ẩn phần ngày tháng, thời gian khi trên giao diện mobile */
-        @media (max-width: 768px) {
-
-            #container_time {
-                display: none;
-            }
-			
-    #notification {
-        max-width: 100%;
-		width: auto;
+    #container_time {
+        background: #f1f1f1;
+        border: 2px solid #999;
+        border-radius: 10px;
+        padding: 2px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
-	    #number_notification_1 {
-        max-width: 100%;
-        width: auto;
+    
+    #day-date-container_time {
+        display: flex;
+        justify-content: center;
     }
-			
+    /* Ẩn phần ngày tháng, thời gian khi trên giao diện mobile */
+    
+    @media (max-width: 768px) {
+        #container_time {
+            display: none;
         }
-    </style>
+        #notification {
+            max-width: 100%;
+            width: auto;
+        }
+        #number_notification_1 {
+            max-width: 100%;
+            width: auto;
+        }
+    }
+</style>
 <!-- Css hiển thị thông báo cho code php -->
-    <style>
-        #toast {
-            visibility: hidden;
-            position: fixed;
-            bottom: 10px;
-            right:55px;
-            background: #333;
-            color: #fff;
-            padding: 15px;
-            border-radius: 5px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 10px;
-        }
-        #toast button {
-            background: transparent;
-            border: none;
-            color: #fff;
-            font-size: 20px;
-            cursor: pointer;
-            position: absolute;
-            top: 5px;
-            right: 5px;
-        }
-        #toastMessage {
-            margin-right: 20px; /* Tạo khoảng trống cho nút đóng */
-        }
-    </style>
+<style>
+    #toast {
+        visibility: hidden;
+        position: fixed;
+        bottom: 10px;
+        right: 55px;
+        background: #333;
+        color: #fff;
+        padding: 15px;
+        border-radius: 5px;
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    #toast button {
+        background: transparent;
+        border: none;
+        color: #fff;
+        font-size: 20px;
+        cursor: pointer;
+        position: absolute;
+        top: 5px;
+        right: 5px;
+    }
+    
+    #toastMessage {
+        margin-right: 20px;
+        /* Tạo khoảng trống cho nút đóng */
+    }
+</style>
 <!-- Css hiển thị media player -->
-    <style>
-
-        #media-container {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        #media-cover {
-            width: 150px;
-            height: 150px;
-            border-radius: 10px;
-        }
-        #progress-container {
-            width: 100%;
-        }
-        #progress-bar {
-            width: 100%;
-        }
-        #time-info {
-            text-align: right;
-            margin-top: 5px;
-        }
-		
-    </style>
-	
+<style>
+    #media-container {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+    
+    #media-cover {
+        width: 150px;
+        height: 150px;
+        border-radius: 10px;
+    }
+    
+    #progress-container {
+        width: 100%;
+    }
+    
+    #progress-bar {
+        width: 100%;
+    }
+    
+    #time-info {
+        text-align: right;
+        margin-top: 5px;
+    }
+</style>
 	<!--script Hiển thị thông báo Mesage php -->
     <script>
         function showMessagePHP(message, timeout=15) {
@@ -246,7 +254,6 @@ function playAudio_upgrade(filePath) {
 }
 
     </script>
-	
 
 </head>
 <div id="toast"><span id="toastMessage"></span><button onclick="hideToast()">×</button></div>

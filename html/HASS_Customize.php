@@ -541,7 +541,7 @@ if (!empty($successMessage)) {
 <div class="invalid-feedback">Cần nhập nội dung code YAML cho tác vụ này</div>
 </div>
 <center>
-<button type="button" class="btn btn-success rounded-pill" onclick="yaml_test_code_hass('intents[<?= $index ?>][data_yaml]')"><i class="bi bi-align-start"></i> Chạy Thử Code Yaml</button>
+<button type="button" class="btn btn-success rounded-pill" onclick="yaml_test_code_hass('intents[<?= $index ?>][data_yaml]')"><i class="bi bi-align-start"></i> Test Code Yaml</button>
 </center>
 </div>
 </div>
