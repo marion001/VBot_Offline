@@ -83,6 +83,9 @@ Cách Cài Đặt Kiểm Tra Mic Và Scan Lấy ID Mic:</h5>
 <b>$:> vlc Test_Microphone.wav</b><br/>
 - Nếu không được bạn cần thử lần lượt các ID được scan và kiểm tra lại driver được cài tương ứng với MIC của bạn chưa<br/>
 - Nếu thành công bạn hãy điền ID Mic đó vào trong cấu hình Config rồi lưu Config lại là được
+<br/><br/>
+Thay đổi âm lượng Mic/Microphone:<br/>
+- Chạy lệnh sau: <b>$:> alsamixer</b> -> <b>F4</b> tìm tới tên thiết bị (Tùy từng kiểu loại Mic, Driver): ví dụ với Mạch AIO tên là: <b>Captue</b> chỉnh khoảng dưới 40 là ổn, nếu nhạy quá thì chỉnh xuống tiếp
 </div>
 </div>
 </div>
@@ -92,9 +95,6 @@ Cách Cài Đặt Kiểm Tra Mic Và Scan Lấy ID Mic:</h5>
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
 Hướng Dẫn Cài Đặt, Kiểm Tra Loa, Âm Thanh Đầu Ra:</h5>
 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
-- Nếu Là Mạch DAC i2s có thể tham khảo cách cài Driver theo Link Sau:<br/>
-- <a href="https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU" target="_bank">https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU</a>
-<br/><br/>
 - Bạn cần phát 1 file âm thanh bằng VLC, có thể tải lên file âm thanh của bạn như XXX.mp3 vào <b>/home/pi</b> chẳng hạn<br/>
 - Tiếp tới hãy chạy file âm thanh đó bằng lệnh sau:<br/>
 <b>$:> vlc XXX.mp3</b><br/>
@@ -329,40 +329,22 @@ Cấu Hình Auto Kết Nối Wifi hoặc Tạo Điểm Truy Cập AP :
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_oled_i2c" aria-expanded="false" aria-controls="collapse_button_oled_i2c">
 Kết Nối Màn Hình I2C:</h5>
 <div id="collapse_button_oled_i2c" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_oled_i2c">
-Loại Màn Hình Đang Được Hỗ Trợ: <b>OLED 128X64 0.96 INCH 1306 giao tiếp I2C</b><br/>
 Sơ Đồ Kết Nối Chân Pin Với GPIO (Loại Giao Tiếp i2c 4 chân Pin):<br/>
 <b>
 - SDA ==> GPIO2 (Pin 3)<br/>
 - SCL ==> GPIO3 (Pin 5)<br/>
 - VCC ==> 3.3V (Pin 1)<br/>
 - GND ==> GND(Pin 14)<br/>
-</b>
-Hình Ảnh Sơ Đồ Chân Kết Nối: <a href="https://github.com/user-attachments/assets/655e0b0a-4891-4a6f-aab8-19c5feb139ed" target="_bank"> Xem Ảnh Kết Nối</a><br/>
-Khi kết nối xong các chân cần chạy lệnh sau để kiểm tra xem màn hình đã được nhận diện với địa chỉ 3c chưa:<br/>
-<b>$:> sudo i2cdetect -y 1</b><br/>
-Nếu nhận diện thành công sẽ có địa chỉ 3c như ảnh: <a href="https://github.com/user-attachments/assets/7aa88c10-7763-422d-ac48-1ad31339fe6f" target="_bank">Xem Ảnh</a>
-
-<br/>
+</b><br/>
 Tài Liệu Tham Khảo:<br/>
 - <a href="https://github.com/adafruit/Adafruit_Python_SSD1306" target="_bank">https://github.com/adafruit/Adafruit_Python_SSD1306</a><br/>
 - <a href="https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/" target="_bank">https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/</a>
-- <a href="https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/" target="_bank">https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/</a>
 
 </div>
 </div>
 </div>
 
-<div class="card accordion" id="accordion_button_tao_gcloud_driver_json">
-<div class="card-body">
-<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_tao_gcloud_driver_json" aria-expanded="false" aria-controls="collapse_button_tao_gcloud_driver_json">
-Tạo Tệp Json Google Driver Backup:</h5>
-<div id="collapse_button_tao_gcloud_driver_json" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_tao_gcloud_driver_json">
-<a href="https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true" target="_bank">Nhấn Để Mở File Hướng Dẫn Tạo Json GDriver</a>
-</div>
-</div>
-</div>
-
-
+	
 		
 		</div>
 		</div>
