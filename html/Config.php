@@ -563,6 +563,26 @@ if ($result_ConfigJson !== false) {
 } else {
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
 }
+
+
+#Đồng thời Restart VBot nếu được nhấn
+if ($_POST['all_config_save'] === 'and_restart_VBot'){
+    $CMD = "systemctl --user restart VBot_Offline.service";
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if ($connection) {
+        if (@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+            $stream = ssh2_exec($connection, $CMD);
+            stream_set_blocking($stream, true);
+            $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+				$messages[] = 'Đang Khởi Động Lại Chương Trình Vbot';
+        } else {
+            $messages[] = 'Xác thực SSH không thành công.';
+        }
+    } else {
+        $messages[] = 'Không thể kết nối tới máy chủ SSH';
+    }
+}
+
 }
 #########################
 
@@ -3726,9 +3746,10 @@ echo '
 
 <div class="row mb-3">
 <center>
-<button type="submit" name="all_config_save" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
+<button type="submit" name="all_config_save" value="" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
 <button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')"><i class="bi bi-eye"></i> Xem Tệp Config</button>
 <button type="button" class="btn btn-success rounded-pill" title="Tải Xuống file: Config.json" onclick="downloadFile('<?php echo $Config_filePath; ?>')"><i class="bi bi-download"></i> Tải Xuống</button>
+<button type="submit" name="all_config_save" value="and_restart_VBot" class="btn btn-danger rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt Và Restart VBot</button>
 </center>
 
     <!-- Modal hiển thị tệp Config.json -->

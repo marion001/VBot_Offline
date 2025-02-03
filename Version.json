@@ -2,7 +2,7 @@
     "version": "1.0.14",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi STT Default, Custom Home Assistant",
-    "releaseDate": "02/02/2025",
+    "releaseDate": "03/02/2025",
     "changes": [
         {
             "type": "feature",
