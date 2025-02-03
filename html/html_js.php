@@ -1774,7 +1774,7 @@ function playlist_media_control(action_control = null) {
     });
     xhr.onerror = function () {
 		loading("hide");
-        show_message("Lỗi, yêu cầu thất bại.");
+        show_message("Yêu cầu thất bại, Chương trình VBot không được khởi chạy hoặc API VBot chưa được bật");
     };
     xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
     xhr.setRequestHeader("Content-Type", "application/json");

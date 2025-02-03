@@ -546,7 +546,7 @@ if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media
 <div class="form-check">
  <input class="form-check-input" value="developer_customization_vbot_processing" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" onclick="change_to_another_mode('dev_custom_vbot', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?><?php if ($Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] === true) echo "checked"; ?>>
   <label class="form-check-label">
-    Áp dụng thêm Vbot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng Vbot xử lý khi Custom Skill không thể xử lý')"></i>
+    Áp dụng thêm VBot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng VBot xử lý khi Custom Skill không thể xử lý')"></i>
   </label>
 </div>
 
