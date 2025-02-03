@@ -443,6 +443,18 @@ $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['restart_alsa'])) {
+$CMD = "sudo systemctl restart alsa-restore";
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die("<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die("<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>");}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
+
 if (isset($_POST['serial_getty_ttyS0_stop'])) {
 $CMD = "sudo systemctl stop serial-getty@ttyS0.service";
 $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -854,7 +866,7 @@ include 'html_sidebar.php';
           <button class="btn btn-danger dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
             VBot Auto
           </button>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_start" type="submit" title="Chạy lại trương trình">Chạy</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_restart" type="submit" title="Tạm dừng trương trình đang chạy">Khởi động lại</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_stop" type="submit" title="Tạm dừng trương trình đang chạy">Dừng</button></li>
@@ -871,7 +883,7 @@ include 'html_sidebar.php';
           <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
             OS Wifi
           </button>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
     <li>
 	<button onclick="loading('show')" class="dropdown-item text-danger" name="restart_auto_wifi" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto Wifi Manager</button></li>
 	<button onclick="loading('show')" class="dropdown-item text-danger" name="enable_auto_wifi" type="submit" title="Kích Hoạt Services Auto Wifi Manaager">Enable Auto Wifi Manager</button></li>
@@ -888,7 +900,7 @@ include 'html_sidebar.php';
           <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
             LCD OLED Auto
           </button>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_start" type="submit" title="Chạy lại trương trình">Chạy</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_restart" type="submit" title="Tạm dừng trương trình đang chạy">Khởi động lại</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_stop" type="submit" title="Tạm dừng trương trình đang chạy">Dừng</button></li>
@@ -904,8 +916,9 @@ include 'html_sidebar.php';
           <button class="btn btn-dark dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
             Hệ Thống
           </button>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="apache_restart" type="submit" title="Khởi động lại apache2">Restart Apache2</button></li>
+    <li><button onclick="loading('show')" class="dropdown-item text-danger" name="restart_alsa" type="submit" title="Khởi động lại Alsa">Restart Alsa-Restore</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="reboot_os" type="submit" title="Khởi động lại hệ thống">Reboot OS</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="chmod_vbot" type="submit" title="Chmod VBot và UI HTML thành 0777">Chmod 0777</button></li>
     <li><button onclick="loading('show')" class="dropdown-item text-danger" name="owner_vbot" type="submit" title="Thay đổi quyền sở hữu các file thành của người dùng SSH">Owner Change</button></li>
@@ -927,7 +940,7 @@ include 'html_sidebar.php';
           <button class="btn btn-success dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
             Thư Viện
           </button>
-          <ul class="dropdown-menu">
+          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
   <li><button onclick="loading('show')" class="dropdown-item text-danger" name="pip_show_all_lib" type="submit" title="Liệt kê các thư viện đã cài bằng pip">pip show all lib</button></li>
 		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="pvporcupine_info" type="submit" title="Kiểm tra thông tin thư viện pvporcupine">Thông tin pvporcupine</button></li>
 		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="picovoice_info" type="submit" title="Kiểm tra thông tin thư viện picovoice">Thông tin picovoice</button></li>
