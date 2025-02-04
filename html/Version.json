@@ -1,8 +1,8 @@
 {
     "version": "1.0.14",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật Dark Mode (Giao diện tối)",
-    "releaseDate": "03/02/2025",
+    "description": "Sửa Lỗi, Tối Ưu Hóa Giao Diện",
+    "releaseDate": "04/02/2025",
     "changes": [
         {
             "type": "feature",
