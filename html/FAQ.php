@@ -84,9 +84,11 @@ Cách Cài Đặt Kiểm Tra Mic Và Scan Lấy ID Mic:</h5>
 - Nếu không được bạn cần thử lần lượt các ID được scan và kiểm tra lại driver được cài tương ứng với MIC của bạn chưa<br/>
 - Nếu thành công bạn hãy điền ID Mic đó vào trong cấu hình Config rồi lưu Config lại là được
 <br/><br/>
-Thay đổi âm lượng Mic/Microphone:<br/>
-- Chạy lệnh sau: <b>$:> alsamixer</b> -> <b>F4</b> tìm tới tên thiết bị (Tùy từng kiểu loại Mic, Driver): ví dụ với Mạch AIO tên là: <b>Captue</b> chỉnh khoảng dưới 40 là ổn, nếu nhạy quá thì chỉnh xuống tiếp
-
+<b>Thay đổi âm lượng Mic/Microphone:</b><br/>
+<b>- B1:</b> Chạy lệnh sau: <b>$:> alsamixer</b> -> nhấn phím <b>F4</b> tìm tới tên thiết bị (Tùy từng kiểu loại Mic, Driver): ví dụ với Mạch AIO tên là: <b>Captue</b> chỉnh khoảng dưới 40 là trung bình, trong quá trình sử dụng nếu thấy nhạy quá cần chính xuống thấp hơn
+<br/><b>- B2:</b> Chạy Lệnh sau để lưu cấu hình alsamixer: <b>$:> sudo alsactl store</b><br/>
+<b>- B3:</b> Sao Lưu Lại Cấu Hình Gốc m8960-soundcard: <b>$:> sudo mv /etc/wm8960-soundcard/wm8960_asound.state /etc/wm8960-soundcard/wm8960_asound_default.state</b><br/>
+<b>- B4:</b> Sao chép tệp cấu hình alsamixer đã lưu vào hệ thống driver m8960-soundcard: <b>$:> sudo cp /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state</b>
 </div>
 </div>
 </div>
