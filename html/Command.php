@@ -25,7 +25,7 @@ if (!isset($_SESSION['user_login']) ||
 $output = '';
 
 $SSH_CONNECT_ERROR = "<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>";
-$SSH2_AUTH_ERROR = $SSH2_AUTH_ERROR;
+$SSH2_AUTH_ERROR = "<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>";
 function picovoice_version($noi_dung_tep, $ten_lop, $ten_phuong_thuc) {
     try {
         $dong = explode("\n", $noi_dung_tep);
@@ -83,6 +83,36 @@ $output .=  stream_get_contents($stream_out);
 }
 }
 
+if (isset($_POST['save_asound_alsamixer_to_driver_wm8960_asound'])) {
+    $CMD = "sudo alsactl store";
+    $CMD1 = "sudo cp /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state";    
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) { die($SSH_CONNECT_ERROR); }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) { die($SSH2_AUTH_ERROR); }
+    $stream = ssh2_exec($connection, $CMD);
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    sleep(1);
+    $stream1 = ssh2_exec($connection, $CMD1);
+    stream_set_blocking($stream1, true);
+    $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
+    $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+    $output .= stream_get_contents($stream_out);
+    $output .= "\n$GET_current_USER@$HostName:~ $ $CMD1\n";
+    $output .= stream_get_contents($stream_out1);
+}
+
+if (isset($_POST['restore_wm8960_soundcard_to_default'])) {
+$CMD = 'sudo cp '.$VBot_Offline.'resource/wm8960_asound_default.state /etc/wm8960-soundcard/wm8960_asound.state';
+$connection = ssh2_connect($ssh_host, $ssh_port);
+if (!$connection) {die($SSH_CONNECT_ERROR);}
+if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+$stream = ssh2_exec($connection, $CMD);
+stream_set_blocking($stream, true);
+$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+$output .=  stream_get_contents($stream_out);
+}
 
 if (isset($_POST['sudo_alsactl_store'])) {
 $CMD = "sudo alsactl store";
@@ -1047,6 +1077,8 @@ include 'html_sidebar.php';
 		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_disable" type="submit" title="wm8960_soundcard_disable">VM8960 SoundCard Disable</button></li>
 		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_enable" type="submit" title="wm8960_soundcard_enable">VM8960 SoundCard Enable</button></li>
 		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_status" type="submit" title="wm8960_soundcard_status">VM8960 SoundCard Status</button></li>
+		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_alsamixer_to_driver_wm8960_asound" type="submit" title="save_asound_alsamixer_to_driver_wm8960_asound">Save Alsamixer To VM8960 SoundCard Driver</button></li>
+		  <li><button onclick="loading('show')" class="dropdown-item text-danger" name="restore_wm8960_soundcard_to_default" type="submit" title="restore_wm8960_soundcard_to_default">Restore VM8960 SoundCard Driver Default</button></li>
   
 		</ul>
 </div>
