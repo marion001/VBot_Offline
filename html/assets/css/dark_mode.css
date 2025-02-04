@@ -207,7 +207,7 @@
   background-color: #1e1e1e;
   color: #e0e0e0;
   border-color: #333 !important;
-  padding: 0.5rem;
+  /* padding: 0.5rem; */
 }
 
 /* Ghi đè màu cho các thẻ bên trong, kể cả thẻ font */

@@ -2292,14 +2292,19 @@ function cacheNewsPaper() {
 //Kiểm tra và hiển thị thông báo cập nhật WEB UI
 function ui_check_update() {
     const localFileUrl_ui = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $HTML_VBot_Offline; ?>/Version.json';
-    const remoteFileUrl_ui = 'https://raw.githubusercontent.com/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/refs/heads/main/html/Version.json';
+    //const remoteFileUrl_ui = 'https://raw.githubusercontent.com/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/refs/heads/main/html/Version.json';
+    const remoteFileUrl_ui = 'https://api.github.com/repos/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/contents/html/Version.json?ref=main';
     function fetchRemoteData(url, callback) {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.onload = function() {
             if (xhr.status === 200) {
                 try {
-                    callback(JSON.parse(xhr.responseText));
+                    //callback(JSON.parse(xhr.responseText));
+                    const response = JSON.parse(xhr.responseText);
+                    const decodedContent = atob(response.content);
+                    const jsonData = JSON.parse(decodedContent);
+                    callback(jsonData);
                 } catch (error) {
                     showMessagePHP("Lỗi khi phân tích dữ liệu JSON từ file remote: "+error, 3);
                 }
@@ -2309,7 +2314,7 @@ function ui_check_update() {
             }
         };
         xhr.onerror = function() {
-            showMessagePHP("Lỗi khi thực hiện yêu cầu XMLHttpRequest.", 3);
+            showMessagePHP("Lỗi khi thực hiện yêu cầu kiểm tra cập nhật Giao Diện", 3);
             callback(null);
         };
         xhr.send();
@@ -2367,17 +2372,22 @@ function ui_check_update() {
     checkForUpdate();
 }
 
-//Kiểm tra và hiển thị thông báo cập nhật WEB UI
+//Kiểm tra và hiển thị thông báo cập nhật chương trình VBot
 function vbot_check_update() {
     const localFileUrl_ui = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $VBot_Offline; ?>Version.json';
-    const remoteFileUrl_ui = 'https://raw.githubusercontent.com/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/refs/heads/main/Version.json';
+    const remoteFileUrl_ui = 'https://api.github.com/repos/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/contents/Version.json?ref=main';
     function fetchRemoteData(url, callback) {
         const xhr = new XMLHttpRequest();
         xhr.open('GET', url, true);
         xhr.onload = function() {
             if (xhr.status === 200) {
                 try {
-                    callback(JSON.parse(xhr.responseText));
+                    //callback(JSON.parse(xhr.responseText));
+                    // Giải mã base64 nếu dữ liệu ở dạng base64
+                    const response = JSON.parse(xhr.responseText);
+                    const decodedContent = atob(response.content);
+                    const jsonData = JSON.parse(decodedContent);
+                    callback(jsonData);
                 } catch (error) {
                     showMessagePHP("Lỗi khi phân tích dữ liệu JSON từ file remote:" +error, 3);
                 }
@@ -2387,7 +2397,7 @@ function vbot_check_update() {
             }
         };
         xhr.onerror = function() {
-            showMessagePHP("Lỗi khi thực hiện yêu cầu XMLHttpRequest.", 3);
+            showMessagePHP("Lỗi khi thực hiện yêu cầu kiểm tra cập nhật Chương Trình VBot", 3);
             callback(null);
         };
         xhr.send();
@@ -2445,6 +2455,7 @@ function vbot_check_update() {
         }
     checkForUpdate();
 }
+
 //Quét các thiết bị sử dụng VBot trong cùng lớp mạng
 function scan_VBot_Device() {
     loading('show');
