@@ -1,8 +1,8 @@
 {
     "version": "1.0.15",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi, Tối Ưu Hóa Chương Trình",
-    "releaseDate": "04/02/2025-2",
+    "description": "Sửa Lỗi chế độ hội thoại khi wake up bằng nút nhấn",
+    "releaseDate": "05/02/2025",
     "changes": [
         {
             "type": "feature",
