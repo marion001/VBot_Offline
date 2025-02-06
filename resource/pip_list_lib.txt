@@ -168,6 +168,7 @@ python-apt                2.2.1
 python-Levenshtein        0.12.2
 python-prctl              1.7
 python-vlc                3.0.16120
+pytubefix                 8.12.1
 pytz                      2022.1
 pyusb                     1.2.1
 rainbowhat                0.1.0

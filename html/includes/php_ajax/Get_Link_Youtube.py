@@ -1,28 +1,17 @@
+import pytubefix
 import sys
-import yt_dlp
 
-def get_link_youtube(video_id):
-    # Tạo URL đầy đủ từ ID video
-    video_url = f"https://www.youtube.com/watch?v={video_id}"
-    ydl_opts = {
-        'format': 'bestaudio',
-        'quiet': True,
-        'noplaylist': True,
-        'extract_flat': True,
-    }
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        try:
-            info_dict = ydl.extract_info(video_url, download=False)
-            # Lấy link audio URL
-            #print(info_dict)
-            if info_dict.get('url'):
-                link_player = info_dict.get('url')
-                print(link_player)
-                #print(info_dict.get('fulltitle'))
-                #print(info_dict.get('release_date'))
-                return link_player
-        except Exception as e:
-            print(f"Lỗi: {e}")
+def get_link_youtube(video_url):
+    try:
+        yt = pytubefix.YouTube(f"https://www.youtube.com/watch?v={video_url}")
+        audio_stream = yt.streams.get_audio_only()
+        audio_url = audio_stream.url
+        if audio_url:
+            print(audio_url)
+            return audio_url
+        return None
+    except Exception as e:
+        #Lib.show_log(f"lỗi khi lấy âm thanh từ video Youtube: {e}", color=Lib.Color.RED)
         return None
 
 if __name__ == "__main__":

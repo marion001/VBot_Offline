@@ -1,12 +1,12 @@
 {
     "version": "1.0.15",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa Lỗi, Tối Ưu Hóa Giao Diện",
-    "releaseDate": "04/02/2025-2",
+    "description": "Tối ưu tốc độ phát Youtube",
+    "releaseDate": "06/02/2025",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy lệnh cập nhật thư viện sau để sử dụng GCloud V2: 'pip install --upgrade google-cloud-speech'"
+            "description": "chạy lệnh cập nhật thư viện sau để sử dụng phát nhạc Youtube: 'pip install pytubefix'"
         },
         {
             "type": "fix",

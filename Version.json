@@ -1,12 +1,12 @@
 {
     "version": "1.0.16",
     "projectName": "Program VBot Offline",
-    "description": "Cho phép chương trình chạy khi lỗi,không phải key picovoice",
-    "releaseDate": "06/02/2025",
+    "description": "Tối ưu tốc độ phát Youtube, Cho phép chương trình chạy khi lỗi,không phải key picovoice",
+    "releaseDate": "06/02/2025-1",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy lệnh cập nhật thư viện sau để sử dụng GCloud V2: 'pip install --upgrade google-cloud-speech'"
+            "description": "chạy lệnh cập nhật thư viện sau để sử dụng phát nhạc Youtube: 'pip install pytubefix'"
         },
         {
             "type": "fix",
