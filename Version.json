@@ -1,8 +1,8 @@
 {
-    "version": "1.0.15",
+    "version": "1.0.16",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi chế độ hội thoại khi wake up bằng nút nhấn",
-    "releaseDate": "05/02/2025",
+    "description": "Cho phép chương trình chạy khi lỗi,không phải key picovoice",
+    "releaseDate": "06/02/2025",
     "changes": [
         {
             "type": "feature",
