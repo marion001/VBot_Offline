@@ -10,6 +10,9 @@ VBot là loa thông minh tích hợp trợ lý ảo tiếng Việt, hỗ trợ �
 - Phát Nhạc Từ Danh Sách Phát (PlayList)
 - Quản Lý Danh Sách Phát trên Webui
 
+- Tích hợp với trợ lý ảo Assist của Home Assistant (Làm Tác Nhân)
+      : https://github.com/marion001/VBot-Assist-Conversation
+
 Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
 
 <hr/>
