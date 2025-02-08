@@ -403,10 +403,11 @@ Hướng Dẫn Train Hotword Snowboy, Cài Thư Viện Snowboy:</h5>
 <div id="collapse_button_train_hotword_snowboy" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_train_hotword_snowboy">
 <b>- Cài Thư Viện:</b> Chạy Lần Lượt Các Lệnh Sau<br/><br/>
 <b>
+$:> cd ~<br/>
 $:> sudo apt update<br/>
 $:> sudo apt install -y swig<br/>
 $:> sudo apt install -y libatlas-base-dev liblapack-dev libblas-dev<br/>
-$:> sudo apt install libopenblas-dev<br/>
+$:> sudo apt install -y libopenblas-dev<br/>
 $:> wget https://www.piwheels.org/simple/scipy/scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
 $:> pip install scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
 $:> cd ~<br/>
