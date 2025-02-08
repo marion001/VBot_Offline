@@ -413,9 +413,12 @@ $:> pip install scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
 $:> cd ~<br/>
 $:> git clone https://github.com/seasalt-ai/snowboy.git<br/>
 $:> cd ~/snowboy<br/>
-$:> sudo python3 setup.py install<br/>
 $:> cd /home/pi/snowboy/swig/Python3<br/>
-$:> make</b>
+$:> make</br>
+$:> sudo python3 setup.py install<br/>
+$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/snowboydetect.py /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/snowboydetect.py<br/>
+$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/_snowboydetect.so /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/_snowboydetect.so</b>
+
 <hr/>
 <b>- Train Hotword:</b> Lần Lượt Các Bước Sau<br/>
 - <b>Lưu Ý: Cần Sử dụng 1 thiết bị khác không chạy Vbot để Train</b><br/><br>
