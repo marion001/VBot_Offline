@@ -4,6 +4,7 @@ VBot là loa thông minh tích hợp trợ lý ảo tiếng Việt, hỗ trợ �
 - ReSpeaker 2-Mics Pi HAT
 - Mạch Vietbot AIO Ver 2.0
 
+- Hỗ trợ đánh thức bằng từ khóa sử dụng Picovoice và Snowboy
 - Đầy Đủ Giao Tiếp API, MQTT
 - Kết Nối Điều Khiển Home Assistant (HASS)
 - Trình Giải Trí, Nghe Nhạc, kể Chuyển, Đọc Báo, PodCast, Tin Tức Trong Ngày, Thời Sự
