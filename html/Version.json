@@ -1,8 +1,8 @@
 {
     "version": "1.0.15",
     "projectName": "WebUI VBot Offline",
-    "description": "Tối ưu tốc độ phát Youtube",
-    "releaseDate": "06/02/2025",
+    "description": "Cập nhật hỗ trợ từ khóa đánh thức của Snowboy",
+    "releaseDate": "08/02/2025",
     "changes": [
         {
             "type": "feature",
