@@ -401,23 +401,27 @@ Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot-Assist-Conver
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_train_hotword_snowboy" aria-expanded="false" aria-controls="collapse_button_train_hotword_snowboy">
 Hướng Dẫn Train Hotword Snowboy, Cài Thư Viện Snowboy:</h5>
 <div id="collapse_button_train_hotword_snowboy" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_train_hotword_snowboy">
-<b>- Cài Thư Viện:</b> Chạy Lần Lượt Các Lệnh Sau<br/><br/>
+<b>- Cài Thư Viện Snowboy:</b> <br/>
+<b>- Auto Tự Động Cài Đặt:</b> Truy Cập Vào SSH Và Chạy Lệnh Sau Trong Console<br/>
+<b>$:> sudo python3 /home/pi/VBot_Offline/resource/snowboy/Auto_install.py</b><br/><br/>
+
+<b>- Nếu Cài Đặt Thủ Công:</b>
+Chạy Lần Lượt Các Lệnh Sau<br/>
 <b>
 $:> cd ~<br/>
 $:> sudo apt update<br/>
 $:> sudo apt install -y swig<br/>
-$:> sudo apt install -y libatlas-base-dev liblapack-dev libblas-dev<br/>
-$:> sudo apt install -y libopenblas-dev<br/>
+$:> sudo apt install -y libatlas-base-dev liblapack-dev libblas-dev libopenblas-dev<br/>
 $:> wget https://www.piwheels.org/simple/scipy/scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
 $:> pip install scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
-$:> cd ~<br/>
 $:> git clone https://github.com/seasalt-ai/snowboy.git<br/>
 $:> cd ~/snowboy<br/>
 $:> cd /home/pi/snowboy/swig/Python3<br/>
 $:> make</br>
-$:> sudo python3 setup.py install<br/>
-$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/snowboydetect.py /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/snowboydetect.py<br/>
-$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/_snowboydetect.so /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/_snowboydetect.so</b>
+$:> sudo python3 /home/pi/snowboy/setup.py install<br/>
+$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/snowboydetect.py /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/<br/>
+$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/_snowboydetect.so /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/<br/>
+$:> sudo cp /home/pi/VBot_Offline/resource/snowboy/common.res /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/</b>
 
 <hr/>
 <b>- Train Hotword:</b> Lần Lượt Các Bước Sau<br/>
