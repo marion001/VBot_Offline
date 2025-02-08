@@ -58,6 +58,19 @@ include 'html_sidebar.php';
 		<div id="accordion">
   <div class="card">
   <br/>
+
+<!-- 
+<div class="card accordion" id="accordion_button_media_player_source">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
+Tets  Drop Down:</h5>
+<div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
+hihi Vũ Tuyển
+</div>
+</div>
+</div>
+-->
+  
 <div class="card-body">
 
 <div class="alert alert-success" role="alert">
@@ -372,7 +385,43 @@ Tạo Tệp Json Google Driver Backup:</h5>
 </div>
 </div>
 
+<div class="card accordion" id="accordion_button_add_vbot_assist_hass">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_add_vbot_assist_hass" aria-expanded="false" aria-controls="collapse_button_add_vbot_assist_hass">
+Tích Hợp Vào Trợ Lý Assist của Home Assistant Làm Tác Nhân:</h5>
+<div id="collapse_button_add_vbot_assist_hass" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_add_vbot_assist_hass">
+Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot-Assist-Conversation" target="_bank">https://github.com/marion001/VBot-Assist-Conversation</a>
+</div>
+</div>
+</div>
 
+
+<div class="card accordion" id="accordion_button_train_hotword_snowboy">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_train_hotword_snowboy" aria-expanded="false" aria-controls="collapse_button_train_hotword_snowboy">
+Hướng Dẫn Train Hotword Snowboy:</h5>
+<div id="collapse_button_train_hotword_snowboy" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_train_hotword_snowboy">
+- <b>Lưu Ý: Cần Sử dụng 1 thiết bị khác không chạy Vbot để Train</b><br/><br>
+B1: <b>Cài Docker trên thiết bị (Cách cài các bạn tham khảo trên google nhé)</b><br/><br/>
+B2: Chạy lệnh sau: <b>$:> sudo docker pull rhasspy/snowboy-seasalt</b><br/><br/>
+B3: Chạy tiếp lệnh sau: <b>$:> docker run -it -p 8899:8000 rhasspy/snowboy-seasalt</b><br/><br/>
+B4: Docker sẽ khởi chạy rhasspy/snowboy-seasalt, hãy kiểm tra xem đã chạy thành công chưa bằng cách truy cập: http://ip:8899<br/>
+nếu cập được vào và hiển thị giao diện để Train là OK<br/><br/>
+B5: Cần Stop, không cho chạy Vbot. Sau đó Truy cập vào SHH với thiết bị chạy VBot rồi chạy lệnh sau:<br/>
+- <b>$:> cd /home/pi/VBot_Offline/resource/test_device</b><br/><br/>
+B6: Mở file <b>Trail_Hotword_Snowboy.py</b> điền địa chỉ ip của thiết bị chạy Docker rhasspy/snowboy-seasalt là dòng số 14 là: <b>server_url = "http://192.168.14.17:8899"</b> thay địa chỉ ip vào, xong lưu lại file<br/><br/>
+B7: Chạy file <b>Trail_Hotword_Snowboy.py</b> bằng lệnh: <b>$:> python3 Trail_Hotword_Snowboy.py</b> nhập tên file hotword cần tạo và nói vào Microphone lần lượt 7 lần<br/><br/>
+- Hoàn tất Train sẽ xuất hiện file <b>.pmdl</b> với tên bạn tạo. Sao chép file đó vào đường dẫn: <b>/home/pi/VBot_Offline/resource/snowboy/hotword</b> hoặc sử dụng Giao Diện để tải lên file<br/>
+
+Nguồn Tham khảo: <a href="https://github.com/rhasspy/snowboy-seasalt" target="_bank">https://github.com/rhasspy/snowboy-seasalt</a>
+
+</div>
+</div>
+</div>
+
+		
+		
+		
 		
 		</div>
 		</div>

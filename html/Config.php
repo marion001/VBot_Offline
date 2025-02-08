@@ -186,6 +186,8 @@ $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['con
 #CẬP NHẬT CHẾ ĐỘ Hotword Engine Picovoice KEY hotword_engine:
 $Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotword_engine_key'];
 $Config['smart_config']['smart_wakeup']['hotword']['lang'] = $_POST['select_hotword_lang'];
+#$Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] = $_POST['hotword_select_wakeup'];
+$Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] = ($_POST['hotword_select_wakeup'] === "null") ? null : $_POST['hotword_select_wakeup'];
 
 #CẬP NHẬT CHẾ ĐỘ Text To Speak (TTS) text_to_speak:
 $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
@@ -564,7 +566,6 @@ if ($result_ConfigJson !== false) {
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
 }
 
-
 #Đồng thời Restart VBot nếu được nhấn
 if ($_POST['all_config_save'] === 'and_restart_VBot'){
     $CMD = "systemctl --user restart VBot_Offline.service";
@@ -585,8 +586,33 @@ if ($_POST['all_config_save'] === 'and_restart_VBot'){
 
 }
 #########################
+#Lưu các giá trị cấu hình chi tiết trong hotword Snowboy
+if (isset($_POST['save_hotword_snowboy'])) {
+		$updatedConfig = [];
+	    foreach ($_POST as $key => $value) {
+        if (strpos($key, 'snowboy_file_name_') === 0) {
+            $index = str_replace('snowboy_file_name_', '', $key);
+            $active_key = 'snowboy_active_' . $index;
+            $sensitive_key = 'snowboy_sensitive_' . $index;
+            $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
+            $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
+            $sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
+            if ($file_name !== '') {
+                $updatedConfig[] = [
+                    "active" => $active,
+                    "file_name" => $file_name,
+                    "sensitive" => $sensitive
+                ];
+            }
+        }
+    }
+    $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = $updatedConfig;
+    file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    $messages[] = 'Cập nhật các giá trị trong Hotword Snowboy thành công';
+}
 
-#Lưu các giá trị cấu hình chi tiết trong hotword
+
+#Lưu các giá trị cấu hình chi tiết trong hotword Picovoice/Procupine
 if (isset($_POST['save_hotword_theo_lang'])) {
     $lang = $_POST['lang_hotword_get'];
     $Lib_modelFilePath = $_POST['select_file_lib_pv'];
@@ -618,7 +644,7 @@ if ($lang !== 'eng' && $lang !== 'vi') {
     $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = $updatedConfig;
     $Config['smart_config']['smart_wakeup']['hotword']['library'][$lang]['modelFilePath'] = $Lib_modelFilePath;
     file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    $messages[] = 'Cập nhật các giá trị trong Hotword thành công';
+    $messages[] = 'Cập nhật các giá trị trong Hotword Picovoice/Procupine thành công';
 }
 }
 }
@@ -963,7 +989,7 @@ Cấu Hình Âm Thanh Volume/Mic:
 <div class="card accordion" id="accordion_button_hotword_engine">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_hotword_engine" aria-expanded="false" aria-controls="collapse_button_hotword_engine">
-Cấu Hình Hotword Engine/Picovoice :</h5>
+Cấu Hình Hotword Engine: Picovoice/Snowboy :</h5>
            
 <div id="collapse_button_hotword_engine" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_hotword_engine" style="">
 
@@ -988,15 +1014,28 @@ Cấu Hình Hotword Engine/Picovoice :</h5>
 <div class="card-body">
 <h5 class="card-title">Hotword <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
 
-     
-     <div class="form-floating mb-3">			
+
+<div class="row mb-3">
+<label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức:</label>
+<div class="col-sm-9">
+<select name="hotword_select_wakeup" id="hotword_select_wakeup" class="form-select border-success" aria-label="Default select example" onchange="selectHotwordWakeup()">
+<option value="porcupine" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Procupine</option>
+<option value="snowboy" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy</option>
+<option value="null" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === null ? 'selected' : ''; ?>>Không Sử Dụng Hotword</option>
+</select>
+</div>
+</div>
+
+<!-- nếu hotword được chọn là Picovoice Procupine -->
+<div id="select_show_picovoice_porcupine">
+<div class="form-floating mb-3">
 <select name="select_hotword_lang" id="select_hotword_lang" class="form-select border-success" aria-label="Default select example">
 <option value="vi" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'vi' ? 'selected' : ''; ?>>Tiếng việt</option>
 <option value="eng" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'eng' ? 'selected' : ''; ?>>Tiếng anh</option>
 </select>
 <label for="select_hotword_lang">Chọn ngôn ngữ để gọi, đánh thức Bot:</label>
 </div>
-			
+
 <table class="table table-bordered border-primary">
                 <thead>
                   <tr>
@@ -1007,20 +1046,38 @@ Cấu Hình Hotword Engine/Picovoice :</h5>
 					<button type="button" class="btn btn-primary rounded-pill" onclick="loadConfigHotword('vi')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Cài đặt Hotword Tiếng Việt">Tiếng Việt</button>
 					<button type="button" class="btn btn-primary rounded-pill" onclick="loadConfigHotword('eng')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Cài đặt Hotword Tiếng Anh">Tiếng Anh</button>
 					<button type="button" class="btn btn-warning rounded-pill" onclick="reload_hotword_config()" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tự động tìm scan các file Hotword có trong thư mục eng và vi để cấu hình trong Config.json">Scan Và Ghi Mới</button>
-				
 					</center>
 					<span id="language_hotwordd" value=""></span>
 					</tr>
 					</thead> 
-                
-                  <thead id="results_body_hotword1">
-                  </thead>
-				   
-                <tbody id="results_body_hotword">
-               
-
-                </tbody>
+                  <thead id="results_body_hotword1"></thead>
+                <tbody id="results_body_hotword"></tbody>
               </table>
+</div>
+
+<div id="select_show_snowboy">
+<center>
+<button type="button" class="btn btn-primary rounded-pill" onclick="loadConfigHotword('snowboy')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Hiển thị danh sách Hotword Snowboy" aria-describedby="tooltip849515">Danh Sách Hotword</button>
+<button type="button" class="btn btn-warning rounded-pill" onclick="reload_hotword_config('snowboy')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tự động tìm scan các file Hotword Snowboy có trong thư mục để cấu hình trong Config.json">Scan Và Ghi Mới</button>
+</center>
+<br/>
+<div class="row mb-3">
+<label for="" class="col-sm-3 col-form-label">Train Từ khóa Hotword:</label>
+<div class="col-sm-9">
+<a href="FAQ.php" target="_bank">Nhấn Để Xem Hướng Dẫn Train Hotword Snowboy</a> 
+</div>
+</div>
+
+<table class="table table-bordered border-primary">
+<thead id="results_body_hotword_snowboy1"></thead>
+<tbody id="results_body_hotword_snowboy"></tbody>
+</table>
+
+
+
+
+</div>
+
 
             </div>
           </div>
@@ -1692,6 +1749,15 @@ Cấu Hình Home Assistant:</h5>
                     <div class="invalid-feedback">Cần nhập thời gian tối đa chờ phản hồi!</div>
 					</div>
                 </div>
+				<div class="row mb-3">
+				<label class="col-sm-3 col-form-label">Tích hợp vào Assist (Tác Nhân):</label>
+				 <div class="col-sm-9">
+				<div class="input-group mb-3">
+                 <input disabled class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assist-Conversation" title="https://github.com/marion001/VBot-Assist-Conversation" value="https://github.com/marion001/VBot-Assist-Conversation">
+			     <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assist-Conversation" target="_bank">Truy Cập</a></button>
+					</div>
+				  </div>
+				  </div>
 </div>
 </div>
 </div>
@@ -3801,11 +3867,21 @@ include 'html_footer.php';
 <script src="assets/vendor/prism/prism-json.min.js"></script>
 <script src="assets/vendor/prism/prism-yaml.min.js"></script>
 
+
+
+
 <?php
 include 'html_js.php';
 ?>
 
 <script>
+//Ẩn hiển nguồn cài đặt hotword khi được chọn
+function selectHotwordWakeup() {
+        var selectedValue = document.getElementById("hotword_select_wakeup").value;
+        document.getElementById("select_show_picovoice_porcupine").style.display = selectedValue === "porcupine" ? "block" : "none";
+        document.getElementById("select_show_snowboy").style.display = selectedValue === "snowboy" ? "block" : "none";
+    }
+
 // Hàm để cuộn lên đầu trang
 function scrollToTop(event) {
     event.preventDefault();
@@ -3898,7 +3974,7 @@ function read_YAML_file_path(fileName) {
             codeElement.textContent = xhr.responseText.trim();
 			// Áp dụng lớp cú pháp YAML
             codeElement.className = 'language-yaml';
-            // Kích hoạt Prism.js để làm nổi bật cú pháp
+            // Kích hoạt Prism.js để lên màu
             Prism.highlightElement(codeElement);
             showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
             document.getElementById('name_file_showzz').textContent = "Tên File: " + fileName.split('/').pop();
@@ -3915,7 +3991,7 @@ function read_YAML_file_path(fileName) {
     xhr.send();
 }
 
-//onclick xem nội dung file json
+//xem nội dung file json
 function readJSON_file_path(filePath) {
     if (filePath === "get_value_backup_config") {
 		//Lấy giá trị value của id: backup_config_json_files
@@ -4018,12 +4094,90 @@ function loadConfigHotword(lang) {
     xhr.onload = function() {
         if (xhr.status === 200) {
             const data = JSON.parse(xhr.responseText);
-            displayResults_Hotword_dataa(data);
+			if (lang === "vi" || lang === "eng") {
+				displayResults_Hotword_dataa(data);
+			}else if (lang === "snowboy") {
+				displayResults_Hotword_Snowboy(data);
+			}
         }
     };
     xhr.send();
 }
 
+//Hiển thị list hotword Snowboy
+function displayResults_Hotword_Snowboy(data) {
+    const resultsDiv_snowboy = document.getElementById('results_body_hotword_snowboy');
+    const resultsDiv_snowboy1 = document.getElementById('results_body_hotword_snowboy1');
+    // Kiểm tra nếu không tìm thấy phần tử để tránh lỗi
+    if (!resultsDiv_snowboy || !resultsDiv_snowboy1) {
+        console.error('Không tìm thấy phần tử HTML cần thiết.');
+        return;
+    }
+    // Xóa nội dung cũ
+    resultsDiv_snowboy.innerHTML = '';
+    resultsDiv_snowboy1.innerHTML = '';
+    // Tạo biến selectHtml để tránh lỗi biến chưa được khai báo
+    let selectHtml = '';
+    if (Array.isArray(data.config) && data.config.length > 0) {
+        let tableContent = '';
+        data.config.forEach(function (item, index) {
+            tableContent += 
+                '<tr>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' +
+                        '<div class="form-switch">' +
+                            '<input class="form-check-input" type="checkbox" name="snowboy_active_' + index + '" ' + (item.active ? 'checked' : '') + '>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td>' +
+                        '<input readonly class="form-control" type="text" name="snowboy_file_name_' + index + '" value="' + item.file_name + '">' +
+                    '</td>' +
+                    '<td>' +
+                        '<input class="form-control" type="number" name="snowboy_sensitive_' + index + '" value="' + item.sensitive + '" step="0.1" min="0.1" max="1.0">' +
+                    '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' +
+                        '<center>' +
+                            '<button type="button" class="btn btn-danger" title="Xóa file: ' + item.file_name + '" onclick="deleteFile(\'' + data.path_hotword + item.file_name + '\', \'' + data.lang + '\')">' +
+                                '<i class="bi bi-trash"></i>' +
+                            '</button> ' +
+                            '<button type="button" class="btn btn-success" title="Tải xuống file: ' + item.file_name + '" onclick="downloadFile(\'' + data.path_hotword + item.file_name + '\')">' +
+                                '<i class="bi bi-download"></i>' +
+                            '</button>' +
+                        '</center>' +
+                    '</td>' +
+                '</tr>';
+        });
+            // Thêm nút nút lưu vào thẻ <tr>
+            tableContent +=
+                '<tr>' +
+                '<td colspan="5" style="text-align: center;">' +
+				
+                '<label for="upload_files_hotword_snowboy"><font color=blue>Tải lên file hotword <b>.umdl</b> hoặc <b>.pmdl</b></font></label>' +
+                '<div class="input-group">' +
+                '<input class="form-control" type="file" name="upload_files_hotword_snowboy[]" id="upload_files_hotword_snowboy" accept=".pmdl,.umdl" multiple>' +
+                ' <button class="btn btn-primary"  type="button" onclick="uploadFilesHotwordSnowboy()">Tải Lên</button>' +
+                '</div>' +
+				
+                '<br/><button type="submit" name="save_hotword_snowboy" class="btn btn-success rounded-pill" title="Lưu cài đặt hotword">Lưu Cài Đặt Hotword</button>' +
+                '</td>' +
+                '</tr>';
+        resultsDiv_snowboy1.innerHTML = 
+            selectHtml +
+            '<tr>' +
+                '<th><center>STT</center></th>' +
+                '<th><center>Kích Hoạt</center></th>' +
+                '<th><center>File Hotword</center></th>' +
+                '<th><center>Độ Nhạy</center></th>' +
+                '<th><center>Hành Động</center></th>' +
+            '</tr>';
+        resultsDiv_snowboy.innerHTML = tableContent;
+    } else {
+        resultsDiv_snowboy.innerHTML = '<tr><td colspan="5"><center>Không có dữ liệu hotword nào.</center></td></tr>';
+    }
+}
+
+
+	//Hiển thị list hotword Picovoice/Procupine
     function displayResults_Hotword_dataa(data) {
         const resultsDiv = document.getElementById('results_body_hotword');
         const resultsDiv1 = document.getElementById('results_body_hotword1');
@@ -4065,7 +4219,7 @@ function loadConfigHotword(lang) {
                 '<tr>' +
                 '<td colspan="5" style="text-align: center;">' +
                 '<input type="hidden" name="lang_hotword_get" id="lang_hotword_get" value="' + data.lang + '">' +
-                '<label for="upload_files"><font color=blue>Tải lên file hotword .ppn hoặc file thư viện .pv cho <b>'+reponse_lang+'</b></font></label>' +
+                '<label for="upload_files_ppn_pv"><font color=blue>Tải lên file hotword .ppn hoặc file thư viện .pv cho <b>'+reponse_lang+'</b></font></label>' +
                 '<div class="input-group">' +
                 '<input class="form-control" type="file" name="upload_files_ppn_pv[]" id="upload_files_ppn_pv" accept=".ppn,.pv" multiple>' +
                 ' <button class="btn btn-primary"  type="button" onclick="uploadFilesHotwordPPNandPV()">Tải Lên</button>' +
@@ -4081,7 +4235,7 @@ function loadConfigHotword(lang) {
                 '<th><center>Độ Nhạy</center></th>' +
                 '<th><center>Hành Động</center></th></tr>';
             resultsDiv.innerHTML = tableContent;
-        } 
+        }
 		//Nếu không có dữ liệu hotword trong COnfig.json là rỗng: []
 		else {
             let i_up = 0;
@@ -4159,7 +4313,7 @@ function loadConfigHotword(lang) {
         });
     }
 
-//Tải lên file ppv và pv
+//Tải lên file ppv và pv dùng cho Picovoice/Procupine
 function uploadFilesHotwordPPNandPV() {
     const formData = new FormData();
     const files = document.getElementById('upload_files_ppn_pv').files;
@@ -4199,39 +4353,99 @@ function uploadFilesHotwordPPNandPV() {
     xhr.send(formData);
 }
 
+//Tải lên file hotword Snowboy
+function uploadFilesHotwordSnowboy() {
+    const formData = new FormData();
+    const files = document.getElementById('upload_files_hotword_snowboy').files;
+    const lang = 'snowboy'
+    if (files.length === 0) {
+        show_message('Vui lòng chọn ít nhất một file để tải lên.');
+        return;
+    }
+    for (let i = 0; i < files.length; i++) {
+        formData.append('upload_files_hotword_snowboy[]', files[i]);
+		//console.log(files);
+    }
+    formData.append('action_hotword_snowboy', 'upload_files_hotword_snowboy');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                let messages = [];
+                if (response.status === 'success') {
+                    // Tổng hợp tất cả thông báo
+                    messages.push(response.messages + '<br/>');
+                } else {
+                    messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
+                }
+                //Tải lại dữ liệu hotword ở Config.json
+                loadConfigHotword(lang)
+                show_message(messages.join('<br/>'));
+            } catch (e) {
+                show_message('Không thể phân tích phản hồi json: ' + e.message);
+            }
+        } else {
+            show_message("<center>Tải file lên thất bại</center>");
+        }
+    };
+    xhr.send(formData);
+}
+
+
 //Cập nhật các file trong eng và vi để Làm mới lại cấu hình Hotword trong Config.json, 
 function reload_hotword_config(langg = "No") {
-    if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json bao gồm cả tiếng anh và tiếng việt?")) {
+    if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json")) {
         return;
     }
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config');
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            if (response.status === 'success') {
-                show_message("<center>" + response.message + "</center>");
-            } else {
-                show_message("<center>" + response.message + "</center>");
-            }
-            var element_data_lang_shows = document.getElementById('data_lang_shows');
-            //Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
-            // Kiểm tra nếu phần tử tồn tại
-            if (element_data_lang_shows) {
-                // Lấy giá trị của thuộc tính 'value'
-                var value_lang = element_data_lang_shows.getAttribute('value');
-                // Thực hiện các hành động cần thiết với giá trị
-                console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
-                if (value_lang === "vi") {
-                    loadConfigHotword("vi")
-                } else if (value_lang === "eng") {
-                    loadConfigHotword("eng")
-                }
-            }
-        } else {
-            show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
-        }
-    };
+	if (langg === "No") {
+		xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config');
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				var response = JSON.parse(xhr.responseText);
+				if (response.status === 'success') {
+					show_message("<center>" + response.message + "</center>");
+				} else {
+					show_message("<center>" + response.message + "</center>");
+				}
+				var element_data_lang_shows = document.getElementById('data_lang_shows');
+				//Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
+				// Kiểm tra nếu phần tử tồn tại
+				if (element_data_lang_shows) {
+					// Lấy giá trị của thuộc tính 'value'
+					var value_lang = element_data_lang_shows.getAttribute('value');
+					// Thực hiện các hành động cần thiết với giá trị
+					//console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
+					if (value_lang === "vi") {
+						loadConfigHotword("vi")
+					} else if (value_lang === "eng") {
+						loadConfigHotword("eng")
+					}
+				}
+			} else {
+				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+			}
+		};
+	}
+	else if (langg === 'snowboy'){
+		console.log('dsadsfsdf');
+		xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config_snowboy');
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+				var response = JSON.parse(xhr.responseText);
+				if (response.status === 'success') {
+					show_message("<center>" + response.message + "</center>");
+				} else {
+					show_message("<center>" + response.message + "</center>");
+				}
+				loadConfigHotword("snowboy")
+			} else {
+				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+			}
+		};
+	}
     xhr.send();
 }
 
@@ -4594,11 +4808,7 @@ function test_key_ChatGPT(text) {
             };
         }
     }
-    // Đặt sự kiện khi DOM đã được tải hoàn toàn và cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
-    document.addEventListener('DOMContentLoaded', function() {
-        updateButton_Audio_Welcome(); // Cập nhật thuộc tính onclick khi DOM tải xong
-        document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome); // Cập nhật khi giá trị thay đổi
-    });
+
 
 //Check key picovoice
 function test_key_Picovoice() {
@@ -4909,6 +5119,15 @@ function update_webui_link() {
     }
 }
 
+// Đặt sự kiện khi DOM đã được tải hoàn toàn v
+document.addEventListener('DOMContentLoaded', function() {
+	//cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
+    updateButton_Audio_Welcome();
+    document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)
+
+	// Gọi hàm để cập nhật trạng thái ban đầu lựa chọn nguồn hotword đánh thức
+    selectHotwordWakeup();
+});
 </script>
 
 	

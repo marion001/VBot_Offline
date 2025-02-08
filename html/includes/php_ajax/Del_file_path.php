@@ -34,9 +34,18 @@ if (file_exists($filePath)) {
             }
             file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         } elseif ($fileExtension === 'pv') {
-			
             $message = 'File .pv: '.basename($filePath).' đã được xóa thành công.';
-        }
+        }elseif ($fileExtension === 'pmdl' || $fileExtension === 'umdl') {
+			$removed = false;
+                foreach ($Config['smart_config']['smart_wakeup']['hotword']['snowboy'] as $key => $item) {
+                    if ($item['file_name'] === $fileName) {
+                        unset($Config['smart_config']['smart_wakeup']['hotword']['snowboy'][$key]);
+                        $removed = true;
+                    }
+                }
+                $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = array_values($Config['smart_config']['smart_wakeup']['hotword']['snowboy']);
+			file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		}
         echo json_encode([
             'status' => 'success',
             'message' => $message

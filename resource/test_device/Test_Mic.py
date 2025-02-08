@@ -12,7 +12,7 @@ from pvrecorder import PvRecorder
 device_index = -1  #Sử dụng thiết bị mặc định thì đặt là: "-1"
 
 #Thời gian ghi âm (6 giây)
-duration = 6
+duration = 2
 
 #Tên File âm thanh
 output_file = "Test_Microphone.wav"  

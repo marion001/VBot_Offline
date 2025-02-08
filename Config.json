@@ -438,6 +438,8 @@
                 "key": "/fcfc34f34f+TGsdTNolucA=="
             },
             "hotword": {
+                "select_wakeup": "porcupine",
+                "notes": "select_wakeup sẽ có 3 giá trị sử dụng từ đánh thức là: porcupine hoặc snowboy, (hoặc null không nằm trong dấu nháy)",
                 "lang": "vi",
                 "library": {
                     "vi": {
@@ -488,7 +490,24 @@
                             "sensitive": 0.5
                         }
                     ]
-                }
+                },
+                "snowboy": [
+                    {
+                        "active": true,
+                        "file_name": "e_cu.pmdl",
+                        "sensitive": 0.5
+                    },
+                    {
+                        "active": true,
+                        "file_name": "hey_siri.pmdl",
+                        "sensitive": 0.5
+                    },
+                    {
+                        "active": true,
+                        "file_name": "ok_google.pmdl",
+                        "sensitive": 0.5
+                    }
+                ]
             }
         },
         "smart_answer": {

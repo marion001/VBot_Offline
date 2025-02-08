@@ -1,69 +1,84 @@
 {
-  "notification_schedule": [
-    {
-      "active": true,
-      "name": "Test Lịch Trình Thông Báo 2",
-      "create_words": "vbot_interface",
-      "data": {
-        "message": "",
-        "audio_file": "/home/pi/VBot_Offline/Media/Audio_Scheduler/Tu_em_sai.mp3",
-        "repeat": 1
-      },
-      "date": [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-        "29/12/2024",
-        "30/12/2024"
-      ],
-      "time": [
-        "20:47",
-        "18:30"
-      ]
+    "notification_schedule": [
+        {
+            "name": "Test Lịch Trình Thông Báo 2",
+            "create_words": "vbot_interface",
+            "data": {
+                "message": "",
+                "audio_file": "/home/pi/VBot_Offline/Media/Audio_Scheduler/Tu_em_sai.mp3",
+                "repeat": 1
+            },
+            "date": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+                "29/12/2024",
+                "30/12/2024"
+            ],
+            "time": [
+                "20:47",
+                "18:30"
+            ],
+            "active": false
+        }
+    ],
+    "send_notify_upgrade_vbot_home_assistant": {
+        "active": false,
+        "time": "03:01"
+    },
+    "display_screen": {
+        "active": false,
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "time_on": [
+            "20:47"
+        ],
+        "time_off": [
+            "18:40"
+        ]
+    },
+    "restart_vbot": {
+        "active": false,
+        "date": [
+            "Sunday"
+        ],
+        "time": [
+            "03:05"
+        ]
+    },
+    "reboot_os": {
+        "active": false,
+        "date": [
+            "Sunday"
+        ],
+        "time": [
+            "03:07"
+        ]
+    },
+    "stop_media_player": {
+        "active": true,
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "time": [
+            "10:02"
+        ]
     }
-  ],
-  "send_notify_upgrade_vbot_home_assistant": {
-    "active": false,
-    "time": "03:01"
-  },
-  "display_screen": {
-    "active": false,
-    "date": [
-      "Monday",
-      "Tuesday",
-      "Wednesday",
-      "Thursday",
-      "Friday",
-      "Saturday",
-      "Sunday"
-    ],
-    "time_on": [
-      "20:47"
-    ],
-    "time_off": [
-      "18:40"
-    ]
-  },
-  "restart_vbot": {
-    "active": false,
-    "date": [
-      "Sunday"
-    ],
-    "time": [
-      "03:05"
-    ]
-  },
-  "reboot_os": {
-    "active": false,
-    "date": [
-      "Sunday"
-    ],
-    "time": [
-      "03:07"
-    ]
-  }
 }

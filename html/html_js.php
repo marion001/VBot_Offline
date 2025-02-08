@@ -125,7 +125,9 @@ function deleteFile(filePath, langg = "No") {
                 loadConfigHotword("vi")
             } else if (langg === "eng") {
                 loadConfigHotword("eng")
-            } else if (langg === "scan_Music_Local") {
+            }else if (langg === "snowboy") {
+                loadConfigHotword("snowboy")
+            }else if (langg === "scan_Music_Local") {
                 list_audio_show_path('scan_Music_Local')
             } else if (langg === "Vbot_Backup_Program") {
 				if (document.getElementById("show_all_file_folder_Backup_Program")) {
