@@ -399,8 +399,22 @@ Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot-Assist-Conver
 <div class="card accordion" id="accordion_button_train_hotword_snowboy">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_train_hotword_snowboy" aria-expanded="false" aria-controls="collapse_button_train_hotword_snowboy">
-Hướng Dẫn Train Hotword Snowboy:</h5>
+Hướng Dẫn Train Hotword Snowboy, Cài Thư Viện Snowboy:</h5>
 <div id="collapse_button_train_hotword_snowboy" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_train_hotword_snowboy">
+<b>- Cài Thư Viện:</b> Chạy Lần Lượt Các Lệnh Sau<br/><br/>
+<b>
+$:> sudo apt update<br/>
+$:> sudo apt install -y swig<br/>
+$:> sudo apt install -y libatlas-base-dev liblapack-dev libblas-dev<br/>
+$:> sudo apt install libopenblas-dev<br/>
+$:> wget https://www.piwheels.org/simple/scipy/scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
+$:> pip install scipy-1.13.1-cp39-cp39-linux_armv7l.whl<br/>
+$:> cd ~<br/>
+$:> git clone https://github.com/seasalt-ai/snowboy.git<br/>
+$:> cd ~/snowboy<br/>
+$:> sudo python3 setup.py install</b>
+<hr/>
+<b>- Train Hotword:</b> Lần Lượt Các Bước Sau<br/>
 - <b>Lưu Ý: Cần Sử dụng 1 thiết bị khác không chạy Vbot để Train</b><br/><br>
 B1: <b>Cài Docker trên thiết bị (Cách cài các bạn tham khảo trên google nhé)</b><br/><br/>
 B2: Chạy lệnh sau: <b>$:> sudo docker pull rhasspy/snowboy-seasalt</b><br/><br/>

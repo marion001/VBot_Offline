@@ -1062,9 +1062,9 @@ Cấu Hình Hotword Engine: Picovoice/Snowboy :</h5>
 </center>
 <br/>
 <div class="row mb-3">
-<label for="" class="col-sm-3 col-form-label">Train Từ khóa Hotword:</label>
+<label for="" class="col-sm-3 col-form-label">Cài Thư Viện, Train Hotword:</label>
 <div class="col-sm-9">
-<a href="FAQ.php" target="_bank">Nhấn Để Xem Hướng Dẫn Train Hotword Snowboy</a> 
+<a href="FAQ.php" target="_bank">Nhấn Vào Đây Để Xem Hướng Dẫn</a> 
 </div>
 </div>
 
