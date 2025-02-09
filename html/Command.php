@@ -822,6 +822,28 @@ $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
 $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['os_image_created'])) {
+    $CMD_CHECK = "[ -f /os_image_created.txt ] && echo 'EXIST' || echo 'NOT_EXIST'";
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) { die($SSH_CONNECT_ERROR); }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) { die($SSH2_AUTH_ERROR); }
+    $stream = ssh2_exec($connection, $CMD_CHECK);
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $check_output = trim(stream_get_contents($stream_out));
+    if ($check_output === "EXIST") {
+        $CMD = "cat /os_image_created.txt";
+        $stream = ssh2_exec($connection, $CMD);
+        stream_set_blocking($stream, true);
+        $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+        #$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+        $output = stream_get_contents($stream_out);
+    } else {
+        $output = "Không lấy được thông tin phiên bản OS IMG";
+    }
+    echo nl2br(htmlspecialchars($output));
+}
+
 
 //check_version_picovoice_porcupine
 if (isset($_POST['check_version_picovoice_porcupine'])) {
@@ -1049,6 +1071,7 @@ include 'html_sidebar.php';
 	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="serial_getty_ttyS0_enable" type="submit" title="Kích hoạt một phiên đăng nhập (login shell) qua cổng UART (Start UP)">Enable serial-getty@ttyS0.service</button></li>
 	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="list_systemctl_enabled" type="submit" title="Các dịch vụ đang khởi động cùng hệ thống">Systemctl List Enable</button></li>
 	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="sudo_alsactl_store" type="submit" title="Lưu cấu hình âm thanh alsamixer">sudo alsactl store</button></li>
+	<li><button onclick="loading('show')" class="dropdown-item text-danger" name="os_image_created" type="submit" title="Kiểm tra phiên bản OS IMG">Phiên bản OS IMG</button></li>
           </ul>
 </div>
 </div>
