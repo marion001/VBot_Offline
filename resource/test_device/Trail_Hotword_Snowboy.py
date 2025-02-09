@@ -20,7 +20,7 @@ device_index = -1
 duration = 2
 
 # Số lần ghi âm yêu cầu tối thiểu là 3
-num_recordings = 6
+num_recordings = 5
 
 # Xóa các file .wav trước khi ghi âm
 for file in glob.glob("*.wav"):
