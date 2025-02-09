@@ -12,6 +12,7 @@ from pvrecorder import PvRecorder
 
 # Địa chỉ server để gửi dữ liệu lên Train Hotword
 server_url = "http://192.168.14.17:8899"
+#server_url = "http://snowboy-train-vbot.duckdns.org:8899"
 
 # ID của Mic Sử dụng thiết bị mặc định thì đặt là "-1"
 device_index = -1
