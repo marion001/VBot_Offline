@@ -995,25 +995,7 @@ Cấu Hình Hotword Engine: Picovoice/Snowboy :</h5>
 
 <div class="card">
 <div class="card-body">
-<h5 class="card-title" title="Key Picovoice">Picovoice <i class="bi bi-question-circle-fill" onclick="show_message('Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>')"></i> :</h5>
-         <div class="row mb-3">
-                  <label for="hotword_engine_key" class="col-sm-3 col-form-label">Token Key:</label>
-                  <div class="col-sm-9">
-				  <div class="input-group mb-3">
-                      <input required class="form-control border-success" type="text" name="hotword_engine_key" id="hotword_engine_key" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>">
-                 <div class="invalid-feedback">Cần nhập key Picovoice để gọi Hotword!</div>
-				  <button class="btn btn-success border-success" type="button" onclick="test_key_Picovoice()">Kiểm Tra</button>
-				
-                  </div>
-                  </div>
-                </div>
-            </div>
-          </div>
-		  
-<div class="card">
-<div class="card-body">
 <h5 class="card-title">Hotword <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
-
 
 <div class="row mb-3">
 <label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức:</label>
@@ -1028,6 +1010,20 @@ Cấu Hình Hotword Engine: Picovoice/Snowboy :</h5>
 
 <!-- nếu hotword được chọn là Picovoice Procupine -->
 <div id="select_show_picovoice_porcupine">
+
+         <div class="row mb-3">
+                  <label for="hotword_engine_key" class="col-sm-3 col-form-label">Picovoice Token Key: <i class="bi bi-question-circle-fill" onclick="show_message('Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>')"></i></label>
+                  <div class="col-sm-9">
+				  <div class="input-group mb-3">
+                      <input required class="form-control border-success" type="text" name="hotword_engine_key" id="hotword_engine_key" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>">
+                 <div class="invalid-feedback">Cần nhập key Picovoice để gọi Hotword!</div>
+				  <button class="btn btn-success border-success" type="button" onclick="test_key_Picovoice()">Kiểm Tra</button>
+				
+                  </div>
+                  </div>
+                </div>
+
+
 <div class="form-floating mb-3">
 <select name="select_hotword_lang" id="select_hotword_lang" class="form-select border-success" aria-label="Default select example">
 <option value="vi" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'vi' ? 'selected' : ''; ?>>Tiếng việt</option>
