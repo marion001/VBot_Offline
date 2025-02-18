@@ -16,7 +16,7 @@ VBot là loa thông minh tích hợp trợ lý ảo tiếng Việt, hỗ trợ �
 
 Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
 
-
+- Liên Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - Liên Hệ Hỗ Trợ: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
 
 <hr/>
