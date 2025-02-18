@@ -1,8 +1,8 @@
 {
-    "version": "1.0.15",
+    "version": "1.0.17",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật hỗ trợ từ khóa đánh thức của Snowboy",
-    "releaseDate": "09/02/2025",
+    "description": "Sửa Lỗi Vặt Trong Các Phiên Bản Cũ",
+    "releaseDate": "18/02/2025",
     "changes": [
         {
             "type": "feature",
