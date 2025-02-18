@@ -439,6 +439,7 @@
             },
             "hotword": {
                 "select_wakeup": "porcupine",
+				"continue_running_if_hotword_initialization_fails": true,
                 "notes": "select_wakeup sẽ có 3 giá trị sử dụng từ đánh thức là: porcupine hoặc snowboy, (hoặc null không nằm trong dấu nháy)",
                 "lang": "vi",
                 "library": {

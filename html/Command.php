@@ -559,7 +559,8 @@ $output .=  stream_get_contents($stream_out);
 }
 
 if (isset($_POST['restart_alsa'])) {
-$CMD = "sudo systemctl restart alsa-restore";
+#$CMD = "sudo systemctl restart alsa-restore";
+$CMD = "sudo systemctl restart alsa-state";
 $connection = ssh2_connect($ssh_host, $ssh_port);
 if (!$connection) {die($SSH_CONNECT_ERROR);}
 if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}

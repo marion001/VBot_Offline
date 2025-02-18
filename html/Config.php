@@ -188,6 +188,7 @@ $Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotwo
 $Config['smart_config']['smart_wakeup']['hotword']['lang'] = $_POST['select_hotword_lang'];
 #$Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] = $_POST['hotword_select_wakeup'];
 $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] = ($_POST['hotword_select_wakeup'] === "null") ? null : $_POST['hotword_select_wakeup'];
+$Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] = isset($_POST['continue_running_if_hotword_initialization_fails']) ? true : false;
 
 #CẬP NHẬT CHẾ ĐỘ Text To Speak (TTS) text_to_speak:
 $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
@@ -996,6 +997,16 @@ Cấu Hình Hotword Engine: Picovoice/Snowboy :</h5>
 <div class="card">
 <div class="card-body">
 <h5 class="card-title">Hotword <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
+
+
+<div class="row mb-3">
+<label for="continue_running_if_hotword_initialization_fails" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup: <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
+<div class="col-sm-9">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="continue_running_if_hotword_initialization_fails" id="continue_running_if_hotword_initialization_fails" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] ? 'checked' : ''; ?>>
+</div>
+</div>
+</div>
 
 <div class="row mb-3">
 <label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức:</label>
