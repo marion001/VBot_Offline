@@ -3028,10 +3028,10 @@ Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:</h5>
 <div class="card">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_assistant" aria-expanded="false" aria-controls="collapse_button_custom_assistant">
-DEV Assistant (Custom Assistant) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:</h5>
+DEV Assistant (Custom Assistant) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:</h5>
 
 <div class="row mb-3">
-<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
+<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
 <div class="col-sm-9">
 <div class="form-switch">
 <input class="form-check-input" type="checkbox" name="customize_developer_assistant_active" id="customize_developer_assistant_active" <?php echo $Config['virtual_assistant']['customize_developer_assistant']['active'] ? 'checked' : ''; ?>>
