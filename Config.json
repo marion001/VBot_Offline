@@ -369,6 +369,8 @@
                     "channels": 1,
                     "chunk": 4096,
                     "language_code": "vi-VN",
+					"interim_results": true,
+					"single_utterance": true,
                     "stt_ggcloud_v2": {
                         "recognizer_id": "điền id recogines của bạn",
                         "model": "short",
