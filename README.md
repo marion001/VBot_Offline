@@ -15,8 +15,9 @@ VBot là loa thông minh tích hợp trợ lý ảo tiếng Việt, hỗ trợ �
       : https://github.com/marion001/VBot-Assist-Conversation
 
 - Chạy VBot thủ công:
-    $:> cd VBot_Offline
-    $:> python3 Start.py
+
+        $:> cd VBot_Offline
+        $:> python3 Start.py
 
 
 Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
