@@ -14,6 +14,10 @@ VBot là loa thông minh tích hợp trợ lý ảo tiếng Việt, hỗ trợ �
 - Tích hợp với trợ lý ảo Assist của Home Assistant (Làm Tác Nhân)
       : https://github.com/marion001/VBot-Assist-Conversation
 
+- Chạy VBot thủ công:
+    $:> python3 Start.py
+
+
 Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
 
 - Liên Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
