@@ -56,21 +56,7 @@
           <i class="bi bi-circle"></i><span>Home Assistant Customize Command</span>
           </a>
         </li>
-        <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Skill">
-          <a href="DEV_Customization.php">
-          <i class="bi bi-circle"></i><span>DEV Customization (Custom Skill)</span>
-          </a>
-        </li>
-        <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Assistant">
-          <a href="DEV_Assistant.php">
-          <i class="bi bi-circle"></i><span>DEV Assistant (Custom Assistant)</span>
-          </a>
-        </li>
-        <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Text To Speak">
-          <a href="DEV_TTS.php">
-          <i class="bi bi-circle"></i><span>DEV Text To Speak (Custom TTS)</span>
-          </a>
-        </li>
+
         <li title="Danh Sách API VBot">
           <a href="API_List.php">
           <i class="bi bi-circle"></i><span>Giao Tiếp API (API REST)</span>
@@ -134,6 +120,29 @@
       </ul>
     </li>
     <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Nâng Cao Dành Cho Người Dùng Cá Nhân Tự Code Và Phát Triển Theo Ý Muốn">
+      <i class="bi bi-file-code-fill"></i><span>DEV Custom VBot</span><i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="cloud-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+        <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Skill">
+          <a href="DEV_Customization.php">
+          <i class="bi bi-circle"></i><span>DEV Customization (Custom Skill)</span>
+          </a>
+        </li>
+        <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Assistant">
+          <a href="DEV_Assistant.php">
+          <i class="bi bi-circle"></i><span>DEV Assistant (Custom Assistant)</span>
+          </a>
+        </li>
+        <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Text To Speak">
+          <a href="DEV_TTS.php">
+          <i class="bi bi-circle"></i><span>DEV Text To Speak (Custom TTS)</span>
+          </a>
+        </li>
+      </ul>
+    </li>
+	
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
       <i class="bi bi-cloud-check"></i><span>Cloud Drive</span><i class="bi bi-chevron-down ms-auto"></i>
