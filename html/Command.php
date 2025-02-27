@@ -844,7 +844,7 @@
       } else {
           $output = "Không lấy được thông tin phiên bản OS IMG";
       }
-      echo nl2br(htmlspecialchars($output));
+      #echo nl2br(htmlspecialchars($output));
   }
   
   
