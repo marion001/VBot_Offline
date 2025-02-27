@@ -178,7 +178,8 @@
           file_put_contents($authConfigPath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           
           // Thiết lập quyền truy cập 0777
-          chmod($authConfigPath, 0777);
+          #chmod($authConfigPath, 0777);
+		  shell_exec("chmod 777 " . escapeshellarg($authConfigPath) . " &");
           //$notifications[] = "File JSON đã được tạo với các trường cần thiết và quyền truy cập đã được thiết lập thành 0777.";
       
           // Đọc và hiển thị nội dung file JSON vừa tạo
@@ -249,8 +250,8 @@
       }
       
       // Thiết lập quyền truy cập 0777
-      chmod($authConfigPath, 0777);
-      
+      shell_exec("chmod 777 " . escapeshellarg($authConfigPath) . " &");
+
       // Đọc file client_secret hiện tại
       $read_authConfigPath = file_get_contents($authConfigPath);
       $data_authConfigPath = json_decode($read_authConfigPath, true);
