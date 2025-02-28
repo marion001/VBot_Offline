@@ -291,7 +291,7 @@
             "active": true,
             "led_gpio": 10,
             "led_type": "ws281x",
-            "notes_led_type": "ReSpeaker_Mic_Array_v2.0, ws281x, apa102",
+            "notes_led_type": "ReSpeaker_Mic_Array_v2.0, ws281x, apa102, dev_custom_led",
             "number_led": 12,
             "brightness": 255,
             "led_invert": false,

@@ -224,11 +224,9 @@
     <?php
       include 'html_footer.php';
       ?>
-    <!-- End Footer -->
+
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-    <!-- Nghe thử file âm thanh 
-      <audio id="audioPlayer" style="display: none;" controls></audio>-->
-    <!-- Template Main JS File -->
+
     <?php
       include 'html_js.php';
       ?>

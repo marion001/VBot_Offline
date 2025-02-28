@@ -65,17 +65,24 @@
     <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
-        <h1>Developers Assistant (Custom Assistant) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể Code File <b>Dev_Assistant.py</b> ở trên giao diện WEB, hoặc có thể truy cập bằng SSH vào Server để Code trực tiếp ở trên file')"></i></h1>
+        <h1>Developers LED (Custom LED) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể Code File <b>Dev_Led.py</b> ở trên giao diện WEB, hoặc có thể truy cập bằng SSH vào Server để Code trực tiếp ở trên file')"></i></h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang Chủ</a></li>
-            <li class="breadcrumb-item active">Dev_Assistant.py</li>
-            &nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['developer_customization']['active'] ? '<p class="text-success" title="Developers Assistant đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Developers Assistant không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
+            <li class="breadcrumb-item active">Dev_Led.py</li>
+            &nbsp;| Trạng Thái Kích Hoạt:
+			<?php 
+			if (isset($Config['smart_config']['led']['led_type']) && $Config['smart_config']['led']['led_type'] === 'dev_custom_led') {
+				echo '<p class="text-success" title="Developers LED đang được kích hoạt">&nbsp;Đang Bật</p>';
+			} else {
+				echo '<p class="text-danger" title="Developers LED không được kích hoạt">&nbsp;Đang Tắt</p>';
+			}
+			?>
           </ol>
         </nav>
       </div>
       <?php
-        $file_path = $VBot_Offline.'Dev_Assistant.py';
+        $file_path = $VBot_Offline.'Dev_Led.py';
            if (isset($_POST['save_code'])) {
                // Lưu mã Python từ trình soạn thảo vào file mà không chạy code
                $python_code = $_POST['code'];
