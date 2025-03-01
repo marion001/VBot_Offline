@@ -8,7 +8,10 @@
   include '../../Configuration.php'; 
   
   header('Content-Type: application/json');
-  
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
   // Lấy giao thức (http hoặc https)
   $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
   
@@ -1322,9 +1325,7 @@
   // Regex để tìm tất cả các thẻ <div> có class chứa "horizontalPost__avt"
   $pattern = '/<div\s+class=["\'][^"\']*horizontalPost__avt[^"\']*["\'].*?>.*?<\/div>/s';
 preg_match_all($pattern, $html, $matches);
-// Regex để tìm tất cả các thẻ 
-<div>
-có class chứa "horizontalPost__main-actions"
+// Regex để tìm tất cả các thẻ <div> có class chứa "horizontalPost__main-actions"
 $pattern1 = '/<div\s+class=["\'][^"\']*horizontalPost__main-actions[^"\']*["\'].*?>.*?<\/div>/s';
 preg_match_all($pattern1, $html, $matches1);
 if (!empty($matches[0]) && !empty($matches1[0])) {
@@ -1337,9 +1338,7 @@ for ($i = 0; $i < $count; $i++) {
 $divAvt = $matches[0][$i];
 // Lấy liên kết và tiêu đề bài viết từ thẻ <a> trong div
 preg_match('/<a\s+href=["\'](.*?)["\'].*?title=["\'](.*?)["\']/', $divAvt, $linkMatches);
-// Lấy hình ảnh từ thẻ 
-<picture>
-hoặc <img>
+// Lấy hình ảnh từ thẻ  <picture> hoặc <img>
 preg_match('/<picture.*?>.*?<source[^>]+data-srcset=["\']([^"\']+)["\']/s', $divAvt, $imgMatches);
 // Thẻ từ matches1[0] (horizontalPost__main-actions)
 $divMain = $matches1[0][$i];
@@ -1352,15 +1351,11 @@ if (in_array($title, $printedTitles)) {
 continue;
 }
 $COVER = null;
-// Kiểm tra hình ảnh, nếu có trong 
-<picture>
-sử dụng, nếu không sẽ lấy từ <img> fallback
+// Kiểm tra hình ảnh, nếu có trong <picture> sử dụng, nếu không sẽ lấy từ <img> fallback
 if (!empty($imgMatches)) {
 $COVER = trim($imgMatches[1]);
 } else {
-// Nếu không tìm thấy trong 
-<picture>
-, kiểm tra thẻ <img> với data-srcset
+// Nếu không tìm thấy trong  <picture> , kiểm tra thẻ <img> với data-srcset
 preg_match('/<img\s+[^>]*data-srcset=["\']([^"\']+)["\']/s', $divAvt, $imgFallbackMatches);
 if (!empty($imgFallbackMatches)) {
 $COVER = trim($imgFallbackMatches[1]);

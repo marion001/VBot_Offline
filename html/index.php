@@ -5,15 +5,11 @@
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
-  ?>
-<?php
   if ($Config['contact_info']['user_login']['active']){
   session_start();
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
@@ -25,105 +21,94 @@
   ?>
 <!DOCTYPE html>
 <html lang="vi">
-  <!--
-    Code By: Vũ Tuyển
-    Designed by: BootstrapMade
-    Facebook: https://www.facebook.com/TWFyaW9uMDAx
-    -->
   <?php
     include 'html_head.php';
     ?>
   <head>
     <!-- CSS thanh trượt Volume index.php -->
-    <style>
-      .volume-slider {
-      position: relative;
-      width: 50px;
-      height: 150px;
-      background: #ddd;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      top: 15px;
-      touch-action: none;
-      }
-      .volume-bar {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: #3498db;
-      border-radius: 10px;
-      }
-      .volume-percentage {
-      position: absolute;
-      top: 15%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 16px;
-      color: #000000;
-      z-index: 1;
-      }
-      .volume-icon {
-      position: absolute;
-      font-size: 24px;
-      color: #000000;
-      bottom: 10px;
-      z-index: 1;
-      }
-    </style>
-    <!-- CSS thanh trượt độ sáng đèn led -->
-    <style>
-      .led_brightness-slider {
-      position: relative;
-      width: 50px;
-      height: 150px;
-      background: #ddd;
-      border-radius: 10px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      top: 15px;
-      touch-action: none;
-      }
-      .led_brightness-bar {
-      position: absolute;
-      bottom: 0;
-      width: 100%;
-      background: #3498db;
-      border-radius: 10px;
-      }
-      .led_brightness-percentage {
-      position: absolute;
-      top: 15%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 16px;
-      color: #000000;
-      z-index: 1;
-      }
-      .led_brightness-icon {
-      position: absolute;
-      font-size: 24px;
-      color: #000000;
-      bottom: 10px;
-      z-index: 1;
-      }
-    </style>
+	<style>
+		.volume-slider {
+			position: relative;
+			width: 50px;
+			height: 150px;
+			background: #ddd;
+			border-radius: 10px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			top: 15px;
+			touch-action: none;
+		}
+		.volume-bar {
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			background: #3498db;
+			border-radius: 10px;
+		}
+		.volume-percentage {
+			position: absolute;
+			top: 15%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 16px;
+			color: #000000;
+			z-index: 1;
+		}
+		.volume-icon {
+			position: absolute;
+			font-size: 24px;
+			color: #000000;
+			bottom: 10px;
+			z-index: 1;
+		}
+	</style>
+	<!-- CSS thanh trượt độ sáng đèn led -->
+	<style>
+		.led_brightness-slider {
+			position: relative;
+			width: 50px;
+			height: 150px;
+			background: #ddd;
+			border-radius: 10px;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			top: 15px;
+			touch-action: none;
+		}
+		.led_brightness-bar {
+			position: absolute;
+			bottom: 0;
+			width: 100%;
+			background: #3498db;
+			border-radius: 10px;
+		}
+		.led_brightness-percentage {
+			position: absolute;
+			top: 15%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			font-size: 16px;
+			color: #000000;
+			z-index: 1;
+		}
+		.led_brightness-icon {
+			position: absolute;
+			font-size: 24px;
+			color: #000000;
+			bottom: 10px;
+			z-index: 1;
+		}
+	</style>
   </head>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Bảng điều khiển</h1>
@@ -655,20 +640,17 @@
                               document.getElementById('show_city').innerHTML = city + ', <span>' + weatherData.sys.country + '</span>';
                           }
                       });
-      
                       var weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=8473858601dabd3d2cbb24fb50840686&units=metric&lang=vi';
                       xhrWeather.open('GET', weatherUrl);
-                      // Gửi request để lấy thời tiết
                       xhrWeather.send();
                   }
               });
               xhr.open('GET', 'https://ipinfo.io/json');
-              // Gửi request để lấy thông tin IP
               xhr.send();
           }
-          // Gọi hàm để hiển thị thông tin vị trí và thời tiết
+       // Gọi hàm để hiển thị thông tin vị trí và thời tiết
       getLocationAndWeather();
-      
+
       //Cập nhật và hiển thị giá trị led vào thẻ html 
       function updateBrightness(value) {
           const brightnessSlider = document.getElementById('led_brightness-slider');
@@ -681,7 +663,7 @@
           brightnessKnob.style.top = (height - (percentage / 100) * height) + 'px';
           brightnessPercentage.textContent = Math.round((value / 255) * 100) + '%';
       }
-      
+
       //Cập nhật giá trị volume vào id="volume-slider" html
       function set_Volume_HTML(volume) {
           // Lấy các phần tử từ ID
@@ -694,24 +676,18 @@
           volumeKnob.style.top = (height - (volume / 100) * height) + 'px';
           volumePercentage.textContent = Math.round(volume) + '%';
       }
-      
+
       // Định dạng thời gian thành HH:MM:SS
       function formatTime_Player(milliseconds) {
           let totalSeconds = Math.floor(milliseconds / 1000);
           let hours = Math.floor(totalSeconds / 3600);
           let minutes = Math.floor((totalSeconds % 3600) / 60);
           let seconds = totalSeconds % 60;
-      
           return hours.toString().padStart(2, '0') + ':' +
               minutes.toString().padStart(2, '0') + ':' +
               seconds.toString().padStart(2, '0');
-      
       }
-      
-      
-      
-      
-      
+
       //Dùng để tua bài hát
       function sendSetTime_duration(set_duration) {
           var data = JSON.stringify({
@@ -720,7 +696,6 @@
               "action": "set_time",
               "set_duration": set_duration
           });
-      
           var xhr = new XMLHttpRequest();
           xhr.addEventListener("readystatechange", function() {
               if (this.readyState === 4) {
@@ -747,7 +722,7 @@
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
-      
+
       //Thay đổi giá trị của biến toàn cục, chế độ hội thoại, chế độ phản hồi, Mic, Wakeup
       function change_to_another_mode(dataKey, actionValue) {
           var data = JSON.stringify({
@@ -755,7 +730,6 @@
               "data": dataKey,
               "action": actionValue // true hoặc false tùy vào giá trị truyền vào
           });
-      
           var xhr = new XMLHttpRequest();
           xhr.addEventListener("readystatechange", function() {
               if (this.readyState === 4) {
@@ -782,12 +756,11 @@
                   }
               }
           });
-      
           xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
-      
+
       //Gửi dữ liệu thay đổi volume tới Bot
       function set_Volume_Data(volume) {
               var data = JSON.stringify({
@@ -796,7 +769,6 @@
                   "action": "setup",
                   "value": volume
               });
-      
               var xhr = new XMLHttpRequest();
               xhr.addEventListener("readystatechange", function() {
                   if (this.readyState === 4) {
@@ -821,21 +793,20 @@
                       }
                   }
               });
-      
               xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
               xhr.setRequestHeader("Content-Type", "application/json");
               xhr.send(data);
           }
-          //Thay đổi độ sáng đèn led
+		  
+      //Thay đổi độ sáng đèn led
       function sendBrightnessData(value) {
           var data = JSON.stringify({
               "type": 2,
               "data": "led",
-      "action": "brightness",
+			  "action": "brightness",
               "value": value
           });
           var xhr = new XMLHttpRequest();
-      
           xhr.addEventListener("readystatechange", function() {
               if (this.readyState === 4) {
                   try {
@@ -861,19 +832,16 @@
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
-      
+
       //Phát TTS notify phát thông báo
       function tts_speaker_notify_send(del_text_input=null) {
       var text_input = document.getElementById('tts_speaker_notify');
-      
       // Kiểm tra xem có cần xóa nội dung của textarea không
       if (del_text_input === "delete_text_tts"){
           text_input.value = ''; // Xóa nội dung trong textarea
           showMessagePHP("Đã xóa nội dung trong nhập liệu thông báo", 5);
           return;
       }
-      
-      //var text_input = document.getElementById('tts_speaker_notify').value;
       if (!text_input.value){
       show_message("Hãy nhập nội dung cần phát thông báo");
       return;
@@ -885,7 +853,6 @@
                   "action": "notify",
                   "value": text_input.value
               });
-      
               var xhr = new XMLHttpRequest();
               xhr.addEventListener("readystatechange", function() {
                   if (this.readyState === 4) {
@@ -903,33 +870,27 @@
                           if (response.success) {
       			loading("hide")
                               showMessagePHP("Đã phát thông báo: " + response.text_tts, 7);
-      			// Cập nhật onclick của nút download với đường dẫn tệp âm thanh
-      
+						// Cập nhật onclick của nút download với đường dẫn tệp âm thanh
                       var audioPath_tts = response.audio_tts;
-                      
                       // Kiểm tra nếu audioPath bắt đầu bằng 'TTS_Audio'
                       if (audioPath_tts.startsWith('TTS_Audio')) {
                           audioPath_tts = '<?php echo $VBot_Offline; ?>'+audioPath_tts;
                       }
-      
                       // Cập nhật onclick của nút download với đường dẫn tệp âm thanh
                       var downloadButton = document.getElementById('download_tts_audio');
                       var playAudio_tts_audio = document.getElementById('playAudio_tts_audio');
                       downloadButton.setAttribute('onclick', "downloadFile('" + audioPath_tts + "')");
                       playAudio_tts_audio.setAttribute('onclick', "playAudio('" + audioPath_tts + "')");
-                  
                           } else {
       			loading("hide")
                               show_message('Lỗi: ' + response.message);
                           }
-      		
                       } catch (error) {
       		loading("hide")
                           show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
                       }
                   }
               });
-      
               xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
               xhr.setRequestHeader("Content-Type", "application/json");
               xhr.send(data);
@@ -1014,7 +975,6 @@
                       if (!isHovering_led_brightness) {
                           updateBrightness(data.led_brightness);
                       }
-      
                       // Cập nhật thanh trượt chỉ khi không đang hover
                       if (!isHovering_volume_slide) {
                           set_Volume_HTML(data.volume);
@@ -1039,20 +999,20 @@
                   document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + error;
               });
       }
-      
+
       // Bắt đầu lấy dữ liệu mỗi giây
       intervalId = setInterval(fetchData_all_info, <?php echo intval($Config['media_player']['media_sync_ui']['delay_time']); ?> * 1000);
-      
+
       // Ngừng cập nhật thanh trượt khi hover chuột vào
       document.getElementById('progress-bar').addEventListener('mouseover', () => {
           isHovering = true;
       });
-      
+
       // Tiếp tục cập nhật thanh trượt khi rời chuột
       document.getElementById('progress-bar').addEventListener('mouseout', () => {
           isHovering = false;
       });
-      
+
       // Lắng nghe sự kiện kéo thanh trượt để hiển thị giá trị khi nhả chuột
       document.getElementById('progress-bar').addEventListener('change', (event) => {
           const progressBar = event.target;
@@ -1060,34 +1020,34 @@
           //Chạy function để tua thời gian media player
           sendSetTime_duration(currentDuration);
       });
-      
+
       // Cập nhật giá trị thời gian khi kéo thanh trượt
       document.getElementById('progress-bar').addEventListener('input', (event) => {
           const progressBar = event.target;
           const currentDuration = progressBar.value;
           document.getElementById('time-info').innerHTML = '<font color=green>' + formatTime_Player(currentDuration) + '</font> / ' + formatTime_Player(fullTime);
       });
-      
+
       //dừng cập nhật volume khi đang hover chuột vào
       document.getElementById('volume-slider').addEventListener('mouseover', () => {
           isHovering_volume_slide = true;
       });
-      
+
       //tiếp tục cập nhật volume khi đang hover chuột vào
       document.getElementById('volume-slider').addEventListener('mouseout', () => {
           isHovering_volume_slide = false;
       });
-      
+
       //dừng cập nhật led_brightness-slider khi đang hover chuột vào
       document.getElementById('led_brightness-slider').addEventListener('mouseover', () => {
           isHovering_led_brightness = true;
       });
-      
+
       //tiếp tục cập nhật led_brightness-slider khi đang hover chuột vào
       document.getElementById('led_brightness-slider').addEventListener('mouseout', () => {
           isHovering_led_brightness = false;
       });
-      
+
       function updateVolume(e) {
           const volumeSlider = document.getElementById('volume-slider');
           const volumeBar = document.getElementById('volume-bar');
@@ -1130,7 +1090,7 @@
           //Khởi tạo với mức âm lượng mặc định
           set_Volume_HTML(<?php echo $Config['smart_config']['speaker']['volume']; ?>);
       }
-      
+
       //Xử lý led
       function setupBrightnessControl() {
           function updateBrightnessFromEvent(e) {
@@ -1205,10 +1165,8 @@
     <script>
       //Lắng nghe và thực hiện khi có thay đổi trong Dom khi tải trang xong
       document.addEventListener('DOMContentLoaded', function() {
-      
           //Touch Kéo Slide volume trên Mobile cảm ứng
           const volumeSlider_mb = document.getElementById('volume-slider');
-      
           function handleTouch_volume(e) {
               const touch_vl = e.touches[0];
               updateVolume(touch_vl);
@@ -1221,15 +1179,15 @@
               const offsetY_vl = touch_vl.clientY - rect_vl.top;
               const height = rect_vl.height;
               const percentage = Math.max(0, Math.min(100, ((height - offsetY_vl) / height) * 100));
-      
+
               // Cập nhật âm lượng và gửi dữ liệu khi nhả tay ra
               set_Volume_Data(Math.round(percentage));
           });
           //end Touch Kéo Slide volume trên Mobile cảm ứng
-      
+
           //Touch Kéo Slide độ sáng trên Mobile cảm ứng
           const brightnessSlider_mb = document.getElementById('led_brightness-slider');
-      
+
           function handleTouch_bright(e) {
               const rect = brightnessSlider_mb.getBoundingClientRect();
               const touch = e.touches[0];
@@ -1239,7 +1197,7 @@
               const value = Math.round((percentage / 100) * 255);
               updateBrightness(value);
           }
-      
+
           function handleTouchEnd_bright(e) {
               const rect = brightnessSlider_mb.getBoundingClientRect();
               const touch = e.changedTouches[0];
@@ -1412,7 +1370,6 @@
       		
       	}
       });
-      
     </script>
   </body>
 </html>

@@ -12,15 +12,11 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <!DOCTYPE html>
@@ -39,16 +35,10 @@
     }
   </style>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Thư Viện Python pip</h1>
@@ -59,7 +49,6 @@
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <section class="section">
         <div class="row">
           <form method="post">
@@ -71,16 +60,14 @@
                 if (!file_exists($filename)) {
                     die("<p class='message'>File <strong>$filename</strong> không tồn tại!</p>");
                 }
-            
                 $lines = file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
                 $startIndex = 0;
                 foreach ($lines as $index => $line) {
                     if (strpos($line, 'Package') !== false && strpos($line, 'Version') !== false) {
-                        $startIndex = $index + 2; // Bỏ qua tiêu đề và dòng gạch ngang
+                        $startIndex = $index + 2;
                         break;
                     }
                 }
-            
                 $packages = [];
                 for ($i = $startIndex; $i < count($lines); $i++) {
                     $parts = preg_split('/\s{2,}/', $lines[$i]);
@@ -90,8 +77,6 @@
                 }
                 return $packages;
             }
-            
-            
             // Hàm đọc và phân tích chuỗi dữ liệu thành mảng URL
             function parsePipString($data) {
             // Tách chuỗi thành các dòng
@@ -104,23 +89,20 @@
                     break;
                 }
             }
-            
             // Khởi tạo mảng lưu gói cài đặt
             $packages = [];
             for ($i = $startIndex; $i < count($lines); $i++) {
-                $parts = preg_split('/\s{2,}/', $lines[$i]); // Tách theo khoảng trắng có 2 hoặc nhiều hơn
+                $parts = preg_split('/\s{2,}/', $lines[$i]);
                 if (count($parts) === 2) { 
                     // Lưu gói và phiên bản vào mảng
                     $packages[trim($parts[0])] = trim($parts[1]);
                 }
             }
-            
             return $packages;
             }
             ?>
           <?php
             if (isset($_POST['check_versions'])) {
-            
             //Chạy lệnh lấy dữu liệu pip của user
             $CMD = "pip list";
             $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -139,7 +121,6 @@
             file_put_contents($filePath, $output);
             #chmod($filePath, 0777);
             //END Chạy lệnh lấy dữ liệu pip của user
-            	
             $urlParts = parse_url($Github_Repo_Vbot);
             $pathParts = explode('/', trim($urlParts['path'], '/'));
             $userName = $pathParts[0];
@@ -150,8 +131,6 @@
             } else {
                 $mainPackages = parsePipString($mainPackages_git);
             }
-            
-            	
                 $userPackages = parsePipFile($VBot_Offline.'resource/pip_list_lib_user.txt');
                 // Kiểm tra thư viện thiếu
                 $missingPackages = array_diff_key($mainPackages, $userPackages);
@@ -188,7 +167,6 @@
                 } else {
                     echo "<h5 class='card-title'><center><font color=green>Tất cả các thư viện python pip cần thiết đều đã được cài đặt</font></center></h5>";
                 }
-            
                 // Hiển thị thư viện sai phiên bản
                 if (!empty($wrongVersionPackages)) {
             		echo "<h5 class='card-title text-danger'>Thư Viện Bị Sai Phiên Bản:</h5>";
@@ -215,7 +193,6 @@
                     echo "<h5 class='card-title'><center><font color=green>Tất cả các thư viện python pip đều đúng phiên bản</font></center></h5>";
                 }
             }
-            
             ?>
         </div>
       </section>
@@ -224,9 +201,7 @@
     <?php
       include 'html_footer.php';
       ?>
-
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-
     <?php
       include 'html_js.php';
       ?>

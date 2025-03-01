@@ -12,14 +12,11 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <!DOCTYPE html>
@@ -28,16 +25,10 @@
     include 'html_head.php';
     ?>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Thông tin, cấu hình Wifi</h1>
@@ -48,7 +39,6 @@
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <section class="section">
         <div class="row">
           <div class="col-lg-12">
@@ -69,13 +59,10 @@
         </div>
       </section>
     </main>
-    <!-- ======= Footer ======= -->
     <?php
       include 'html_footer.php';
       ?>
-    <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-    <!-- Template Main JS File -->
     <?php
       include 'html_js.php';
       ?>
@@ -106,7 +93,6 @@
                           table += '<td style="text-align: center; vertical-align: middle;"><button onclick="deleteWifi(\''+wifi.ssid+'\')" class="btn btn-danger rounded-pill"><i class="bi bi-trash3-fill"></i> Xóa</button></td>';
                           table += '</tr>';
                       });
-      
                       table += '</tbody></table>';
                       fileListDiv.innerHTML = table;
       				loading("hide");
@@ -120,7 +106,7 @@
           xhr.open("GET", "includes/php_ajax/Wifi_Act.php?Show_Wifi_List");
           xhr.send();
       }
-      
+
       //Quét wifi
       function fetchAndDisplayWifiList() {
       	loading("show");
@@ -186,7 +172,7 @@
           };
           xhr.send();
       }
-      
+
       // Kết nối tới WiFi
       function connectWifiNew(ssid, security, action) {
       	loading("show");
@@ -262,7 +248,7 @@
                      '&password=' + encodeURIComponent(password);
           xhr.send(data);
       }
-      
+
       //Xóa Wifi
       function deleteWifi(ssid) {
           if (!ssid || ssid.trim() === '') {
@@ -284,7 +270,6 @@
                       var response = JSON.parse(xhr.responseText);
                       if (response.success) {
                           show_message('Xóa WiFi '+ssid+' thành công: ' +response.message);
-      					
                       } else {
                           show_message('Xóa WiFi '+ssid+' thất bại: ' +response.message);
                       }
@@ -304,7 +289,7 @@
           var data = 'action=delete_wifi&wifiName=' + encodeURIComponent(ssid);
           xhr.send(data);
       }
-      
+
       //Kết nối tới wifi đã lưu trước đó
       function connectWifiOld(ssid) {
           if (!ssid || ssid.trim() === '') {
@@ -340,6 +325,7 @@
           var data = 'action=connect_wifi&password=""&ssid=' + encodeURIComponent(ssid);
           xhr.send(data);
       }
+
       //Lấy Mật Khẩu Wifi
       function getWifiPassword(ssid) {
       	loading("show");
@@ -373,7 +359,7 @@
           };
           xhr.send();
       }
-      
+
       //Lấy thông tin mạng đang kết nối
       function getWifiNetworkInformation() {
           var xhr = new XMLHttpRequest();
@@ -405,7 +391,6 @@
           };
           xhr.send();
       }
-      
       getWifiNetworkInformation();
     </script>
   </body>

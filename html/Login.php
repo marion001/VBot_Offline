@@ -5,7 +5,7 @@
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
-  
+
   #Quên Mật Khẩu
   if (isset($_GET['forgot_password'])) {
       $my_email = $_GET['mail'];
@@ -50,9 +50,7 @@
                   if ($newPassword === $renewPassword) {
                       //Tiến hành cập nhật mật khẩu mới
   					$Config['contact_info']['user_login']['user_password'] = $renewPassword;
-  
   					file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-  
                       $response = [
                           "success" => true,
                           "message" => "Mật khẩu đã được thay đổi thành công!"
@@ -86,14 +84,14 @@
   }
   
   session_start();
+
   //Đăng xuất
   if (isset($_GET['logout'])) {
-  unset($_SESSION['user_login']);
-  header('Location: Login.php');
-  exit;
+	  unset($_SESSION['user_login']);
+	  header('Location: Login.php');
+	  exit;
   }
-  
-  
+
   if ($Config['contact_info']['user_login']['active']){
   // Kiểm tra xem người dùng đã đăng nhập chưa
   if (isset($_SESSION['user_login'])) {
@@ -105,11 +103,9 @@
       header('Location: index.php');
       exit;
   }
-  
-  
+
   if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $password_user = $_POST['yourPassword'];
-  
       // Kiểm tra mật khẩu trực tiếp
   	// Thay 'password' bằng mật khẩu thực tế của bạn
       if ($password_user === $Config['contact_info']['user_login']['user_password']) {

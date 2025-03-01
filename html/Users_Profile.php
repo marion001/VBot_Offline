@@ -12,15 +12,11 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <?php
@@ -57,14 +53,13 @@
           break;
       }
   }
-  
+
   // Lưu lại tên tỉnh, quận và ID vào mảng $Config
   $Config['contact_info']['address']['province'] = $selectedProvinceName;
   $Config['contact_info']['address']['district'] = $selectedDistrictName;
   $Config['contact_info']['address']['id_province'] = $provinceId;
   $Config['contact_info']['address']['id_district'] = $districtId;
-  
-  	
+
   #CẬP NHẬT Thông tin người dùng
   $Config['contact_info']['full_name'] = $_POST['full_name'];
   $Config['contact_info']['location']['latitude'] = floatval($_POST['latitude_name']);
@@ -75,7 +70,7 @@
   // Lưu cấu hình $Config vào file JSON
   file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
   }
-  
+
   if (isset($_POST['save_change_user_login'])) {
   $Config['contact_info']['user_login']['active'] = isset($_POST['user_login_active']) ? true : false;
   // Lưu cấu hình $Config vào file JSON
@@ -88,16 +83,10 @@
     include 'html_head.php';
     ?>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Thông tin cá nhân</h1>
@@ -109,7 +98,6 @@
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <section class="section profile">
         <div class="row">
           <div class="col-xl-4">
@@ -312,16 +300,10 @@
         </div>
       </section>
     </main>
-    <!-- End #main -->
-    <!-- ======= Footer ======= -->
     <?php
       include 'html_footer.php';
       ?>
-    <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-    <!-- Nghe thử file âm thanh -->
-    <audio id="audioPlayer" style="display: none;" controls></audio>
-    <!-- Template Main JS File -->
     <?php
       include 'html_js.php';
       ?>
@@ -377,7 +359,6 @@
                 xhr.onreadystatechange = function () {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         var response = JSON.parse(xhr.responseText);
-      
                         if (response.success) {
                             //console.log("Success: " + response.message);
                            show_message(response.message);

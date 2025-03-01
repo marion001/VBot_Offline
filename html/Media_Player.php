@@ -11,19 +11,14 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
-  
+
   $URL_Address = dirname($Current_URL);
-  //echo $URL_Address;
   ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -33,16 +28,10 @@
   <head>
   </head>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php';
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Trình Phát Đa Phương Tiện</h1>
@@ -54,7 +43,6 @@
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <section class="section">
         <div class="row">
           <div class="col-lg-12" id="div_message_error" style="display: none;">
@@ -195,32 +183,22 @@
       </section>
     </main>
     <!-- End #main -->
-    <!-- ======= Footer ======= -->
     <?php
       include 'html_footer.php';
       ?>
-    <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-    <!-- Nghe thử file âm thanh
-      <audio id="audioPlayer" style="display: none;" controls></audio>
-       -->
-    <!-- Template Main JS File -->
     <?php
       include 'html_js.php';
       ?>
     <script>
       // Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
       document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
-      
-      
       //Hiển thị dữ liệu PlayList
       function cachePlayList() {
-      
           var inputElement = document.getElementById("tim_kiem_bai_hat_all");
           if (inputElement) {
               inputElement.style.display = "none";
       	}
-      
           var xhr = new XMLHttpRequest();
           xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList', true);
           // Khi yêu cầu được hoàn thành
@@ -248,7 +226,7 @@
       						   	  fileInfo += ' <a href="https://www.youtube.com/watch?v='+playlist.id+'" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
       							  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							  fileInfo += '</div></div>';
-      
+
                               } else if (playlist.source === "ZingMP3") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
@@ -259,7 +237,7 @@
                                   fileInfo += ' <button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="get_ZingMP3_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'' + playlist.artist + '\')"><i class="bi bi-play-circle"></i></button>';
       							  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							  fileInfo += '</div></div>';
-      
+
                               } else if (playlist.source === "PodCast") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
@@ -271,7 +249,7 @@
       							fileInfo += ' <a href="'+playlist.audio+'" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
       							fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							fileInfo += '</div></div>';
-      
+
                               } else if (playlist.source === "Local") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
@@ -284,7 +262,6 @@
                               }
                               fileListDiv.innerHTML += fileInfo;
                           });
-      
                       } else {
                           fileListDiv.innerHTML = '<center>Không có dữ liệu ở danh sách phát</center>';
                       }
@@ -295,22 +272,17 @@
                   show_message('Không thể tải dữ liệu Playlist. Trạng thái: ' + xhr.status);
               }
           };
-      
           xhr.onerror = function() {
               show_message('Lỗi khi thực hiện yêu cầu lấy dữ liệu Playlist');
           };
-      
-          // Gửi yêu cầu
           xhr.send();
       }
-      
-      
-      
     </script>
     <script>
       //script liên quan tới API GET Media Player
       let isHovering = false;
-      let fullTime = 0; // lưu trữ toàn bộ thời gian bài nhạc
+	  //lưu trữ toàn bộ thời gian bài nhạc
+      let fullTime = 0;
       let intervalId;
       // Định dạng thời gian thành HH:MM:SS
       function formatTime_Player(milliseconds) {
@@ -318,14 +290,11 @@
           let hours = Math.floor(totalSeconds / 3600);
           let minutes = Math.floor((totalSeconds % 3600) / 60);
           let seconds = totalSeconds % 60;
-      
       return hours.toString().padStart(2, '0') + ':' +
              minutes.toString().padStart(2, '0') + ':' +
              seconds.toString().padStart(2, '0');
-      
       }
-      
-      
+
       // Cập nhật thông tin GET từ API
       function fetchData_Media_Player() {
           // Kiểm tra nếu checkbox được tích hoặc sync_active là true
@@ -334,7 +303,6 @@
           if (!syncCheckbox.checked) {
               return; 
           }
-      
           fetch("<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/?type=1&data=media_player")
               .then(response => {
                   if (!response.ok) {
@@ -350,50 +318,41 @@
                       document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + data.volume+'%</font>';
                       document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : 'Không') + '</font>';
                       document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + data.media_player_source + '</font>';
-                      // Cập nhật ảnh bìa
+                      // Cập nhật ảnh cover
                       document.getElementById('media-cover').src = data.media_cover ? data.media_cover : 'assets/img/Error_Null_Media_Player.png';
-      
                       // Cập nhật giá trị full time
                       fullTime = data.full_time;
-      
                       // Cập nhật thanh trượt chỉ khi không đang hover
                       if (!isHovering) {
                           let progressBar = document.getElementById('progress-bar');
                           progressBar.max = fullTime;
                           progressBar.value = data.current_duration;
-      
                           let timeInfo = document.getElementById('time-info');
                           timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(data.current_duration) + '</font> / ' + formatTime_Player(fullTime);
                       }
                   } else {
       				document.getElementById('div_message_error').style.display = 'block';
-                      // Hiển thị thông báo lỗi khi lấy dữ liệu không thành công
                       console.log('Lỗi khi lấy dữ liệu', data.message);
                   }
               })
               .catch(error => {
-      			    // Hiển thị thẻ #div_message_error
       			document.getElementById('div_message_error').style.display = 'block';
       			document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: '+error;
-                  //console.log('Lỗi kết nối:', error);
-                  //show_message('Không thể kết nối đến API của VBot, Vui lòng kiểm tra lại kết nối và thử lại.');
               });
       }
-      
-      
       // Bắt đầu lấy dữ liệu mỗi giây
       intervalId = setInterval(fetchData_Media_Player, <?php echo intval($Config['media_player']['media_sync_ui']['delay_time']); ?> * 1000);
-      
+
       // Ngừng cập nhật thanh trượt khi hover chuột vào
       document.getElementById('progress-bar').addEventListener('mouseover', () => {
           isHovering = true;
       });
-      
+
       // Tiếp tục cập nhật thanh trượt khi rời chuột
       document.getElementById('progress-bar').addEventListener('mouseout', () => {
           isHovering = false;
       });
-      
+
       // Lắng nghe sự kiện kéo thanh trượt để hiển thị giá trị khi nhả chuột
       document.getElementById('progress-bar').addEventListener('change', (event) => {
           const progressBar = event.target;
@@ -401,44 +360,35 @@
       	//Chạy function để tua thời gian media player
       	sendSetTime_duration(currentDuration);
       });
-      
+
       // Cập nhật giá trị thời gian khi kéo thanh trượt
       document.getElementById('progress-bar').addEventListener('input', (event) => {
           const progressBar = event.target;
           const currentDuration = progressBar.value;
       	document.getElementById('time-info').innerHTML = '<font color=green>' +formatTime_Player(currentDuration) + '</font> / ' + formatTime_Player(fullTime);
       });
-      
+
       //Dùng để tua bài hát
       function sendSetTime_duration(set_duration) {
-          // Tạo đối tượng data với tham số set_duration
           var data = JSON.stringify({
               "type": 1,
               "data": "media_control",
               "action": "set_time",
               "set_duration": set_duration
           });
-      
-          // Tạo đối tượng XMLHttpRequest
           var xhr = new XMLHttpRequest();
-          //xhr.withCredentials = true;
           xhr.addEventListener("readystatechange", function() {
               if (this.readyState === 4) {
-      			
-      
       			var response = JSON.parse(this.responseText);
       				if (response.success){
       					showMessagePHP(response.message);
       				}else{
       					show_message('Lỗi: ' +response.message); 
       				}
-                   
               }
           });
-          // Mở kết nối POST và thiết lập tiêu đề Content-Type
           xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
-          // Gửi dữ liệu
           xhr.send(data);
       }
     </script>

@@ -10,18 +10,15 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
-  // Đường dẫn tới thư mục
+
   $directory = $VBot_Offline."TTS_Audio";
+
   // Xóa tất cả các tệp trong thư mục nếu yêu cầu POST 'delete' được gửi
   if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['delete_all_file'])) {
       $files = scandir($directory);
@@ -29,11 +26,11 @@
       foreach ($files as $file) {
           $filePath = $directory . '/' . $file;
           if (is_file($filePath)) {
-              unlink($filePath); // Xóa file
+              unlink($filePath);
           }
       }
   }
-  
+
   // Hàm chuyển đổi kích thước file sang KB, MB, GB
   function formatSizeUnits($bytes) {
       if ($bytes >= 1073741824) {
@@ -59,16 +56,10 @@
     include 'html_head.php';
     ?>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Log/Cache TTS</h1>
@@ -140,14 +131,10 @@
         </div>
       </section>
     </main>
-    <!-- End #main -->
-    <!-- ======= Footer ======= -->
     <?php
       include 'html_footer.php';
       ?>
-    <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-    <!-- Template Main JS File -->
     <?php
       include 'html_js.php';
       ?>

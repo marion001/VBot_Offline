@@ -61,11 +61,11 @@
       document.getElementById("times").innerHTML = formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec);
   	//console.log(formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec))
   }
-  
+
   function formatTime(unit) {
       return unit < 10 ? "0" + unit : unit;
   }
-  
+
   // Cập nhật ngày và thứ chỉ một lần khi trang tải
   function updateDate() {
       var d = new Date();

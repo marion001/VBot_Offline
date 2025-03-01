@@ -127,7 +127,19 @@
   $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .=  stream_get_contents($stream_out);
   }
-  
+
+  if (isset($_POST['logs_apache2'])) {
+  $CMD = "cat /var/log/apache2/error.log";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {die($SSH_CONNECT_ERROR);}
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+  }
+
   if (isset($_POST['list_systemctl_enabled'])) {
   $CMD = "sudo systemctl list-unit-files --state=enabled";
   $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -1049,6 +1061,7 @@
                           </button>
                           <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                             <li><button onclick="loading('show')" class="dropdown-item text-danger" name="apache_restart" type="submit" title="Khởi động lại apache2">Restart Apache2</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="logs_apache2" type="submit" title="Khởi động lại apache2">Logs Apache2</button></li>
                             <li><button onclick="loading('show')" class="dropdown-item text-danger" name="restart_alsa" type="submit" title="Khởi động lại Alsa">Restart Alsa-Restore</button></li>
                             <li><button onclick="loading('show')" class="dropdown-item text-danger" name="reboot_os" type="submit" title="Khởi động lại hệ thống">Reboot OS</button></li>
                             <li><button onclick="loading('show')" class="dropdown-item text-danger" name="chmod_vbot" type="submit" title="Chmod VBot và UI HTML thành 0777">Chmod 0777</button></li>

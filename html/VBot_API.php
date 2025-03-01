@@ -5,8 +5,7 @@
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
-  ?>
-<?php
+
   $data = array(
       "info" => array(
           "author_name" => "Vũ Tuyển",
@@ -16,16 +15,10 @@
       ),
       "success" => true,
       "user_name" => $Config['contact_info']['full_name'],
-      #"vbot_program_path" => $VBot_Offline,
-      #"vbot_interface_path" => $HTML_VBot_Offline,
       "ip_address" => $Domain,
       "port_api" => $Config['api']['port'],
       "host_name" => $HostName,
   );
-  
-  // Thiết lập header cho JSON
   header('Content-Type: application/json');
-  
-  // Chuyển dữ liệu thành JSON và xuất
   echo json_encode($data, JSON_UNESCAPED_UNICODE);
   ?>

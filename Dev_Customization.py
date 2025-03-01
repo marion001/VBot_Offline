@@ -1,8 +1,17 @@
+'''
+Code By: Vũ Tuyển
+Designed by: BootstrapMade
+GitHub VBot: https://github.com/marion001/VBot_Offline.git
+Facebook Group: https://www.facebook.com/groups/1148385343358824
+Facebook: https://www.facebook.com/TWFyaW9uMDAx
+'''
+
 """
 Phần xử lý dữ liệu các bạn sẽ tự code và xử lý theo ý, sở thích và tùy biến của bạn
 Tôi sẽ cung cấp các tài liệu và ví dụ đủ để các bạn xây dựng và phát triển thỏa mãn mày mò, học hỏi
 """
 
+#Thư Viện VBot: Lib
 import Lib
 """
 Thêm thư viện Lib

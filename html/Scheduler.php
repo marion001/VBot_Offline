@@ -5,22 +5,17 @@
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
-  ?>
-<?php
+
   if ($Config['contact_info']['user_login']['active']){
   session_start();
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <!DOCTYPE html>
@@ -29,60 +24,64 @@
     include 'html_head.php';
     ?>
   <head>
-    <style>
-      .time-input-container {
-      position: relative; 
-      }
-      /* Danh sách gợi ý */
-      .suggestions-list {
-      position: absolute;
-      top: 100%; 
-      left: 0;
-      background-color: white;
-      border: 1px solid #ccc;
-      z-index: 1000;
-      max-height: 200px;
-      overflow-y: auto;
-      white-space: nowrap;  
-      width: 100%;        
-      margin-top: 2px;      
-      padding: 0;
-      border-radius: 4px;
-      }
-      .suggestion-item {
-      padding: 8px 10px;
-      cursor: pointer;
-      border-bottom: 1px solid #ddd;
-      }
-      .suggestion-item:last-child {
-      border-bottom: none; 
-      }
-      .suggestion-item:hover {
-      background-color: #f0f0f0;
-      }
-    </style>
-    <style>
-      .scroll-btn {
-      position: fixed;
-      right: 5px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #007bff;
-      color: white;
-      text-align: center;
-      line-height: 40px;
-      font-size: 24px;
-      z-index: 4; 
-      }
-      .scroll-to-bottom {
-      bottom: 15px;
-      }
-      .scroll-to-top {
-      bottom: 60px;
-      }
-    </style>
-    <!-- <link href="assets/vendor/prism/prism.min.css" rel="stylesheet"> -->
+	<style>
+		.time-input-container {
+			position: relative;
+		}
+		
+		.suggestions-list {
+			position: absolute;
+			top: 100%;
+			left: 0;
+			background-color: white;
+			border: 1px solid #ccc;
+			z-index: 1000;
+			max-height: 200px;
+			overflow-y: auto;
+			white-space: nowrap;
+			width: 100%;
+			margin-top: 2px;
+			padding: 0;
+			border-radius: 4px;
+		}
+		
+		.suggestion-item {
+			padding: 8px 10px;
+			cursor: pointer;
+			border-bottom: 1px solid #ddd;
+		}
+		
+		.suggestion-item:last-child {
+			border-bottom: none;
+		}
+		
+		.suggestion-item:hover {
+			background-color: #f0f0f0;
+		}
+	</style>
+	<style>
+		.scroll-btn {
+			position: fixed;
+			right: 5px;
+			width: 40px;
+			height: 40px;
+			border-radius: 50%;
+			background-color: #007bff;
+			color: white;
+			text-align: center;
+			line-height: 40px;
+			font-size: 24px;
+			z-index: 4;
+		}
+		
+		.scroll-to-bottom {
+			bottom: 15px;
+		}
+		
+		.scroll-to-top {
+			bottom: 60px;
+		}
+	</style>
     <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
     <style>
       #modal_dialog_show_Home_Assistant {
@@ -99,16 +98,10 @@
     </style>
   </head>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Lên Lịch: Lời Nhắc, Thông Báo (Scheduler) <i class="bi bi-question-circle-fill" onclick="show_message('Để Bật hoặc Tắt sử dụng cần thiết lập trong tab <b>Cấu Hình Config</b>')"></i></h1>
@@ -120,17 +113,13 @@
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <form method="POST" class="row g-3 needs-validation" action="" enctype="multipart/form-data" novalidate>
         <?php
           $json_file = $VBot_Offline.$Config['schedule']['data_json_file'];
           // Mảng lưu thông báo lỗi
           $errorMessages = [];
           $successMessage = [];
-          
-          
           function generate_audio_select($directory, $field_name, $selected_value = '') {
-              // Kiểm tra thư mục có tồn tại không
               if (!is_dir($directory)) {
                   echo "<p style='color: red;'>Thư mục không tồn tại.</p>";
                   return;
@@ -151,15 +140,13 @@
               }
               echo '</select>';
           }
-          
-          
+
           $directory = dirname($json_file);
           if (!is_dir($directory)) {
               mkdir($directory, 0777, true);
           	chmod($directory, 0777);
           }
-          
-          
+
           if (!file_exists($json_file)) {
               $default_data = [
                   'notification_schedule' => []
@@ -167,17 +154,15 @@
               file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
               chmod($json_file, 0777);
           }
-          
-          
+
           $json_data = file_get_contents($json_file);
           $data = json_decode($json_data, true);
-          
-          
+
           if ($data === null) {
               echo "Không thể đọc dữ liệu JSON từ tệp, Vui lòng kiểm tra lại định dạng tệp json";
               exit();
           }
-          
+
           // Các ngày trong tuần
           $week_days = [
           	"Monday" => "Thứ Hai",
@@ -188,7 +173,7 @@
           	"Saturday" => "Thứ Bảy",
           	"Sunday" => "Chủ Nhật"
           ];
-          
+
           if (isset($_POST['delete_all_Scheduler'])) {
               if (file_exists($json_file)) {
                   if (unlink($json_file)) {
@@ -210,42 +195,32 @@
               } else {
                   $errorMessage[] = "Tệp dữ liệu không tồn tại.";
               }
-          				
           }
-          
-          
           if (isset($_POST['Scheduler_Upload_Audio_Submit'])) {
-          	
-              $file_save_directory = $VBot_Offline.$Config['schedule']['audio_path'];
-          
+            $file_save_directory = $VBot_Offline.$Config['schedule']['audio_path'];
           	// Kiểm tra và tạo thư mục, thiết lập quyền
           	if (!file_exists($file_save_directory)) {
           		if (!mkdir($file_save_directory, 0777, true)) {
           			$errorMessages[] = 'Không thể tạo thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền thư mục.';
           		}
           	}
-          
           	if (!chmod($file_save_directory, 0777)) {
           		$errorMessages[] = 'Không thể thiết lập quyền cho thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền hệ thống.';
           	}
-          
               $data_recovery_type = $_POST['Scheduler_Upload_Audio_Submit'];
               if ($data_recovery_type === "Scheduler_Upload_Audio") {
                   $uploadOk = 1;
                   $errorMessages = [];
                   $successMessage = [];
-          
                   // Kiểm tra xem tệp có được gửi không
                   if (isset($_FILES["fileToUpload_Scheduler_Upload_Audio"])) {
                       $fileName = basename($_FILES["fileToUpload_Scheduler_Upload_Audio"]["name"]);
                       $fileTargetPath = $file_save_directory . "/" . $fileName; // Đường dẫn đầy đủ
-          
                       // Kiểm tra định dạng tệp (chỉ chấp nhận tệp âm thanh như mp3, wav, etc.)
                       if (!preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $fileName)) {
                           $errorMessages[] = "- Chỉ chấp nhận các định dạng tệp âm thanh (mp3, wav, flac, ogg, aac)";
                           $uploadOk = 0;
                       }
-          
                       if ($uploadOk == 0) {
                           $errorMessages[] = "- Tệp âm thanh không được tải lên.";
                       } else {
@@ -263,8 +238,7 @@
           
               }
           }
-          
-          
+
           //Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
           if (isset($_POST['start_recovery_Scheduler'])) {
           $data_recovery_type = $_POST['start_recovery_Scheduler'];
@@ -291,7 +265,7 @@
                   $errorMessages[] = "- Không có tệp sao lưu nào được tải lên";
               }
           }
-          
+
           else if ($data_recovery_type === "khoi_phuc_file_he_thong"){
           	$start_recovery_custom_hass = $_POST['backup_scheduler_json_files'];
           if (!empty($start_recovery_custom_hass)) {
@@ -312,10 +286,10 @@
           }
           echo '<script>window.location.href = "Scheduler.php";</script>';
           }
-          
+
           // Xử lý dữ liệu sau khi người dùng gửi form
           if (isset($_POST['save_all_Scheduler'])) {
-          
+
           #Sao Lưu Dữ Liệu Trước
           if (isset($Config['backup_upgrade']['scheduler']['active']) && $Config['backup_upgrade']['scheduler']['active'] === true) {
           // Đường dẫn gốc và đích
@@ -348,19 +322,15 @@
               $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
           }
           }
-          
+
           #Lưu dữ liệu Lập Lịch, Thông Báo
               if (isset($_POST['notification_schedule'])) {
                   $updated_schedule = [];
           		foreach ($_POST['notification_schedule'] as $task) {
           			$task['active'] = isset($task['active']) ? (bool)$task['active'] : false;
-          			
           			$task['create_words'] = isset($task['create_words']) && !empty($task['create_words']) ? $task['create_words'] : 'vbot_interface';
-          
           			$task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
-          			
           			$task['data']['audio_file'] = isset($task['data']['audio_file']) && !empty($task['data']['audio_file']) ? $task['data']['audio_file'] : "";
-          
           			// Kiểm tra các điều kiện cơ bản của task
           			if (
           				!empty($task['name']) &&
@@ -382,11 +352,11 @@
                   file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                   #$successMessage[] = "Dữ liệu đã được lưu thành công.";
               }
-          
+
           #Lưu dữ liệu Thông Báo Cập Nhật Home Assistant
           $data['send_notify_upgrade_vbot_home_assistant']['active'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_active']) ? true : false;
           $data['send_notify_upgrade_vbot_home_assistant']['time'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_time']) ? $_POST['send_notify_upgrade_vbot_home_assistant_time'] : '03:01';
-          
+
           #Lưu dữ liệu Bật tắt màn hình
           $time_on_display_screen = isset($_POST['time_on_display_screen']) ? $_POST['time_on_display_screen'] : [];
           $time_off_display_screen = isset($_POST['time_off_display_screen']) ? $_POST['time_off_display_screen'] : [];
@@ -394,26 +364,25 @@
           $data['display_screen']['date'] = isset($_POST['dates_display_screen']) ? $_POST['dates_display_screen'] : [];
           $data['display_screen']['time_on'] = array_filter($time_on_display_screen);
           $data['display_screen']['time_off'] = array_filter($time_off_display_screen);
-          
+
           #Lưu dữ liệu dừng phát media Player
           $time_stop_media_player = isset($_POST['time_stop_media_player']) ? $_POST['time_stop_media_player'] : [];
           $data['stop_media_player']['time'] = array_filter($time_stop_media_player);
           $data['stop_media_player']['active'] = isset($_POST['stop_media_player_active']) ? true : false;
           $data['stop_media_player']['date'] = isset($_POST['dates_stop_media_player']) ? $_POST['dates_stop_media_player'] : [];
-          
+
           #Lưu dữ liệu Restart VBot
           $time_restart_vbot = isset($_POST['time_restart_vbot']) ? $_POST['time_restart_vbot'] : [];
           $data['restart_vbot']['time'] = array_filter($time_restart_vbot);
           $data['restart_vbot']['active'] = isset($_POST['restart_vbot_service_active']) ? true : false;
           $data['restart_vbot']['date'] = isset($_POST['dates_restart_vbot']) ? $_POST['dates_restart_vbot'] : [];
-          
+
           #Lưu dữ liệu Reboot OS
           $time_reboot_os = isset($_POST['time_reboot_os']) ? $_POST['time_reboot_os'] : [];
           $data['reboot_os']['time'] = array_filter($time_reboot_os);
           $data['reboot_os']['active'] = isset($_POST['reboot_os_active']) ? true : false;
           $data['reboot_os']['date'] = isset($_POST['dates_reboot_os']) ? $_POST['dates_reboot_os'] : [];
-          
-          
+
           #lưu toàn bộ dữ liệu vào file Json
           file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           $successMessage[] = "Dữ liệu đã được lưu thành công.";
@@ -432,7 +401,6 @@
                   echo '</ul>';
                   echo '</div>';
               }
-              
               // Hiển thị thông báo thành công nếu có
               if (!empty($successMessage)) {
               	echo '<div class="alert alert-success alert-dismissible fade show" id="message_error" role="alert">';
@@ -493,7 +461,6 @@
                               $audio_file = isset($notification['data']['audio_file']) ? htmlspecialchars($notification['data']['audio_file']) : "";
                                        // Gọi hàm để tạo dropdown cho trường âm thanh này
                                        generate_audio_select($VBot_Offline.$Config['schedule']['audio_path'], 'notification_schedule[' . $index . '][data][audio_file]', $audio_file);
-                                  
                                ?>
                             <button class="btn btn-success border-success" onclick="playAudio_Schedule('notification_schedule[<?php echo $index; ?>][data][audio_file]')" type="button"><i class="bi bi-play-circle"></i></button>
                           </div>
@@ -941,8 +908,6 @@
                   <button type="button" class="btn btn-danger border-primary" title="Xóa Tệp Sao Lưu Custom Home Assistant" onclick="delete_file_backup_scheduler(\'get_value_backup_config\')"><i class="bi bi-trash"></i></button>
                   </div>';
                   }
-                  
-                  
                   ?>
               </div>
             </div>
@@ -993,7 +958,7 @@
               return null;
           }
       }
-      
+
       function get_audio_schedule() {
       	loading("show");
           var xhr = new XMLHttpRequest();
@@ -1008,22 +973,18 @@
       				loading("hide");
                       // Lấy phần tử <div> với id "du_lieu_audio_schedule"
                       var audioScheduleDiv = document.getElementById("du_lieu_audio_schedule");
-                      
                       // Làm trống nội dung thẻ div trước khi thêm dữ liệu mới
                       audioScheduleDiv.innerHTML = '';
-      
                       // Tạo bảng HTML để hiển thị tên và kích thước tệp
                       var table = document.createElement('table');
       				// Thêm lớp CSS để làm đẹp bảng class="table table-bordered border-primary"
                       table.classList.add('table', 'table-bordered', 'border-primary');
-      
                       // Tạo tiêu đề bảng
                       var thead = document.createElement('thead');
                       var headerRow = document.createElement('tr');
                       headerRow.innerHTML = '<th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Kích thước (MB)</th><th style="text-align: center; vertical-align: middle;">Hành Động</th>';
                       thead.appendChild(headerRow);
                       table.appendChild(thead);
-      
                       var tbody = document.createElement('tbody');
                       response.forEach(function(audio) {
                           var row = document.createElement('tr');
@@ -1053,8 +1014,7 @@
               console.error("Lỗi trong quá trình gửi yêu cầu.");
           };
       }
-      
-      
+
       //Xóa file backup Config
       function delete_file_backup_scheduler(filePath) {
           if (filePath === "get_value_backup_config") {
@@ -1069,7 +1029,7 @@
               showMessagePHP("Không có tệp nào được chọn để tải xuống.");
           }
       }
-      
+
       //Tải xuống file backup Config
       function dowlaod_file_backup_scheduler(filePath) {
           if (filePath === "get_value_backup_config") {
@@ -1084,7 +1044,7 @@
               showMessagePHP("Không có tệp nào được chọn để tải xuống.");
           }
       }
-      
+
       //onclick xem nội dung file json
       function readJSON_file_path(filePath) {
           if (filePath === "get_value_backup_config") {
@@ -1120,7 +1080,6 @@
       let newTaskIndex = <?= count($data['notification_schedule']) ?>; 
       // Biến lưu trữ các tác vụ đã xóa
       let deletedTasks = [];
-      
       // Hàm tải lại dữ liệu vào DOM (tải lại các ngày có sẵn từ server hoặc từ mảng hiện tại)
       function createDateElement(index, specific_date, container) {
       	// Tạo ID đặc biệt cho mỗi ngày
@@ -1144,7 +1103,7 @@
           // Thêm HTML vào container
           container.innerHTML += dateElementHTML;
       }
-      
+
       // Hàm thêm nút "Thêm ngày" vào cuối container
       function addAddButton(container, index) {
       	// Xóa thẻ div chứa các phần tử bên trong
@@ -1160,7 +1119,7 @@
           // Thêm nút "Thêm ngày" mới vào cuối cùng của container
           container.innerHTML += '<div class="mt-3"><input type="button" class="btn btn-info rounded-pill" value="Thêm ngày cụ thể" onclick="addDateInput(' + index + ')"></div>';
       }
-      
+
       // Hàm thêm một ngày mới vào container
       function addDateInput(index) {
           const currentDate = new Date();
@@ -1174,7 +1133,7 @@
       	// Thêm nút "Thêm ngày" vào cuối container sau khi thêm ngày mới
           addAddButton(container, index);
       }
-      
+
       // Hàm xóa ngày khi người dùng nhấn nút xóa
       function removeDateInput(dateGroupId) {
           const dateGroup = document.getElementById('date-group-' + dateGroupId);
@@ -1183,7 +1142,7 @@
               dateGroup.remove();
           }
       }
-      
+
       // Xóa một tác vụ
       function deleteTask(taskIndex) {
           if (confirm("Bạn có chắc muốn xóa tác vụ này?")) {
@@ -1198,7 +1157,7 @@
               taskDiv.innerHTML = '<div style="color: red;">Đã xóa tác vụ thứ tự: <b>' + taskIndex + '</b> Chờ lưu thay đổi để áp dụng. <button class="btn btn-warning rounded-pill" type="button" onclick="restoreTask(' + taskIndex + ')">Khôi Phục</button></div>';
           }
       }
-      
+
       // Phục hồi một tác vụ
       function restoreTask(taskIndex) {
           // Tìm tác vụ đã xóa từ mảng deletedTasks
@@ -1212,13 +1171,13 @@
               deletedTasks = deletedTasks.filter(task => task.index !== taskIndex);
           }
       }
-      
+
       function addNewTask() {
           const taskContainer = document.getElementById('task-container');
           let taskHtml = 
               "<hr/><div class='card accordion'><div class='card-body'><div id='task-" + newTaskIndex + "'>" +
                   "<h5 class='card-title'>Lập Lịch, Tác Vụ Thông Báo Mới:</h5>" +
-      
+
       			"<div class='row mb-3'>" +
       			"<label for='active-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Kích hoạt:</label>" +
       			"<div class='col-sm-9'>" +
@@ -1227,7 +1186,7 @@
       			"</div>" +
       			"</div>" +
       			"</div>" +
-      
+
       			"<div class='row mb-3'>" +
       			"<label for='name-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tên tác vụ:</label>" +
       			"<div class='col-sm-9'>" +
@@ -1235,14 +1194,14 @@
       			"<div class='invalid-feedback'>Cần đặt tên định danh cho tác vụ này</div>" +
       			"</div>" +
       			"</div>" +
-      
+
       			"<div class='row mb-3'>" +
       			"<label for='message-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Nội Dung Thông Báo:</label>" +
       			"<div class='col-sm-9'>" +
       			"<textarea type='text' rows='3' class='form-control border-success' id='message-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][message]' placeholder='Cần nhập nội dung thông báo'></textarea>" +
       			"</div>" +
       			"</div>" +
-      
+
       /*
       			"<div class='row mb-3'>" +
       			"<label for='audio_file-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tệp Âm Thanh (Link,URL/PATH):</label>" +
@@ -1251,7 +1210,7 @@
       			"</div>" +
       			"</div>" +
       */
-      
+
       			"<div class='row mb-3'>" +
       			"<label for='repeat-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Số lần lặp lại:</label>" +
       			"<div class='col-sm-9'>" +
@@ -1259,7 +1218,7 @@
       			"<div class='invalid-feedback'>Cần điền số lần lặp lại thông báo</div>" +
       			"</div>" +
       			"</div>" +
-      
+
       			"<div class='row mb-3'>" +
                   "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần:</label>" +
       			"<div class='col-sm-9'>" +
@@ -1273,7 +1232,7 @@
       				 "<button type='button' class='mt-3 btn btn-info rounded-pill' id='button_hien_thi_ngay_"+newTaskIndex+"' onclick='addDateInput("+newTaskIndex+")'>Thêm ngày cụ thể</button>" +
       				 "</div>" +
       				 "</div></div>" +
-      
+
       			"<div class='row mb-3'>" +
                   "<label class='col-sm-3 col-form-label'>Thời gian (HH:MM) <i class='bi bi-question-circle-fill' onclick='show_message(\"Thời gian theo định dạng giờ, phút phải có dấu : ở giữa, định dạng nhập là 24h: từ 00:00 tới 23:59\")'></i>:</label><br>" +
       			"<div class='col-sm-9'>" +
@@ -1296,7 +1255,7 @@
           newTaskIndex++
       	showMessagePHP("Đã Thêm Ô Nhập Liệu Tác Vụ Lập Lịch Mới, Hãy Điền Thông Tin Vào", 6);
       }
-      
+
       // Xóa input thời gian
       function removeTimeInput(taskIndex, buttonElement) {
           const timeContainer = document.getElementById('time-container-' + taskIndex);
@@ -1304,7 +1263,7 @@
           // Cập nhật hiển thị nút "Xóa" sau khi xóa một input
           updateRemoveButtonVisibility(taskIndex);
       }
-      
+
       // Cập nhật hiển thị nút "Xóa" khi có ít nhất 2 input
       function updateRemoveButtonVisibility(taskIndex) {
           const timeContainer = document.getElementById('time-container-' + taskIndex);
@@ -1429,7 +1388,7 @@
           });
           timeOnCounter_display_screen++;
       });
-      
+
       // Thêm input cho Time Off
       document.getElementById('add-time-off_display_screen').addEventListener('click', function() {
           const timeOffContainer = document.getElementById('time-off-container');
@@ -1457,6 +1416,7 @@
       });
     </script>
     <!--END Scripts lập Lịch Màn Hình -->
+
     <!-- Scripts Restart VBot -->
     <script>
       let time_Restart_VBot = <?= count($restart_vbot['time']) ?>;
@@ -1487,6 +1447,7 @@
       });
     </script>
     <!--END Scripts Restart VBot -->
+
     <!-- Scripts stop media Player -->
     <script>
       let time_Stop_Media_Player = <?= count($stop_media_player['time']) ?>;
@@ -1517,6 +1478,7 @@
       });
     </script>
     <!--END Scripts stop media Player -->
+
     <!-- Scripts REBOOT OS SYSTEM -->
     <script>
       let time_REboot_OS = <?= count($reboot_os['time']) ?>;

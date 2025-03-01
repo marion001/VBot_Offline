@@ -11,15 +11,11 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <?php
@@ -27,19 +23,14 @@
   function convertToGB($value) {
       $number = floatval($value);
       if (strpos($value, 'T') !== false) {
-  		// Chuyển đổi từ TB sang GB
           return $number * 1024;
       } elseif (strpos($value, 'G') !== false) {
-  		// Giữ nguyên GB
           return $number;
       } elseif (strpos($value, 'M') !== false) {
-  		// Chuyển đổi từ MB sang GB
           return $number / 1024;
       } elseif (strpos($value, 'K') !== false) {
-  		// Chuyển đổi từ KB sang GB
           return $number / (1024 * 1024);
       } else {
-  		// Trường hợp không xác định hoặc đơn vị rất nhỏ
           return 0;
       }
   }
@@ -50,16 +41,10 @@
     include 'html_head.php';
     ?>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Thông tin hệ thống</h1>
@@ -112,14 +97,11 @@
               <?php
                 // Hàm chuyển đổi đơn vị từ KB sang GB
                 function convertKBToGB($kb) {
-                	// 1 GB = 1048576 KB
+                	//1 GB = 1048576 KB
                     return $kb / 1048576;
                 }
-                // Lấy thông tin RAM từ lệnh free
                 $ramInfo = shell_exec('free -k');
-                // Chuyển đổi kết quả thành mảng dòng
                 $lines = explode("\n", trim($ramInfo));
-                // Phân tích dòng thứ hai, nơi chứa thông tin về RAM
                 $columns = preg_split('/\s+/', $lines[1]);
                 // Lấy các giá trị RAM
                 $totalRAM = convertKBToGB($columns[1]);
@@ -147,35 +129,24 @@
               <?php
                 // Lấy thông tin tiến trình CPU từ lệnh ps
                 $processes = shell_exec('ps aux --sort=-%cpu');
-                // Chia đầu ra thành các dòng
                 $lines = explode("\n", trim($processes));
-                // Biến để lưu tổng phần trăm CPU sử dụng
                 $totalCpuUsage = 0;
-                // Bỏ qua dòng tiêu đề và tính tổng phần trăm CPU
                 foreach ($lines as $index => $line) {
-                    // Bỏ qua dòng tiêu đề
                     if ($index == 0) {
                         continue;
                     }
-                    // Tách các trường trong dòng
                     $fields = preg_split('/\s+/', $line, -1, PREG_SPLIT_NO_EMPTY);
-                    // Nếu dòng có đủ số trường
                     if (count($fields) >= 11) {
-                        // Thêm phần trăm CPU vào tổng
                         $totalCpuUsage += floatval($fields[2]);
                     }
                 }
-                
                 // Lấy thông tin CPU từ tệp /proc/cpuinfo
                 $cpuInfo = shell_exec('cat /proc/cpuinfo');
-                
                 // Chuyển đổi kết quả thành mảng dòng
                 $lines = explode("\n", trim($cpuInfo));
-                
                 $modelName = '';
                 $cpuCores = 0;
                 $cpuMHz = 0;
-                
                 foreach ($lines as $line) {
                     if (strpos($line, 'model name') !== false) {
                         $modelName = trim(explode(':', $line)[1]);
@@ -226,9 +197,7 @@
                       <?php
                         foreach ($lines_disk as $index => $line) {
                             if ($index === 0) continue;
-                            // Phân tách các cột
                             $columns = preg_split('/\s+/', $line);
-                            // Hiển thị chỉ các cột quan trọng
                             echo "<tr>";
                             echo "<td>{$columns[0]}</td>"; // Filesystem
                             echo "<td>{$columns[1]}</td>"; // Size
@@ -261,27 +230,19 @@
                       <?php
                         // Lấy thông tin RAM từ hệ thống
                         $ramInfo1 = shell_exec('free -h');
-                        // Chuyển đổi dữ liệu thành mảng các dòng
                         $ramLines1 = explode("\n", trim($ramInfo1));
-                        
+
                         // Hiển thị các dòng thông tin RAM (Mem và Swap)
                         for ($i = 1; $i < count($ramLines1); $i++) {
                             echo '<tr>';
                             $columns1 = preg_split('/\s+/', $ramLines1[$i]);
-                        
-                            // Hiển thị nhãn (Mem hoặc Swap)
                             echo '<td>' . $columns1[0] . '</td>';
-                        
-                            // Hiển thị các giá trị từ cột 2 trở đi
                             for ($j = 1; $j < count($columns1); $j++) {
                                 echo '<td>' . $columns1[$j] . '</td>';
                             }
-                        
-                            // Thêm cột trống nếu cần thiết (chỉ cho dòng Swap)
                             if ($columns1[0] === "Swap:") {
                                 echo '<td colspan="3"></td>';
                             }
-                        
                             echo '</tr>';
                         }
                         ?>
@@ -296,15 +257,12 @@
                 // Xóa từ "up" và cắt chuỗi ở các dấu phẩy
                 $uptime = str_replace('up ', '', $uptime);
                 $uptimeParts = explode(', ', $uptime);
-            
                 $translations = [
                     'days' => 'ngày',
                     'hours' => 'giờ',
                     'minutes' => 'phút'
                 ];
-            
                 $result = [];
-            
                 // Duyệt qua từng phần của thời gian khởi động
                 foreach ($uptimeParts as $part) {
                     list($value, $unit) = explode(' ', $part);
@@ -312,13 +270,10 @@
                         $result[] = "$value " . $translations[$unit];
                     }
                 }
-            
                 return implode(', ', $result);
             }
-            
             // Lấy thời gian khởi động hệ thống
             $uptime = shell_exec('uptime -p');
-            
             // Chuyển đổi thời gian khởi động thành tiếng Việt
             $uptimeVietnamese = convertUptimeToVietnamese(trim($uptime));
             // Lấy thông tin về bo mạch (board)
@@ -329,7 +284,6 @@
             $pythonVersion = shell_exec('python3 --version 2>&1');
             // Lấy phiên bản Apache
             $apacheVersion = shell_exec('apache2 -v | grep "Server version"');
-            
             ?>
           <div class="col-lg-4">
             <div class="card">
@@ -394,10 +348,8 @@
                   <?php
                     // Lấy thông tin CPU từ lệnh lscpu
                     $cpuInfo1 = shell_exec('lscpu');
-                    
                     // Chuyển đổi dữ liệu thành mảng các dòng
                     $cpuLines1 = explode("\n", trim($cpuInfo1));
-                    
                     // Danh sách các thông tin cần hiển thị
                     $desiredKeys = [
                         'Architecture',
@@ -416,14 +368,12 @@
                         'BogoMIPS',
                         'Flags'
                     ];
-                    
                     foreach ($cpuLines1 as $line) {
                         // Chia dòng thành cặp "tên thuộc tính : giá trị"
                         $parts = explode(':', $line, 2);
                         if (count($parts) == 2) {
                             $key = trim($parts[0]);
                             $value = trim($parts[1]);
-                    
                             // Kiểm tra xem thuộc tính có trong danh sách cần hiển thị không
                             if (in_array($key, $desiredKeys)) {
                     			echo '<div class="activity-item d-flex">';
@@ -433,8 +383,7 @@
                         }
                     }
                     $cpuSerial = shell_exec('cat /proc/cpuinfo | grep Serial | awk \'{print $3}\'');
-                    
-                    ?>       
+                    ?>
                   <div class="activity-item d-flex">
                     <div class="activite-label text-success">Seri CPU:</div>
                     <div class="activity-content text-danger">
@@ -448,11 +397,9 @@
         </div>
       </section>
     </main>
-    <!-- ======= Footer ======= -->
     <?php
       include 'html_footer.php';
       ?>
-    <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
     <?php
       include 'html_js.php';
