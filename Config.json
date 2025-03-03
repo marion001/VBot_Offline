@@ -26,12 +26,20 @@
     },
     "api": {
         "active": true,
+        "port": 5002,
         "show_log": {
             "active": false,
             "max_log": 30,
             "log_lever": true
         },
-        "port": 5002
+        "streaming_server": {
+            "active": false,
+            "port": 5003,
+            "working_mode": "main_processing",
+            "notes": "working_mode: main_processing, null",
+            "source_stt": "stt_default",
+            "max_stream_audio_empty": 4
+        }
     },
     "web_interface": {
         "errors_display": false,
@@ -369,8 +377,8 @@
                     "channels": 1,
                     "chunk": 4096,
                     "language_code": "vi-VN",
-					"interim_results": true,
-					"single_utterance": true,
+                    "interim_results": true,
+                    "single_utterance": true,
                     "stt_ggcloud_v2": {
                         "recognizer_id": "điền id recogines của bạn",
                         "model": "short",
@@ -441,7 +449,7 @@
             },
             "hotword": {
                 "select_wakeup": "porcupine",
-				"continue_running_if_hotword_initialization_fails": true,
+                "continue_running_if_hotword_initialization_fails": true,
                 "notes": "select_wakeup sẽ có 3 giá trị sử dụng từ đánh thức là: porcupine hoặc snowboy, (hoặc null không nằm trong dấu nháy)",
                 "lang": "vi",
                 "library": {

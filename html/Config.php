@@ -355,7 +355,15 @@
   
   #Cập nhật trợ lý ảo custom assistant customize_developer_assistant_active
   $Config['virtual_assistant']['customize_developer_assistant']['active'] = isset($_POST['customize_developer_assistant_active']) ? true : false;
-  
+
+  #Cập nhật Streaming
+  $Config['api']['streaming_server']['active'] = isset($_POST['streming_active']) ? true : false;
+  $Config['api']['streaming_server']['port'] = intval($_POST['port_server_streaming_audio']);
+  $Config['api']['streaming_server']['working_mode'] = $_POST['streaming_server_working_mode'];
+  $Config['api']['streaming_server']['source_stt'] = $_POST['streaming_server_source_stt'];
+  $Config['api']['streaming_server']['max_stream_audio_empty'] = intval($_POST['max_stream_audio_empty']);
+
+
   #Cập nhật Bluetooth
   $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
   $Config['bluetooth']['show_logs'] = isset($_POST['bluetooth_show_logs']) ? true : false;
@@ -869,6 +877,69 @@
                   </div>
                 </div>
               </div>
+			  
+      <div class="card accordion" id="accordion_button_streaming_server_audio">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
+      Streming Audio Server <font color=red>(Đang Phát Triển)</font>:</h5>
+      <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
+
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng thiết bị chạy chương trình VBot làm Server')"></i> :</label>
+                      <div class="col-sm-9">
+                        <div class="form-switch">
+                          <input class="form-check-input" type="checkbox" name="streming_active" id="streming_active" <?php echo $Config['api']['streaming_server']['active'] ? 'checked' : ''; ?>>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="api_port" class="col-sm-3 col-form-label">Port Server:</label>
+                      <div class="col-sm-9">
+                        <div class="input-group mb-3">
+                          <input required type="number" class="form-control border-danger" name="port_server_streaming_audio" id="port_server_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['port']) ?>">
+                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
+                          <button class="btn btn-success border-danger" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" target="_bank">Kiểm Tra</a></button>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="streaming_server_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
+                      <div class="col-sm-9">
+                        <select name="streaming_server_working_mode" id="streaming_server_working_mode" class="form-select border-danger" aria-label="Default select example">
+                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (VBot xử lý và thực thi)</option>
+                          <option value="null" <?php echo $Config['api']['streaming_server']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="streaming_server_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT:</label>
+                      <div class="col-sm-9">
+                        <select name="streaming_server_source_stt" id="streaming_server_source_stt" class="form-select border-danger" aria-label="Default select example">
+                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="max_stream_audio_empty" class="col-sm-3 col-form-label">Thời Gian Chờ Tối Đa:</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-danger" name="max_stream_audio_empty" id="max_stream_audio_empty" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['max_stream_audio_empty']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['max_stream_audio_empty']) ?>">
+                        <div class="invalid-feedback">Cần nhập tối đa dòng logs được hiển thị khi đọc qua đường API</div>
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label for="url_server_streaming_audio" class="col-sm-3 col-form-label">URL Server Streaming Audio:</label>
+                      <div class="col-sm-9">
+                        <input readonly type="text" class="form-control border-danger" name="url_server_streaming_audio" id="url_server_streaming_audio" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>" value="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>">
+                      </div>
+                    </div>
+      </div>
+      </div>
+      </div>
+			  
               <div class="card accordion" id="accordion_button_volume_setting">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">

@@ -147,6 +147,7 @@
   
   //Cổng port của đường API
   $Port_API = $Config['api']['port'];
+  $Port_Server_Streaming_Audio = $Config['api']['streaming_server']['port'];
   
   // Tìm tất cả các tệp có tên bắt đầu bằng 'avata_user'
   $files = glob('assets/img/avata_user.*');
