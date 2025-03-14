@@ -358,11 +358,23 @@
 
   #Cập nhật Streaming
   $Config['api']['streaming_server']['active'] = isset($_POST['streming_active']) ? true : false;
-  $Config['api']['streaming_server']['port'] = intval($_POST['port_server_streaming_audio']);
-  $Config['api']['streaming_server']['working_mode'] = $_POST['streaming_server_working_mode'];
-  $Config['api']['streaming_server']['source_stt'] = $_POST['streaming_server_source_stt'];
-  $Config['api']['streaming_server']['max_stream_audio_empty'] = intval($_POST['max_stream_audio_empty']);
+  $Config['api']['streaming_server']['connection_protocol'] = $_POST['streaming_server_connection_protocol'];
 
+  #Cập nhật Streaming HTTP POST
+  $Config['api']['streaming_server']['protocol']['http_post']['port'] = intval($_POST['port_server_streaming_audio']);
+  $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] = $_POST['streaming_server_working_mode'];
+  $Config['api']['streaming_server']['protocol']['http_post']['source_stt'] = $_POST['streaming_server_source_stt'];
+  $Config['api']['streaming_server']['protocol']['http_post']['max_stream_audio_empty'] = intval($_POST['max_stream_audio_empty']);
+
+  #Cập nhật Streaming Socket
+  $Config['api']['streaming_server']['protocol']['socket']['port'] = intval($_POST['port_server_socket_streaming_audio']);
+  $Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time'] = intval($_POST['socket_maximum_recording_time']);
+  $Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected'] = intval($_POST['socket_maximum_client_connected']);
+  $Config['api']['streaming_server']['protocol']['socket']['source_stt'] = $_POST['streaming_server_source_stt_socket'];
+  $Config['api']['streaming_server']['protocol']['socket']['working_mode'] = $_POST['streaming_server_working_mode_socket'];
+  $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] = $_POST['streaming_server_select_wakeup_socket'];
+  
+  
 
   #Cập nhật Bluetooth
   $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
@@ -881,7 +893,7 @@
       <div class="card accordion" id="accordion_button_streaming_server_audio">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
-      Streming Audio Server <font color=red>(Đang Phát Triển)</font>:</h5>
+      Streming Audio Server:</h5>
       <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
 
                     <div class="row mb-3">
@@ -894,11 +906,101 @@
                     </div>
 
                     <div class="row mb-3">
-                      <label for="api_port" class="col-sm-3 col-form-label">Port Server:</label>
+                      <label for="streaming_server_connection_protocol" class="col-sm-3 col-form-label">Kiểu Loại Kết Nối:</label>
+                      <div class="col-sm-9">
+                        <select name="streaming_server_connection_protocol" id="streaming_server_connection_protocol" class="form-select border-success" aria-label="Default select example">
+                          <option value="socket" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'socket' ? 'selected' : ''; ?>>Socket</option>
+                          <option disabled value="http_post" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'http_post' ? 'selected' : ''; ?>>HTTP POST</option>
+						</select>
+                      </div>
+                    </div>
+
+
+				  <div class="card accordion" id="accordion_button_socket_server_socket">
+				  <div class="card-body">
+				  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_socket" aria-expanded="false" aria-controls="collapse_button_socket_server_socket">
+				  Chế Độ Kết Nối Socket:</h5>
+				  <div id="collapse_button_socket_server_socket" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_socket">
+
+					<div class="row mb-3">
+                      <label for="api_port" class="col-sm-3 col-form-label">Port Server Socket:</label>
+                      <div class="col-sm-9">
+                          <input required type="number" class="form-control border-success" name="port_server_socket_streaming_audio" id="port_server_socket_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>">
+                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio Socket!</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="socket_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa:</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-success" name="socket_maximum_recording_time" id="socket_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>">
+                        <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi Client gửi dữ liệu âm thanh</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="socket_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối:</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-success" name="socket_maximum_client_connected" id="socket_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>">
+                        <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="streaming_server_source_stt_socket" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Từ Client:</label>
+                      <div class="col-sm-9">
+                        <select name="streaming_server_source_stt_socket" id="streaming_server_source_stt_socket" class="form-select border-success" aria-label="Default select example">
+                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['socket']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="streaming_server_working_mode_socket" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
+                      <div class="col-sm-9">
+                        <select name="streaming_server_working_mode_socket" id="streaming_server_working_mode_socket" class="form-select border-success" aria-label="Default select example">
+                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa chạy VBot xử lý và thực thi)</option>
+                          <option disabled value="null" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="streaming_server_select_wakeup_socket" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
+                      <div class="col-sm-9">
+                        <select name="streaming_server_select_wakeup_socket" id="streaming_server_select_wakeup_socket" class="form-select border-success" aria-label="Default select example">
+                          <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (Wake Up Client)</option>
+                          <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (Wakeup Client)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="url_server_streaming_audio_socket" class="col-sm-3 col-form-label">URL Server Socket Streaming Audio:</label>
+                      <div class="col-sm-9">
+						<div class="input-group mb-3">
+                        <input readonly type="text" class="form-control border-danger" name="url_server_streaming_audio_socket" id="url_server_streaming_audio_socket" placeholder="<?php echo htmlspecialchars('ws://'.$serverIp.':'.$Port_Server_Streaming_Audio_Socket); ?>" value="<?php echo htmlspecialchars('ws://'.$serverIp.':'.$Port_Server_Streaming_Audio_Socket); ?>">
+						<button class="btn btn-success border-danger" type="button" title="Kiểm tra kết nối Socket Server Streaming" onclick="connectWebSocketAndSendID()">Kiểm Tra</button>
+					  </div>
+                      </div>
+                    </div>
+					
+				  </div>
+				  </div>
+				  </div>
+
+				  <div class="card accordion" id="accordion_button_socket_server_http">
+				  <div class="card-body">
+				  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_http" aria-expanded="false" aria-controls="collapse_button_socket_server_http">
+				  Chế Độ Kết Nối HTTP POST <i class="bi bi-question-circle-fill" onclick="show_message('Chưa có hướng dẫn ở chế độ này')"></i>  <font color=red>(Đang Phát Triển)</font></h5>
+				  <div id="collapse_button_socket_server_http" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_http">
+
+					<div class="row mb-3">
+                      <label for="api_port" class="col-sm-3 col-form-label">Port Server HTTP:</label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
-                          <input required type="number" class="form-control border-danger" name="port_server_streaming_audio" id="port_server_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['port']) ?>">
-                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
+                          <input required type="number" class="form-control border-danger" name="port_server_streaming_audio" id="port_server_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['port']) ?>">
+                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio HTTP POST!</div>
                           <button class="btn btn-success border-danger" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" target="_bank">Kiểm Tra</a></button>
                         </div>
                       </div>
@@ -908,17 +1010,17 @@
                       <label for="streaming_server_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_working_mode" id="streaming_server_working_mode" class="form-select border-danger" aria-label="Default select example">
-                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (VBot xử lý và thực thi)</option>
-                          <option value="null" <?php echo $Config['api']['streaming_server']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
+                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa chạy VBot xử lý và thực thi)</option>
+                          <option value="null" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
 						</select>
                       </div>
                     </div>
 
                     <div class="row mb-3">
-                      <label for="streaming_server_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT:</label>
+                      <label for="streaming_server_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Từ Client:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_source_stt" id="streaming_server_source_stt" class="form-select border-danger" aria-label="Default select example">
-                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot</option>
+                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
 						</select>
                       </div>
                     </div>
@@ -926,16 +1028,19 @@
                     <div class="row mb-3">
                       <label for="max_stream_audio_empty" class="col-sm-3 col-form-label">Thời Gian Chờ Tối Đa:</label>
                       <div class="col-sm-9">
-                        <input required type="number" class="form-control border-danger" name="max_stream_audio_empty" id="max_stream_audio_empty" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['max_stream_audio_empty']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['max_stream_audio_empty']) ?>">
-                        <div class="invalid-feedback">Cần nhập tối đa dòng logs được hiển thị khi đọc qua đường API</div>
+                        <input required type="number" class="form-control border-danger" name="max_stream_audio_empty" id="max_stream_audio_empty" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['max_stream_audio_empty']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['max_stream_audio_empty']) ?>">
+                        <div class="invalid-feedback">Cần nhập thời gian chờ tối đa, mặc định 5</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="url_server_streaming_audio" class="col-sm-3 col-form-label">URL Server Streaming Audio:</label>
+                      <label for="url_server_streaming_audio" class="col-sm-3 col-form-label">URL Server HTTP POST Streaming Audio:</label>
                       <div class="col-sm-9">
-                        <input readonly type="text" class="form-control border-danger" name="url_server_streaming_audio" id="url_server_streaming_audio" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>" value="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>">
+                        <input readonly type="text" class="form-control border-danger" name="url_server_streaming_audio" id="url_server_streaming_audio" placeholder="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>" value="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>">
                       </div>
                     </div>
+			  </div>
+			  </div>
+			  </div>
       </div>
       </div>
       </div>
@@ -4776,7 +4881,29 @@
       		show_message('Không tìm thấy input có id "webui_path".');
           }
       }
-      
+
+	//Kiểm tra kết nối Socket Server Streaming
+	function connectWebSocketAndSendID() {
+		const url = document.getElementById("url_server_streaming_audio_socket").value;
+		if (!url) {
+			console.error("Vui lòng nhập URL Server WebSocket!");
+			return;
+		}
+		const ws = new WebSocket(url);
+		ws.onopen = function() {
+			show_message('Kết nối WebSocket thành công tới Server: '+url);
+			const sessionId = Math.random().toString(36).substring(2, 10);
+			ws.send("VBot_Tester_Socket_Connect_"+sessionId);
+			ws.close();
+		};
+		ws.onerror = function(error) {
+			show_message("Lỗi kết nối tới Socket Server Streaming: " +error);
+		};
+		ws.onclose = function(event) {
+			//console.log("Kết nối WebSocket đã đóng:", event.code, event.reason);
+		};
+	}
+
       // Đặt sự kiện khi DOM đã được tải hoàn toàn v
       document.addEventListener('DOMContentLoaded', function() {
       	//cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome

@@ -6,7 +6,7 @@
     "changes": [
         {
             "type": "feature",
-            "description": "chạy lệnh cập nhật thư viện sau để sử dụng phát nhạc Youtube: 'pip install pytubefix'"
+            "description": "chạy lệnh cập nhật thư viện websockets: 'pip install websockets'"
         },
         {
             "type": "fix",

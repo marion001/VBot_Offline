@@ -1,31 +1,5 @@
 {
-    "notification_schedule": [
-        {
-            "name": "Test Lịch Trình Thông Báo 2",
-            "create_words": "vbot_interface",
-            "data": {
-                "message": "",
-                "audio_file": "/home/pi/VBot_Offline/Media/Audio_Scheduler/Tu_em_sai.mp3",
-                "repeat": 1
-            },
-            "date": [
-                "Monday",
-                "Tuesday",
-                "Wednesday",
-                "Thursday",
-                "Friday",
-                "Saturday",
-                "Sunday",
-                "29/12/2024",
-                "30/12/2024"
-            ],
-            "time": [
-                "20:47",
-                "18:30"
-            ],
-            "active": false
-        }
-    ],
+    "notification_schedule": [],
     "send_notify_upgrade_vbot_home_assistant": {
         "active": false,
         "time": "03:01"
@@ -67,7 +41,10 @@
         ]
     },
     "stop_media_player": {
-        "active": true,
+        "time": [
+            "03:09"
+        ],
+        "active": false,
         "date": [
             "Monday",
             "Tuesday",
@@ -76,9 +53,6 @@
             "Friday",
             "Saturday",
             "Sunday"
-        ],
-        "time": [
-            "10:02"
         ]
     }
 }

@@ -12,18 +12,18 @@
                 }
             },
             "questions": [
-                "tắt hộ cái đèn ngủ.",
-                "đèn ngủ tắt hộ đi!"
+                "tắt hộ cái đèn ngủ",
+                "đèn ngủ tắt hộ đi"
             ]
         },
         {
             "name": "Bật Đèn Ngủ",
             "reply": "được rồi để bật đèn ngủ",
             "data_yaml": {
-                "action": "switch.turn_off",
+                "action": "switch.turn_on",
                 "data": "{}",
                 "target": {
-                    "entity_id": "{}"
+                    "entity_id": "switch.den_ngu"
                 }
             },
             "questions": [
@@ -34,7 +34,7 @@
         },
         {
             "active": true,
-            "name": "Tắt Đèn Phòng Ngủ",
+            "name": "Tắt Đèn Phòng Ngủ Và Đèn Ngủ",
             "reply": "",
             "data_yaml": {
                 "action": "switch.turn_off",
@@ -47,7 +47,7 @@
                 }
             },
             "questions": [
-                "tắt đèn phòng ngủ",
+                "tắt đèn phòng ngủ cả đèn ngủ đi nhé",
                 "tắt đèn phòng ngủ lên",
                 "tắt đèn phòng ngủ nhé"
             ]
@@ -58,7 +58,7 @@
             "data_yaml": {
                 "action": "cover.set_cover_position",
                 "data": {
-                    "position": 51
+                    "position": 50
                 },
                 "target": {
                     "entity_id": "cover.virtual_cover"
@@ -68,25 +68,6 @@
                 "Mở rèm phòng khách một nửa"
             ],
             "active": false
-        },
-        {
-            "active": true,
-            "name": "tắt quạt phòng 2",
-            "reply": "tắt quạt phòng 2",
-            "data_yaml": {
-                "action": "switch.turn_off",
-                "data": "{}",
-                "target": {
-                    "entity_id": [
-                        "switch.den_ngu",
-                        "switch.den_ngu2"
-                    ]
-                }
-            },
-            "questions": [
-                "tắt quạt phòng 2",
-                "tắt quạt phòng 22 nhé"
-            ]
         }
     ]
 }
