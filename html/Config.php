@@ -982,8 +982,8 @@
                       <label for="streaming_server_select_wakeup_socket" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_select_wakeup_socket" id="streaming_server_select_wakeup_socket" class="form-select border-success" aria-label="Default select example">
-                          <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (Wake Up Client)</option>
-                          <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (Wakeup Client)</option>
+                          <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (WakeUp Client)</option>
+                          <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (WakeUP Client)</option>
 						</select>
                       </div>
                     </div>
