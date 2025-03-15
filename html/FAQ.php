@@ -193,6 +193,12 @@
                   Nút Nhấn và Hành Động Của Nút:
                 </h5>
                 <div id="collapse_button_5" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_5">
+				
+      <div class="card accordion" id="accordion_button_faq_nut_nhan_thuong">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_faq_nut_nhan_thuong" aria-expanded="false" aria-controls="collapse_button_faq_nut_nhan_thuong">
+      Nút Nhấn Thường (Nhấn Nhả):</h5>
+      <div id="collapse_button_faq_nut_nhan_thuong" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_faq_nut_nhan_thuong">
                   <ul>
                     <li>
                       <b>Nút nhấn up</b>
@@ -318,9 +324,27 @@
                       </ul>
                     </li>
                   </ul>
+				  </div>
+				  </div>
+				  </div>
+				  
+				  
+      <div class="card accordion" id="accordion_button_faq_nut_nhan_encoder">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_faq_nut_nhan_encoder" aria-expanded="false" aria-controls="collapse_button_faq_nut_nhan_encoder">
+      Nút Nhấn Xoay Encoder:</h5>
+      <div id="collapse_button_faq_nut_nhan_encoder" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_faq_nut_nhan_encoder">
+	Đang Cập Nhật.....
+      </div>
+      </div>
+      </div>
+				  
+				  
                 </div>
               </div>
             </div>
+			
+			
             <div class="card accordion" id="accordion_button_6">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_6" aria-expanded="false">
@@ -442,6 +466,28 @@
                 </div>
               </div>
             </div>
+			
+      <div class="card accordion" id="accordion_button_socket_streaming_audio_server">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_streaming_audio_server" aria-expanded="false" aria-controls="collapse_button_socket_streaming_audio_server">
+      Socket Server Streaming Audio:</h5>
+      <div id="collapse_button_socket_streaming_audio_server" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_streaming_audio_server">
+      - Bạn có thể dùng các thiết bị để làm Client như ESP32, Raspberry Pi, Máy Tính, V..v....<br/>
+	  - Client Cần Đọc Dữ Liệu Âm Thanh Từ Microphone Và Streaming Trực Tiếp Tới Server Chạy VBot<br/><br/><br/>
+	  <b>- Cơ Chế Làm Việc Của Client Kết Nối Tới Serer:</b><br/>
+	  <font color=red>-- Phía Client sẽ Gửi Yêu Cầu Kết Nối Tới Socket Server, Client Phát Hiện Kết Nối Thành Công Thì Sẽ Gửi 1 id (Ngẫu Nhiên Random) Do Client Tạo Ra (Chuỗi Hoặc Dãy Số, Hoặc Gì Cũng Được) Để Server Nhận Biết, Quản Lý, Trả Về Dữ Liệu Đúng Client Đó Theo id</font><br/><br/>
+	  <b>Demo Test Streaming Bằng Trình Duyệt WEB Trên Máy Tính</b><br/>
+	  B1: Tải Xuống File <b>Test_Client_Socket_Streaming.html</b> tại đường dẫn: <b>/home/pi/VBot_Offline/resource/test_device/Test_Client_Socket_Streaming.html</b> Về Máy Tính Của Bạn.<br/>
+	  Hoặc Nhấn Vào Đây Để Tải Xuống: <button type="button" class="btn btn-success" title="Tải xuống file: Test_Client_Socket_Streaming.html" onclick="downloadFile('/home/pi/VBot_Offline/resource/test_device/Test_Client_Socket_Streaming.html')"><i class="bi bi-download"></i></button><br/>
+	  B2: Nhấn Chuột Phải Vào File <b>Test_Client_Socket_Streaming.html</b> Đã Được Tải Về Trên Máy Tính Của Bạn Chọn: <b>Open with</b> -> <b>Rồi Chọn Vào Trình Duyệt Web Của Bạn Để Mở Lên</b><br/><br/>
+	  B3: Thay Địa Chỉ Server Socket Streaming Tương Ứng Với Loa Của Bạn Rồi Nhấn Vào: <b>Kết nối tới Server</b><br/><br/>
+	  B4: Bật Microphone Để Cấp Quyền Truy Cập<br/><br/>
+	  B5: Đánh Thức Client Bằng Cách Nói Từ Khóa HotWord Vào Mic Ở Phía Client Để Bắt Đầu Ra Lệnh Cho VBot
+      </div>
+      </div>
+      </div>
+			
+			
           </div>
         </div>
       </section>

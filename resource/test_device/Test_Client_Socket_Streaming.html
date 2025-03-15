@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="vi">
+<!--
+  #Code By: Vũ Tuyển
+  #Designed by: BootstrapMade
+  #GitHub VBot: https://github.com/marion001/VBot_Offline.git
+  #Facebook Group: https://www.facebook.com/groups/1148385343358824
+  #Facebook: https://www.facebook.com/TWFyaW9uMDAx
+  -->
+
+<head>
+    <meta charset="UTF-8">
+    <title>VBot Audio Streaming WebSocket</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+	<meta name="description" content="VBot Assistant - Loa Thông Minh VBot tiếng Việt, tích hợp trợ lý ảo giúp điều khiển nhà thông minh, phát nhạc, nhắc nhở và nhiều tiện ích khác. Trải nghiệm loa thông minh cho người Việt.">
+	<meta name="keywords" content="VBot Assistant, Loa Thông Minh VBot, Loa Thông Minh Tiếng Việt, Loa Thông Minh Trợ Lý Ảo VBot, trợ lý ảo, loa thông minh Việt Nam, điều khiển giọng nói, nhà thông minh">
+	<meta name="author" content="Vũ Tuyển">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        #logDisplay {
+            height: 250px;
+            overflow-y: auto;
+            background-color: #212529;
+            color: #ffffff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        
+        .error {
+            color: red;
+        }
+        
+        .success {
+            color: green;
+        }
+        
+        .info {
+            color: blue;
+        }
+    </style>
+</head>
+
+<body class="container mt-4">
+
+    <h2 class="text-center mb-4">VBot Audio Streaming (WebSocket)</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Thiết Lập Kết Nối</h5>
+            <div class="mb-3">
+                <label for="serverUrl" class="form-label">Địa Chỉ Server Socket Streaming:</label>
+                <input type="text" id="serverUrl" class="form-control border-success" value="ws://192.168.14.194:5003">
+            </div>
+            <button class="btn btn-success d-flex align-items-center gap-2">
+                <input class="form-check-input" type="checkbox" id="enableSocket" onchange="toggleWebSocket()">
+                <label class="form-check-label mb-0" for="enableSocket">Kết nối Tới Server</label>
+            </button>
+            <br/>
+            <button id="startRecording" class="btn btn-primary me-2" onclick="startRecording()">🎤 Bật Microphone</button>
+            <button id="stopRecording" class="btn btn-danger" disabled onclick="stopRecording()">🛑 Tắt Microphone</button>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Logs Dữ Liệu Từ Server</h5> Cần đánh thức WakeUP bằng từ nóng Hotword vào Microphone ở Phía Client.
+            <div id="logDisplay" class="border"></div>
+        </div>
+    </div>
+
+    <script>
+        // Biến toàn cục để quản lý WebSocket, recorder, stream và trạng thái
+        let socket = null; // WebSocket kết nối đến server
+        let recorder = null; // Bộ xử lý ghi âm
+        let mediaStream = null; // Luồng dữ liệu âm thanh từ microphone
+        let isRecording = false; // Trạng thái ghi âm
+        let context = null; // AudioContext để xử lý âm thanh
+        const sampleRate = 16000; // Tần số lấy mẫu (16kHz)
+        const chunkSize = 512; // Kích thước mỗi khối âm thanh gửi đi
+        let sessionId = null; // ID phiên của client
+        const logDisplay = document.getElementById("logDisplay"); // Vùng hiển thị log
+
+        // Ghi log ra giao diện và console
+        function logMessage(message, type = 'info') {
+            const logEntry = document.createElement('p');
+            logEntry.textContent = '[' + new Date().toLocaleTimeString() + '] ' + message;
+            logEntry.className = type;
+            logEntry.style.color = "#ffffff";
+            try {
+                // Trích xuất JSON từ chuỗi log (nếu có)
+                const jsonData = JSON.parse(message.match(/\{.*\}/)?.[0]);
+                if (jsonData.vbot_client_id) {
+                    logEntry.style.color = "#ff9800";
+                } else if (jsonData.waiting_to_wake_up) {
+                    logEntry.style.color = "#00FF00";
+                } else if (jsonData.wake_word_detected) {
+                    logEntry.style.color = "#00FF00";
+                } else if (jsonData.recording_streaming) {
+                    logEntry.style.color = "#2196F3";
+                }
+            } catch (e) {
+                //console.log("[Lỗi JSON] Không thể parse JSON hợp lệ:", message);
+                logEntry.style.color = "#ffffff";
+            }
+            logDisplay.appendChild(logEntry);
+            logDisplay.scrollTop = logDisplay.scrollHeight;
+            //console.log(message);
+        }
+
+        // Lấy URL của WebSocket từ ô nhập
+        function getServerUrl() {
+            return document.getElementById("serverUrl").value;
+        }
+
+        // Kết nối WebSocket
+        function connectWebSocket() {
+            // Tránh kết nối lại khi đã mở
+            if (socket && socket.readyState === WebSocket.OPEN) return;
+            // Tạo WebSocket đến server
+            socket = new WebSocket(getServerUrl());
+            // Sự kiện khi WebSocket mở
+            socket.onopen = function() {
+                logMessage("[Client] Kết nối WebSocket thành công tới: " + getServerUrl(), "success");
+                // Tạo sessionId ngẫu nhiên để nhận diện client
+                sessionId = "client_" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                socket.send(sessionId);
+                logMessage("[Client] Gửi Session ID: " + sessionId, "info");
+            };
+            // Sự kiện nhận tin nhắn từ server
+            socket.onmessage = function(event) {
+                logMessage("[Server] " + event.data, "info");
+            };
+            // Sự kiện khi WebSocket đóng
+            socket.onclose = function() {
+                logMessage("WebSocket đã đóng.", "error");
+            };
+            // Xử lý lỗi kết nối WebSocket
+            socket.onerror = function(error) {
+                logMessage("Lỗi WebSocket: " + error.message, "error");
+                socket.close();
+            };
+        }
+
+        // Ngắt kết nối WebSocket
+        function disconnectWebSocket() {
+            if (socket) {
+                logMessage("Đóng kết nối WebSocket...", "info");
+                socket.close();
+                socket = null;
+            }
+        }
+
+        // Bật/tắt WebSocket khi click vào checkbox
+        function toggleWebSocket() {
+            if (document.getElementById("enableSocket").checked) {
+                connectWebSocket();
+                // Kiểm tra quyền microphone sau khi kết nối WebSocket
+                setTimeout(() => {
+                    /*
+            checkMicrophonePermission(function (granted) {
+                if (!granted) {
+                    logMessage("Microphone chưa được cấp quyền! Hãy kiểm tra cài đặt trình duyệt.", "error");
+                }
+            });
+			*/
+                    // Đợi 1 giây để chắc chắn WebSocket đã kết nối
+                }, 1000);
+            } else {
+                disconnectWebSocket();
+            }
+        }
+
+        // Hàm kiểm tra quyền truy cập microphone
+        function checkMicrophonePermission(callback) {
+            if (!navigator.permissions) {
+                logMessage("Trình duyệt không hỗ trợ kiểm tra quyền, thử truy cập microphone...", "warning");
+                callback(true);
+                return;
+            }
+            navigator.permissions.query({
+                name: "microphone"
+            }).then(function(permissionStatus) {
+                if (permissionStatus.state === "granted") {
+                    logMessage("Quyền microphone đã được cấp.", "success");
+                    callback(true);
+                    startRecording();
+                } else if (permissionStatus.state === "denied") {
+                    logMessage("Quyền microphone bị từ chối! Hãy kiểm tra cài đặt trình duyệt.", "error");
+                    alert("Vui lòng cấp quyền microphone trong cài đặt trình duyệt để sử dụng tính năng này.");
+                    callback(false);
+                } else {
+                    logMessage("Cần cấp quyền truy cập Microphone trên trình duyệt", "warning");
+                    navigator.mediaDevices.getUserMedia({
+                            audio: true
+                        })
+                        .then(function(stream) {
+                            logMessage("Quyền microphone đã được cấp thành công", "success");
+                            // Đóng stream sau khi yêu cầu thành công
+                            stream.getTracks().forEach(track => track.stop());
+                            callback(true);
+                            startRecording()
+                        })
+                        .catch(function(error) {
+                            logMessage("Người dùng từ chối cấp quyền microphone!", "error");
+                            alert("Bạn cần cấp quyền microphone để sử dụng tính năng này.");
+                            callback(false);
+                        });
+                }
+            });
+        }
+
+        // Bắt đầu ghi âm và gửi dữ liệu qua WebSocket
+        function startRecording() {
+            if (isRecording || !document.getElementById("enableSocket").checked) return;
+            isRecording = true;
+            // Đảm bảo WebSocket đã kết nối trước khi gửi âm thanh
+            connectWebSocket();
+            // Kiểm tra trình duyệt có hỗ trợ microphone không
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({
+                        audio: true
+                    })
+                    .then(function(stream) {
+                        logMessage("Bắt đầu thu âm Streaming...", "success");
+                        // Khởi tạo AudioContext với tần số 16kHz
+                        window.AudioContext = window.AudioContext || window.webkitAudioContext;
+                        context = new AudioContext({
+                            sampleRate: sampleRate
+                        });
+                        // Tạo nguồn âm thanh từ microphone
+                        mediaStream = context.createMediaStreamSource(stream);
+                        // Tạo bộ xử lý ghi âm, xử lý từng khối 512 mẫu
+                        recorder = context.createScriptProcessor(chunkSize, 1, 1);
+                        // Sự kiện khi có âm thanh thu được
+                        recorder.onaudioprocess = function(e) {
+                            if (!isRecording || !socket || socket.readyState !== WebSocket.OPEN) return;
+                            const inputBuffer = e.inputBuffer;
+                            // Lấy dữ liệu từ kênh âm thanh đầu tiên
+                            const inputData = inputBuffer.getChannelData(0);
+                            // Chuyển đổi dữ liệu từ float (-1 đến 1) sang Int16 (-32768 đến 32767)
+                            const int16Array = new Int16Array(chunkSize);
+                            for (let i = 0; i < chunkSize; i++) {
+                                int16Array[i] = Math.max(-32768, Math.min(32767, inputData[i] * 32768));
+                            }
+                            // Gửi dữ liệu âm thanh đến server
+                            socket.send(int16Array.buffer);
+                        };
+                        // Kết nối luồng âm thanh với bộ xử lý
+                        mediaStream.connect(recorder);
+                        recorder.connect(context.destination);
+                        // Vô hiệu hóa nút "Bật Microphone" và bật "Tắt Microphone"
+                        document.getElementById("startRecording").disabled = true;
+                        document.getElementById("stopRecording").disabled = false;
+                    })
+                    .catch(function(e) {
+                        logMessage("Lỗi truy cập micrô: " + e.message, "error");
+                    });
+            } else {
+                logMessage("Trình duyệt không hỗ trợ getUserMedia", "error");
+            }
+        }
+
+        // Dừng ghi âm và ngắt kết nối microphone
+        function stopRecording() {
+            if (!isRecording) return;
+            isRecording = false;
+            // Ngắt kết nối các thành phần audio
+            if (recorder) recorder.disconnect();
+            if (mediaStream) mediaStream.disconnect();
+            if (context) context.close();
+            // Kích hoạt lại nút "Bật Microphone"
+            document.getElementById("startRecording").disabled = false;
+            document.getElementById("stopRecording").disabled = true;
+            logMessage("[Client] Đã Ngắt Kết Nối Microphone", "info");
+            // Gửi tín hiệu "stop" tới server để thông báo dừng ghi âm
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(new TextEncoder().encode("stop"));
+            }
+            // Xóa session ID
+            sessionId = null;
+        }
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

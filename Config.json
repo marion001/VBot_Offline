@@ -324,7 +324,22 @@
         },
         "button_active": {
             "active": true,
-            "notes": "true hoặc false để Bật hoặc Tắt sử dụng nút nhấn"
+            "notes": "true hoặc false để Bật hoặc Tắt sử dụng nút nhấn",
+            "encoder_rotary": {
+                "active": false,
+                "gpio_clk": 7,
+                "gpio_dt": 8,
+                "gpio_sw": 27,
+                "rotating_step": 2,
+                "rotating_show_logs": false,
+                "bounce_time_gpio_sw": 120,
+                "action_gpio_sw": "wakeup",
+                "long_press_gpio_sw": {
+                    "active": true,
+                    "duration": 2,
+                    "action_gpio_sw": "play_playlist"
+                }
+            }
         },
         "button": {
             "down": {

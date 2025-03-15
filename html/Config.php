@@ -466,7 +466,20 @@
   
   #Cập nhật bật tắt kích hoạt đọc báo, tin tức
   $Config['media_player']['news_paper']['active'] = isset($_POST['news_paper_active']) ? true : false;
-  
+
+  #Cập Nhật Nút Nhấn Encoder Rotary
+  $Config['smart_config']['button_active']['encoder_rotary']['active'] = isset($_POST['encoder_rotary_active']) ? true : false;
+  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] = isset($_POST['ncoder_rotary_long_press_active']) ? true : false;
+  $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] = isset($_POST['encoder_rotating_show_logs']) ? true : false;
+  $Config['smart_config']['button_active']['encoder_rotary']['gpio_clk'] = intval($_POST['encoder_rotary_gpio_clk']);
+  $Config['smart_config']['button_active']['encoder_rotary']['gpio_dt'] = intval($_POST['encoder_rotary_gpio_dt']);
+  $Config['smart_config']['button_active']['encoder_rotary']['gpio_sw'] = intval($_POST['encoder_rotary_gpio_ws']);
+  $Config['smart_config']['button_active']['encoder_rotary']['rotating_step'] = intval($_POST['encoder_rotary_gpio_step']);
+  $Config['smart_config']['button_active']['encoder_rotary']['bounce_time_gpio_sw'] = intval($_POST['encoder_rotary_bounce_time_sw']);
+  $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] = $_POST['encoder_rotary_action_gpio_sw'];
+  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['duration'] = intval($_POST['encoder_rotary_long_press_duration']);
+  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] = $_POST['encoder_rotary_long_press_action_gpio_sw'];
+
   #Cập nhật Custom Skill active
   $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
   $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] = isset($_POST['developer_customization_vbot_processing']) ? true : false;
@@ -893,7 +906,7 @@
       <div class="card accordion" id="accordion_button_streaming_server_audio">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
-      Streming Audio Server:</h5>
+      Streming Audio Server <i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
       <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
 
                     <div class="row mb-3">
@@ -919,7 +932,7 @@
 				  <div class="card accordion" id="accordion_button_socket_server_socket">
 				  <div class="card-body">
 				  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_socket" aria-expanded="false" aria-controls="collapse_button_socket_server_socket">
-				  Chế Độ Kết Nối Socket:</h5>
+				  Chế Độ Kết Nối Socket <i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
 				  <div id="collapse_button_socket_server_socket" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_socket">
 
 					<div class="row mb-3">
@@ -959,7 +972,7 @@
                       <label for="streaming_server_working_mode_socket" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_working_mode_socket" id="streaming_server_working_mode_socket" class="form-select border-success" aria-label="Default select example">
-                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa chạy VBot xử lý và thực thi)</option>
+                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
                           <option disabled value="null" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
 						</select>
                       </div>
@@ -1010,7 +1023,7 @@
                       <label for="streaming_server_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_working_mode" id="streaming_server_working_mode" class="form-select border-danger" aria-label="Default select example">
-                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa chạy VBot xử lý và thực thi)</option>
+                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
                           <option value="null" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
 						</select>
                       </div>
@@ -1984,10 +1997,21 @@
                   </div>
                 </div>
               </div>
+			  
+
+
+      <div class="card accordion" id="accordion_button_multype_button_config">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
+      Cấu Hình Nút Nhấn:</h5>
+      <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
+      
+			  
+			  
               <div class="card accordion" id="accordion_button_setting_bton">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_bton" aria-expanded="false" aria-controls="collapse_button_setting_bton">
-                    Cấu Hình Nút Nhấn:
+                    Cấu Hình Nút Nhấn Dạng Thường <font color=red> (Nhấn Nhả)</font>:
                   </h5>
                   <div id="collapse_button_setting_bton" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_bton" style="">
                     <div class="row mb-3">
@@ -2042,14 +2066,10 @@
                               echo '<th scope="row" style="text-align: center; vertical-align: middle;"><center>' . $buttonName . ':</center></th>';
                               echo '<td style="text-align: center; vertical-align: middle;"><!-- GPIO --><input required type="number" style="width: 90px;" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
                           echo '<td style="text-align: center; vertical-align: middle;"><!-- Pulled High --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][pulled_high]"' . ($buttonData['pulled_high'] ? ' checked' : '') . '></div></td>';
-                          
                           echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn nhả --> <div class="form-switch"><center><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
-                          
                           echo '<td><center><!-- bounce_time --><input required type="number" min="20" max="500" step="10" style="width: 100px;" class="form-control border-success" title="" name="button[' . $buttonName . '][bounce_time]" value="' . $buttonData['bounce_time'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
-                          
                           echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
                           echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="2" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
-                          
                           echo '</tr>';
                           }
                           ?>
@@ -2058,6 +2078,107 @@
                   </div>
                 </div>
               </div>
+
+      <div class="card accordion" id="accordion_button_Encoder_Rotary">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Encoder_Rotary" aria-expanded="false" aria-controls="collapse_button_Encoder_Rotary">
+      Cấu Hình Nút Nhấn Dạng Xoay <font color=red> (Sử Dụng Encoder Rotary)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Sử Dụng Nút Nhấn Dạng Xoay Encoder, Tương Thích Với Các Module Encoder Có 5 Chân Trên Thị Trường Như:  <b>KY-040 RV09 EC11</b><br/>- Khuyến Nghị Chỉ Nên Kích Hoạt Sử Dụng 1 Trong 2 Kiểu Nút Nhấn Là: <b> Nút Nhấn Dạng Xoay Encoder</b> Hoặc <b>Nút Nhấn Nhả Dạng Thường</b>')"></i>:</h5>
+      <div id="collapse_button_Encoder_Rotary" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Encoder_Rotary">
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn dạng Encoder Rotary hoặc không sử dụng')"></i> :</label>
+                      <div class="col-sm-9">
+                        <div class="form-switch">
+                          <input class="form-check-input" type="checkbox" name="encoder_rotary_active" id="encoder_rotary_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['active'] ? 'checked' : ''; ?>>
+                        </div>
+                      </div>
+                    </div>
+
+<table class="table table-bordered border-primary">
+  <thead>
+
+      <tr>
+      <th scope="col" colspan="2" style="text-align: center; vertical-align: middle;"><font color="red">Cấu hình Encoder</font></th>
+	  <th scope="col" colspan="4" style="text-align: center; vertical-align: middle;"><font color="red">Chức Năng Nút Nhấn SW, KEY</font></th>
+	   </tr>
+
+  </thead>
+  <tbody>
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;"><font color="blue">CLK, S1 = GPIO:</font></th>
+		<td><input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_clk" id="encoder_rotary_gpio_clk" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_clk']; ?>"></td>
+<th colspan="2" scope="col" style="text-align: center; vertical-align: middle;"><font color="red">Nhấn Nhả</font></th>
+<th colspan="2" scope="col" style="text-align: center; vertical-align: middle;"><font color="red">Nhấn Giữ </font></th>
+	</tr>
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;"><font color="blue">DT, S2 = GPIO:</font></th>
+	<td><input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_dt" id="encoder_rotary_gpio_dt" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_dt']; ?>"></td>
+    <th scope="col" style="text-align: center; vertical-align: middle;">Thời Gian Nhấn (ms):</th>
+	<td><input class="form-control border-success" step="1" min="1" max="1000" type="number" name="encoder_rotary_bounce_time_sw" id="encoder_rotary_bounce_time_sw" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['bounce_time_gpio_sw']; ?>"></td>
+    <th scope="col" style="text-align: center; vertical-align: middle;">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng tính năng Nhấn Giữ')"></i>:</th>
+<td scope="col" style="text-align: center; vertical-align: middle;">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="ncoder_rotary_long_press_active" id="ncoder_rotary_long_press_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] ? 'checked' : ''; ?>>
+</div>
+</td>
+    </tr>
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;"><font color="blue">SW, KEY = GPIO:</font></th>
+	<td><input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_ws" id="encoder_rotary_gpio_ws" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_sw']; ?>"></td>
+<th style="text-align: center; vertical-align: middle;">Hành Động:</th>
+<td>
+<select name="encoder_rotary_action_gpio_sw" id="encoder_rotary_action_gpio_sw" class="form-select border-success" aria-label="Default select example">
+<option value="wakeup" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] === 'wakeup' ? 'selected' : ''; ?>>Đánh Thức (WakeUP)</option>
+<option value="mic" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] === 'mic' ? 'selected' : ''; ?>>Bật/Tắt Mic</option>
+</select>
+</td>
+<th style="text-align: center; vertical-align: middle;">Thời Gian Giữ (s):</th>
+<td>
+<input class="form-control border-success" step="1" min="1" max="10" type="number" name="encoder_rotary_long_press_duration" id="encoder_rotary_long_press_duration" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['duration']; ?>">
+</td>
+</tr>
+<tr>
+<th scope="row" style="text-align: center; vertical-align: middle;"><font color="blue">Bước Xoay, Step:</font></th>
+<td><input class="form-control border-success" step="1" min="1" max="10" type="number" name="encoder_rotary_gpio_step" id="encoder_rotary_gpio_step" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_step']; ?>"></td>
+<td colspan="2"></td>
+
+<th style="text-align: center; vertical-align: middle;">Hành Động <i class="bi bi-question-circle-fill" onclick="show_message('Các Thao Tác Nâng Cao Khác Khi Nhấn Giữ Bạn Có Thể Tham Khảo Tại Đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a>')"></i>:</th>
+<td>
+<select name="encoder_rotary_long_press_action_gpio_sw" id="encoder_rotary_long_press_action_gpio_sw" class="form-select border-success" aria-label="Default select example">
+<option value="wakeup" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'wakeup' ? 'selected' : ''; ?>>Đánh Thức (WakeUP)</option>
+<option value="mic" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'mic' ? 'selected' : ''; ?>>Bật/Tắt Mic</option>
+<option value="conversation_mode" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'conversation_mode' ? 'selected' : ''; ?>>Bật/Tắt Chế Độ Hội Thoại</option>
+<option value="play_playlist" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'play_playlist' ? 'selected' : ''; ?>>Phát Danh Sách Nhạc</option>
+<option value="pause_media" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'pause_media' ? 'selected' : ''; ?>>Tạm Dừng Phát</option>
+<option value="stop_media_player" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'stop_media_player' ? 'selected' : ''; ?>>Dừng Phát Nhạc</option>
+<option value="restart_vbot" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'restart_vbot' ? 'selected' : ''; ?>>Restart VBot</option>
+<option value="reboot_os" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'reboot_os' ? 'selected' : ''; ?>>Reboot OS</option>
+</select>
+</td>
+</tr>
+
+<tr>
+<th colspan="1" style="text-align: center; vertical-align: middle;"><font color="blue">Hiển Thị Logs Khi Xoay:</font></th>
+<td colspan="1" style="text-align: center; vertical-align: middle;">
+<div class="form-switch">
+<input class="form-check-input" type="checkbox" name="encoder_rotating_show_logs" id="encoder_rotating_show_logs" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] ? 'checked' : ''; ?>>
+</div>
+</td>
+<td colspan="4">
+
+</td>
+</tr>
+</tbody>
+</table>
+
+      </div>
+      </div>
+      </div>
+
+      </div>
+      </div>
+      </div>
+	  
+			  
               <div class="card accordion" id="accordion_button_lcd_oled">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_lcd_oled" aria-expanded="false" aria-controls="collapse_button_lcd_oled">
