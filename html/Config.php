@@ -374,7 +374,16 @@
   $Config['api']['streaming_server']['protocol']['socket']['working_mode'] = $_POST['streaming_server_working_mode_socket'];
   $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] = $_POST['streaming_server_select_wakeup_socket'];
   
-  
+  #Cập nhật UDP Streaming
+  $Config['api']['streaming_server']['protocol']['udp_sock']['port'] = intval($_POST['port_server_udp_streaming_audio']);
+  $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] = intval($_POST['udp_maximum_recording_time']);
+  $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected'] = intval($_POST['udp_maximum_client_connected']);
+  $Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients'] = intval($_POST['udp_time_remove_inactive_clients']);
+  $Config['api']['streaming_server']['protocol']['udp_sock']['gain_factor_mic_client'] = floatval($_POST['udp_gain_factor_mic_client']);
+  $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] = $_POST['udp_source_stt'];
+  $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] = $_POST['udp_working_mode'];
+  $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] = $_POST['udp_select_wakeup'];
+
 
   #Cập nhật Bluetooth
   $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
@@ -923,10 +932,101 @@
                       <div class="col-sm-9">
                         <select name="streaming_server_connection_protocol" id="streaming_server_connection_protocol" class="form-select border-success" aria-label="Default select example">
                           <option value="socket" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'socket' ? 'selected' : ''; ?>>Socket</option>
+                          <option value="udp_sock" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'udp_sock' ? 'selected' : ''; ?>>UDP Socket</option>
                           <option value="http_post" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'http_post' ? 'selected' : ''; ?>>HTTP POST</option>
 						</select>
                       </div>
                     </div>
+
+			  <div class="card accordion" id="accordion_button_udp_server_streaming">
+			  <div class="card-body">
+			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
+			  Chế Độ Kết Nối UDP Socket:</h5>
+			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
+
+					<div class="row mb-3">
+                      <label for="api_port" class="col-sm-3 col-form-label">Port Server UDP:</label>
+                      <div class="col-sm-9">
+                          <input required type="number" class="form-control border-success" name="port_server_udp_streaming_audio" id="port_server_udp_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>">
+                          <div class="invalid-feedback">Cần nhập cổng Port dành cho UDP Server Streaming Audio!</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa (s):</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-success" name="udp_maximum_recording_time" id="udp_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time']) ?>">
+                        <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối:</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-success" name="udp_maximum_client_connected" id="udp_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected']) ?>">
+                        <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_time_remove_inactive_clients" class="col-sm-3 col-form-label">Thời gian dọn dẹp Client (s):</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-success" name="udp_time_remove_inactive_clients" id="udp_time_remove_inactive_clients" step="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>">
+                        <div class="invalid-feedback">Cần nhập thời gian dọn dẹp các Client không hoạt động trong một khoảng thời gian</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_gain_factor_mic_client" class="col-sm-3 col-form-label">Hệ số khuếch đại Mic phía Client (Gain):</label>
+                      <div class="col-sm-9">
+                        <input required type="number" class="form-control border-success" name="udp_gain_factor_mic_client" id="udp_gain_factor_mic_client" step="0.1" min="1" max="10" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['gain_factor_mic_client']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['gain_factor_mic_client']) ?>">
+                        <div class="invalid-feedback">Cần nhập hệ số khuếch đại âm thanh mic của Client</div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client:</label>
+                      <div class="col-sm-9">
+                        <select name="udp_source_stt" id="udp_source_stt" class="form-select border-success" aria-label="Default select example">
+                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
+                      <div class="col-sm-9">
+                        <select name="udp_working_mode" id="udp_working_mode" class="form-select border-success" aria-label="Default select example">
+                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
+                          <option disabled value="null" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_select_wakeup" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
+                      <div class="col-sm-9">
+                        <select name="udp_select_wakeup" id="udp_select_wakeup" class="form-select border-success" aria-label="Default select example">
+                          <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (WakeUp Client)</option>
+                          <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (WakeUP Client)</option>
+						</select>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_server_streaming_audio" class="col-sm-3 col-form-label">UDP Server Streaming Audio:</label>
+                      <div class="col-sm-9">
+                        <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio" id="udp_server_streaming_audio" placeholder="<?php echo htmlspecialchars('udp://'.$serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>" value="<?php echo htmlspecialchars('udp://'.$serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>">
+                      </div>
+                    </div>
+
+			  </div>
+			  </div>
+			  </div>
+
+
+
+
 
 
 				  <div class="card accordion" id="accordion_button_socket_server_socket">
@@ -936,7 +1036,7 @@
 				  <div id="collapse_button_socket_server_socket" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_socket">
 
 					<div class="row mb-3">
-                      <label for="api_port" class="col-sm-3 col-form-label">Port Server Socket:</label>
+                      <label for="port_server_socket_streaming_audio" class="col-sm-3 col-form-label">Port Server Socket:</label>
                       <div class="col-sm-9">
                           <input required type="number" class="form-control border-success" name="port_server_socket_streaming_audio" id="port_server_socket_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>">
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio Socket!</div>
@@ -947,7 +1047,7 @@
                       <label for="socket_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa:</label>
                       <div class="col-sm-9">
                         <input required type="number" class="form-control border-success" name="socket_maximum_recording_time" id="socket_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>">
-                        <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi Client gửi dữ liệu âm thanh</div>
+                        <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
                       </div>
                     </div>
 
@@ -960,7 +1060,7 @@
                     </div>
 
                     <div class="row mb-3">
-                      <label for="streaming_server_source_stt_socket" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Từ Client:</label>
+                      <label for="streaming_server_source_stt_socket" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_source_stt_socket" id="streaming_server_source_stt_socket" class="form-select border-success" aria-label="Default select example">
                           <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['socket']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>

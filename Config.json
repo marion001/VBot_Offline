@@ -50,6 +50,16 @@
                     "source_stt": "stt_default",
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine"
+                },
+                "udp_sock": {
+                    "port": 5003,
+                    "maximum_recording_time": 7,
+                    "maximum_client_connected": 5,
+                    "time_remove_inactive_clients": 600,
+                    "gain_factor_mic_client": 3.0,
+                    "source_stt": "stt_default",
+                    "working_mode": "main_processing",
+                    "select_wakeup": "porcupine"
                 }
             }
         }
