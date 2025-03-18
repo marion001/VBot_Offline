@@ -3,7 +3,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W
 - ReSpeaker 2-Mics Pi HAT
 - Mạch Vietbot AIO Ver 2.0
-
+- Kết Nối Client Server Sử Dụng MCU Như ESP32,ESP32 D1 MINI, ESP32S3, V..v...
 - Hỗ Trợ Đánh Thức Bằng Từ Khóa Sử Dụng Picovoice Và Snowboy
 - Đầy Đủ Giao Tiếp API, MQTT
 - Kết Nối Điều Khiển Home Assistant (HASS)
@@ -19,6 +19,9 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Tích hợp với trợ lý ảo Assist của Home Assistant (Làm Tác Nhân)
       : https://github.com/marion001/VBot-Assist-Conversation
 
+- Thiết Lập Diy VBot Client Kết Nối Tới Loa VBot
+      : https://github.com/marion001/VBot_Client_Offline
+  
 - Chạy VBot thủ công:
 
         $:> git clone https://github.com/marion001/VBot_Offline.git
