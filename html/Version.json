@@ -1,8 +1,8 @@
 {
     "version": "1.0.19",
     "projectName": "WebUI VBot Offline",
-    "description": "Thêm Tích Hợp Hỗ Trợ Nút Nhấn Dạng Encode Rotary, Cập Nhật Tính Năng Gán Loa Chạy VBot Thành Server Streaming Audio Kết Nối Nhiều Client, Đa Mô Hình, Đa Nền Tảng",
-    "releaseDate": "17/03/2025",
+    "description": "Sửa Lỗi, Cập Nhật Tính Năng Gán Loa Chạy VBot Thành Server Streaming Audio Kết Nối Nhiều Client, Đa Mô Hình, Đa Nền Tảng",
+    "releaseDate": "19/03/2025",
     "changes": [
         {
             "type": "feature",
