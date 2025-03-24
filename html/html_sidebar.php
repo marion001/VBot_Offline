@@ -119,6 +119,20 @@
         </li>
       </ul>
     </li>
+	
+<li class="nav-heading"><i class="bi bi-globe"></i> Client / Server</li>
+<li class="nav-item">
+
+    <li class="nav-item" onclick="loading('show')">
+      <a class="nav-link collapsed" href="VBot_Client.php">
+      <i class="bi bi-globe-central-south-asia"></i>
+      <span>Quản Lý Client</span>
+      </a>
+    </li>
+
+
+</li>
+	
     <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Nâng Cao Dành Cho Người Dùng Cá Nhân Tự Code Và Phát Triển Theo Ý Muốn">

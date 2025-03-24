@@ -1,8 +1,8 @@
 {
-    "version": "1.0.19",
+    "version": "1.0.20",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Tính Năng Gán Loa Chạy VBot Thành Server Streaming Audio Kết Nối Nhiều Client, Đa Mô Hình, Đa Nền Tảng",
-    "releaseDate": "19/03/2025",
+    "description": "Sửa Lỗi Kết Nối Nhiều Client -> Server, Quản Lý Đồng Bộ Client Trên Giao Diện WebUI",
+    "releaseDate": "24/03/2025",
     "changes": [
         {
             "type": "feature",

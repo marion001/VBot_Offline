@@ -34,10 +34,10 @@
         },
         "streaming_server": {
             "active": false,
-            "connection_protocol": "socket",
+            "connection_protocol": "udp_sock",
             "protocol": {
                 "http_post": {
-                    "port": 5004,
+                    "port": 5003,
                     "working_mode": "main_processing",
                     "notes": "working_mode: main_processing, null",
                     "source_stt": "stt_default",
@@ -53,10 +53,10 @@
                 },
                 "udp_sock": {
                     "port": 5003,
-                    "maximum_recording_time": 7,
-                    "maximum_client_connected": 5,
-                    "time_remove_inactive_clients": 600,
-                    "gain_factor_mic_client": 3.0,
+                    "maximum_recording_time": 6,
+                    "maximum_client_connected": 3,
+                    "time_remove_inactive_clients": 900,
+                    "gain_factor_mic_client": 3,
                     "source_stt": "stt_default",
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine"

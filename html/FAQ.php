@@ -68,7 +68,7 @@
             -->
           <div class="card-body">
             <div class="alert alert-success" role="alert">
-              Link Tải Xuống IMG: <a href="https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ" target="_bank">https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>
+              Link Tải Xuống IMG: <a href="https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ" target="_blank">https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>
             </div>
             <div class="card accordion" id="accordion_button_mic_tetser">
               <div class="card-body">
@@ -108,7 +108,7 @@
                 </h5>
                 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
                   - Nếu Là Mạch DAC i2s có thể tham khảo cách cài Driver theo Link Sau:<br/>
-                  - <a href="https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU" target="_bank">https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU</a>
+                  - <a href="https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU" target="_blank">https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU</a>
                   <br/><br/>
                   - Bạn cần phát 1 file âm thanh bằng VLC, có thể tải lên file âm thanh của bạn như XXX.mp3 vào <b>/home/pi</b> chẳng hạn<br/>
                   - Tiếp tới hãy chạy file âm thanh đó bằng lệnh sau:<br/>
@@ -391,15 +391,15 @@
                   - VCC ==> 3.3V (Pin 1)<br/>
                   - GND ==> GND(Pin 14)<br/>
                   </b>
-                  Hình Ảnh Sơ Đồ Chân Kết Nối: <a href="https://github.com/user-attachments/assets/655e0b0a-4891-4a6f-aab8-19c5feb139ed" target="_bank"> Xem Ảnh Kết Nối</a><br/>
+                  Hình Ảnh Sơ Đồ Chân Kết Nối: <a href="https://github.com/user-attachments/assets/655e0b0a-4891-4a6f-aab8-19c5feb139ed" target="_blank"> Xem Ảnh Kết Nối</a><br/>
                   Khi kết nối xong các chân cần chạy lệnh sau để kiểm tra xem màn hình đã được nhận diện với địa chỉ 3c chưa:<br/>
                   <b>$:> sudo i2cdetect -y 1</b><br/>
-                  Nếu nhận diện thành công sẽ có địa chỉ 3c như ảnh: <a href="https://github.com/user-attachments/assets/7aa88c10-7763-422d-ac48-1ad31339fe6f" target="_bank">Xem Ảnh</a>
+                  Nếu nhận diện thành công sẽ có địa chỉ 3c như ảnh: <a href="https://github.com/user-attachments/assets/7aa88c10-7763-422d-ac48-1ad31339fe6f" target="_blank">Xem Ảnh</a>
                   <br/>
                   Tài Liệu Tham Khảo:<br/>
-                  - <a href="https://github.com/adafruit/Adafruit_Python_SSD1306" target="_bank">https://github.com/adafruit/Adafruit_Python_SSD1306</a><br/>
-                  - <a href="https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/" target="_bank">https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/</a>
-                  - <a href="https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/" target="_bank">https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/</a>
+                  - <a href="https://github.com/adafruit/Adafruit_Python_SSD1306" target="_blank">https://github.com/adafruit/Adafruit_Python_SSD1306</a><br/>
+                  - <a href="https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/" target="_blank">https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/</a>
+                  - <a href="https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/" target="_blank">https://www.instructables.com/Raspberry-Pi-Monitoring-System-Via-OLED-Display-Mo/</a>
                 </div>
               </div>
             </div>
@@ -409,7 +409,7 @@
                   Tạo Tệp Json Google Driver Backup:
                 </h5>
                 <div id="collapse_button_tao_gcloud_driver_json" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_tao_gcloud_driver_json">
-                  <a href="https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true" target="_bank">Nhấn Để Mở File Hướng Dẫn Tạo Json GDriver</a>
+                  <a href="https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true" target="_blank">Nhấn Để Mở File Hướng Dẫn Tạo Json GDriver</a>
                 </div>
               </div>
             </div>
@@ -419,7 +419,7 @@
                   Tích Hợp Vào Trợ Lý Assist của Home Assistant Làm Tác Nhân:
                 </h5>
                 <div id="collapse_button_add_vbot_assist_hass" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_add_vbot_assist_hass">
-                  Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot-Assist-Conversation" target="_bank">https://github.com/marion001/VBot-Assist-Conversation</a>
+                  Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot-Assist-Conversation" target="_blank">https://github.com/marion001/VBot-Assist-Conversation</a>
                 </div>
               </div>
             </div>
@@ -462,7 +462,7 @@
                   B6: Mở file <b>Trail_Hotword_Snowboy.py</b> điền địa chỉ ip của thiết bị chạy Docker rhasspy/snowboy-seasalt là dòng số 14 là: <b>server_url = "http://192.168.14.17:8899"</b> thay địa chỉ ip vào, xong lưu lại file<br/><br/>
                   B7: Chạy file <b>Trail_Hotword_Snowboy.py</b> bằng lệnh: <b>$:> python3 Trail_Hotword_Snowboy.py</b> nhập tên file hotword cần tạo và nói vào Microphone lần lượt 7 lần<br/><br/>
                   - Hoàn tất Train sẽ xuất hiện file <b>.pmdl</b> với tên bạn tạo. Sao chép file đó vào đường dẫn: <b>/home/pi/VBot_Offline/resource/snowboy/hotword</b> hoặc sử dụng Giao Diện để tải lên file<br/>
-                  Nguồn Tham khảo: <a href="https://github.com/rhasspy/snowboy-seasalt" target="_bank">https://github.com/rhasspy/snowboy-seasalt</a>
+                  Nguồn Tham khảo: <a href="https://github.com/rhasspy/snowboy-seasalt" target="_blank">https://github.com/rhasspy/snowboy-seasalt</a>
                 </div>
               </div>
             </div>
@@ -472,8 +472,9 @@
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_streaming_audio_server" aria-expanded="false" aria-controls="collapse_button_socket_streaming_audio_server">
       Socket Server Streaming Audio:</h5>
       <div id="collapse_button_socket_streaming_audio_server" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_streaming_audio_server">
-      - Bạn có thể dùng các thiết bị để làm Client như ESP32, Raspberry Pi, Máy Tính, V..v....<br/>
+	  - Bạn có thể dùng các thiết bị để làm Client như ESP32, Raspberry Pi, Máy Tính, V..v....<br/>
 	  - Client Cần Đọc Dữ Liệu Âm Thanh Từ Microphone Và Streaming Trực Tiếp Tới Server Chạy VBot<br/><br/><br/>
+	  <hr/><h5>Nếu Lựa Chọn Là Socket:</h5>
 	  <b>- Cơ Chế Làm Việc Của Client Kết Nối Tới Serer:</b><br/>
 	  <font color=red>-- Phía Client sẽ Gửi Yêu Cầu Kết Nối Tới Socket Server, Client Phát Hiện Kết Nối Thành Công Thì Sẽ Gửi 1 id (Ngẫu Nhiên Random) Do Client Tạo Ra (Chuỗi Hoặc Dãy Số, Hoặc Gì Cũng Được) Để Server Nhận Biết, Quản Lý, Trả Về Dữ Liệu Đúng Client Đó Theo id</font><br/><br/>
 	  <b>Demo Test Streaming Bằng Trình Duyệt WEB Trên Máy Tính</b><br/>
@@ -483,7 +484,9 @@
 	  B3: Thay Địa Chỉ Server Socket Streaming Tương Ứng Với Loa Của Bạn Rồi Nhấn Vào: <b>Kết nối tới Server</b><br/><br/>
 	  B4: Bật Microphone Để Cấp Quyền Truy Cập<br/><br/>
 	  B5: Đánh Thức Client Bằng Cách Nói Từ Khóa HotWord Vào Mic Ở Phía Client Để Bắt Đầu Ra Lệnh Cho VBot
-      </div>
+      <hr/><h5>Nếu Lựa CHọn ESP32, ESP32s3, ESP32 D1 Mini</h5>
+	  - Truy Cập Vào Github Sau: <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank">https://github.com/marion001/VBot_Client_Offline</a>
+	  </div>
       </div>
       </div>
 			
