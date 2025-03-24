@@ -941,14 +941,14 @@
 			  <div class="card accordion" id="accordion_button_udp_server_streaming">
 			  <div class="card-body">
 			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-			  Chế Độ Kết Nối UDP Socket:</h5>
+			  ESP32, ESP32S3, ESP32 D1 Mini:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 
 					<div class="row mb-3">
-                      <label for="api_port" class="col-sm-3 col-form-label">Port Server UDP:</label>
+                      <label for="api_port" class="col-sm-3 col-form-label">Port Server:</label>
                       <div class="col-sm-9">
                           <input required type="number" class="form-control border-success" name="port_server_udp_streaming_audio" id="port_server_udp_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>">
-                          <div class="invalid-feedback">Cần nhập cổng Port dành cho UDP Server Streaming Audio!</div>
+                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
                       </div>
                     </div>
 
