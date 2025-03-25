@@ -989,6 +989,7 @@
                       <div class="col-sm-9">
                         <select name="udp_source_stt" id="udp_source_stt" class="form-select border-success" aria-label="Default select example">
                           <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
+                          <option value="stt_ggcloud" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] === 'stt_ggcloud' ? 'selected' : ''; ?>>STT Google Cloud V1</option>
 						</select>
                       </div>
                     </div>
@@ -1014,9 +1015,9 @@
                     </div>
 
                     <div class="row mb-3">
-                      <label for="udp_server_streaming_audio" class="col-sm-3 col-form-label">UDP Server Streaming Audio:</label>
+                      <label for="udp_server_streaming_audio" class="col-sm-3 col-form-label">Server Streaming Audio:</label>
                       <div class="col-sm-9">
-                        <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio" id="udp_server_streaming_audio" placeholder="<?php echo htmlspecialchars('udp://'.$serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>" value="<?php echo htmlspecialchars('udp://'.$serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>">
+                        <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio" id="udp_server_streaming_audio" placeholder="<?php echo htmlspecialchars($serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>" value="<?php echo htmlspecialchars($serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>">
                       </div>
                     </div>
 
