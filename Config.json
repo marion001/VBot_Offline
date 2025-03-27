@@ -59,7 +59,8 @@
                     "gain_factor_mic_client": 3,
                     "source_stt": "stt_default",
                     "working_mode": "main_processing",
-                    "select_wakeup": "porcupine"
+                    "select_wakeup": "porcupine",
+					"client_conversation_mode": true
                 }
             }
         }

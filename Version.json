@@ -1,8 +1,8 @@
 {
-    "version": "1.0.21",
+    "version": "1.0.22",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ Trợ Cấu Hình STT Google Cloud V1 Cho Client, Sửa Lỗi Kết Nối Nhiều Client -> Server, Quản Lý Đồng Bộ Client Trên Giao Diện WebUI",
-    "releaseDate": "25/03/2025",
+    "description": "Hỗ trợ chế độ hỏi đáp liên tục phía client",
+    "releaseDate": "27/03/2025",
     "changes": [
         {
             "type": "feature",

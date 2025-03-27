@@ -383,6 +383,7 @@
   $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] = $_POST['udp_source_stt'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] = $_POST['udp_working_mode'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] = $_POST['udp_select_wakeup'];
+  $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
 
 
   #Cập nhật Bluetooth
@@ -943,6 +944,15 @@
 			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
 			  ESP32, ESP32S3, ESP32 D1 Mini:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
+
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Chế Độ Hội Thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng chế độ hội thoại, trò chuyện liên tục')"></i> :</label>
+                      <div class="col-sm-9">
+                        <div class="form-switch">
+                          <input class="form-check-input" type="checkbox" name="udp_sock_client_conversation_mode" id="udp_sock_client_conversation_mode" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] ? 'checked' : ''; ?>>
+                        </div>
+                      </div>
+                    </div>
 
 					<div class="row mb-3">
                       <label for="api_port" class="col-sm-3 col-form-label">Port Server:</label>
