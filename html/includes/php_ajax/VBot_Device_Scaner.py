@@ -16,7 +16,7 @@ try:
 except ImportError:
     print(json.dumps({
         "success": False,
-        "messager": "Thư viện 'python-nmap' không được cài đặt. Vui lòng cài đặt bằng 2 lệnh sau: 'pip3 install python-nmap' và 'sudo apt-get install nmap'",
+        "messager": "Thư viện 'python-nmap' không được cài đặt. Vui lòng cài đặt bằng 2 lệnh sau: 'pip install python-nmap' và 'sudo apt-get install nmap'",
         "data": {}
     }, indent=4))
     exit(1)
