@@ -1,12 +1,27 @@
-import os
+#Code By: Vũ Tuyển
+#GitHub VBot: https://github.com/marion001/VBot_Offline.git
+#Facebook Group: https://www.facebook.com/groups/1148385343358824
+#Facebook: https://www.facebook.com/TWFyaW9uMDAx
+
 import requests
 import ipaddress
+import json
 import subprocess
 import re
-import json
 from concurrent.futures import ThreadPoolExecutor
 
+try:
+    import nmap
+except ImportError:
+    print(json.dumps({
+        "success": False,
+        "messager": "Thư viện 'python-nmap' không được cài đặt. Vui lòng cài đặt bằng 2 lệnh sau: 'pip3 install python-nmap' và 'sudo apt-get install nmap'",
+        "data": {}
+    }, indent=4))
+    exit(1)
+
 def read_info_startup(iface_name="wlan0"):
+    """Lấy địa chỉ IP của interface mạng"""
     try:
         ip_result = subprocess.run(['ip', 'addr', 'show', iface_name], capture_output=True, text=True)
         ip_output = ip_result.stdout
@@ -15,15 +30,8 @@ def read_info_startup(iface_name="wlan0"):
     except Exception:
         return None
 
-def ping_ip(ip):
-    try:
-        response = os.popen(f"ping -c 1 -w 2 {ip}")
-        result = response.read()
-        return "1 packets transmitted, 1 received" in result
-    except Exception:
-        return False
-
 def check_device(ip):
+    """Kiểm tra xem thiết bị có chạy VBot Client không"""
     url = f"http://{ip}/VBot_Client_Info"
     try:
         response = requests.get(url, timeout=1)
@@ -35,12 +43,25 @@ def check_device(ip):
         pass
     return None
 
-def process_ip(ip):
-    if ping_ip(str(ip)):
-        return check_device(str(ip))
-    return None
+def scan_network(ip_address):
+    """Quét mạng bằng nmap và kiểm tra thiết bị VBot Client"""
+    nm = nmap.PortScanner()
+    # Quét subnet /24 với ping scan (-sn) để tìm các host đang hoạt động
+    network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
+    nm.scan(hosts=str(network), arguments='-sn')  # -sn: Ping scan, không quét port
+    
+    active_ips = [host for host in nm.all_hosts() if nm[host].state() == 'up']
+    found_devices = []
+
+    if active_ips:
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            results = executor.map(check_device, active_ips)
+            found_devices = [result for result in results if result is not None]
+
+    return found_devices
 
 def scan_and_check_devices():
+    """Hàm chính để quét và kiểm tra thiết bị"""
     ip_address = read_info_startup()
     if ip_address is None:
         print(json.dumps({
@@ -50,12 +71,7 @@ def scan_and_check_devices():
         }, indent=4))
         return
 
-    ip_network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
-    found_devices = []
-
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        results = list(executor.map(process_ip, ip_network.hosts()))
-        found_devices = [result for result in results if result is not None]
+    found_devices = scan_network(ip_address)
 
     if found_devices:
         print(json.dumps({

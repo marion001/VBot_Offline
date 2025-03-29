@@ -98,7 +98,7 @@
 		color: #fff;
 		padding: 15px;
 		border-radius: 5px;
-		z-index: 1000;
+		z-index: 1059;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
@@ -143,22 +143,36 @@
   </style>
   <!--script Hiển thị thông báo Mesage php -->
   <script>
-    function showMessagePHP(message, timeout=15) {
-        var toast = document.getElementById('toast');
-        var toastMessage = document.getElementById('toastMessage');
-        toastMessage.innerText = message;
-        toast.style.visibility = 'visible';
-        
-        // Ẩn thông báo sau 30 giây
-        setTimeout(function() {
-            toast.style.visibility = 'hidden';
-        }, timeout * 1000);
-    }
-    
-    function hideToast() {
-        document.getElementById('toast').style.visibility = 'hidden';
-    }
-    
+	function showMessagePHP(message, timeout = 15) {
+		var toastContainer = document.getElementById('toast');
+		// Hiển thị lại toastContainer nếu bị ẩn trước đó
+		toastContainer.style.visibility = 'visible';
+		toastContainer.style.display = 'flex';
+		var toastMessage = document.createElement('div');
+		toastMessage.className = 'toast-message';
+		toastMessage.innerHTML = '<span>' + message + '</span> <button onclick="removeToast(this)" class="text-danger">×</button>';
+		toastContainer.appendChild(toastMessage);
+		setTimeout(function () {
+			removeToast(toastMessage);
+		}, timeout * 1000);
+	}
+	function removeToast(toastElement) {
+		toastElement.remove();
+		var toastContainer = document.getElementById('toast');
+		// Nếu không còn thông báo nào thì ẩn luôn #toast
+		if (toastContainer.querySelectorAll('.toast-message').length === 0) {
+			hideToast();
+		}
+	}
+	function hideToast() {
+		var toastContainer = document.getElementById('toast');
+		// Xóa toàn bộ nội dung nhưng vẫn giữ nút đóng
+		toastContainer.innerHTML = '<button onclick="hideToast()">×</button>';
+		// Ẩn hoàn toàn
+		toastContainer.style.visibility = 'hidden';
+		toastContainer.style.display = 'none';
+	}
+
     //Hiển thị và đóng thông báo Message
     function show_message(message) {
     document.querySelector('#notificationModal .modal-body').innerHTML = message;
@@ -238,6 +252,7 @@
   </script>
 </head>
 <div id="toast"><span id="toastMessage"></span><button onclick="hideToast()">×</button></div>
+
 <!-- Thông báo Mesage html_head.php -->
 <div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="notificationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">

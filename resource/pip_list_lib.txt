@@ -165,6 +165,7 @@ pyserial                  3.5b0
 pysmbc                    1.0.23
 python-apt                2.2.1
 python-Levenshtein        0.12.2
+python-nmap               0.7.1
 python-prctl              1.7
 python-vlc                3.0.16120
 pytubefix                 8.12.1

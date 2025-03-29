@@ -1231,3 +1231,9 @@ h6 {
   font-size: 13px;
   color: #012970;
 }
+
+
+#notificationModal {
+    position: fixed !important;
+    z-index: 1060;
+}

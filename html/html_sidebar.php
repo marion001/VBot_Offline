@@ -126,7 +126,7 @@
     <li class="nav-item" onclick="loading('show')">
       <a class="nav-link collapsed" href="VBot_Client.php">
       <i class="bi bi-globe-central-south-asia"></i>
-      <span>Quản Lý Client</span>
+      <span>Quản Lý VBot Client</span>
       </a>
     </li>
 

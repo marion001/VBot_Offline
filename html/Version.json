@@ -1,12 +1,12 @@
 {
-    "version": "1.0.22",
+    "version": "1.0.23",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ trợ chế độ hỏi đáp liên tục phía client",
-    "releaseDate": "27/03/2025",
+    "description": "Tối Ưu Cơ Chế Liên Kết, Quản Lý Client",
+    "releaseDate": "29/03/2025",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy lệnh cập nhật thư viện websockets: 'pip install websockets'"
+            "description": "chạy 2 lệnh sau cập nhật thư viện nmap: 'pip install python-nmap' và 'sudo apt-get install nmap'"
         },
         {
             "type": "fix",

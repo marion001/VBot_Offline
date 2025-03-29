@@ -3,13 +3,31 @@
 #Facebook Group: https://www.facebook.com/groups/1148385343358824
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 
-import os
-import requests
-import ipaddress
 import subprocess
 import re
 import json
+import requests
+import ipaddress
 from concurrent.futures import ThreadPoolExecutor
+
+# Kiểm tra và import các thư viện cần thiết
+try:
+    import nmap
+except ImportError:
+    print(json.dumps({
+        "success": False,
+        "messager": "Thư viện 'python-nmap' không được cài đặt. Vui lòng cài đặt bằng 2 lệnh sau: 'pip3 install python-nmap' và 'sudo apt-get install nmap'",
+        "data": {}
+    }, indent=4))
+    exit(1)
+
+# Kiểm tra nmap binary
+def check_nmap_installed():
+    try:
+        subprocess.run(['nmap', '--version'], capture_output=True, text=True, check=True)
+        return True
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        return False
 
 # Lấy địa chỉ IP của máy tính hiện tại
 def read_info_startup(iface_name="wlan0"):
@@ -21,17 +39,6 @@ def read_info_startup(iface_name="wlan0"):
         return ip_address
     except Exception:
         return None
-
-# Hàm kiểm tra kết nối bằng ping
-def ping_ip(ip):
-    try:
-        response = os.popen(f"ping -c 1 -w 2 {ip}")
-        result = response.read()
-        if "1 packets transmitted, 1 received" in result:
-            return True
-        return False
-    except Exception:
-        return False
 
 # Hàm kiểm tra dữ liệu từ API và lưu thông tin khi thành công
 def check_device(ip):
@@ -53,19 +60,21 @@ def check_device(ip):
                 "port_api": None,
                 "host_name": None,
                 "user_name": None
-                }
+            }
     except requests.exceptions.RequestException:
         pass
     return None
 
-# Hàm xử lý cho mỗi IP (kiểm tra ping và API)
-def process_ip(ip):
-    if ping_ip(str(ip)):
-        return check_device(str(ip))
-    return None
-
-# Quét mạng LAN và kiểm tra thiết bị
+# Quét mạng LAN và kiểm tra thiết bị bằng nmap
 def scan_and_check_devices():
+    if not check_nmap_installed():
+        print(json.dumps({
+            "success": False,
+            "messager": "Chương trình 'nmap' không được cài đặt trên hệ thống. Vui lòng cài đặt bằng lệnh: 'sudo apt-get install nmap'",
+            "data": {}
+        }, indent=4))
+        return
+
     ip_address = read_info_startup()
     if ip_address is None:
         print(json.dumps({
@@ -75,16 +84,38 @@ def scan_and_check_devices():
         }, indent=4))
         return
     
+    # Khởi tạo nmap PortScanner
+    try:
+        nm = nmap.PortScanner()
+    except Exception as e:
+        print(json.dumps({
+            "success": False,
+            "messager": f"Lỗi khi khởi tạo nmap: {str(e)}",
+            "data": {}
+        }, indent=4))
+        return
+
     ip_network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
-    found_devices = []  # Danh sách thiết bị tìm thấy
+    found_devices = []
 
-    # Sử dụng ThreadPoolExecutor để tăng tốc độ kiểm tra các IP
-    with ThreadPoolExecutor(max_workers=20) as executor:
-        results = list(executor.map(process_ip, ip_network.hosts()))
-        # Lọc ra các thiết bị hợp lệ (không phải None)
-        found_devices = [result for result in results if result is not None]
+    # Quét chỉ các host (bỏ .0 và .255) để khớp với code cũ
+    try:
+        nm.scan(hosts=str(ip_network), arguments='-sn')  # Quét subnet, không bao gồm .0 và .255
+    except Exception as e:
+        print(json.dumps({
+            "success": False,
+            "messager": f"Lỗi khi quét mạng bằng nmap: {str(e)}",
+            "data": {}
+        }, indent=4))
+        return
 
-    # Xử lý kết quả sau khi quét xong
+    active_ips = [host for host in nm.all_hosts() if nm[host].state() == 'up']
+
+    if active_ips:
+        with ThreadPoolExecutor(max_workers=20) as executor:
+            results = list(executor.map(check_device, active_ips))
+            found_devices = [result for result in results if result is not None]
+
     if found_devices:
         print(json.dumps({
             "success": True,

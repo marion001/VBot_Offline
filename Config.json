@@ -60,7 +60,8 @@
                     "source_stt": "stt_default",
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine",
-					"client_conversation_mode": true
+                    "client_conversation_mode": true,
+                    "data_client_name": "Data_VBot_Client.json"
                 }
             }
         }
@@ -660,6 +661,7 @@
                     "Vbot_error.log",
                     "stt_token_google_cloud.json",
                     "tts_token_google_cloud.json",
+					"Data_VBot_Client.json",
                     "Home_Assistant.json",
                     "Home_Assistant_Custom.json",
                     "Data_Schedule.json",
@@ -703,6 +705,7 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "News_Paper.json",
+					"Data_VBot_Client.json",
                     "PlayList.json",
                     "PodCast.json",
                     "Youtube.json",
