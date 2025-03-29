@@ -2,11 +2,11 @@
     "version": "1.0.23",
     "projectName": "WebUI VBot Offline",
     "description": "Tối Ưu Cơ Chế Liên Kết, Quản Lý Client",
-    "releaseDate": "29/03/2025",
+    "releaseDate": "29/03/2025-1",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy 2 lệnh sau cập nhật thư viện nmap: 'pip install python-nmap' và 'sudo apt-get install nmap'"
+            "description": "chạy 2 lệnh sau cập nhật thư viện nmap: 'pip install python-nmap' và 'sudo apt-get install nmap -y'"
         },
         {
             "type": "fix",
