@@ -135,10 +135,10 @@
 	
     <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
     <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Nâng Cao Dành Cho Người Dùng Cá Nhân Tự Code Và Phát Triển Theo Ý Muốn">
+      <a class="nav-link collapsed" data-bs-target="#setting-dev-nav" data-bs-toggle="collapse" href="#" title="Nâng Cao Dành Cho Người Dùng Cá Nhân Tự Code Và Phát Triển Theo Ý Muốn">
       <i class="bi bi-file-code-fill"></i><span>DEV Custom VBot</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
-      <ul id="cloud-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+      <ul id="setting-dev-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
         <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Skill">
           <a href="DEV_Customization.php">
           <i class="bi bi-circle"></i><span>DEV Customization (Custom Skill)</span>
@@ -161,6 +161,7 @@
         </li>
       </ul>
     </li>
+	
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
       <i class="bi bi-cloud-check"></i><span>Cloud Drive</span><i class="bi bi-chevron-down ms-auto"></i>
@@ -173,6 +174,7 @@
         </li>
       </ul>
     </li>
+	
     <li class="nav-item" onclick="loading('show')">
       <a class="nav-link collapsed" href="Wifi.php">
       <i class="bi bi-wifi"></i>
