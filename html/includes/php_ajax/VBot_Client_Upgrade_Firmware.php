@@ -41,7 +41,7 @@ if (isset($_GET['bypass_upgrade_firmware']) && !empty($_GET['ip'])) {
         echo json_encode(["success" => false, "message" => "Lỗi kết nối tới thiết bị: " . $error]);
     } else {
         http_response_code($httpCode);
-        echo json_encode(["success" => true, "message" => "Thiết bị đang nâng cấp firmware"]);
+        echo json_encode(["success" => true, "message" => "bypass_ota_ok"]);
     }
     exit;
 }

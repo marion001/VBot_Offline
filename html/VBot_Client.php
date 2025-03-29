@@ -702,14 +702,40 @@ function start_upgrade_firmware(ip_address, url_firmware) {
         return;
     }
     showMessagePHP("Bắt đầu nâng cấp Firmware", 5);
+    // Thiết lập timeout cho toàn bộ quá trình (180 giây)
+    var totalTimeout = 180000;
+    var startTime = Date.now();
+    // Timeout cho bypass_upgrade_firmware (30 giây)
+    var bypassTimeout = 30000;
+    var bypassTimer = setTimeout(function() {
+        loading('hide');
+        show_message("Gián Đoạn, hết thời gian chờ nhận phản hồi bỏ qua xác thực OTA khi nâng cấp Firmware, Bạn cần nâng cấp thủ công");
+    }, bypassTimeout);
     bypass_upgrade_firmware(ip_address, function(result) {
-        if (result.toLowerCase().includes("thiết bị đang nâng cấp firmware")) {
+		// Hủy timeout của bypass nếu hoàn thành
+        clearTimeout(bypassTimer);
+        // Kiểm tra thời gian đã trôi qua
+        var elapsedTime = Date.now() - startTime;
+        if (elapsedTime >= totalTimeout) {
+            loading('hide');
+            show_message("Gián Đoạn, hết thời gian chờ nhận phản hồi khi nâng cấp Firmware, Bạn cần nâng cấp thủ công");
+            return;
+        }
+        if (result.toLowerCase().includes("bypass_ota_ok")) {
             showMessagePHP("Bỏ qua xác thực OTA thành công, đang tiến hành cập nhật Firmware....", 5);
-            // Gửi yêu cầu start_upgrade_firmware
             var xhr = new XMLHttpRequest();
             var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php?start_upgrade_firmware&ip=' + encodeURIComponent(ip_address) + '&url_firmware=' + encodeURIComponent(url_firmware);
             xhr.open('GET', url, true);
+            // Timeout cho XMLHttpRequest (còn lại từ 180 giây)
+            var remainingTime = totalTimeout - elapsedTime;
+            var xhrTimeout = setTimeout(function() {
+                xhr.abort();
+                loading('hide');
+                show_message("Gián Đoạn, hết thời gian chờ nhận phản hồi khi nâng cấp Firmware, Bạn cần nâng cấp thủ công");
+            }, remainingTime);
             xhr.onload = function () {
+				//Hủy timeout nếu request hoàn thành
+                clearTimeout(xhrTimeout);
                 if (xhr.status >= 200 && xhr.status < 300) {
                     var data = JSON.parse(xhr.responseText);
                     if (data.success) {
@@ -722,7 +748,6 @@ function start_upgrade_firmware(ip_address, url_firmware) {
                     }
                 } else {
                     loading('hide');
-                    // Hiển thị phản hồi chi tiết từ server khi lỗi
                     try {
                         var errorData = JSON.parse(xhr.responseText);
                         show_message("Tải lên không thành công với trạng thái: " + xhr.status + " - " + errorData.message);
@@ -732,6 +757,8 @@ function start_upgrade_firmware(ip_address, url_firmware) {
                 }
             };
             xhr.onerror = function () {
+				// Hủy timeout nếu có lỗi mạng
+                clearTimeout(xhrTimeout);
                 loading('hide');
                 show_message("Lỗi mạng trong quá trình cập nhật Firmware");
             };
@@ -787,10 +814,19 @@ function start_upgrade_firmware_manual(ip_address) {
         return;
     }
     loading('show');
-    showMessagePHP("Đang gửi Firmware tới Client để nâng cấp...", 5);
+    showMessagePHP("Đang gửi Firmware .bin tới Client để nâng cấp Thủ Công...", 5);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php', true);
+    // Thiết lập timeout 3 phút (180 giây)
+    var timeoutDuration = 180000;
+    var timeoutId = setTimeout(function() {
+        xhr.abort();
+        loading('hide');
+        showMessagePHP("Gián Đoạn, hết thời gian chờ nhận phản hồi khi nâng cấp Firmware, Bạn cần nâng cấp thủ công", 5);
+    }, timeoutDuration);
+
     xhr.onload = function () {
+        clearTimeout(timeoutId);
         try {
             var response = JSON.parse(xhr.responseText);
             if (xhr.status === 200 && response.success) {
@@ -807,6 +843,7 @@ function start_upgrade_firmware_manual(ip_address) {
         }
     };
     xhr.onerror = function () {
+        clearTimeout(timeoutId);
         loading('hide');
         showMessagePHP("Lỗi kết nối trong quá trình nâng cấp firmware", 5);
     };
