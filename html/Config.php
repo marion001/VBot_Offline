@@ -383,6 +383,7 @@
   $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] = $_POST['udp_source_stt'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] = $_POST['udp_working_mode'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] = $_POST['udp_select_wakeup'];
+  $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'] = $_POST['udp_server_data_client_name'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
 
 
@@ -1023,6 +1024,14 @@
 						</select>
                       </div>
                     </div>
+
+                    <div class="row mb-3">
+                      <label for="udp_server_data_client_name" class="col-sm-3 col-form-label">Tệp Dữ Liệu Client:</label>
+                      <div class="col-sm-9">
+                        <input readonly type="text" class="form-control border-danger" name="udp_server_data_client_name" id="udp_server_data_client_name" placeholder="<?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name']; ?>" value="<?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name']; ?>">
+                      </div>
+                    </div>
+
 
                     <div class="row mb-3">
                       <label for="udp_server_streaming_audio" class="col-sm-3 col-form-label">Server Streaming Audio:</label>
