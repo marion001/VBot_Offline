@@ -195,6 +195,7 @@
   $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] = $_POST['tts_select'];
   $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'] = $_POST['directory_tts'];
+  $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'] = intval($_POST['clean_cache_tts_max_file']);
   
   #Cập Nhật TTS Dev Custom
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] = isset($_POST['tts_dev_customize_active']) ? true : false;
@@ -1532,6 +1533,12 @@
                       <label for="directory_tts" class="col-sm-3 col-form-label">Thư Mục Chứa TTS:</label>
                       <div class="col-sm-9">
                         <input readonly class="form-control border-danger" type="text" name="directory_tts" id="directory_tts" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts']; ?>">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label for="clean_cache_tts_max_file" class="col-sm-3 col-form-label" title="Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép">Dọn Dẹp TTS Nếu Vượt Quá (file) <i class="bi bi-question-circle-fill" onclick="show_message('Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép')"></i> :</label>
+                      <div class="col-sm-9">
+                        <input required class="form-control border-danger" step="1" min="0" max="3000" type="number" name="clean_cache_tts_max_file" id="clean_cache_tts_max_file" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ tăng lên cao nhất" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file']; ?>">
                       </div>
                     </div>
                     <div class="row">
