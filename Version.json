@@ -1,8 +1,8 @@
 {
-    "version": "1.0.23",
+    "version": "1.0.24",
     "projectName": "Program VBot Offline",
-    "description": "Tối Ưu Cơ Chế Liên Kết, Quản Lý Client",
-    "releaseDate": "29/03/2025-1",
+    "description": "Hỗ trợ phát TTS về Client",
+    "releaseDate": "30/03/2025",
     "changes": [
         {
             "type": "feature",
