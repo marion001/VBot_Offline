@@ -21,7 +21,7 @@ if ($Config['contact_info']['user_login']['active']) {
 <!DOCTYPE html>
 <html lang="vi">
 <?php include 'html_head.php'; ?>
-
+ <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
 <style>
     #vbot_Client_Scan_devices {
         width: 100%;
@@ -85,6 +85,7 @@ if ($Config['contact_info']['user_login']['active']) {
 	}
 	
 </style>
+
 <body>
 <?php include 'html_header_bar.php'; ?>
 <?php include 'html_sidebar.php'; ?>
@@ -140,6 +141,26 @@ if ($Config['contact_info']['user_login']['active']) {
             <div class="modal-footer d-flex justify-content-center">
                 <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-lg"></i> Đóng</button>
                 <button type="button" class="btn btn-success" id="saveConfigBtn"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal hiển thị JSON -->
+<div class="modal fade" id="jsonDisplayModal" tabindex="-1" aria-labelledby="jsonDisplayModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-xl">
+        <div class="modal-content">
+            <div class="modal-header d-flex justify-content-between align-items-center w-100">
+                <h5 class="modal-title" id="jsonDisplayModalLabel"> Dữ liệu cấu hình từ Client</h5>
+				<div class="d-flex align-items-center">
+                <i class="bi bi-x-lg text-danger" title="Đóng" data-bs-dismiss="modal"></i>
+				</div>
+            </div>
+            <div class="modal-body">
+                <pre id="jsonContent" style="white-space: pre-wrap; word-wrap: break-word;"></pre>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Đóng</button>
             </div>
         </div>
     </div>
@@ -271,10 +292,11 @@ function displayDeviceData(data) {
             '<td style="text-align: center; vertical-align: middle;" id="device-version-' + index + '">' + (device.version || '') + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' + (device.chip_model || '') + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' +
-            '<button class="btn btn-success config-btn" data-ip="' + (device.ip_address || '') + '" data-bs-toggle="modal" data-bs-target="#clientConfigModal">Cấu Hình</button> ' +
+            '<button class="btn btn-success config-btn" data-ip="' + (device.ip_address || '') + '" data-bs-toggle="modal" data-bs-target="#clientConfigModal" title="Cấu hình"><i class="bi bi-gear-wide-connected"></i></button> ' +
             '<button class="btn btn-info ping-btn" data-ip="' + (device.ip_address || '') + '" data-index="' + index + '" title="Kiểm tra trạng thái"><i class="bi bi-wifi"></i></button> ' +
+            '<button type="button" class="btn btn-warning" onclick="showJsonData(\'' + (device.ip_address || '') + '\')" title="Xem dữ liệu cấu hình json"><i class="bi bi-filetype-json"></i></button> ' +
             '<button class="btn btn-danger delete-btn" data-ip="' + (device.ip_address || '') + '" title="Xóa Client: ' + (device.ip_address || '') + '"><i class="bi bi-trash"></i></button> ' +
-            '</td>' +
+			'</td>' +
             '</tr>';
         // Check version
         fetch(versionUrl)
@@ -381,15 +403,30 @@ function showConfigModal(device) {
         '<tr><th>Hiệu Ứng LED Loading (Xử Lý) 1-3:</th><td><input type="number" min="1" max="3" class="form-control led-loading border-success" value="' + (device.led_config?.loading_effect || '') + '"></td></tr>' +
         '<tr><th>Màu LED Think/WakeUP (Hex):</th><td><div class="input-group mb-3"><input type="text" class="form-control led-think border-success" value="' + (device.led_config?.think_color || '') + '"><input type="color" class="form-control-color color-picker border-success" value="' + (device.led_config?.think_color ? '#' + device.led_config.think_color : '#000000') + '"></div></td></tr>' +
         '</tbody></table>' +
-
-        '<table class="config-table table table-bordered border-primary">' +
-        '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;"><font color="red">Cấu Hình Nút Nhấn</font></th></tr></thead>' +
+		'<table class="config-table table table-bordered border-primary">' +
+        '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color="red">Cấu Hình Nút Nhấn</font></th></tr></thead>' +
         '<tbody>' +
-        '<tr><th>Nút Nhấn Mic (Bật/Tắt Sử Dụng WakeUP Bằng Giọng Nói) GPIO Pin:</th><td><input type="number" class="form-control button-mic border-success" value="' + (device.button?.gpio_mic || '') + '"></td></tr>' +
-        '<tr><th>Nút Nhấn WakeUp (Đánh Thức Bằng Nút Nhấn) GPIO Pin:</th><td><input type="number" class="form-control button-wake border-success" value="' + (device.button?.gpio_wake_up || '') + '"></td></tr>' +
-        '<tr><th>Thời Gian Nhấn (ms):</th><td><input type="number" class="form-control button-delay border414-success" value="' + (device.button?.debounce_delay || '') + '"></td></tr>' +
+        '<tr><th style="text-align: center; vertical-align: middle;">Nút Nhấn Mic (Bật/Tắt Sử Dụng WakeUP Bằng Giọng Nói) GPIO Pin:</th><td colspan="2" style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button-mic border-success" value="' + (device.button?.gpio_mic || '') + '"></td></tr>' +
+        '<tr><th style="text-align: center; vertical-align: middle;">Nút Nhấn WakeUp (Đánh Thức Bằng Nút Nhấn) GPIO Pin:</th><td colspan="2" style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button-wake border-success" value="' + (device.button?.gpio_wake_up || '') + '"></td></tr>' +
+        '<tr><th style="text-align: center; vertical-align: middle;">Thời Gian Nhấn (ms):</th><td colspan="2" style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button-delay border-success" value="' + (device.button?.debounce_delay || '') + '"></td></tr>' +
+        '<tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color="red">Cấu Hình Nhấn Giữ Nút</font></th></tr>' +
+		'<tr><th style="text-align: center; vertical-align: middle;">Chức Năng/Cấu Hình</th><th style="text-align: center; vertical-align: middle;">Cấu Hình Nhấn Giữ WakeUp</th><th style="text-align: center; vertical-align: middle;">Cấu Hình Nhấn Giữ MIC</th></tr>' +
+        '<tr><th style="text-align: center; vertical-align: middle;">Kích Hoạt Nhấn Giữ:</th>' +
+            '<td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input long-press-wakeup-active border-success" ' + (device.button?.long_press_wakeup_active ? 'checked' : '') + '></div></td>' +
+            '<td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input long-press-mic-active border-success" ' + (device.button?.long_press_mic_active ? 'checked' : '') + '></div></td></tr>' +
+        '<tr><th style="text-align: center; vertical-align: middle;">Hành Động Thực Hiện Nhấn Giữ:</th>' +
+            '<td style="text-align: center; vertical-align: middle;"><select class="form-select long-press-wakeup-action border-success">' +
+                '<option value="0" ' + (device.button?.long_press_wakeup_action === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
+                '<option value="1" ' + (device.button?.long_press_wakeup_action === 1 ? 'selected' : '') + '>Restart ESP</option>' +
+            '</select></td>' +
+            '<td style="text-align: center; vertical-align: middle;"><select class="form-select long-press-mic-action border-success">' +
+                '<option value="0" ' + (device.button?.long_press_mic_action === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
+                '<option value="1" ' + (device.button?.long_press_mic_action === 1 ? 'selected' : '') + '>Restart ESP</option>' +
+            '</select></td></tr>' +
+        '<tr><th style="text-align: center; vertical-align: middle;">Thời Gian Giữ Nút (ms) 1000=1s:</th>' +
+            '<td style="text-align: center; vertical-align: middle;"><input type="number" class="form-control long-press-wakeup-time border-success" value="' + (device.button?.long_press_wakeup_time || '') + '"></td>' +
+            '<td style="text-align: center; vertical-align: middle;"><input type="number" class="form-control long-press-mic-time border-success" value="' + (device.button?.long_press_mic_time || '') + '"></td></tr>' +
         '</tbody></table>' +
-
         '<table class="config-table table table-bordered border-primary">' +
         '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;"><font color="red">Thiết Lập Tùy Chọn Khác</font></th></tr></thead>' +
         '<tbody>' +
@@ -546,7 +583,14 @@ function saveConfig(ip_address) {
             gpio_mic: parseInt(document.querySelector('.button-mic').value) || 0,
             debounce_delay: parseInt(document.querySelector('.button-delay').value) || 0,
             wakeup_active: document.querySelector('.wake-active').checked,
-            mic_active: document.querySelector('.mic-active').checked
+            mic_active: document.querySelector('.mic-active').checked,
+
+			long_press_wakeup_active: document.querySelector('.long-press-wakeup-active').checked,
+            long_press_mic_active: document.querySelector('.long-press-mic-active').checked,
+            long_press_wakeup_time: parseInt(document.querySelector('.long-press-wakeup-time').value) || 0,
+            long_press_mic_time: parseInt(document.querySelector('.long-press-mic-time').value) || 0,
+            long_press_wakeup_action: parseInt(document.querySelector('.long-press-wakeup-action').value) || 0,
+            long_press_mic_action: parseInt(document.querySelector('.long-press-mic-action').value) || 0
         },
         logs_serial_active: document.querySelector('.serial-log').checked,
         conversation_active: document.querySelector('.conversation-active').checked
@@ -573,7 +617,15 @@ function saveConfig(ip_address) {
         '&mic_state=' + (config.button.mic_active ? 'true' : 'false') +
         '&speaker_state=' + (config.i2s_config.speaker_active ? 'true' : 'false') +
         '&wakeup_state=' + (config.button.wakeup_active ? 'true' : 'false') +
-        '&conv_mode=' + (config.conversation_active ? 'true' : 'false');
+        '&conv_mode=' + (config.conversation_active ? 'true' : 'false') +
+		
+		'&press_state=' + (config.button.long_press_wakeup_active ? 'true' : 'false') +
+        '&pre_mic_state=' + (config.button.long_press_mic_active ? 'true' : 'false') +
+        '&press_dur=' + config.button.long_press_wakeup_time +
+        '&mic_dur=' + config.button.long_press_mic_time +
+        '&press_opt=' + config.button.long_press_wakeup_action +
+        '&mic_opt=' + config.button.long_press_mic_action;
+		
     const xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
@@ -922,13 +974,11 @@ async function pingDevice(ip, index, showNotification = false) {
     try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        
         const response = await fetch('http://' + ip + '/VBot_Client_Info', { 
             mode: 'no-cors',
             signal: controller.signal
         });
         clearTimeout(timeoutId);
-        
         const statusDot = document.getElementById('status-' + index);
         if (statusDot) {
             statusDot.classList.remove('offline');
@@ -981,6 +1031,39 @@ function deleteClient(ip) {
         });
 }
 
+// Hàm hiển thị dữ liệu JSON trong modal
+function showJsonData(ip_address) {
+    loading('show');
+    const url = 'http://'+ip_address+'/VBot_Client_Info';
+    fetch(url)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Không thể kết nối tới client: ' + ip_address);
+            }
+            return response.json();
+        })
+        .then(data => {
+            loading('hide');
+            // Định dạng JSON với khoảng cách thụt đầu dòng
+            const formattedJson = JSON.stringify(data, null, 2);
+            // Đặt nội dung vào thẻ <code> với class của Prism
+            document.getElementById('jsonContent').innerHTML = '<code class="language-json">' + formattedJson + '</code>';
+            // Áp dụng Prism để tô màu cú pháp
+            Prism.highlightAllUnder(document.getElementById('jsonContent'));
+            // Hiển thị modal
+            const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));
+            jsonModal.show();
+        })
+        .catch(error => {
+            loading('hide');
+            showMessagePHP('Lỗi khi lấy dữ liệu JSON: ' + error.message, 5);
+            document.getElementById('jsonContent').innerHTML = '<code class="language-json">Không thể tải dữ liệu JSON.</code>';
+            Prism.highlightAllUnder(document.getElementById('jsonContent'));
+            const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));
+            jsonModal.show();
+        });
+}
+
 //Hiển thị dữ liệu khi trang được tải
 document.addEventListener('DOMContentLoaded', function() {
     loading('show');
@@ -1000,7 +1083,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 </script>
-
+<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/prism/prism-json.min.js"></script>
 <?php include 'html_js.php'; ?>
 </body>
 </html>
