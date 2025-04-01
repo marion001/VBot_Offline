@@ -1,7 +1,7 @@
 {
     "version": "1.0.25",
     "projectName": "Program VBot Offline",
-    "description": "Tối ưu cache cho trợ lý ảo TTS",
+    "description": "Tối ưu Cache TTS cho trợ lý ảo",
     "releaseDate": "01/04/2025",
     "changes": [
         {
