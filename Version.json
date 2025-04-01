@@ -1,8 +1,8 @@
 {
-    "version": "1.0.24",
+    "version": "1.0.25",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ trợ phát TTS về Client",
-    "releaseDate": "30/03/2025",
+    "description": "Tối ưu cache cho trợ lý ảo TTS",
+    "releaseDate": "01/04/2025",
     "changes": [
         {
             "type": "feature",
