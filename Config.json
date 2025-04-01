@@ -118,6 +118,7 @@
         "mqtt_show_logs_reconnect": false
     },
     "virtual_assistant": {
+		"cache_active": true,
         "prioritize_virtual_assistants": [
             "default_assistant",
             "zalo_assistant",
