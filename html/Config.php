@@ -880,7 +880,7 @@
                         <div class="input-group mb-3">
                           <input required type="number" class="form-control border-success" name="api_port" id="api_port" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['port']) ?>">
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho API!</div>
-                          <button class="btn btn-success border-success" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>" target="_bank">Kiểm Tra</a></button>
+                          <button class="btn btn-success border-success" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>" target="_blank">Kiểm Tra</a></button>
                         </div>
                       </div>
                     </div>
@@ -944,7 +944,7 @@
 			  <div class="card accordion" id="accordion_button_udp_server_streaming">
 			  <div class="card-body">
 			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-			  ESP32, ESP32S3, ESP32 D1 Mini:</h5>
+			  ESP32, ESP32S3, ESP32 D1 Mini -> <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank"> Flash VBot Client <i class="bi bi-github"></i></a>:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 
                     <div class="row mb-3">
@@ -1135,7 +1135,7 @@
                         <div class="input-group mb-3">
                           <input required type="number" class="form-control border-danger" name="port_server_streaming_audio" id="port_server_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['port']) ?>">
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio HTTP POST!</div>
-                          <button class="btn btn-success border-danger" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" target="_bank">Kiểm Tra</a></button>
+                          <button class="btn btn-success border-danger" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" target="_blank">Kiểm Tra</a></button>
                         </div>
                       </div>
                     </div>
@@ -1345,7 +1345,7 @@
                           <div class="row mb-3">
                             <label for="" class="col-sm-3 col-form-label">Cài Thư Viện, Train Hotword:</label>
                             <div class="col-sm-9">
-                              <a href="FAQ.php" target="_bank">Nhấn Vào Đây Để Xem Hướng Dẫn</a> 
+                              <a href="FAQ.php" target="_blank">Nhấn Vào Đây Để Xem Hướng Dẫn</a> 
                             </div>
                           </div>
                           <table class="table table-bordered border-primary">
@@ -1932,7 +1932,7 @@
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <input disabled class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assist-Conversation" title="https://github.com/marion001/VBot-Assist-Conversation" value="https://github.com/marion001/VBot-Assist-Conversation">
-                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assist-Conversation" target="_bank">Truy Cập</a></button>
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assist-Conversation" target="_blank">Truy Cập</a></button>
                         </div>
                       </div>
                     </div>
@@ -3105,7 +3105,7 @@
                     </div>
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Difi.ai | <a href="https://cloud.dify.ai" target="_bank">cloud.dify.ai</a>:</h5>
+                        <h5 class="card-title">Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
                           <div class="col-sm-9">
@@ -4554,7 +4554,7 @@
                               '<br/><b>- Kinh độ:</b> ' + response.response.longitude + '<br/><b>- Vĩ độ:</b> ' + response.response.latitude + '<br/><b>- Múi giờ:</b> ' + response.response.time_zone +
                               '<br/><b>- Quốc gia:</b> ' + response.response.country + '<br/><b>- Ngôn ngữ:</b> ' + response.response.language +
                               '<br/><b>- Phiên bản Home Assistant:</b> ' + response.response.version + '<br/><b>- Trạng thái hoạt động:</b> ' + response.response.state +
-                              '<br/><b>- URL nội bộ:</b> <a href="' + response.response.internal_url + '" target="_bank">' + response.response.internal_url + '</a><br/><b>- URL bên ngoài:</b> <a href="' + response.response.external_url + '" target="_bank">' + response.response.external_url + '</a>');
+                              '<br/><b>- URL nội bộ:</b> <a href="' + response.response.internal_url + '" target="_blank">' + response.response.internal_url + '</a><br/><b>- URL bên ngoài:</b> <a href="' + response.response.external_url + '" target="_blank">' + response.response.external_url + '</a>');
                       } else {
                           show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + response.message)
                       }
