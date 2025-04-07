@@ -43,6 +43,7 @@ Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRs
 
 - Liên Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - Liên Hệ Hỗ Trợ: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
+- Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
 
 <hr/>
 
