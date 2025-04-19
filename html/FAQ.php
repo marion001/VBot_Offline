@@ -486,6 +486,27 @@
 	  B5: Đánh Thức Client Bằng Cách Nói Từ Khóa HotWord Vào Mic Ở Phía Client Để Bắt Đầu Ra Lệnh Cho VBot
       <hr/><h5>Nếu Lựa CHọn ESP32, ESP32s3, ESP32 D1 Mini</h5>
 	  - Truy Cập Vào Github Sau: <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank">https://github.com/marion001/VBot_Client_Offline</a>
+	  Hỗ trợ phát âm thanh .mp3 qua api (Chỉ dùng với cùng lớp mạng nội bộ Local, URL là dạng http, không hỗ trợ https):<br/><br/>
+	  - Demo CURL phát âm thanh:<br/>
+	<pre class="text-danger">
+	curl -X POST http://192.168.14.80/play_audio -d "url=http://192.168.14.17/1.mp3"
+	</pre>
+	- DEMO CURL dừng phát âm thanh:<br/>
+	<pre class="text-danger">
+	curl http://192.168.14.80/stop_audio
+	</pre>
+	- DEMO CURL Restart ESP:<br/>
+	<pre class="text-danger">
+	curl -X POST http://192.168.14.80/restart
+		</pre>
+	- DEMO CURL Reset Wifi:<br/>
+	<pre class="text-danger">
+	curl -X POST http://192.168.14.80/resetwifi
+	</pre>
+	- DEMO CURL xóa, đặt lại toàn bộ dữ liệu về mặc định:<br/>
+	<pre class="text-danger">
+	curl -X POST http://192.168.14.80/cleanNVS
+	</pre>
 	  </div>
       </div>
       </div>
