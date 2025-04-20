@@ -56,7 +56,6 @@
                     "maximum_recording_time": 6,
                     "maximum_client_connected": 3,
                     "time_remove_inactive_clients": 900,
-                    "gain_factor_mic_client": 3,
                     "source_stt": "stt_default",
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine",

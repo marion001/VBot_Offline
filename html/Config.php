@@ -380,7 +380,6 @@
   $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] = intval($_POST['udp_maximum_recording_time']);
   $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected'] = intval($_POST['udp_maximum_client_connected']);
   $Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients'] = intval($_POST['udp_time_remove_inactive_clients']);
-  $Config['api']['streaming_server']['protocol']['udp_sock']['gain_factor_mic_client'] = floatval($_POST['udp_gain_factor_mic_client']);
   $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] = $_POST['udp_source_stt'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] = $_POST['udp_working_mode'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] = $_POST['udp_select_wakeup'];
@@ -985,14 +984,6 @@
                       <div class="col-sm-9">
                         <input required type="number" class="form-control border-success" name="udp_time_remove_inactive_clients" id="udp_time_remove_inactive_clients" step="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>">
                         <div class="invalid-feedback">Cần nhập thời gian dọn dẹp các Client không hoạt động trong một khoảng thời gian</div>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="udp_gain_factor_mic_client" class="col-sm-3 col-form-label">Hệ số khuếch đại Mic phía Client (Gain):</label>
-                      <div class="col-sm-9">
-                        <input required type="number" class="form-control border-success" name="udp_gain_factor_mic_client" id="udp_gain_factor_mic_client" step="0.1" min="1" max="10" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['gain_factor_mic_client']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['gain_factor_mic_client']) ?>">
-                        <div class="invalid-feedback">Cần nhập hệ số khuếch đại âm thanh mic của Client</div>
                       </div>
                     </div>
 
