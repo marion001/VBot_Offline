@@ -1032,6 +1032,16 @@
                       </div>
                     </div>
 
+                    <div class="row mb-3">
+                      <label for="udp_server_streaming_audio_local" class="col-sm-3 col-form-label">URL Audio Local:</label>
+                      <div class="col-sm-9">
+						<div class="input-group mb-3">
+                        <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio_local" id="udp_server_streaming_audio_local" value="<?php echo htmlspecialchars('http://'.$serverIp.'/assets/sound/'); ?>">
+						<a href="<?php echo htmlspecialchars('http://'.$serverIp.'/assets/sound/'); ?>" target="_blank"><button class="btn btn-success border-danger" type="button">Truy Cập</button></a>
+					  </div>
+                      </div>
+                    </div>
+
 			  </div>
 			  </div>
 			  </div>
