@@ -1,8 +1,8 @@
 {
-    "version": "1.0.28",
+    "version": "1.0.29",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi Led Volume, Tái cấu trúc Client Server, Hỗ trợ phát nhạc Local trên Client, Hỗ trợ đọc tên bài hát trước khi phát trên Loa",
-    "releaseDate": "21/04/2025",
+    "releaseDate": "21/04/2025-1",
     "changes": [
         {
             "type": "feature",

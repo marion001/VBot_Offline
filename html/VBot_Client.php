@@ -277,6 +277,7 @@ function displayDeviceData(data) {
         '<tr>' +
         '<th style="text-align: center; vertical-align: middle;">Tên Client</th>' +
         '<th style="text-align: center; vertical-align: middle;">Địa Chỉ IP</th>' +
+        '<th style="text-align: center; vertical-align: middle;">Server Đang Kết Nối</th>' +
         '<th style="text-align: center; vertical-align: middle;">Phiên Bản Firmware</th>' +
         '<th style="text-align: center; vertical-align: middle;">Chip Model</th>' +
         '<th style="text-align: center; vertical-align: middle;">Hành Động</th>' +
@@ -292,6 +293,7 @@ function displayDeviceData(data) {
             '<tr>' +
             '<td style="text-align: center; vertical-align: middle;"><span class="status-dot" id="status-' + index + '"></span>' + (device.client_name || '') + '</td>' +
             '<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.ip_address || '') + '" target="_blank">' + (device.ip_address || '') + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
+            '<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.server.vbot_server_ip || '') + '" target="_blank">' + (device.server.vbot_server_ip || '') + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
             '<td style="text-align: center; vertical-align: middle;" id="device-version-' + index + '">' + (device.version || '') + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' + (device.chip_model || '') + '</td>' +
             '<td style="text-align: center; vertical-align: middle;">' +
