@@ -60,6 +60,7 @@
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine",
                     "client_conversation_mode": true,
+					"music_playback_on_client": true,
                     "data_client_name": "Data_VBot_Client.json"
                 }
             }

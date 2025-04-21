@@ -385,6 +385,7 @@
   $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] = $_POST['udp_select_wakeup'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'] = $_POST['udp_server_data_client_name'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
+  $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] = isset($_POST['udp_sock_music_playback_on_client']) ? true : false;
 
 
   #Cập nhật Bluetooth
@@ -943,7 +944,7 @@
 			  <div class="card accordion" id="accordion_button_udp_server_streaming">
 			  <div class="card-body">
 			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-			  ESP32, ESP32S3, ESP32 D1 Mini -> <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank"> Flash VBot Client <i class="bi bi-github"></i></a>:</h5>
+			  ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi -> <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank"> Flash VBot Client <i class="bi bi-github"></i></a>:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 
                     <div class="row mb-3">
@@ -951,6 +952,15 @@
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input" type="checkbox" name="udp_sock_client_conversation_mode" id="udp_sock_client_conversation_mode" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] ? 'checked' : ''; ?>>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Phát Nhạc Local Trên Client: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để phát nhạc, các bài hát Local trên Client')"></i> :</label>
+                      <div class="col-sm-9">
+                        <div class="form-switch">
+                          <input class="form-check-input" type="checkbox" name="udp_sock_music_playback_on_client" id="udp_sock_music_playback_on_client" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
