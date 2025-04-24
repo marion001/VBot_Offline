@@ -943,9 +943,16 @@
 
 			  <div class="card accordion" id="accordion_button_udp_server_streaming">
 			  <div class="card-body">
-			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-			  ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi -> <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank"> Flash VBot Client <i class="bi bi-github"></i></a>:</h5>
+			  <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
+			  ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
+
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Flash Firmware:</label>
+                      <div class="col-sm-9">
+                        <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank"> ESP32, ESP32S3, ESP32 D1 Mini, ESP32S3 Supper Mini <i class="bi bi-github"></i></a>
+                      </div>
+                    </div>
 
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Chế Độ Hội Thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng chế độ hội thoại, trò chuyện liên tục')"></i> :</label>
