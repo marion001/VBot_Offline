@@ -1,0 +1,161 @@
+[
+    {
+        "success": true,
+        "project_name": "VBot Client Offline",
+        "client_name": "VBot Client",
+        "wifi_name": "Assistant",
+        "version": "25/04/2025",
+        "chip_model": "ESP32-D0WD-V3",
+        "free_heap": "80 KB",
+        "firmware_url": "https://github.com/marion001/VBot_Client_Offline/raw/refs/heads/main/ESP32/bin/esp32_udp_stream.ino.bin",
+        "ip_address": "192.168.14.77",
+        "HTML_ICON_LOCAL": "http://192.168.14.194/assets/img/favicon.png",
+        "VBOT_CHECK_API_VERSION": "https://api.github.com/repos/marion001/VBot_Client_Offline/contents/ESP32/bin/Version.json",
+        "server": {
+            "vbot_server_ip": "192.168.14.194",
+            "vbot_server_port": 5003
+        },
+        "i2s_config": {
+            "i2s_sck_bclk_gpio": 25,
+            "i2s_ws_lrc_gpio": 26,
+            "i2s_sd_gpio": 27,
+            "i2s_din_gpio": 14,
+            "i2s_gain_mic": 20,
+            "i2s_speaker_volume": 100,
+            "i2s_mic_channel": "left"
+        },
+        "led_config": {
+            "led_active": true,
+            "led_gpio": 23,
+            "led_number": 12,
+            "led_brightness": 255,
+            "led_think_color": "0000FF",
+            "led_loading_effect": 1
+        },
+        "button": {
+            "button_active": true,
+            "button_mic_gpio": 21,
+            "button_wakeup_gpio": 17,
+            "button_debounce_delay": 50,
+            "button_wakeup_long_press_active": true,
+            "button_mic_long_press_active": true,
+            "button_wakeup_long_press_action": 1,
+            "button_mic_long_press_action": 2,
+            "button_wakeup_long_press_time": 2000,
+            "button_mic_long_press_time": 2000
+        },
+        "other_settings": {
+            "logs_serial_active": true,
+            "conversation_active": true,
+            "sound_startup": true,
+            "mic_mutex_active": true,
+            "speaker_active": true
+        }
+    },
+    {
+        "success": true,
+        "project_name": "VBot Client Offline",
+        "client_name": "Client ESP32s3",
+        "wifi_name": "PhongNgu",
+        "version": "25/04/2025",
+        "chip_model": "ESP32-S3",
+        "free_heap": "105 KB",
+        "firmware_url": "https://github.com/marion001/VBot_Client_Offline/raw/refs/heads/main/ESP32S3/bin/esp32s3_udp_stream.ino.bin",
+        "ip_address": "192.168.14.109",
+        "HTML_ICON_LOCAL": "http://192.168.14.194/assets/img/favicon.png",
+        "VBOT_CHECK_API_VERSION": "https://api.github.com/repos/marion001/VBot_Client_Offline/contents/ESP32S3/bin/Version.json",
+        "server": {
+            "vbot_server_ip": "192.168.14.194",
+            "vbot_server_port": 5003
+        },
+        "i2s_config": {
+            "i2s_sck_bclk_gpio": 2,
+            "i2s_ws_lrc_gpio": 3,
+            "i2s_sd_gpio": 4,
+            "i2s_din_gpio": 8,
+            "i2s_gain_mic": 20,
+            "i2s_speaker_volume": 100,
+            "i2s_mic_channel": "left"
+        },
+        "led_config": {
+            "led_active": true,
+            "led_gpio": 15,
+            "led_number": 12,
+            "led_brightness": 255,
+            "led_think_color": "0000FF",
+            "led_loading_effect": 1
+        },
+        "button": {
+            "button_active": true,
+            "button_mic_gpio": 5,
+            "button_wakeup_gpio": 17,
+            "button_debounce_delay": 50,
+            "button_wakeup_long_press_active": true,
+            "button_mic_long_press_active": true,
+            "button_wakeup_long_press_action": 0,
+            "button_mic_long_press_action": 2,
+            "button_wakeup_long_press_time": 2000,
+            "button_mic_long_press_time": 2000
+        },
+        "other_settings": {
+            "logs_serial_active": true,
+            "conversation_active": true,
+            "sound_startup": true,
+            "mic_mutex_active": true,
+            "speaker_active": true
+        }
+    },
+    {
+        "success": true,
+        "project_name": "VBot Client Offline",
+        "client_name": "Client_HW_AM08",
+        "wifi_name": "Assistant",
+        "version": "25/04/2025",
+        "chip_model": "ESP32-D0WD-V3",
+        "free_heap": "84 KB",
+        "firmware_url": "https://github.com/marion001/VBot_Client_Offline/raw/refs/heads/main/ESP32/bin/esp32_udp_stream.ino.bin",
+        "ip_address": "192.168.14.148",
+        "HTML_ICON_LOCAL": "http://192.168.14.113/assets/img/favicon.png",
+        "VBOT_CHECK_API_VERSION": "https://api.github.com/repos/marion001/VBot_Client_Offline/contents/ESP32/bin/Version.json",
+        "server": {
+            "vbot_server_ip": "192.168.14.113",
+            "vbot_server_port": 5003
+        },
+        "i2s_config": {
+            "i2s_sck_bclk_gpio": 25,
+            "i2s_ws_lrc_gpio": 26,
+            "i2s_sd_gpio": 27,
+            "i2s_din_gpio": 17,
+            "i2s_gain_mic": 20,
+            "i2s_speaker_volume": 100,
+            "i2s_mic_channel": "left"
+        },
+        "led_config": {
+            "led_active": true,
+            "led_gpio": 16,
+            "led_number": 2,
+            "led_brightness": 255,
+            "led_think_color": "0000FF",
+            "led_loading_effect": 1
+        },
+        "button": {
+            "button_active": true,
+            "button_mic_gpio": 5,
+            "button_wakeup_gpio": 4,
+            "button_debounce_delay": 50,
+            "button_wakeup_long_press_active": false,
+            "button_mic_long_press_active": false,
+            "button_wakeup_long_press_action": 0,
+            "button_mic_long_press_action": 2,
+            "button_wakeup_long_press_time": 2000,
+            "button_mic_long_press_time": 2000
+        },
+        "other_settings": {
+            "logs_serial_active": true,
+            "conversation_active": true,
+            "sound_startup": true,
+            "mic_mutex_active": true,
+            "speaker_active": true
+        }
+    }
+]

@@ -4460,7 +4460,6 @@
       		};
       	}
       	else if (langg === 'snowboy'){
-      		console.log('dsadsfsdf');
       		xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config_snowboy');
       		xhr.onload = function() {
       			if (xhr.status === 200) {
@@ -4577,7 +4576,7 @@
                           show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + response.message)
                       }
                   } else {
-                      console.log('Lỗi kết nối: ' + xhr.statusText);
+					  show_message('<center><font color=red><b>Thất bại</b></font></center><br/>' + xhr.statusText)
                   }
               }
           };
@@ -4760,7 +4759,7 @@
               var fileNameWithExtension = parts.pop();
               return fileNameWithExtension;
           }
-      
+
           //Hiển thị các bài hát trong thư mục Local
           function list_audio_show_path(id_path_music) {
               var xhr = new XMLHttpRequest();

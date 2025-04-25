@@ -225,39 +225,40 @@
       }
       exit;
   }
-  
-  #Cập nhật lại hotword snowboy
-  if (isset($_GET['reload_hotword_config_snowboy'])) {
-      $directory = $VBot_Offline . "resource/snowboy/hotword";
-      // Khởi tạo cấu hình mới từ dữ liệu có sẵn trong Config
-      $newSnowboyConfig = $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] ?? [];
-      if (is_dir($directory)) {
-          // Lấy danh sách file .pmdl và .umdl
-          $files = array_merge(glob("$directory/*.pmdl"), glob("$directory/*.umdl"));
-          foreach ($files as $file) {
-              $parts = explode('/', $file);
-              $fileName = end($parts);
-              $exists = false;
-              // Kiểm tra xem file đã tồn tại trong config chưa
-              foreach ($newSnowboyConfig as $item) {
-                  if ($item['file_name'] === $fileName) {
-                      $exists = true;
-                      break;
-                  }
-              }
-              // Nếu chưa tồn tại, thêm vào config
-              if (!$exists) {
-                  $newSnowboyConfig[] = ['active' => true, 'file_name' => $fileName, 'sensitive' => 0.5];
-              }
-          }
-      }
-      $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = $newSnowboyConfig;
-      if (file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
-          echo json_encode(['status' => 'success', 'message' => 'Đã cập nhật cấu hình Hotword Snowboy thành công.']);
-      } else {
-          echo json_encode(['status' => 'error', 'message' => 'Lỗi khi ghi file cấu hình Hotword Snowboy.']);
-      }
-      exit;
-  }
+
+#Cập nhật lại hotword snowboy
+if (isset($_GET['reload_hotword_config_snowboy'])) {
+    $directory = $VBot_Offline . "resource/snowboy/hotword";
+    // Khởi tạo cấu hình mới là mảng rỗng để xóa toàn bộ dữ liệu cũ
+    $newSnowboyConfig = [];
+    if (is_dir($directory)) {
+        // Lấy danh sách file .pmdl và .umdl
+        $files = array_merge(glob("$directory/*.pmdl"), glob("$directory/*.umdl"));
+        
+        foreach ($files as $file) {
+            $parts = explode('/', $file);
+            $fileName = end($parts);
+            
+            // Thêm tất cả file vào config
+            $newSnowboyConfig[] = [
+                'active' => true,
+                'file_name' => $fileName,
+                'sensitive' => 0.5
+            ];
+        }
+        // Cập nhật config
+        $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = $newSnowboyConfig;
+        
+        // Ghi file cấu hình
+        if (file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+            echo json_encode(['status' => 'success', 'message' => 'Đã cập nhật cấu hình Hotword Snowboy thành công.']);
+        } else {
+            echo json_encode(['status' => 'error', 'message' => 'Lỗi khi ghi file cấu hình Hotword Snowboy.']);
+        }
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Thư mục hotword không tồn tại.']);
+    }
+    exit;
+}
   
   ?>
