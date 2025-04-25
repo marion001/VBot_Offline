@@ -303,7 +303,7 @@
           if (!syncCheckbox.checked) {
               return; 
           }
-          fetch("<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/?type=1&data=media_player")
+          fetch("<?php echo $URL_API_VBOT ?>/?type=1&data=media_player")
               .then(response => {
                   if (!response.ok) {
                       throw new Error(`HTTP error! status: ${response.status}`);
@@ -384,10 +384,10 @@
       					showMessagePHP(response.message);
       				}else{
       					show_message('Lỗi: ' +response.message); 
-      				}
+      				} 
               }
           });
-          xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+          xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }

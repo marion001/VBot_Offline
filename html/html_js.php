@@ -587,7 +587,7 @@
           show_message('Vui lòng chọn ít nhất một file');
       }
   }
-  //Điều khiển volume
+  //Điều khiển volume theo bước
   function control_volume(action) {
       loading("show");
       var data = JSON.stringify({
@@ -616,7 +616,7 @@
               }
           }
       });
-      xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+      xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }
@@ -649,64 +649,10 @@
               }
           }
       });
-      xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+      xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }
-  
-  
-  
-  //Phát nhạc Media Player
-  /*
-  function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
-      loading("show");
-  // Kiểm tra nếu URL bắt đầu với các domain cần tìm
-  if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/")) {
-  	
-  	getAudioLink_newspaper(url_media)
-    .then(function(audioLink) {
-      console.log("Audio Link: ", audioLink);
-  	url_media = audioLink;
-  	console.log("url_media: ", url_media);
-    })
-    .catch(function(error) {
-  	showMessagePHP("Có lỗi: " +error);
-    });
-  	
-  }
-  
-      var data = JSON.stringify({
-          "type": 1,
-          "data": "media_control",
-          "action": "play",
-          "media_link": url_media,
-          "media_cover": url_cover,
-          "media_name": name_media,
-          "media_player_source": media_source
-      });
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("readystatechange", function() {
-          if (this.readyState === XMLHttpRequest.DONE) {
-              loading("hide");
-              if (this.status === 200) {
-                  try {
-                      var data = JSON.parse(this.responseText);
-                      //console.log(data);  // Hiển thị dữ liệu trong console
-                      showMessagePHP(data.message, 7);
-                  } catch (e) {
-                      show_message("Lỗi phân tích JSON: " + e);
-                  }
-              } else {
-                  show_message("Lỗi HTTP: " + this.status, this.statusText);
-              }
-          }
-      });
-      xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(data);
-  }
-  */
-  
   
   // Hàm lấy Audio Link
   function getAudioLink_newspaper(url_media) {
@@ -785,7 +731,7 @@
               }
           }
       });
-      xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+      xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }
@@ -899,7 +845,7 @@
                   }
               }
           });
-          xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+          xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
@@ -1776,7 +1722,7 @@
   		loading("hide");
           show_message("Yêu cầu thất bại, Chương trình VBot không được khởi chạy hoặc API VBot chưa được bật");
       };
-      xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+      xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }
@@ -2117,7 +2063,7 @@
           }
       }
   });
-  xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+  xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
   xhr.setRequestHeader("Content-Type", "application/json");
   xhr.send(data);
   // Thiết lập hẹn giờ để hiển thị thông báo nếu phản hồi quá chậm
@@ -2651,7 +2597,7 @@
               }
           }
       });
-      xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+      xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }

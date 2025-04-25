@@ -2,7 +2,7 @@
     "version": "1.0.30",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi Hotword Snowboy tự động WakeUP khi ở trạng thái chờ",
-    "releaseDate": "25/04/2025-2",
+    "releaseDate": "25/04/2025-3",
     "changes": [
         {
             "type": "feature",

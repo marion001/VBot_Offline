@@ -67,6 +67,9 @@
         }
     },
     "web_interface": {
+		"external": {
+			"active": false
+		},
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },

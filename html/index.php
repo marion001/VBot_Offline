@@ -559,13 +559,13 @@
                         <div class="form-check">
                           <input <?php if ($Config['api']['active'] === false) echo "disabled"; ?> class="form-check-input" value="api" type="radio" name="select_log_display_style" id="log_display_style_api" onclick="change_og_display_style('change_log', 'api', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "api") echo "checked"; ?>>
                           <label class="form-check-label">
-                          API <a href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
+                          API <a href="<?php echo $URL_API_VBOT ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
                           </label>
                         </div>
                         <div class="form-check">
                           <input class="form-check-input" value="all" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'all', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "all") echo "checked"; ?>>
                           <label class="form-check-label">
-                          ALL (Tất Cả) <a href="<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
+                          ALL (Tất Cả) <a href="<?php echo $URL_API_VBOT ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
                           </label>
                         </div>
                       </div>
@@ -718,7 +718,7 @@
                   }
               }
           });
-          xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+          xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
@@ -756,7 +756,7 @@
                   }
               }
           });
-          xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+          xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
@@ -793,7 +793,7 @@
                       }
                   }
               });
-              xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+              xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
               xhr.setRequestHeader("Content-Type", "application/json");
               xhr.send(data);
           }
@@ -828,7 +828,7 @@
                   }
               }
           });
-          xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+          xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
@@ -891,7 +891,7 @@
                       }
                   }
               });
-              xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+              xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
               xhr.setRequestHeader("Content-Type", "application/json");
               xhr.send(data);
           }
@@ -912,7 +912,7 @@
           if (!syncCheckbox.checked) {
               return;
           }
-          fetch("<?php echo $Protocol.$serverIp.':'.$Port_API; ?>/?type=1&data=all_info")
+          fetch("<?php echo $URL_API_VBOT ?>/?type=1&data=all_info")
               .then(response => {
                   if (!response.ok) {
                       document.getElementById('div_message_error').style.display = 'block';

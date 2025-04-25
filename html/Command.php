@@ -283,7 +283,171 @@
   $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .=  stream_get_contents($stream_out);
   }
-  
+
+
+if (isset($_POST['enabled_vbot_api_external'])) {
+    $proxyConfig = <<<EOT
+    ProxyPass /vbot_api_external/ http://localhost:{$Port_API}/
+    ProxyPassReverse /vbot_api_external/ http://localhost:{$Port_API}/
+EOT;
+
+    // Thực hiện SSH kết nối
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {die($SSH_CONNECT_ERROR);}
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+    // Đọc file cấu hình
+    $cmd_read = "cat /etc/apache2/sites-available/000-default.conf";
+    $stream = ssh2_exec($connection, $cmd_read);
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $conf_content = stream_get_contents($stream_out);
+    fclose($stream);
+    // Ghi log lệnh đọc file
+    $output = "$GET_current_USER@$HostName:~ $ $cmd_read\n";
+    // Tìm khối <VirtualHost *:80>
+    if (!preg_match('/<VirtualHost\s*\*:80\s*>\s*(.*?)\s*<\/VirtualHost>/s', $conf_content, $matches)) {
+        die("Không tìm thấy khối <VirtualHost *:80> trong file cấu hình Apache2");
+    }
+    $virtual_host_content = $matches[1]; // Nội dung bên trong <VirtualHost *:80>
+    $virtual_host_full = $matches[0]; // Toàn bộ khối <VirtualHost *:80> ... </VirtualHost>
+    // Kiểm tra sự tồn tại của ProxyPass và ProxyPassReverse (bao gồm cả dòng bị bình luận)
+    $has_proxy_pass = preg_match('/^\s*(#)?\s*ProxyPass \/vbot_api_external\//m', $virtual_host_content, $proxy_pass_match);
+    $has_proxy_pass_reverse = preg_match('/^\s*(#)?\s*ProxyPassReverse \/vbot_api_external\//m', $virtual_host_content, $proxy_pass_reverse_match);
+    // Xử lý nội dung trong khối VirtualHost
+    if ($has_proxy_pass || $has_proxy_pass_reverse) {
+        // Thay thế hoặc uncomment các dòng hiện có
+        $new_vhost_content = $virtual_host_content;
+        if ($has_proxy_pass) {
+            // Nếu dòng ProxyPass tồn tại (có hoặc không có #), thay thế hoặc uncomment
+            $new_vhost_content = preg_replace(
+                '/^\s*#?\s*ProxyPass \/vbot_api_external\/.*?$/m',
+                '    ProxyPass /vbot_api_external/ http://localhost:'.$Port_API.'/',
+                $new_vhost_content
+            );
+        } else {
+            // Nếu không có ProxyPass, thêm mới vào cuối khối
+            $new_vhost_content = rtrim($new_vhost_content) . "\n    ProxyPass /vbot_api_external/ http://localhost:".$Port_API."/";
+        }
+        if ($has_proxy_pass_reverse) {
+            // Nếu dòng ProxyPassReverse tồn tại (có hoặc không có #), thay thế hoặc uncomment
+            $new_vhost_content = preg_replace(
+                '/^\s*#?\s*ProxyPassReverse \/vbot_api_external\/.*?$/m',
+                '    ProxyPassReverse /vbot_api_external/ http://localhost:'.$Port_API.'/',
+                $new_vhost_content
+            );
+        } else {
+            // Nếu không có ProxyPassReverse, thêm mới vào cuối khối
+            $new_vhost_content = rtrim($new_vhost_content) . "\n    ProxyPassReverse /vbot_api_external/ http://localhost:".$Port_API."/";
+        }
+    } else {
+        // Nếu không có cả hai, thêm cả hai vào cuối khối
+        $new_vhost_content = rtrim($virtual_host_content) . "\n" . $proxyConfig;
+    }
+    // Cập nhật toàn bộ nội dung file với khối VirtualHost đã chỉnh sửa
+    $new_conf = preg_replace(
+        '/<VirtualHost\s*\*:80\s*>\s*.*?\s*<\/VirtualHost>/s',
+        "<VirtualHost *:80>\n$new_vhost_content\n</VirtualHost>",
+        $conf_content
+    );
+    // Tạo file tạm trên server
+    $remote_temp_file = '/tmp/apache_conf_temp.conf';
+    $cmd_touch = "touch $remote_temp_file";
+    $stream_touch = ssh2_exec($connection, $cmd_touch);
+    stream_set_blocking($stream_touch, true);
+    $stream_touch_out = ssh2_fetch_stream($stream_touch, SSH2_STREAM_STDIO);
+    $result_touch = stream_get_contents($stream_touch_out);
+    fclose($stream_touch);
+    $output .= "$GET_current_USER@$HostName:~ $ $cmd_touch\n";
+    // Ghi nội dung mới vào file tạm
+    $cmd_write = "echo " . escapeshellarg($new_conf) . " > $remote_temp_file";
+    $stream_write = ssh2_exec($connection, $cmd_write);
+    stream_set_blocking($stream_write, true);
+    $stream_write_out = ssh2_fetch_stream($stream_write, SSH2_STREAM_STDIO);
+    $result_write = stream_get_contents($stream_write_out);
+    fclose($stream_write);
+    // Sao chép file tạm vào vị trí cấu hình
+    $cmd_replace = "sudo cp $remote_temp_file /etc/apache2/sites-available/000-default.conf";
+    $stream_replace = ssh2_exec($connection, $cmd_replace);
+    stream_set_blocking($stream_replace, true);
+    $stream_replace_out = ssh2_fetch_stream($stream_replace, SSH2_STREAM_STDIO);
+    $result_replace = stream_get_contents($stream_replace_out);
+    fclose($stream_replace);
+    // Kích hoạt Modules proxy và proxy_http
+    $cmd_proxy = "sudo a2enmod proxy";
+    $cmd_proxy_http = "sudo a2enmod proxy_http";
+    $stream_proxy = ssh2_exec($connection, $cmd_proxy);
+    $stream_proxy_http = ssh2_exec($connection, $cmd_proxy_http);
+    stream_set_blocking($stream_proxy, true);
+    stream_set_blocking($stream_proxy_http, true);
+    $stream_proxy_out = ssh2_fetch_stream($stream_proxy, SSH2_STREAM_STDIO);
+    $stream_proxy_http_out = ssh2_fetch_stream($stream_proxy_http, SSH2_STREAM_STDIO);
+    $result_proxy = stream_get_contents($stream_proxy_out);
+    $result_proxy_http = stream_get_contents($stream_proxy_http_out);
+    fclose($stream_proxy);
+    fclose($stream_proxy_http);
+    // Ghi log các lệnh
+    $output .= "$GET_current_USER@$HostName:~ $ $cmd_replace\n";
+    $output .= "$GET_current_USER@$HostName:~ $ $cmd_proxy\n";
+    $output .= $result_proxy . "\n";
+    $output .= "$GET_current_USER@$HostName:~ $ $cmd_proxy_http\n";
+    $output .= $result_proxy_http . "\n";
+	$output .= "Đã thiết lập cấu hình WebUI ra Internet thành công, Vui lòng Restart lại Apache2 hoặc Reboot lại hệ thống để áp dụng";
+}
+
+if (isset($_POST['disable_vbot_api_external'])) {
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {die($SSH_CONNECT_ERROR);}
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+    // Đọc file cấu hình
+    $cmd_read = "cat /etc/apache2/sites-available/000-default.conf";
+    $stream = ssh2_exec($connection, $cmd_read);
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $conf_content = stream_get_contents($stream_out);
+    fclose($stream);
+    // Ghi log lệnh đọc file
+    $output = "pi@VBot-Assistant:~ $ $cmd_read\n";
+    // Tìm khối <VirtualHost *:80>
+    if (!preg_match('/<VirtualHost\s*\*:80\s*>\s*(.*?)\s*<\/VirtualHost>/s', $conf_content, $matches)) {
+        die("Không tìm thấy khối <VirtualHost *:80> trong file cấu hình Apache2");
+    }
+	// Nội dung bên trong <VirtualHost *:80>
+    $virtual_host_content = $matches[1];
+    // Xóa tất cả các dòng ProxyPass và ProxyPassReverse (có hoặc không có #)
+    $new_vhost_content = preg_replace('/^\s*#?\s*ProxyPass\s+\/vbot_api_external\/.*$/m', '', $virtual_host_content);
+    $new_vhost_content = preg_replace('/^\s*#?\s*ProxyPassReverse\s+\/vbot_api_external\/.*$/m', '',$new_vhost_content);
+    // Cập nhật toàn bộ nội dung file với khối VirtualHost đã chỉnh sửa
+    $new_conf = preg_replace('/<VirtualHost\s*\*:80\s*>\s*.*?\s*<\/VirtualHost>/s', "<VirtualHost *:80>\n$new_vhost_content\n</VirtualHost>",$conf_content);
+    // Tạo file tạm trên server
+    $remote_temp_file = '/tmp/apache_conf_temp.conf';
+    $cmd_touch = "touch $remote_temp_file";
+    $stream_touch = ssh2_exec($connection, $cmd_touch);
+    stream_set_blocking($stream_touch, true);
+    $stream_touch_out = ssh2_fetch_stream($stream_touch, SSH2_STREAM_STDIO);
+    $result_touch = stream_get_contents($stream_touch_out);
+    fclose($stream_touch);
+    // Ghi log lệnh touch
+    $output .= "pi@VBot-Assistant:~ $ $cmd_touch\n";
+    // Ghi nội dung mới vào file tạm
+    $cmd_write = "echo " . escapeshellarg($new_conf) . " > $remote_temp_file";
+    $stream_write = ssh2_exec($connection, $cmd_write);
+    stream_set_blocking($stream_write, true);
+    $stream_write_out = ssh2_fetch_stream($stream_write, SSH2_STREAM_STDIO);
+    $result_write = stream_get_contents($stream_write_out);
+    fclose($stream_write);
+    // Sao chép file tạm vào vị trí cấu hình
+    $cmd_replace = "sudo cp $remote_temp_file /etc/apache2/sites-available/000-default.conf";
+    $stream_replace = ssh2_exec($connection, $cmd_replace);
+    stream_set_blocking($stream_replace, true);
+    $stream_replace_out = ssh2_fetch_stream($stream_replace, SSH2_STREAM_STDIO);
+    $result_replace = stream_get_contents($stream_replace_out);
+    fclose($stream_replace);
+    // Ghi log các lệnh
+    $output .= "pi@VBot-Assistant:~ $ $cmd_replace\n";
+    $output .= $result_replace . "\n";
+    $output .= "Đã vô hiệu cấu hình WebUI ra Internet thành công, Vui lòng Restart lại Apache2 hoặc Reboot lại hệ thống để áp dụng";
+}
+
   if (isset($_POST['auto_wifi_manager_only'])) {
   $file_auto_wifi_manager_only = $VBot_Offline.'resource/wifi_manager/start-wifi-connect_wifi_only.sh';
   $file_auto_service = $VBot_Offline.'resource/wifi_manager/wifi-connect.service';
@@ -1038,6 +1202,20 @@
                           </ul>
                         </div>
                       </div>
+						<div class="btn-group">
+                        <div class="dropdown">
+                          <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình WebUI Ra Internet">
+                          WebUI External
+                          </button>
+                          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="enabled_vbot_api_external" type="submit" title="Cấu Hình WebUI Ra Internet">Kích Hoạt WebUI Ra Internet</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="disable_vbot_api_external" type="submit" title="Cấu Hình WebUI Ra Internet">Vô Hiệu WebUI Ra Internet</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="apache_restart" type="submit" title="Restart Apache2">Restart WebUI Apache2</button></li>
+
+                          </ul>
+                        </div>
+                        </div>
+					  
                       <div class="btn-group">
                         <div class="dropdown">
                           <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">

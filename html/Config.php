@@ -123,6 +123,7 @@
   #Cập nhật giá trị đường dẫn path web ui
   $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
   $Config['web_interface']['errors_display'] = isset($_POST['webui_errors_display']) ? true : false;
+  $Config['web_interface']['external']['active'] = isset($_POST['webui_external']) ? true : false;
   
   
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
@@ -847,6 +848,16 @@
                         </div>
                       </div>
                     </div>
+					
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
+                      <div class="col-sm-9">
+                        <div class="form-switch">
+                          <input class="form-check-input" type="checkbox" name="webui_external" id="webui_external" <?php echo $Config['web_interface']['external']['active'] ? 'checked' : ''; ?>>
+                        </div>
+                      </div>
+                    </div>
+					
                     <div class="row mb-3">
                       <label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn):</label>
                       <div class="col-sm-9">
@@ -857,6 +868,9 @@
                         </div>
                       </div>
                     </div>
+					
+
+					
                   </div>
                 </div>
               </div>

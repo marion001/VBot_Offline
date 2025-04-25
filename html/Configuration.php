@@ -34,6 +34,7 @@
   
   //đường dẫn path VBot python
   $VBot_Offline = "/home/pi/VBot_Offline/";
+
   // Đường dẫn đến tệp JSON
   $Config_filePath = $VBot_Offline.'Config.json';
   
@@ -164,7 +165,10 @@
   } else {
       $Avata_File = "assets/img/no-face.png";
   }
-  
-  
-  
+
+if ($Config['web_interface']['external']['active'] === true){  
+	$URL_API_VBOT = "/vbot_api_external/";
+}else{
+	$URL_API_VBOT = $Protocol.$serverIp.':'.$Port_API;
+}
   ?>
