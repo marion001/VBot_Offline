@@ -6,6 +6,8 @@
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
 
+
+  
   #Quên Mật Khẩu
   if (isset($_GET['forgot_password'])) {
       $my_email = $_GET['mail'];
@@ -80,8 +82,22 @@
   echo json_encode($response);
   exit();
   }
-  
-  session_start();
+
+
+session_start();
+
+// Hàm tạo token CSRF
+function generateCsrfToken() {
+    if (empty($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+
+// Hàm kiểm tra token CSRF
+function verifyCsrfToken($token) {
+    return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
+}
 
   //Đăng xuất
   if (isset($_GET['logout'])) {
@@ -102,22 +118,28 @@
       exit;
   }
 
-  if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-      $password_user = $_POST['yourPassword'];
-      // Kiểm tra mật khẩu trực tiếp
-  	// Thay 'password' bằng mật khẩu thực tế của bạn
-      if ($password_user === $Config['contact_info']['user_login']['user_password']) {
-          $_SESSION['user_login'] = [
-  			// Lưu mật khẩu vào session để kiểm tra khi đăng xuất
-              //'password' => $password_user, 
-              'login_time' => time()
-          ];
-          header('Location: index.php');
-          exit;
-      } else {
-          $error = "Sai mật khẩu!";
-      }
-  }
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Kiểm tra CSRF token
+    if (!isset($_POST['csrf_token']) || !verifyCsrfToken($_POST['csrf_token'])) {
+        $error = "Yêu cầu không hợp lệ!";
+    } else {
+        $password_user = $_POST['yourPassword'];
+        if ($password_user === $Config['contact_info']['user_login']['user_password']) {
+            // Đăng nhập thành công
+            $_SESSION['user_login'] = [
+                'logged_in' => true,
+                'login_time' => time()
+            ];
+            header('Location: index.php');
+            exit;
+        } else {
+            // Đăng nhập thất bại
+            //sleep(1); // Thêm độ trễ để làm chậm brute force
+            $error = "Sai mật khẩu!";
+        }
+    }
+}
+generateCsrfToken();
   ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -193,6 +215,7 @@
                           <div class="col-12">
                             <label for="yourPassword" class="form-label">Mật khẩu:</label>
                             <input type="password" name="yourPassword" class="form-control border-success" placeholder="Nhập mật khẩu đăng nhập" id="yourPassword" required>
+							<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <div class="invalid-feedback">Vui lòng nhập mật khẩu của bạn!</div>
                           </div>
                           <div class="d-grid gap-2 mt-3">
