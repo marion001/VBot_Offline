@@ -16,8 +16,6 @@
                   "success" => true,
                   "message" => $Config['contact_info']['user_login']['user_password']
               ];
-              // Ví dụ: Gửi email chứa liên kết đặt lại mật khẩu
-              // sendResetLink($my_email);
           } else {
               $response = [
                   "success" => false,
@@ -127,6 +125,8 @@
     include 'html_head.php';
     ?>
   <body>
+  
+  
     <!-- Loading Mesage-->
     <div id="loadingOverlay" class="overlay_loading">
       <div class="spinner-border spinner-border-sm" role="status">
@@ -159,12 +159,15 @@
           <div class="container">
             <div class="row justify-content-center">
               <div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
-                <div class="d-flex justify-content-center py-4">
-                  <a href="index.php" class="logo d-flex align-items-center w-auto">
-                  <img src="assets/img/logo.png" alt="">
-                  <span class="d-none d-lg-block">VBot Assistant</span>
-                  </a>
-                </div>
+    <a href=""><img src="assets/img/logo.png" alt="Logo" class="logo-img mb-3" style="width: 250px; height: 250px; object-fit: contain;"></a>
+            <!-- Logo -->
+<div class="d-flex justify-content-center py-4">
+  <a href="" class="logo d-flex flex-column align-items-center w-auto">
+    <span class="d-block d-lg-none">VBot Assistant</span>  <!-- Hiển thị trên mobile -->
+    <span class="d-none d-lg-block">VBot Assistant</span>   <!-- Hiển thị trên desktop -->
+  </a>
+</div>
+
                 <!-- End Logo -->
                 <div class="card">
                   <div class="card-body">
@@ -180,6 +183,7 @@
                     <div class="tab-content pt-2">
                       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                         <div class="pt-4 pb-2">
+                          <h3 class="card-title text-center pb-0 fs-4 text-danger"><?php echo $Config['contact_info']['full_name']; ?></h5>
                           <h5 class="card-title text-center pb-0 fs-4">Đăng Nhập Hệ Thống</h5>
                         </div>
                         <?php if (isset($error)): ?>
@@ -187,8 +191,8 @@
                         <?php endif; ?>
                         <form class="row g-3 needs-validation" novalidate method="POST" action="">
                           <div class="col-12">
-                            <label for="yourPassword" class="form-label">Mật khẩu</label>
-                            <input type="password" name="yourPassword" class="form-control border-success" id="yourPassword" required>
+                            <label for="yourPassword" class="form-label">Mật khẩu:</label>
+                            <input type="password" name="yourPassword" class="form-control border-success" placeholder="Nhập mật khẩu đăng nhập" id="yourPassword" required>
                             <div class="invalid-feedback">Vui lòng nhập mật khẩu của bạn!</div>
                           </div>
                           <div class="d-grid gap-2 mt-3">

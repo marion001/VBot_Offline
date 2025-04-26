@@ -9,7 +9,21 @@
   
   header('Content-Type: application/json');
   
-  
+if ($Config['contact_info']['user_login']['active']){
+  session_start();
+  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
+  if (!isset($_SESSION['user_login']) ||
+      (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
+      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
+      session_unset();
+      session_destroy();
+      echo json_encode([
+          'success' => false,
+          'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
+      ]);
+      exit;
+  }
+}
   
   if (isset($_GET['upload_Music_Local'])) {
   	// Định nghĩa các định dạng file được phép tải lên

@@ -363,7 +363,7 @@ function displayDeviceData(data) {
         button.addEventListener('click', function() {
             const ip = this.getAttribute('data-ip');
             const index = this.getAttribute('data-index');
-            pingDevice(ip, index, true); // Tham số true để hiển thị thông báo
+            pingDevice(ip, index, true);
         });
     });
 }
@@ -484,7 +484,7 @@ function showConfigModal(device) {
         '<tr><th>Khôi Phục Cấu Hình Cài Đặt (.json):</th>' +
         '<td style="text-align: center; vertical-align: middle;"><div class="input-group mb-3"><input class="form-control client_name border-success" type="file" id="configFile_restore" accept=".json">' +
         '<button type="button" onclick="upload_restore_settings(\'' + (device.ip_address || '') + '\')" class="btn btn-success"><i class="bi bi-filetype-json"></i> Khôi Phục Cấu Hình</button>' +
-        '<a href="http://' + (device.ip_address || '') + '/VBot_Client_Dowload_Config" target="_blank"><button type="button" class="btn btn-primary"><i class="bi bi-download"></i> Tải Xuống Tệp Cấu Hình</button></a>' +
+		'<button type="button" class="btn btn-primary" onclick="downloadConfig(\'' + (device.ip_address || '') + '\')"><i class="bi bi-download"></i> Tải Xuống Tệp Cấu Hình .json</button>' +
         '</div></td></tr>' +
         '</tbody></table><hr/>' +
 
@@ -555,7 +555,6 @@ function fetchMusicList(ip_address) {
                        '</tr>' +
                        '</thead>' +
                        '<tbody>';
-
             for (var i = 0; i < data.length; i++) {
                 var item = data[i];
                 html += '<tr>' +
@@ -579,60 +578,57 @@ function fetchMusicList(ip_address) {
 }
 
 // Tải lại dữ liệu cho Client riêng lẻ
-function loading_data_client(ip_address, time_out = 1000) {
+function loading_data_client(ip_address, time_out = 10000) {
     loading('show');
     setTimeout(function() {
-        const infoUrl = 'http://' + ip_address + '/VBot_Client_Info';
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', infoUrl, true);
-        xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4) {
-                if (xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            loading('hide');
-                            loadFromServer().then(devices => {
-                                const updatedDevice = response;
-                                const deviceIndex = devices.findIndex(d => d.ip_address === ip_address);
-                                if (deviceIndex !== -1) {
-                                    devices[deviceIndex] = updatedDevice;
-                                } else {
-                                    devices.push(updatedDevice);
-                                }
-                                saveToServer(devices);
-                                displayDeviceData(devices);
-                                showMessagePHP('Đã tải lại dữ liệu cho ' + ip_address, 5);
-                                // Kiểm tra xem modal có đang mở và thuộc về IP này không
-                                const modal = document.getElementById('clientConfigModal');
-                                const isModalOpen = modal.classList.contains('show');
-                                const modalIp = modal.querySelector('#clientConfigModalLabel font')?.textContent?.includes(ip_address);
-                                if (isModalOpen && modalIp) {
-                                    showConfigModal(updatedDevice);
-                                }
-                            });
-                        } else {
-                            loading('hide');
-                            showMessagePHP('Tải lại dữ liệu thất bại', 5);
-                        }
-                    } catch (error) {
-                        loading('hide');
-                        showMessagePHP('Lỗi xử lý dữ liệu từ API: ' + error.message, 5);
-                    }
-                } else {
-                    loading('hide');
-                    showMessagePHP('Không thể kết nối tới client: ' + ip_address, 5);
+        const phpUrl = '/includes/php_ajax/Scanner.php';
+        const formData = new FormData();
+        formData.append('showJsonData_Client', ip_address);
+        fetch(phpUrl, {
+            method: 'POST',
+            body: formData
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Không thể kết nối tới server PHP');
                 }
-            }
-        };
-        xhr.send();
+                return response.json();
+            })
+            .then(response => {
+                if (response.success) {
+                    loading('hide');
+                    loadFromServer().then(devices => {
+                        const updatedDevice = response;
+                        const deviceIndex = devices.findIndex(d => d.ip_address === ip_address);
+                        if (deviceIndex !== -1) {
+                            devices[deviceIndex] = updatedDevice; 
+                        } else {
+                            devices.push(updatedDevice);
+                        }
+                        saveToServer(devices);
+                        displayDeviceData(devices);
+                        showMessagePHP('Đã tải lại dữ liệu cho ' + ip_address, 5);
+                        const modal = document.getElementById('clientConfigModal');
+                        const isModalOpen = modal.classList.contains('show');
+                        const modalIp = modal.querySelector('#clientConfigModalLabel font')?.textContent?.includes(ip_address);
+                        if (isModalOpen && modalIp) {
+                            showConfigModal(updatedDevice);
+                        }
+                    });
+                } else {
+                    throw new Error(response.error || 'Tải lại dữ liệu thất bại');
+                }
+            })
+            .catch(error => {
+                loading('hide');
+                showMessagePHP('Lỗi: ' + error.message, 5);
+            });
     }, time_out);
 }
 
-// Lưu cấu hình Config theo ip client
+//Lưu cấu hình Config theo từng Client
 function saveConfig(ip_address) {
     loading('show');
-    // Thu thập cấu hình
     const config = {
         ip_address: ip_address,
         client_name: document.querySelector('.client_name').value,
@@ -691,94 +687,98 @@ function saveConfig(ip_address) {
         config.led_config.led_think_color = '0000ff';
     }
 
-// Log để debug giá trị long press action
-    console.log('WakeUp Long Press Action:', config.button.button_wakeup_long_press_action);
-    console.log('MIC Long Press Action:', config.button.button_mic_long_press_action);
+    // Log để debug giá trị long press action
+    //console.log('WakeUp Long Press Action:', config.button.button_wakeup_long_press_action);
+    //console.log('MIC Long Press Action:', config.button.button_mic_long_press_action);
 
-    // Xây dựng dữ liệu gửi
-    const params = new URLSearchParams();
-    params.append('clientName', config.client_name);
-    params.append('udp_server', config.server.vbot_server_ip);
-    params.append('udp_server_port', config.server.vbot_server_port);
-    params.append('i2s_sck_bclk', config.i2s_config.i2s_sck_bclk_gpio);
-    params.append('i2s_ws_lrc', config.i2s_config.i2s_ws_lrc_gpio);
-    params.append('i2s_dout', config.i2s_config.i2s_din_gpio);
-    params.append('i2s_sd', config.i2s_config.i2s_sd_gpio);
-    params.append('gain_mic', config.i2s_config.i2s_gain_mic);
-    params.append('i2s_slot_mask', config.i2s_config.i2s_mic_channel);
-    params.append('volume_level', config.i2s_config.i2s_speaker_volume);
-    params.append('gpio_ws2812b', config.led_config.led_gpio);
-    params.append('num_pixels', config.led_config.led_number);
-    params.append('brightness', config.led_config.led_brightness);
-    params.append('loading_effect', config.led_config.led_loading_effect);
-    params.append('LED_THINK_COLOR', config.led_config.led_think_color);
-    params.append('gpio_button_mic', config.button.button_mic_gpio);
-    params.append('gpio_button_wakeup', config.button.button_wakeup_gpio);
-    params.append('DEBOUNCE_DELAY', config.button.button_debounce_delay);
-    params.append('longPressOption', config.button.button_wakeup_long_press_action);
-    params.append('micLongPressOption', config.button.button_mic_long_press_action);
-    params.append('longPressDuration', config.button.button_wakeup_long_press_time);
-    params.append('micLongPressDuration', config.button.button_mic_long_press_time);
+    //dữ liệu gửi
+    const formData = new FormData();
+    formData.append('client_save_config', ip_address);
+    formData.append('clientName', config.client_name);
+    formData.append('udp_server', config.server.vbot_server_ip);
+    formData.append('udp_server_port', config.server.vbot_server_port);
+    formData.append('i2s_sck_bclk', config.i2s_config.i2s_sck_bclk_gpio);
+    formData.append('i2s_ws_lrc', config.i2s_config.i2s_ws_lrc_gpio);
+    formData.append('i2s_dout', config.i2s_config.i2s_din_gpio);
+    formData.append('i2s_sd', config.i2s_config.i2s_sd_gpio);
+    formData.append('gain_mic', config.i2s_config.i2s_gain_mic);
+    formData.append('i2s_slot_mask', config.i2s_config.i2s_mic_channel);
+    formData.append('volume_level', config.i2s_config.i2s_speaker_volume);
+    formData.append('gpio_ws2812b', config.led_config.led_gpio);
+    formData.append('num_pixels', config.led_config.led_number);
+    formData.append('brightness', config.led_config.led_brightness);
+    formData.append('loading_effect', config.led_config.led_loading_effect);
+    formData.append('LED_THINK_COLOR', config.led_config.led_think_color);
+    formData.append('gpio_button_mic', config.button.button_mic_gpio);
+    formData.append('gpio_button_wakeup', config.button.button_wakeup_gpio);
+    formData.append('DEBOUNCE_DELAY', config.button.button_debounce_delay);
+    formData.append('longPressOption', config.button.button_wakeup_long_press_action);
+    formData.append('micLongPressOption', config.button.button_mic_long_press_action);
+    formData.append('longPressDuration', config.button.button_wakeup_long_press_time);
+    formData.append('micLongPressDuration', config.button.button_mic_long_press_time);
 
     // Chỉ thêm các tham số boolean nếu giá trị là true
-    if (config.led_config.led_active) params.append('ledActive', 'on');
-    if (config.button.button_active) params.append('button_active', 'on');
-    if (config.button.button_wakeup_long_press_active) params.append('longPressActive', 'on');
-    if (config.button.button_mic_long_press_active) params.append('micLongPressActive', 'on');
-    if (config.other_settings.logs_serial_active) params.append('logsActive', 'on');
-    if (config.other_settings.conversation_active) params.append('conversation_mode_active', 'on');
-    if (config.other_settings.sound_startup) params.append('sound_on_startup', 'on');
-    if (config.other_settings.mic_mutex_active) params.append('micActive', 'on');
-    if (config.other_settings.speaker_active) params.append('speakerActive', 'on');
-    const data = params.toString();
-    const url = 'http://' + ip_address + '/save';
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                loading('hide');
-                showMessagePHP('Lưu cấu hình thành công cho ' + ip_address + '|' + config.client_name, 5);
+    if (config.led_config.led_active) formData.append('ledActive', 'on');
+    if (config.button.button_active) formData.append('button_active', 'on');
+    if (config.button.button_wakeup_long_press_active) formData.append('longPressActive', 'on');
+    if (config.button.button_mic_long_press_active) formData.append('micLongPressActive', 'on');
+    if (config.other_settings.logs_serial_active) formData.append('logsActive', 'on');
+    if (config.other_settings.conversation_active) formData.append('conversation_mode_active', 'on');
+    if (config.other_settings.sound_startup) formData.append('sound_on_startup', 'on');
+    if (config.other_settings.mic_mutex_active) formData.append('micActive', 'on');
+    if (config.other_settings.speaker_active) formData.append('speakerActive', 'on');
 
-                // Gửi yêu cầu GET để lấy thông tin client
-                const infoUrl = 'http://' + ip_address + '/VBot_Client_Info';
-                const infoXhr = new XMLHttpRequest();
-                infoXhr.open('GET', infoUrl, true);
-                infoXhr.onreadystatechange = function () {
-                    if (infoXhr.readyState === 4 && infoXhr.status === 200) {
-                        try {
-                            const response = JSON.parse(infoXhr.responseText);
-                            if (response.success) {
-                                loadFromServer().then(devices => {
-                                    const updatedDevice = response;
-                                    const deviceIndex = devices.findIndex(d => d.ip_address === ip_address);
-                                    if (deviceIndex !== -1) {
-                                        devices[deviceIndex] = updatedDevice;
-                                    } else {
-                                        devices.push(updatedDevice);
-                                    }
-                                    saveToServer(devices);
-                                    displayDeviceData(devices);
-                                    showConfigModal(updatedDevice);
-                                });
-                            } else {
-                                showMessagePHP('Lấy thông tin client thất bại', 5);
-                            }
-                        } catch (error) {
-                            showMessagePHP('Lỗi xử lý dữ liệu từ API client', 5);
-                        }
-                    }
-                };
-                infoXhr.send();
-            } else {
-                loading('hide');
-                const errorMessage = xhr.responseText || 'Lưu cấu hình thất bại cho ' + ip_address;
-                showMessagePHP(errorMessage, 5);
+    fetch('/includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Không thể kết nối tới server PHP');
             }
-        }
-    };
-    xhr.send(data);
+            return response.json();
+        })
+        .then(data => {
+            if (!data.success) {
+                throw new Error(data.error || 'Lưu cấu hình thất bại cho ' + ip_address);
+            }
+            const infoFormData = new FormData();
+            infoFormData.append('showJsonData_Client', ip_address);
+            return fetch('/includes/php_ajax/Scanner.php', {
+                method: 'POST',
+                body: infoFormData
+            })
+                .then(infoResponse => {
+                    if (!infoResponse.ok) {
+                        throw new Error('Không thể kết nối tới server PHP để lấy thông tin client');
+                    }
+                    return infoResponse.json();
+                })
+                .then(infoData => {
+                    loading('hide');
+                    if (infoData.success) {
+                        showMessagePHP('Lưu cấu hình thành công cho ' + ip_address + '|' + config.client_name, 5);
+                        loadFromServer().then(devices => {
+                            const updatedDevice = infoData;
+                            const deviceIndex = devices.findIndex(d => d.ip_address === ip_address);
+                            if (deviceIndex !== -1) {
+                                devices[deviceIndex] = updatedDevice;
+                            } else {
+                                devices.push(updatedDevice);
+                            }
+                            saveToServer(devices);
+                            displayDeviceData(devices);
+                            showConfigModal(updatedDevice);
+                        });
+                    } else {
+                        throw new Error(infoData.error || 'Lấy thông tin client thất bại');
+                    }
+                });
+        })
+        .catch(error => {
+            loading('hide');
+            showMessagePHP('Lỗi: ' + error.message, 5);
+        });
 }
 
 function clearServerData() {
@@ -802,33 +802,36 @@ function playAudioFromUrl(ip_address, link_url) {
         show_message('Vui lòng nhập URL âm thanh .mp3');
         return;
     }
-	loading('show');
-    const xhr = new XMLHttpRequest();
-    const params = 'url=' + encodeURIComponent(audioUrl);
-    xhr.open('POST', 'http://'+ip_address+'/play_audio', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-				loading('hide');
-                showMessagePHP(xhr.responseText, 5);
-            } else {
-				loading('hide');
-                show_message('Lỗi khi phát âm thanh. Mã lỗi: ' + xhr.status + ' - ' + xhr.responseText);
+    loading('show');
+    const formData = new FormData();
+    formData.append('client_play_audio', ip_address);
+    formData.append('url', audioUrl);
+    fetch('/includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Không thể kết nối tới server PHP');
             }
-        }
-    };
-
-    xhr.onerror = function () {
-        loading('hide');
-		show_message('Đã xảy ra lỗi trong quá trình gửi yêu cầu phát âm thanh');
-    };
-
-    xhr.send(params);
+            return response.json();
+        })
+        .then(data => {
+            loading('hide');
+            if (data.success) {
+                showMessagePHP(data.message || 'Phát âm thanh thành công', 5);
+            } else {
+                throw new Error(data.error || 'Lỗi khi phát âm thanh');
+            }
+        })
+        .catch(error => {
+            loading('hide');
+            show_message('Lỗi: ' + error.message);
+        });
 }
 
 
-// Hàm gửi yêu cầu reset tới VBot Client
+// Hàm gửi yêu cầu control tới VBot Client
 function ctrl_act_vbot_client(ip_address, action) {
     loading('show');
     if (!ip_address || typeof ip_address !== 'string' || ip_address.trim() === '') {
@@ -841,6 +844,7 @@ function ctrl_act_vbot_client(ip_address, action) {
         loading('hide');
         return;
     }
+    let control_action;
     if (action === 'restart_esp') {
         control_action = 'restart';
     } else if (action === 'reset_wifi_esp') {
@@ -852,26 +856,31 @@ function ctrl_act_vbot_client(ip_address, action) {
         show_message('Dữ liệu thao tác không hợp lệ');
         return;
     }
-    const url = 'http://' + ip_address + '/' + control_action;
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
+    const formData = new FormData();
+    formData.append('client_ctrl_act_vbot', ip_address);
+    formData.append('action', control_action);
+    fetch('/includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Không thể kết nối tới server PHP');
+            }
+            return response.json();
+        })
+        .then(data => {
             loading('hide');
-            showMessagePHP('Đã gửi yêu cầu khởi động lại cho: ' + ip_address, 5);
-        }
-    };
-    xhr.onerror = function () {
-        loading('hide');
-        showMessagePHP('Đã gửi yêu cầu khởi động lại cho: ' + ip_address, 5);
-    };
-    xhr.timeout = 5000;
-    xhr.ontimeout = function () {
-        loading('hide');
-        showMessagePHP('Đã gửi yêu cầu khởi động lại cho: ' + ip_address, 5);
-    };
-    xhr.send();
+            if (data.success) {
+                showMessagePHP('Đã gửi yêu cầu ' + control_action + ' cho: ' + ip_address, 5);
+            } else {
+                throw new Error(data.error || 'Gửi yêu cầu thất bại');
+            }
+        })
+        .catch(error => {
+            loading('hide');
+            showMessagePHP('Lỗi: ' + error.message, 5);
+        });
 }
 
 // Tiến hành cập nhật Firmware tự động
@@ -974,7 +983,6 @@ function bypass_upgrade_firmware(ip_address, callback) {
         if (xhr.status >= 200 && xhr.status < 300) {
             var data = JSON.parse(xhr.responseText);
             if (data.success) {
-				// Trả về "Thiết bị đang nâng cấp firmware"
                 callback(data.message);
             } else {
                 show_message("Bỏ qua xác thực OTA thất bại: " + data.message);
@@ -1019,7 +1027,6 @@ function start_upgrade_firmware_manual(ip_address) {
         loading('hide');
         showMessagePHP("Gián Đoạn, hết thời gian chờ nhận phản hồi khi nâng cấp Firmware, Bạn cần nâng cấp thủ công", 5);
     }, timeoutDuration);
-
     xhr.onload = function () {
         clearTimeout(timeoutId);
         try {
@@ -1056,25 +1063,31 @@ function upload_restore_settings(ip_address) {
         return;
     }
     const formData = new FormData();
-    formData.append("file", file);
-    fetch('http://' + ip_address + '/upload_nvs_config', {
-            method: 'POST',
-            body: formData
-        })
+    formData.append('client_upload_restore_settings', ip_address);
+    formData.append('config_file', file);
+    fetch('/includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
+        method: 'POST',
+        body: formData
+    })
         .then(response => {
-            if (response.ok) {
-                loading('hide');
+            if (!response.ok) {
+                throw new Error('Không thể kết nối tới server PHP');
+            }
+            return response.json();
+        })
+        .then(data => {
+            loading('hide');
+            if (data.success) {
                 showMessagePHP("Đã tải lên tệp khôi phục cấu hình thành công!", 5);
+                loading_data_client(ip_address, 2000);
             } else {
-                loading('hide');
-                show_message("Tải lên tệp khôi phục cấu hình thất bại!");
+                throw new Error(data.error || 'Tải lên tệp khôi phục cấu hình thất bại!');
             }
         })
         .catch(error => {
             loading('hide');
-            showMessagePHP("Đã thao tác tải lên tệp .json khôi phục cấu hình", 5);
+            showMessagePHP('Lỗi: ' + error.message, 5);
         });
-    loading_data_client(ip_address, 2000);
 }
 
 // Thêm Client thủ công bằng IP
@@ -1115,22 +1128,34 @@ function reloadClients() {
 async function pingDevice(ip, index, showNotification = false) {
     loading('show');
     try {
+        const phpUrl = '/includes/php_ajax/Scanner.php';
+        const formData = new FormData();
+        formData.append('showJsonData_Client', ip);
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 3000);
-        const response = await fetch('http://' + ip + '/VBot_Client_Info', { 
-            mode: 'no-cors',
+        const response = await fetch(phpUrl, {
+            method: 'POST',
+            body: formData,
             signal: controller.signal
         });
         clearTimeout(timeoutId);
-        const statusDot = document.getElementById('status-' + index);
-        if (statusDot) {
-            statusDot.classList.remove('offline');
-            statusDot.classList.add('online');
-            statusDot.title = 'Trực Tuyến';
+
+        if (!response.ok) {
+            throw new Error('Không thể kết nối tới server PHP');
         }
-        //console.log(ip + ' is online');
-        if (showNotification) {
-            showMessagePHP('<p class="text-success"><b>Thiết bị ' + ip + ' đang Trực Tuyến</b></p>', 3);
+        const data = await response.json();
+        const statusDot = document.getElementById('status-' + index);
+        if (data.success) {
+            if (statusDot) {
+                statusDot.classList.remove('offline');
+                statusDot.classList.add('online');
+                statusDot.title = 'Trực Tuyến';
+            }
+            if (showNotification) {
+                showMessagePHP('<p class="text-success"><b>Thiết bị ' + ip + ' đang Trực Tuyến</b></p>', 3);
+            }
+        } else {
+            throw new Error(data.error || 'Thiết bị ngoại tuyến');
         }
         loading('hide');
     } catch (error) {
@@ -1140,7 +1165,6 @@ async function pingDevice(ip, index, showNotification = false) {
             statusDot.classList.add('offline');
             statusDot.title = 'Ngoại Tuyến';
         }
-        //console.log(ip + ' is offline');
         if (showNotification) {
             showMessagePHP('<p class="text-danger"><b>Thiết bị ' + ip + ' đang Ngoại Tuyến</b></p>', 3);
         }
@@ -1174,26 +1198,30 @@ function deleteClient(ip) {
         });
 }
 
-// Hàm hiển thị dữ liệu JSON trong modal
+//Hàm hiển thị dữ liệu JSON trong modal
 function showJsonData(ip_address) {
     loading('show');
-    const url = 'http://'+ip_address+'/VBot_Client_Info';
-    fetch(url)
+    const phpUrl = '/includes/php_ajax/Scanner.php';
+    const formData = new FormData();
+    formData.append('showJsonData_Client', ip_address);
+    fetch(phpUrl, {
+        method: 'POST',
+        body: formData
+    })
         .then(response => {
             if (!response.ok) {
-                throw new Error('Không thể kết nối tới client: ' + ip_address);
+                throw new Error('Không thể kết nối tới server PHP');
             }
             return response.json();
         })
         .then(data => {
             loading('hide');
-            // Định dạng JSON với khoảng cách thụt đầu dòng
+            if (!data.success) {
+                throw new Error(data.error || 'Không thể lấy dữ liệu từ client');
+            }
             const formattedJson = JSON.stringify(data, null, 2);
-            // Đặt nội dung vào thẻ <code> với class của Prism
             document.getElementById('jsonContent').innerHTML = '<code class="language-json">' + formattedJson + '</code>';
-            // Áp dụng Prism để tô màu cú pháp
             Prism.highlightAllUnder(document.getElementById('jsonContent'));
-            // Hiển thị modal
             const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));
             jsonModal.show();
         })
@@ -1204,6 +1232,52 @@ function showJsonData(ip_address) {
             Prism.highlightAllUnder(document.getElementById('jsonContent'));
             const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));
             jsonModal.show();
+        });
+}
+
+function downloadConfig(ip_address) {
+    loading('show'); // Hiển thị trạng thái đang tải
+
+    // Kiểm tra ip_address
+    if (!ip_address || typeof ip_address !== 'string' || ip_address.trim() === '') {
+        show_message('Địa chỉ IP không hợp lệ hoặc rỗng');
+        loading('hide');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('client_download_config', ip_address);
+
+    fetch('/includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
+        method: 'POST',
+        body: formData
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Không thể kết nối tới server PHP');
+            }
+            return response.json();
+        })
+        .then(data => {
+            loading('hide');
+            if (data.success) {
+                const blob = new Blob([data.content], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = data.filename || 'vbot_config_client.json';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                showMessagePHP('Tải xuống tệp cấu hình thành công', 5);
+            } else {
+                throw new Error(data.error || 'Tải xuống tệp cấu hình thất bại');
+            }
+        })
+        .catch(error => {
+            loading('hide');
+            show_message('Lỗi: ' + error.message);
         });
 }
 

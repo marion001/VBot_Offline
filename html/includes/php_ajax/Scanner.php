@@ -8,6 +8,22 @@
   include '../../Configuration.php';
   header('Content-Type: application/json');
   
+if ($Config['contact_info']['user_login']['active']){
+  session_start();
+  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
+  if (!isset($_SESSION['user_login']) ||
+      (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
+      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
+      session_unset();
+      session_destroy();
+      echo json_encode([
+          'success' => false,
+          'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
+      ]);
+      exit;
+  }
+}
+  
   if (isset($_GET['scan_mic'])) {
       // Câu lệnh gọi Python script
       $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Scan_Mic.py");
@@ -240,7 +256,7 @@
       $error_output = stream_get_contents($stderr);
   
       fclose($stream);
-  
+
       if (!empty($error_output)) {
           echo json_encode([
               'success' => false,
@@ -249,7 +265,7 @@
           ], JSON_PRETTY_PRINT);
           exit;
       }
-  
+
       $json_output = json_decode($output, true);
       if (json_last_error() === JSON_ERROR_NONE) {
           echo json_encode($json_output, JSON_PRETTY_PRINT);
@@ -262,6 +278,55 @@
       }
       exit;
   }
-  
-  
+
+
+// Kiểm tra nếu có dữ liệu POST với showJsonData_Client
+if (isset($_POST['showJsonData_Client'])) {
+    $ip_address = $_POST['showJsonData_Client'];
+    if (empty($ip_address)) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Yêu cầu không hợp lệ, thiếu showJsonData_Client hoặc giá trị rỗng'
+        ]);
+        exit;
+    }
+    if (!filter_var($ip_address, FILTER_VALIDATE_IP)) {
+        echo json_encode([
+            'success' => false,
+            'error' => 'Địa chỉ IP không hợp lệ'
+        ]);
+        exit;
+    }
+    $targetUrl = 'http://' . $ip_address . '/VBot_Client_Info';
+    try {
+        $ch = curl_init($targetUrl);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        $response = curl_exec($ch);
+        if ($response === false) {
+            throw new Exception('Không thể kết nối tới client: ' . curl_error($ch));
+        }
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        if ($httpCode !== 200) {
+            throw new Exception('Phản hồi từ client không thành công. Mã trạng thái: ' . $httpCode);
+        }
+        curl_close($ch);
+        $data = json_decode($response, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new Exception('Dữ liệu JSON không hợp lệ từ client: ' . $ip_address);
+        }
+        echo json_encode(array_merge(['success' => true], $data));
+    } catch (Exception $e) {
+        if (isset($ch)) {
+            curl_close($ch);
+        }
+        echo json_encode([
+            'success' => false,
+            'error' => $e->getMessage()
+        ]);
+    }
+}
+
+
   ?>

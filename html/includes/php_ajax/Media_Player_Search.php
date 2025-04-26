@@ -9,6 +9,22 @@
   
   header('Content-Type: application/json');
 
+if ($Config['contact_info']['user_login']['active']){
+  session_start();
+  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
+  if (!isset($_SESSION['user_login']) ||
+      (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
+      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
+      session_unset();
+      session_destroy();
+      echo json_encode([
+          'success' => false,
+          'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
+      ]);
+      exit;
+  }
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -237,6 +253,7 @@ ini_set('display_errors', 1);
       if (isset($response_data['err']) && $response_data['err'] == 0 && isset($response_data['data']['128']))
       {
           $url_128 = $response_data['data']['128'];
+          //return ['success' => true, 'url' => $url_128, 'full_data' => $response_data];
           return ['success' => true, 'url' => $url_128];
       }
       else
@@ -389,7 +406,6 @@ ini_set('display_errors', 1);
       }
   	exit();
   }
-  
   
   //GetLink Các Trang Báo
   if (isset($_GET['Get_Link_NewsPaper'])) {
@@ -1403,4 +1419,101 @@ $response['message'] = 'Trang Báo chưa được hỗ trợ';
 echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 exit();
 }
+
+// Kiểm tra dữ liệu POST với key zing_download_mp3_to_local
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Đọc dữ liệu JSON từ body (phải ở ngoài để xác định $postData)
+    $input = file_get_contents('php://input');
+    $postData = json_decode($input, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lỗi phân tích JSON POST: ' . json_last_error_msg()
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    // Xử lý khi zing_download_mp3_to_local tồn tại và là mảng
+    if (isset($postData['zing_download_mp3_to_local']) && is_array($postData['zing_download_mp3_to_local'])) {
+        $response = ['success' => false, 'message' => 'Dữ liệu POST không hợp lệ hoặc thiếu zing_download_mp3_to_local.'];
+        $data = $postData['zing_download_mp3_to_local'];
+        $mp3Url = isset($data['url']) ? filter_var($data['url'], FILTER_SANITIZE_URL) : '';
+        $songName = isset($data['name']) ? trim($data['name']) : '';
+        // Kiểm tra dữ liệu đầu vào
+        if (empty($mp3Url) || empty($songName) || !filter_var($mp3Url, FILTER_VALIDATE_URL)) {
+            $response = [
+                'success' => false,
+                'message' => 'URL hoặc tên bài hát không hợp lệ.'
+            ];
+        } else {
+            // Đảm bảo tên file có đuôi .mp3
+            if (!preg_match('/\.mp3$/i', $songName)) {
+                $songName .= '.mp3';
+            }
+            // Thư mục đích để lưu file
+            $savePath = $VBot_Offline.$Config['media_player']['music_local']['path'].'/';
+            $fullPath = $savePath . basename($songName);
+            // Kiểm tra thư mục đích
+            if (!is_dir($savePath)) {
+                if (!mkdir($savePath, 0777, true)) {
+                    $response = [
+                        'success' => false,
+                        'message' => "Không thể tạo thư mục $savePath."
+                    ];
+                }
+            } elseif (!is_writable($savePath)) {
+                $response = [
+                    'success' => false,
+                    'message' => "Thư mục $savePath không có quyền ghi."
+                ];
+            } else {
+                $ch = curl_init($mp3Url);
+                curl_setopt_array($ch, [
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_FOLLOWLOCATION => true,
+                    CURLOPT_TIMEOUT => 90, // Tăng timeout cho file lớn
+                    CURLOPT_FAILONERROR => true,
+                    CURLOPT_SSL_VERIFYPEER => false, // Bỏ qua SSL nếu cần
+                    CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+                ]);
+                $fileContent = curl_exec($ch);
+                if (curl_errno($ch)) {
+                    $response = [
+                        'success' => false,
+                        'message' => 'Lỗi cURL: ' . curl_error($ch)
+                    ];
+                } else {
+                    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+                    if ($httpCode !== 200) {
+                        $response = [
+                            'success' => false,
+                            'message' => "Không thể tải file. Mã trạng thái HTTP: $httpCode"
+                        ];
+                    } else {
+                        if (file_put_contents($fullPath, $fileContent) !== false) {
+                            chmod($fullPath, 0777);
+                            $response = [
+                                'success' => true,
+                                'message' => "Đã tải: ".basename($songName)." vào thư mục nhạc Local"
+                            ];
+                        } else {
+                            $response = [
+                                'success' => false,
+                                'message' => "Không thể lưu file tải xuống vào thư mục Local Kiểm tra quyền ghi."
+                            ];
+                        }
+                    }
+                }
+                curl_close($ch);
+            }
+        }
+        echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    echo json_encode([
+        'success' => false,
+        'message' => 'Yêu cầu POST thiếu dữ liệu hoặc định dạng sai.'
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 ?>

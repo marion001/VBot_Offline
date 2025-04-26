@@ -103,7 +103,7 @@
       logsOutput.scrollTop = logsOutput.scrollHeight;
       }
       };
-      xhr.open("GET", "<?php echo $URL_API_VBOT; ?>/logs");
+      xhr.open("GET", "<?php echo $URL_API_VBOT; ?>logs");
       xhr.send();
       }
 

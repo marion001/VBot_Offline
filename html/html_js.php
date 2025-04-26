@@ -26,28 +26,37 @@
 <script src="assets/vendor/hls/hls.js"></script>
 <!--END Thông báo -->
 <script>
-  // Đổi màu giao diện
   const themeToggle = document.getElementById('themeToggle');
+
   function setTheme(theme) {
-      document.documentElement.setAttribute('data-theme', theme);
-      localStorage.setItem('vbot_theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('vbot_theme', theme);
+    
+    if (themeToggle) {
       if (theme === 'dark') {
-          themeToggle.classList.remove('bi-moon-stars-fill');
-          themeToggle.innerHTML = '<i class="bi bi-sun"></i> Chế độ sáng';
+        themeToggle.classList.remove('bi-moon-stars-fill');
+        themeToggle.innerHTML = '<i class="bi bi-sun"></i> Chế độ sáng';
       } else {
-          themeToggle.classList.remove('bi-sun');
-          themeToggle.innerHTML = '<i class="bi bi-moon-stars-fill"></i> Chế độ tối';
+        themeToggle.classList.remove('bi-sun');
+        themeToggle.innerHTML = '<i class="bi bi-moon-stars-fill"></i> Chế độ tối';
       }
+    }
   }
+
   function toggleTheme() {
-      const currentTheme = document.documentElement.getAttribute('data-theme');
-      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-      setTheme(newTheme);
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
   }
+
   const savedTheme = localStorage.getItem('vbot_theme') || 'light';
   setTheme(savedTheme);
-  themeToggle.addEventListener('click', toggleTheme);
+
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
 </script>
+
 <!-- Template Main JS File -->
 <script src="assets/js/main.js"></script>
 <script>
@@ -58,7 +67,11 @@
       var hour = d.getHours();
       var min = d.getMinutes();
       var sec = d.getSeconds();
-      document.getElementById("times").innerHTML = formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec);
+      //document.getElementById("times").innerHTML = formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec);
+	  if (document.getElementById("times")) {
+		  document.getElementById("times").innerHTML = `${formatTime(hour)}:${formatTime(min)}:${formatTime(sec)}`;
+		}
+
   	//console.log(formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec))
   }
 
@@ -76,9 +89,17 @@
       var year = d.getFullYear();
       var day = d.getDay();
       var dayarr = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-      document.getElementById("days").innerHTML = dayarr[day];
-      document.getElementById("dates").innerHTML = date + "/" + montharr[month] + "/" + year;
+      //document.getElementById("days").innerHTML = dayarr[day];
+      //document.getElementById("dates").innerHTML = date + "/" + montharr[month] + "/" + year;
       //console.log(date + " " + montharr[month] + " " + year);
+	  
+	if (document.getElementById("days")) {
+	  document.getElementById("days").innerHTML = dayarr[day];
+	}
+
+	if (document.getElementById("dates")) {
+	  document.getElementById("dates").innerHTML = date + "/" + montharr[month] + "/" + year;
+	}
   }
   //Cập nhật ngày tháng khi trang tải xong
   document.addEventListener('DOMContentLoaded', function() {
@@ -1000,7 +1021,9 @@
                           fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (cache_ZING.duration || 'N/A') + '</font></p>';
                           fileInfo += '<button class="btn btn-success" title="Phát: ' + cache_ZING.name + '" onclick="get_ZingMP3_Link(\'' + cache_ZING.id + '\', \'' + cache_ZING.name + '\', \'' + cache_ZING.thumb + '\', \'' + cache_ZING.artist + '\')"><i class="bi bi-play-circle"></i></button>';
                           fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + cache_ZING.name + '" onclick="addToPlaylist(\'' + cache_ZING.name + '\', \'' + cache_ZING.thumb + '\', \'' + cache_ZING.id + '\', \'' + (cache_ZING.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + cache_ZING.id + '\', null, \'' + cache_ZING.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
-                          fileInfo += '</div></div>';
+						  fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: '+cache_ZING.name+'" onclick="dowload_ZingMP3_ID(\'' + cache_ZING.id + '\', \''+cache_ZING.name+'\')"><i class="bi bi-download"></i></button>';
+						  fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: '+cache_ZING.name+'" onclick="download_zingMp3_to_local(\'' + cache_ZING.id + '\', \''+cache_ZING.name+'\')"><i class="bi bi-save2"></i></button>';
+						  fileInfo += '</div></div>';
                           zingDataDiv.innerHTML += fileInfo;
                           adjustContainerStyle_tableContainer();
                       });
@@ -1066,7 +1089,9 @@
                           fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
                           fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="startMediaPlayer(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
                           fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
-                          fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                          fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: '+podcast.title+'" onclick="download_AUDIO_URL(\'' + podcast.audio + '\', \''+podcast.title+'\')"><i class="bi bi-download"></i></button>';
+						  fileInfo += ' <button class="btn btn-danger" title="Tải Vào Thư Mục Local: '+podcast.title+'" onclick="download_Link_url_to_local(\'' + podcast.audio + '\', \''+podcast.title+'\')"><i class="bi bi-save2"></i></button>';
+						  fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                           fileInfo += '</div></div>';
                           fileListDiv.innerHTML += fileInfo;
                           adjustContainerStyle_tableContainer();
@@ -1184,7 +1209,7 @@
                   // Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
                   if (Array.isArray(data.data) && data.data.length > 0) {
                       fileListDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache Youtube" onclick="cache_delete(\'Youtube\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
-                      // Xử lý và hiển thị từng podcast
+                      // Xử lý và hiển thị từng dữ liệu
                       data.data.forEach(function(youtube) {
                           var description = youtube.description.length > 70 ? youtube.description.substring(0, 70) + '...' : youtube.description;
                           var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
@@ -1416,7 +1441,9 @@
               fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (zing.duration || 'N/A') + '</font></p>';
               fileInfo += '<button class="btn btn-success" title="Phát: ' + zing.name + '" onclick="get_ZingMP3_Link(\'' + zing.id + '\', \'' + zing.name + '\', \'' + zing.thumb + '\', \'' + zing.artist + '\')"><i class="bi bi-play-circle"></i></button>';
               fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + zing.name + '" onclick="addToPlaylist(\'' + zing.name + '\', \'' + zing.thumb + '\', \'' + zing.id + '\', \'' + (zing.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + zing.id + '\', null, \'' + zing.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
-              fileInfo += '</div></div>';
+              fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: '+zing.name+'" onclick="dowload_ZingMP3_ID(\'' + zing.id + '\', \''+zing.name+'\')"><i class="bi bi-download"></i></button>';
+			  fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: '+zing.name+'" onclick="download_zingMp3_to_local(\'' + zing.id + '\', \''+zing.name+'\')"><i class="bi bi-save2"></i></button>';
+			  fileInfo += '</div></div>';
               fileListDiv.innerHTML += fileInfo;
           });
       }
@@ -1498,7 +1525,9 @@
           fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
           fileInfo += '<button class="btn btn-success" title="Phát: ' + podcast.title + '" onclick="startMediaPlayer(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
           fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
-          fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+          fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: '+podcast.title+'" onclick="download_AUDIO_URL(\'' + podcast.audio + '\', \''+podcast.title+'\')"><i class="bi bi-download"></i></button>';
+		  fileInfo += ' <button class="btn btn-danger" title="Tải Vào Thư Mục Local: '+podcast.title+'" onclick="download_Link_url_to_local(\'' + podcast.audio + '\', \''+podcast.title+'\')"><i class="bi bi-save2"></i></button>';
+		  fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
           fileInfo += '</div></div>';
           // Thêm thông tin vào phần tử danh sách
           fileListDiv.innerHTML += fileInfo;
@@ -1916,42 +1945,47 @@
   }
   
   // Hàm tải tin nhắn từ localStorage
-  function loadMessages() {
-      const chatbox = document.getElementById('chatbox');
-      const messages = JSON.parse(localStorage.getItem('messages')) || [];
-      chatbox.innerHTML = '';
-      messages.forEach(function(message, index) {
-          var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
-              '<span class="delete_message_chatbox" data-index="' + index + '" title="Xóa tin nhắn">x</span>' +
-              '<div class="message-time">' + message.time + '</div>';
-          // Kiểm tra nếu tin nhắn là tệp âm thanh
-          if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
-  // Lấy đuôi mở rộng của tệp
-              var audioExtension = message.text.split('.').pop();
-              var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text);
-              messageHTML +=
-                  '<div class="audio-container">' +
-                  '    <audio controls>' +
-                  '        <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
-                  '        Your browser does not support the audio element.' +
-                  '    </audio>' +
-                  '</div>';
-          } else {
-              messageHTML += '<div>' + message.text + '</div>';
-          }
-          messageHTML += '</div>';
-          chatbox.innerHTML += messageHTML;
-      });
-      scrollToBottom();
-      // Thêm sự kiện click cho dấu x
-      document.querySelectorAll('.delete_message_chatbox').forEach(function(button) {
-          button.addEventListener('click', function() {
-              const index = parseInt(this.getAttribute('data-index'), 10);
-              deleteMessage(index);
-          });
-      });
-      // showMessagePHP("Đã tải lại dữ liệu Chatbox", 5);
-  }
+function loadMessages() {
+    const chatbox = document.getElementById('chatbox');
+    if (!chatbox) return; // Nếu không có chatbox thì thoát luôn
+
+    const messages = JSON.parse(localStorage.getItem('messages')) || [];
+    chatbox.innerHTML = '';
+    
+    messages.forEach(function(message, index) {
+        var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
+            '<span class="delete_message_chatbox" data-index="' + index + '" title="Xóa tin nhắn">x</span>' +
+            '<div class="message-time">' + message.time + '</div>';
+
+        if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
+            var audioExtension = message.text.split('.').pop();
+            var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text);
+            messageHTML +=
+                '<div class="audio-container">' +
+                '    <audio controls>' +
+                '        <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
+                '        Your browser does not support the audio element.' +
+                '    </audio>' +
+                '</div>';
+        } else {
+            messageHTML += '<div>' + message.text + '</div>';
+        }
+
+        messageHTML += '</div>';
+        chatbox.innerHTML += messageHTML;
+    });
+
+    scrollToBottom();
+
+    // Gán sự kiện xóa tin nhắn
+    document.querySelectorAll('.delete_message_chatbox').forEach(function(button) {
+        button.addEventListener('click', function() {
+            const index = parseInt(this.getAttribute('data-index'), 10);
+            deleteMessage(index);
+        });
+    });
+}
+
   
   // Hàm xóa tất cả tin nhắn từ localStorage và giao diện
   function clearMessages() {
@@ -1972,7 +2006,7 @@
   
   // Hàm để dừng tất cả các phần tử audio đang phát
   function stopAllAudio() {
-  console.log("dừng audio");
+  //console.log("dừng audio");
   var audios = document.querySelectorAll('audio');
   audios.forEach(function(audio) {
       audio.pause();
@@ -2076,48 +2110,57 @@
       }, 13000); // 13 giây nữa để tổng cộng là 20 giây
   }, 7000); // 7 giây
   }
-  
-  // Xử lý sự kiện khi nhấn nút gửi
-  document.getElementById('send_button_chatbox').addEventListener('click', function() {
-  var userInput = document.getElementById('user_input_chatbox');
-  var message = userInput.value.trim();
-  if (message) {
-      // Tạo nội dung HTML cho tin nhắn của người dùng
-      const userMessageHTML =
-          '<div class="message user-message">' +
-          '    <div class="message-time">' + getCurrentTime() + '</div>' +
-          '    <div>' + message + '</div>' +
-          '</div>';
-      // Thêm tin nhắn vào chatbox
-      document.getElementById('chatbox').innerHTML += userMessageHTML;
-      // Lưu tin nhắn của người dùng vào localStorage
-      saveMessage('user', message);
-      // Gửi yêu cầu với tin nhắn của người dùng
-      sendRequest(message);
-      // Xóa trường nhập liệu sau khi gửi
-      userInput.value = '';
-      //kéo xuống cuối cùng Chatbox
-      setTimeout(scrollToBottom, 100);
-  }
-  });
-  
-  // Xử lý sự kiện nhấn phím Enter để gửi tin nhắn
-  document.getElementById('user_input_chatbox').addEventListener('keypress', function(event) {
-  if (event.key === 'Enter') {
+	// Xử lý sự kiện khi nhấn nút gửi
+	const sendButton = document.getElementById('send_button_chatbox');
+	if (sendButton) {
+	  sendButton.addEventListener('click', function () {
+		const userInput = document.getElementById('user_input_chatbox');
+		const message = userInput?.value.trim();
+		
+		if (message) {
+		  const userMessageHTML =
+			'<div class="message user-message">' +
+			'    <div class="message-time">' + getCurrentTime() + '</div>' +
+			'    <div>' + message + '</div>' +
+			'</div>';
+
+		  const chatbox = document.getElementById('chatbox');
+		  if (chatbox) {
+			chatbox.innerHTML += userMessageHTML;
+		  }
+
+		  saveMessage('user', message);
+		  sendRequest(message);
+		  if (userInput) userInput.value = '';
+		  setTimeout(scrollToBottom, 100);
+		}
+	  });
+	}
+  const inputChatbox = document.getElementById('user_input_chatbox');
+const sendBtnChatbox = document.getElementById('send_button_chatbox');
+
+if (inputChatbox && sendBtnChatbox) {
+  inputChatbox.addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
       event.preventDefault();
-      document.getElementById('send_button_chatbox').click();
-  }
+      sendBtnChatbox.click();
+    }
   });
+}
+  
   // Tải tin nhắn từ localStorage khi trang được tải
   loadMessages();
   
   //Khi chatbox được hiển thị hoàn toàn
   document.addEventListener('DOMContentLoaded', () => {
   const myModal = document.getElementById('modalDialogScrollable_chatbot');
-  myModal.addEventListener('shown.bs.modal', () => {
+  if (myModal) {
+    myModal.addEventListener('shown.bs.modal', () => {
       scrollToBottom();
-  });
-  });
+    });
+  }
+});
+
 </script>
 <script>
   //kiểm tra nếu có thẻ id là tableContainer sẽ thay đổi kích thước chiều dọc tùy thuộc vào nội dung
@@ -2171,7 +2214,7 @@
   function play_playlist_json_path(url_json_file) {
   	loading('show');
     var xhr = new XMLHttpRequest();
-    xhr.open("POST", "<?php echo $Protocol . $serverIp . ':' . $Port_API; ?>", true);
+    xhr.open("POST", "<?php echo $URL_API_VBOT; ?>", true);
     xhr.setRequestHeader("Content-Type", "application/json");
     var data = JSON.stringify({
       "type": 1,
@@ -2635,9 +2678,207 @@
       localStorage.removeItem('bluetoothDevices_Vbot');
       document.getElementById("Bluetooth_Scan_devices").innerHTML = "<center><h5 class='card-title text-danger'>Không có danh sách thiết bị Bluetooth nào được tìm thấy</h5></center>";
   }
-  
-  
-  
+
+  //Tải xuống bài hát Zingmp3
+  function dowload_ZingMP3_ID(zing_id, zing_name) {
+  	loading("show");
+      var xhr = new XMLHttpRequest();
+      var url = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_GetLink&Zing_ID='+zing_id;
+      xhr.open('GET', url, true);
+      xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+              try {
+                  var data = JSON.parse(xhr.responseText);
+                  if (data.success == true) {
+					fetch(data.url)
+						.then(response => {
+							loading("hide");
+							if (!response.ok) {
+								show_message('Lỗi xảy ra, không thể tải file âm thanh từ ZingMP3');
+							}
+							return response.blob();
+						})
+						.then(blob => {
+							const url = window.URL.createObjectURL(blob);
+							const a = document.createElement('a');
+							a.href = url;
+							a.download = zing_name+'.mp3';
+							document.body.appendChild(a);
+							a.click();
+							document.body.removeChild(a);
+							window.URL.revokeObjectURL(url);
+							loading("hide");
+							showMessagePHP('Đã tải xuống file âm thanh từ ZingMP3: '+zing_name+'.mp3', 5);
+						})
+						.catch(error => {
+							loading("hide");
+							show_message('Lỗi, Không thể tải file âm thanh từ Zingmp3:' + error);
+						});
+                  } else {
+  					loading("hide");
+                      show_message('Yêu cầu không thành công, Không lấy được link để tải xuống hoặc bạn có thể thử lại');
+                  }
+              } catch (e) {
+  				loading("hide");
+                  show_message('Lỗi phân tích cú pháp JSON:' + e);
+              }
+          } else if (xhr.readyState === 4) {
+  			loading("hide");
+              show_message('Lỗi tìm nạp dữ liệu:' + xhr.status);
+          }
+      };
+      xhr.send();
+  }
+
+//Tải xuống tệp âm thanh từ url/Link online
+function download_AUDIO_URL(url, name_title) {
+    if (!url || !name_title) {
+        show_message('Lỗi: URL hoặc tên bài hát không được để trống.');
+        return;
+    }
+    loading("show");
+    fetch(url)
+        .then(response => {
+            loading("hide");
+            if (!response.ok) {
+                throw new Error('Lỗi xảy ra, không thể tải file âm thanh từ ZingMP3');
+            }
+            return response.blob();
+        })
+        .then(blob => {
+            const blobUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = blobUrl;
+            a.download = name_title + '.mp3';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(blobUrl);
+            showMessagePHP('Đã tải xuống file âm thanh: ' + name_title + '.mp3', 5);
+			loading("hide");
+        })
+        .catch(error => {
+            loading("hide");
+            show_message('Lỗi, Không thể tải xuống file âm thanh: ' + error.message);
+        });
+}
+
+// Tải Nhạc ZingMP3 Vào Thư Mục Local
+function download_zingMp3_to_local(IDzing, songName) {
+    // Kiểm tra dữ liệu đầu vào
+    if (!IDzing || !songName) {
+		show_message('Lỗi: ID Zing hoặc tên bài hát không được để trống.');
+    }
+    loading("show");
+    var xhr = new XMLHttpRequest();
+    var url_get_link = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_GetLink&Zing_ID=' + encodeURIComponent(IDzing);
+    xhr.open('GET', url_get_link, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (data.success == true) {
+                    var xhr2 = new XMLHttpRequest();
+                    xhr2.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
+                    xhr2.setRequestHeader('Content-Type', 'application/json');
+                    xhr2.onreadystatechange = function () {
+                        if (xhr2.readyState === 4) {
+                            loading("hide");
+                            if (xhr2.status === 200) {
+                                try {
+                                    var data2 = JSON.parse(xhr2.responseText);
+                                    if (data2.success) {
+										showMessagePHP(data2.message, 5);
+                                    } else {
+                                        show_message('Lỗi: ' + data2.message);
+                                    }
+                                } catch (e) {
+                                    show_message('Lỗi phân tích JSON: ' + e.message);
+                                }
+                            } else {
+                                show_message('Lỗi HTTP: ' + xhr2.status);
+                            }
+                        }
+                    };
+                    var postData = JSON.stringify({
+                        zing_download_mp3_to_local: {
+                            url: data.url,
+                            name: songName
+                        }
+                    });
+                    try {
+                        xhr2.send(postData);
+                    } catch (error) {
+                        loading("hide");
+                        show_message('Lỗi gửi yêu cầu: ' + error.message);
+                    }
+                } else {
+                    loading("hide");
+                    show_message('Yêu cầu không thành công, Không lấy được link để tải xuống hoặc bạn có thể thử lại');
+                }
+            } catch (e) {
+                loading("hide");
+                show_message('Lỗi phân tích cú pháp JSON: ' + e);
+            }
+        } else if (xhr.readyState === 4) {
+            loading("hide");
+            show_message('Lỗi tìm nạp dữ liệu: ' + xhr.status);
+        }
+    };
+    xhr.send();
+}
+
+// Tải file MP3 từ URL vào thư mục local trên server
+function download_Link_url_to_local(url_audio, songName) {
+    // Kiểm tra dữ liệu đầu vào
+    if (!url_audio || !songName) {
+        show_message('Lỗi: URL âm thanh hoặc tên bài hát không được để trống.');
+        return;
+    }
+    // Loại bỏ đuôi .mp3 nếu đã có (để tránh trùng lặp trong PHP)
+    songName = songName.replace(/\.mp3$/i, '');
+    loading("show");
+    var xhr2 = new XMLHttpRequest();
+    xhr2.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
+    xhr2.setRequestHeader('Content-Type', 'application/json');
+    xhr2.onreadystatechange = function () {
+        if (xhr2.readyState === 4) {
+            loading("hide");
+            if (xhr2.status === 200) {
+                if (!xhr2.responseText) {
+                    show_message('Lỗi: Phản hồi rỗng từ server');
+                    return;
+                }
+                try {
+                    var data2 = JSON.parse(xhr2.responseText);
+                    if (data2.success) {
+                        showMessagePHP(data2.message, 5);
+                    } else {
+                        show_message('Lỗi: ' + data2.message);
+                    }
+                } catch (e) {
+                    show_message('Lỗi phân tích JSON: ' + e.message);
+                }
+            } else {
+                show_message('Lỗi HTTP: ' + xhr2.status);
+            }
+        }
+    };
+    var postData = JSON.stringify({
+        zing_download_mp3_to_local: {
+            url: url_audio,
+            name: songName
+        }
+    });
+    try {
+        xhr2.send(postData);
+    } catch (error) {
+        loading("hide");
+        show_message('Lỗi gửi yêu cầu: ' + error.message);
+    }
+}
+
+
   /*
   // Hàm thêm thông báo mới vào danh sách thông báo
   function addNotification(message) {

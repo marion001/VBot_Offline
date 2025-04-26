@@ -235,6 +235,8 @@
                                   fileInfo += '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlist.duration + '</font></p>';
       							  fileInfo += '<p style="margin: 0;">Nguồn Nhạc: <font color="green">' + playlist.source + '</font></p>';
                                   fileInfo += ' <button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="get_ZingMP3_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'' + playlist.artist + '\')"><i class="bi bi-play-circle"></i></button>';
+      							  fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: '+playlist.title+'" onclick="dowload_ZingMP3_ID(\'' + playlist.id + '\', \''+playlist.title+'\')"><i class="bi bi-download"></i></button>';
+      							  fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: '+playlist.title+'" onclick="download_zingMp3_to_local(\'' + playlist.id + '\', \''+playlist.title+'\')"><i class="bi bi-save2"></i></button>';
       							  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							  fileInfo += '</div></div>';
 
@@ -244,11 +246,13 @@
                                   fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color="green">' + playlist.title + '</font></p>';
                                   fileInfo += '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlist.duration + '</font></p>';
                                   fileInfo += '<p style="margin: 0;">Thể Loại: <font color="green">' + description + '</font></p>';
-      							fileInfo += '<p style="margin: 0;">Nguồn Nhạc: <font color="green">' + playlist.source + '</font></p>';
+      							  fileInfo += '<p style="margin: 0;">Nguồn Nhạc: <font color="green">' + playlist.source + '</font></p>';
                                   fileInfo += '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>';
-      							fileInfo += ' <a href="'+playlist.audio+'" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
-      							fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
-      							fileInfo += '</div></div>';
+								  fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: '+playlist.title+'" onclick="download_AUDIO_URL(\'' + playlist.audio + '\', \''+playlist.title+'\')"><i class="bi bi-download"></i></button>';
+      							  fileInfo += ' <button class="btn btn-danger" title="Tải Vào Thư Mục Local: '+playlist.title+'" onclick="download_Link_url_to_local(\'' + playlist.audio + '\', \''+playlist.title+'\')"><i class="bi bi-save2"></i></button>';
+								  fileInfo += ' <a href="'+playlist.audio+'" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+								  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
+      							  fileInfo += '</div></div>';
 
                               } else if (playlist.source === "Local") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
@@ -303,7 +307,7 @@
           if (!syncCheckbox.checked) {
               return; 
           }
-          fetch("<?php echo $URL_API_VBOT ?>/?type=1&data=media_player")
+          fetch("<?php echo $URL_API_VBOT ?>?type=1&data=media_player")
               .then(response => {
                   if (!response.ok) {
                       throw new Error(`HTTP error! status: ${response.status}`);

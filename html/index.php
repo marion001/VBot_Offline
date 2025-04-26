@@ -559,13 +559,13 @@
                         <div class="form-check">
                           <input <?php if ($Config['api']['active'] === false) echo "disabled"; ?> class="form-check-input" value="api" type="radio" name="select_log_display_style" id="log_display_style_api" onclick="change_og_display_style('change_log', 'api', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "api") echo "checked"; ?>>
                           <label class="form-check-label">
-                          API <a href="<?php echo $URL_API_VBOT ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
+                          API <a href="<?php echo $URL_API_VBOT ?>logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
                           </label>
                         </div>
                         <div class="form-check">
                           <input class="form-check-input" value="all" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'all', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "all") echo "checked"; ?>>
                           <label class="form-check-label">
-                          ALL (Tất Cả) <a href="<?php echo $URL_API_VBOT ?>/logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
+                          ALL (Tất Cả) <a href="<?php echo $URL_API_VBOT ?>logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
                           </label>
                         </div>
                       </div>
@@ -912,12 +912,19 @@
           if (!syncCheckbox.checked) {
               return;
           }
-          fetch("<?php echo $URL_API_VBOT ?>/?type=1&data=all_info")
+          fetch("<?php echo $URL_API_VBOT ?>?type=1&data=all_info")
               .then(response => {
                   if (!response.ok) {
                       document.getElementById('div_message_error').style.display = 'block';
                       document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + response.status;
                   }
+					// Kiểm tra Content-Type
+					const contentType = response.headers.get('content-type');
+					if (!contentType || !contentType.includes('application/json')) {
+						return response.text().then(text => {
+							throw new Error('Dữ liệu phản hồi không phải JSON');
+						});
+					}
                   return response.json();
               })
               .then(data => {
@@ -957,21 +964,21 @@
                       document.getElementById('media-cover').src = data.media_player.media_cover ? data.media_player.media_cover : 'assets/img/Error_Null_Media_Player.png';
                       // Cập nhật giá trị full time
                       fullTime = data.media_player.full_time;
-      	//Log thay đổi chế độ đầu ra
-      	if (data.log_display_style === "console"){
-      		document.getElementById('log_display_style_console').checked = true;
-      		rlc_log_display_style = "Console";
-      	}else if (data.log_display_style === "display_screen"){
-      		document.getElementById('log_display_style_oled_display').checked = true;
-      		rlc_log_display_style = "Display Screen";
-      	}else if (data.log_display_style === "api"){
-      		document.getElementById('log_display_style_api').checked = true;
-      		rlc_log_display_style = "API";
-      	}else if (data.log_display_style === "all"){
-      		document.getElementById('log_display_style_both').checked = true;
-      		rlc_log_display_style = "ALL";
-      	}
-      	document.getElementById('show_log_name_log_display_style').innerHTML = ' | <font color=green>'+rlc_log_display_style+'</font>';
+					  //Log thay đổi chế độ đầu ra
+					if (data.log_display_style === "console"){
+						document.getElementById('log_display_style_console').checked = true;
+						rlc_log_display_style = "Console";
+					}else if (data.log_display_style === "display_screen"){
+						document.getElementById('log_display_style_oled_display').checked = true;
+						rlc_log_display_style = "Display Screen";
+					}else if (data.log_display_style === "api"){
+						document.getElementById('log_display_style_api').checked = true;
+						rlc_log_display_style = "API";
+					}else if (data.log_display_style === "all"){
+						document.getElementById('log_display_style_both').checked = true;
+						rlc_log_display_style = "ALL";
+					}
+					document.getElementById('show_log_name_log_display_style').innerHTML = ' | <font color=green>'+rlc_log_display_style+'</font>';
                       if (!isHovering_led_brightness) {
                           updateBrightness(data.led_brightness);
                       }
@@ -989,14 +996,12 @@
                       }
                   } else {
                       document.getElementById('div_message_error').style.display = 'block';
-                      // Hiển thị thông báo lỗi khi lấy dữ liệu không thành công
-                      console.log('Lỗi khi lấy dữ liệu', data.message);
+                      //console.log('Lỗi khi lấy dữ liệu', data.message);
                   }
               })
               .catch(error => {
-                  // Hiển thị thẻ #div_message_error
                   document.getElementById('div_message_error').style.display = 'block';
-                  document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + error;
+                  document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: '+response.status +', '+ error;
               });
       }
 

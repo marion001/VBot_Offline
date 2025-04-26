@@ -1,8 +1,8 @@
 {
     "version": "1.0.31",
     "projectName": "WebUI VBot Offline",
-    "description": "Cho Phép Truy Cập WebUI VBot Ra Bên Ngoài Internet",
-    "releaseDate": "25/04/2025-2_beta",
+    "description": "Nâng cấp cơ chế Bảo mật dữ liệu người dùng khi truy cập WebUI từ bên ngoài Internet, Hỗ trợ Get Link, tải xuống tệp âm thanh ZingMP3",
+    "releaseDate": "26/04/2025",
     "changes": [
         {
             "type": "feature",

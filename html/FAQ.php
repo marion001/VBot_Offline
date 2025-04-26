@@ -510,7 +510,21 @@
 	  </div>
       </div>
       </div>
-			
+
+      <div class="card accordion" id="accordion_button_socket_streaming_audio_server">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#OK_webui_external" aria-expanded="false" aria-controls="OK_webui_external">
+      Cho Phép Truy Cập Giao Diện WebUI Bên Ngoài Internet:</h5>
+      <div id="OK_webui_external" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#OK_webui_external">
+		- B1: Cần Bật trong tab: <b>Cấu Hình Config -> Web Interface (Giao Diện) -> Cho Phép Truy Cập Bên Ngoài Internet -> Lưu Cấu Hình</b><br/>
+		- B2: Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/>
+		- B3: Sau đó Reboot lại hệ thống hoặc Restart lại Apache2 để áp dụng thay đổi<br/><br/>
+		- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này<br/><br/>
+		- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>
+	  </div>
+      </div>
+      </div>
+
 			
           </div>
         </div>
