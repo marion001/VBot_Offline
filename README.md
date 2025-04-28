@@ -24,6 +24,11 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 
 - Thiết Lập Diy VBot Client Kết Nối Tới Loa VBot
       : https://github.com/marion001/VBot_Client_Offline
+
+- Thông Tin Đăng Nhập SSH:
+
+        $:> user: pi
+        $:> pass: vbot123
   
 - Chạy VBot thủ công:
 
