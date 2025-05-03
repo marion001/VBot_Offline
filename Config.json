@@ -666,7 +666,6 @@
                     "Vbot_error.log",
                     "stt_token_google_cloud.json",
                     "tts_token_google_cloud.json",
-					"Data_VBot_Client.json",
                     "Home_Assistant.json",
                     "Home_Assistant_Custom.json",
                     "Data_Schedule.json",
@@ -677,6 +676,8 @@
                     "ZingMP3.json",
                     "Dev_Assistant.py",
                     "Dev_TTS.py",
+                    "Dev_Led.py",
+                    "Dev_Customization.py",
                     "eng",
                     "vi",
                     "library",
@@ -710,13 +711,14 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "News_Paper.json",
-					"Data_VBot_Client.json",
                     "PlayList.json",
                     "PodCast.json",
                     "Youtube.json",
                     "ZingMP3.json",
                     "client_secret.json",
                     "verify_token.json",
+                    "VBot_Devices_Network.json",
+                    "Data_VBot_Client.json",
                     "__pycache__"
                 ]
             }

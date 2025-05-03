@@ -1,7 +1,6 @@
 {
     "intents": [
         {
-            "active": true,
             "name": "Tắt Đèn Ngủ",
             "reply": "biết rồi",
             "data_yaml": {
@@ -14,7 +13,8 @@
             "questions": [
                 "tắt hộ cái đèn ngủ",
                 "đèn ngủ tắt hộ đi"
-            ]
+            ],
+            "active": false
         },
         {
             "name": "Bật Đèn Ngủ",
@@ -33,7 +33,6 @@
             "active": false
         },
         {
-            "active": true,
             "name": "Tắt Đèn Phòng Ngủ Và Đèn Ngủ",
             "reply": "",
             "data_yaml": {
@@ -50,7 +49,8 @@
                 "tắt đèn phòng ngủ cả đèn ngủ đi nhé",
                 "tắt đèn phòng ngủ lên",
                 "tắt đèn phòng ngủ nhé"
-            ]
+            ],
+            "active": false
         },
         {
             "name": "Thiết Lập Rèm Phòng Khách",

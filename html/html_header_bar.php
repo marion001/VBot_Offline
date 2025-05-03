@@ -46,7 +46,7 @@
       </li>
       <!-- End Notification Nav -->
       <li class="nav-item nav-icon" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng">
-        <i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="get_localStorage_vbotScanDevices()"></i>
+        <i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="get_vbotScanDevices()"></i>
       </li>
       <div class="modal fade" id="modalDialogScrollable_VBot_Scan_Devicde" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable" id="vbotScan_size_setting">

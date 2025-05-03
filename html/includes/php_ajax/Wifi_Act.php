@@ -17,7 +17,7 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode([
           'success' => false,
           'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-      ]);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
 }
@@ -331,14 +331,14 @@ if ($Config['contact_info']['user_login']['active']){
           'success' => true,
           'message' => 'Lấy danh sách WiFi thành công.',
           'data' => $formattedWifiInfo
-      ], JSON_PRETTY_PRINT);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   } else {
       // Trả về kết quả JSON với trạng thái success là false nếu lệnh không thành công
       echo json_encode([
           'success' => false,
           'message' => 'Không thể lấy danh sách WiFi.',
           'data' => []
-      ], JSON_PRETTY_PRINT);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   }
   exit();
   }
@@ -405,7 +405,7 @@ if ($Config['contact_info']['user_login']['active']){
       'success' => true,
       'message' => 'Dữ liệu đã được lấy thành công.',
       'data' => $wifiData
-  ], JSON_PRETTY_PRINT);
+  ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   exit();
   }
   ?>

@@ -1,0 +1,14 @@
+[
+    {
+        "ip_address": "192.168.14.113",
+        "port_api": 5002,
+        "host_name": "VBot-Assistant",
+        "user_name": "Loa Phòng Ngủ"
+    },
+    {
+        "ip_address": "192.168.14.194",
+        "port_api": 5002,
+        "host_name": "VBot-Assistant",
+        "user_name": "Vũ Tuyển DEV"
+    }
+]

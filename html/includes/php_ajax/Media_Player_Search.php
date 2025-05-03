@@ -20,7 +20,7 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode([
           'success' => false,
           'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-      ]);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
 }
@@ -141,7 +141,7 @@ ini_set('display_errors', 1);
               $files_info[] = ['name' => $item, 'cover' => $Cover_URL_Local . '/assets/img/icon_audio_local.png', 'full_path' => $path, 'size' => bytesToMB(filesize($path)) ];
           }
       }
-      echo json_encode($files_info, JSON_PRETTY_PRINT);
+      echo json_encode($files_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit();
   }
   
@@ -183,7 +183,7 @@ ini_set('display_errors', 1);
       }
       // Trả về kết quả dưới dạng JSON
       //header('Content-Type: application/json');
-      echo json_encode($files_info, JSON_PRETTY_PRINT);
+      echo json_encode($files_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit();
   }
   
@@ -281,8 +281,8 @@ ini_set('display_errors', 1);
               ];
           }
       }
-      header('Content-Type: application/json');
-      echo json_encode($radio_info, JSON_PRETTY_PRINT);
+      //header('Content-Type: application/json');
+      echo json_encode($radio_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit();
   }
   
@@ -317,13 +317,13 @@ ini_set('display_errors', 1);
           'success' => false,
           'message' => 'Tên bài hát không được cung cấp.'
       );
-      echo json_encode($response, JSON_PRETTY_PRINT);
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
       $zingJsonPath = '../cache/ZingMP3.json';
       if (!file_exists($zingJsonPath)) {
           // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
-          file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT));
+          file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           chmod($zingJsonPath, 0777);
       }
       $curl = curl_init();
@@ -417,7 +417,7 @@ ini_set('display_errors', 1);
           'message' => 'Cần nhập URL,Link Báo',
   		'data' => []
       );
-      echo json_encode($response, JSON_PRETTY_PRINT);
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
   if (strpos($URL, "vietnamnet.vn") !== false) {
@@ -560,13 +560,13 @@ ini_set('display_errors', 1);
           'message' => 'Cần nhập dữ liệu để tìm kiếm',
   		'data' => []
       );
-      echo json_encode($response, JSON_PRETTY_PRINT);
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
       $podcastJsonPath = '../cache/PodCast.json';
       if (!file_exists($podcastJsonPath)) {
           // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
-          file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT));
+          file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           chmod($podcastJsonPath, 0777);
       }
   
@@ -648,7 +648,7 @@ ini_set('display_errors', 1);
   	//Cache Ghi đè toàn bộ nội dung vào file ZingMP3.json
       file_put_contents($podcastJsonPath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
   }
-  echo json_encode($result, JSON_PRETTY_PRINT);
+  echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   exit();
   }
   
@@ -681,13 +681,13 @@ ini_set('display_errors', 1);
               'message' => 'Cần nhập dữ liệu để tìm kiếm',
               'data' => []
           );
-          echo json_encode($responseb, JSON_PRETTY_PRINT);
+          echo json_encode($responseb, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
       $youtubeJsonPath = '../cache/Youtube.json';
       if (!file_exists($youtubeJsonPath)) {
           // Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
-          file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT));
+          file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           chmod($youtubeJsonPath, 0777);
       }
       $searchUrlYoutube = "https://www.googleapis.com/youtube/v3/search?part=snippet&q=" . urlencode($Youtube_Name) . "&maxResults=" . $Youtube_Limit . "&key=" . $Config['media_player']['youtube']['google_apis_key'];
@@ -734,7 +734,7 @@ ini_set('display_errors', 1);
                   'message' => 'Tìm kiếm thành công',
                   'data' => $items
               ];
-              echo json_encode($responsez, JSON_PRETTY_PRINT);
+              echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   			
   			file_put_contents($youtubeJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           }
@@ -772,7 +772,7 @@ ini_set('display_errors', 1);
               'message' => 'Cần nhập ID của video Youtube',
               'data' => []
           );
-          echo json_encode($response, JSON_PRETTY_PRINT);
+          echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
       // Câu lệnh gọi Python script
@@ -785,7 +785,7 @@ ini_set('display_errors', 1);
               'message' => 'Không thể kết nối tới máy chủ SSH.',
               'data' => []
           );
-          echo json_encode($response, JSON_PRETTY_PRINT);
+          echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
       if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
@@ -794,7 +794,7 @@ ini_set('display_errors', 1);
               'message' => 'Xác thực SSH không thành công.',
               'data' => []
           );
-          echo json_encode($response, JSON_PRETTY_PRINT);
+          echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
       // Thực thi câu lệnh Python trên máy chủ SSH
@@ -805,7 +805,7 @@ ini_set('display_errors', 1);
               'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
               'data' => []
           );
-          echo json_encode($response, JSON_PRETTY_PRINT);
+          echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
       // Chuyển sang chế độ đồng bộ để đợi kết quả
@@ -828,7 +828,7 @@ ini_set('display_errors', 1);
           );
       }
       fclose($stream);
-      echo json_encode($response, JSON_PRETTY_PRINT);
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
   
@@ -1080,7 +1080,7 @@ ini_set('display_errors', 1);
       ];
       if (empty($News_Paper)) {
           $response['message'] = 'Cần nhập dữ liệu để tìm kiếm';
-          echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+          echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
   	$filePath = "../cache/".$Config['media_player']['news_paper']['newspaper_file_name'];
@@ -1416,7 +1416,7 @@ $response['message'] = "Không tìm thấy thẻ nào với class 'horizontalPos
 else {
 $response['message'] = 'Trang Báo chưa được hỗ trợ';
 }
-echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 exit();
 }
 
@@ -1429,7 +1429,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         echo json_encode([
             'success' => false,
             'message' => 'Lỗi phân tích JSON POST: ' . json_last_error_msg()
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
     // Xử lý khi zing_download_mp3_to_local tồn tại và là mảng
@@ -1506,13 +1506,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 curl_close($ch);
             }
         }
-        echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+        echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         exit;
     }
     echo json_encode([
         'success' => false,
         'message' => 'Yêu cầu POST thiếu dữ liệu hoặc định dạng sai.'
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }
 

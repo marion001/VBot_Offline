@@ -18,7 +18,7 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode([
           'success' => false,
           'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-      ]);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
 }
@@ -377,7 +377,7 @@ if ($Config['contact_info']['user_login']['active']){
   	];
       $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
       if (!file_exists($filePath_HASS)) {
-          file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT));
+          file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           chmod($filePath_HASS, 0777);
       }
       $existingData = json_decode(file_get_contents($filePath_HASS), true);

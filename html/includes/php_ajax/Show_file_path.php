@@ -23,7 +23,7 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode([
           'success' => false,
           'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-      ]);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
 }

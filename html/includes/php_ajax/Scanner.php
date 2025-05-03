@@ -19,7 +19,7 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode([
           'success' => false,
           'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-      ]);
+      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit;
   }
 }
@@ -144,75 +144,172 @@ if ($Config['contact_info']['user_login']['active']){
       $response['devices'] = $control_data;
   
       // Chuyển đổi sang định dạng JSON và trả về
-      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+      echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       exit();
   }
   
   
+  
   #Scan các thiết bị Chạy VBot trong mạng Lan
-  if (isset($_GET['VBot_Device_Scaner'])) {
-      $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/VBot_Device_Scaner.py");
-  
-      $connection = ssh2_connect($ssh_host, $ssh_port);
-      if (!$connection) {
-          echo json_encode([
-              'success' => false,
-              'message' => 'Không thể kết nối tới máy chủ SSH.',
-              'data' => []
-          ], JSON_PRETTY_PRINT);
-          exit;
-      }
-  
-      if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-          echo json_encode([
-              'success' => false,
-              'message' => 'Xác thực SSH không thành công.',
-              'data' => []
-          ], JSON_PRETTY_PRINT);
-          exit;
-      }
-  
-      $stream = ssh2_exec($connection, $CMD);
-      if (!$stream) {
-          echo json_encode([
-              'success' => false,
-              'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
-              'data' => []
-          ], JSON_PRETTY_PRINT);
-          exit;
-      }
-  
-      stream_set_blocking($stream, true);
-  
-      $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-      $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
-  
-      $output = stream_get_contents($stdout);
-      $error_output = stream_get_contents($stderr);
-  
-      fclose($stream);
-  
-      if (!empty($error_output)) {
-          echo json_encode([
-              'success' => false,
-              'message' => 'Lỗi từ script Python: ' . $error_output,
-              'data' => []
-          ], JSON_PRETTY_PRINT);
-          exit;
-      }
-  
-      $json_output = json_decode($output, true);
-      if (json_last_error() === JSON_ERROR_NONE) {
-          echo json_encode($json_output, JSON_PRETTY_PRINT);
-      } else {
-          echo json_encode([
-              'success' => false,
-              'message' => 'Phản hồi từ script Python không hợp lệ.',
-              'data' => []
-          ], JSON_PRETTY_PRINT);
-      }
-      exit;
-  }
+if (isset($_GET['VBot_Device_Scaner'])) {
+    $json_file_path = "$directory_path/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json";
+    $json_dir_path = dirname($json_file_path);
+    // Kiểm tra và tạo thư mục nếu chưa tồn tại
+    if (!is_dir($json_dir_path)) {
+        try {
+            mkdir($json_dir_path, 0777, true);
+            chmod($json_dir_path, 0777);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không thể tạo thư mục: ' . $e->getMessage(),
+                'data' => []
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            exit;
+        }
+    }
+    // Kiểm tra và tạo file JSON nếu chưa tồn tại
+    if (!file_exists($json_file_path)) {
+        try {
+            file_put_contents($json_file_path, json_encode([]));
+            chmod($json_file_path, 0777);
+        } catch (Exception $e) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không thể tạo file JSON: ' . $e->getMessage(),
+                'data' => []
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            exit;
+        }
+    }
+    $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/VBot_Device_Scaner.py");
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối tới máy chủ SSH.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Xác thực SSH không thành công.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    stream_set_blocking($stream, true);
+    $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+    $output = stream_get_contents($stdout);
+    $error_output = stream_get_contents($stderr);
+    fclose($stream);
+    if (!empty($error_output)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lỗi từ script Python: ' . $error_output,
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    $json_output = json_decode($output, true);
+    if (json_last_error() === JSON_ERROR_NONE) {
+        if ($json_output['success']) {
+            //Lọc dữ liệu hoàn chỉnh (tất cả trường không được null)
+            $complete_data = array_filter($json_output['data'], function($device) {
+                return !is_null($device['ip_address']) && 
+                       !is_null($device['port_api']) && 
+                       !is_null($device['host_name']) && 
+                       !is_null($device['user_name']);
+            });
+            //Lưu dữ liệu hoàn chỉnh vào file JSON
+            if (!empty($complete_data)) {
+                try {
+                    $existing_data = json_decode(file_get_contents($json_file_path), true);
+                    if (!is_array($existing_data)) {
+						//Khởi tạo mảng rỗng nếu file JSON lỗi
+                        $existing_data = [];
+                    }
+                    //Gộp dữ liệu mới, loại bỏ trùng lặp dựa trên ip_address
+                    $ip_addresses = array_column($existing_data, 'ip_address');
+                    foreach ($complete_data as $new_device) {
+                        $index = array_search($new_device['ip_address'], $ip_addresses);
+                        if ($index !== false) {
+							//Cập nhật nếu đã tồn tại
+                            $existing_data[$index] = $new_device;
+                        } else {
+							//Thêm mới nếu chưa có
+                            $existing_data[] = $new_device;
+                        }
+                    }
+                    if (!file_put_contents($json_file_path, json_encode(array_values($existing_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+                        throw new Exception('Không thể ghi dữ liệu vào file JSON.');
+                    }
+                    chmod($json_file_path, 0777);
+                } catch (Exception $e) {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Lỗi khi lưu dữ liệu: ' . $e->getMessage(),
+                        'data' => []
+                    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    exit;
+                }
+            }
+            $json_output['data'] = json_decode(file_get_contents($json_file_path), true) ?? [];
+        }
+        echo json_encode($json_output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Phản hồi từ script Python không hợp lệ.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    exit;
+}
+
+//Xóa dữ liệu đã Scan các thiết bị sử dụng Vbot trong mạng Lan
+if (isset($_GET['Clean_VBot_Device_Scaner'])) {
+    $json_file_path = "$directory_path/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json";
+    if (!file_exists($json_file_path)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'File JSON không tồn tại.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    try {
+        // Ghi mảng rỗng vào file JSON
+        if (file_put_contents($json_file_path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) === false) {
+            throw new Exception('Không thể ghi dữ liệu vào file json');
+        }
+        chmod($json_file_path, 0777);
+        echo json_encode([
+            'success' => true,
+            'message' => 'Đã xóa dữ liệu thành công',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lỗi khi xóa dữ liệu: ' . $e->getMessage(),
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+    exit;
+}
 
 //Scan VBot Client trong Mạng Lan
   if (isset($_GET['VBot_Client_Device_Scaner'])) {
@@ -224,7 +321,7 @@ if ($Config['contact_info']['user_login']['active']){
               'success' => false,
               'message' => 'Không thể kết nối tới máy chủ SSH.',
               'data' => []
-          ], JSON_PRETTY_PRINT);
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
   
@@ -233,7 +330,7 @@ if ($Config['contact_info']['user_login']['active']){
               'success' => false,
               'message' => 'Xác thực SSH không thành công.',
               'data' => []
-          ], JSON_PRETTY_PRINT);
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
   
@@ -243,7 +340,7 @@ if ($Config['contact_info']['user_login']['active']){
               'success' => false,
               'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
               'data' => []
-          ], JSON_PRETTY_PRINT);
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
   
@@ -262,19 +359,19 @@ if ($Config['contact_info']['user_login']['active']){
               'success' => false,
               'message' => 'Lỗi từ script Python: ' . $error_output,
               'data' => []
-          ], JSON_PRETTY_PRINT);
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
 
       $json_output = json_decode($output, true);
       if (json_last_error() === JSON_ERROR_NONE) {
-          echo json_encode($json_output, JSON_PRETTY_PRINT);
+          echo json_encode($json_output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       } else {
           echo json_encode([
               'success' => false,
               'message' => 'Phản hồi từ script Python không hợp lệ.',
               'data' => []
-          ], JSON_PRETTY_PRINT);
+          ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
       }
       exit;
   }

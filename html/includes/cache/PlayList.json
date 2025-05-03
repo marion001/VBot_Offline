@@ -25,6 +25,30 @@
             "id": "Z7E7WO9D",
             "channelTitle": null,
             "artist": "Tú Na"
+        },
+        {
+            "ids_list": "D8BB9F",
+            "title": "Cảm Ơn Em.mp3",
+            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em.mp3",
+            "duration": "4.33 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em.mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "6711B8",
+            "title": "Nợ Tình Em.mp3",
+            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Nợ Tình Em.mp3",
+            "duration": "4.15 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Nợ Tình Em.mp3",
+            "channelTitle": null,
+            "artist": null
         }
     ]
 }

@@ -183,7 +183,7 @@
       link.click();
       document.body.removeChild(link);
   }
-  
+
   //Hiển thị tất cả các file có trong thư mục show ra tên file, đường dẫn, thời gian tạo, kích thước tệp
   function show_all_file_in_directory(directory_path, source_backup, resultDiv_Id) {
   	loading("show");
@@ -318,13 +318,12 @@
   	
   }
   
-  // Hiển thị thông báo xác nhận với thông tin chi tiết về backup
+  //Hiển thị thông báo xác nhận với thông tin chi tiết về backup
   function confirmRestore(backup_file_name) {
       var result = confirm(backup_file_name);
       if (result) {
           loading('show');
       }
-      // Nếu người dùng nhấn "Cancel", ngăn không cho form được submit
       return result;
   }
   
@@ -336,7 +335,6 @@
           document.execCommand("copy");
           showMessagePHP("Đã Sao Chép!", 3);
       } catch (err) {
-          //console.error('Lỗi khi sao chép nội dung: ', err);
           show_message("Lỗi khi sao chép nội dung. Vui lòng thử lại.");
       }
   }
@@ -344,10 +342,8 @@
   //Mở đường dẫn trong tab mới
   function openNewTab(url_link) {
       if (url_link) {
-          // Mở đường dẫn trong tab mới nếu giá trị tồn tại
           window.open(url_link, '_blank');
       } else {
-          // Xử lý trường hợp không có giá trị data-url-link
           show_message('Không có đường dẫn được cung cấp');
       }
   }
@@ -367,14 +363,10 @@
                   var codeElement = document.getElementById('code_config');
                   if (response.success) {
                       if (typeof response.data === 'object') {
-                          // Hiển thị dữ liệu JSON với cú pháp màu sắc
                           codeElement.textContent = JSON.stringify(response.data, null, 2);
-                          // Áp dụng cú pháp màu sắc
                           Prism.highlightElement(codeElement);
                       } else {
-                          // Hiển thị dữ liệu văn bản
                           codeElement.textContent = response.data;
-                          // Đổi lớp để hiển thị văn bản không có màu sắc
                           codeElement.className = 'language-txt';
                       }
                   } else {
@@ -388,7 +380,6 @@
           }
       };
       xhr.onerror = function() {
-          //document.getElementById('message_LoadConfigJson').textContent = 'Lỗi kết nối.';
           show_message("Lỗi kết nối");
       };
       xhr.send();
@@ -427,8 +418,7 @@
                       document.getElementById('show_all_file_folder_Backup_Program').innerHTML = table;
                   }else if (document.getElementById('show_all_file_folder_Backup_web_interface')){
   					document.getElementById('show_all_file_folder_Backup_web_interface').innerHTML = table;
-  				}
-                     // document.getElementById(id_inter_html).innerHTML = table; // Hiển thị bảng
+					}
                   } else {
   					loading('hide');
                       show_message(response.message);
@@ -479,8 +469,7 @@
   							// Kích hoạt Prism.js để làm nổi bật cú pháp
   							Prism.highlightElement(modalContentElement);
                       }
-                      $('#responseModal_read_files_in_backup').modal('show'); // Hiện modal
-                     // document.getElementById(id_inter_html).innerHTML = table; // Hiển thị bảng
+                      $('#responseModal_read_files_in_backup').modal('show');
                   } else {
   					loading('hide');
                       show_message(response.message);
@@ -2441,7 +2430,7 @@ if (inputChatbox && sendBtnChatbox) {
           }
       checkForUpdate();
   }
-  
+
   //Quét các thiết bị sử dụng VBot trong cùng lớp mạng
   function scan_VBot_Device() {
       loading('show');
@@ -2480,7 +2469,7 @@ if (inputChatbox && sendBtnChatbox) {
   											'<th style="text-align: center; vertical-align: middle;">Địa Chỉ IP</th>' +
   											'<th style="text-align: center; vertical-align: middle;">Port API</th>' +
   											'<th style="text-align: center; vertical-align: middle;">Host Name</th>' +
-  											'<th style="text-align: center; vertical-align: middle;">VBot Name</th>' +
+  											'<th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th>' +
   										'</tr>' +
   									'</thead>' +
   									'<tbody>';
@@ -2498,8 +2487,6 @@ if (inputChatbox && sendBtnChatbox) {
   								'</tbody>' +
   							'</table>';
   							document.getElementById("vbot_Scan_devices").innerHTML = tableHTML;
-  							//Lưu dữ liệu vào localStorage dạng json
-  							localStorage.setItem('vbotScanDevices', JSON.stringify(data));
   						}
   						else {
   							document.getElementById("vbot_Scan_devices").innerHTML = "Không tìm thấy thiết bị nào.";
@@ -2518,48 +2505,84 @@ if (inputChatbox && sendBtnChatbox) {
       };
       xhr.send();
   }
-  
-  // Lấy lại dữ liệu scan trước đó từ localStorage
-  function get_localStorage_vbotScanDevices(){
-  const savedDevices = JSON.parse(localStorage.getItem('vbotScanDevices'));
-  if (savedDevices && Array.isArray(savedDevices) && savedDevices.length > 0) {
-      let tableHTML = 
-  		'<p class="card-title"> Dữ liệu được tìm kiếm trước đó:</b>' +
-          '<table class="table table-bordered border-primary" cellspacing="0" cellpadding="5">' +
-              '<thead>' +
-                  '<tr>' +
-                      '<th style="text-align: center; vertical-align: middle;">Địa Chỉ IP</th>' +
-                      '<th style="text-align: center; vertical-align: middle;">Port API</th>' +
-                      '<th style="text-align: center; vertical-align: middle;">Host Name</th>' +
-                      '<th style="text-align: center; vertical-align: middle;">VBot Name</th>' +
-                  '</tr>' +
-              '</thead>' +
-              '<tbody>';
-      savedDevices.forEach(device => {
-          tableHTML += 
-              '<tr>' +
-                  '<td style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + (device.ip_address || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.ip_address || '') + '</a></b></td>' +
-                  '<td style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + (device.ip_address || '') + ':' + (device.port_api || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.port_api || '') + '</a></b></td>' +
-                  '<td style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + (device.host_name || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.host_name || '') + '</a></b></td>' +
-                  '<td style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + (device.user_name || '') + '</p></b></td>' +
-              '</tr>';
-      });
-      tableHTML += 
-          '</tbody>' +
-      '</table>';
-      document.getElementById("vbot_Scan_devices").innerHTML = tableHTML;
-  } else {
-      document.getElementById("vbot_Scan_devices").innerHTML = "<center><h5 class='text-danger'>Không có thiết bị nào, nhấn vào QUÉT THIẾT BỊ để tìm kiếm</h5></center>";
-  }
-  }
-  
-  //xóa dữ liệu localStorage vbotScanDevices
-  function clearAllDevices_vbotScanDevices() {
-      localStorage.removeItem('vbotScanDevices');
-  	showMessagePHP("Đã xóa dữ liệu thành công", 3);
-  	get_localStorage_vbotScanDevices();
-  }
-  
+
+//Lấy dữ liệu Các thiết bị chạy Vbot trong mạng lan đã được Scan
+function get_vbotScanDevices() {
+    const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path."/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json"; ?>';
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const jsonData = JSON.parse(xhr.responseText);
+                if (jsonData.success && Array.isArray(jsonData.data) && jsonData.data.length > 0) {
+                    let tableHTML = 
+                        '<p class="card-title">Dữ liệu được tìm kiếm trước đó:</p>' +
+                        '<table class="table table-bordered border-primary" cellspacing="0" cellpadding="5">' +
+                            '<thead>' +
+                                '<tr>' +
+                                    '<th style="text-align: center; vertical-align: middle;">Địa Chỉ IP</th>' +
+                                    '<th style="text-align: center; vertical-align: middle;">Port API</th>' +
+                                    '<th style="text-align: center; vertical-align: middle;">HostName</th>' +
+                                    '<th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody>';
+                    jsonData.data.forEach(device => {
+                        tableHTML += 
+                            '<tr>' +
+                                '<td style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + (device.ip_address || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.ip_address || '') + '</a></b></td>' +
+                                '<td style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + (device.ip_address || '') + ':' + (device.port_api || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.port_api || '') + '</a></b></td>' +
+                                '<td style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + (device.host_name || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.host_name || '') + '</a></b></td>' +
+                                '<td style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + (device.user_name || '') + '</p></b></td>' +
+                            '</tr>';
+                    });
+                    tableHTML += 
+                        '</tbody>' +
+                        '</table>';
+                    document.getElementById("vbot_Scan_devices").innerHTML = tableHTML;
+                } else {
+                    document.getElementById("vbot_Scan_devices").innerHTML = "<center><h5 class='text-danger'>Không có thiết bị nào, nhấn vào QUÉT THIẾT BỊ để tìm kiếm</h5></center>";
+                }
+            } catch (error) {
+                document.getElementById("vbot_Scan_devices").innerHTML = "<center><h5 class='text-danger'>Lỗi khi phân tích dữ liệu: " + error.message + "</h5></center>";
+            }
+        } else {
+            document.getElementById("vbot_Scan_devices").innerHTML = "<center><h5 class='text-danger'>Lỗi khi tải dữ liệu: Mã trạng thái " + xhr.status + "</h5></center>";
+        }
+    };
+    xhr.onerror = function() {
+        document.getElementById("vbot_Scan_devices").innerHTML = "<center><h5 class='text-danger'>Lỗi mạng khi tải dữ liệu</h5></center>";
+    };
+    xhr.send();
+}
+
+//Xóa dữ liệu đã lưu Các thiết bị chạy VBot Trong Lan
+function clearAllDevices_vbotScanDevices() {
+    const url = 'includes/php_ajax/Scanner.php?Clean_VBot_Device_Scaner';
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onload = function() {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                showMessagePHP(response.message, 3);
+                if (response.success) {
+                    get_vbotScanDevices();
+                }
+            } catch (error) {
+                showMessagePHP('Lỗi khi phân tích dữ liệu: ' + error.message, 3);
+            }
+        } else {
+            showMessagePHP('Lỗi khi xóa dữ liệu: Mã trạng thái ' + xhr.status, 3);
+        }
+    };
+    xhr.onerror = function() {
+        showMessagePHP('Lỗi mạng khi xóa dữ liệu', 3);
+    };
+    xhr.send();
+}
+
   function bluetooth_command_at_input() {
       // Bluetooth command khi được nhập lệnh thủ công ở thẻ input
       var inputValue = document.getElementById('ble_Command_UI').value.trim();
@@ -2572,7 +2595,7 @@ if (inputChatbox && sendBtnChatbox) {
       }
       bluetooth_control('command', inputValue);
   }
-  
+
   //Bật, tắt, Command bluetooth
   function bluetooth_control(Action, Value) {
       loading('show');
