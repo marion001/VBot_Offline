@@ -88,5 +88,10 @@
 		"danh sách",
 		"danh sách nhạc",
 		"playlist"
+	],
+	"on_speaker": [
+		"trên loa",
+		"tới loa",
+		"ở loa"
 	]
 }
