@@ -169,6 +169,6 @@
 if ($Config['web_interface']['external']['active'] === true){  
 	$URL_API_VBOT = "/vbot_api_external/";
 }else{
-	$URL_API_VBOT = $Protocol.$serverIp.':'.$Port_API;
+	$URL_API_VBOT = $Protocol.$serverIp.':'.$Port_API.'/';
 }
   ?>
