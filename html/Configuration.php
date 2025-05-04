@@ -16,7 +16,7 @@
   
   // Lấy đường dẫn thư mục chứa tệp PHP
   $directory_path = dirname(__FILE__);
-  
+
   //Lấy HostName
   $HostName = gethostname();
   
@@ -29,7 +29,7 @@
   // Lấy địa chỉ IP của người dùng khi truy cập
   $userIp = $_SERVER['REMOTE_ADDR'];
   
-  //Đường dẫn ui html
+  //Đường dẫn ui html /home/pi/VBot_Offline/html
   $HTML_VBot_Offline = getcwd();
   
   //đường dẫn path VBot python

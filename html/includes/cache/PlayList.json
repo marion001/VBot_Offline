@@ -3,42 +3,6 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "DDAB94",
-            "title": "Cảm Ơn Em",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/a/0/6/4/a0648741356edad7c734788c84c18877.jpg",
-            "audio": "Z7EWW6IC",
-            "duration": "04:42",
-            "description": null,
-            "source": "ZingMP3",
-            "id": "Z7EWW6IC",
-            "channelTitle": null,
-            "artist": "Đặng Thiên Chí"
-        },
-        {
-            "ids_list": "B0D066",
-            "title": "Nợ Tình Em",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/1/0/7/2/10729adc2f1b6f29f0027a8f636a0a9c.jpg",
-            "audio": "Z7E7WO9D",
-            "duration": "04:31",
-            "description": null,
-            "source": "ZingMP3",
-            "id": "Z7E7WO9D",
-            "channelTitle": null,
-            "artist": "Tú Na"
-        },
-        {
-            "ids_list": "D8BB9F",
-            "title": "Cảm Ơn Em.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em.mp3",
-            "duration": "4.33 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
             "ids_list": "6711B8",
             "title": "Nợ Tình Em.mp3",
             "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",

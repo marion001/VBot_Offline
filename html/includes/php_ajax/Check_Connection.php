@@ -88,8 +88,161 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode($response);
       exit;
   }
-  
-  
+
+#Kiểm tra trạng thái các thiết bị chạy Vbot Server trong mạng lan
+if (isset($_GET['check_status_vbot_server_in_lan'])) {
+    $ip = isset($_GET['ip']) ? $_GET['ip'] : '';
+    $port = isset($_GET['port']) ? $_GET['port'] : '';
+    if (empty($ip) || empty($port)) {
+        echo json_encode(['success' => false, 'message' => 'Thiếu IP hoặc cổng PORT']);
+        exit;
+    }
+    $url = "http://".$ip.":".$port;
+    $curl = curl_init();
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+    ));
+    $response = curl_exec($curl);
+    if(curl_errno($curl)) {
+        echo json_encode(['success' => false, 'message' => 'Lỗi cURL: ' . curl_error($curl)]);
+        curl_close($curl);
+        exit;
+    }
+    curl_close($curl);
+    $success = false;
+	$message = "";
+    // Kiểm tra phản hồi từ server
+    if ($response) {
+        $json_response = json_decode($response, true);
+        if (isset($json_response['success']) && $json_response['success'] === true) {
+            $success = true;
+			$message = "Thiết bị đang trực tuyến";
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Thiết bị ngoại tuyến, hoặc chương trình VBot chưa được khởi chạy']);
+            exit;
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Không nhận được phản hồi']);
+        exit;
+    }
+    // Trả về kết quả cuối cùng
+    echo json_encode(['success' => $success, 'message' => $message, 'ip_address' => $ip, 'port_api' => $port]);
+    exit;
+}
+
+//Thêm thiết bị chạy Vbot Server thủ công bằng IP
+if (isset($_GET['add_ip_vbot_server'])) {
+    $ip = isset($_GET['ip']) ? trim($_GET['ip']) : '';
+    if (empty($ip)) {
+        echo json_encode(['success' => false, 'error' => 'Thiếu địa chỉ IP']);
+        exit;
+    }
+    $url = "http://$ip/VBot_API.php";
+    $curl = curl_init();
+    curl_setopt_array($curl, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_TIMEOUT => 5,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET'
+    ]);
+    $response = curl_exec($curl);
+    curl_close($curl);
+    if (!$response) {
+        echo json_encode(['success' => false, 'error' => 'Không thể kết nối đến IP']);
+        exit;
+    }
+    $json = json_decode($response, true);
+    if (!isset($json['success']) || $json['success'] !== true) {
+        echo json_encode(['success' => false, 'error' => 'API trả về success = false']);
+        exit;
+    }
+    $device = [
+        'ip_address' => $json['ip_address'] ?? $ip,
+        'port_api' => $json['port_api'] ?? 5002,
+        'host_name' => $json['host_name'] ?? '',
+        'user_name' => $json['user_name'] ?? ''
+    ];
+    $json_path = $directory_path.'/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json';
+	$dir_path = dirname($json_path);
+	if (!is_dir($dir_path)) {
+		mkdir($dir_path, 0777, true);
+		chmod($dir_path, 0777);
+	}
+	if (!file_exists($json_path)) {
+		file_put_contents($json_path, "[]");
+		chmod($json_path, 0777);
+	}
+    $devices = [];
+    if (file_exists($json_path)) {
+        $content = file_get_contents($json_path);
+        $devices = json_decode($content, true);
+        if (!is_array($devices)) {
+            $devices = [];
+        }
+    }
+    $updated = false;
+    foreach ($devices as &$d) {
+        if ($d['ip_address'] === $device['ip_address']) {
+            $d = $device;
+            $updated = true;
+            break;
+        }
+    }
+    unset($d);
+    if (!$updated) {
+        $devices[] = $device;
+    }
+    file_put_contents($json_path, json_encode($devices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+    echo json_encode(['success' => true, 'device' => $device]);
+    exit;
+}
+
+//Xóa thiết bị chạy Vbot Server thủ công bằng IP
+if (isset($_GET['delete_ip_vbot_server'])) {
+    $ip = isset($_GET['ip']) ? trim($_GET['ip']) : '';
+    if (empty($ip)) {
+        echo json_encode(['success' => false, 'error' => 'Thiếu địa chỉ IP']);
+        exit;
+    }
+    $json_path = $directory_path.'/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json';
+    $dir_path = dirname($json_path);
+    if (!is_dir($dir_path)) {
+        mkdir($dir_path, 0777, true);
+        chmod($dir_path, 0777);
+    }
+    if (!file_exists($json_path)) {
+        file_put_contents($json_path, "[]");
+        chmod($json_path, 0777);
+    }
+    $devices = [];
+    if (file_exists($json_path)) {
+        $content = file_get_contents($json_path);
+        $devices = json_decode($content, true);
+        if (!is_array($devices)) {
+            $devices = [];
+        }
+    }
+    $original_count = count($devices);
+    $devices = array_filter($devices, function ($device) use ($ip) {
+        return $device['ip_address'] !== $ip;
+    });
+    $devices = array_values($devices);
+    if (count($devices) < $original_count) {
+        file_put_contents($json_path, json_encode($devices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        echo json_encode(['success' => true, 'message' => 'Xóa thiết bị thành công', 'ip_address' => $ip]);
+    } else {
+        echo json_encode(['success' => false, 'error' => 'Không tìm thấy dữ liệu IP tương ứng để xóa']);
+    }
+    exit;
+}
+
   #kiểm tra kết nối tới SSH Server
   if (isset($_GET['check_ssh'])) {
       $ssh_host = $_GET['host'];

@@ -52,16 +52,23 @@
         <div class="modal-dialog modal-lg modal-dialog-scrollable" id="vbotScan_size_setting">
           <div class="modal-content">
             <div id="welcome-message" class="welcome-message">
-              Tìm Kiếm Các Thiết Bị VBot Trong Cùng Lớp Mạng
+              Tìm Kiếm Các Thiết Bị Chạy VBot Trong Cùng Lớp Mạng
               <div class="icon-group_chatbot">
                 <i class="bi bi-trash text-danger pe-3" title="Xóa Dữ Liệu Tìm Kiếm" onclick="clearAllDevices_vbotScanDevices()"></i>
+                <i class="bi bi-arrow-repeat refresh-btn pe-3 text-success" title="Kiểm tra, tải lại trạng thái hoạt động của các thiết bị chạy VBot" onclick="check_Device_Status_VBot_Server()"></i>
                 <i class="bi bi-arrows-fullscreen pe-3" id="vbotScan_fullscreen" onclick="vbotScan_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
                 <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
               </div>
             </div>
             <br/>
             <button type="button" class="btn btn-warning" onclick="scan_VBot_Device()"><i class="bi bi-radar"></i> Quét Thiết Bị</button>
-            <br/>
+			<br/>
+            <div class="input-group mb-3">
+  <span class="input-group-text border-success">Thêm Thủ Công:</span>
+  <input type="text" id="add_ip_vbot_server" class="form-control border-success" placeholder="Nhập địa chỉ ip thiết bị loa VBot">
+<button type="button" id="btn_add_ip_vbot_server" name="btn_add_ip_vbot_server" title="Thêm thiết bị VBot thủ công" class="btn btn-primary border-success" onclick="add_IP_VBot_Server()">Thêm</button>
+</div>
+
             <div id="vbot_Scan_devices"></div>
           </div>
         </div>

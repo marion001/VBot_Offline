@@ -1,8 +1,8 @@
 {
-    "version": "1.0.31",
+    "version": "1.0.32",
     "projectName": "WebUI VBot Offline",
-    "description": "Nâng cấp cơ chế Bảo mật dữ liệu người dùng khi truy cập WebUI từ bên ngoài Internet, Hỗ trợ Get Link, tải xuống tệp âm thanh ZingMP3",
-    "releaseDate": "26/04/2025-1",
+    "description": "Đồng bộ, ra lệnh điều khiển các loa chạy VBot (Từ loa Vbot1 ra lệnh sang loa VBot2, từ Client của Loa VBot1 sang loa Vbot2) trong cùng lớp Mạng nội bộ, Bổ xung thêm xử lý dữ liệu ChatBox",
+    "releaseDate": "04/05/2025",
     "changes": [
         {
             "type": "feature",

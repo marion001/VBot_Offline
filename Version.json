@@ -1,8 +1,8 @@
 {
-    "version": "1.0.30",
+    "version": "1.0.32",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi đồng bộ nút nhấn khi đang phát nhạc",
-    "releaseDate": "27/04/2025",
+    "description": "Đồng bộ, ra lệnh điều khiển các loa chạy VBot (Từ loa Vbot1 ra lệnh sang loa VBot2, từ Client của Loa VBot1 sang loa Vbot2) trong cùng lớp Mạng nội bộ, Bổ xung thêm xử lý dữ liệu ChatBox",
+    "releaseDate": "04/05/2025",
     "changes": [
         {
             "type": "feature",
