@@ -67,11 +67,9 @@
       var hour = d.getHours();
       var min = d.getMinutes();
       var sec = d.getSeconds();
-      //document.getElementById("times").innerHTML = formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec);
 	  if (document.getElementById("times")) {
-		  document.getElementById("times").innerHTML = `${formatTime(hour)}:${formatTime(min)}:${formatTime(sec)}`;
+		  document.getElementById('times').innerHTML = formatTime(hour) + ':' + formatTime(min) + ':' + formatTime(sec);
 		}
-
   	//console.log(formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec))
   }
 
@@ -89,9 +87,6 @@
       var year = d.getFullYear();
       var day = d.getDay();
       var dayarr = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-      //document.getElementById("days").innerHTML = dayarr[day];
-      //document.getElementById("dates").innerHTML = date + "/" + montharr[month] + "/" + year;
-      //console.log(date + " " + montharr[month] + " " + year);
 	  
 	if (document.getElementById("days")) {
 	  document.getElementById("days").innerHTML = dayarr[day];
@@ -1481,7 +1476,7 @@
           fileListDiv.innerHTML += fileInfo;
       });
   }
-  
+
   function processPodCastData(data_media_PodCast) {
       //console.log(data);
       // Kiểm tra xem dữ liệu có hợp lệ không
@@ -1522,7 +1517,7 @@
           fileListDiv.innerHTML += fileInfo;
       });
   }
-  
+
   // Hàm xử lý dữ liệu media Local
   function processLocalData(data_media_local) {
       var fileListDiv = document.getElementById('show_list_media_local');
@@ -1537,7 +1532,6 @@
       } else {
           fileListDiv.innerHTML = '';
           if (!document.getElementById('upload_Music_Local')) {
-  
               fileListDiv.innerHTML = '<form enctype="multipart/form-data" method="POST" action="">' +
                   '<div class="input-group">' +
                   '<input class="form-control border-success" type="file" id="upload_Music_Local" multiple="">' +
@@ -1744,7 +1738,7 @@
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }
-  
+
   //xử lý Nghe thử các file âm thanh
   function playAudio(filePath) {
       loading("show");
@@ -1798,7 +1792,7 @@
       };
       xhr.send();
   }
-  
+
   //Play video hoặc m3u8 HLS
   function playHLS(url) {
       loading("show");
@@ -1844,7 +1838,7 @@
           chatbotIcon.classList.add('bi-arrows-fullscreen');
       }
   }
-  
+
   // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện chatbox
   function vbotScan_toggleFullScreen() {
       var chatbotSizeSetting = document.getElementById('vbotScan_size_setting');
@@ -1867,8 +1861,7 @@
           chatbotIcon.classList.add('bi-arrows-fullscreen');
       }
   }
-  
-  
+
   // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện chatbox
   function vbotBluetooth_toggleFullScreen() {
       var chatbotSizeSetting = document.getElementById('vbotBluetooth_size_setting');
@@ -1936,16 +1929,14 @@
   // Hàm tải tin nhắn từ localStorage
 function loadMessages() {
     const chatbox = document.getElementById('chatbox');
-    if (!chatbox) return; // Nếu không có chatbox thì thoát luôn
-
+	// Nếu không có chatbox thì thoát luôn
+    if (!chatbox) return;
     const messages = JSON.parse(localStorage.getItem('messages')) || [];
     chatbox.innerHTML = '';
-    
     messages.forEach(function(message, index) {
         var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
             '<span class="delete_message_chatbox" data-index="' + index + '" title="Xóa tin nhắn">x</span>' +
             '<div class="message-time">' + message.time + '</div>';
-
         if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
             var audioExtension = message.text.split('.').pop();
             var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text);
@@ -1959,13 +1950,10 @@ function loadMessages() {
         } else {
             messageHTML += '<div>' + message.text + '</div>';
         }
-
         messageHTML += '</div>';
         chatbox.innerHTML += messageHTML;
     });
-
     scrollToBottom();
-
     // Gán sự kiện xóa tin nhắn
     document.querySelectorAll('.delete_message_chatbox').forEach(function(button) {
         button.addEventListener('click', function() {
@@ -1975,7 +1963,6 @@ function loadMessages() {
     });
 }
 
-  
   // Hàm xóa tất cả tin nhắn từ localStorage và giao diện
   function clearMessages() {
   if (!confirm("Bạn có chắc chắn muốn xóa lịch sử chat ?")) {
@@ -2002,144 +1989,215 @@ function loadMessages() {
       audio.currentTime = 0;
   });
   }
-  
-  // Hàm gửi yêu cầu POST và xử lý phản hồi
-  function sendRequest(message) {
-  var data = JSON.stringify({
-      "type": 3,
-      "data": "main_processing",
-      "action": "chatbot",
-      "value": message
-  });
-  var xhr = new XMLHttpRequest();
-  var chatbox = document.getElementById('chatbox');
-  var typingIndicator = document.createElement('div');
-  var timeout;
-  typingIndicator.className = 'typing-indicator';
-  typingIndicator.innerHTML = 'Đang xử lý...';
-  chatbox.appendChild(typingIndicator);
-  xhr.addEventListener("readystatechange", function() {
-      if (this.readyState === 4) {
-          clearTimeout(timeout);
-          typingIndicator.remove();
-          if (this.status === 200) {
-              var response = JSON.parse(this.responseText);
-   stopAllAudio();
-              var botMessageHTML = '';
-              if (response.success) {
-                  // Biểu thức chính quy kiểm tra chuỗi có bắt đầu bằng 'TTS_Audio' và kết thúc bằng mp3, ogg, hoặc wav
-                  var audioUrl = response.message;
-                  var audioPattern = /^TTS_Audio.*\.(mp3|ogg|wav)$/i;
-                  if (audioPattern.test(audioUrl)) {
-  		// Lấy đuôi mở rộng của tệp
-                      var audioExtension = audioUrl.split('.').pop();
-                      var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(audioUrl);
-                      botMessageHTML =
-                          '<div class="message bot-message">' +
-                          '    <div class="message-time">' + getCurrentTime() + '</div>' +
-                          '    <div class="audio-container">' +
-                          //'         <audio controls autoplay>' +
-                          '         <audio controls>' +
-                          '            <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
-                          '            Your browser does not support the audio element.' +
-                          '        </audio>' +
-                          '    </div>' +
-                          '</div>';
-                  } else {
-                      botMessageHTML =
-                          '<div class="message bot-message">' +
-                          '    <div class="message-time">' + getCurrentTime() + '</div>' +
-                          '    <div>' + response.message + '</div>' +
-                          '</div>';
-                  }
-                  // Thêm tin nhắn của bot vào chatbox
-                  document.getElementById('chatbox').innerHTML += botMessageHTML;
-                  // Lưu tin nhắn của bot vào localStorage
-                  saveMessage('bot', response.message);
-              } else {
-                  var errorMessageHTML =
-                      msg_error = "Có lỗi xảy ra. Vui lòng thử lại";
-                  /*  
-  	'<div class="message">' +
-                  '    Có lỗi xảy ra. Vui lòng thử lại.' +
-                  '</div>';
-  	*/
-                  '<div class="message bot-message">' +
-                  '    <div class="message-time">' + getCurrentTime() + '</div>' +
-                      '    <div>' + msg_error + '</div>' +
-                      '</div>';
-                  // Thêm tin nhắn lỗi vào chatbox
-                  document.getElementById('chatbox').innerHTML += errorMessageHTML;
-                  saveMessage('bot', msg_error);
-              }
-              setTimeout(scrollToBottom, 100);
-          } else {
-              msg_error = "Có vẻ bot đang không phản hồi, vui lòng thử lại.";
-              var failureMessageHTML =
-                  '<div class="message bot-message">' +
-                  '    <div class="message-time">' + getCurrentTime() + '</div>' +
-                  '    <div>' + msg_error + '</div>' +
-                  '</div>';
-              // Thêm tin nhắn thất bại vào chatbox
-              document.getElementById('chatbox').innerHTML += failureMessageHTML;
-              saveMessage('bot', msg_error);
-          }
-      }
-  });
-  xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
-  xhr.setRequestHeader("Content-Type", "application/json");
-  xhr.send(data);
-  // Thiết lập hẹn giờ để hiển thị thông báo nếu phản hồi quá chậm
-  timeout = setTimeout(function() {
-      typingIndicator.innerHTML = 'Vui lòng chờ thêm...';
-      timeout = setTimeout(function() {
-          msg_error = "Có vẻ bot đang không phản hồi, vui lòng thử lại";
-          typingIndicator.innerHTML = msg_error;
-          saveMessage('bot', msg_error);
-      }, 13000); // 13 giây nữa để tổng cộng là 20 giây
-  }, 7000); // 7 giây
-  }
-	// Xử lý sự kiện khi nhấn nút gửi
-	const sendButton = document.getElementById('send_button_chatbox');
-	if (sendButton) {
-	  sendButton.addEventListener('click', function () {
-		const userInput = document.getElementById('user_input_chatbox');
-		const message = userInput?.value.trim();
-		
-		if (message) {
-		  const userMessageHTML =
-			'<div class="message user-message">' +
-			'    <div class="message-time">' + getCurrentTime() + '</div>' +
-			'    <div>' + message + '</div>' +
-			'</div>';
 
-		  const chatbox = document.getElementById('chatbox');
-		  if (chatbox) {
-			chatbox.innerHTML += userMessageHTML;
-		  }
-
-		  saveMessage('user', message);
-		  sendRequest(message);
-		  if (userInput) userInput.value = '';
-		  setTimeout(scrollToBottom, 100);
-		}
-	  });
-	}
-  const inputChatbox = document.getElementById('user_input_chatbox');
-const sendBtnChatbox = document.getElementById('send_button_chatbox');
-
-if (inputChatbox && sendBtnChatbox) {
-  inputChatbox.addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      sendBtnChatbox.click();
-    }
-  });
+//gửi yêu cầu POST Chatbox và xử lý phản hồi
+function sendRequest(message) {
+    var data = JSON.stringify({
+        "type": 3,
+        "data": "main_processing",
+        "action": "chatbot",
+        "value": message
+    });
+    var xhr = new XMLHttpRequest();
+    var chatbox = document.getElementById('chatbox');
+    var typingIndicator = document.createElement('div');
+    var timeout;
+    typingIndicator.className = 'typing-indicator';
+    typingIndicator.innerHTML = 'Đang xử lý...';
+    chatbox.appendChild(typingIndicator);
+    xhr.addEventListener("readystatechange", function() {
+        if (this.readyState === 4) {
+            clearTimeout(timeout);
+            typingIndicator.remove();
+            if (this.status === 200) {
+                var response = JSON.parse(this.responseText);
+                stopAllAudio();
+                var botMessageHTML = '';
+                if (response.success) {
+                    var audioUrl = response.message;
+                    var audioPattern = /^TTS_Audio.*\.(mp3|ogg|wav)$/i;
+                    if (audioPattern.test(audioUrl)) {
+                        var audioExtension = audioUrl.split('.').pop();
+                        var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(audioUrl);
+                        botMessageHTML =
+                            '<div class="message bot-message">' +
+                            '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                            '    <div class="audio-container">' +
+                            '         <audio controls>' +
+                            '            <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
+                            '            Your browser does not support the audio element.' +
+                            '        </audio>' +
+                            '    </div>' +
+                            '</div>';
+                    } else {
+                        botMessageHTML =
+                            '<div class="message bot-message">' +
+                            '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                            '    <div>' + response.message + '</div>' +
+                            '</div>';
+                    }
+                    document.getElementById('chatbox').innerHTML += botMessageHTML;
+                    saveMessage('bot', response.message);
+                    if (flag_mic_recording && isAutoClick_btn_send_msg) {
+                        isAutoClick_btn_send_msg = false;
+                        Recording_STT();
+                    }
+                } else {
+                    playSound_default('/assets/sound/default/dong.mp3');
+                    var msg_error = "Có lỗi xảy ra. Vui lòng thử lại";
+                    var errorMessageHTML =
+                        '<div class="message bot-message">' +
+                        '<div class="message-time">' + getCurrentTime() + '</div>' +
+                        '<div>' + msg_error + '</div>' +
+                        '</div>';
+                    document.getElementById('chatbox').innerHTML += errorMessageHTML;
+                    saveMessage('bot', msg_error);
+                    if (flag_mic_recording && isAutoClick_btn_send_msg) {
+                        isAutoClick_btn_send_msg = false;
+                        Recording_STT();
+                    }
+                }
+                setTimeout(scrollToBottom, 100);
+            } else {
+                flag_mic_recording = false;
+                isAutoClick_btn_send_msg = false;
+                playSound_default('/assets/sound/default/dong.mp3');
+                var msg_error = "Có vẻ VBot đang không phản hồi, vui lòng thử lại.";
+                var failureMessageHTML =
+                    '<div class="message bot-message">' +
+                    '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                    '    <div>' + msg_error + '</div>' +
+                    '</div>';
+                document.getElementById('chatbox').innerHTML += failureMessageHTML;
+                saveMessage('bot', msg_error);
+            }
+        }
+    });
+    xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(data);
+    timeout = setTimeout(function() {
+        typingIndicator.innerHTML = 'Vui lòng chờ thêm...';
+        timeout = setTimeout(function() {
+            var msg_error = "Có vẻ bot đang không phản hồi, vui lòng thử lại";
+            typingIndicator.innerHTML = msg_error;
+            saveMessage('bot', msg_error);
+        }, 13000);
+    }, 7000);
 }
-  
+
+// Xử lý sự kiện khi nhấn nút gửi
+const sendButton = document.getElementById('send_button_chatbox');
+if (sendButton) {
+    sendButton.addEventListener('click', function() {
+        // Đặt lại cờ nếu không phải nhấn tự động
+        if (!isAutoClick_btn_send_msg) {
+            flag_mic_recording = false;
+            isAutoClick_btn_send_msg = false;
+        }
+        const userInput = document.getElementById('user_input_chatbox');
+        const message = userInput?.value.trim();
+        if (message) {
+            const userMessageHTML =
+                '<div class="message user-message">' +
+                '    <div class="message-time">' + getCurrentTime() + '</div>' +
+                '    <div>' + message + '</div>' +
+                '</div>';
+            const chatbox = document.getElementById('chatbox');
+            if (chatbox) {
+                chatbox.innerHTML += userMessageHTML;
+            }
+            saveMessage('user', message);
+            sendRequest(message);
+            if (userInput) userInput.value = '';
+            setTimeout(scrollToBottom, 100);
+        }
+    });
+}
+
+// Xử lý sự kiện nhấn Enter
+const inputChatbox = document.getElementById('user_input_chatbox');
+const sendBtnChatbox = document.getElementById('send_button_chatbox');
+if (inputChatbox && sendBtnChatbox) {
+    inputChatbox.addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            flag_mic_recording = false;
+            isAutoClick_btn_send_msg = false;
+            sendBtnChatbox.click();
+        }
+    });
+}
+
+//thu âm từ Microphone
+function Recording_STT() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        show_message('Trình duyệt của bạn không hỗ trợ nhận diện giọng nói');
+        return;
+    }
+    const recognition = new SpeechRecognition();
+    recognition.lang = 'vi-VN'; //ngôn ngữ tiếng việt
+    recognition.interimResults = true; //Hiển thị kết quả tạm thời
+    recognition.continuous = false;	//tự động phát hiện kết thúc câu
+    const inputField = document.getElementById('user_input_chatbox');
+    const sendButton = document.getElementById('send_button_chatbox');
+    const animationDiv = document.getElementById('Recording_STT_mic_animation');
+    playSound_default('/assets/sound/default/ding.mp3');
+	//Nếu 10 giây không có giọng nói thì tắt Mic
+    let timeoutId = setTimeout(() => {recognition.stop();}, 10000);
+    recognition.onresult = function(event) {
+        flag_mic_recording = true;
+        isAutoClick_btn_send_msg = false;
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+            transcript += event.results[i][0].transcript;
+        }
+        inputField.value = transcript;
+        clearTimeout(timeoutId);
+    };
+    recognition.onerror = function(event) {
+		
+        animationDiv.style.display = 'none';
+        if (event.error === 'no-speech' || event.error === 'aborted') {
+            flag_mic_recording = false;
+            isAutoClick_btn_send_msg = false;
+            showMessagePHP('Không có giọng nói được truyền vào', 6);
+        }else if (event.error === 'not-allowed'){
+            flag_mic_recording = false;
+            isAutoClick_btn_send_msg = false;
+            show_message('Sử Dụng Microphone Thất bại, Kết nối WebUI VBot cần được truy cập bằng (Doamin, Tên Miền) và bảo mật bằng https, Điều này khiến trình duyệt chặn truy cập vào Microphone vì kết nối không phải là https: ' + event.error);
+		}
+		else {
+            flag_mic_recording = false;
+            isAutoClick_btn_send_msg = false;
+            show_message('Lỗi nhận diện giọng nói: ' + event.error);
+        }
+        clearTimeout(timeoutId);
+    };
+    recognition.onend = function() {
+        animationDiv.style.display = 'none';
+        if (sendButton && flag_mic_recording) {
+            isAutoClick_btn_send_msg = true;
+            sendButton.click();
+        }
+		else {
+            flag_mic_recording = false;
+            isAutoClick_btn_send_msg = false;
+            playSound_default('/assets/sound/default/dong.mp3');
+			if (!sendButton){
+				show_message('Lỗi, Không tìm thấy nút gửi tin nhắn: send_button_chatbox');
+			}
+        }
+        clearTimeout(timeoutId);
+    };
+    animationDiv.style.display = 'flex';
+    flag_mic_recording = true;
+    isAutoClick_btn_send_msg = false;
+    recognition.start();
+}
   // Tải tin nhắn từ localStorage khi trang được tải
   loadMessages();
-  
   //Khi chatbox được hiển thị hoàn toàn
   document.addEventListener('DOMContentLoaded', () => {
   const myModal = document.getElementById('modalDialogScrollable_chatbot');
@@ -2150,6 +2208,29 @@ if (inputChatbox && sendBtnChatbox) {
   }
 });
 
+//Phát âm thanh báo hiệu thu âm hoặc kết thúc
+function playSound_default(path_sound) {
+    // playSound_default('/assets/sound/default/ding.mp3');
+    const audio = new Audio(path_sound);
+    audio.play();
+    audio.onended = () => {
+        //console.log("Âm thanh phát xong. Bắt đầu thu âm...");
+        //startRecording();
+    };
+    audio.onerror = () => {
+        showMessagePHP('Không thể phát âm thanh DING', 5)
+    };
+}
+
+//Hàm thay đổi icon mic dựa trên giao thức URL
+function updateMicIcon() {
+    const micIcon = document.getElementById('mic_icon_rec');
+    if (micIcon) {
+        const isHttps = window.location.protocol === 'https:';
+        micIcon.className = isHttps ? 'bi bi-mic-fill' : 'bi bi-mic-mute text-warning';
+    }
+}
+updateMicIcon();
 </script>
 <script>
   //kiểm tra nếu có thẻ id là tableContainer sẽ thay đổi kích thước chiều dọc tùy thuộc vào nội dung
@@ -2820,7 +2901,7 @@ function delete_IP_VBot_Server(ip) {
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
   }
-  
+
   function loadBluetoothDevices() {
       // Lấy dữ liệu từ localStorage
       var storedData = localStorage.getItem('bluetoothDevices_Vbot');
@@ -2848,7 +2929,7 @@ function delete_IP_VBot_Server(ip) {
           document.getElementById("Bluetooth_Scan_devices").innerHTML = "<center><h5 class='card-title text-danger'>Không có danh sách thiết bị Bluetooth nào được tìm thấy</h5></center>";
       }
   }
-  
+
   function clearBluetoothDevices() {
   	//Bluetooth xóa dữ liệu được lưu trong localStorage
       localStorage.removeItem('bluetoothDevices_Vbot');
@@ -3053,7 +3134,6 @@ function download_Link_url_to_local(url_audio, songName) {
         show_message('Lỗi gửi yêu cầu: ' + error.message);
     }
 }
-
 
   /*
   // Hàm thêm thông báo mới vào danh sách thông báo

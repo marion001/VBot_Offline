@@ -10,13 +10,62 @@
   <title>VBot Assistant - <?php echo $Config['contact_info']['full_name'] ?></title>
   <!-- css ChatBot -->
   <link href="assets/css/chatbot_head_bar.css" rel="stylesheet">
-  <style>
+<style>
     #vbot_Scan_devices {
-    max-height: 400px;
-    overflow-y: auto;
-    word-wrap: break-word;
+        max-height: 400px;
+        overflow-y: auto;
+        word-wrap: break-word;
     }
-  </style>
+    
+    #Recording_STT_mic_animation {
+        display: none;
+        height: 30px;
+        width: 120px;
+        margin: 10px auto;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .waveform {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100%;
+        width: 100%;
+    }
+    
+    .wave-bar {
+        width: 4px;
+        height: 10px;
+        background-color: #28a745;
+        margin: 0 2px;
+        animation: wave 0.5s infinite ease-in-out;
+    }
+    
+    .wave-bar:nth-child(2) {animation-delay: 0.1s;}
+    .wave-bar:nth-child(3) {animation-delay: 0.2s;}
+    .wave-bar:nth-child(4) {animation-delay: 0.3s;}
+    .wave-bar:nth-child(5) {animation-delay: 0.4s;}
+    .wave-bar:nth-child(6) {animation-delay: 0.5s;}
+    .wave-bar:nth-child(7) {animation-delay: 0.6s;}
+    .wave-bar:nth-child(8) {animation-delay: 0.7s;}
+    .wave-bar:nth-child(9) {animation-delay: 0.8s;}
+    .wave-bar:nth-child(10) {animation-delay: 0.9s;}
+    @keyframes wave {
+        0%, 100% {
+            height: 10px;
+        }
+        50% {
+            height: 30px;
+        }
+    }
+    
+    .modal-footer {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+</style>
 </head>
 <header id="header" class="header fixed-top d-flex align-items-center">
   <div class="d-flex align-items-center justify-content-between">
@@ -76,7 +125,6 @@
       <!-- Bluetooth -->
       <?php
         if (isset($Config['bluetooth']['active']) && $Config['bluetooth']['active'] == true) {
-        
         echo '<a class="nav-item nav-icon" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_Bluetooth_Scan_Devicde" onclick="loadBluetoothDevices()">
                    <i class="bi bi-bluetooth text-success"></i>
                   </a>';
@@ -162,8 +210,23 @@
               </div>
             </div>
             <div class="modal-footer">
+		
+			    <div id="Recording_STT_mic_animation">
+        <div class="waveform">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+        </div>
+    </div>
               <div class="input-group mb-3">
-                <button class="btn btn-info border-success" onclick="Recording_STT('start', '6')"><i class="bi bi-mic"></i></button>
+                <button class="btn btn-success border-success" onclick="Recording_STT()" title="Nhấn để kích hoạt và  nói từ Microphone"><i id="mic_icon_rec" class="bi bi-mic-fill"></i></button>
                 <input type="text" class="form-control border-success" id="user_input_chatbox" placeholder="Nhập tin nhắn...">
                 <button id="send_button_chatbox" class="btn btn-primary border-success" title="Gửi tin nhắn"><i class="bi bi-send"></i>
                 </button>

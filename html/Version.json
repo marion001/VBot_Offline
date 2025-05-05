@@ -2,7 +2,7 @@
     "version": "1.0.32",
     "projectName": "WebUI VBot Offline",
     "description": "Đồng bộ, ra lệnh điều khiển các loa chạy VBot (Từ loa Vbot1 ra lệnh sang loa VBot2, từ Client của Loa VBot1 sang loa Vbot2) trong cùng lớp Mạng nội bộ, Bổ xung thêm xử lý dữ liệu ChatBox",
-    "releaseDate": "04/05/2025-1",
+    "releaseDate": "05/05/2025",
     "changes": [
         {
             "type": "feature",

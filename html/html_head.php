@@ -143,6 +143,10 @@
   </style>
   <!--script Hiển thị thông báo Mesage php -->
   <script>
+	//biến cờ kích hoạt Mic để nói
+	let flag_mic_recording = false;
+	// Cờ để phân biệt nút nhấn gửi tin nhắn tự động hay người dùng nhấn
+	let isAutoClick_btn_send_msg = false;
 	function showMessagePHP(message, timeout = 15) {
 		var toastContainer = document.getElementById('toast');
 		// Hiển thị lại toastContainer nếu bị ẩn trước đó
@@ -182,13 +186,9 @@
     function close_message() {
     $('#notificationModal').modal('hide');
     }
-    
-    
-    
-    
+
     //xử lý Nghe thử các file âm thanh
     function playAudio_upgrade(filePath) {
-    //loading("show");
     function getMimeType(extension) {
     const mimeTypes = {
         'mp3': 'audio/mpeg',
@@ -196,7 +196,6 @@
         'ogg': 'audio/ogg',
         'aac': 'audio/aac',
         'flac': 'audio/flac',
-        // Thêm các định dạng tệp âm thanh khác nếu cần
     };
     
     return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
@@ -204,8 +203,7 @@
     const audioPlayer = document.getElementById('audioPlayer');
     // Kiểm tra nếu filePath bắt đầu bằng 'http'
     if (filePath.startsWith('http')) {
-    //loading("hide");
-    
+
     // Kiểm tra nếu filePath là '.m3u8'
     if (filePath.endsWith('.m3u8')) {
         //Chạy playHLS nếu là m3u8
@@ -217,11 +215,11 @@
             show_message('Lỗi khi phát âm thanh: ' + error.message);
         });
     }
-    return; // Kết thúc hàm nếu đã phát trực tiếp
+    return;
     }
     
     const xhr = new XMLHttpRequest();
-    
+
     // Gửi yêu cầu GET tới server để lấy tệp âm thanh dưới dạng base64
     xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
     xhr.responseType = 'text';
@@ -242,7 +240,6 @@
     };
     
     xhr.onerror = function() {
-    //loading("hide");
     show_message('Yêu cầu phát âm thanh không thành công');
     };
     

@@ -525,7 +525,26 @@
       </div>
       </div>
 
-			
+      <div class="card accordion" id="accordion_button_socket_streaming_audio_server">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#vbot_on_speaker_guide" aria-expanded="false" aria-controls="vbot_on_speaker_guide">
+      Ra lệnh điều khiển, tương tác giữa các loa chạy VBot trong cùng lớp mạng Lan:</h5>
+      <div id="vbot_on_speaker_guide" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#vbot_on_speaker_guide">
+		- B1: Trong Giao Diện WebUI Cần <b>Quét Để Tìm Kiếm Các Thiết Bị Chạy VBot Trong Cùng Lớp Mạng Lan</b><br/>
+		- B2: Đặt tên định danh (là duy nhất) cho Loa của bạn: <b>Cá Nhân -> Chỉnh Sửa Hồ Sơ -> Tên</b> Ví dụ đặt là: (<b>Loa Phòng Ngủ</b> hoặc <b>Phòng Ngủ</b>)<br/><br/>
+		- B3: Câu lệnh để từ Loa VBot1 thực thi trên loa VBot2 trong file: <b>Adverbs.json -> on_speaker</b><br/><br/>
+		- B4:<br/>
+			  Ví Dụ Câu Lệnh 1: Phát danh sách nhạc trên loa phòng ngủ<br/>
+			  Ví Dụ Câu Lệnh 2: Bật/Tắt Mic trên loa phòng ngủ<br/>
+			  Ví Dụ Câu Lệnh 3: Bật/Tắt chế độ hội thoại ở loa phòng ngủ<br/>
+			  Ví Dụ Câu Lệnh 4: phát bài hát [Tên Bài Hát] trên loa phòng ngủ<br/>
+			  Ví Dụ Câu Lệnh 5: [kể truyện, đọc báo, tin tức] [Tên Truyện, Tên Báo, Tin tức] trên loa phòng ngủ<br/>
+			  Ví Dụ Câu Lệnh 6: [dừng nhạc, tiếp tục, tạm dừng] trên loa phòng ngủ<br/>
+	  </div>
+      </div>
+      </div>
+
+
           </div>
         </div>
       </section>
