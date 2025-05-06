@@ -1001,7 +1001,7 @@
               })
               .catch(error => {
                   document.getElementById('div_message_error').style.display = 'block';
-                  document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: '+response.status +', '+ error;
+                  document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, '+ error;
               });
       }
 
