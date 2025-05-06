@@ -16,7 +16,6 @@
         overflow-y: auto;
         word-wrap: break-word;
     }
-    
     #Recording_STT_mic_animation {
         display: none;
         height: 30px;
@@ -25,7 +24,6 @@
         justify-content: center;
         align-items: center;
     }
-    
     .waveform {
         display: flex;
         justify-content: center;
@@ -33,7 +31,6 @@
         height: 100%;
         width: 100%;
     }
-    
     .wave-bar {
         width: 4px;
         height: 10px;
@@ -41,7 +38,6 @@
         margin: 0 2px;
         animation: wave 0.5s infinite ease-in-out;
     }
-    
     .wave-bar:nth-child(2) {animation-delay: 0.1s;}
     .wave-bar:nth-child(3) {animation-delay: 0.2s;}
     .wave-bar:nth-child(4) {animation-delay: 0.3s;}
@@ -59,7 +55,6 @@
             height: 30px;
         }
     }
-    
     .modal-footer {
         display: flex;
         flex-direction: column;
@@ -117,7 +112,6 @@
   <input type="text" id="add_ip_vbot_server" class="form-control border-success" placeholder="Nhập địa chỉ ip thiết bị loa VBot">
 <button type="button" id="btn_add_ip_vbot_server" name="btn_add_ip_vbot_server" title="Thêm thiết bị VBot thủ công" class="btn btn-primary border-success" onclick="add_IP_VBot_Server()">Thêm</button>
 </div>
-
             <div id="vbot_Scan_devices"></div>
           </div>
         </div>
@@ -191,19 +185,24 @@
       <!-- END Bluetooth -->
       <!-- Chatbot Biểu tượng mở chatbox -->
       <li class="nav-item nav-icon">
-        <i class="bi bi-chat-dots text-primary" type="button" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>
+        <i class="bi bi-chat-dots text-primary" type="button" onclick="fetchAndPopulateDevices_chatbot()" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>
       </li>
       <div class="modal fade" id="modalDialogScrollable_chatbot" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable" id="chatbot_size_setting">
           <div class="modal-content">
-            <div id="welcome-message" class="welcome-message">
-              VBot-ChatBox
-              <div class="icon-group_chatbot">
-                <i class="bi bi-arrow-repeat pe-3" onclick="loadMessages()" title="Tải lại Chatbox"></i>
+
+	            <div id="welcome-message" class="welcome-message">
+              VBot ChatBox:
+			  <select class="form-select border-success" name="source_chatbot_api" id="source_chatbot_api">
+				<option value="<?php echo $URL_API_VBOT; ?>" data-full_name_chatbot_api="<?php echo $Config['contact_info']['full_name']; ?>" selected><?php echo $Config['contact_info']['full_name']; ?> - Mặc Định</option>
+				</select>
+              &nbsp;<div class="icon-group_chatbot">
+                <i class="bi bi-arrow-repeat pe-3 text-success" onclick="scan_VBot_Device()" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng Lan"></i>
                 <i class="bi bi-arrows-fullscreen pe-3" id="chatbot_fullscreen" onclick="chatbot_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện chatbox"></i>
-                <i class="bi bi-x-lg" data-bs-dismiss="modal" title="Đóng ChatBox"></i>
+                <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng ChatBox"></i>
               </div>
             </div>
+
             <div class="modal-body">
               <div id="chatbox_wrapper">
                 <div id="chatbox"></div>
@@ -227,6 +226,7 @@
     </div>
               <div class="input-group mb-3">
                 <button class="btn btn-success border-success" onclick="Recording_STT()" title="Nhấn để kích hoạt và  nói từ Microphone"><i id="mic_icon_rec" class="bi bi-mic-fill"></i></button>
+                <button class="btn btn-danger border-success" onclick="Recording_STT('stop')" title="Nhấn để dừng Microphone"><i class="bi bi-stop-circle-fill"></i></button>
                 <input type="text" class="form-control border-success" id="user_input_chatbox" placeholder="Nhập tin nhắn...">
                 <button id="send_button_chatbox" class="btn btn-primary border-success" title="Gửi tin nhắn"><i class="bi bi-send"></i>
                 </button>
@@ -234,8 +234,7 @@
                 </button>
                 <button id="clear_button_chatbox" class="btn btn-warning border-success" onclick="clearMessages()" title="Xóa lịch sử Chat"><i class="bi bi-trash"></i>
                 </button>
-                <button type="button" class="btn btn-danger border-success" data-bs-dismiss="modal" title="Đóng ChatBox"><i class="bi bi-x-lg"></i>
-                </button>
+                <!-- <button type="button" class="btn btn-danger border-success" data-bs-dismiss="modal" title="Đóng ChatBox"><i class="bi bi-x-lg"></i></button> -->
               </div>
             </div>
           </div>
@@ -341,12 +340,9 @@
             }
             ?>
         </ul>
-        <!-- End Profile Dropdown Items -->
       </li>
-      <!-- End Profile Nav -->
     </ul>
   </nav>
-  <!-- End Icons Navigation -->
   <script>
     //Khởi động lại chương trình VBot html_header_bar.php
     function power_action_service(action_name, mess_name) {
@@ -378,7 +374,5 @@
         xhr.open("GET", url, true);
         xhr.send();
     }
-    
-    
   </script>
 </header>

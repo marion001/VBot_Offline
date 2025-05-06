@@ -647,4 +647,79 @@ if (isset($_GET['delete_ip_vbot_server'])) {
       curl_close($ch);
       exit();
   }
+#Chatbox Check_Connection.php?vbot_chatbox&ip=192.168.14.113&port=5002&text=tên%20bạn%20là%20gì
+if (isset($_GET['vbot_chatbox'])) {
+    if (!isset($_GET['ip_port']) || !isset($_GET['text'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Thiếu một hoặc nhiều tham số: ip:port, text'
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    $ip_port = $_GET['ip_port'];
+    $text = $_GET['text'];
+    //$url = "http://".$ip_port;
+    $curl = curl_init();
+    $postData = json_encode([
+        'type' => 3,
+        'data' => 'main_processing',
+        'action' => 'chatbot',
+        'value' => $text
+    ]);
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $ip_port,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => $postData,
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json'
+        ),
+    ));
+    $response = curl_exec($curl);
+    if ($response === false) {
+        $curlError = curl_error($curl);
+        $curlErrno = curl_errno($curl);
+        curl_close($curl);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lỗi cURL: ' . $curlError,
+            'error_code' => $curlErrno
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+    curl_close($curl);
+    if ($httpCode !== 200) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Yêu cầu thất bại với mã HTTP: ' . $httpCode,
+            'response' => $response
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    $jsonResponse = json_decode($response, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Lỗi phân tích JSON trả về: ' . json_last_error_msg(),
+            'response' => $response
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    if (!isset($jsonResponse['success']) || !isset($jsonResponse['message'])) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Dữ liệu JSON trả về không đúng định dạng',
+            'response' => $jsonResponse
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+	echo json_encode($jsonResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	exit();
+}
   ?>

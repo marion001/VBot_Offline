@@ -3,16 +3,40 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "6711B8",
-            "title": "Nợ Tình Em.mp3",
+            "ids_list": "9C2D31",
+            "title": "cô gái à.mp3",
             "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Nợ Tình Em.mp3",
-            "duration": "4.15 MB",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/cô gái à.mp3",
+            "duration": "3.67 MB",
             "description": null,
             "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/Nợ Tình Em.mp3",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/cô gái à.mp3",
             "channelTitle": null,
             "artist": null
+        },
+        {
+            "ids_list": "088F2E",
+            "title": "Tuyệt Duyên - Thương Ly Biệt 2.mp3",
+            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Tuyệt Duyên - Thương Ly Biệt 2.mp3",
+            "duration": "4.45 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Tuyệt Duyên - Thương Ly Biệt 2.mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "ADBF30",
+            "title": "Tình Khúc Vàng (Remix)",
+            "cover": "https://photo-zmp3.zmdcdn.me/avatars/e/a/eac7b6df395627214cd3b7900416eccc_1441251753.jpg",
+            "audio": "ZW78BIEI",
+            "duration": "04:18",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "ZW78BIEI",
+            "channelTitle": null,
+            "artist": "Đan Trường"
         }
     ]
 }

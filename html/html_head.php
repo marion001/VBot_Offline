@@ -182,7 +182,6 @@
     document.querySelector('#notificationModal .modal-body').innerHTML = message;
     $('#notificationModal').modal('show');
     }
-    
     function close_message() {
     $('#notificationModal').modal('hide');
     }
@@ -197,7 +196,7 @@
         'aac': 'audio/aac',
         'flac': 'audio/flac',
     };
-    
+
     return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
     }
     const audioPlayer = document.getElementById('audioPlayer');
@@ -217,9 +216,7 @@
     }
     return;
     }
-    
     const xhr = new XMLHttpRequest();
-
     // Gửi yêu cầu GET tới server để lấy tệp âm thanh dưới dạng base64
     xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
     xhr.responseType = 'text';
