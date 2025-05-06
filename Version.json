@@ -2,7 +2,7 @@
     "version": "1.0.33",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi đánh thức Hotword WakeUP",
-    "releaseDate": "06/05/2025-1",
+    "releaseDate": "06/05/2025-2",
     "changes": [
         {
             "type": "feature",
