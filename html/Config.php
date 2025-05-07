@@ -3026,7 +3026,7 @@
                       <div class="card-body">
                         <h5 class="card-title">Trợ Lý Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i> :</h5>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Default Assistant')"></i> :</label>
+                          <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Default Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input class="form-check-input" type="checkbox" name="default_assistant_active" id="default_assistant_active" <?php echo $Config['virtual_assistant']['default_assistant']['active'] ? 'checked' : ''; ?>>
