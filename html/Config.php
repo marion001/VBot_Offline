@@ -35,9 +35,7 @@
   $read_stt_token_google_cloud = null;
   
   if (isset($_POST['start_recovery_config_json'])) {
-  
   $data_recovery_type = $_POST['start_recovery_config_json'];
-  
   if ($data_recovery_type === "khoi_phuc_tu_tep_he_thong"){
   $start_recovery_config_json = $_POST['backup_config_json_files'];
   if (!empty($start_recovery_config_json)) {
@@ -87,7 +85,6 @@
   if (isset($_POST['all_config_save'])) {
   
   if ($Config['backup_upgrade']['config_json']['active'] === true){
-  
   // Lấy ngày và giờ hiện tại
   $dateTime = new DateTime();
   $newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
@@ -334,7 +331,26 @@
   $Config['virtual_assistant']['default_assistant']['active'] = isset($_POST['default_assistant_active']) ? true : false;
   $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_chatbox'] = isset($_POST['default_assistant_convert_audio_to_text_used_for_chatbox']) ? true : false;
   $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_display_and_logs'] = isset($_POST['default_assistant_convert_audio_to_text_used_for_display_and_logs']) ? true : false;
-  
+	
+  #Cập nhật trợ lý ảo Olli
+  $Config['virtual_assistant']['olli']['active'] = isset($_POST['olli_assistant_active']) ? true : false;
+  $Config['virtual_assistant']['olli']['time_out'] = intval($_POST['olli_assistant_time_out']);
+  $Config['virtual_assistant']['olli']['voice_name'] = $_POST['olli_assistant_voice_name'];
+  $Config['virtual_assistant']['olli']['password'] = $_POST['olli_assistant_password'];
+  $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_chatbox'] = isset($_POST['olli_convert_audio_to_text_used_for_chatbox']) ? true : false;
+  $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_display_and_logs'] = isset($_POST['olli_convert_audio_to_text_used_for_display_and_logs']) ? true : false;
+  $input_olli_assistant_username = trim($_POST['olli_assistant_username']);
+  if (filter_var($input_olli_assistant_username, FILTER_VALIDATE_EMAIL)) {
+      $Config['virtual_assistant']['olli']['username'] = $input_olli_assistant_username;
+  } elseif (preg_match('/^\d{9,10}$/', $input_olli_assistant_username)) {
+      if (strlen($input_olli_assistant_username) == 10 && $input_olli_assistant_username[0] == '0') {
+          $input_olli_assistant_username = substr($input_olli_assistant_username, 1);
+      }
+      $Config['virtual_assistant']['olli']['username'] = '+84' . $input_olli_assistant_username;
+  } else {
+      $Config['virtual_assistant']['olli']['username'] = trim($_POST['olli_assistant_username']);
+  }
+
   #Cập nhật giá trị trợ lý ảo chatgpt
   $Config['virtual_assistant']['chat_gpt']['key_chat_gpt'] = $_POST['chat_gpt_key'];
   $Config['virtual_assistant']['chat_gpt']['role_system_content'] = $_POST['chat_gpt_role_system_content'];
@@ -388,7 +404,6 @@
   $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
   $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] = isset($_POST['udp_sock_music_playback_on_client']) ? true : false;
 
-
   #Cập nhật Bluetooth
   $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
   $Config['bluetooth']['show_logs'] = isset($_POST['bluetooth_show_logs']) ? true : false;
@@ -403,7 +418,8 @@
   $virtual_assistant_priority_4 = isset($_POST['virtual_assistant_priority4']) ? $_POST['virtual_assistant_priority4'] : '';
   $virtual_assistant_priority_5 = isset($_POST['virtual_assistant_priority5']) ? $_POST['virtual_assistant_priority5'] : '';
   $virtual_assistant_priority_6 = isset($_POST['virtual_assistant_priority6']) ? $_POST['virtual_assistant_priority6'] : '';
-  $Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5, $virtual_assistant_priority_6];
+  $virtual_assistant_priority_7 = isset($_POST['virtual_assistant_priority7']) ? $_POST['virtual_assistant_priority7'] : '';
+  $Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5, $virtual_assistant_priority_6, $virtual_assistant_priority_7];
   
   #Cập nhật sao lưu trương trình VBot
   $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
@@ -2905,6 +2921,7 @@
                             <select class="form-select border-success" name="virtual_assistant_priority1" id="virtual_assistant_priority1">
                               <option value="">-- Chọn Trợ Lý --</option>
                               <option value="default_assistant" <?php if ($virtual_assistant_priority[0] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+							  <option value="olli" <?php if ($virtual_assistant_priority[0] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
                               <option value="google_gemini" <?php if ($virtual_assistant_priority[0] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
                               <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
                               <option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
@@ -2919,6 +2936,7 @@
                             <select class="form-select border-success" name="virtual_assistant_priority2" id="virtual_assistant_priority2">
                               <option value="">-- Chọn Trợ Lý --</option>
                               <option value="default_assistant" <?php if ($virtual_assistant_priority[1] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+							  <option value="olli" <?php if ($virtual_assistant_priority[1] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
                               <option value="google_gemini" <?php if ($virtual_assistant_priority[1] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
                               <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
                               <option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
@@ -2933,6 +2951,7 @@
                             <select class="form-select border-success" name="virtual_assistant_priority3" id="virtual_assistant_priority3">
                               <option value="">-- Chọn Trợ Lý --</option>
                               <option value="default_assistant" <?php if ($virtual_assistant_priority[2] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+							  <option value="olli" <?php if ($virtual_assistant_priority[2] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
                               <option value="google_gemini" <?php if ($virtual_assistant_priority[2] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
                               <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
                               <option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
@@ -2947,6 +2966,7 @@
                             <select class="form-select border-success" name="virtual_assistant_priority4" id="virtual_assistant_priority4">
                               <option value="">-- Chọn Trợ Lý --</option>
                               <option value="default_assistant" <?php if ($virtual_assistant_priority[3] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+							  <option value="olli" <?php if ($virtual_assistant_priority[3] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
                               <option value="google_gemini" <?php if ($virtual_assistant_priority[3] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
                               <option value="chat_gpt" <?php if ($virtual_assistant_priority[3] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
                               <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
@@ -2961,6 +2981,7 @@
                             <select class="form-select border-success" name="virtual_assistant_priority5" id="virtual_assistant_priority5">
                               <option value="">-- Chọn Trợ Lý --</option>
                               <option value="default_assistant" <?php if ($virtual_assistant_priority[4] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+							  <option value="olli" <?php if ($virtual_assistant_priority[4] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
                               <option value="google_gemini" <?php if ($virtual_assistant_priority[4] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
                               <option value="chat_gpt" <?php if ($virtual_assistant_priority[4] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
                               <option value="zalo_assistant" <?php if ($virtual_assistant_priority[4] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
@@ -2975,6 +2996,7 @@
                             <select class="form-select border-success" name="virtual_assistant_priority6" id="virtual_assistant_priority6">
                               <option value="">-- Chọn Trợ Lý --</option>
                               <option value="default_assistant" <?php if ($virtual_assistant_priority[5] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+							  <option value="olli" <?php if ($virtual_assistant_priority[5] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
                               <option value="google_gemini" <?php if ($virtual_assistant_priority[5] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
                               <option value="chat_gpt" <?php if ($virtual_assistant_priority[5] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
                               <option value="zalo_assistant" <?php if ($virtual_assistant_priority[5] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
@@ -2983,11 +3005,26 @@
                             </select>
                           </div>
                         </div>
+                        <div class="row mb-3">
+                          <label for="virtual_assistant_priority7" class="col-sm-3 col-form-label">Top 7:</label>
+                          <div class="col-sm-9">
+                            <select class="form-select border-success" name="virtual_assistant_priority7" id="virtual_assistant_priority7">
+                              <option value="">-- Chọn Trợ Lý --</option>
+                              <option value="default_assistant" <?php if ($virtual_assistant_priority[6] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
+                              <option value="olli" <?php if ($virtual_assistant_priority[6] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
+                              <option value="google_gemini" <?php if ($virtual_assistant_priority[6] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
+                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[6] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
+                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[6] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
+                              <option value="dify_ai" <?php if ($virtual_assistant_priority[6] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
+                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[6] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
+                            </select>
+                          </div>
+                        </div>
                       </div>
                     </div>
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i> :</h5>
+                        <h5 class="card-title">Trợ Lý Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i> :</h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Default Assistant')"></i> :</label>
                           <div class="col-sm-9">
@@ -3027,7 +3064,100 @@
                     </div>
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i> :</h5>
+                        <h5 class="card-title">Trợ Lý Zalo AI Assistant:</h5>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" <?php echo $Config['virtual_assistant']['zalo_assistant']['active'] ? 'checked' : ''; ?>>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="zalo_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="input-group mb-3">
+                              <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="zalo_assistant_time_out" id="zalo_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>">
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="zalo_assistant_set_expiration_time" class="col-sm-3 col-form-label">Đặt thời gian hết hạn Token (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Đặt thời gian hết hạn cho token trung bình đặt 1 ngày tham số tính bằng giây: 86400')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="input-group mb-3">
+                              <input  class="form-control border-success" type="number" min="21600" max="604800" step="1" name="zalo_assistant_set_expiration_time" id="zalo_assistant_set_expiration_time" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>">
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Trợ Lý Olli AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Olli AI Assistant')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input" type="checkbox" name="olli_assistant_active" id="olli_assistant_active" <?php echo $Config['virtual_assistant']['olli']['active'] ? 'checked' : ''; ?>>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="olli_assistant_username" class="col-sm-3 col-form-label">Tài Khoản <i class="bi bi-question-circle-fill" onclick="show_message('Tài Khoản Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
+                          <div class="col-sm-9">
+                              <input  class="form-control border-success" type="text" name="olli_assistant_username" id="olli_assistant_username" placeholder="Tài Khoản Đăng Nhập Của Bạn, Email hoặc Số Điện Thoại" value="<?php echo $Config['virtual_assistant']['olli']['username']; ?>">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="olli_assistant_password" class="col-sm-3 col-form-label">Mật Khẩu <i class="bi bi-question-circle-fill" onclick="show_message('Mật Khẩu Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
+                          <div class="col-sm-9">
+                              <input  class="form-control border-success" type="text" name="olli_assistant_password" id="olli_assistant_password" placeholder="Mật Khẩu Đăng Nhập Của Bạn" value="<?php echo $Config['virtual_assistant']['olli']['password']; ?>">
+                          <br/><center><button class="btn btn-success border-success" type="button"  onclick="check_info_login_olli()">Kiểm Tra Kết Nối</button>
+						  </center>
+						  </div>
+
+                        </div>
+                        <div class="row mb-3">
+                          <label for="olli_assistant_voice_name" class="col-sm-3 col-form-label">Giọng Đọc:</label>
+							<div class="col-sm-9">
+                            <select class="form-select border-success" name="olli_assistant_voice_name" id="olli_assistant_voice_name">
+                              <option value="vn_north" <?php if ($Config['virtual_assistant']['olli']['voice_name'] === "vn_north") echo "selected"; ?>>Giọng Miền Bắc</option>
+                              <option value="vn_south" <?php if ($Config['virtual_assistant']['olli']['voice_name'] === "vn_south") echo "selected"; ?>>Giọng Miền Nam</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label for="olli_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+                          <div class="col-sm-9">
+                              <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="olli_assistant_time_out" id="olli_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['olli']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['olli']['time_out']; ?>">
+                          </div>
+                        </div>
+                        <div class="card-body">
+                          <h5 class="card-title">Chuyển đổi thêm kết quả từ âm thanh thành văn bản (text) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi này chỉ áp dụng với trợ lý ảo Olli AI Assistant')"></i> :</h5>
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Áp dụng với Chatbot <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
+                            <div class="col-sm-9">
+                              <div class="form-switch">
+                                <input class="form-check-input" type="checkbox" name="olli_convert_audio_to_text_used_for_chatbox" id="olli_convert_audio_to_text_used_for_chatbox" <?php echo $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_chatbox'] ? 'checked' : ''; ?>>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Áp dụng với Hệ thống, Console, Logs, Logs API <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
+                            <div class="col-sm-9">
+                              <div class="form-switch">
+                                <input class="form-check-input" type="checkbox" name="olli_convert_audio_to_text_used_for_display_and_logs" id="olli_convert_audio_to_text_used_for_display_and_logs" <?php echo $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_display_and_logs'] ? 'checked' : ''; ?>>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Trợ Lý Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i> :</h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Gemini')"></i> :</label>
                           <div class="col-sm-9">
@@ -3055,7 +3185,7 @@
                     </div>
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Chat GPT:</h5>
+                        <h5 class="card-title">Trợ Lý Chat GPT:</h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Chat GPT')"></i> :</label>
                           <div class="col-sm-9">
@@ -3106,38 +3236,10 @@
                         </div>
                       </div>
                     </div>
+
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Zalo AI Assistant:</h5>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" <?php echo $Config['virtual_assistant']['zalo_assistant']['active'] ? 'checked' : ''; ?>>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="zalo_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="zalo_assistant_time_out" id="zalo_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="zalo_assistant_set_expiration_time" class="col-sm-3 col-form-label">Đặt thời gian hết hạn Token (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Đặt thời gian hết hạn cho token trung bình đặt 1 ngày tham số tính bằng giây: 86400')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input  class="form-control border-success" type="number" min="21600" max="604800" step="1" name="zalo_assistant_set_expiration_time" id="zalo_assistant_set_expiration_time" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>">
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
+                        <h5 class="card-title">Trợ Lý Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
                           <div class="col-sm-9">
@@ -3182,7 +3284,7 @@
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_assistant" aria-expanded="false" aria-controls="collapse_button_custom_assistant">
-                          DEV Assistant (Custom Assistant, Người dùng tự code) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
+                          Trợ Lý DEV Assistant (Custom Assistant, Người dùng tự code) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
                         </h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
@@ -4948,7 +5050,7 @@
           };
           xhr.send();
       }
-      
+
       //Chọn Mic để đẩy vào value của thẻ input Mic
       function selectDevice_MIC(id) {
           var micInput = document.getElementById('mic_id');
@@ -4959,7 +5061,7 @@
               show_message('Không tìm thấy thẻ input với id "mic_id".', 3);
           }
       }
-      
+
       //Chọn Speaker để đẩy vào value của thẻ Tên thiết bị (alsamixer):
       function selectDevice_Alsamixer(name) {
           var alsamixerInput = document.getElementById('alsamixer_name');
@@ -4970,7 +5072,7 @@
               show_message('Không tìm thấy thẻ input với id "alsamixer_name".', 3);
           }
       }
-      
+
       //Play nghe thử âm thanh tts mẫu của google CLOUD
       function play_tts_sample_gcloud(){
       	loading('show');
@@ -4987,7 +5089,6 @@
       	}
       	loading('hide');
       }
-      
     </script>
     <script>
       //Cập nhật bảng mã màu vào thẻ input
@@ -5010,6 +5111,60 @@
           // Cập nhật giá trị của thẻ input với mã màu đã chọn (không có '#')
           document.getElementById(colorCodeInputId).value = selectedColor;
       }
+
+//Kiểm tra đăng nhập
+function check_info_login_olli() {
+	loading('show');
+    var rawUsername = document.getElementById("olli_assistant_username").value.trim();
+    var password = document.getElementById("olli_assistant_password").value;
+    var isEmail = /^[^@]+@[^@]+\.[^@]+$/.test(rawUsername);
+    var username = rawUsername;
+    if (!isEmail) {
+        if (/^\+84\d{9}$/.test(username)) {
+			//Đúng định dạng
+        } else if (/^0\d{9}$/.test(username)) {
+            username = '+84' + username.substring(1);
+        } else if (/^\d{9}$/.test(username)) {
+            username = '+84' + username;
+        } else {
+            show_message("Tài khoản đăng nhập không hợp lệ");
+			loading('hide');
+            return;
+        }
+    }
+	var url = isEmail ? atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9sb2dpbg==') : atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9vdHAvbG9naW4=');
+    var data = isEmail ? { email: username, password: password } : { phone_number: username, password: password };
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.setRequestHeader("Accept", "*/*");
+    xhr.setRequestHeader("Accept-Language", "vi-VN;q=1.0, en-VN;q=0.9");
+    xhr.setRequestHeader("Language-Code", "vi");
+    xhr.setRequestHeader("Timezone", "Asia/Ho_Chi_Minh");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    var responseData = JSON.parse(xhr.responseText);
+                    if (responseData.code === 200) {
+						loading('hide');
+						show_message("<center class='text-success'>Xác thực Thành Công</center><br/>- " +responseData.data.tts_voice.sample_text);
+                    } else {
+						loading('hide');
+                        show_message("Xác thực thất bại: " + responseData + "<br/>Kiểm tra lại tài khoản hoặc mật khẩu");
+                    }
+                } catch (e) {
+					loading('hide');
+                    show_message("Lỗi xử lý phản hồi json từ server:" +e);
+                }
+            } else {
+				loading('hide');
+				show_message("Lỗi kết nối: " +xhr.status+ "<br/>Kiểm tra lại tài khoản hoặc mật khẩu");
+            }
+        }
+    };
+    xhr.send(JSON.stringify(data));
+}
     </script>
     <script>
       //Dành cho Test Led 
@@ -5019,8 +5174,6 @@
               return;
           }
           const led_value = document.getElementById(action).value;
-          //console.log(led_value);
-          //console.log(action);
           let led_action;
           if (action === "led_think") {
               led_action = "think";
@@ -5046,7 +5199,6 @@
                   if (this.status === 200) {
                       const response = JSON.parse(this.responseText);
                       if (response.success) {
-                          //show_message(response.message || "Yêu cầu đã được gửi thành công.");
                           showMessagePHP(response.message, 3);
                       } else {
                           show_message("Yêu cầu không thành công: " + (response.message || "Lỗi không xác định."));
@@ -5117,12 +5269,10 @@
                               var data = response.data;
                               var pathParts = dataPath.split('->');
                               var currentData = data;
-                              // Duyệt qua các phần của path để lấy dữ liệu
                               for (var i = 0; i < pathParts.length; i++) {
                                   var part = pathParts[i].trim();
                                   currentData = currentData[part];
                               }
-                              // Cập nhật nội dung của thẻ textarea
                               var textarea = document.getElementById(textareaId);
                               if (textarea) {
                                   textarea.value = JSON.stringify(currentData, null, 4);
@@ -5150,7 +5300,6 @@
       
       //Cập nhật đường dẫn path web ui vào thẻ input
       function update_webui_link() {
-          // Gán giá trị vào input có id là "webui_path"
           const inputField = document.getElementById('webui_path');
           if (inputField) {
       		path_web_ui_html = "<?php echo $directory_path; ?>";
@@ -5183,12 +5332,11 @@
 		};
 	}
 
-      // Đặt sự kiện khi DOM đã được tải hoàn toàn v
+      // Đặt sự kiện khi DOM đã được tải hoàn toàn
       document.addEventListener('DOMContentLoaded', function() {
       	//cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
           updateButton_Audio_Welcome();
           document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)
-      
       	// Gọi hàm để cập nhật trạng thái ban đầu lựa chọn nguồn hotword đánh thức
           selectHotwordWakeup();
       });

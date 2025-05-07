@@ -10,12 +10,14 @@
             "id_province": "33"
         },
         "location": {
-            "latitude": 20.99999,
-            "longitude": 106.88888
+            "latitude": 15.99999,
+            "longitude": 126.88888
         },
         "user_login": {
             "active": false,
-            "user_password": "vbot123"
+            "user_password": "vbot123",
+            "login_attempts": 5,
+            "login_lock_time": 900
         }
     },
     "ssh_server": {
@@ -60,16 +62,16 @@
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine",
                     "client_conversation_mode": true,
-					"music_playback_on_client": true,
+                    "music_playback_on_client": true,
                     "data_client_name": "Data_VBot_Client.json"
                 }
             }
         }
     },
     "web_interface": {
-		"external": {
-			"active": false
-		},
+        "external": {
+            "active": false
+        },
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
@@ -121,9 +123,10 @@
         "mqtt_show_logs_reconnect": false
     },
     "virtual_assistant": {
-		"cache_active": true,
+        "cache_active": true,
         "prioritize_virtual_assistants": [
             "default_assistant",
+            "olli",
             "zalo_assistant",
             "google_gemini",
             "chat_gpt",
@@ -133,6 +136,20 @@
         "default_assistant": {
             "active": true,
             "time_out": 10,
+            "convert_audio_to_text": {
+                "used_for_chatbox": true,
+                "used_for_display_and_logs": false
+            }
+        },
+        "olli": {
+            "active": false,
+            "time_out": 10,
+            "username": "0986888888",
+            "password": "VBotzZ@123",
+            "voice_name": "vn_north",
+            "device_session_id": "917A4B51",
+            "access_token": "44.55.66",
+            "expire_time": 1746610000,
             "convert_audio_to_text": {
                 "used_for_chatbox": true,
                 "used_for_display_and_logs": false
@@ -149,7 +166,7 @@
             "active": true,
             "time_out": 15,
             "device_token": "586d5714b9e6c3fea9f5d71f0511dac971533e32e3480647a13a809990f53a83",
-            "expire_time": 1734880200,
+            "expire_time": 1746610000,
             "set_expiration_time": 86400
         },
         "google_gemini": {
@@ -201,8 +218,8 @@
         },
         "zing_mp3": {
             "active": true,
-            "authentication_zmp3_rqid": "MHwxNzEdUngMjI0LjM0LjEyOHx2MS4xMS4xMnwxNzMzOTY0MzIxOTEw",
-            "expire_time": 1733967921
+            "authentication_zmp3_rqid": "Ew",
+            "expire_time": 1746610000
         },
         "news_paper": {
             "active": true,
@@ -253,11 +270,11 @@
         ],
         "podcast": {
             "active": true,
-            "username": "dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=",
-            "password": "VmlldGJvdEAx",
             "time_out": 7,
+            "device_session_id": "917A4B51",
+            "voice_name": "vn_north",
             "access_token": "zz.11.22",
-            "expire_time": 1733459155
+            "expire_time": 1746610000
         },
         "radio": {
             "active": true
@@ -618,7 +635,7 @@
                     "active": false
                 },
                 "directory_tts": "TTS_Audio",
-				"clean_cache_tts_max_file": 1000
+                "clean_cache_tts_max_file": 1000
             }
         },
         "auto_restart_program_error": true

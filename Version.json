@@ -1,8 +1,8 @@
 {
-    "version": "1.0.33",
+    "version": "1.0.34",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi đánh thức Hotword WakeUP",
-    "releaseDate": "06/05/2025-3",
+    "description": "Tích hợp liên kết Trợ Lý Ảo Olli Maika, Cá nhân hóa dữ liệu, đồng bộ với người dùng",
+    "releaseDate": "07/05/2025",
     "changes": [
         {
             "type": "feature",
