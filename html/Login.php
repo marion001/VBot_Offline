@@ -6,8 +6,6 @@
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
 
-
-  
   #Quên Mật Khẩu
   if (isset($_GET['forgot_password'])) {
       $my_email = $_GET['mail'];
@@ -119,12 +117,12 @@ function verifyCsrfToken($token) {
   }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Kiểm tra CSRF token
     if (!isset($_POST['csrf_token']) || !verifyCsrfToken($_POST['csrf_token'])) {
         $error = "Yêu cầu không hợp lệ!";
     } else {
-        $password_user = $_POST['yourPassword'];
-        if ($password_user === $Config['contact_info']['user_login']['user_password']) {
+		$stored_hash = hash('sha256', $Config['contact_info']['user_login']['user_password']);
+        $password_user = $_POST['token_password'];
+		if (hash_equals($stored_hash, $password_user)) {
             // Đăng nhập thành công
             $_SESSION['user_login'] = [
                 'logged_in' => true,
@@ -132,9 +130,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ];
             header('Location: index.php');
             exit;
-        } else {
-            // Đăng nhập thất bại
-            //sleep(1); // Thêm độ trễ để làm chậm brute force
+		} else {
             $error = "Sai mật khẩu!";
         }
     }
@@ -146,9 +142,8 @@ generateCsrfToken();
   <?php
     include 'html_head.php';
     ?>
+	<script src="assets/js/crypto-js.min.js"></script>
   <body>
-  
-  
     <!-- Loading Mesage-->
     <div id="loadingOverlay" class="overlay_loading">
       <div class="spinner-border spinner-border-sm" role="status">
@@ -211,10 +206,11 @@ generateCsrfToken();
                         <?php if (isset($error)): ?>
                         <p style="color: red;"><?php echo $error; ?></p>
                         <?php endif; ?>
-                        <form class="row g-3 needs-validation" novalidate method="POST" action="">
+                        <form class="row g-3 needs-validation" novalidate method="POST" onsubmit="return VBot_Hash();" action="">
                           <div class="col-12">
-                            <label for="yourPassword" class="form-label">Mật khẩu:</label>
-                            <input type="password" name="yourPassword" class="form-control border-success" placeholder="Nhập mật khẩu đăng nhập" id="yourPassword" required>
+                            <label for="salt_password" class="form-label">Mật khẩu:</label>
+                            <input type="password" name="salt_password" class="form-control border-success" placeholder="Nhập mật khẩu đăng nhập" id="salt_password" required>
+                            <input type="hidden" name="token_password" class="form-control border-success" id="token_password">
 							<input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <div class="invalid-feedback">Vui lòng nhập mật khẩu của bạn!</div>
                           </div>
@@ -251,6 +247,17 @@ generateCsrfToken();
     <!-- End #main -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
     <p style="display: none;" id="loading_show"></p>
+
+    <script>
+        function VBot_Hash() {
+            const password = document.getElementById("salt_password").value;
+            const hashed = CryptoJS.SHA256(password).toString();
+            document.getElementById("token_password").value = hashed;
+            document.getElementById("salt_password").value = "21a6b5db2e8d0be9699defb1d3468d92d9e71b4db3d3f8cdca1645234e5e3cbf";
+            return true;
+        }
+    </script>
+
     <?php
       include 'html_js.php';
       ?>
