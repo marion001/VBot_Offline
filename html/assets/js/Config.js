@@ -507,7 +507,7 @@ function play_tts_sample_gcloud() {
             show_message('Cần chọn 1 giọng đọc để nghe thử');
         }
     } else {
-        showMessagePHP('Không tìm thấy dữu liệu thẻ select với id=tts_ggcloud_voice_name', 3);
+        showMessagePHP('Không tìm thấy dữ liệu thẻ select với id=tts_ggcloud_voice_name', 3);
     }
     loading('hide');
 }

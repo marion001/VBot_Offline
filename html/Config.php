@@ -2519,6 +2519,8 @@
                         </div>
                       </div>
                     </div>
+
+					<!--
                     <div class="card accordion" id="accordion_button_setting">
                       <div class="card-body">
                         <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting" aria-expanded="false" aria-controls="collapse_button_setting">
@@ -2526,7 +2528,7 @@
                         </h5>
                         <div id="collapse_button_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting" style="">
                           <?php
-                            foreach ($Config['smart_config']['smart_wakeup']['sound']['default'] as $key => $value) {
+                           /* foreach ($Config['smart_config']['smart_wakeup']['sound']['default'] as $key => $value) {
                                 echo "
                                 <div class='row mb-3'>
                                     <label for='sound_{$key}' class='col-sm-3 col-form-label'>{$key}:</label>
@@ -2538,10 +2540,13 @@
                                     </div>
                                 </div>";
                             }
+							*/
                             ?>
                         </div>
                       </div>
                     </div>
+					-->
+
                   </div>
                 </div>
               </div>
