@@ -4664,65 +4664,76 @@
           }
       }
 
-//Load danh sách giọng đọc tts GCloud load_list_GoogleVoices_tts('tts_ggcloud');
+//Tải danh sách giọng đọc của google tts cloud
 function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
-	if (loadingg === 'ok'){
-		loading("show");
-	}
+	if (loadingg === 'ok') loading("show");
 	let selectElement_tts_gcloud;
-    let currentSelectedVoice_tts_gcloud;
-	if (select_tts_gcloud === 'tts_ggcloud'){
+	let currentSelectedVoice_tts_gcloud;
+	if (select_tts_gcloud === 'tts_ggcloud') {
 		selectElement_tts_gcloud = document.getElementById('tts_ggcloud_voice_name');
 		currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name']; ?>';
-	}
-	else if (select_tts_gcloud === 'tts_ggcloud_key'){
+	} else if (select_tts_gcloud === 'tts_ggcloud_key') {
 		selectElement_tts_gcloud = document.getElementById('tts_ggcloud_key_voice_name');
 		currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?>';
-	} 
-    if (!selectElement_tts_gcloud) {
-		if (loadingg === 'ok'){
-			loading("hide");
-		}
+	}
+	if (!selectElement_tts_gcloud) {
+		if (loadingg === 'ok') loading("hide");
 		showMessagePHP("Không tìm thấy thẻ select tts gcloud được chọn", 5);
-        return;
-    }
-    const xhr = new XMLHttpRequest();
-    xhr.open("GET", "includes/other_data/list_voices_tts_gcloud.json", true);
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-                const data = JSON.parse(xhr.responseText);
-                const voiceList = data.voice_list_vi_vn;
-                selectElement_tts_gcloud.innerHTML = ""; // Xóa các option cũ
-                voiceList.forEach(function (voice) {
-                    const option = document.createElement("option");
-                    option.value = voice;
-                    option.textContent = voice;
-                    if (voice === currentSelectedVoice_tts_gcloud) {
-                        option.selected = true;
-						option.setAttribute("selected", "");
-                    }
-                    selectElement_tts_gcloud.appendChild(option);
-                });
-				if (loadingg === 'ok'){
-					showMessagePHP("Đã tải danh sách giọng đọc TTS Google Cloud", 5);
-					loading("hide");
+		return;
+	}
+	function loadJSON(url, useRaw = false) {
+		const xhr = new XMLHttpRequest();
+		xhr.open("GET", url, true);
+		if (useRaw) {
+			xhr.setRequestHeader("Accept", "application/vnd.github.v3.raw");
+		}
+		xhr.onreadystatechange = function () {
+			if (xhr.readyState === 4) {
+				if (xhr.status === 200) {
+					try {
+						const data = JSON.parse(xhr.responseText);
+						const voiceList = data.voice_list_vi_vn;
+						selectElement_tts_gcloud.innerHTML = "";
+						voiceList.forEach(function (voice) {
+							const option = document.createElement("option");
+							option.value = voice;
+							option.textContent = voice;
+							if (voice === currentSelectedVoice_tts_gcloud) {
+								option.selected = true;
+								option.setAttribute("selected", "");
+							}
+							selectElement_tts_gcloud.appendChild(option);
+						});
+						if (loadingg === 'ok') {
+							showMessagePHP("Đã tải danh sách giọng đọc TTS Google Cloud", 5);
+							loading("hide");
+						}
+					} catch (e) {
+						if (useRaw) {
+							//console.warn("Lỗi phân tích JSON từ GitHub API, dùng nội bộ:", e);
+							loadJSON("includes/other_data/list_voices_tts_gcloud.json");
+						} else {
+							if (loadingg === 'ok') loading("hide");
+							showMessagePHP("Lỗi phân tích JSON tts GCloud: " + e, 5);
+						}
+					}
+				} else {
+					if (useRaw) {
+						//console.warn("Lỗi khi lấy từ GitHub API, fallback sang nội bộ:", xhr.status);
+						loadJSON("includes/other_data/list_voices_tts_gcloud.json");
+					} else {
+						if (loadingg === 'ok') loading("hide");
+						showMessagePHP("Không thể tải file JSON tts GCloud. Mã lỗi HTTP: " + xhr.status, 5);
+					}
 				}
-            } catch (e) {
-				if (loadingg === 'ok'){
-					loading("hide");
-				}
-				showMessagePHP("Lỗi phân tích tệp JSON tts GCloud:" +e, 5);
-            }
-        } else if (xhr.readyState === 4) {
-			if (loadingg === 'ok'){
-				loading("hide");
 			}
-			showMessagePHP("Không thể tải file JSON tts GCloud Mã lỗi HTTP: " +xhr.status, 5);
-        }
-    };
-    xhr.send();
+		};
+		xhr.send();
+	}
+	// Gọi GitHub trước, nếu lỗi sẽ tự động fallback
+	loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
 }
+
 
       // Đặt sự kiện khi DOM đã được tải hoàn toàn
       document.addEventListener('DOMContentLoaded', function() {
