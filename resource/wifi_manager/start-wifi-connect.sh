@@ -1,46 +1,105 @@
 #!/usr/bin/env bash
 
-#Đợi 30s cho thiết bị khởi động xong
-sleep 30
+# Đợi 35s cho thiết bị khởi động xong
+sleep 35
 
-#lấy tên SSID hiện tại nếu có
+# Thời gian chờ để kiểm tra thiết bị kết nối vào AP
+TIME_AP=120
+
+# Thời gian chờ trước khi reboot nếu có thiết bị kết nối vào AP
+TIME_AP_CONNECT=90
+
+# Lấy tên SSID hiện tại nếu có
 OLD_SSID=$(iwgetid -r)
 
 # Lưu địa chỉ IP hiện tại (nếu có)
 OLD_IP=$(cat /home/pi/ip.txt 2>/dev/null)
 
-# Lưu tên Wifi hiện tại (nếu có)
+# Lưu tên WiFi hiện tại (nếu có)
 OLD_WIFI=$(cat /home/pi/wifi.txt 2>/dev/null)
 
-# Kiểm tra kết nối Wifi
+# Kiểm tra kết nối WiFi
 CURRENT_IP=$(hostname -I | awk '{print $1}')
 
-iwgetid -r
-if [ $? -eq 0 ]; then
-    printf 'Wifi đã kết nối...\n'
-    # Nếu IP cũ khác với IP hiện tại, hoặc tên wifi khác với wifi hiện tại
-    if [ "$OLD_IP" != "$CURRENT_IP" ] || [ "$OLD_WIFI" != "$OLD_SSID" ]; then
-        # Lấy và ghi địa chỉ IP vào file
-        echo $CURRENT_IP > /home/pi/ip.txt
-		# Lấy và tên wifi vào file
-        echo $OLD_SSID > /home/pi/wifi.txt
-        sudo -u pi python3 /home/pi/_VBot_IP.py
+# Lấy địa chỉ IP của gateway
+GATEWAY_IP=$(ip route | grep default | awk '{print $3}')
+
+# Hàm kiểm tra ping tới IP local (gateway)
+check_local_ping() {
+    if [ -z "$GATEWAY_IP" ]; then
+        printf "Không tìm thấy GATEWAY_IP!\n"
+        return 1
     fi
-    # In ra địa chỉ IP hiện tại
-    printf "Địa chỉ IP của bạn là: $CURRENT_IP\n"
-    # Khởi động Apache
-    sudo systemctl start apache2
-    # Kích hoạt và chạy dịch vụ VBot_Offline
-    systemctl --user enable --now VBot_Offline.service
+    ping -c 5 -W 3 "$GATEWAY_IP" > /dev/null 2>&1
+    return $?
+}
+
+iwgetid -r
+#Nếu có wifi đang kết nối
+if [ $? -eq 0 ]; then
+    #printf 'WiFi đã kết nối...\n'
+    #Kiểm tra ping tới gateway nếu thành công
+    if check_local_ping; then
+        #printf 'Kết nối mạng nội bộ hoạt động (ping tới %s thành công)!\n' "$GATEWAY_IP"
+        #Nếu IP cũ khác với IP hiện tại, hoặc tên WiFi khác với WiFi hiện tại
+        if [ "$OLD_IP" != "$CURRENT_IP" ] || [ "$OLD_WIFI" != "$OLD_SSID" ]; then
+            # Lấy và ghi địa chỉ IP vào file
+            echo "$CURRENT_IP" > /home/pi/ip.txt
+            # Lấy và ghi tên WiFi vào file
+            echo "$OLD_SSID" > /home/pi/wifi.txt
+			#Đọc địa chỉ IP nếu phát hiện có thay đổi tên wifi hoặc ip
+            sudo -u pi python3 /home/pi/_VBot_IP.py
+        fi
+        #printf "Địa chỉ IP của bạn là: %s\n" "$CURRENT_IP"
+        #Khởi động Apache
+        sudo systemctl start apache2
+        #Kích hoạt và chạy dịch vụ VBot_Offline
+        systemctl --user enable --now VBot_Offline.service
+        #Nghỉ (90 giây) trước khi tiếp tục lặp lại
+        sleep 90
+	#Nếu ping thất bại
+    else
+        printf 'Mất kết nối mạng nội bộ (ping tới %s không thành công)!\n' "$GATEWAY_IP"
+        # Xử lý khi không ping được tới gateway
+        systemctl --user disable --now VBot_Offline.service
+        sudo systemctl stop apache2
+        printf 'Bắt đầu phát AP kết nối WiFi...\n'
+        wifi-connect -s VBot_Assistant -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
+        WIFI_CONNECT_PID=$!
+        # Chờ TIME_AP giây để xem có thiết bị nào kết nối hay không
+        sleep "$TIME_AP"
+        # Kiểm tra xem có thiết bị nào kết nối vào AP hay không
+        CONNECTED_DEVICES=$(ip neigh | grep '192.168.4' | grep REACHABLE)
+        if [ -z "$CONNECTED_DEVICES" ]; then
+            printf 'Không có thiết bị nào được kết nối với AP, Đang tiến hành kết nối với WiFi trước đó...\n'
+            # Khôi phục kết nối Wi-Fi cũ nếu có
+            if [ -n "$OLD_SSID" ]; then
+                nmcli dev wifi connect "$OLD_SSID"
+            else
+                printf 'Không tìm thấy WiFi trước đó để kết nối, Đang khởi động lại thiết bị...\n'
+				sleep 3
+                sudo reboot
+            fi
+        else
+            printf 'Có thiết bị được kết nối với AP, Khởi động lại sau %s giây...\n' "$TIME_AP_CONNECT"
+            # Nếu có thiết bị kết nối vào AP, đợi TIME_AP_CONNECT giây trước khi reboot
+            sleep "$TIME_AP_CONNECT"
+            sudo reboot
+        fi
+        # Dừng wifi-connect
+        sudo kill "$WIFI_CONNECT_PID"
+    fi
+#Nếu không có wifi đang kết nối
 else
+    printf 'WiFi không kết nối...\n'
     systemctl --user disable --now VBot_Offline.service
     sudo systemctl stop apache2
     printf 'Bắt đầu phát AP kết nối WiFi...\n'
     wifi-connect -s VBot_Assistant -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
     WIFI_CONNECT_PID=$!
-    # Chờ 120 giây để xem có thiết bị nào kết nối hay không
-    sleep 120
-    # Kiểm tra xem có thiết bị nào kết nối vào AP hay không (dùng lệnh arp-scan hoặc ip neigh)
+    # Chờ TIME_AP giây để xem có thiết bị nào kết nối hay không
+    sleep "$TIME_AP"
+    # Kiểm tra xem có thiết bị nào kết nối vào AP hay không
     CONNECTED_DEVICES=$(ip neigh | grep '192.168.4' | grep REACHABLE)
     if [ -z "$CONNECTED_DEVICES" ]; then
         printf 'Không có thiết bị nào được kết nối với AP, Đang tiến hành kết nối với WiFi trước đó...\n'
@@ -49,15 +108,15 @@ else
             nmcli dev wifi connect "$OLD_SSID"
         else
             printf 'Không tìm thấy WiFi trước đó để kết nối, Đang khởi động lại thiết bị...\n'
+			sleep 3
             sudo reboot
         fi
     else
-        printf 'Có thiết bị được kết nối với AP, Khởi động lại sau 60 giây...\n'
-        
-        #Nếu có thiết bị kết nối vào AP sẽ đợi 60 giây để cấu hình wifi trước khi reboot lại hệ thống
-        sleep 90
+        printf 'Có thiết bị được kết nối với AP, Khởi động lại sau %s giây...\n' "$TIME_AP_CONNECT"
+        # Nếu có thiết bị kết nối vào AP, đợi TIME_AP_CONNECT giây trước khi reboot
+        sleep "$TIME_AP_CONNECT"
         sudo reboot
     fi
     # Dừng wifi-connect
-    sudo kill $WIFI_CONNECT_PID
+    sudo kill "$WIFI_CONNECT_PID"
 fi

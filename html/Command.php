@@ -478,7 +478,8 @@ if (isset($_POST['disable_vbot_api_external'])) {
   $stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO);
   $stream_out5 = ssh2_fetch_stream($stream5, SSH2_STREAM_STDIO);
   $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
-  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output = "$GET_current_USER@$HostName:~ $> Chỉ Cài Đặt Auto Wifi Manager Không Đọc Địa Chỉ IP\n";
+  $output .= "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .= "$GET_current_USER@$HostName:~ $ $CMD3\n";
   $output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
   $output .= "$GET_current_USER@$HostName:~ $ $CMD4\n";
@@ -493,7 +494,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
   }
   
   if (isset($_POST['auto_wifi_manager_and_speaker_ip'])) {
-  $file_auto_wifi_manager_only = $VBot_Offline.'resource/wifi_manager/start-wifi-connect_wifi_only.sh';
+  $file_auto_wifi_manager_only = $VBot_Offline.'resource/wifi_manager/start-wifi-connect.sh';
   $file_auto_service = $VBot_Offline.'resource/wifi_manager/wifi-connect.service';
   $file_python_ip = $VBot_Offline.'resource/wifi_manager/_VBot_IP.py';
   $CMD = "cp $file_auto_wifi_manager_only /home/pi/start-wifi-connect.sh";
@@ -527,7 +528,8 @@ if (isset($_POST['disable_vbot_api_external'])) {
   $stream_out4 = ssh2_fetch_stream($stream4, SSH2_STREAM_STDIO);
   $stream_out6 = ssh2_fetch_stream($stream6, SSH2_STREAM_STDIO);
   $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
-  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output = "$GET_current_USER@$HostName:~ $> Cài Đặt Auto Wifi Manager Và Tự Động Đọc Địa Chỉ IP\n";
+  $output .= "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .= "$GET_current_USER@$HostName:~ $ $CMD3\n";
   $output .= "$GET_current_USER@$HostName:~ $ $CMD5\n";
   $output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
@@ -542,7 +544,6 @@ if (isset($_POST['disable_vbot_api_external'])) {
   $output .=  stream_get_contents($stream_out6);
   $output .=  stream_get_contents($stream_out1);
   }
-  
   
   if (isset($_POST['config_auto'])) {
   // Đường dẫn đến file service
@@ -1195,7 +1196,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
                               <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_auto_wifi" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto Wifi Manager</button>
                             </li>
                             <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_auto_wifi" type="submit" title="Kích Hoạt Services Auto Wifi Manaager">Enable Auto Wifi Manager</button></li>
-                            <button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_only" type="submit" title="Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP">Install Auto Wifi Manager</button></li>
+                            <button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_only" type="submit" title="Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP">Chỉ Install Auto Wifi Manager</button></li>
                             <button onclick="loading('show')" class="dropdown-item text-danger" name="auto_wifi_manager_and_speaker_ip" type="submit" title="Cài Đặt Auto Wifi Manager Và Đọc Địa Chỉ IP Khi Mà IP Hoặc Wifi Bị Thay Đổi">Install Auto Wifi Manager + Đọc IP</button></li>
                             <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_auto_wifi" type="submit" title="Xem Logs Auto Wifi Manaager">Logs Auto Wifi Manager</button></li>
                             <button onclick="loading('show')" class="dropdown-item text-danger" name="status_auto_wifi" type="submit" title="Kiêm tra trạng thái Auto Wifi Manaager">Status Auto Wifi Manager</button></li>

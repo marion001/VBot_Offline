@@ -1,8 +1,8 @@
 {
     "version": "1.0.34",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật các mẫu giọng đọc Mới của Google Cloud Text To Speak",
-    "releaseDate": "08/05/2025",
+    "description": "Sửa Lỗi Auto Wifi Manager, Cập nhật các mẫu giọng đọc Mới của Google Cloud Text To Speak",
+    "releaseDate": "08/05/2025-1",
     "changes": [
         {
             "type": "feature",

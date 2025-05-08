@@ -1,8 +1,8 @@
 {
     "version": "1.0.34",
     "projectName": "Program VBot Offline",
-    "description": "Tích hợp liên kết Trợ Lý Ảo Olli Maika, Cá nhân hóa dữ liệu, đồng bộ với người dùng",
-    "releaseDate": "07/05/2025",
+    "description": "Sửa Lỗi Auto Wifi Manager: Command/Terminal -> OS Wifi -> Install Auto Wifi Manager + Đọc IP",
+    "releaseDate": "08/05/2025",
     "changes": [
         {
             "type": "feature",
