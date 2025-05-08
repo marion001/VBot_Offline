@@ -56,7 +56,7 @@ if [ $? -eq 0 ]; then
         #Kích hoạt và chạy dịch vụ VBot_Offline
         systemctl --user enable --now VBot_Offline.service
         #Nghỉ (90 giây) trước khi tiếp tục lặp lại
-        sleep 90
+        #sleep 90
 	#Nếu ping thất bại
     else
         printf 'Mất kết nối mạng nội bộ (ping tới %s không thành công)!\n' "$GATEWAY_IP"
@@ -77,7 +77,7 @@ if [ $? -eq 0 ]; then
                 nmcli dev wifi connect "$OLD_SSID"
             else
                 printf 'Không tìm thấy WiFi trước đó để kết nối, Đang khởi động lại thiết bị...\n'
-				sleep 3
+				#sleep 3
                 sudo reboot
             fi
         else
@@ -108,7 +108,7 @@ else
             nmcli dev wifi connect "$OLD_SSID"
         else
             printf 'Không tìm thấy WiFi trước đó để kết nối, Đang khởi động lại thiết bị...\n'
-			sleep 3
+			#sleep 3
             sudo reboot
         fi
     else

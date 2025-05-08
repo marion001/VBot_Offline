@@ -42,7 +42,7 @@ if [ $? -eq 0 ]; then
     if check_local_ping; then
         #printf 'Kết nối mạng nội bộ hoạt động (ping tới %s thành công)!\n' "$GATEWAY_IP"
         #Nghỉ (90 giây) trước khi tiếp tục lặp lại
-        sleep 90
+        #sleep 90
 	#Nếu ping thất bại
     else
         printf 'Mất kết nối mạng nội bộ (ping tới %s không thành công)!\n' "$GATEWAY_IP"
@@ -63,7 +63,7 @@ if [ $? -eq 0 ]; then
                 nmcli dev wifi connect "$OLD_SSID"
             else
                 printf 'Không tìm thấy WiFi trước đó để kết nối, Đang khởi động lại thiết bị...\n'
-				sleep 3
+				#sleep 3
                 sudo reboot
             fi
         else
@@ -94,7 +94,7 @@ else
             nmcli dev wifi connect "$OLD_SSID"
         else
             printf 'Không tìm thấy WiFi trước đó để kết nối, Đang khởi động lại thiết bị...\n'
-			sleep 3
+			#sleep 3
             sudo reboot
         fi
     else
