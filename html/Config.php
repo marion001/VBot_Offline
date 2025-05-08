@@ -1704,19 +1704,11 @@
                               <div class="input-group mb-3">
                                 <div class="form-floating">
                                   <select name="tts_ggcloud_voice_name" id="tts_ggcloud_voice_name" class="form-select border-success" aria-label="Default select example">
-                                    <option value="vi-VN-Neural2-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Neural2-A' ? 'selected' : ''; ?>>vi-VN-Neural2-A FEMALE</option>
-                                    <option value="vi-VN-Neural2-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Neural2-D' ? 'selected' : ''; ?>>vi-VN-Neural2-D MALE</option>
-                                    <option value="vi-VN-Standard-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-A' ? 'selected' : ''; ?>>vi-VN-Standard-A FEMALE</option>
-                                    <option value="vi-VN-Standard-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-B' ? 'selected' : ''; ?>>vi-VN-Standard-B MALE</option>
-                                    <option value="vi-VN-Standard-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-C' ? 'selected' : ''; ?>>vi-VN-Standard-C FEMALE</option>
-                                    <option value="vi-VN-Standard-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Standard-D' ? 'selected' : ''; ?>>vi-VN-Standard-D MALE</option>
-                                    <option value="vi-VN-Wavenet-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-A' ? 'selected' : ''; ?>>vi-VN-Wavenet-A FEMALE</option>
-                                    <option value="vi-VN-Wavenet-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-B' ? 'selected' : ''; ?>>vi-VN-Wavenet-B MALE</option>
-                                    <option value="vi-VN-Wavenet-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-C' ? 'selected' : ''; ?>>vi-VN-Wavenet-C FEMALE</option>
-                                    <option value="vi-VN-Wavenet-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] === 'vi-VN-Wavenet-D' ? 'selected' : ''; ?>>vi-VN-Wavenet-D MALE</option>
+                                    <option value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name']; ?>" selected><?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name']; ?></option>
                                   </select>
                                   <label for="tts_ggcloud_voice_name">Giọng đọc:</label>
                                 </div>
+								<button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
                                 <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i></button>
                               </div>
                               <div class="form-floating mb-3">  
@@ -1872,19 +1864,11 @@
                               <div class="input-group mb-3">
                                 <div class="form-floating">
                                   <select name="tts_ggcloud_key_voice_name" id="tts_ggcloud_key_voice_name" class="form-select border-success" aria-label="Default select example">
-                                    <option value="vi-VN-Neural2-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Neural2-A' ? 'selected' : ''; ?>>vi-VN-Neural2-A FEMALE</option>
-                                    <option value="vi-VN-Neural2-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Neural2-D' ? 'selected' : ''; ?>>vi-VN-Neural2-D MALE</option>
-                                    <option value="vi-VN-Standard-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-A' ? 'selected' : ''; ?>>vi-VN-Standard-A FEMALE</option>
-                                    <option value="vi-VN-Standard-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-B' ? 'selected' : ''; ?>>vi-VN-Standard-B MALE</option>
-                                    <option value="vi-VN-Standard-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-C' ? 'selected' : ''; ?>>vi-VN-Standard-C FEMALE</option>
-                                    <option value="vi-VN-Standard-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Standard-D' ? 'selected' : ''; ?>>vi-VN-Standard-D MALE</option>
-                                    <option value="vi-VN-Wavenet-A" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-A' ? 'selected' : ''; ?>>vi-VN-Wavenet-A FEMALE</option>
-                                    <option value="vi-VN-Wavenet-B" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-B' ? 'selected' : ''; ?>>vi-VN-Wavenet-B MALE</option>
-                                    <option value="vi-VN-Wavenet-C" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-C' ? 'selected' : ''; ?>>vi-VN-Wavenet-C FEMALE</option>
-                                    <option value="vi-VN-Wavenet-D" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name'] === 'vi-VN-Wavenet-D' ? 'selected' : ''; ?>>vi-VN-Wavenet-D MALE</option>
+                                    <option value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?>" selected><?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?></option>
                                   </select>
                                   <label for="tts_ggcloud_key_voice_name">Giọng đọc:</label>
                                 </div>
+								<button type="button" name="load_list_gcloudkey_tts" id="load_list_gcloudkey_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud_key', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
                                 <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i></button>
                               </div>
                               <div class="form-floating mb-3">  
@@ -4621,7 +4605,7 @@
           xhr.open("GET", url + "?" + params, true);
           xhr.send();
       }
-      
+
       //Hiển thị dữ liệu BackList.json
       function getBacklistData(dataPath, textareaId) {
           var url = "includes/php_ajax/Show_file_path.php?data_backlist";
@@ -4663,7 +4647,6 @@
           xhr.open("GET", url, true);
           xhr.send();
       }
-      
       //Cập nhật đường dẫn path web ui vào thẻ input
       function update_webui_link() {
           const inputField = document.getElementById('webui_path');
@@ -4676,6 +4659,66 @@
           }
       }
 
+//Load danh sách giọng đọc tts GCloud load_list_GoogleVoices_tts('tts_ggcloud');
+function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
+	if (loadingg === 'ok'){
+		loading("show");
+	}
+	let selectElement_tts_gcloud;
+    let currentSelectedVoice_tts_gcloud;
+	if (select_tts_gcloud === 'tts_ggcloud'){
+		selectElement_tts_gcloud = document.getElementById('tts_ggcloud_voice_name');
+		currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name']; ?>';
+	}
+	else if (select_tts_gcloud === 'tts_ggcloud_key'){
+		selectElement_tts_gcloud = document.getElementById('tts_ggcloud_key_voice_name');
+		currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?>';
+	} 
+    if (!selectElement_tts_gcloud) {
+		if (loadingg === 'ok'){
+			loading("hide");
+		}
+		showMessagePHP("Không tìm thấy thẻ select tts gcloud được chọn", 5);
+        return;
+    }
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "includes/other_data/list_voices_tts_gcloud.json", true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                const voiceList = data.voice_list_vi_vn;
+                selectElement_tts_gcloud.innerHTML = ""; // Xóa các option cũ
+                voiceList.forEach(function (voice) {
+                    const option = document.createElement("option");
+                    option.value = voice;
+                    option.textContent = voice;
+                    if (voice === currentSelectedVoice_tts_gcloud) {
+                        option.selected = true;
+						option.setAttribute("selected", "");
+                    }
+                    selectElement_tts_gcloud.appendChild(option);
+                });
+				if (loadingg === 'ok'){
+					showMessagePHP("Đã tải danh sách giọng đọc TTS Google Cloud", 5);
+					loading("hide");
+				}
+            } catch (e) {
+				if (loadingg === 'ok'){
+					loading("hide");
+				}
+				showMessagePHP("Lỗi phân tích tệp JSON tts GCloud:" +e, 5);
+            }
+        } else if (xhr.readyState === 4) {
+			if (loadingg === 'ok'){
+				loading("hide");
+			}
+			showMessagePHP("Không thể tải file JSON tts GCloud Mã lỗi HTTP: " +xhr.status, 5);
+        }
+    };
+    xhr.send();
+}
+
       // Đặt sự kiện khi DOM đã được tải hoàn toàn
       document.addEventListener('DOMContentLoaded', function() {
       	//cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
@@ -4684,6 +4727,9 @@
       	// Gọi hàm để cập nhật trạng thái ban đầu lựa chọn nguồn hotword đánh thức
           selectHotwordWakeup();
       });
+	  
+	  
+	  
     </script>
   </body>
 </html>

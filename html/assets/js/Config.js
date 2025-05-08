@@ -57,6 +57,7 @@ document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
         const div_select_tts_zalo_html = document.getElementById('select_tts_zalo_html');
         const div_select_tts_viettel_html = document.getElementById('select_tts_viettel_html');
         if (document.getElementById('tts_ggcloud').checked) {
+			load_list_GoogleVoices_tts('tts_ggcloud');
             div_select_tts_ggcloud_html.style.display = 'block'; // Hiển thị div
         } else {
             div_select_tts_ggcloud_html.style.display = 'none'; // Ẩn div
@@ -88,6 +89,7 @@ document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
             div_select_tts_edge_html.style.display = 'none';
         }
         if (document.getElementById('tts_ggcloud_key').checked) {
+			load_list_GoogleVoices_tts('tts_ggcloud_key');
             div_select_tts_ggcloud_key.style.display = 'block';
             document.getElementById("tts_dev_customize_active").checked = false;
         } else {

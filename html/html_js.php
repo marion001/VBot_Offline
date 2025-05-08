@@ -1618,6 +1618,7 @@ function fetchAndPopulateDevices_chatbot() {
 						selectElement.appendChild(option);
 					}
                 });
+				check_Device_Status_VBot_Server('on');
             } catch (e) {
 				showMessagePHP('Lỗi: Không thể phân tích JSON - ' + e.message, 5);
             }
@@ -1935,7 +1936,7 @@ function fetchAndPopulateDevices_chatbot() {
   }
 
 //Kiểm tra trực tuyến các thiết bị Vot server trong mạng lan
-function check_Device_Status_VBot_Server() {
+function check_Device_Status_VBot_Server(chatbox_click='off') {
     const table = document.getElementById("vbot_Scan_devices").querySelector("table");
     if (!table) {
         return;
