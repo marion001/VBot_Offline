@@ -858,7 +858,6 @@
                         </div>
                       </div>
                     </div>
-					
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
                       <div class="col-sm-9">
@@ -867,7 +866,6 @@
                         </div>
                       </div>
                     </div>
-					
                     <div class="row mb-3">
                       <label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn):</label>
                       <div class="col-sm-9">
@@ -878,7 +876,6 @@
                         </div>
                       </div>
                     </div>
-					
 
 					
                   </div>
@@ -953,7 +950,6 @@
                         </div>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="streaming_server_connection_protocol" class="col-sm-3 col-form-label">Kiểu Loại Kết Nối:</label>
                       <div class="col-sm-9">
@@ -977,7 +973,6 @@
                         <a href="https://github.com/marion001/VBot_Client_Offline" target="_blank"> ESP32, ESP32S3, ESP32 D1 Mini, ESP32S3 Supper Mini <i class="bi bi-github"></i></a>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Chế Độ Hội Thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng chế độ hội thoại, trò chuyện liên tục')"></i> :</label>
                       <div class="col-sm-9">
@@ -986,7 +981,6 @@
                         </div>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Phát Nhạc Local Trên Client: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để phát nhạc, các bài hát Local trên Client')"></i> :</label>
                       <div class="col-sm-9">
@@ -995,7 +989,6 @@
                         </div>
                       </div>
                     </div>
-
 					<div class="row mb-3">
                       <label for="api_port" class="col-sm-3 col-form-label">Port Server:</label>
                       <div class="col-sm-9">
@@ -1003,7 +996,6 @@
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa (s):</label>
                       <div class="col-sm-9">
@@ -1011,7 +1003,6 @@
                         <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối:</label>
                       <div class="col-sm-9">
@@ -1019,7 +1010,6 @@
                         <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_time_remove_inactive_clients" class="col-sm-3 col-form-label">Thời gian dọn dẹp Client (s):</label>
                       <div class="col-sm-9">
@@ -1027,7 +1017,6 @@
                         <div class="invalid-feedback">Cần nhập thời gian dọn dẹp các Client không hoạt động trong một khoảng thời gian</div>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client:</label>
                       <div class="col-sm-9">
@@ -1037,7 +1026,6 @@
 						</select>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
                       <div class="col-sm-9">
@@ -1047,7 +1035,6 @@
 						</select>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_select_wakeup" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
                       <div class="col-sm-9">
@@ -1057,22 +1044,18 @@
 						</select>
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_server_data_client_name" class="col-sm-3 col-form-label">Tệp Dữ Liệu Client:</label>
                       <div class="col-sm-9">
                         <input readonly type="text" class="form-control border-danger" name="udp_server_data_client_name" id="udp_server_data_client_name" placeholder="<?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name']; ?>" value="<?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name']; ?>">
                       </div>
                     </div>
-
-
                     <div class="row mb-3">
                       <label for="udp_server_streaming_audio" class="col-sm-3 col-form-label">Server Streaming Audio:</label>
                       <div class="col-sm-9">
                         <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio" id="udp_server_streaming_audio" placeholder="<?php echo htmlspecialchars($serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>" value="<?php echo htmlspecialchars($serverIp.':'.$Port_Server_Streaming_Audio_UDP); ?>">
                       </div>
                     </div>
-
                     <div class="row mb-3">
                       <label for="udp_server_streaming_audio_local" class="col-sm-3 col-form-label">URL Audio Local:</label>
                       <div class="col-sm-9">
@@ -1086,11 +1069,6 @@
 			  </div>
 			  </div>
 			  </div>
-
-
-
-
-
 
 				  <div class="card accordion" id="accordion_button_socket_server_socket">
 				  <div class="card-body">
@@ -1690,7 +1668,6 @@
                               </div>
                             </div>
                             <!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
-                            <!-- ẩn hiện cấu hình select_stt_ggcloud_html style="display: none;" -->
                             <div id="select_tts_ggcloud_html" class="col-12" style="display: none;">
                               <h4 class="card-title" title="Chuyển văn bản thành văn bản">
                                 <center><font color=red>TTS Google Cloud</font></center>
@@ -2897,112 +2874,33 @@
                         <?php
                           //Get Ưu tiên Nguồn Phát
                           $virtual_assistant_priority = $Config['virtual_assistant']['prioritize_virtual_assistants'];
-                          ?>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority1" class="col-sm-3 col-form-label">Top 1:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority1" id="virtual_assistant_priority1">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[0] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-							  <option value="olli" <?php if ($virtual_assistant_priority[0] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[0] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[0] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[0] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[0] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[0] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority2" class="col-sm-3 col-form-label">Top 2:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority2" id="virtual_assistant_priority2">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[1] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-							  <option value="olli" <?php if ($virtual_assistant_priority[1] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[1] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[1] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[1] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[1] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[1] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority3" class="col-sm-3 col-form-label">Top 3:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority3" id="virtual_assistant_priority3">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[2] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-							  <option value="olli" <?php if ($virtual_assistant_priority[2] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[2] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[2] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[2] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[2] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[2] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority4" class="col-sm-3 col-form-label">Top 4:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority4" id="virtual_assistant_priority4">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[3] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-							  <option value="olli" <?php if ($virtual_assistant_priority[3] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[3] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[3] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[3] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[3] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[3] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority5" class="col-sm-3 col-form-label">Top 5:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority5" id="virtual_assistant_priority5">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[4] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-							  <option value="olli" <?php if ($virtual_assistant_priority[4] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[4] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[4] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[4] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[4] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[4] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority6" class="col-sm-3 col-form-label">Top 6:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority6" id="virtual_assistant_priority6">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[5] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-							  <option value="olli" <?php if ($virtual_assistant_priority[5] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[5] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[5] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[5] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[5] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[5] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="virtual_assistant_priority7" class="col-sm-3 col-form-label">Top 7:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="virtual_assistant_priority7" id="virtual_assistant_priority7">
-                              <option value="">-- Chọn Trợ Lý --</option>
-                              <option value="default_assistant" <?php if ($virtual_assistant_priority[6] === "default_assistant") echo "selected"; ?>>Default Assistant</option>
-                              <option value="olli" <?php if ($virtual_assistant_priority[6] === "olli") echo "selected"; ?>>Olli AI Assistant</option>
-                              <option value="google_gemini" <?php if ($virtual_assistant_priority[6] === "google_gemini") echo "selected"; ?>>Google Gemini</option>
-                              <option value="chat_gpt" <?php if ($virtual_assistant_priority[6] === "chat_gpt") echo "selected"; ?>>Chat GPT</option>
-                              <option value="zalo_assistant" <?php if ($virtual_assistant_priority[6] === "zalo_assistant") echo "selected"; ?>>Zalo AI Assistant</option>
-                              <option value="dify_ai" <?php if ($virtual_assistant_priority[6] === "dify_ai") echo "selected"; ?>>Dify AI Assistant</option>
-                              <option value="customize_developer_assistant" <?php if ($virtual_assistant_priority[6] === "customize_developer_assistant") echo "selected"; ?>>DEV Custom Assistant (Người Dùng Tự Code)</option>
-                            </select>
-                          </div>
-                        </div>
+						$assistant_options = [
+							"default_assistant" => "Default Assistant",
+							"olli" => "Olli AI Assistant",
+							"google_gemini" => "Google Gemini",
+							"chat_gpt" => "Chat GPT",
+							"zalo_assistant" => "Zalo AI Assistant",
+							"dify_ai" => "Dify AI Assistant",
+							"customize_developer_assistant" => "DEV Custom Assistant (Người Dùng Tự Code)"
+						];
+						for ($i = 0; $i < 7; $i++) {
+							$label = "Top " . ($i + 1);
+							$select_name = "virtual_assistant_priority" . ($i + 1);
+							$selected_value = $virtual_assistant_priority[$i] ?? '';
+							echo '<div class="row mb-3">';
+							echo '  <label for="' . $select_name . '" class="col-sm-3 col-form-label">' . $label . ':</label>';
+							echo '  <div class="col-sm-9">';
+							echo '    <select class="form-select border-success" name="' . $select_name . '" id="' . $select_name . '">';
+							echo '      <option value="">-- Chọn Trợ Lý --</option>';
+							foreach ($assistant_options as $value => $label_option) {
+								$selected = ($selected_value === $value) ? "selected" : "";
+								echo '      <option value="' . $value . '" ' . $selected . '>' . $label_option . '</option>';
+							}
+							echo '    </select>';
+							echo '  </div>';
+							echo '</div>';
+						}
+						?>
                       </div>
                     </div>
                     <div class="card">
