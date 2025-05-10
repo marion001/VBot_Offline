@@ -120,7 +120,8 @@ include 'html_sidebar.php';
       <option value="<?php echo $directory_path.'/includes/cache/Youtube.json'; ?>">Youtube.json</option>
       <option value="<?php echo $directory_path.'/includes/cache/ZingMP3.json'; ?>">ZingMP3.json</option>
       <option value="<?php echo $directory_path.'/includes/cache/News_Paper.json'; ?>">WebUI Báo, Tin Tức News_Paper.json</option>
-      <option value="<?php echo $VBot_Offline.'Version.json'; ?>">Version.json</option>
+      <option value="<?php echo $VBot_Offline.'Version.json'; ?>">VBot Version.json</option>
+      <option value="<?php echo $directory_path.'/Version.json'; ?>">WebUI Version.json</option>
     </select>
     <div class="editor" id="editor"></div>
   </div>
@@ -166,7 +167,7 @@ include 'html_footer.php';
         if (xhr.status === 200) {
           try {
             var json = JSON.parse(xhr.responseText);
-            editor.setValue(JSON.stringify(json, null, 4));
+            editor.setValue(JSON.stringify(json.data, null, 4));
 			loading('hide');
 			//showMessagePHP('Đã tải nội dung File JSON', 5);
           } catch (e) {
