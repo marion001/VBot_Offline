@@ -151,7 +151,7 @@
                   </div>
                   <div class="tab-pane fade profile-edit pt-3" id="profile-edit" role="tabpanel">
                     <!-- Profile Edit Form -->
-                    <form class="row g-3 needs-validation" enctype="multipart/form-data" novalidate method="POST" action="">
+                    <form class="row g-3 needs-validation" enctype="multipart/form-data" novalidate method="POST" action="" onsubmit="return validateForm_pass()">
                       <div class="row mb-3">
                         <label class="col-md-4 col-lg-3 col-form-label">Ảnh hồ sơ cá nhân</label>
                         <div class="col-md-8 col-lg-9">
@@ -307,138 +307,198 @@
     <?php
       include 'html_js.php';
       ?>
-    <script>
-      function fileToUpload_avata() {
-          var fileInput = document.getElementById('avataa_fileToUpload');
-          if (fileInput.files.length === 0) {
-              show_message('Chưa chọn tệp nào.');
-              return;
-          }
-          var formData = new FormData();
-          formData.append('fileToUpload_avata', fileInput.files[0]);
-          formData.append('upload_avata', 'true');
-          var xhr = new XMLHttpRequest();
-          xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?upload_avata', true);
-          xhr.onload = function () {
-              if (xhr.status === 200) {
-                  try {
-                      var response = JSON.parse(xhr.responseText);
-                      console.log(response);
-                      if (response.success) {
-                          show_message(response.message+"<br/>Hãy tải lại trang để áp dụng");
-                      } else {
-                          show_message(response.message);
-                      }
-                  } catch (e) {
-                      console.error('Lỗi khi phân tích phản hồi JSON:', e);
-                      show_message('Lỗi khi xử lý phản hồi từ máy chủ.');
-                  }
-              } else {
-                  console.error('Yêu cầu thất bại. Trạng thái trả về: ' + xhr.status);
-                  show_message('Yêu cầu bị lỗi với mã trạng thái: ' + xhr.status);
-              }
-          };
-          xhr.onerror = function () {
-              console.error('Yêu cầu thất bại.');
-              show_message('Yêu cầu bị lỗi.');
-          };
-          xhr.send(formData);
-      }
-    </script>
-    <script>
-      //Thay đổi mật khẩu web UI
-            function changePassword() {
-                var currentPassword = document.getElementById("currentPassword").value;
-                var newPassword = document.getElementById("newPassword").value;
-                var renewPassword = document.getElementById("renewPassword").value;
-                var xhr = new XMLHttpRequest();
-                xhr.open("GET", "Login.php?change_password&currentPassword=" 
-                    + encodeURIComponent(currentPassword) 
-                    + "&newpassword=" + encodeURIComponent(newPassword) 
-                    + "&renewpassword=" + encodeURIComponent(renewPassword), true);
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === 4 && xhr.status === 200) {
-                        var response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            //console.log("Success: " + response.message);
-                           show_message(response.message);
-                        } else {
-                            //console.log("Error: " + response.message);
-                            show_message("Lỗi: " + response.message);
-                        }
-                    }
-                };
-                xhr.send();
+<script>
+//Kiểm tra nhật mật khẩu webui nếu chứa khoảng trống
+function validateForm_pass() {
+	loading('show');
+    const webui_password = document.getElementById('webui_password');
+    const email_name = document.getElementById('email_name');
+    const longitude_name = document.getElementById('longitude_name');
+    const latitude_name = document.getElementById('latitude_name');
+    if (/\s/.test(webui_password.value)) {
+        show_message('Mật khẩu đăng nhập WebUI không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+    if (webui_password.value.trim() === '') {
+        show_message('Cần nhập mật khẩu đăng nhập WebUI');
+		loading('hide');
+        return false;
+    }
+
+    if (/\s/.test(email_name.value)) {
+        show_message('Địa chỉ Email không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+    if (email_name.value.trim() === '') {
+        show_message('Cần nhập địa chỉ Email của bạn khi quên mật khẩu WebUI');
+		loading('hide');
+        return false;
+    }
+
+    if (/\s/.test(longitude_name.value)) {
+        show_message('Kinh độ không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+    if (/\s/.test(latitude_name.value)) {
+        show_message('Vĩ độ không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+	loading('hide');
+    return true;
+}
+
+//Tải lên avata
+function fileToUpload_avata() {
+	loading('show');
+    var fileInput = document.getElementById('avataa_fileToUpload');
+    if (fileInput.files.length === 0) {
+        show_message('Chưa chọn tệp nào.');
+		loading('hide');
+        return;
+    }
+    var formData = new FormData();
+    formData.append('fileToUpload_avata', fileInput.files[0]);
+    formData.append('upload_avata', 'true');
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?upload_avata', true);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                var response = JSON.parse(xhr.responseText);
+                console.log(response);
+                if (response.success) {
+					loading('hide');
+                    show_message(response.message + "<br/>Hãy tải lại trang để áp dụng");
+                } else {
+					loading('hide');
+                    show_message(response.message);
+                }
+            } catch (e) {
+				loading('hide');
+                show_message('Lỗi khi xử lý phản hồi từ máy chủ: '+e);
             }
-        
-    </script>
-    <script>
-      const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file='+'<?php echo $VBot_Offline; ?>'+'resource/VietNam_Localtion.json';
-      $(document).ready(function () {
-      	$.get(apiURL, function (response) {
-      		if (response.success && response.data) {
-      			const data = response.data;
-      			//console.log(data);
-      			const $provinceSelect = $('#city-province');
-      			const provinces = data.province || [];
-      			provinces.sort((a, b) => a.name.localeCompare(b.name));
-      			//dropdown tỉnh
-      			provinces.forEach(province => {
-      				const isSelectedProvince = (province.idProvince == '<?php echo $Config['contact_info']['address']['id_province']; ?>') ? 'selected' : '';
-      				$provinceSelect.append('<option value="' + province.idProvince + '" ' + isSelectedProvince + '>' + province.name + '</option>');
-      			});
-      			//Kiểm tra nếu đã có tỉnh được chọn thì load quận tương ứng
-      			const selectedProvinceId = '<?php echo $Config['contact_info']['address']['id_province']; ?>';
-      			loadDistricts(data.district || [], selectedProvinceId);
-      			// Thêm sự kiện cho tỉnh được chọn
-      			$provinceSelect.on('change', function () {
-      				const idProvince = $(this).val();
-      				loadDistricts(data.district || [], idProvince);
-      			});
-      		} else {
-      			showMessagePHP('Dữ liệu không hợp lệ: ' + (response.message || 'Không có thông tin chi tiết.'), 5);
-      		}
-      	}).fail(function (error) {
-      		showMessagePHP('Lỗi khi tải dữ liệu thông tin địa chỉ: '+error, 5);
-      	});
-      	// Load các quận/huyện cho tỉnh đã chọn
-      	function loadDistricts(districtList, idProvince) {
-      		const $districtSelect = $('#district-town');
-      		$districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>');
-      		// Lọc và sắp xếp các quận/huyện theo tỉnh
-      		const filteredDistricts = districtList
-      			.filter(d => d.idProvince == idProvince)
-      			.sort((a, b) => a.name.localeCompare(b.name));
-      		//Thêm các option cho quận, và thêm thuộc tính selected nếu quận đã chọn
-      		filteredDistricts.forEach(district => {
-      			const isSelectedDistrict = (district.idDistrict == '<?php echo $Config['contact_info']['address']['id_district']; ?>') ? 'selected' : '';
-      			$districtSelect.append('<option value="' + district.idDistrict + '" ' + isSelectedDistrict + '>' + district.name + '</option>');
-      		});
-      	}
-      });
-    </script>
-    <script>
-      function getLocationData() {
-      loading('show');
-          $.ajax({
-              url: 'https://ipinfo.io/json',
-              type: 'GET',
-              dataType: 'json',
-              success: function(data) {
-      loading('hide');
-                  const loc = data.loc.split(',');
-                  const latitude = loc[0];
-                  const longitude = loc[1];
-                  $('#latitude_name').val(latitude);
-                  $('#longitude_name').val(longitude);
-      showMessagePHP('Đã cập nhật dữ liệu vị trí hiện tại, Vị trí được phát hiện: '+data.city+', '+data.region, 10);
-              },
-              error: function(xhr, status, error) {
-      loading('hide');
-                  show_message('Không thể lấy thông tin vị trí: ' + error);
-              }
-          });
-      }
+        } else {
+            loading('hide');
+            show_message('Yêu cầu bị lỗi với mã trạng thái: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function() {
+        loading('hide');
+        show_message('Yêu cầu thất bại');
+    };
+    xhr.send(formData);
+}
+
+//Thay đổi mật khẩu web UI
+function changePassword() {
+	loading('show');
+    var currentPassword = document.getElementById("currentPassword").value;
+    var newPassword = document.getElementById("newPassword").value;
+    var renewPassword = document.getElementById("renewPassword").value;
+	
+    if (/\s/.test(currentPassword)) {
+        show_message('Mật khẩu cũ không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+    if (/\s/.test(newPassword)) {
+        show_message('Mật khẩu mới không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+    if (/\s/.test(renewPassword)) {
+        show_message('Nhập lại mật khẩu mới không được phép chứa khoảng trống hoặc dấu cách!');
+		loading('hide');
+        return false;
+    }
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "Login.php?change_password&currentPassword=" + encodeURIComponent(currentPassword) + "&newpassword=" + encodeURIComponent(newPassword) + "&renewpassword=" + encodeURIComponent(renewPassword), true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = JSON.parse(xhr.responseText);
+            if (response.success) {
+				loading('hide');
+                show_message(response.message);
+            } else {
+				loading('hide');
+                show_message("Lỗi: " + response.message);
+            }
+        }
+    };
+    xhr.send();
+}
+
+//Lựa chọn địa danh
+const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + '<?php echo $VBot_Offline; ?>' + 'resource/VietNam_Localtion.json';
+$(document).ready(function() {
+    $.get(apiURL, function(response) {
+        if (response.success && response.data) {
+            const data = response.data;
+            //console.log(data);
+            const $provinceSelect = $('#city-province');
+            const provinces = data.province || [];
+            provinces.sort((a, b) => a.name.localeCompare(b.name));
+            //dropdown tỉnh
+            provinces.forEach(province => {
+                const isSelectedProvince = (province.idProvince == '<?php echo $Config['contact_info']['address']['id_province']; ?>') ? 'selected' : '';
+                $provinceSelect.append('<option value="' + province.idProvince + '" ' + isSelectedProvince + '>' + province.name + '</option>');
+            });
+            //Kiểm tra nếu đã có tỉnh được chọn thì load quận tương ứng
+            const selectedProvinceId = '<?php echo $Config['contact_info']['address']['id_province']; ?>';
+            loadDistricts(data.district || [], selectedProvinceId);
+            // Thêm sự kiện cho tỉnh được chọn
+            $provinceSelect.on('change', function() {
+                const idProvince = $(this).val();
+                loadDistricts(data.district || [], idProvince);
+            });
+        } else {
+            showMessagePHP('Dữ liệu không hợp lệ: ' + (response.message || 'Không có thông tin chi tiết.'), 5);
+        }
+    }).fail(function(error) {
+        showMessagePHP('Lỗi khi tải dữ liệu thông tin địa chỉ: ' + error, 5);
+    });
+    // Load các quận/huyện cho tỉnh đã chọn
+    function loadDistricts(districtList, idProvince) {
+        const $districtSelect = $('#district-town');
+        $districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>');
+        // Lọc và sắp xếp các quận/huyện theo tỉnh
+        const filteredDistricts = districtList
+            .filter(d => d.idProvince == idProvince)
+            .sort((a, b) => a.name.localeCompare(b.name));
+        //Thêm các option cho quận, và thêm thuộc tính selected nếu quận đã chọn
+        filteredDistricts.forEach(district => {
+            const isSelectedDistrict = (district.idDistrict == '<?php echo $Config['contact_info']['address']['id_district']; ?>') ? 'selected' : '';
+            $districtSelect.append('<option value="' + district.idDistrict + '" ' + isSelectedDistrict + '>' + district.name + '</option>');
+        });
+    }
+});
+
+//Lấy vị trí hiện tại
+function getLocationData() {
+    loading('show');
+    $.ajax({
+        url: 'https://ipinfo.io/json',
+        type: 'GET',
+        dataType: 'json',
+        success: function(data) {
+            loading('hide');
+            const loc = data.loc.split(',');
+            const latitude = loc[0];
+            const longitude = loc[1];
+            $('#latitude_name').val(latitude);
+            $('#longitude_name').val(longitude);
+            showMessagePHP('Đã cập nhật dữ liệu vị trí hiện tại, Vị trí được phát hiện: ' + data.city + ', ' + data.region, 10);
+        },
+        error: function(xhr, status, error) {
+            loading('hide');
+            show_message('Không thể lấy thông tin vị trí: ' + error);
+        }
+    });
+}
     </script>
   </body>
 </html>

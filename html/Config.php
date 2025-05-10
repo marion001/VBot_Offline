@@ -954,7 +954,7 @@
                       <label for="streaming_server_connection_protocol" class="col-sm-3 col-form-label">Kiểu Loại Kết Nối:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_connection_protocol" id="streaming_server_connection_protocol" class="form-select border-success" aria-label="Default select example">
-                          <option value="udp_sock" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'udp_sock' ? 'selected' : ''; ?>>ESP32, ESP32 D1 Mini, ESP32S3</option>
+                          <option value="udp_sock" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'udp_sock' ? 'selected' : ''; ?>>Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini</option>
 						  <option value="socket" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'socket' ? 'selected' : ''; ?>>Socket</option>
                           <option value="http_post" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'http_post' ? 'selected' : ''; ?>>HTTP POST</option>
 						</select>
@@ -964,7 +964,7 @@
 			  <div class="card accordion" id="accordion_button_udp_server_streaming">
 			  <div class="card-body">
 			  <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-			  ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi:</h5>
+			  Cấu hình nếu sử dụng: ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 
                     <div class="row mb-3">

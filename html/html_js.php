@@ -362,6 +362,11 @@
   function forgotPassword() {
       loading("show");
       var email = document.getElementById("forgotPassword_email").value;
+    if (/\s/.test(email)) {
+        show_message('Email không được phép chứa khoảng trống hoặc dấu cách!');
+		loading("hide");
+        return false;
+    }
       var xhr = new XMLHttpRequest();
       xhr.open("GET", "Login.php?forgot_password&mail=" + encodeURIComponent(email), true);
       xhr.onreadystatechange = function() {
