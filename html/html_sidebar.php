@@ -72,6 +72,11 @@
           <i class="bi bi-circle"></i><span>Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</span>
           </a>
         </li>
+        <li title="Chỉnh sửa nội dung các tệp Json">
+          <a href="View_Edit_Json.php">
+          <i class="bi bi-circle"></i><span>Chỉnh sửa tệp Json</span>
+          </a>
+        </li>
       </ul>
     </li>
     <li class="nav-item">

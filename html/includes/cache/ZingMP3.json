@@ -1,82 +1,90 @@
-[
-    {
-        "id": "Z6AIA0I8",
-        "name": "Hoa Cỏ Lau",
-        "artist": "Phong Max",
-        "duration": "03:31",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/9/f/5/7/9f579b0fe9276f8eba9464199f9a1b49.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6CZUCI8",
-        "name": "Hoa Cỏ Lau (Remix)",
-        "artist": "Phong Max",
-        "duration": "03:57",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/e/4/8/2/e482a208d1124d5e4d4ba79f56bf0cd9.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6DOZCO8",
-        "name": "Hoa Cỏ Lau (Ballad)",
-        "artist": "Ngân Ngân",
-        "duration": "03:34",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/7/8/0/6/7806c3ae887611fe0c4a66ff6464338a.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6BCWW7W",
-        "name": "Hoa Cỏ Lau (Official Remix)",
-        "artist": "Phong Max",
-        "duration": "02:43",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/b/e/7/1/be71d975255322e307da665887387c2b.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6B6EO9I",
-        "name": "Hoa Cỏ Lau (Chips Lofi)",
-        "artist": "Phong Max",
-        "duration": "03:12",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/a/4/d/4/a4d4d60e830fbb33b9fe60c763ff7e1e.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6A9AWD6",
-        "name": "Hoa Cỏ Lau (Lo-Fi Version)",
-        "artist": "Phong Max",
-        "duration": "03:31",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/1/5/3/4/15347416ca91ca5323cd91d672625036.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6BU09CZ",
-        "name": "Hoa Cỏ Lau (Speed Up)",
-        "artist": "Phong Max",
-        "duration": "02:42",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/b/e/9/8/be98ab38c1bc13847ca0ab8af5f00945.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6C77IC0",
-        "name": "Hoa Cỏ Lau (Nam Con Remix)",
-        "artist": "Exclusive Music, Phong Max",
-        "duration": "04:18",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/c/7/d/4/c7d4327e9dde6d8835ba2dca64930b59.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6CZUCI7",
-        "name": "Hoa Cỏ Lau (Lofi Version) [Instrumental]",
-        "artist": "Phong Max",
-        "duration": "03:54",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/e/4/8/2/e482a208d1124d5e4d4ba79f56bf0cd9.jpg",
-        "url": null
-    },
-    {
-        "id": "Z6C77Z06",
-        "name": "Hoa Cỏ Lau (Nam Con Remix) [Full Instrumental]",
-        "artist": "Exclusive Music, Nam Con",
-        "duration": "04:43",
-        "thumb": "https://photo-zmp3.zmdcdn.me/cover/6/9/5/d/695d82c0dcbcb0c52266576124676caf.jpg",
-        "url": null
+{
+    "success": true,
+    "message": "Tệp đã được đọc thành công.",
+    "data": {
+        "success": true,
+        "message": "Tệp đã được đọc thành công.",
+        "data": [
+            {
+                "id": "Z6AIA0I8",
+                "name": "Hoa Cỏ Lau",
+                "artist": "Phong Max",
+                "duration": "03:31",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/9/f/5/7/9f579b0fe9276f8eba9464199f9a1b49.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6CZUCI8",
+                "name": "Hoa Cỏ Lau (Remix)",
+                "artist": "Phong Max",
+                "duration": "03:57",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/e/4/8/2/e482a208d1124d5e4d4ba79f56bf0cd9.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6DOZCO8",
+                "name": "Hoa Cỏ Lau (Ballad)",
+                "artist": "Ngân Ngân",
+                "duration": "03:34",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/7/8/0/6/7806c3ae887611fe0c4a66ff6464338a.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6BCWW7W",
+                "name": "Hoa Cỏ Lau (Official Remix)",
+                "artist": "Phong Max",
+                "duration": "02:43",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/b/e/7/1/be71d975255322e307da665887387c2b.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6B6EO9I",
+                "name": "Hoa Cỏ Lau (Chips Lofi)",
+                "artist": "Phong Max",
+                "duration": "03:12",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/a/4/d/4/a4d4d60e830fbb33b9fe60c763ff7e1e.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6A9AWD6",
+                "name": "Hoa Cỏ Lau (Lo-Fi Version)",
+                "artist": "Phong Max",
+                "duration": "03:31",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/1/5/3/4/15347416ca91ca5323cd91d672625036.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6BU09CZ",
+                "name": "Hoa Cỏ Lau (Speed Up)",
+                "artist": "Phong Max",
+                "duration": "02:42",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/b/e/9/8/be98ab38c1bc13847ca0ab8af5f00945.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6C77IC0",
+                "name": "Hoa Cỏ Lau (Nam Con Remix)",
+                "artist": "Exclusive Music, Phong Max",
+                "duration": "04:18",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/c/7/d/4/c7d4327e9dde6d8835ba2dca64930b59.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6CZUCI7",
+                "name": "Hoa Cỏ Lau (Lofi Version) [Instrumental]",
+                "artist": "Phong Max",
+                "duration": "03:54",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/e/4/8/2/e482a208d1124d5e4d4ba79f56bf0cd9.jpg",
+                "url": null
+            },
+            {
+                "id": "Z6C77Z06",
+                "name": "Hoa Cỏ Lau (Nam Con Remix) [Full Instrumental]",
+                "artist": "Exclusive Music, Nam Con",
+                "duration": "04:43",
+                "thumb": "https://photo-zmp3.zmdcdn.me/cover/6/9/5/d/695d82c0dcbcb0c52266576124676caf.jpg",
+                "url": null
+            }
+        ]
     }
-]
+}
