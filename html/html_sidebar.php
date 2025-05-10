@@ -74,7 +74,7 @@
         </li>
         <li title="Chỉnh sửa nội dung các tệp Json">
           <a href="View_Edit_Json.php">
-          <i class="bi bi-circle"></i><span>Chỉnh sửa tệp Json</span>
+          <i class="bi bi-circle"></i><span>Chỉnh Sửa Tệp JSON</span>
           </a>
         </li>
       </ul>
