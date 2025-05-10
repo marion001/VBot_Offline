@@ -421,6 +421,11 @@ function showIframeModal(ipAddress, source_text_device) {
         hostname.startsWith('192.168.') ||
         hostname.startsWith('10.') || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
     );
+    if (ipAddress === hostname) {
+		showMessagePHP('Bạn đang ở thiết bị này rồi: ['+source_text_device+' - '+ipAddress+']');
+        loading('hide');
+        return;
+    }
     if (!isLocalNetwork || location.protocol === 'https:') {
         show_message('Chức năng này chỉ hoạt động khi truy cập trong cùng lớp mạng nội bộ');
         loading('hide');
@@ -443,6 +448,7 @@ function showIframeModal(ipAddress, source_text_device) {
     });
     modal._element.addEventListener('hidden.bs.modal', () => observer.disconnect(), {once: true});
 	loading('hide');
+	showMessagePHP('Đang tương tác với: ['+source_text_device+' - '+ipAddress+']');
 }
 
 // Hàm cập nhật kích thước modal-body và iframe
