@@ -87,11 +87,11 @@ include 'html_sidebar.php';
 <!-- End Sidebar-->
   <main id="main" class="main">
     <div class="pagetitle">
-      <h1>Đọc, Chỉnh Sửa File Json</h1>
+      <h1>Đọc, Chỉnh Sửa File JSON</h1>
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang Chủ</a></li>
-          <li class="breadcrumb-item">Chỉnh sửa json</li>
+          <li class="breadcrumb-item">Chỉnh sửa JSON</li>
         </ol>
       </nav>
     </div><!-- End Page Title -->
