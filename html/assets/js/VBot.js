@@ -391,6 +391,77 @@ function vbotScan_toggleFullScreen() {
     }
 }
 
+// Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện iframeModal_toggleFullScreen
+function iframeModal_toggleFullScreen() {
+    var iframeModal_size_setting = document.getElementById('iframeModal_size_setting');
+    var iframeModal_fullscreen = document.getElementById('iframeModal_fullscreen');
+    if (iframeModal_size_setting.classList.contains('modal-lg')) {
+        iframeModal_size_setting.classList.remove('modal-lg');
+        iframeModal_size_setting.classList.add('modal-xl');
+    } else if (iframeModal_size_setting.classList.contains('modal-xl')) {
+        iframeModal_size_setting.classList.remove('modal-xl');
+        iframeModal_size_setting.classList.add('modal-fullscreen');
+        iframeModal_fullscreen.classList.remove('bi-arrows-fullscreen');
+        iframeModal_fullscreen.classList.add('bi-fullscreen-exit');
+    } else if (iframeModal_size_setting.classList.contains('modal-fullscreen')) {
+        iframeModal_size_setting.classList.remove('modal-fullscreen');
+        iframeModal_size_setting.classList.add('modal-lg');
+        iframeModal_fullscreen.classList.remove('bi-fullscreen-exit');
+        iframeModal_fullscreen.classList.add('bi-arrows-fullscreen');
+    }
+}
+
+//Hiển thị thẻ modal iframe
+function showIframeModal(ipAddress, source_text_device) {
+	loading('show');
+    // Kiểm tra mạng nội bộ và không phải HTTPS
+    const hostname = location.hostname;
+    const isLocalNetwork = (
+        hostname === 'localhost' ||
+        hostname.startsWith('192.168.') ||
+        hostname.startsWith('10.') || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
+    );
+    if (!isLocalNetwork || location.protocol === 'https:') {
+        show_message('Chức năng này chỉ hoạt động khi truy cập trong cùng lớp mạng nội bộ');
+        loading('hide');
+        return;
+    }
+    const iframeModal_source = document.getElementById('iframeModal_source');
+    const iframe = document.getElementById('contentIframe');
+    const modalDialog = document.getElementById('iframeModal_size_setting');
+    const modalContent = modalDialog.querySelector('.modal-content');
+    const modalBody = modalDialog.querySelector('.modal-body');
+	iframeModal_source.innerHTML = '<b>Thiết Bị:  ['+source_text_device +'- <a href="http://'+ipAddress+'" target="_blank">'+ ipAddress+'</a>]</b>';
+    iframe.src = 'http://' + ipAddress;
+    updateIframeSize();
+    const modal = new bootstrap.Modal(document.getElementById('iframeModal'));
+    modal.show();
+    const observer = new MutationObserver(() => updateIframeSize());
+    observer.observe(modalDialog, {
+        attributes: true,
+        attributeFilter: ['class']
+    });
+    modal._element.addEventListener('hidden.bs.modal', () => observer.disconnect(), {once: true});
+	loading('hide');
+}
+
+// Hàm cập nhật kích thước modal-body và iframe
+function updateIframeSize() {
+    const modalDialog = document.getElementById('iframeModal_size_setting');
+    const modalContent = modalDialog.querySelector('.modal-content');
+    const modalHeader = modalContent.querySelector('.modal-header');
+    const modalBody = modalContent.querySelector('.modal-body');
+    const iframe = document.getElementById('contentIframe');
+    // Tính chiều cao header động
+    const headerHeight = modalHeader ? modalHeader.offsetHeight : 0;
+    // Đặt chiều cao modal-body và iframe bằng inline styles
+    modalBody.style.height = `calc(100% - ${headerHeight}px)`;
+    iframe.style.width = '100%';
+    iframe.style.height = '100%';
+    iframe.style.border = 'none';
+    iframe.style.display = 'block';
+}
+
 // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện BLE
 function vbotBluetooth_toggleFullScreen() {
     var chatbotSizeSetting = document.getElementById('vbotBluetooth_size_setting');

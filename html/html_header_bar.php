@@ -60,6 +60,16 @@
         flex-direction: column;
         align-items: center;
     }
+#contentIframe {
+    width: 100 % ;
+    height: 100 % ;
+    border: none;
+    display: block;
+}
+#iframeModal_header {
+	background-color: #bcffcd;
+    color: #0b7beb;
+}
 </style>
 </head>
 <header id="header" class="header fixed-top d-flex align-items-center">
@@ -116,6 +126,23 @@
           </div>
         </div>
       </div>
+
+    <!-- Modal iframe -->
+    <div class="modal fade" id="iframeModal" tabindex="-1" data-bs-backdrop="false" aria-labelledby="iframeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-fullscreen modal-dialog-scrollable" id="iframeModal_size_setting">
+            <div class="modal-content">
+                <div class="modal-header" id="iframeModal_header">
+				<div id="iframeModal_source">dsdsd</div>
+					<i class="bi bi-arrows-fullscreen pe-3 text-success ms-auto" id="iframeModal_fullscreen" onclick="iframeModal_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
+					<i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
+                </div>
+                <div class="modal-body">
+                    <iframe id="contentIframe"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
       <!-- Bluetooth -->
       <?php
         if (isset($Config['bluetooth']['active']) && $Config['bluetooth']['active'] == true) {
