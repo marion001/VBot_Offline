@@ -1,8 +1,8 @@
 {
-    "version": "1.0.35",
+    "version": "1.0.36",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Auto Wifi Manager: Command/Terminal -> OS Wifi -> Install Auto Wifi Manager + Đọc IP",
-    "releaseDate": "10/05/2025",
+    "description": "Clean Code, Sửa một số lỗi vặt",
+    "releaseDate": "11/05/2025",
     "changes": [
         {
             "type": "feature",
