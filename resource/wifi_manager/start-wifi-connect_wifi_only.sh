@@ -108,9 +108,9 @@ while true; do
             #Nếu IP hoặc Wi-Fi thay đổi, lưu lại và gọi Python
 			if [ "$OLD_IP" != "$CURRENT_IP" ] || [ "$OLD_WIFI" != "$OLD_SSID" ]; then
 				#Lọc IP không phải localhost và không phải hostname, ip phải ở dạng số
-				if [[ "$CURRENT_IP" != "127.0.0.1" ]] && [[ "$CURRENT_IP" != "$(hostname)" ]] && [[ "$CURRENT_IP" != "$(hostname -f)" ]]; then
+				if [ "$CURRENT_IP" != "127.0.0.1" ] && [ "$CURRENT_IP" != "$(hostname)" ] && [ "$CURRENT_IP" != "$(hostname -f)" ]; then
 					#Kiểm tra IP chỉ chứa số và dấu chấm
-					if [[ "$CURRENT_IP" =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+					if echo "$CURRENT_IP" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
 						printf "%s\n" "$CURRENT_IP" > /home/pi/ip.txt
 						printf "%s\n" "$OLD_SSID" > /home/pi/wifi.txt
 						#sudo -u pi python3 /home/pi/_VBot_IP.py
