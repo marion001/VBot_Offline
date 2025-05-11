@@ -313,6 +313,10 @@
   $Config['media_player']['music_local']['minimum_threshold'] = floatval($_POST['music_local_minimum_threshold']);
   $Config['media_player']['music_local']['allowed_formats'] = array_map('trim', explode(',', $allowed_formats_str));
   
+  #Cập nhật giá trị đọc truyện, kể truyện 
+  $Config['media_player']['podcast']['active'] = isset($_POST['podcast_active']) ? true : false;
+  $Config['media_player']['podcast']['allows_priority_use_of_virtual_assistants'] = isset($_POST['podcast_virtual_assistants_active']) ? true : false;
+  
   #cẬP NHẬT GIÁ TRỊ youtube
   $Config['media_player']['youtube']['google_apis_key'] = $_POST['youtube_google_apis_key'];
   $Config['media_player']['youtube']['active'] = isset($_POST['youtube_active']) ? true : false;
@@ -2647,7 +2651,7 @@
               <div class="card accordion" id="accordion_button_media_player_source">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
-                    Nguồn Phát Media Player: Nhạc, Radio, PodCast, Đọc Báo Tin tức:
+                    Nguồn Phát Media Player: Nhạc, Radio, Kể Truyện, PodCast, Đọc Báo Tin tức:
                   </h5>
                   <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
                     <div class="card">
@@ -2741,6 +2745,29 @@
                         </div>
                       </div>
                     </div>
+					
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Đọc Truyện, Kể Truyện, PodCast:</h5>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng Đọc Truyện')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input" type="checkbox" name="podcast_active" id="podcast_active" <?php echo $Config['media_player']['podcast']['active'] ? 'checked' : ''; ?>>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Cho phép dùng ưu tiên trợ lý ảo: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Kích hoạt, sẽ sử dụng dữ liệu từ chế độ: Ưu tiên trợ lý ảo')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input" type="checkbox" name="podcast_virtual_assistants_active" id="podcast_virtual_assistants_active" <?php echo $Config['media_player']['podcast']['allows_priority_use_of_virtual_assistants'] ? 'checked' : ''; ?>>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+					
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title">Đài, Radio:</h5>

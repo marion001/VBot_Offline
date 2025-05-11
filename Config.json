@@ -270,6 +270,7 @@
         ],
         "podcast": {
             "active": true,
+			"allows_priority_use_of_virtual_assistants": false,
             "time_out": 7,
             "device_session_id": "917A4B51",
             "voice_name": "vn_north",
