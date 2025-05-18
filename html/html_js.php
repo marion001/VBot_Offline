@@ -1242,7 +1242,7 @@
       };
       xhr.send();
   }
-  
+
   //Xử lý Play, next, prev phaylist
   function playlist_media_control(action_control = null) {
   	loading("show");
@@ -1260,6 +1260,13 @@
               "data": "media_control",
               "action": "play_list",
               "control": "prev"
+          });
+      } else if (action_control === 'local') {
+          data = JSON.stringify({
+              "type": 1,
+              "data": "media_control",
+              "action": "play_list",
+              "source_playlist": "local"
           });
       } else {
           data = JSON.stringify({
@@ -1281,7 +1288,7 @@
                       show_message("Lỗi xảy ra: " + JSON.stringify(response));
                   }
               } catch (error) {
-                  show_message("Có lỗi xảy ra: " + error.message);
+                  show_message("Có lỗi xảy ra: " + error);
               }
           }
       });

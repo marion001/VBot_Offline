@@ -737,6 +737,7 @@
                     "verify_token.json",
                     "VBot_Devices_Network.json",
                     "Data_VBot_Client.json",
+					"PlayList_Local.json",
                     "__pycache__"
                 ]
             }

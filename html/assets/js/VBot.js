@@ -301,8 +301,11 @@ function processLocalData(data_media_local) {
                 '<div class="input-group">' +
                 '<input class="form-control border-success" type="file" id="upload_Music_Local" multiple="">' +
                 '<button class="btn btn-success border-success" type="button" onclick="upload_File(\'upload_Music_Local\')">Tải Lên</button>' +
-                '<button type="button" class="btn btn-primary border-success" onclick="media_player_search(\'Local\')" title="Tải lại dữ liệu bài hát trong thư mục Local"><i class="bi bi-arrow-repeat"></i></button></div></form>';
-        }
+                '<button type="button" class="btn btn-primary border-success" onclick="media_player_search(\'Local\')" title="Tải lại dữ liệu bài hát trong thư mục Local"><i class="bi bi-arrow-repeat"></i></button></div></form>' +
+				'<br/><center><button class="btn btn-success" title="Phát toàn bộ bài hát trong thư mục nội bộ Local" onclick="playlist_media_control(\'local\')"><i class="bi bi-play-circle"></i> Phát Toàn Bộ Nhạc Local</button></center>';
+        }else{
+			fileListDiv.innerHTML = '<br/><center><button class="btn btn-success" title="Phát toàn bộ bài hát trong thư mục nội bộ Local" onclick="playlist_media_control(\'local\')"><i class="bi bi-play-circle"></i> Phát Toàn Bộ Nhạc Local</button></center>';
+		}
         data_media_local.forEach(function(file) {
             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';

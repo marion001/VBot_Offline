@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://baomoi-tts-mcloud-bf-s1.bmcdn.me/kckjzh5Azvc/a061554ff69319cd4082/74d5cd3f10b9ffe7a6a8/64/4d538d7dcf62263c7f73.m4a?authen=exp=1735030923~acl=/kckjzh5Azvc/*~hmac=eb4117731eed4c9a63a6d34c2029f20b\",\r\n    \"media_name\": \"Thủ tướng Phạm Minh Chính dự Lễ khánh thành công trình tái thiết khu dân cư Làng Nủ\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"Báo Mới\"\r\n}",
+					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"http://192.168.14.194/assets/sound/Music_Local/thuyền quyên - diệu kiên.mp3\",\r\n    \"media_name\": \"Thủ tướng Phạm Minh Chính dự Lễ khánh thành công trình tái thiết khu dân cư Làng Nủ\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"Báo Mới\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -175,13 +175,13 @@
 			"response": []
 		},
 		{
-			"name": "Truyền PlayList Dạng json Để Phát",
+			"name": "Phát Toàn Bộ Bài Hát Có Trong Thư Mục Local",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"json\",\r\n    \"json_file\": \"/home/pi/VBot_Offline/Media/News_Paper/News_Paper.json\"\r\n}",
+					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"local\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -189,13 +189,41 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Truyền PlayList Dạng json Để Phát",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"json\",\r\n    \"json_file\": \"http://192.168.14.113/includes/cache/PlayList.json\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
 					],
 					"port": "5002"
 				}
@@ -1788,13 +1816,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"194"
 					],
 					"port": "5002"
 				}
@@ -1816,13 +1844,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"194"
 					],
 					"port": "5002"
 				}

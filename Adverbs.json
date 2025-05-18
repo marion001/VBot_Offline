@@ -89,6 +89,10 @@
 		"danh sách nhạc",
 		"playlist"
 	],
+	"local": [
+		"nội bộ",
+		"local"
+	],
 	"on_speaker": [
 		"trên loa",
 		"tới loa",
