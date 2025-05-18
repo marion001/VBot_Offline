@@ -833,6 +833,17 @@ $scripts_yaml = '
         qos: '.$MQTT_Qos.'
         retain: '.$MQTT_Retain.'
 
+'.strtolower($MQTT_Client_Name).'_playlist_local_player:
+  alias: "'.$MQTT_Client_Name.' PlayList Local Player"
+  icon: mdi:play
+  sequence:
+    - service: mqtt.publish
+      data:
+        topic: "'.$MQTT_Client_Name.'/script/playlist_control/set"
+        payload: "LOCAL"
+        qos: '.$MQTT_Qos.'
+        retain: '.$MQTT_Retain.'
+
 '.strtolower($MQTT_Client_Name).'_playlist_control_player:
   alias: "'.$MQTT_Client_Name.' PlayList Player"
   icon: mdi:play
