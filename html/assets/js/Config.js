@@ -497,19 +497,22 @@ function selectDevice_Alsamixer(name) {
 }
 
 //Play nghe thử âm thanh tts mẫu của google CLOUD
-function play_tts_sample_gcloud() {
+function play_tts_sample_gcloud(id_html) {
     loading('show');
-    const selectElement = document.getElementById('tts_ggcloud_voice_name');
+    const selectElement = document.getElementById(id_html);
     if (selectElement) {
         if (selectElement.value) {
             playAudio('https://cloud.google.com/static/text-to-speech/docs/audio/' + selectElement.value + '.wav');
+			loading('hide');
         } else {
+			loading('hide');
             show_message('Cần chọn 1 giọng đọc để nghe thử');
         }
     } else {
-        showMessagePHP('Không tìm thấy dữ liệu thẻ select với id=tts_ggcloud_voice_name', 3);
+		loading('hide');
+        showMessagePHP('Không tìm thấy dữ liệu thẻ select với id:' +id_html, 3);
     }
-    loading('hide');
+    
 }
 
 //Cập nhật bảng mã màu vào thẻ input
@@ -609,4 +612,83 @@ function connectWebSocketAndSendID() {
     ws.onclose = function(event) {
         //console.log("Kết nối WebSocket đã đóng:", event.code, event.reason);
     };
+}
+
+function show_create_audio_WakeUP_Reply() {
+  const resultDiv = document.getElementById("displayResults_create_audio_WakeUP_Reply");
+    resultDiv.style.display = "block";
+}
+
+function handleAudioReplyType() {
+  const type = document.getElementById("audio_reply_type").value;
+  const contentDiv = document.getElementById("tts_audio_reply_options");
+
+	if (type === "wakeup_reply_tts_gcloud") {
+	  contentDiv.innerHTML =
+		'<div class="form-floating mb-3">' +
+		  '<input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="create_tts_ggcloud_WakeUP_Reply_speed" id="create_tts_ggcloud_WakeUP_Reply_speed" value="1.0">' +
+		  '<label for="create_tts_ggcloud_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
+		'</div>' +
+		'<div class="input-group mb-3">' +
+		  '<div class="form-floating">' +
+			'<select name="create_tts_ggcloud_WakeUP_Reply_voice_name" id="tts_audio_reply_voice_name" class="form-select border-success">' +
+			  '<option>Đang tải danh sách...</option>' +
+			'</select>' +
+			'<label for="tts_audio_reply_voice_name">Giọng đọc:</label>' +
+		  '</div>' +
+		'<button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts(\'tts_audio_reply\', \'ok\')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>' +
+		'<button type="button" class="btn btn-success" onclick="play_tts_sample_gcloud(\'tts_audio_reply_voice_name\')"><i class="bi bi-play-circle"></i></button>' +
+		'</div>' +
+		'<div class="form-floating mb-3">' +
+		'<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
+		'<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
+		'</div>' +
+		'<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
+		'<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
+		'<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+		'<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
+		'</div>' +
+		'<center>' +
+		'<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_ggcloud\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
+		' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
+		'</center>';
+	  // Gọi hàm tải danh sách giọng đọc
+	  load_list_GoogleVoices_tts("tts_audio_reply", "ok");
+	}else if (type === "wakeup_reply_tts_zalo") {
+	  contentDiv.innerHTML =
+		'<div class="form-floating mb-3">' +
+		  '<input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="create_tts_zalo_WakeUP_Reply_speed" id="create_tts_zalo_WakeUP_Reply_speed" value="1.0">' +
+		  '<label for="create_tts_zalo_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
+		'</div>' +
+		'<div class="input-group mb-3">' +
+		  '<div class="form-floating">' +
+			'<select name="create_tts_zalo_WakeUP_Reply_voice_name" id="create_tts_zalo_WakeUP_Reply_voice_name" class="form-select border-success">' +
+			  '<option value="1" selected>Nữ Miền Nam 1</option>' +
+			  '<option value="2">Nữ Miền Bắc 1</option>' +
+			  '<option value="3">Nam Miền Nam</option>' +
+			  '<option value="4">Nam Miền Bắc</option>' +
+			  '<option value="5">Nữ Miền Bắc 2</option>' +
+			  '<option value="6">Nữ Miền Nam 2</option>' +
+			'</select>' +
+			'<label for="create_tts_zalo_WakeUP_Reply_voice_name">Giọng đọc:</label>' +
+		  '</div>' +
+		'</div>' +
+		'<div class="form-floating mb-3">' +
+		'<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
+		'<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
+		'</div>' +
+		'<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
+		'<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
+		'<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+		'<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
+		'</div>' +
+		'<center>' +
+		'<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_zalo\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
+		' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
+		'</center>';
+	}
+
+	  else {
+		contentDiv.innerHTML = "";
+	  }
 }

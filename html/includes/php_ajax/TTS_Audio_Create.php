@@ -126,9 +126,8 @@ if (isset($_GET['create_tts_audio'])) {
 			$result = json_decode($response, true);
 			return $result['access_token'] ?? null;
 		}
-
 		// Hàm gọi API Text-to-Speech
-		function synthesizeText($text, $accessToken, $outputFile, $lang, $voice_name, $speakingRate = 1.0) {
+		function synthesizeText($text, $accessToken, $outputFile, $lang, $voice_name, $speakingRate) {
 			$data = [
 				'input' => ['text' => $text],
 				'voice' => [
@@ -158,14 +157,13 @@ if (isset($_GET['create_tts_audio'])) {
 			}
 			return false;
 		}
-
 		// Xử lý chính
 		$accessToken = getAccessTokenFromJson($jsonKeyPath);
 		$filename = sanitize_filename($text);
 		$outputFile = $extraSavePath . '/' . $filename;
 		$response = ['success' => false, 'message' => 'Không tạo được file âm thanh.'];
 		if ($accessToken) {
-			$success = synthesizeText($text, $accessToken, $outputFile, $lang, $voice_name);
+			$success = synthesizeText($text, $accessToken, $outputFile, $lang, $voice_name, $speakingRate);
 			if ($success) {
 				$response = [
 					'success' => true,
@@ -177,6 +175,77 @@ if (isset($_GET['create_tts_audio'])) {
 		}
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit();
+	}
+
+	else if ($source === 'tts_zalo') {
+		// Kiểm tra thêm thông tin đầu vào
+		$required_params = ['encode_type', 'speaker_speed', 'speaker_id'];
+		foreach ($required_params as $param) {
+			if (empty($_GET[$param])) {
+				echo json_encode([
+					'success' => false,
+					'error' => "Thiếu tham số: $param"
+				], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+				exit;
+			}
+		}
+		$apiKeys = $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'];
+		$success = false;
+		foreach ($apiKeys as $apiKey) {
+			$ch = curl_init();
+			$postFields = http_build_query([
+				'input' => $text,
+				'speaker_id' => $_GET['speaker_id'],
+				'speed' => $_GET['speaker_speed'],
+				'encode_type' => $_GET['encode_type']
+			]);
+			curl_setopt_array($ch, [
+				CURLOPT_URL => 'https://api.zalo.ai/v1/tts/synthesize',
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_POST => true,
+				CURLOPT_POSTFIELDS => $postFields,
+				CURLOPT_HTTPHEADER => [
+					"apikey: $apiKey",
+					"Content-Type: application/x-www-form-urlencoded"
+				]
+			]);
+			$response = curl_exec($ch);
+			$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+			curl_close($ch);
+			if ($httpCode === 200) {
+				$result = json_decode($response, true);
+				if (isset($result['error_code']) && $result['error_code'] == 0) {
+					$audioUrl = $result['data']['url'];
+					$filename = sanitize_filename($text);
+					$savePath = $VBot_Offline.$Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'].'/'.$filename;
+					$audioData = file_get_contents($audioUrl);
+					if ($audioData !== false) {
+						file_put_contents($savePath, $audioData);
+						echo json_encode([
+							'success' => true,
+							'message' => 'Tạo file âm thanh thành công',
+							'file_path' => $savePath,
+							'file_name' => $filename,
+							//'api_key' => $apiKey,
+							'url' => $audioUrl
+						], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+					} else {
+						echo json_encode([
+							'success' => false,
+							'error' => 'Không thể tải file từ URL TTS.'
+						], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+					}
+					$success = true;
+					break;
+				}
+			}
+		}
+		if (!$success) {
+			echo json_encode([
+				'success' => false,
+				'error' => 'Tất cả API key TTS Zalo đều thất bại.'
+			], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		}
 	}
 exit();
 }

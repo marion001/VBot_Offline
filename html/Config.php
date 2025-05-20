@@ -1714,7 +1714,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                   <label for="tts_ggcloud_voice_name">Giọng đọc:</label>
                                 </div>
 								<button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
-                                <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i></button>
+                                <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_voice_name')"><i class="bi bi-play-circle"></i></button>
                               </div>
                               <div class="form-floating mb-3">  
                                 <input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_gcloud_speaking_speed" id="tts_gcloud_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['speaking_speed']; ?>">
@@ -1874,7 +1874,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                   <label for="tts_ggcloud_key_voice_name">Giọng đọc:</label>
                                 </div>
 								<button type="button" name="load_list_gcloudkey_tts" id="load_list_gcloudkey_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud_key', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
-                                <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud()"><i class="bi bi-play-circle"></i></button>
+                                <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_key_voice_name')"><i class="bi bi-play-circle"></i></button>
                               </div>
                               <div class="form-floating mb-3">  
                                 <input type="text" class="form-control border-danger" name="tts_ggcloud_key_language_code" id="tts_ggcloud_key_language_code" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code']; ?>">
@@ -3760,6 +3760,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                   </div>
 				  <center>
 <button type="button" class="btn btn-primary rounded-pill" onclick="loadWakeupReply()" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Hiển Thị Danh Sách Câu Phản Hồi">Hiển Thị Danh Sách Câu Phản Hồi</button>
+<button type="button" class="btn btn-success rounded-pill" onclick="show_create_audio_WakeUP_Reply()" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tạo File Âm Thanh Câu Phản Hồi">Tạo File Âm Thanh</button>
 <button type="button" class="btn btn-warning rounded-pill" onclick="reload_hotword_config('wakeup_reply')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tự động tìm scan các file âm thanh .mp3 trong thư mục wakeup_reply để cấu hình trong Config.json">Scan Và Ghi Mới</button>
 </center><br/><table class="table table-bordered border-primary">
 <tbody>
@@ -3767,18 +3768,28 @@ if (isset($_POST['save_config_wakeup_reply'])) {
 <td style="text-align: center; vertical-align: middle;">
 <label for="upload_files_wakeup_reply"><font color="blue">Tải lên file âm thanh Câu Phản Hồi .mp3</font></label>
 <div class="input-group">
-  <input class="form-control" type="file" name="upload_files_wakeup_reply[]" id="upload_files_wakeup_reply" accept=".mp3" multiple>
-  <button class="btn btn-primary" type="button" onclick="uploadFilesWakeUP_Reply()">Tải Lên</button>
+  <input class="form-control border-success" type="file" name="upload_files_wakeup_reply[]" id="upload_files_wakeup_reply" accept=".mp3" multiple>
+  <button class="btn btn-primary border-success" type="button" onclick="uploadFilesWakeUP_Reply()">Tải Lên</button>
 </div>
 </td></tr></tbody></table>
-<div id="displayResults_wakeup_reply"></div>
 
+<div style="display: none;" id="displayResults_create_audio_WakeUP_Reply">
 
+<div class="input-group mb-3">
+<span class="input-group-text border-success" id="basic-addon1">Nguồn Tạo Tệp Âm Thanh:</span>
+  <select id="audio_reply_type" onchange="handleAudioReplyType()" class="form-select border-success">
+	<option selected>Chọn Nguồn TTS....</option>
+    <option value="wakeup_reply_tts_gcloud">TTS Google Cloud (JSON File)</option>
+    <option value="wakeup_reply_tts_zalo">TTS Zalo (Sử Dụng KEY)</option>
+  </select>
+</div>
+  <div id="tts_audio_reply_options"></div>
+</div>
+
+<div id="displayResults_wakeup_reply"></div> 
       </div>
       </div>
       </div>
-			  
-			  
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title">Chế Độ Hội Thoại/Trò Chuyện Liên Tục <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật Bạn chỉ cần gọi Bot 1 lần, sau khi bot trả lời xong sẽ tự động lắng nghe tiếp và lặp lại (cho tới khi Bạn không còn yêu cầu nào nữa)')"></i> :</h5>
@@ -4123,7 +4134,7 @@ function loadWakeupReply() {
                                     '<input class="form-check-input" type="checkbox" name="save_wakeup_reply_active_' + index + '" ' + (item.active ? 'checked' : '') + '>' +
                                 '</div></td>' +
                                 '<td>' +
-                                    '<input readonly class="form-control" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + item.file_name + '">' +
+                                    '<input readonly class="form-control border-danger" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + item.file_name + '">' +
                                 '</td>' +
                                 '<td style="text-align: center;">' +
 								'<button type="button" title="Nghe thử: ' + item.file_name + '" class="btn btn-primary" onclick="playAudio(\''+ pathVBot_PY + item.file_name + '\')"><i class="bi bi-play-circle"></i></button> ' +
@@ -4767,6 +4778,110 @@ function uploadFilesWakeUP_Reply() {
           }
       }
 
+//Lựa chọn file âm thanh dùng cho wakeup reply
+function use_this_wakeup_reply_sound(filePath) {
+	loading('show');
+  const encodedFilePath = encodeURIComponent(filePath);
+  const url = 'includes/php_ajax/Hotword_pv_ppn.php?use_this_wakeup_reply_sound&file_path=' + encodedFilePath;
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", url, true);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success) {
+			  loadWakeupReply();
+            showMessagePHP(response.message || "Đã sử dụng file âm thanh làm wakeup reply!", 5);
+			loading('hide');
+          } else {
+			  loading('hide');
+            showMessagePHP(response.message || "Thao tác thất bại!", 5);
+          }
+        } catch (err) {
+			loading('hide');
+          showMessagePHP("Lỗi xử lý phản hồi server!", 5);
+        }
+      } else {
+		  loading('hide');
+        showMessagePHP("Lỗi kết nối đến server!", 5);
+      }
+    }
+  };
+  xhr.send();
+}
+
+//Tạo file âm thanh tts gcloud
+function createAudio_Wakeup_reply(source_tts) {
+	loading('show');
+  const text = document.getElementById("tts_audio_reply_input_text").value.trim();
+  if (!text) {
+	  loading('hide');
+    showMessagePHP("Vui lòng nhập nội dung để tạo âm thanh", 5);
+    return;
+  }
+  let url_tts = "";
+
+  if (source_tts === 'tts_ggcloud'){
+  const speed = document.getElementById("create_tts_ggcloud_WakeUP_Reply_speed").value;
+  const voiceName = document.getElementById("tts_audio_reply_voice_name").value;
+  const encodedText = encodeURIComponent(text);
+  const encodedVoice = encodeURIComponent(voiceName);
+  url_tts = "includes/php_ajax/TTS_Audio_Create.php?create_tts_audio&source_tts=tts_ggcloud&language_code=vi-VN&speaking_rate="+speed+"&voice_name="+encodedVoice+"&text="+encodedText;
+  }
+
+	else if (source_tts === 'tts_zalo') {
+		const speakerId = document.getElementById("create_tts_zalo_WakeUP_Reply_voice_name").value;
+		const speakerSpeed = document.getElementById("create_tts_zalo_WakeUP_Reply_speed").value;
+		const encodedText = encodeURIComponent(text);
+		url_tts = "includes/php_ajax/TTS_Audio_Create.php"
+			+ "?create_tts_audio"
+			+ "&source_tts=tts_zalo"
+			+ "&speaker_id=" + speakerId
+			+ "&speaker_speed=" + speakerSpeed
+			+ "&encode_type=1&text=" + encodedText;
+	}
+
+  const xhr = new XMLHttpRequest();
+  xhr.open("GET", url_tts, true);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === 4) {
+      if (xhr.status === 200) {
+        try {
+          const data = JSON.parse(xhr.responseText);
+			if (data.success) {
+			  showMessagePHP(data.message || "Tạo file âm thanh thành công", 5);
+			  const filePathInput = document.getElementById("tts_audio_reply_output_path");
+			  const showww_reply_output_path = document.getElementById("showww_tts_audio_reply_output_path");
+				const playButton = document.getElementById("btn_play_audio_reply_out_p");
+				const downloadButton = document.getElementById("btn_download_audio_reply_out_p");
+				const adddButton = document.getElementById("add_use_this_wakeup_reply_sound");
+				 
+			  if (filePathInput && showww_reply_output_path) {
+				loading('hide');
+				filePathInput.value = data.file_path || "";
+				showww_reply_output_path.style.display = "flex";
+				playButton.setAttribute("onclick", "playAudio('" + data.file_path + "')");
+				downloadButton.setAttribute("onclick", "downloadFile('" + data.file_path + "')");
+				adddButton.setAttribute("onclick", "use_this_wakeup_reply_sound('" + data.file_path + "')");
+			  }
+			}else {
+				loading('hide');
+            showMessagePHP("Lỗi khi tạo file âm thanh: " + (data.message || "Không rõ lỗi"), 5);
+          }
+        } catch (e) {
+			loading('hide');
+          showMessagePHP("Lỗi Phản Hồi Từ Server, Vui Lòng Thử Lại: " + e.message, 5);
+        }
+      } else {
+		  loading('hide');
+        showMessagePHP("Không thể gửi yêu cầu tạo âm thanh. Mã lỗi: " + xhr.status, 5);
+      }
+    }
+  };
+  xhr.send();
+}
+
 //Tải danh sách giọng đọc của google tts cloud
 function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
 	if (loadingg === 'ok') loading("show");
@@ -4778,6 +4893,9 @@ function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
 	} else if (select_tts_gcloud === 'tts_ggcloud_key') {
 		selectElement_tts_gcloud = document.getElementById('tts_ggcloud_key_voice_name');
 		currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?>';
+	}else if (select_tts_gcloud === 'tts_audio_reply') {
+		  selectElement_tts_gcloud = document.getElementById('tts_audio_reply_voice_name');
+		  currentSelectedVoice_tts_gcloud = 'vi-VN-Neural2-A';
 	}
 	if (!selectElement_tts_gcloud) {
 		if (loadingg === 'ok') loading("hide");
@@ -4813,7 +4931,6 @@ function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
 						}
 					} catch (e) {
 						if (useRaw) {
-							//console.warn("Lỗi phân tích JSON từ GitHub API, dùng nội bộ:", e);
 							loadJSON("includes/other_data/list_voices_tts_gcloud.json");
 						} else {
 							if (loadingg === 'ok') loading("hide");
@@ -4822,7 +4939,6 @@ function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
 					}
 				} else {
 					if (useRaw) {
-						//console.warn("Lỗi khi lấy từ GitHub API, fallback sang nội bộ:", xhr.status);
 						loadJSON("includes/other_data/list_voices_tts_gcloud.json");
 					} else {
 						if (loadingg === 'ok') loading("hide");
@@ -4836,7 +4952,6 @@ function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
 	// Gọi GitHub trước, nếu lỗi sẽ tự động fallback
 	loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
 }
-
       // Đặt sự kiện khi DOM đã được tải hoàn toàn
       document.addEventListener('DOMContentLoaded', function() {
       	//cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
@@ -4845,9 +4960,7 @@ function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
       	// Gọi hàm để cập nhật trạng thái ban đầu lựa chọn nguồn hotword đánh thức
           selectHotwordWakeup();
       });
-	  
-	  
-	  
+
     </script>
   </body>
 </html>

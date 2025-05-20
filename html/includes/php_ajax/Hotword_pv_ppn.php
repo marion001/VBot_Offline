@@ -4,7 +4,7 @@
   #GitHub VBot: https://github.com/marion001/VBot_Offline.git
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
-  
+
 include '../../Configuration.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
@@ -348,7 +348,7 @@ if (isset($_POST['wakeup_reply_upload']) && $_POST['wakeup_reply_upload'] === 'u
                 $destination = $targetDir . $fileName;
                 if (move_uploaded_file($tmpName, $destination)) {
                     $successCount++;
-                    $successFiles[] = $fileName;  // Lưu tên file thành công
+                    $successFiles[] = $fileName;
                 } else {
                     $errorMessages[] = "Không thể lưu file: $fileName";
                 }
@@ -393,9 +393,53 @@ if (isset($_POST['wakeup_reply_upload']) && $_POST['wakeup_reply_upload'] === 'u
     } else {
         $response['messages'] = ['Không có tệp nào được gửi.'];
     }
-
     echo json_encode($response, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
     exit();
+}
+
+#Lựa chọn file âm thanh dùng cho wakeup reply
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['use_this_wakeup_reply_sound'])) {
+    $sourcePath = $_GET['file_path'] ?? '';
+    $destFolder = $VBot_Offline.'resource/sound/wakeup_reply/';
+    if (!file_exists($sourcePath)) {
+        echo json_encode(["success" => false, "message" => "File không tồn tại"]);
+        exit;
+    }
+    $baseName = basename($sourcePath);
+    $destPath = $destFolder . $baseName;
+    $relativePath = 'resource/sound/wakeup_reply/' . $baseName;
+	if (!copy($sourcePath, $destPath)) {
+		echo json_encode(["success" => false, "message" => "Không thể sao chép file"]);
+		exit;
+	}
+    if (!file_exists($Config_filePath)) {
+        echo json_encode(["success" => false, "message" => "Không tìm thấy Config.json"]);
+        exit;
+    }
+    $configData = json_decode(file_get_contents($Config_filePath), true);
+    if (!isset($configData['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'])) {
+        $configData['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] = [];
+    }
+    $soundFiles = &$configData['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'];
+    $exists = false;
+    foreach ($soundFiles as $entry) {
+        if ($entry['file_name'] === $relativePath) {
+            $exists = true;
+            break;
+        }
+    }
+    if (!$exists) {
+        $soundFiles[] = [
+            "file_name" => $relativePath,
+            "active" => true
+        ];
+        file_put_contents($Config_filePath, json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
+    }
+    echo json_encode([
+        "success" => true,
+        "message" => "Đã cập nhật danh sách câu phản hồi wakeup_reply"
+    ]);
+	exit();
 }
 
 
