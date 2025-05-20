@@ -471,6 +471,18 @@ switch:
     retain: '.$MQTT_Retain.'
     icon: mdi:repeat-once
 
+  - name: "'.$MQTT_Client_Name.' Chế Độ Câu Phản Hồi"
+    state_topic: "'.$MQTT_Client_Name.'/switch/wakeup_reply/state"
+    command_topic: "'.$MQTT_Client_Name.'/switch/wakeup_reply/set"
+    payload_on: "ON"
+    payload_off: "OFF"
+    state_on: "ON"
+    state_off: "OFF"
+    optimistic: false
+    qos: '.$MQTT_Qos.'
+    retain: '.$MQTT_Retain.'
+    icon: mdi:reply-all
+
   - name: "'.$MQTT_Client_Name.' Mic, Microphone"
     state_topic: "'.$MQTT_Client_Name.'/switch/mic_on_off/state"
     command_topic: "'.$MQTT_Client_Name.'/switch/mic_on_off/set"

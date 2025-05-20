@@ -56,6 +56,8 @@
                   loadConfigHotword("eng")
               }else if (langg === "snowboy") {
                   loadConfigHotword("snowboy")
+              }else if (langg === "wakeup_reply") {
+                  loadWakeupReply();
               }else if (langg === "scan_Music_Local") {
                   list_audio_show_path('scan_Music_Local')
               } else if (langg === "Vbot_Backup_Program") {

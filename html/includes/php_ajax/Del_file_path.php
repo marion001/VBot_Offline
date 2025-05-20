@@ -39,14 +39,13 @@
       $fileName = basename($filePath);
       if (unlink($filePath)) {
           $message = 'File: '.basename($filePath).' đã được xóa thành công.';
+		  #Nếu là file hotword Picovoice
           if ($fileExtension === 'ppn') {
               $message = 'File .ppn: '.basename($filePath).' đã được xóa thành công.';
-              $removed = false;
               foreach (['vi', 'eng'] as $lang) {
                   foreach ($Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] as $key => $item) {
                       if ($item['file_name'] === $fileName) {
                           unset($Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang][$key]);
-                          $removed = true;
                       }
                   }
                   $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = array_values($Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang]);
@@ -54,17 +53,27 @@
               file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           } elseif ($fileExtension === 'pv') {
               $message = 'File .pv: '.basename($filePath).' đã được xóa thành công.';
-          }elseif ($fileExtension === 'pmdl' || $fileExtension === 'umdl') {
-  			$removed = false;
+          }
+		  #Nếu là file Hotwor Snowboy
+		  elseif ($fileExtension === 'pmdl' || $fileExtension === 'umdl') {
                   foreach ($Config['smart_config']['smart_wakeup']['hotword']['snowboy'] as $key => $item) {
                       if ($item['file_name'] === $fileName) {
                           unset($Config['smart_config']['smart_wakeup']['hotword']['snowboy'][$key]);
-                          $removed = true;
                       }
                   }
                   $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = array_values($Config['smart_config']['smart_wakeup']['hotword']['snowboy']);
   			file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
   		}
+		#Nếu là các file âm thanh trong câu phản hồi
+		elseif (strpos($filePath, 'sound/wakeup_reply') !== false) {
+			foreach ($Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] as $key => $item) {
+				if (basename($item['file_name']) === $fileName) {
+					unset($Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'][$key]);
+				}
+			}
+			$Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] = array_values($Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file']);
+			file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		}
           echo json_encode([
               'status' => 'success',
               'message' => $message

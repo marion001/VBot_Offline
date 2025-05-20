@@ -393,11 +393,11 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input disabled class="form-check-input" type="checkbox" name="show_wakeup_reply" id="show_wakeup_reply" onclick="change_to_another_mode('wakeup_reply', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input" type="checkbox" name="show_wakeup_reply" id="show_wakeup_reply" onclick="change_to_another_mode('wakeup_reply', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
-                      <i class="bi bi-ban"></i><b class="text-decoration-line-through"><font color="green" disabled> Bật, Tắt Chế độ câu phản hồi</font></b>
+                      <b><font color="green"> Bật, Tắt Chế độ câu phản hồi</font></b>
                     </div>
                   </div>
                 </div>

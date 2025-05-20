@@ -450,6 +450,9 @@
   #Cập nhật  Chương trình Vbot
   $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_vbot']) ? true : false;
   
+  #Câu Phản Hồi
+  $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] = isset($_POST['wakeup_reply_active']) ? true : false;
+  
   #Cập nhật giao diện vbot
   $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_interface']) ? true : false;
   
@@ -713,7 +716,28 @@
   }
   }
   }
-  
+
+#Lưu các giá trị trong câu phản hồi
+if (isset($_POST['save_config_wakeup_reply'])) {
+    $newSoundFileList = [];
+    // Tìm tất cả các key có định dạng save_wakeup_reply_file_name_#
+	foreach ($_POST as $key => $value) {
+		if (strpos($key, 'save_wakeup_reply_file_name_') === 0) {
+			$index = str_replace('save_wakeup_reply_file_name_', '', $key);
+			$fileName = $_POST['save_wakeup_reply_file_name_' . $index];
+			$isActive = isset($_POST['save_wakeup_reply_active_' . $index]) ? true : false;
+			$newSoundFileList[] = [
+				'file_name' => $fileName,
+				'active' => $isActive
+			];
+		}
+	}
+    $Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] = $newSoundFileList;
+    $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] = isset($_POST['wakeup_reply_active']) ? true : false;
+    file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		$messages[] = 'Cập nhật các giá trị trong Câu Phản Hồi (wakeup_reply) thành công';
+}
+
   #Đọc File stt và tts google cloud
    if (file_exists($stt_token_google_cloud)) {
   		$read_stt_token_google_cloud = file_get_contents($stt_token_google_cloud);
@@ -2333,7 +2357,7 @@
                         <div class="input-group">
                           <select name="display_screen_connection_type" id="display_screen_connection_type" class="form-select border-success">
                             <option value="lcd_i2c" <?php echo $Config['display_screen']['connection_type'] === 'lcd_i2c' ? 'selected' : ''; ?>>Kết Nối I2C</option>
-                            <option value="lcd_spi" <?php echo $Config['display_screen']['connection_type'] === 'lcd_spi' ? 'selected' : ''; ?>>Kết Nối SPI</option>
+                            <option value="lcd_spi" <?php echo $Config['display_screen']['connection_type'] === 'lcd_spi' ? 'selected' : ''; ?> disabled>Kết Nối SPI (Chức Năng Đang Phát Triển)</option>
                           </select>
                         </div>
                       </div>
@@ -2415,7 +2439,7 @@
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title">Cấu Hình Màn SPI:</h5>
-                        Chưa DEV
+                        Chức Năng Đang Phát Triển
                       </div>
                     </div>
                   </div>
@@ -3718,6 +3742,43 @@
                   </div>
                 </div>
               </div>
+			  
+			  
+      <div class="card accordion" id="accordion_button_wakeup_reply_source">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_wakeup_reply_source" aria-expanded="false" aria-controls="collapse_button_wakeup_reply_source">
+      Chế Độ Câu Phản Hồi (Khi Được Đánh Thức) <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Đánh thức Bot bằng giọng nói thì Bot sẽ phản hồi lại bằng file âm thanh Audio khi lần đầu tiên được đánh thức<br/> Chỉ chấp nhận file âm thanh .mp3')"></i> :</h5>
+      <div id="collapse_button_wakeup_reply_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_wakeup_reply_source">
+
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích hoạt chế độ câu phản hồi <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ câu phản hồi')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input" type="checkbox" name="wakeup_reply_active" id="wakeup_reply_active" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+				  <center>
+<button type="button" class="btn btn-primary rounded-pill" onclick="loadWakeupReply()" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Hiển Thị Danh Sách Câu Phản Hồi">Hiển Thị Danh Sách Câu Phản Hồi</button>
+<button type="button" class="btn btn-warning rounded-pill" onclick="reload_hotword_config('wakeup_reply')" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tự động tìm scan các file âm thanh .mp3 trong thư mục wakeup_reply để cấu hình trong Config.json">Scan Và Ghi Mới</button>
+</center><br/><table class="table table-bordered border-primary">
+<tbody>
+<tr>
+<td style="text-align: center; vertical-align: middle;">
+<label for="upload_files_wakeup_reply"><font color="blue">Tải lên file âm thanh Câu Phản Hồi .mp3</font></label>
+<div class="input-group">
+  <input class="form-control" type="file" name="upload_files_wakeup_reply[]" id="upload_files_wakeup_reply" accept=".mp3" multiple>
+  <button class="btn btn-primary" type="button" onclick="uploadFilesWakeUP_Reply()">Tải Lên</button>
+</div>
+</td></tr></tbody></table>
+<div id="displayResults_wakeup_reply"></div>
+
+
+      </div>
+      </div>
+      </div>
+			  
+			  
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title">Chế Độ Hội Thoại/Trò Chuyện Liên Tục <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật Bạn chỉ cần gọi Bot 1 lần, sau khi bot trả lời xong sẽ tự động lắng nghe tiếp và lặp lại (cho tới khi Bạn không còn yêu cầu nào nữa)')"></i> :</h5>
@@ -3909,7 +3970,7 @@
               showMessagePHP("Không có tệp nào được chọn để tải xuống.");
           }
       }
-      
+
       //Tải xuống file backup Config
       function dowlaod_file_backup_json_config(filePath) {
           if (filePath === "get_value_backup_config") {
@@ -3924,7 +3985,7 @@
               showMessagePHP("Không có tệp nào được chọn để tải xuống.");
           }
       }
-      
+
       //Kiểm tra kết nối MQTT
       function checkMQTTConnection() {
       	loading('show');
@@ -3955,7 +4016,7 @@
           };
           xhr.send();
       }
-      
+
       //Đọc nội dung các file yaml MQTT
       function read_YAML_file_path(fileName) {
       	loading('show');
@@ -3985,7 +4046,7 @@
           };
           xhr.send();
       }
-      
+
       //xem nội dung file json
       function readJSON_file_path(filePath) {
           if (filePath === "get_value_backup_config") {
@@ -4022,6 +4083,112 @@
           };
           xhr.send();
       }
+
+// Hiển thị list danh sách câu phản hồi
+function loadWakeupReply() {
+    const xhr = new XMLHttpRequest();
+	const pathVBot_PY = '<?php echo $VBot_Offline; ?>';
+    xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?get_wakeup_reply', true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    //showMessagePHP('Lấy Dữ Liệu Câu Phản Hồi Thành Công');
+                    const data = response.config;
+                    const container = document.getElementById('displayResults_wakeup_reply');
+					if (!data || !Array.isArray(data) || data.length === 0) {
+						container.innerHTML = '<div class="alert alert-warning text-center mt-3 text-danger">Dữ liệu Rỗng, Không có dữ liệu câu phản hồi nào</div>';
+						return;
+					}
+                    let html = 
+                        '<br/><table class="table table-bordered border-primary">' +
+                            '<thead>' +
+                                '<tr>' +
+                                    '<th class="text-danger" style="text-align: center;" colspan="4">Cài Đặt Câu Phản Hồi</th>' +
+                                '</tr>' +
+                                '<tr>' +
+                                    '<th style="text-align: center;">STT</th>' +
+                                    '<th style="text-align: center;">Kích Hoạt</th>' +
+                                    '<th style="text-align: center;">Đường Dẫn File</th>' +
+                                    '<th style="text-align: center;">Hành Động</th>' +
+                                '</tr>' +
+                            '</thead>' +
+                            '<tbody>';
+                    data.forEach((item, index) => {
+                        html += 
+                            '<tr>' +
+                                '<td style="text-align: center;">' + (index + 1) + '</td>' +
+                                '<td style="text-align: center;"><div class="form-switch">' +
+                                    '<input class="form-check-input" type="checkbox" name="save_wakeup_reply_active_' + index + '" ' + (item.active ? 'checked' : '') + '>' +
+                                '</div></td>' +
+                                '<td>' +
+                                    '<input readonly class="form-control" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + item.file_name + '">' +
+                                '</td>' +
+                                '<td style="text-align: center;">' +
+								'<button type="button" title="Nghe thử: ' + item.file_name + '" class="btn btn-primary" onclick="playAudio(\''+ pathVBot_PY + item.file_name + '\')"><i class="bi bi-play-circle"></i></button> ' +
+                                ' <button type="button" class="btn btn-success" onclick="downloadFile(\''+ pathVBot_PY + item.file_name + '\')" title="Tải Xuống File: ' + item.file_name + '"><i class="bi bi-download"></i></button> ' +
+                                ' <button type="button" class="btn btn-danger" title="Xóa file: ' + item.file_name + '" onclick="deleteFile(\''+ pathVBot_PY + item.file_name + '\', \'wakeup_reply\')"><i class="bi bi-trash"></i></button>' +
+								'</td>' +
+                            '</tr>';
+                    });
+                    html += 
+                        '<tr><td colspan="4"><center><button class="btn btn-success rounded-pill" type="submit" name="save_config_wakeup_reply" title="Lưu cài đặt câu phản hồi">Lưu Cài Đặt Câu Phản Hồi</button></center></td></tr>' +
+                        '</tbody></table>';
+                    container.innerHTML = html;
+                } else {
+                    show_message('Không thành công: ' + response.message);
+                }
+            } catch (err) {
+                show_message('Lỗi khi phân tích JSON: ' + err);
+            }
+        } else {
+            show_message('Lỗi HTTP: ' + xhr.status);
+        }
+    };
+    xhr.onerror = function () {
+        show_message('Lỗi khi gửi yêu cầu.');
+    };
+    xhr.send();
+}
+
+//Tải Lên File âm thanh wakeup_reply
+function uploadFilesWakeUP_Reply() {
+    const input = document.getElementById('upload_files_wakeup_reply');
+    const files = input.files;
+    if (files.length === 0) {
+        show_message('Vui lòng chọn ít nhất một file âm thanh .mp3 để tải lên.');
+        return;
+    }
+    const formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+        formData.append('upload_files_wakeup_reply[]', files[i]);
+    }
+    formData.append('wakeup_reply_upload', 'upload_files_wakeup_reply');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+            try {
+                const res = JSON.parse(xhr.responseText);
+                let messageHtml = "";
+                if (Array.isArray(res.messages)) {
+                    messageHtml = res.messages.join("\n");
+                } else if (res.message) {
+                    messageHtml = res.message;
+                }
+                show_message(messageHtml);
+				input.value = '';
+				loadWakeupReply();
+            } catch (e) {
+                show_message('Lỗi khi phân tích phản hồi từ máy chủ.');
+            }
+        } else {
+            show_message('Lỗi khi gửi yêu cầu tải lên.');
+        }
+    };
+    xhr.send(formData);
+}
 
       //Tải lên file ppv và pv dùng cho Picovoice/Procupine
       function uploadFilesHotwordPPNandPV() {
@@ -4105,7 +4272,7 @@
 
       //Cập nhật các file trong eng và vi để Làm mới lại cấu hình Hotword trong Config.json, 
       function reload_hotword_config(langg = "No") {
-          if (!confirm("Bạn có chắc chắn muốn cập nhật lại dữ liệu Hotword trong Config.json")) {
+          if (!confirm("Bạn có chắc chắn muốn cập nhật mới dữ liệu")) {
               return;
           }
           var xhr = new XMLHttpRequest();
@@ -4120,17 +4287,12 @@
       					show_message("<center>" + response.message + "</center>");
       				}
       				var element_data_lang_shows = document.getElementById('data_lang_shows');
-      				//Tải lại dữ liệu hotword ở Config.json theo lang nếu có giá trị
-      				// Kiểm tra nếu phần tử tồn tại
       				if (element_data_lang_shows) {
-      					// Lấy giá trị của thuộc tính 'value'
       					var value_lang = element_data_lang_shows.getAttribute('value');
-      					// Thực hiện các hành động cần thiết với giá trị
-      					//console.log('Giá trị của phần tử với ID "data_lang_shows" là: ' + value_lang);
       					if (value_lang === "vi") {
-      						loadConfigHotword("vi")
+      						loadConfigHotword("vi");
       					} else if (value_lang === "eng") {
-      						loadConfigHotword("eng")
+      						loadConfigHotword("eng");
       					}
       				}
       			} else {
@@ -4148,9 +4310,25 @@
       				} else {
       					show_message("<center>" + response.message + "</center>");
       				}
-      				loadConfigHotword("snowboy")
+      				loadConfigHotword("snowboy");
       			} else {
       				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+      			}
+      		};
+      	}
+      	else if (langg === 'wakeup_reply'){
+      		xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_wakeup_reply');
+      		xhr.onload = function() {
+      			if (xhr.status === 200) {
+      				var response = JSON.parse(xhr.responseText);
+      				if (response.status === 'success') {
+      					show_message("<center>" + response.message + "</center>");
+      				} else {
+      					show_message("<center>" + response.message + "</center>");
+      				}
+      				loadWakeupReply();
+      			} else {
+      				show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Câu Phản Hồi Wakeup Reply</center>");
       			}
       		};
       	}
@@ -4658,7 +4836,6 @@ function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg='no') {
 	// Gọi GitHub trước, nếu lỗi sẽ tự động fallback
 	loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
 }
-
 
       // Đặt sự kiện khi DOM đã được tải hoàn toàn
       document.addEventListener('DOMContentLoaded', function() {

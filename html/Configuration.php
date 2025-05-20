@@ -4,55 +4,55 @@
   #GitHub VBot: https://github.com/marion001/VBot_Offline.git
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
-  
+
   #tăng giới hạn bộ nhớ cho PHP
   //ini_set('memory_limit', '512M');
   ini_set('memory_limit', '1G');
   ini_set('upload_max_filesize', '300M');
   ini_set('post_max_size', '300M');
-  
+
   // Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
   //$current_file_path = __FILE__;
-  
+
   // Lấy đường dẫn thư mục chứa tệp PHP
   $directory_path = dirname(__FILE__);
 
   //Lấy HostName
   $HostName = gethostname();
-  
+
   //Lấy User Hiện Tại: pi
   $GET_current_USER = get_current_user();
-  
+
   // Lấy địa chỉ IP của máy chủ
   $serverIp = $_SERVER['SERVER_ADDR'];
-  
+
   // Lấy địa chỉ IP của người dùng khi truy cập
   $userIp = $_SERVER['REMOTE_ADDR'];
-  
+
   //Đường dẫn ui html /home/pi/VBot_Offline/html
   $HTML_VBot_Offline = getcwd();
-  
+
   //đường dẫn path VBot python
   $VBot_Offline = "/home/pi/VBot_Offline/";
 
   // Đường dẫn đến tệp JSON
   $Config_filePath = $VBot_Offline.'Config.json';
-  
+
   //địa chỉ URL Repo Github, địa chỉ này sẽ dùng cho cập nhật, không được chỉnh sửa
   $Github_Repo_Vbot = "https://github.com/marion001/VBot_Offline";
-  
+
   //Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
   $excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt'];
-  
+
   //Đọc và giải mã dữ liệu JSON
   $Config = null; // Khởi tạo biến để lưu dữ liệu
-  
+
   //Khởi tạo biến để lưu dữ liệu
   #$Version_VBot_Program = null; 
-  
+
   //biến lưu trữ thông báo php
   $messages = [];
-  
+
   //Danh sách các đuôi file không cho phép tải xuống
   $Restricted_Extensions = ['html', 'python', 'php', 'so'];
   
