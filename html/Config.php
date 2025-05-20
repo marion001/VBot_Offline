@@ -210,7 +210,7 @@
   
   #cập nhật giá trị trong tts tts_default
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['speaking_speed'] = floatval($_POST['tts_default_speaking_speed']);
-  $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] = intval($_POST['tts_default_voice_name']);
+  $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] = intval($_POST['tts_default_quality']);
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] = intval($_POST['tts_default_voice_name']);
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_did'] = $_POST['authentication_zai_did'];
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_did'] = $_POST['expires_zai_did'];
@@ -1664,7 +1664,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                               <div class="form-floating mb-3">
                                 <select name="tts_default_quality" id="tts_default_quality" class="form-select border-success" aria-label="Default select example">
                                   <option value="0" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 0 ? 'selected' : ''; ?>>Tiêu chuẩn</option>
-                                  <option disabled value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 1 ? 'selected' : ''; ?>>Chất lượng cao</option>
+                                  <option disabled value="0" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 1 ? 'selected' : ''; ?>>Chất lượng cao</option>
                                 </select>
                                 <label for="tts_default_quality">Chất lượng giọng đọc:</label>
                               </div>
@@ -1692,7 +1692,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                 <label for="expires_zai_did" class="form-label">Hết hạn zai_did:</label>
                               </div>
                               <div class="form-floating mb-3">
-                                <center><button class="btn btn-primary rounded-pill" type="button" onclick="">Get Token zai_did</button> <i class="bi bi-question-circle-fill" onclick="show_message('zai_did Chỉ dùng cho trợ lý ảo Default Assistant, với chức năng: Chuyển đổi thêm kết quả thành văn bản (text), Hạn sử dụng 1 năm')"></i></center>
+                                <center><button class="btn btn-success rounded-pill" type="button" onclick="get_token_tts_default_zai_did()">Lấy Token zai_did</button> <i class="bi bi-question-circle-fill" onclick="show_message('zai_did Chỉ dùng cho trợ lý ảo Default Assistant, với chức năng: Chuyển đổi thêm kết quả thành văn bản (text), Hạn sử dụng 1 năm')"></i></center>
                               </div>
                             </div>
                             <!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
@@ -4886,6 +4886,31 @@ function createAudio_Wakeup_reply(source_tts) {
     }
   };
   xhr.send();
+}
+
+//Lấy token zai_did tts_default
+function get_token_tts_default_zai_did() {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?get_token_tts_default_zai_did', true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    const zaiDid = response.zai_did;
+                    const expires = response.expires_zai_did;
+                    document.getElementById('authentication_zai_did').value = zaiDid;
+                    document.getElementById('expires_zai_did').value = expires;
+					showMessagePHP(response.message, 5);
+                } else {
+					show_message(response.message);
+                }
+            } catch (e) {
+				show_message(e);
+            }
+        }
+    };
+    xhr.send();
 }
 
 //Tải danh sách giọng đọc của google tts cloud

@@ -722,4 +722,54 @@ if (isset($_GET['vbot_chatbox'])) {
 	echo json_encode($jsonResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit();
 }
+
+//Lấy token zai_did tts_default
+if (isset($_GET['get_token_tts_default_zai_did'])) {
+	$ch = curl_init(base64_decode('aHR0cHM6Ly9haS56YWxvLmNsb3VkLw=='));
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_HEADER, true);
+	curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+	curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
+	$response = curl_exec($ch);
+	if (curl_errno($ch)) {
+		$error = curl_error($ch);
+		curl_close($ch);
+		echo json_encode([
+			'success' => false,
+			'message' => "Lỗi cURL, Vui lòng thử lại: $error"
+		]);
+		exit();
+	}
+	$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+	$header = substr($response, 0, $header_size);
+	curl_close($ch);
+	preg_match_all('/Set-Cookie:\s*(zai_did=[^;]+);.*?Expires=([^;]+);?/i', $header, $matches);
+	if (!empty($matches[1]) && !empty($matches[2])) {
+		$cookie_value = $matches[1][0];
+		$expires_raw = $matches[2][0];
+		try {
+			$dt = new DateTime($expires_raw, new DateTimeZone('GMT'));
+			$dt->modify('-10 days');
+			$expires_iso = $dt->format('Y-m-d\TH:i:sP');
+			$zai_did_value = explode('=', $cookie_value)[1];
+			echo json_encode([
+				'success' => true,
+				'message' => 'Lấy Token zai_did thành công, hãy Lưu Cài Đặt Cấu Hình Config để áp dụng',
+				'zai_did' => $zai_did_value,
+				'expires_zai_did' => $expires_iso
+			], JSON_PRETTY_PRINT);
+		} catch (Exception $e) {
+			echo json_encode([
+				'success' => false,
+				'message' => 'Lỗi xử lý thời gian: ' . $e->getMessage()
+			]);
+		}
+	} else {
+		echo json_encode([
+			'success' => false,
+			'message' => 'Không tìm thấy zai_did hoặc thời gian hết hạn. Vui lòng thử lại'
+		]);
+	}
+exit();
+}
   ?>
