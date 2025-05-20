@@ -212,8 +212,8 @@
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['speaking_speed'] = floatval($_POST['tts_default_speaking_speed']);
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] = intval($_POST['tts_default_voice_name']);
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['voice_name'] = intval($_POST['tts_default_voice_name']);
-  $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_sid'] = $_POST['authentication_zai_sid'];
-  $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_sid'] = $_POST['expires_zai_sid'];
+  $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_did'] = $_POST['authentication_zai_did'];
+  $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_did'] = $_POST['expires_zai_did'];
   
   #cập nhật giá trị trong tts tts_edge
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed'] = floatval($_POST['tts_edge_speaking_speed']);
@@ -1664,7 +1664,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                               <div class="form-floating mb-3">
                                 <select name="tts_default_quality" id="tts_default_quality" class="form-select border-success" aria-label="Default select example">
                                   <option value="0" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 0 ? 'selected' : ''; ?>>Tiêu chuẩn</option>
-                                  <option value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 1 ? 'selected' : ''; ?>>Chất lượng cao</option>
+                                  <option disabled value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['quality'] === 1 ? 'selected' : ''; ?>>Chất lượng cao</option>
                                 </select>
                                 <label for="tts_default_quality">Chất lượng giọng đọc:</label>
                               </div>
@@ -1684,15 +1684,15 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                 <label for="tts_default_voice_name">Giọng đọc:</label>
                               </div>
                               <div class="form-floating mb-3">
-                                <input class="form-control border-danger" type="text" name="authentication_zai_sid" id="authentication_zai_sid" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_sid']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_sid']; ?>">
-                                <label for="authentication_zai_sid" class="form-label">Mã Token zai_sid:</label>
+                                <input class="form-control border-danger" type="text" name="authentication_zai_did" id="authentication_zai_did" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_did']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_did']; ?>">
+                                <label for="authentication_zai_did" class="form-label">Mã Token zai_did:</label>
                               </div>
                               <div class="form-floating mb-3">
-                                <input class="form-control border-danger" type="text" name="expires_zai_sid" id="expires_zai_sid" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_sid']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_sid']; ?>">
-                                <label for="expires_zai_sid" class="form-label">Hết hạn zai_sid:</label>
+                                <input class="form-control border-danger" type="text" name="expires_zai_did" id="expires_zai_did" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_did']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_did']; ?>">
+                                <label for="expires_zai_did" class="form-label">Hết hạn zai_did:</label>
                               </div>
                               <div class="form-floating mb-3">
-                                <center><button class="btn btn-primary rounded-pill" type="button" onclick="">Get Token zai_sid</button> <i class="bi bi-question-circle-fill" onclick="show_message('zai_sid Chỉ dùng cho trợ lý ảo Default Assistant, với chức năng: Chuyển đổi thêm kết quả thành văn bản (text), Hạn sử dụng 1 năm')"></i></center>
+                                <center><button class="btn btn-primary rounded-pill" type="button" onclick="">Get Token zai_did</button> <i class="bi bi-question-circle-fill" onclick="show_message('zai_did Chỉ dùng cho trợ lý ảo Default Assistant, với chức năng: Chuyển đổi thêm kết quả thành văn bản (text), Hạn sử dụng 1 năm')"></i></center>
                               </div>
                             </div>
                             <!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
