@@ -1741,10 +1741,12 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                               </div>
                               <div class="form-floating mb-3">
                                 <select name="tts_zalo_voice_name" id="tts_zalo_voice_name" class="form-select border-success" aria-label="Default select example">
-                                  <option value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 1 ? 'selected' : ''; ?>>(Nữ) Miền Nam</option>
+                                  <option value="1" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 1 ? 'selected' : ''; ?>>(Nữ) Miền Nam 1</option>
+								  <option value="2" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 2 ? 'selected' : ''; ?>>(Nữ) Miền Bắc 1</option>
                                   <option value="3" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 3 ? 'selected' : ''; ?>>(Nam) Miền Nam</option>
-                                  <option value="2" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 2 ? 'selected' : ''; ?>>(Nữ) Miền Bắc</option>
                                   <option value="4" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 4 ? 'selected' : ''; ?>>(Nam) Miền Bắc</option>
+                                  <option value="5" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 5 ? 'selected' : ''; ?>>(Nữ) Miền Bắc 2</option>
+                                  <option value="6" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['voice_name'] === 6 ? 'selected' : ''; ?>>(Nữ) Miền Nam 2</option>
                                 </select>
                                 <label for="tts_zalo_voice_name">Giọng đọc:</label>
                               </div>
@@ -3776,7 +3778,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
 <div style="display: none;" id="displayResults_create_audio_WakeUP_Reply">
 
 <div class="input-group mb-3">
-<span class="input-group-text border-success" id="basic-addon1">Nguồn Tạo Tệp Âm Thanh:</span>
+<span class="input-group-text border-success text-danger" id="basic-addon1">Nguồn Tạo Tệp Âm Thanh:</span>
   <select id="audio_reply_type" onchange="handleAudioReplyType()" class="form-select border-success">
 	<option selected>Chọn Nguồn TTS....</option>
     <option value="wakeup_reply_tts_gcloud">TTS Google Cloud (JSON File)</option>
@@ -4780,6 +4782,10 @@ function uploadFilesWakeUP_Reply() {
 
 //Lựa chọn file âm thanh dùng cho wakeup reply
 function use_this_wakeup_reply_sound(filePath) {
+	if (!filePath) {
+        show_message('Không có dữ liệu file âm thanh');
+        return;
+    }
 	loading('show');
   const encodedFilePath = encodeURIComponent(filePath);
   const url = 'includes/php_ajax/Hotword_pv_ppn.php?use_this_wakeup_reply_sound&file_path=' + encodedFilePath;
@@ -4796,15 +4802,15 @@ function use_this_wakeup_reply_sound(filePath) {
 			loading('hide');
           } else {
 			  loading('hide');
-            showMessagePHP(response.message || "Thao tác thất bại!", 5);
+            show_message(response.message || "Thao tác thất bại!");
           }
         } catch (err) {
 			loading('hide');
-          showMessagePHP("Lỗi xử lý phản hồi server!", 5);
+          show_message("Lỗi xử lý phản hồi server!");
         }
       } else {
 		  loading('hide');
-        showMessagePHP("Lỗi kết nối đến server!", 5);
+        show_message("Lỗi kết nối đến server!");
       }
     }
   };

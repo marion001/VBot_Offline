@@ -663,6 +663,9 @@
   					if (youtube_name == null) {
   						youtube_name = data.data.title;
   					}
+					if (youtube_cover == null) {
+						youtube_cover = data.data.cover;
+					}
   					startMediaPlayer(data.data.dlink, youtube_name, youtube_cover, 'Youtube');
                   } else {
   					loading("hide");

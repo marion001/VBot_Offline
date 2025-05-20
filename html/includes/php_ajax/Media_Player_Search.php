@@ -757,10 +757,7 @@ ini_set('display_errors', 1);
       }
   	exit();
   }
-  
-  
-  
-  
+ 
   #get Link Youtube
   if (isset($_GET['GetLink_Youtube'])) {
       // Lấy ID video YouTube từ request
@@ -775,6 +772,26 @@ ini_set('display_errors', 1);
           echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
+	$title = "N/A (Không Xác Định Được Tên)";
+	$thumbnails = "https://img.youtube.com/vi/$Youtube_ID/0.jpg";
+
+	$url_api_ytb = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&id='.$Youtube_ID.'&key='.$Config['media_player']['youtube']['google_apis_key'];
+	$ch = curl_init();
+	curl_setopt($ch, CURLOPT_URL, $url_api_ytb);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	$response = curl_exec($ch);
+	if (curl_errno($ch)) {
+		echo 'Lỗi cURL: ' . curl_error($ch);
+		curl_close($ch);
+		exit;
+	}
+	curl_close($ch);
+	$data_api_ytb = json_decode($response, true);
+	if (isset($data_api_ytb['items'][0]['snippet']['title'])) {
+		$title = $data_api_ytb['items'][0]['snippet']['title'];
+		$thumbnails = $data_api_ytb['items'][0]['snippet']['thumbnails']['high']['url'];
+	}
+
       // Câu lệnh gọi Python script
       $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Get_Link_Youtube.py $Youtube_ID");
       // Kết nối SSH
@@ -817,7 +834,9 @@ ini_set('display_errors', 1);
               'success' => true,
               'message' => 'Lấy link thành công.',
               'data' => array(
-                  'dlink' => trim($output)
+                  'dlink' => trim($output),
+				  'cover' => $thumbnails,
+				  'title' => $title
               )
           );
       } else {
