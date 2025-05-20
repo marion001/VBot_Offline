@@ -5,7 +5,10 @@
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   
   include '../../Configuration.php';
-  header('Content-Type: application/json');
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type, Authorization");
+header('Content-Type: application/json; charset=utf-8');
 if ($Config['contact_info']['user_login']['active']){
   session_start();
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập

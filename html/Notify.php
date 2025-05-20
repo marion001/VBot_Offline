@@ -20,7 +20,6 @@
       $error = curl_error($curl);
       $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
       curl_close($curl);
-      // Kiểm tra lỗi và trả về
       if ($httpCode !== 200 || $error) {
           return false;
       }
@@ -56,9 +55,16 @@
           }
       }
   }
-  // Gọi hàm kiểm tra quyền với thư mục WEbUI
-  checkPermissions($directory_path.'/');
-  checkPermissions($VBot_Offline);
+
+$real_directory_path = realpath($directory_path.'/');
+$real_base_path = realpath($VBot_Offline);
+if ($real_directory_path !== false && strpos($real_directory_path, $real_base_path) === 0) {
+	checkPermissions($VBot_Offline);
+} else {
+	checkPermissions($directory_path.'/');
+	checkPermissions($VBot_Offline);
+}
+  
   ?>
 <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" title="Thông báo">
 <i class="bi bi-bell text-success"></i>

@@ -10,7 +10,7 @@ include '../../Configuration.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']){
   session_start();
