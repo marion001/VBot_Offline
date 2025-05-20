@@ -603,7 +603,7 @@
                 },
                 "tts_default": {
                     "speaking_speed": 0.9,
-                    "quality": 1,
+                    "quality": 0,
                     "voice_name": 1,
                     "authentication_zai_did": "8k9uAj3FNiTevcSSryzXoYYo6Kp1ncB7ARWLJJGq",
                     "expires_zai_did": "2026-04-28T14:10:27+00:00"
