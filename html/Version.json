@@ -1,8 +1,8 @@
 {
-    "version": "1.0.37",
+    "version": "1.0.38",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ trợ phát toàn bộ bài nhạc trong thư mục Local",
-    "releaseDate": "18/05/2025",
+    "description": "Cập Nhật Chức Năng Phát Câu Phản Hồi Khi Được Đánh Thức (Thay cho âm thanh DING)",
+    "releaseDate": "20/05/2025",
     "changes": [
         {
             "type": "feature",
