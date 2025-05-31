@@ -1,8 +1,8 @@
 {
-    "version": "1.0.38",
+    "version": "1.0.39",
     "projectName": "Program VBot Offline",
-    "description": "Cập Nhật Chức Năng Phát Câu Phản Hồi Khi Được Đánh Thức (Thay cho âm thanh DING)",
-    "releaseDate": "20/05/2025-1",
+    "description": "Tối ưu hóa luồng dữ liệu nút nhấn",
+    "releaseDate": "31/05/2025",
     "changes": [
         {
             "type": "feature",
