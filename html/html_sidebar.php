@@ -67,9 +67,9 @@
           <i class="bi bi-circle"></i><span>Kiểm Tra Thư Viện python pip</span>
           </a>
         </li>
-        <li title="Lập Lịch, Lên Tác Vụ (Scheduler)">
+        <li title="Lập Lịch, Lên Tác Vụ, Báo Thức, Thông Báo (Scheduler)">
           <a href="Scheduler.php">
-          <i class="bi bi-circle"></i><span>Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</span>
+          <i class="bi bi-circle"></i><span>Lên Lịch: Báo Thức, Lời Nhắc, Thông Báo (Scheduler)</span>
           </a>
         </li>
         <li title="Chỉnh sửa nội dung các tệp Json">

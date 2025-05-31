@@ -104,7 +104,7 @@
       ?>
     <main id="main" class="main">
       <div class="pagetitle">
-        <h1>Lên Lịch: Lời Nhắc, Thông Báo (Scheduler) <i class="bi bi-question-circle-fill" onclick="show_message('Để Bật hoặc Tắt sử dụng cần thiết lập trong tab <b>Cấu Hình Config</b>')"></i></h1>
+        <h1>Lên Lịch: Báo Thức, Lời Nhắc, Thông Báo (Scheduler) <i class="bi bi-question-circle-fill" onclick="show_message('Để Bật hoặc Tắt sử dụng cần thiết lập trong tab <b>Cấu Hình Config</b>')"></i></h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
@@ -553,6 +553,7 @@
               <?php endif; ?>
             </div>
             <hr style="border: 2px solid #0000FF;">
+			<div class="alert alert-success text-center" role="alert"><b>Các Tác Vụ Sẵn Có Trên Hệ Thống</b></div>
             <div class="card accordion" id="accordion_button_send_notify_upgrade_vbot_hass">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_send_notify_upgrade_vbot_hass" aria-expanded="false" aria-controls="collapse_button_send_notify_upgrade_vbot_hass">
