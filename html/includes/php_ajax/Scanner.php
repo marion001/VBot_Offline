@@ -237,7 +237,8 @@ if (isset($_GET['VBot_Device_Scaner'])) {
                     if (!file_put_contents($json_file_path, json_encode(array_values($existing_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
                         throw new Exception('Không thể ghi dữ liệu vào file JSON.');
                     }
-                    chmod($json_file_path, 0777);
+                    #chmod($json_file_path, 0777);
+					shell_exec("chmod 0777 " . escapeshellarg($json_file_path));
                 } catch (Exception $e) {
                     echo json_encode([
                         'success' => false,
