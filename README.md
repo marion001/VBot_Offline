@@ -4,7 +4,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Mạch Mic ReSpeaker 2-Mics Pi HAT, ReSpeaker Mic Array v2.0, Mic USB, V..v...
 - Hoặc Mạch Mic Vietbot AIO Ver 2.0
 - Hoặc Có Thể Sử Dụng Các Module Mic i2s Và phát âm thanh Audio I2s
-- Hỗ Trợ Các Loại Đèn LED Có Mã Như: WS2812B, APPA102
+- Hỗ Trợ Các Loại Đèn LED Có Mã Như: WS2812B, APPA102 (Sử dụng duy nhất chân GPIO10 trên Raspberry Pi để điều khiển led)
 - --------------------------------
 - Kết Nối Client Server Sử Dụng MCU Như ESP32,ESP32 D1 MINI, ESP32S3, V..v...
 - Hỗ Trợ Đánh Thức Bằng Từ Khóa Sử Dụng Picovoice Và Snowboy
