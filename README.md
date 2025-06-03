@@ -1,6 +1,6 @@
 VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khiển nhà thông minh, trả lời câu hỏi, nhắc nhở, phát nhạc và nhiều tiện ích khác. Với thiết kế tinh tế và khả năng hiểu ngôn ngữ tự nhiên, VBot mang đến sự tiện nghi và trải nghiệm hiện đại, gần gũi cho mọi gia đình Việt.
 ------------------------------------------------
-- HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W
+- HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W (IMG có sẵn được Build trên Raspberry Pi Zero 2W)
 - Mạch Mic ReSpeaker 2-Mics Pi HAT, ReSpeaker Mic Array v2.0, Mic USB, V..v...
 - Hoặc Mạch Mic Vietbot AIO Ver 2.0
 - Hoặc Có Thể Sử Dụng Các Module Mic i2s Và phát âm thanh Audio I2s
@@ -50,6 +50,48 @@ Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRs
 - Liên Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - Liên Hệ Hỗ Trợ: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
 - Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
+
+      Model: Raspberry Pi Zero 2 W Rev 1.0
+
+      $:>uname -a
+      Linux VBot-Assistant 6.1.21-v7+ #1642 SMP Mon Apr  3 17:20:52 BST 2023 armv7l GNU/Linux
+
+      $:>python3 --version
+      Python 3.9.2
+
+      $:>apache2 -v
+      Server version: Apache/2.4.56 (Raspbian)
+      Server built:   2023-04-02T03:06:01
+
+      $:>php -v
+      PHP 7.4.33 (cli) (built: Feb 22 2023 20:07:47) ( NTS )
+      Copyright (c) The PHP Group
+      Zend Engine v3.4.0, Copyright (c) Zend Technologies
+          with Zend OPcache v7.4.33, Copyright (c), by Zend Technologies
+
+      $:>lsb_release -a
+      No LSB modules are available.
+      Distributor ID: Raspbian
+      Description:    Raspbian GNU/Linux 11 (bullseye)
+      Release:        11
+      Codename:       bullseye
+
+      $:>cat /etc/os-release
+      PRETTY_NAME="Raspbian GNU/Linux 11 (bullseye)"
+      NAME="Raspbian GNU/Linux"
+      VERSION_ID="11"
+      VERSION="11 (bullseye)"
+      VERSION_CODENAME=bullseye
+      ID=raspbian
+      ID_LIKE=debian
+      HOME_URL="http://www.raspbian.org/"
+      SUPPORT_URL="http://www.raspbian.org/RaspbianForums"
+      BUG_REPORT_URL="http://www.raspbian.org/RaspbianBugs"
+
+      $:>vcgencmd version
+      Mar 17 2023 10:53:00
+      Copyright (c) 2012 Broadcom
+      version 82f3750a65fadae9a38077e3c2e217ad158c8d54 (clean) (release) (start_cd)
 
 <hr/>
 
