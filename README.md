@@ -45,7 +45,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
         - Code Chuyển Văn Bản Thành Giọng Nói: Dev_TTS.py
 
 
-Link Download IMG FLASH: https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
+Link Download IMG FLASH (IMG Được Build Trên Raspberry Pi Zero 2W): https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
 
 - Liên Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - Liên Hệ Hỗ Trợ: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
