@@ -1276,16 +1276,16 @@ if (isset($_POST['disable_vbot_api_external'])) {
                       <div class="btn-group">
                         <div class="dropdown">
                           <button class="btn btn-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          VM8960-SoundCard
+                          WM8960-SoundCard
                           </button>
                           <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_start" type="submit" title="wm8960_soundcard_start">VM8960 SoundCard Start</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_stop" type="submit" title="wm8960_soundcard_stop">VM8960 SoundCard Stop</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_disable" type="submit" title="wm8960_soundcard_disable">VM8960 SoundCard Disable</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_enable" type="submit" title="wm8960_soundcard_enable">VM8960 SoundCard Enable</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_status" type="submit" title="wm8960_soundcard_status">VM8960 SoundCard Status</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_alsamixer_to_driver_wm8960_asound" type="submit" title="save_asound_alsamixer_to_driver_wm8960_asound">Save Alsamixer To VM8960 SoundCard Driver</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="restore_wm8960_soundcard_to_default" type="submit" title="restore_wm8960_soundcard_to_default">Restore VM8960 SoundCard Driver Default</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_start" type="submit" title="wm8960_soundcard_start">WM8960 SoundCard Start</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_stop" type="submit" title="wm8960_soundcard_stop">WM8960 SoundCard Stop</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_disable" type="submit" title="wm8960_soundcard_disable">WM8960 SoundCard Disable</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_enable" type="submit" title="wm8960_soundcard_enable">WM8960 SoundCard Enable</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_status" type="submit" title="wm8960_soundcard_status">WM8960 SoundCard Status</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_alsamixer_to_driver_wm8960_asound" type="submit" title="save_asound_alsamixer_to_driver_wm8960_asound">Save Alsamixer To WM8960 SoundCard Driver</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="restore_wm8960_soundcard_to_default" type="submit" title="restore_wm8960_soundcard_to_default">Restore WM8960 SoundCard Driver Default</button></li>
                           </ul>
                         </div>
                       </div>

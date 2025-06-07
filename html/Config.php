@@ -2088,7 +2088,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led:</label>
+                      <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led <i class="bi bi-question-circle-fill" onclick="show_message('Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>')"></i>:</label>
                       <div class="col-sm-9">
                         <select name="led_type_select" id="led_type_select" class="form-select border-success" aria-label="Default select example">
                           <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>WS281x</option>
