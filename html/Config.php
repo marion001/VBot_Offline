@@ -740,15 +740,15 @@ if (isset($_POST['save_config_wakeup_reply'])) {
 
   #Đọc File stt và tts google cloud
    if (file_exists($stt_token_google_cloud)) {
-  		$read_stt_token_google_cloud = file_get_contents($stt_token_google_cloud);
+$read_stt_token_google_cloud = file_get_contents($stt_token_google_cloud);
       } else {
-  		$read_stt_token_google_cloud = '';
+$read_stt_token_google_cloud = '';
   		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
       }
    if (file_exists($tts_token_google_cloud)) {
-  		$read_tts_token_google_cloud = file_get_contents($tts_token_google_cloud);
+$read_tts_token_google_cloud = file_get_contents($tts_token_google_cloud);
       } else {
-  		$read_tts_token_google_cloud = '';
+$read_tts_token_google_cloud = '';
   		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
       }
   ?>
@@ -1482,7 +1482,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                               </h4>
                               <div class="form-floating mb-3">
                                 <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_json_file_token" id="stt_ggcloud_json_file_token" style="height: 150px;">
-                                <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
+<?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
                                 </textarea>
                                 <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực:</label>
                               </div>
@@ -1519,9 +1519,9 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                 <label for="stt_ggcloud_rate">Thời gian chờ tối đa (giây):</label>
                               </div>
                               <div class="form-floating mb-3">
-                                <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_v2_json_file_token" id="stt_ggcloud_v2_json_file_token" style="height: 150px;">
-                                <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
-                                </textarea>
+<textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_v2_json_file_token" id="stt_ggcloud_v2_json_file_token" style="height: 150px;">
+<?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
+</textarea>
                                 <label for="stt_ggcloud_v2_json_file_token">Tệp tin json xác thực:</label>
                               </div>
                               <div class="form-floating mb-3">
@@ -1642,7 +1642,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                               </div>
                               <div class="form-check" >
                                 <input  class="form-check-input" type="radio" name="tts_select" id="tts_dev_customize" value="tts_dev_customize" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_dev_customize' ? 'checked' : ''; ?>>
-                                <label  class="form-check-label" for="tts_dev_customize">TTS DEV Customize <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code, chuyển văn bản thành giọng nói nếu chọn tts này, dữ liệu để các bạn code sẽ nằm trong tệp: <b>Dev_TTS.py</b><br/>- Cần thêm kích hoạt bên dưới để sử dụng vào chương trình')"></i></label>
+                                <label  class="form-check-label" for="tts_dev_customize">TTS DEV Customize: Dev_TTS.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code, chuyển văn bản thành giọng nói nếu chọn tts này, dữ liệu để các bạn code sẽ nằm trong tệp: <b>Dev_TTS.py</b><br/>- Cần thêm kích hoạt bên dưới để sử dụng vào chương trình')"></i></label>
                                 <div class="form-switch">
                                   <label class="form-label" for="tts_dev_customize_active">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Nếu Dùng TTS DEV Custom bạn cần phải kích hoạt để được khởi tạo dữ liệu khi chạy chương trình')"></i></label>
                                   <input class="form-check-input" type="checkbox" name="tts_dev_customize_active" id="tts_dev_customize_active" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] ? 'checked' : ''; ?>>
@@ -1721,9 +1721,9 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                 <label for="tts_gcloud_speaking_speed" class="form-label">Tốc độ đọc:</label>	
                               </div>
                               <div class="form-floating mb-3">
-                                <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="tts_ggcloud_json_file_token" id="tts_ggcloud_json_file_token" style="height: 150px;">
-                                <?php echo htmlspecialchars(trim($read_tts_token_google_cloud)); ?>
-                                </textarea>
+<textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="tts_ggcloud_json_file_token" id="tts_ggcloud_json_file_token" style="height: 150px;">
+<?php echo htmlspecialchars(trim($read_tts_token_google_cloud)); ?>
+</textarea>
                                 <label for="tts_ggcloud_json_file_token">Tệp tin json xác thực:</label>
                               </div>
                               <div class="form-floating mb-3">
@@ -2094,7 +2094,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                           <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>WS281x</option>
                           <option value="apa102" <?php echo $Config['smart_config']['led']['led_type'] === 'apa102' ? 'selected' : ''; ?>>APA102</option>
                           <option value="ReSpeaker_Mic_Array_v2.0" <?php echo $Config['smart_config']['led']['led_type'] === 'ReSpeaker_Mic_Array_v2.0' ? 'selected' : ''; ?>>ReSpeaker Mic Array v2.0</option>
-                          <option value="dev_custom_led" <?php echo $Config['smart_config']['led']['led_type'] === 'dev_custom_led' ? 'selected' : ''; ?>>DEV Custom Led (Người dùng tự code)</option>
+                          <option value="dev_custom_led" <?php echo $Config['smart_config']['led']['led_type'] === 'dev_custom_led' ? 'selected' : ''; ?>>DEV Custom Led: Dev_Led.py (Người dùng tự code)</option>
                         </select>
                       </div>
                     </div>
@@ -2402,26 +2402,16 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                               <?php
                                 // so sánh file đánh dấu checked
                                 $LCD_I2C_Font_TTF = $Config['display_screen']['lcd_i2c']['font_ttf'];
-                                
-                                // Mở thư mục
                                 if ($handle_font = opendir($VBot_Offline.'resource/screen_disp/font')) {
-                                    // Khởi tạo mảng lưu trữ các tệp âm thanh
                                     $font_file = [];
-                                
-                                    // Đọc các tệp trong thư mục
                                     while (false !== ($entry_font = readdir($handle_font))) {
-                                        // Lấy phần mở rộng của tệp
                                         $file_parts = pathinfo($entry_font);
                                         $extension_font = isset($file_parts['extension']) ? strtolower($file_parts['extension']) : '';
-                                
-                                        // Kiểm tra xem tệp có phải là tệp âm thanh hợp lệ không
                                         if (in_array($extension_font, ['ttf', 'otf'])) {
                                             $font_file[] = $entry_font;
                                         }
                                     }
-                                    // Đóng thư mục
                                     closedir($handle_font);
-                                    // Hiển thị các tệp âm thanh dưới dạng thẻ <select>
                                     echo '<select name="lcd_i2c_font_ttf" id="lcd_i2c_font_ttf" class="form-select border-success">';
                                     foreach ($font_file as $file_font) {
                                 		 $selected_font = ($LCD_I2C_Font_TTF === 'resource/screen_disp/font/'.$file_font) ? ' selected' : ''; 
@@ -2429,7 +2419,6 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                     }
                                     echo '</select>';
                                 } else {
-                                    //echo 'Không thể mở thư mục welcome';
                                 	echo "<script>showMessagePHP('Không thể mở thư mục resource/screen_disp/font');</script>";
                                 }
                                 ?>
@@ -2469,28 +2458,17 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                           <div class="col-sm-9">
                             <div class="input-group">
                               <?php
-                                // so sánh file đánh dấu checked
                                 $Audio_welcome_file = $Config['smart_config']['smart_wakeup']['sound']['welcome']['welcome_file'];
-                                
-                                // Mở thư mục
                                 if ($handle = opendir($VBot_Offline.'resource/sound/welcome')) {
-                                    // Khởi tạo mảng lưu trữ các tệp âm thanh
                                     $audio_files = [];
-                                
-                                    // Đọc các tệp trong thư mục
                                     while (false !== ($entry = readdir($handle))) {
-                                        // Lấy phần mở rộng của tệp
                                         $file_parts = pathinfo($entry);
                                         $extension = isset($file_parts['extension']) ? strtolower($file_parts['extension']) : '';
-                                
-                                        // Kiểm tra xem tệp có phải là tệp âm thanh hợp lệ không
                                         if (in_array($extension, $Allowed_Extensions_Audio)) {
                                             $audio_files[] = $entry;
                                         }
                                     }
-                                    // Đóng thư mục
                                     closedir($handle);
-                                    // Hiển thị các tệp âm thanh dưới dạng thẻ <select>
                                     echo '<select name="sound_welcome_file_path" id="sound_welcome_file_path" class="form-select border-success">';
                                     foreach ($audio_files as $file) {
                                 		 $selected = ($Audio_welcome_file === 'resource/sound/welcome/'.$file) ? ' selected' : ''; 
@@ -2498,7 +2476,6 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                                     }
                                     echo '</select>';
                                 } else {
-                                    //echo 'Không thể mở thư mục welcome';
                                 	echo "<script>showMessagePHP('Không thể mở thư mục welcome');</script>";
                                 }
                                 ?>
@@ -2934,7 +2911,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
 							"chat_gpt" => "Chat GPT",
 							"zalo_assistant" => "Zalo AI Assistant",
 							"dify_ai" => "Dify AI Assistant",
-							"customize_developer_assistant" => "DEV Custom Assistant (Người Dùng Tự Code)"
+							"customize_developer_assistant" => "DEV Custom Assistant: Dev_Assistant.py (Người Dùng Tự Code)"
 						];
 						for ($i = 0; $i < 7; $i++) {
 							$label = "Top " . ($i + 1);
@@ -3210,7 +3187,7 @@ if (isset($_POST['save_config_wakeup_reply'])) {
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_assistant" aria-expanded="false" aria-controls="collapse_button_custom_assistant">
-                          Trợ Lý DEV Assistant (Custom Assistant, Người dùng tự code) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
+                          Trợ Lý DEV Assistant: Dev_Assistant.py (Custom Assistant, Người dùng tự code) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
                         </h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
@@ -3228,11 +3205,11 @@ if (isset($_POST['save_config_wakeup_reply'])) {
               <div class="card accordion" id="accordion_button_collapse_button_developer_customization">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" title="chế độ tùy chỉnh cho các lập trình viên, DEV" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_developer_customization" aria-expanded="false" aria-controls="collapse_button_developer_customization">
-                    DEV Customization (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> :
+                    DEV Customization: Dev_Customization.py (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> :
                   </h5>
                   <div id="collapse_button_developer_customization" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_developer_customization">
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Chế độ DEV (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ để vào và sử dụng chế độ Custom Skill cho các bạn Dev thoải mái xử lý dữ liệu lập trình và tùy biến')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Chế độ DEV: Dev_Customization.py (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ để vào và sử dụng chế độ Custom Skill cho các bạn Dev thoải mái xử lý dữ liệu lập trình và tùy biến')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input" type="checkbox" name="developer_customization_active" id="developer_customization_active" <?php echo $Config['developer_customization']['active'] ? 'checked' : ''; ?>>
