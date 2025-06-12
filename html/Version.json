@@ -1,8 +1,8 @@
 {
-    "version": "1.0.38",
+    "version": "1.0.39",
     "projectName": "WebUI VBot Offline",
     "description": "Cập Nhật Chức Năng Phát Câu Phản Hồi Khi Được Đánh Thức (Thay cho âm thanh DING)",
-    "releaseDate": "20/05/2025-1",
+    "releaseDate": "12/06/2025",
     "changes": [
         {
             "type": "feature",

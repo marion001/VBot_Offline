@@ -3218,9 +3218,9 @@ $read_tts_token_google_cloud = '';
                     </div>
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Nếu Custom Skill không thể xử lý:</h5>
+                        <h5 class="card-title">Nếu Custom Skill: Dev_Customization.py không thể xử lý:</h5>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Sử dụng Vbot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng Vbot xử lý dữ liệu khi mà Custom Skill không xử lý được')"></i> :</label>
+                          <label class="col-sm-3 col-form-label">Tiếp tục sử dụng Vbot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng Vbot xử lý dữ liệu khi mà Custom Skill không xử lý được')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input class="form-check-input" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" <?php echo $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] ? 'checked' : ''; ?>>
@@ -3247,7 +3247,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="schedule_data_json_file" class="col-sm-3 col-form-label">Tệp Dữ Liệu Cấu Hình:</label>
+                      <label for="schedule_data_json_file" class="col-sm-3 col-form-label">Tệp Lưu Trữ Dữ Liệu Cấu Hình:</label>
                       <div class="col-sm-9">
                         <input readonly class="form-control border-danger" type="text" name="schedule_data_json_file" id="schedule_data_json_file" placeholder="<?php echo $Config['schedule']['data_json_file']; ?>" value="<?php echo $Config['schedule']['data_json_file']; ?>">
                       </div>
