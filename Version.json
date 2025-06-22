@@ -1,8 +1,8 @@
 {
-    "version": "1.0.39",
+    "version": "1.0.40",
     "projectName": "Program VBot Offline",
-    "description": "Tối ưu hóa luồng dữ liệu nút nhấn",
-    "releaseDate": "31/05/2025-1",
+    "description": "Đã sửa tất cả các lỗi, và mang tới cho các bạn thêm vài lỗi nữa",
+    "releaseDate": "22/06/2025",
     "changes": [
         {
             "type": "feature",
