@@ -36,7 +36,9 @@
         "bài",
         "mở",
         "bật",
-        "hát"
+        "hát",
+		"ở",
+		"trên"
     ],
     "increase": [
         "tăng"
@@ -98,5 +100,14 @@
 		"tới loa",
 		"đến loa",
 		"ở loa"
+	],
+	"youtube": [
+		"youtube",
+		"du tút"
+	],
+	"zing_mp3": [
+		"zing mp3",
+		"zingmp3",
+		"zing"
 	]
 }

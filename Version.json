@@ -1,8 +1,8 @@
 {
-    "version": "1.0.40",
+    "version": "1.0.41",
     "projectName": "Program VBot Offline",
-    "description": "Đã sửa tất cả các lỗi, và mang tới cho các bạn thêm vài lỗi nữa",
-    "releaseDate": "22/06/2025",
+    "description": "Loại bỏ giới hạn tốc độ xử lý. Hỗ trợ ra lệnh phát nhạc, bài hát, nếu câu lệnh có kèm từ khóa chứa nguồn tìm kiếm như: Zing, Youtube, nội bộ",
+    "releaseDate": "22/06/2025-1",
     "changes": [
         {
             "type": "feature",

@@ -74,10 +74,14 @@ def LED_LOADING():
     #Màu xanh lá cây
     BASE_COLOR = Color(0, 255, 0)
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
-    while Lib.led_effect_active and Lib.current_led_effect == "LOADING":
+    while Lib.led_effect_active:
+        if Lib.current_led_effect != "LOADING":
+            break
         strip.setBrightness(LED_BRIGHTNESS)
         #Chia số lượng led thành 2 nửa
         for j in range(num_pixels // 2):
+            if Lib.current_led_effect != "LOADING":
+                break
             #Đặt toàn bộ LED Tắt
             for i in range(num_pixels):
                 strip.setPixelColor(i, Color(0, 0, 0))
@@ -110,7 +114,9 @@ def LED_THINK(color_hex=Lib.config['smart_config']['led']['effect']['led_think']
     #Chuyển đổi màu từ HEX trong Config.json sang số nguyên
     base_color = int('0x' + color_hex, 16)
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
-    while Lib.led_effect_active and Lib.current_led_effect == "THINK":
+    while Lib.led_effect_active:
+        if Lib.current_led_effect != "THINK":
+            break
         # Hiệu ứng sáng dần
         for brightness in range(0, 256, 5):  
             strip.setBrightness(brightness)
@@ -139,9 +145,13 @@ def LED_MUTE(color_hex=Lib.config['smart_config']['led']['effect']['led_mute']):
     global Lib
     Lib.led_effect_active = True
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
-    while Lib.led_effect_active and Lib.current_led_effect == "MUTE":
+    while Lib.led_effect_active:
+        if Lib.current_led_effect != "MUTE":
+            break
         strip.setBrightness(LED_BRIGHTNESS)
         for i in range(strip.numPixels()):
+            if Lib.current_led_effect != "MUTE":
+                break
             strip.setPixelColor(i, int('0x' + color_hex, 16))
         strip.show()
         Lib.time.sleep(2)
@@ -157,7 +167,9 @@ def LED_ERROR():
     global Lib
     Lib.led_effect_active = True
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
-    while Lib.led_effect_active and Lib.current_led_effect == "ERROR":
+    while Lib.led_effect_active:
+        if Lib.current_led_effect != "ERROR":
+            break
         strip.setBrightness(LED_BRIGHTNESS)
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, Color(255, 0, 0))
@@ -205,15 +217,21 @@ def LED_PAUSE():
         if i == 5: r, g, b = v, p, q
         return int(r * 255), int(g * 255), int(b * 255)
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
-    while Lib.led_effect_active and Lib.current_led_effect == "PAUSE":
+    while Lib.led_effect_active:
+        if Lib.current_led_effect != "PAUSE":
+            break
         strip.setBrightness(LED_BRIGHTNESS)
         hue = Lib.random.randint(0, 360)
         for brightness in range(0, 256, 5):
+            if Lib.current_led_effect != "PAUSE":
+                break
             set_strip_color_brightness(hue, brightness)
             Lib.time.sleep(0.09)
             if not Lib.led_effect_active:
                 break
         for brightness in range(255, -1, -5):
+            if Lib.current_led_effect != "PAUSE":
+                break
             set_strip_color_brightness(hue, brightness)
             Lib.time.sleep(0.09)
             if not Lib.led_effect_active:
@@ -235,10 +253,14 @@ def LED_SPEAK():
     #Màu Xanh lá Cây
     BASE_COLOR = Color(0, 255, 0)
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
-    while Lib.led_effect_active and Lib.current_led_effect == "SPEAK":
+    while Lib.led_effect_active:
+        if Lib.current_led_effect != "SPEAK":
+            break
         strip.setBrightness(LED_BRIGHTNESS)
         #Sử Dụng reversed QUAY NGƯỢC LẠI hiệu ứng LOADING
-        for j in reversed(range(num_pixels // 2)):  
+        for j in reversed(range(num_pixels // 2)):
+            if Lib.current_led_effect != "SPEAK":
+                break
             # Tắt toàn bộ LED
             for i in range(num_pixels):
                 strip.setPixelColor(i, Color(0, 0, 0))
@@ -280,7 +302,11 @@ def LED_STARTUP():
     ]
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
     while Lib.led_effect_active and Lib.current_led_effect == "STARTUP":
+        if Lib.current_led_effect != "STARTUP":
+            break
         for color in colors:
+            if Lib.current_led_effect != "STARTUP":
+                break
             #Chia số lượng đèn LED Làm 2 nửa
             for i in range(num_pixels // 2):
                 #Nửa Phải
@@ -343,7 +369,7 @@ def LED_VOLUME(volume_change):
 #Chạy thử: $:> python3 Dev_Led.py
 """
 try:
-    #Ví dụ hiệu ứng LED Volume
+    #Ví dụ hiệu ứng LED STARTUP
     Lib.led_effect_active = True
     Lib.current_led_effect = "STARTUP"
     LED_STARTUP()
