@@ -294,6 +294,15 @@ function processLocalData(data_media_local) {
     }
     if (!data_media_local || data_media_local.length === 0) {
         show_message('<p>Không có dữ liệu bài hát Local</p>');
+        fileListDiv.innerHTML = '';
+        if (!document.getElementById('upload_Music_Local')) {
+            fileListDiv.innerHTML = '<form enctype="multipart/form-data" method="POST" action="">' +
+                '<div class="input-group">' +
+                '<input class="form-control border-success" type="file" id="upload_Music_Local" multiple="">' +
+                '<button class="btn btn-success border-success" type="button" onclick="upload_File(\'upload_Music_Local\')">Tải Lên</button>' +
+                '<button type="button" class="btn btn-primary border-success" onclick="media_player_search(\'Local\')" title="Tải lại dữ liệu bài hát trong thư mục Local"><i class="bi bi-arrow-repeat"></i></button></div></form>' +
+				'<br/><center><p class="text-danger">Không có dữ liệu bài hát nào trong thư mục Nội Bộ (Local)</p></center>';
+		}
     } else {
         fileListDiv.innerHTML = '';
         if (!document.getElementById('upload_Music_Local')) {
