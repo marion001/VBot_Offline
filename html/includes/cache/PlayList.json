@@ -3,15 +3,15 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "5CFE20",
-            "title": "CÔ GÁI À EM ĐỪNG KHÓC ( BẢN CHUẨN TIK TOK ) - THAZH X ĐÔNG REMIX || NHẠC HOT TREND TIK TOK 2025",
-            "cover": "https://i.ytimg.com/vi/1YJV1HuCOxY/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=1YJV1HuCOxY",
-            "duration": null,
-            "description": "Title: CÔ GÁI À EM ĐỪNG KHÓC ( BẢN CHUẨN TIK TOK ) - THAZH X ĐÔNG REMI...",
-            "source": "Youtube",
-            "id": "1YJV1HuCOxY",
-            "channelTitle": "PĐT MUSIC ",
+            "ids_list": "DB21F0",
+            "title": "em lÀ cÔ giÁo vÙng cao remix  dj ĐẠt di  nhẠc hot tiktok 2025.mp3",
+            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/em lÀ cÔ giÁo vÙng cao remix  dj ĐẠt di  nhẠc hot tiktok 2025.mp3",
+            "duration": "4.16 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/em lÀ cÔ giÁo vÙng cao remix  dj ĐẠt di  nhẠc hot tiktok 2025.mp3",
+            "channelTitle": null,
             "artist": null
         }
     ]
