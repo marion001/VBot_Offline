@@ -1,8 +1,8 @@
 {
-    "version": "1.0.41",
+    "version": "1.0.42",
     "projectName": "Program VBot Offline",
-    "description": "Loại bỏ giới hạn tốc độ xử lý. Hỗ trợ ra lệnh phát nhạc, bài hát, nếu câu lệnh có kèm từ khóa chứa nguồn tìm kiếm như: Zing, Youtube, nội bộ",
-    "releaseDate": "22/06/2025-1",
+    "description": "Sửa lỗi tự phát nhạc khi đang được tạm dừng để đánh thức",
+    "releaseDate": "24/06/2025",
     "changes": [
         {
             "type": "feature",
