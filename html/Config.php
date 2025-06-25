@@ -181,6 +181,10 @@
   #Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
   $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['conversation_mode']) ? true : false;
   
+  #Cập nhật chế độ đa lệnh trong 1 câu
+  $Config['multiple_command']['active'] = isset($_POST['multiple_command']) ? true : false;
+  $Config['multiple_command']['continue_listening_after_commands'] = isset($_POST['continue_listening_after_commands']) ? true : false;
+  
   #CẬP NHẬT CHẾ ĐỘ Hotword Engine Picovoice KEY hotword_engine:
   $Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotword_engine_key'];
   $Config['smart_config']['smart_wakeup']['hotword']['lang'] = $_POST['select_hotword_lang'];
@@ -3782,6 +3786,31 @@ $read_tts_token_google_cloud = '';
                   </div>
                 </div>
               </div>
+
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Chế Độ Xử Lý Đa Lệnh Trong 1 Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh trong 1 câu: <b>và, sau đó, rồi</b> trong file: <b>Adverbs.json</b>')"></i> :</h5>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích hoạt chế độ xử lý đa lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ đa lệnh trong 1 câu')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input" type="checkbox" name="multiple_command" id="multiple_command" <?php echo $Config['multiple_command']['active'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Tiếp tục được đánh thức, lắng nghe khi xử lý xong đa lệnh: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để tự động được đánh thức và lắng nghe câu lệnh tiếp theo, khi xử lý xong đa lệnh trong 1 câu<br/> - Yêu cầu Chế Độ Hội Thoại phải được kích hoạt để sử dụng')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input" type="checkbox" name="continue_listening_after_commands" id="continue_listening_after_commands" <?php echo $Config['multiple_command']['continue_listening_after_commands'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+
               <div class="card">
                 <div class="card-body">
                   <h5 class="card-title">Đọc thông tin khi khởi động:</h5>

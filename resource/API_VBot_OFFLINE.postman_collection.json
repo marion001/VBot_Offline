@@ -1466,6 +1466,118 @@
 			"response": []
 		},
 		{
+			"name": "Kích Hoạt Trợ Lý Ảo Olli AI Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"olli\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Trợ Lý Ảo Olli AI Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"olli\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kích Hoạt Trợ Lý Ảo DEV Custom Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_assistant\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Trợ Lý Ảo DEV Custom Assistant Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_assistant\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Kích Hoạt Chế Độ Câu Phản Hồi",
 			"request": {
 				"method": "POST",
@@ -1508,13 +1620,125 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.194:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kích Hoạt Chế Độ Đa Lệnh Trong 1 Câu Lệnh",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"multiple_command\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Chế Độ Đa Lệnh Trong 1 Câu Lệnh Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"multiple_command\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Kích Hoạt Tiếp Tục Được Đánh Thức, Lắng Nghe Khi Xử Lý Xong Đa Lệnh",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"continue_listening_after_commands\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Tiếp Tục Được Đánh Thức, Lắng Nghe Khi Xử Lý Xong Đa Lệnh",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"continue_listening_after_commands\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.194:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"194"
 					],
 					"port": "5002"
 				}

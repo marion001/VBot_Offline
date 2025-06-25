@@ -3,16 +3,16 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "DB21F0",
-            "title": "em lÀ cÔ giÁo vÙng cao remix  dj ĐẠt di  nhẠc hot tiktok 2025.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/em lÀ cÔ giÁo vÙng cao remix  dj ĐẠt di  nhẠc hot tiktok 2025.mp3",
-            "duration": "4.16 MB",
+            "ids_list": "E6F9E0",
+            "title": "Cô Gái À Em Đừng Khóc Nữa (TTM Remix)",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/1/9/2/f/192fd6d0a04174619f3b9986f71db987.jpg",
+            "audio": "Z8O7E89F",
+            "duration": "03:38",
             "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/em lÀ cÔ giÁo vÙng cao remix  dj ĐẠt di  nhẠc hot tiktok 2025.mp3",
+            "source": "ZingMP3",
+            "id": "Z8O7E89F",
             "channelTitle": null,
-            "artist": null
+            "artist": "Oanh Tạ"
         }
     ]
 }

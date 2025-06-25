@@ -361,7 +361,7 @@
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
-                      <b><font color="green">Cache lại kết quả TTS</font></b>
+                      <b><font color="green">Cache lại kết quả TTS <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ sử dụng lại dữ liệu cache, dữ liệu trước đó để sử dụng nhằm làm tăng tốc độ và tối ưu quá trình xử lý dữ liệu')"></i></font></b>
                     </div>
                   </div>
                   <div class="activity-item d-flex">
@@ -370,7 +370,7 @@
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
-                      <b><font color="green">Mic, Microphone</font></b>
+                      <b><font color="green">Mic, Microphone <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Mic tạm thời')"></i></font></b>
                     </div>
                   </div>
                   <div class="activity-item d-flex">
@@ -388,7 +388,7 @@
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
-                      <b><font color="green">Đánh thức, Wake up</font></b>
+                      <b><font color="green"><i class="bi bi-play-circle"></i> Đánh thức, Wake up</font></b>
                     </div>
                   </div>
                   <div class="activity-item d-flex">
@@ -397,7 +397,16 @@
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
-                      <b><font color="green"> Bật, Tắt Chế độ câu phản hồi</font></b>
+                      <b><font color="green"> Bật, Tắt Chế độ câu phản hồi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được đánh thức bằng giọng nói, hệ thống sẽ phản hồi lại bằng file âm thanh sau đó tiếp tục nghe lệnh từ người dùng')"></i></font></b>
+                    </div>
+                  </div>
+                  <div class="activity-item d-flex">
+                    <div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="multiple_command_active" id="multiple_command_active" onclick="change_to_another_mode('multiple_command', this.checked)" <?php echo $Config['multiple_command']['active'] ? 'checked' : ''; ?>>
+                    </div>
+                    <i class="bi bi-dash-lg"></i>
+                    <div class="activity-content">
+                      <b><font color="green"> Bật, Tắt Chế độ xử lý đa câu lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh trong 1 câu: <b>và, sau đó, rồi</b> trong file: <b>Adverbs.json</b>')"></i></font></b>
                     </div>
                   </div>
                 </div>
@@ -477,6 +486,21 @@
                           Dify AI
                           </label>
                         </div>
+						
+                        <div class="form-check">
+                          <input class="form-check-input" value="olli_active" type="checkbox" name="olli_active" id="olli_active" onclick="change_to_another_mode('olli', this.checked)" <?php if ($Config['virtual_assistant']['olli']['active'] === true) echo "checked"; ?>>
+                          <label class="form-check-label">
+                          Olli AI Assistant
+                          </label>
+                        </div>
+
+                        <div class="form-check">
+                          <input class="form-check-input" value="dev_custom_assistant_active" type="checkbox" name="dev_custom_assistant_active" id="dev_custom_assistant_active" onclick="change_to_another_mode('dev_custom_assistant', this.checked)" <?php if ($Config['virtual_assistant']['customize_developer_assistant']['active'] === true) echo "checked"; ?>>
+                          <label class="form-check-label">
+                          DEV Custom Assistant (Dev_Assistant.py)
+                          </label>
+                        </div>
+
                       </div>
                     </li>
                     <li>
@@ -934,6 +958,7 @@
                       // Cập nhật các phần tử khác
                       document.getElementById('show_conversation_mode').checked = data.conversation_mode ? true : false;
                       document.getElementById('show_wakeup_reply').checked = data.wakeup_reply ? true : false;
+                      document.getElementById('multiple_command_active').checked = data.multiple_command_active ? true : false;
                       document.getElementById('show_mic_on_off').checked = data.mic_on_off ? true : false;
                       document.getElementById('on_off_display_logs').checked = data.log_display_active ? true : false;
                       document.getElementById('mqtt_show_logs_reconnect').checked = data.mqtt_show_logs_reconnect ? true : false;
@@ -953,6 +978,8 @@
                       document.getElementById('chat_gpt_active').checked = data.chat_gpt_active ? true : false;
                       document.getElementById('zalo_assistant_active').checked = data.zalo_assistant_active ? true : false;
                       document.getElementById('dify_ai_active').checked = data.dify_ai_active ? true : false;
+                      document.getElementById('olli_active').checked = data.olli_assistant_active ? true : false;
+                      document.getElementById('dev_custom_assistant_active').checked = data.dev_custom_assistant ? true : false;
                       document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
                       document.getElementById('developer_customization_vbot_processing').checked = data.dev_custom_vbot ? true : false;
                       //document.getElementById('show_wake_up').checked = false;

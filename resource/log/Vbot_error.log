@@ -1,0 +1,8 @@
+[21:53:28 24-06-2025] Có Lỗi Xảy Ra: name 'split_commands' is not defined
+[21:53:29 24-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[21:56:03 24-06-2025] Có Lỗi Xảy Ra: name 're' is not defined
+[21:56:03 24-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[22:37:48 24-06-2025] Có Lỗi Xảy Ra: 'MediaPlayer' object has no attribute 'Pause_Media'
+[22:37:48 24-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:53:05 24-06-2025] Có Lỗi Xảy Ra: name 'string' is not defined
+[23:53:05 24-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.

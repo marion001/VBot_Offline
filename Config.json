@@ -270,7 +270,7 @@
         ],
         "podcast": {
             "active": true,
-			"allows_priority_use_of_virtual_assistants": false,
+            "allows_priority_use_of_virtual_assistants": false,
             "time_out": 7,
             "device_session_id": "917A4B51",
             "voice_name": "vn_north",
@@ -315,6 +315,10 @@
             "vbot_processing": false
         },
         "notes": "Chế độ Custom Skill, tùy chỉnh cho các bạn dev, lập trình viện tự code"
+    },
+    "multiple_command": {
+        "active": true,
+        "continue_listening_after_commands": true
     },
     "smart_config": {
         "backlist_file_name": "BackList.json",
@@ -735,7 +739,7 @@
                     "verify_token.json",
                     "VBot_Devices_Network.json",
                     "Data_VBot_Client.json",
-					"PlayList_Local.json",
+                    "PlayList_Local.json",
                     "__pycache__"
                 ]
             }

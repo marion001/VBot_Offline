@@ -1,8 +1,8 @@
 {
-    "version": "1.0.41",
+    "version": "1.0.43",
     "projectName": "WebUI VBot Offline",
-    "description": "Loại bỏ giới hạn tốc độ xử lý chương trình, Hỗ trợ ra lệnh phát nhạc, bài hát, nếu câu lệnh có kèm từ khóa chứa nguồn tìm kiếm như: Zing, Zing MP3, Youtube, nội bộ",
-    "releaseDate": "22/06/2025-1",
+    "description": "Hỗ trợ xử lý đa lệnh trong cùng 1 câu lệnh",
+    "releaseDate": "25/06/2025",
     "changes": [
         {
             "type": "feature",
