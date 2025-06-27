@@ -971,7 +971,7 @@ $read_tts_token_google_cloud = '';
       <div class="card accordion" id="accordion_button_streaming_server_audio">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
-      Streming Audio Server <i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
+      Streming Audio Server <font color=red> (Vbot Client, Client - Server) </font><i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
       <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
 
                     <div class="row mb-3">
@@ -1098,6 +1098,16 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
 
+					<div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Flash Firmware URL:</label>
+                      <div class="col-sm-9">
+                        <div class="input-group mb-3">
+                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot_Client_Offline" title="https://github.com/marion001/VBot_Client_Offline" value="https://github.com/marion001/VBot_Client_Offline">
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Client_Offline" target="_blank">Truy Cập</a></button>
+                        </div>
+                      </div>
+                    </div>
+
 			  </div>
 			  </div>
 			  </div>
@@ -1105,7 +1115,7 @@ $read_tts_token_google_cloud = '';
 				  <div class="card accordion" id="accordion_button_socket_server_socket">
 				  <div class="card-body">
 				  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_socket" aria-expanded="false" aria-controls="collapse_button_socket_server_socket">
-				  Chế Độ Kết Nối Socket <i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
+				  Chế Độ Kết Nối Socket <font color=red> (Đang Phát Triển) </font> <i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
 				  <div id="collapse_button_socket_server_socket" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_socket">
 
 					<div class="row mb-3">
@@ -1170,7 +1180,7 @@ $read_tts_token_google_cloud = '';
 					  </div>
                       </div>
                     </div>
-					
+
 				  </div>
 				  </div>
 				  </div>
@@ -1230,7 +1240,7 @@ $read_tts_token_google_cloud = '';
       </div>
       </div>
       </div>
-			  
+
               <div class="card accordion" id="accordion_button_volume_setting">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
@@ -1322,7 +1332,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_hotword_engine">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_hotword_engine" aria-expanded="false" aria-controls="collapse_button_hotword_engine">
-                    Cấu Hình Hotword Engine: Picovoice/Snowboy :
+                    Cấu Hình WakeUP Hotword Engine (Từ Đánh Thức) Picovoice/Snowboy:
                   </h5>
                   <div id="collapse_button_hotword_engine" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_hotword_engine" style="">
                     <div class="card">
@@ -1898,7 +1908,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_homeassistant">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_homeassistant" aria-expanded="false" aria-controls="collapse_button_setting_homeassistant">
-                    Cấu Hình Home Assistant:
+                    Cấu Hình Home Assistant (HASS):
                   </h5>
                   <div id="collapse_button_setting_homeassistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_homeassistant">
                     <div class="row mb-3">
@@ -1918,7 +1928,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="hass_long_token" class="col-sm-3 col-form-label" title="Mã token của nhà thông minh Home Assistant">Mã Token:</label>
+                      <label for="hass_long_token" class="col-sm-3 col-form-label" title="Mã token của nhà thông minh Home Assistant">Mã Token (Long Token):</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="text" name="hass_long_token" id="hass_long_token" title="Mã token của nhà thông minh Home Assistant" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>">
                         <div class="invalid-feedback">Cần nhập mã Token của nhà thông minh!</div>
@@ -1979,7 +1989,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_mqtt_tuyen">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_mqtt_tuyen" aria-expanded="false" aria-controls="collapse_button_mqtt_tuyen">
-                    Cấu Hình MQTT Broker:
+                    Cấu Hình Kết Nối MQTT Broker:
                   </h5>
                   <div id="collapse_button_mqtt_tuyen" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mqtt_tuyen">
                     <div class="row mb-3">

@@ -110,9 +110,24 @@
 		"zingmp3",
 		"zing"
 	],
+	"multi_command": [
+		"đa lệnh"
+	],
 	"split_keywords": [
 		"và",
 		"rồi",
 		"sau đó"
+	],
+	"action_command_together": [
+		"on",
+		"off",
+		"open",
+		"close",
+		"closed",
+		"enable",
+		"disable",
+		"script",
+		"check",
+		"setup"
 	]
 }

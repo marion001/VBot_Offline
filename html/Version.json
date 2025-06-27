@@ -2,7 +2,7 @@
     "version": "1.0.43",
     "projectName": "WebUI VBot Offline",
     "description": "Hỗ trợ xử lý đa lệnh trong cùng 1 câu lệnh",
-    "releaseDate": "25/06/2025",
+    "releaseDate": "27/06/2025",
     "changes": [
         {
             "type": "feature",

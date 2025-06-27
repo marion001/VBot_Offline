@@ -26,6 +26,14 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Thiết Lập Diy VBot Client Kết Nối Tới Loa VBot
       : https://github.com/marion001/VBot_Client_Offline
 
+- Hỗ Trợ Xử Lý Đa Lệnh Trong 1 Câu Lệnh:
+  
+          Ví Dụ Câu Lệnh:
+        - Bật đèn ngủ và tắt đèn bếp
+        - Bật đèn khòng khách và đèn phòng ngủ
+        - Tắt đèn bếp sau đó phát danh sách nhạc
+  
+
 - Thông Tin Đăng Nhập SSH:
 
         $:> user: pi
