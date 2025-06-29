@@ -3312,6 +3312,12 @@ if (file_exists($gemini_model_list_json_file)) {
                         <input readonly class="form-control border-danger" type="text" name="schedule_data_json_file" id="schedule_data_json_file" placeholder="<?php echo $Config['schedule']['data_json_file']; ?>" value="<?php echo $Config['schedule']['data_json_file']; ?>">
                       </div>
                     </div>
+                    <div class="row mb-3">
+                      <label for="schedule_audio_path" class="col-sm-3 col-form-label">Thư Mục Chứa Tệp Âm Thanh:</label>
+                      <div class="col-sm-9">
+                        <input readonly class="form-control border-danger" type="text" name="schedule_audio_path" id="schedule_audio_path" placeholder="<?php echo $Config['schedule']['audio_path']; ?>" value="<?php echo $Config['schedule']['audio_path']; ?>">
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
