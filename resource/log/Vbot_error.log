@@ -6,3 +6,19 @@
 [22:37:48 24-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
 [23:53:05 24-06-2025] Có Lỗi Xảy Ra: name 'string' is not defined
 [23:53:05 24-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[21:56:38 26-06-2025] Có Lỗi Xảy Ra: name 'action_verbs' is not defined
+[21:56:38 26-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[21:58:00 26-06-2025] Có Lỗi Xảy Ra: name 'action_verbs' is not defined
+[21:58:00 26-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:10:19 27-06-2025] Có Lỗi Xảy Ra: name 'datetime' is not defined
+[23:10:19 27-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:12:34 27-06-2025] Có Lỗi Xảy Ra: name 'timezone' is not defined
+[23:12:34 27-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:14:19 27-06-2025] Có Lỗi Xảy Ra: name 'API_KEY' is not defined
+[23:14:19 27-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:15:59 27-06-2025] Có Lỗi Xảy Ra: name 'command' is not defined
+[23:15:59 27-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:17:14 27-06-2025] Có Lỗi Xảy Ra: name 'new_time_notify' is not defined
+[23:17:14 27-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+[23:18:53 27-06-2025] Có Lỗi Xảy Ra: name 'new_time_notify' is not defined
+[23:18:54 27-06-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.

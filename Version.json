@@ -1,12 +1,12 @@
 {
-    "version": "1.0.43",
+    "version": "1.0.44",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ trợ xử lý đa lệnh trong cùng 1 câu lệnh",
-    "releaseDate": "27/06/2025",
+    "description": "Sửa lỗi sai thời gian khi lập lịch lời nhắc bằng giọng nói",
+    "releaseDate": "29/06/2025",
     "changes": [
         {
             "type": "feature",
-            "description": "chạy 2 lệnh sau cập nhật thư viện nmap: 'pip install python-nmap' và 'sudo apt-get install nmap -y'"
+            "description": "cài đặt bổ sung thư viện dùng cho gemini: 'pip install google-generativeai'"
         },
         {
             "type": "fix",

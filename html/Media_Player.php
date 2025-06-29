@@ -68,6 +68,9 @@
                     <p id="audio-source">Nguồn Media: <font color="blue">N/A</font></p>
                   </div>
                 </div>
+				  <div id="waveContainer_song_nhac" style="display: none; justify-content: center; align-items: center;">
+    <canvas id="waveCanvas_songNhac" height="70" style="width: 100%;"></canvas>
+  </div>
                 <div id="progress-container">
                   <input type="range" id="progress-bar" min="0" max="100" value="0" title="Kéo để tua khi đang phát nhạc">
                   <div id="time-info"><font color=red>00:00:00 / 00:00:00</font></div>
@@ -310,7 +313,7 @@
           fetch("<?php echo $URL_API_VBOT ?>?type=1&data=media_player")
               .then(response => {
                   if (!response.ok) {
-                      throw new Error(`HTTP error! status: ${response.status}`);
+                      throw new Error('HTTP error! status: ' + response.status);
                   }
                   return response.json();
               })
@@ -334,14 +337,22 @@
                           let timeInfo = document.getElementById('time-info');
                           timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(data.current_duration) + '</font> / ' + formatTime_Player(fullTime);
                       }
+					  if (data.audio_playing){
+						  updateDisplay_SongNhac(true);
+					  }else{
+						  updateDisplay_SongNhac(false);
+					  }
                   } else {
-      				document.getElementById('div_message_error').style.display = 'block';
-                      console.log('Lỗi khi lấy dữ liệu', data.message);
+						updateDisplay_SongNhac(false);
+						document.getElementById('div_message_error').style.display = 'block';
+						//console.log('Lỗi khi lấy dữ liệu', data.message);
+						document.getElementById('message_error').innerHTML = data.message;
                   }
               })
               .catch(error => {
-      			document.getElementById('div_message_error').style.display = 'block';
-      			document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: '+error;
+					updateDisplay_SongNhac(false);
+					document.getElementById('div_message_error').style.display = 'block';
+					document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: '+error;
               });
       }
       // Bắt đầu lấy dữ liệu mỗi giây
@@ -396,5 +407,73 @@
           xhr.send(data);
       }
     </script>
+  <script>
+	//Hiệu Ứng Sóng Nhạc Khi Phát Media Player
+    let currentStatus_SongNHAC = false;
+    let previousStatus_SongNHAC = null;
+    const canvas_SN = document.getElementById("waveCanvas_songNhac");
+    const ctx = canvas_SN.getContext("2d");
+    function resizeCanvas_SN() {
+      const container = document.getElementById("waveContainer_song_nhac");
+      canvas_SN.width = container.clientWidth || window.innerWidth;
+      canvas_SN.height = 70;
+    }
+    window.addEventListener("resize", resizeCanvas_SN);
+    resizeCanvas_SN();
+    let time_SongNhac = 0;
+    function drawWaves() {
+      resizeCanvas_SN();
+      const width = canvas_SN.width;
+      const height = canvas_SN.height;
+      ctx.clearRect(0, 0, width, height);
+      if (currentStatus_SongNHAC) {
+        document.getElementById("waveContainer_song_nhac").style.display = "flex";
+        let bassPulse_SN = Math.sin(time_SongNhac * 0.5) * 20 + 20;
+        // Sóng 1
+        ctx.beginPath();
+        const gradient1 = ctx.createLinearGradient(0, 0, 0, height);
+        gradient1.addColorStop(0, '#00f7ff');
+        gradient1.addColorStop(1, '#8a2be2');
+        ctx.strokeStyle = gradient1;
+        ctx.lineWidth = 2;
+        for (let x = 0; x < width; x++) {
+          const amplitude = Math.min(15 + bassPulse_SN, 30);
+          const y = height / 2 + Math.sin(x * 0.02 + time_SongNhac) * amplitude * Math.sin(time_SongNhac * 0.3);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        // Sóng 2
+        ctx.beginPath();
+        const gradient2 = ctx.createLinearGradient(0, 0, 0, height);
+        gradient2.addColorStop(0, '#ff00cc');
+        gradient2.addColorStop(1, '#ff4500');
+        ctx.strokeStyle = gradient2;
+        ctx.lineWidth = 2;
+        for (let x = 0; x < width; x++) {
+          const amplitude = Math.min(10 + bassPulse_SN, 30);
+          const y = height / 2 + Math.cos(x * 0.015 + time_SongNhac * 1.2) * amplitude * Math.cos(time_SongNhac * 0.4);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        time_SongNhac += 0.05;
+      } else {
+        document.getElementById("waveContainer_song_nhac").style.display = "none";
+      }
+      requestAnimationFrame(drawWaves);
+    }
+
+    function updateDisplay_SongNhac(status_SN) {
+      if (status_SN === previousStatus_SongNHAC) return;
+      previousStatus_SongNHAC = status_SN;
+      currentStatus_SongNHAC = status_SN;
+    }
+
+    // Khởi động vòng vẽ sóng
+    window.addEventListener("DOMContentLoaded", () => {
+      drawWaves();
+    });
+  </script>
   </body>
 </html>

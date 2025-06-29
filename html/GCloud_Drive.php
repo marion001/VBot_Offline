@@ -459,8 +459,8 @@
                         echo "<script>startCountdown(5);</script>"; 
                         echo '<button type="button" class="btn btn-info" onclick="reload_page()">Tải Lại</button>';
                     } else{
-                		echo "<p class='text-danger'>- Xảy ra Lỗi, Token không tồn tại khi được làm mới, Cần Phải Cấu Hình Lại Mã Ủy Quyền<br/><br/>";
-                		echo "Thông tin trả về:<br/>" .json_encode($newAccessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."</p>";
+                		echo "<div class='alert alert-danger' role='alert'>- Xảy ra Lỗi, Token không tồn tại khi được làm mới, Cần Phải Cấu Hình Lại Mã Ủy Quyền<br/><br/>";
+                		echo "Thông tin trả về:<br/>" .json_encode($newAccessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)."</div>";
                         $authUrl = $client->createAuthUrl();
                 		echo '<div class="row mb-3">
                                   <label for="auth_Url" class="col-sm-3 col-form-label">Truy Cập URL Sau Để Lấy Mã Xác Thực: </label>
@@ -484,7 +484,7 @@
                 	}
                 }
                  else {
-                		echo "<center><p class='card-title text-danger'>Cần Cấu Hình Để Lấy Mã Truy Cập Xác Thực Token</p></center>";
+                		echo "<div class='alert alert-danger' role='alert'>Cần Cấu Hình Để Lấy Mã Truy Cập Xác Thực Token</div>";
                         $authUrl = $client->createAuthUrl();
                 		echo '<div class="row mb-3">
                                   <label for="auth_Url" class="col-sm-3 col-form-label">Truy Cập URL Sau Để Lấy Mã Xác Thực: </label>

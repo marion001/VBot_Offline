@@ -330,6 +330,8 @@
   
   #cẬP NHẬT GIÁ TRỊ Trợ Lý Ảo/Assistant:
   $Config['virtual_assistant']['google_gemini']['api_key'] = $_POST['google_gemini_key'];
+  $Config['virtual_assistant']['google_gemini']['model_name'] = $_POST['gemini_models_name'];
+  $Config['virtual_assistant']['google_gemini']['api_version'] = $_POST['gemini_api_version'];
   $Config['virtual_assistant']['google_gemini']['active'] = isset($_POST['google_gemini_active']) ? true : false;
   $Config['virtual_assistant']['google_gemini']['time_out'] = intval($_POST['google_gemini_time_out']);
   
@@ -916,7 +918,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_API">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_API" aria-expanded="false" aria-controls="collapse_button_setting_API">
-                    Cấu Hình API:
+                    Cấu Hình API Vbot Server:
                   </h5>
                   <div id="collapse_button_setting_API" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_API">
                     <div class="row mb-3">
@@ -1423,7 +1425,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_stt">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_stt" aria-expanded="false" aria-controls="collapse_button_setting_stt">
-                    Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> &nbsp;:
+                    Chuyển Giọng Nói Thành Văn Bản - Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> &nbsp;:
                   </h5>
                   <div id="collapse_button_setting_stt" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_stt" style="">
                     <div class="row mb-3">
@@ -1579,7 +1581,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_tts">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_tts" aria-expanded="false" aria-controls="collapse_button_setting_tts">
-                    Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi kết quả từ văn bản thành giọng nói để phát ra loa')"></i> &nbsp;: 
+                    Chuyển Văn Bản Thành Giọng Nói - Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi kết quả từ văn bản thành giọng nói để phát ra loa')"></i> &nbsp;: 
                   </h5>
                   <div id="collapse_button_setting_tts" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_tts" style="">
                     <div class="row mb-3">
@@ -1908,7 +1910,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_homeassistant">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_homeassistant" aria-expanded="false" aria-controls="collapse_button_setting_homeassistant">
-                    Cấu Hình Home Assistant (HASS):
+                    Cấu Hình Kết Nối Tới Home Assistant (HASS):
                   </h5>
                   <div id="collapse_button_setting_homeassistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_homeassistant">
                     <div class="row mb-3">
@@ -2090,7 +2092,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_led">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_led" aria-expanded="false" aria-controls="collapse_button_setting_led">
-                    Cấu Hình Đèn Led:
+                    Cấu Hình Sử Dụng Đèn Led:
                   </h5>
                   <div id="collapse_button_setting_led" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_led">
                     <div class="row mb-3">
@@ -2177,7 +2179,7 @@ $read_tts_token_google_cloud = '';
       <div class="card accordion" id="accordion_button_multype_button_config">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
-      Cấu Hình Nút Nhấn:</h5>
+      Cấu Hình Sử Dụng Nút Nhấn:</h5>
       <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
       
 			  
@@ -2551,7 +2553,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_media_player">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
-                    Cấu Hình Media Player:
+                    Cấu Hình Phát Nhạc - Media Player:
                   </h5>
                   <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
                     <div class="card">
@@ -2909,7 +2911,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_virtual_assistant">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_virtual_assistant" aria-expanded="false" aria-controls="collapse_button_virtual_assistant">
-                    Trợ Lý Ảo/Assistant:
+                    Cấu Hình Trợ Lý Ảo/Assistant:
                   </h5>
                   <div id="collapse_button_virtual_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_virtual_assistant" style="">
                     <div class="card">
@@ -3094,6 +3096,54 @@ $read_tts_token_google_cloud = '';
                             </div>
                           </div>
                         </div>
+<?php
+$gemini_model_list_json_file = $HTML_VBot_Offline.'/includes/other_data/gemini_model_list.json';
+if (file_exists($gemini_model_list_json_file)) {
+    $data = json_decode(file_get_contents($gemini_model_list_json_file), true);
+    $selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-2.0-flash';
+    $selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
+    // Thẻ select model
+    if (isset($data["gemini_models"]) && is_array($data["gemini_models"])) {
+        echo '<div class="row mb-3"><label for="gemini_models_name" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
+        echo '<div class="col-sm-9"><select name="gemini_models_name" id="gemini_models_name" class="form-select border-danger" aria-label="Default select example">';
+        foreach ($data["gemini_models"] as $model) {
+            $selected = ($model == $selected_model) ? ' selected' : '';
+            echo '<option value="' . htmlspecialchars($model) . '"' . $selected . '>' . htmlspecialchars($model) . '</option>';
+        }
+        echo '</select></div></div>';
+    } else {
+		echo '<div class="row mb-3"><label for="gemini_models_name" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
+        echo '<div class="col-sm-9">';
+		echo '<input class="form-control border-danger" type="text" name="gemini_models_name" id="gemini_models_name" placeholder="'.$Config['virtual_assistant']['google_gemini']['model_name'].'" value="'.$Config['virtual_assistant']['google_gemini']['model_name'].'">';
+		echo '</div></div>';
+    }
+    // Thẻ select gemini_api_version
+    if (isset($data["gemini_api_version"]) && is_array($data["gemini_api_version"])) {
+        echo '<div class="row mb-3"><label for="gemini_api_version" class="col-sm-3 col-form-label">Phiên Bản API:</label>';
+        echo '<div class="col-sm-9"><select name="gemini_api_version" id="gemini_api_version" class="form-select border-danger" aria-label="Default select example">';
+        foreach ($data["gemini_api_version"] as $version) {
+            $selected = ($version == $selected_version) ? ' selected' : '';
+            echo '<option value="' . htmlspecialchars($version) . '"' . $selected . '>' . htmlspecialchars($version) . '</option>';
+        }
+        echo '</select></div></div>';
+    } else {
+		echo '<div class="row mb-3"><label for="gemini_api_version" class="col-sm-3 col-form-label">Phiên Bản API:</label>';
+        echo '<div class="col-sm-9">';
+		echo '<input class="form-control border-danger" type="text" name="gemini_api_version" id="gemini_api_version" placeholder="'.$Config['virtual_assistant']['google_gemini']['api_version'].'" value="'.$Config['virtual_assistant']['google_gemini']['api_version'].'">';
+		echo '</div></div>';
+    }
+} else {
+		#echo '<script>error_notify("Tệp Json không tồn tại hoặc Tệp bị lỗi: '.$gemini_model_list_json_file.'");</script>';
+		echo '<div class="row mb-3"><label for="gemini_models_name" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
+        echo '<div class="col-sm-9">';
+		echo '<input class="form-control border-danger" type="text" name="gemini_models_name" id="gemini_models_name" placeholder="'.$Config['virtual_assistant']['google_gemini']['model_name'].'" value="'.$Config['virtual_assistant']['google_gemini']['model_name'].'">';
+		echo '</div></div>';
+		echo '<div class="row mb-3"><label for="gemini_api_version" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
+        echo '<div class="col-sm-9">';
+		echo '<input class="form-control border-danger" type="text" name="gemini_api_version" id="gemini_api_version" placeholder="'.$Config['virtual_assistant']['google_gemini']['api_version'].'" value="'.$Config['virtual_assistant']['google_gemini']['api_version'].'">';
+		echo '</div></div>';
+}
+?>
                         <div class="row mb-3">
                           <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
                           <div class="col-sm-9">
@@ -3272,7 +3322,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_cap_nhat" aria-expanded="false" aria-controls="collapse_button_sao_luu_cap_nhat">
-                    Sao Lưu/Cập Nhật:
+                    Cấu Hình Cài Đặt: Sao Lưu/Cập Nhật:
                   </h5>
                   <div id="collapse_button_sao_luu_cap_nhat" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sao_luu_cap_nhat">
                     <div class="row mb-3">
@@ -3426,39 +3476,37 @@ $read_tts_token_google_cloud = '';
                               <div class="row mb-3">
                                 <label for="backup_upgrade_vbot_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control border-success" rows="5" name="backup_upgrade_vbot_exclude_files_folder" id="backup_upgrade_vbot_exclude_files_folder">
-                                    <?php
-                                      $excludeFilesFolder_Vbot_backup_upgrade = isset($Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder']) ? $Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder'] : [];
-                                          if (!empty($excludeFilesFolder_Vbot_backup_upgrade)) {
-                                              foreach ($excludeFilesFolder_Vbot_backup_upgrade as $index_exclude_files_folder => $item_exclude_files_folder) {
-                                                  echo htmlspecialchars($item_exclude_files_folder);
-                                                  // Không thêm xuống dòng cuối cùng sau phần tử cuối
-                                                  if ($index_exclude_files_folder < count($excludeFilesFolder_Vbot_backup_upgrade) - 1) {
-                                                      echo "\n";
-                                                  }
-                                              }
-                                          }
-                                      ?>
-                                    </textarea>
+<textarea class="form-control border-success" rows="5" name="backup_upgrade_vbot_exclude_files_folder" id="backup_upgrade_vbot_exclude_files_folder">
+<?php
+$excludeFilesFolder_Vbot_backup_upgrade = isset($Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder']) ? $Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder'] : [];
+if (!empty($excludeFilesFolder_Vbot_backup_upgrade)) {
+foreach ($excludeFilesFolder_Vbot_backup_upgrade as $index_exclude_files_folder => $item_exclude_files_folder) {
+echo htmlspecialchars($item_exclude_files_folder);
+// Không thêm xuống dòng cuối cùng sau phần tử cuối
+if ($index_exclude_files_folder < count($excludeFilesFolder_Vbot_backup_upgrade) - 1) {
+echo "\n";
+}
+}
+}
+?></textarea>
                                 </div>
                               </div>
                               <div class="row mb-3">
                                 <label for="backup_upgrade_vbot_exclude_file_format" class="col-sm-3 col-form-label">Bỏ qua định dạng tệp không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi định dạng tệp là 1 dòng, cần có dấu <b>.</b> ở trước định dạng tệp ví dụ: <b>.mp3</b> hoặc <b>.mp4</b>')"></i> :</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control border-success" rows="5" name="backup_upgrade_vbot_exclude_file_format" id="backup_upgrade_vbot_exclude_file_format">
-                                    <?php
-                                      $backup_upgrade_vbot_exclude_file = isset($Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format']) ? $Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] : [];
-                                          if (!empty($backup_upgrade_vbot_exclude_file)) {
-                                              foreach ($backup_upgrade_vbot_exclude_file as $index_exclude_file_format => $item_index_exclude_file_format) {
-                                                  echo htmlspecialchars($item_index_exclude_file_format);
-                                                  // Không thêm xuống dòng cuối cùng sau phần tử cuối
-                                                  if ($index_exclude_file_format < count($backup_upgrade_vbot_exclude_file) - 1) {
-                                                      echo "\n";
-                                                  }
-                                              }
-                                          }
-                                      ?>
-                                    </textarea>
+<textarea class="form-control border-success" rows="5" name="backup_upgrade_vbot_exclude_file_format" id="backup_upgrade_vbot_exclude_file_format">
+<?php
+$backup_upgrade_vbot_exclude_file = isset($Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format']) ? $Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] : [];
+if (!empty($backup_upgrade_vbot_exclude_file)) {
+foreach ($backup_upgrade_vbot_exclude_file as $index_exclude_file_format => $item_index_exclude_file_format) {
+echo htmlspecialchars($item_index_exclude_file_format);
+// Không thêm xuống dòng cuối cùng sau phần tử cuối
+if ($index_exclude_file_format < count($backup_upgrade_vbot_exclude_file) - 1) {
+echo "\n";
+}
+}
+}
+?></textarea>
                                 </div>
                               </div>
                               <center>
@@ -3486,20 +3534,19 @@ $read_tts_token_google_cloud = '';
                               <div class="row mb-3">
                                 <label for="vbot_program_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control border-success" rows="5" name="vbot_program_upgrade_keep_the_file_folder" id="vbot_program_upgrade_keep_the_file_folder">
-                                    <?php
-                                      $excludeFilesFolder_Vbot_upgrade = isset($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory']) ? $Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] : [];
-                                          if (!empty($excludeFilesFolder_Vbot_upgrade)) {
-                                              foreach ($excludeFilesFolder_Vbot_upgrade as $index_exclude_files_folder_Vbot_UPGRADE => $item_exclude_files_folder_VBot_upgrade) {
-                                                  echo htmlspecialchars($item_exclude_files_folder_VBot_upgrade);
-                                                  // Không thêm xuống dòng cuối cùng sau phần tử cuối
-                                                  if ($index_exclude_files_folder_Vbot_UPGRADE < count($excludeFilesFolder_Vbot_upgrade) - 1) {
-                                                      echo "\n";
-                                                  }
-                                              }
-                                          }
-                                      ?>
-                                    </textarea>
+<textarea class="form-control border-success" rows="5" name="vbot_program_upgrade_keep_the_file_folder" id="vbot_program_upgrade_keep_the_file_folder">
+<?php
+$excludeFilesFolder_Vbot_upgrade = isset($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory']) ? $Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] : [];
+if (!empty($excludeFilesFolder_Vbot_upgrade)) {
+foreach ($excludeFilesFolder_Vbot_upgrade as $index_exclude_files_folder_Vbot_UPGRADE => $item_exclude_files_folder_VBot_upgrade) {
+echo htmlspecialchars($item_exclude_files_folder_VBot_upgrade);
+// Không thêm xuống dòng cuối cùng sau phần tử cuối
+if ($index_exclude_files_folder_Vbot_UPGRADE < count($excludeFilesFolder_Vbot_upgrade) - 1) {
+echo "\n";
+}
+}
+}
+?></textarea>
                                 </div>
                               </div>
                             </div>
@@ -3539,39 +3586,37 @@ $read_tts_token_google_cloud = '';
                               <div class="row mb-3">
                                 <label for="backup_upgrade_web_interface_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control border-success" rows="5" name="backup_upgrade_web_interface_exclude_files_folder" id="backup_upgrade_web_interface_exclude_files_folder">
-                                    <?php
-                                      $excludeFilesFolder_Vbot_web_interface = isset($Config['backup_upgrade']['web_interface']['backup']['exclude_files_folder']) ? $Config['backup_upgrade']['web_interface']['backup']['exclude_files_folder'] : [];
-                                          if (!empty($excludeFilesFolder_Vbot_web_interface)) {
-                                              foreach ($excludeFilesFolder_Vbot_web_interface as $index_exclude_files_folder_web_interface => $item_exclude_files_folder_web_interface) {
-                                                  echo htmlspecialchars($item_exclude_files_folder_web_interface);
-                                                  // Không thêm xuống dòng cuối cùng sau phần tử cuối
-                                                  if ($index_exclude_files_folder_web_interface < count($excludeFilesFolder_Vbot_web_interface) - 1) {
-                                                      echo "\n";
-                                                  }
-                                              }
-                                          }
-                                      ?>
-                                    </textarea>
+<textarea class="form-control border-success" rows="5" name="backup_upgrade_web_interface_exclude_files_folder" id="backup_upgrade_web_interface_exclude_files_folder">
+<?php
+$excludeFilesFolder_Vbot_web_interface = isset($Config['backup_upgrade']['web_interface']['backup']['exclude_files_folder']) ? $Config['backup_upgrade']['web_interface']['backup']['exclude_files_folder'] : [];
+if (!empty($excludeFilesFolder_Vbot_web_interface)) {
+foreach ($excludeFilesFolder_Vbot_web_interface as $index_exclude_files_folder_web_interface => $item_exclude_files_folder_web_interface) {
+echo htmlspecialchars($item_exclude_files_folder_web_interface);
+// Không thêm xuống dòng cuối cùng sau phần tử cuối
+if ($index_exclude_files_folder_web_interface < count($excludeFilesFolder_Vbot_web_interface) - 1) {
+echo "\n";
+}
+}
+}
+?></textarea>
                                 </div>
                               </div>
                               <div class="row mb-3">
                                 <label for="backup_upgrade_web_interface_exclude_file_format" class="col-sm-3 col-form-label">Bỏ qua định dạng tệp không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi định dạng tệp là 1 dòng, cần có dấu <b>.</b> ở trước định dạng tệp ví dụ: <b>.mp3</b> hoặc <b>.mp4</b>')"></i> :</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control border-success" rows="5" name="backup_upgrade_web_interface_exclude_file_format" id="backup_upgrade_web_interface_exclude_file_format">
-                                    <?php
-                                      $backup_upgrade_web_interface_exclude_file = isset($Config['backup_upgrade']['web_interface']['backup']['exclude_file_format']) ? $Config['backup_upgrade']['web_interface']['backup']['exclude_file_format'] : [];
-                                          if (!empty($backup_upgrade_web_interface_exclude_file)) {
-                                              foreach ($backup_upgrade_web_interface_exclude_file as $index_exclude_file_format_web_interface => $exclude_file_format_web_interface) {
-                                                  echo htmlspecialchars($exclude_file_format_web_interface);
-                                                  // Không thêm xuống dòng cuối cùng sau phần tử cuối
-                                                  if ($index_exclude_file_format_web_interface < count($backup_upgrade_web_interface_exclude_file) - 1) {
-                                                      echo "\n";
-                                                  }
-                                              }
-                                          }
-                                      ?>
-                                    </textarea>
+<textarea class="form-control border-success" rows="5" name="backup_upgrade_web_interface_exclude_file_format" id="backup_upgrade_web_interface_exclude_file_format">
+<?php
+$backup_upgrade_web_interface_exclude_file = isset($Config['backup_upgrade']['web_interface']['backup']['exclude_file_format']) ? $Config['backup_upgrade']['web_interface']['backup']['exclude_file_format'] : [];
+if (!empty($backup_upgrade_web_interface_exclude_file)) {
+foreach ($backup_upgrade_web_interface_exclude_file as $index_exclude_file_format_web_interface => $exclude_file_format_web_interface) {
+echo htmlspecialchars($exclude_file_format_web_interface);
+// Không thêm xuống dòng cuối cùng sau phần tử cuối
+if ($index_exclude_file_format_web_interface < count($backup_upgrade_web_interface_exclude_file) - 1) {
+echo "\n";
+}
+}
+}
+?></textarea>
                                 </div>
                               </div>
                             </div>
@@ -3594,20 +3639,19 @@ $read_tts_token_google_cloud = '';
                               <div class="row mb-3">
                                 <label for="vbot_web_interface_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
                                 <div class="col-sm-9">
-                                    <textarea class="form-control border-success" rows="5" name="vbot_web_interface_upgrade_keep_the_file_folder" id="vbot_web_interface_upgrade_keep_the_file_folder">
-                                    <?php
-                                      $excludeFilesFolder_web_interface_upgrade = isset($Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory']) ? $Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] : [];
-                                          if (!empty($excludeFilesFolder_web_interface_upgrade)) {
-                                              foreach ($excludeFilesFolder_web_interface_upgrade as $index_exclude_files_folder_web_interface_UPGRADE => $item_exclude_files_folder_web_interface_upgrade) {
-                                                  echo htmlspecialchars($item_exclude_files_folder_web_interface_upgrade);
-                                                  // Không thêm xuống dòng cuối cùng sau phần tử cuối
-                                                  if ($index_exclude_files_folder_web_interface_UPGRADE < count($excludeFilesFolder_web_interface_upgrade) - 1) {
-                                                      echo "\n";
-                                                  }
-                                              }
-                                          }
-                                      ?>
-                                    </textarea>
+<textarea class="form-control border-success" rows="5" name="vbot_web_interface_upgrade_keep_the_file_folder" id="vbot_web_interface_upgrade_keep_the_file_folder">
+<?php
+$excludeFilesFolder_web_interface_upgrade = isset($Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory']) ? $Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] : [];
+if (!empty($excludeFilesFolder_web_interface_upgrade)) {
+foreach ($excludeFilesFolder_web_interface_upgrade as $index_exclude_files_folder_web_interface_UPGRADE => $item_exclude_files_folder_web_interface_upgrade) {
+echo htmlspecialchars($item_exclude_files_folder_web_interface_upgrade);
+// Không thêm xuống dòng cuối cùng sau phần tử cuối
+if ($index_exclude_files_folder_web_interface_UPGRADE < count($excludeFilesFolder_web_interface_upgrade) - 1) {
+echo "\n";
+}
+}
+}
+?></textarea>
                                 </div>
                               </div>
                             </div>
@@ -3621,7 +3665,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_Cloud_backup">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Cloud_Backup" aria-expanded="false" aria-controls="collapse_button_Cloud_Backup">
-                    Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:
+                    Cấu Hình Sao Lưu Dữ Liệu - Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:
                   </h5>
                   <div id="collapse_button_Cloud_Backup" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Cloud_Backup">
                     <div class="card">

@@ -218,7 +218,13 @@
                         <p id="audio-playing">Trạng thái: <font color="blue">N/A</font></p>
                         <p id="audio-source">Nguồn Media: <font color="blue">N/A</font></p>
                       </div>
+					  
                     </div>
+
+  <div id="waveContainer_song_nhac" style="display: none; justify-content: center; align-items: center;">
+    <canvas id="waveCanvas_songNhac" height="70" style="width: 100%;"></canvas>
+  </div>
+
                     <div id="progress-container">
                       <input type="range" id="progress-bar" min="0" max="100" value="0" title="Kéo để tua khi đang phát nhạc">
                       <div id="time-info"><font color=red>00:00:00 / 00:00:00</font></div>
@@ -290,7 +296,13 @@
               <div class="col-12">
                 <div class="card">
                   <div class="card-body">
-                    <h5 class="card-title">Phát Thông Báo <i class="bi bi-megaphone"></i> <i class="bi bi-question-circle-fill" onclick="show_message('Phát nội dung cần thông báo ra loa')"></i> <span> | Text to Speak</span></h5>
+                    <h5 class="card-title d-flex align-items-center">Phát Thông Báo &nbsp;<i class="bi bi-megaphone"></i> &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Phát nội dung cần thông báo ra loa')"></i>
+&nbsp; Tới Thiết Bị:&nbsp;
+<select class="form-select border-success" style="width: auto;" name="source_text_to_speak_api" id="source_text_to_speak_api">
+<option value="<?php echo $URL_API_VBOT; ?>" data-full_name_tts_api="<?php echo $Config['contact_info']['full_name']; ?>" selected><?php echo $Config['contact_info']['full_name']; ?> - Mặc Định</option>
+</select>
+
+</h5>
                     <div class="form-floating mb-3">
                       <textarea type="text" class="form-control border-success" style="height: 100px;"  name="tts_speaker_notify" id="tts_speaker_notify">
 </textarea>
@@ -323,7 +335,7 @@
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
-                      <b><font color="green">Đồng bộ, Sync <i class="bi bi-question-circle-fill" onclick="show_message('Đồng bộ trạng thái và dữ liệu của Bot với Web UI theo thời gian thực<br/>- Tắt hoặc thiết lập thời gian trễ trong: <b>Cấu hình Config -> Cấu Hình Media Player -> Đồng bộ trạng thái Media với Web UI</b> ')"></i></font></b>
+                      <b><font color="green">Đồng bộ, Sync WebUI <i class="bi bi-question-circle-fill" onclick="show_message('Đồng bộ trạng thái và dữ liệu của Bot với Web UI theo thời gian thực<br/>- Tắt hoặc thiết lập thời gian trễ trong: <b>Cấu hình Config -> Cấu Hình Media Player -> Đồng bộ trạng thái Media với Web UI</b> ')"></i></font></b>
                     </div>
                   </div>
                   <!--
@@ -860,9 +872,10 @@
       //Phát TTS notify phát thông báo
       function tts_speaker_notify_send(del_text_input=null) {
       var text_input = document.getElementById('tts_speaker_notify');
+      var source_text_to_speak_api = document.getElementById('source_text_to_speak_api').value;
       // Kiểm tra xem có cần xóa nội dung của textarea không
       if (del_text_input === "delete_text_tts"){
-          text_input.value = ''; // Xóa nội dung trong textarea
+          text_input.value = '';
           showMessagePHP("Đã xóa nội dung trong nhập liệu thông báo", 5);
           return;
       }
@@ -915,7 +928,7 @@
                       }
                   }
               });
-              xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
+              xhr.open("POST", source_text_to_speak_api);
               xhr.setRequestHeader("Content-Type", "application/json");
               xhr.send(data);
           }
@@ -991,6 +1004,12 @@
                       document.getElementById('media-cover').src = data.media_player.media_cover ? data.media_player.media_cover : 'assets/img/Error_Null_Media_Player.png';
                       // Cập nhật giá trị full time
                       fullTime = data.media_player.full_time;
+					  
+					  if (data.media_player.audio_playing){
+						  updateDisplay_SongNhac(true);
+					  }else{
+						  updateDisplay_SongNhac(false);
+					  }
 					  //Log thay đổi chế độ đầu ra
 					if (data.log_display_style === "console"){
 						document.getElementById('log_display_style_console').checked = true;
@@ -1023,12 +1042,14 @@
                       }
                   } else {
                       document.getElementById('div_message_error').style.display = 'block';
+					  updateDisplay_SongNhac(false);
                       //console.log('Lỗi khi lấy dữ liệu', data.message);
                   }
               })
               .catch(error => {
                   document.getElementById('div_message_error').style.display = 'block';
                   document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, '+ error;
+				  updateDisplay_SongNhac(false);
               });
       }
 
@@ -1402,6 +1423,121 @@
       		
       	}
       });
+
+//Phát Thông báo tts tới loa được chọn
+function fetchAndPopulateDevices_tts() {
+    const selectElement = document.getElementById('source_text_to_speak_api');
+    if (!selectElement) {
+        return;
+    }
+	const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path."/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json"; ?>';;
+	const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onload = function () {
+        if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (!data.success) {
+                    return;
+                }
+                if (!data.data || !Array.isArray(data.data)) {
+                    return;
+                }
+				const serverIp = '<?php echo $serverIp; ?>';
+                while (selectElement.options.length > 1) {
+                    selectElement.remove(1);
+                }
+                data.data.forEach(device => {
+					if (device.ip_address !== serverIp) {
+						const option = document.createElement('option');
+						option.value = 'http://' + device.ip_address + ':' + device.port_api + '/';
+						option.text = device.user_name;
+						option.setAttribute('data-full_name_tts_api', device.user_name);
+						selectElement.appendChild(option);
+					}
+                });
+				//check_Device_Status_VBot_Server('on');
+            } catch (e) {
+				showMessagePHP('Lỗi phát tts: Không thể phân tích JSON - ' + e.message, 5);
+            }
+        } else {
+			showMessagePHP('Lỗi phát tts: lấy dữ liệu các Loa VBot trong cùng lớp mạng: HTTP status ' + xhr.status, 5);
+        }
+    };
+    xhr.onerror = function () {
+		showMessagePHP('Lỗi phát tts: khi gửi yêu cầu lấy dữ liệu các loa chạy VBot trong cùng lớp mạng', 5);
+    };
+    xhr.send();
+}
     </script>
+  <script>
+	//Hiệu Ứng Sóng Nhạc Khi Phát Media Player
+    let currentStatus_SongNHAC = false;
+    let previousStatus_SongNHAC = null;
+    const canvas_SN = document.getElementById("waveCanvas_songNhac");
+    const ctx = canvas_SN.getContext("2d");
+    function resizeCanvas_SN() {
+      const container = document.getElementById("waveContainer_song_nhac");
+      canvas_SN.width = container.clientWidth || window.innerWidth;
+      canvas_SN.height = 70;
+    }
+    window.addEventListener("resize", resizeCanvas_SN);
+    resizeCanvas_SN();
+    let time_SongNhac = 0;
+    function drawWaves() {
+      resizeCanvas_SN();
+      const width = canvas_SN.width;
+      const height = canvas_SN.height;
+      ctx.clearRect(0, 0, width, height);
+      if (currentStatus_SongNHAC) {
+        document.getElementById("waveContainer_song_nhac").style.display = "flex";
+        let bassPulse_SN = Math.sin(time_SongNhac * 0.5) * 20 + 20;
+        // Sóng 1
+        ctx.beginPath();
+        const gradient1 = ctx.createLinearGradient(0, 0, 0, height);
+        gradient1.addColorStop(0, '#00f7ff');
+        gradient1.addColorStop(1, '#8a2be2');
+        ctx.strokeStyle = gradient1;
+        ctx.lineWidth = 2;
+        for (let x = 0; x < width; x++) {
+          const amplitude = Math.min(15 + bassPulse_SN, 30);
+          const y = height / 2 + Math.sin(x * 0.02 + time_SongNhac) * amplitude * Math.sin(time_SongNhac * 0.3);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        // Sóng 2
+        ctx.beginPath();
+        const gradient2 = ctx.createLinearGradient(0, 0, 0, height);
+        gradient2.addColorStop(0, '#ff00cc');
+        gradient2.addColorStop(1, '#ff4500');
+        ctx.strokeStyle = gradient2;
+        ctx.lineWidth = 2;
+        for (let x = 0; x < width; x++) {
+          const amplitude = Math.min(10 + bassPulse_SN, 30);
+          const y = height / 2 + Math.cos(x * 0.015 + time_SongNhac * 1.2) * amplitude * Math.cos(time_SongNhac * 0.4);
+          if (x === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        time_SongNhac += 0.05;
+      } else {
+        document.getElementById("waveContainer_song_nhac").style.display = "none";
+      }
+      requestAnimationFrame(drawWaves);
+    }
+
+    function updateDisplay_SongNhac(status_SN) {
+      if (status_SN === previousStatus_SongNHAC) return;
+      previousStatus_SongNHAC = status_SN;
+      currentStatus_SongNHAC = status_SN;
+    }
+
+    // Khởi động vòng vẽ sóng và list thiết bị dùng cho tts
+    window.addEventListener("DOMContentLoaded", () => {
+      drawWaves();
+	  fetchAndPopulateDevices_tts();
+    });
+  </script>
   </body>
 </html>

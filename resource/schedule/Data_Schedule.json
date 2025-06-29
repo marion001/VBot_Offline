@@ -1,58 +1,81 @@
 {
-    "notification_schedule": [],
-    "send_notify_upgrade_vbot_home_assistant": {
-        "active": false,
-        "time": "03:01"
-    },
-    "display_screen": {
-        "active": false,
-        "date": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ],
-        "time_on": [
-            "20:47"
-        ],
-        "time_off": [
-            "18:40"
-        ]
-    },
-    "restart_vbot": {
-        "active": false,
-        "date": [
-            "Sunday"
-        ],
-        "time": [
-            "03:05"
-        ]
-    },
-    "reboot_os": {
-        "active": false,
-        "date": [
-            "Sunday"
-        ],
-        "time": [
-            "03:07"
-        ]
-    },
-    "stop_media_player": {
-        "time": [
-            "03:09"
-        ],
-        "active": false,
-        "date": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ]
+  "notification_schedule": [
+    {
+      "active": true,
+      "name": "vvvvvv",
+      "create_words": "vbot_interface",
+      "data": {
+        "message": "vvvvvv",
+        "repeat": 1,
+        "audio_file": ""
+      },
+      "date": [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+      ],
+      "time": [
+        "15:00"
+      ]
     }
+  ],
+  "send_notify_upgrade_vbot_home_assistant": {
+    "active": false,
+    "time": "03:01"
+  },
+  "display_screen": {
+    "active": false,
+    "date": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ],
+    "time_on": [
+      "20:47"
+    ],
+    "time_off": [
+      "18:40"
+    ]
+  },
+  "restart_vbot": {
+    "active": false,
+    "date": [
+      "Sunday"
+    ],
+    "time": [
+      "03:05"
+    ]
+  },
+  "reboot_os": {
+    "active": false,
+    "date": [
+      "Sunday"
+    ],
+    "time": [
+      "03:07"
+    ]
+  },
+  "stop_media_player": {
+    "time": [
+      "03:09"
+    ],
+    "active": false,
+    "date": [
+      "Monday",
+      "Tuesday",
+      "Wednesday",
+      "Thursday",
+      "Friday",
+      "Saturday",
+      "Sunday"
+    ]
+  }
 }

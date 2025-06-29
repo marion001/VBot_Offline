@@ -17,7 +17,17 @@
       exit;
   }
   }
+
+$Schedule_Audio_dir = $VBot_Offline.$Config['schedule']['audio_path'];
+if (!file_exists($Schedule_Audio_dir)) {
+    if (mkdir($Schedule_Audio_dir, 0777, true)) {
+        //echo "Đã tạo thư mục: $Schedule_Audio_dir\n";
+    }
+	shell_exec("chmod 777 " . escapeshellarg($Schedule_Audio_dir));
+}
+
   ?>
+  
 <!DOCTYPE html>
 <html lang="vi">
   <?php

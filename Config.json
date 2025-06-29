@@ -172,7 +172,9 @@
         "google_gemini": {
             "active": false,
             "time_out": 25,
-            "api_key": "fc3ct43cr_8888888888888888"
+            "api_key": "fc3ct43cr_8888888888888888",
+            "model_name": "gemini-2.0-flash",
+            "api_version": "v1beta"
         },
         "chat_gpt": {
             "active": false,
@@ -313,8 +315,7 @@
         "active": false,
         "if_custom_skill_can_not_handle": {
             "vbot_processing": false
-        },
-        "notes": "Chế độ Custom Skill, tùy chỉnh cho các bạn dev, lập trình viện tự code"
+        }
     },
     "multiple_command": {
         "active": true,
@@ -362,7 +363,6 @@
         },
         "button_active": {
             "active": true,
-            "notes": "true hoặc false để Bật hoặc Tắt sử dụng nút nhấn",
             "encoder_rotary": {
                 "active": false,
                 "gpio_clk": 7,
