@@ -15,7 +15,6 @@
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
   $_SESSION['user_login']['login_time'] = time();
   }
   ?>
@@ -30,7 +29,7 @@
 		.volume-slider {
 			position: relative;
 			width: 50px;
-			height: 150px;
+			height: 168px;
 			background: #ddd;
 			border-radius: 10px;
 			cursor: pointer;
@@ -69,7 +68,7 @@
 		.led_brightness-slider {
 			position: relative;
 			width: 50px;
-			height: 150px;
+			height: 168px;
 			background: #ddd;
 			border-radius: 10px;
 			cursor: pointer;
@@ -178,7 +177,7 @@
                   <div class="card-body">
                     <div class="d-flex justify-content-around">
                       <div class="ps-3" title="Kéo để thay đổi âm lượng của thiết bị">
-                        <font color="blue">Âm lượng</font>
+                        <!-- <font color="blue">Âm lượng</font> -->
                         <div class="volume-control">
                           <div class="volume-slider" id="volume-slider">
                             <div class="volume-percentage" id="volume-percentage"></div>
@@ -189,7 +188,7 @@
                         </div>
                       </div>
                       <div class="ps-3" title="Kéo để thay đổi độ sáng đèn Led của thiết bị">
-                        <font color="blue">Độ sáng</font>
+                        <!-- <font color="blue">Độ sáng</font> -->
                         <div class="led_brightness-control">
                           <div class="led_brightness-slider" id="led_brightness-slider">
                             <div class="led_brightness-percentage" id="led_brightness-percentage"></div>
