@@ -6,7 +6,7 @@
     "changes": [
         {
             "type": "feature",
-            "description": "cài đặt bổ sung thư viện dùng cho gemini: 'pip install google-generativeai'"
+            "description": "....."
         },
         {
             "type": "fix",
