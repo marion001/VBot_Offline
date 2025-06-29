@@ -1767,14 +1767,13 @@ $read_tts_token_google_cloud = '';
                                 <label for="tts_zalo_voice_name">Giọng đọc:</label>
                               </div>
                               <div class="form-floating mb-3">
-                                <textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_zalo_api_key" id="tts_zalo_api_key" style="height: 150px;">
-                                <?php
-                                  //Hiển thị api Key zalo theo dòng
-                                  $apiKeys_tts_zalo = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key']) ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] : [];
-                                  $textareaContent_tts_zalo = implode("\n", array_map('trim', $apiKeys_tts_zalo));
-                                  echo htmlspecialchars($textareaContent_tts_zalo);
-                                  ?>
-                                </textarea>
+<textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_zalo_api_key" id="tts_zalo_api_key" style="height: 150px;">
+<?php
+//Hiển thị api Key zalo theo dòng
+$apiKeys_tts_zalo = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key']) ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_zalo']['api_key'] : [];
+$textareaContent_tts_zalo = implode("\n", array_map('trim', $apiKeys_tts_zalo));
+echo htmlspecialchars($textareaContent_tts_zalo);
+?></textarea>
                                 <label for="tts_zalo_api_key">Api Keys (Mỗi Keys 1 dòng):</label>
                               </div>
                               <div class="form-floating mb-3">
@@ -1824,16 +1823,13 @@ $read_tts_token_google_cloud = '';
                                 </div>
                               </div>
                               <div class="form-floating mb-3">
-                                <textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_viettel_api_key" id="tts_viettel_api_key" style="height: 150px;">
-                                <?php
-                                  //Hiển thị api Key Viettel theo dòng
-                                  $apiKeys_tts_viettel = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key']) 
-                                      ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key'] 
-                                      : [];
-                                  $textareaContent_tts_viettel = implode("\n", array_map('trim', $apiKeys_tts_viettel));
-                                  echo htmlspecialchars($textareaContent_tts_viettel);
-                                  ?>
-                                </textarea>
+<textarea class="form-control border-success" placeholder="Api Keys, Mỗi Keys tương ứng với 1 dòng" name="tts_viettel_api_key" id="tts_viettel_api_key" style="height: 150px;">
+<?php
+//Hiển thị api Key Viettel theo dòng
+$apiKeys_tts_viettel = isset($Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key']) ? $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['api_key'] : [];
+$textareaContent_tts_viettel = implode("\n", array_map('trim', $apiKeys_tts_viettel));
+echo htmlspecialchars($textareaContent_tts_viettel);
+?></textarea>
                                 <label for="tts_viettel_api_key">Api Keys (Mỗi Keys 1 dòng):</label>
                               </div>
                               <div class="form-floating mb-3">
