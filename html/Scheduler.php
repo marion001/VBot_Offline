@@ -375,6 +375,26 @@ if (!file_exists($Schedule_Audio_dir)) {
           $data['display_screen']['time_on'] = array_filter($time_on_display_screen);
           $data['display_screen']['time_off'] = array_filter($time_off_display_screen);
 
+			#Lưu dữ liệu thay đổi âm lượng
+			$times_change_volume = $_POST['time_change_volume'] ?? [];
+			$volumes_change_volume = $_POST['volumes_volume_time'] ?? [];
+			$filtered_times = [];
+			$filtered_volumes = [];
+			// Duyệt từng cặp và lọc nếu cả 2 đều hợp lệ
+			foreach ($times_change_volume as $index => $time) {
+				$time = trim($time);
+				$volume = trim($volumes_change_volume[$index] ?? '');
+				if ($time !== '' && $volume !== '' && is_numeric($volume)) {
+					$filtered_times[] = $time;
+					$filtered_volumes[] = $volume;
+					
+				}
+			}
+			$data['change_volume']['date'] = isset($_POST['dates_change_volume']) ? $_POST['dates_change_volume'] : [];
+			$data['change_volume']['active'] = isset($_POST['change_volume_active']) ? true : false;
+			$data['change_volume']['time'] = $filtered_times;
+			$data['change_volume']['volume_time'] = $filtered_volumes;
+
           #Lưu dữ liệu dừng phát media Player
           $time_stop_media_player = isset($_POST['time_stop_media_player']) ? $_POST['time_stop_media_player'] : [];
           $data['stop_media_player']['time'] = array_filter($time_stop_media_player);
@@ -609,6 +629,71 @@ if (!file_exists($Schedule_Audio_dir)) {
                 </div>
               </div>
             </div>
+
+            <div class="card accordion" id="accordion_button_volume_change">
+              <div class="card-body">
+                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_change" aria-expanded="false" aria-controls="collapse_button_volume_change">
+                  <font color="Blue">Lập Lịch Thay Đổi Âm Lượng</font>, Trạng Thái:&nbsp;
+                  <?php 
+                    echo isset($data['change_volume']['active']) ? ($data['change_volume']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
+                    ?>
+                </h5>
+                <div id="collapse_button_volume_change" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_change">
+                  <?php
+                    // Kiểm tra dữ liệu change_volume và gán giá trị mặc định nếu không có
+                    if (!isset($data['change_volume']) || empty($data['change_volume'])) {
+                        // Gán giá trị mặc định nếu không có dữ liệu change_volume
+                        $data['change_volume'] = [
+                            'active' => false,
+                            'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                            'time' => ["23:59"],
+                            'volume_time' => ["65"]
+                        ];
+                    } 
+                    $change_volume = $data['change_volume'];
+                    ?>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input" type="checkbox" name="change_volume_active" id="change_volume_active" value="<?php echo $change_volume['active']; ?>" <?= $change_volume['active'] ? 'checked' : '' ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Checkbox ngày -->
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Màn Hình')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <?php foreach ($week_days as $date => $label): ?>
+                        <input class="form-check-input" type="checkbox" name="dates_change_volume[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $change_volume['date']) ? 'checked' : '' ?>>
+                        <label><?= htmlspecialchars($label) ?></label>
+                        <br/>
+                        <?php endforeach; ?>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Thời gian -->
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                    <div class="col-sm-9">
+                      <div class="time-inputs_display_screen" id="time-changes_volumes">
+						<?php foreach ($change_volume['time'] as $index => $time): ?>
+						<div class="time-input-container input-group mb-3" id="time-change_volume-<?= $index ?>">
+						  <input class="form-control border-success" type="text" name="time_change_volume[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+						  <input class="form-control border-primary" type="number" name="volumes_volume_time[]" value="<?= isset($change_volume['volume_time'][$index]) ? htmlspecialchars($change_volume['volume_time'][$index]) : '' ?>" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">
+						  <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-<?= $index ?>"><i class="bi bi-trash"></i></button>
+						</div>
+						<?php endforeach; ?>
+                        <button class="btn btn-success rounded-pill" type="button" id="add-time-change_volume">Thêm thời gian</button>
+                      </div>
+                    </div>
+                  </div>
+                  <hr/>
+                </div>
+              </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_display_screen_time">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_display_screen_time" aria-expanded="false" aria-controls="collapse_button_display_screen_time">
@@ -953,6 +1038,7 @@ if (!file_exists($Schedule_Audio_dir)) {
       ?>
     <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
+	
     <script>
       function playAudio_Schedule(id_select_DOM) {
           var element = document.getElementById(id_select_DOM);
@@ -1431,25 +1517,19 @@ if (!file_exists($Schedule_Audio_dir)) {
     <!-- Scripts Restart VBot -->
     <script>
       let time_Restart_VBot = <?= count($restart_vbot['time']) ?>;
-      // Thêm input cho Time On
       document.getElementById('add-time-restart_vbot').addEventListener('click', function() {
           const timeOnContainer = document.getElementById('time-on-restart_vbot');
-          // Tạo id cho input mới và container
           const inputContainerId = 'time_restart_vbot-' + time_Restart_VBot;
-          // Sử dụng innerHTML để tạo input và button xóa
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-restart_vbot', 'input-group', 'mb-3');
           inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_restart_vbot[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-restart_vbot-' + time_Restart_VBot + '"><i class="bi bi-trash"></i></button>';
-          // Thêm container vào trong DOM
           timeOnContainer.insertBefore(inputContainer, this);
-          // Gắn sự kiện xóa khi nhấn Delete
           document.getElementById('delete-restart_vbot-' + time_Restart_VBot).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
           });
           time_Restart_VBot++;
       });
-      // Gắn sự kiện xóa ban đầu cho các button đã có
       document.querySelectorAll('.time-inputs_restart_vbot > div > button').forEach(button => {
           button.addEventListener('click', function() {
               const container = button.parentElement;
@@ -1462,25 +1542,19 @@ if (!file_exists($Schedule_Audio_dir)) {
     <!-- Scripts stop media Player -->
     <script>
       let time_Stop_Media_Player = <?= count($stop_media_player['time']) ?>;
-      // Thêm input cho Time On
       document.getElementById('add-time-stop_media_player').addEventListener('click', function() {
           const timeOnContainer = document.getElementById('time-on-stop_media_player');
-          // Tạo id cho input mới và container
           const inputContainerId = 'time_stop_media_player-' + time_Stop_Media_Player;
-          // Sử dụng innerHTML để tạo input và button xóa
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-stop_media_player', 'input-group', 'mb-3');
           inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_stop_media_player[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-stop_media_player-' + time_Stop_Media_Player + '"><i class="bi bi-trash"></i></button>';
-          // Thêm container vào trong DOM
           timeOnContainer.insertBefore(inputContainer, this);
-          // Gắn sự kiện xóa khi nhấn Delete
           document.getElementById('delete-stop_media_player-' + time_Stop_Media_Player).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
           });
           time_Stop_Media_Player++;
       });
-      // Gắn sự kiện xóa ban đầu cho các button đã có
       document.querySelectorAll('.time-inputs_stop_media_player > div > button').forEach(button => {
           button.addEventListener('click', function() {
               const container = button.parentElement;
@@ -1493,25 +1567,19 @@ if (!file_exists($Schedule_Audio_dir)) {
     <!-- Scripts REBOOT OS SYSTEM -->
     <script>
       let time_REboot_OS = <?= count($reboot_os['time']) ?>;
-      // Thêm input cho Time On
       document.getElementById('add-time-reboot_os').addEventListener('click', function() {
           const timeOnContainer = document.getElementById('time-on-reboot_os');
-          // Tạo id cho input mới và container
           const inputContainerId = 'time_reboot_os-' + time_REboot_OS;
-          // Sử dụng innerHTML để tạo input và button xóa
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-reboot_os', 'input-group', 'mb-3');
           inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_reboot_os[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-reboot_os-' + time_REboot_OS + '"><i class="bi bi-trash"></i></button>';
-          // Thêm container vào trong DOM
           timeOnContainer.insertBefore(inputContainer, this);
-          // Gắn sự kiện xóa khi nhấn Delete
           document.getElementById('delete-reboot_os-' + time_REboot_OS).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
           });
           time_REboot_OS++;
       });
-      // Gắn sự kiện xóa ban đầu cho các button đã có
       document.querySelectorAll('.time-inputs_reboot_os > div > button').forEach(button => {
           button.addEventListener('click', function() {
               const container = button.parentElement;
@@ -1519,6 +1587,31 @@ if (!file_exists($Schedule_Audio_dir)) {
           });
       });
     </script>
+
+<script>
+let timeVolumeCounter = <?= count($change_volume['time']) ?>;
+document.getElementById('add-time-change_volume').addEventListener('click', function () {
+  const container = document.getElementById('time-changes_volumes');
+  const inputContainerId = 'time-change_volume-' + timeVolumeCounter;
+  const inputContainer = document.createElement('div');
+  inputContainer.id = inputContainerId;
+  inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
+inputContainer.innerHTML =
+  '<input class="form-control border-success" type="text" name="time_change_volume[]" placeholder="HH:mm">' +
+  '<input class="form-control border-primary" type="number" name="volumes_volume_time[]" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">' +
+  '<button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-' + timeVolumeCounter + '">' +
+  '<i class="bi bi-trash"></i>' +
+  '</button>';
+  container.insertBefore(inputContainer, this);
+document.getElementById('delete-change_volume-' + timeVolumeCounter).addEventListener('click', function () {
+  document.getElementById(inputContainerId).remove();
+});
+  timeVolumeCounter++;
+});
+</script>
+
+
+	
     <!--END Scripts REBOOT OS SYSTEM -->
     <script src="assets/vendor/prism/prism.min.js"></script>
     <script src="assets/vendor/prism/prism-json.min.js"></script>

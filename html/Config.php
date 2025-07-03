@@ -650,7 +650,7 @@
               $stream = ssh2_exec($connection, $CMD);
               stream_set_blocking($stream, true);
               $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
-  				$messages[] = 'Đang Khởi Động Lại Chương Trình Vbot';
+  				$messages[] = 'Đang Khởi Động Lại Chương Trình VBot';
           } else {
               $messages[] = 'Xác thực SSH không thành công.';
           }
@@ -918,7 +918,7 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_setting_API">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_API" aria-expanded="false" aria-controls="collapse_button_setting_API">
-                    Cấu Hình API Vbot Server:
+                    Cấu Hình API VBot Server:
                   </h5>
                   <div id="collapse_button_setting_API" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_API">
                     <div class="row mb-3">
@@ -973,7 +973,7 @@ $read_tts_token_google_cloud = '';
       <div class="card accordion" id="accordion_button_streaming_server_audio">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
-      Streming Audio Server <font color=red> (Vbot Client, Client - Server) </font><i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
+      Streming Audio Server <font color=red> (VBot Client, Client - Server) </font><i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
       <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
 
                     <div class="row mb-3">
@@ -1024,7 +1024,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
 					<div class="row mb-3">
-                      <label for="api_port" class="col-sm-3 col-form-label">Port Server:</label>
+                      <label for="port_server_udp_streaming_audio" class="col-sm-3 col-form-label">Port Server:</label>
                       <div class="col-sm-9">
                           <input required type="number" class="form-control border-success" name="port_server_udp_streaming_audio" id="port_server_udp_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>">
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
@@ -1095,7 +1095,7 @@ $read_tts_token_google_cloud = '';
                       <div class="col-sm-9">
 						<div class="input-group mb-3">
                         <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio_local" id="udp_server_streaming_audio_local" value="<?php echo htmlspecialchars('http://'.$serverIp.'/assets/sound/'); ?>">
-						<a href="<?php echo htmlspecialchars('http://'.$serverIp.'/assets/sound/'); ?>" target="_blank"><button class="btn btn-success border-danger" type="button">Truy Cập</button></a>
+						<button class="btn btn-success border-danger" type="button"><a style="color: white;" href="<?php echo htmlspecialchars('http://'.$serverIp.'/assets/sound/'); ?>" target="_blank">Truy Cập</a></button>
 					  </div>
                       </div>
                     </div>
@@ -3246,7 +3246,7 @@ if (file_exists($gemini_model_list_json_file)) {
                     </div>
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_assistant" aria-expanded="false" aria-controls="collapse_button_custom_assistant">
+                        <h5 class="card-title">
                           Trợ Lý DEV Assistant: Dev_Assistant.py (Custom Assistant, Người dùng tự code) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
                         </h5>
                         <div class="row mb-3">
@@ -3280,7 +3280,7 @@ if (file_exists($gemini_model_list_json_file)) {
                       <div class="card-body">
                         <h5 class="card-title">Nếu Custom Skill: Dev_Customization.py không thể xử lý:</h5>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tiếp tục sử dụng Vbot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng Vbot xử lý dữ liệu khi mà Custom Skill không xử lý được')"></i> :</label>
+                          <label class="col-sm-3 col-form-label">Tiếp tục sử dụng VBot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng VBot xử lý dữ liệu khi mà Custom Skill không xử lý được')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input class="form-check-input" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" <?php echo $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] ? 'checked' : ''; ?>>
@@ -3299,7 +3299,7 @@ if (file_exists($gemini_model_list_json_file)) {
                   </h5>
                   <div id="collapse_button_schedule_lich" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_lich">
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để khởi động Phát lời nhắc, Thông báo khi Vbot được khởi chạy')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để khởi động Phát lời nhắc, Thông báo khi VBot được khởi chạy')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input" type="checkbox" name="schedule_active" id="schedule_active" <?php echo $Config['schedule']['active'] ? 'checked' : ''; ?>>
@@ -3336,7 +3336,7 @@ if (file_exists($gemini_model_list_json_file)) {
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Khởi Động Lại VBot: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, Chương trình sẽ khởi động lại Vbot khi quá trình cập nhật Nâng Cấp Vbot thành công')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Khởi Động Lại VBot: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, Chương trình sẽ khởi động lại VBot khi quá trình cập nhật Nâng Cấp VBot thành công')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input" type="checkbox" name="restart_vbot_upgrade" id="restart_vbot_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['restart_vbot'] ? 'checked' : ''; ?>>
@@ -3344,7 +3344,7 @@ if (file_exists($gemini_model_list_json_file)) {
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Thông Báo Âm Thanh: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ thông báo bằng âm thanh khi quá trình Cập Nhật, Nâng Cấp Giao Diện Web hoặc chương trình Vbot thành công')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Thông Báo Âm Thanh: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ thông báo bằng âm thanh khi quá trình Cập Nhật, Nâng Cấp Giao Diện Web hoặc chương trình VBot thành công')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input" type="checkbox" name="sound_notification_backup_upgrade" id="sound_notification_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['sound_notification'] ? 'checked' : ''; ?>>
@@ -3512,7 +3512,7 @@ echo "\n";
                                 </div>
                               </div>
                               <center>
-                                <button type="button" name="show_all_file_in_directoryyyy" class="btn btn-success rounded-pill" onclick="show_all_file_in_directory('<?php echo $HTML_VBot_Offline . '/' . $Backup_Dir_Save_VBot; ?>', 'show_all_file_folder_Backup_Program')">Danh Sách Tệp Sao Lưu Vbot</button>
+                                <button type="button" name="show_all_file_in_directoryyyy" class="btn btn-success rounded-pill" onclick="show_all_file_in_directory('<?php echo $HTML_VBot_Offline . '/' . $Backup_Dir_Save_VBot; ?>', 'show_all_file_folder_Backup_Program')">Danh Sách Tệp Sao Lưu VBot</button>
                                 <br/><br/>
                                 <div class="limited-height" id="show_all_file_folder_Backup_Program"></div>
                               </center>
@@ -3689,14 +3689,14 @@ echo "\n";
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Chương Trình Vbot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Chương Trình Vbot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Chương Trình VBot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_vbot_name" id="gcloud_drive_backup_folder_vbot_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name']; ?>">
                             <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Giao Diện Vbot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Giao Diện Vbot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Giao Diện VBot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_interface_name" id="gcloud_drive_backup_folder_interface_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name']; ?>">
                             <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>

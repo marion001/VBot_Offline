@@ -1027,6 +1027,8 @@ if (isset($_POST['disable_vbot_api_external'])) {
   
   //check_version_picovoice_porcupine
   if (isset($_POST['check_version_picovoice_porcupine'])) {
+	  
+/*
   $remotePath = "/home/$ssh_user/.local/lib/python3.9/site-packages/";
   $pattern = '/^pvporcupine-(\d+\.\d+\.\d+)\.dist-info$/m';
   // Thực hiện lệnh ls để lấy danh sách thư mục
@@ -1057,7 +1059,18 @@ if (isset($_POST['disable_vbot_api_external'])) {
   $firstThreeCharspicovoice_version = substr($text_picovoice_version, 0, 3);
   $output .= "Phiên bản Picovoice: $text_picovoice_version\n";
   }
-  
+  */
+
+  $CMD = "pip show picovoice pvporcupine";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {die($SSH_CONNECT_ERROR);}
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+
   //Kiểm tra phiên bản porcupine hiện tại
    if ($Config['smart_config']['smart_wakeup']['hotword']['lang'] == 'vi') {
       $porcupine_check = $Config['smart_config']['smart_wakeup']['hotword']['library']['vi']['modelFilePath'];
@@ -1067,7 +1080,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
   
   $file_path = $VBot_Offline.'resource/picovoice/library/'.$porcupine_check;
   $text_porcupine_version = porcupine_version($file_path);
-  $output .= "Phiên bản Porcupine: $text_porcupine_version";
+  $output .= "\nPhiên bản thư viện Porcupine: $text_porcupine_version";
   }
   
   
