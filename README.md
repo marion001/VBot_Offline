@@ -1,4 +1,7 @@
 VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khiển nhà thông minh, trả lời câu hỏi, nhắc nhở, phát nhạc và nhiều tiện ích khác. Với thiết kế tinh tế và khả năng hiểu ngôn ngữ tự nhiên, VBot mang đến sự tiện nghi và trải nghiệm hiện đại, gần gũi cho mọi gia đình Việt.
+-----
+- Các Bạn Có Nhu Cầu Mua Mạch VBot Assistant AIO Liên Hệ Mình Nhé: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
+- Mạch được thiết kế dùng với Loa Xiaodu Donkey Kong
 ------------------------------------------------
 - HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W (IMG có sẵn được Build trên Raspberry Pi Zero 2W)
 - Mạch Mic ReSpeaker 2-Mics Pi HAT v1 (sử dụng ic WM8960), ReSpeaker Mic Array v2.0, Mic USB, V..v...
@@ -55,8 +58,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 
 Link Download IMG FLASH (IMG Được Build Trên Raspberry Pi Zero 2W): https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
 
-- Liên Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
-- Liên Hệ Hỗ Trợ: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
+- Group Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
 
       Model: Raspberry Pi Zero 2 W Rev 1.0
