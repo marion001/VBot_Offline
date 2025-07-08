@@ -330,7 +330,7 @@
                 <div class="activity">
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" title="Đồng bộ VBot với Web UI" type="checkbox" name="sync_checkbox" id="sync_checkbox" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" title="Đồng bộ VBot với Web UI" type="checkbox" name="sync_checkbox" id="sync_checkbox" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -340,7 +340,7 @@
                   <!--
                     <div class="activity-item d-flex">
                         <div class="form-switch">
-                            <input class="form-check-input" type="checkbox" id="bluetooth_power" name="bluetooth_power" onclick="bluetooth_control('power', this.checked)">
+                            <input class="form-check-input border-success" type="checkbox" id="bluetooth_power" name="bluetooth_power" onclick="bluetooth_control('power', this.checked)">
                         </div>
                         <i class="bi bi-dash-lg"></i>
                         <div class="activity-content">
@@ -350,7 +350,7 @@
                     -->
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" id="media_player_active" name="media_player_active" onclick="change_to_another_mode('media_player_active', this.checked)" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" type="checkbox" id="media_player_active" name="media_player_active" onclick="change_to_another_mode('media_player_active', this.checked)" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -359,7 +359,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" id="wake_up_in_media_player" name="wake_up_in_media_player" onclick="change_to_another_mode('wake_up_in_media_player', this.checked)" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" type="checkbox" id="wake_up_in_media_player" name="wake_up_in_media_player" onclick="change_to_another_mode('wake_up_in_media_player', this.checked)" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -368,7 +368,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" id="cache_tts" name="cache_tts" onclick="change_to_another_mode('cache_tts', this.checked)" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" type="checkbox" id="cache_tts" name="cache_tts" onclick="change_to_another_mode('cache_tts', this.checked)" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -377,7 +377,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="show_mic_on_off" id="show_mic_on_off" onclick="change_to_another_mode('mic_on_off', this.checked)">
+                      <input class="form-check-input border-success" type="checkbox" name="show_mic_on_off" id="show_mic_on_off" onclick="change_to_another_mode('mic_on_off', this.checked)">
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -386,7 +386,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="show_conversation_mode" id="show_conversation_mode" onclick="change_to_another_mode('conversation_mode', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="show_conversation_mode" id="show_conversation_mode" onclick="change_to_another_mode('conversation_mode', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -395,7 +395,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" id="show_wake_up" name="show_wake_up" onclick="change_to_another_mode('wake_up', this.checked)">
+                      <input class="form-check-input border-success" type="checkbox" id="show_wake_up" name="show_wake_up" onclick="change_to_another_mode('wake_up', this.checked)">
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -404,7 +404,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="show_wakeup_reply" id="show_wakeup_reply" onclick="change_to_another_mode('wakeup_reply', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="show_wakeup_reply" id="show_wakeup_reply" onclick="change_to_another_mode('wakeup_reply', this.checked)" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -413,7 +413,7 @@
                   </div>
                   <div class="activity-item d-flex">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="multiple_command_active" id="multiple_command_active" onclick="change_to_another_mode('multiple_command', this.checked)" <?php echo $Config['multiple_command']['active'] ? 'checked' : ''; ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="multiple_command_active" id="multiple_command_active" onclick="change_to_another_mode('multiple_command', this.checked)" <?php echo $Config['multiple_command']['active'] ? 'checked' : ''; ?>>
                     </div>
                     <i class="bi bi-dash-lg"></i>
                     <div class="activity-content">
@@ -434,13 +434,13 @@
                       <font color="blue">Home Assistant:</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="home_assistant_active" type="checkbox" name="home_assistant_active" id="home_assistant_active" onclick="change_to_another_mode('home_assistant', this.checked)" <?php if ($Config['home_assistant']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="home_assistant_active" type="checkbox" name="home_assistant_active" id="home_assistant_active" onclick="change_to_another_mode('home_assistant', this.checked)" <?php if ($Config['home_assistant']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để liên kết và điều khiển nhà thông minh')"></i>
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="hass_custom_commands_active" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" onclick="change_to_another_mode('hass_custom_active', this.checked)" <?php if ($Config['home_assistant']['custom_commands']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="hass_custom_commands_active" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" onclick="change_to_another_mode('hass_custom_active', this.checked)" <?php if ($Config['home_assistant']['custom_commands']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Lệnh Tùy Chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt sử dụng lệnh tùy chỉnh (Custom Command) để điều khiển nhà thông minh')"></i>
                           </label>
@@ -451,13 +451,13 @@
                       <font color="blue">DEV Customization (Custom Skill):</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="developer_customization_active" type="checkbox" name="developer_customization_active" id="developer_customization_active" onclick="change_to_another_mode('dev_custom', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?> <?php if ($Config['developer_customization']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="developer_customization_active" type="checkbox" name="developer_customization_active" id="developer_customization_active" onclick="change_to_another_mode('dev_custom', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?> <?php if ($Config['developer_customization']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Custom Skill <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng chế độ DEV Customization (Custom Skill)')"></i>
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="developer_customization_vbot_processing" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" onclick="change_to_another_mode('dev_custom_vbot', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?><?php if ($Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="developer_customization_vbot_processing" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" onclick="change_to_another_mode('dev_custom_vbot', this.checked)" <?php if ($Config['developer_customization']['active'] === false) echo "disabled"; ?><?php if ($Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Áp dụng thêm VBot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng VBot xử lý khi Custom Skill không thể xử lý')"></i>
                           </label>
@@ -468,45 +468,45 @@
                       <font color="blue">Trợ lý ảo <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng trợ lý ảo tương ứng')"></i> :</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="default_assistant_active" type="checkbox" name="default_assistant_active" id="default_assistant_active" onclick="change_to_another_mode('default_assistant', this.checked)" <?php if ($Config['virtual_assistant']['default_assistant']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="default_assistant_active" type="checkbox" name="default_assistant_active" id="default_assistant_active" onclick="change_to_another_mode('default_assistant', this.checked)" <?php if ($Config['virtual_assistant']['default_assistant']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Default Assistant
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="google_gemini_active" type="checkbox" name="google_gemini_active" id="google_gemini_active" onclick="change_to_another_mode('google_gemini', this.checked)" <?php if ($Config['virtual_assistant']['google_gemini']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="google_gemini_active" type="checkbox" name="google_gemini_active" id="google_gemini_active" onclick="change_to_another_mode('google_gemini', this.checked)" <?php if ($Config['virtual_assistant']['google_gemini']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Google Gemini
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="chat_gpt_active" type="checkbox" name="chat_gpt_active" id="chat_gpt_active" onclick="change_to_another_mode('chat_gpt', this.checked)" <?php if ($Config['virtual_assistant']['chat_gpt']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="chat_gpt_active" type="checkbox" name="chat_gpt_active" id="chat_gpt_active" onclick="change_to_another_mode('chat_gpt', this.checked)" <?php if ($Config['virtual_assistant']['chat_gpt']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Chat GPT
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="zalo_assistant_active" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" onclick="change_to_another_mode('zalo_assistant', this.checked)" <?php if ($Config['virtual_assistant']['zalo_assistant']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="zalo_assistant_active" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" onclick="change_to_another_mode('zalo_assistant', this.checked)" <?php if ($Config['virtual_assistant']['zalo_assistant']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Zalo AI Assistant
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="dify_ai_active" type="checkbox" name="dify_ai_active" id="dify_ai_active" onclick="change_to_another_mode('dify_ai', this.checked)" <?php if ($Config['virtual_assistant']['dify_ai']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="dify_ai_active" type="checkbox" name="dify_ai_active" id="dify_ai_active" onclick="change_to_another_mode('dify_ai', this.checked)" <?php if ($Config['virtual_assistant']['dify_ai']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Dify AI
                           </label>
                         </div>
 						
                         <div class="form-check">
-                          <input class="form-check-input" value="olli_active" type="checkbox" name="olli_active" id="olli_active" onclick="change_to_another_mode('olli', this.checked)" <?php if ($Config['virtual_assistant']['olli']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="olli_active" type="checkbox" name="olli_active" id="olli_active" onclick="change_to_another_mode('olli', this.checked)" <?php if ($Config['virtual_assistant']['olli']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Olli AI Assistant
                           </label>
                         </div>
 
                         <div class="form-check">
-                          <input class="form-check-input" value="dev_custom_assistant_active" type="checkbox" name="dev_custom_assistant_active" id="dev_custom_assistant_active" onclick="change_to_another_mode('dev_custom_assistant', this.checked)" <?php if ($Config['virtual_assistant']['customize_developer_assistant']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="dev_custom_assistant_active" type="checkbox" name="dev_custom_assistant_active" id="dev_custom_assistant_active" onclick="change_to_another_mode('dev_custom_assistant', this.checked)" <?php if ($Config['virtual_assistant']['customize_developer_assistant']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           DEV Custom Assistant (Dev_Assistant.py)
                           </label>
@@ -518,19 +518,19 @@
                       <font color="blue">Nguồn Nhạc <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng nguồn Nhạc, Radio, PodCast tương ứng, khi Bot tìm kiếm dữ liệu')"></i> :</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="music_local_active" type="checkbox" name="music_local_active" id="music_local_active" onclick="change_to_another_mode('music_local', this.checked)" <?php if ($Config['media_player']['music_local']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="music_local_active" type="checkbox" name="music_local_active" id="music_local_active" onclick="change_to_another_mode('music_local', this.checked)" <?php if ($Config['media_player']['music_local']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Music Local
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="zing_mp3_active" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" onclick="change_to_another_mode('zing_mp3', this.checked)" <?php if ($Config['media_player']['zing_mp3']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="zing_mp3_active" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" onclick="change_to_another_mode('zing_mp3', this.checked)" <?php if ($Config['media_player']['zing_mp3']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Zing MP3
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="youtube_active" type="checkbox" name="youtube_active" id="youtube_active" onclick="change_to_another_mode('youtube', this.checked)" <?php if ($Config['media_player']['youtube']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="youtube_active" type="checkbox" name="youtube_active" id="youtube_active" onclick="change_to_another_mode('youtube', this.checked)" <?php if ($Config['media_player']['youtube']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Youtube
                           </label>
@@ -541,7 +541,7 @@
                       <font color="blue">Đọc Báo, Tin Tức <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng tính năng đọc báo, tin tức trong ngày')"></i> :</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="news_paper_active" type="checkbox" name="news_paper_active" id="news_paper_active" onclick="change_to_another_mode('news_paper', this.checked)" <?php if ($Config['media_player']['news_paper']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="news_paper_active" type="checkbox" name="news_paper_active" id="news_paper_active" onclick="change_to_another_mode('news_paper', this.checked)" <?php if ($Config['media_player']['news_paper']['active'] === true) echo "checked"; ?>>
                         </div>
                       </div>
                     </li>
@@ -549,7 +549,7 @@
                       <font color="blue">Màn Hình (Display Screen) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng, hiển thị dữ liệu lên màn hình')"></i> :</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="display_screen_active" type="checkbox" name="display_screen_active" id="display_screen_active" onclick="change_to_another_mode('display_screen', this.checked)" <?php if ($Config['display_screen']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="display_screen_active" type="checkbox" name="display_screen_active" id="display_screen_active" onclick="change_to_another_mode('display_screen', this.checked)" <?php if ($Config['display_screen']['active'] === true) echo "checked"; ?>>
                         </div>
                       </div>
                     </li>
@@ -568,7 +568,7 @@
                       <font color="blue">Bật, Tắt Logs hệ thống</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="on_off_display_logs" type="checkbox" name="on_off_display_logs" id="on_off_display_logs" onclick="change_og_display_style('change_log', this.checked ? 'on' : 'off', true)" <?php if ($Config['smart_config']['show_log']['active'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="on_off_display_logs" type="checkbox" name="on_off_display_logs" id="on_off_display_logs" onclick="change_og_display_style('change_log', this.checked ? 'on' : 'off', true)" <?php if ($Config['smart_config']['show_log']['active'] === true) echo "checked"; ?>>
                           <!-- <label class="form-check-label">
                             Xóa Log API
                             </label>
@@ -580,25 +580,25 @@
                       <font color="blue">Thay đổi chế độ hiển thị Logs <i class="bi bi-question-circle-fill" onclick="show_message('Thay đổi chế độ hiển thị Logs đầu ra trực tiếp và lấy dữ liệu theo thời gian thực')"></i> :</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="console" type="radio" name="select_log_display_style" id="log_display_style_console" onclick="change_og_display_style('change_log', 'console', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "console") echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="console" type="radio" name="select_log_display_style" id="log_display_style_console" onclick="change_og_display_style('change_log', 'console', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "console") echo "checked"; ?>>
                           <label class="form-check-label">
                           Console
                           </label>
                         </div>
                         <div class="form-check">
-                          <input <?php if ($Config['display_screen']['active'] === false) echo "disabled"; ?> class="form-check-input" value="display_screen" type="radio" name="select_log_display_style" id="log_display_style_oled_display" onclick="change_og_display_style('change_log', 'display_screen', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "display_screen") echo "checked"; ?>>
+                          <input <?php if ($Config['display_screen']['active'] === false) echo "disabled"; ?> class="form-check-input border-success" value="display_screen" type="radio" name="select_log_display_style" id="log_display_style_oled_display" onclick="change_og_display_style('change_log', 'display_screen', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "display_screen") echo "checked"; ?>>
                           <label class="form-check-label">
                           Màn Hình
                           </label>
                         </div>
                         <div class="form-check">
-                          <input <?php if ($Config['api']['active'] === false) echo "disabled"; ?> class="form-check-input" value="api" type="radio" name="select_log_display_style" id="log_display_style_api" onclick="change_og_display_style('change_log', 'api', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "api") echo "checked"; ?>>
+                          <input <?php if ($Config['api']['active'] === false) echo "disabled"; ?> class="form-check-input border-success" value="api" type="radio" name="select_log_display_style" id="log_display_style_api" onclick="change_og_display_style('change_log', 'api', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "api") echo "checked"; ?>>
                           <label class="form-check-label">
                           API <a href="<?php echo $URL_API_VBOT ?>logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
                           </label>
                         </div>
                         <div class="form-check">
-                          <input class="form-check-input" value="all" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'all', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "all") echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="all" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'all', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "all") echo "checked"; ?>>
                           <label class="form-check-label">
                           ALL (Tất Cả) <a href="<?php echo $URL_API_VBOT ?>logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
                           </label>
@@ -609,7 +609,7 @@
                       <font color="blue">Dọn dẹp Logs</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="log_api_del" type="radio" name="delete_log_api" id="delete_log_api" onclick="change_og_display_style('clear_api', 'clear_api', this.checked)">
+                          <input class="form-check-input border-success" value="log_api_del" type="radio" name="delete_log_api" id="delete_log_api" onclick="change_og_display_style('clear_api', 'clear_api', this.checked)">
                           <label class="form-check-label">
                           Xóa Log API
                           </label>
@@ -620,7 +620,7 @@
                       <font color="blue">MQTT Broker Logs</font>
                       <div class="form-switch">
                         <div class="form-check">
-                          <input class="form-check-input" value="mqtt_show_logs_reconnect" type="checkbox" name="mqtt_show_logs_reconnect" id="mqtt_show_logs_reconnect" onclick="change_og_display_style('mqtt_show_logs_reconnect', this.checked ? 'on' : 'off', true)" <?php if ($Config['mqtt_broker']['mqtt_show_logs_reconnect'] === true) echo "checked"; ?>>
+                          <input class="form-check-input border-success" value="mqtt_show_logs_reconnect" type="checkbox" name="mqtt_show_logs_reconnect" id="mqtt_show_logs_reconnect" onclick="change_og_display_style('mqtt_show_logs_reconnect', this.checked ? 'on' : 'off', true)" <?php if ($Config['mqtt_broker']['mqtt_show_logs_reconnect'] === true) echo "checked"; ?>>
                         </div>
                       </div>
                     </li>

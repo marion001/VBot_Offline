@@ -881,14 +881,14 @@ $read_tts_token_google_cloud = '';
               <div class="card accordion" id="accordion_button_webui_path">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
-                    Web Interface (Giao Diện): 
+                    Cấu Hình Web Interface (Giao Diện): 
                   </h5>
                   <div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Hiển Thị Lỗi <i class="bi bi-question-circle-fill" onclick="show_message('Chức Năng Này Chỉ Dành Cho Nhà Phát Triển DEV Debug')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="webui_errors_display" id="webui_errors_display" <?php echo $Config['web_interface']['errors_display'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="webui_errors_display" id="webui_errors_display" <?php echo $Config['web_interface']['errors_display'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -896,7 +896,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="webui_external" id="webui_external" <?php echo $Config['web_interface']['external']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="webui_external" id="webui_external" <?php echo $Config['web_interface']['external']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -925,7 +925,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Kích Hoạt API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng và giao tiếp với VBot thông qua API')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="api_active" id="api_active" <?php echo $Config['api']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="api_active" id="api_active" <?php echo $Config['api']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -943,7 +943,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Hiển Thị Log API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt hiển thị log của API, Chỉ hiển thị khi Debug trực tiếp trên Console, Terminal')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="api_log_active" id="api_log_active" <?php echo $Config['api']['show_log']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="api_log_active" id="api_log_active" <?php echo $Config['api']['show_log']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -966,6 +966,17 @@ $read_tts_token_google_cloud = '';
                         </select>
                       </div>
                     </div>
+					
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Danh Sách Dữ Liệu API:</label>
+                      <div class="col-sm-9">
+                        <div class="input-group mb-3">
+                          <input disabled class="form-control border-danger" type="text" value="http://<?php echo $serverIp; ?>/API_List.php">
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="/API_List.php" target="_blank">Truy Cập</a></button>
+                        </div>
+                      </div>
+                    </div>
+					
                   </div>
                 </div>
               </div>
@@ -980,7 +991,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng thiết bị chạy chương trình VBot làm Server')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="streming_active" id="streming_active" <?php echo $Config['api']['streaming_server']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="streming_active" id="streming_active" <?php echo $Config['api']['streaming_server']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -1011,7 +1022,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Chế Độ Hội Thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng chế độ hội thoại, trò chuyện liên tục')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="udp_sock_client_conversation_mode" id="udp_sock_client_conversation_mode" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="udp_sock_client_conversation_mode" id="udp_sock_client_conversation_mode" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -1019,7 +1030,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Phát Nhạc Local Trên Client: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để phát nhạc, các bài hát Local trên Client')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="udp_sock_music_playback_on_client" id="udp_sock_music_playback_on_client" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="udp_sock_music_playback_on_client" id="udp_sock_music_playback_on_client" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -1266,7 +1277,7 @@ $read_tts_token_google_cloud = '';
                           <label class="col-sm-3 col-form-label">Auto Scan Mic <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ tìm kiếm và liệt kê các ID và Tên của Microphone có trên hệ thống, và hiển thị ra các đường Logs mỗi khi trương trình được khởi chạy')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="mic_scan_on_boot" id="mic_scan_on_boot" <?php echo $Config['smart_config']['mic']['scan_on_boot'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="mic_scan_on_boot" id="mic_scan_on_boot" <?php echo $Config['smart_config']['mic']['scan_on_boot'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -1319,7 +1330,7 @@ $read_tts_token_google_cloud = '';
                           <label class="col-sm-3 col-form-label">Ghi Nhớ Âm Lượng <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lưu lại giá trị âm lượng vào tệp Config.json mỗi khi được thay đổi trong quá trình Bot hoạt động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="remember_last_volume" id="remember_last_volume" <?php echo $Config['smart_config']['speaker']['remember_last_volume'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="remember_last_volume" id="remember_last_volume" <?php echo $Config['smart_config']['speaker']['remember_last_volume'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -1344,7 +1355,7 @@ $read_tts_token_google_cloud = '';
                           <label for="continue_running_if_hotword_initialization_fails" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup: <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="continue_running_if_hotword_initialization_fails" id="continue_running_if_hotword_initialization_fails" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="continue_running_if_hotword_initialization_fails" id="continue_running_if_hotword_initialization_fails" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -1472,15 +1483,15 @@ $read_tts_token_google_cloud = '';
                             <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_stt; ?></font></center>
                             <div class="col-sm-9">
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="stt_select" id="stt_default" value="stt_default" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_default' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="stt_select" id="stt_default" value="stt_default" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_default' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="stt_default">STT Mặc Định VBot (Free)</label>
                               </div>
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="stt_select" id="stt_ggcloud" value="stt_ggcloud" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="stt_ggcloud">STT Google Cloud V1 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b> <br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                               </div>
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="stt_select" id="stt_ggcloud_v2" value="stt_ggcloud_v2" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud_v2' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="stt_select" id="stt_ggcloud_v2" value="stt_ggcloud_v2" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud_v2' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/>Lệnh Update Cập Nhật Lib: <b>$:> pip install --upgrade google-cloud-speech</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                               </div>
                             </div>
@@ -1588,7 +1599,7 @@ $read_tts_token_google_cloud = '';
                       <label class="col-sm-3 col-form-label">Kích hoạt Cache lại TTS:</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="cache_tts" id="cache_tts" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="cache_tts" id="cache_tts" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
                           <label class="form-check-label" for="cache_tts"> (Bật hoặc Tắt sử dụng Cache)</label>
                         </div>
                       </div>
@@ -1633,35 +1644,35 @@ $read_tts_token_google_cloud = '';
                             <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_tts; ?></font></center>
                             <div class="col-sm-9">
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="tts_default">TTS Mặc Định (Free) <i class="bi bi-question-circle-fill" onclick="show_message('Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định')"></i></label>
                               </div>
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="tts_ggcloud">TTS Google Cloud (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
                               </div>
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tts_select" id="tts_ggcloud_key" value="tts_ggcloud_key" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud_key' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_ggcloud_key" value="tts_ggcloud_key" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud_key' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="tts_ggcloud_key">TTS Google Cloud (Key) hoặc (Free Key) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Key của Google Cloud để xác thực hoặc sử dụng Key miễn phí bằng cách lấy thủ công và có thời gian hết hạn')"></i></label>
                               </div>
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tts_select" id="tts_zalo" value="tts_zalo" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_zalo' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_zalo" value="tts_zalo" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_zalo' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="tts_zalo">TTS Zalo (Api Keys) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Api keys của zalo càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href=\'https://zalo.ai/account/manage-keys\' target=\'_bank\'>https://zalo.ai/account/manage-keys</a>')"></i></label>
                               </div>
                               <div class="form-check">
-                                <input class="form-check-input" type="radio" name="tts_select" id="tts_viettel" value="tts_viettel" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_viettel' ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_viettel" value="tts_viettel" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_viettel' ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="tts_viettel">TTS Viettel (Api Keys) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Api keys của Viettel càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href=\'https://viettelai.vn/dashboard/token\' target=\'_bank\'>https://viettelai.vn/dashboard/token</a>')"></i></label>
                               </div>
                               <div class="form-check" >
-                                <input  class="form-check-input" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
+                                <input  class="form-check-input border-success" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
                                 <label  class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
                               </div>
                               <div class="form-check" >
-                                <input  class="form-check-input" type="radio" name="tts_select" id="tts_dev_customize" value="tts_dev_customize" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_dev_customize' ? 'checked' : ''; ?>>
+                                <input  class="form-check-input border-success" type="radio" name="tts_select" id="tts_dev_customize" value="tts_dev_customize" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_dev_customize' ? 'checked' : ''; ?>>
                                 <label  class="form-check-label" for="tts_dev_customize">TTS DEV Customize: Dev_TTS.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code, chuyển văn bản thành giọng nói nếu chọn tts này, dữ liệu để các bạn code sẽ nằm trong tệp: <b>Dev_TTS.py</b><br/>- Cần thêm kích hoạt bên dưới để sử dụng vào chương trình')"></i></label>
                                 <div class="form-switch">
                                   <label class="form-label" for="tts_dev_customize_active">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Nếu Dùng TTS DEV Custom bạn cần phải kích hoạt để được khởi tạo dữ liệu khi chạy chương trình')"></i></label>
-                                  <input class="form-check-input" type="checkbox" name="tts_dev_customize_active" id="tts_dev_customize_active" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] ? 'checked' : ''; ?>>
+                                  <input class="form-check-input border-success" type="checkbox" name="tts_dev_customize_active" id="tts_dev_customize_active" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] ? 'checked' : ''; ?>>
                                 </div>
                               </div>
                             </div>
@@ -1818,7 +1829,7 @@ echo htmlspecialchars($textareaContent_tts_zalo);
                               </div>
                               <div class="form-floating mb-3">
                                 <div class="form-switch">
-                                  <input class="form-check-input" type="checkbox" name="tts_viettel_without_filter" id="tts_viettel_without_filter" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['without_filter'] ? 'checked' : ''; ?>>
+                                  <input class="form-check-input border-success" type="checkbox" name="tts_viettel_without_filter" id="tts_viettel_without_filter" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['without_filter'] ? 'checked' : ''; ?>>
                                   <label class="form-check-label" for="cache_tts"> <i class="bi bi-question-circle-fill" onclick="show_message('Bật để tăng chất lượng giọng nói nhưng tốc độ sẽ xử lý chậm hơn và ngược lại')"> </i> (Bật, Tắt) Tăng chất lượng giọng nói</label>
                                 </div>
                               </div>
@@ -1913,7 +1924,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng điều khiển nhà thông minh Home Assistant')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="hass_active" id="hass_active" <?php echo $Config['home_assistant']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="hass_active" id="hass_active" <?php echo $Config['home_assistant']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -1921,7 +1932,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" <?php echo $Config['home_assistant']['custom_commands']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" <?php echo $Config['home_assistant']['custom_commands']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -1994,7 +2005,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt sử dụng giao thức MQTT')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="mqtt_active" id="mqtt_active" <?php echo $Config['mqtt_broker']['mqtt_active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="mqtt_active" id="mqtt_active" <?php echo $Config['mqtt_broker']['mqtt_active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2002,7 +2013,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Logs MQTT <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để hiển thị logs khi kết nối, mất kết nối MQTT')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="mqtt_show_logs_reconnect" id="mqtt_show_logs_reconnect" <?php echo $Config['mqtt_broker']['mqtt_show_logs_reconnect'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="mqtt_show_logs_reconnect" id="mqtt_show_logs_reconnect" <?php echo $Config['mqtt_broker']['mqtt_show_logs_reconnect'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2067,7 +2078,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Retain <i class="bi bi-question-circle-fill" onclick="show_message('- retain=True: Khi bạn gửi một tin nhắn với retain=True, MQTT broker sẽ giữ lại tin nhắn đó và gửi lại cho bất kỳ client nào kết nối vào MQTT đó sau này, ngay cả khi client đó đã không nhận dữ liệu ban đầu.<br/><br/>- retain=False: Tin nhắn sẽ không được lưu trữ. Khi client kết nối vào MQTT, nó sẽ không nhận lại tin nhắn cũ')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="mqtt_retain" id="mqtt_retain" <?php echo $Config['mqtt_broker']['mqtt_retain'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="mqtt_retain" id="mqtt_retain" <?php echo $Config['mqtt_broker']['mqtt_retain'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2095,7 +2106,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Kích hoạt đèn Led <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng đèn led trạng thái')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="led_active_on_off" id="led_active_on_off" <?php echo $Config['smart_config']['led']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="led_active_on_off" id="led_active_on_off" <?php echo $Config['smart_config']['led']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2132,7 +2143,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Đảo ngược đầu LED <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược đầu (Bắt Đầu) sáng của đèn led')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="led_invert" id="led_invert" <?php echo $Config['smart_config']['led']['led_invert'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="led_invert" id="led_invert" <?php echo $Config['smart_config']['led']['led_invert'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2140,7 +2151,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Đèn LED khi khởi động <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng đèn led báo trạng thái khi trương trình đang khởi chạy')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="led_starting_up" id="led_starting_up" <?php echo $Config['smart_config']['led']['led_starting_up'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="led_starting_up" id="led_starting_up" <?php echo $Config['smart_config']['led']['led_starting_up'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2190,7 +2201,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn hoặc không sử dụng')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="button_active" id="button_active" <?php echo $Config['smart_config']['button_active']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="button_active" id="button_active" <?php echo $Config['smart_config']['button_active']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2237,10 +2248,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           echo '<tr>';
                               echo '<th scope="row" style="text-align: center; vertical-align: middle;"><center>' . $buttonName . ':</center></th>';
                               echo '<td style="text-align: center; vertical-align: middle;"><!-- GPIO --><input required type="number" style="width: 90px;" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
-                          echo '<td style="text-align: center; vertical-align: middle;"><!-- Pulled High --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][pulled_high]"' . ($buttonData['pulled_high'] ? ' checked' : '') . '></div></td>';
-                          echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn nhả --> <div class="form-switch"><center><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
+                          echo '<td style="text-align: center; vertical-align: middle;"><!-- Pulled High --><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][pulled_high]"' . ($buttonData['pulled_high'] ? ' checked' : '') . '></div></td>';
+                          echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn nhả --> <div class="form-switch"><center><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
                           echo '<td><center><!-- bounce_time --><input required type="number" min="20" max="500" step="10" style="width: 100px;" class="form-control border-success" title="" name="button[' . $buttonName . '][bounce_time]" value="' . $buttonData['bounce_time'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
-                          echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
+                          echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
                           echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="2" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
                           echo '</tr>';
                           }
@@ -2260,7 +2271,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn dạng Encoder Rotary hoặc không sử dụng')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="encoder_rotary_active" id="encoder_rotary_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="encoder_rotary_active" id="encoder_rotary_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -2289,7 +2300,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
     <th scope="col" style="text-align: center; vertical-align: middle;">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng tính năng Nhấn Giữ')"></i>:</th>
 <td scope="col" style="text-align: center; vertical-align: middle;">
 <div class="form-switch">
-<input class="form-check-input" type="checkbox" name="ncoder_rotary_long_press_active" id="ncoder_rotary_long_press_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] ? 'checked' : ''; ?>>
+<input class="form-check-input border-success" type="checkbox" name="ncoder_rotary_long_press_active" id="ncoder_rotary_long_press_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] ? 'checked' : ''; ?>>
 </div>
 </td>
     </tr>
@@ -2332,7 +2343,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 <th colspan="1" style="text-align: center; vertical-align: middle;"><font color="blue">Hiển Thị Logs Khi Xoay:</font></th>
 <td colspan="1" style="text-align: center; vertical-align: middle;">
 <div class="form-switch">
-<input class="form-check-input" type="checkbox" name="encoder_rotating_show_logs" id="encoder_rotating_show_logs" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] ? 'checked' : ''; ?>>
+<input class="form-check-input border-success" type="checkbox" name="encoder_rotating_show_logs" id="encoder_rotating_show_logs" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] ? 'checked' : ''; ?>>
 </div>
 </td>
 <td colspan="4">
@@ -2361,7 +2372,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt hiển thị sử dụng màn hình LCD OLED')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="display_screen_active" id="display_screen_active" <?php echo $Config['display_screen']['active'] ? 'checked' : ''; ?> title="Nhấn để Bật hoặc Tắt sử dụng màn hình">
+                          <input class="form-check-input border-success" type="checkbox" name="display_screen_active" id="display_screen_active" <?php echo $Config['display_screen']['active'] ? 'checked' : ''; ?> title="Nhấn để Bật hoặc Tắt sử dụng màn hình">
                         </div>
                       </div>
                     </div>
@@ -2461,7 +2472,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi chương trình khởi động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="sound_welcome_active" id="sound_welcome_active" <?php echo $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="sound_welcome_active" id="sound_welcome_active" <?php echo $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2559,7 +2570,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt: </label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="media_player_active" id="media_player_active" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="media_player_active" id="media_player_active" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2567,7 +2578,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Cho Phép Đánh Thức Khi Đang Phát Media player: </label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="wake_up_in_media_player" id="wake_up_in_media_player" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="wake_up_in_media_player" id="wake_up_in_media_player" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2605,7 +2616,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt tự động đồng bộ khi truy cập vào Web UI')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="media_sync_ui" id="media_sync_ui" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="media_sync_ui" id="media_sync_ui" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2676,7 +2687,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc Zing MP3')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" <?php echo $Config['media_player']['zing_mp3']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" <?php echo $Config['media_player']['zing_mp3']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2689,7 +2700,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc Youtube')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="youtube_active" id="youtube_active" <?php echo $Config['media_player']['youtube']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="youtube_active" id="youtube_active" <?php echo $Config['media_player']['youtube']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2711,7 +2722,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc Local')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="music_local_active" id="music_local_active" <?php echo $Config['media_player']['music_local']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="music_local_active" id="music_local_active" <?php echo $Config['media_player']['music_local']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2768,7 +2779,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng Đọc Truyện')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="podcast_active" id="podcast_active" <?php echo $Config['media_player']['podcast']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="podcast_active" id="podcast_active" <?php echo $Config['media_player']['podcast']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2776,7 +2787,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Cho phép dùng ưu tiên trợ lý ảo: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Kích hoạt, sẽ sử dụng dữ liệu từ chế độ: Ưu tiên trợ lý ảo')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="podcast_virtual_assistants_active" id="podcast_virtual_assistants_active" <?php echo $Config['media_player']['podcast']['allows_priority_use_of_virtual_assistants'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="podcast_virtual_assistants_active" id="podcast_virtual_assistants_active" <?php echo $Config['media_player']['podcast']['allows_priority_use_of_virtual_assistants'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2790,7 +2801,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng nguồn phát radio')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="radio_active" id="radio_active" <?php echo $Config['media_player']['radio']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="radio_active" id="radio_active" <?php echo $Config['media_player']['radio']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2856,7 +2867,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng nguồn phát radio')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="news_paper_active" id="news_paper_active" <?php echo $Config['media_player']['news_paper']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="news_paper_active" id="news_paper_active" <?php echo $Config['media_player']['news_paper']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2952,7 +2963,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Default Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="default_assistant_active" id="default_assistant_active" <?php echo $Config['virtual_assistant']['default_assistant']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="default_assistant_active" id="default_assistant_active" <?php echo $Config['virtual_assistant']['default_assistant']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -2968,7 +2979,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             <label class="col-sm-3 col-form-label">Áp dụng với Chatbot <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
                             <div class="col-sm-9">
                               <div class="form-switch">
-                                <input class="form-check-input" type="checkbox" name="default_assistant_convert_audio_to_text_used_for_chatbox" id="default_assistant_convert_audio_to_text_used_for_chatbox" <?php echo $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_chatbox'] ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="checkbox" name="default_assistant_convert_audio_to_text_used_for_chatbox" id="default_assistant_convert_audio_to_text_used_for_chatbox" <?php echo $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_chatbox'] ? 'checked' : ''; ?>>
                               </div>
                             </div>
                           </div>
@@ -2976,7 +2987,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             <label class="col-sm-3 col-form-label">Áp dụng với Hệ thống, Console, Logs, Logs API <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
                             <div class="col-sm-9">
                               <div class="form-switch">
-                                <input class="form-check-input" type="checkbox" name="default_assistant_convert_audio_to_text_used_for_display_and_logs" id="default_assistant_convert_audio_to_text_used_for_display_and_logs" <?php echo $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_display_and_logs'] ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="checkbox" name="default_assistant_convert_audio_to_text_used_for_display_and_logs" id="default_assistant_convert_audio_to_text_used_for_display_and_logs" <?php echo $Config['virtual_assistant']['default_assistant']['convert_audio_to_text']['used_for_display_and_logs'] ? 'checked' : ''; ?>>
                               </div>
                             </div>
                           </div>
@@ -2990,7 +3001,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" <?php echo $Config['virtual_assistant']['zalo_assistant']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="zalo_assistant_active" id="zalo_assistant_active" <?php echo $Config['virtual_assistant']['zalo_assistant']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3016,7 +3027,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Olli AI Assistant')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="olli_assistant_active" id="olli_assistant_active" <?php echo $Config['virtual_assistant']['olli']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="olli_assistant_active" id="olli_assistant_active" <?php echo $Config['virtual_assistant']['olli']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3056,7 +3067,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             <label class="col-sm-3 col-form-label">Áp dụng với Chatbot <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
                             <div class="col-sm-9">
                               <div class="form-switch">
-                                <input class="form-check-input" type="checkbox" name="olli_convert_audio_to_text_used_for_chatbox" id="olli_convert_audio_to_text_used_for_chatbox" <?php echo $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_chatbox'] ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="checkbox" name="olli_convert_audio_to_text_used_for_chatbox" id="olli_convert_audio_to_text_used_for_chatbox" <?php echo $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_chatbox'] ? 'checked' : ''; ?>>
                               </div>
                             </div>
                           </div>
@@ -3064,7 +3075,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             <label class="col-sm-3 col-form-label">Áp dụng với Hệ thống, Console, Logs, Logs API <i class="bi bi-question-circle-fill" onclick="show_message('khi được tắt dữ liệu trả về sẽ là file âm thanh, khi được bật sẽ trả về dữ liệu là file âm thanh và văn bản (text)<br/>Cân nhắc khi được bật thời gian xử lý sẽ lâu hơn')"></i> :</label>
                             <div class="col-sm-9">
                               <div class="form-switch">
-                                <input class="form-check-input" type="checkbox" name="olli_convert_audio_to_text_used_for_display_and_logs" id="olli_convert_audio_to_text_used_for_display_and_logs" <?php echo $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_display_and_logs'] ? 'checked' : ''; ?>>
+                                <input class="form-check-input border-success" type="checkbox" name="olli_convert_audio_to_text_used_for_display_and_logs" id="olli_convert_audio_to_text_used_for_display_and_logs" <?php echo $Config['virtual_assistant']['olli']['convert_audio_to_text']['used_for_display_and_logs'] ? 'checked' : ''; ?>>
                               </div>
                             </div>
                           </div>
@@ -3079,7 +3090,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Gemini')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="google_gemini_active" id="google_gemini_active" <?php echo $Config['virtual_assistant']['google_gemini']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="google_gemini_active" id="google_gemini_active" <?php echo $Config['virtual_assistant']['google_gemini']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3155,7 +3166,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Chat GPT')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="chat_gpt_active" id="chat_gpt_active" <?php echo $Config['virtual_assistant']['chat_gpt']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="chat_gpt_active" id="chat_gpt_active" <?php echo $Config['virtual_assistant']['chat_gpt']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3209,7 +3220,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="dify_ai_active" id="dify_ai_active" <?php echo $Config['virtual_assistant']['dify_ai']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="dify_ai_active" id="dify_ai_active" <?php echo $Config['virtual_assistant']['dify_ai']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3217,7 +3228,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Giữ Phiên Chat Session <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để lưu trữ ID phiên cho các lần hỏi đáp tiếp theo<br/><br/>- Phiên sẽ được làm mới mỗi khi chương trình VBot được khởi chạy')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="dify_ai_session_chat" id="dify_ai_session_chat" <?php echo $Config['virtual_assistant']['dify_ai']['session_chat_conversation'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="dify_ai_session_chat" id="dify_ai_session_chat" <?php echo $Config['virtual_assistant']['dify_ai']['session_chat_conversation'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3247,13 +3258,13 @@ if (file_exists($gemini_model_list_json_file)) {
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title">
-                          Trợ Lý DEV Assistant: Dev_Assistant.py (Custom Assistant, Người dùng tự code) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
+                          Trợ Lý DEV Assistant: Dev_Assistant.py <font color=red>(Custom Assistant, Người dùng tự code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
                         </h5>
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="customize_developer_assistant_active" id="customize_developer_assistant_active" <?php echo $Config['virtual_assistant']['customize_developer_assistant']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="customize_developer_assistant_active" id="customize_developer_assistant_active" <?php echo $Config['virtual_assistant']['customize_developer_assistant']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3265,14 +3276,14 @@ if (file_exists($gemini_model_list_json_file)) {
               <div class="card accordion" id="accordion_button_collapse_button_developer_customization">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" title="chế độ tùy chỉnh cho các lập trình viên, DEV" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_developer_customization" aria-expanded="false" aria-controls="collapse_button_developer_customization">
-                    DEV Customization: Dev_Customization.py (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> :
+                    DEV Customization: Custom Skill, Dev_Customization.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> :
                   </h5>
                   <div id="collapse_button_developer_customization" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_developer_customization">
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Chế độ DEV: Dev_Customization.py (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ để vào và sử dụng chế độ Custom Skill cho các bạn Dev thoải mái xử lý dữ liệu lập trình và tùy biến')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="developer_customization_active" id="developer_customization_active" <?php echo $Config['developer_customization']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="developer_customization_active" id="developer_customization_active" <?php echo $Config['developer_customization']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3283,7 +3294,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Tiếp tục sử dụng VBot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng VBot xử lý dữ liệu khi mà Custom Skill không xử lý được')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" <?php echo $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="developer_customization_vbot_processing" id="developer_customization_vbot_processing" <?php echo $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3295,14 +3306,14 @@ if (file_exists($gemini_model_list_json_file)) {
               <div class="card accordion" id="accordion_button_schedule_lich">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_schedule_lich" aria-expanded="false" aria-controls="collapse_button_schedule_lich">
-                    Cài Đặt Lời Nhắc, Thông báo (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo')"></i>:
+                    Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo')"></i>:
                   </h5>
                   <div id="collapse_button_schedule_lich" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_lich">
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để khởi động Phát lời nhắc, Thông báo khi VBot được khởi chạy')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="schedule_active" id="schedule_active" <?php echo $Config['schedule']['active'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="schedule_active" id="schedule_active" <?php echo $Config['schedule']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3324,14 +3335,14 @@ if (file_exists($gemini_model_list_json_file)) {
               <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_cap_nhat" aria-expanded="false" aria-controls="collapse_button_sao_luu_cap_nhat">
-                    Cấu Hình Cài Đặt: Sao Lưu/Cập Nhật:
+                    Cấu Hình Cài Đặt Sao Lưu/Cập Nhật:
                   </h5>
                   <div id="collapse_button_sao_luu_cap_nhat" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sao_luu_cap_nhat">
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Tự Động Kiểm Tra Bản Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ tự động kiểm tra cập nhật mới khi truy cập vào giao diện web ui')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="automatically_check_for_updates" id="automatically_check_for_updates" <?php echo $Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="automatically_check_for_updates" id="automatically_check_for_updates" <?php echo $Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3339,7 +3350,7 @@ if (file_exists($gemini_model_list_json_file)) {
                       <label class="col-sm-3 col-form-label">Khởi Động Lại VBot: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, Chương trình sẽ khởi động lại VBot khi quá trình cập nhật Nâng Cấp VBot thành công')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="restart_vbot_upgrade" id="restart_vbot_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['restart_vbot'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="restart_vbot_upgrade" id="restart_vbot_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['restart_vbot'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3347,7 +3358,7 @@ if (file_exists($gemini_model_list_json_file)) {
                       <label class="col-sm-3 col-form-label">Thông Báo Âm Thanh: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ thông báo bằng âm thanh khi quá trình Cập Nhật, Nâng Cấp Giao Diện Web hoặc chương trình VBot thành công')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="sound_notification_backup_upgrade" id="sound_notification_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['sound_notification'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="sound_notification_backup_upgrade" id="sound_notification_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['sound_notification'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3355,7 +3366,7 @@ if (file_exists($gemini_model_list_json_file)) {
                       <label class="col-sm-3 col-form-label">Tải Lại Giao Diện Web: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ tải lại giao diện Web khi Nâng Cấp, Cập Nhật web ui thành công')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="refresh_page_ui_backup_upgrade" id="refresh_page_ui_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] ? 'checked' : ''; ?>>
+                          <input class="form-check-input border-success" type="checkbox" name="refresh_page_ui_backup_upgrade" id="refresh_page_ui_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3366,7 +3377,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Config.json mỗi khi lưu hoặc thay đổi cấu hình Config.json')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="backup_config_json_active" id="backup_config_json_active" <?php echo $Config['backup_upgrade']['config_json']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="backup_config_json_active" id="backup_config_json_active" <?php echo $Config['backup_upgrade']['config_json']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3395,7 +3406,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Home_Assistant_Custom.json mỗi khi lưu hoặc thay đổi cấu hình Home_Assistant_Custom.json')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="custom_home_assistant_active" id="custom_home_assistant_active" <?php echo $Config['backup_upgrade']['custom_home_assistant']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="custom_home_assistant_active" id="custom_home_assistant_active" <?php echo $Config['backup_upgrade']['custom_home_assistant']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3424,7 +3435,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Data_Schedule.json mỗi khi lưu hoặc thay đổi lưu cấu hình')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="backup_scheduler_active" id="backup_scheduler_active" <?php echo $Config['backup_upgrade']['scheduler']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="backup_scheduler_active" id="backup_scheduler_active" <?php echo $Config['backup_upgrade']['scheduler']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3452,14 +3463,14 @@ if (file_exists($gemini_model_list_json_file)) {
                         <div class="card accordion" id="accordion_button_cau_hinh_sao_luu_vbot">
                           <div class="card-body">
                             <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cau_hinh_sao_luu_vbot" aria-expanded="false" aria-controls="collapse_button_cau_hinh_sao_luu_vbot">
-                              Sao Lưu VBot:
+                              Sao Lưu Chương Trình VBot:
                             </h5>
                             <div id="collapse_button_cau_hinh_sao_luu_vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cau_hinh_sao_luu_vbot">
                               <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Đồng bộ lên Google Drive: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu sẽ được tải lên Google Drive')"></i> :</label>
                                 <div class="col-sm-9">
                                   <div class="form-switch">
-                                    <input class="form-check-input" type="checkbox" name="backup_vbot_google_drive" id="backup_vbot_google_drive" <?php echo $Config['backup_upgrade']['vbot_program']['backup']['backup_to_cloud']['google_drive'] ? 'checked' : ''; ?>>
+                                    <input class="form-check-input border-success" type="checkbox" name="backup_vbot_google_drive" id="backup_vbot_google_drive" <?php echo $Config['backup_upgrade']['vbot_program']['backup']['backup_to_cloud']['google_drive'] ? 'checked' : ''; ?>>
                                   </div>
                                 </div>
                               </div>
@@ -3522,14 +3533,14 @@ echo "\n";
                         <div class="card accordion" id="accordion_button_cau_hinh_Cap_nhat_Vbot">
                           <div class="card-body">
                             <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cau_hinh_Cap_nhat_Vbot" aria-expanded="false" aria-controls="collapse_button_cau_hinh_Cap_nhat_Vbot">
-                              Cập Nhật VBot:
+                              Cập Nhật Chương Trình VBot:
                             </h5>
                             <div id="collapse_button_cau_hinh_Cap_nhat_Vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cau_hinh_Cap_nhat_Vbot">
                               <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu được tạo ra trước khi cập nhật sẽ được tải lên Google Drive')"></i> :</label>
                                 <div class="col-sm-9">
                                   <div class="form-switch">
-                                    <input class="form-check-input" type="checkbox" name="make_a_backup_before_updating_vbot" id="make_a_backup_before_updating_vbot" <?php echo $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
+                                    <input class="form-check-input border-success" type="checkbox" name="make_a_backup_before_updating_vbot" id="make_a_backup_before_updating_vbot" <?php echo $Config['backup_upgrade']['vbot_program']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
                                   </div>
                                 </div>
                               </div>
@@ -3562,14 +3573,14 @@ echo "\n";
                         <div class="card accordion" id="accordion_button_sao_luu_giao_dien">
                           <div class="card-body">
                             <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_giao_dien" aria-expanded="false" aria-controls="collapse_button_sao_luu_giao_dien">
-                              Sao Lưu Giao Diện:
+                              Sao Lưu Giao Diện WebUI VBot:
                             </h5>
                             <div id="collapse_button_sao_luu_giao_dien" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sao_luu_giao_dien">
                               <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Đồng bộ lên Google Drive: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu sẽ được tải lên Google Drive')"></i> :</label>
                                 <div class="col-sm-9">
                                   <div class="form-switch">
-                                    <input class="form-check-input" type="checkbox" name="backup_web_interface_google_drive" id="backup_web_interface_google_drive" <?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'checked' : ''; ?>>
+                                    <input class="form-check-input border-success" type="checkbox" name="backup_web_interface_google_drive" id="backup_web_interface_google_drive" <?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'checked' : ''; ?>>
                                   </div>
                                 </div>
                               </div>
@@ -3627,14 +3638,14 @@ echo "\n";
                         <div class="card accordion" id="accordion_button_cap_nhat_giao_dien">
                           <div class="card-body">
                             <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cap_nhat_giao_dien" aria-expanded="false" aria-controls="collapse_button_cap_nhat_giao_dien">
-                              Cập Nhật Giao Diện:
+                              Cập Nhật Giao Diện WebUI VBot:
                             </h5>
                             <div id="collapse_button_cap_nhat_giao_dien" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cap_nhat_giao_dien">
                               <div class="row mb-3">
                                 <label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu được tạo ra trước khi cập nhật sẽ được tải lên Google Drive')"></i> :</label>
                                 <div class="col-sm-9">
                                   <div class="form-switch">
-                                    <input class="form-check-input" type="checkbox" name="make_a_backup_before_updating_interface" id="make_a_backup_before_updating_interface" <?php echo $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
+                                    <input class="form-check-input border-success" type="checkbox" name="make_a_backup_before_updating_interface" id="make_a_backup_before_updating_interface" <?php echo $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] ? 'checked' : ''; ?>>
                                   </div>
                                 </div>
                               </div>
@@ -3667,7 +3678,7 @@ echo "\n";
               <div class="card accordion" id="accordion_button_Cloud_backup">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Cloud_Backup" aria-expanded="false" aria-controls="collapse_button_Cloud_Backup">
-                    Cấu Hình Sao Lưu Dữ Liệu - Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:
+                    Cấu Hình Tải Lên Bản Sao Lưu Dữ Liệu - Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:
                   </h5>
                   <div id="collapse_button_Cloud_Backup" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Cloud_Backup">
                     <div class="card">
@@ -3677,7 +3688,7 @@ echo "\n";
                           <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu dữ liệu lê Google Cloud Drive')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input class="form-check-input" type="checkbox" name="google_cloud_drive_active" id="google_cloud_drive_active" <?php echo $Config['backup_upgrade']['google_cloud_drive']['active'] ? 'checked' : ''; ?>>
+                              <input class="form-check-input border-success" type="checkbox" name="google_cloud_drive_active" id="google_cloud_drive_active" <?php echo $Config['backup_upgrade']['google_cloud_drive']['active'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
@@ -3748,7 +3759,7 @@ echo "\n";
                       <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để Khởi Tạo Bluetooth')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="bluetooth_active" id="bluetooth_active" <?php echo $Config['bluetooth']['active'] ? 'checked' : ''; ?>>
+                          <input readonly class="form-check-input border-danger" type="checkbox" name="bluetooth_active" id="bluetooth_active" <?php echo $Config['bluetooth']['active'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3756,7 +3767,7 @@ echo "\n";
                       <label class="col-sm-3 col-form-label">Hiển thị Logs Bluetooth <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để hiển thị logs Bluetooth')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
-                          <input class="form-check-input" type="checkbox" name="bluetooth_show_logs" id="bluetooth_show_logs" <?php echo $Config['bluetooth']['show_logs'] ? 'checked' : ''; ?>>
+                          <input readonly class="form-check-input border-danger" type="checkbox" name="bluetooth_show_logs" id="bluetooth_show_logs" <?php echo $Config['bluetooth']['show_logs'] ? 'checked' : ''; ?>>
                         </div>
                       </div>
                     </div>
@@ -3793,7 +3804,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Kích hoạt chế độ câu phản hồi <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ câu phản hồi')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="wakeup_reply_active" id="wakeup_reply_active" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="wakeup_reply_active" id="wakeup_reply_active" <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -3836,7 +3847,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Kích hoạt chế độ hội thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ hội thoại')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="conversation_mode" id="conversation_mode" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="conversation_mode" id="conversation_mode" <?php echo $Config['smart_config']['smart_wakeup']['conversation_mode'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -3850,7 +3861,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Kích hoạt chế độ xử lý đa lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ đa lệnh trong 1 câu')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="multiple_command" id="multiple_command" <?php echo $Config['multiple_command']['active'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="multiple_command" id="multiple_command" <?php echo $Config['multiple_command']['active'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -3859,7 +3870,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Tiếp tục được đánh thức, lắng nghe khi xử lý xong đa lệnh: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để tự động được đánh thức và lắng nghe câu lệnh tiếp theo, khi xử lý xong đa lệnh trong 1 câu<br/> - Yêu cầu Chế Độ Hội Thoại phải được kích hoạt để sử dụng')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="continue_listening_after_commands" id="continue_listening_after_commands" <?php echo $Config['multiple_command']['continue_listening_after_commands'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="continue_listening_after_commands" id="continue_listening_after_commands" <?php echo $Config['multiple_command']['continue_listening_after_commands'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -3874,7 +3885,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Bật, Tắt đọc thông tin <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt đọc thông tin khi Chương trình khởi động như: Địa chỉ ip của thiết bị, v..v...')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="read_information_startup" id="read_information_startup" <?php echo $Config['smart_config']['read_information_startup']['active'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="read_information_startup" id="read_information_startup" <?php echo $Config['smart_config']['read_information_startup']['active'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -3896,7 +3907,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Khởi động lại hệ thống khi gặp sự cố hoặc lỗi bất ngờ: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động khởi động lại chương trình VBot khi gặp sự cố hoặc có lỗi xảy ra bất ngờ, Sẽ chỉ hoạt động ở chế độ đang chạy Auto')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="auto_restart_program_error" id="auto_restart_program_error" <?php echo $Config['smart_config']['auto_restart_program_error'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="auto_restart_program_error" id="auto_restart_program_error" <?php echo $Config['smart_config']['auto_restart_program_error'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -3909,7 +3920,7 @@ echo "\n";
                     <label class="col-sm-3 col-form-label">Bật, Tắt logs hệ thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ chương trình khi được chạy')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="log_active" id="log_active" <?php echo $Config['smart_config']['show_log']['active'] ? 'checked' : ''; ?>>
+                        <input class="form-check-input border-success" type="checkbox" name="log_active" id="log_active" <?php echo $Config['smart_config']['show_log']['active'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
@@ -4195,7 +4206,7 @@ function loadWakeupReply() {
                             '<tr>' +
                                 '<td style="text-align: center;">' + (index + 1) + '</td>' +
                                 '<td style="text-align: center;"><div class="form-switch">' +
-                                    '<input class="form-check-input" type="checkbox" name="save_wakeup_reply_active_' + index + '" ' + (item.active ? 'checked' : '') + '>' +
+                                    '<input class="form-check-input border-success" type="checkbox" name="save_wakeup_reply_active_' + index + '" ' + (item.active ? 'checked' : '') + '>' +
                                 '</div></td>' +
                                 '<td>' +
                                     '<input readonly class="form-control border-danger" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + item.file_name + '">' +

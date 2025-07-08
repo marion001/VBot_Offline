@@ -1140,7 +1140,7 @@
                   <label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật:</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="make_a_backup_before_updating" id="make_a_backup_before_updating" <?php if ($Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating']) echo 'checked'; ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="make_a_backup_before_updating" id="make_a_backup_before_updating" <?php if ($Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating']) echo 'checked'; ?>>
                     </div>
                   </div>
                 </div>
@@ -1148,7 +1148,7 @@
                   <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thông Báo Âm Thanh <i class="bi bi-question-circle-fill" onclick="show_message('Thông báo bằng âm thanh khi chương trình được cập nhật thành công')"></i>:</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="sound_updated_the_interface_successfully" id="sound_updated_the_interface_successfully"  <?php if ($Config['backup_upgrade']['advanced_settings']['sound_notification']) echo 'checked'; ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="sound_updated_the_interface_successfully" id="sound_updated_the_interface_successfully"  <?php if ($Config['backup_upgrade']['advanced_settings']['sound_notification']) echo 'checked'; ?>>
                     </div>
                   </div>
                 </div>
@@ -1156,7 +1156,7 @@
                   <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Tải Bản Sao Lưu Lên Cloud:</label>
                   <div class="col-sm-9">
                     <div class="input-group mb-3">
-                      <input <?php echo $google_cloud_drive_active ? '' : 'disabled'; ?> class="form-check-input" type="checkbox" name="web_interface_cloud_backup_khi_cap_nhat" id="web_interface_cloud_backup_khi_cap_nhat" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_cloud_backup_khi_cap_nhat">Google Drive</label>&emsp;&emsp;
+                      <input <?php echo $google_cloud_drive_active ? '' : 'disabled'; ?> class="form-check-input border-success" type="checkbox" name="web_interface_cloud_backup_khi_cap_nhat" id="web_interface_cloud_backup_khi_cap_nhat" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_cloud_backup_khi_cap_nhat">Google Drive</label>&emsp;&emsp;
                     </div>
                   </div>
                 </div>
@@ -1166,7 +1166,7 @@
                     <div class="input-group mb-3">
                       <?php
                         foreach ($Config['backup_upgrade']['web_interface']['upgrade']['keep_file_directory'] as $keep_the_file_folder_tuyen) {
-                            echo '<input type="checkbox" class="form-check-input" name="keep_the_file_folder[]" id="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" value="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" checked>&nbsp;<label for="' . htmlspecialchars($keep_the_file_folder_tuyen) . '">' . htmlspecialchars($keep_the_file_folder_tuyen) . '</label>&emsp;&emsp;';
+                            echo '<input type="checkbox" class="form-check-input border-success" name="keep_the_file_folder[]" id="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" value="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" checked>&nbsp;<label for="' . htmlspecialchars($keep_the_file_folder_tuyen) . '">' . htmlspecialchars($keep_the_file_folder_tuyen) . '</label>&emsp;&emsp;';
                         }
                         ?>
                     </div>
@@ -1203,7 +1203,7 @@
                     <div class="input-group mb-3">
                       <?php
                         foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_files_folder'] as $exclude_files_folderr) {
-                            echo '<input type="checkbox" class="form-check-input" name="exclude_files_folder[]" id="' . htmlspecialchars($exclude_files_folderr) . '" value="' . htmlspecialchars($exclude_files_folderr) . '" checked>&nbsp;<label for="' . htmlspecialchars($exclude_files_folderr) . '">' . htmlspecialchars($exclude_files_folderr) . '</label>&emsp;&emsp;';
+                            echo '<input type="checkbox" class="form-check-input border-success" name="exclude_files_folder[]" id="' . htmlspecialchars($exclude_files_folderr) . '" value="' . htmlspecialchars($exclude_files_folderr) . '" checked>&nbsp;<label for="' . htmlspecialchars($exclude_files_folderr) . '">' . htmlspecialchars($exclude_files_folderr) . '</label>&emsp;&emsp;';
                         }
                         ?>
                     </div>
@@ -1215,7 +1215,7 @@
                     <div class="input-group mb-3">
                       <?php
                         foreach ($Config['backup_upgrade']['web_interface']['backup']['exclude_file_format'] as $exclude_file_formatt) {
-                            echo '<input type="checkbox" class="form-check-input" name="exclude_file_format[]" id="' . htmlspecialchars($exclude_file_formatt) . '" value="' . htmlspecialchars($exclude_file_formatt) . '" checked>&nbsp;<label for="' . htmlspecialchars($exclude_file_formatt) . '">' . htmlspecialchars($exclude_file_formatt) . '</label>&emsp;&emsp;';
+                            echo '<input type="checkbox" class="form-check-input border-success" name="exclude_file_format[]" id="' . htmlspecialchars($exclude_file_formatt) . '" value="' . htmlspecialchars($exclude_file_formatt) . '" checked>&nbsp;<label for="' . htmlspecialchars($exclude_file_formatt) . '">' . htmlspecialchars($exclude_file_formatt) . '</label>&emsp;&emsp;';
                         }
                         ?>
                     </div>
@@ -1226,7 +1226,7 @@
                   <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Nguồn:</label>
                   <div class="col-sm-9">
                     <div class="input-group mb-3">
-                      <input <?php echo $google_cloud_drive_active ? '' : 'disabled'; ?> class="form-check-input" type="checkbox" name="web_interface_cloud_backup" id="web_interface_gdrive_backup" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_gdrive_backup">Google Drive</label>&emsp;&emsp;
+                      <input <?php echo $google_cloud_drive_active ? '' : 'disabled'; ?> class="form-check-input border-success" type="checkbox" name="web_interface_cloud_backup" id="web_interface_gdrive_backup" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive'] ? 'gdrive' : ''; ?>" <?php if ($Config['backup_upgrade']['web_interface']['backup']['backup_to_cloud']['google_drive']) echo 'checked'; ?>>&nbsp;<label for="web_interface_gdrive_backup">Google Drive</label>&emsp;&emsp;
                     </div>
                   </div>
                 </div>

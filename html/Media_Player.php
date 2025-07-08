@@ -55,7 +55,7 @@
               <div class="card-body">
                 <div class="card-title">
                   <div class="form-switch">
-                    <input class="form-check-input" type="checkbox" name="sync_checkbox" id="sync_checkbox" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
+                    <input class="form-check-input border-success" type="checkbox" name="sync_checkbox" id="sync_checkbox" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
                     <label class="form-check-label" for="sync_checkbox" title="Thiết lập trong: Cấu hình Config->Đồng bộ trạng thái với Web UI"> Đồng Bộ</label>
                   </div>
                 </div>
