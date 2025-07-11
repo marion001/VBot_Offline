@@ -1134,7 +1134,7 @@ $read_tts_token_google_cloud = '';
 					<div class="row mb-3">
                       <label for="port_server_socket_streaming_audio" class="col-sm-3 col-form-label">Port Server Socket:</label>
                       <div class="col-sm-9">
-                          <input required type="number" class="form-control border-success" name="port_server_socket_streaming_audio" id="port_server_socket_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>">
+                          <input required type="number" class="form-control border-danger" name="port_server_socket_streaming_audio" id="port_server_socket_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>">
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio Socket!</div>
                       </div>
                     </div>
@@ -1142,7 +1142,7 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="socket_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa:</label>
                       <div class="col-sm-9">
-                        <input required type="number" class="form-control border-success" name="socket_maximum_recording_time" id="socket_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>">
+                        <input required type="number" class="form-control border-danger" name="socket_maximum_recording_time" id="socket_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>">
                         <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
                       </div>
                     </div>
@@ -1150,7 +1150,7 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="socket_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối:</label>
                       <div class="col-sm-9">
-                        <input required type="number" class="form-control border-success" name="socket_maximum_client_connected" id="socket_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>">
+                        <input required type="number" class="form-control border-danger" name="socket_maximum_client_connected" id="socket_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>">
                         <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
                       </div>
                     </div>
@@ -1158,7 +1158,7 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="streaming_server_source_stt_socket" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client:</label>
                       <div class="col-sm-9">
-                        <select name="streaming_server_source_stt_socket" id="streaming_server_source_stt_socket" class="form-select border-success" aria-label="Default select example">
+                        <select name="streaming_server_source_stt_socket" id="streaming_server_source_stt_socket" class="form-select border-danger" aria-label="Default select example">
                           <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['socket']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
 						</select>
                       </div>
@@ -1167,7 +1167,7 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="streaming_server_working_mode_socket" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
                       <div class="col-sm-9">
-                        <select name="streaming_server_working_mode_socket" id="streaming_server_working_mode_socket" class="form-select border-success" aria-label="Default select example">
+                        <select name="streaming_server_working_mode_socket" id="streaming_server_working_mode_socket" class="form-select border-danger" aria-label="Default select example">
                           <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
                           <option disabled value="null" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
 						</select>
@@ -1177,7 +1177,7 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="streaming_server_select_wakeup_socket" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
                       <div class="col-sm-9">
-                        <select name="streaming_server_select_wakeup_socket" id="streaming_server_select_wakeup_socket" class="form-select border-success" aria-label="Default select example">
+                        <select name="streaming_server_select_wakeup_socket" id="streaming_server_select_wakeup_socket" class="form-select border-danger" aria-label="Default select example">
                           <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (WakeUp Client)</option>
                           <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (WakeUP Client)</option>
 						</select>
@@ -1269,7 +1269,7 @@ $read_tts_token_google_cloud = '';
                             <div class="input-group mb-3">
                               <input required class="form-control border-success" type="number" name="mic_id" id="mic_id" placeholder="<?php echo $Config['smart_config']['mic']['id']; ?>" value="<?php echo $Config['smart_config']['mic']['id']; ?>">
                               <div class="invalid-feedback">Cần nhập ID của Mic!</div>
-                              <button class="btn btn-success border-success" type="button" onclick="scan_audio_devices('scan_mic')">Tìm Kiếm</button>
+                              <button class="btn btn-success border-success" type="button" onclick="scan_audio_devices('scan_mic')">Tìm Kiếm ID Mic</button>
                             </div>
                           </div>
                         </div>
@@ -1350,7 +1350,7 @@ $read_tts_token_google_cloud = '';
                   <div id="collapse_button_hotword_engine" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_hotword_engine" style="">
                     <div class="card">
                       <div class="card-body">
-                        <h5 class="card-title">Hotword <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
+                        <h5 class="card-title">Hotword / Từ Nóng Đánh Thức <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
                         <div class="row mb-3">
                           <label for="continue_running_if_hotword_initialization_fails" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup: <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
                           <div class="col-sm-9">
@@ -2114,7 +2114,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led <i class="bi bi-question-circle-fill" onclick="show_message('Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>')"></i>:</label>
                       <div class="col-sm-9">
                         <select name="led_type_select" id="led_type_select" class="form-select border-success" aria-label="Default select example">
-                          <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>WS281x</option>
+                          <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>WS281x, SK6812, VBot AIO, Vietbot AIO</option>
                           <option value="apa102" <?php echo $Config['smart_config']['led']['led_type'] === 'apa102' ? 'selected' : ''; ?>>APA102</option>
                           <option value="ReSpeaker_Mic_Array_v2.0" <?php echo $Config['smart_config']['led']['led_type'] === 'ReSpeaker_Mic_Array_v2.0' ? 'selected' : ''; ?>>ReSpeaker Mic Array v2.0</option>
                           <option value="dev_custom_led" <?php echo $Config['smart_config']['led']['led_type'] === 'dev_custom_led' ? 'selected' : ''; ?>>DEV Custom Led: Dev_Led.py (Người dùng tự code)</option>

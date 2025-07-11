@@ -169,7 +169,7 @@
 	
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#cloud-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
-      <i class="bi bi-cloud-check"></i><span>Cloud Drive</span><i class="bi bi-chevron-down ms-auto"></i>
+      <i class="bi bi-cloud-check"></i><span>Cloud Data BackUp</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="cloud-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
         <li title="Thiết lập đa lệnh tùy chỉnh cho Home Assistant để điều khiển thiết bị" onclick="loading('show')">
