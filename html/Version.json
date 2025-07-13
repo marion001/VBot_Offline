@@ -1,8 +1,8 @@
 {
-    "version": "1.0.45",
+    "version": "1.0.46",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ trợ lên lịch thay đổi âm lượng Volume",
-    "releaseDate": "03/07/2025",
+    "description": "Sửa một số lỗi đã tồn tại từ trước đó",
+    "releaseDate": "13/07/2025",
     "changes": [
         {
             "type": "feature",

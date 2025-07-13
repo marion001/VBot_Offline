@@ -2851,9 +2851,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         <h5 class="card-title">
                           Đọc Báo, Tin Tức 
                           <i class="bi bi-question-circle-fill" 
-                            onclick="show_message('Ví dụ Các link/url báo được hỗ trợ:<br/><br>\
+                            onclick="show_message('Câu Lệnh: Ví dụ Các link/url báo được hỗ trợ:<br/><br>\
                             - https://podcast.tuoitre.vn<br>\
-                            - https://thanhnien.vn/thoi-su.htm<br>\
                             - https://vnexpress.net/podcast<br/>\
                             - https://vnexpress.net/podcast/vnexpress-hom-nay<br/>\
                             - https://vietnamnet.vn/podcast/ban-tin-thoi-su<br/>\
