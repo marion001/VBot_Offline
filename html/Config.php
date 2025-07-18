@@ -286,8 +286,10 @@
   $Config['smart_config']['led']['led_type'] = $_POST['led_type_select'];
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
   $Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
-  $Config['smart_config']['led']['brightness'] = intval($_POST['led_brightness']);
+  #$Config['smart_config']['led']['brightness'] = intval($_POST['led_brightness']);
+  $Config['smart_config']['led']['brightness'] = intval(min(100, max(0, intval($_POST['led_brightness']))) * 255 / 100);
   $Config['smart_config']['led']['led_invert'] = isset($_POST['led_invert']) ? true : false;
+  $Config['smart_config']['led']['remember_last_brightness'] = isset($_POST['remember_last_brightness']) ? true : false;
   $Config['smart_config']['led']['led_starting_up'] = isset($_POST['led_starting_up']) ? true : false;
   $Config['smart_config']['led']['effect']['led_think'] = $_POST['led_think'];
   $Config['smart_config']['led']['effect']['led_mute'] = $_POST['led_mute'];
@@ -1327,7 +1329,7 @@ $read_tts_token_google_cloud = '';
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Ghi Nhớ Âm Lượng <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lưu lại giá trị âm lượng vào tệp Config.json mỗi khi được thay đổi trong quá trình Bot hoạt động')"></i> :</label>
+                          <label class="col-sm-3 col-form-label">Ghi Nhớ Âm Lượng Khi Được Thay Đổi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lưu lại giá trị âm lượng vào tệp Config.json mỗi khi được thay đổi trong quá trình Bot hoạt động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input class="form-check-input border-success" type="checkbox" name="remember_last_volume" id="remember_last_volume" <?php echo $Config['smart_config']['speaker']['remember_last_volume'] ? 'checked' : ''; ?>>
@@ -1983,6 +1985,17 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         <div class="invalid-feedback">Cần nhập thời gian tối đa chờ phản hồi!</div>
                       </div>
                     </div>
+					
+                    <div class="row mb-3">
+                       <label class="col-sm-3 col-form-label" title="Liên Kết Loa VBot Với Home Assist (Hass)">Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) <i class="bi bi-question-circle-fill" onclick="show_message('Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component')"></i> : </label>
+                      <div class="col-sm-9">
+						<div class="input-group mb-3">
+                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" title="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" value="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git">
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" target="_blank">Truy Cập</a></button>
+                        </div>
+                      </div>
+                    </div>
+					
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Tích hợp vào Assist (Tác Nhân):</label>
                       <div class="col-sm-9">
@@ -2083,7 +2096,16 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tạo File Cấu Hình <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
+                       <label class="col-sm-3 col-form-label" title="Liên Kết Loa VBot Với Home Assist (Hass)">Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) <i class="bi bi-question-circle-fill" onclick="show_message('Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component')"></i> : </label>
+                      <div class="col-sm-9">
+						<div class="input-group mb-3">
+                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" title="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" value="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git">
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" target="_blank">Truy Cập</a></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Hoặc Tạo File Cấu Hình Thủ Công <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <button class="btn btn-primary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('mqtts.yaml')">mqtts.yaml</button>
@@ -2134,11 +2156,21 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="led_brightness" class="col-sm-3 col-form-label" title="Độ sáng của đèn Led">Độ sáng đèn LED: <i class="bi bi-question-circle-fill" onclick="show_message('Độ sáng của Led sẽ từ 0 đến 255, tương ứng với 0 -> 100%')"></i> :</label>
+                      <label for="led_brightness" class="col-sm-3 col-form-label" title="Độ sáng của đèn Led">Độ sáng đèn LED: <i class="bi bi-question-circle-fill" onclick="show_message('Độ sáng của Led sẽ từ 0 -> 100%')"></i> :</label>
                       <div class="col-sm-9">
-                        <input class="form-control border-success" step="0" min="1" max="255" type="number" name="led_brightness" id="led_brightness" value="<?php echo $Config['smart_config']['led']['brightness']; ?>">
+                        <input class="form-control border-success" step="0" min="1" max="100" type="number" name="led_brightness" id="led_brightness" value="<?php echo intval($Config['smart_config']['led']['brightness'] * 100 / 255); ?>">
                       </div>
                     </div>
+					
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Ghi Nhớ Độ Sáng Khi Được Thay Đổi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật sẽ lưu lại giá trị độ sáng của đèn led khi được thay đổi trong lúc Chương Trình đang hoạt động vào Config.json')"></i> :</label>
+                      <div class="col-sm-9">
+                        <div class="form-switch">
+                          <input class="form-check-input border-success" type="checkbox" name="remember_last_brightness" id="remember_last_brightness" <?php echo $Config['smart_config']['led']['remember_last_brightness'] ? 'checked' : ''; ?>>
+                        </div>
+                      </div>
+                    </div>
+					
                     <div class="row mb-3">
                       <label class="col-sm-3 col-form-label">Đảo ngược đầu LED <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược đầu (Bắt Đầu) sáng của đèn led')"></i> :</label>
                       <div class="col-sm-9">

@@ -3,39 +3,9 @@
     "message": "Danh sách phát PlayList Local",
     "data": [
         {
-            "title": "Cảm Ơn Em.mp3",
+            "title": "1.mp3",
             "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/Cảm Ơn Em.mp3",
-            "source": "Local"
-        },
-        {
-            "title": "Tấm Cám.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/Tấm Cám.mp3",
-            "source": "Local"
-        },
-        {
-            "title": "Nợ Tình Em.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/Nợ Tình Em.mp3",
-            "source": "Local"
-        },
-        {
-            "title": "thuyền quyên - diệu kiên.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/thuyền quyên - diệu kiên.mp3",
-            "source": "Local"
-        },
-        {
-            "title": "cô gái à.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/cô gái à.mp3",
-            "source": "Local"
-        },
-        {
-            "title": "Tuyệt Duyên - Thương Ly Biệt 2.mp3",
-            "cover": "http://192.168.14.194/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/Tuyệt Duyên - Thương Ly Biệt 2.mp3",
+            "audio": "Media/Music_Local/1.mp3",
             "source": "Local"
         }
     ]

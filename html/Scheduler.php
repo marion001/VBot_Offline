@@ -395,6 +395,26 @@ if (!file_exists($Schedule_Audio_dir)) {
 			$data['change_volume']['time'] = $filtered_times;
 			$data['change_volume']['volume_time'] = $filtered_volumes;
 
+			#Lưu dữ liệu thay đổi Độ Sáng LED
+			$times_change_led_brightness = $_POST['time_change_brightness'] ?? [];
+			$brightness_change_led_brightness = $_POST['brightness_brightnes_time'] ?? [];
+			$filtered_times_brightness = [];
+			$filtered_brightness = [];
+			// Duyệt từng cặp và lọc nếu cả 2 đều hợp lệ
+			foreach ($times_change_led_brightness as $index => $time_led_brightness) {
+				$time_led_brightness = trim($time_led_brightness);
+				$led_brightness = trim($brightness_change_led_brightness[$index] ?? '');
+				if ($time_led_brightness !== '' && $led_brightness !== '' && is_numeric($led_brightness)) {
+					$filtered_times_brightness[] = $time_led_brightness;
+					$filtered_brightness[] = $led_brightness;
+					
+				}
+			}
+			$data['change_led_brightness']['date'] = isset($_POST['dates_changes_brightness']) ? $_POST['dates_changes_brightness'] : [];
+			$data['change_led_brightness']['active'] = isset($_POST['change_led_brightness_active']) ? true : false;
+			$data['change_led_brightness']['time'] = $filtered_times_brightness;
+			$data['change_led_brightness']['brightness_time'] = $filtered_brightness;
+
           #Lưu dữ liệu dừng phát media Player
           $time_stop_media_player = isset($_POST['time_stop_media_player']) ? $_POST['time_stop_media_player'] : [];
           $data['stop_media_player']['time'] = array_filter($time_stop_media_player);
@@ -693,6 +713,75 @@ if (!file_exists($Schedule_Audio_dir)) {
                 </div>
               </div>
             </div>
+
+
+
+            <div class="card accordion" id="accordion_button_brightness_change">
+              <div class="card-body">
+                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_brightness_change" aria-expanded="false" aria-controls="collapse_button_brightness_change">
+                  <font color="Blue">Lập Lịch Thay Đổi Độ Sáng Đèn LED</font>, Trạng Thái:&nbsp;
+                  <?php 
+                    echo isset($data['change_led_brightness']['active']) ? ($data['change_led_brightness']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
+                    ?>
+                </h5>
+                <div id="collapse_button_brightness_change" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_brightness_change">
+                  <?php
+                    // Kiểm tra dữ liệu change_led_brightness và gán giá trị mặc định nếu không có
+                    if (!isset($data['change_led_brightness']) || empty($data['change_led_brightness'])) {
+                        // Gán giá trị mặc định nếu không có dữ liệu change_led_brightness
+                        $data['change_led_brightness'] = [
+                            'active' => false,
+                            'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                            'time' => ["23:59"],
+                            'brightness_time' => ["20"]
+                        ];
+                    } 
+                    $change_led_brightness = $data['change_led_brightness'];
+                    ?>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input" type="checkbox" name="change_led_brightness_active" id="change_led_brightness_active" value="<?php echo $change_led_brightness['active']; ?>" <?= $change_led_brightness['active'] ? 'checked' : '' ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Checkbox ngày -->
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Màn Hình')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <?php foreach ($week_days as $date => $label): ?>
+                        <input class="form-check-input" type="checkbox" name="dates_changes_brightness[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $change_led_brightness['date']) ? 'checked' : '' ?>>
+                        <label><?= htmlspecialchars($label) ?></label>
+                        <br/>
+                        <?php endforeach; ?>
+                      </div>
+                    </div>
+                  </div>
+                  <!-- Thời gian -->
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                    <div class="col-sm-9">
+                      <div class="time-inputs_display_screen" id="time-changes_brightness">
+						<?php foreach ($change_led_brightness['time'] as $index => $time): ?>
+						<div class="time-input-container input-group mb-3" id="time-change_led_brightness-<?= $index ?>">
+						  <input class="form-control border-success" type="text" name="time_change_brightness[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+						  <input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" value="<?= isset($change_led_brightness['brightness_time'][$index]) ? htmlspecialchars($change_led_brightness['brightness_time'][$index]) : '' ?>" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">
+						  <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-<?= $index ?>"><i class="bi bi-trash"></i></button>
+						</div>
+						<?php endforeach; ?>
+                        <button class="btn btn-success rounded-pill" type="button" id="add-time-change_led_brightness">Thêm thời gian</button>
+                      </div>
+                    </div>
+                  </div>
+                  <hr/>
+                </div>
+              </div>
+            </div>
+
+
+
 
             <div class="card accordion" id="accordion_button_display_screen_time">
               <div class="card-body">
@@ -1463,23 +1552,19 @@ if (!file_exists($Schedule_Audio_dir)) {
               }
           });
     </script>
+
     <!-- Scripts lập Lịch Màn Hình -->
     <script>
       let timeOnCounter_display_screen = <?= count($display_screen['time_on']) ?>;
       let timeOffCounter_display_screen = <?= count($display_screen['time_off']) ?>;
-      // Thêm input cho Time On
       document.getElementById('add-time-on_display_screen').addEventListener('click', function() {
           const timeOnContainer = document.getElementById('time-on-container');
-          // Tạo id cho input mới và container
           const inputContainerId = 'time-on_display_screen-' + timeOnCounter_display_screen;
-          // Sử dụng innerHTML để tạo input và button xóa
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
           inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_on_display_screen[]" placeholder="HH:mm (Thời gian bật)"><button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-on_display_screen-' + timeOnCounter_display_screen + '"><i class="bi bi-trash"></i></button>';
-          // Thêm container vào trong DOM
           timeOnContainer.insertBefore(inputContainer, this);
-          // Gắn sự kiện xóa khi nhấn Delete
           document.getElementById('delete-on_display_screen-' + timeOnCounter_display_screen).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
           });
@@ -1489,22 +1574,17 @@ if (!file_exists($Schedule_Audio_dir)) {
       // Thêm input cho Time Off
       document.getElementById('add-time-off_display_screen').addEventListener('click', function() {
           const timeOffContainer = document.getElementById('time-off-container');
-          // Tạo id cho input mới và container
           const inputContainerId = 'time-off_display_screen-' + timeOffCounter_display_screen;
-          // Sử dụng innerHTML để tạo input và button xóa
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
           inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_off_display_screen[]" placeholder="HH:mm (Thời gian tắt)"><button class="btn btn-danger border-success" title="Xóa thời gian Tắt này" type="button" id="delete-off_display_screen-' + timeOffCounter_display_screen + '"><i class="bi bi-trash"></i></button>';
-          // Thêm container vào trong DOM
           timeOffContainer.insertBefore(inputContainer, this);
-          // Gắn sự kiện xóa khi nhấn Delete
           document.getElementById('delete-off_display_screen-' + timeOffCounter_display_screen).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
           });
           timeOffCounter_display_screen++;
       });
-      // Gắn sự kiện xóa ban đầu cho các button đã có
       document.querySelectorAll('.time-inputs_display_screen > div > button').forEach(button => {
           button.addEventListener('click', function() {
               const container = button.parentElement;
@@ -1564,8 +1644,8 @@ if (!file_exists($Schedule_Audio_dir)) {
     </script>
     <!--END Scripts stop media Player -->
 
-    <!-- Scripts REBOOT OS SYSTEM -->
     <script>
+		//Reboot OS
       let time_REboot_OS = <?= count($reboot_os['time']) ?>;
       document.getElementById('add-time-reboot_os').addEventListener('click', function() {
           const timeOnContainer = document.getElementById('time-on-reboot_os');
@@ -1589,6 +1669,7 @@ if (!file_exists($Schedule_Audio_dir)) {
     </script>
 
 <script>
+//Thay Đổi ÂM Lượng
 let timeVolumeCounter = <?= count($change_volume['time']) ?>;
 document.getElementById('add-time-change_volume').addEventListener('click', function () {
   const container = document.getElementById('time-changes_volumes');
@@ -1607,6 +1688,31 @@ document.getElementById('delete-change_volume-' + timeVolumeCounter).addEventLis
   document.getElementById(inputContainerId).remove();
 });
   timeVolumeCounter++;
+});
+</script>
+
+<script>
+//Thay đổi độ sáng LED
+let timeBrightnessCounter = <?= count($change_led_brightness['time']) ?>;
+document.getElementById('add-time-change_led_brightness').addEventListener('click', function () {
+  const container = document.getElementById('time-changes_brightness');
+  const inputContainerId = 'time-change_led_brightness-' + timeBrightnessCounter;
+  const inputContainer = document.createElement('div');
+
+  inputContainer.id = inputContainerId;
+  inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
+
+  inputContainer.innerHTML =
+    '<input class="form-control border-success" type="text" name="time_change_brightness[]" placeholder="HH:mm">' +
+    '<input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">' +
+    '<button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-' + timeBrightnessCounter + '">' +
+    '<i class="bi bi-trash"></i>' +
+    '</button>';
+  container.insertBefore(inputContainer, this);
+  document.getElementById('delete-change_led_brightness-' + timeBrightnessCounter).addEventListener('click', function () {
+    document.getElementById(inputContainerId).remove();
+  });
+  timeBrightnessCounter++;
 });
 </script>
 

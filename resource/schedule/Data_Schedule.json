@@ -65,7 +65,7 @@
             "Saturday",
             "Sunday"
         ],
-        "active": true,
+        "active": false,
         "time": [
             "20:25",
             "20:27"
@@ -73,6 +73,24 @@
         "volume_time": [
             "44",
             "99"
+        ]
+    },
+    "change_led_brightness": {
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "active": true,
+        "time": [
+            "21:17"
+        ],
+        "brightness_time": [
+            "20"
         ]
     }
 }

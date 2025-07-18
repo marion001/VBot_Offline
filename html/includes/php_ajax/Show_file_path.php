@@ -441,7 +441,7 @@ number:
     state_topic: "'.$MQTT_Client_Name.'/number/led_brightness/state"
     command_topic: "'.$MQTT_Client_Name.'/number/led_brightness/set"
     min: 0
-    max: 255
+    max: 100
     qos: '.$MQTT_Qos.'
     #unit_of_measurement: "%"
     icon: "mdi:brightness-5"

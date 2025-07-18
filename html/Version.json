@@ -1,8 +1,8 @@
 {
-    "version": "1.0.46",
+    "version": "1.0.47",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa một số lỗi đã tồn tại từ trước đó",
-    "releaseDate": "13/07/2025",
+    "description": "Hỗ trợ lên Hass bằng Custom Component thông qua MQTT, Cập Nhật Tính Năng: Lập lịch thay đổi độ sáng đèn LED, Thêm Nút Đặt Lại Cấu Hình Wifi",
+    "releaseDate": "18/07/2025",
     "changes": [
         {
             "type": "feature",

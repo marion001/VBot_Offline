@@ -686,18 +686,19 @@
        // Gọi hàm để hiển thị thông tin vị trí và thời tiết
       getLocationAndWeather();
 
-      //Cập nhật và hiển thị giá trị led vào thẻ html 
-      function updateBrightness(value) {
-          const brightnessSlider = document.getElementById('led_brightness-slider');
-          const brightnessBar = document.getElementById('led_brightness-bar');
-          const brightnessKnob = document.getElementById('led_brightness-knob');
-          const brightnessPercentage = document.getElementById('led_brightness-percentage');
-          const height = brightnessSlider.clientHeight;
-          const percentage = Math.max(0, Math.min(100, (value / 255) * 100));
-          brightnessBar.style.height = percentage + '%';
-          brightnessKnob.style.top = (height - (percentage / 100) * height) + 'px';
-          brightnessPercentage.textContent = Math.round((value / 255) * 100) + '%';
-      }
+		//Cập nhật và hiển thị giá trị led vào thẻ html 
+		function updateBrightness(value) {
+			const brightnessSlider = document.getElementById('led_brightness-slider');
+			const brightnessBar = document.getElementById('led_brightness-bar');
+			const brightnessKnob = document.getElementById('led_brightness-knob');
+			const brightnessPercentage = document.getElementById('led_brightness-percentage');
+			const height = brightnessSlider.clientHeight;
+			const percentage = Math.max(0, Math.min(100, value));
+			brightnessBar.style.height = percentage + '%';
+			brightnessKnob.style.top = (height - (percentage / 100) * height) + 'px';
+			brightnessPercentage.textContent = Math.round(percentage) + '%';
+		}
+
 
       //Cập nhật giá trị volume vào id="volume-slider" html
       function set_Volume_HTML(volume) {
@@ -967,7 +968,7 @@
                   if (data.success) {
                       //console.log(data);
                       document.getElementById('div_message_error').style.display = 'none';
-                      // Cập nhật các phần tử khác
+                      // Cập nhật các phần tử khác led_brightness
                       document.getElementById('show_conversation_mode').checked = data.conversation_mode ? true : false;
                       document.getElementById('show_wakeup_reply').checked = data.wakeup_reply ? true : false;
                       document.getElementById('multiple_command_active').checked = data.multiple_command_active ? true : false;
@@ -1025,7 +1026,8 @@
 					}
 					document.getElementById('show_log_name_log_display_style').innerHTML = ' | <font color=green>'+rlc_log_display_style+'</font>';
                       if (!isHovering_led_brightness) {
-                          updateBrightness(data.led_brightness);
+						  const brightnessPercentzz = Math.round(Math.max(0, Math.min(255, data.led_brightness)) * 100 / 255);
+                          updateBrightness(brightnessPercentzz);
                       }
                       // Cập nhật thanh trượt chỉ khi không đang hover
                       if (!isHovering_volume_slide) {
@@ -1145,16 +1147,18 @@
 
       //Xử lý led
       function setupBrightnessControl() {
-          function updateBrightnessFromEvent(e) {
-              const brightnessSlider = document.getElementById('led_brightness-slider');
-              const rect = brightnessSlider.getBoundingClientRect();
-              const offsetY = e.clientY - rect.top;
-              const height = rect.height;
-              const percentage = Math.max(0, Math.min(100, ((height - offsetY) / height) * 100));
-              const brightnessValue = Math.round((percentage / 100) * 255);
-              updateBrightness(brightnessValue);
-              return brightnessValue;
-          }
+		function updateBrightnessFromEvent(e) {
+			const brightnessSlider = document.getElementById('led_brightness-slider');
+			const rect = brightnessSlider.getBoundingClientRect();
+			const height = rect.height;
+			const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+			const offsetY = clientY - rect.top;
+			const clampedOffsetY = Math.max(0, Math.min(height, offsetY));
+			const percentage = Math.round(((height - clampedOffsetY) / height) * 100);
+			updateBrightness(percentage);
+			return percentage;
+		}
+
           const brightnessSlider = document.getElementById('led_brightness-slider');
           let isDragging = false;
           brightnessSlider.addEventListener('mousedown', function(e) {
@@ -1175,7 +1179,7 @@
               }
           });
           //cập nhật hiển thị giá trị led mặc định lần đầu khi tải trang
-          updateBrightness(<?php echo $Config['smart_config']['led']['brightness']; ?>);
+          updateBrightness(<?php echo round($Config['smart_config']['led']['brightness'] * 100 / 255); ?>);
       }
     </script>
     <script>
@@ -1240,27 +1244,27 @@
           //Touch Kéo Slide độ sáng trên Mobile cảm ứng
           const brightnessSlider_mb = document.getElementById('led_brightness-slider');
 
-          function handleTouch_bright(e) {
-              const rect = brightnessSlider_mb.getBoundingClientRect();
-              const touch = e.touches[0];
-              const offsetY = touch.clientY - rect.top;
-              const height = rect.height;
-              const percentage = Math.max(0, Math.min(100, ((height - offsetY) / height) * 100));
-              const value = Math.round((percentage / 100) * 255);
-              updateBrightness(value);
-          }
+		function handleTouch_bright(e) {
+			const rect = brightnessSlider_mb.getBoundingClientRect();
+			const touch = e.touches[0];
+			const offsetY = touch.clientY - rect.top;
+			const height = rect.height;
+			const clampedOffsetY = Math.max(0, Math.min(height, offsetY));
+			const percentage = Math.round(((height - clampedOffsetY) / height) * 100);
+			updateBrightness(percentage);
+		}
 
-          function handleTouchEnd_bright(e) {
-              const rect = brightnessSlider_mb.getBoundingClientRect();
-              const touch = e.changedTouches[0];
-              const offsetY = touch.clientY - rect.top;
-              const height = rect.height;
-              const percentage = Math.max(0, Math.min(100, ((height - offsetY) / height) * 100));
-              const value = Math.round((percentage / 100) * 255);
-              // Cập nhật giao diện và gửi dữ liệu khi nhả tay ra
-              updateBrightness(value);
-              sendBrightnessData(value);
-          }
+		function handleTouchEnd_bright(e) {
+			const rect = brightnessSlider_mb.getBoundingClientRect();
+			const touch = e.changedTouches[0];
+			const offsetY = touch.clientY - rect.top;
+			const height = rect.height;
+			const clampedOffsetY = Math.max(0, Math.min(height, offsetY));
+			const percentage = Math.round(((height - clampedOffsetY) / height) * 100);
+			updateBrightness(percentage);
+			sendBrightnessData(percentage);
+		}
+
           brightnessSlider_mb.addEventListener('touchstart', handleTouch_bright);
           brightnessSlider_mb.addEventListener('touchmove', handleTouch_bright);
           brightnessSlider_mb.addEventListener('touchend', handleTouchEnd_bright);
@@ -1278,8 +1282,7 @@
              loading('show');
              var tableContainer = document.getElementById('tableContainer');
              var tableHTML =
-                 //'<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-forward-fill"></i></button></center>' +
-      		'<h5 class="card-title">PlayList, Danh Sách Phát  <span>| Media Player</span></h5><h5>Xóa toàn bộ bài hát trong PlayList <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button></h5><table class="table table-borderless datatable" id="playlistTable">' +
+                 '<h5 class="card-title">PlayList, Danh Sách Phát  <span>| Media Player</span></h5><h5>Xóa toàn bộ bài hát trong PlayList <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button></h5><table class="table table-borderless datatable" id="playlistTable">' +
                  '<thead>' +
                  '<tr>' +
                  '<th scope="col" style="text-align: center; vertical-align: middle;">STT</th>' +
@@ -1353,7 +1356,6 @@
                          fileInfo = '<tr><td colspan="3">Không có dữ liệu</td></tr>';
                      }
                      tableBody.innerHTML = fileInfo;
-                     // Khởi tạo DataTable
                      try {
                          new simpleDatatables.DataTable(table, {
       					// Tùy chọn phân trang

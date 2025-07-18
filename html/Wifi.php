@@ -50,6 +50,7 @@
                   <br/>
                   <button id="loadWifiButton" name="loadWifiButton" class="btn btn-primary rounded-pill" onclick="Show_Wifi_List()">Danh Sách Wifi Đã Kết Nối</button>
                   <button id="scanWifiButton" class="btn btn-secondary rounded-pill" onclick="fetchAndDisplayWifiList()">Quét Mạng Wifi</button>
+                  <button id="resetAllWifi" class="btn btn-danger rounded-pill" onclick="reset_All_Wifi()">Đặt Lại Cấu Hình Wifi</button>
                 </center>
                 <br/>
                 <div id="hienthiketqua"></div>
@@ -67,6 +68,27 @@
       include 'html_js.php';
       ?>
     <script>
+
+//Reset cấu hình wifi
+function reset_All_Wifi() {
+    if (confirm("Bạn có chắc chắn muốn xóa tất cả các kết nối Wi-Fi không?\nHành động này sẽ làm mất kết nối mạng hiện tại!\n\nVà hệ thống sẽ tạo điểm truy cập Wifi mới với tên: 'VBot Assistant' để bạn kết nối và cấu hình")) {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", "includes/php_ajax/Wifi_Act.php?Reset_Wifi=true", true);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    const response = JSON.parse(xhr.responseText);
+					show_message(response.message);
+                } else {
+                    show_message("Lỗi khi gửi yêu cầu đặt lại cấu hình wifi");
+                }
+            }
+        };
+        xhr.send();
+    }
+}
+
+
       //Hiển thị dang sách wifi đã kết nối
       function Show_Wifi_List() {
       	loading("show");

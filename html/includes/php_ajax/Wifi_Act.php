@@ -26,17 +26,11 @@ if ($Config['contact_info']['user_login']['active']){
 }
   ?>
 <?php
+
   if (isset($_GET['Delete_Wifi'])) {
-  
-      // Kiểm tra nếu có tham số 'action' và 'wifiName' trong yêu cầu POST
       if (isset($_POST['action']) && $_POST['action'] == 'delete_wifi' && isset($_POST['wifiName'])) {
           $wifiName = $_POST['wifiName'];
-  
-  
-  // Thực hiện lệnh iwconfig
   $wifiInfo = shell_exec('iwconfig wlan0');
-  
-  // Kiểm tra xem có dữ liệu trả về không
   if (empty($wifiInfo)) {
       echo json_encode([
           'success' => false,
@@ -45,16 +39,13 @@ if ($Config['contact_info']['user_login']['active']){
       ]);
       exit;
   }
-  
-  
+
   // Sử dụng các mẫu chính quy để trích xuất thông tin từ kết quả
   preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
   $wifiData_ESSID = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
-  
-  
+
   // Kiểm tra xem tên Wi-Fi từ POST có khớp với ESSID từ iwconfig không
   if ($wifiName !== $wifiData_ESSID) {
-              // Kết nối tới máy chủ SSH
           $connection = ssh2_connect($ssh_host, $ssh_port);
           if (!$connection) {
               echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.']);
@@ -64,45 +55,30 @@ if ($Config['contact_info']['user_login']['active']){
               echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại.']);
               exit;
           }
-  
-          // Thực hiện lệnh xóa WiFi
           $stream = ssh2_exec($connection, "sudo nmcli connection delete '$wifiName'");
           if (!$stream) {
               echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh xóa WiFi.']);
               exit;
           }
-  
           stream_set_blocking($stream, true);
           $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
           $result = stream_get_contents($stream_out);
-  
-          // Trả về kết quả dưới dạng JSON
           echo json_encode(['success' => true, 'message' => $result]);
-  
   } else {
       echo json_encode(['success' => false, 'message' => 'Wifi '.$wifiName.' đang được kết nối, Không cho phép xóa']);
   }
       } else {
-          // Trả về lỗi nếu các tham số không hợp lệ
           echo json_encode(['success' => false, 'message' => 'Lỗi khi xóa WiFi: Tham số không hợp lệ.']);
       }
   	exit();
   }
-  
-  	
   	
   if (isset($_GET['Connect_Wifi'])) {
-  
-      // Kiểm tra nếu 'action' có trong POST
       if (isset($_POST['action'])) {
           $action = $_POST['action'];
-  
-          // Kiểm tra nếu 'ssid' và 'password' có trong POST
           if (isset($_POST['ssid']) && isset($_POST['password'])) {
               $ssid = $_POST['ssid'];
               $password = $_POST['password'];
-  
-              // Kết nối tới WiFi
               $connection = ssh2_connect($ssh_host, $ssh_port);
               if (!$connection) {
                   echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.']);
@@ -112,8 +88,6 @@ if ($Config['contact_info']['user_login']['active']){
                   echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại.']);
                   exit;
               }
-  
-              // Tạo lệnh kết nối WiFi
               if ($action == 'connect_wifi') {
                   $command = "sudo nmcli connection up '$ssid'";
               } elseif ($action == 'connect_and_save_wifi') {
@@ -126,14 +100,10 @@ if ($Config['contact_info']['user_login']['active']){
                   echo json_encode(['success' => false, 'message' => 'Hành động không hợp lệ.']);
                   exit;
               }
-  
-              // Thực thi lệnh trên SSH
               $stream = ssh2_exec($connection, $command);
               stream_set_blocking($stream, true);
               $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
               $result = stream_get_contents($stream_out);
-  
-              // Trả về kết quả
               echo json_encode(['success' => true, 'message' => $result]);
   
           } else {
@@ -144,10 +114,42 @@ if ($Config['contact_info']['user_login']['active']){
       }
   	exit();
   }
-  
+
+//Đặt lại cấu hình Wifi
+if (isset($_GET['Reset_Wifi'])) {
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối đến server SSH.',
+            'data' => null
+        ]);
+        exit;
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Xác thực SSH thất bại.',
+            'data' => null
+        ]);
+        exit;
+    }
+    $command = 'dos2unix '.$VBot_Offline.'resource/wifi_manager/reset_wifi.sh && sudo '.$VBot_Offline.'resource/wifi_manager/reset_wifi.sh';
+    $stream = ssh2_exec($connection, $command);
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $result = stream_get_contents($stream_out);
+    echo json_encode([
+        'success' => true,
+        'message' => 'Đã gửi lệnh đặt lại toàn bộ cấu hình WiFi, Hãy kiểm tra, kết nối và cấu hình với điểm truy cập Wifi được phát ra là: VBot Assistant',
+        'data' => null
+    ]);
+    exit;
+}
+
+#Quét các mạng wifi xung quanh
   if (isset($_GET['Scan_Wifi_List']))
   {
-  	
       $connection = ssh2_connect($ssh_host, $ssh_port);
       if (!$connection) {
           echo json_encode([
@@ -157,7 +159,6 @@ if ($Config['contact_info']['user_login']['active']){
           ]);
           exit;
       }
-  
       if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
           echo json_encode([
               'success' => false,
@@ -166,12 +167,10 @@ if ($Config['contact_info']['user_login']['active']){
           ]);
           exit;
       }
-  
       $stream = ssh2_exec($connection, "sudo nmcli -t -f SSID,BSSID,MODE,CHAN,RATE,SIGNAL,BARS,SECURITY dev wifi");
       stream_set_blocking($stream, true);
       $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
       $result = stream_get_contents($stream_out);
-  
       if (!$result) {
           echo json_encode([
               'success' => false,
@@ -180,16 +179,13 @@ if ($Config['contact_info']['user_login']['active']){
           ]);
           exit;
       }
-  
       $lines = explode("\n", $result);
       $wifi_data = [];
-  
       foreach ($lines as $line) {
           if (!empty($line)) {
               $line = str_replace('\\', '', $line);
               $parts = explode(':', $line);
               $parts = array_map('htmlspecialchars', $parts);
-  
               $bssidParts = array_slice($parts, 1, 6);
               $bssid = implode(':', $bssidParts);
               $chan = $parts[8];
@@ -200,8 +196,6 @@ if ($Config['contact_info']['user_login']['active']){
               $Check_ssid_hidee = empty($parts[0]) ? "wifi_hidden" : $parts[0];
               $Check_ssid_hide = empty($parts[0]) ? "Mạng ẩn" : $parts[0];
               $security = empty($parts[12]) ? "Không mật khẩu" : $parts[12];
-  
-  
               $wifi_data[] = [
                   'SSID' => $Check_ssid_hide,
                   'BSSID' => $bssid,
@@ -213,68 +207,49 @@ if ($Config['contact_info']['user_login']['active']){
               ];
           }
       }
-  
       echo json_encode([
           'success' => true,
           'message' => 'Quét WiFi thành công.',
           'data' => $wifi_data
       ]);
       exit;
-  	
-  	
   }
-  
   if (isset($_GET['Get_Password_Wifi'])) {
       $response = ['success' => false, 'message' => '', 'data' => []];
-  
       $connection = ssh2_connect($ssh_host, $ssh_port);
       if (!$connection) {
           $response['message'] = "Không thể kết nối đến server SSH.";
           echo json_encode($response);
           exit;
       }
-  
       if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
           $response['message'] = "Xác thực SSH thất bại.";
           echo json_encode($response);
           exit;
       }
-  
       $desiredSSID = isset($_GET['ssid']) ? $_GET['ssid'] : '';
-  
       if (empty($desiredSSID)) {
           $response['message'] = "Cần nhập tên Wifi để lấy mật khẩu.";
           echo json_encode($response);
           exit;
       }
-  
-      // Đường dẫn đến thư mục chứa tệp cấu hình mạng WiFi
       $configFilePath = '/etc/NetworkManager/system-connections/';
-  
-      // Lấy danh sách tệp cấu hình
       $stream = ssh2_exec($connection, "ls \"$configFilePath\"");
       stream_set_blocking($stream, true);
       $files = explode("\n", trim(stream_get_contents($stream)));
-  
-      // Lặp qua từng tệp cấu hình
       foreach ($files as $file) {
           if (!empty($file)) {
-              // Xóa dấu ngoặc kép từ tên file chứa khoảng trắng và dấu cách
               $file = trim($file, '"');
               $configFile = $configFilePath . $file;
-              // Thực hiện lệnh để đọc nội dung của tệp cấu hình và lấy SSID và mật khẩu
               $stream = ssh2_exec($connection, "sudo cat \"$configFile\"");
               stream_set_blocking($stream, true);
               $configContent = stream_get_contents($stream);
-  
-              // Tìm kiếm thông tin cần thiết trong nội dung tệp cấu hình
               preg_match('/ssid=(.*)/', $configContent, $ssidMatches);
               preg_match('/psk=(.*)/', $configContent, $passwordMatches);
               preg_match('/uuid=(.*)/', $configContent, $uuidMatches);
               preg_match('/timestamp=(.*)/', $configContent, $timestampMatches);
               preg_match('/seen-bssids=(.*)/', $configContent, $bssidMatches);
-  
-  // Chuyển đổi timestamp sang định dạng ngày giờ
+				// Chuyển đổi timestamp sang định dạng ngày giờ
               $formattedTimestamp = !empty($timestampMatches[1]) ? date("H:i:s d-m-Y", $timestampMatches[1]) : null;
               if (!empty($ssidMatches[1]) && strpos($ssidMatches[1], $desiredSSID) !== false) {
                   $wifiInfo = [
@@ -289,38 +264,24 @@ if ($Config['contact_info']['user_login']['active']){
               }
           }
       }
-  
-      // Đóng kết nối SSH
-     // ssh2_disconnect($connection);
-  
       if (!empty($response['data'])) {
           $response['success'] = true;
           $response['message'] = "Tìm thấy thông tin WiFi.";
       } else {
           $response['message'] = "Không tìm thấy WiFi phù hợp.";
       }
-  
       echo json_encode($response);
-  	
   	exit();
   }
-  
+
+#Hiển thị các mạng wifi đã kết nối
   if (isset($_GET['Show_Wifi_List']))
   {
-  // Chạy lệnh nmcli để lấy danh sách WiFi
   $result = shell_exec('nmcli -t -f NAME,UUID,DEVICE con show');
-  
-  // Kiểm tra xem lệnh có chạy thành công hay không
   if ($result !== null) {
-      // Tách các tên mạng WiFi đã lưu thành mảng
       $savedWifiInfo = explode("\n", trim($result));
-  
-      // Loại bỏ các giá trị trống từ mảng
       $savedWifiInfo = array_filter($savedWifiInfo);
-  
-      // Định dạng lại mỗi phần tử trong mảng thành một đối tượng JSON với các trường SSID, UUID, Interface
       $formattedWifiInfo = array_map(function($item) {
-          // Tách từng thành phần của chuỗi
           $parts = explode(':', $item);
           return [
               "ssid" => $parts[0],
@@ -328,15 +289,12 @@ if ($Config['contact_info']['user_login']['active']){
               "interface" => $parts[2]
           ];
       }, $savedWifiInfo);
-  
-      // Trả về kết quả JSON với trạng thái success là true và dữ liệu WiFi
       echo json_encode([
           'success' => true,
           'message' => 'Lấy danh sách WiFi thành công.',
           'data' => $formattedWifiInfo
       ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   } else {
-      // Trả về kết quả JSON với trạng thái success là false nếu lệnh không thành công
       echo json_encode([
           'success' => false,
           'message' => 'Không thể lấy danh sách WiFi.',
@@ -345,14 +303,11 @@ if ($Config['contact_info']['user_login']['active']){
   }
   exit();
   }
-  
-  
+
+#kiểm tra thông tin mạng wifi đang kết nối
   if (isset($_GET['Wifi_Network_Information']))
   {
-  // Thực hiện lệnh iwconfig
   $wifiInfo = shell_exec('iwconfig wlan0');
-  
-  // Kiểm tra xem có dữ liệu trả về không
   if (empty($wifiInfo)) {
       echo json_encode([
           'success' => false,
@@ -361,10 +316,8 @@ if ($Config['contact_info']['user_login']['active']){
       ]);
       exit;
   }
-  
-  // Phân tích kết quả
   $wifiData = [];
-  
+
   // Sử dụng các mẫu chính quy để trích xuất thông tin từ kết quả
   preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
   preg_match('/Frequency:([\d\.]+)\sGHz/', $wifiInfo, $frequencyMatches);
@@ -383,7 +336,7 @@ if ($Config['contact_info']['user_login']['active']){
   preg_match('/Tx excessive retries:(\d+)/', $wifiInfo, $txExcessiveRetriesMatches);
   preg_match('/Invalid misc:(\d+)/', $wifiInfo, $invalidMiscMatches);
   preg_match('/Missed beacon:(\d+)/', $wifiInfo, $missedBeaconMatches);
-  
+
   // Lưu kết quả vào mảng
   $wifiData['ESSID'] = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
   $wifiData['Frequency'] = isset($frequencyMatches[1]) ? $frequencyMatches[1] . ' GHz' : 'N/A';
@@ -402,8 +355,6 @@ if ($Config['contact_info']['user_login']['active']){
   $wifiData['Tx_Excessive_Retries'] = isset($txExcessiveRetriesMatches[1]) ? $txExcessiveRetriesMatches[1] : 'N/A';
   $wifiData['Invalid_Misc'] = isset($invalidMiscMatches[1]) ? $invalidMiscMatches[1] : 'N/A';
   $wifiData['Missed_Beacon'] = isset($missedBeaconMatches[1]) ? $missedBeaconMatches[1] : 'N/A';
-  
-  // Trả về dữ liệu dưới dạng JSON
   echo json_encode([
       'success' => true,
       'message' => 'Dữ liệu đã được lấy thành công.',

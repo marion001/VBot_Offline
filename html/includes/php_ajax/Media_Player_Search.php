@@ -1154,42 +1154,7 @@ ini_set('display_errors', 1);
       }
   else if (strpos($News_Paper, "thanhnien.vn") !== false){
   // Lấy nội dung HTML từ URL
-  $html = file_get_contents($News_Paper);
-  if ($html === false) {
-  	$response['message'] = "Không thể lấy dữ liệu từ Báo: $News_Paper";
-  	exit();
-  }
-  // Tìm và trích xuất JSON từ thẻ <script>
-  preg_match('/var\s+params\s*=\s*(\{.*?\});/is', $html, $matches);
-  if (!empty($matches[1])) {
-      $params = json_decode($matches[1], true);
-      if ($params && isset($params['jsonSkinAudio']['playList'])) {
-          $playList = $params['jsonSkinAudio']['playList'];
-          $result = ["data" => []];
-          foreach ($playList as $item) {
-                          $result["data"][] = [
-                              //"title" => $item['title'] ?? 'N/A',
-                              "title" => str_replace(["'", "\""], "", $item['title'] ?? 'N/A'),
-                              "audio" => $item['jsonpost']['fullPost'][0]['link'] ?? 'N/A',
-                              "cover" => str_replace('50_50', '150_150', $item['thumb'] ?? 'N/A'),
-                              "duration" => "N/A",
-  							"publish_time" => "N/A",
-                              "source" => "Báo Thanh Niên"
-                          ];
-          }
-                      if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
-                          $response['success'] = true;
-                          $response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
-                          $response['data'] = $result["data"];
-                      } else {
-                          $response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
-                      }
-      } else {
-  		$response['message'] = "Không tìm thấy danh sách phát nhạc trong chuỗi dữ liệu JSON";
-      }
-  } else {
-  	$response['message'] = "Không tìm thấy dữ liệu trong script";
-  }
+  $response['message'] = "Nguồn dữ liệu Báo Thanh Niên không còn được hỗ trợ";
   }
   else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
       $html = file_get_contents($News_Paper);
