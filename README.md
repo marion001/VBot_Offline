@@ -1,6 +1,6 @@
 VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khiển nhà thông minh, trả lời câu hỏi, nhắc nhở, phát nhạc và nhiều tiện ích khác. Với thiết kế tinh tế và khả năng hiểu ngôn ngữ tự nhiên, VBot mang đến sự tiện nghi và trải nghiệm hiện đại, gần gũi cho mọi gia đình Việt.
 -----
-- Các Bạn Có Nhu Cầu Mua Mạch VBot Assistant AIO Liên Hệ Mình Nhé: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
+- Các Bạn Có Nhu Cầu Mua Mạch VBot Assistant AIO, hoặc Nguyên 1 Chiếc Loa Liên Hệ Mình Nhé: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
 - Mạch được thiết kế dùng với Loa Xiaodu Donkey Kong
 - Group Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
