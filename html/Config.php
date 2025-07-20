@@ -1990,8 +1990,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                        <label class="col-sm-3 col-form-label" title="Liên Kết Loa VBot Với Home Assist (Hass)">Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) <i class="bi bi-question-circle-fill" onclick="show_message('Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component')"></i> : </label>
                       <div class="col-sm-9">
 						<div class="input-group mb-3">
-                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" title="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" value="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git">
-                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" target="_blank">Truy Cập</a></button>
+                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot_Offline_Custom_Component" title="https://github.com/marion001/VBot_Offline_Custom_Component" value="https://github.com/marion001/VBot_Offline_Custom_Component">
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Offline_Custom_Component" target="_blank">Truy Cập</a></button>
                         </div>
                       </div>
                     </div>
@@ -2099,8 +2099,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                        <label class="col-sm-3 col-form-label" title="Liên Kết Loa VBot Với Home Assist (Hass)">Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) <i class="bi bi-question-circle-fill" onclick="show_message('Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component')"></i> : </label>
                       <div class="col-sm-9">
 						<div class="input-group mb-3">
-                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" title="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" value="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git">
-                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assistant-MQTT-HASS.git" target="_blank">Truy Cập</a></button>
+                          <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot_Offline_Custom_Component" title="https://github.com/marion001/VBot_Offline_Custom_Component" value="https://github.com/marion001/VBot_Offline_Custom_Component">
+                          <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Offline_Custom_Component" target="_blank">Truy Cập</a></button>
                         </div>
                       </div>
                     </div>
