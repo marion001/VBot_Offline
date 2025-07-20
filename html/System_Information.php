@@ -34,6 +34,31 @@
           return 0;
       }
   }
+
+function read_partition_size($path) {
+    if (!file_exists($path)) return 0;
+    $blocks = (int)trim(file_get_contents($path));
+    return $blocks * 512; // mỗi block = 512 byte
+}
+
+function format_bytes($bytes) {
+    $units = ['B', 'KB', 'MB', 'GB', 'TB'];
+    $i = 0;
+    while ($bytes >= 1024 && $i < count($units)-1) {
+        $bytes /= 1024;
+        $i++;
+    }
+    return round($bytes, 2) . ' ' . $units[$i];
+}
+
+// Đường dẫn hệ thống
+$root_partition_path = '/sys/class/block/mmcblk0p2/size'; // phân vùng root (thường là mmcblk0p2)
+$sd_card_path = '/sys/block/mmcblk0/size'; // toàn bộ thẻ nhớ
+
+// Đọc dung lượng
+$root_size = read_partition_size($root_partition_path);
+$card_size = read_partition_size($sd_card_path);
+  
   ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -55,6 +80,20 @@
           </ol>
         </nav>
       </div>
+	  
+	  <?php
+if ($card_size > 0 && ($card_size - $root_size) > 500 * 1024 * 1024) {
+	echo '<div class="alert alert-danger" role="alert">
+  ⚠️  Hệ thống **chưa mở rộng hết dung lượng thẻ nhớ<br/>
+- Đăng nhập vào ssh rồi gõ lệnh sau:<br/>
+$: <b>sudo raspi-config</b><br/>
+- Chọn: <b>(6)Advance Options</b> -> <b>(A1)Expand File System</b> đợi vài giây -> <b>OK</b> -> <b>Fish</b> -> <b>Yes</b> để rebot
+  
+</div>';
+    echo "➡  Hãy chạy: sudo raspi-config → Advanced Options → Expand Filesystem\n";
+}
+	  ?>
+	  
       <section class="section dashboard">
         <div class="row">
           <div class="col-lg-8">

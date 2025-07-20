@@ -67,7 +67,7 @@ google-auth-oauthlib         0.1.0
 google-cloud                 0.34.0
 google-cloud-core            1.7.3
 google-cloud-speech          2.30.0
-google-cloud-texttospeech    2.11.0
+google-cloud-texttospeech    2.27.0
 google-cloud-translate       2.0.1
 google-generativeai          0.8.5
 googleapis-common-protos     1.59.1
