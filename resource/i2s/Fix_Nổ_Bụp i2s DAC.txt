@@ -1,0 +1,37 @@
+Bước 1: Tạo file
+
+sudo nano /etc/systemd/system/i2s_dac_keepalive.service
+
+Nội dung File Service
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+[Unit]
+Description=VBot Assistant – Keep I2S DAC awake to prevent pop noise
+After=sound.target
+
+[Service]
+ExecStart=/usr/bin/aplay -r 44100 -f S16_LE -c 2 /dev/zero
+Restart=always
+Nice=-19
+
+[Install]
+WantedBy=multi-user.target
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+Bước 2: Kích hoạt dịch vụ
+$:> sudo systemctl daemon-reload
+$:> sudo systemctl enable --now i2s_dac_keepalive.service
+
+Bước 3: Kiểm tra
+$:> systemctl status i2s_dac_keepalive.service
+
+Bạn sẽ thấy:
+● i2s_dac_keepalive.service - VBot Assistant – Keep I2S DAC awake to prevent pop noise
+   Loaded: loaded (/etc/systemd/system/i2s_dac_keepalive.service; enabled)
+   Active: active (running)
+   
+   
+Tùy chọn dừng thủ công:
+$:> sudo systemctl stop i2s_dac_keepalive.service

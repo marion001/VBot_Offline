@@ -21,7 +21,8 @@ def get_ip_addresses(interface):
 interface = 'wlan0'
 ip_addresses = get_ip_addresses(interface)
 audio_ip = "/tmp/ip_address.mp3"
-if ip_addresses and ip_addresses[0].startswith("192.168"):
+#if ip_addresses and ip_addresses[0].startswith("192.168"):
+if ip_addresses and ip_addresses[0] != "127.0.0.1":
     print(f"Địa chỉ IP của bạn là: {ip_addresses[0]}")
     tts = gTTS(text=f"Địa chỉ IP của bạn là {ip_addresses[0]}", lang='vi')
     tts.save(audio_ip)
