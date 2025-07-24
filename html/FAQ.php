@@ -98,7 +98,9 @@
                   <br/><b>- B2:</b> Chạy Lệnh sau để lưu cấu hình alsamixer: <b>$:> sudo alsactl store</b><br/>
                   <b>- B3:</b> Sao Lưu Lại Cấu Hình Gốc m8960-soundcard: <b>$:> sudo mv /etc/wm8960-soundcard/wm8960_asound.state /etc/wm8960-soundcard/wm8960_asound_default.state</b><br/>
                   <b>- B4:</b>Chạy lệnh sau để sao chép tệp cấu hình alsamixer đã lưu ở <b>B2</b> vào hệ thống driver m8960-soundcard: <b>$:> sudo cp /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state</b>
-                </div>
+					<br/><br/>
+					- Lưu Ý: Nếu sử dụng Mic i2s: <b>INMP441</b> kếp hợp với <b>MAX9857</b> thì bạn cần Flash <b>'IMG VBot I2S'</b> và thiết lập ID MIC Bắt Buộc là: '<b>-1</b>' Nhé
+				</div>
               </div>
             </div>
             <div class="card accordion" id="accordion_button_media_player_source">

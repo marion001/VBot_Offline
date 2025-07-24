@@ -85,7 +85,7 @@
   }
   }
   
-  if (isset($_POST['save_asound_alsamixer_to_driver_wm8960_asound'])) {
+  if (isset($_POST['save_asound_to_alsamixer'])) {
       $CMD = "sudo alsactl store";
       $CMD1 = "sudo cp /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state";    
       $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -104,7 +104,7 @@
       $output .= stream_get_contents($stream_out1);
   }
   
-  if (isset($_POST['restore_wm8960_soundcard_to_default'])) {
+  if (isset($_POST['alsamixer_asound_to_alsamixer'])) {
   $CMD = 'sudo cp '.$VBot_Offline.'resource/wm8960_asound_default.state /etc/wm8960-soundcard/wm8960_asound.state';
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
@@ -152,7 +152,7 @@
   $output .=  stream_get_contents($stream_out);
   }
   
-  if (isset($_POST['wm8960_soundcard_stop'])) {
+  if (isset($_POST['alsamixer_soundcard_stop'])) {
   $CMD = "sudo systemctl stop wm8960-soundcard.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
@@ -164,7 +164,7 @@
   $output .=  stream_get_contents($stream_out);
   }
   
-  if (isset($_POST['wm8960_soundcard_start'])) {
+  if (isset($_POST['alsamixer_soundcard_start'])) {
   $CMD = "sudo systemctl start wm8960-soundcard.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
@@ -176,7 +176,7 @@
   $output .=  stream_get_contents($stream_out);
   }
   
-  if (isset($_POST['wm8960_soundcard_disable'])) {
+  if (isset($_POST['alsamixer_soundcard_disable'])) {
   $CMD = "sudo systemctl disable wm8960-soundcard.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
@@ -188,7 +188,7 @@
   $output .=  stream_get_contents($stream_out);
   }
   
-  if (isset($_POST['wm8960_soundcard_status'])) {
+  if (isset($_POST['alsamixer_soundcard_status'])) {
   $CMD = "sudo systemctl status wm8960-soundcard.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
@@ -200,7 +200,7 @@
   $output .=  stream_get_contents($stream_out);
   }
   
-  if (isset($_POST['wm8960_soundcard_enable'])) {
+  if (isset($_POST['alsamixer_soundcard_enable'])) {
   $CMD = "sudo systemctl enable /usr/src/wm8960-soundcard-1.0/wm8960-soundcard.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
@@ -1289,16 +1289,16 @@ if (isset($_POST['disable_vbot_api_external'])) {
                       <div class="btn-group">
                         <div class="dropdown">
                           <button class="btn btn-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          WM8960-SoundCard
+                          ALSA SoundCard
                           </button>
                           <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_start" type="submit" title="wm8960_soundcard_start">WM8960 SoundCard Start</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_stop" type="submit" title="wm8960_soundcard_stop">WM8960 SoundCard Stop</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_disable" type="submit" title="wm8960_soundcard_disable">WM8960 SoundCard Disable</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_enable" type="submit" title="wm8960_soundcard_enable">WM8960 SoundCard Enable</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="wm8960_soundcard_status" type="submit" title="wm8960_soundcard_status">WM8960 SoundCard Status</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_alsamixer_to_driver_wm8960_asound" type="submit" title="save_asound_alsamixer_to_driver_wm8960_asound">Save Alsamixer To WM8960 SoundCard Driver</button></li>
-                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="restore_wm8960_soundcard_to_default" type="submit" title="restore_wm8960_soundcard_to_default">Restore WM8960 SoundCard Driver Default</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_start" type="submit" title="alsamixer_soundcard_start">ALSA SoundCard Start</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_stop" type="submit" title="alsamixer_soundcard_stop">ALSA SoundCard Stop</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_disable" type="submit" title="alsamixer_soundcard_disable">ALSA SoundCard Disable</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_enable" type="submit" title="alsamixer_soundcard_enable">ALSA SoundCard Enable</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_status" type="submit" title="alsamixer_soundcard_status">ALSA SoundCard Status</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_to_alsamixer" type="submit" title="save_asound_to_alsamixer">Save Alsamixer SoundCard</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_asound_to_alsamixer" type="submit" title="alsamixer_asound_to_alsamixer">Restore ALSA SoundCard Driver Default</button></li>
                           </ul>
                         </div>
                       </div>
