@@ -1,0 +1,2 @@
+cài thưu viện có phiên bản:
+pip install google-cloud-texttospeech==2.11.0
