@@ -67,7 +67,7 @@ google-auth-oauthlib         0.1.0
 google-cloud                 0.34.0
 google-cloud-core            1.7.3
 google-cloud-speech          2.30.0
-google-cloud-texttospeech    2.27.0
+google-cloud-texttospeech    2.11.0
 google-cloud-translate       2.0.1
 google-generativeai          0.8.5
 googleapis-common-protos     1.59.1
@@ -130,6 +130,7 @@ pidng                        4.0.9
 piexif                       1.1.3
 piglow                       1.2.5
 pigpio                       1.78
+PiIR                         0.2.5
 Pillow                       8.1.2
 pip                          20.3.4
 pixel-ring                   0.1.0
