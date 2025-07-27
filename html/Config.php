@@ -12,14 +12,11 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <?php
@@ -33,7 +30,9 @@
   }
   }
   $read_stt_token_google_cloud = null;
-  
+
+
+  //Khôi phục dữ liệu File Config.json
   if (isset($_POST['start_recovery_config_json'])) {
   $data_recovery_type = $_POST['start_recovery_config_json'];
   if ($data_recovery_type === "khoi_phuc_tu_tep_he_thong"){
@@ -55,20 +54,16 @@
       }
   }else if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len"){
       $uploadOk = 1;
-      // Kiểm tra xem tệp có được gửi không
       if (isset($_FILES["fileToUpload_configjson_restore"])) {
           $targetFile = $VBot_Offline.'Config.json';
           $fileName = basename($_FILES["fileToUpload_configjson_restore"]["name"]);
-          // Kiểm tra xem tệp có phải là .json không
   		if (!preg_match('/\.json$/', $fileName) || !preg_match('/^Config/', $fileName)) {
   		$messages[] = "- Chỉ chấp nhận tệp .json, dành cho Config.json";
   		$uploadOk = 0;
   		}
-          // Kiểm tra xem $uploadOk có bằng 0 không
           if ($uploadOk == 0) {
               $messages[] = "- Tệp sao lưu không được tải lên";
           } else {
-              // Di chuyển tệp vào thư mục đích
               if (move_uploaded_file($_FILES["fileToUpload_configjson_restore"]["tmp_name"], $targetFile)) {
                   $messages[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục thành công";
               } else {
@@ -80,7 +75,7 @@
       }
   }
   }
-  
+
   #Lưu lại các giá trị Config.json
   if (isset($_POST['all_config_save'])) {
   
@@ -121,7 +116,6 @@
   $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
   $Config['web_interface']['errors_display'] = isset($_POST['webui_errors_display']) ? true : false;
   $Config['web_interface']['external']['active'] = isset($_POST['webui_external']) ? true : false;
-  
   
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
   $Config['home_assistant']['minimum_threshold'] = floatval($_POST['hass_minimum_threshold']);
@@ -237,7 +231,6 @@
   $apiKeys_ZALO_TTS = array_filter(array_map(function($key_tts_ZL) {
       return str_replace("\r", '', $key_tts_ZL);
   }, $apiKeys_ZALO_TTS), function($key_tts_ZL) {
-  	// Loại bỏ các chuỗi trống
        return !empty($key_tts_ZL);
   });
   $apiKeys_ZALO_TTS = array_values($apiKeys_ZALO_TTS);
@@ -250,7 +243,6 @@
   $apiKeys_VIETTEL_TTS = array_filter(array_map(function($key_tts_VT) {
       return str_replace("\r", '', $key_tts_VT);
   }, $apiKeys_VIETTEL_TTS), function($key_tts_VT) {
-  	// Loại bỏ các chuỗi trống
        return !empty($key_tts_VT);
   });
   $apiKeys_VIETTEL_TTS = array_values($apiKeys_VIETTEL_TTS);
@@ -286,7 +278,6 @@
   $Config['smart_config']['led']['led_type'] = $_POST['led_type_select'];
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
   $Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
-  #$Config['smart_config']['led']['brightness'] = intval($_POST['led_brightness']);
   $Config['smart_config']['led']['brightness'] = intval(min(100, max(0, intval($_POST['led_brightness']))) * 255 / 100);
   $Config['smart_config']['led']['led_invert'] = isset($_POST['led_invert']) ? true : false;
   $Config['smart_config']['led']['remember_last_brightness'] = isset($_POST['remember_last_brightness']) ? true : false;
@@ -414,13 +405,6 @@
   $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'] = $_POST['udp_server_data_client_name'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
   $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] = isset($_POST['udp_sock_music_playback_on_client']) ? true : false;
-
-  #Cập nhật Bluetooth
-  $Config['bluetooth']['active'] = isset($_POST['bluetooth_active']) ? true : false;
-  $Config['bluetooth']['show_logs'] = isset($_POST['bluetooth_show_logs']) ? true : false;
-  $Config['bluetooth']['gpio_power'] = intval($_POST['bluetooth_gpio_power']);
-  $Config['bluetooth']['baud_rate'] = intval($_POST['bluetooth_baud_rate']);
-  $Config['bluetooth']['serial_port'] = $_POST['bluetooth_serial_port'];
   
   #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
   $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
@@ -557,9 +541,10 @@
   // Lưu dữ liệu radio đã cập nhật vào cấu hình
   $Config['media_player']['radio_data'] = $updated_radio_data;
   ##########################################
-  
+
+
   // Khởi tạo mảng newspaper đã cập nhật
-  // Cập nhật newspaper từ POST
+  // Cập nhật newspaper
   $updated_news_paper_data = [];
   foreach ($_POST as $key_newspaper => $value) {
       if (strpos($key_newspaper, 'newspaper_name_') === 0) {
@@ -608,9 +593,7 @@
       if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
           $json_data_goolge_cloud_stt = '{}';
       }
-      // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
       $json_data_goolge_cloud_stt = trim($json_data_goolge_cloud_stt);
-      // Lưu dữ liệu vào file
       file_put_contents($stt_token_google_cloud, $json_data_goolge_cloud_stt);
       //$messages[] = 'Dữ liệu stt_token_google_cloud đã được lưu vào file thành công.';
   } else {
@@ -629,12 +612,11 @@
       }
       // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
       $json_data_goolge_cloud_tts = trim($json_data_goolge_cloud_tts);
-      // Lưu dữ liệu vào file
       file_put_contents($tts_token_google_cloud, $json_data_goolge_cloud_tts);
       //$messages[] = 'Dữ liệu tts_token_google_cloud đã được lưu vào file thành công.';
   } else {
       $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
-  }	
+  }
   $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
   
   if ($result_ConfigJson !== false) {
@@ -662,6 +644,7 @@
   }
   
   }
+
   #########################
   #Lưu các giá trị cấu hình chi tiết trong hotword Snowboy
   if (isset($_POST['save_hotword_snowboy'])) {
@@ -766,7 +749,6 @@ $read_tts_token_google_cloud = '';
     include 'html_head.php';
     ?>
   <head>
-    <!-- <link href="assets/vendor/prism/prism.min.css" rel="stylesheet"> -->
     <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
     <style>
       #modal_dialog_show_config {
@@ -816,10 +798,6 @@ $read_tts_token_google_cloud = '';
     <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
     <!-- End Sidebar-->
@@ -912,7 +890,6 @@ $read_tts_token_google_cloud = '';
                         </div>
                       </div>
                     </div>
-
 					
                   </div>
                 </div>
@@ -3780,50 +3757,6 @@ echo "\n";
                   </div>
                 </div>
               </div>
-              <div class="card accordion" id="accordion_button_bluetooth_uart_vbot">
-                <div class="card-body">
-                  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_bluetooth_uart_vbot" aria-expanded="false" aria-controls="collapse_button_bluetooth_uart_vbot">
-                    Bluetooth <i class="bi bi-bluetooth"></i> <font color=red>(Chức năng chưa được phát triển)</font>:
-                  </h5>
-                  <div id="collapse_button_bluetooth_uart_vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_bluetooth_uart_vbot">
-                    <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để Khởi Tạo Bluetooth')"></i> :</label>
-                      <div class="col-sm-9">
-                        <div class="form-switch">
-                          <input readonly class="form-check-input border-danger" type="checkbox" name="bluetooth_active" id="bluetooth_active" <?php echo $Config['bluetooth']['active'] ? 'checked' : ''; ?>>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Hiển thị Logs Bluetooth <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để hiển thị logs Bluetooth')"></i> :</label>
-                      <div class="col-sm-9">
-                        <div class="form-switch">
-                          <input readonly class="form-check-input border-danger" type="checkbox" name="bluetooth_show_logs" id="bluetooth_show_logs" <?php echo $Config['bluetooth']['show_logs'] ? 'checked' : ''; ?>>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="bluetooth_gpio_power" class="col-sm-3 col-form-label">GPIO Power:</label>
-                      <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="number" step="1" min="1" max="30" name="bluetooth_gpio_power" id="bluetooth_gpio_power" placeholder="<?php echo $Config['bluetooth']['gpio_power']; ?>" value="<?php echo $Config['bluetooth']['gpio_power']; ?>">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="bluetooth_baud_rate" class="col-sm-3 col-form-label">Baud Rate:</label>
-                      <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="number" name="bluetooth_baud_rate" id="bluetooth_baud_rate" placeholder="<?php echo $Config['bluetooth']['baud_rate']; ?>" value="<?php echo $Config['bluetooth']['baud_rate']; ?>">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="bluetooth_serial_port" class="col-sm-3 col-form-label">Serial Port:</label>
-                      <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="text"  name="bluetooth_serial_port" id="bluetooth_serial_port" placeholder="<?php echo $Config['bluetooth']['serial_port']; ?>" value="<?php echo $Config['bluetooth']['serial_port']; ?>">
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-			  
 			  
       <div class="card accordion" id="accordion_button_wakeup_reply_source">
       <div class="card-body">
@@ -4633,7 +4566,7 @@ function uploadFilesWakeUP_Reply() {
               };
               xhr.send();
           }
-      
+
           // Cập nhật giá trị của thuộc tính onclick của nút sound_welcome_file_path vào nút nghe thử play_Audio_Welcome
           function updateButton_Audio_Welcome() {
               const selectElement = document.getElementById('sound_welcome_file_path');
@@ -4645,7 +4578,7 @@ function uploadFilesWakeUP_Reply() {
                   };
               }
           }
-      
+
       //Check key picovoice
       function test_key_Picovoice() {
       	loading("show");
@@ -4675,7 +4608,7 @@ function uploadFilesWakeUP_Reply() {
           };
           xhr.send();
       }
-      
+
       //scan_audio_devices('scan_Mic')
       //scan mic hoặc audio out
       function scan_audio_devices(device_name) {
@@ -4793,7 +4726,7 @@ function uploadFilesWakeUP_Reply() {
           xhr.setRequestHeader("Content-Type", "application/json");
           xhr.send(data);
       }
-      
+
       //Thay đổi giá trị value của BackList.json theo đường dẫn chỉ định 
       function changeBacklistValue(path_json, value_type) {
           var url = "includes/php_ajax/Show_file_path.php";

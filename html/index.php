@@ -337,17 +337,6 @@
                       <b><font color="green">Đồng bộ, Sync WebUI <i class="bi bi-question-circle-fill" onclick="show_message('Đồng bộ trạng thái và dữ liệu của Bot với Web UI theo thời gian thực<br/>- Tắt hoặc thiết lập thời gian trễ trong: <b>Cấu hình Config -> Cấu Hình Media Player -> Đồng bộ trạng thái Media với Web UI</b> ')"></i></font></b>
                     </div>
                   </div>
-                  <!--
-                    <div class="activity-item d-flex">
-                        <div class="form-switch">
-                            <input class="form-check-input border-success" type="checkbox" id="bluetooth_power" name="bluetooth_power" onclick="bluetooth_control('power', this.checked)">
-                        </div>
-                        <i class="bi bi-dash-lg"></i>
-                        <div class="activity-content">
-                       <b><font color="green">Bluetooth Power <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt nguồn Bluetooth')"></i></font></b>
-                        </div>
-                    </div>
-                    -->
                   <div class="activity-item d-flex">
                     <div class="form-switch">
                       <input class="form-check-input border-success" type="checkbox" id="media_player_active" name="media_player_active" onclick="change_to_another_mode('media_player_active', this.checked)" <?php echo $Config['media_player']['active'] ? 'checked' : ''; ?>>
@@ -650,21 +639,16 @@
               var xhr = new XMLHttpRequest();
               xhr.addEventListener('readystatechange', function() {
                   if (this.readyState === 4) {
-                      // Chuyển đổi dữ liệu JSON thành đối tượng JavaScript
                       var data = JSON.parse(this.responseText);
-                      // Lấy các giá trị cần thiết từ dữ liệu IP
                       var city = data.city;
                       var loc = data.loc;
                       var country = data.country;
-                      // Tách giá trị lat và lon từ loc
                       var locArray = loc.split(',');
                       var lat = locArray[0];
                       var lon = locArray[1];
-                      // Khởi tạo một đối tượng XMLHttpRequest để lấy thông tin thời tiết
                       var xhrWeather = new XMLHttpRequest();
                       xhrWeather.addEventListener('readystatechange', function() {
                           if (this.readyState === 4) {
-                              // Chuyển đổi dữ liệu thời tiết JSON thành đối tượng JavaScript
                               var weatherData = JSON.parse(this.responseText);
                               var icon = 'https://openweathermap.org/img/w/' + weatherData.weather[0].icon + '.png';
                               document.getElementById('show_weather').textContent = weatherData.main.temp + '°C';
@@ -737,10 +721,10 @@
               if (this.readyState === 4) {
                   try {
                       if (this.status === 0) {
-                          showMessagePHP('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                          showMessagePHP('Lỗi Tua Dữ Liệu Media Palyer: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                           return;
                       } else if (this.status !== 200) {
-                          showMessagePHP('Lỗi: Mã trạng thái HTTP ' + this.status);
+                          showMessagePHP('Lỗi Tua Dữ Liệu Media Palyer: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
                           return;
                       }
                       var response = JSON.parse(this.responseText);
@@ -771,10 +755,10 @@
               if (this.readyState === 4) {
                   try {
                       if (this.status === 0) {
-                          show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                          show_message('Lỗi Thay Đổi Chế Độ: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                           return;
                       } else if (this.status !== 200) {
-                          show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
+                          show_message('Lỗi Thay Đổi Chế Độ: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
                           return;
                       }
                       // Nếu dataKey là "wake_up", bỏ chọn checkbox
@@ -810,10 +794,10 @@
                   if (this.readyState === 4) {
                       try {
                           if (this.status === 0) {
-                              show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                              show_message('Lỗi Thay Đổi Âm Lượng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                               return;
                           } else if (this.status !== 200) {
-                              show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
+                              show_message('Lỗi Thay Đổi Âm Lượng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
                               return;
                           }
                           var response = JSON.parse(this.responseText);
@@ -847,10 +831,10 @@
               if (this.readyState === 4) {
                   try {
                       if (this.status === 0) {
-                          show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                          show_message('Lỗi Thay Đổi Độ Sáng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                           return;
                       } else if (this.status !== 200) {
-                          show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
+                          show_message('Lỗi Thay Đổi Độ Sáng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa. Mã trạng thái HTTP: ' + this.status);
                           return;
                       }
                       var response = JSON.parse(this.responseText);
@@ -896,11 +880,11 @@
                       try {
                           if (this.status === 0) {
       			loading("hide")
-                              show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
+                              show_message('Lỗi Phát TTS: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                               return;
                           } else if (this.status !== 200) {
       			loading("hide")
-                              show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
+                              show_message('Lỗi Phát TTS: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
                               return;
                           }
                           var response = JSON.parse(this.responseText);
@@ -977,7 +961,6 @@
                       document.getElementById('mqtt_show_logs_reconnect').checked = data.mqtt_show_logs_reconnect ? true : false;
                       document.getElementById('cache_tts').checked = data.cache_tts_active ? true : false;
                       document.getElementById('media_player_active').checked = data.media_player.media_player_active ? true : false;
-                      document.getElementById('bluetooth_power').checked = data.bluetooth_power ? true : false;
                       document.getElementById('wake_up_in_media_player').checked = data.media_player.wake_up_in_media_player ? true : false;
                       document.getElementById('music_local_active').checked = data.media_player.music_local_active ? true : false;
                       document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
@@ -1161,16 +1144,18 @@
 
           const brightnessSlider = document.getElementById('led_brightness-slider');
           let isDragging = false;
+		  //Khi nhấn chuột
           brightnessSlider.addEventListener('mousedown', function(e) {
               isDragging = true;
-              const brightnessValue = updateBrightnessFromEvent(e);
-              sendBrightnessData(brightnessValue);
+			  updateBrightnessFromEvent(e);
           });
           document.addEventListener('mousemove', function(e) {
               if (isDragging) {
+				  //Chỉ cập nhật UI
                   updateBrightnessFromEvent(e);
               }
           });
+		  //Khi nhả chuột
           document.addEventListener('mouseup', function(e) {
               if (isDragging) {
                   isDragging = false;
@@ -1190,11 +1175,9 @@
           xhr.onreadystatechange = function() {
               if (xhr.readyState === XMLHttpRequest.DONE) {
                   if (xhr.status === 200) {
-      	//console.log(xhr.responseText);
                       try {
                           var response = JSON.parse(xhr.responseText);
                           if (response.success) {
-                              //console.log('Dữ liệu Wi-Fi:' +xhr.responseText);
                               document.getElementById('show_wifi_name').textContent = response.data.ESSID;
                               document.getElementById('show_bit_rate').textContent = response.data.Bit_Rate;
                               document.getElementById('show_frequency').textContent = response.data.Frequency;
@@ -1269,7 +1252,6 @@
           brightnessSlider_mb.addEventListener('touchmove', handleTouch_bright);
           brightnessSlider_mb.addEventListener('touchend', handleTouchEnd_bright);
           //End Touch Kéo Slide độ sáng trên Mobile cảm ứng
-      
           //Thay đổi và cập nhật volume khi trượt thanh slide html, click chuột
           setupVolumeControl();
           //Thay đổi và cập nhật độ sáng khi trượt thanh slide html, click chuột
@@ -1358,18 +1340,18 @@
                      tableBody.innerHTML = fileInfo;
                      try {
                          new simpleDatatables.DataTable(table, {
-      					// Tùy chọn phân trang
+							//Tùy chọn phân trang
                              perPageSelect: [5, 10, 15, ['All', -1]],
-      					// Thiết lập số lượng trang mặc định là 5
+							//Thiết lập số lượng trang mặc định là 5
                              perPage: 5,
                              columns: [{
                                      select: 0,
                                      sortSequence: ['asc', 'desc']
-                                 }, // Sắp xếp cột thứ 1 (STT)
+                                 }, //Sắp xếp cột thứ 1 (STT)
                                  {
                                      select: 1,
                                      sortSequence: ['asc', 'desc']
-                                 } // Sắp xếp cột thứ 2 (Bài Hát)
+                                 } //Sắp xếp cột thứ 2 (Bài Hát)
                              ]
                          });
                      } catch (e) {
@@ -1457,7 +1439,6 @@ function fetchAndPopulateDevices_tts() {
 						selectElement.appendChild(option);
 					}
                 });
-				//check_Device_Status_VBot_Server('on');
             } catch (e) {
 				showMessagePHP('Lỗi phát tts: Không thể phân tích JSON - ' + e.message, 5);
             }

@@ -45,10 +45,7 @@
   $excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt'];
 
   //Đọc và giải mã dữ liệu JSON
-  $Config = null; // Khởi tạo biến để lưu dữ liệu
-
-  //Khởi tạo biến để lưu dữ liệu
-  #$Version_VBot_Program = null; 
+  $Config = null;
 
   //biến lưu trữ thông báo php
   $messages = [];
@@ -73,41 +70,25 @@
   
   //Lấy tên miền (ví dụ: 192.168.14.113)
   $Domain = $_SERVER['HTTP_HOST'];
-  
+
   //Lấy đường dẫn tới file hiện tại (ví dụ: /html/includes/php_ajax/Media_Player_Search.php)
   $Path = $_SERVER['REQUEST_URI'];
-  
+
   //Kết hợp thành URL đầy đủ
   $Current_URL = $Protocol . $Domain . $Path;
-  
+
   #Đọc nội dung file Config
   if (file_exists($Config_filePath)) {
       $Config = json_decode(file_get_contents($Config_filePath), true);
       if (json_last_error() !== JSON_ERROR_NONE) {
           echo 'Có lỗi xảy ra khi giải mã JSON: ' . json_last_error_msg();
-  		//Đặt dữ liệu thành null nếu có lỗi
           $Config = null;
       }
   } else {
       echo 'Tệp JSON không tồn tại tại đường dẫn: ' . $Config_filePath;
-  	//Đặt dữ liệu thành null nếu tệp không tồn tại
       $Config = null;
   }
-  
-  #Đọc nội dung file Bluetooth_CMD
-  if (file_exists($VBot_Offline.'resource/bluetooth/Bluetooth_CMD.json')) {
-      $BLE_CMD = json_decode(file_get_contents($VBot_Offline.'resource/bluetooth/Bluetooth_CMD.json'), true);
-      if (json_last_error() !== JSON_ERROR_NONE) {
-          echo 'Có lỗi xảy ra khi giải mã JSON: ' . json_last_error_msg();
-  		//Đặt dữ liệu thành null nếu có lỗi
-          $BLE_CMD = null;
-      }
-  } else {
-      echo 'Tệp JSON không tồn tại tại đường dẫn: ' . $Config_filePath;
-  	//Đặt dữ liệu thành null nếu tệp không tồn tại
-      $BLE_CMD = null;
-  }
-  
+
   if (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
   //Bật Logs PHP
   ini_set('display_errors', 1);
@@ -133,8 +114,7 @@
   $Download_Path = $Config['backup_upgrade']['download_path'];
   
   $Extract_Path = $Config['backup_upgrade']['extract_path'];
-  
-  
+
   //Thông tin kết nối SSH
   #sudo apt-get install php-ssh2
   #$ssh_host = $Config['ssh_server']['ssh_host'];
@@ -142,10 +122,10 @@
   $ssh_port = $Config['ssh_server']['ssh_port'];
   $ssh_user = $Config['ssh_server']['ssh_username'];
   $ssh_password = $Config['ssh_server']['ssh_password'];
-  
+
   //Kiểm tra xem google cloud backup có được bật hay không:
   $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['active'];
-  
+
   //Cổng port của đường API
   $Port_API = $Config['api']['port'];
   $Port_Server_Streaming_Audio = $Config['api']['streaming_server']['protocol']['http_post']['port'];
@@ -157,9 +137,7 @@
   // Kiểm tra xem có tệp nào không
   if (count($files) > 0) {
       foreach ($files as $file_path) {
-          // Lấy tên tệp bao gồm phần mở rộng
           $file_name = basename($file_path);
-          // Hiển thị tên tệp
           $Avata_File = "assets/img/".htmlspecialchars($file_name);
       }
   } else {

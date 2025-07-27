@@ -12,113 +12,95 @@ session_start();
 // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
 if (!isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-    
-    // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
     session_unset();
     session_destroy();
     header('Location: Login.php');
     exit;
 }
-// Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-//$_SESSION['user_login']['login_time'] = time();
 }
 ?>
 
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-   <style>
-        .scroll-btn {
-            position: fixed;
-            right: 5px;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background-color: #007bff;
-            color: white;
-            text-align: center;
-            line-height: 40px;
-            font-size: 24px;
-			z-index: 4; 
-        }
-
-        .scroll-to-bottom {
-            bottom: 15px;
-        }
-
-        .scroll-to-top {
-            bottom: 60px;
-        }
-
-    </style>
-
-     <style>
-	 
-
-	 
-#api_test_json_sample {
-    white-space: pre-wrap; /* Giữ nguyên khoảng cách và thụt lề trong code */
-    font-family: monospace; /* Dùng font monospace để dễ đọc code */
-    background-color: #141212; /* Nền sáng để làm nổi bật code */
-    padding: 10px;
-    border: 1px solid #ccc; /* Viền thẻ */
-    border-radius: 5px; /* Bo góc mềm mại */
-    color: #00ff37; /* Màu chữ chính */
-}
-
-/* Màu cho từ khóa trong code */
-#api_test_json_sample .keyword {
-    color: #d6336c; /* Màu cho từ khóa như var, const, function... */
-    font-weight: bold;
-}
-
-/* Màu cho chuỗi */
-#api_test_json_sample .string {
-    color: #21ffe0; /* Màu cho chuỗi */
-}
-
-/* Màu cho số */
-#api_test_json_sample .number {
-    color: #fd7e14; /* Màu cho số */
-}
-
-/* Màu cho đối tượng JSON hoặc dấu ngoặc */
-#api_test_json_sample .brace {
-    color: #007bff; /* Màu cho dấu ngoặc { } */
-}
-
-/* Màu cho các bình luận */
-#api_test_json_sample .comment {
-    color: #6c757d; /* Màu xám cho bình luận */
-}
-
-#reponse_tets_code_api {
-    white-space: pre-wrap; /* Giữ nguyên khoảng trắng và thụt lề trong JSON */
-    font-family: monospace; /* Sử dụng font monospace cho code */
-    background-color: #000; /* Nền đen */
-    color: #1e90ff; /* Màu chữ xanh dương */
-    padding: 10px;
-    border: 1px solid #ccc; /* Viền sáng cho thẻ */
-    border-radius: 5px; /* Bo góc mềm mại */
-    margin-top: 10px; /* Khoảng cách phía trên */
-}
-
-	 
-        #modal_dialog_show_TEST_API {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 20px auto;
-            max-width: calc(100vw - 40px);
-        }
-
-        #modal_dialog_show_TEST_API .modal-content {
-            max-height: calc(100vh - 40px);
-            overflow-y: auto;
-        }
-    </style>
-	
 <style>
+    .scroll-btn {
+        position: fixed;
+        right: 5px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        line-height: 40px;
+        font-size: 24px;
+        z-index: 4;
+    }
+    
+    .scroll-to-bottom {
+        bottom: 15px;
+    }
+    
+    .scroll-to-top {
+        bottom: 60px;
+    }
+    
+    #api_test_json_sample {
+        white-space: pre-wrap;
+        font-family: monospace;
+        background-color: #141212;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        color: #00ff37;
+    }
+    
+    #api_test_json_sample .keyword {
+        color: #d6336c;
+        font-weight: bold;
+    }
+    
+    #api_test_json_sample .string {
+        color: #21ffe0;
+    }
+    
+    #api_test_json_sample .number {
+        color: #fd7e14;
+    }
+    
+    #api_test_json_sample .brace {
+        color: #007bff;
+    }
+    
+    #api_test_json_sample .comment {
+        color: #6c757d;
+    }
+    
+    #reponse_tets_code_api {
+        white-space: pre-wrap;
+        font-family: monospace;
+        background-color: #000;
+        color: #1e90ff;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        margin-top: 10px;
+    }
+    
+    #modal_dialog_show_TEST_API {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 20px auto;
+        max-width: calc(100vw - 40px);
+    }
+    
+    #modal_dialog_show_TEST_API .modal-content {
+        max-height: calc(100vh - 40px);
+        overflow-y: auto;
+    }
+    
     .list-container {
         max-height: 100vh;
         overflow-y: auto;
@@ -398,7 +380,6 @@ const apiCode =
 }
 </script>
 
-  <!-- Template Main JS File -->
 <script>
     const items = <?php echo json_encode($items, JSON_HEX_TAG); ?>;
 // Hàm hiển thị chi tiết API

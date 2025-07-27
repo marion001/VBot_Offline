@@ -1,8 +1,8 @@
 {
-    "version": "1.0.47",
+    "version": "1.0.48",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ trợ lên Hass bằng Custom Component thông qua MQTT, Cập Nhật Tính Năng: Lập lịch thay đổi độ sáng đèn LED, Thêm Nút Đặt Lại Cấu Hình Wifi",
-    "releaseDate": "18/07/2025",
+    "description": "Sửa lỗi thông báo cấp phát địa chỉ ip khi kết nối với bộ phát wifi, di động và vài lỗi khác, Loại bỏ Bluetooth",
+    "releaseDate": "27/07/2025",
     "changes": [
         {
             "type": "feature",

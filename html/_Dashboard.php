@@ -1110,7 +1110,7 @@
       ?>
     <main id="main" class="main">
       <div class="pagetitle">
-        <h1>Quản Lý Giao Diện</h1>
+        <h1>Quản Lý Giao Diện (Phiên bản: <?php echo '<b class="text-danger">'.$Version_VBot_Interface['version'].'</b> Ngày phát hành: <b class="text-danger">'.$Version_VBot_Interface['releaseDate'].'</b>)'; ?></h1>
         <nav>
           <ol class="breadcrumb">
             <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>

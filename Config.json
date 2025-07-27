@@ -75,13 +75,6 @@
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
-    "bluetooth": {
-        "active": false,
-        "show_logs": false,
-        "gpio_power": 4,
-        "baud_rate": 115200,
-        "serial_port": "/dev/serial0"
-    },
     "display_screen": {
         "active": false,
         "connection_type": "lcd_i2c",
@@ -465,9 +458,7 @@
                     "music_sound_pause": "resource/sound/default/music_pause.mp3",
                     "music_sound_stops": "resource/sound/default/music_stops.mp3",
                     "start_playlist_play": "resource/sound/default/start_playlist_play.mp3",
-                    "play_answer_error": "resource/sound/default/play_answer_error.mp3",
-                    "bluetooth_on": "resource/sound/default/bluetooth_on.mp3",
-                    "bluetooth_off": "resource/sound/default/bluetooth_off.mp3"
+                    "play_answer_error": "resource/sound/default/play_answer_error.mp3"
                 },
                 "welcome": {
                     "active": true,
