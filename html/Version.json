@@ -1,8 +1,8 @@
 {
-    "version": "1.0.48",
+    "version": "1.0.50",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi thông báo cấp phát địa chỉ ip khi kết nối với bộ phát wifi, di động và vài lỗi khác, Loại bỏ Bluetooth",
-    "releaseDate": "27/07/2025",
+    "description": "Loại Bỏ Kết Nối Màn Hình LCD OLED",
+    "releaseDate": "02/08/2025",
     "changes": [
         {
             "type": "feature",
