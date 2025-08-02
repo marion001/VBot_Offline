@@ -156,14 +156,7 @@
   $Config['smart_config']['speaker']['volume_step'] = intval($_POST['bot_volume_step']);
   $Config['smart_config']['speaker']['remember_last_volume'] = isset($_POST['remember_last_volume']) ? true : false;
   
-  #Cập Nhật GIá Trị Màn Hình LCD OLED
-  $Config['display_screen']['active'] = isset($_POST['display_screen_active']) ? true : false;
-  $Config['display_screen']['connection_type'] = $_POST['display_screen_connection_type'];
-  
-  #Cập nhật giá trị màn hình kết nối i2c
-  $Config['display_screen']['lcd_i2c']['screen_type'] = $_POST['lcd_i2c_screen_type'];
-  $Config['display_screen']['lcd_i2c']['font_size'] = intval($_POST['lcd_i2c_font_size']);
-  $Config['display_screen']['lcd_i2c']['font_ttf'] = $_POST['lcd_i2c_font_ttf'];
+
   
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
@@ -379,20 +372,6 @@
   #Cập nhật Streaming
   $Config['api']['streaming_server']['active'] = isset($_POST['streming_active']) ? true : false;
   $Config['api']['streaming_server']['connection_protocol'] = $_POST['streaming_server_connection_protocol'];
-
-  #Cập nhật Streaming HTTP POST
-  $Config['api']['streaming_server']['protocol']['http_post']['port'] = intval($_POST['port_server_streaming_audio']);
-  $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] = $_POST['streaming_server_working_mode'];
-  $Config['api']['streaming_server']['protocol']['http_post']['source_stt'] = $_POST['streaming_server_source_stt'];
-  $Config['api']['streaming_server']['protocol']['http_post']['max_stream_audio_empty'] = intval($_POST['max_stream_audio_empty']);
-
-  #Cập nhật Streaming Socket
-  $Config['api']['streaming_server']['protocol']['socket']['port'] = intval($_POST['port_server_socket_streaming_audio']);
-  $Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time'] = intval($_POST['socket_maximum_recording_time']);
-  $Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected'] = intval($_POST['socket_maximum_client_connected']);
-  $Config['api']['streaming_server']['protocol']['socket']['source_stt'] = $_POST['streaming_server_source_stt_socket'];
-  $Config['api']['streaming_server']['protocol']['socket']['working_mode'] = $_POST['streaming_server_working_mode_socket'];
-  $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] = $_POST['streaming_server_select_wakeup_socket'];
   
   #Cập nhật UDP Streaming
   $Config['api']['streaming_server']['protocol']['udp_sock']['port'] = intval($_POST['port_server_udp_streaming_audio']);
@@ -979,8 +958,6 @@ $read_tts_token_google_cloud = '';
                       <div class="col-sm-9">
                         <select name="streaming_server_connection_protocol" id="streaming_server_connection_protocol" class="form-select border-success" aria-label="Default select example">
                           <option value="udp_sock" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'udp_sock' ? 'selected' : ''; ?>>Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini</option>
-						  <option value="socket" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'socket' ? 'selected' : ''; ?>>Socket</option>
-                          <option value="http_post" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'http_post' ? 'selected' : ''; ?>>HTTP POST</option>
 						</select>
                       </div>
                     </div>
@@ -988,7 +965,7 @@ $read_tts_token_google_cloud = '';
 			  <div class="card accordion" id="accordion_button_udp_server_streaming">
 			  <div class="card-body">
 			  <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-			  Cấu hình nếu sử dụng: ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi:</h5>
+			  Cấu hình sử dụng: ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi:</h5>
 			  <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 
                     <div class="row mb-3">
@@ -1104,131 +1081,9 @@ $read_tts_token_google_cloud = '';
 			  </div>
 			  </div>
 
-				  <div class="card accordion" id="accordion_button_socket_server_socket">
-				  <div class="card-body">
-				  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_socket" aria-expanded="false" aria-controls="collapse_button_socket_server_socket">
-				  Chế Độ Kết Nối Socket <font color=red> (Đang Phát Triển) </font> <i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
-				  <div id="collapse_button_socket_server_socket" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_socket">
 
-					<div class="row mb-3">
-                      <label for="port_server_socket_streaming_audio" class="col-sm-3 col-form-label">Port Server Socket:</label>
-                      <div class="col-sm-9">
-                          <input required type="number" class="form-control border-danger" name="port_server_socket_streaming_audio" id="port_server_socket_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['port']) ?>">
-                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio Socket!</div>
-                      </div>
-                    </div>
 
-                    <div class="row mb-3">
-                      <label for="socket_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa:</label>
-                      <div class="col-sm-9">
-                        <input required type="number" class="form-control border-danger" name="socket_maximum_recording_time" id="socket_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time']) ?>">
-                        <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
-                      </div>
-                    </div>
 
-                    <div class="row mb-3">
-                      <label for="socket_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối:</label>
-                      <div class="col-sm-9">
-                        <input required type="number" class="form-control border-danger" name="socket_maximum_client_connected" id="socket_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected']) ?>">
-                        <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="streaming_server_source_stt_socket" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client:</label>
-                      <div class="col-sm-9">
-                        <select name="streaming_server_source_stt_socket" id="streaming_server_source_stt_socket" class="form-select border-danger" aria-label="Default select example">
-                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['socket']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
-						</select>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="streaming_server_working_mode_socket" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
-                      <div class="col-sm-9">
-                        <select name="streaming_server_working_mode_socket" id="streaming_server_working_mode_socket" class="form-select border-danger" aria-label="Default select example">
-                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
-                          <option disabled value="null" <?php echo $Config['api']['streaming_server']['protocol']['socket']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
-						</select>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="streaming_server_select_wakeup_socket" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
-                      <div class="col-sm-9">
-                        <select name="streaming_server_select_wakeup_socket" id="streaming_server_select_wakeup_socket" class="form-select border-danger" aria-label="Default select example">
-                          <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (WakeUp Client)</option>
-                          <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (WakeUP Client)</option>
-						</select>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="url_server_streaming_audio_socket" class="col-sm-3 col-form-label">URL Server Socket Streaming Audio:</label>
-                      <div class="col-sm-9">
-						<div class="input-group mb-3">
-                        <input readonly type="text" class="form-control border-danger" name="url_server_streaming_audio_socket" id="url_server_streaming_audio_socket" placeholder="<?php echo htmlspecialchars('ws://'.$serverIp.':'.$Port_Server_Streaming_Audio_Socket); ?>" value="<?php echo htmlspecialchars('ws://'.$serverIp.':'.$Port_Server_Streaming_Audio_Socket); ?>">
-						<button class="btn btn-success border-danger" type="button" title="Kiểm tra kết nối Socket Server Streaming" onclick="connectWebSocketAndSendID()">Kiểm Tra</button>
-					  </div>
-                      </div>
-                    </div>
-
-				  </div>
-				  </div>
-				  </div>
-
-				  <div class="card accordion" id="accordion_button_socket_server_http">
-				  <div class="card-body">
-				  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_http" aria-expanded="false" aria-controls="collapse_button_socket_server_http">
-				  Chế Độ Kết Nối HTTP POST <i class="bi bi-question-circle-fill" onclick="show_message('Chưa có hướng dẫn ở chế độ này')"></i>  <font color=red>(Đang Phát Triển)</font></h5>
-				  <div id="collapse_button_socket_server_http" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_http">
-
-					<div class="row mb-3">
-                      <label for="api_port" class="col-sm-3 col-form-label">Port Server HTTP:</label>
-                      <div class="col-sm-9">
-                        <div class="input-group mb-3">
-                          <input required type="number" class="form-control border-danger" name="port_server_streaming_audio" id="port_server_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['port']) ?>">
-                          <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio HTTP POST!</div>
-                          <button class="btn btn-success border-danger" type="button" title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>"><a title="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'; ?>" target="_blank">Kiểm Tra</a></button>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="streaming_server_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
-                      <div class="col-sm-9">
-                        <select name="streaming_server_working_mode" id="streaming_server_working_mode" class="form-select border-danger" aria-label="Default select example">
-                          <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
-                          <option value="null" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
-						</select>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="streaming_server_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Từ Client:</label>
-                      <div class="col-sm-9">
-                        <select name="streaming_server_source_stt" id="streaming_server_source_stt" class="form-select border-danger" aria-label="Default select example">
-                          <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['http_post']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
-						</select>
-                      </div>
-                    </div>
-
-                    <div class="row mb-3">
-                      <label for="max_stream_audio_empty" class="col-sm-3 col-form-label">Thời Gian Chờ Tối Đa:</label>
-                      <div class="col-sm-9">
-                        <input required type="number" class="form-control border-danger" name="max_stream_audio_empty" id="max_stream_audio_empty" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['max_stream_audio_empty']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['http_post']['max_stream_audio_empty']) ?>">
-                        <div class="invalid-feedback">Cần nhập thời gian chờ tối đa, mặc định 5</div>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="url_server_streaming_audio" class="col-sm-3 col-form-label">URL Server HTTP POST Streaming Audio:</label>
-                      <div class="col-sm-9">
-                        <input readonly type="text" class="form-control border-danger" name="url_server_streaming_audio" id="url_server_streaming_audio" placeholder="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>" value="<?php echo htmlspecialchars($Protocol.$serverIp.':'.$Port_Server_Streaming_Audio.'/vbot/stream_audio_server'); ?>">
-                      </div>
-                    </div>
-			  </div>
-			  </div>
-			  </div>
       </div>
       </div>
       </div>
@@ -2369,105 +2224,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
       </div>
       </div>
       </div>
-	  
+
 			  
-              <div class="card accordion" id="accordion_button_lcd_oled">
-                <div class="card-body">
-                  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_lcd_oled" aria-expanded="false" aria-controls="collapse_button_lcd_oled">
-                    Màn Hình LCD OLED  &nbsp; <i class="bi bi-question-circle-fill" onclick="show_message('Tài Liệu:<br/>- <a href=\'https://github.com/adafruit/Adafruit_Python_SSD1306\' target=\'_bank\'>https://github.com/adafruit/Adafruit_Python_SSD1306</a> <br/>- <a href=\'https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/\' target=\'_bank\'>https://www.the-diy-life.com/add-an-oled-stats-display-to-raspberry-pi-os-bullseye/</a>')"></i>  &nbsp;:
-                  </h5>
-                  <div id="collapse_button_lcd_oled" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_lcd_oled" style="">
-                    <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt hiển thị sử dụng màn hình LCD OLED')"></i> :</label>
-                      <div class="col-sm-9">
-                        <div class="form-switch">
-                          <input class="form-check-input border-success" type="checkbox" name="display_screen_active" id="display_screen_active" <?php echo $Config['display_screen']['active'] ? 'checked' : ''; ?> title="Nhấn để Bật hoặc Tắt sử dụng màn hình">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Loại Màn Hình Kết Nối :</label>
-                      <div class="col-sm-9">
-                        <div class="input-group">
-                          <select name="display_screen_connection_type" id="display_screen_connection_type" class="form-select border-success">
-                            <option value="lcd_i2c" <?php echo $Config['display_screen']['connection_type'] === 'lcd_i2c' ? 'selected' : ''; ?>>Kết Nối I2C</option>
-                            <option value="lcd_spi" <?php echo $Config['display_screen']['connection_type'] === 'lcd_spi' ? 'selected' : ''; ?> disabled>Kết Nối SPI (Chức Năng Đang Phát Triển)</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Văn Bản Đầu <i class="bi bi-question-circle-fill" onclick="show_message('Chỉ Cho phép hiển thị văn bản và không có dấu, không có ký tự đặc biệt')"></i> :</label>
-                      <div class="col-sm-9">
-                        <div class="input-group">
-                          <input class="form-control border-success" type="text" name="display_screen_text_display_center" id="display_screen_text_display_center" placeholder="<?php echo $Config['display_screen']['text_display_center']; ?>" value="<?php echo $Config['display_screen']['text_display_center']; ?>">
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Cấu Hình Màn I2C <i class="bi bi-question-circle-fill" onclick="show_message('Sơ Đồ Kết Nối Chân Pin Với GPIO (Loại Giao Tiếp i2c 4 chân Pin):<br/><b>- SDA ==> GPIO2 (Pin 3)<br/>- SCL ==> GPIO3 (Pin 5)<br/>- VCC ==> 3.3V (Pin 1)<br/>- GND ==> GND(Pin 14)</b>')"></i>:</h5>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Mã Màn Hình I2C:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group">
-                              <select name="lcd_i2c_screen_type" id="lcd_i2c_screen_type" class="form-select border-success">
-                                <option value="SSD1306_128_64" <?php echo $Config['display_screen']['lcd_i2c']['screen_type'] === 'SSD1306_128_64' ? 'selected' : ''; ?>>SSD1306 128x64 LCD OLED 0.96inch 4pin</option>
-                                <option value="SSD1306_128_32" <?php echo $Config['display_screen']['lcd_i2c']['screen_type'] === 'SSD1306_128_32' ? 'selected' : ''; ?>>SSD1306 128x32 LCD OLED 0.91inch 4pin</option>
-                                <option value="SSD1306_96_16" <?php echo $Config['display_screen']['lcd_i2c']['screen_type'] === 'SSD1306_96_16' ? 'selected' : ''; ?>>SSD1306 96x16 LCD OLED 0.691inch 4pin</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="lcd_i2c_font_size" class="col-sm-3 col-form-label">Cỡ Chữ:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group">
-                              <input class="form-control border-success" type="number" min="5" max="25" step="1" name="lcd_i2c_font_size" id="lcd_i2c_font_size" placeholder="<?php echo $Config['display_screen']['lcd_i2c']['font_size']; ?>" value="<?php echo $Config['display_screen']['lcd_i2c']['font_size']; ?>">
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="lcd_i2c_font_ttf" class="col-sm-3 col-form-label">Phông Chữ:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group">
-                              <?php
-                                // so sánh file đánh dấu checked
-                                $LCD_I2C_Font_TTF = $Config['display_screen']['lcd_i2c']['font_ttf'];
-                                if ($handle_font = opendir($VBot_Offline.'resource/screen_disp/font')) {
-                                    $font_file = [];
-                                    while (false !== ($entry_font = readdir($handle_font))) {
-                                        $file_parts = pathinfo($entry_font);
-                                        $extension_font = isset($file_parts['extension']) ? strtolower($file_parts['extension']) : '';
-                                        if (in_array($extension_font, ['ttf', 'otf'])) {
-                                            $font_file[] = $entry_font;
-                                        }
-                                    }
-                                    closedir($handle_font);
-                                    echo '<select name="lcd_i2c_font_ttf" id="lcd_i2c_font_ttf" class="form-select border-success">';
-                                    foreach ($font_file as $file_font) {
-                                		 $selected_font = ($LCD_I2C_Font_TTF === 'resource/screen_disp/font/'.$file_font) ? ' selected' : ''; 
-                                	echo '<option value="' . htmlspecialchars('resource/screen_disp/font/'.$file_font) . '"' . $selected_font . '>' . htmlspecialchars($file_font) . '</option>';
-                                    }
-                                    echo '</select>';
-                                } else {
-                                	echo "<script>showMessagePHP('Không thể mở thư mục resource/screen_disp/font');</script>";
-                                }
-                                ?>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Cấu Hình Màn SPI:</h5>
-                        Chức Năng Đang Phát Triển
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
               <div class="card accordion" id="accordion_button_Sound_System">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Sound_System" aria-expanded="false" aria-controls="collapse_button_Sound_System">
@@ -3894,7 +3652,6 @@ echo "\n";
                       <select name="log_display_style" id="log_display_style" class="form-select border-success" aria-label="Default select example">
                         <option value="console" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'console' ? 'selected' : ''; ?>>console (Hiển thị log ra bảng điều khiển đầu cuối)</option>
                         <option value="api" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'api' ? 'selected' : ''; ?>>api (Hiển thị log ra API, Web UI)</option>
-                        <option value="display_screen" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'display_screen' ? 'selected' : ''; ?>>display_screen (Hiển thị log ra màn hình)</option>
                         <option value="all" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'all' ? 'selected' : ''; ?>>all (Hiển thị log ra tất cả các đường)</option>
                       </select>
                     </div>

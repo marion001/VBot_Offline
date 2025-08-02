@@ -781,85 +781,6 @@ if (!file_exists($Schedule_Audio_dir)) {
             </div>
 
 
-
-
-            <div class="card accordion" id="accordion_button_display_screen_time">
-              <div class="card-body">
-                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_display_screen_time" aria-expanded="false" aria-controls="collapse_button_display_screen_time">
-                  <font color="Blue">Lập Lịch, Bật Tắt Hiển Thị Dữ Liệu Màn Hình</font>, Trạng Thái:&nbsp;
-                  <?php 
-                    echo isset($data['display_screen']['active']) ? ($data['display_screen']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>'; 
-                    ?>
-                </h5>
-                <div id="collapse_button_display_screen_time" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_display_screen_time">
-                  <?php
-                    // Kiểm tra dữ liệu display_screen và gán giá trị mặc định nếu không có
-                    if (!isset($data['display_screen']) || empty($data['display_screen'])) {
-                        // Gán giá trị mặc định nếu không có dữ liệu display_screen
-                        $data['display_screen'] = [
-                            'active' => false,
-                            'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                            'time_on' => ["05:01"],
-                            'time_off' => ["23:59"]
-                        ];
-                    } 
-                    $display_screen = $data['display_screen'];
-                    ?>
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
-                    <div class="col-sm-9">
-                      <div class="form-switch">
-                        <input class="form-check-input" type="checkbox" name="display_screen_active" id="display_screen_active" value="<?php echo $display_screen['active']; ?>" <?= $display_screen['active'] ? 'checked' : '' ?>>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Checkbox ngày -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Màn Hình')"></i> :</label>
-                    <div class="col-sm-9">
-                      <div class="form-switch">
-                        <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_display_screen[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $display_screen['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br/>
-                        <?php endforeach; ?>
-                      </div>
-                    </div>
-                  </div>
-                  <!-- Thời gian bật -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Thời Gian Bật:</label>
-                    <div class="col-sm-9">
-                      <div class="time-inputs_display_screen" id="time-on-container">
-                        <?php foreach ($display_screen['time_on'] as $index => $time_on): ?>
-                        <div class="time-input-container input-group mb-3" id="time-on_display_screen-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_on_display_screen[]" value="<?= htmlspecialchars($time_on) ?>" placeholder="HH:mm">
-                          <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-on_display_screen-<?= $index ?>"><i class="bi bi-trash"></i></button>
-                        </div>
-                        <?php endforeach; ?>
-                        <button class="btn btn-success rounded-pill" type="button" id="add-time-on_display_screen">Thêm thời gian bật</button>
-                      </div>
-                    </div>
-                  </div>
-                  <hr/>
-                  <!-- Thời gian tắt -->
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Thời Gian Tắt:</label>
-                    <div class="col-sm-9">
-                      <div class="time-inputs_display_screen" id="time-off-container">
-                        <?php foreach ($display_screen['time_off'] as $index => $time_off): ?>
-                        <div class="time-input-container input-group mb-3" id="time-off_display_screen-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_off_display_screen[]" value="<?= htmlspecialchars($time_off) ?>" placeholder="HH:mm">
-                          <button class="btn btn-danger border-success" title="Xóa thời gian Tắt này" type="button" id="delete-off_display_screen-<?= $index ?>"><i class="bi bi-trash"></i></button>
-                        </div>
-                        <?php endforeach; ?>
-                        <button class="btn btn-warning rounded-pill" type="button" id="add-time-off_display_screen">Thêm thời gian tắt</button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
             <div class="card accordion" id="accordion_button_stop_media_player">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_stop_media_player" aria-expanded="false" aria-controls="collapse_button_stop_media_player">
@@ -1552,47 +1473,6 @@ if (!file_exists($Schedule_Audio_dir)) {
               }
           });
     </script>
-
-    <!-- Scripts lập Lịch Màn Hình -->
-    <script>
-      let timeOnCounter_display_screen = <?= count($display_screen['time_on']) ?>;
-      let timeOffCounter_display_screen = <?= count($display_screen['time_off']) ?>;
-      document.getElementById('add-time-on_display_screen').addEventListener('click', function() {
-          const timeOnContainer = document.getElementById('time-on-container');
-          const inputContainerId = 'time-on_display_screen-' + timeOnCounter_display_screen;
-          const inputContainer = document.createElement('div');
-          inputContainer.id = inputContainerId;
-      inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
-          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_on_display_screen[]" placeholder="HH:mm (Thời gian bật)"><button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-on_display_screen-' + timeOnCounter_display_screen + '"><i class="bi bi-trash"></i></button>';
-          timeOnContainer.insertBefore(inputContainer, this);
-          document.getElementById('delete-on_display_screen-' + timeOnCounter_display_screen).addEventListener('click', function() {
-              document.getElementById(inputContainerId).remove();
-          });
-          timeOnCounter_display_screen++;
-      });
-
-      // Thêm input cho Time Off
-      document.getElementById('add-time-off_display_screen').addEventListener('click', function() {
-          const timeOffContainer = document.getElementById('time-off-container');
-          const inputContainerId = 'time-off_display_screen-' + timeOffCounter_display_screen;
-          const inputContainer = document.createElement('div');
-          inputContainer.id = inputContainerId;
-      inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
-          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_off_display_screen[]" placeholder="HH:mm (Thời gian tắt)"><button class="btn btn-danger border-success" title="Xóa thời gian Tắt này" type="button" id="delete-off_display_screen-' + timeOffCounter_display_screen + '"><i class="bi bi-trash"></i></button>';
-          timeOffContainer.insertBefore(inputContainer, this);
-          document.getElementById('delete-off_display_screen-' + timeOffCounter_display_screen).addEventListener('click', function() {
-              document.getElementById(inputContainerId).remove();
-          });
-          timeOffCounter_display_screen++;
-      });
-      document.querySelectorAll('.time-inputs_display_screen > div > button').forEach(button => {
-          button.addEventListener('click', function() {
-              const container = button.parentElement;
-              container.remove();
-          });
-      });
-    </script>
-    <!--END Scripts lập Lịch Màn Hình -->
 
     <!-- Scripts Restart VBot -->
     <script>

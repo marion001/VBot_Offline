@@ -534,14 +534,7 @@
                         </div>
                       </div>
                     </li>
-                    <li>
-                      <font color="blue">Màn Hình (Display Screen) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng, hiển thị dữ liệu lên màn hình')"></i> :</font>
-                      <div class="form-switch">
-                        <div class="form-check">
-                          <input class="form-check-input border-success" value="display_screen_active" type="checkbox" name="display_screen_active" id="display_screen_active" onclick="change_to_another_mode('display_screen', this.checked)" <?php if ($Config['display_screen']['active'] === true) echo "checked"; ?>>
-                        </div>
-                      </div>
-                    </li>
+
                   </ul>
                 </div>
               </div>
@@ -572,12 +565,6 @@
                           <input class="form-check-input border-success" value="console" type="radio" name="select_log_display_style" id="log_display_style_console" onclick="change_og_display_style('change_log', 'console', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "console") echo "checked"; ?>>
                           <label class="form-check-label">
                           Console
-                          </label>
-                        </div>
-                        <div class="form-check">
-                          <input <?php if ($Config['display_screen']['active'] === false) echo "disabled"; ?> class="form-check-input border-success" value="display_screen" type="radio" name="select_log_display_style" id="log_display_style_oled_display" onclick="change_og_display_style('change_log', 'display_screen', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "display_screen") echo "checked"; ?>>
-                          <label class="form-check-label">
-                          Màn Hình
                           </label>
                         </div>
                         <div class="form-check">
@@ -966,7 +953,7 @@
                       document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
                       document.getElementById('youtube_active').checked = data.media_player.youtube_active ? true : false;
                       document.getElementById('news_paper_active').checked = data.news_paper_active ? true : false;
-                      document.getElementById('display_screen_active').checked = data.display_screen_active ? true : false;
+                      //document.getElementById('display_screen_active').checked = data.display_screen_active ? true : false;
                       document.getElementById('home_assistant_active').checked = data.home_assistant_active ? true : false;
                       document.getElementById('hass_custom_commands_active').checked = data.hass_custom_commands_active ? true : false;
                       document.getElementById('default_assistant_active').checked = data.default_assistant_active ? true : false;
@@ -997,9 +984,6 @@
 					if (data.log_display_style === "console"){
 						document.getElementById('log_display_style_console').checked = true;
 						rlc_log_display_style = "Console";
-					}else if (data.log_display_style === "display_screen"){
-						document.getElementById('log_display_style_oled_display').checked = true;
-						rlc_log_display_style = "Display Screen";
 					}else if (data.log_display_style === "api"){
 						document.getElementById('log_display_style_api').checked = true;
 						rlc_log_display_style = "API";

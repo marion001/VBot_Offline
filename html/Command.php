@@ -1230,9 +1230,9 @@ if (isset($_POST['disable_vbot_api_external'])) {
                         </div>
                         </div>
 					  
-                      <div class="btn-group">
+                      <div class="btn-group" disabled>
                         <div class="dropdown">
-                          <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
+                          <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" disabled>
                           LCD OLED Auto
                           </button>
                           <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">

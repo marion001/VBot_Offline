@@ -423,7 +423,6 @@ select:
     icon: mdi:math-log
     options:
       - "console"
-      - "display_screen"
       - "api"
       - "all"
 
@@ -735,18 +734,6 @@ switch:
     retain: '.$MQTT_Retain.'
     icon: mdi:assistant
 
-  - name: "'.$MQTT_Client_Name.' Display Screen"
-    state_topic: "'.$MQTT_Client_Name.'/switch/display_screen_active/state"
-    command_topic: "'.$MQTT_Client_Name.'/switch/display_screen_active/set"
-    payload_on: "ON"
-    payload_off: "OFF"
-    state_on: "ON"
-    state_off: "OFF"
-    optimistic: false
-    qos: '.$MQTT_Qos.'
-    retain: '.$MQTT_Retain.'
-    icon: mdi:monitor-shimmer
-
   - name: "'.$MQTT_Client_Name.' Multiple Command"
     state_topic: "'.$MQTT_Client_Name.'/switch/multiple_command_active/state"
     command_topic: "'.$MQTT_Client_Name.'/switch/multiple_command_active/set"
@@ -1022,7 +1009,6 @@ entities:
   - entity: sensor.'.strtolower($MQTT_Client_Name).'_ngay_phat_hanh_giao_dien
   - entity: sensor.'.strtolower($MQTT_Client_Name).'_phien_ban_chuong_trinh
   - entity: sensor.'.strtolower($MQTT_Client_Name).'_ngay_phat_hanh_chuong_trinh
-  - entity: switch.'.strtolower($MQTT_Client_Name).'_display_screen
   - entity: switch.'.strtolower($MQTT_Client_Name).'_dify_ai
   - entity: switch.'.strtolower($MQTT_Client_Name).'_multiple_command
   - entity: switch.'.strtolower($MQTT_Client_Name).'_continue_listening_after_commands

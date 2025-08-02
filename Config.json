@@ -75,19 +75,6 @@
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
-    "display_screen": {
-        "active": false,
-        "connection_type": "lcd_i2c",
-        "text_display_center": "VBot Assistant",
-        "lcd_i2c": {
-            "screen_type": "SSD1306_128_64",
-            "font_ttf": "resource/screen_disp/font/Chonburi_Regular.ttf",
-            "font_size": 10
-        },
-        "lcd_spi": {
-            "screen_type": "SSD1306_128_64"
-        }
-    },
     "home_assistant": {
         "active": true,
         "minimum_threshold": 0.6,
