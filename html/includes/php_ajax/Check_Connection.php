@@ -33,10 +33,11 @@ if ($Config['contact_info']['user_login']['active']){
           exit;
       }
       $action = $actionData['action'];
-      $data = isset($actionData['data']) ? $actionData['data'] : [];
+      //$data = isset($actionData['data']) ? $actionData['data'] : [];
       $target = $actionData['target'];
-  	$entity_id = $target['entity_id'];
+	  $entity_id = $target['entity_id'];
       list($domain, $service) = explode('.', $action);
+	  /*
       if (is_string($entity_id)) {
   		#Nếu là chuỗi
           $payload = ['entity_id' => [$entity_id]];
@@ -47,6 +48,16 @@ if ($Config['contact_info']['user_login']['active']){
           // Còn lại gắn mảng rỗng
           $payload = ['entity_id' => []];
       }
+	  */
+	//Bảo đảm $data là mảng trước
+	$data = is_array($actionData['data'] ?? null) ? $actionData['data'] : [];
+	if (is_string($entity_id)) {
+		$payload = array_merge(['entity_id' => [$entity_id]], $data);
+	} elseif (is_array($entity_id)) {
+		$payload = array_merge(['entity_id' => $entity_id], $data);
+	} else {
+		$payload = array_merge(['entity_id' => []], $data);
+	}
       $headers = [
           "Authorization: Bearer ".$Config['home_assistant']['long_token'],
           "Content-Type: application/json"
@@ -90,6 +101,7 @@ if ($Config['contact_info']['user_login']['active']){
       echo json_encode($response);
       exit;
   }
+
 
 #Kiểm tra trạng thái các thiết bị chạy Vbot Server trong mạng lan
 if (isset($_GET['check_status_vbot_server_in_lan'])) {

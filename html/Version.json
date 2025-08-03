@@ -1,8 +1,8 @@
 {
-    "version": "1.0.50",
+    "version": "1.0.51",
     "projectName": "WebUI VBot Offline",
-    "description": "Loại Bỏ Kết Nối Màn Hình LCD OLED",
-    "releaseDate": "02/08/2025",
+    "description": "Sửa lỗi Test Code YAML Custom Hass",
+    "releaseDate": "03/08/2025",
     "changes": [
         {
             "type": "feature",
