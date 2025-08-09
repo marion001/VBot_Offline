@@ -279,6 +279,19 @@
                             </font>
                           </ul>
                         </li>
+                        <li>
+                          <font color="green">Ở Trạng Thái Đang Phát Câu Trả Lời, TTS:</font>
+                          <ul>
+                            <font color="blue">
+                              <li>
+                                Nhấn Nhả + Nhấn Giữ:
+                                <ul>
+                                  <li>Dừng Phát Câu Trả Lời, TTS</li>
+                                </ul>
+                              </li>
+                            </font>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                     <br/>
@@ -323,6 +336,19 @@
                             </font>
                           </ul>
                         </li>
+                        <li>
+                          <font color="green">Ở Trạng Thái Đang Phát Câu Trả Lời, TTS:</font>
+                          <ul>
+                            <font color="blue">
+                              <li>
+                                Nhấn Nhả + Nhấn Giữ:
+                                <ul>
+                                  <li>Dừng Phát Câu Trả Lời, TTS</li>
+                                </ul>
+                              </li>
+                            </font>
+                          </ul>
+                        </li>
                       </ul>
                     </li>
                   </ul>
@@ -336,7 +362,7 @@
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_faq_nut_nhan_encoder" aria-expanded="false" aria-controls="collapse_button_faq_nut_nhan_encoder">
       Nút Nhấn Xoay Encoder:</h5>
       <div id="collapse_button_faq_nut_nhan_encoder" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_faq_nut_nhan_encoder">
-	Đang Cập Nhật.....
+	Chức năng được lựa chọn trong Phần: Cấu Hình Config -> Cấu Hình Nút Nhấn
       </div>
       </div>
       </div>
