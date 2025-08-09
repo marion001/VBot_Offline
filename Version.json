@@ -1,8 +1,8 @@
 {
-    "version": "1.0.51",
+    "version": "1.0.52",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi Test Code YAML Custom Hass",
-    "releaseDate": "03/08/2025",
+    "description": "Được phép dừng phát Câu Trả Lời, TTS khi đang phát. Khi nhấn nút Mic hoặc WakeUP",
+    "releaseDate": "09/08/2025",
     "changes": [
         {
             "type": "feature",

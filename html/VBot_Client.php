@@ -104,6 +104,12 @@ if ($Config['contact_info']['user_login']['active']) {
         </nav>
     </div>
 
+<div class="input-group mb-3">
+                <span class="input-group-text border-danger" id="basic-addon2">Hướng Dẫn:</span>
+            <input type="text" disabled class="form-control border-danger" name="guide_client" id="guide_client" value="https://github.com/marion001/VBot_Client_Offline">
+            <button class="btn btn-success border-success" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Client_Offline" target="_blank">Truy Cập</a></button>
+        </div>
+
     <section class="section">
         <center>
             <button type="button" class="btn btn-primary" onclick="scan_VBot_Client_Device()"><i class="bi bi-radar"></i> Quét Thiết Bị Client</button>
@@ -112,9 +118,7 @@ if ($Config['contact_info']['user_login']['active']) {
         </center>
         <br/>
         <div class="input-group mb-3">
-            <div class="input-group-prepend">
                 <span class="input-group-text border-success" id="basic-addon1">Thêm Client Thủ Công</span>
-            </div>
             <input type="text" class="form-control border-success" name="add_client_manual_ip" id="add_client_manual_ip" placeholder="Nhập địa chỉ IP Của Client">
             <button type="button" class="btn btn-primary border-success" onclick="bat_dau_them_client_thu_cong()">Thêm</button>
         </div>
