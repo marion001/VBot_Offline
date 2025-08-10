@@ -1,8 +1,8 @@
 {
     "version": "1.0.52",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ trợ thay đổi múi giờ trong Command/Terminal",
-    "releaseDate": "10/08/2025",
+    "description": "Nâng Cấp Bảo Mật WebUI, Cho Phép Giới Hạn Số Lần Đăng Nhập Sai, Tránh Attack Brute-Force. Hỗ trợ thay đổi múi giờ trong Command/Terminal",
+    "releaseDate": "10/08/2025-1",
     "changes": [
         {
             "type": "feature",

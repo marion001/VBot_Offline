@@ -73,6 +73,8 @@
 
   if (isset($_POST['save_change_user_login'])) {
   $Config['contact_info']['user_login']['active'] = isset($_POST['user_login_active']) ? true : false;
+  $Config['contact_info']['user_login']['login_attempts'] = intval($_POST['login_attempts']);
+  $Config['contact_info']['user_login']['login_lock_time'] = intval($_POST['login_lock_time']);
   // Lưu cấu hình $Config vào file JSON
   file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
   }
@@ -245,6 +247,23 @@
                           </div>
                         </div>
                       </div>
+
+                      <div class="row mb-3">
+                        <label for="login_attempts" class="col-md-4 col-lg-3 col-form-label">Số Lần Đăng Nhập Sai Tối Đa:</label>
+                        <div class="col-md-8 col-lg-9">
+                          <input required name="login_attempts" type="number" min="3" class="form-control border-success" id="login_attempts" placeholder="<?php echo $Config['contact_info']['user_login']['login_attempts']; ?>" value="<?php echo $Config['contact_info']['user_login']['login_attempts']; ?>">
+                          <div class="invalid-feedback">Vui Lòng Nhập Số Lần Đăng Nhập Vào WebUI Khi Nhập Sai Mật Khẩu</div>
+                        </div>
+                      </div>
+
+                      <div class="row mb-3">
+                        <label for="login_lock_time" class="col-md-4 col-lg-3 col-form-label">Thời Gian Chờ Đăng Nhập Sai Tối Đa (s/Giây):</label>
+                        <div class="col-md-8 col-lg-9">
+                          <input required name="login_lock_time" type="number" min="3" class="form-control border-success" id="login_lock_time" placeholder="<?php echo $Config['contact_info']['user_login']['login_lock_time']; ?>" value="<?php echo $Config['contact_info']['user_login']['login_lock_time']; ?>">
+                          <div class="invalid-feedback">Vui Lòng Nhập Thời Gian Chờ Tối Đa Khi Nhập Sai Mật Khẩu</div>
+                        </div>
+                      </div>
+
                       <hr/>
                       <div class="text-center">
                         <button type="submit" name="save_change_user_login" class="btn btn-primary rounded-pill">Lưu Cài Đặt</button>

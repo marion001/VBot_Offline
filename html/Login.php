@@ -6,6 +6,69 @@
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
 
+$filePath_Data = 'includes/other_data/WebUI_Login_Security/Login_Data.json';
+$dirPath_Data  = dirname($filePath_Data);
+
+// Nếu thư mục chưa tồn tại thì tạo
+if (!is_dir($dirPath_Data)) {
+    mkdir($dirPath_Data, 0777, true);
+	exec('chmod 0777 ' . escapeshellarg($dirPath_Data));
+}
+
+// Nếu file chưa tồn tại thì tạo với nội dung mặc định
+if (!file_exists($filePath_Data)) {
+    $defaultData = [
+        "number_of_failed_logins" => intval(0),
+        "last_failed_login_time" => null
+    ];
+    file_put_contents($filePath_Data, json_encode($defaultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+	exec('chmod 0777 ' . escapeshellarg($filePath_Data));
+}
+
+$Login_Data = json_decode(file_get_contents($filePath_Data), true);
+
+$error1 = '';
+$error = '';
+if (isset($_POST['reset_limit_login'])) {
+    $inputEmail = trim($_POST['email'] ?? '');
+    if (strcasecmp($inputEmail, $Config['contact_info']['email']) === 0) {
+        if (file_exists($filePath_Data)) {
+            $Login_Data['number_of_failed_logins'] = 0;
+            $Login_Data['last_failed_login_time']  = null;
+            file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            $error .= "✅ Đã reset giới hạn đăng nhập.<br/><br/>";
+        }
+    } else {
+        $error1 = "<font color='red' size='5'>❌ Email không trùng khớp, không thể Reset thời gian chờ</font>";
+    }
+}
+
+//So sánh
+if ($Login_Data['number_of_failed_logins'] == $Config['contact_info']['user_login']['login_attempts']){
+	$Login_Data['last_failed_login_time'] = time();
+	file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+}
+else if ($Login_Data['number_of_failed_logins'] >= $Config['contact_info']['user_login']['login_attempts']) {
+	$lastTime = intval($Login_Data['last_failed_login_time']);
+	$unlockTime = $lastTime + $Config['contact_info']['user_login']['login_lock_time'];
+	$now = time();
+        if ($now < $unlockTime) {
+            $error .= "<br/><center><h1><font color='red'>VBot Assistant Đăng Nhập Thất Bại</font><br/><br/>Vượt quá số lần đăng nhập cho phép! Hãy thử lại sau <font color='red'>" . ($unlockTime - $now) . "</font> giây<br/><br/><a href='Login.php'>Tải Lại Trang</a></h1>";
+            echo $error;
+			echo '<hr/><h2><font color=red>Reset Giới Hạn Thời Gian Chờ</font></h2><br/><form method="POST">
+			Nhập Email: <input type="text" name="email" placeholder="Nhập Email Của Bạn">
+			<button type="submit" name="reset_limit_login">Reset Giới Hạn Đăng Nhập</button>
+			</form><br/>';
+			echo $error1;
+			echo '</center>';
+            exit();
+        } else {
+            $Login_Data['number_of_failed_logins'] = 0;
+            $Login_Data['last_failed_login_time'] = null;
+            file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+        }
+}
+
   #Quên Mật Khẩu
   if (isset($_GET['forgot_password'])) {
       $my_email = $_GET['mail'];
@@ -81,7 +144,6 @@
   exit();
   }
 
-
 session_start();
 
 // Hàm tạo token CSRF
@@ -118,11 +180,13 @@ function verifyCsrfToken($token) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_POST['csrf_token']) || !verifyCsrfToken($_POST['csrf_token'])) {
-        $error = "Yêu cầu không hợp lệ!";
+        $error .= "Yêu cầu đăng nhập không hợp lệ!";
     } else {
 		$stored_hash = hash('sha256', $Config['contact_info']['user_login']['user_password']);
         $password_user = $_POST['token_password'];
 		if (hash_equals($stored_hash, $password_user)) {
+			$Login_Data['number_of_failed_logins'] = 0;
+			file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             // Đăng nhập thành công
             $_SESSION['user_login'] = [
                 'logged_in' => true,
@@ -131,7 +195,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             header('Location: index.php');
             exit;
 		} else {
-            $error = "Sai mật khẩu!";
+            $error .= "❌ Sai mật khẩu!";
+			$Login_Data['number_of_failed_logins'] = intval($Login_Data['number_of_failed_logins']) + 1;
+			file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+			$currentFails = intval($Login_Data['number_of_failed_logins']);
+			$maxAttempts  = intval($Config['contact_info']['user_login']['login_attempts']);
+			$remaining    = $maxAttempts - $currentFails;
+			if ($remaining > 0 && $remaining <= 3) {
+				$error .= "<br/>Bạn còn <b>{$remaining}</b> lần đăng nhập";
+			}
         }
     }
 }
@@ -184,7 +256,6 @@ generateCsrfToken();
     <span class="d-none d-lg-block">VBot Assistant</span>   <!-- Hiển thị trên desktop -->
   </a>
 </div>
-
                 <!-- End Logo -->
                 <div class="card">
                   <div class="card-body">
