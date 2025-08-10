@@ -1114,13 +1114,11 @@ if (isset($_POST['disable_vbot_api_external'])) {
   file_put_contents($destinationFile, $fileContent);
   chmod($destinationFile, 0777);
   $output .= "Porcupine:> Phiên bản thư viện Porcupine (.pv) được cài đặt là: $versions_porcupine_install\n";
-  
   $fileNameZip = 'porcupine-'.$versions_porcupine_install.'/lib/common';
-  $zipFilePath = $destinationPath.'/v'.$versions_porcupine_install.'.zip'; // Đường dẫn đến file ZIP
+  $zipFilePath = $destinationPath.'/v'.$versions_porcupine_install.'.zip';
   $zip = new ZipArchive;
   if ($zip->open($zipFilePath) === TRUE) {
       $fileNamesToCopy = ["$fileNameZip/porcupine_params.pv", "$fileNameZip/porcupine_params_vn.pv"];
-  
       foreach ($fileNamesToCopy as $fileNameInZip) {
           // Kiểm tra xem file có tồn tại trong ZIP hay không
           $index = $zip->locateName($fileNameInZip);
@@ -1131,7 +1129,6 @@ if (isset($_POST['disable_vbot_api_external'])) {
               $destinationFilee = $destinationPath . '/' . basename($fileNameInZip);
               // Ghi nội dung của file vào thư mục đích
               file_put_contents($destinationFilee, $fileContent);
-              
               //$output .= 'Porcupine:> File '.basename($fileNameInZip).' đã được đưa vào thư mục lib có chứa tệp .pv | ';
           } else {
               $output .= 'Porcupine:> File '.basename($fileNameInZip). 'không tồn tại | ';
@@ -1140,11 +1137,42 @@ if (isset($_POST['disable_vbot_api_external'])) {
       $zip->close();
   	shell_exec('rm ' . escapeshellarg($zipFilePath));
   	$output .= 'Porcupine:> HÃY CHỌN LẠI NGÔN NGỮ HOTWORD VÀ LƯU CẤU HÌNH SAU ĐÓ KHỞI ĐỘNG LẠI VBot ĐỂ ÁP DỤNG.';
-  	
   } else {
       $output .= 'Porcupine:> Lỗi không thể mở file thư viện Porcupine: v'.$versions_porcupine_install.'.zip \n';
   }
   }
+  }
+
+  if (isset($_POST['set_time_zones'])) {
+	$timezones_value = $_POST['show_lits_timezone'];
+  $CMD = "sudo timedatectl set-timezone $timezones_value";
+  $CMD1 = "timedatectl";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {die($SSH_CONNECT_ERROR);}
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  sleep(3);
+  $stream1 = ssh2_exec($connection, $CMD1);
+  stream_set_blocking($stream1, true);
+  $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .= "$GET_current_USER@$HostName:~ $ $CMD1\n";
+  $output .=  stream_get_contents($stream_out);
+  $output .=  stream_get_contents($stream_out1);
+  }
+
+  if (isset($_POST['check_time_zones'])) {
+  $CMD = "timedatectl";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {die($SSH_CONNECT_ERROR);}
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
   }
   ?>
 <!DOCTYPE html>
@@ -1170,7 +1198,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
           <ol class="breadcrumb">
             <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
             <li class="breadcrumb-item active">Command/Terminal</li>
-            <li class="breadcrumb-item active text-danger"><?php echo @trim(file_get_contents('/os_image_created.txt')) ?: 'N/A'; ?></li>
+            <li class="breadcrumb-item active"><?php echo "<font color='green'>".@trim(file_get_contents('/os_image_created.txt'))."</font>" ?: "<font color='red'>VBot Assistant OS Image Build: N/A</font>"; ?></li>
           </ol>
         </nav>
       </div>
@@ -1230,7 +1258,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
                           </ul>
                         </div>
                         </div>
-					  
+
                       <div class="btn-group" disabled>
                         <div class="dropdown">
                           <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" disabled>
@@ -1353,6 +1381,42 @@ if (isset($_POST['disable_vbot_api_external'])) {
                     </div>
                   </div>
                 </form>
+				<hr/>
+				
+                <form method="POST" action="">
+                  <div class="row g-3 d-flex justify-content-center">
+				  
+                    <div class="col-auto">
+                      <div class="btn-group">
+                        <div class="dropdown">
+                          <button class="btn btn-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Thiết Lập Múi Giờ, Thời Gian Cho Hệ Thống">
+                          Thời Gian, Múi Giờ
+                          </button>
+                          <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="list_time_zones" type="submit" id="list_time_zones" title="Hiển Thị Danh Sách Múi Giờ">Danh Sách Múi Giờ</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="check_time_zones" type="submit" id="check_time_zones" title="Kiểm Tra Múi Giờ Hiện Tại Trên Hệ Thống">Kiểm Tra Múi Giờ Hệ Thống</button></li>
+                          </ul>
+                        </div>
+                      </div>
+
+                  </div>
+				<?php
+				if (isset($_POST['list_time_zones'])) {
+				$listtimezone = shell_exec('timedatectl list-timezones');
+				$timezones = explode("\n", trim($listtimezone));
+				echo '<br/><br/><div class="input-group mb-3"><span class="input-group-text text-success">Chọn Múi Giờ:</span><select name="show_lits_timezone" id="show_lits_timezone" class="form-select border-success">';
+				foreach ($timezones as $tz) {
+					if (!empty($tz)) {
+						echo '<option value="' . htmlspecialchars($tz) . '">' . htmlspecialchars($tz) . '</option>';
+					}
+				}
+				echo '</select><button class="btn btn-success border-primary" name="set_time_zones" id="set_time_zones" type="submit" onclick="loading(\'show\')">Thiết Lập Múi Giờ</button></div>';
+				  }
+				?>
+                  </div>
+                </form>
+				
+				
                 <hr/>
                 <form method="POST" action="">
                   <div class="input-group mb-3">

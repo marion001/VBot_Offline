@@ -1,8 +1,8 @@
 {
-    "version": "1.0.51",
+    "version": "1.0.52",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi Test Code YAML Custom Hass",
-    "releaseDate": "03/08/2025",
+    "description": "Hỗ trợ thay đổi múi giờ trong Command/Terminal",
+    "releaseDate": "10/08/2025",
     "changes": [
         {
             "type": "feature",
