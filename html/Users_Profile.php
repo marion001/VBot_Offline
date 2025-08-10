@@ -123,21 +123,21 @@
                     <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Cài đặt</button>
                   </li>
                   <li class="nav-item">
-                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Đổi mật khẩu</button>
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-change-password">Đổi mật khẩu WebUI</button>
                   </li>
                   <li class="nav-item">
-                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-forgot-password">Quên mật khẩu</button>
+                    <button type="button" class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-forgot-password">Quên mật khẩu WebUI</button>
                   </li>
                 </ul>
                 <div class="tab-content pt-2">
                   <div class="tab-pane fade profile-overview active show" id="profile-overview" role="tabpanel">
                     <h5 class="card-title">Chi tiết hồ sơ</h5>
                     <div class="row">
-                      <div class="col-lg-3 col-md-4 label ">Tên</div>
+                      <div class="col-lg-3 col-md-4 label ">Tên:</div>
                       <div class="col-lg-9 col-md-8"><?php echo $Config['contact_info']['full_name']; ?></div>
                     </div>
                     <div class="row">
-                      <div class="col-lg-3 col-md-4 label">Địa Chỉ</div>
+                      <div class="col-lg-3 col-md-4 label">Địa Chỉ:</div>
                       <div class="col-lg-9 col-md-8"><?php echo $Config['contact_info']['address']['district'].", ".$Config['contact_info']['address']['province']; ?></div>
                     </div>
                     <div class="row">
@@ -153,7 +153,7 @@
                     <!-- Profile Edit Form -->
                     <form class="row g-3 needs-validation" enctype="multipart/form-data" novalidate method="POST" action="" onsubmit="return validateForm_pass()">
                       <div class="row mb-3">
-                        <label class="col-md-4 col-lg-3 col-form-label">Ảnh hồ sơ cá nhân</label>
+                        <label class="col-md-4 col-lg-3 col-form-label">Ảnh hồ sơ cá nhân:</label>
                         <div class="col-md-8 col-lg-9">
                           <img src="<?php echo $Avata_File; ?>" alt="Profile">
                           <div class="pt-2">
@@ -166,14 +166,14 @@
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="full_name" class="col-md-4 col-lg-3 col-form-label">Tên</label>
+                        <label for="full_name" class="col-md-4 col-lg-3 col-form-label">Tên:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="full_name" type="text" class="form-control border-success" id="full_name" value="<?php echo $Config['contact_info']['full_name']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Tên!</div>
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-md-4 col-lg-3 col-form-label">Địa Chỉ</label>
+                        <label class="col-md-4 col-lg-3 col-form-label">Địa Chỉ:</label>
                         <div class="col-md-8 col-lg-9">
                           <div class="input-group mb-3 border-success">
                             <div class="input-group-prepend">
@@ -196,7 +196,7 @@
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-md-4 col-lg-3 col-form-label">Vị Trí</label>
+                        <label class="col-md-4 col-lg-3 col-form-label">Vị Trí:</label>
                         <div class="col-md-8 col-lg-9">
                           <div class="input-group mb-3 border-success">
                             <div class="input-group-prepend">
@@ -209,19 +209,19 @@
                               <span class="input-group-text border-success">Vĩ Độ: </span>
                             </div>
                             <input type="text" name="latitude_name" id="latitude_name" class="form-control border-success" placeholder="<?php echo $Config['contact_info']['location']['latitude']; ?>" value="<?php echo $Config['contact_info']['location']['latitude']; ?>">
-                          </div>
-                          <button type="button" class="btn btn-info" onclick="getLocationData()">Lấy Vị Trí Hiện Tại</button>
+                          </div><center>
+                          <button type="button" class="btn btn-info" onclick="getLocationData()">Lấy Vị Trí Hiện Tại</button></center>
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="email_name" class="col-md-4 col-lg-3 col-form-label">Email</label>
+                        <label for="email_name" class="col-md-4 col-lg-3 col-form-label">Email:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="email_name" type="text" class="form-control border-success" id="email_name" placeholder="<?php echo $Config['contact_info']['email']; ?>" value="<?php echo $Config['contact_info']['email']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Email (Dùng để tìm lại mật khẩu và 1 số chức năng khác) !</div>
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="webui_password" class="col-md-4 col-lg-3 col-form-label">Mật khẩu Web UI</label>
+                        <label for="webui_password" class="col-md-4 col-lg-3 col-form-label">Mật khẩu Web UI:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="webui_password" type="text" class="form-control border-success" id="webui_password" placeholder="<?php echo $Config['contact_info']['user_login']['user_password']; ?>" value="<?php echo $Config['contact_info']['user_login']['user_password']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Mật Khảu Đăng Nhập Web UI (Dùng để đăng nhập khi bạn bật đăng nhập trên web ui) !</div>
@@ -237,11 +237,11 @@
                     <form class="row g-3 needs-validation" enctype="multipart/form-data" novalidate method="POST" action="">
                       <!-- Settings Form -->
                       <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Đăng nhập Web UI</label>
+                        <label class="col-sm-3 col-form-label">Đăng nhập Web UI:</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input" type="checkbox" name="user_login_active" id="user_login_active" <?php echo $Config['contact_info']['user_login']['active'] ? 'checked' : ''; ?>>
-                            <label class="form-check-label" for="user_login_active">Bật hoặc đăng nhập</label>
+                            <label class="form-check-label" for="user_login_active"> Bật để kích hoạt sử dụng mật khẩu đăng nhập vào giao diện WebUI VBot</label>
                           </div>
                         </div>
                       </div>
@@ -255,21 +255,21 @@
                   <div class="tab-pane fade pt-3" id="profile-change-password" role="tabpanel">
                     <!-- Change Password Form -->
                     <div class="row mb-3">
-                      <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Cũ</label>
+                      <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Cũ:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="currentPassword" type="password" class="form-control border-success" id="currentPassword">
                         <div class="valid-feedback">Cần nhập mật khẩu cũ!</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Mới</label>
+                      <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Mới:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="newPassword" type="password" class="form-control border-success" id="newPassword">
                         <div class="valid-feedback">Cần nhập mật khẩu mới!</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Nhập Lại Mật Khẩu Mới</label>
+                      <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Nhập Lại Mật Khẩu Mới:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="renewPassword" type="password" class="form-control border-success" id="renewPassword">
                         <div class="valid-feedback">Cần nhập lại mật khẩu mới!</div>
@@ -282,7 +282,7 @@
                   <div class="tab-pane fade pt-3" id="profile-forgot-password" role="tabpanel">
                     <!-- Change Password Form -->
                     <div class="row mb-3">
-                      <label for="forgotPassword_email" class="col-md-4 col-lg-3 col-form-label">Nhập Email</label>
+                      <label for="forgotPassword_email" class="col-md-4 col-lg-3 col-form-label">Nhập Email:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="forgotPassword_email" type="text" class="form-control border-success" id="forgotPassword_email" value="<?php echo $Config['contact_info']['email']; ?>">
                         <div class="valid-feedback">Cần nhập địa chỉ email để lấy lại mật khẩu</div>
