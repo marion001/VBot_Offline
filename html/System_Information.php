@@ -323,6 +323,7 @@ $: <b>sudo raspi-config</b><br/>
             $pythonVersion = shell_exec('python3 --version 2>&1');
             // Lấy phiên bản Apache
             $apacheVersion = shell_exec('apache2 -v | grep "Server version"');
+            $os_img_Version = @trim(file_get_contents('/os_image_created.txt')) ?: 'N/A';
             ?>
           <div class="col-lg-4">
             <div class="card">
@@ -371,6 +372,13 @@ $: <b>sudo raspi-config</b><br/>
                       <?php echo $apacheVersion; ?>
                     </div>
                   </div>
+                  <div class="activity-item d-flex">
+                    <div class="activite-label text-success">Phiên Bản OS IMG:</div>
+                    <div class="activity-content text-danger">
+                      <?php echo $os_img_Version; ?>
+                    </div>
+                  </div>
+				  
                   <div class="activity-item d-flex">
                     <div class="activite-label text-success">Thời gian khởi động:</div>
                     <div class="activity-content text-danger">

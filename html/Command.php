@@ -1170,6 +1170,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
           <ol class="breadcrumb">
             <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang chủ</a></li>
             <li class="breadcrumb-item active">Command/Terminal</li>
+            <li class="breadcrumb-item active text-danger"><?php echo @trim(file_get_contents('/os_image_created.txt')) ?: 'N/A'; ?></li>
           </ol>
         </nav>
       </div>
