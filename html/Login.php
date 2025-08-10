@@ -9,13 +9,11 @@
 $filePath_Data = 'includes/other_data/WebUI_Login_Security/Login_Data.json';
 $dirPath_Data  = dirname($filePath_Data);
 
-// Nếu thư mục chưa tồn tại thì tạo
 if (!is_dir($dirPath_Data)) {
     mkdir($dirPath_Data, 0777, true);
 	exec('chmod 0777 ' . escapeshellarg($dirPath_Data));
 }
 
-// Nếu file chưa tồn tại thì tạo với nội dung mặc định
 if (!file_exists($filePath_Data)) {
     $defaultData = [
         "number_of_failed_logins" => intval(0),
@@ -26,7 +24,6 @@ if (!file_exists($filePath_Data)) {
 }
 
 $Login_Data = json_decode(file_get_contents($filePath_Data), true);
-
 $error1 = '';
 $error = '';
 if (isset($_POST['reset_limit_login'])) {
@@ -43,7 +40,6 @@ if (isset($_POST['reset_limit_login'])) {
     }
 }
 
-//So sánh
 if ($Login_Data['number_of_failed_logins'] == $Config['contact_info']['user_login']['login_attempts']){
 	$Login_Data['last_failed_login_time'] = time();
 	file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
