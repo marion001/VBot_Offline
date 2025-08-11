@@ -60,6 +60,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 
 Link Download IMG FLASH (IMG Được Build Trên Raspberry Pi Zero 2W): https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
 
+Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://drive.google.com/drive/folders/1wLxamxFjP96LT-rN2iobJ8M3j5nGrxs_?usp=drive_link
 
       Model: Raspberry Pi Zero 2 W Rev 1.0
 
