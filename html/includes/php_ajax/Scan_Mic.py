@@ -11,7 +11,8 @@ def show_micro_devices():
         devices = PvRecorder.get_available_devices()
         
         if devices:
-            devices_list = [{"ID": index, "Tên": device} for index, device in enumerate(devices)]
+            devices_list = [{"ID": -1, "Tên": "Sử Dụng Mặc Định Trên Hệ Thống"}]
+            devices_list += [{"ID": index, "Tên": device} for index, device in enumerate(devices)]
             response = {
                 "success": True,
                 "message": "Danh sách thiết bị Micro được lấy thành công.",
