@@ -1427,7 +1427,8 @@ if (isset($_POST['disable_vbot_api_external'])) {
 				echo '<br/><br/><div class="input-group mb-3"><span class="input-group-text text-success">Chọn Múi Giờ:</span><select name="show_lits_timezone" id="show_lits_timezone" class="form-select border-success">';
 				foreach ($timezones as $tz) {
 					if (!empty($tz)) {
-						echo '<option value="' . htmlspecialchars($tz) . '">' . htmlspecialchars($tz) . '</option>';
+						$selected = ($tz === "Asia/Ho_Chi_Minh") ? ' selected' : '';
+						echo '<option value="' . htmlspecialchars($tz) . '"' . $selected . '>' . htmlspecialchars($tz) . '</option>';
 					}
 				}
 				echo '</select><button class="btn btn-success border-primary" name="set_time_zones" id="set_time_zones" type="submit" onclick="loading(\'show\')">Thiết Lập Múi Giờ</button></div>';
