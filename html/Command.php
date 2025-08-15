@@ -1174,6 +1174,25 @@ if (isset($_POST['disable_vbot_api_external'])) {
   $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .=  stream_get_contents($stream_out);
   }
+  
+  if (isset($_POST['fix_time_zones'])) {
+	$timezones_value = $_POST['show_lits_timezone'];
+  $CMD = 'sudo cp '.$VBot_Offline.'resource/timesyncd.conf /etc/systemd/timesyncd.conf';
+  $CMD1 = "sudo systemctl restart systemd-timesyncd && sudo timedatectl set-ntp true && sudo timedatectl timesync-status && timedatectl";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {die($SSH_CONNECT_ERROR);}
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $stream1 = ssh2_exec($connection, $CMD1);
+  stream_set_blocking($stream1, true);
+  $stream_out1 = ssh2_fetch_stream($stream1, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .= "$GET_current_USER@$HostName:~ $ $CMD1\n";
+  $output .=  stream_get_contents($stream_out);
+  $output .=  stream_get_contents($stream_out1);
+  }
   ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -1395,6 +1414,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
                           <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                             <li><button onclick="loading('show')" class="dropdown-item text-danger" name="list_time_zones" type="submit" id="list_time_zones" title="Hiển Thị Danh Sách Múi Giờ">Danh Sách Múi Giờ</button></li>
                             <li><button onclick="loading('show')" class="dropdown-item text-danger" name="check_time_zones" type="submit" id="check_time_zones" title="Kiểm Tra Múi Giờ Hiện Tại Trên Hệ Thống">Kiểm Tra Múi Giờ Hệ Thống</button></li>
+                            <li><button onclick="loading('show')" class="dropdown-item text-danger" name="fix_time_zones" type="submit" id="fix_time_zones" title="Sửa Lỗi Đồng Bộ, Sai Thời Gian Hệ Thống">Sửa Lỗi Đồng Bộ, Sai Thời Gian</button></li>
                           </ul>
                         </div>
                       </div>

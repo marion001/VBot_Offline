@@ -1,8 +1,8 @@
 {
-    "version": "1.0.52",
+    "version": "1.0.53",
     "projectName": "WebUI VBot Offline",
-    "description": "Nâng Cấp Bảo Mật WebUI, Cho Phép Giới Hạn Số Lần Đăng Nhập Sai, Tránh Attack Brute-Force. Hỗ trợ thay đổi múi giờ trong Command/Terminal",
-    "releaseDate": "10/08/2025-1",
+    "description": "Sửa lỗi đồng bộ thời gian trên hệ thống, Sửa Lỗi STT - TTS GCloud liên quan tới lỗi thời gian",
+    "releaseDate": "15/08/2025",
     "changes": [
         {
             "type": "feature",

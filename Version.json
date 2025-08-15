@@ -1,8 +1,8 @@
 {
-    "version": "1.0.52",
+    "version": "1.0.53",
     "projectName": "Program VBot Offline",
-    "description": "Được phép dừng phát Câu Trả Lời, TTS khi đang phát. Khi nhấn nút Mic hoặc WakeUP",
-    "releaseDate": "09/08/2025",
+    "description": "Sửa lỗi đồng bộ thời gian trên hệ thống, Sửa Lỗi STT - TTS GCloud liên quan tới lỗi thời gian",
+    "releaseDate": "15/08/2025",
     "changes": [
         {
             "type": "feature",

@@ -499,6 +499,7 @@
   $Config['schedule']['active'] = isset($_POST['schedule_active']) ? true : false;
   #Cập nhật xử lý lỗi
   $Config['smart_config']['auto_restart_program_error'] = isset($_POST['auto_restart_program_error']) ? true : false;
+  $Config['smart_config']['fix_time_sync_error'] = isset($_POST['fix_time_sync_error']) ? true : false;
   
   ##############################################
   // Khởi tạo mảng radio_data đã cập nhật
@@ -3630,6 +3631,14 @@ echo "\n";
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="auto_restart_program_error" id="auto_restart_program_error" <?php echo $Config['smart_config']['auto_restart_program_error'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Tự động sửa lỗi đồng bộ, sai thời gian hệ thống: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động sửa lỗi đồng bộ, sai thời gian trên hệ thống OS khi chương trình VBot khởi chạy')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="fix_time_sync_error" id="fix_time_sync_error" <?php echo $Config['smart_config']['fix_time_sync_error'] ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>
