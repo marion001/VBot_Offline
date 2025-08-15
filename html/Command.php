@@ -1420,20 +1420,27 @@ if (isset($_POST['disable_vbot_api_external'])) {
                       </div>
 
                   </div>
-				<?php
-				if (isset($_POST['list_time_zones'])) {
-				$listtimezone = shell_exec('timedatectl list-timezones');
-				$timezones = explode("\n", trim($listtimezone));
-				echo '<br/><br/><div class="input-group mb-3"><span class="input-group-text text-success">Chọn Múi Giờ:</span><select name="show_lits_timezone" id="show_lits_timezone" class="form-select border-success">';
-				foreach ($timezones as $tz) {
-					if (!empty($tz)) {
-						$selected = ($tz === "Asia/Ho_Chi_Minh") ? ' selected' : '';
-						echo '<option value="' . htmlspecialchars($tz) . '"' . $selected . '>' . htmlspecialchars($tz) . '</option>';
-					}
-				}
-				echo '</select><button class="btn btn-success border-primary" name="set_time_zones" id="set_time_zones" type="submit" onclick="loading(\'show\')">Thiết Lập Múi Giờ</button></div>';
-				  }
-				?>
+<?php
+if (isset($_POST['list_time_zones'])) {
+    // Lấy múi giờ hiện tại của server
+    $current_tz = trim(shell_exec('timedatectl show -p Timezone --value'));
+    // Lấy danh sách múi giờ
+    $listtimezone = shell_exec('timedatectl list-timezones');
+    $timezones = explode("\n", trim($listtimezone));
+    echo '<br/><br/><div class="input-group mb-3">';
+    echo '<span class="input-group-text text-success">Chọn Múi Giờ:</span>';
+    echo '<select name="show_lits_timezone" id="show_lits_timezone" class="form-select border-success">';
+    foreach ($timezones as $tz) {
+        if (!empty($tz)) {
+            $selected = ($tz === $current_tz) ? ' selected' : '';
+            echo '<option value="' . htmlspecialchars($tz) . '"' . $selected . '>' . htmlspecialchars($tz) . '</option>';
+        }
+    }
+    echo '</select>';
+    echo '<button class="btn btn-success border-primary" name="set_time_zones" id="set_time_zones" type="submit" onclick="loading(\'show\')">Thiết Lập Múi Giờ</button>';
+    echo '</div>';
+}
+?>
                   </div>
                 </form>
 				

@@ -445,7 +445,8 @@
                     "music_sound_pause": "resource/sound/default/music_pause.mp3",
                     "music_sound_stops": "resource/sound/default/music_stops.mp3",
                     "start_playlist_play": "resource/sound/default/start_playlist_play.mp3",
-                    "play_answer_error": "resource/sound/default/play_answer_error.mp3"
+                    "play_answer_error": "resource/sound/default/play_answer_error.mp3",
+					"stt_to_text_error": "resource/sound/default/stt_to_text_error.mp3"
                 },
                 "welcome": {
                     "active": true,
