@@ -2,7 +2,7 @@
     "version": "1.0.53",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi đồng bộ thời gian trên hệ thống, Sửa Lỗi STT - TTS GCloud liên quan tới lỗi thời gian",
-    "releaseDate": "15/08/2025",
+    "releaseDate": "15/08/2025-1",
     "changes": [
         {
             "type": "feature",
