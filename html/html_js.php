@@ -1322,7 +1322,7 @@
       const audioPlayer = document.getElementById('audioPlayer');
       if (filePath.startsWith('http')) {
           loading("hide");
-          if (filePath.endsWith('.m3u8')) {
+          if (filePath.toLowerCase().includes("m3u8")) {
               playHLS(filePath);
           } else {
               audioPlayer.src = filePath;

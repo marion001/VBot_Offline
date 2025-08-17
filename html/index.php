@@ -866,35 +866,42 @@
                   if (this.readyState === 4) {
                       try {
                           if (this.status === 0) {
-      			loading("hide")
+								loading("hide")
                               show_message('Lỗi Phát TTS: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
                               return;
                           } else if (this.status !== 200) {
-      			loading("hide")
+								loading("hide")
                               show_message('Lỗi Phát TTS: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
                               return;
                           }
                           var response = JSON.parse(this.responseText);
                           if (response.success) {
-      			loading("hide")
+								loading("hide")
                               showMessagePHP("Đã phát thông báo: " + response.text_tts, 7);
 						// Cập nhật onclick của nút download với đường dẫn tệp âm thanh
                       var audioPath_tts = response.audio_tts;
-                      // Kiểm tra nếu audioPath bắt đầu bằng 'TTS_Audio'
-                      if (audioPath_tts.startsWith('TTS_Audio')) {
-                          audioPath_tts = '<?php echo $VBot_Offline; ?>'+audioPath_tts;
-                      }
+					  //console.log(audioPath_tts);
+						if (typeof audioPath_tts === "string") {
+							//là string offline
+							if (audioPath_tts.startsWith("TTS_Audio")) {
+								audioPath_tts = "<?php echo $VBot_Offline; ?>" + audioPath_tts;
+							}
+						}else if (Array.isArray(audioPath_tts)) {
+							//là mảng link online
+							audioPath_tts = audioPath_tts[0];
+							//console.log("Online TTS link:", audioPath_tts);
+						}
                       // Cập nhật onclick của nút download với đường dẫn tệp âm thanh
                       var downloadButton = document.getElementById('download_tts_audio');
                       var playAudio_tts_audio = document.getElementById('playAudio_tts_audio');
                       downloadButton.setAttribute('onclick', "downloadFile('" + audioPath_tts + "')");
                       playAudio_tts_audio.setAttribute('onclick', "playAudio('" + audioPath_tts + "')");
                           } else {
-      			loading("hide")
+							  loading("hide")
                               show_message('Lỗi: ' + response.message);
                           }
                       } catch (error) {
-      		loading("hide")
+						  loading("hide")
                           show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
                       }
                   }

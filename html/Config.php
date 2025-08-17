@@ -31,7 +31,6 @@
   }
   $read_stt_token_google_cloud = null;
 
-
   //Khôi phục dữ liệu File Config.json
   if (isset($_POST['start_recovery_config_json'])) {
   $data_recovery_type = $_POST['start_recovery_config_json'];
@@ -1488,7 +1487,7 @@ $read_tts_token_google_cloud = '';
                               </div>
                               <div class="form-check">
                                 <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_ggcloud_key" value="tts_ggcloud_key" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud_key' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_ggcloud_key">TTS Google Cloud (Key) hoặc (Free Key) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Key của Google Cloud để xác thực hoặc sử dụng Key miễn phí bằng cách lấy thủ công và có thời gian hết hạn')"></i></label>
+                                <label class="form-check-label" for="tts_ggcloud_key">TTS Google Cloud (Free Key) <i class="bi bi-question-circle-fill" onclick="show_message('Sử dụng Key miễn phí bằng cách lấy thủ công và có thời gian hết hạn: https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html')"></i></label>
                               </div>
                               <div class="form-check">
                                 <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_zalo" value="tts_zalo" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_zalo' ? 'checked' : ''; ?>>
@@ -1717,7 +1716,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                 <center><font color=red>TTS Google Cloud KEY</font></center>
                               </h4>
                               - Lấy Key Miễn Phí: <i class="bi bi-question-circle-fill" onclick="show_message('Truy Cập: <a href=\'https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html\' target=\'_bank\'>https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html</a> <br/>- <b>Nhấn F12</b>, Chuyển Qua Tab: <b>Mạng</b> Lựa Chọn Ngôn Ngữ Tiếng Việt nhập bất kỳ văn bản vào ô rồi nhấn nút: <b>SPEAK IT</b> sau đó <b>Xác Minh Capcha.</b><br/> Nhìn vào Tab vừa nhấn F12 tìm tới giá trị bắt đầu bằng <b>proxy?url=</b> trong toàn bộ giá trị đó tìm tới chỗ: <b>&token=</b> Sau dấu = đó chính mã token hãy sao chép và dán vào ô bên dưới<br/><b>- Lưu Ý: Key Miễn Phí này sẽ có thời gian sử dụng, nếu key hết hạn bạn cần lấy key mới thủ công</b>')"></i>
-                              <br/>- Key Mất Phí: <i class="bi bi-question-circle-fill" onclick="show_message('Key này sẽ nằm trong Project <a href=\'https://console.cloud.google.com\' target=\'_bank\'>https://console.cloud.google.com/</a> chọn vào dự án của bạn, và được kích hoạt API: Cloud Text To Text API (Hoặc có thể tạo mới Project để lấy key, như dùng tệp .json)')"></i>
                               <div class="form-floating mb-3">  
                                 <input type="text" class="form-control border-success" name="tts_ggcloud_key_token" id="tts_ggcloud_key_token" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['token_key']; ?>">
                                 <label for="tts_ggcloud_key_token" class="form-label">Token Key:</label>	

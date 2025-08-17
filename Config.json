@@ -661,6 +661,7 @@
                     "News_Paper.json",
                     "PlayList.json",
                     "PodCast.json",
+                    "Login_Data.json",
                     "Youtube.json",
                     "ZingMP3.json",
                     "Dev_Assistant.py",
@@ -701,6 +702,7 @@
                 "keep_file_directory": [
                     "News_Paper.json",
                     "PlayList.json",
+                    "Login_Data.json",
                     "PodCast.json",
                     "Youtube.json",
                     "ZingMP3.json",

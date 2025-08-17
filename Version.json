@@ -1,12 +1,12 @@
 {
-    "version": "1.0.53",
+    "version": "1.0.54",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi đồng bộ thời gian trên hệ thống, Sửa Lỗi STT - TTS GCloud liên quan tới lỗi thời gian",
-    "releaseDate": "15/08/2025-1",
+    "description": "Sửa Lỗi TTS EDGE (Yêu Cài Mới, Cập Nhật Thư Viện), Tăng Tốc Độ TTS GCloud, Bổ Sung Các Chế Độ Xử Lý Dữ Liệu Từ Luồng Chính Vào Chatbox",
+    "releaseDate": "17/08/2025",
     "changes": [
         {
             "type": "feature",
-            "description": "....."
+            "description": "Cần Cài Bổ Sung Thư Viện: 'pip install edge-tts==7.2.0'"
         },
         {
             "type": "fix",
