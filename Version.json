@@ -2,7 +2,7 @@
     "version": "1.0.54",
     "projectName": "Program VBot Offline",
     "description": "Sửa Lỗi TTS EDGE (Yêu Cài Mới, Cập Nhật Thư Viện), Tăng Tốc Độ TTS GCloud, Bổ Sung Các Chế Độ Xử Lý Dữ Liệu Từ Luồng Chính Vào Chatbox",
-    "releaseDate": "17/08/2025",
+    "releaseDate": "18/08/2025",
     "changes": [
         {
             "type": "feature",
