@@ -1,8 +1,8 @@
 {
-    "version": "1.0.54",
+    "version": "1.0.55",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa Lỗi TTS EDGE (Yêu Cài Mới, Cập Nhật Thư Viện), Tăng Tốc Độ TTS GCloud, Bổ Sung Các Chế Độ Xử Lý Dữ Liệu Từ Luồng Chính Vào Chatbox",
-    "releaseDate": "17/08/2025",
+    "description": "Sửa Lỗi Tạo Mới Lập Lịch Thông Báo Không Hiển Thị Tệp Âm Thanh .mp3 và sửa lỗi một số thay đổi nhỏ khác",
+    "releaseDate": "25/08/2025",
     "changes": [
         {
             "type": "feature",

@@ -2430,3 +2430,111 @@ function download_Link_url_to_local(url_audio, songName) {
   };
   <?php } ?>
 </script>
+
+<script>
+// Hàm khởi tạo log viewer (gọi API thật sự)
+function initLogViewer(checkboxId, outputId, apiUrl) {
+    const checkboxEl = document.getElementById(checkboxId);
+    const outputEl   = document.getElementById(outputId);
+    if (!checkboxEl || !outputEl) return;
+    // Xoá interval cũ trước khi tạo mới
+    if (window.logInterval) clearInterval(window.logInterval);
+    function fetchLogs() {
+        const xhr = new XMLHttpRequest();
+        xhr.onerror = function () {
+            outputEl.innerHTML = '<span style="color: red;">Không thể kết nối đến API, vui lòng kiểm tra lại</span>';
+            outputEl.scrollTop = outputEl.scrollHeight;
+        };
+        xhr.ontimeout = function () {
+            outputEl.innerHTML = '<span style="color: red;">Lỗi timeout. API phản hồi quá lâu.</span>';
+            outputEl.scrollTop = outputEl.scrollHeight;
+        };
+        xhr.timeout = 10000;
+        xhr.onreadystatechange = function () {
+		if (xhr.readyState === XMLHttpRequest.DONE) {
+			try {
+				const response = JSON.parse(xhr.responseText);
+				if (response.success) {
+					if (response.data && response.data.length > 0) {
+						const logs = response.data
+							.map(item => formatLogMessage(item.logs_message))
+							.join('');
+						outputEl.innerHTML = logs;
+					} else {
+						outputEl.innerHTML = '<span style="color: orange;">Dữ Liệu Logs Chương Trình VBot Rỗng</span>';
+					}
+				} else {
+					outputEl.innerHTML = '<span style="color: red;">Lỗi: ' + response.message + '</span>';
+				}
+			} catch (e) {
+				outputEl.innerHTML = '<span style="color: green;">Nội dung trả về: </span><br>' +
+									 '<pre>' + xhr.responseText + '</pre>';
+			}
+			outputEl.scrollTop = outputEl.scrollHeight;
+		}
+
+        };
+        xhr.open("GET", apiUrl + "logs");
+        xhr.send();
+    }
+    // bắt đầu interval
+    window.logInterval = setInterval(fetchLogs, 1000);
+}
+
+// Màu cho log messages
+function formatLogMessage(message) {
+    const logStyles = [
+        { keyword: '[BOT] Đang thu âm', style: 'color: rgb(255, 105, 97);' },
+        { keyword: '[BOT]', style: 'color: rgb(255, 214, 10);' },
+        { keyword: '[HUMAN]', style: 'color: rgb(0, 255, 0);' },
+        { keyword: 'Đang chờ được đánh thức.', style: 'color: rgb(0, 255, 0);' },
+        { keyword: 'dữ liệu âm thanh', style: 'color: rgb(144, 238, 144);' },
+        { keyword: 'Không có giọng nói được truyền vào', style: 'color: rgb(221, 160, 221);' },
+        { keyword: 'Đã được đánh thức.', style: 'color: rgb(255, 182, 193);' },
+        { keyword: 'Đang phát', style: 'color: rgb(255, 165, 0);' },
+        { keyword: '[Custom skills', style: 'color: rgb(64, 224, 208);' },
+        { keyword: 'ERROR', style: 'color: rgb(255, 69, 58);' },
+        { keyword: 'WARNING', style: 'color: rgb(255, 140, 0);' },
+        { keyword: 'SUCCESS', style: 'color: rgb(50, 205, 50);' },
+    ];
+    const style = logStyles.find(log => message.includes(log.keyword))?.style || 'color: white;';
+    return '<div style="' + style + '">' + message + '</div>';
+}
+
+// Map checkbox -> div output
+const logCheckboxMap = {
+    "fetchLogsCheckbox": "logsOutput",
+    "fetchLogsCheckbox_Head": "logsOutput_Head"
+};
+
+// Gắn sự kiện cho cả 2 checkbox
+document.querySelectorAll("#fetchLogsCheckbox, #fetchLogsCheckbox_Head")
+  .forEach(cb => {
+    cb.addEventListener("change", function() {
+      if (this.checked) {
+        // Tắt checkbox còn lại
+        document.querySelectorAll("#fetchLogsCheckbox, #fetchLogsCheckbox_Head")
+          .forEach(other => {
+            if (other !== this) {
+              other.checked = false;
+              document.getElementById(logCheckboxMap[other.id]).innerHTML = "";
+            }
+          });
+        // Bật log cho checkbox này
+        const outputId = logCheckboxMap[this.id];
+        initLogViewer(this.id, outputId, "<?php echo $URL_API_VBOT; ?>");
+
+      } else {
+        // Nếu tắt thì clear interval và clear log
+        if (window.logInterval) clearInterval(window.logInterval);
+        document.getElementById(logCheckboxMap[this.id]).innerHTML = "";
+      }
+    });
+  });
+// Khi click icon đóng thì bỏ tích checkbox Head và clear interval
+document.getElementById("Close_Logs_Head").addEventListener("click", function() {
+    const cbHead = document.getElementById("fetchLogsCheckbox_Head");
+    cbHead.checked = false;
+    if (logInterval) clearInterval(logInterval);
+});
+</script>

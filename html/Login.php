@@ -9,6 +9,23 @@
 $filePath_Data = 'includes/other_data/WebUI_Login_Security/Login_Data.json';
 $dirPath_Data  = dirname($filePath_Data);
 
+$logDir  = $VBot_Offline.'resource/log';
+$logFile = $logDir . "/Vbot_error.log";
+if (!file_exists($logDir)) {
+    mkdir($logDir, 0777, true);
+}
+exec("chmod -R 777 " . escapeshellarg($logDir));
+if (!file_exists($logFile)) {
+    file_put_contents($logFile, "");
+}
+exec("chmod 777 " . escapeshellarg($logFile));
+function Logs($message) {
+    global $logFile;
+    $current_time = date("H:i:s d-m-Y");
+    $line = "[" . $current_time . "][VBot WebUI] " . $message . "\n";
+    file_put_contents($logFile, $line, FILE_APPEND);
+}
+
 if (!is_dir($dirPath_Data)) {
     mkdir($dirPath_Data, 0777, true);
 	exec('chmod 0777 ' . escapeshellarg($dirPath_Data));
@@ -33,10 +50,14 @@ if (isset($_POST['reset_limit_login'])) {
             $Login_Data['number_of_failed_logins'] = 0;
             $Login_Data['last_failed_login_time']  = null;
             file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            $error .= "✅ Đã reset giới hạn đăng nhập.<br/><br/>";
+			$Msg_ERROR = "✅ Đã reset giới hạn đăng nhập WebUI";
+            $error .= $Msg_ERROR.'<br/><br/>';
+			Logs($Msg_ERROR);
         }
     } else {
-        $error1 = "<font color='red' size='5'>❌ Email không trùng khớp, không thể Reset thời gian chờ</font>";
+		$Msg_ERROR = '❌ Email không trùng khớp, không thể Reset thời gian chờ đăng nhập WebUI';
+        $error1 = "<font color='red' size='5'>$Msg_ERROR</font>";
+		Logs($Msg_ERROR);
     }
 }
 
@@ -176,7 +197,9 @@ function verifyCsrfToken($token) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!isset($_POST['csrf_token']) || !verifyCsrfToken($_POST['csrf_token'])) {
-        $error .= "Yêu cầu đăng nhập không hợp lệ!";
+		$Msg_ERROR = "Yêu cầu đăng nhập không hợp lệ!";
+        $error .= $Msg_ERROR;
+		Logs($Msg_ERROR);
     } else {
 		$stored_hash = hash('sha256', $Config['contact_info']['user_login']['user_password']);
         $password_user = $_POST['token_password'];
@@ -200,6 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 			if ($remaining > 0 && $remaining <= 3) {
 				$error .= "<br/>Bạn còn <b>{$remaining}</b> lần đăng nhập";
 			}
+			//Logs("Sai Mật Khẩu");
         }
     }
 }

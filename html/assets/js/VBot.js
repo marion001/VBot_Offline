@@ -403,6 +403,25 @@ function vbotScan_toggleFullScreen() {
     }
 }
 
+function Logs_API_toggleFullScreen() {
+    var chatbotSizeSetting = document.getElementById('Show_LogsAPI_size_setting');
+    var chatbotIcon = document.getElementById('Show_LogsAPI_fullscreen');
+    if (chatbotSizeSetting.classList.contains('modal-lg')) {
+        chatbotSizeSetting.classList.remove('modal-lg');
+        chatbotSizeSetting.classList.add('modal-xl');
+    } else if (chatbotSizeSetting.classList.contains('modal-xl')) {
+        chatbotSizeSetting.classList.remove('modal-xl');
+        chatbotSizeSetting.classList.add('modal-fullscreen');
+        chatbotIcon.classList.remove('bi-arrows-fullscreen');
+        chatbotIcon.classList.add('bi-fullscreen-exit');
+    } else if (chatbotSizeSetting.classList.contains('modal-fullscreen')) {
+        chatbotSizeSetting.classList.remove('modal-fullscreen');
+        chatbotSizeSetting.classList.add('modal-lg');
+        chatbotIcon.classList.remove('bi-fullscreen-exit');
+        chatbotIcon.classList.add('bi-arrows-fullscreen');
+    }
+}
+
 // Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện iframeModal_toggleFullScreen
 function iframeModal_toggleFullScreen() {
     var iframeModal_size_setting = document.getElementById('iframeModal_size_setting');
@@ -478,30 +497,6 @@ function updateIframeSize() {
     iframe.style.height = '100%';
     iframe.style.border = 'none';
     iframe.style.display = 'block';
-}
-
-// Hàm thay đổi class giữa modal-lg, modal-xl và modal-fullscreen và cập nhật icon dao diện BLE
-function vbotBluetooth_toggleFullScreen() {
-    var chatbotSizeSetting = document.getElementById('vbotBluetooth_size_setting');
-    var chatbotIcon = document.getElementById('vbotBluetooth_fullscreen');
-    var modalContent = document.getElementById('BLT_modal-content_Style');
-    if (chatbotSizeSetting.classList.contains('modal-lg')) {
-        chatbotSizeSetting.classList.remove('modal-lg');
-        chatbotSizeSetting.classList.add('modal-xl');
-        modalContent.style.height = '50%';
-    } else if (chatbotSizeSetting.classList.contains('modal-xl')) {
-        chatbotSizeSetting.classList.remove('modal-xl');
-        chatbotSizeSetting.classList.add('modal-fullscreen');
-        modalContent.style.height = '100%';
-        chatbotIcon.classList.remove('bi-arrows-fullscreen');
-        chatbotIcon.classList.add('bi-fullscreen-exit');
-    } else if (chatbotSizeSetting.classList.contains('modal-fullscreen')) {
-        chatbotSizeSetting.classList.remove('modal-fullscreen');
-        chatbotSizeSetting.classList.add('modal-lg');
-        chatbotIcon.classList.remove('bi-fullscreen-exit');
-        chatbotIcon.classList.add('bi-arrows-fullscreen');
-        modalContent.style.height = '50%';
-    }
 }
 
 //  hàm cuộn xuống dưới cùng tin nhắn

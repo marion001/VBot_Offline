@@ -139,11 +139,8 @@ if (!file_exists($Schedule_Audio_dir)) {
                   // Kiểm tra định dạng tệp
                   return preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $file) && !is_dir($directory . '/' . $file);
               });
-              // Tạo phần HTML cho thẻ <select>
-              echo '<select class="form-control border-success" name="' . htmlspecialchars($field_name) . '" id="' . htmlspecialchars($field_name) . '">';
+              echo '<select class="form-select border-success" name="' . htmlspecialchars($field_name) . '" id="' . htmlspecialchars($field_name) . '">';
               echo '<option value="">Chọn tệp âm thanh</option>';
-              
-              // Tạo các thẻ <option> cho từng tệp âm thanh
               foreach ($audioFiles as $audioFile) {
                   $selected = ($directory.'/'.$audioFile == $selected_value) ? 'selected' : '';
                   echo '<option value="' . htmlspecialchars($directory.'/'.$audioFile) . '" ' . $selected . '>' . htmlspecialchars($audioFile) . '</option>';
@@ -209,6 +206,7 @@ if (!file_exists($Schedule_Audio_dir)) {
           if (isset($_POST['Scheduler_Upload_Audio_Submit'])) {
             $file_save_directory = $VBot_Offline.$Config['schedule']['audio_path'];
           	// Kiểm tra và tạo thư mục, thiết lập quyền
+			/*
           	if (!file_exists($file_save_directory)) {
           		if (!mkdir($file_save_directory, 0777, true)) {
           			$errorMessages[] = 'Không thể tạo thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền thư mục.';
@@ -217,6 +215,24 @@ if (!file_exists($Schedule_Audio_dir)) {
           	if (!chmod($file_save_directory, 0777)) {
           		$errorMessages[] = 'Không thể thiết lập quyền cho thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền hệ thống.';
           	}
+			*/
+			// Kiểm tra và tạo thư mục, thiết lập quyền
+			if (!file_exists($file_save_directory)) {
+				// Tạo thư mục bằng exec thay vì mkdir
+				exec("mkdir -p " . escapeshellarg($file_save_directory) . " 2>&1", $output_mkdir, $return_mkdir);
+				if ($return_mkdir !== 0) {
+					$errorMessages[] = 'Không thể tạo thư mục ' . $file_save_directory . '. Chi tiết: ' . implode("\n", $output_mkdir);
+				}
+			}
+
+			// Thiết lập quyền bằng exec thay vì chmod
+			exec("chmod -R 0777 " . escapeshellarg($file_save_directory) . " 2>&1", $output_chmod, $return_chmod);
+			if ($return_chmod !== 0) {
+				$errorMessages[] = 'Không thể thiết lập quyền cho thư mục ' . $file_save_directory . '. Chi tiết: ' . implode("\n", $output_chmod);
+			}
+
+			
+			
               $data_recovery_type = $_POST['Scheduler_Upload_Audio_Submit'];
               if ($data_recovery_type === "Scheduler_Upload_Audio") {
                   $uploadOk = 1;
@@ -481,7 +497,7 @@ if (!file_exists($Schedule_Audio_dir)) {
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="name-<?= $index ?>" class="col-sm-3 col-form-label">Tên Tác Vụ <i class="bi bi-question-circle-fill" onclick="show_message('Tên Định Danh Để Phân Biệt Với Các Hành Động, Thao Tác Khác')"></i>:</label>
+                        <label for="name-<?= $index ?>" class="col-sm-3 col-form-label">Tên Tác Vụ <i class="bi bi-question-circle-fill" onclick="show_message('Tên Định Danh Để Phân Biệt Với Các Hành Động, Thao Tác Khác')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                         <div class="col-sm-9">
                           <input required class="form-control border-success" type="text" id="name-<?= $index ?>" name="notification_schedule[<?= $index ?>][name]" placeholder="<?= htmlspecialchars($notification['name']) ?>" value="<?= htmlspecialchars($notification['name']) ?>" title="Đặt Tên Định Danh Cho Lịch, Tác Vụ Này">
                           <div class="invalid-feedback">Cần đặt tên định danh cho tác vụ thông báo này</div>
@@ -494,7 +510,7 @@ if (!file_exists($Schedule_Audio_dir)) {
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="message-<?= $index ?>" class="col-sm-3 col-form-label">Nội Dung Thông Báo <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập nội dung thông báo, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>:</label>
+                        <label for="message-<?= $index ?>" class="col-sm-3 col-form-label">Nội Dung Thông Báo <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập nội dung thông báo, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i> <font color="blue" size="6" title="Có thể nhập, lựa chọn hoặc để trống">*</font> :</label>
                         <div class="col-sm-9">
                           <textarea type="text" rows="3" class="form-control border-success" id="message-<?= $index ?>" name="notification_schedule[<?= $index ?>][data][message]"><?= htmlspecialchars($notification['data']['message']) ?></textarea>
                         </div>
@@ -502,7 +518,7 @@ if (!file_exists($Schedule_Audio_dir)) {
                       <div class="row mb-3">
                         <label for="audio_file-<?= $index ?>" class="col-sm-3 col-form-label">
                         Tệp Âm Thanh (Link,URL/PATH) 
-                        <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập thông tin đường dẫn, link, url tới tệp âm thanh, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>:
+                        <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập thông tin đường dẫn, link, url tới tệp âm thanh, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i> <font color="blue" size="6" title="Có thể nhập, lựa chọn hoặc để trống">*</font> :
                         </label>
                         <div class="col-sm-9">
                           <div class="input-group mb-3">
@@ -517,7 +533,7 @@ if (!file_exists($Schedule_Audio_dir)) {
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="repeat-<?= $index ?>" class="col-sm-3 col-form-label">Số lần lặp lại <i class="bi bi-question-circle-fill" onclick="show_message('Số lần lặp lại phát thông báo khi tác vụ này được kích hoạt, để 2 lần thì đến giờ sẽ thông báo 2 lần liên tiếp')"></i>:</label>
+                        <label for="repeat-<?= $index ?>" class="col-sm-3 col-form-label">Số lần lặp lại <i class="bi bi-question-circle-fill" onclick="show_message('Số lần lặp lại phát thông báo khi tác vụ này được kích hoạt, để 2 lần thì đến giờ sẽ thông báo 2 lần liên tiếp')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                         <div class="col-sm-9">
                           <input required type="number" class="form-control border-success" id="repeat-<?= $index ?>" name="notification_schedule[<?= $index ?>][data][repeat]" value="<?= htmlspecialchars($notification['data']['repeat']) ?>">
                           <div class="invalid-feedback">Cần đặt tên cho hành động này</div>
@@ -526,7 +542,7 @@ if (!file_exists($Schedule_Audio_dir)) {
                       <div class="row mb-3">
                         <label for="date-<?= $index ?>" class="col-sm-3 col-form-label">
                         Chọn các ngày trong tuần hoặc thiết lập ngày cụ thể (có thể thiết lập được cả 2 loại dữ liệu cùng lúc)
-                        <i class="bi bi-question-circle-fill" onclick="show_message('Chọn ít nhất một trong các ngày trong tuần hoặc nhập ngày cụ thể vào ô dưới, định dạng ngày sẽ phải phân cách bởi dấu / ví dụ: <b>01/12/20244</b>')"></i>:
+                        <i class="bi bi-question-circle-fill" onclick="show_message('Chọn ít nhất một trong các ngày trong tuần hoặc nhập ngày cụ thể vào ô dưới, định dạng ngày sẽ phải phân cách bởi dấu / ví dụ: <b>01/12/20244</b>')"></i> <font color='red' size='6' title='Bắt Buộc Nhập'>*</font> :
                         </label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -561,18 +577,12 @@ if (!file_exists($Schedule_Audio_dir)) {
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Thời gian (HH:MM) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian theo định dạng giờ, phút phải có dấu : ở giữa định dạng nhập là 24h: từ 00:00 tới 23:59')"></i>:</label>
+                        <label class="col-sm-3 col-form-label">Thời gian (HH:MM) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian theo định dạng giờ, phút phải có dấu : ở giữa định dạng nhập là 24h: từ 00:00 tới 23:59')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                         <div class="col-sm-9">
                           <div id="time-container-<?= $index ?>">
                             <?php foreach ($notification['time'] as $time_key => $time_value) : ?>
                             <div class="time-input-container input-group mb-3">
-                              <input type="text" class="form-control border-success time-input" 
-                                name="notification_schedule[<?= $index ?>][time][]" 
-                                value="<?= htmlspecialchars($time_value) ?>" 
-                                id="time-input-<?= $index ?>-<?= $time_key ?>" 
-                                placeholder="Chọn giờ và phút" 
-                                onclick="showHourSuggestions(this)" 
-                                autocomplete="off">
+                              <input type="text" class="form-control border-success time-input" name="notification_schedule[<?= $index ?>][time][]" value="<?= htmlspecialchars($time_value) ?>" id="time-input-<?= $index ?>-<?= $time_key ?>" placeholder="HH:MM (Giờ:phút)" onclick="showHourSuggestions(this)" autocomplete="off">
                               <div class="suggestions-list" id="suggestions-list-<?= $index ?>-<?= $time_key ?>" style="display: none;">
                                 <!-- Các gợi ý sẽ được thêm vào đây -->
                               </div>
@@ -1170,6 +1180,42 @@ if (!file_exists($Schedule_Audio_dir)) {
               $('#openModalBtn_lichthongbao').modal('show');
           }
       }
+
+function loadAudioFiles(selectId) {
+    const xhr = new XMLHttpRequest();
+    const url = "includes/php_ajax/Show_file_path.php?show_all_file&directory_path=<?php echo $VBot_Offline.$Config['schedule']['audio_path'] ?>";
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === 4) {
+            const selectElem = document.getElementById(selectId);
+            if (!selectElem) return;
+            
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success && Array.isArray(response.data)) {
+                        selectElem.innerHTML = "<option value=''>Chọn tệp âm thanh</option>";
+                        response.data.forEach(file => {
+                            let opt = document.createElement("option");
+                            opt.value = file.path;
+                            opt.textContent = file.name + " (" + file.size + ")";
+                            selectElem.appendChild(opt);
+                        });
+                    } else {
+                        selectElem.innerHTML = "<option value=''>Không tìm thấy file âm thanh</option>";
+                    }
+                } catch (e) {
+                    selectElem.innerHTML = "<option value=''>Lỗi phân tích JSON</option>";
+                }
+            } else {
+                selectElem.innerHTML = "<option value=''>Không tải được dữ liệu thư mục chứa file âm thanh</option>";
+            }
+        }
+    };
+    xhr.send();
+}
+
+	  
     </script>
     <script>
       // Hiển thị modal xem nội dung file json Home_Assistant.json
@@ -1295,7 +1341,7 @@ if (!file_exists($Schedule_Audio_dir)) {
       			"</div>" +
 
       			"<div class='row mb-3'>" +
-      			"<label for='name-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tên tác vụ:</label>" +
+      			"<label for='name-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tên tác vụ <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
       			"<div class='col-sm-9'>" +
       			"<input required class='form-control border-success' type='text' id='name-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][name]' placeholder='Cần nhập tên tác vụ mới'>" +
       			"<div class='invalid-feedback'>Cần đặt tên định danh cho tác vụ này</div>" +
@@ -1303,23 +1349,31 @@ if (!file_exists($Schedule_Audio_dir)) {
       			"</div>" +
 
       			"<div class='row mb-3'>" +
-      			"<label for='message-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Nội Dung Thông Báo:</label>" +
+      			"<label for='message-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Nội Dung Thông Báo <font color='blue' size='6' title='Có thể nhập, lựa chọn hoặc để trống'>*</font>:</label>" +
       			"<div class='col-sm-9'>" +
       			"<textarea type='text' rows='3' class='form-control border-success' id='message-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][message]' placeholder='Cần nhập nội dung thông báo'></textarea>" +
       			"</div>" +
       			"</div>" +
 
-      /*
-      			"<div class='row mb-3'>" +
-      			"<label for='audio_file-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tệp Âm Thanh (Link,URL/PATH):</label>" +
-      			"<div class='col-sm-9'>" +
-      			"<input class='form-control border-success' type='text' id='audio_file-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][audio_file]' placeholder='Hoặc đường dẫn Path, Link, Url đến âm thanh'>" +
-      			"</div>" +
-      			"</div>" +
-      */
+				"<div class='row mb-3'>" +
+				"<label for='audio_file-" + newTaskIndex + "' class='col-sm-3 col-form-label'>" +
+				"Tệp Âm Thanh (Link,URL/PATH) " +
+				"<i class='bi bi-question-circle-fill' onclick=\"show_message('Cần nhập thông tin đường dẫn hoặc chọn file âm thanh, hệ thống ưu tiên phát text, nếu text trống thì sẽ phát file âm thanh.')\"></i> <font color='blue' size='6' title='Có thể nhập, lựa chọn hoặc để trống'>*</font>:" +
+				"</label>" +
+				"<div class='col-sm-9'>" +
+				"<div class='input-group mb-3'>" +
+				"<select class='form-select border-success' id='audio_file-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][audio_file]' class='form-control border-success'>" +
+				"<option value=''>Đang tải danh sách...</option>" +
+				"</select>" +
+				"<button class='btn btn-success border-success' type='button' onclick=\"playAudio_Schedule('notification_schedule[" + newTaskIndex + "][data][audio_file]')\">" +
+				"<i class='bi bi-play-circle'></i></button>" +
+				"</div>" +
+				"</div>" +
+				"</div>" +
+				
 
       			"<div class='row mb-3'>" +
-      			"<label for='repeat-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Số lần lặp lại:</label>" +
+      			"<label for='repeat-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Số lần lặp lại <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
       			"<div class='col-sm-9'>" +
       			"<input required class='form-control border-success' type='number' id='repeat-" + newTaskIndex + "' min='1' step='1' max ='5' name='notification_schedule[" + newTaskIndex + "][data][repeat]' value='1'>" +
       			"<div class='invalid-feedback'>Cần điền số lần lặp lại thông báo</div>" +
@@ -1327,7 +1381,7 @@ if (!file_exists($Schedule_Audio_dir)) {
       			"</div>" +
 
       			"<div class='row mb-3'>" +
-                  "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần:</label>" +
+                  "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
       			"<div class='col-sm-9'>" +
       			"<div class='form-switch'>";
       			taskHtml += "<?php foreach (['Monday' => 'Thứ Hai', 'Tuesday' => 'Thứ Ba', 'Wednesday' => 'Thứ Tư', 'Thursday' => 'Thứ Năm', 'Friday' => 'Thứ Sáu', 'Saturday' => 'Thứ Bảy', 'Sunday' => 'Chủ Nhật'] as $key => $label) : ?>" +
@@ -1341,7 +1395,7 @@ if (!file_exists($Schedule_Audio_dir)) {
       				 "</div></div>" +
 
       			"<div class='row mb-3'>" +
-                  "<label class='col-sm-3 col-form-label'>Thời gian (HH:MM) <i class='bi bi-question-circle-fill' onclick='show_message(\"Thời gian theo định dạng giờ, phút phải có dấu : ở giữa, định dạng nhập là 24h: từ 00:00 tới 23:59\")'></i>:</label><br>" +
+                  "<label class='col-sm-3 col-form-label'>Thời gian (HH:MM) <i class='bi bi-question-circle-fill' onclick='show_message(\"Thời gian theo định dạng giờ, phút phải có dấu : ở giữa, định dạng nhập là 24h: từ 00:00 tới 23:59\")'></i> <font color='red' size='6' title='Bắt Buộc Nhập'>*</font> :</label><br>" +
       			"<div class='col-sm-9'>" +
                   "<div id='time-container-" + newTaskIndex + "'>" +
                       "<div class='input-group mb-3'>" +
@@ -1358,9 +1412,26 @@ if (!file_exists($Schedule_Audio_dir)) {
       			"</div>" +
               "</div>";
           taskContainer.innerHTML += taskHtml;
+		  
+		      // Sau khi chèn vào DOM -> gọi API để fill dữ liệu
+    loadAudioFiles("audio_file-" + newTaskIndex);
+
+
+    // Tự động cuộn đến task mới và focus input
+    const newTaskElem = document.getElementById("task-" + newTaskIndex);
+    if (newTaskElem) {
+        newTaskElem.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+        const firstInput = newTaskElem.querySelector("input[type='text']");
+        if (firstInput) firstInput.focus();
+    }
+
       	// Tăng index để tạo tác vụ mới tiếp theo
           newTaskIndex++
       	showMessagePHP("Đã Thêm Ô Nhập Liệu Tác Vụ Lập Lịch Mới, Hãy Điền Thông Tin Vào", 6);
+		
       }
 
       // Xóa input thời gian
@@ -1483,7 +1554,7 @@ if (!file_exists($Schedule_Audio_dir)) {
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-restart_vbot', 'input-group', 'mb-3');
-          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_restart_vbot[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-restart_vbot-' + time_Restart_VBot + '"><i class="bi bi-trash"></i></button>';
+          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_restart_vbot[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-restart_vbot-' + time_Restart_VBot + '"><i class="bi bi-trash"></i></button>';
           timeOnContainer.insertBefore(inputContainer, this);
           document.getElementById('delete-restart_vbot-' + time_Restart_VBot).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
@@ -1508,7 +1579,7 @@ if (!file_exists($Schedule_Audio_dir)) {
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-stop_media_player', 'input-group', 'mb-3');
-          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_stop_media_player[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-stop_media_player-' + time_Stop_Media_Player + '"><i class="bi bi-trash"></i></button>';
+          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_stop_media_player[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-stop_media_player-' + time_Stop_Media_Player + '"><i class="bi bi-trash"></i></button>';
           timeOnContainer.insertBefore(inputContainer, this);
           document.getElementById('delete-stop_media_player-' + time_Stop_Media_Player).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();
@@ -1533,7 +1604,7 @@ if (!file_exists($Schedule_Audio_dir)) {
           const inputContainer = document.createElement('div');
           inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-reboot_os', 'input-group', 'mb-3');
-          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_reboot_os[]" placeholder="HH:mm (Thời gian)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-reboot_os-' + time_REboot_OS + '"><i class="bi bi-trash"></i></button>';
+          inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_reboot_os[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-reboot_os-' + time_REboot_OS + '"><i class="bi bi-trash"></i></button>';
           timeOnContainer.insertBefore(inputContainer, this);
           document.getElementById('delete-reboot_os-' + time_REboot_OS).addEventListener('click', function() {
               document.getElementById(inputContainerId).remove();

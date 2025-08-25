@@ -168,14 +168,14 @@
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="full_name" class="col-md-4 col-lg-3 col-form-label">Tên:</label>
+                        <label for="full_name" class="col-md-4 col-lg-3 col-form-label">Tên <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="full_name" type="text" class="form-control border-success" id="full_name" value="<?php echo $Config['contact_info']['full_name']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Tên!</div>
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-md-4 col-lg-3 col-form-label">Địa Chỉ:</label>
+                        <label class="col-md-4 col-lg-3 col-form-label">Địa Chỉ <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <div class="input-group mb-3 border-success">
                             <div class="input-group-prepend">
@@ -198,7 +198,7 @@
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-md-4 col-lg-3 col-form-label">Vị Trí:</label>
+                        <label class="col-md-4 col-lg-3 col-form-label">Vị Trí <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <div class="input-group mb-3 border-success">
                             <div class="input-group-prepend">
@@ -216,14 +216,14 @@
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="email_name" class="col-md-4 col-lg-3 col-form-label">Email:</label>
+                        <label for="email_name" class="col-md-4 col-lg-3 col-form-label">Email <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="email_name" type="text" class="form-control border-success" id="email_name" placeholder="<?php echo $Config['contact_info']['email']; ?>" value="<?php echo $Config['contact_info']['email']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Email (Dùng để tìm lại mật khẩu và 1 số chức năng khác) !</div>
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label for="webui_password" class="col-md-4 col-lg-3 col-form-label">Mật khẩu Web UI:</label>
+                        <label for="webui_password" class="col-md-4 col-lg-3 col-form-label">Mật khẩu Web UI <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="webui_password" type="text" class="form-control border-success" id="webui_password" placeholder="<?php echo $Config['contact_info']['user_login']['user_password']; ?>" value="<?php echo $Config['contact_info']['user_login']['user_password']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Mật Khảu Đăng Nhập Web UI (Dùng để đăng nhập khi bạn bật đăng nhập trên web ui) !</div>
@@ -249,7 +249,7 @@
                       </div>
 
                       <div class="row mb-3">
-                        <label for="login_attempts" class="col-md-4 col-lg-3 col-form-label">Số Lần Đăng Nhập Sai Tối Đa:</label>
+                        <label for="login_attempts" class="col-md-4 col-lg-3 col-form-label">Số Lần Đăng Nhập Sai Tối Đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="login_attempts" type="number" min="3" class="form-control border-success" id="login_attempts" placeholder="<?php echo $Config['contact_info']['user_login']['login_attempts']; ?>" value="<?php echo $Config['contact_info']['user_login']['login_attempts']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Số Lần Đăng Nhập Vào WebUI Khi Nhập Sai Mật Khẩu</div>
@@ -257,7 +257,7 @@
                       </div>
 
                       <div class="row mb-3">
-                        <label for="login_lock_time" class="col-md-4 col-lg-3 col-form-label">Thời Gian Chờ Đăng Nhập Sai Tối Đa (s/Giây):</label>
+                        <label for="login_lock_time" class="col-md-4 col-lg-3 col-form-label">Thời Gian Chờ Đăng Nhập Sai Tối Đa (s/Giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                         <div class="col-md-8 col-lg-9">
                           <input required name="login_lock_time" type="number" min="3" class="form-control border-success" id="login_lock_time" placeholder="<?php echo $Config['contact_info']['user_login']['login_lock_time']; ?>" value="<?php echo $Config['contact_info']['user_login']['login_lock_time']; ?>">
                           <div class="invalid-feedback">Vui Lòng Nhập Thời Gian Chờ Tối Đa Khi Nhập Sai Mật Khẩu</div>
@@ -274,21 +274,21 @@
                   <div class="tab-pane fade pt-3" id="profile-change-password" role="tabpanel">
                     <!-- Change Password Form -->
                     <div class="row mb-3">
-                      <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Cũ:</label>
+                      <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Cũ <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="currentPassword" type="password" class="form-control border-success" id="currentPassword">
                         <div class="valid-feedback">Cần nhập mật khẩu cũ!</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Mới:</label>
+                      <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Mới <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="newPassword" type="password" class="form-control border-success" id="newPassword">
                         <div class="valid-feedback">Cần nhập mật khẩu mới!</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Nhập Lại Mật Khẩu Mới:</label>
+                      <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Nhập Lại Mật Khẩu Mới <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="renewPassword" type="password" class="form-control border-success" id="renewPassword">
                         <div class="valid-feedback">Cần nhập lại mật khẩu mới!</div>
@@ -301,7 +301,7 @@
                   <div class="tab-pane fade pt-3" id="profile-forgot-password" role="tabpanel">
                     <!-- Change Password Form -->
                     <div class="row mb-3">
-                      <label for="forgotPassword_email" class="col-md-4 col-lg-3 col-form-label">Nhập Email:</label>
+                      <label for="forgotPassword_email" class="col-md-4 col-lg-3 col-form-label">Nhập Email <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-md-8 col-lg-9">
                         <input required name="forgotPassword_email" type="text" class="form-control border-success" id="forgotPassword_email" value="<?php echo $Config['contact_info']['email']; ?>">
                         <div class="valid-feedback">Cần nhập địa chỉ email để lấy lại mật khẩu</div>

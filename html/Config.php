@@ -813,21 +813,21 @@ $read_tts_token_google_cloud = '';
                   </h5>
                   <div id="collapse_button_ssh" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_ssh">
                     <div class="row mb-3">
-                      <label for="ssh_port" class="col-sm-3 col-form-label">Cổng kết nối:</label>
+                      <label for="ssh_port" class="col-sm-3 col-form-label">Cổng kết nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="number" name="ssh_port" id="ssh_port" placeholder="<?php echo $Config['ssh_server']['ssh_port']; ?>" value="<?php echo $Config['ssh_server']['ssh_port']; ?>">
                         <div class="invalid-feedback">Cần nhập cổng kết nối tới máy chủ SSH</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="ssh_username" class="col-sm-3 col-form-label">Tên đăng nhập:</label>
+                      <label for="ssh_username" class="col-sm-3 col-form-label">Tên đăng nhập <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="text" name="ssh_username" id="ssh_username" placeholder="<?php echo $Config['ssh_server']['ssh_username']; ?>" value="<?php echo $Config['ssh_server']['ssh_username']; ?>">
                         <div class="invalid-feedback">Cần nhập tên đăng nhập của máy chủ SSH</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="ssh_password" class="col-sm-3 col-form-label">Mật khẩu:</label>
+                      <label for="ssh_password" class="col-sm-3 col-form-label">Mật khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="text" name="ssh_password" id="ssh_password" placeholder="<?php echo $Config['ssh_server']['ssh_password']; ?>" value="<?php echo $Config['ssh_server']['ssh_password']; ?>">
                         <div class="invalid-feedback">Cần nhập mật khẩu của máy chủ SSH</div>
@@ -860,7 +860,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn):</label>
+                      <label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <input required type="text" class="form-control border-success" name="webui_path" id="webui_path" placeholder="<?php echo htmlspecialchars($directory_path) ?>" value="<?php echo htmlspecialchars($directory_path) ?>">
@@ -888,7 +888,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="api_port" class="col-sm-3 col-form-label">Port API:</label>
+                      <label for="api_port" class="col-sm-3 col-form-label">Port API <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <input required type="number" class="form-control border-success" name="api_port" id="api_port" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['port']) ?>">
@@ -906,7 +906,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="max_logs_api" class="col-sm-3 col-form-label">Tối Đa Dòng Logs API:</label>
+                      <label for="max_logs_api" class="col-sm-3 col-form-label">Tối Đa Dòng Logs API <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required type="number" class="form-control border-success" name="max_logs_api" id="max_logs_api" max="70" step="1" min="10" placeholder="<?php echo htmlspecialchars($Config['api']['show_log']['max_log']) ?>" value="<?php echo htmlspecialchars($Config['api']['show_log']['max_log']) ?>">
                         <div class="invalid-feedback">Cần nhập tối đa dòng logs được hiển thị khi đọc qua đường API</div>
@@ -954,7 +954,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="streaming_server_connection_protocol" class="col-sm-3 col-form-label">Kiểu Loại Kết Nối:</label>
+                      <label for="streaming_server_connection_protocol" class="col-sm-3 col-form-label">Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <select name="streaming_server_connection_protocol" id="streaming_server_connection_protocol" class="form-select border-success" aria-label="Default select example">
                           <option value="udp_sock" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'udp_sock' ? 'selected' : ''; ?>>Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini</option>
@@ -991,35 +991,35 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
 					<div class="row mb-3">
-                      <label for="port_server_udp_streaming_audio" class="col-sm-3 col-form-label">Port Server:</label>
+                      <label for="port_server_udp_streaming_audio" class="col-sm-3 col-form-label">Port Server <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                           <input required type="number" class="form-control border-success" name="port_server_udp_streaming_audio" id="port_server_udp_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>">
                           <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="udp_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa (s):</label>
+                      <label for="udp_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa (s) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required type="number" class="form-control border-success" name="udp_maximum_recording_time" id="udp_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time']) ?>">
                         <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="udp_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối:</label>
+                      <label for="udp_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required type="number" class="form-control border-success" name="udp_maximum_client_connected" id="udp_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected']) ?>">
                         <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="udp_time_remove_inactive_clients" class="col-sm-3 col-form-label">Thời gian dọn dẹp Client (s):</label>
+                      <label for="udp_time_remove_inactive_clients" class="col-sm-3 col-form-label">Thời gian dọn dẹp Client (s) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <input required type="number" class="form-control border-success" name="udp_time_remove_inactive_clients" id="udp_time_remove_inactive_clients" step="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>">
                         <div class="invalid-feedback">Cần nhập thời gian dọn dẹp các Client không hoạt động trong một khoảng thời gian</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="udp_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client:</label>
+                      <label for="udp_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <select name="udp_source_stt" id="udp_source_stt" class="form-select border-success" aria-label="Default select example">
                           <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
@@ -1028,7 +1028,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc:</label>
+                      <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <select name="udp_working_mode" id="udp_working_mode" class="form-select border-success" aria-label="Default select example">
                           <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
@@ -1037,7 +1037,7 @@ $read_tts_token_google_cloud = '';
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="udp_select_wakeup" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client:</label>
+                      <label for="udp_select_wakeup" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <select name="udp_select_wakeup" id="udp_select_wakeup" class="form-select border-success" aria-label="Default select example">
                           <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (WakeUp Client)</option>
@@ -1098,7 +1098,7 @@ $read_tts_token_google_cloud = '';
                       <div class="card-body">
                         <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a>')"></i> &nbsp;:</h5>
                         <div class="row mb-3">
-                          <label for="mic_id" class="col-sm-3 col-form-label">ID Mic <i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé')"></i>:</label>
+                          <label for="mic_id" class="col-sm-3 col-form-label">ID Mic <i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                           <div class="col-sm-9">
                             <div class="input-group mb-3">
                               <input required class="form-control border-success" type="number" name="mic_id" id="mic_id" placeholder="<?php echo $Config['smart_config']['mic']['id']; ?>" value="<?php echo $Config['smart_config']['mic']['id']; ?>">
@@ -1133,28 +1133,28 @@ $read_tts_token_google_cloud = '';
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình')"></i> :</label>
+                          <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume" id="bot_volume" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Âm lượng khi chạy lần đầu tiên" placeholder="<?php echo $Config['smart_config']['speaker']['volume']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume']; ?>">
                             <div class="invalid-feedback">Cần nhập âm lượng khi khởi động!</div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="bot_volume_min" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Âm lượng thấp nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0')"></i> :</label>
+                          <label for="bot_volume_min" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Âm lượng thấp nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_min" id="bot_volume_min" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ giảm xuống thấp nhất" placeholder="<?php echo $Config['smart_config']['speaker']['volume_min']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_min']; ?>">
                             <div class="invalid-feedback">Cần nhập âm lượng hạ xuống thấp nhất khi Bot thay đổi!</div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="bot_volume_max" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ tăng lên cao nhất">Âm lượng cao nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100')"></i> :</label>
+                          <label for="bot_volume_max" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ tăng lên cao nhất">Âm lượng cao nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_max" id="bot_volume_max" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ tăng lên cao nhất" placeholder="<?php echo $Config['smart_config']['speaker']['volume_max']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_max']; ?>">
                             <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="bot_volume_step" class="col-sm-3 col-form-label" title="Bước âm lượng khi được thay đổi">Bước âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Bước âm lượng thay đổi khi mỗi lần tăng hoặc giảm âm lượng')"></i> :</label>
+                          <label for="bot_volume_step" class="col-sm-3 col-form-label" title="Bước âm lượng khi được thay đổi">Bước âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Bước âm lượng thay đổi khi mỗi lần tăng hoặc giảm âm lượng')"></i> <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_step" id="bot_volume_step" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Bước âm lượng khi được thay đổi" placeholder="<?php echo $Config['smart_config']['speaker']['volume_step']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_step']; ?>">
                             <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
