@@ -1,8 +1,8 @@
 {
-    "version": "1.0.55",
+    "version": "1.0.56",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa Lỗi Tạo Mới Lập Lịch Thông Báo Không Hiển Thị Tệp Âm Thanh .mp3 và sửa lỗi một số thay đổi nhỏ khác",
-    "releaseDate": "25/08/2025",
+    "description": "Sửa Lỗi Dừng tiến Trình Đang Chạy Trong Lịch Trình, Thông Báo -> Đang Được Phát, Khi Sử Dụng: Nút Nhấn, API, MQTT",
+    "releaseDate": "26/08/2025",
     "changes": [
         {
             "type": "feature",

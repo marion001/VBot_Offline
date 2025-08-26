@@ -975,14 +975,14 @@ if (!file_exists($Schedule_Audio_dir)) {
               <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_Scheduler" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Lời Nhắc, Thông Báo không')">
               <i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
             </center>
-            <h5 class="card-title"><font color="green">Tải Lên Tệp Âm Thanh:</font></h5>
+            <h5 class="card-title"><font color="green">Tải Lên Tệp Âm Thanh <i class="bi bi-question-circle-fill" onclick="show_message('Dữ Liệu Tệp/File Âm Thanh Khi Được Tải Lên Sẽ Nằm Ở: <b><?php echo $VBot_Offline.$Config['schedule']['audio_path'].'/' ?></b>')"></i>:</font></h5>
             <div class="row mb-3">
-              <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp:</b></label>
+              <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp <i class="bi bi-question-circle-fill" onclick="show_message('Dữ Liệu Tệp/File Âm Thanh Khi Được Tải Lên Sẽ Nằm Ở: <b><?php echo $VBot_Offline.$Config['schedule']['audio_path'].'/' ?></b>')"></i>:</b></label>
               <div class="col-sm-9">
                 <div class="input-group">
                   <input class="form-control border-success" type="file" name="fileToUpload_Scheduler_Upload_Audio" accept=".mp3,.wav,.ogg,.aac">
-                  <button class="btn btn-warning border-success" type="submit" name="Scheduler_Upload_Audio_Submit" value="Scheduler_Upload_Audio">Tải Lên</button>
-                  <button class="btn btn-primary border-success" type="button" onclick="get_audio_schedule()"><i class="bi bi-music-note-list"></i></button>
+                  <button class="btn btn-warning border-success" type="submit" name="Scheduler_Upload_Audio_Submit" value="Scheduler_Upload_Audio" title="Tải Lên File Âm Thanh">Tải Lên</button>
+                  <button class="btn btn-primary border-success" type="button" onclick="get_audio_schedule()" title="Hiển Thị Danh Sách Tệp Âm Thanh"><i class="bi bi-music-note-list"></i></button>
                 </div>
               </div>
             </div>
