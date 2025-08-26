@@ -701,6 +701,7 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "News_Paper.json",
+					"Data_Schedule.json",
                     "PlayList.json",
                     "Login_Data.json",
                     "PodCast.json",
