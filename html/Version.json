@@ -1,8 +1,8 @@
 {
-    "version": "1.0.56",
+    "version": "1.0.57",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa Lỗi Dừng tiến Trình Đang Chạy Trong Lịch Trình, Thông Báo -> Đang Được Phát, Khi Sử Dụng: Nút Nhấn, API, MQTT",
-    "releaseDate": "26/08/2025",
+    "description": "Cơ cấu lại toàn bộ quy trình xử lý dữ liệu nhằm tăng tốc độ xử lý",
+    "releaseDate": "31/08/2025",
     "changes": [
         {
             "type": "feature",

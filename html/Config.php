@@ -1194,7 +1194,7 @@ $read_tts_token_google_cloud = '';
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức:</label>
+                          <label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                           <div class="col-sm-9">
                             <select name="hotword_select_wakeup" id="hotword_select_wakeup" class="form-select border-success" aria-label="Default select example" onchange="selectHotwordWakeup()">
                               <option value="porcupine" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Procupine</option>
@@ -1206,7 +1206,7 @@ $read_tts_token_google_cloud = '';
                         <!-- nếu hotword được chọn là Picovoice Procupine -->
                         <div id="select_show_picovoice_porcupine">
                           <div class="row mb-3">
-                            <label for="hotword_engine_key" class="col-sm-3 col-form-label">Picovoice Token Key: <i class="bi bi-question-circle-fill" onclick="show_message('Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>')"></i></label>
+                            <label for="hotword_engine_key" class="col-sm-3 col-form-label">Picovoice Token Key <font color="red" size="6" title="Bắt Buộc Nhập">*</font> : <i class="bi bi-question-circle-fill" onclick="show_message('Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>')"></i></label>
                             <div class="col-sm-9">
                               <div class="input-group mb-3">
                                 <input required class="form-control border-success" type="text" name="hotword_engine_key" id="hotword_engine_key" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>">
@@ -1274,25 +1274,25 @@ $read_tts_token_google_cloud = '';
                   </h5>
                   <div id="collapse_button_setting_stt" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_stt" style="">
                     <div class="row mb-3">
-                      <label for="duration_recording" class="col-sm-3 col-form-label" title="Thời gian thu âm tối đa">Thời gian lắng nghe tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian lắng nghe tối đa khi Bot được đánh thức')"></i> :</label>
+                      <label for="duration_recording" class="col-sm-3 col-form-label" title="Thời gian thu âm tối đa">Thời gian lắng nghe tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian lắng nghe tối đa khi Bot được đánh thức')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="number" step="1" min="4" max="10" name="duration_recording" id="duration_recording" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian thu âm tối đa" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="silence_duration" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian im lặng tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa, khi phát hiện im lặng trong quá trình đang lắng nghe thì sẽ dừng lắng nghe, (tham số phải nhỏ hơn thời gian lắng nghe tối đa)')"></i> :</label>
+                      <label for="silence_duration" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian im lặng tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa, khi phát hiện im lặng trong quá trình đang lắng nghe thì sẽ dừng lắng nghe, (tham số phải nhỏ hơn thời gian lắng nghe tối đa)')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" step="1" min="1" max="10" type="number" name="silence_duration" id="silence_duration" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa khi thu âm" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="single_utterance_time" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian tối đa dừng câu, từ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)')"></i> :</label>
+                      <label for="single_utterance_time" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian tối đa dừng câu, từ (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" step="0.1" min="0.1" max="6" type="number" name="single_utterance_time" id="single_utterance_time" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time']; ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="min_amplitude_threshold" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Ngưỡng biên độ tối thiểu (RMS) <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng biên độ để đánh giá đang được im lặng khi lắng nghe, (biên độ càng cao thì cần âm thanh môi trường lớn và ngược lại)')"></i> :</label>
+                      <label for="min_amplitude_threshold" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Ngưỡng biên độ tối thiểu (RMS) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng biên độ để đánh giá đang được im lặng khi lắng nghe, (biên độ càng cao thì cần âm thanh môi trường lớn và ngược lại)')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" step="10" min="310" max="2000" type="number" name="min_amplitude_threshold" id="min_amplitude_threshold" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Ngưỡng biên độ tối thiểu để nhận biết là có âm thanh" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold']; ?>">
                       </div>
@@ -1301,7 +1301,7 @@ $read_tts_token_google_cloud = '';
                       <div class="col-lg-6">
                         <div class="card">
                           <div class="card-body">
-                            <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn STT (Speak To Text):</h5>
+                            <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn STT (Speak To Text) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</h5>
                             <?php 
                               $GET_stt_select = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select']; 
                               if ($GET_stt_select === "stt_default"){
@@ -1345,7 +1345,7 @@ $read_tts_token_google_cloud = '';
                                 <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_json_file_token" id="stt_ggcloud_json_file_token" style="height: 150px;">
 <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
                                 </textarea>
-                                <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực:</label>
+                                <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực: stt_token_google_cloud.json</label>
                               </div>
                               <div class="form-floating mb-3">
                                 <center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
@@ -1383,7 +1383,7 @@ $read_tts_token_google_cloud = '';
 <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_v2_json_file_token" id="stt_ggcloud_v2_json_file_token" style="height: 150px;">
 <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
 </textarea>
-                                <label for="stt_ggcloud_v2_json_file_token">Tệp tin json xác thực:</label>
+                                <label for="stt_ggcloud_v2_json_file_token">Tệp tin json xác thực: stt_token_google_cloud.json</label>
                               </div>
                               <div class="form-floating mb-3">
                                 <center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline.$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
@@ -1454,7 +1454,7 @@ $read_tts_token_google_cloud = '';
                       <div class="col-lg-6">
                         <div class="card">
                           <div class="card-body">
-                            <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn TTS (Text To Speak) <i class="bi bi-question-circle-fill" onclick="show_message('Cần lựa chọn TTS bên dưới để sử dụng hoặc cấu hình cài đặt cho TTS đó')"></i> :</h5>
+                            <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn TTS (Text To Speak) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Cần lựa chọn TTS bên dưới để sử dụng hoặc cấu hình cài đặt cho TTS đó')"></i> :</h5>
                             <?php 
                               $GET_tts_select = $Config['smart_config']['smart_answer']['text_to_speak']['tts_select']; 
                               if ($GET_tts_select === "tts_default"){
@@ -1585,7 +1585,7 @@ $read_tts_token_google_cloud = '';
 <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="tts_ggcloud_json_file_token" id="tts_ggcloud_json_file_token" style="height: 150px;">
 <?php echo htmlspecialchars(trim($read_tts_token_google_cloud)); ?>
 </textarea>
-                                <label for="tts_ggcloud_json_file_token">Tệp tin json xác thực:</label>
+                                <label for="tts_ggcloud_json_file_token">Tệp tin json xác thực: tts_token_google_cloud.json</label>
                               </div>
                               <div class="form-floating mb-3">
                                 <center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline.$Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
@@ -1770,14 +1770,14 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="hass_long_token" class="col-sm-3 col-form-label" title="Mã token của nhà thông minh Home Assistant">Mã Token (Long Token):</label>
+                      <label for="hass_long_token" class="col-sm-3 col-form-label" title="Mã token của nhà thông minh Home Assistant">Mã Token (Long Token) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="text" name="hass_long_token" id="hass_long_token" title="Mã token của nhà thông minh Home Assistant" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>">
                         <div class="invalid-feedback">Cần nhập mã Token của nhà thông minh!</div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="hass_internal_url" class="col-sm-3 col-form-label" title="Địa chỉ url nội bộ">URL nội bộ:</label>
+                      <label for="hass_internal_url" class="col-sm-3 col-form-label" title="Địa chỉ url nội bộ">URL nội bộ <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <input required class="form-control border-success" type="text" name="hass_internal_url" id="hass_internal_url" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['internal_url']) ?>" title="Địa chỉ url nội bộ" value="<?php echo htmlspecialchars($Config['home_assistant']['internal_url']) ?>">
@@ -1787,7 +1787,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="hass_external_url" class="col-sm-3 col-form-label" title="Địa chỉ url bên ngoài">URL bên ngoài:</label>
+                      <label for="hass_external_url" class="col-sm-3 col-form-label" title="Địa chỉ url bên ngoài">URL bên ngoài <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <input class="form-control border-success" type="text" name="hass_external_url" id="hass_external_url" title="Địa chỉ url bên ngoài" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['external_url']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['external_url']) ?>">
@@ -1796,7 +1796,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="hass_minimum_threshold" class="col-sm-3 col-form-label" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa">Ngưỡng kết quả tối thiểu <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng kết quả cho phép từ 0.1 đến 0.9 ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị')"></i> :</label>
+                      <label for="hass_minimum_threshold" class="col-sm-3 col-form-label" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa">Ngưỡng kết quả tối thiểu <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng kết quả cho phép từ 0.1 đến 0.9 ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị')"></i> :</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="number" step="0.1" min="0.5" max="0.9" name="hass_minimum_threshold" id="hass_minimum_threshold" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['minimum_threshold']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['minimum_threshold']) ?>">
                         <div class="invalid-feedback">Cần nhập ngưỡng tối thiểu để so sánh tên thiết bị với yêu cầu của bạn!</div>
@@ -1810,7 +1810,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="hass_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa khi truy vấn và xử lý dữ liệu')"></i> :</label>
+                      <label for="hass_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Thời gian chờ tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa khi truy vấn và xử lý dữ liệu')"></i> :</label>
                       <div class="col-sm-9">
                         <input required class="form-control border-success" type="number" step="1" min="5" max="60" name="hass_time_out" id="hass_time_out" title="Thời gian chờ phản hồi tối đa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['time_out']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['time_out']) ?>">
                         <div class="invalid-feedback">Cần nhập thời gian tối đa chờ phản hồi!</div>
@@ -1862,7 +1862,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_host" class="col-sm-3 col-form-label" title="MQTT Host, máy chủ của MQTT cần kết nối tới">Máy Chủ MQTT: </label>
+                      <label for="mqtt_host" class="col-sm-3 col-form-label" title="MQTT Host, máy chủ của MQTT cần kết nối tới">Máy Chủ MQTT <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                       <div class="col-sm-9">
                         <div class="input-group mb-3">
                           <input class="form-control border-success" type="text" name="mqtt_host" id="mqtt_host" title="Địa chỉ Link/Url/Host của MQTT Broker" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_host']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_host']) ?>">
@@ -1871,37 +1871,37 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_port" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Cổng PORT: </label>
+                      <label for="mqtt_port" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Cổng PORT <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: </label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="number" name="mqtt_port" id="mqtt_port" title="Cổng Port của MQTT Broker" placeholder="1883" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_port']) ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_username" class="col-sm-3 col-form-label" title="Tài Khoản Kết Nối MQTT">Tài Khoản: </label>
+                      <label for="mqtt_username" class="col-sm-3 col-form-label" title="Tài Khoản Kết Nối MQTT">Tài Khoản <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: </label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="text" name="mqtt_username" id="mqtt_username" title="Tài khoản kết nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_username']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_username']) ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_password" class="col-sm-3 col-form-label" title="Mật Khẩu Kết Nối MQTT">Mật Khẩu: </label>
+                      <label for="mqtt_password" class="col-sm-3 col-form-label" title="Mật Khẩu Kết Nối MQTT">Mật Khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: </label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="text" name="mqtt_password" id="mqtt_password" title="Mật khẩu kết nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_password']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_password']) ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_client_name" class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tên Client <i class="bi bi-question-circle-fill" onclick="show_message('Nếu có nhiều hơn 1 thiết bị trong Mạng, bạn cần thay đổi Tên Client cho khác nhau và là duy nhất, ví dụ: <b>VBot1</b> hoặc <b>VBot2</b><br/>Tên Client này sẽ được gắn với <b>state_topic</b> và <b>command_topic</b> trong cấu hình <b>mqtts.yaml</b><br/><br/>Ví dụ tên Client là <b>Vbot1</b>:<br/><b>- state_topic: \'VBot1/switch/mic_on_off/state\'</b> <br/><b>- command_topic: \'VBot1/switch/mic_on_off/set\'</b>')"></i> : </label>
+                      <label for="mqtt_client_name" class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tên Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Nếu có nhiều hơn 1 thiết bị trong Mạng, bạn cần thay đổi Tên Client cho khác nhau và là duy nhất, ví dụ: <b>VBot1</b> hoặc <b>VBot2</b><br/>Tên Client này sẽ được gắn với <b>state_topic</b> và <b>command_topic</b> trong cấu hình <b>mqtts.yaml</b><br/><br/>Ví dụ tên Client là <b>Vbot1</b>:<br/><b>- state_topic: \'VBot1/switch/mic_on_off/state\'</b> <br/><b>- command_topic: \'VBot1/switch/mic_on_off/set\'</b>')"></i> : </label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="text" name="mqtt_client_name" id="mqtt_client_name" title="Đặt Tên Client Cho Kết Nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']) ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ (Time Out) (giây)">Thời gian chờ (Time Out) (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
+                      <label for="mqtt_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ (Time Out) (giây)">Thời gian chờ (Time Out) (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="number" min="20" max="120" step="1" name="mqtt_time_out" id="mqtt_time_out" title="Thời gian chờ (Time Out) (giây)" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_time_out']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_time_out']) ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="mqtt_connection_waiting_time" class="col-sm-3 col-form-label" title="Thời gian chờ kết nối lại (giây)">Thời gian chờ kết nối lại (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
+                      <label for="mqtt_connection_waiting_time" class="col-sm-3 col-form-label" title="Thời gian chờ kết nối lại (giây)">Thời gian chờ kết nối lại (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" type="number" min="10" max="9999" step="1" name="mqtt_connection_waiting_time" id="mqtt_connection_waiting_time" title="Thời gian chờ kết nối lại (giây)" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time']) ?>">
                       </div>
@@ -1964,7 +1964,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led <i class="bi bi-question-circle-fill" onclick="show_message('Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>')"></i>:</label>
+                      <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>')"></i>:</label>
                       <div class="col-sm-9">
                         <select name="led_type_select" id="led_type_select" class="form-select border-success" aria-label="Default select example">
                           <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>WS281x, SK6812, VBot AIO, Vietbot AIO</option>
@@ -1975,26 +1975,26 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="led_gpio" class="col-sm-3 col-form-label" title="Chân GPIO để điều khiển đèn LED">Led Pin GPIO: <i class="bi bi-question-circle-fill" onclick="show_message('Chân Data của led sẽ được gán và điều khiển bởi chân GPIO')"></i> :</label>
+                      <label for="led_gpio" class="col-sm-3 col-form-label" title="Chân GPIO để điều khiển đèn LED">LED Pin GPIO <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" step="1" min="1" max="30" type="number" name="led_gpio" id="led_gpio" value="<?php echo $Config['smart_config']['led']['led_gpio']; ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="number_led" class="col-sm-3 col-form-label" title="Số lượng đèn Led cần sử dụng">Số lượng LED: <i class="bi bi-question-circle-fill" onclick="show_message('Số lượng đèn Led bạn sử dụng (Mỗi mắt led sẽ là 1)')"></i> :</label>
+                      <label for="number_led" class="col-sm-3 col-form-label" title="Số lượng đèn LED cần sử dụng">Số lượng LED <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" step="1" min="1" max="150" type="number" name="number_led" id="number_led" value="<?php echo $Config['smart_config']['led']['number_led']; ?>">
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="led_brightness" class="col-sm-3 col-form-label" title="Độ sáng của đèn Led">Độ sáng đèn LED: <i class="bi bi-question-circle-fill" onclick="show_message('Độ sáng của Led sẽ từ 0 -> 100%')"></i> :</label>
+                      <label for="led_brightness" class="col-sm-3 col-form-label" title="Độ sáng của đèn LED">Độ sáng đèn LED <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Độ sáng của LED sẽ từ 0 -> 100%')"></i> :</label>
                       <div class="col-sm-9">
                         <input class="form-control border-success" step="0" min="1" max="100" type="number" name="led_brightness" id="led_brightness" value="<?php echo intval($Config['smart_config']['led']['brightness'] * 100 / 255); ?>">
                       </div>
                     </div>
 					
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Ghi Nhớ Độ Sáng Khi Được Thay Đổi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật sẽ lưu lại giá trị độ sáng của đèn led khi được thay đổi trong lúc Chương Trình đang hoạt động vào Config.json')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Ghi Nhớ Độ Sáng Khi Được Thay Đổi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật sẽ lưu lại giá trị độ sáng của đèn LED khi được thay đổi trong lúc Chương Trình đang hoạt động vào Config.json')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input border-success" type="checkbox" name="remember_last_brightness" id="remember_last_brightness" <?php echo $Config['smart_config']['led']['remember_last_brightness'] ? 'checked' : ''; ?>>
@@ -2003,7 +2003,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     </div>
 					
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Đảo ngược đầu LED <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược đầu (Bắt Đầu) sáng của đèn led')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Đảo ngược đầu LED <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược đầu (Bắt Đầu) sáng của đèn LED')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input border-success" type="checkbox" name="led_invert" id="led_invert" <?php echo $Config['smart_config']['led']['led_invert'] ? 'checked' : ''; ?>>
@@ -2011,7 +2011,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label">Đèn LED khi khởi động <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng đèn led báo trạng thái khi trương trình đang khởi chạy')"></i> :</label>
+                      <label class="col-sm-3 col-form-label">Đèn LED khi khởi động <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng đèn LED báo trạng thái khi trương trình đang khởi chạy')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="form-switch">
                           <input class="form-check-input border-success" type="checkbox" name="led_starting_up" id="led_starting_up" <?php echo $Config['smart_config']['led']['led_starting_up'] ? 'checked' : ''; ?>>
@@ -2020,26 +2020,44 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     </div>
                     <h5 class="card-title">Hiệu Ứng, Màu Sắc:</h5>
                     <div class="row mb-3">
-                      <label for="led_think" class="col-sm-3 col-form-label" title="Màu Led Khi Lắng Nghe">Led Think: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
+                      <label for="led_think" class="col-sm-3 col-form-label" title="Màu LED Khi Lắng Nghe">LED Think <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="input-group">
                           <input class="form-control border-success" type="text" name="led_think" id="led_think" value="<?php echo $Config['smart_config']['led']['effect']['led_think']; ?>">
-                          <input class="form-control-color border-success" type="color" id="color_led_think" onchange="updateColorCode_input('color_led_think', 'led_think')" title="Thay đổi màu Led khi được đánh thức">                   
-                          <button class="btn btn-success border-success" type="button" onclick="test_led('led_think')">Test Led</button>
+                          <input class="form-control-color border-success" type="color" id="color_led_think" onchange="updateColorCode_input('color_led_think', 'led_think')" title="Thay đổi màu LED khi được đánh thức">                   
+                          <button class="btn btn-success border-success" type="button" onclick="test_led('led_think')">Kiểm Tra Màu</button>
                         </div>
                       </div>
                     </div>
                     <div class="row mb-3">
-                      <label for="led_mute" class="col-sm-3 col-form-label" title="Màu Led khi Microphone được tắt">Led Mute: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
+                      <label for="led_mute" class="col-sm-3 col-form-label" title="Màu LED khi Microphone được tắt">LED Mute <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
                       <div class="col-sm-9">
                         <div class="input-group">
                           <input class="form-control border-success" type="text" name="led_mute" id="led_mute" value="<?php echo $Config['smart_config']['led']['effect']['led_mute']; ?>">
                           <input class="form-control-color border-success" type="color" id="color_led_mutex" onchange="updateColorCode_input('color_led_mutex', 'led_mute')" title="Thay đổi màu LED khi Mic bị tắt">
-                          <button class="btn btn-success border-success" type="button" onclick="test_led('led_mute')">Test Led</button>
+                          <button class="btn btn-success border-success" type="button" onclick="test_led('led_mute')">Kiểm Tra Màu</button>
                         </div>
                       </div>
                     </div>
-                    <center><button type="button" class="btn btn-danger rounded-pill" name="led_off" id="led_off" value="led_off" onclick="test_led('led_off')">Dừng Test LED</button></center>
+					
+                    <div class="row mb-3">
+                      <label for="led_mute" class="col-sm-3 col-form-label" title="Màu LED khi Microphone được tắt">Hiệu Ứng LED Khác:</label>
+                      <div class="col-sm-9">
+                        <div class="input-group">
+                            <select class="form-select border-success" name="get_test_led_selected" id="get_test_led_selected">
+                              <option value="">-- Chọn Hiệu Ứng Kiểm Tra/Test LED --</option>
+                              <option value="speak">LED_SPEAK (Hiệu Ứng Khi Nói)</option>
+                              <option value="pause">LED_PAUSE (Hiệu Ứng Khi Tạm Dừng Phát)</option>
+                              <option value="loading">LED_LOADING (Hiệu Ứng Khi Xử Lý Thông Tin, Dữ Liệu)</option>
+                              <option value="startup">LED_STARTUP (Hiệu Ứng Khi Đang Khởi Động)</option>
+                              <option value="error">LED_ERROR (Hiệu Ứng Khi Có Lỗi Xảy Ra)</option>
+                            </select>
+						  <button class="btn btn-success border-success" type="button" onclick="get_test_led()">Kiểm Tra Hiệu Ứng</button>
+                        </div>
+                      </div>
+                    </div>
+					
+                    <center><button type="button" class="btn btn-danger rounded-pill" name="led_off" id="led_off" value="led_off" onclick="test_led('led_off')">Dừng Kiểm Tra/Dừng Test LED</button></center>
                   </div>
                 </div>
               </div>
@@ -2797,13 +2815,13 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="olli_assistant_username" class="col-sm-3 col-form-label">Tài Khoản <i class="bi bi-question-circle-fill" onclick="show_message('Tài Khoản Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
+                          <label for="olli_assistant_username" class="col-sm-3 col-form-label">Tài Khoản <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tài Khoản Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
                           <div class="col-sm-9">
                               <input  class="form-control border-success" type="text" name="olli_assistant_username" id="olli_assistant_username" placeholder="Tài Khoản Đăng Nhập Của Bạn, Email hoặc Số Điện Thoại" value="<?php echo $Config['virtual_assistant']['olli']['username']; ?>">
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="olli_assistant_password" class="col-sm-3 col-form-label">Mật Khẩu <i class="bi bi-question-circle-fill" onclick="show_message('Mật Khẩu Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
+                          <label for="olli_assistant_password" class="col-sm-3 col-form-label">Mật Khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mật Khẩu Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
                           <div class="col-sm-9">
                               <input  class="form-control border-success" type="text" name="olli_assistant_password" id="olli_assistant_password" placeholder="Mật Khẩu Đăng Nhập Của Bạn" value="<?php echo $Config['virtual_assistant']['olli']['password']; ?>">
                           <br/><center><button class="btn btn-success border-success" type="button"  onclick="check_info_login_olli()">Kiểm Tra Kết Nối</button>
@@ -2812,7 +2830,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 
                         </div>
                         <div class="row mb-3">
-                          <label for="olli_assistant_voice_name" class="col-sm-3 col-form-label">Giọng Đọc:</label>
+                          <label for="olli_assistant_voice_name" class="col-sm-3 col-form-label">Giọng Đọc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
 							<div class="col-sm-9">
                             <select class="form-select border-success" name="olli_assistant_voice_name" id="olli_assistant_voice_name">
                               <option value="vn_north" <?php if ($Config['virtual_assistant']['olli']['voice_name'] === "vn_north") echo "selected"; ?>>Giọng Miền Bắc</option>
@@ -2821,7 +2839,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="olli_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+                          <label for="olli_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
                           <div class="col-sm-9">
                               <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="olli_assistant_time_out" id="olli_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['olli']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['olli']['time_out']; ?>">
                           </div>
@@ -2860,7 +2878,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="google_gemini_key" class="col-sm-3 col-form-label">Api Keys:</label>
+                          <label for="google_gemini_key" class="col-sm-3 col-form-label">Api Keys <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                           <div class="col-sm-9">
                             <div class="input-group mb-3">
                               <input  class="form-control border-success" type="text" name="google_gemini_key" id="google_gemini_key" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['api_key']; ?>">
@@ -2936,7 +2954,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="chat_gpt_key" class="col-sm-3 col-form-label">Api Keys:</label>
+                          <label for="chat_gpt_key" class="col-sm-3 col-form-label">Api Keys <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                           <div class="col-sm-9">
                             <div class="input-group mb-3">
                               <input  class="form-control border-success" type="text" name="chat_gpt_key" id="chat_gpt_key" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>">
@@ -2998,7 +3016,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="dify_ai_key" class="col-sm-3 col-form-label">Api Keys:</label>
+                          <label for="dify_ai_key" class="col-sm-3 col-form-label">Api Keys <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                           <div class="col-sm-9">
                             <div class="input-group mb-3">
                               <input  class="form-control border-success" type="text" name="dify_ai_key" id="dify_ai_key" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>">
@@ -3013,7 +3031,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="dify_ai_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
+                          <label for="dify_ai_time_out" class="col-sm-3 col-form-label">Thời gian chờ tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
                           <div class="col-sm-9">
                               <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="dify_ai_time_out" id="dify_ai_time_out" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['time_out']; ?>">
                           </div>
@@ -3094,6 +3112,9 @@ if (file_exists($gemini_model_list_json_file)) {
                         <input readonly class="form-control border-danger" type="text" name="schedule_audio_path" id="schedule_audio_path" placeholder="<?php echo $Config['schedule']['audio_path']; ?>" value="<?php echo $Config['schedule']['audio_path']; ?>">
                       </div>
                     </div>
+                    <div class="row mb-3">
+                        <b class="text-danger">Yêu Cầu: Cần Nhập Thêm KEY Trợ Lý Gemini Để Có Thể (Hoa Mỹ, Mỹ Miều) Lời Nhắc Khi Lập Lịch</b>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -3154,7 +3175,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Config, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Config, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_files_config_json" id="limit_backup_files_config_json" value="<?php echo $Config['backup_upgrade']['config_json']['limit_backup_files']; ?>">
@@ -3183,7 +3204,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Custom_HomeAssistant, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Custom_HomeAssistant, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_custom_home_assistant" id="limit_backup_custom_home_assistant" value="<?php echo $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']; ?>">
@@ -3212,7 +3233,7 @@ if (file_exists($gemini_model_list_json_file)) {
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Scheduler, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Scheduler, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_scheduler" id="limit_backup_scheduler" value="<?php echo $Config['backup_upgrade']['scheduler']['limit_backup_files']; ?>">
@@ -3246,13 +3267,13 @@ if (file_exists($gemini_model_list_json_file)) {
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="backup_upgrade_vbot_limit_backup_files" class="col-sm-3 col-form-label">Tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Tối đa số lượng tệp tin sao lưu trên hệ thống')"></i> :</label>
+                                <label for="backup_upgrade_vbot_limit_backup_files" class="col-sm-3 col-form-label">Tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tối đa số lượng tệp tin sao lưu trên hệ thống')"></i> :</label>
                                 <div class="col-sm-9">
                                     <input  class="form-control border-success" type="number" min="2" step="1" max="10" name="backup_upgrade_vbot_limit_backup_files" id="backup_upgrade_vbot_limit_backup_files" placeholder="<?php echo $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files']; ?>" value="<?php echo $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files']; ?>">
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="backup_upgrade_vbot_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
+                                <label for="backup_upgrade_vbot_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
                                 <div class="col-sm-9">
 <textarea class="form-control border-success" rows="5" name="backup_upgrade_vbot_exclude_files_folder" id="backup_upgrade_vbot_exclude_files_folder">
 <?php
@@ -3270,7 +3291,7 @@ echo "\n";
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="backup_upgrade_vbot_exclude_file_format" class="col-sm-3 col-form-label">Bỏ qua định dạng tệp không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi định dạng tệp là 1 dòng, cần có dấu <b>.</b> ở trước định dạng tệp ví dụ: <b>.mp3</b> hoặc <b>.mp4</b>')"></i> :</label>
+                                <label for="backup_upgrade_vbot_exclude_file_format" class="col-sm-3 col-form-label">Bỏ qua định dạng tệp không sao lưu <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi định dạng tệp là 1 dòng, cần có dấu <b>.</b> ở trước định dạng tệp ví dụ: <b>.mp3</b> hoặc <b>.mp4</b>')"></i> :</label>
                                 <div class="col-sm-9">
 <textarea class="form-control border-success" rows="5" name="backup_upgrade_vbot_exclude_file_format" id="backup_upgrade_vbot_exclude_file_format">
 <?php
@@ -3310,7 +3331,7 @@ echo "\n";
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="vbot_program_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
+                                <label for="vbot_program_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
                                 <div class="col-sm-9">
 <textarea class="form-control border-success" rows="5" name="vbot_program_upgrade_keep_the_file_folder" id="vbot_program_upgrade_keep_the_file_folder">
 <?php
@@ -3356,13 +3377,13 @@ echo "\n";
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="backup_web_interface_limit_backup_files" class="col-sm-3 col-form-label">Tệp sao lưu tối đa <i class="bi bi-question-circle-fill" onclick="show_message('Tối đa số lượng tệp tin sao lưu trên hệ thống')"></i> :</label>
+                                <label for="backup_web_interface_limit_backup_files" class="col-sm-3 col-form-label">Tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tối đa số lượng tệp tin sao lưu trên hệ thống')"></i> :</label>
                                 <div class="col-sm-9">
                                     <input  class="form-control border-success" type="number" min="2" step="1" max="10" name="backup_web_interface_limit_backup_files" id="backup_web_interface_limit_backup_files" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files']; ?>">
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="backup_upgrade_web_interface_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
+                                <label for="backup_upgrade_web_interface_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
                                 <div class="col-sm-9">
 <textarea class="form-control border-success" rows="5" name="backup_upgrade_web_interface_exclude_files_folder" id="backup_upgrade_web_interface_exclude_files_folder">
 <?php
@@ -3380,7 +3401,7 @@ echo "\n";
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="backup_upgrade_web_interface_exclude_file_format" class="col-sm-3 col-form-label">Bỏ qua định dạng tệp không sao lưu <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi định dạng tệp là 1 dòng, cần có dấu <b>.</b> ở trước định dạng tệp ví dụ: <b>.mp3</b> hoặc <b>.mp4</b>')"></i> :</label>
+                                <label for="backup_upgrade_web_interface_exclude_file_format" class="col-sm-3 col-form-label">Bỏ qua định dạng tệp không sao lưu <font color="blue" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi định dạng tệp là 1 dòng, cần có dấu <b>.</b> ở trước định dạng tệp ví dụ: <b>.mp3</b> hoặc <b>.mp4</b>')"></i> :</label>
                                 <div class="col-sm-9">
 <textarea class="form-control border-success" rows="5" name="backup_upgrade_web_interface_exclude_file_format" id="backup_upgrade_web_interface_exclude_file_format">
 <?php
@@ -3415,7 +3436,7 @@ echo "\n";
                                 </div>
                               </div>
                               <div class="row mb-3">
-                                <label for="vbot_web_interface_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
+                                <label for="vbot_web_interface_upgrade_keep_the_file_folder" class="col-sm-3 col-form-label">Giữ lại Tệp, Thư Mục Không Cập Nhật <font color="blue" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp hoặc thư mục không cho phép cập nhật, mỗi tệp hoặc thư mục là 1 dòng, nếu là tệp tin thì cần có đầy đủ tên và đuôi của tệp, ví dụ giữ lại tệp: <b>Config.json</b>, giữ lại thư mục: <b>eng</b>')"></i> :</label>
                                 <div class="col-sm-9">
 <textarea class="form-control border-success" rows="5" name="vbot_web_interface_upgrade_keep_the_file_folder" id="vbot_web_interface_upgrade_keep_the_file_folder">
 <?php
@@ -3458,21 +3479,21 @@ echo "\n";
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Cha Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Tên Thư Mục Cha Sao Lưu <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_name" id="gcloud_drive_backup_folder_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name']; ?>">
                             <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Chương Trình VBot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Chương Trình VBot <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_vbot_name" id="gcloud_drive_backup_folder_vbot_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name']; ?>">
                             <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Giao Diện VBot <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
+                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Giao Diện VBot <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
                           <div class="col-sm-9">
                             <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_interface_name" id="gcloud_drive_backup_folder_interface_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name']; ?>">
                             <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
@@ -3481,7 +3502,7 @@ echo "\n";
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kiểu Loại Truy Cập <i class="bi bi-question-circle-fill" onclick="show_message('- Để giá trị là offline thì sẽ tự động làm mới lại mã token xác thực khi hết hạn<br/>- Để giá trị là online thì mỗi lần mã token xác thực hết hạn bạn cần lấy lại bằng thao tác thủ công')"></i> : </label>
                           <div class="col-sm-9">
-                            <select class="form-select border-success" name="gcloud_drive_setAccessType" id="gcloud_drive_setAccessType">
+                            <select class="form-select border-danger" name="gcloud_drive_setAccessType" id="gcloud_drive_setAccessType">
                               <option value="offline" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setAccessType'] === "offline") echo "selected"; ?>>Offline (Tự động làm mới Token)</option>
                               <option value="online" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setAccessType'] === "online") echo "selected"; ?>>Online (Làm mới Token thủ công)</option>
                             </select>
@@ -3501,7 +3522,7 @@ echo "\n";
                           </i> : 
                           </label>
                           <div class="col-sm-9">
-                            <select class="form-select border-success" name="gcloud_drive_setPrompt" id="gcloud_drive_setPrompt">
+                            <select class="form-select border-danger" name="gcloud_drive_setPrompt" id="gcloud_drive_setPrompt">
                               <option value="none" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "none") echo "selected"; ?>>None (Không hiển thị)</option>
                               <option value="consent" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "consent") echo "selected"; ?>>Consent (Yêu cầu đồng ý cấp quyền)</option>
                               <option value="select_account" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "select_account") echo "selected"; ?>>Select Account (Chọn tài khoản muốn dùng)</option>
@@ -3623,9 +3644,9 @@ echo "\n";
               </div>
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title">Xử Lý Lỗi:</h5>
+                  <h5 class="card-title text-danger">Xử Lý Lỗi:</h5>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Khởi động lại hệ thống khi gặp sự cố hoặc lỗi bất ngờ: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động khởi động lại chương trình VBot khi gặp sự cố hoặc có lỗi xảy ra bất ngờ, Sẽ chỉ hoạt động ở chế độ đang chạy Auto')"></i> :</label>
+                    <label class="col-sm-3 col-form-label text-danger">Khởi động lại hệ thống khi gặp sự cố hoặc lỗi bất ngờ: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động khởi động lại chương trình VBot khi gặp sự cố hoặc có lỗi xảy ra bất ngờ, Sẽ chỉ hoạt động ở chế độ đang chạy Auto')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="auto_restart_program_error" id="auto_restart_program_error" <?php echo $Config['smart_config']['auto_restart_program_error'] ? 'checked' : ''; ?>>
@@ -3633,7 +3654,7 @@ echo "\n";
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Tự động sửa lỗi đồng bộ, sai thời gian hệ thống: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động sửa lỗi đồng bộ, sai thời gian trên hệ thống OS khi chương trình VBot khởi chạy')"></i> :</label>
+                    <label class="col-sm-3 col-form-label text-danger">Tự động sửa lỗi đồng bộ, sai thời gian hệ thống: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động sửa lỗi đồng bộ, sai thời gian trên hệ thống OS khi chương trình VBot khởi chạy')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="fix_time_sync_error" id="fix_time_sync_error" <?php echo $Config['smart_config']['fix_time_sync_error'] ? 'checked' : ''; ?>>
@@ -3646,7 +3667,7 @@ echo "\n";
                 <div class="card-body">
                   <h5 class="card-title">Log Hệ Thống:</h5>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Bật, Tắt logs hệ thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ chương trình khi được chạy')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Bật, Tắt Logs Hệ Thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ chương trình khi được chạy')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="log_active" id="log_active" <?php echo $Config['smart_config']['show_log']['active'] ? 'checked' : ''; ?>>
@@ -3654,7 +3675,7 @@ echo "\n";
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label for="log_display_style" class="col-sm-3 col-form-label">Kiểu hiển thị Logs:</label>
+                    <label for="log_display_style" class="col-sm-3 col-form-label">Kiểu Hiển Thị Logs:</label>
                     <div class="col-sm-9">
                       <select name="log_display_style" id="log_display_style" class="form-select border-success" aria-label="Default select example">
                         <option value="console" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'console' ? 'selected' : ''; ?>>console (Hiển thị log ra bảng điều khiển đầu cuối)</option>
@@ -4439,57 +4460,90 @@ function uploadFilesWakeUP_Reply() {
           xhr.send();
       }
 
-      //Dành cho Test Led 
-      function test_led(action) {
-          if ( <?php echo $Config['smart_config']['led']['active'] ? 'true' : 'false'; ?> === false) {
-              show_message("Chế độ sử dụng Led không được kích hoạt");
-              return;
-          }
-          const led_value = document.getElementById(action).value;
-          let led_action;
-          if (action === "led_think") {
-              led_action = "think";
-          } else if (action === "led_mute") {
-              led_action = "mute";
-          } else if (action === "led_off") {
-              led_action = "off";
-          } else {
-              show_message("Tham số truyền vào không hợp lệ");
-              return;
-          }
-          loading("show");
-          const data = JSON.stringify({
-              "type": 2,
-              "data": "led",
-              "action": led_action,
-              "value": led_value
-          });
-          const xhr = new XMLHttpRequest();
-          xhr.withCredentials = true;
-          xhr.addEventListener("readystatechange", function() {
-              if (this.readyState === 4) {
-                  if (this.status === 200) {
-                      const response = JSON.parse(this.responseText);
-                      if (response.success) {
-                          showMessagePHP(response.message, 3);
-                      } else {
-                          show_message("Yêu cầu không thành công: " + (response.message || "Lỗi không xác định."));
-                      }
-                      loading("hide");
-                  } else {
-                      show_message("Có lỗi xảy ra trong quá trình gửi yêu cầu.");
-                      loading("hide");
-                  }
-              }
-          });
-          xhr.onerror = function() {
-              show_message("Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.");
-              loading("hide");
-          };
-          xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
-          xhr.setRequestHeader("Content-Type", "application/json");
-          xhr.send(data);
-      }
+      //Dành cho Test Led
+	function test_led(action) {
+		if ( <?php echo $Config['smart_config']['led']['active'] ? 'true' : 'false'; ?> === false) {
+			show_message("Chế độ sử dụng Led không được kích hoạt");
+			return;
+		}
+		let led_action;
+		let led_value = "";
+		switch (action) {
+			case "speak":
+			case "pause":
+			case "loading":
+			case "startup":
+			case "error":
+				led_action = action;
+				led_value = null;
+				break;
+			case "led_think":
+				led_action = "think";
+				led_value = document.getElementById(action)?.value || "";
+				break;
+			case "led_mute":
+				led_action = "mute";
+				led_value = document.getElementById(action)?.value || "";
+				break;
+			case "led_off":
+				led_action = "off";
+				led_value = document.getElementById(action)?.value || "";
+				break;
+			default:
+				show_message("Tham số truyền vào không hợp lệ");
+				return;
+		}
+
+		loading("show");
+		const data = JSON.stringify({
+			"type": 2,
+			"data": "led",
+			"action": led_action,
+			"value": led_value
+		});
+
+		const xhr = new XMLHttpRequest();
+		xhr.withCredentials = true;
+		xhr.addEventListener("readystatechange", function() {
+			if (this.readyState === 4) {
+				if (this.status === 200) {
+					const response = JSON.parse(this.responseText);
+					if (response.success) {
+						showMessagePHP(response.message, 3);
+					} else {
+						show_message("Yêu cầu không thành công: " + (response.message || "Lỗi không xác định."));
+					}
+					loading("hide");
+				} else {
+					show_message("Có lỗi xảy ra trong quá trình gửi yêu cầu.");
+					loading("hide");
+				}
+			}
+		});
+		xhr.onerror = function() {
+			show_message("Không thể kết nối tới server. Vui lòng kiểm tra kết nối mạng.");
+			loading("hide");
+		};
+		xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+		xhr.setRequestHeader("Content-Type", "application/json");
+		xhr.send(data);
+	}
+
+	// Hàm gọi khi nhấn nút
+	function get_test_led() {
+		let selectEl = document.getElementById("get_test_led_selected");
+		if (!selectEl) {
+			showMessagePHP('Không tìm thấy thẻ select có id: get_test_led_selected', 3);
+			return;
+		}
+		let value = selectEl.value;
+		if (value === "") {
+			show_message("Vui Lòng Chọn Hiệu Ứng Để Kiểm Tra");
+			return;
+		}
+		test_led(value);
+	}
+
 
       //Thay đổi giá trị value của BackList.json theo đường dẫn chỉ định 
       function changeBacklistValue(path_json, value_type) {

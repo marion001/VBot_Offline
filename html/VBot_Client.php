@@ -119,7 +119,7 @@ if ($Config['contact_info']['user_login']['active']) {
         <br/>
         <div class="input-group mb-3">
                 <span class="input-group-text border-success" id="basic-addon1">Thêm Client Thủ Công</span>
-            <input type="text" class="form-control border-success" name="add_client_manual_ip" id="add_client_manual_ip" placeholder="Nhập địa chỉ IP Của Client">
+            <input type="text" class="form-control border-success" name="add_client_manual_ip" id="add_client_manual_ip" placeholder="Nhập địa chỉ IP Của Client, VD: 192.168.1.199">
             <button type="button" class="btn btn-primary border-success" onclick="bat_dau_them_client_thu_cong()">Thêm</button>
         </div>
         <hr/>
@@ -281,7 +281,7 @@ function displayDeviceData(data) {
         '<tr>' +
         '<th style="text-align: center; vertical-align: middle;">Tên Client</th>' +
         '<th style="text-align: center; vertical-align: middle;">Địa Chỉ IP</th>' +
-        '<th style="text-align: center; vertical-align: middle;">Server Đang Kết Nối</th>' +
+        '<th style="text-align: center; vertical-align: middle;">Client Đang Kết Nối Tới Server</th>' +
         '<th style="text-align: center; vertical-align: middle;">Phiên Bản Firmware</th>' +
         '<th style="text-align: center; vertical-align: middle;">Chip Model</th>' +
         '<th style="text-align: center; vertical-align: middle;">Hành Động</th>' +

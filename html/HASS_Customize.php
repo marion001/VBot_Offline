@@ -12,15 +12,11 @@
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
       session_unset();
       session_destroy();
       header('Location: Login.php');
       exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
   }
   ?>
 <!DOCTYPE html>
@@ -50,7 +46,6 @@
 		bottom: 60px;
       }
     </style>
-    <!-- <link href="assets/vendor/prism/prism.min.css" rel="stylesheet"> -->
     <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
     <style>
       #modal_dialog_show_Home_Assistant {
@@ -67,16 +62,10 @@
     </style>
   </head>
   <body>
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
-      ?>
-    <!-- End Header -->
-    <!-- ======= Sidebar ======= -->
-    <?php
       include 'html_sidebar.php';
       ?>
-    <!-- End Sidebar-->
     <main id="main" class="main">
       <div class="pagetitle">
         <h1>Lệnh Tùy Chỉnh Home Assistant <i class="bi bi-question-circle-fill" onclick="show_message('- Hỗ trợ code YAML, Có trong: <b>Công cụ nhà phát triển -> Hành Động</b><br/>- Công cụ phát triển hành động cho phép bạn thực hiện bất kỳ hành động nào có trong Home Assistant.')"></i></h1>
@@ -88,16 +77,13 @@
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <form class="row g-3 needs-validation" novalidate method="POST" enctype="multipart/form-data" action="">
         <?php
-          // Đọc dữ liệu JSON
           $jsonFilePath = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
-          
-          // Mảng lưu thông báo lỗi
+          // Mảng lưu thông báo
           $errorMessages = [];
           $successMessage = [];
-          
+
           #Chuyển đổi Json Sang YAML không dùng thư viện
           function arrayToYaml($array, $indent = 0) {
               $yaml = '';
@@ -136,7 +122,7 @@
               }
               return $yaml;
           }
-          
+
           #Chuyển đổi Yaml Sang Json không dùng thư viện
           function yamlToArray($yaml) {
               $lines = explode("\n", trim($yaml));
@@ -190,15 +176,10 @@
               }
               return $result;
           }
-          
-          
-          
-          
-          
-          
+
           // Xử lý dữ liệu khi form được gửi
           if (isset($_POST['save_custom_home_assistant'])) {
-          
+
           #Sao Lưu Dữ Liệu Trước
           if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
           // Đường dẫn gốc và đích
@@ -264,9 +245,8 @@
                   $errorMessages[] = "Không thể lưu dữ liệu. Vui lòng kiểm tra quyền truy cập tệp tin.";
               }
           }
-          
+
           if (isset($_POST['delete_all_custom_home_assistant'])) {
-          
           #Sao Lưu Dữ Liệu Trước
           if (isset($Config['backup_upgrade']['custom_home_assistant']['active']) && $Config['backup_upgrade']['custom_home_assistant']['active'] === true) {
           // Đường dẫn gốc và đích
@@ -299,20 +279,16 @@
               $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
           }
           }
-          
+
           // Đường dẫn thư mục
           $directory = $VBot_Offline.'resource/hass';
-          
-          // Kiểm tra thư mục có tồn tại không
           if (is_dir($directory)) {
-              // Lấy danh sách tất cả các file JSON trong thư mục
               $files = glob($directory . '/*.json');
               foreach ($files as $file) {
                   if (is_file($file)) {
                       unlink($file);
                   }
               }
-          
               $content = json_encode([
                   "intents" => []
               ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
@@ -323,11 +299,8 @@
           } else {
               $errorMessages[] = "Thư mục không tồn tại: " . $directory;
           }
-          
-          
           }
-          
-          
+
           //Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
           if (isset($_POST['start_recovery_custom_homeassistant'])) {
           $data_recovery_type = $_POST['start_recovery_custom_homeassistant'];
@@ -376,7 +349,6 @@
               }
           }
           }
-          
           if (file_exists($jsonFilePath)) {
               $jsonData = file_get_contents($jsonFilePath);
               $data = json_decode($jsonData, true);
@@ -386,9 +358,7 @@
               $data = ['intents' => []];
               file_put_contents($jsonFilePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
           }
-          
           $intents = $data['intents'];
-          
           if (empty($intents)) {
           	 echo '<center><h5 class="card-title"><font color="red">Chưa có tác vụ nào được thiết lập cho Custom Home Assistant:</font></h5></center>';
           }
@@ -421,7 +391,7 @@
                   echo '</div>';
               }
               ?>
-            <h5 class="card-title"><font color="green">Thiết Lập Lệnh Tùy Chỉnh Home Assistant:</font> <a href="https://github.com/user-attachments/assets/eb92a617-12f6-40c9-9d00-35cdbe5cd0bb" target="_bank">(Ảnh Hướng Dẫn, Demo)</a></h5>
+            <h5 class="card-title"><font color="green">Thiết Lập Lệnh Tùy Chỉnh Home Assistant:</font> <a href="https://github.com/user-attachments/assets/eb92a617-12f6-40c9-9d00-35cdbe5cd0bb" target="_bank">(Cấu Trúc Code YAML: Ảnh Hướng Dẫn, Demo)</a></h5>
             <?php foreach ($intents as $index => $intent): ?>
             <div class="card accordion" id="accordion_button_custom_hass_<?= $index + 1 ?>">
               <div class="card-body">
@@ -496,12 +466,10 @@
                   $defaultContent = json_encode([
                       "intents" => []
                   ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                  // Ghi nội dung vào tệp tin
                   if (file_put_contents($jsonFilePath, $defaultContent) !== false) {
                       chmod($jsonFilePath, 0777);
                   }
               }
-              
               ?>
             <!-- Các phần tử mới sẽ được thêm vào đây -->
             <div id="accordion-container"></div>
@@ -514,6 +482,14 @@
               <i class="bi bi-download"></i> Tải Xuống</button>
               <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_custom_home_assistant" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Custom Home Assistant không')"><i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
             </center>
+					<h5 class="card-title"><font color="green">Dữ Liệu Cấu Hình:</font></h5>
+                    <div class="row mb-3">
+                      <label for="custom_home_assistant_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
+                      <div class="col-sm-9">
+                        <input readonly class="form-control border-danger" type="text" name="custom_home_assistant_config_path" id="custom_home_assistant_config_path" value="<?php echo $VBot_Offline.$Config['home_assistant']['custom_commands']['custom_command_file']; ?>">
+                      </div>
+                    </div>
+			<hr/>
             <h5 class="card-title"><font color="green">Khôi Phục Dữ Liệu:</font></h5>
             <div class="row mb-3">
               <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>

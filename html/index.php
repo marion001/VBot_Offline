@@ -299,6 +299,7 @@
 &nbsp; Tới Thiết Bị:&nbsp;
 <select class="form-select border-success" style="width: auto;" name="source_text_to_speak_api" id="source_text_to_speak_api">
 <option value="<?php echo $URL_API_VBOT; ?>" data-full_name_tts_api="<?php echo $Config['contact_info']['full_name']; ?>" selected><?php echo $Config['contact_info']['full_name']; ?> - Mặc Định</option>
+
 </select>
 
 </h5>
@@ -804,7 +805,7 @@
               xhr.setRequestHeader("Content-Type", "application/json");
               xhr.send(data);
           }
-		  
+
       //Thay đổi độ sáng đèn led
       function sendBrightnessData(value) {
           var data = JSON.stringify({
@@ -844,7 +845,6 @@
       function tts_speaker_notify_send(del_text_input=null) {
       var text_input = document.getElementById('tts_speaker_notify');
       var source_text_to_speak_api = document.getElementById('source_text_to_speak_api').value;
-      // Kiểm tra xem có cần xóa nội dung của textarea không
       if (del_text_input === "delete_text_tts"){
           text_input.value = '';
           showMessagePHP("Đã xóa nội dung trong nhập liệu thông báo", 5);
@@ -854,13 +854,25 @@
       show_message("Hãy nhập nội dung cần phát thông báo");
       return;
       }
-      loading("show")
+			loading("show")
+			if (source_text_to_speak_api === 'send_notify_home_assistant'){
+              var data = JSON.stringify({
+                  "type": 3,
+                  "data": "tts",
+                  "action": "home_assistant",
+				  "title": "VBot - <?php echo $Config['contact_info']['full_name']; ?>",
+                  "messenger": text_input.value
+              });
+			  source_text_to_speak_api = '<?php echo $URL_API_VBOT ?>';
+			}
+			else {
               var data = JSON.stringify({
                   "type": 3,
                   "data": "tts",
                   "action": "notify",
                   "value": text_input.value
               });
+			}
               var xhr = new XMLHttpRequest();
               xhr.addEventListener("readystatechange", function() {
                   if (this.readyState === 4) {
@@ -877,7 +889,11 @@
                           var response = JSON.parse(this.responseText);
                           if (response.success) {
 								loading("hide")
-                              showMessagePHP("Đã phát thông báo: " + response.text_tts, 7);
+							  if (!response?.text_tts?.trim()) {
+									showMessagePHP("Đã phát thông báo: " + response.text_messenger + '. Tới Home Assistant', 7);
+								} else {
+									showMessagePHP("Đã phát thông báo: " + response.text_tts, 7);
+								}
 						// Cập nhật onclick của nút download với đường dẫn tệp âm thanh
                       var audioPath_tts = response.audio_tts;
 					  //console.log(audioPath_tts);
@@ -1398,7 +1414,7 @@
       	}
       });
 
-//Phát Thông báo tts tới loa được chọn
+//Phát Thông báo tts tới loa được chọn (điền dữ liệu vào thẻ select)
 function fetchAndPopulateDevices_tts() {
     const selectElement = document.getElementById('source_text_to_speak_api');
     if (!selectElement) {
@@ -1430,6 +1446,13 @@ function fetchAndPopulateDevices_tts() {
 						selectElement.appendChild(option);
 					}
                 });
+				if (<?php echo $Config['home_assistant']['active'] ? 'true' : 'false'; ?>) {
+					const option = document.createElement('option');
+					option.value = 'send_notify_home_assistant';
+					option.text = 'Home Assistant (HASS)';
+					option.setAttribute('data-full_name_tts_api', "VBot - <?php echo $Config['contact_info']['full_name']; ?>");
+					selectElement.appendChild(option);
+				}
             } catch (e) {
 				showMessagePHP('Lỗi phát tts: Không thể phân tích JSON - ' + e.message, 5);
             }

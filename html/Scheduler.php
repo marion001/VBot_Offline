@@ -965,6 +965,9 @@ if (!file_exists($Schedule_Audio_dir)) {
                 </div>
               </div>
             </div>
+			
+
+			
             <center>
               <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
               <button type="button" class="btn btn-success rounded-pill" onclick="addNewTask()">Thêm mới tác vụ</button>
@@ -975,6 +978,20 @@ if (!file_exists($Schedule_Audio_dir)) {
               <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_Scheduler" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Lời Nhắc, Thông Báo không')">
               <i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
             </center>
+					<h5 class="card-title"><font color="green">Dữ Liệu Cấu Hình:</font></h5>
+                    <div class="row mb-3">
+                      <label for="schedule_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
+                      <div class="col-sm-9">
+                        <input readonly class="form-control border-danger" type="text" name="schedule_config_path" id="schedule_config_path" value="<?php echo $VBot_Offline.$Config['schedule']['data_json_file']; ?>">
+                      </div>
+                    </div>
+                    <div class="row mb-3">
+                      <label for="schedule_audio_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Âm Thanh:</b></label>
+                      <div class="col-sm-9">
+                        <input readonly class="form-control border-danger" type="text" name="schedule_audio_path" id="schedule_audio_path" value="<?php echo $VBot_Offline.$Config['schedule']['audio_path'].'/'; ?>">
+                      </div>
+                    </div>
+<hr/>
             <h5 class="card-title"><font color="green">Tải Lên Tệp Âm Thanh <i class="bi bi-question-circle-fill" onclick="show_message('Dữ Liệu Tệp/File Âm Thanh Khi Được Tải Lên Sẽ Nằm Ở: <b><?php echo $VBot_Offline.$Config['schedule']['audio_path'].'/' ?></b>')"></i>:</font></h5>
             <div class="row mb-3">
               <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp <i class="bi bi-question-circle-fill" onclick="show_message('Dữ Liệu Tệp/File Âm Thanh Khi Được Tải Lên Sẽ Nằm Ở: <b><?php echo $VBot_Offline.$Config['schedule']['audio_path'].'/' ?></b>')"></i>:</b></label>

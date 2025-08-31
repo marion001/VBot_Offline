@@ -161,13 +161,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"169"
 					],
 					"port": "5002"
 				}
@@ -217,13 +217,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.194:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"194"
+						"169"
 					],
 					"port": "5002"
 				}
@@ -1858,7 +1858,7 @@
 			"response": []
 		},
 		{
-			"name": "Tắt Đèn LED",
+			"name": "LED OFF (Tắt Đèn LED)",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1886,7 +1886,7 @@
 			"response": []
 		},
 		{
-			"name": "Led Think",
+			"name": "(Hiệu Ứng) LED THINK",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1914,7 +1914,7 @@
 			"response": []
 		},
 		{
-			"name": "Led Mute",
+			"name": "(Hiệu Ứng) LED MUTE",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -1942,13 +1942,13 @@
 			"response": []
 		},
 		{
-			"name": "Thay Đổi Kiểu Hiển Thị Logs",
+			"name": "(Hiệu Ứng) LED SPEAK",
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"both\",\r\n    \"notes\": \"value: all, console, api, display_screen\"\r\n}",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"speak\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -1956,13 +1956,153 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(Hiệu Ứng) LED PAUSE",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"pause\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(Hiệu Ứng) LED LOADING",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"loading\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(Hiệu Ứng) LED STARTUP",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"startup\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "(Hiệu Ứng) LED ERROR",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"error\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Thay Đổi Kiểu Hiển Thị Logs",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"all\",\r\n    \"notes\": \"value: all, console, api\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
 					],
 					"port": "5002"
 				}
@@ -2138,6 +2278,34 @@
 			"response": []
 		},
 		{
+			"name": "Gửi Thông Báo Tới Hass, Home Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"home_assistant\",\r\n    \"title\": \"VBot Messenger\",\r\n    \"messenger\": \"Chào tuyển nhé\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "ChatBot",
 			"request": {
 				"method": "POST",
@@ -2292,13 +2460,69 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.194:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"194"
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gọi Trợ Lý Ảo Olli Maika Assistant",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"olli_assistant\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Gọi Trợ Lý Ảo DEV Assistant (Người Dùng Tự Code)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"dev_assistant\",\r\n    \"value\": \"chào bạn\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.169:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"169"
 					],
 					"port": "5002"
 				}
@@ -2320,13 +2544,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"169"
 					],
 					"port": "5002"
 				}
@@ -2432,13 +2656,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.30:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"30"
+						"169"
 					],
 					"port": "5002"
 				}
@@ -2480,7 +2704,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mở bài hát BẠC PHẬN, CON ĐƯỜNG MƯA - NGÂN NGÂN | BẢN COVER TRIỆU VIEW | ALBUM BALLAD HOT NHẤT 2025\"\r\n}",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -2488,13 +2712,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.194:5002",
+					"raw": "http://192.168.14.169:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"194"
+						"169"
 					],
 					"port": "5002"
 				}

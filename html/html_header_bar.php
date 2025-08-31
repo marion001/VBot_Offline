@@ -121,7 +121,7 @@
 			<br/>
             <div class="input-group mb-3">
   <span class="input-group-text border-success">Thêm Thủ Công:</span>
-  <input type="text" id="add_ip_vbot_server" class="form-control border-success" placeholder="Nhập địa chỉ ip thiết bị loa VBot">
+  <input type="text" id="add_ip_vbot_server" class="form-control border-success" placeholder="Nhập địa chỉ ip thiết bị loa VBot, VD: 192.168.1.107">
 <button type="button" id="btn_add_ip_vbot_server" name="btn_add_ip_vbot_server" title="Thêm thiết bị VBot thủ công" class="btn btn-primary border-success" onclick="add_IP_VBot_Server()">Thêm</button>
 </div>
             <div id="vbot_Scan_devices"></div>
@@ -166,7 +166,7 @@
         <div class="modal-dialog modal-fullscreen modal-dialog-scrollable" id="iframeModal_size_setting">
             <div class="modal-content">
                 <div class="modal-header" id="iframeModal_header">
-				<div id="iframeModal_source">dsdsd</div>
+				<div id="iframeModal_source">Vũ Tuyển - Comback Soon</div>
 					<i class="bi bi-arrows-fullscreen pe-3 text-success ms-auto" id="iframeModal_fullscreen" onclick="iframeModal_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
 					<i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
                 </div>
