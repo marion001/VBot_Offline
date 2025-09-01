@@ -35,6 +35,8 @@
   //đường dẫn path VBot python
   $VBot_Offline = "/home/pi/VBot_Offline/";
 
+  $Backup_dir = $HTML_VBot_Offline.'/Backup_Upgrade/Backup_Config/';
+
   // Đường dẫn đến tệp JSON
   $Config_filePath = $VBot_Offline.'Config.json';
 
@@ -77,17 +79,62 @@
   //Kết hợp thành URL đầy đủ
   $Current_URL = $Protocol . $Domain . $Path;
 
-  #Đọc nội dung file Config
-  if (file_exists($Config_filePath)) {
-      $Config = json_decode(file_get_contents($Config_filePath), true);
-      if (json_last_error() !== JSON_ERROR_NONE) {
-          echo 'Có lỗi xảy ra khi giải mã JSON: ' . json_last_error_msg();
-          $Config = null;
-      }
-  } else {
-      echo 'Tệp JSON không tồn tại tại đường dẫn: ' . $Config_filePath;
-      $Config = null;
-  }
+  //ĐƯờng dẫn thư mục file backup Config
+  $Backup_dir = $HTML_VBot_Offline.'/Backup_Upgrade/Backup_Config/';
+
+// Kiểm tra file không tồn tại hoặc rỗng
+$needCopy = false;
+if (!file_exists($Config_filePath)) {
+    $needCopy = true;
+} else {
+    $fileContent = file_get_contents($Config_filePath);
+    if (empty(trim($fileContent))) {
+        $needCopy = true;
+    }
+}
+if ($needCopy) {
+    $backupFiles = glob($Backup_dir . 'Config_*.json');
+    if (!empty($backupFiles)) {
+        usort($backupFiles, function($a, $b) {
+            return filemtime($b) - filemtime($a);
+        });
+        $latestBackup = $backupFiles[0];
+        //echo "Backup được chọn: $latestBackup\n";
+        //echo "Sao chép tới: $Config_filePath\n";
+        if (file_exists($Config_filePath)) {
+            exec("rm -f " . escapeshellarg($Config_filePath));
+        }
+        $dirPath = dirname($Config_filePath);
+        exec("chmod 0777 " . escapeshellarg($dirPath));
+        $cmd = "cp " . escapeshellarg($latestBackup) . " " . escapeshellarg($Config_filePath);
+        exec($cmd, $output, $return_var);
+        if ($return_var === 0) {
+            //echo "Đã sao chép Config từ backup.\n";
+			echo '<script>
+				alert("- Lỗi Dữ Liệu Tệp Cấu Hình Config.json\n\n- Đã Khôi Phục Dữ Liệu Từ Tệp Sao Lưu Mới Nhất: '.basename($latestBackup).'");
+				</script>';
+			exec("chmod 0777 " . escapeshellarg($Config_filePath));
+            $fileContent = file_get_contents($Config_filePath);
+        } else {
+            //echo "Không thể sao chép file backup vào: $Config_filePath\n";
+            $Config = null;
+        }
+    } else {
+        //echo "Không tìm thấy file backup nào trong: $Backup_dir\n";
+        $Config = null;
+    }
+}
+
+// Giải mã JSON nếu file tồn tại và không lỗi
+if (!empty($fileContent)) {
+    $Config = json_decode($fileContent, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        echo 'Có lỗi xảy ra khi giải mã Config.json: ' . json_last_error_msg();
+        $Config = null;
+    }
+} else {
+    $Config = null;
+}
 
   if (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
   //Bật Logs PHP
