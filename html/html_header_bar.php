@@ -238,7 +238,7 @@
       <!-- restart vbot -->	
       <li class="nav-item dropdown pe-3">
         <a class="nav-item nav-icon" href="#" data-bs-toggle="dropdown">
-        <i class="bi bi-power text-danger"></i>
+        <i class="bi bi-power text-danger" title="Lựa chọn hành động"></i>
         </a>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow POWER_CONTROL">
           <form method="POST"	action="">

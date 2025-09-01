@@ -1,8 +1,8 @@
 {
-    "version": "1.0.57",
+    "version": "1.0.58",
     "projectName": "Program VBot Offline",
     "description": "Cơ cấu lại toàn bộ quy trình xử lý dữ liệu nhằm tăng tốc độ xử lý",
-    "releaseDate": "31/08/2025",
+    "releaseDate": "01/09/2025",
     "changes": [
         {
             "type": "feature",
