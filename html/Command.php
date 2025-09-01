@@ -1003,7 +1003,7 @@ if (isset($_POST['disable_vbot_api_external'])) {
   }
 
   if (isset($_POST['Stop_Service_Unnecessary_Processes'])) {
-  $CMD = 'dos2unix '.$VBot_Offline.'resource/Stop_Unnecessary_Processes.sh && sudo '.$VBot_Offline.'resource/Stop_Unnecessary_Processes.sh';
+  $CMD = 'sudo dos2unix '.$VBot_Offline.'resource/Stop_Unnecessary_Processes.sh && sudo '.$VBot_Offline.'resource/Stop_Unnecessary_Processes.sh';
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {die($SSH_CONNECT_ERROR);}
   if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
