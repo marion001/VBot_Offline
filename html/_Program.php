@@ -142,37 +142,31 @@
           $messages[] = "<font color=green>- Các giá trị đã được thay thế và lưu vào tệp: <b>'$configNewPath'</b></font><br/>";
           return true;
       }
-      
+
       #Hàm xóa thư mục và các file, thư mục con bên trong
-      function deleteDirectory($dir) {
-      	global $messages;
-          // Kiểm tra xem thư mục có tồn tại không
-          if (!is_dir($dir)) {
-      		$messages[] = "<font color=red>Thư mục $dir không tồn tại để xóa dữ liệu</font>";
-              return false;
-          }
-          // Mở thư mục
-          $files = scandir($dir);
-          foreach ($files as $file) {
-              // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
-              if ($file != '.' && $file != '..') {
-      			$filePath = rtrim($dir, '/') . '/' . $file;
-                  // Nếu là thư mục, gọi đệ quy
-                  if (is_dir($filePath)) {
-                      deleteDirectory($filePath);
-                  } else {
-                      // Xóa tệp
-                      unlink($filePath);
-                      //$messages[] = "<font color=red>- Đã xóa tệp: </font> <font color=blue>$filePath</font>";
-                  }
-              }
-          }
-          // Cuối cùng, xóa thư mục
-          rmdir($dir);
-          //$messages[] = "<font color=red>- Đã xóa thư mục: </font> <font color=blue>$dir</font>";
-          return true;
-      }
-      
+		function deleteDirectory($dir) {
+			global $messages;
+			if (!file_exists($dir)) {
+				$messages[] = "<font color=red>Thư mục hoặc tệp $dir không tồn tại để xóa dữ liệu</font>";
+				return false;
+			}
+			// Nếu là file hoặc symlink thì xóa luôn
+			if (is_file($dir) || is_link($dir)) {
+				return @unlink($dir);
+			}
+			// Nếu là thư mục thì duyệt bên trong
+			$files = scandir($dir);
+			foreach ($files as $file) {
+				if ($file == '.' || $file == '..') {
+					continue;
+				}
+				$filePath = rtrim($dir, '/') . '/' . $file;
+				deleteDirectory($filePath);
+			}
+			// Xóa thư mục rỗng sau khi đã xử lý hết bên trong
+			return @rmdir($dir);
+		}
+
       #Sao chép tệp có lựa chọn giữ lại file hoặc thư mục
       function copyFiles($source, $destination, $keepList = []) {
           global $messages;

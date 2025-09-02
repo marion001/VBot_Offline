@@ -1,8 +1,8 @@
 {
     "version": "1.0.58",
     "projectName": "WebUI VBot Offline",
-    "description": "Cơ cấu lại toàn bộ quy trình xử lý dữ liệu nhằm tăng tốc độ xử lý",
-    "releaseDate": "01/09/2025-2",
+    "description": "Sửa Lỗi Khôi Phục Dữ Liệu Từ Bản Sao Lưu, Cơ cấu lại toàn bộ quy trình xử lý dữ liệu nhằm tăng tốc độ xử lý",
+    "releaseDate": "02/09/2025",
     "changes": [
         {
             "type": "feature",

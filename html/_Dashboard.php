@@ -191,34 +191,30 @@
           closedir($dir);
           return true;
       }
-      
-      function deleteDirectory($dir) {
-      	global $messages;
-          // Kiểm tra xem thư mục có tồn tại không
-          if (!is_dir($dir)) {
-      		$messages[] = "<font color=red>Thư mục $dir không tồn tại để xóa dữ liệu</font>";
-              return false;
-          }
-          $files = scandir($dir);
-          foreach ($files as $file) {
-              // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
-              if ($file != '.' && $file != '..') {
-      			$filePath = rtrim($dir, '/') . '/' . $file; // loại bỏ dấu / ở cuối
-                  // Nếu là thư mục, gọi đệ quy
-                  if (is_dir($filePath)) {
-                      deleteDirectory($filePath);
-                  } else {
-                      unlink($filePath);
-                      //$messages[] = "<font color=red>- Đã xóa tệp: </font> <font color=blue>$filePath</font>";
-                  }
-              }
-          }
-          //xóa thư mục
-          rmdir($dir);
-          //$messages[] = "<font color=red>- Đã xóa thư mục: </font> <font color=blue>$dir</font>";
-          return true;
-      }
-      
+
+		function deleteDirectory($dir) {
+			global $messages;
+			if (!file_exists($dir)) {
+				$messages[] = "<font color=red>Thư mục hoặc tệp $dir không tồn tại để xóa dữ liệu</font>";
+				return false;
+			}
+			// Nếu là file hoặc symlink thì xóa luôn
+			if (is_file($dir) || is_link($dir)) {
+				return @unlink($dir);
+			}
+			// Nếu là thư mục thì duyệt bên trong
+			$files = scandir($dir);
+			foreach ($files as $file) {
+				if ($file == '.' || $file == '..') {
+					continue;
+				}
+				$filePath = rtrim($dir, '/') . '/' . $file;
+				deleteDirectory($filePath);
+			}
+			// Xóa thư mục rỗng sau khi đã xử lý hết bên trong
+			return @rmdir($dir);
+		}
+
       #function Sao lưu Giao diện Web UI
       function backup_interface($Exclude_Files_Folder, $Exclude_File_Format){
       
