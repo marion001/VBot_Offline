@@ -236,6 +236,14 @@
             {
                 "name": "Tiền Phong",
                 "link": "https://tienphong.vn/podcast/"
+            },
+            {
+                "name": "Tiền Phong Xã Hội",
+                "link": "https://tienphong.vn/xa-hoi-tin-tuc/"
+            },
+            {
+                "name": "Tiền Phong Chính Trị",
+                "link": "https://tienphong.vn/chinh-tri/"
             }
         ],
         "podcast": {
