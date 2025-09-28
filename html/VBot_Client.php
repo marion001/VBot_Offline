@@ -136,7 +136,7 @@ if ($Config['contact_info']['user_login']['active']) {
             <div class="modal-header d-flex justify-content-between align-items-center w-100">
                 <h5 class="modal-title" id="clientConfigModalLabel">Cấu Hình Client</h5>
                 <div class="d-flex align-items-center">
-                    <i class="bi bi-arrow-repeat refresh-btn pe-3 text-success" title="Tải lại dữ liệu Client"></i>
+                    <i id="refreshBtn" data-ip-address="" class="bi bi-arrow-repeat refresh-btn pe-3 text-success" title="Tải lại dữ liệu Client"></i>
                     <i class="bi bi-arrows-fullscreen fullscreen-toggle pe-3 text-primary" title="Phóng to/Thu nhỏ"></i>
                     <i class="bi bi-x-lg text-danger" title="Đóng" data-bs-dismiss="modal"></i>
                 </div>
@@ -289,17 +289,14 @@ function displayDeviceData(data) {
         '</thead>' +
         '<tbody>';
     data.forEach(function(device, index) {
-        const isS3 = (device.client_name || '').toLowerCase().includes('s3');
-        const versionUrl = isS3 
-            ? 'https://api.github.com/repos/marion001/VBot_Client_Offline/contents/ESP32S3/bin/Version.json' 
-            : 'https://api.github.com/repos/marion001/VBot_Client_Offline/contents/ESP32/bin/Version.json';
-        tableHTML += 
+        const versionUrl = device.VBOT_CHECK_API_VERSION;
+        tableHTML +=
             '<tr>' +
             '<td style="text-align: center; vertical-align: middle;"><span class="status-dot" id="status-' + index + '"></span>' + (device.client_name || '') + '</td>' +
             '<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.ip_address || '') + '" target="_blank">' + (device.ip_address || '') + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
             '<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.server.vbot_server_ip || '') + '" target="_blank">' + (device.server.vbot_server_ip || '') + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
             '<td style="text-align: center; vertical-align: middle;" id="device-version-' + index + '">' + (device.version || '') + '</td>' +
-            '<td style="text-align: center; vertical-align: middle;">' + (device.chip_model || '') + '</td>' +
+            '<td style="text-align: center; vertical-align: middle;">' + (device.chip_model || '') + ' ' + (device.chip_suffix || '') +'</td>' +
             '<td style="text-align: center; vertical-align: middle;">' +
             '<button class="btn btn-success config-btn" data-ip="' + (device.ip_address || '') + '" data-bs-toggle="modal" data-bs-target="#clientConfigModal" title="Cấu hình"><i class="bi bi-gear-wide-connected"></i></button> ' +
             '<button class="btn btn-info ping-btn" data-ip="' + (device.ip_address || '') + '" data-index="' + index + '" title="Kiểm tra trạng thái"><i class="bi bi-wifi"></i></button> ' +
@@ -379,28 +376,28 @@ function showConfigModal(device) {
         '<table class="config-table table table-bordered border-primary">' +
         '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;" class="text-danger">Thông Tin Client</th></tr></thead>' +
         '<tbody>' +
-        '<tr><th>Tên Thiết Bị (Tối đa 25 ký tự):</th><td><input type="text" class="form-control client_name border-success" value="' + (device.client_name || '') + '"></td></tr>' +
+        '<tr><th>Tên Client: (Tối đa 25 ký tự):</th><td><input type="text" class="form-control client_name border-success" value="' + (device.client_name || '') + '"></td></tr>' +
         '<tr><th>Địa Chỉ IP:</th><td><a href="http://' + (device.ip_address || '') + '" target="_blank">' + (device.ip_address || '') + ' <i class="bi bi-box-arrow-up-right"></i></a></td></tr>' +
+		'<tr><th>Tên WiFi (SSID):</th><td>' + (device.wifi_name || '') + '</td></tr>' +
         '<tr><th>Phiên Bản VBot Client (Build Date):</th><td class="text-danger">' + (device.version || '') + '</td></tr>' +
-        '<tr><th>Chip Model:</th><td>' + (device.chip_model || '') + '</td></tr>' +
+        '<tr><th>Chip Model:</th><td>' + (device.chip_model || '') + ' ' + (device.chip_suffix || '') + '</td></tr>' +
         '<tr><th>Firmware URL:</th><td><a href="' + (device.firmware_url || '') + '" target="_blank">' + (device.firmware_url || '') + '</a></td></tr>' +
         '</tbody></table>' +
 
         '<table class="config-table table table-bordered border-primary">' +
         '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;" class="text-danger">Cấu Hình Kết Nối Tới Server VBot</th></tr></thead>' +
         '<tbody>' +
-        '<tr><th>Địa Chỉ IP VBot Server:</th><td><input type="text" class="form-control vbot_server_ip border-success" value="' + (device.server?.vbot_server_ip || '') + '"></td></tr>' +
-        '<tr><th>VBot Server Socket Port:</th><td><input type="number" class="form-control vbot_server_port border-success" value="' + (device.server?.vbot_server_port || '') + '"></td></tr>' +
+        '<tr><th>Địa chỉ IP Server:</th><td><input type="text" class="form-control vbot_server_ip border-success" value="' + (device.server?.vbot_server_ip || '') + '"></td></tr>' +
+        '<tr><th>Cổng Port Server:</th><td><input type="number" class="form-control vbot_server_port border-success" value="' + (device.server?.vbot_server_port || '') + '" min="1" step="1"></td></tr>' +
         '</tbody></table>' +
 
         '<table class="config-table table table-bordered border-primary">' +
-        '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;" class="text-danger">I2S Cấu hình GPIO cho Mic INMP441 và Audio MAX98357</th></tr></thead>' +
+        '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;" class="text-danger">I2S Cấu hình GPIO Mic INMP441</th></tr></thead>' +
         '<tbody>' +
-        '<tr><th>INMP441=SCK / MAX98357=BCLK GPIO Pin:</th><td><input type="number" class="form-control i2s_sck_bclk_gpio border-success" value="' + (device.i2s_config?.i2s_sck_bclk_gpio || '') + '"></td></tr>' +
-        '<tr><th>INMP441=WS / MAX98357=LRC GPIO Pin:</th><td><input type="number" class="form-control i2s_ws_lrc_gpio border-success" value="' + (device.i2s_config?.i2s_ws_lrc_gpio || '') + '"></td></tr>' +
-        '<tr><th>INMP441=SD GPIO Pin:</th><td><input type="number" class="form-control i2s_sd_gpio border-success" value="' + (device.i2s_config?.i2s_sd_gpio || '') + '"></td></tr>' +
-        '<tr><th>MAX98357=DIN GPIO Pin:</th><td><input type="number" class="form-control i2s_din_gpio border-success" value="' + (device.i2s_config?.i2s_din_gpio || '') + '"></td></tr>' +
-        '<tr><th>Khuếch Đại Mic Gain (5.0->50.0):</th><td><input type="number" step="0.1" class="form-control i2s_gain_mic border-success" value="' + (device.i2s_config?.i2s_gain_mic || '') + '"></td></tr>' +
+        '<tr><th>INMP441=SCK Chân GPIO:</th><td><input type="number" class="form-control i2s_sck_gpio border-success" value="' + (device.i2s_config?.i2s_sck_gpio || '') + '" min="1" max="100" step="1"></td></tr>' +
+        '<tr><th>INMP441=WS Chân GPIO:</th><td><input type="number" class="form-control i2s_ws_gpio border-success" value="' + (device.i2s_config?.i2s_ws_gpio || '') + '" min="1" max="100" step="1"></td></tr>' +
+        '<tr><th>INMP441=SD Chân GPIO:</th><td><input type="number" class="form-control i2s_sd_gpio border-success" value="' + (device.i2s_config?.i2s_sd_gpio || '') + '" min="1" max="100" step="1"></td></tr>' +
+        '<tr><th>Khuếch Đại Mic Gain (5.0->50.0):</th><td><input type="number" class="form-control i2s_gain_mic border-success" value="' + (device.i2s_config?.i2s_gain_mic || '') + '" step="0.1" min="1" max="100"></td></tr>' +
         '<tr><th>Chọn Kênh Mic:</th><td>' +
 		'<select class="form-select i2s_mic_channel border-success">' +
 		'<option value="left" ' + (device.i2s_config?.i2s_mic_channel === 'left' ? 'selected' : '') + '>Mic Trái (Left: L/R -> GND)</option>' +
@@ -408,7 +405,15 @@ function showConfigModal(device) {
 		'<option value="both" ' + (device.i2s_config?.i2s_mic_channel === 'both' ? 'selected' : '') + '>Cả 2 Mic</option>' +
 		'</select>' +
 		'</td></tr>' +
-		'<tr><th>Âm Lượng Loa (%):</th><td><input type="number" step="1" min="0" max="100" class="form-control i2s_speaker_volume border-success" value="' + (device.i2s_config?.i2s_speaker_volume || '') + '"></td></tr>' +
+        '</tbody></table>' +
+
+        '<table class="config-table table table-bordered border-primary">' +
+        '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;" class="text-danger">I2S Cấu hình GPIO Âm Thanh MAX98357</th></tr></thead>' +
+        '<tbody>' +
+        '<tr><th>MAX98357=BCLK Chân GPIO:</th><td><input type="number" class="form-control i2s_bclk_gpio border-success" value="' + (device.i2s_config?.i2s_bclk_gpio || '') + '" min="1" max="100" step="1"></td></tr>' +
+        '<tr><th>MAX98357=LRC Chân GPIO:</th><td><input type="number" class="form-control i2s_lrc_gpio border-success" value="' + (device.i2s_config?.i2s_lrc_gpio || '') + '" min="1" max="100" step="1"></td></tr>' +
+        '<tr><th>MAX98357=DIN Chân GPIO:</th><td><input type="number" class="form-control i2s_din_gpio border-success" value="' + (device.i2s_config?.i2s_din_gpio || '') + '" min="1" max="100" step="1"></td></tr>' +
+        '<tr><th>Âm Lượng (%)</th><td><input type="number" step="1" min="0" max="100" class="form-control i2s_speaker_volume border-success" value="' + (device.i2s_config?.i2s_speaker_volume || '') + '" min="0" max="100" step="1"></td></tr>' +
         '</tbody></table>' +
 
         '<table class="config-table table table-bordered border-primary">' +
@@ -427,37 +432,86 @@ function showConfigModal(device) {
 		'</select>' +
 		'</td></tr>' +
         '<tr><th>Màu LED Think/WakeUP (Hex):</th><td><div class="input-group mb-3"><input type="text" class="form-control led_think_color border-success" value="' + (device.led_config?.led_think_color || '') + '"><input type="color" class="form-control-color color-picker border-success" value="' + (device.led_config?.led_think_color ? '#' + device.led_config.led_think_color : '#000000') + '"></div></td></tr>' +
-        '</tbody></table>' +
+        '<tr><th>Kiểm Tra, Test Hiệu Ứng LED:</th><td><div class="input-group mb-3"><select id="ledEffect" class="form-select border-success">'+
+		'<option value="" selected>Chọn Hiệu Ứng LED Kiểm Tra</option><option value="LED_OFF">Tắt LED (LED_OFF)</option><option value="LED_THINK">Khi Được Đánh Thức (LED_THINK)</option>' +
+		'<option value="LED_LOADING">Khi Xử Lý Dữ Liệu (LED_LOADING)</option><option value="LED_SPEAK">Khi Phát Âm Thanh (LED_SPEAK)</option><option value="LED_ERROR">Khi Có Lỗi (LED_ERROR)</option>' +
+		'<option value="LED_AP_MODE">Khi Lỗi Kết Nối Wifi (LED_AP_MODE)</option><option value="LED_MIC_OFF">Khi Tắt Mic (LED_MIC_OFF)</option><option value="LED_WAIT_THINK">Khi Chờ Kết Nối Tới Server (LED_WAIT_THINK)</option>' +
+		'<option value="LED_STARTUP">Khi Khởi Động (LED_STARTUP)</option><option value="LED_VOLUME">Khi Âm Lượng Thay Đổi (LED_VOLUME)</option></select>' +
+		'<button type="button" class="btn btn-success" onclick="testLed(\'' + (device.ip_address || '') + '\')">Kiểm Tra</button></div></td></tr>' +
+		'</tbody></table>' +
 
-		'<table class="config-table table table-bordered border-primary">' +
-        '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;" class="text-danger">Cấu Hình Sử Dụng Nút Nhấn (Button)</th></tr></thead>' +
-        '<tbody>' +
-		'<tr><th>Kích Hoạt Sử Dụng Nút Nhấn:</th><td colspan="2" style="text-align: center; vertical-align: middle;"><div class="form-switch">' +
-		'<input type="checkbox" class="form-check-input button_active border-success" ' + (device.button.button_active ? 'checked' : '') + '></div></td></tr>' +
-        '<tr><th>Nút Nhấn Mic (Bật/Tắt Sử Dụng WakeUP Bằng Giọng Nói) GPIO Pin:</th><td colspan="2" style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button_mic_gpio border-success" value="' + (device.button?.button_mic_gpio || '') + '"></td></tr>' +
-        '<tr><th>Nút Nhấn WakeUp (Đánh Thức Bằng Nút Nhấn) GPIO Pin:</th><td colspan="2" style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button_wakeup_gpio border-success" value="' + (device.button?.button_wakeup_gpio || '') + '"></td></tr>' +
-        '<tr><th>Thời Gian Nhấn (ms) 1000=1s:</th><td colspan="2" style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button_debounce_delay border-success" value="' + (device.button?.button_debounce_delay || '') + '"></td></tr>' +
-        '<tr><th colspan="3" style="text-align: center; vertical-align: middle;" class="text-danger">Cấu Hình Nhấn Giữ Nút</th></tr>' +
-		'<tr><th style="text-align: center; vertical-align: middle;" class="text-danger">Chức Năng/Cấu Hình Nhấn Giữ</th><th style="text-align: center; vertical-align: middle;" class="text-danger">Cấu Hình Nhấn Giữ Nút WakeUp</th>' +
-		'<th style="text-align: center; vertical-align: middle;" class="text-danger">Cấu Hình Nhấn Giữ Nút MIC</th></tr>' +
-        '<tr><th>Kích Hoạt Nhấn Giữ:</th>' +
-            '<td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input button_wakeup_long_press_active border-success" ' + (device.button?.button_wakeup_long_press_active ? 'checked' : '') + '></div></td>' +
-            '<td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input button_mic_long_press_active border-success" ' + (device.button?.button_mic_long_press_active ? 'checked' : '') + '></div></td></tr>' +
-        '<tr><th>Hành Động Thực Hiện Nhấn Giữ:</th>' +
-            '<td style="text-align: center; vertical-align: middle;"><select class="form-select button_wakeup_long_press_action border-success">' +
-                '<option value="0" ' + (device.button?.button_wakeup_long_press_action === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
-                '<option value="1" ' + (device.button?.button_wakeup_long_press_action === 1 ? 'selected' : '') + '>Khởi Động Lại</option>' +
-                '<option value="2" ' + (device.button?.button_wakeup_long_press_action === 2 ? 'selected' : '') + '>Dừng Phát Âm Thanh</option>' +
-            '</select></td>' +
-            '<td style="text-align: center; vertical-align: middle;"><select class="form-select button_mic_long_press_action border-success">' +
-                '<option value="0" ' + (device.button?.button_mic_long_press_action === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
-                '<option value="1" ' + (device.button?.button_mic_long_press_action === 1 ? 'selected' : '') + '>Khởi Động Lại</option>' +
-                '<option value="2" ' + (device.button?.button_mic_long_press_action === 2 ? 'selected' : '') + '>Dừng Phát Âm Thanh</option>' +
-            '</select></td></tr>' +
-        '<tr><th>Thời Gian Giữ Nút (ms) 1000=1s:</th>' +
-            '<td style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button_wakeup_long_press_time border-success" value="' + (device.button?.button_wakeup_long_press_time || '') + '"></td>' +
-            '<td style="text-align: center; vertical-align: middle;"><input type="number" class="form-control button_mic_long_press_time border-success" value="' + (device.button?.button_mic_long_press_time || '') + '"></td></tr>' +
-        '</tbody></table>' +
+'<table class="config-table table table-bordered border-primary"><tbody><tr><td colspan="6" class="text-danger" style="text-align:center;"><b>Cấu Hình Sử Dụng Nút Nhấn (Button)</b></td></tr>' +
+'<tr><td colspan="3"><b>Kích Hoạt Sử Dụng Nút Nhấn:</b></td><td colspan="3"><div class="form-switch">' +
+'<input type="checkbox" class="form-check-input button_active border-success" ' + (device.button?.button_active ? 'checked' : '') + '></div></td></tr>' +
+'<tr><td colspan="3"><b>Chọn Kiểu loại nút nhấn:</b></td><td colspan="3">' +
+'<select class="form-select button_push_btn_type border-success">' +
+'<option value="0" ' + (device.button?.button_push_btn_type === false ? 'selected' : '') + '>Nút Nhấn Dạng Xoay Encoder (KY-040 RV09 EC11)</option>' +
+'<option value="1" ' + (device.button?.button_push_btn_type === true ? 'selected' : '') + '>Nút Nhấn Thường (Nhấn Nhả)</option>' +
+'</select></td></tr>' +
+'<tr><td colspan="3"><b>Thời gian nhấn nhả (ms):</b></td><td colspan="3"><input type="number" class="form-control button_debounce_delay border-success" value="' + (device.button?.button_debounce_delay || '') + '" min="10" step="5" max="1000"></td></tr>' +
+'<tr><td colspan="6">' +
+'<table class="config-table table table-bordered border-primary"><tbody>' +
+'<tr><th colspan="6" style="text-align:center;">Cấu Hình Nếu Sử Dụng Nút Nhấn Thường (Dạng Nhấn Nhả)</th></tr>' +
+'<tr><th colspan="2" style="text-align:center;">Mức Kích Hoạt Nút Nhấn:</th><td colspan="2">' +
+'<select class="form-select bt_active_high border-success">' +
+'<option value="0" ' + (device.button?.button_active_high === false ? 'selected' : '') + '>Mức Thấp (GPIO với GND) Mặc Định</option>' +
+'<option value="1" ' + (device.button?.button_active_high === true ? 'selected' : '') + '>Mức Cao (GPIO với 3.3->5v, Mạch VBot AIO i2s)</option>' +
+'</select>' +
+'</td><th colspan="2" class="text-danger"><center>Thiết Lập Nhấn Giữ</center></th></tr>' +
+'<tr class="text-danger"><th><center>Tên Nút Nhấn</center></th><th><center>Kích Hoạt</center></th><th><center>Chân GPIO</center></th><th><center>Nhấn Giữ</center></th>' +
+'<th><center>Hành Động Giữ</center></th><th><center>Thời Gian Giữ (ms)</center></th></tr>' +
+'<tr><th style="text-align:center;">WakeUP:</th><td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input button_wake_active border-success" ' + (device.button.button_wake_active ? 'checked' : '') + '></div></td>' +
+'<td><input type="number" class="form-control button_wakeup_gpio border-success" value="' + (device.button?.button_wakeup_gpio || '') + '" min="0" step="1" max="100"></td>' +
+'<td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input button_wakeup_long_press_active border-success" ' + (device.button.button_wakeup_long_press_active ? 'checked' : '') + '></div></td>' +
+'<td><select class="form-select button_wakeup_long_press_action border-success">' +
+'<option value="0" ' + (device.button?.button_wakeup_long_press_action === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
+'<option value="1" ' + (device.button?.button_wakeup_long_press_action === 1 ? 'selected' : '') + '>Khởi động lại</option>' +
+'<option value="2" ' + (device.button?.button_wakeup_long_press_action === 2 ? 'selected' : '') + '>Dừng Phát Âm Thanh</option></select></td>' +
+'<td><input type="number" class="form-control button_wakeup_long_press_time border-success" value="' + (device.button?.button_wakeup_long_press_time || '') + '" min="500" step="10" max="60000"></td></tr><tr>' +
+'<th style="text-align:center;">MIC:</th><td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input button_mic_active border-success" ' + (device.button.button_mic_active ? 'checked' : '') + '></div></td>' +
+'<td><input type="number" class="form-control button_mic_gpio border-success" value="' + (device.button?.button_mic_gpio || '') + '" min="0" step="1" max="100"></td>' +
+'<td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input button_mic_long_press_active border-success" ' + (device.button.button_mic_long_press_active ? 'checked' : '') + '></div></td>' +
+'<td><select class="form-select button_mic_long_press_action border-success">' +
+'<option value="0" ' + (device.button?.button_mic_long_press_action === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
+'<option value="1" ' + (device.button?.button_mic_long_press_action === 1 ? 'selected' : '') + '>Khởi động lại</option>' +
+'<option value="2" ' + (device.button?.button_mic_long_press_action === 2 ? 'selected' : '') + '>Dừng Phát Âm Thanh</option></select></td>' +
+'<td><input type="number" class="form-control button_mic_long_press_time border-success" value="' + (device.button?.button_mic_long_press_time || '') + '" min="500" step="10" max="60000"></td></tr>' +
+'<tr><th style="text-align:center;">UP:</th>' +
+'<td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input button_up_active border-success" ' + (device.button.button_up_active ? 'checked' : '') + '></div></td>' +
+'<td><input type="number" class="form-control button_up_gpio border-success" value="' + (device.button?.button_up_gpio || '') + '" min="0" step="1" max="100"></td>' +
+'<td style="text-align:center;">' +
+'<div class="form-switch"><input type="checkbox" class="form-check-input upLongPressActive border-success" id="upLongPressActive" name="upLongPressActive" checked disabled></div></td>' +
+'<th style="text-align:center;">Volume = 100%</th><th style="text-align:center;">2000(ms)</th></tr><tr>' +
+'<th style="text-align:center;">DOWN:</th><td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input button_down_active border-success" ' + (device.button.button_down_active ? 'checked' : '') + '></div></td>' +
+'<td><input type="number" class="form-control button_down_gpio border-success" value="' + (device.button?.button_down_gpio || '') + '" min="0" step="1" max="100"></td>' +
+'<td style="text-align:center;"><div class="form-switch"><input type="checkbox" class="form-check-input downLongPressActive border-success" id="downLongPressActive" name="downLongPressActive" checked disabled></div></td>' +
+'<th style="text-align:center;">Volume = 0%</th><th style="text-align:center;">2000(ms)</th></tr></tbody></table></td></tr>' +
+
+'<tr><td colspan="6"><table class="config-table table table-bordered border-primary"><tbody><tr><th colspan="6" class="text-danger" style="text-align:center;">Cấu Hình Nếu Sử Dụng Nút Nhấn Dạng Xoay Encoder</th></tr>' +
+'<tr class="text-danger"><th colspan="1"><center>Nút Nhấn</center></th><th colspan="1"><center>Chân GPIO</center></th>' +
+'<th colspan="2"><center>Cấu Hình Nhấn Nhả</center></th><th colspan="2"><center>Cấu Hình Nhấn Giữ</center></th></tr>' +
+'<tr><th colspan="1" style="text-align:center;">ENCODER CLK:</th><td colspan="1">' +
+'<input type="number" class="form-control button_encd_gpio_clk border-success" value="' + (device.button?.button_encd_gpio_clk || '') + '" min="0" step="1" max="100"></td>' +
+
+'<th style="text-align:center;">Hành Động:</th>' +
+'<td><select class="form-select button_encd_pres_opt border-success">' +
+'<option value="2" ' + (device.button?.button_encd_pres_opt === 2 ? 'selected' : '') + '>Đánh Thức (WakeUP)</option>' +
+'<option value="0" ' + (device.button?.button_encd_pres_opt === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
+'<option value="3" ' + (device.button?.button_encd_pres_opt === 3 ? 'selected' : '') + '>Dừng Phát Âm Thanh</option>' +
+'<option value="1" ' + (device.button?.button_encd_pres_opt === 1 ? 'selected' : '') + '>Restart ESP</option></select></td>' +
+
+'<th style="text-align:center;">Hành Động:</th>' +
+'<td><select class="form-select button_encd_l_pre_opt border-success">' +
+'<option value="2" ' + (device.button?.button_encd_l_pre_opt === 2 ? 'selected' : '') + '>Đánh Thức (WakeUP)</option>' +
+'<option value="0" ' + (device.button?.button_encd_l_pre_opt === 0 ? 'selected' : '') + '>Bật/Tắt Mic</option>' +
+'<option value="3" ' + (device.button?.button_encd_l_pre_opt === 3 ? 'selected' : '') + '>Dừng Phát Âm Thanh</option>' +
+'<option value="1" ' + (device.button?.button_encd_l_pre_opt === 1 ? 'selected' : '') + '>Restart ESP</option></select></td></tr>' +
+'<tr><th colspan="1" style="text-align:center;">ENCODER DT:</th>' +
+'<td colspan="1"><input type="number" class="form-control button_encd_gpio_dt border-success" value="' + (device.button?.button_encd_gpio_dt || '') + '" min="0" step="1" max="100"></td>' +
+'<td colspan="2" style="text-align:center;">/</td><th style="text-align:center;">Thời Gian Giữ (ms):</th>' +
+'<td><input type="number" class="form-control button_encd_long_prs border-success" value="' + (device.button?.button_encd_long_prs || '') + '" min="500" step="10" max="60000"></td></tr><tr>' +
+'<th colspan="1" style="text-align:center;">ENCODER SW:</th><td colspan="1"><input type="number" class="form-control button_encd_gpio_sw border-success" value="' + (device.button?.button_encd_gpio_sw || '') + '" min="0" step="1" max="100"></td>' +
+'<td colspan="2" style="text-align:center;">/</td><td colspan="2" style="text-align:center;">/</td></tr></tbody></table></td></tr></tbody></table>' +
 
         '<table class="config-table table table-bordered border-primary">' +
         '<thead><tr><th colspan="2" style="text-align: center; vertical-align: middle;" class="text-danger">Thiết Lập Tùy Chọn Khác</th></tr></thead>' +
@@ -465,11 +519,11 @@ function showConfigModal(device) {
         '<tr><th>Hiển Thị Logs Cổng Serial:</th><td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input logs_serial_active border-success" ' + (device.other_settings.logs_serial_active ? 'checked' : '') + '></div></td></tr>' +
         '<tr><th>Kích Hoạt Chế độ hội thoại:</th><td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input conversation_active border-success" ' + (device.other_settings.conversation_active ? 'checked' : '') + '></div></td></tr>' +
         '<tr><th>Âm Thanh Khi Khởi Động:</th><td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input sound_startup border-success" ' + (device.other_settings.sound_startup ? 'checked' : '') + '></div></td></tr>' +
-        '<tr><th>Kích Hoạt Mic (Mic Mute On/Off):</th><td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input mic_mutex_active border-success" ' + (device.other_settings.mic_mutex_active ? 'checked' : '') + '></div></td></tr>' +
+        '<tr><th>Bật, Tắt Mic:</th><td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input mic_mutex_active border-success" ' + (device.other_settings.mic_mutex_active ? 'checked' : '') + '></div></td></tr>' +
         '<tr><th>Kích Hoạt Sử Dụng Loa:</th><td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input speaker_active border-success" ' + (device.other_settings.speaker_active ? 'checked' : '') + '></div></td></tr>' +
         '</tbody></table>' +
 
-		'<table class="config-table table table-bordered border-primary"><tbody><tr><th colspan="2" class="text-danger"><center>Music Player URL Local http .mp3</center></th></tr>' +
+		'<table class="config-table table table-bordered border-primary"><tbody><tr><th colspan="2" class="text-danger"><center>Media Player (Thử nghiệm/Experiment)</center></th></tr>' +
 		'<tr><th>Play Audio Link/URL <i class="bi bi-question-circle-fill" onclick="show_message(\'Chỉ hỗ trợ tệp âm thanh .mp3 và là URL Local trong mạng nội bộ, ví dụ URL: http://192.168.14.194/1.mp3\')"></i>:</th><td><div class="input-group mb-3"><input class="form-control border-success" type="text" id="audioUrl" placeholder="Nhập Link/URL Local âm thanh .mp3">' +
 		'<button type="button" title="Phát âm thanh từ Link/URL Local" class="btn btn-success border-success" onclick="playAudioFromUrl(\'' + (device.ip_address || '') + '\', \'\')"><i class="bi bi-play-circle"></i></button></div></td></tr>' +
 		'</tbody></table>' +
@@ -491,13 +545,11 @@ function showConfigModal(device) {
 		'<button type="button" class="btn btn-primary" onclick="downloadConfig(\'' + (device.ip_address || '') + '\')"><i class="bi bi-download"></i> Tải Xuống Tệp Cấu Hình .json</button>' +
         '</div></td></tr>' +
         '</tbody></table><hr/>' +
-
         '<center>' +
             '<button type="button" class="btn btn-warning" onclick="ctrl_act_vbot_client(\'' + (device.ip_address || '') + '\', \'restart_esp\')"><i class="bi bi-arrow-counterclockwise"></i> Restart ESP</button>' +
             ' <button type="button" class="btn btn-info" onclick="ctrl_act_vbot_client(\'' + (device.ip_address || '') + '\', \'reset_wifi_esp\')"><i class="bi bi-wifi-off"></i> Reset Cấu Hình Wifi</button>' +
             ' <button type="button" class="btn btn-danger" onclick="ctrl_act_vbot_client(\'' + (device.ip_address || '') + '\', \'cleanNVS\')"> <i class="bi bi-recycle"></i> Reset Toàn Bộ Dữ Liệu</button>' +
         '</center>';
-
     document.getElementById('modalContent').innerHTML = modalContent;
     const textInput = document.querySelector('.led_think_color');
     const colorInput = document.querySelector('.color-picker');
@@ -532,10 +584,17 @@ function showConfigModal(device) {
         updateFullscreenIcon();
     };
     updateFullscreenIcon();
-    const refreshBtn = document.querySelector('.refresh-btn');
-    refreshBtn.onclick = function() {
-        loading_data_client(device.ip_address, 1000);
-    };
+
+const refreshBtn = document.getElementById('refreshBtn');
+if (refreshBtn) {
+    refreshBtn.dataset.ipAddress = device.ip_address;
+    const newRefreshBtn = refreshBtn.cloneNode(true);
+    refreshBtn.replaceWith(newRefreshBtn);
+    newRefreshBtn.addEventListener('click', () => {
+        const ip = newRefreshBtn.dataset.ipAddress;
+        loading_data_client(ip, 1000);
+    });
+}
 	//lấy dữ liệu âm thanh local đẩy lên bảng Client
 	fetchMusicList(device.ip_address);
 }
@@ -633,41 +692,60 @@ function loading_data_client(ip_address, time_out = 10000) {
 //Lưu cấu hình Config theo từng Client
 function saveConfig(ip_address) {
     loading('show');
+
     const config = {
         ip_address: ip_address,
         client_name: document.querySelector('.client_name').value,
         server: {
-            vbot_server_ip: document.querySelector('.vbot_server_ip').value,
+            vbot_server_ip: document.querySelector('.vbot_server_ip').value || '127.0.0.1',
             vbot_server_port: parseInt(document.querySelector('.vbot_server_port').value) || 0
         },
         i2s_config: {
-            i2s_sck_bclk_gpio: parseInt(document.querySelector('.i2s_sck_bclk_gpio').value) || 0,
-            i2s_ws_lrc_gpio: parseInt(document.querySelector('.i2s_ws_lrc_gpio').value) || 0,
-            i2s_sd_gpio: parseInt(document.querySelector('.i2s_sd_gpio').value) || 0,
-            i2s_din_gpio: parseInt(document.querySelector('.i2s_din_gpio').value) || 0,
-            i2s_gain_mic: parseFloat(document.querySelector('.i2s_gain_mic').value) || 0,
-            i2s_mic_channel: document.querySelector('.i2s_mic_channel').value || 'left',
-            i2s_speaker_volume: parseFloat(document.querySelector('.i2s_speaker_volume').value) || 0
+            // INMP441
+            i2s_sck: parseInt(document.querySelector('.i2s_sck_gpio').value) || 0,
+            i2s_ws: parseInt(document.querySelector('.i2s_ws_gpio').value) || 0,
+            i2s_sd: parseInt(document.querySelector('.i2s_sd_gpio').value) || 0,
+            gain_mic: parseFloat(document.querySelector('.i2s_gain_mic').value) || 20,
+            i2s_slot_mask: document.querySelector('.i2s_mic_channel').value || 'left',
+            // MAX98357
+            i2s_bclk: parseInt(document.querySelector('.i2s_bclk_gpio').value) || 0,
+            i2s_lrc: parseInt(document.querySelector('.i2s_lrc_gpio').value) || 0,
+            i2s_dout: parseInt(document.querySelector('.i2s_din_gpio').value) || 0,
+            volume_level: parseFloat(document.querySelector('.i2s_speaker_volume').value) || 0
         },
         led_config: {
             led_active: document.querySelector('.led_active').checked,
             led_gpio: parseInt(document.querySelector('.led_gpio').value) || 0,
-            led_number: parseInt(document.querySelector('.led_number').value) || 0,
-            led_brightness: parseInt(document.querySelector('.led_brightness').value) || 0,
+            led_number: parseInt(document.querySelector('.led_number').value) || 12,
+            led_brightness: parseInt(document.querySelector('.led_brightness').value) || 255,
             led_loading_effect: parseInt(document.querySelector('.led_loading_effect').value) || 0,
-            led_think_color: document.querySelector('.led_think_color').value
+            led_think_color: document.querySelector('.led_think_color').value || '0000FF'
         },
         button: {
             button_active: document.querySelector('.button_active').checked,
+            button_push_btn_type: document.querySelector('.button_push_btn_type').value,
+            bt_active_high: document.querySelector('.bt_active_high').value,
+            button_debounce_delay: parseInt(document.querySelector('.button_debounce_delay').value) || 100,
+            button_wake_active: document.querySelector('.button_wake_active').checked,
+            button_mic_active: document.querySelector('.button_mic_active').checked,
+            button_up_active: document.querySelector('.button_up_active').checked,
+            button_down_active: document.querySelector('.button_down_active').checked,
             button_wakeup_gpio: parseInt(document.querySelector('.button_wakeup_gpio').value) || 0,
             button_mic_gpio: parseInt(document.querySelector('.button_mic_gpio').value) || 0,
-            button_debounce_delay: parseInt(document.querySelector('.button_debounce_delay').value) || 200,
+            button_up_gpio: parseInt(document.querySelector('.button_up_gpio').value) || 0,
+            button_down_gpio: parseInt(document.querySelector('.button_down_gpio').value) || 0,
             button_wakeup_long_press_active: document.querySelector('.button_wakeup_long_press_active').checked,
             button_mic_long_press_active: document.querySelector('.button_mic_long_press_active').checked,
-            button_wakeup_long_press_action: parseInt(document.querySelector('.button_wakeup_long_press_action').value) || 0,
-            button_mic_long_press_action: parseInt(document.querySelector('.button_mic_long_press_action').value) || 0,
-            button_wakeup_long_press_time: parseInt(document.querySelector('.button_wakeup_long_press_time').value) || 200,
-            button_mic_long_press_time: parseInt(document.querySelector('.button_mic_long_press_time').value) || 2000
+            button_wakeup_long_press_action: parseInt(document.querySelector('.button_wakeup_long_press_action').value),
+            button_mic_long_press_action: parseInt(document.querySelector('.button_mic_long_press_action').value),
+            button_wakeup_long_press_time: parseInt(document.querySelector('.button_wakeup_long_press_time').value) || 2000,
+            button_mic_long_press_time: parseInt(document.querySelector('.button_mic_long_press_time').value) || 2000,
+            button_encd_gpio_clk: parseInt(document.querySelector('.button_encd_gpio_clk').value) || 0,
+            button_encd_gpio_dt: parseInt(document.querySelector('.button_encd_gpio_dt').value) || 0,
+            button_encd_gpio_sw: parseInt(document.querySelector('.button_encd_gpio_sw').value) || 0,
+			button_encd_pres_opt: parseInt(document.querySelector('.button_encd_pres_opt').value),
+            button_encd_l_pre_opt: parseInt(document.querySelector('.button_encd_l_pre_opt').value),
+            button_encd_long_prs: parseInt(document.querySelector('.button_encd_long_prs').value) || 2000
         },
         other_settings: {
             logs_serial_active: document.querySelector('.logs_serial_active').checked,
@@ -678,112 +756,126 @@ function saveConfig(ip_address) {
         }
     };
 
-    // Kiểm tra dữ liệu đầu vào
+    // Kiểm tra dữ liệu bắt buộc
     if (!config.client_name || !config.server.vbot_server_ip) {
         loading('hide');
         showMessagePHP('Vui lòng điền đầy đủ thông tin bắt buộc', 5);
         return;
     }
 
-    // Kiểm tra định dạng màu HEX
+    // Kiểm tra màu HEX
     const hexColorPattern = /^[0-9A-Fa-f]{6}$/;
     if (!hexColorPattern.test(config.led_config.led_think_color)) {
-        config.led_config.led_think_color = '0000ff';
+        config.led_config.led_think_color = '0000FF';
     }
 
-    // Log để debug giá trị long press action
-    //console.log('WakeUp Long Press Action:', config.button.button_wakeup_long_press_action);
-    //console.log('MIC Long Press Action:', config.button.button_mic_long_press_action);
-
-    //dữ liệu gửi
+    // Chuẩn bị FormData
     const formData = new FormData();
     formData.append('client_save_config', ip_address);
     formData.append('clientName', config.client_name);
     formData.append('udp_server', config.server.vbot_server_ip);
     formData.append('udp_server_port', config.server.vbot_server_port);
-    formData.append('i2s_sck_bclk', config.i2s_config.i2s_sck_bclk_gpio);
-    formData.append('i2s_ws_lrc', config.i2s_config.i2s_ws_lrc_gpio);
-    formData.append('i2s_dout', config.i2s_config.i2s_din_gpio);
-    formData.append('i2s_sd', config.i2s_config.i2s_sd_gpio);
-    formData.append('gain_mic', config.i2s_config.i2s_gain_mic);
-    formData.append('i2s_slot_mask', config.i2s_config.i2s_mic_channel);
-    formData.append('volume_level', config.i2s_config.i2s_speaker_volume);
+
+    // I2S INMP441
+    formData.append('i2s_sck', config.i2s_config.i2s_sck);
+	
+    formData.append('i2s_ws', config.i2s_config.i2s_ws);
+    formData.append('i2s_sd', config.i2s_config.i2s_sd);
+    formData.append('gain_mic', config.i2s_config.gain_mic);
+    formData.append('i2s_slot_mask', config.i2s_config.i2s_slot_mask);
+
+    // I2S MAX98357
+    formData.append('i2s_bclk', config.i2s_config.i2s_bclk);
+    formData.append('i2s_lrc', config.i2s_config.i2s_lrc);
+    formData.append('i2s_dout', config.i2s_config.i2s_dout);
+    formData.append('volume_level', config.i2s_config.volume_level);
+
+    // LED
+    if (config.led_config.led_active) formData.append('ledActive', 'on');
     formData.append('gpio_ws2812b', config.led_config.led_gpio);
     formData.append('num_pixels', config.led_config.led_number);
     formData.append('brightness', config.led_config.led_brightness);
     formData.append('loading_effect', config.led_config.led_loading_effect);
     formData.append('LED_THINK_COLOR', config.led_config.led_think_color);
-    formData.append('gpio_button_mic', config.button.button_mic_gpio);
-    formData.append('gpio_button_wakeup', config.button.button_wakeup_gpio);
-    formData.append('DEBOUNCE_DELAY', config.button.button_debounce_delay);
-    formData.append('longPressOption', config.button.button_wakeup_long_press_action);
-    formData.append('micLongPressOption', config.button.button_mic_long_press_action);
-    formData.append('longPressDuration', config.button.button_wakeup_long_press_time);
-    formData.append('micLongPressDuration', config.button.button_mic_long_press_time);
 
-    // Chỉ thêm các tham số boolean nếu giá trị là true
-    if (config.led_config.led_active) formData.append('ledActive', 'on');
+    // Button
     if (config.button.button_active) formData.append('button_active', 'on');
+    formData.append('push_btn_type', config.button.button_push_btn_type);
+    formData.append('DEBOUNCE_DELAY', config.button.button_debounce_delay);
+    formData.append('bt_active_high', config.button.bt_active_high);
+    if (config.button.button_wake_active) formData.append('btn_wake_active', 'on');
+    formData.append('gpio_button_wakeup', config.button.button_wakeup_gpio);
     if (config.button.button_wakeup_long_press_active) formData.append('longPressActive', 'on');
+    formData.append('longPressOption', config.button.button_wakeup_long_press_action);
+    formData.append('longPressDuration', config.button.button_wakeup_long_press_time);
+    if (config.button.button_mic_active) formData.append('btn_mic_active', 'on');
+    formData.append('gpio_button_mic', config.button.button_mic_gpio);
     if (config.button.button_mic_long_press_active) formData.append('micLongPressActive', 'on');
+    formData.append('micLongPressOption', config.button.button_mic_long_press_action);
+    formData.append('micLongPressDuration', config.button.button_mic_long_press_time);
+    if (config.button.button_up_active) formData.append('btn_up_active', 'on');
+    formData.append('gpio_button_up', config.button.button_up_gpio);
+    if (config.button.button_down_active) formData.append('btn_down_active', 'on');
+    formData.append('gpio_button_down', config.button.button_down_gpio);
+    formData.append('button_encd_gpio_clk', config.button.button_encd_gpio_clk);
+    formData.append('button_encd_pres_opt', config.button.button_encd_pres_opt);
+    formData.append('button_encd_l_pre_opt', config.button.button_encd_l_pre_opt);
+    formData.append('button_encd_gpio_dt', config.button.button_encd_gpio_dt);
+    formData.append('button_encd_long_prs', config.button.button_encd_long_prs);
+    formData.append('button_encd_gpio_sw', config.button.button_encd_gpio_sw);
+
+    // Other settings
     if (config.other_settings.logs_serial_active) formData.append('logsActive', 'on');
     if (config.other_settings.conversation_active) formData.append('conversation_mode_active', 'on');
     if (config.other_settings.sound_startup) formData.append('sound_on_startup', 'on');
     if (config.other_settings.mic_mutex_active) formData.append('micActive', 'on');
     if (config.other_settings.speaker_active) formData.append('speakerActive', 'on');
 
+    // Gửi dữ liệu
     fetch('/includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
         method: 'POST',
         body: formData
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Không thể kết nối tới server PHP');
-            }
-            return response.json();
+    .then(response => {
+        if (!response.ok) throw new Error('Không thể kết nối tới server PHP');
+        return response.json();
+    })
+    .then(data => {
+        if (!data.success) throw new Error(data.error || 'Lưu cấu hình thất bại cho ' + ip_address);
+
+        const infoFormData = new FormData();
+        infoFormData.append('showJsonData_Client', ip_address);
+        return fetch('/includes/php_ajax/Scanner.php', {
+            method: 'POST',
+            body: infoFormData
         })
-        .then(data => {
-            if (!data.success) {
-                throw new Error(data.error || 'Lưu cấu hình thất bại cho ' + ip_address);
-            }
-            const infoFormData = new FormData();
-            infoFormData.append('showJsonData_Client', ip_address);
-            return fetch('/includes/php_ajax/Scanner.php', {
-                method: 'POST',
-                body: infoFormData
-            })
-                .then(infoResponse => {
-                    if (!infoResponse.ok) {
-                        throw new Error('Không thể kết nối tới server PHP để lấy thông tin client');
-                    }
-                    return infoResponse.json();
-                })
-                .then(infoData => {
-                    loading('hide');
-                    if (infoData.success) {
-                        showMessagePHP('Lưu cấu hình thành công cho ' + ip_address + '|' + config.client_name, 5);
-                        loadFromServer().then(devices => {
-                            const updatedDevice = infoData;
-                            const deviceIndex = devices.findIndex(d => d.ip_address === ip_address);
-                            if (deviceIndex !== -1) {
-                                devices[deviceIndex] = updatedDevice;
-                            } else {
-                                devices.push(updatedDevice);
-                            }
-                            saveToServer(devices);
-                            displayDeviceData(devices);
-                            showConfigModal(updatedDevice);
-                        });
-                    } else {
-                        throw new Error(infoData.error || 'Lấy thông tin client thất bại');
-                    }
-                });
+        .then(infoResponse => {
+            if (!infoResponse.ok) throw new Error('Không thể kết nối tới server PHP để lấy thông tin client');
+            return infoResponse.json();
         })
-        .catch(error => {
+        .then(infoData => {
             loading('hide');
-            showMessagePHP('Lỗi: ' + error.message, 5);
+            if (infoData.success) {
+                showMessagePHP('Lưu cấu hình thành công cho ' + ip_address + ' | ' + config.client_name, 5);
+                loadFromServer().then(devices => {
+                    const updatedDevice = infoData;
+                    const deviceIndex = devices.findIndex(d => d.ip_address === ip_address);
+                    if (deviceIndex !== -1) devices[deviceIndex] = updatedDevice;
+                    else devices.push(updatedDevice);
+                    saveToServer(devices);
+                    displayDeviceData(devices);
+                    showConfigModal(updatedDevice);
+                });
+            } else throw new Error(infoData.error || 'Lấy thông tin client thất bại');
         });
+    })
+    .catch(error => {
+        loading('hide');
+        showMessagePHP('Lỗi: ' + error.message, 5);
+    });
 }
+
+
 
 function clearServerData() {
     var confirmUpgrade = confirm("Bạn có chắc chắn muốn xóa dữ liệu được tìm kiếm trước đó");
@@ -1237,6 +1329,27 @@ function showJsonData(ip_address) {
             const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));
             jsonModal.show();
         });
+}
+
+//Test, Kiểm Tra LED
+async function testLed(ip_address) {
+    if (!ip_address || typeof ip_address !== 'string' || ip_address.trim() === '') {
+        show_message('Địa chỉ IP không hợp lệ hoặc rỗng');
+        loading('hide');
+        return;
+	}
+  const effect = document.getElementById("ledEffect").value;
+  if (effect === "") {alert("Vui lòng chọn hiệu ứng cần kiểm tra"); return;}
+  try {
+	const response = await fetch("http://"+ip_address+"/test_led", {
+	  method: "POST",
+	  headers: {"Content-Type": "application/x-www-form-urlencoded"},
+	  body: "effect=" + encodeURIComponent(effect)
+	});
+	const text = await response.text();
+	alert(text);
+  }
+  catch (err) {alert("Lỗi: " + err);}
 }
 
 function downloadConfig(ip_address) {

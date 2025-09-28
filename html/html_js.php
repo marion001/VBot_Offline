@@ -495,7 +495,7 @@
                       show_message("Lỗi phân tích phản hồi JSON: " + e.message);
                   }
               } else {
-                  show_message("Lỗi kết nối, Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API: http status" + xhr.status);
+                  show_message("Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, API: http status" + xhr.status);
               }
           }
       });
@@ -584,7 +584,7 @@
           startMediaPlayer(url_media, name_media, url_cover, media_source);
       }
   }
-  
+
   // Hàm khởi tạo phát nhạc
   function startMediaPlayer(url_media, name_media, url_cover, media_source) {
       var data = JSON.stringify({
@@ -608,7 +608,7 @@
                       show_message("Lỗi phân tích JSON: " + e);
                   }
               } else {
-                  show_message("Lỗi HTTP: " + this.status, this.statusText);
+                  show_message("Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Lỗi HTTP: " + this.status, this.statusText);
               }
           }
       });
@@ -1285,16 +1285,22 @@
       xhr.addEventListener("readystatechange", function () {
           if (this.readyState === 4) {
   			loading("hide");
-              try {
-                  const response = JSON.parse(this.responseText);
-                  if (response.success) {
-                      showMessagePHP(response.message, 3);
-                  } else {
-                      show_message("Lỗi xảy ra: " + JSON.stringify(response));
-                  }
-              } catch (error) {
-                  show_message("Có lỗi xảy ra: " + error);
-              }
+			try {
+				const text = this.responseText.trim();
+				// Kiểm tra xem dữ liệu trả về có phải JSON không
+				if (text.startsWith("{") || text.startsWith("[")) {
+					const response = JSON.parse(text);
+					if (response.success) {
+						showMessagePHP(response.message, 3);
+					} else {
+						show_message("Lỗi xảy ra: " + JSON.stringify(response));
+					}
+				} else {
+					show_message("Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Error: Dữ liệu phản hồi không phải JSON");
+				}
+			} catch (error) {
+				show_message("Có lỗi xảy ra khi xử lý phản hồi: " + error);
+			}
           }
       });
       xhr.onerror = function () {
@@ -2472,7 +2478,6 @@ function initLogViewer(checkboxId, outputId, apiUrl) {
 			}
 			outputEl.scrollTop = outputEl.scrollHeight;
 		}
-
         };
         xhr.open("GET", apiUrl + "logs");
         xhr.send();
@@ -2523,7 +2528,6 @@ document.querySelectorAll("#fetchLogsCheckbox, #fetchLogsCheckbox_Head")
         // Bật log cho checkbox này
         const outputId = logCheckboxMap[this.id];
         initLogViewer(this.id, outputId, "<?php echo $URL_API_VBOT; ?>");
-
       } else {
         // Nếu tắt thì clear interval và clear log
         if (window.logInterval) clearInterval(window.logInterval);

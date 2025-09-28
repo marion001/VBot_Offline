@@ -396,38 +396,63 @@ elseif (isset($_POST['client_save_config'])) {
         exit;
     }
     $params = [
+        // Server / Client
         'clientName' => $_POST['clientName'] ?? '',
         'udp_server' => $_POST['udp_server'] ?? '',
-        'udp_server_port' => $_POST['udp_server_port'] ?? '0',
-        'i2s_sck_bclk' => $_POST['i2s_sck_bclk'] ?? '0',
-        'i2s_ws_lrc' => $_POST['i2s_ws_lrc'] ?? '0',
-        'i2s_dout' => $_POST['i2s_dout'] ?? '0',
-        'i2s_sd' => $_POST['i2s_sd'] ?? '0',
-        'gain_mic' => $_POST['gain_mic'] ?? '0',
+        'udp_server_port' => intval($_POST['udp_server_port'] ?? 0),
+        // I2S Config - INMP441
+        'i2s_sck' => intval($_POST['i2s_sck'] ?? 0),
+        'i2s_ws' => intval($_POST['i2s_ws'] ?? 0),
+        'i2s_sd' => intval($_POST['i2s_sd'] ?? 0),
+        'gain_mic' => floatval($_POST['gain_mic'] ?? 20),
         'i2s_slot_mask' => $_POST['i2s_slot_mask'] ?? 'left',
-        'volume_level' => $_POST['volume_level'] ?? '0',
-        'gpio_ws2812b' => $_POST['gpio_ws2812b'] ?? '0',
-        'num_pixels' => $_POST['num_pixels'] ?? '0',
-        'brightness' => $_POST['brightness'] ?? '0',
-        'loading_effect' => $_POST['loading_effect'] ?? '0',
-        'LED_THINK_COLOR' => $_POST['LED_THINK_COLOR'] ?? '0000ff',
-        'gpio_button_mic' => $_POST['gpio_button_mic'] ?? '0',
-        'gpio_button_wakeup' => $_POST['gpio_button_wakeup'] ?? '0',
-        'DEBOUNCE_DELAY' => $_POST['DEBOUNCE_DELAY'] ?? '200',
-        'longPressOption' => $_POST['longPressOption'] ?? '0',
-        'micLongPressOption' => $_POST['micLongPressOption'] ?? '0',
-        'longPressDuration' => $_POST['longPressDuration'] ?? '200',
-        'micLongPressDuration' => $_POST['micLongPressDuration'] ?? '2000',
-        'ledActive' => isset($_POST['ledActive']) ? 'on' : 'off',
-        'button_active' => isset($_POST['button_active']) ? 'on' : 'off',
-        'longPressActive' => isset($_POST['longPressActive']) ? 'on' : 'off',
-        'micLongPressActive' => isset($_POST['micLongPressActive']) ? 'on' : 'off',
-        'logsActive' => isset($_POST['logsActive']) ? 'on' : 'off',
-        'conversation_mode_active' => isset($_POST['conversation_mode_active']) ? 'on' : 'off',
-        'sound_on_startup' => isset($_POST['sound_on_startup']) ? 'on' : 'off',
-        'micActive' => isset($_POST['micActive']) ? 'on' : 'off',
-        'speakerActive' => isset($_POST['speakerActive']) ? 'on' : 'off'
+        // I2S Config - MAX98357
+        'i2s_bclk' => intval($_POST['i2s_bclk'] ?? 0),
+        'i2s_lrc' => intval($_POST['i2s_lrc'] ?? 0),
+        'i2s_dout' => intval($_POST['i2s_dout'] ?? 0),
+        'volume_level' => floatval($_POST['volume_level'] ?? 0),
+        // LED Config
+        'gpio_ws2812b' => intval($_POST['gpio_ws2812b'] ?? 0),
+        'num_pixels' => intval($_POST['num_pixels'] ?? 12),
+        'brightness' => intval($_POST['brightness'] ?? 255),
+        'loading_effect' => intval($_POST['loading_effect'] ?? 0),
+        'LED_THINK_COLOR' => preg_match('/^[0-9A-Fa-f]{6}$/', $_POST['LED_THINK_COLOR'] ?? '') ? $_POST['LED_THINK_COLOR'] : '0000FF',
+        // Button Config
+        'push_btn_type' => intval($_POST['push_btn_type'] ?? 0),
+        'DEBOUNCE_DELAY' => intval($_POST['DEBOUNCE_DELAY'] ?? 100),
+        'bt_active_high' => intval($_POST['bt_active_high']) ?? 0,
+        'gpio_button_wakeup' => intval($_POST['gpio_button_wakeup'] ?? 0),
+        'longPressOption' => intval($_POST['longPressOption'] ?? 0),
+        'longPressDuration' => intval($_POST['longPressDuration'] ?? 2000),
+        'gpio_button_mic' => intval($_POST['gpio_button_mic'] ?? 0),
+        'micLongPressOption' => intval($_POST['micLongPressOption'] ?? 2),
+        'micLongPressDuration' => intval($_POST['micLongPressDuration'] ?? 2000),
+        'gpio_button_up' => intval($_POST['gpio_button_up'] ?? 0),
+        'gpio_button_down' => intval($_POST['gpio_button_down'] ?? 0),
+        // Encoder Button
+        'button_encd_gpio_clk' => intval($_POST['button_encd_gpio_clk'] ?? 0),
+        'button_encd_gpio_dt' => intval($_POST['button_encd_gpio_dt'] ?? 0),
+        'button_encd_gpio_sw' => intval($_POST['button_encd_gpio_sw'] ?? 0),
+        //'button_encd_pres_opt' => intval($_POST['button_encd_pres_opt'] ?? 2),
+		'button_encd_pres_opt' => array_key_exists('button_encd_pres_opt', $_POST) ? intval($_POST['button_encd_pres_opt']) : 2,
+        'button_encd_l_pre_opt' => intval($_POST['button_encd_l_pre_opt'] ?? 0),
+        'button_encd_long_prs' => intval($_POST['button_encd_long_prs'] ?? 2000)
     ];
+    // Chỉ thêm các boolean nếu tồn tại trong $_POST
+    if (isset($_POST['ledActive'])) $params['ledActive'] = 'on';
+    if (isset($_POST['button_active'])) $params['button_active'] = 'on';
+    if (isset($_POST['longPressActive'])) $params['longPressActive'] = 'on';
+    if (isset($_POST['micLongPressActive'])) $params['micLongPressActive'] = 'on';
+    if (isset($_POST['btn_wake_active'])) $params['btn_wake_active'] = 'on';
+    if (isset($_POST['btn_mic_active'])) $params['btn_mic_active'] = 'on';
+    if (isset($_POST['btn_up_active'])) $params['btn_up_active'] = 'on';
+    if (isset($_POST['btn_down_active'])) $params['btn_down_active'] = 'on';
+    if (isset($_POST['logsActive'])) $params['logsActive'] = 'on';
+    if (isset($_POST['conversation_mode_active'])) $params['conversation_mode_active'] = 'on';
+    if (isset($_POST['sound_on_startup'])) $params['sound_on_startup'] = 'on';
+    if (isset($_POST['micActive'])) $params['micActive'] = 'on';
+    if (isset($_POST['speakerActive'])) $params['speakerActive'] = 'on';
+    // Kiểm tra thông tin bắt buộc
     if (empty($params['clientName']) || empty($params['udp_server'])) {
         echo json_encode([
             'success' => false,
@@ -435,10 +460,7 @@ elseif (isset($_POST['client_save_config'])) {
         ]);
         exit;
     }
-    $hexColorPattern = '/^[0-9A-Fa-f]{6}$/';
-    if (!preg_match($hexColorPattern, $params['LED_THINK_COLOR'])) {
-        $params['LED_THINK_COLOR'] = '0000ff';
-    }
+    // Gửi dữ liệu POST tới client
     $postData = http_build_query($params);
     $targetUrl = 'http://' . $ip_address . '/save';
     try {
@@ -499,6 +521,7 @@ elseif (isset($_POST['client_play_audio'])) {
         exit;
     }
     $fileExtension = pathinfo(parse_url($audio_url, PHP_URL_PATH), PATHINFO_EXTENSION);
+	/*
     if (strtolower($fileExtension) !== 'mp3') {
         echo json_encode([
             'success' => false,
@@ -506,6 +529,7 @@ elseif (isset($_POST['client_play_audio'])) {
         ]);
         exit;
     }
+	*/
     $targetUrl = 'http://' . $ip_address . '/play_audio';
     $postData = 'url=' . urlencode($audio_url);
     try {

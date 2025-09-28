@@ -1,8 +1,8 @@
 {
-    "version": "1.0.58",
+    "version": "1.0.59",
     "projectName": "Program VBot Offline",
     "description": "Tối ưu tốc độ điều khiển Home Assistant, Cơ cấu lại toàn bộ quy trình xử lý dữ liệu nhằm tăng tốc độ xử lý",
-    "releaseDate": "02/09/2025",
+    "releaseDate": "28/09/2025",
     "changes": [
         {
             "type": "feature",

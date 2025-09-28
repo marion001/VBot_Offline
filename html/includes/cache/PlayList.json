@@ -13,6 +13,54 @@
             "id": "Z8O7E89F",
             "channelTitle": null,
             "artist": "Oanh Tạ"
+        },
+        {
+            "ids_list": "37A178",
+            "title": "1.mp3",
+            "cover": "http://192.168.14.169/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/1.mp3",
+            "duration": "3.27 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/1.mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "663C14",
+            "title": "thuyền quyên.mp3",
+            "cover": "http://192.168.14.169/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/thuyền quyên.mp3",
+            "duration": "3.27 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/thuyền quyên.mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "98E16F",
+            "title": "TAY TRÁI CHỈ TRĂNG - DJ TRIỆU MUZIK FT CM REMIX - 左手指月 - Upwards To The Moon",
+            "cover": "https://i.ytimg.com/vi/Pemu_FbzLEs/hqdefault.jpg",
+            "audio": "https://www.youtube.com/watch?v=Pemu_FbzLEs",
+            "duration": null,
+            "description": "BẢN FULL 1 TIẾNG: https://youtu.be/YGtVf1q3VAQ?si=5vJdPaUhBmdvKEFp LIÊ...",
+            "source": "Youtube",
+            "id": "Pemu_FbzLEs",
+            "channelTitle": "DJ Triệu Muzik Official",
+            "artist": null
+        },
+        {
+            "ids_list": "EB7AAE",
+            "title": "Tay Trái Chỉ Trăng Remix  ( Dj QT Mix )",
+            "cover": "https://i.ytimg.com/vi/wDYn39p3S0U/hqdefault.jpg",
+            "audio": "https://www.youtube.com/watch?v=wDYn39p3S0U",
+            "duration": null,
+            "description": "Facebook :https://www.facebook.com/TikTok-QT-Dj-QT-Official-1021176583...",
+            "source": "Youtube",
+            "id": "wDYn39p3S0U",
+            "channelTitle": "Dj QT Mix Official",
+            "artist": null
         }
     ]
 }
