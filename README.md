@@ -118,5 +118,5 @@ Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://driv
 
 Sơ đồ mạch Loa Thông Minh Tiếng Việt VBot Assistant DAC I2S Sử Dụng Mic INMP441 và MAX89357
 
-[VBot_i2s_bb.pdf](https://github.com/user-attachments/files/22600497/VBot_i2s_bb.pdf)
-<img width="2178" height="1830" alt="Image" src="https://github.com/user-attachments/assets/7633adfa-b394-42f7-b16c-c8d84496c049" />
+[VBot_i2s_bb.pdf](https://github.com/user-attachments/files/22600902/VBot_i2s_bb.pdf)
+<img width="2583" height="1830" alt="Image" src="https://github.com/user-attachments/assets/cbaec230-83aa-4c42-b642-1677f6e6dbf5" />
