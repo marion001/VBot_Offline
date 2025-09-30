@@ -22,7 +22,6 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Lên Lịch Trình, Thông Báo, Lời Nhắc, v...v....
 - Sao Lưu, Backup dữ liệu lên Google Cloud Driver
 - Thiết Lập Mật Khẩu Đăng Nhập Webui
-- Hỗ Trợ Màn Hình SSD1306 128x64 LCD OLED 0.96inch 4pin
 - Hỗ Trợ Truy Cập WebUI VBot bên ngoài mạng Internet
 - Liên kết và tương tác, ra lệnh với các thiết bị chạy VBot trong cùng lớp mạng (Loa 1 ra lệnh Control, điều khiển, phát nhạc, đọc báo, tin tức, tới Loa 2, Client Loa 1 ra lệnh tới Loa 2, V..v....)
 - Tích hợp với trợ lý ảo Assist của Home Assistant (Làm Tác Nhân)
