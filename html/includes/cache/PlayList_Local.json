@@ -3,15 +3,21 @@
     "message": "Danh sách phát PlayList Local",
     "data": [
         {
-            "title": "thuyền quyên.mp3",
-            "cover": "http://192.168.14.169/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/thuyền quyên.mp3",
+            "title": "Cô Gái À Em Đừng Khóc Nữa (TTM Remix).mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "Media/Music_Local/Cô Gái À Em Đừng Khóc Nữa (TTM Remix).mp3",
             "source": "Local"
         },
         {
-            "title": "1.mp3",
-            "cover": "http://192.168.14.169/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/1.mp3",
+            "title": "Tình Anh.mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "Media/Music_Local/Tình Anh.mp3",
+            "source": "Local"
+        },
+        {
+            "title": "Em Là Cô Giáo Vùng Cao (Remix).mp3",
+            "cover": "http://192.168.14.113/assets/img/icon_audio_local.png",
+            "audio": "Media/Music_Local/Em Là Cô Giáo Vùng Cao (Remix).mp3",
             "source": "Local"
         }
     ]

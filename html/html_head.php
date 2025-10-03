@@ -135,6 +135,7 @@
     }
     #progress-bar {
 		width: 100%;
+		cursor: pointer;
     }
     #time-info {
 		text-align: right;
@@ -149,7 +150,6 @@
       // Tạo thẻ li mới
       var li = document.createElement("li");
       li.classList.add("notification-item");
-  
       // Nội dung của thẻ li
       li.innerHTML = '<a href="#"><font color="red"><i class="bi bi-exclamation-circle"></i></font></a>' +
                      '<div>' +
@@ -157,17 +157,14 @@
                      '<p class="text-primary">' + message + '</p>' +
                      //'<a href="#"><p class="text-danger">Kiểm Tra</p></a>' +
                      '</div>';
-  
       // Thêm thẻ li vào trong ul
       document.querySelector('#notification').appendChild(li);
-  
       // Cập nhật số lượng thông báo trong header
       var countElement = document.querySelector('#number_notification');
       var currentCount = parseInt(countElement.innerText);
       countElement.innerText = currentCount + 1; // Tăng số lượng thông báo
   }
 
-  
 	//biến cờ kích hoạt Mic để nói
 	let flag_mic_recording = false;
 	// Cờ để phân biệt nút nhấn gửi tin nhắn tự động hay người dùng nhấn

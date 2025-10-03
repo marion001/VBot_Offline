@@ -5,10 +5,9 @@
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   include 'Configuration.php';
-  
   if ($Config['contact_info']['user_login']['active']){
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
+  //Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (!isset($_SESSION['user_login']) ||
       (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
       session_unset();
@@ -17,7 +16,6 @@
       exit;
   }
   }
-
   $URL_Address = dirname($Current_URL);
   ?>
 <!DOCTYPE html>
@@ -56,7 +54,7 @@
                 <div class="card-title">
                   <div class="form-switch">
                     <input class="form-check-input border-success" type="checkbox" name="sync_checkbox" id="sync_checkbox" <?php echo $Config['media_player']['media_sync_ui']['active'] ? 'checked' : ''; ?>>
-                    <label class="form-check-label" for="sync_checkbox" title="Thiết lập trong: Cấu hình Config->Đồng bộ trạng thái với Web UI"> Đồng Bộ</label>
+                    <label class="form-check-label" for="sync_checkbox" title="Thiết lập trong: Cấu hình Config->Đồng bộ trạng thái với Web UI"> Đồng Bộ Dữ Liệu</label>
                   </div>
                 </div>
                 <div id="media-container">
@@ -75,7 +73,7 @@
                   <input type="range" id="progress-bar" min="0" max="100" value="0" title="Kéo để tua khi đang phát nhạc">
                   <div id="time-info"><font color=red>00:00:00 / 00:00:00</font></div>
                 </div>
-                <h5 class="card-title">Media Control:</h5>
+                <h5 class="card-title">Media Player Control:</h5>
                 <center>
                   <button type="button" id="volumeDOWN_Button" name="volumeDOWN_Button" title="Giảm âm lượng" class="btn btn-primary" onclick="control_volume('down')"><i class="bi bi-volume-down-fill"></i>
                   </button>
@@ -89,7 +87,7 @@
                   </button>
                 </center>
                 <hr/>
-                <h5 class="card-title">PlayList Control:</h5>
+                <h5 class="card-title">Danh Sách Nhạc (PlayList) Control:</h5>
                 <center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
                   <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
                   <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
@@ -160,13 +158,10 @@
                   </div>
                   <div class="tab-pane fade" id="bordered-justified-newspaper" role="tabpanel" aria-labelledby="newspaper-tab">
                     <?php
-                      // Kiểm tra nếu mảng news_paper_data tồn tại
                       if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media_player']['news_paper_data'])) {
-                          // Bắt đầu thẻ <select>
                           echo '<div class="input-group form-floating mb-3">	<select class="form-select border-success" name="news_paper" id="news_paper">';
                           echo '<option value="">-- Chọn Báo, Tin Tức --</option>';
                           foreach ($Config['media_player']['news_paper_data'] as $newsPaper) {
-                              // Kiểm tra và lấy các trường `name` và `link`
                               $name = isset($newsPaper['name']) ? htmlspecialchars($newsPaper['name']) : 'Không rõ tên';
                               $link = isset($newsPaper['link']) ? htmlspecialchars($newsPaper['link']) : '#';
                               echo '<option value="'.$link.'" title="Báo: '.$name.'">'.$name.'</option>';
@@ -194,7 +189,7 @@
       include 'html_js.php';
       ?>
     <script>
-      // Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
+      //Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
       document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
       //Hiển thị dữ liệu PlayList
       function cachePlayList() {
@@ -204,13 +199,13 @@
       	}
           var xhr = new XMLHttpRequest();
           xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList', true);
-          // Khi yêu cầu được hoàn thành
+          //Khi yêu cầu được hoàn thành
           xhr.onload = function() {
               if (xhr.status === 200) {
                   var fileListDiv = document.getElementById('show_list_Playlist');
                   try {
       				fileListDiv.innerHTML = '<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button></center>';
-      				fileListDiv.innerHTML += '<br/>Xóa toàn bộ danh sách phát: <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button>';
+      				fileListDiv.innerHTML += '<hr/><center><button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa Toàn Bộ Danh Sách Phát</button></center><hr/>';
                       var data = JSON.parse(xhr.responseText);
                       if (Array.isArray(data.data) && data.data.length > 0) {
                           // Xử lý và hiển thị từng playlist
@@ -223,13 +218,13 @@
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
                                   fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color="green">' + playlist.title + '</font></p>';
                                   fileInfo += '<p style="margin: 0;">Kênh: <font color="green">' + playlist.channelTitle + '</font></p>';
+                                  fileInfo += '<p style="margin: 0;">Thời Lượng: <font color="green">' + (playlist.duration || 'N/A') + '</font></p>';
                                   fileInfo += '<p style="margin: 0;">Mô tả: <font color="green">' + description + '</font></p>';
                                   fileInfo += '<p style="margin: 0;">Nguồn Nhạc: <font color="green">' + playlist.source + '</font></p>';
                                   fileInfo += ' <button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="get_Youtube_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\')"><i class="bi bi-play-circle"></i></button>';
       						   	  fileInfo += ' <a href="https://www.youtube.com/watch?v='+playlist.id+'" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
       							  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							  fileInfo += '</div></div>';
-
                               } else if (playlist.source === "ZingMP3") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
@@ -242,7 +237,6 @@
       							  fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: '+playlist.title+'" onclick="download_zingMp3_to_local(\'' + playlist.id + '\', \''+playlist.title+'\')"><i class="bi bi-save2"></i></button>';
       							  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							  fileInfo += '</div></div>';
-
                               } else if (playlist.source === "PodCast") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
@@ -256,7 +250,6 @@
 								  fileInfo += ' <a href="'+playlist.audio+'" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
 								  fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: '+playlist.title+'" onclick="deleteFromPlaylist(\'delete_some\', \''+playlist.ids_list+'\')"><i class="bi bi-trash"></i></button>';
       							  fileInfo += '</div></div>';
-
                               } else if (playlist.source === "Local") {
                                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
@@ -291,7 +284,7 @@
 	  //lưu trữ toàn bộ thời gian bài nhạc
       let fullTime = 0;
       let intervalId;
-      // Định dạng thời gian thành HH:MM:SS
+      //Định dạng thời gian thành HH:MM:SS
       function formatTime_Player(milliseconds) {
           let totalSeconds = Math.floor(milliseconds / 1000);
           let hours = Math.floor(totalSeconds / 3600);
@@ -301,12 +294,11 @@
              minutes.toString().padStart(2, '0') + ':' +
              seconds.toString().padStart(2, '0');
       }
-
-      // Cập nhật thông tin GET từ API
+      //Cập nhật thông tin GET từ API
       function fetchData_Media_Player() {
-          // Kiểm tra nếu checkbox được tích hoặc sync_active là true
+          //Kiểm tra nếu checkbox được tích hoặc sync_active là true
           const syncCheckbox = document.getElementById('sync_checkbox');
-          // Không thực hiện fetchData_Media_Player nếu checkbox không được tích
+          //Không thực hiện fetchData_Media_Player nếu checkbox không được tích
           if (!syncCheckbox.checked) {
               return; 
           }
@@ -320,16 +312,16 @@
               .then(data => {
                   if (data.success) {
       				document.getElementById('div_message_error').style.display = 'none';
-                      // Cập nhật các phần tử khác
+                      //Cập nhật các phần tử khác
                       document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' + (data.media_name ? data.media_name : 'N/A') + '</font>';
                       document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + data.volume+'%</font>';
                       document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : 'Không') + '</font>';
                       document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + data.media_player_source + '</font>';
-                      // Cập nhật ảnh cover
+                      //Cập nhật ảnh cover
                       document.getElementById('media-cover').src = data.media_cover ? data.media_cover : 'assets/img/Error_Null_Media_Player.png';
-                      // Cập nhật giá trị full time
+                      //Cập nhật giá trị full time
                       fullTime = data.full_time;
-                      // Cập nhật thanh trượt chỉ khi không đang hover
+                      //Cập nhật thanh trượt chỉ khi không đang hover
                       if (!isHovering) {
                           let progressBar = document.getElementById('progress-bar');
                           progressBar.max = fullTime;
@@ -355,34 +347,29 @@
 					document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: '+error;
               });
       }
-      // Bắt đầu lấy dữ liệu mỗi giây
+      //Bắt đầu lấy dữ liệu mỗi giây
       intervalId = setInterval(fetchData_Media_Player, <?php echo intval($Config['media_player']['media_sync_ui']['delay_time']); ?> * 1000);
-
-      // Ngừng cập nhật thanh trượt khi hover chuột vào
+      //Ngừng cập nhật thanh trượt khi hover chuột vào
       document.getElementById('progress-bar').addEventListener('mouseover', () => {
           isHovering = true;
       });
-
-      // Tiếp tục cập nhật thanh trượt khi rời chuột
+      //Tiếp tục cập nhật thanh trượt khi rời chuột
       document.getElementById('progress-bar').addEventListener('mouseout', () => {
           isHovering = false;
       });
-
-      // Lắng nghe sự kiện kéo thanh trượt để hiển thị giá trị khi nhả chuột
+      //Lắng nghe sự kiện kéo thanh trượt để hiển thị giá trị khi nhả chuột
       document.getElementById('progress-bar').addEventListener('change', (event) => {
           const progressBar = event.target;
           const currentDuration = progressBar.value;
       	//Chạy function để tua thời gian media player
       	sendSetTime_duration(currentDuration);
       });
-
-      // Cập nhật giá trị thời gian khi kéo thanh trượt
+      //Cập nhật giá trị thời gian khi kéo thanh trượt
       document.getElementById('progress-bar').addEventListener('input', (event) => {
           const progressBar = event.target;
           const currentDuration = progressBar.value;
       	document.getElementById('time-info').innerHTML = '<font color=green>' +formatTime_Player(currentDuration) + '</font> / ' + formatTime_Player(fullTime);
       });
-
       //Dùng để tua bài hát
       function sendSetTime_duration(set_duration) {
           var data = JSON.stringify({
@@ -429,7 +416,7 @@
       if (currentStatus_SongNHAC) {
         document.getElementById("waveContainer_song_nhac").style.display = "flex";
         let bassPulse_SN = Math.sin(time_SongNhac * 0.5) * 20 + 20;
-        // Sóng 1
+        //Sóng 1
         ctx.beginPath();
         const gradient1 = ctx.createLinearGradient(0, 0, 0, height);
         gradient1.addColorStop(0, '#00f7ff');
@@ -443,7 +430,7 @@
           else ctx.lineTo(x, y);
         }
         ctx.stroke();
-        // Sóng 2
+        //Sóng 2
         ctx.beginPath();
         const gradient2 = ctx.createLinearGradient(0, 0, 0, height);
         gradient2.addColorStop(0, '#ff00cc');
@@ -463,17 +450,37 @@
       }
       requestAnimationFrame(drawWaves);
     }
-
     function updateDisplay_SongNhac(status_SN) {
       if (status_SN === previousStatus_SongNHAC) return;
       previousStatus_SongNHAC = status_SN;
       currentStatus_SongNHAC = status_SN;
     }
-
-    // Khởi động vòng vẽ sóng
+    //Khởi động vòng vẽ sóng
     window.addEventListener("DOMContentLoaded", () => {
       drawWaves();
     });
+	//Bắt sự kiện nhấn Enter khi nhập liệu tìm kiếm bài hát
+	document.addEventListener("DOMContentLoaded", function () {
+		const input = document.getElementById("song_name_value");
+		if (input) {
+			input.addEventListener("keypress", function (e) {
+				if (e.key === "Enter") {
+					e.preventDefault();
+
+					// Tìm tab đang active
+					const activeTab = document.querySelector("#select_source_media_music .nav-link.active");
+					let source = activeTab ? activeTab.getAttribute("name") : "";
+
+					if (!source) {
+						show_message('Vui lòng chọn nguồn nhạc trước khi tìm kiếm!');
+						return;
+					}
+					// Gọi tìm kiếm tương ứng
+					media_player_search(source);
+				}
+			});
+		}
+	});
   </script>
   </body>
 </html>

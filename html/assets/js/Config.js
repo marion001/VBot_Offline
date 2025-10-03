@@ -431,7 +431,14 @@ function test_key_ChatGPT(text) {
 function test_key_Gemini(text) {
     loading("show");
     var apiKey = document.getElementById('google_gemini_key').value;
-    var url = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=' + apiKey;
+    var gemini_models_name = document.getElementById('gemini_models_name').value;
+    var apiVersion = document.getElementById('gemini_api_version').value;
+	if (!apiKey || !gemini_models_name || !apiVersion) {
+		loading("hide");
+		show_message('<b class="text-danger">Thiếu tham số cấu hình để kiểm tra Gemini: API Key, Model name hoặc API version</b>');
+		return;
+	}
+    var url = 'https://generativelanguage.googleapis.com/'+apiVersion+'/models/'+gemini_models_name+':generateContent?key=' + apiKey;
     var payload = {
         contents: [{
             parts: [{
@@ -450,7 +457,7 @@ function test_key_Gemini(text) {
                 var candidates = response.candidates;
                 if (candidates.length > 0) {
                     var contentText = candidates[0].content.parts[0].text;
-                    show_message('<center>Kiểm Tra API KEY Thành Công</center><br/>Phản hồi: <font color=green>' + contentText + '</font>');
+                    show_message('<center class="text-success"><b>Kiểm Tra API KEY Thành Công</b></center><br/>- API Key: <b>'+apiKey+'</b><br/>- Mô Hình: <b>'+gemini_models_name+'</b><br/>- Phiên Bản API: <b>'+apiVersion+'</b><hr/>Phản hồi: <font color=green>' + contentText + '</font>');
                 }
             } else {
                 var response = JSON.parse(xhr.responseText);

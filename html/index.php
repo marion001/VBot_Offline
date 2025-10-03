@@ -1271,7 +1271,7 @@
              loading('show');
              var tableContainer = document.getElementById('tableContainer');
              var tableHTML =
-                 '<h5 class="card-title">PlayList, Danh Sách Phát  <span>| Media Player</span></h5><h5>Xóa toàn bộ bài hát trong PlayList <button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa</button></h5><table class="table table-borderless datatable" id="playlistTable">' +
+                 '<h5 class="card-title">PlayList, Danh Sách Nhạc  <span>| Media Player</span></h5><button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa Toàn Bộ Bài Hát Trong Danh Sách Nhạc</button><table class="table table-borderless datatable" id="playlistTable">' +
                  '<thead>' +
                  '<tr>' +
                  '<th scope="col" style="text-align: center; vertical-align: middle;">STT</th>' +
@@ -1309,10 +1309,11 @@
                                  '<p style="margin: 0; font-weight: bold;">Tên bài hát: <font color="green">' + playlist.title + '</font></p>' +
                                  (playlist.source === 'Youtube' ?
                                      '<p style="margin: 0;">Kênh: <font color="green">' + playlist.channelTitle + '</font></p>' +
+                                     '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlist.duration + '</font></p>' +
                                      '<p style="margin: 0;">Mô tả: <font color="green">' + description + '</font></p>' : '') +
                                  (playlist.source === 'ZingMP3' ?
                                      '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color="green">' + playlist.artist + '</font></p>' +
-                                     '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlist.duration + '</font></p>' : '') +
+                                     '<p style="margin: 0;">Thời Lượng: <font color="green">' + (playlist.duration || 'N/A') + '</font></p>' : '') +
                                  (playlist.source === 'PodCast' ?
                                      '<p style="margin: 0;">Thể Loại: <font color="green">' + description + '</font></p>' : '') +
                                  (playlist.source === 'Local' ?
@@ -1427,12 +1428,8 @@ function fetchAndPopulateDevices_tts() {
         if (xhr.status >= 200 && xhr.status < 300) {
             try {
                 const data = JSON.parse(xhr.responseText);
-                if (!data.success) {
-                    return;
-                }
-                if (!data.data || !Array.isArray(data.data)) {
-                    return;
-                }
+                if (!data.success) {return;}
+                if (!data.data || !Array.isArray(data.data)) {return;}
 				const serverIp = '<?php echo $serverIp; ?>';
                 while (selectElement.options.length > 1) {
                     selectElement.remove(1);
@@ -1488,7 +1485,7 @@ function fetchAndPopulateDevices_tts() {
       if (currentStatus_SongNHAC) {
         document.getElementById("waveContainer_song_nhac").style.display = "flex";
         let bassPulse_SN = Math.sin(time_SongNhac * 0.5) * 20 + 20;
-        // Sóng 1
+        //Sóng 1
         ctx.beginPath();
         const gradient1 = ctx.createLinearGradient(0, 0, 0, height);
         gradient1.addColorStop(0, '#00f7ff');
@@ -1502,7 +1499,7 @@ function fetchAndPopulateDevices_tts() {
           else ctx.lineTo(x, y);
         }
         ctx.stroke();
-        // Sóng 2
+        //Sóng 2
         ctx.beginPath();
         const gradient2 = ctx.createLinearGradient(0, 0, 0, height);
         gradient2.addColorStop(0, '#ff00cc');
@@ -1534,6 +1531,21 @@ function fetchAndPopulateDevices_tts() {
       drawWaves();
 	  fetchAndPopulateDevices_tts();
     });
+	//Bắt sự kiện nhấn Enter khi nhập liệu tìm kiếm bài hát
+	document.addEventListener("keypress", function(e) {
+		if (e.key === "Enter" && e.target && e.target.id === "song_name_value") {
+			e.preventDefault();
+			let selectEl = document.getElementById("select_cache_media");
+			let source = selectEl ? selectEl.value : "";
+			if (source && source !== "") {
+				media_player_search(source);
+			} else {
+				show_message('Vui lòng chọn nguồn nhạc trước khi tìm kiếm!');
+				//selectEl.focus();
+			}
+		}
+	});
+
   </script>
   </body>
 </html>

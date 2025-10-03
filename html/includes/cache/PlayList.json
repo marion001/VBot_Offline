@@ -3,43 +3,7 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "E6F9E0",
-            "title": "Cô Gái À Em Đừng Khóc Nữa (TTM Remix)",
-            "cover": "https://photo-zmp3.zmdcdn.me/cover/1/9/2/f/192fd6d0a04174619f3b9986f71db987.jpg",
-            "audio": "Z8O7E89F",
-            "duration": "03:38",
-            "description": null,
-            "source": "ZingMP3",
-            "id": "Z8O7E89F",
-            "channelTitle": null,
-            "artist": "Oanh Tạ"
-        },
-        {
-            "ids_list": "37A178",
-            "title": "1.mp3",
-            "cover": "http://192.168.14.169/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/1.mp3",
-            "duration": "3.27 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/1.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "663C14",
-            "title": "thuyền quyên.mp3",
-            "cover": "http://192.168.14.169/assets/img/icon_audio_local.png",
-            "audio": "/home/pi/VBot_Offline/Media/Music_Local/thuyền quyên.mp3",
-            "duration": "3.27 MB",
-            "description": null,
-            "source": "Local",
-            "id": "/home/pi/VBot_Offline/Media/Music_Local/thuyền quyên.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
-            "ids_list": "98E16F",
+            "ids_list": "1CDAE0",
             "title": "TAY TRÁI CHỈ TRĂNG - DJ TRIỆU MUZIK FT CM REMIX - 左手指月 - Upwards To The Moon",
             "cover": "https://i.ytimg.com/vi/Pemu_FbzLEs/hqdefault.jpg",
             "audio": "https://www.youtube.com/watch?v=Pemu_FbzLEs",
@@ -51,7 +15,7 @@
             "artist": null
         },
         {
-            "ids_list": "EB7AAE",
+            "ids_list": "CAE18C",
             "title": "Tay Trái Chỉ Trăng Remix  ( Dj QT Mix )",
             "cover": "https://i.ytimg.com/vi/wDYn39p3S0U/hqdefault.jpg",
             "audio": "https://www.youtube.com/watch?v=wDYn39p3S0U",
@@ -60,6 +24,18 @@
             "source": "Youtube",
             "id": "wDYn39p3S0U",
             "channelTitle": "Dj QT Mix Official",
+            "artist": null
+        },
+        {
+            "ids_list": "800359",
+            "title": "Nhạc Trung Remix - Tay Trái Chỉ Trăng - Tát Đỉnh Đỉnh - Nhạc Hot TikTok 2021 😅😁",
+            "cover": "https://i.ytimg.com/vi/aHtsBkxP0UY/hqdefault.jpg",
+            "audio": "https://www.youtube.com/watch?v=aHtsBkxP0UY",
+            "duration": "00:04:01",
+            "description": "Nhạc Trung Remix - Tay Trái Chỉ Trăng - Tát Đỉnh Đỉnh - Nhạc Hot TikTo...",
+            "source": "Youtube",
+            "id": "aHtsBkxP0UY",
+            "channelTitle": "Lỉnk Music ♡",
             "artist": null
         }
     ]

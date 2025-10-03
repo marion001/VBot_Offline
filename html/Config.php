@@ -2888,58 +2888,70 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
 <?php
 $gemini_model_list_json_file = $HTML_VBot_Offline.'/includes/other_data/gemini_model_list.json';
+$selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-2.0-flash';
+$selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
+function renderSelectOrInput_Gemini($gemini_model_list_json_file, $id, $label, $data, $selectedValue, $placeholder = '', $withButton = false) {
+    echo '<div class="row mb-3">';
+    echo '<label for="' . $id . '" class="col-sm-3 col-form-label">' . htmlspecialchars($label) . ':</label>';
+    echo '<div class="col-sm-9">';
+    if (is_array($data) && !empty($data)) {
+        //Select
+        if ($withButton) {
+            echo '<div class="input-group">';
+            echo '<select name="' . $id . '" id="' . $id . '" class="form-select border-danger" aria-label="Default select example">';
+            foreach ($data as $item) {
+                $selected = ($item == $selectedValue) ? ' selected' : '';
+                echo '<option value="' . htmlspecialchars($item) . '"' . $selected . '>' . htmlspecialchars($item) . '</option>';
+            }
+            echo '</select>';
+            echo '<button class="btn btn-primary" type="button" id="btn_' . $id . '" title="' . htmlspecialchars($gemini_model_list_json_file, ENT_QUOTES) . '" onclick="readJSON_file_path(\'' . addslashes($gemini_model_list_json_file) . '\')">Tệp Dữ Liệu Mô Hình</button>';
+            echo '</div>';
+        } else {
+            echo '<select name="' . $id . '" id="' . $id . '" class="form-select border-danger" aria-label="Default select example">';
+            foreach ($data as $item) {
+                $selected = ($item == $selectedValue) ? ' selected' : '';
+                echo '<option value="' . htmlspecialchars($item) . '"' . $selected . '>' . htmlspecialchars($item) . '</option>';
+            }
+            echo '</select>';
+        }
+    } else {
+        //Input text
+        if ($withButton) {
+            echo '<div class="input-group">';
+            echo '<input class="form-control border-danger" type="text" name="' . $id . '" id="' . $id . '" placeholder="' . htmlspecialchars($placeholder) . '" value="' . htmlspecialchars($selectedValue) . '">';
+            echo '<button class="btn btn-primary" type="button" id="btn_' . $id . '" title="'.$gemini_model_list_json_file.'">Tệp Dữ Liệu Mô Hình</button>';
+            echo '</div>';
+        } else {
+            echo '<input class="form-control border-danger" type="text" name="' . $id . '" id="' . $id . '" placeholder="' . htmlspecialchars($placeholder) . '" value="' . htmlspecialchars($selectedValue) . '">';
+        }
+    }
+    echo '</div></div>';
+}
 if (file_exists($gemini_model_list_json_file)) {
     $data = json_decode(file_get_contents($gemini_model_list_json_file), true);
-    $selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-2.0-flash';
-    $selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
-    // Thẻ select model
-    if (isset($data["gemini_models"]) && is_array($data["gemini_models"])) {
-        echo '<div class="row mb-3"><label for="gemini_models_name" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
-        echo '<div class="col-sm-9"><select name="gemini_models_name" id="gemini_models_name" class="form-select border-danger" aria-label="Default select example">';
-        foreach ($data["gemini_models"] as $model) {
-            $selected = ($model == $selected_model) ? ' selected' : '';
-            echo '<option value="' . htmlspecialchars($model) . '"' . $selected . '>' . htmlspecialchars($model) . '</option>';
-        }
-        echo '</select></div></div>';
-    } else {
-		echo '<div class="row mb-3"><label for="gemini_models_name" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
-        echo '<div class="col-sm-9">';
-		echo '<input class="form-control border-danger" type="text" name="gemini_models_name" id="gemini_models_name" placeholder="'.$Config['virtual_assistant']['google_gemini']['model_name'].'" value="'.$Config['virtual_assistant']['google_gemini']['model_name'].'">';
-		echo '</div></div>';
-    }
-    // Thẻ select gemini_api_version
-    if (isset($data["gemini_api_version"]) && is_array($data["gemini_api_version"])) {
-        echo '<div class="row mb-3"><label for="gemini_api_version" class="col-sm-3 col-form-label">Phiên Bản API:</label>';
-        echo '<div class="col-sm-9"><select name="gemini_api_version" id="gemini_api_version" class="form-select border-danger" aria-label="Default select example">';
-        foreach ($data["gemini_api_version"] as $version) {
-            $selected = ($version == $selected_version) ? ' selected' : '';
-            echo '<option value="' . htmlspecialchars($version) . '"' . $selected . '>' . htmlspecialchars($version) . '</option>';
-        }
-        echo '</select></div></div>';
-    } else {
-		echo '<div class="row mb-3"><label for="gemini_api_version" class="col-sm-3 col-form-label">Phiên Bản API:</label>';
-        echo '<div class="col-sm-9">';
-		echo '<input class="form-control border-danger" type="text" name="gemini_api_version" id="gemini_api_version" placeholder="'.$Config['virtual_assistant']['google_gemini']['api_version'].'" value="'.$Config['virtual_assistant']['google_gemini']['api_version'].'">';
-		echo '</div></div>';
-    }
+    // Chỉ gemini_models_name mới có nút
+    renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', $data['gemini_models'] ?? null, $selected_model, $selected_model, true);
+    renderSelectOrInput_Gemini($gemini_model_list_json_file,'gemini_api_version', 'Phiên Bản API', $data['gemini_api_version'] ?? null, $selected_version, $selected_version);
 } else {
-		#echo '<script>error_notify("Tệp Json không tồn tại hoặc Tệp bị lỗi: '.$gemini_model_list_json_file.'");</script>';
-		echo '<div class="row mb-3"><label for="gemini_models_name" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
-        echo '<div class="col-sm-9">';
-		echo '<input class="form-control border-danger" type="text" name="gemini_models_name" id="gemini_models_name" placeholder="'.$Config['virtual_assistant']['google_gemini']['model_name'].'" value="'.$Config['virtual_assistant']['google_gemini']['model_name'].'">';
-		echo '</div></div>';
-		echo '<div class="row mb-3"><label for="gemini_api_version" class="col-sm-3 col-form-label">Mô Hình Gemini:</label>';
-        echo '<div class="col-sm-9">';
-		echo '<input class="form-control border-danger" type="text" name="gemini_api_version" id="gemini_api_version" placeholder="'.$Config['virtual_assistant']['google_gemini']['api_version'].'" value="'.$Config['virtual_assistant']['google_gemini']['api_version'].'">';
-		echo '</div></div>';
+    renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', null, $selected_model, $selected_model, true);
+    renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_api_version', 'Phiên Bản API', null, $selected_version, $selected_version);
 }
 ?>
+
                         <div class="row mb-3">
                           <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
                           <div class="col-sm-9">
                             <input  class="form-control border-success" type="number" min="5" step="1" max="30" name="google_gemini_time_out" id="google_gemini_time_out" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>">
                           </div>
                         </div>
+						
+                        <div class="row mb-3">
+                          <label for="gemini_models_path_file" class="col-sm-3 col-form-label">Đường dẫn tệp mô hình (Path Model) <i class="bi bi-question-circle-fill" onclick="show_message('Đường dẫn tệp mô hình (Path Model)')"></i> :</label>
+                          <div class="col-sm-9">
+                            <input class="form-control border-danger" type="text" name="gemini_models_path_file" id="gemini_models_path_file" placeholder="<?php echo $gemini_model_list_json_file; ?>" value="<?php echo $gemini_model_list_json_file; ?>">
+                          </div>
+                        </div>
+						
                       </div>
                     </div>
                     <div class="card">
