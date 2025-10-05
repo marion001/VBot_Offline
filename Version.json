@@ -1,8 +1,8 @@
 {
-    "version": "1.0.60",
+    "version": "1.0.61",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi phát danh sách nhạc, lỗi API Gemini và tối ưu code hệ thống",
-    "releaseDate": "03/10/2025",
+    "description": "Sửa lỗi tra cứu thời tiết, Tối ưu tăng tốc độ STT VBot Default (xử lý vod tự động nhận biết khi kết thúc câu lệnh)",
+    "releaseDate": "05/10/2025",
     "changes": [
         {
             "type": "feature",

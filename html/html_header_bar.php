@@ -9,7 +9,7 @@
 <head>
   <title>VBot Assistant - <?php echo $Config['contact_info']['full_name'] ?></title>
   <!-- css ChatBot -->
-  <link href="assets/css/chatbot_head_bar.css" rel="stylesheet">
+  <link href="assets/css/chatbot_head_bar.css?v=<?php echo $Cache_UI_Ver; ?>" rel="stylesheet">
 <style>
     #vbot_Scan_devices {
         max-height: 400px;

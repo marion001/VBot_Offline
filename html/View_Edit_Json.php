@@ -51,9 +51,9 @@ include 'html_head.php';
 ?>
 <head>
   <!-- Thêm CSS của Prism -->
-  <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
-  <link rel="stylesheet" href="assets/vendor/codemirror/codemirror.min.css">
-  <link rel="stylesheet" href="assets/vendor/codemirror/dracula.min.css">
+  <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css?v=<?php echo $Cache_UI_Ver; ?>">
+  <link rel="stylesheet" href="assets/vendor/codemirror/codemirror.min.css?v=<?php echo $Cache_UI_Ver; ?>">
+  <link rel="stylesheet" href="assets/vendor/codemirror/dracula.min.css?v=<?php echo $Cache_UI_Ver; ?>">
   <style>
 .editor {
   width: 100% !important;
@@ -138,9 +138,9 @@ include 'html_footer.php';
 ?>
 <!-- End Footer -->
 <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-<script src="assets/vendor/codemirror/codemirror.min.js"></script>
-<script src="assets/vendor/codemirror/javascript.min.js"></script>
-<script src="assets/vendor/prism/prism.min.js"></script>
+<script src="assets/vendor/codemirror/codemirror.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/codemirror/javascript.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script>
   var currentFile = document.getElementById("file_selector").value;
   var editor = CodeMirror(document.getElementById("editor"), {

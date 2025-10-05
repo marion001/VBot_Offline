@@ -402,9 +402,6 @@
             "speak_to_text": {
                 "stt_select": "stt_default",
                 "duration_recording": 6,
-                "silence_duration": 3,
-                "min_amplitude_threshold": 370,
-                "single_utterance_time": 0.9,
                 "stt_default": {
                     "notes": "Không cần cấu hình gì cả ở đây"
                 },
@@ -454,7 +451,7 @@
                     "music_sound_stops": "resource/sound/default/music_stops.mp3",
                     "start_playlist_play": "resource/sound/default/start_playlist_play.mp3",
                     "play_answer_error": "resource/sound/default/play_answer_error.mp3",
-					"stt_to_text_error": "resource/sound/default/stt_to_text_error.mp3"
+                    "stt_to_text_error": "resource/sound/default/stt_to_text_error.mp3"
                 },
                 "welcome": {
                     "active": true,
@@ -618,7 +615,7 @@
             }
         },
         "auto_restart_program_error": true,
-		"fix_time_sync_error": true
+        "fix_time_sync_error": true
     },
     "backup_upgrade": {
         "download_path": "Backup_Upgrade/Download",
@@ -709,7 +706,7 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "News_Paper.json",
-					"Data_Schedule.json",
+                    "Data_Schedule.json",
                     "PlayList.json",
                     "Login_Data.json",
                     "PodCast.json",

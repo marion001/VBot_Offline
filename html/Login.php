@@ -234,7 +234,7 @@ generateCsrfToken();
   <?php
     include 'html_head.php';
     ?>
-	<script src="assets/js/crypto-js.min.js"></script>
+	<script src="assets/js/crypto-js.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
   <body>
     <!-- Loading Mesage-->
     <div id="loadingOverlay" class="overlay_loading">

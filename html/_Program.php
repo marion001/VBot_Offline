@@ -56,7 +56,7 @@
       padding: 10px;
       }
     </style>
-    <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css?v=<?php echo $Cache_UI_Ver; ?>">
   </head>
   <body>
     <?php
@@ -1454,9 +1454,9 @@
           $('#responseModal_read_files_in_backup').modal('hide');
       }
     </script>
-    <script src="assets/vendor/prism/prism.min.js"></script>
-    <script src="assets/vendor/prism/prism-json.min.js"></script>
-    <script src="assets/vendor/prism/prism-yaml.min.js"></script>
+    <script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+    <script src="assets/vendor/prism/prism-json.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+    <script src="assets/vendor/prism/prism-yaml.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
     <?php
       include 'html_js.php';
       ?>

@@ -1,8 +1,8 @@
 {
-    "version": "1.0.60",
+    "version": "1.0.61",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi phát danh sách nhạc, lỗi API Gemini và tối ưu code hệ thống",
-    "releaseDate": "03/10/2025",
+    "description": "Tự động làm mới lại Cache dữ liệu mới khi cập nhật giao diện, Loại bỏ thông số cấu hình liên quan tới STT VBot Default",
+    "releaseDate": "05/10/2025",
     "changes": [
         {
             "type": "feature",

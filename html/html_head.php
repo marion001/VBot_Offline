@@ -144,7 +144,6 @@
   </style>
   <!--script Hiển thị thông báo Mesage php -->
   <script>
-  
   // Hàm thêm thông báo mới vào danh sách thông báo
   function error_notify(message) {
       // Tạo thẻ li mới

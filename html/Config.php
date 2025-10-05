@@ -160,10 +160,7 @@
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration'] = intval($_POST['silence_duration']);
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time'] = floatval($_POST['single_utterance_time']);
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold'] = intval($_POST['min_amplitude_threshold']);
-  
+
   #Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
   $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['conversation_mode']) ? true : false;
   
@@ -728,7 +725,7 @@ $read_tts_token_google_cloud = '';
     include 'html_head.php';
     ?>
   <head>
-    <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
+    <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css?v=<?php echo $Cache_UI_Ver; ?>">
     <style>
       #modal_dialog_show_config {
       display: flex;
@@ -815,21 +812,21 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="ssh_port" class="col-sm-3 col-form-label">Cổng kết nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
-                        <input required class="form-control border-success" type="number" name="ssh_port" id="ssh_port" placeholder="<?php echo $Config['ssh_server']['ssh_port']; ?>" value="<?php echo $Config['ssh_server']['ssh_port']; ?>">
+                        <input required class="form-control border-danger" type="number" name="ssh_port" id="ssh_port" placeholder="<?php echo $Config['ssh_server']['ssh_port']; ?>" value="<?php echo $Config['ssh_server']['ssh_port']; ?>">
                         <div class="invalid-feedback">Cần nhập cổng kết nối tới máy chủ SSH</div>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label for="ssh_username" class="col-sm-3 col-form-label">Tên đăng nhập <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
-                        <input required class="form-control border-success" type="text" name="ssh_username" id="ssh_username" placeholder="<?php echo $Config['ssh_server']['ssh_username']; ?>" value="<?php echo $Config['ssh_server']['ssh_username']; ?>">
+                        <input required class="form-control border-danger" type="text" name="ssh_username" id="ssh_username" placeholder="<?php echo $Config['ssh_server']['ssh_username']; ?>" value="<?php echo $Config['ssh_server']['ssh_username']; ?>">
                         <div class="invalid-feedback">Cần nhập tên đăng nhập của máy chủ SSH</div>
                       </div>
                     </div>
                     <div class="row mb-3">
                       <label for="ssh_password" class="col-sm-3 col-form-label">Mật khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-sm-9">
-                        <input required class="form-control border-success" type="text" name="ssh_password" id="ssh_password" placeholder="<?php echo $Config['ssh_server']['ssh_password']; ?>" value="<?php echo $Config['ssh_server']['ssh_password']; ?>">
+                        <input required class="form-control border-danger" type="text" name="ssh_password" id="ssh_password" placeholder="<?php echo $Config['ssh_server']['ssh_password']; ?>" value="<?php echo $Config['ssh_server']['ssh_password']; ?>">
                         <div class="invalid-feedback">Cần nhập mật khẩu của máy chủ SSH</div>
                       </div>
                     </div>
@@ -1276,25 +1273,7 @@ $read_tts_token_google_cloud = '';
                     <div class="row mb-3">
                       <label for="duration_recording" class="col-sm-3 col-form-label" title="Thời gian thu âm tối đa">Thời gian lắng nghe tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian lắng nghe tối đa khi Bot được đánh thức')"></i> :</label>
                       <div class="col-sm-9">
-                        <input class="form-control border-success" type="number" step="1" min="4" max="10" name="duration_recording" id="duration_recording" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian thu âm tối đa" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="silence_duration" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian im lặng tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa, khi phát hiện im lặng trong quá trình đang lắng nghe thì sẽ dừng lắng nghe, (tham số phải nhỏ hơn thời gian lắng nghe tối đa)')"></i> :</label>
-                      <div class="col-sm-9">
-                        <input class="form-control border-success" step="1" min="1" max="10" type="number" name="silence_duration" id="silence_duration" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa khi thu âm" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['silence_duration']; ?>">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="single_utterance_time" class="col-sm-3 col-form-label" title="Thời gian im lặng tối đa khi thu âm">Thời gian tối đa dừng câu, từ (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)')"></i> :</label>
-                      <div class="col-sm-9">
-                        <input class="form-control border-success" step="0.1" min="0.1" max="6" type="number" name="single_utterance_time" id="single_utterance_time" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian im lặng tối đa ngắt câu từ được coi là xong (single_utterance)" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['single_utterance_time']; ?>">
-                      </div>
-                    </div>
-                    <div class="row mb-3">
-                      <label for="min_amplitude_threshold" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Ngưỡng biên độ tối thiểu (RMS) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng biên độ để đánh giá đang được im lặng khi lắng nghe, (biên độ càng cao thì cần âm thanh môi trường lớn và ngược lại)')"></i> :</label>
-                      <div class="col-sm-9">
-                        <input class="form-control border-success" step="10" min="310" max="2000" type="number" name="min_amplitude_threshold" id="min_amplitude_threshold" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Ngưỡng biên độ tối thiểu để nhận biết là có âm thanh" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['min_amplitude_threshold']; ?>">
+                        <input class="form-control border-success" type="number" step="1" min="4" max="30" name="duration_recording" id="duration_recording" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian thu âm tối đa" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>">
                       </div>
                     </div>
                     <div class="row">
@@ -2493,7 +2472,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <div class="col-sm-9">
                             <div class="input-group mb-3">
                               <input readonly class="form-control border-danger" type="text" name="youtube_google_apis_key" id="youtube_google_apis_key" placeholder="<?php echo $Config['media_player']['youtube']['google_apis_key']; ?>" value="<?php echo $Config['media_player']['youtube']['google_apis_key']; ?>">
-                              <button class="btn btn-success border-success" type="button">Kiểm Tra</button>
+                              <button class="btn btn-success border-success" type="button" disabled>Kiểm Tra</button>
                             </div>
                           </div>
                         </div>
@@ -2524,8 +2503,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                         <?php
-                          // Get Định dạng được phép từ cấu hình
-                          // Chuyển mảng thành chuỗi, mỗi phần tử cách nhau bởi dấu phẩy
                           $allowed_formats_str = implode(", ", $Config['media_player']['music_local']['allowed_formats']);
                           ?>
                         <div class="row mb-3">
@@ -3795,13 +3772,13 @@ echo "\n";
     <i class="bi bi-arrow-down-short"></i>
     </a>
     <!-- Template Main JS File -->
-    <script src="assets/vendor/prism/prism.min.js"></script>
-    <script src="assets/vendor/prism/prism-json.min.js"></script>
-    <script src="assets/vendor/prism/prism-yaml.min.js"></script>
+    <script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+    <script src="assets/vendor/prism/prism-json.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+    <script src="assets/vendor/prism/prism-yaml.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
     <?php
       include 'html_js.php';
       ?>
-	<script src="assets/js/Config.js"></script>
+	<script src="assets/js/Config.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
     <script>
       //Xóa file backup Config
       function delete_file_backup_json_config(filePath) {

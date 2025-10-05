@@ -11,25 +11,19 @@
   $git_username = $pathParts[0];
   $git_repository = $pathParts[1];
   ?>
-<!-- Vendor JS Files -->
-<script src="assets/vendor/apexcharts/apexcharts.min.js"></script>
-<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-<script src="assets/vendor/chart.js/chart.umd.js"></script>
-<script src="assets/vendor/echarts/echarts.min.js"></script>
-<script src="assets/vendor/quill/quill.js"></script>
-<script src="assets/vendor/simple-datatables/simple-datatables.js"></script>
-<script src="assets/vendor/tinymce/tinymce.min.js"></script>
-<script src="assets/vendor/php-email-form/validate.js"></script>
-<!-- Thông báo -->
-<script src="assets/vendor/jquery/jquery-3.5.1.min.js"></script>
-<script src="assets/vendor/popper/popper.min.js"></script>
-<script src="assets/vendor/hls/hls.js"></script>
-<!--END Thông báo -->
-
-<!-- Template Main JS File -->
-<script src="assets/js/main.js"></script>
-<script src="assets/js/VBot.js"></script>
-
+<script src="assets/vendor/apexcharts/apexcharts.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/chart.js/chart.umd.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/echarts/echarts.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/quill/quill.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/simple-datatables/simple-datatables.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/tinymce/tinymce.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/php-email-form/validate.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/jquery/jquery-3.5.1.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/popper/popper.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/hls/hls.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/main.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/VBot.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script>
   //Xóa File theo path
   function deleteFile(filePath, langg = "No") {
@@ -226,7 +220,6 @@
           }
       };
       xhr.send();
-  	
   }
 
   //Đọc dữ liệu file theo path
@@ -359,7 +352,6 @@
       };
       xhr.send();
   }
-  
   //tìm lại mật khẩu
   function forgotPassword() {
       loading("show");

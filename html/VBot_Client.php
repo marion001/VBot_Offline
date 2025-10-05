@@ -21,7 +21,7 @@ if ($Config['contact_info']['user_login']['active']) {
 <!DOCTYPE html>
 <html lang="vi">
 <?php include 'html_head.php'; ?>
- <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css">
+ <link rel="stylesheet" href="assets/vendor/prism/prism-tomorrow.min.css?v=<?php echo $Cache_UI_Ver; ?>">
 <style>
     #vbot_Client_Scan_devices {
         width: 100%;
@@ -1417,8 +1417,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 });
 </script>
-<script src="assets/vendor/prism/prism.min.js"></script>
-<script src="assets/vendor/prism/prism-json.min.js"></script>
+<script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/vendor/prism/prism-json.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <?php include 'html_js.php'; ?>
 </body>
 </html>

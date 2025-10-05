@@ -26,8 +26,8 @@
     ?>
   <head>
     <!-- CodeMirror CSS -->
-    <link rel="stylesheet" href="assets/vendor/codemirror/codemirror.min.css">
-    <link rel="stylesheet" href="assets/vendor/codemirror/dracula.min.css">
+    <link rel="stylesheet" href="assets/vendor/codemirror/codemirror.min.css?v=<?php echo $Cache_UI_Ver; ?>">
+    <link rel="stylesheet" href="assets/vendor/codemirror/dracula.min.css?v=<?php echo $Cache_UI_Ver; ?>">
     <style>
       .editor {
       width: 100%;
@@ -125,8 +125,8 @@
     <!-- End Footer -->
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
     <!-- CodeMirror JS -->
-    <script src="assets/vendor/codemirror/codemirror.min.js"></script>
-    <script src="assets/vendor/codemirror/python.min.js"></script>
+    <script src="assets/vendor/codemirror/codemirror.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+    <script src="assets/vendor/codemirror/python.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
     <script>
       // Khởi tạo CodeMirror trong thẻ textarea
       var editor = CodeMirror.fromTextArea(document.getElementById("code-editor"), {
