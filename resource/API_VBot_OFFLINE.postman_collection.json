@@ -1522,6 +1522,62 @@
 			"response": []
 		},
 		{
+			"name": "Kích Hoạt Trợ Lý Ảo XiaoZhi",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"xiaozhi\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Trợ Lý Ảo XiaoZhi Copy",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"xiaozhi\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.113:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"113"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Kích Hoạt Trợ Lý Ảo DEV Custom Assistant",
 			"request": {
 				"method": "POST",

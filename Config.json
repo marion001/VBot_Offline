@@ -1,4 +1,5 @@
 {
+    "launch_source": "VBot_Assistant",
     "contact_info": {
         "full_name": "Vũ Tuyển",
         "email": "",
@@ -451,7 +452,8 @@
                     "music_sound_stops": "resource/sound/default/music_stops.mp3",
                     "start_playlist_play": "resource/sound/default/start_playlist_play.mp3",
                     "play_answer_error": "resource/sound/default/play_answer_error.mp3",
-                    "stt_to_text_error": "resource/sound/default/stt_to_text_error.mp3"
+                    "stt_to_text_error": "resource/sound/default/stt_to_text_error.mp3",
+                    "connected_successfully": "resource/sound/default/connected_successfully.mp3"
                 },
                 "welcome": {
                     "active": true,
@@ -745,6 +747,36 @@
             "limit_backup_files": 5,
             "setAccessType": "offline",
             "setPrompt": "consent"
+        }
+    },
+    "xiaozhi": {
+        "active": false,
+        "activation_status": false,
+        "start_the_protocol": "websocket",
+        "device_id": "",
+        "serial_number": "",
+        "hmac_key": "",
+        "device_activation_code": "",
+        "system_options": {
+            "client_id": "",
+            "device_id": "",
+            "network": {
+                "ota_version_url": "https://api.tenclass.net/xiaozhi/ota/",
+                "websocket_url": "",
+                "websocket_access_token": "",
+                "firmware": {
+                    "version": "",
+                    "url": ""
+                },
+                "mqtt_info": {
+                    "endpoint": "",
+                    "client_id": "",
+                    "username": "",
+                    "password": "",
+                    "publish_topic": "",
+                    "subscribe_topic": ""
+                }
+            }
         }
     }
 }

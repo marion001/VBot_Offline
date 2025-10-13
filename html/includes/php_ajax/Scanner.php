@@ -296,7 +296,6 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
 //Scan VBot Client trong Mạng Lan
   if (isset($_GET['VBot_Client_Device_Scaner'])) {
       $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/VBot_Client_Device_Scaner.py");
-  
       $connection = ssh2_connect($ssh_host, $ssh_port);
       if (!$connection) {
           echo json_encode([
@@ -306,7 +305,6 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
           ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
-  
       if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
           echo json_encode([
               'success' => false,
@@ -315,7 +313,6 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
           ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
-  
       $stream = ssh2_exec($connection, $CMD);
       if (!$stream) {
           echo json_encode([
@@ -325,17 +322,12 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
           ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
-  
       stream_set_blocking($stream, true);
-  
       $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
       $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
-  
       $output = stream_get_contents($stdout);
       $error_output = stream_get_contents($stderr);
-  
       fclose($stream);
-
       if (!empty($error_output)) {
           echo json_encode([
               'success' => false,
@@ -344,7 +336,6 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
           ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
           exit;
       }
-
       $json_output = json_decode($output, true);
       if (json_last_error() === JSON_ERROR_NONE) {
           echo json_encode($json_output, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -405,6 +396,48 @@ if (isset($_POST['showJsonData_Client'])) {
             'error' => $e->getMessage()
         ]);
     }
+	exit();
+}else if (isset($_POST['xiaozhi'])) {
+    $action = isset($_POST['action']) ? trim($_POST['action']) : '';
+    if ($action === 'unlink_reset_data') {
+		$Config['xiaozhi']['activation_status'] = false;
+		$Config['xiaozhi']['device_id'] = null;
+		$Config['xiaozhi']['serial_number'] = "";
+		$Config['xiaozhi']['hmac_key'] = "";
+		$Config['xiaozhi']['device_activation_code'] = "";
+		$Config['xiaozhi']['system_options']['client_id'] = "";
+		$Config['xiaozhi']['system_options']['device_id'] = "";
+		$Config['xiaozhi']['system_options']['network']['firmware']['version'] = "";
+		$Config['xiaozhi']['system_options']['network']['firmware']['url'] = "";
+		$Config['xiaozhi']['system_options']['network']['websocket_url'] = "";
+		$Config['xiaozhi']['system_options']['network']['websocket_access_token'] = "";
+		$Config['xiaozhi']['system_options']['network']['mqtt_info']['endpoint'] = "";
+		$Config['xiaozhi']['system_options']['network']['mqtt_info']['client_id'] = "";
+		$Config['xiaozhi']['system_options']['network']['mqtt_info']['username'] = "";
+		$Config['xiaozhi']['system_options']['network']['mqtt_info']['password'] = "";
+		$Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic'] = "";
+		$Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic'] = "";
+		$result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		if ($result_ConfigJson !== false) {
+			$messages = "Đã hủy liên kết và Reset lại dữ liệu cấu hình trên thiết bị này thành công, bạn cần truy cập trang chủ của Server để xóa liên kết với thiết bị này";
+		} else {
+			$messages = "Lỗi xảy ra khi hủy liên kết và Reset lại dữ liệu cấu hình";
+		}
+        echo json_encode([
+            'success' => true,
+            'message' => $messages,
+			'data' => []
+        ]);
+        exit;
+    } else {
+        echo json_encode([
+            'success' => false,
+            'message' => "action không hợp lệ hoặc thiếu: {$action}",
+			'data' => []
+        ]);
+        exit;
+    }
+	exit();
 }
 
 

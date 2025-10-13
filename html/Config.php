@@ -155,8 +155,6 @@
   $Config['smart_config']['speaker']['volume_step'] = intval($_POST['bot_volume_step']);
   $Config['smart_config']['speaker']['remember_last_volume'] = isset($_POST['remember_last_volume']) ? true : false;
   
-
-  
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
@@ -497,8 +495,14 @@
   $Config['smart_config']['auto_restart_program_error'] = isset($_POST['auto_restart_program_error']) ? true : false;
   $Config['smart_config']['fix_time_sync_error'] = isset($_POST['fix_time_sync_error']) ? true : false;
   
+  #Cập nhật XiaoZhi AI
+  $Config['xiaozhi']['active'] = isset($_POST['xiaozhi_ai_active']) ? true : false;
+  $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
+  $Config['xiaozhi']['system_options']['network']['ota_version_url'] = rtrim(trim($_POST['xiaozhi_ota_version_url']), '/') . '/';
+  #Cập nhật chế độ chạy toàn bộ chương trình
+  $Config['launch_source'] = !empty($_POST['launch_source']) ? $_POST['launch_source'] : 'VBot_Assistant';
+  
   ##############################################
-  // Khởi tạo mảng radio_data đã cập nhật
   // Cập nhật radio_data từ POST
   $updated_radio_data = [];
   foreach ($_POST as $key => $value) {
@@ -517,7 +521,6 @@
   // Lưu dữ liệu radio đã cập nhật vào cấu hình
   $Config['media_player']['radio_data'] = $updated_radio_data;
   ##########################################
-
 
   // Khởi tạo mảng newspaper đã cập nhật
   // Cập nhật newspaper
@@ -557,10 +560,8 @@
   } else {
       $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
   }
-  
   }else if ($_POST['stt_select'] === "stt_ggcloud_v2"){
-  
-  
+
   #Cập nhật json stt Google Cloud V2
   $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_v2_json_file_token'];
   json_decode($json_data_goolge_cloud_stt);
@@ -576,8 +577,7 @@
       $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
   }
   }
-  
-  
+
   #Cập nhật tts Google Cloud
   $json_data_goolge_cloud_tts = $_POST['tts_ggcloud_json_file_token'];
   json_decode($json_data_goolge_cloud_tts);
@@ -600,7 +600,7 @@
   } else {
       $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
   }
-  
+
   #Đồng thời Restart VBot nếu được nhấn
   if ($_POST['all_config_save'] === 'and_restart_VBot'){
       $CMD = "systemctl --user restart VBot_Offline.service";
@@ -618,7 +618,6 @@
           $messages[] = 'Không thể kết nối tới máy chủ SSH';
       }
   }
-  
   }
 
   #########################
@@ -646,7 +645,7 @@
       file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
       $messages[] = 'Cập nhật các giá trị trong Hotword Snowboy thành công';
   }
-  
+
   #Lưu các giá trị cấu hình chi tiết trong hotword Picovoice/Procupine
   if (isset($_POST['save_hotword_theo_lang'])) {
       $lang = $_POST['lang_hotword_get'];
@@ -803,6 +802,16 @@ $read_tts_token_google_cloud = '';
         <section class="section">
           <div class="row">
             <div class="col-lg-12">
+
+			<div class="row mb-3 align-items-center">
+			  <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi')"></i>:</label>
+			  <div class="col-sm-9">
+				<select class="form-select border-success" name="launch_source" id="launch_source">
+				  <option value="VBot_Assistant" <?php if ($Config['launch_source'] === "VBot_Assistant") echo "selected"; ?>>Chạy VBot Assistant</option>
+				  <option value="XiaoZhi_AI" <?php if ($Config['launch_source'] === "XiaoZhi_AI") echo "selected"; ?>>Chỉ Chạy XiaoZhi AI</option>
+				</select>
+			  </div>
+			</div>
               <div class="card accordion" id="accordion_button_ssh">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_ssh" aria-expanded="false" aria-controls="collapse_button_ssh">
@@ -866,7 +875,6 @@ $read_tts_token_google_cloud = '';
                         </div>
                       </div>
                     </div>
-					
                   </div>
                 </div>
               </div>
@@ -2694,6 +2702,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 							"chat_gpt" => "Chat GPT",
 							"zalo_assistant" => "Zalo AI Assistant",
 							"dify_ai" => "Dify AI Assistant",
+							"xiaozhi" => "XiaoZhi AI",
 							"customize_developer_assistant" => "DEV Custom Assistant: Dev_Assistant.py (Người Dùng Tự Code)"
 						];
 						for ($i = 0; $i < 7; $i++) {
@@ -3045,6 +3054,148 @@ if (file_exists($gemini_model_list_json_file)) {
                   </div>
                 </div>
               </div>
+
+
+      <div class="card accordion" id="accordion_button_xiaozhiai">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_xiaozhiai" aria-expanded="false" aria-controls="collapse_button_xiaozhiai">
+      Cấu Hình Bot XiaoZhi AI:</h5>
+      <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
+
+		<div class="row mb-3">
+		  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi AI')"></i> :</label>
+		  <div class="col-sm-9">
+			<div class="form-switch">
+			  <input class="form-check-input border-success" type="checkbox" name="xiaozhi_ai_active" id="xiaozhi_ai_active" <?php echo $Config['xiaozhi']['active'] ? 'checked' : ''; ?>>
+			</div>
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_ota_version_url" class="col-sm-3 col-form-label">Link/URL OTA Server <i class="bi bi-question-circle-fill" onclick="show_message('Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/')"></i>:</label>
+		  <div class="col-sm-9">
+			<input class="form-control border-success" type="text" name="xiaozhi_ota_version_url" id="xiaozhi_ota_version_url" value="<?php echo $Config['xiaozhi']['system_options']['network']['ota_version_url']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_start_the_protocol" class="col-sm-3 col-form-label">Giao Thức Kết Nối:</label>
+		  <div class="col-sm-9">
+			<select class="form-select border-success" name="xiaozhi_start_the_protocol" id="xiaozhi_start_the_protocol">
+			  <option value="websocket" <?php if ($Config['xiaozhi']['start_the_protocol'] === "websocket") echo "selected"; ?>>WebSocket</option>
+			  <option value="udp_mqtt" <?php if ($Config['xiaozhi']['start_the_protocol'] === "udp_mqtt") echo "selected"; ?> disabled>UDP + MQTT (Chưa hỗ trợ)</option>
+			</select>
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_activation_status" class="col-sm-3 col-form-label">Trạng Thái Liên Kết <i class="bi bi-question-circle-fill" onclick="show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+		<?php
+		$status = $Config['xiaozhi']['activation_status'];
+		if ($status === true || $status === "true" || $status === 1 || $status === "1") {
+			echo '<span class="text-success fw-bold"><i class="bi bi-check-lg"></i> Đã được liên kết với máy chủ</span>
+			<button type="button" class="btn btn-sm btn-danger ms-2" id="btn_get_activation_code" onclick="xiaozhi_unlink_reset_data()">
+			<i class="bi bi-link-45deg"></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu</button>';
+		} else {
+			echo '<span class="text-danger fw-bold"><i class="bi bi-x-circle"></i> Thiết Bị chưa được liên kết với máy chủ</span> ';
+			echo '<button disabled type="button" class="btn btn-sm btn-success ms-2" id="btn_get_activation_code">
+					<i class="bi bi-link-45deg"></i> Liên kết và lấy mã xác nhận</button>';
+		}
+		?>
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_websocket_url" class="col-sm-3 col-form-label">WebSocket Link/URL Server <i class="bi bi-question-circle-fill" onclick="show_message('Nhập địa chỉ Link/URL WebSocket của Server cần kết nối, Ví dụ: wss://api.tenclass.net/xiaozhi/v1/')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_websocket_url" id="xiaozhi_websocket_url" value="<?php echo $Config['xiaozhi']['system_options']['network']['websocket_url']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_firmware_version" class="col-sm-3 col-form-label">Phiên Bản Firmware <i class="bi bi-question-circle-fill" onclick="show_message('Nhập số phiên bản, Ví Dụ: 2.0.3')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_firmware_version" id="xiaozhi_firmware_version" value="<?php echo $Config['xiaozhi']['system_options']['network']['firmware']['version']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_device_id" class="col-sm-3 col-form-label">ID Thiết Bị <i class="bi bi-question-circle-fill" onclick="show_message('Mã ID định danh của thiết bị này do máy chủ cung cấp khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="number" name="xiaozhi_device_id" id="xiaozhi_device_id" value="<?php echo $Config['xiaozhi']['device_id']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_serial_number" class="col-sm-3 col-form-label">Serial Thiết Bị (SN-****) <i class="bi bi-question-circle-fill" onclick="show_message('Mã Serial định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_serial_number" id="xiaozhi_serial_number" value="<?php echo $Config['xiaozhi']['serial_number']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_hmac_key" class="col-sm-3 col-form-label">HMAC KEY <i class="bi bi-question-circle-fill" onclick="show_message('Mã HMAC Key định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_hmac_key" id="xiaozhi_hmac_key" value="<?php echo $Config['xiaozhi']['hmac_key']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_device_activation_code" class="col-sm-3 col-form-label">Mã Kích Hoạt Thiết Bị <i class="bi bi-question-circle-fill" onclick="show_message('Mã 6 số kích hoạt đăng ký thiết bị liên kết với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="number" name="xiaozhi_device_activation_code" id="xiaozhi_device_activation_code" value="<?php echo $Config['xiaozhi']['device_activation_code']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_client_id" class="col-sm-3 col-form-label">Client ID <i class="bi bi-question-circle-fill" onclick="show_message('Mã Client ID định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_client_id" id="xiaozhi_client_id" value="<?php echo $Config['xiaozhi']['system_options']['client_id']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mac_device_id" class="col-sm-3 col-form-label">Địa Chỉ MAC <i class="bi bi-question-circle-fill" onclick="show_message('Địa Chỉ MAC định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mac_device_id" id="xiaozhi_mac_device_id" value="<?php echo $Config['xiaozhi']['system_options']['device_id']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_websocket_access_token" class="col-sm-3 col-form-label">WebSocket Token <i class="bi bi-question-circle-fill" onclick="show_message('Mặc định là: test-token')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_websocket_access_token" id="xiaozhi_websocket_access_token" value="<?php echo $Config['xiaozhi']['system_options']['network']['websocket_access_token']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mqtt_endpoint" class="col-sm-3 col-form-label">MQTT Link/URL Server <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Link/URL Server tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ, Ví dụ: mqtt.xiaozhi.me')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_endpoint" id="xiaozhi_mqtt_endpoint" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['endpoint']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mqtt_client_id" class="col-sm-3 col-form-label">MQTT Client ID <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Client ID tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_client_id" id="xiaozhi_mqtt_client_id" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['client_id']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mqtt_username" class="col-sm-3 col-form-label">MQTT Tài Khoản <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Tài Khoản tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_username" id="xiaozhi_mqtt_username" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['username']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mqtt_password" class="col-sm-3 col-form-label">MQTT Mật Khẩu <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Mật Khẩu tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_password" id="xiaozhi_mqtt_password" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['password']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mqtt_publish_topic" class="col-sm-3 col-form-label">MQTT Publish Topic <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Publish Topic tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_publish_topic" id="xiaozhi_mqtt_publish_topic" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic']; ?>">
+		  </div>
+		</div>
+		<div class="row mb-3">
+		  <label for="xiaozhi_mqtt_subscribe_topic" class="col-sm-3 col-form-label">MQTT Subscribe Topic <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Publish Topic tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
+		  <div class="col-sm-9">
+			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_subscribe_topic" id="xiaozhi_mqtt_subscribe_topic" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic']; ?>">
+		  </div>
+		</div>
+      </div>
+      </div>
+      </div>
+
               <div class="card accordion" id="accordion_button_collapse_button_developer_customization">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" title="chế độ tùy chỉnh cho các lập trình viên, DEV" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_developer_customization" aria-expanded="false" aria-controls="collapse_button_developer_customization">
@@ -4482,7 +4633,6 @@ function uploadFilesWakeUP_Reply() {
 				show_message("Tham số truyền vào không hợp lệ");
 				return;
 		}
-
 		loading("show");
 		const data = JSON.stringify({
 			"type": 2,
@@ -4490,7 +4640,6 @@ function uploadFilesWakeUP_Reply() {
 			"action": led_action,
 			"value": led_value
 		});
-
 		const xhr = new XMLHttpRequest();
 		xhr.withCredentials = true;
 		xhr.addEventListener("readystatechange", function() {
@@ -4691,7 +4840,6 @@ function createAudio_Wakeup_reply(source_tts) {
 			+ "&speaker_speed=" + speakerSpeed
 			+ "&encode_type=1&text=" + encodedText;
 	}
-
   const xhr = new XMLHttpRequest();
   xhr.open("GET", url_tts, true);
   xhr.onreadystatechange = function () {
@@ -4706,7 +4854,6 @@ function createAudio_Wakeup_reply(source_tts) {
 				const playButton = document.getElementById("btn_play_audio_reply_out_p");
 				const downloadButton = document.getElementById("btn_download_audio_reply_out_p");
 				const adddButton = document.getElementById("add_use_this_wakeup_reply_sound");
-				 
 			  if (filePathInput && showww_reply_output_path) {
 				loading('hide');
 				filePathInput.value = data.file_path || "";
@@ -4730,6 +4877,41 @@ function createAudio_Wakeup_reply(source_tts) {
     }
   };
   xhr.send();
+}
+
+//Hủy liên kết đặt lại cấu hình dữ liệu XiaoZhi
+function xiaozhi_unlink_reset_data() {
+    if (!confirm("-Bạn có chắc chắn muốn hủy liên kết và đặt lại dữ liệu cấu hình XiaoZhi này không? \n\n-Khi được đặt lại, bạn cần truy cập trang chủ Server để xóa thiết bị đã liên kết này")) return;
+	loading('show');
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Scanner.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    var response = JSON.parse(xhr.responseText);
+                    var msg = response.message;
+                    if (response.success) {
+						loading('hide');
+                        if (confirm('-' +msg + "\n\n - Nhấn OK để áp dụng và tải lại trang này")) {
+                            location.reload();
+                        }
+                    } else {
+						loading('hide');
+                        show_message("Lỗi: " + msg);
+                    }
+                } catch (e) {
+					loading('hide');
+                    show_message("Lỗi khi đọc phản hồi từ server: " + e.message);
+                }
+            } else {
+				loading('hide');
+                show_message("Lỗi kết nối server (HTTP " + xhr.status + ")");
+            }
+        }
+    };
+    xhr.send("xiaozhi=1&action=unlink_reset_data");
 }
 
 //Lấy token zai_did tts_default

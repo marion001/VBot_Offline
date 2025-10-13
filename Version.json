@@ -1,12 +1,12 @@
 {
-    "version": "1.0.61",
+    "version": "1.0.62",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi tra cứu thời tiết, Tối ưu tăng tốc độ STT VBot Default (xử lý vod tự động nhận biết khi kết thúc câu lệnh)",
-    "releaseDate": "05/10/2025",
+    "description": "Tích Hợp XiaoZhi AI làm trợ lý ảo hoặc lựa chọn chỉ chạy 1 trong 2 là: XiaoZhi và VBot Assistant",
+    "releaseDate": "13/10/2025",
     "changes": [
         {
             "type": "feature",
-            "description": "Cần Cài Bổ Sung Thư Viện: 'pip install edge-tts==7.2.0'"
+            "description": "Cần Cài Bổ Sung 2 Thư Viện Sau: 'pip install py-machineid==0.8.1' và 'pip install opuslib==3.0.1'"
         },
         {
             "type": "fix",

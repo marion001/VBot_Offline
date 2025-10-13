@@ -487,14 +487,18 @@
                           Dify AI
                           </label>
                         </div>
-						
                         <div class="form-check">
                           <input class="form-check-input border-success" value="olli_active" type="checkbox" name="olli_active" id="olli_active" onclick="change_to_another_mode('olli', this.checked)" <?php if ($Config['virtual_assistant']['olli']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
                           Olli AI Assistant
                           </label>
                         </div>
-
+                        <div class="form-check">
+                          <input class="form-check-input border-success" value="xiaozhi_active" type="checkbox" name="xiaozhi_active" id="xiaozhi_active" onclick="change_to_another_mode('xiaozhi', this.checked)" <?php if ($Config['xiaozhi']['active'] === true) echo "checked"; ?>>
+                          <label class="form-check-label">
+                          XiaoZhi AI
+                          </label>
+                        </div>
                         <div class="form-check">
                           <input class="form-check-input border-success" value="dev_custom_assistant_active" type="checkbox" name="dev_custom_assistant_active" id="dev_custom_assistant_active" onclick="change_to_another_mode('dev_custom_assistant', this.checked)" <?php if ($Config['virtual_assistant']['customize_developer_assistant']['active'] === true) echo "checked"; ?>>
                           <label class="form-check-label">
@@ -984,6 +988,7 @@
                       document.getElementById('chat_gpt_active').checked = data.chat_gpt_active ? true : false;
                       document.getElementById('zalo_assistant_active').checked = data.zalo_assistant_active ? true : false;
                       document.getElementById('dify_ai_active').checked = data.dify_ai_active ? true : false;
+                      document.getElementById('xiaozhi_active').checked = data.xiaozhi_active ? true : false;
                       document.getElementById('olli_active').checked = data.olli_assistant_active ? true : false;
                       document.getElementById('dev_custom_assistant_active').checked = data.dev_custom_assistant ? true : false;
                       document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
