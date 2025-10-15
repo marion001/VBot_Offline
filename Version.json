@@ -1,8 +1,8 @@
 {
     "version": "1.0.62",
     "projectName": "Program VBot Offline",
-    "description": "Tích Hợp XiaoZhi AI làm trợ lý ảo hoặc lựa chọn chỉ chạy 1 trong 2 là: XiaoZhi và VBot Assistant",
-    "releaseDate": "13/10/2025",
+    "description": "Tích Hợp XiaoZhi AI làm trợ lý ảo hoặc lựa chọn chỉ chạy 1 trong 2 là: XiaoZhi và VBot Assistant, cho phép sử dụng nút nhấn WakeUP khi đang tắt Mic",
+    "releaseDate": "15/10/2025",
     "changes": [
         {
             "type": "feature",

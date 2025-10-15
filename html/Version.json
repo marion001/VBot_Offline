@@ -1,7 +1,7 @@
 {
     "version": "1.0.62",
     "projectName": "WebUI VBot Offline",
-    "description": "Tích Hợp XiaoZhi AI làm trợ lý ảo hoặc lựa chọn chỉ chạy 1 trong 2 là: XiaoZhi và VBot Assistant",
+    "description": "Tích Hợp XiaoZhi AI làm trợ lý ảo hoặc lựa chọn chỉ chạy 1 trong 2 là: XiaoZhi và VBot Assistant, Thêm cơ chế lấy mã xác thực trên giao diện WebUI",
     "releaseDate": "13/10/2025",
     "changes": [
         {

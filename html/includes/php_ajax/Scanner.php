@@ -5,7 +5,7 @@
   #Facebook Group: https://www.facebook.com/groups/1148385343358824
   #Facebook: https://www.facebook.com/TWFyaW9uMDAx
   
-  include '../../Configuration.php';
+include '../../Configuration.php';
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -59,7 +59,7 @@ if ($Config['contact_info']['user_login']['active']){
       
   	exit();
   }
-  
+
   if (isset($_GET['scan_alsamixer'])) {
       $CMD = 'amixer';
       $response = [
@@ -349,6 +349,40 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
       exit;
   }
 
+#Xác Thực, Liên Kết Với XiaoZhi
+if (isset($_GET['XiaoZhi_Active'])) {
+    $action = isset($_GET['action']) ? $_GET['action'] : '';
+    if ($action === 'get_device_info') {
+        //Lấy thông tin thiết bị
+        $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/XiaoZhi_Active.py");
+    } elseif ($action === 'signature_hmac') {
+        //Tạo chữ ký HMAC cho challenge
+        $challenge = isset($_GET['challenge']) ? escapeshellarg($_GET['challenge']) : "''";
+        $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/XiaoZhi_Active.py") . " --sign $challenge";
+    } else {
+		echo json_encode(['success' => false, 'message' => 'Tham số truyền vào không đúng, không hợp lệ']);
+        exit();
+    }
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH']);
+        exit();
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode(['success' => false, 'message' => 'Xác thực SSH không thành công.']);
+        exit();
+    }
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh trên máy chủ SSH.']);
+        exit();
+    }
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $output = stream_get_contents($stream_out);
+    echo $output;
+    exit();
+}
 
 // Kiểm tra nếu có dữ liệu POST với showJsonData_Client
 if (isset($_POST['showJsonData_Client'])) {
@@ -429,7 +463,45 @@ if (isset($_POST['showJsonData_Client'])) {
 			'data' => []
         ]);
         exit;
-    } else {
+    }
+    else if ($action === 'active_success_save_data') {
+        $json_data = isset($_POST['json_data']) ? $_POST['json_data'] : '';
+        $data = json_decode($json_data, true);
+        if (empty($data)) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Không có dữ liệu JSON hợp lệ'
+            ]);
+            exit;
+        }
+		$Config['xiaozhi']['activation_status'] = $data['activation_status'];
+		$Config['xiaozhi']['device_activation_code'] = $data['activation_code'];
+		$Config['xiaozhi']['device_id'] = $data['device_id'];
+		$Config['xiaozhi']['hmac_key'] = $data['hmac_signature'];
+		$Config['xiaozhi']['serial_number'] = $data['serial_number'];
+		$Config['xiaozhi']['system_options']['client_id'] = $data['client_id'];
+		$Config['xiaozhi']['system_options']['device_id'] = $data['mac_address'];
+		$Config['xiaozhi']['system_options']['network']['websocket_url'] = $data['websocket_url'];
+		$Config['xiaozhi']['system_options']['network']['websocket_access_token'] = $data['websocket_token'];
+		$Config['xiaozhi']['system_options']['network']['mqtt_info'] = $data['mqtt'];
+		$Config['xiaozhi']['system_options']['network']['firmware']['version'] = $data['firmware_version'];
+		$result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		if ($result_ConfigJson !== false) {
+			echo json_encode([
+            'success' => true,
+            'message' => 'Đã Kích Hoạt Và Lưu Dữ Liệu Thành Công, Hãy tải lại trang này và Khởi động lại chương trình để áp dụng dữ liệu mới',
+            'data' => $json_data
+        ]);
+		} else {
+			echo json_encode([
+				'success' => false,
+				'message' => 'Lỗi xảy ra khi lưu dữ liệu kích hoạt',
+				'data' => $json_data
+			]);
+		}
+        exit;
+    }
+	else {
         echo json_encode([
             'success' => false,
             'message' => "action không hợp lệ hoặc thiếu: {$action}",

@@ -752,11 +752,13 @@
     "xiaozhi": {
         "active": false,
         "activation_status": false,
+        "time_out_output_stream": 0.2,
         "start_the_protocol": "websocket",
         "device_id": "",
         "serial_number": "",
         "hmac_key": "",
         "device_activation_code": "",
+        "time_out": 28,
         "system_options": {
             "client_id": "",
             "device_id": "",
