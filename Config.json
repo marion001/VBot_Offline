@@ -758,7 +758,8 @@
         "serial_number": "",
         "hmac_key": "",
         "device_activation_code": "",
-        "time_out": 28,
+        "tts_time_out": 20,
+        "reconnection_timeout": 3,
         "system_options": {
             "client_id": "",
             "device_id": "",

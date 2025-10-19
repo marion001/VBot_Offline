@@ -454,11 +454,13 @@ if (isset($_POST['showJsonData_Client'])) {
 		$result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		if ($result_ConfigJson !== false) {
 			$messages = "Đã hủy liên kết và Reset lại dữ liệu cấu hình trên thiết bị này thành công, bạn cần truy cập trang chủ của Server để xóa liên kết với thiết bị này";
+			$success = true;
 		} else {
 			$messages = "Lỗi xảy ra khi hủy liên kết và Reset lại dữ liệu cấu hình";
+			$success = false;
 		}
         echo json_encode([
-            'success' => true,
+            'success' => $success,
             'message' => $messages,
 			'data' => []
         ]);
@@ -501,6 +503,40 @@ if (isset($_POST['showJsonData_Client'])) {
 		}
         exit;
     }
+	else if ($action === 'activation_status_false') {
+		$Config['xiaozhi']['activation_status'] = false;
+		$result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		if ($result_ConfigJson !== false) {
+			$messages = "Đã yêu cầu liên kết xác thực lại với máy chủ, Chương trình sẽ tự động xác thực lại ở phiên khởi động lần tới. Hoặc nhấn vào đây để: <center><button type='button' class='btn btn-sm btn-success ms-2' onclick='xiaozhi_active_device_info()'><i class='bi bi-link-45deg'></i> Tiến Hành Xác Thực Lại</button></center><br/>";
+			$success = true;
+		} else {
+			$messages = "Lỗi xảy ra khi yêu cầu liên kết xác thực lại với máy chủ";
+			$success = false;
+		}
+        echo json_encode([
+            'success' => $success,
+            'message' => $messages,
+			'data' => []
+        ]);
+        exit;
+	}
+	else if ($action === 'activation_status_true') {
+		$Config['xiaozhi']['activation_status'] = true;
+		$result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		if ($result_ConfigJson !== false) {
+			$messages = "Thay đổi giá trị thành công, thiết bị đã được liên kết với máy chủ Server";
+			$success = true;
+		} else {
+			$messages = "Thay đổi giá trị thất bại, thiết bị đã được liên kết với máy chủ Server";
+			$success = false;
+		}
+        echo json_encode([
+            'success' => $success,
+            'message' => $messages,
+			'data' => []
+        ]);
+        exit;
+	}
 	else {
         echo json_encode([
             'success' => false,

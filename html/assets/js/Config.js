@@ -785,7 +785,7 @@ async function xiaozhi_active_device_info() {
                 });
                 if (activateResp.status === 202) {
 					showMessagePHP("Đang chờ nhập mã kích hoạt: "+active_number_code, 5);
-					show_message("<b class='text-danger'>Mã Kích Hoạt Thiết Bị Của Bạn Là: <h5><center>"+active_number_code+"</center></h5></b>-Vui Lòng Nhập Mã Kích Hoạt Này Trên Trang Chủ Của Server");
+					show_message("<b class='text-danger'>Mã Kích Hoạt Thiết Bị Của Bạn Là: <h5><center>"+active_number_code+"</center> Vui Lòng truy Cập: " + (result.activation.message.replace(/(\r?\n|\\n)(.*)/, " và nhập mã: $2")) + "</h5></b>-Vui Lòng Nhập Mã Kích Hoạt Này Trên Trang Chủ Của Server");
                     await new Promise(r => setTimeout(r, 3000));
                 } else if (activateResp.status === 200) {
 					loading("hide");
@@ -841,7 +841,8 @@ async function xiaozhi_active_device_info() {
             }
         } else {
 			loading("hide");
-			show_message("<b class='text-success'>Thiết bị đã được liên kết với máy chủ Server</b>");
+			show_message("<b class='text-success'>Thiết bị đã được liên kết với máy chủ Server, Hãy tải lại trang này để làm mới dữ liệu cấu hình</b>");
+			xiaozhi_activation_status_true();
         }
     } catch (error) {
 		loading("hide");
@@ -849,40 +850,74 @@ async function xiaozhi_active_device_info() {
     }
 }
 
-//Hủy liên kết đặt lại cấu hình dữ liệu XiaoZhi
-function xiaozhi_unlink_reset_data() {
-    if (!confirm("-Bạn có chắc chắn muốn hủy liên kết và đặt lại dữ liệu cấu hình XiaoZhi này không? \n\n-Khi được đặt lại, bạn cần truy cập trang chủ Server để xóa thiết bị đã liên kết này")) return;
-	loading('show');
+//Cấu hình, thành động thao tác với xiaozhi
+function xiaozhi_action(action, confirmText, callback) {
+    if (!confirm(confirmText)) return;
+    loading('show');
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Scanner.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
+            loading('hide');
             if (xhr.status === 200) {
                 try {
                     var response = JSON.parse(xhr.responseText);
-                    var msg = response.message;
                     if (response.success) {
-						loading('hide');
-                        if (confirm('-' +msg + "\n\n - Nhấn OK để áp dụng và tải lại trang này")) {
-                            location.reload();
-                        }
+                        callback(true, response.message);
                     } else {
-						loading('hide');
-                        show_message("Lỗi: " + msg);
+                        callback(false, response.message);
                     }
                 } catch (e) {
-					loading('hide');
-                    show_message("Lỗi khi đọc phản hồi từ server: " + e.message);
+                    callback(false, "Lỗi khi đọc phản hồi từ server: " + e.message);
                 }
             } else {
-				loading('hide');
-                show_message("Lỗi kết nối server (HTTP " + xhr.status + ")");
+                callback(false, "Lỗi kết nối server (HTTP " + xhr.status + ")");
             }
         }
     };
-    xhr.send("xiaozhi=1&action=unlink_reset_data");
+    xhr.send("xiaozhi=1&action=" + encodeURIComponent(action));
 }
+
+//Hủy liên kết và đặt lại cấu hình
+function xiaozhi_unlink_reset_data() {
+    xiaozhi_action(
+        "unlink_reset_data",
+        "-Bạn có chắc chắn muốn hủy liên kết và đặt lại dữ liệu cấu hình XiaoZhi này không?\n\n-Khi được đặt lại, bạn cần truy cập trang chủ Server để xóa thiết bị đã liên kết này",
+        function(success, msg) {
+            if (success) {
+                if (confirm('-' + msg + "\n\n - Nhấn OK để áp dụng và tải lại trang này")) {
+                    location.reload();
+                }
+            } else {
+                show_message("Lỗi: " + msg);
+            }
+        }
+    );
+}
+
+//Đặt lại activation_status = false
+function xiaozhi_activation_status_false() {
+    xiaozhi_action(
+        "activation_status_false",
+        "-Bạn có chắc chắn muốn chạy lại liên kết xác thực với máy chủ không?",
+        function(success, msg) {
+            show_message(msg);
+        }
+    );
+}
+
+//Đặt lại activation_status = true
+function xiaozhi_activation_status_true() {
+    xiaozhi_action(
+        "activation_status_true",
+        "-Bạn có chắc chắn muốn chạy lại liên kết xác thực với máy chủ không?",
+        function(success, msg) {
+            showMessagePHP(msg, 5);
+        }
+    );
+}
+
 
 //Lấy token zai_did tts_default
 function get_token_tts_default_zai_did() {

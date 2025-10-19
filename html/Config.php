@@ -17,7 +17,6 @@ if ($Config['contact_info']['user_login']['active']) {
     }
 }
 
-
 if ($Config['backup_upgrade']['config_json']['active'] === true) {
     $directoryPath_Backup_Config = $Config['backup_upgrade']['config_json']['backup_path'];
     //Kiểm tra xem thư mục Backup_Config có tồn tại hay không
@@ -28,7 +27,7 @@ if ($Config['backup_upgrade']['config_json']['active'] === true) {
     }
 }
 
-  $read_stt_token_google_cloud = null;
+$read_stt_token_google_cloud = null;
 
 //Khôi phục dữ liệu File Config.json
 if (isset($_POST['start_recovery_config_json'])) {
@@ -78,10 +77,9 @@ if (isset($_POST['start_recovery_config_json'])) {
     }
 }
 
-
   #Lưu lại các giá trị Config.json
   if (isset($_POST['all_config_save'])) {
-  
+
   if ($Config['backup_upgrade']['config_json']['active'] === true){
   // Lấy ngày và giờ hiện tại
   $dateTime = new DateTime();
@@ -103,11 +101,11 @@ if (isset($_POST['start_recovery_config_json'])) {
       }
   }
   }
-  
+
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG mic
   $Config['smart_config']['mic']['id'] = intval($_POST['mic_id']);
   $Config['smart_config']['mic']['scan_on_boot'] = isset($_POST['mic_scan_on_boot']) ? true : false;
-  
+
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG API
   $Config['api']['active'] = isset($_POST['api_active']) ? true : false;
   $Config['api']['port'] = intval($_POST['api_port']);
@@ -119,7 +117,7 @@ if (isset($_POST['start_recovery_config_json'])) {
   $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
   $Config['web_interface']['errors_display'] = isset($_POST['webui_errors_display']) ? true : false;
   $Config['web_interface']['external']['active'] = isset($_POST['webui_external']) ? true : false;
-  
+
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
   $Config['home_assistant']['minimum_threshold'] = floatval($_POST['hass_minimum_threshold']);
   $Config['home_assistant']['lowest_to_display_logs'] = floatval($_POST['hass_lowest_to_display_logs']);
@@ -129,7 +127,7 @@ if (isset($_POST['start_recovery_config_json'])) {
   $Config['home_assistant']['long_token'] = $_POST['hass_long_token'];
   $Config['home_assistant']['active'] = isset($_POST['hass_active']) ? true : false;
   $Config['home_assistant']['custom_commands']['active'] = isset($_POST['hass_custom_commands_active']) ? true : false;
-  
+
   #Cập nhật các giá trị trong MQTT Broker
   $Config['mqtt_broker']['mqtt_active'] = isset($_POST['mqtt_active']) ? true : false;
   $Config['mqtt_broker']['mqtt_show_logs_reconnect'] = isset($_POST['mqtt_show_logs_reconnect']) ? true : false;
@@ -502,7 +500,8 @@ if (isset($_POST['start_recovery_config_json'])) {
   #Cập nhật XiaoZhi AI
   $Config['xiaozhi']['active'] = isset($_POST['xiaozhi_ai_active']) ? true : false;
   $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
-  $Config['xiaozhi']['time_out'] = intval($_POST['xiaozhi_time_out']);
+  $Config['xiaozhi']['tts_time_out'] = intval($_POST['xiaozhi_tts_time_out']);
+  $Config['xiaozhi']['reconnection_timeout'] = intval($_POST['xiaozhi_reconnection_timeout']);
   $Config['xiaozhi']['time_out_output_stream'] = floatval($_POST['xiaozhi_time_out_output_stream']);
   $Config['xiaozhi']['system_options']['network']['ota_version_url'] = rtrim(trim($_POST['xiaozhi_ota_version_url']), '/') . '/';
   #Cập nhật chế độ chạy toàn bộ chương trình
@@ -3068,147 +3067,107 @@ if (file_exists($gemini_model_list_json_file)) {
       Cấu Hình Bot XiaoZhi AI:</h5>
       <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
 
-		<div class="row mb-3">
-		  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi AI')"></i> :</label>
-		  <div class="col-sm-9">
-			<div class="form-switch">
-			  <input class="form-check-input border-success" type="checkbox" name="xiaozhi_ai_active" id="xiaozhi_ai_active" <?php echo $Config['xiaozhi']['active'] ? 'checked' : ''; ?>>
+		<?php
+		function input_field($id, $label, $value = '', $disabled = false, $type = 'text', $help = '', $extra_class = 'border-success') {
+			$disabled_attr = $disabled ? 'disabled' : '';
+			$help_icon = $help ? " <i class='bi bi-question-circle-fill' onclick=\"show_message('$help')\"></i>" : '';
+			return "
+			<div class='row mb-3'>
+			  <label for='$id' class='col-sm-3 col-form-label'>$label$help_icon:</label>
+			  <div class='col-sm-9'>
+				<input $disabled_attr class='form-control $extra_class' type='$type' name='$id' id='$id' value='" . htmlspecialchars($value) . "'>
+			  </div>
+			</div>";
+		}
+
+		function select_field($id, $label, $options, $selected) {
+			$html = "
+			<div class='row mb-3'>
+			  <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
+			  <div class='col-sm-9'>
+				<select class='form-select border-success' name='$id' id='$id'>";
+			foreach ($options as $value => $text) {
+				$sel = ($value === $selected) ? 'selected' : '';
+				$html .= "<option value='$value' $sel>$text</option>";
+			}
+			$html .= "</select></div></div>";
+			return $html;
+		}
+		//Kích hoạt
+		echo "
+		<div class='row mb-3'>
+		  <label class='col-sm-3 col-form-label'>Kích hoạt 
+			<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi AI')\"></i> :
+		  </label>
+		  <div class='col-sm-9'>
+			<div class='form-switch'>
+			  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_active' id='xiaozhi_ai_active' " . 
+			  (!empty($Config['xiaozhi']['active']) ? 'checked' : '') . ">
 			</div>
 		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_ota_version_url" class="col-sm-3 col-form-label">Link/URL OTA Server <i class="bi bi-question-circle-fill" onclick="show_message('Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/')"></i>:</label>
-		  <div class="col-sm-9">
-			<input class="form-control border-success" type="text" name="xiaozhi_ota_version_url" id="xiaozhi_ota_version_url" value="<?php echo $Config['xiaozhi']['system_options']['network']['ota_version_url']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_start_the_protocol" class="col-sm-3 col-form-label">Giao Thức Kết Nối:</label>
-		  <div class="col-sm-9">
-			<select class="form-select border-success" name="xiaozhi_start_the_protocol" id="xiaozhi_start_the_protocol">
-			  <option value="websocket" <?php if ($Config['xiaozhi']['start_the_protocol'] === "websocket") echo "selected"; ?>>WebSocket</option>
-			  <option value="udp_mqtt" <?php if ($Config['xiaozhi']['start_the_protocol'] === "udp_mqtt") echo "selected"; ?> disabled>UDP + MQTT (Chưa hỗ trợ)</option>
-			</select>
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_activation_status" class="col-sm-3 col-form-label">Trạng Thái Liên Kết <i class="bi bi-question-circle-fill" onclick="show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-		<?php
-		$status = $Config['xiaozhi']['activation_status'];
+		</div>";
+		//Link OTA
+		echo input_field(
+			'xiaozhi_ota_version_url',
+			'Link/URL OTA Server',
+			$Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '',
+			false,
+			'text',
+			"Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/"
+		);
+		//Giao thức
+		echo select_field(
+			'xiaozhi_start_the_protocol',
+			'Giao Thức Kết Nối',
+			['websocket' => 'WebSocket', 'udp_mqtt' => 'UDP + MQTT (Chưa hỗ trợ)'],
+			$Config['xiaozhi']['start_the_protocol'] ?? 'websocket'
+		);
+		//Trạng thái liên kết
+		$status = $Config['xiaozhi']['activation_status'] ?? false;
+		echo "<div class='row mb-3'>
+		  <label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
+			<i class='bi bi-question-circle-fill' onclick=\"show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')\"></i>:
+		  </label>
+		  <div class='col-sm-9'>";
 		if ($status === true || $status === "true" || $status === 1 || $status === "1") {
-			echo '<span class="text-success fw-bold"><i class="bi bi-check-lg"></i> Đã được liên kết với máy chủ</span>
-			<button type="button" class="btn btn-sm btn-danger ms-2" onclick="xiaozhi_unlink_reset_data()">
-			<i class="bi bi-link-45deg"></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu</button>';
+			echo "<span class='text-success fw-bold'><i class='bi bi-check-lg'></i> Đã được liên kết với máy chủ</span>
+			<button type='button' class='btn btn-sm btn-danger ms-2' onclick='xiaozhi_unlink_reset_data()'>
+			  <i class='bi bi-link-45deg'></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu
+			</button>
+			<button type='button' class='btn btn-sm btn-warning ms-2' onclick='xiaozhi_activation_status_false()'>
+			  <i class='bi bi-link-45deg'></i>Liên Kết Xác Thực Lại
+			</button>";
 		} else {
-			echo '<span class="text-danger fw-bold"><i class="bi bi-x-circle"></i> Thiết Bị chưa được liên kết với máy chủ</span> ';
-			echo '<button type="button" class="btn btn-sm btn-success ms-2" onclick="xiaozhi_active_device_info()"><i class="bi bi-link-45deg"></i> Liên kết và lấy mã xác nhận</button>';
+			echo "<span class='text-danger fw-bold'><i class='bi bi-x-circle'></i> Thiết Bị chưa được liên kết với máy chủ</span>
+			<button type='button' class='btn btn-sm btn-success ms-2' onclick='xiaozhi_active_device_info()'>
+			  <i class='bi bi-link-45deg'></i> Liên kết và lấy mã xác nhận
+			</button>";
 		}
+		echo "</div></div>";
+		//Các input tĩnh khác
+		echo input_field('xiaozhi_websocket_url', 'WebSocket Link/URL Server', $Config['xiaozhi']['system_options']['network']['websocket_url'] ?? '', true, 'text', 'Ví dụ: wss://api.tenclass.net/xiaozhi/v1/', 'border-danger');
+		echo input_field('xiaozhi_firmware_version', 'Phiên Bản Firmware', $Config['xiaozhi']['system_options']['network']['firmware']['version'] ?? '', true, 'text', 'Nhập số phiên bản, Ví Dụ: 2.0.3', 'border-danger');
+		echo input_field('xiaozhi_device_id', 'ID Thiết Bị', $Config['xiaozhi']['device_id'] ?? '', true, 'number', 'Mã ID định danh của thiết bị', 'border-danger');
+		echo input_field('xiaozhi_serial_number', 'Serial Thiết Bị (SN-****)', $Config['xiaozhi']['serial_number'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_hmac_key', 'HMAC KEY Signature', $Config['xiaozhi']['hmac_key'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_device_activation_code', 'Mã Kích Hoạt Thiết Bị', $Config['xiaozhi']['device_activation_code'] ?? '', true, 'number', '', 'border-danger');
+		echo input_field('xiaozhi_client_id', 'Client ID', $Config['xiaozhi']['system_options']['client_id'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mac_device_id', 'Địa Chỉ MAC', $Config['xiaozhi']['system_options']['device_id'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_websocket_access_token', 'WebSocket Token', $Config['xiaozhi']['system_options']['network']['websocket_access_token'] ?? '', true, 'text', 'Mặc định là: test-token', 'border-danger');
+		//MQTT section
+		$net = $Config['xiaozhi']['system_options']['network']['mqtt_info'] ?? [];
+		echo input_field('xiaozhi_mqtt_endpoint', 'MQTT Link/URL Server', $net['endpoint'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $net['client_id'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mqtt_username', 'MQTT Tài Khoản', $net['username'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $net['password'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $net['publish_topic'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $net['subscribe_topic'] ?? '', true, 'text', '', 'border-danger');
+		//Timeout
+		echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 1, false, 'number', 'Thời gian chờ kết thúc tối đa phát audio cuối');
+		echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, false, 'number', 'Thời gian chờ phản hồi tối đa khi nhận dữ liệu trả về từ máy chủ');
+		echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, false, 'number', 'Thời gian chờ kết nối lại tối đa khi bị mất kết nối');
 		?>
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_websocket_url" class="col-sm-3 col-form-label">WebSocket Link/URL Server <i class="bi bi-question-circle-fill" onclick="show_message('Nhập địa chỉ Link/URL WebSocket của Server cần kết nối, Ví dụ: wss://api.tenclass.net/xiaozhi/v1/')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_websocket_url" id="xiaozhi_websocket_url" value="<?php echo $Config['xiaozhi']['system_options']['network']['websocket_url']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_firmware_version" class="col-sm-3 col-form-label">Phiên Bản Firmware <i class="bi bi-question-circle-fill" onclick="show_message('Nhập số phiên bản, Ví Dụ: 2.0.3')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_firmware_version" id="xiaozhi_firmware_version" value="<?php echo $Config['xiaozhi']['system_options']['network']['firmware']['version']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_device_id" class="col-sm-3 col-form-label">ID Thiết Bị <i class="bi bi-question-circle-fill" onclick="show_message('Mã ID định danh của thiết bị này do máy chủ cung cấp khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="number" name="xiaozhi_device_id" id="xiaozhi_device_id" value="<?php echo $Config['xiaozhi']['device_id']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_serial_number" class="col-sm-3 col-form-label">Serial Thiết Bị (SN-****) <i class="bi bi-question-circle-fill" onclick="show_message('Mã Serial định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_serial_number" id="xiaozhi_serial_number" value="<?php echo $Config['xiaozhi']['serial_number']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_hmac_key" class="col-sm-3 col-form-label">HMAC KEY Signature <i class="bi bi-question-circle-fill" onclick="show_message('Mã HMAC Key định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_hmac_key" id="xiaozhi_hmac_key" value="<?php echo $Config['xiaozhi']['hmac_key']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_device_activation_code" class="col-sm-3 col-form-label">Mã Kích Hoạt Thiết Bị <i class="bi bi-question-circle-fill" onclick="show_message('Mã 6 số kích hoạt đăng ký thiết bị liên kết với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="number" name="xiaozhi_device_activation_code" id="xiaozhi_device_activation_code" value="<?php echo $Config['xiaozhi']['device_activation_code']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_client_id" class="col-sm-3 col-form-label">Client ID <i class="bi bi-question-circle-fill" onclick="show_message('Mã Client ID định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_client_id" id="xiaozhi_client_id" value="<?php echo $Config['xiaozhi']['system_options']['client_id']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mac_device_id" class="col-sm-3 col-form-label">Địa Chỉ MAC <i class="bi bi-question-circle-fill" onclick="show_message('Địa Chỉ MAC định danh của thiết bị này sẽ được kiển thị khi được kích hoạt, liên kết thành công với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mac_device_id" id="xiaozhi_mac_device_id" value="<?php echo $Config['xiaozhi']['system_options']['device_id']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_websocket_access_token" class="col-sm-3 col-form-label">WebSocket Token <i class="bi bi-question-circle-fill" onclick="show_message('Mặc định là: test-token')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_websocket_access_token" id="xiaozhi_websocket_access_token" value="<?php echo $Config['xiaozhi']['system_options']['network']['websocket_access_token']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mqtt_endpoint" class="col-sm-3 col-form-label">MQTT Link/URL Server <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Link/URL Server tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ, Ví dụ: mqtt.xiaozhi.me')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_endpoint" id="xiaozhi_mqtt_endpoint" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['endpoint']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mqtt_client_id" class="col-sm-3 col-form-label">MQTT Client ID <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Client ID tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_client_id" id="xiaozhi_mqtt_client_id" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['client_id']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mqtt_username" class="col-sm-3 col-form-label">MQTT Tài Khoản <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Tài Khoản tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_username" id="xiaozhi_mqtt_username" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['username']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mqtt_password" class="col-sm-3 col-form-label">MQTT Mật Khẩu <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Mật Khẩu tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_password" id="xiaozhi_mqtt_password" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['password']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mqtt_publish_topic" class="col-sm-3 col-form-label">MQTT Publish Topic <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Publish Topic tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_publish_topic" id="xiaozhi_mqtt_publish_topic" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_mqtt_subscribe_topic" class="col-sm-3 col-form-label">MQTT Subscribe Topic <i class="bi bi-question-circle-fill" onclick="show_message('MQTT Publish Topic tự động hiển thị khi được kết nối và kích hoạt đăng ký với máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input disabled class="form-control border-danger" type="text" name="xiaozhi_mqtt_subscribe_topic" id="xiaozhi_mqtt_subscribe_topic" value="<?php echo $Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_time_out_output_stream" class="col-sm-3 col-form-label">Time Out Audio <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ kết thúc tối đa phát audio cuối')"></i>:</label>
-		  <div class="col-sm-9">
-			<input class="form-control border-success" type="number" step="0.1" min="0.1" max="2" name="xiaozhi_time_out_output_stream" id="xiaozhi_time_out_output_stream" value="<?php echo $Config['xiaozhi']['time_out_output_stream']; ?>">
-		  </div>
-		</div>
-		<div class="row mb-3">
-		  <label for="xiaozhi_time_out" class="col-sm-3 col-form-label">Thời Gian Chờ Tối Đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa khi nhận dữ liệu trả về từ máy chủ')"></i>:</label>
-		  <div class="col-sm-9">
-			<input class="form-control border-success" type="number" step="1" min="5" name="xiaozhi_time_out" id="xiaozhi_time_out" value="<?php echo $Config['xiaozhi']['time_out']; ?>">
-		  </div>
-		</div>
+
       </div>
       </div>
       </div>
@@ -3627,66 +3586,76 @@ echo "\n";
                     <div class="card">
                       <div class="card-body">
                         <h5 class="card-title">Google Cloud Drive <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình thiết lập đồng bộ dữ liệu lên Google Cloud Drive<br/>- Nếu có nhiều thiết bị cần đồng bộ lên Google Cloud Drive thì cần thay đổi tên của 3 thư mục để tránh bị trùng lặp với dữ liệu của thiết bị khác<br/><a href=\'https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true\' target=\'_bank\'><b>Hướng dẫn tạo file json</b></a>')"></i> | <a href="GCloud_Drive.php" title="Truy Cập"> <i class="bi bi-box-arrow-up-right"></i> Truy Cập</a> :</h5>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu dữ liệu lê Google Cloud Drive')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="form-switch">
-                              <input class="form-check-input border-success" type="checkbox" name="google_cloud_drive_active" id="google_cloud_drive_active" <?php echo $Config['backup_upgrade']['google_cloud_drive']['active'] ? 'checked' : ''; ?>>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Cha Sao Lưu <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
-                          <div class="col-sm-9">
-                            <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_name" id="gcloud_drive_backup_folder_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name']; ?>">
-                            <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Chương Trình VBot <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
-                          <div class="col-sm-9">
-                            <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_vbot_name" id="gcloud_drive_backup_folder_vbot_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name']; ?>">
-                            <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu Giao Diện VBot <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
-                          <div class="col-sm-9">
-                            <input required class="form-control border-success" type="text" name="gcloud_drive_backup_folder_interface_name" id="gcloud_drive_backup_folder_interface_name" value="<?php echo $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name']; ?>">
-                            <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu trên Google Drive</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kiểu Loại Truy Cập <i class="bi bi-question-circle-fill" onclick="show_message('- Để giá trị là offline thì sẽ tự động làm mới lại mã token xác thực khi hết hạn<br/>- Để giá trị là online thì mỗi lần mã token xác thực hết hạn bạn cần lấy lại bằng thao tác thủ công')"></i> : </label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-danger" name="gcloud_drive_setAccessType" id="gcloud_drive_setAccessType">
-                              <option value="offline" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setAccessType'] === "offline") echo "selected"; ?>>Offline (Tự động làm mới Token)</option>
-                              <option value="online" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setAccessType'] === "online") echo "selected"; ?>>Online (Làm mới Token thủ công)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Đặt Lời Nhắc Khi Xác Thực 
-                          <i class="bi bi-question-circle-fill" 
-                            onclick="show_message('- none: Không hiển thị bất kỳ trang yêu cầu quyền nào từ Google. ' + 
-                            'Nếu người dùng đã đăng nhập và đã cấp quyền, họ sẽ được chuyển hướng ngay lập tức. ' + 
-                            'Nếu không có quyền hoặc người dùng chưa đăng nhập, yêu cầu sẽ trả về lỗi.<br/><br/> ' + 
-                            '- consent: Luôn yêu cầu người dùng đồng ý cấp quyền, ngay cả khi họ đã cấp quyền trước đó. ' + 
-                            'Điều này hữu ích khi bạn muốn người dùng xác nhận lại các quyền đã cấp.<br/><br/> ' + 
-                            '- select_account: Hiển thị một danh sách các tài khoản Google để người dùng chọn tài khoản muốn sử dụng ' + 
-                            'nếu họ đã đăng nhập nhiều tài khoản.<br/><br/> ' + 
-                            '- consent select_account: Hiển thị cả hộp chọn tài khoản và yêu cầu người dùng xác nhận lại quyền truy cập.')">
-                          </i> : 
-                          </label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-danger" name="gcloud_drive_setPrompt" id="gcloud_drive_setPrompt">
-                              <option value="none" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "none") echo "selected"; ?>>None (Không hiển thị)</option>
-                              <option value="consent" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "consent") echo "selected"; ?>>Consent (Yêu cầu đồng ý cấp quyền)</option>
-                              <option value="select_account" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "select_account") echo "selected"; ?>>Select Account (Chọn tài khoản muốn dùng)</option>
-                              <option value="consent select_account" <?php if ($Config['backup_upgrade']['google_cloud_drive']['setPrompt'] === "consent select_account") echo "selected"; ?>>Consent Select Account (Chọn và Yêu cầu đồng ý cấp quyền)</option>
-                            </select>
-                          </div>
-                        </div>
+
+						<?php
+						echo "
+						<div class='row mb-3'>
+						  <label class='col-sm-3 col-form-label'>
+							Kích hoạt 
+							<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc Tắt chức năng sao lưu dữ liệu lên Google Cloud Drive')\"></i> :
+						  </label>
+						  <div class='col-sm-9'>
+							<div class='form-switch'>
+							  <input class='form-check-input border-success' type='checkbox' 
+									 name='google_cloud_drive_active' id='google_cloud_drive_active' 
+									 " . ($Config['backup_upgrade']['google_cloud_drive']['active'] ? 'checked' : '') . ">
+							</div>
+						  </div>
+						</div>";
+
+						echo input_field(
+							'gcloud_drive_backup_folder_name',
+							"Tên Thư Mục Cha Sao Lưu <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>",
+							$Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'],
+							false,
+							'text',
+							"Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới"
+						);
+
+						echo input_field(
+							'gcloud_drive_backup_folder_vbot_name',
+							"Tên Thư Mục Sao Lưu Chương Trình VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>",
+							$Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'],
+							false,
+							'text',
+							"Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới"
+						);
+
+						echo input_field(
+							'gcloud_drive_backup_folder_interface_name',
+							"Tên Thư Mục Sao Lưu Giao Diện VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>",
+							$Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'],
+							false,
+							'text',
+							"Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới"
+						);
+
+						echo select_field(
+							'gcloud_drive_setAccessType',
+							"Kiểu Loại Truy Cập <i class='bi bi-question-circle-fill' onclick=\"show_message('- Để giá trị là offline thì sẽ tự động làm mới lại mã token xác thực khi hết hạn<br/>- Để giá trị là online thì mỗi lần mã token xác thực hết hạn bạn cần lấy lại bằng thao tác thủ công')\"></i>",
+							[
+								'offline' => 'Offline (Tự động làm mới Token)',
+								'online' => 'Online (Làm mới Token thủ công)'
+							],
+							$Config['backup_upgrade']['google_cloud_drive']['setAccessType']
+						);
+
+						echo select_field(
+							'gcloud_drive_setPrompt',
+							"Đặt Lời Nhắc Khi Xác Thực 
+							 <i class='bi bi-question-circle-fill' 
+								onclick=\"show_message('- none: Không hiển thị bất kỳ trang yêu cầu quyền nào từ Google.<br/><br/>Nếu người dùng đã đăng nhập và đã cấp quyền, họ sẽ được chuyển hướng ngay lập tức.<br/><br/>Nếu không có quyền hoặc người dùng chưa đăng nhập, yêu cầu sẽ trả về lỗi.<br/><br/>- consent: Luôn yêu cầu người dùng đồng ý cấp quyền.<br/><br/>- select_account: Hiển thị danh sách tài khoản Google để người dùng chọn.<br/><br/>- consent select_account: Hiển thị cả hộp chọn tài khoản và yêu cầu người dùng xác nhận lại quyền.')\"></i>",
+							[
+								'none' => 'None (Không hiển thị)',
+								'consent' => 'Consent (Yêu cầu đồng ý cấp quyền)',
+								'select_account' => 'Select Account (Chọn tài khoản muốn dùng)',
+								'consent select_account' => 'Consent Select Account (Chọn và Yêu cầu đồng ý cấp quyền)'
+							],
+							$Config['backup_upgrade']['google_cloud_drive']['setPrompt']
+						);
+						?>
+
+						
                       </div>
                     </div>
                   </div>

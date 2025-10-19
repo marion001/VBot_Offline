@@ -12,7 +12,7 @@
   ini_set('post_max_size', '300M');
 
   //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-  $Cache_UI_Ver = '1.0.1';
+  $Cache_UI_Ver = '1.0.2';
 
   // Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
   //$current_file_path = __FILE__;
