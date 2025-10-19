@@ -1470,8 +1470,8 @@ $read_tts_token_google_cloud = '';
                             <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_tts; ?></font></center>
                             <div class="col-sm-9">
                               <div class="form-check">
-                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_default">TTS Mặc Định (Free) <i class="bi bi-question-circle-fill" onclick="show_message('Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định')"></i></label>
+                                <input disabled class="form-check-input border-success" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="tts_default">TTS Mặc Định (Free) <font color=red>Đang Bị Lỗi</font> <i class="bi bi-question-circle-fill" onclick="show_message('Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định')"></i></label>
                               </div>
                               <div class="form-check">
                                 <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
@@ -1491,7 +1491,7 @@ $read_tts_token_google_cloud = '';
                               </div>
                               <div class="form-check" >
                                 <input  class="form-check-input border-success" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
-                                <label  class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
+                                <label  class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <font color=green>(Khuyến Khích Nên Sử Dụng)</font> <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
                               </div>
                               <div class="form-check" >
                                 <input  class="form-check-input border-success" type="radio" name="tts_select" id="tts_dev_customize" value="tts_dev_customize" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_dev_customize' ? 'checked' : ''; ?>>
