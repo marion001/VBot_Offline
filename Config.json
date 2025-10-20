@@ -108,11 +108,9 @@
         "prioritize_virtual_assistants": [
             "default_assistant",
             "olli",
-            "zalo_assistant",
+            "xiaozhi",
             "google_gemini",
-            "chat_gpt",
-            "dify_ai",
-            "customize_developer_assistant"
+            "chat_gpt"
         ],
         "default_assistant": {
             "active": true,
@@ -180,6 +178,7 @@
     "media_player": {
         "active": true,
         "time_out": 30,
+        "audio_stream_timeout": 1.6,
         "wake_up_in_media_player": false,
         "media_sync_ui": {
             "active": true,
@@ -752,7 +751,7 @@
     "xiaozhi": {
         "active": false,
         "activation_status": false,
-        "time_out_output_stream": 0.2,
+        "time_out_output_stream": 0.5,
         "start_the_protocol": "websocket",
         "device_id": "",
         "serial_number": "",

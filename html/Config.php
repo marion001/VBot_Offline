@@ -291,6 +291,7 @@ if (isset($_POST['start_recovery_config_json'])) {
   #Cập Nhật Bật hoặc tắt Sử dụng Media Player
   $Config['media_player']['active'] = isset($_POST['media_player_active']) ? true : false;
   $Config['media_player']['wake_up_in_media_player'] = isset($_POST['wake_up_in_media_player']) ? true : false;
+  $Config['media_player']['audio_stream_timeout'] = floatval($_POST['media_player_audio_stream_timeout']);
   
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG music_local
   $allowed_formats_str = $_POST['music_local_allowed_formats'];
@@ -774,8 +775,6 @@ $read_tts_token_google_cloud = '';
              echo "<script>showMessagePHP('$allMessages');</script>";
          }
          ?>
-    <!--end Hiển thị thông báo Mesage php -->
-    <!-- ======= Header ======= -->
     <?php
       include 'html_header_bar.php'; 
       include 'html_sidebar.php';
@@ -802,7 +801,6 @@ $read_tts_token_google_cloud = '';
           </ol>
         </nav>
       </div>
-      <!-- End Page Title -->
       <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="">
         <section class="section">
           <div class="row">
@@ -1086,18 +1084,12 @@ $read_tts_token_google_cloud = '';
                         </div>
                       </div>
                     </div>
-
 			  </div>
 			  </div>
 			  </div>
-
-
-
-
       </div>
       </div>
       </div>
-
               <div class="card accordion" id="accordion_button_volume_setting">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
@@ -1468,40 +1460,65 @@ $read_tts_token_google_cloud = '';
                               }
                               ?>
                             <center>Bạn đang dùng TTS: <font color=red><?php echo $replace_text_tts; ?></font></center>
-                            <div class="col-sm-9">
-                              <div class="form-check">
-                                <input disabled class="form-check-input border-success" type="radio" name="tts_select" id="tts_default" value="tts_default" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_default' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_default">TTS Mặc Định (Free) <font color=red>Đang Bị Lỗi</font> <i class="bi bi-question-circle-fill" onclick="show_message('Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định')"></i></label>
-                              </div>
-                              <div class="form-check">
-                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_ggcloud" value="tts_ggcloud" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_ggcloud">TTS Google Cloud (Authentication.json) <font color=red>Nên sử dụng</font> <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
-                              </div>
-                              <div class="form-check">
-                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_ggcloud_key" value="tts_ggcloud_key" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_ggcloud_key' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_ggcloud_key">TTS Google Cloud (Free Key) <i class="bi bi-question-circle-fill" onclick="show_message('Sử dụng Key miễn phí bằng cách lấy thủ công và có thời gian hết hạn: https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html')"></i></label>
-                              </div>
-                              <div class="form-check">
-                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_zalo" value="tts_zalo" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_zalo' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_zalo">TTS Zalo (Api Keys) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Api keys của zalo càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href=\'https://zalo.ai/account/manage-keys\' target=\'_bank\'>https://zalo.ai/account/manage-keys</a>')"></i></label>
-                              </div>
-                              <div class="form-check">
-                                <input class="form-check-input border-success" type="radio" name="tts_select" id="tts_viettel" value="tts_viettel" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_viettel' ? 'checked' : ''; ?>>
-                                <label class="form-check-label" for="tts_viettel">TTS Viettel (Api Keys) <i class="bi bi-question-circle-fill" onclick="show_message('Cần sử dụng Api keys của Viettel càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href=\'https://viettelai.vn/dashboard/token\' target=\'_bank\'>https://viettelai.vn/dashboard/token</a>')"></i></label>
-                              </div>
-                              <div class="form-check" >
-                                <input  class="form-check-input border-success" type="radio" name="tts_select" id="tts_edge" value="tts_edge" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_edge' ? 'checked' : ''; ?>>
-                                <label  class="form-check-label" for="tts_edge">TTS Microsoft Edge (Free) <font color=green>(Khuyến Khích Nên Sử Dụng)</font> <i class="bi bi-question-circle-fill" onclick="show_message('TTS Microsoft edge Free')"></i></label>
-                              </div>
-                              <div class="form-check" >
-                                <input  class="form-check-input border-success" type="radio" name="tts_select" id="tts_dev_customize" value="tts_dev_customize" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === 'tts_dev_customize' ? 'checked' : ''; ?>>
-                                <label  class="form-check-label" for="tts_dev_customize">TTS DEV Customize: Dev_TTS.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code, chuyển văn bản thành giọng nói nếu chọn tts này, dữ liệu để các bạn code sẽ nằm trong tệp: <b>Dev_TTS.py</b><br/>- Cần thêm kích hoạt bên dưới để sử dụng vào chương trình')"></i></label>
-                                <div class="form-switch">
-                                  <label class="form-label" for="tts_dev_customize_active">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Nếu Dùng TTS DEV Custom bạn cần phải kích hoạt để được khởi tạo dữ liệu khi chạy chương trình')"></i></label>
-                                  <input class="form-check-input border-success" type="checkbox" name="tts_dev_customize_active" id="tts_dev_customize_active" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active'] ? 'checked' : ''; ?>>
-                                </div>
-                              </div>
-                            </div>
+							<?php 
+								$tts_list_select = [
+								'tts_default' => [
+									'label' => 'TTS Mặc Định (Free) <font color=red>Đang Bị Lỗi</font>',
+									'help'  => "Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định",
+									'disabled' => true,
+								],
+								'tts_ggcloud' => [
+									'label' => 'TTS Google Cloud (Authentication.json) <font color=red>Nên sử dụng</font>',
+									'help'  => "Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href='https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ' target='_bank'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>",
+								],
+								'tts_ggcloud_key' => [
+									'label' => 'TTS Google Cloud (Free Key)',
+									'help'  => "Sử dụng Key miễn phí bằng cách lấy thủ công và có thời gian hết hạn: https://www.gstatic.com/cloud-site-ux/text_to_speech/text_to_speech.min.html",
+								],
+								'tts_zalo' => [
+									'label' => 'TTS Zalo (Api Keys)',
+									'help'  => "Cần sử dụng Api keys của zalo càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href='https://zalo.ai/account/manage-keys' target='_bank'>https://zalo.ai/account/manage-keys</a>",
+								],
+								'tts_viettel' => [
+									'label' => 'TTS Viettel (Api Keys)',
+									'help'  => "Cần sử dụng Api keys của Viettel càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href='https://viettelai.vn/dashboard/token' target='_bank'>https://viettelai.vn/dashboard/token</a>",
+								],
+								'tts_edge' => [
+									'label' => 'TTS Microsoft Edge (Free) <font color=green>(Khuyến Khích Nên Sử Dụng)</font>',
+									'help'  => 'TTS Microsoft edge Free',
+								],
+								'tts_dev_customize' => [
+									'label' => 'TTS DEV Customize: Dev_TTS.py <font color=red>(Người Dùng Tự Code)</font>',
+									'help'  => "Người dùng sẽ tự code, chuyển văn bản thành giọng nói nếu chọn tts này, dữ liệu để các bạn code sẽ nằm trong tệp: <b>Dev_TTS.py</b><br/>- Cần thêm kích hoạt bên dưới để sử dụng vào chương trình",
+									'extra' => [
+										'id' => 'tts_dev_customize_active',
+										'label' => 'Kích Hoạt',
+										'help'  => "Nếu Dùng TTS DEV Custom bạn cần phải kích hoạt để được khởi tạo dữ liệu khi chạy chương trình",
+										'checked' => !empty($Config['smart_config']['smart_answer']['text_to_speak']['tts_dev_customize']['active']),
+									],
+								],
+							];
+							?>
+							<div class="col-sm-9">
+							  <?php foreach ($tts_list_select as $id => $opt): ?>
+								<div class="form-check">
+								  <input class="form-check-input border-success" type="radio" name="tts_select" id="<?php echo $id; ?>" value="<?php echo $id; ?>"<?php echo ($Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] === $id) ? 'checked' : ''; ?> <?php echo !empty($opt['disabled']) ? 'disabled' : ''; ?>>
+								  <label class="form-check-label" for="<?php echo $id; ?>">
+									<?php echo $opt['label']; ?>
+									<i class="bi bi-question-circle-fill" onclick="show_message('<?php echo addslashes($opt['help']); ?>')"></i>
+								  </label>
+								  <?php if (!empty($opt['extra'])): ?>
+									<div class="form-switch mt-1">
+									  <label class="form-label" for="<?php echo $opt['extra']['id']; ?>">
+										<?php echo $opt['extra']['label']; ?>
+										<i class="bi bi-question-circle-fill" onclick="show_message('<?php echo addslashes($opt['extra']['help']); ?>')"></i>
+									  </label>
+									  <input class="form-check-input border-success" type="checkbox" name="<?php echo $opt['extra']['id']; ?>" id="<?php echo $opt['extra']['id']; ?>" <?php echo $opt['extra']['checked'] ? 'checked' : ''; ?>>
+									</div>
+								  <?php endif; ?>
+								</div>
+							  <?php endforeach; ?>
+							</div>
                           </div>
                         </div>
                       </div>
@@ -1633,26 +1650,46 @@ echo htmlspecialchars($textareaContent_tts_zalo);
                                 <input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="tts_viettel_speaking_speed" id="tts_viettel_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['speaking_speed']; ?>">
                                 <label for="tts_viettel_speaking_speed" class="form-label">Tốc độ đọc:</label>	
                               </div>
-                              <div class="form-floating mb-3">
-                                <select name="tts_viettel_voice_name" id="tts_viettel_voice_name" class="form-select border-success" aria-label="Default select example">
-                                  <option value="hn-quynhanh" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-quynhanh' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Quỳnh Anh</option>
-                                  <option value="hn-phuongtrang" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-phuongtrang' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Phương Trang</option>
-                                  <option value="hn-thaochi" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thaochi' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Thảo Chi</option>
-                                  <option value="hn-thanhha" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thanhha' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Thanh Hà</option>
-                                  <option value="hn-thanhphuong" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thanhphuong' ? 'selected' : ''; ?>>(Nữ) Miền Bắc: Thanh Phương</option>
-                                  <option value="hn-thanhtung" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-thanhtung' ? 'selected' : ''; ?>>(Nam) Miền Bắc: Thanh Tùng</option>
-                                  <option value="hn-namkhanh" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-namkhanh' ? 'selected' : ''; ?>>(Nam) Miền Bắc: Nam Khánh</option>
-                                  <option value="hn-tienquan" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hn-tienquan' ? 'selected' : ''; ?>>(Nam) Miền Bắc: Tiến Quân</option>
-                                  <option value="hue-maingoc" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hue-maingoc' ? 'selected' : ''; ?>>(Nữ) Miền Trung: Mai Ngọc</option>
-                                  <option value="hue-baoquoc" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hue-baoquoc' ? 'selected' : ''; ?>>(Nam) Miền Trung: Bảo Quốc</option>
-                                  <option value="hcm-diemmy" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-diemmy' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Diễm My</option>
-                                  <option value="hcm-phuongly" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-phuongly' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Phương Ly</option>
-                                  <option value="hcm-thuydung" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-thuydung' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Thùy Dung</option>
-                                  <option value="hcm-thuyduyen" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-thuyduyen' ? 'selected' : ''; ?>>(Nữ) Miền Nam: Thùy Duyên</option>
-                                  <option value="hcm-minhquan" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === 'hcm-minhquan' ? 'selected' : ''; ?>>(Nam) Miền Nam: Minh Quân</option>
-                                </select>
-                                <label for="tts_viettel_voice_name">Giọng đọc:</label>
-                              </div>
+							<?php
+							$voices_tts_viettel = [
+								'Miền Bắc' => [
+									'hn-quynhanh'   => '(Nữ) Miền Bắc: Quỳnh Anh',
+									'hn-phuongtrang'=> '(Nữ) Miền Bắc: Phương Trang',
+									'hn-thaochi'    => '(Nữ) Miền Bắc: Thảo Chi',
+									'hn-thanhha'    => '(Nữ) Miền Bắc: Thanh Hà',
+									'hn-thanhphuong'=> '(Nữ) Miền Bắc: Thanh Phương',
+									'hn-thanhtung'  => '(Nam) Miền Bắc: Thanh Tùng',
+									'hn-namkhanh'   => '(Nam) Miền Bắc: Nam Khánh',
+									'hn-tienquan'   => '(Nam) Miền Bắc: Tiến Quân',
+								],
+								'Miền Trung' => [
+									'hue-maingoc' => '(Nữ) Miền Trung: Mai Ngọc',
+									'hue-baoquoc' => '(Nam) Miền Trung: Bảo Quốc',
+								],
+								'Miền Nam' => [
+									'hcm-diemmy'   => '(Nữ) Miền Nam: Diễm My',
+									'hcm-phuongly' => '(Nữ) Miền Nam: Phương Ly',
+									'hcm-thuydung' => '(Nữ) Miền Nam: Thùy Dung',
+									'hcm-thuyduyen'=> '(Nữ) Miền Nam: Thùy Duyên',
+									'hcm-minhquan' => '(Nam) Miền Nam: Minh Quân',
+								],
+							];
+							?>
+							<div class="form-floating mb-3">
+							  <select name="tts_viettel_voice_name" id="tts_viettel_voice_name" class="form-select border-success" aria-label="Default select example">
+								<?php foreach ($voices_tts_viettel as $region => $list): ?>
+								  <optgroup label="<?php echo htmlspecialchars($region); ?>">
+									<?php foreach ($list as $value => $label): ?>
+									  <option value="<?php echo htmlspecialchars($value); ?>"
+										<?php echo ($Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['voice_name'] === $value) ? 'selected' : ''; ?>>
+										<?php echo htmlspecialchars($label); ?>
+									  </option>
+									<?php endforeach; ?>
+								  </optgroup>
+								<?php endforeach; ?>
+							  </select>
+							  <label for="tts_viettel_voice_name">Giọng đọc:</label>
+							</div>
                               <div class="form-floating mb-3">
                                 <div class="form-switch">
                                   <input class="form-check-input border-success" type="checkbox" name="tts_viettel_without_filter" id="tts_viettel_without_filter" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_viettel']['without_filter'] ? 'checked' : ''; ?>>
@@ -2336,7 +2373,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
               <div class="card accordion" id="accordion_button_media_player">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
-                    Cấu Hình Phát Nhạc - Media Player:
+                    Cấu Hình Phát Nhạc, Câu Trả Lời - Media Player:
                   </h5>
                   <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
                     <div class="card">
@@ -2356,6 +2393,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             <div class="form-switch">
                               <input class="form-check-input border-success" type="checkbox" name="wake_up_in_media_player" id="wake_up_in_media_player" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
                             </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Thời gian im lặng tối đa cho PCM Stream <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian tối đa khi không nhận và phát được âm thanh pcm stream thì sẽ được coi là đã phát xong ở luồng âm thanh Streaming')"></i>:</label>
+                          <div class="col-sm-9">
+                              <input class="form-control border-success" type="number" min="0.5" step="0.1" max="10" name="media_player_audio_stream_timeout" id="media_player_audio_stream_timeout" value="<?php echo $Config['media_player']['audio_stream_timeout']; ?>">
                           </div>
                         </div>
                       </div>
@@ -2710,7 +2753,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 							"xiaozhi" => "XiaoZhi AI",
 							"customize_developer_assistant" => "DEV Custom Assistant: Dev_Assistant.py (Người Dùng Tự Code)"
 						];
-						for ($i = 0; $i < 7; $i++) {
+						for ($i = 0; $i < 5; $i++) {
 							$label = "Top " . ($i + 1);
 							$select_name = "virtual_assistant_priority" . ($i + 1);
 							$selected_value = $virtual_assistant_priority[$i] ?? '';
@@ -2730,9 +2773,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 						?>
                       </div>
                     </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Trợ Lý Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i> :</h5>
+
+					  <div class="card accordion" id="accordion_button_cfg_default_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_default_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_default_assistant">
+					  Cấu Hình Trợ Lý => Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i>:</h5>
+					  <div id="collapse_button_cfg_default_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_default_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Default Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
@@ -2766,11 +2812,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Trợ Lý Zalo AI Assistant:</h5>
+					  </div>
+					  </div>
+					  </div>
+
+					  <div class="card accordion" id="accordion_button_cfg_zaloai_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_zaloai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_zaloai_assistant">
+					  Cấu Hình Trợ Lý => Zalo AI Assistant:</h5>
+					  <div id="collapse_button_cfg_zaloai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_zaloai_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
@@ -2791,12 +2841,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <input  class="form-control border-success" type="number" min="21600" max="604800" step="1" name="zalo_assistant_set_expiration_time" id="zalo_assistant_set_expiration_time" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>">
                           </div>
                         </div>
-                      </div>
-                    </div>
+                        </div>
+                        </div>
+                        </div>
 
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Trợ Lý Olli AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
+					  <div class="card accordion" id="accordion_button_cfg_olliai_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_olliai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_olliai_assistant">
+					  Cấu Hình Trợ Lý => Olli AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
+					  <div id="collapse_button_cfg_olliai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_olliai_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Olli AI Assistant')"></i> :</label>
                           <div class="col-sm-9">
@@ -2818,7 +2871,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <br/><center><button class="btn btn-success border-success" type="button"  onclick="check_info_login_olli()">Kiểm Tra Kết Nối</button>
 						  </center>
 						  </div>
-
                         </div>
                         <div class="row mb-3">
                           <label for="olli_assistant_voice_name" class="col-sm-3 col-form-label">Giọng Đọc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
@@ -2856,10 +2908,13 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                     </div>
+                    </div>
 
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Trợ Lý Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i> :</h5>
+					  <div class="card accordion" id="accordion_button_cfg_gemini_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_gemini_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_gemini_assistant">
+					  Cấu Hình Trợ Lý => Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i>:</h5>
+					  <div id="collapse_button_cfg_gemini_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_gemini_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Gemini')"></i> :</label>
                           <div class="col-sm-9">
@@ -2942,12 +2997,15 @@ if (file_exists($gemini_model_list_json_file)) {
                             <input class="form-control border-danger" type="text" name="gemini_models_path_file" id="gemini_models_path_file" placeholder="<?php echo $gemini_model_list_json_file; ?>" value="<?php echo $gemini_model_list_json_file; ?>">
                           </div>
                         </div>
-						
                       </div>
                     </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Trợ Lý Chat GPT:</h5>
+                    </div>
+
+					  <div class="card accordion" id="accordion_button_cfg_chatgpt_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_chatgpt_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_chatgpt_assistant">
+					  Cấu Hình Trợ Lý => Chat GPT:</h5>
+					  <div id="collapse_button_cfg_chatgpt_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_chatgpt_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Chat GPT')"></i> :</label>
                           <div class="col-sm-9">
@@ -2998,10 +3056,13 @@ if (file_exists($gemini_model_list_json_file)) {
                         </div>
                       </div>
                     </div>
+                    </div>
 
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">Trợ Lý Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
+					  <div class="card accordion" id="accordion_button_cfg_difyai_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_difyai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_difyai_assistant">
+					  Cấu Hình Trợ Lý => Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
+					  <div id="collapse_button_cfg_difyai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_difyai_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
                           <div class="col-sm-9">
@@ -3041,11 +3102,13 @@ if (file_exists($gemini_model_list_json_file)) {
                         </div>
                       </div>
                     </div>
-                    <div class="card">
-                      <div class="card-body">
-                        <h5 class="card-title">
-                          Trợ Lý DEV Assistant: Dev_Assistant.py <font color=red>(Custom Assistant, Người dùng tự code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
-                        </h5>
+                    </div>
+
+					  <div class="card accordion" id="accordion_button_cfg_devassistant_assistant">
+					  <div class="card-body">
+					  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_devassistant_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_devassistant_assistant">
+					   Cấu Hình Trợ Lý => DEV Assistant: Dev_Assistant.py <font color=red>(Custom Assistant, Người dùng tự code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:</h5>
+					  <div id="collapse_button_cfg_devassistant_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_devassistant_assistant">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
                           <div class="col-sm-9">
@@ -3056,30 +3119,29 @@ if (file_exists($gemini_model_list_json_file)) {
                         </div>
                       </div>
                     </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-
       <div class="card accordion" id="accordion_button_xiaozhiai">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_xiaozhiai" aria-expanded="false" aria-controls="collapse_button_xiaozhiai">
-      Cấu Hình Bot XiaoZhi AI:</h5>
+      Cấu Hình Bot/Trợ Lý XiaoZhi AI:</h5>
       <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
 
 		<?php
-		function input_field($id, $label, $value = '', $disabled = false, $type = 'text', $help = '', $extra_class = 'border-success') {
+		function input_field($id, $label, $value = '', $disabled = false, $type = 'text', $step = '1', $help = '', $extra_class = 'border-success') {
 			$disabled_attr = $disabled ? 'disabled' : '';
 			$help_icon = $help ? " <i class='bi bi-question-circle-fill' onclick=\"show_message('$help')\"></i>" : '';
 			return "
 			<div class='row mb-3'>
 			  <label for='$id' class='col-sm-3 col-form-label'>$label$help_icon:</label>
 			  <div class='col-sm-9'>
-				<input $disabled_attr class='form-control $extra_class' type='$type' name='$id' id='$id' value='" . htmlspecialchars($value) . "'>
+				<input $disabled_attr class='form-control $extra_class' type='$type' step='$step' name='$id' id='$id' value='" . htmlspecialchars($value) . "'>
 			  </div>
 			</div>";
 		}
-
 		function select_field($id, $label, $options, $selected) {
 			$html = "
 			<div class='row mb-3'>
@@ -3163,15 +3225,13 @@ if (file_exists($gemini_model_list_json_file)) {
 		echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $net['publish_topic'] ?? '', true, 'text', '', 'border-danger');
 		echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $net['subscribe_topic'] ?? '', true, 'text', '', 'border-danger');
 		//Timeout
-		echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 1, false, 'number', 'Thời gian chờ kết thúc tối đa phát audio cuối');
+		echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, false, 'number', '0.1', 'Thời gian chờ kết thúc tối đa phát audio cuối');
 		echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, false, 'number', 'Thời gian chờ phản hồi tối đa khi nhận dữ liệu trả về từ máy chủ');
 		echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, false, 'number', 'Thời gian chờ kết nối lại tối đa khi bị mất kết nối');
 		?>
-
       </div>
       </div>
       </div>
-
               <div class="card accordion" id="accordion_button_collapse_button_developer_customization">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" title="chế độ tùy chỉnh cho các lập trình viên, DEV" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_developer_customization" aria-expanded="false" aria-controls="collapse_button_developer_customization">

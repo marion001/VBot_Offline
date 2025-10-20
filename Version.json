@@ -1,8 +1,8 @@
 {
-    "version": "1.0.63",
+    "version": "1.0.64",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi khi chọn chỉ khởi chạy Xiaozhi, Tích Hợp XiaoZhi AI làm trợ lý ảo hoặc lựa chọn chỉ chạy 1 trong 2 là: XiaoZhi và VBot Assistant, cho phép sử dụng nút nhấn WakeUP khi đang tắt Mic",
-    "releaseDate": "19/10/2025",
+    "description": "Sửa lỗi tranh quyền Microphone khi chỉ chạy ở chế độ xiaozhi, đồng bộ các luồng tín hiệu âm thanh với VBot",
+    "releaseDate": "20/10/2025",
     "changes": [
         {
             "type": "feature",
