@@ -766,7 +766,7 @@
             "device_id": "",
             "network": {
                 "ota_version_url": "https://api.tenclass.net/xiaozhi/ota/",
-                "websocket_url": "",
+                "websocket_url": "wss://api.tenclass.net/xiaozhi/v1/",
                 "websocket_access_token": "",
                 "firmware": {
                     "version": "",
