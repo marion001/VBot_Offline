@@ -503,11 +503,12 @@ if (isset($_POST['start_recovery_config_json'])) {
   $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
   $Config['xiaozhi']['tts_time_out'] = intval($_POST['xiaozhi_tts_time_out']);
   $Config['xiaozhi']['reconnection_timeout'] = intval($_POST['xiaozhi_reconnection_timeout']);
+  $Config['xiaozhi']['tts_stream_silence_time'] = intval($_POST['xiaozhi_tts_stream_silence_time']);
   $Config['xiaozhi']['time_out_output_stream'] = floatval($_POST['xiaozhi_time_out_output_stream']);
   $Config['xiaozhi']['system_options']['network']['ota_version_url'] = rtrim(trim($_POST['xiaozhi_ota_version_url']), '/') . '/';
   #Cập nhật chế độ chạy toàn bộ chương trình
   $Config['launch_source'] = !empty($_POST['launch_source']) ? $_POST['launch_source'] : 'VBot_Assistant';
-  
+
   ##############################################
   // Cập nhật radio_data từ POST
   $updated_radio_data = [];
