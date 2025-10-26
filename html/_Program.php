@@ -1085,18 +1085,15 @@
       // Kiểm tra nếu biến Restore_Backup tồn tại và không rỗng
       if (isset($_POST['Restore_Backup'])) {
       $messages = [];
-      
       // Kiểm tra và tạo từng thư mục
       foreach ($directoriessss as $directory) {
           createDirectory($directory);
       }
-      
       // Kiểm tra value nếu dữ liệu không rỗng
       if (!empty($_POST['Restore_Backup'])) {
       $data_restore_file = $_POST['Restore_Backup'];
       //Khôi phục dữ liệu trên google cloud nếu data_restore_file bắt đầu bằng link http
       if (strpos($data_restore_file, 'http') === 0) {
-      	
       if ($google_cloud_drive_active === true){
       if ($libPath_exist === true) {
       $messages[] = "<font color=green>- Tiến hành khôi phục dữ liệu từ tệp sao lưu trên Google Cloud Drive</font>";
@@ -1112,7 +1109,6 @@
       	if (extractTarGz($downloadedFileName, $Extract_Path)) {
       		$Extract_Path_OK = $directory_path.'/'.$Extract_Path.'/';
       		$messages[] = "<font color=green>- Giải nén thành công vào đường dẫn: <b>$Extract_Path/</b> </font><br/>";
-      
       if (copyFiles($Extract_Path_OK, $VBot_Offline)) {
           $messages[] = "<font color=green><b>- Sao chép toàn bộ tệp và thư mục thành công!</b></font><br/>";
       	deleteDirectory($Extract_Path);
@@ -1154,7 +1150,6 @@
       	deleteDirectory($Download_Path);
       	$messages[] = "<br/><font color=green><b>- Đã hoàn tất khôi phục dữ liệu từ bản sao lưu: ".basename($data_restore_file)."</b></font>";
       	$messages[] = "<br/><font color=green><b>- Bạn cần khởi động lại chương trình Vbot để áp dụng các thay đổi từ bản sao lưu</b></font>";
-      
       } else {
           $messages[] = "<font color=red>- Sao chép tệp thất bại</font>";
       }
@@ -1168,27 +1163,21 @@
        $messages[] = "<font color=red>- Dữ liệu Restore_Backup là rỗng.</font>";
       }
       }
-        
-      
       if (isset($_POST['Check_For_Upgrade'])) {
           // Tách URL thành các phần
           $parsedUrl = parse_url($Github_Repo_Vbot);
           $pathParts = explode('/', trim($parsedUrl['path'], '/'));
-      
           // Kiểm tra và gán giá trị
           if (count($pathParts) >= 2) {
               $git_username = $pathParts[0];
               $git_repository = $pathParts[1];
-      
               // Đường dẫn tới file local và URL của file trên GitHub
               $localFile = $VBot_Offline . 'Version.json';
               $remoteFileUrl = "https://raw.githubusercontent.com/$git_username/$git_repository/refs/heads/main/Version.json";
-      
               // Đọc nội dung file local
               if (file_exists($localFile)) {
                   $localContent = file_get_contents($localFile);
                   $localData = json_decode($localContent, true);
-      
                   // Đọc nội dung file từ GitHub sử dụng cURL
                   $remoteContent = fetchContent($remoteFileUrl);
                   if ($remoteContent !== false) {
@@ -1196,6 +1185,11 @@
                       // Lấy giá trị "releaseDate" từ cả hai file và so sánh
                       if (isset($localData['releaseDate']) && isset($remoteData['releaseDate'])) {
                           if ($localData['releaseDate'] !== $remoteData['releaseDate']) {
+							  if ($localData['changes'][0]['description'] !== $remoteData['changes'][0]['description']) {
+								  $check_lib_noti = '<font color=blue><b>'.$remoteData['changes'][0]['description'].'</b></font>';
+							  }else{
+								  $check_lib_noti = null;
+							  }
                               $messages[] = "<font color=green><b>- Có bản cập nhật chương trình VBot mới:</b></font>";
                               $messages[] = "
       <font color=green><ul>
@@ -1206,7 +1200,7 @@
             <li>Mô Tả: <font color=red><b>{$remoteData['description']}</b></font></li>
       	  <li>Nội Dung Thay Đổi:
       	  <ul>
-      	   <li>Tính Năng: <font color=red><b>{$remoteData['changes'][0]['description']}</b></font></li>
+      	   <li>Tính Năng: {$check_lib_noti} <marquee>{$check_lib_noti}</marquee></li>
       	   <li>Sửa Lỗi: <font color=red><b>{$remoteData['changes'][1]['description']}</b></font></li>
       	   <li>Cải Tiến: <font color=red><b>{$remoteData['changes'][2]['description']}</b></font></li>
       	  </ul>
@@ -1224,7 +1218,6 @@
           </ul>
         </li>
       </ul></font>";
-      
                               $messages[] = "<font color=green><b>- Hãy cập nhật lên phiên bản mới để được hỗ trợ tốt nhất.</b></font>";
                           } else {
                               $messages[] = "<font color=red><b>- Không có bản cập nhật chương trình mới nào</b></font>";
@@ -1252,7 +1245,6 @@
               $messages[] = "<font color=red>Không thể lấy thông tin username và repository từ URL: $Github_Repo_Vbot</font>";
           }
       }
-      
       ?>
     <main id="main" class="main">
       <div class="pagetitle">

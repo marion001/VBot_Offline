@@ -1035,7 +1035,6 @@
               if (file_exists($localFile)) {
                   $localContent = file_get_contents($localFile);
                   $localData = json_decode($localContent, true);
-      
                   // Đọc nội dung file trên GitHub
                   $remoteContent = file_get_contents($remoteFileUrl);
                   if ($remoteContent !== false) {  // Sửa điều kiện ở đây
@@ -1043,37 +1042,39 @@
                       // Lấy giá trị "releaseDate" từ cả hai file và so sánh
                       if (isset($localData['releaseDate']) && isset($remoteData['releaseDate'])) {
                           if ($localData['releaseDate'] !== $remoteData['releaseDate']) {
+							  if ($localData['changes'][0]['description'] !== $remoteData['changes'][0]['description']) {
+								  $check_lib_noti = '<font color=blue><b>'.$remoteData['changes'][0]['description'].'</b></font>';
+							  }else{
+								  $check_lib_noti = null;
+							  }
                               $messages[] = "<font color=green><b>- Có bản cập nhật giao diện VBot mới:</b></font>";
-      $messages[] = "
-      <font color=green><ul>
-        <li>Phiên Bản Mới:
-          <ul>
-            <li>Ngày Phát Hành: <font color=red><b>{$remoteData['releaseDate']}</b></font></li>
-            <li>Phiên Bản: <font color=red><b>{$remoteData['version']}</b></font></li>
-            <li>Mô Tả: <font color=red><b>{$remoteData['description']}</b></font></li>
-      	  <li>Nội Dung Thay Đổi:
-      	  <ul>
-      	   <li>Tính Năng: <font color=red><b>{$remoteData['changes'][0]['description']}</b></font></li>
-      	   <li>Sửa Lỗi: <font color=red><b>{$remoteData['changes'][1]['description']}</b></font></li>
-      	   <li>Cải tiến: <font color=red><b>{$remoteData['changes'][2]['description']}</b></font></li>
-      	  </ul>
-      	  </li>
-          </ul>
-        </li>
-      </ul></font>
-      
-      <font color=blue><ul>
-        <li>Phiên Bản Hiện Tại:
-          <ul>
-            <li>Ngày Phát Hành: <b>{$localData['releaseDate']}</b></li>
-            <li>Phiên Bản: <b>{$localData['version']}</b></li>
-      	  <li>Mô Tả: <b>{$localData['description']}</b></li>
-          </ul>
-        </li>
-      </ul></font>";
-      
-      $messages[] = "<font color=green><b>- Hãy cập nhật lên phiên bản mới để được hỗ trợ tốt nhất.</b></font>";
-      
+							  $messages[] = "
+							  <font color=green><ul>
+								<li>Phiên Bản Mới:
+								  <ul>
+									<li>Ngày Phát Hành: <font color=red><b>{$remoteData['releaseDate']}</b></font></li>
+									<li>Phiên Bản: <font color=red><b>{$remoteData['version']}</b></font></li>
+									<li>Mô Tả: <font color=red><b>{$remoteData['description']}</b></font></li>
+								  <li>Nội Dung Thay Đổi:
+								  <ul>
+								   <li>Tính Năng: {$check_lib_noti} <marquee>{$check_lib_noti}</marquee></li>
+								   <li>Sửa Lỗi: <font color=red><b>{$remoteData['changes'][1]['description']}</b></font></li>
+								   <li>Cải tiến: <font color=red><b>{$remoteData['changes'][2]['description']}</b></font></li>
+								  </ul>
+								  </li>
+								  </ul>
+								</li>
+							  </ul></font>
+							  <font color=blue><ul>
+								<li>Phiên Bản Hiện Tại:
+								  <ul>
+									<li>Ngày Phát Hành: <b>{$localData['releaseDate']}</b></li>
+									<li>Phiên Bản: <b>{$localData['version']}</b></li>
+								  <li>Mô Tả: <b>{$localData['description']}</b></li>
+								  </ul>
+								</li>
+							  </ul></font>";
+							  $messages[] = "<font color=green><b>- Hãy cập nhật lên phiên bản mới để được hỗ trợ tốt nhất.</b></font>";
       } else {
       $messages[] = "<font color=red><b>- Không có bản cập nhật giao diện mới nào</b></font>";
       $messages[] = "
