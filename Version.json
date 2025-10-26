@@ -2,7 +2,7 @@
     "version": "1.0.65",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi đồng bộ dữ liệu Xiaozhi các luồng tương thích với VBot",
-    "releaseDate": "26/10/2025-1",
+    "releaseDate": "26/10/2025-2",
     "changes": [
         {
             "type": "feature",
