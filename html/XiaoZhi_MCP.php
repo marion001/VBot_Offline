@@ -7,15 +7,17 @@
 include 'Configuration.php';
 ?>
 <?php
-if ($Config['contact_info']['user_login']['active']){
-session_start();
-if (!isset($_SESSION['user_login']) ||
-    (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
+if ($Config['contact_info']['user_login']['active']) {
+  session_start();
+  if (
+    !isset($_SESSION['user_login']) ||
+    (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
+  ) {
     session_unset();
     session_destroy();
     header('Location: Login.php');
     exit;
-}
+  }
 }
 ?>
 
@@ -24,11 +26,12 @@ if (!isset($_SESSION['user_login']) ||
 <?php
 include 'html_head.php';
 ?>
+
 <body>
-<?php
-include 'html_header_bar.php'; 
-include 'html_sidebar.php';
-?>
+  <?php
+  include 'html_header_bar.php';
+  include 'html_sidebar.php';
+  ?>
 
   <main id="main" class="main">
 
@@ -41,26 +44,29 @@ include 'html_sidebar.php';
         </ol>
       </nav>
     </div>
-	    <section class="section">
-        <div class="row">
-		
-		
-		<center><h5 class="text-danger">Comback Soon</h5></center>
-		
-		</div>
-		</section>
-	
-</main>
+    <section class="section">
+      <div class="row">
 
-<?php
-include 'html_footer.php';
-?>
+
+        <center>
+          <h5 class="text-danger">Comback Soon</h5>
+        </center>
+
+      </div>
+    </section>
+
+  </main>
+
+  <?php
+  include 'html_footer.php';
+  ?>
 
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
-<?php
-include 'html_js.php';
-?>
+  <?php
+  include 'html_js.php';
+  ?>
 
 </body>
+
 </html>

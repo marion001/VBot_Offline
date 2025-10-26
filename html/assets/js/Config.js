@@ -25,7 +25,7 @@ function scrollToBottom(event) {
 
 //ẩn hiện Cấu hình STT: khi lựa chọn radio Lựa chọn STT (Speak To Text):
 document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
-    radio.addEventListener('change', function() {
+    radio.addEventListener('change', function () {
         const div_select_stt_ggcloud_html = document.getElementById('select_stt_ggcloud_html');
         const div_select_stt_default_html = document.getElementById('select_stt_default_html');
         const div_select_stt_ggcloud_v2_html = document.getElementById('select_stt_ggcloud_v2_html');
@@ -49,7 +49,7 @@ document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
 
 //ẩn hiện cấu hình tts khi được lựa chọn
 document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
-    radio.addEventListener('change', function() {
+    radio.addEventListener('change', function () {
         const div_select_tts_ggcloud_html = document.getElementById('select_tts_ggcloud_html');
         const div_select_tts_default_html = document.getElementById('select_tts_default_html');
         const div_select_tts_edge_html = document.getElementById('select_tts_edge_html');
@@ -57,7 +57,7 @@ document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
         const div_select_tts_zalo_html = document.getElementById('select_tts_zalo_html');
         const div_select_tts_viettel_html = document.getElementById('select_tts_viettel_html');
         if (document.getElementById('tts_ggcloud').checked) {
-			load_list_GoogleVoices_tts('tts_ggcloud');
+            load_list_GoogleVoices_tts('tts_ggcloud');
             div_select_tts_ggcloud_html.style.display = 'block'; // Hiển thị div
         } else {
             div_select_tts_ggcloud_html.style.display = 'none'; // Ẩn div
@@ -89,7 +89,7 @@ document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
             div_select_tts_edge_html.style.display = 'none';
         }
         if (document.getElementById('tts_ggcloud_key').checked) {
-			load_list_GoogleVoices_tts('tts_ggcloud_key');
+            load_list_GoogleVoices_tts('tts_ggcloud_key');
             div_select_tts_ggcloud_key.style.display = 'block';
             document.getElementById("tts_dev_customize_active").checked = false;
         } else {
@@ -117,7 +117,7 @@ function displayResults_Hotword_Snowboy(data) {
     let selectHtml = '';
     if (Array.isArray(data.config) && data.config.length > 0) {
         let tableContent = '';
-        data.config.forEach(function(item, index) {
+        data.config.forEach(function (item, index) {
             tableContent +=
                 '<tr>' +
                 '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>' +
@@ -186,7 +186,7 @@ function displayResults_Hotword_dataa(data) {
     // Tạo thẻ <select> một lần với tất cả các tùy chọn
     var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
     selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
-    fileList.forEach(function(file) {
+    fileList.forEach(function (file) {
         var isSelected_lib = (file === data.config_lib_pv_to_lang) ? ' selected' : '';
         selectHtml += '<option value="' + file + '"' + isSelected_lib + '>' + file + '</option>';
     });
@@ -236,7 +236,7 @@ function displayResults_Hotword_dataa(data) {
         let tableContent = '';
         var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
         selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
-        fileList.forEach(function(file) {
+        fileList.forEach(function (file) {
             var isSelected_lib = (file === data.config_lib_pv_to_lang) ? ' selected' : '';
             selectHtml += '<option value="' + file + '"' + isSelected_lib + '>' + file + '</option>';
         });
@@ -263,7 +263,7 @@ function displayResults_Hotword_dataa(data) {
     var deleteIconn = document.getElementById('deleteFilePV');
     var downloadIcon = document.getElementById('downloadFilePV');
     // Thiết lập onclick xóa file trong thẻ select với giá trị mặc định
-    deleteIconn.onclick = function() {
+    deleteIconn.onclick = function () {
         if (selectedValuee) {
             deleteFile(data.path_pv + selectedValuee);
             // Tải lại dữ liệu hotword ở Config.json
@@ -273,7 +273,7 @@ function displayResults_Hotword_dataa(data) {
         }
     };
     // Thiết lập onclick tải xuống file
-    downloadIcon.onclick = function() {
+    downloadIcon.onclick = function () {
         if (selectedValuee) {
             downloadFile(data.path_pv + selectedValuee);
         } else {
@@ -281,11 +281,11 @@ function displayResults_Hotword_dataa(data) {
         }
     };
     // Lắng nghe sự kiện thay đổi trên thẻ select pv để xóa file
-    document.getElementById('select_file_lib_pv').addEventListener('change', function() {
+    document.getElementById('select_file_lib_pv').addEventListener('change', function () {
         var selectedValue = this.value;
         var deleteIcon = document.getElementById('deleteFilePV');
         var downloadIcon = document.getElementById('downloadFilePV');
-        deleteIcon.onclick = function() {
+        deleteIcon.onclick = function () {
             if (selectedValue) {
                 deleteFile(data.path_pv + selectedValue);
                 // Tải lại dữ liệu hotword ở Config.json
@@ -294,7 +294,7 @@ function displayResults_Hotword_dataa(data) {
                 show_message('Cần chọn file thư viện .pv trước khi xóa');
             }
         };
-        downloadIcon.onclick = function() {
+        downloadIcon.onclick = function () {
             if (selectedValue) {
                 downloadFile(data.path_pv + selectedValue);
             } else {
@@ -353,7 +353,7 @@ function test_key_difyAI() {
     Object.keys(headers).forEach(key => {
         xhr.setRequestHeader(key, headers[key]);
     });
-    xhr.onload = function() {
+    xhr.onload = function () {
         try {
             if (xhr.status === 200) {
                 try {
@@ -379,7 +379,7 @@ function test_key_difyAI() {
             show_message("[Dify AI] Lỗi xử lý phản hồi: " + e);
         }
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         loading('hide');
         show_message("[Dify AI] Lỗi kết nối HTTP, vui lòng kiểm tra lại kết nối mạng.");
     };
@@ -411,7 +411,7 @@ function test_key_ChatGPT(text) {
             content: text
         }]
     });
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
                 loading("hide");
@@ -433,12 +433,12 @@ function test_key_Gemini(text) {
     var apiKey = document.getElementById('google_gemini_key').value;
     var gemini_models_name = document.getElementById('gemini_models_name').value;
     var apiVersion = document.getElementById('gemini_api_version').value;
-	if (!apiKey || !gemini_models_name || !apiVersion) {
-		loading("hide");
-		show_message('<b class="text-danger">Thiếu tham số cấu hình để kiểm tra Gemini: API Key, Model name hoặc API version</b>');
-		return;
-	}
-    var url = 'https://generativelanguage.googleapis.com/'+apiVersion+'/models/'+gemini_models_name+':generateContent?key=' + apiKey;
+    if (!apiKey || !gemini_models_name || !apiVersion) {
+        loading("hide");
+        show_message('<b class="text-danger">Thiếu tham số cấu hình để kiểm tra Gemini: API Key, Model name hoặc API version</b>');
+        return;
+    }
+    var url = 'https://generativelanguage.googleapis.com/' + apiVersion + '/models/' + gemini_models_name + ':generateContent?key=' + apiKey;
     var payload = {
         contents: [{
             parts: [{
@@ -449,7 +449,7 @@ function test_key_Gemini(text) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             loading("hide");
             if (xhr.status === 200) {
@@ -457,7 +457,7 @@ function test_key_Gemini(text) {
                 var candidates = response.candidates;
                 if (candidates.length > 0) {
                     var contentText = candidates[0].content.parts[0].text;
-                    show_message('<center class="text-success"><b>Kiểm Tra API KEY Thành Công</b></center><br/>- API Key: <b>'+apiKey+'</b><br/>- Mô Hình: <b>'+gemini_models_name+'</b><br/>- Phiên Bản API: <b>'+apiVersion+'</b><hr/>Phản hồi: <font color=green>' + contentText + '</font>');
+                    show_message('<center class="text-success"><b>Kiểm Tra API KEY Thành Công</b></center><br/>- API Key: <b>' + apiKey + '</b><br/>- Mô Hình: <b>' + gemini_models_name + '</b><br/>- Phiên Bản API: <b>' + apiVersion + '</b><hr/>Phản hồi: <font color=green>' + contentText + '</font>');
                 }
             } else {
                 var response = JSON.parse(xhr.responseText);
@@ -510,21 +510,21 @@ function play_tts_sample_gcloud(id_html) {
     if (selectElement) {
         if (selectElement.value) {
             playAudio('https://cloud.google.com/static/text-to-speech/docs/audio/' + selectElement.value + '.wav');
-			loading('hide');
+            loading('hide');
         } else {
-			loading('hide');
+            loading('hide');
             show_message('Cần chọn 1 giọng đọc để nghe thử');
         }
     } else {
-		loading('hide');
-        showMessagePHP('Không tìm thấy dữ liệu thẻ select với id:' +id_html, 3);
+        loading('hide');
+        showMessagePHP('Không tìm thấy dữ liệu thẻ select với id:' + id_html, 3);
     }
-    
+
 }
 
 //Cập nhật bảng mã màu vào thẻ input
 // Thiết lập giá trị ban đầu cho các thẻ input khi tải trang
-window.onload = function() {
+window.onload = function () {
     // Thiết lập màu cho thẻ đầu tiên
     setColorPickerValue('color_led_think', 'led_think');
     // Thiết lập màu cho thẻ thứ hai
@@ -533,9 +533,9 @@ window.onload = function() {
 
 // Hàm thiết lập màu cho các thẻ colorPicker dựa trên giá trị colorCodeInput
 function setColorPickerValue(colorPickerId, colorCodeInputId) {
-        const initialColor = document.getElementById(colorCodeInputId).value;
-        document.getElementById(colorPickerId).value = '#' + initialColor;
-    }
+    const initialColor = document.getElementById(colorCodeInputId).value;
+    document.getElementById(colorPickerId).value = '#' + initialColor;
+}
 
 // Hàm cập nhật mã màu vào thẻ input
 function updateColorCode_input(colorPickerId, colorCodeInputId) {
@@ -547,25 +547,25 @@ function updateColorCode_input(colorPickerId, colorCodeInputId) {
 
 //Kiểm tra đăng nhập
 function check_info_login_olli() {
-	loading('show');
+    loading('show');
     var rawUsername = document.getElementById("olli_assistant_username").value.trim();
     var password = document.getElementById("olli_assistant_password").value;
     var isEmail = /^[^@]+@[^@]+\.[^@]+$/.test(rawUsername);
     var username = rawUsername;
     if (!isEmail) {
         if (/^\+84\d{9}$/.test(username)) {
-			//Đúng định dạng
+            //Đúng định dạng
         } else if (/^0\d{9}$/.test(username)) {
             username = '+84' + username.substring(1);
         } else if (/^\d{9}$/.test(username)) {
             username = '+84' + username;
         } else {
             show_message("Tài khoản đăng nhập không hợp lệ");
-			loading('hide');
+            loading('hide');
             return;
         }
     }
-	var url = isEmail ? atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9sb2dpbg==') : atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9vdHAvbG9naW4=');
+    var url = isEmail ? atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9sb2dpbg==') : atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9vdHAvbG9naW4=');
     var data = isEmail ? { email: username, password: password } : { phone_number: username, password: password };
     var xhr = new XMLHttpRequest();
     xhr.open("POST", url, true);
@@ -580,19 +580,19 @@ function check_info_login_olli() {
                 try {
                     var responseData = JSON.parse(xhr.responseText);
                     if (responseData.code === 200) {
-						loading('hide');
-						show_message("<center class='text-success'>Xác thực Thành Công</center><br/>- " +responseData.data.tts_voice.sample_text);
+                        loading('hide');
+                        show_message("<center class='text-success'>Xác thực Thành Công</center><br/>- " + responseData.data.tts_voice.sample_text);
                     } else {
-						loading('hide');
+                        loading('hide');
                         show_message("Xác thực thất bại: " + responseData + "<br/>Kiểm tra lại tài khoản hoặc mật khẩu");
                     }
                 } catch (e) {
-					loading('hide');
-                    show_message("Lỗi xử lý phản hồi json từ server:" +e);
+                    loading('hide');
+                    show_message("Lỗi xử lý phản hồi json từ server:" + e);
                 }
             } else {
-				loading('hide');
-				show_message("Lỗi kết nối: " +xhr.status+ "<br/>Kiểm tra lại tài khoản hoặc mật khẩu");
+                loading('hide');
+                show_message("Lỗi kết nối: " + xhr.status + "<br/>Kiểm tra lại tài khoản hoặc mật khẩu");
             }
         }
     };
@@ -607,125 +607,125 @@ function connectWebSocketAndSendID() {
         return;
     }
     const ws = new WebSocket(url);
-    ws.onopen = function() {
+    ws.onopen = function () {
         show_message('Kết nối WebSocket thành công tới Server: ' + url);
         const sessionId = Math.random().toString(36).substring(2, 10);
         ws.send("VBot_Tester_Socket_Connect_" + sessionId);
         ws.close();
     };
-    ws.onerror = function(error) {
+    ws.onerror = function (error) {
         show_message("Lỗi kết nối tới Socket Server Streaming: " + error);
     };
-    ws.onclose = function(event) {
+    ws.onclose = function (event) {
         //console.log("Kết nối WebSocket đã đóng:", event.code, event.reason);
     };
 }
 
 function show_create_audio_WakeUP_Reply() {
-  const resultDiv = document.getElementById("displayResults_create_audio_WakeUP_Reply");
+    const resultDiv = document.getElementById("displayResults_create_audio_WakeUP_Reply");
     resultDiv.style.display = "block";
 }
 
 function handleAudioReplyType() {
-  const type = document.getElementById("audio_reply_type").value;
-  const contentDiv = document.getElementById("tts_audio_reply_options");
-	if (type === "wakeup_reply_tts_gcloud") {
-	  contentDiv.innerHTML =
-		'<div class="form-floating mb-3">' +
-		  '<input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="create_tts_ggcloud_WakeUP_Reply_speed" id="create_tts_ggcloud_WakeUP_Reply_speed" value="1.0">' +
-		  '<label for="create_tts_ggcloud_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
-		'</div>' +
-		'<div class="input-group mb-3">' +
-		  '<div class="form-floating">' +
-			'<select name="create_tts_ggcloud_WakeUP_Reply_voice_name" id="tts_audio_reply_voice_name" class="form-select border-success">' +
-			  '<option>Đang tải danh sách...</option>' +
-			'</select>' +
-			'<label for="tts_audio_reply_voice_name">Giọng đọc:</label>' +
-		  '</div>' +
-		'<button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts(\'tts_audio_reply\', \'ok\')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>' +
-		'<button type="button" class="btn btn-success" onclick="play_tts_sample_gcloud(\'tts_audio_reply_voice_name\')"><i class="bi bi-play-circle"></i></button>' +
-		'</div>' +
-		'<div class="form-floating mb-3">' +
-		'<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
-		'<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
-		'</div>' +
-		'<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
-		'<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
-		'<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
-		'<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
-		'</div>' +
-		'<center>' +
-		'<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_ggcloud\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
-		' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
-		'</center>';
-	  // Gọi hàm tải danh sách giọng đọc
-	  load_list_GoogleVoices_tts("tts_audio_reply", "ok");
-	}else if (type === "wakeup_reply_tts_zalo") {
-	  contentDiv.innerHTML =
-		'<div class="form-floating mb-3">' +
-		  '<input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="create_tts_zalo_WakeUP_Reply_speed" id="create_tts_zalo_WakeUP_Reply_speed" value="1.0">' +
-		  '<label for="create_tts_zalo_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
-		'</div>' +
-		'<div class="input-group mb-3">' +
-		  '<div class="form-floating">' +
-			'<select name="create_tts_zalo_WakeUP_Reply_voice_name" id="create_tts_zalo_WakeUP_Reply_voice_name" class="form-select border-success">' +
-			  '<option value="1" selected>Nữ Miền Nam 1</option>' +
-			  '<option value="2">Nữ Miền Bắc 1</option>' +
-			  '<option value="3">Nam Miền Nam</option>' +
-			  '<option value="4">Nam Miền Bắc</option>' +
-			  '<option value="5">Nữ Miền Bắc 2</option>' +
-			  '<option value="6">Nữ Miền Nam 2</option>' +
-			'</select>' +
-			'<label for="create_tts_zalo_WakeUP_Reply_voice_name">Giọng đọc:</label>' +
-		  '</div>' +
-		'</div>' +
-		'<div class="form-floating mb-3">' +
-		'<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
-		'<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
-		'</div>' +
-		'<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
-		'<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
-		'<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
-		'<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
-		'</div>' +
-		'<center>' +
-		'<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_zalo\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
-		' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
-		'</center>';
-	}
-	  else {
-		contentDiv.innerHTML = "";
-	  }
+    const type = document.getElementById("audio_reply_type").value;
+    const contentDiv = document.getElementById("tts_audio_reply_options");
+    if (type === "wakeup_reply_tts_gcloud") {
+        contentDiv.innerHTML =
+            '<div class="form-floating mb-3">' +
+            '<input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="create_tts_ggcloud_WakeUP_Reply_speed" id="create_tts_ggcloud_WakeUP_Reply_speed" value="1.0">' +
+            '<label for="create_tts_ggcloud_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
+            '</div>' +
+            '<div class="input-group mb-3">' +
+            '<div class="form-floating">' +
+            '<select name="create_tts_ggcloud_WakeUP_Reply_voice_name" id="tts_audio_reply_voice_name" class="form-select border-success">' +
+            '<option>Đang tải danh sách...</option>' +
+            '</select>' +
+            '<label for="tts_audio_reply_voice_name">Giọng đọc:</label>' +
+            '</div>' +
+            '<button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts(\'tts_audio_reply\', \'ok\')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>' +
+            '<button type="button" class="btn btn-success" onclick="play_tts_sample_gcloud(\'tts_audio_reply_voice_name\')"><i class="bi bi-play-circle"></i></button>' +
+            '</div>' +
+            '<div class="form-floating mb-3">' +
+            '<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
+            '<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
+            '</div>' +
+            '<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
+            '<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
+            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+            '<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
+            '</div>' +
+            '<center>' +
+            '<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_ggcloud\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
+            ' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
+            '</center>';
+        // Gọi hàm tải danh sách giọng đọc
+        load_list_GoogleVoices_tts("tts_audio_reply", "ok");
+    } else if (type === "wakeup_reply_tts_zalo") {
+        contentDiv.innerHTML =
+            '<div class="form-floating mb-3">' +
+            '<input type="number" min="0.8" step="0.1" max="1.2" class="form-control border-success" name="create_tts_zalo_WakeUP_Reply_speed" id="create_tts_zalo_WakeUP_Reply_speed" value="1.0">' +
+            '<label for="create_tts_zalo_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
+            '</div>' +
+            '<div class="input-group mb-3">' +
+            '<div class="form-floating">' +
+            '<select name="create_tts_zalo_WakeUP_Reply_voice_name" id="create_tts_zalo_WakeUP_Reply_voice_name" class="form-select border-success">' +
+            '<option value="1" selected>Nữ Miền Nam 1</option>' +
+            '<option value="2">Nữ Miền Bắc 1</option>' +
+            '<option value="3">Nam Miền Nam</option>' +
+            '<option value="4">Nam Miền Bắc</option>' +
+            '<option value="5">Nữ Miền Bắc 2</option>' +
+            '<option value="6">Nữ Miền Nam 2</option>' +
+            '</select>' +
+            '<label for="create_tts_zalo_WakeUP_Reply_voice_name">Giọng đọc:</label>' +
+            '</div>' +
+            '</div>' +
+            '<div class="form-floating mb-3">' +
+            '<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
+            '<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
+            '</div>' +
+            '<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
+            '<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
+            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+            '<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
+            '</div>' +
+            '<center>' +
+            '<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_zalo\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
+            ' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
+            '</center>';
+    }
+    else {
+        contentDiv.innerHTML = "";
+    }
 }
 
 //Xác Thực Liên Kết với Server XiaoZhi
 async function xiaozhi_active_device_info() {
-	loading("show");
-	const id_otaUrl = document.getElementById("xiaozhi_ota_version_url");
-	var otaUrl;
-	if (!id_otaUrl) {
-		show_message("Không tìm thấy phần tử có id 'xiaozhi_ota_version_url'");
-	} else {
-		otaUrl = id_otaUrl.value.trim();
-		if (!otaUrl) {
-			show_message("Link/URL OTA Server Gđang bị trống, không có dữ liệu");
-		} else {
-			if (!otaUrl.endsWith("/")) {
-				otaUrl = otaUrl + "/";
-			}
-		}
-	}
+    loading("show");
+    const id_otaUrl = document.getElementById("xiaozhi_ota_version_url");
+    var otaUrl;
+    if (!id_otaUrl) {
+        show_message("Không tìm thấy phần tử có id 'xiaozhi_ota_version_url'");
+    } else {
+        otaUrl = id_otaUrl.value.trim();
+        if (!otaUrl) {
+            show_message("Link/URL OTA Server Gđang bị trống, không có dữ liệu");
+        } else {
+            if (!otaUrl.endsWith("/")) {
+                otaUrl = otaUrl + "/";
+            }
+        }
+    }
     const localUrl = "includes/php_ajax/Scanner.php?XiaoZhi_Active&action=get_device_info";
     try {
-		showMessagePHP("Đang lấy thông tin thiết bị phần cứng...", 3);
+        showMessagePHP("Đang lấy thông tin thiết bị phần cứng...", 3);
         const response = await fetch(localUrl, { method: "GET" });
         if (!response.ok) throw new Error("HTTP Error " + response.status);
         const deviceInfo = await response.json();
-		//console.log("deviceInfo:", JSON.stringify(deviceInfo, null, 2));
-		showMessagePHP("Lấy thông tin thiết bị thành công", 3);
+        //console.log("deviceInfo:", JSON.stringify(deviceInfo, null, 2));
+        showMessagePHP("Lấy thông tin thiết bị thành công", 3);
         if (!deviceInfo || Object.keys(deviceInfo).length === 0 || !deviceInfo.success) {
-			loading("hide");
-			show_message("<b class='text-danger'>Không lấy được thông tin phần cứng thiết bị</b>");
+            loading("hide");
+            show_message("<b class='text-danger'>Không lấy được thông tin phần cứng thiết bị</b>");
             return;
         }
         const headers = {
@@ -745,26 +745,26 @@ async function xiaozhi_active_device_info() {
                 mac: deviceInfo.mac_address,
             },
         };
-		showMessagePHP("Tiến hành gửi thông tin dữ liệu lên máy chủ...", 3);
+        showMessagePHP("Tiến hành gửi thông tin dữ liệu lên máy chủ...", 3);
         const otaResponse = await fetch(otaUrl, {
             method: "POST",
             headers: headers,
             body: JSON.stringify(payload),
         });
         const result = await otaResponse.json();
-		//console.log("result:", JSON.stringify(result, null, 2));
+        //console.log("result:", JSON.stringify(result, null, 2));
         //Kiểm tra activation
         if (result?.activation?.challenge) {
-			showMessagePHP("Đang tiến hành kích hoạt thiết bị này với máy chủ", 3);
+            showMessagePHP("Đang tiến hành kích hoạt thiết bị này với máy chủ", 3);
             const challenge = result.activation.challenge;
             const active_number_code = result.activation.code;
-            const hmacUrl = "includes/php_ajax/Scanner.php?XiaoZhi_Active&action=signature_hmac&challenge="+encodeURIComponent(challenge);
-			showMessagePHP("Gửi yêu cầu lấy HMAC...", 3);
+            const hmacUrl = "includes/php_ajax/Scanner.php?XiaoZhi_Active&action=signature_hmac&challenge=" + encodeURIComponent(challenge);
+            showMessagePHP("Gửi yêu cầu lấy HMAC...", 3);
             const hmacResponse = await fetch(hmacUrl);
             const hmacData = await hmacResponse.json();
-			showMessagePHP("Đã ký Signature HMAC với thiết bị này thành công", 3);
+            showMessagePHP("Đã ký Signature HMAC với thiết bị này thành công", 3);
             //Gửi activate và chờ nhập mã kích hoạt
-            const activateUrl = otaUrl+"activate";
+            const activateUrl = otaUrl + "activate";
             const activatePayload = {
                 Payload: {
                     algorithm: "hmac-sha256",
@@ -775,8 +775,8 @@ async function xiaozhi_active_device_info() {
             };
             let activationCode = null;
             let waiting = true;
-			showMessagePHP("Đang tiến hành gửi thông tin kích hoạt thiết bị này tới Máy Chủ, Vui Lòng Đợi Mã Kích Hoạt", 15);
-			show_message("<b>Đang tiến hành gửi thông tin kích hoạt thiết bị này tới Máy Chủ, Vui Lòng Đợi Mã Kích Hoạt...</b>");
+            showMessagePHP("Đang tiến hành gửi thông tin kích hoạt thiết bị này tới Máy Chủ, Vui Lòng Đợi Mã Kích Hoạt", 15);
+            show_message("<b>Đang tiến hành gửi thông tin kích hoạt thiết bị này tới Máy Chủ, Vui Lòng Đợi Mã Kích Hoạt...</b>");
             while (waiting) {
                 const activateResp = await fetch(activateUrl, {
                     method: "POST",
@@ -784,69 +784,69 @@ async function xiaozhi_active_device_info() {
                     body: JSON.stringify(activatePayload)
                 });
                 if (activateResp.status === 202) {
-					showMessagePHP("Đang chờ nhập mã kích hoạt: "+active_number_code, 5);
-					show_message("<b class='text-danger'>Mã Kích Hoạt Thiết Bị Của Bạn Là: <h5><center>"+active_number_code+"</center> Vui Lòng truy Cập: " + (result.activation.message.replace(/(\r?\n|\\n)(.*)/, " và nhập mã: $2")) + "</h5></b>-Vui Lòng Nhập Mã Kích Hoạt Này Trên Trang Chủ Của Server");
+                    showMessagePHP("Đang chờ nhập mã kích hoạt: " + active_number_code, 5);
+                    show_message("<b class='text-danger'>Mã Kích Hoạt Thiết Bị Của Bạn Là: <h5><center>" + active_number_code + "</center> Vui Lòng truy Cập: " + (result.activation.message.replace(/(\r?\n|\\n)(.*)/, " và nhập mã: $2")) + "</h5></b>-Vui Lòng Nhập Mã Kích Hoạt Này Trên Trang Chủ Của Server");
                     await new Promise(r => setTimeout(r, 3000));
                 } else if (activateResp.status === 200) {
-					loading("hide");
+                    loading("hide");
                     const activateResult = await activateResp.json();
-					//console.log("activateResult:", JSON.stringify(activateResult, null, 2));
+                    //console.log("activateResult:", JSON.stringify(activateResult, null, 2));
                     activationCode = activateResult.activation?.code || null;
                     waiting = false;
-					show_message("<b class='text-success'>Đã Kích Hoạt, Liên Kết Thiết Bị Này Thành Công</b>");
-					const logData = {
-						firmware_version: result.firmware.version,
-						activation_status: true,
-						client_id: deviceInfo.machine_id,
-						mac_address: deviceInfo.mac_address,
-						websocket_token: result.websocket.token,
-						websocket_url: result.websocket.url,
-						mqtt: result.mqtt,
-						activation_code: active_number_code,
-						device_id: activateResult.device_id,
-						serial_number: deviceInfo.serial_number,
-						hmac_signature: hmacData.signature
-					};
-					fetch("includes/php_ajax/Scanner.php", {
-						method: "POST",
-						headers: {
-							"Content-Type": "application/x-www-form-urlencoded",
-						},
-						body: new URLSearchParams({
-							xiaozhi: "1",
-							action: "active_success_save_data",
-							json_data: JSON.stringify(logData)
-						}),
-					})
-					.then(res => res.json())
-					.then(data => {
-						loading("hide");
-						if (data.success) {
-							show_message("<b class='text-success'>" + (data.message || "Đã lưu dữ liệu kích hoạt thành công") + "</b>");
-						} else {
-							show_message("<b class='text-danger'>" + (data.message || "Không thể lưu dữ liệu kích hoạt") + "</b>");
-						}
-					})
-					.catch(err => {
-						loading("hide");
-						show_message('Kích hoạt thành công, Lỗi khi lưu dữ liệu kich hoạt vào Config.json:' +err);
-					});
-	
+                    show_message("<b class='text-success'>Đã Kích Hoạt, Liên Kết Thiết Bị Này Thành Công</b>");
+                    const logData = {
+                        firmware_version: result.firmware.version,
+                        activation_status: true,
+                        client_id: deviceInfo.machine_id,
+                        mac_address: deviceInfo.mac_address,
+                        websocket_token: result.websocket.token,
+                        websocket_url: result.websocket.url,
+                        mqtt: result.mqtt,
+                        activation_code: active_number_code,
+                        device_id: activateResult.device_id,
+                        serial_number: deviceInfo.serial_number,
+                        hmac_signature: hmacData.signature
+                    };
+                    fetch("includes/php_ajax/Scanner.php", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        body: new URLSearchParams({
+                            xiaozhi: "1",
+                            action: "active_success_save_data",
+                            json_data: JSON.stringify(logData)
+                        }),
+                    })
+                        .then(res => res.json())
+                        .then(data => {
+                            loading("hide");
+                            if (data.success) {
+                                show_message("<b class='text-success'>" + (data.message || "Đã lưu dữ liệu kích hoạt thành công") + "</b>");
+                            } else {
+                                show_message("<b class='text-danger'>" + (data.message || "Không thể lưu dữ liệu kích hoạt") + "</b>");
+                            }
+                        })
+                        .catch(err => {
+                            loading("hide");
+                            show_message('Kích hoạt thành công, Lỗi khi lưu dữ liệu kich hoạt vào Config.json:' + err);
+                        });
+
                 } else {
-					loading("hide");
+                    loading("hide");
                     const errText = await activateResp.text();
                     waiting = false;
-					show_message("Xảy ra lỗi khi kích hoạt, liên kết thiết bị: " + activateResp.status + " " + errText);
+                    show_message("Xảy ra lỗi khi kích hoạt, liên kết thiết bị: " + activateResp.status + " " + errText);
                 }
             }
         } else {
-			loading("hide");
-			show_message("<b class='text-success'>Thiết bị đã được liên kết với máy chủ Server, Hãy tải lại trang này để làm mới dữ liệu cấu hình</b>");
-			xiaozhi_activation_status_true();
+            loading("hide");
+            show_message("<b class='text-success'>Thiết bị đã được liên kết với máy chủ Server, Hãy tải lại trang này để làm mới dữ liệu cấu hình</b>");
+            xiaozhi_activation_status_true();
         }
     } catch (error) {
-		loading("hide");
-		show_message("Lỗi khi gửi hoặc nhận dữ liệu: " + error);
+        loading("hide");
+        show_message("Lỗi khi gửi hoặc nhận dữ liệu: " + error);
     }
 }
 
@@ -884,7 +884,7 @@ function xiaozhi_unlink_reset_data() {
     xiaozhi_action(
         "unlink_reset_data",
         "-Bạn có chắc chắn muốn hủy liên kết và đặt lại dữ liệu cấu hình XiaoZhi này không?\n\n-Khi được đặt lại, bạn cần truy cập trang chủ Server để xóa thiết bị đã liên kết này",
-        function(success, msg) {
+        function (success, msg) {
             if (success) {
                 if (confirm('-' + msg + "\n\n - Nhấn OK để áp dụng và tải lại trang này")) {
                     location.reload();
@@ -901,7 +901,7 @@ function xiaozhi_activation_status_false() {
     xiaozhi_action(
         "activation_status_false",
         "-Bạn có chắc chắn muốn chạy lại liên kết xác thực với máy chủ không?",
-        function(success, msg) {
+        function (success, msg) {
             show_message(msg);
         }
     );
@@ -912,7 +912,7 @@ function xiaozhi_activation_status_true() {
     xiaozhi_action(
         "activation_status_true",
         "-Bạn có chắc chắn muốn chạy lại liên kết xác thực với máy chủ không?",
-        function(success, msg) {
+        function (success, msg) {
             showMessagePHP(msg, 5);
         }
     );
@@ -932,12 +932,12 @@ function get_token_tts_default_zai_did() {
                     const expires = response.expires_zai_did;
                     document.getElementById('authentication_zai_did').value = zaiDid;
                     document.getElementById('expires_zai_did').value = expires;
-					showMessagePHP(response.message, 5);
+                    showMessagePHP(response.message, 5);
                 } else {
-					show_message(response.message);
+                    show_message(response.message);
                 }
             } catch (e) {
-				show_message(e);
+                show_message(e);
             }
         }
     };
@@ -946,108 +946,108 @@ function get_token_tts_default_zai_did() {
 
 //Tạo file âm thanh tts gcloud
 function createAudio_Wakeup_reply(source_tts) {
-	loading('show');
-  const text = document.getElementById("tts_audio_reply_input_text").value.trim();
-  if (!text) {
-	  loading('hide');
-    showMessagePHP("Vui lòng nhập nội dung để tạo âm thanh", 5);
-    return;
-  }
-  let url_tts = "";
-
-  if (source_tts === 'tts_ggcloud'){
-  const speed = document.getElementById("create_tts_ggcloud_WakeUP_Reply_speed").value;
-  const voiceName = document.getElementById("tts_audio_reply_voice_name").value;
-  const encodedText = encodeURIComponent(text);
-  const encodedVoice = encodeURIComponent(voiceName);
-  url_tts = "includes/php_ajax/TTS_Audio_Create.php?create_tts_audio&source_tts=tts_ggcloud&language_code=vi-VN&speaking_rate="+speed+"&voice_name="+encodedVoice+"&text="+encodedText;
-  }
-
-	else if (source_tts === 'tts_zalo') {
-		const speakerId = document.getElementById("create_tts_zalo_WakeUP_Reply_voice_name").value;
-		const speakerSpeed = document.getElementById("create_tts_zalo_WakeUP_Reply_speed").value;
-		const encodedText = encodeURIComponent(text);
-		url_tts = "includes/php_ajax/TTS_Audio_Create.php"
-			+ "?create_tts_audio"
-			+ "&source_tts=tts_zalo"
-			+ "&speaker_id=" + speakerId
-			+ "&speaker_speed=" + speakerSpeed
-			+ "&encode_type=1&text=" + encodedText;
-	}
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", url_tts, true);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        try {
-          const data = JSON.parse(xhr.responseText);
-			if (data.success) {
-			  showMessagePHP(data.message || "Tạo file âm thanh thành công", 5);
-			  const filePathInput = document.getElementById("tts_audio_reply_output_path");
-			  const showww_reply_output_path = document.getElementById("showww_tts_audio_reply_output_path");
-				const playButton = document.getElementById("btn_play_audio_reply_out_p");
-				const downloadButton = document.getElementById("btn_download_audio_reply_out_p");
-				const adddButton = document.getElementById("add_use_this_wakeup_reply_sound");
-			  if (filePathInput && showww_reply_output_path) {
-				loading('hide');
-				filePathInput.value = data.file_path || "";
-				showww_reply_output_path.style.display = "flex";
-				playButton.setAttribute("onclick", "playAudio('" + data.file_path + "')");
-				downloadButton.setAttribute("onclick", "downloadFile('" + data.file_path + "')");
-				adddButton.setAttribute("onclick", "use_this_wakeup_reply_sound('" + data.file_path + "')");
-			  }
-			}else {
-				loading('hide');
-            showMessagePHP("Lỗi khi tạo file âm thanh: " + (data.message || "Không rõ lỗi"), 5);
-          }
-        } catch (e) {
-			loading('hide');
-          showMessagePHP("Lỗi Phản Hồi Từ Server, Vui Lòng Thử Lại: " + e.message, 5);
-        }
-      } else {
-		  loading('hide');
-        showMessagePHP("Không thể gửi yêu cầu tạo âm thanh. Mã lỗi: " + xhr.status, 5);
-      }
+    loading('show');
+    const text = document.getElementById("tts_audio_reply_input_text").value.trim();
+    if (!text) {
+        loading('hide');
+        showMessagePHP("Vui lòng nhập nội dung để tạo âm thanh", 5);
+        return;
     }
-  };
-  xhr.send();
+    let url_tts = "";
+
+    if (source_tts === 'tts_ggcloud') {
+        const speed = document.getElementById("create_tts_ggcloud_WakeUP_Reply_speed").value;
+        const voiceName = document.getElementById("tts_audio_reply_voice_name").value;
+        const encodedText = encodeURIComponent(text);
+        const encodedVoice = encodeURIComponent(voiceName);
+        url_tts = "includes/php_ajax/TTS_Audio_Create.php?create_tts_audio&source_tts=tts_ggcloud&language_code=vi-VN&speaking_rate=" + speed + "&voice_name=" + encodedVoice + "&text=" + encodedText;
+    }
+
+    else if (source_tts === 'tts_zalo') {
+        const speakerId = document.getElementById("create_tts_zalo_WakeUP_Reply_voice_name").value;
+        const speakerSpeed = document.getElementById("create_tts_zalo_WakeUP_Reply_speed").value;
+        const encodedText = encodeURIComponent(text);
+        url_tts = "includes/php_ajax/TTS_Audio_Create.php"
+            + "?create_tts_audio"
+            + "&source_tts=tts_zalo"
+            + "&speaker_id=" + speakerId
+            + "&speaker_speed=" + speakerSpeed
+            + "&encode_type=1&text=" + encodedText;
+    }
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url_tts, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    const data = JSON.parse(xhr.responseText);
+                    if (data.success) {
+                        showMessagePHP(data.message || "Tạo file âm thanh thành công", 5);
+                        const filePathInput = document.getElementById("tts_audio_reply_output_path");
+                        const showww_reply_output_path = document.getElementById("showww_tts_audio_reply_output_path");
+                        const playButton = document.getElementById("btn_play_audio_reply_out_p");
+                        const downloadButton = document.getElementById("btn_download_audio_reply_out_p");
+                        const adddButton = document.getElementById("add_use_this_wakeup_reply_sound");
+                        if (filePathInput && showww_reply_output_path) {
+                            loading('hide');
+                            filePathInput.value = data.file_path || "";
+                            showww_reply_output_path.style.display = "flex";
+                            playButton.setAttribute("onclick", "playAudio('" + data.file_path + "')");
+                            downloadButton.setAttribute("onclick", "downloadFile('" + data.file_path + "')");
+                            adddButton.setAttribute("onclick", "use_this_wakeup_reply_sound('" + data.file_path + "')");
+                        }
+                    } else {
+                        loading('hide');
+                        showMessagePHP("Lỗi khi tạo file âm thanh: " + (data.message || "Không rõ lỗi"), 5);
+                    }
+                } catch (e) {
+                    loading('hide');
+                    showMessagePHP("Lỗi Phản Hồi Từ Server, Vui Lòng Thử Lại: " + e.message, 5);
+                }
+            } else {
+                loading('hide');
+                showMessagePHP("Không thể gửi yêu cầu tạo âm thanh. Mã lỗi: " + xhr.status, 5);
+            }
+        }
+    };
+    xhr.send();
 }
 
 //Lựa chọn file âm thanh dùng cho wakeup reply
 function use_this_wakeup_reply_sound(filePath) {
-	if (!filePath) {
+    if (!filePath) {
         show_message('Không có dữ liệu file âm thanh');
         return;
     }
-	loading('show');
-  const encodedFilePath = encodeURIComponent(filePath);
-  const url = 'includes/php_ajax/Hotword_pv_ppn.php?use_this_wakeup_reply_sound&file_path=' + encodedFilePath;
-  const xhr = new XMLHttpRequest();
-  xhr.open("GET", url, true);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        try {
-          const response = JSON.parse(xhr.responseText);
-          if (response.success) {
-			  loadWakeupReply();
-            showMessagePHP(response.message || "Đã sử dụng file âm thanh làm wakeup reply!", 5);
-			loading('hide');
-          } else {
-			  loading('hide');
-            show_message(response.message || "Thao tác thất bại!");
-          }
-        } catch (err) {
-			loading('hide');
-          show_message("Lỗi xử lý phản hồi server!");
+    loading('show');
+    const encodedFilePath = encodeURIComponent(filePath);
+    const url = 'includes/php_ajax/Hotword_pv_ppn.php?use_this_wakeup_reply_sound&file_path=' + encodedFilePath;
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (response.success) {
+                        loadWakeupReply();
+                        showMessagePHP(response.message || "Đã sử dụng file âm thanh làm wakeup reply!", 5);
+                        loading('hide');
+                    } else {
+                        loading('hide');
+                        show_message(response.message || "Thao tác thất bại!");
+                    }
+                } catch (err) {
+                    loading('hide');
+                    show_message("Lỗi xử lý phản hồi server!");
+                }
+            } else {
+                loading('hide');
+                show_message("Lỗi kết nối đến server!");
+            }
         }
-      } else {
-		  loading('hide');
-        show_message("Lỗi kết nối đến server!");
-      }
-    }
-  };
-  xhr.send();
+    };
+    xhr.send();
 }
 
 //Cập nhật đường dẫn path web ui vào thẻ input html
@@ -1065,7 +1065,7 @@ function update_webui_link(path_web_ui_html) {
 function getBacklistData(dataPath, textareaId) {
     var url = "includes/php_ajax/Show_file_path.php?data_backlist";
     var xhr = new XMLHttpRequest();
-    xhr.addEventListener("readystatechange", function() {
+    xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             if (this.status === 200) {
                 try {
@@ -1096,7 +1096,7 @@ function getBacklistData(dataPath, textareaId) {
             }
         }
     });
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
     };
     xhr.open("GET", url, true);
@@ -1108,7 +1108,7 @@ function changeBacklistValue(path_json, value_type) {
     var url = "includes/php_ajax/Show_file_path.php";
     var params = "delete_data_backlist=1&path=" + path_json + "&value_type=" + value_type;
     var xhr = new XMLHttpRequest();
-    xhr.addEventListener("readystatechange", function() {
+    xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             if (this.status === 200) {
                 try {
@@ -1120,7 +1120,8 @@ function changeBacklistValue(path_json, value_type) {
                         } else if (path_json === "backlist->tts_viettel->backlist_limit") {
                             getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
                         }
-                    } else {;
+                    } else {
+                        ;
                         show_message("Có lỗi xảy ra khi cập nhật backlist: " + response.message);
                     }
                 } catch (e) {
@@ -1131,7 +1132,7 @@ function changeBacklistValue(path_json, value_type) {
             }
         }
     });
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
     };
     xhr.open("GET", url + "?" + params, true);
@@ -1160,7 +1161,7 @@ function scan_audio_devices(device_name) {
     var url = 'includes/php_ajax/Scanner.php?' + device_name;
     xhr.open('GET', url, true);
     xhr.responseType = 'json';
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
             loading("hide");
             var data = xhr.response;
@@ -1172,7 +1173,7 @@ function scan_audio_devices(device_name) {
                     var tableHTML = '<table class="table table-bordered border-primary">';
                     tableHTML += '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color=green>' + data.message + '</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Mic</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
                     tableHTML += '<tbody>';
-                    data.devices.forEach(function(device) {
+                    data.devices.forEach(function (device) {
                         tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.ID + '</td><td style="vertical-align: middle;">' + (device.Tên || '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_MIC(' + device.ID + ')">Chọn</button></td></td></tr>';
                     });
                     tableHTML += '</tbody></table>';
@@ -1189,7 +1190,7 @@ function scan_audio_devices(device_name) {
                     var tableHTML = '<table class="table table-bordered border-primary">';
                     tableHTML += '<thead><tr><th colspan="6" style="text-align: center; vertical-align: middle;"><font color=green>' + data.message + '</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Speaker</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Khả Năng</th><th style="text-align: center; vertical-align: middle;">Kênh Phát</th><th style="text-align: center; vertical-align: middle;">Thông Số</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
                     tableHTML += '<tbody>';
-                    data.devices.forEach(function(device) {
+                    data.devices.forEach(function (device) {
                         tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.id + '</td><td style="vertical-align: middle;">' + (device.name || '') + '</td><td style="vertical-align: middle;">' + (device.capabilities || '') + '</td><td style="vertical-align: middle;">' + (device.playback_channels || '') + '</td><td style="vertical-align: middle;">' + (device.values.length > 0 ? device.values.map(value => (value.channel || '') + ' ' + (value.details || '')).join('<br>') : '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_Alsamixer(\'' + device.name + '\')">Chọn</button></td></td></tr>';
                     });
                     tableHTML += '</tbody></table>';
@@ -1211,7 +1212,7 @@ function scan_audio_devices(device_name) {
             show_message('Lỗi: ' + xhr.statusText);
         }
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         loading("hide");
         show_message('Yêu cầu thất bại. Vui lòng kiểm tra kết nối mạng.');
     };
@@ -1227,7 +1228,7 @@ function test_key_Picovoice() {
     var url = 'includes/php_ajax/Check_Connection.php?check_key_picovoice&key=' + token + '&lang=' + lang;
     xhr.open('GET', url);
     xhr.responseType = 'json';
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
             loading("hide");
             var data = xhr.response;
@@ -1241,7 +1242,7 @@ function test_key_Picovoice() {
             show_message('Lỗi: ' + xhr.statusText);
         }
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         loading("hide");
         show_message('Yêu cầu thất bại');
     };
@@ -1252,7 +1253,7 @@ function test_key_Picovoice() {
 function list_audio_show_path(id_path_music) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Show_file_path.php?' + encodeURIComponent(id_path_music), true);
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             //console.log(xhr.responseText)
             var data = JSON.parse(xhr.responseText);
@@ -1269,7 +1270,7 @@ function list_audio_show_path(id_path_music) {
                     '<th><center>Tên File</center></th>' +
                     '<th><center>Hành Động</center></th>' +
                     '</tr>';
-                data.forEach(function(file, index) {
+                data.forEach(function (file, index) {
                     var fileName = getFileNameFromPath(file);
                     var rowContent =
                         '<tr>' +
@@ -1295,7 +1296,7 @@ function list_audio_show_path(id_path_music) {
                     '<th><center>Tên File</center></th>' +
                     '<th><center>Hành Động</center></th>' +
                     '</tr>';
-                data.forEach(function(file, index) {
+                data.forEach(function (file, index) {
                     var fileName = getFileNameFromPath(file);
                     var rowContent =
                         '<tr>' +
@@ -1328,7 +1329,7 @@ function checkSSHConnection(sshHost) {
         '&pass=' + encodeURIComponent(sshPass);
     xhr.open('GET', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             loading("hide");
             if (xhr.status === 200) {
@@ -1357,7 +1358,7 @@ function CheckConnectionHomeAssistant(inputId) {
     var token_hasss = document.getElementById('hass_long_token').value;
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Check_Connection.php?check_hass&url_hass=' + encodeURIComponent(url_hasss) + '&token_hass=' + encodeURIComponent(token_hasss), true);
-    xhr.onreadystatechange = function() {
+    xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             loading("hide");
             if (xhr.status === 200) {
@@ -1395,7 +1396,7 @@ function uploadFilesHotwordSnowboy() {
     formData.append('action_hotword_snowboy', 'upload_files_hotword_snowboy');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status === 200) {
             try {
                 const response = JSON.parse(xhr.responseText);
@@ -1435,7 +1436,7 @@ function uploadFilesHotwordPPNandPV() {
     formData.append('action_ppn_pv', 'upload_files_ppn_pv');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status === 200) {
             try {
                 const response = JSON.parse(xhr.responseText);
@@ -1467,7 +1468,7 @@ function reload_hotword_config(langg = "No") {
     var xhr = new XMLHttpRequest();
     if (langg === "No") {
         xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config');
-        xhr.onload = function() {
+        xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
@@ -1490,7 +1491,7 @@ function reload_hotword_config(langg = "No") {
         };
     } else if (langg === 'snowboy') {
         xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config_snowboy');
-        xhr.onload = function() {
+        xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
@@ -1505,7 +1506,7 @@ function reload_hotword_config(langg = "No") {
         };
     } else if (langg === 'wakeup_reply') {
         xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_wakeup_reply');
-        xhr.onload = function() {
+        xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
                 if (response.status === 'success') {
@@ -1537,7 +1538,7 @@ function uploadFilesWakeUP_Reply() {
     formData.append('wakeup_reply_upload', 'upload_files_wakeup_reply');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status === 200) {
             try {
                 const res = JSON.parse(xhr.responseText);
@@ -1564,7 +1565,7 @@ function uploadFilesWakeUP_Reply() {
 function loadWakeupReply(pathVBot_PY) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?get_wakeup_reply', true);
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status === 200) {
             try {
                 const response = JSON.parse(xhr.responseText);
@@ -1621,7 +1622,7 @@ function loadWakeupReply(pathVBot_PY) {
             show_message('Lỗi HTTP: ' + xhr.status);
         }
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         show_message('Lỗi khi gửi yêu cầu.');
     };
     xhr.send();
@@ -1631,7 +1632,7 @@ function loadWakeupReply(pathVBot_PY) {
 function loadConfigHotword(lang) {
     const xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?hotword&lang=' + lang, true);
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status === 200) {
             const data = JSON.parse(xhr.responseText);
             if (lang === "vi" || lang === "eng") {
@@ -1649,7 +1650,7 @@ function read_YAML_file_path(fileName) {
     loading('show');
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'includes/php_ajax/Show_file_path.php?yaml=' + fileName, true);
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
             loading('hide');
             var codeElement = document.getElementById('code_config');
@@ -1667,7 +1668,7 @@ function read_YAML_file_path(fileName) {
             show_message('Thất bại, Mã lỗi:' + xhr.status)
         }
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         loading('hide');
         show_message('Lỗi xảy ra, Truy vấn thất bại')
     };
@@ -1684,7 +1685,7 @@ function checkMQTTConnection() {
     var url = 'includes/php_ajax/Check_Connection.php?check_mqtt&host=' + host + '&port=' + port + '&user=' + user + '&pass=' + pass;
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
-    xhr.onload = function() {
+    xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
             loading('hide');
             try {
@@ -1698,7 +1699,7 @@ function checkMQTTConnection() {
             show_message('Yêu cầu thất bại. Mã lỗi: ' + xhr.status)
         }
     };
-    xhr.onerror = function() {
+    xhr.onerror = function () {
         loading('hide');
         show_message('Yêu cầu bị lỗi.')
     };

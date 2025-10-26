@@ -10,20 +10,22 @@ header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json; charset=utf-8');
 
-if ($Config['contact_info']['user_login']['active']){
-  session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
-  if (!isset($_SESSION['user_login']) ||
-      (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
-      // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
-      session_unset();
-      session_destroy();
-      echo json_encode([
-          'success' => false,
-          'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-      ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-      exit;
-  }
+if ($Config['contact_info']['user_login']['active']) {
+    session_start();
+    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
+    if (
+        !isset($_SESSION['user_login']) ||
+        (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
+    ) {
+        // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
+        session_unset();
+        session_destroy();
+        echo json_encode([
+            'success' => false,
+            'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -36,7 +38,7 @@ $hash_bypass_OTA = "441018525208457705bf09a8ee3c1093";
 // [1] Bypass nâng cấp firmware (Gửi yêu cầu đến thiết bị)
 if (isset($_GET['bypass_upgrade_firmware']) && !empty($_GET['ip'])) {
     $ip = $_GET['ip'];
-    $targetUrl = 'http://'.$ip.'/ota/start?mode=fr&hash='.$hash_bypass_OTA;
+    $targetUrl = 'http://' . $ip . '/ota/start?mode=fr&hash=' . $hash_bypass_OTA;
     // Thêm các tham số khác (nếu có)
     $params = $_GET;
     unset($params['bypass_upgrade_firmware'], $params['ip']);
@@ -84,7 +86,7 @@ elseif (isset($_GET['start_upgrade_firmware'], $_GET['ip'], $_GET['url_firmware'
     // Lưu file vào bộ nhớ tạm
     file_put_contents($temp_file, $file_content);
     // Gửi firmware tới thiết bị
-    $upload_url = 'http://'.$ip.'/ota/upload';
+    $upload_url = 'http://' . $ip . '/ota/upload';
     $firmware_filename = "VBot_Client_FW_" . basename($url_firmware);
     $post_data = ['file' => new CURLFile($temp_file, 'application/octet-stream', $firmware_filename)];
     $ch = curl_init();
@@ -109,8 +111,8 @@ elseif (isset($_GET['start_upgrade_firmware'], $_GET['ip'], $_GET['url_firmware'
 
 //Nâng Cấp Thủ Công
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && isset($_POST['ip_address'])) {
-    $ip_address = $_POST['ip_address']; 
-    $tmpDir = sys_get_temp_dir(); 
+    $ip_address = $_POST['ip_address'];
+    $tmpDir = sys_get_temp_dir();
     $tmpFile = $tmpDir . '/' . basename($_FILES['firmware']['name']);
 
     if (pathinfo($tmpFile, PATHINFO_EXTENSION) !== 'bin') {
@@ -123,7 +125,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && i
         exit;
     }
     // Gửi yêu cầu bắt đầu nâng cấp firmware
-    $ota_start_url = 'http://'.$ip_address.'/ota/start?mode=fr&hash='.$hash_bypass_OTA;
+    $ota_start_url = 'http://' . $ip_address . '/ota/start?mode=fr&hash=' . $hash_bypass_OTA;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $ota_start_url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -137,7 +139,7 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && i
         exit;
     }
     // Gửi firmware tới thiết bị
-    $upload_url = 'http://'.$ip_address.'/ota/upload';
+    $upload_url = 'http://' . $ip_address . '/ota/upload';
     $firmware_filename = "VBot_Client_FW_" . basename($_FILES['firmware']['name']);
     $post_data = ['file' => new CURLFile($tmpFile, 'application/octet-stream', $firmware_filename)];
     $ch = curl_init();
@@ -155,13 +157,13 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && i
     } else {
         echo json_encode(["success" => true, "message" => "Đã Nâng cấp Firmware"]);
     }
-	exit;
+    exit;
 }
 
 //Lưu dữ liệu Client Data
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_data_vbot_client') {
     // Đường dẫn file JSON trên server
-    $json_file = $directory_path.'/includes/other_data/VBot_Client_Data/'.$Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'];
+    $json_file = $directory_path . '/includes/other_data/VBot_Client_Data/' . $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'];
     $directory = dirname($json_file);
     // Kiểm tra và tạo thư mục nếu chưa tồn tại
     if (!is_dir($directory)) {
@@ -434,7 +436,7 @@ elseif (isset($_POST['client_save_config'])) {
         'button_encd_gpio_dt' => intval($_POST['button_encd_gpio_dt'] ?? 0),
         'button_encd_gpio_sw' => intval($_POST['button_encd_gpio_sw'] ?? 0),
         //'button_encd_pres_opt' => intval($_POST['button_encd_pres_opt'] ?? 2),
-		'button_encd_pres_opt' => array_key_exists('button_encd_pres_opt', $_POST) ? intval($_POST['button_encd_pres_opt']) : 2,
+        'button_encd_pres_opt' => array_key_exists('button_encd_pres_opt', $_POST) ? intval($_POST['button_encd_pres_opt']) : 2,
         'button_encd_l_pre_opt' => intval($_POST['button_encd_l_pre_opt'] ?? 0),
         'button_encd_long_prs' => intval($_POST['button_encd_long_prs'] ?? 2000)
     ];
@@ -521,7 +523,7 @@ elseif (isset($_POST['client_play_audio'])) {
         exit;
     }
     $fileExtension = pathinfo(parse_url($audio_url, PHP_URL_PATH), PATHINFO_EXTENSION);
-	/*
+    /*
     if (strtolower($fileExtension) !== 'mp3') {
         echo json_encode([
             'success' => false,
@@ -602,7 +604,7 @@ elseif (isset($_POST['client_download_config'])) {
         curl_close($ch);
         echo json_encode([
             'success' => true,
-            'filename' => 'VBot_Client_Config_'.$ip_address.'.json',
+            'filename' => 'VBot_Client_Config_' . $ip_address . '.json',
             'content' => $response
         ]);
     } catch (Exception $e) {
@@ -614,10 +616,8 @@ elseif (isset($_POST['client_download_config'])) {
             'error' => $e->getMessage()
         ]);
     }
-}
-else {
+} else {
     http_response_code(400);
     echo json_encode(["success" => false, "message" => "Yêu cầu không hợp lệ"]);
     exit;
 }
-?>
