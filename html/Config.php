@@ -723,6 +723,32 @@ $read_tts_token_google_cloud = file_get_contents($tts_token_google_cloud);
 $read_tts_token_google_cloud = '';
   		$messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
       }
+
+#Tự Sinh HTML
+function input_field($id, $label, $value = '', $disabled = false, $type = 'text', $step = '1', $help = '', $extra_class = 'border-success') {
+	$disabled_attr = $disabled ? 'disabled' : '';
+	$help_icon = $help ? " <i class='bi bi-question-circle-fill' onclick=\"show_message('$help')\"></i>" : '';
+	return "
+	<div class='row mb-3'>
+	  <label for='$id' class='col-sm-3 col-form-label'>$label$help_icon:</label>
+	  <div class='col-sm-9'>
+		<input $disabled_attr class='form-control $extra_class' type='$type' step='$step' name='$id' id='$id' value='" . htmlspecialchars($value) . "'>
+	  </div>
+	</div>";
+}
+function select_field($id, $label, $options, $selected) {
+	$html = "
+	<div class='row mb-3'>
+	  <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
+	  <div class='col-sm-9'>
+		<select class='form-select border-success' name='$id' id='$id'>";
+	foreach ($options as $value => $text) {
+		$sel = ($value === $selected) ? 'selected' : '';
+		$html .= "<option value='$value' $sel>$text</option>";
+	}
+	$html .= "</select></div></div>";
+	return $html;
+}
   ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -1199,7 +1225,7 @@ $read_tts_token_google_cloud = '';
                           <label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
                           <div class="col-sm-9">
                             <select name="hotword_select_wakeup" id="hotword_select_wakeup" class="form-select border-success" aria-label="Default select example" onchange="selectHotwordWakeup()">
-                              <option value="porcupine" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Procupine</option>
+                              <option value="porcupine" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Procupine (Nên Dùng)</option>
                               <option value="snowboy" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy</option>
                               <option value="null" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === null ? 'selected' : ''; ?>>Không Sử Dụng Hotword</option>
                             </select>
@@ -2745,12 +2771,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           $virtual_assistant_priority = $Config['virtual_assistant']['prioritize_virtual_assistants'];
 						$assistant_options = [
 							"default_assistant" => "Default Assistant",
-							"olli" => "Olli AI Assistant",
+							"olli" => "Olli AI Assistant (Khuyến Nghị)",
 							"google_gemini" => "Google Gemini",
 							"chat_gpt" => "Chat GPT",
 							"zalo_assistant" => "Zalo AI Assistant",
 							"dify_ai" => "Dify AI Assistant",
-							"xiaozhi" => "XiaoZhi AI",
+							"xiaozhi" => "XiaoZhi AI (Khuyến Nghị)",
 							"customize_developer_assistant" => "DEV Custom Assistant: Dev_Assistant.py (Người Dùng Tự Code)"
 						];
 						for ($i = 0; $i < 5; $i++) {
@@ -2758,16 +2784,16 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 							$select_name = "virtual_assistant_priority" . ($i + 1);
 							$selected_value = $virtual_assistant_priority[$i] ?? '';
 							echo '<div class="row mb-3">';
-							echo '  <label for="' . $select_name . '" class="col-sm-3 col-form-label">' . $label . ':</label>';
-							echo '  <div class="col-sm-9">';
-							echo '    <select class="form-select border-success" name="' . $select_name . '" id="' . $select_name . '">';
-							echo '      <option value="">-- Chọn Trợ Lý --</option>';
+							echo '<label for="' . $select_name . '" class="col-sm-3 col-form-label">' . $label . ':</label>';
+							echo '<div class="col-sm-9">';
+							echo '<select class="form-select border-success" name="' . $select_name . '" id="' . $select_name . '">';
+							echo '<option value="">-- Chọn Trợ Lý --</option>';
 							foreach ($assistant_options as $value => $label_option) {
 								$selected = ($selected_value === $value) ? "selected" : "";
-								echo '      <option value="' . $value . '" ' . $selected . '>' . $label_option . '</option>';
+								echo '<option value="' . $value . '" ' . $selected . '>' . $label_option . '</option>';
 							}
-							echo '    </select>';
-							echo '  </div>';
+							echo '</select>';
+							echo '</div>';
 							echo '</div>';
 						}
 						?>
@@ -3131,30 +3157,6 @@ if (file_exists($gemini_model_list_json_file)) {
       <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
 
 		<?php
-		function input_field($id, $label, $value = '', $disabled = false, $type = 'text', $step = '1', $help = '', $extra_class = 'border-success') {
-			$disabled_attr = $disabled ? 'disabled' : '';
-			$help_icon = $help ? " <i class='bi bi-question-circle-fill' onclick=\"show_message('$help')\"></i>" : '';
-			return "
-			<div class='row mb-3'>
-			  <label for='$id' class='col-sm-3 col-form-label'>$label$help_icon:</label>
-			  <div class='col-sm-9'>
-				<input $disabled_attr class='form-control $extra_class' type='$type' step='$step' name='$id' id='$id' value='" . htmlspecialchars($value) . "'>
-			  </div>
-			</div>";
-		}
-		function select_field($id, $label, $options, $selected) {
-			$html = "
-			<div class='row mb-3'>
-			  <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
-			  <div class='col-sm-9'>
-				<select class='form-select border-success' name='$id' id='$id'>";
-			foreach ($options as $value => $text) {
-				$sel = ($value === $selected) ? 'selected' : '';
-				$html .= "<option value='$value' $sel>$text</option>";
-			}
-			$html .= "</select></div></div>";
-			return $html;
-		}
 		//Kích hoạt
 		echo "
 		<div class='row mb-3'>
@@ -3207,27 +3209,28 @@ if (file_exists($gemini_model_list_json_file)) {
 		}
 		echo "</div></div>";
 		//Các input tĩnh khác
-		echo input_field('xiaozhi_websocket_url', 'WebSocket Link/URL Server', $Config['xiaozhi']['system_options']['network']['websocket_url'] ?? '', true, 'text', 'Ví dụ: wss://api.tenclass.net/xiaozhi/v1/', 'border-danger');
-		echo input_field('xiaozhi_firmware_version', 'Phiên Bản Firmware', $Config['xiaozhi']['system_options']['network']['firmware']['version'] ?? '', true, 'text', 'Nhập số phiên bản, Ví Dụ: 2.0.3', 'border-danger');
-		echo input_field('xiaozhi_device_id', 'ID Thiết Bị', $Config['xiaozhi']['device_id'] ?? '', true, 'number', 'Mã ID định danh của thiết bị', 'border-danger');
-		echo input_field('xiaozhi_serial_number', 'Serial Thiết Bị (SN-****)', $Config['xiaozhi']['serial_number'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_hmac_key', 'HMAC KEY Signature', $Config['xiaozhi']['hmac_key'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_device_activation_code', 'Mã Kích Hoạt Thiết Bị', $Config['xiaozhi']['device_activation_code'] ?? '', true, 'number', '', 'border-danger');
-		echo input_field('xiaozhi_client_id', 'Client ID', $Config['xiaozhi']['system_options']['client_id'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_mac_device_id', 'Địa Chỉ MAC', $Config['xiaozhi']['system_options']['device_id'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_websocket_access_token', 'WebSocket Token', $Config['xiaozhi']['system_options']['network']['websocket_access_token'] ?? '', true, 'text', 'Mặc định là: test-token', 'border-danger');
+		echo input_field('xiaozhi_websocket_url', 'WebSocket Link/URL Server', $Config['xiaozhi']['system_options']['network']['websocket_url'] ?? '', true, 'text', '', 'Ví dụ: wss://api.tenclass.net/xiaozhi/v1/');
+		echo input_field('xiaozhi_firmware_version', 'Phiên Bản Firmware', $Config['xiaozhi']['system_options']['network']['firmware']['version'] ?? '', true, 'text', '', 'Mặc định sẽ lấy theo Phiên Bản Chương Trình VBot');
+		echo input_field('xiaozhi_device_id', 'ID Thiết Bị', $Config['xiaozhi']['device_id'] ?? '', true, 'number', '', 'Mã ID định danh của thiết bị');
+		echo input_field('xiaozhi_serial_number', 'Serial Thiết Bị (SN-****)', $Config['xiaozhi']['serial_number'] ?? '', true, 'text', '', 'Serial Thiết Bị (SN-****)');
+		echo input_field('xiaozhi_hmac_key', 'HMAC KEY Signature', $Config['xiaozhi']['hmac_key'] ?? '', true, 'text', '', 'HMAC KEY Signature');
+		echo input_field('xiaozhi_device_activation_code', 'Mã Kích Hoạt Thiết Bị', $Config['xiaozhi']['device_activation_code'] ?? '', true, 'number', '', 'Mã Kích Hoạt Thiết Bị Gồm 6 Số Liên Kết Với Server');
+		echo input_field('xiaozhi_client_id', 'Client ID', $Config['xiaozhi']['system_options']['client_id'] ?? '', true, 'text', '', 'Mã Định Danh Client ID Của Thiết Bị Này');
+		echo input_field('xiaozhi_mac_device_id', 'Địa Chỉ MAC', $Config['xiaozhi']['system_options']['device_id'] ?? '', true, 'text', '', 'Địa Chỉ Mac Của Thiết Bị Này');
+		echo input_field('xiaozhi_websocket_access_token', 'WebSocket Token', $Config['xiaozhi']['system_options']['network']['websocket_access_token'] ?? '', true, 'text', '', 'Mặc định là: test-token');
 		//MQTT section
 		$net = $Config['xiaozhi']['system_options']['network']['mqtt_info'] ?? [];
-		echo input_field('xiaozhi_mqtt_endpoint', 'MQTT Link/URL Server', $net['endpoint'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $net['client_id'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_mqtt_username', 'MQTT Tài Khoản', $net['username'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $net['password'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $net['publish_topic'] ?? '', true, 'text', '', 'border-danger');
-		echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $net['subscribe_topic'] ?? '', true, 'text', '', 'border-danger');
+		echo input_field('xiaozhi_mqtt_endpoint', 'MQTT Link/URL Server', $net['endpoint'] ?? '', true, 'text', '');
+		echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $net['client_id'] ?? '', true, 'text', '');
+		echo input_field('xiaozhi_mqtt_username', 'MQTT Tài Khoản', $net['username'] ?? '', true, 'text', '');
+		echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $net['password'] ?? '', true, 'text', '');
+		echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $net['publish_topic'] ?? '', true, 'text', '');
+		echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $net['subscribe_topic'] ?? '', true, 'text', '');
 		//Timeout
-		echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, false, 'number', '0.1', 'Thời gian chờ kết thúc tối đa phát audio cuối');
-		echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, false, 'number', 'Thời gian chờ phản hồi tối đa khi nhận dữ liệu trả về từ máy chủ');
-		echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, false, 'number', 'Thời gian chờ kết nối lại tối đa khi bị mất kết nối');
+		echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, false, 'number', '0.1', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS');
+		echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, false, 'number', '1', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại');
+		echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, false, 'number', '1', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ');
+		echo input_field('xiaozhi_tts_stream_silence_time', 'Ngưỡng im lặng cho phép tối đa TTS (Giây)', $Config['xiaozhi']['tts_stream_silence_time'] ?? 5, false, 'number', '1', 'là ngưỡng im lặng tối đa mà hệ thống cho phép trong luồng âm thanh TTS — nếu vượt quá thì coi như TTS kết thúc hoặc bị lỗi im lặng');
 		?>
       </div>
       </div>

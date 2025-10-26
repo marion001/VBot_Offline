@@ -71,13 +71,13 @@
     },
     "web_interface": {
         "external": {
-            "active": false
+            "active": true
         },
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
     "home_assistant": {
-        "active": true,
+        "active": false,
         "minimum_threshold": 0.6,
         "lowest_to_display_logs": 0.39,
         "internal_url": "http://192.168.14.17:8123",
@@ -142,7 +142,7 @@
             "time_out": 15
         },
         "zalo_assistant": {
-            "active": true,
+            "active": false,
             "time_out": 15,
             "device_token": "586d5714b9e6c3fea9f5d71f0511dac971533e32e3480647a13a809990f53a83",
             "expire_time": 1746610000,
@@ -729,12 +729,12 @@
             "refresh_page_ui": true
         },
         "custom_home_assistant": {
-            "active": true,
+            "active": false,
             "backup_path": "Backup_Upgrade/Backup_Custom_HomeAssistant",
             "limit_backup_files": 6
         },
         "scheduler": {
-            "active": true,
+            "active": false,
             "backup_path": "Backup_Upgrade/Backup_Scheduler",
             "limit_backup_files": 5
         },
@@ -757,8 +757,10 @@
         "serial_number": "",
         "hmac_key": "",
         "device_activation_code": "",
-        "tts_time_out": 20,
+        "tts_time_out": 13,
         "reconnection_timeout": 3,
+        "tts_stream_silence_time": 5,
+        "call_tools_file": "resource/xiaozhi/xiaozhi_tools.json",
         "system_options": {
             "client_id": "",
             "device_id": "",

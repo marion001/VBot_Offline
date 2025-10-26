@@ -1,8 +1,8 @@
 {
-    "version": "1.0.64",
+    "version": "1.0.65",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi tranh quyền Microphone khi chỉ chạy ở chế độ xiaozhi, đồng bộ các luồng tín hiệu âm thanh với VBot",
-    "releaseDate": "20/10/2025",
+    "description": "Sửa lỗi đồng bộ dữ liệu Xiaozhi các luồng tương thích với VBot",
+    "releaseDate": "26/10/2025",
     "changes": [
         {
             "type": "feature",

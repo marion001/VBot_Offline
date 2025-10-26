@@ -1,0 +1,295 @@
+[18:41:47 14-10-2025] [STT GCloud V1] Đã xảy ra lỗi: 400 Malordered Data Received. Expected streaming_config but received audio_content. Send exactly one config, followed by audio data.
+[07:40:42 15-10-2025] [STT GCloud V1] Đã xảy ra lỗi: 400 Audio Timeout Error: Long duration elapsed without audio. Audio should be sent close to real time.
+[07:41:56 15-10-2025] [STT GCloud V1] Đã xảy ra lỗi: 400 Audio Timeout Error: Long duration elapsed without audio. Audio should be sent close to real time.
+[19:02:34 15-10-2025] [Detect Hotword] Có Lỗi Xảy Ra: Failed to read from device.
+[19:02:34 15-10-2025] [Restart VBot Service] [19:02:34 15-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[19:06:01 15-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: name 'time' is not defined
+[19:06:15 15-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: name 'time' is not defined
+[21:46:36 15-10-2025] [21:46:36 15-10-2025] Khởi động thất bại. Cổng Port API: 5002 đã được sử dụng bởi các chương trình sau:
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+python3.9 465   pi   12u  IPv4  14748      0t0  TCP *:5002 (LISTEN)
+python3.9 465   pi   15u  IPv4  14748      0t0  TCP *:5002 (LISTEN)
+
+[23:14:32 15-10-2025] [Detect Hotword] Có Lỗi Xảy Ra: 'NoneType' object has no attribute 'process'
+[23:14:32 15-10-2025] [Restart VBot Service] [23:14:32 15-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[23:15:22 15-10-2025] [Detect Hotword] Có Lỗi Xảy Ra: 'NoneType' object has no attribute 'process'
+[23:15:22 15-10-2025] [Restart VBot Service] [23:15:22 15-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[23:28:33 15-10-2025] [Detect Hotword] Có Lỗi Xảy Ra: name 'VBot_XiaoAI' is not defined
+[23:28:33 15-10-2025] [Restart VBot Service] [23:28:33 15-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[23:33:02 15-10-2025] [Detect Hotword] Có Lỗi Xảy Ra: name 'VBot_XiaoAI' is not defined
+[23:33:02 15-10-2025] [Restart VBot Service] [23:33:02 15-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[19:37:37 16-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:13:31 16-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[21:13:15 16-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: name 'message' is not defined
+[21:13:15 16-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: name 'message' is not defined
+[17:37:08 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[17:40:33 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:06:58 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:07:08 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:08:34 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:10:17 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:12:46 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:20:57 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:22:40 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:31:52 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:32:30 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:33:12 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:34:00 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:41:23 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: 
+[19:43:38 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: 
+[20:04:16 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:06:49 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:08:01 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:09:59 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:11:39 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:12:51 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:14:00 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:15:09 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: fin=1 opcode=8 data=b''
+[20:18:53 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:20:35 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[21:40:02 17-10-2025][VBot WebUI] ✅ Đã reset giới hạn đăng nhập WebUI
+[21:40:02 17-10-2025][VBot WebUI] Yêu cầu đăng nhập không hợp lệ!
+[23:01:43 17-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: ping/pong timed out
+[23:04:55 17-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:22 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:23 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:24 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[19:17:25 18-10-2025] [VBot XiaoZhi] Lỗi giải mã âm thanh: name 'os' is not defined
+[20:16:04 18-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: module 'Lib' has no attribute 'xiaozhi_connected_once'
+[20:17:17 18-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: module 'Lib' has no attribute 'xiaozhi_connected_once'
+[20:18:28 18-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: module 'Lib' has no attribute 'xiaozhi_connected_once'
+[20:19:37 18-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: module 'Lib' has no attribute 'xiaozhi_connected_once'
+[20:20:47 18-10-2025] [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: module 'Lib' has no attribute 'xiaozhi_connected_once'
+[20:25:48 18-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:25:58 18-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:26:10 18-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:26:20 18-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[20:26:58 18-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[21:13:05 18-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu: 'time_out'
+[21:30:23 18-10-2025] [MAIN] Có Lỗi Xảy Ra: name 'VBot_XiaoAI' is not defined
+[21:30:23 18-10-2025] [Restart VBot Service] [21:30:23 18-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[21:58:29 18-10-2025] [MAIN] Có Lỗi Xảy Ra: Expecting value: line 1 column 1 (char 0)
+[21:58:29 18-10-2025] [Restart VBot Service] [21:58:29 18-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[22:03:55 18-10-2025] [MAIN] Có Lỗi Xảy Ra: Expecting value: line 1 column 1 (char 0)
+[22:03:55 18-10-2025] [Restart VBot Service] [22:03:55 18-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[22:05:36 18-10-2025] [MAIN] Có Lỗi Xảy Ra: Expecting value: line 1 column 1 (char 0)
+[22:05:36 18-10-2025] [Restart VBot Service] [22:05:36 18-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[22:07:40 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:07:45 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:07:50 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:07:55 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:01 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:06 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:11 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:16 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:21 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:26 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:31 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:36 18-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[22:08:37 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:42 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:47 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:52 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:08:57 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:02 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:08 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:13 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:18 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:23 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:28 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:33 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:39 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:44 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:49 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:54 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:09:59 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:10:04 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket: scheme https is invalid
+[22:14:33 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:14:38 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:14:43 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:14:49 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:14:54 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:14:59 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:04 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:09 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:14 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:20 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:25 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:30 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:35 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:40 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:45 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:51 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:15:56 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:16:01 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:16:06 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:16:11 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:16:16 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[22:16:22 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://xiaozhi.vietbot.vn/voice, Mã Lỗi: scheme https is invalid
+[23:50:37 18-10-2025] [VBot XiaoZhi] Socket Lỗi gửi cấu hình thông số hello tới máy chủ: Connection is already closed.
+[23:50:37 18-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: 'NoneType' object has no attribute 'sock'
+[08:01:05 19-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: ping/pong timed out
+[08:01:17 19-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Sun, 19 Oct 2025 01:01:17 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.7'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[08:01:25 19-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Sun, 19 Oct 2025 01:01:25 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.71'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[08:01:33 19-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Sun, 19 Oct 2025 01:01:33 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.6'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[08:29:20 19-10-2025] [VBot XiaoZhi] Socket Lỗi gửi cấu hình thông số hello tới máy chủ: Connection is already closed.
+[08:29:20 19-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: 'NoneType' object has no attribute 'sock'
+[09:09:21 19-10-2025][VBot WebUI] Yêu cầu đăng nhập không hợp lệ!
+[18:27:10 19-10-2025][VBot WebUI] Yêu cầu đăng nhập không hợp lệ!
+[18:27:15 19-10-2025][VBot WebUI] Yêu cầu đăng nhập không hợp lệ!
+[18:27:35 19-10-2025][VBot WebUI] Yêu cầu đăng nhập không hợp lệ!
+[17:58:25 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:26 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:27 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:28 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[17:58:29 20-10-2025] [Media Player] Lỗi trong luồng run: name 'last_audio_time' is not defined
+[18:01:15 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: ping/pong timed out
+[18:01:28 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:01:28 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.7'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:01:38 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:01:38 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.6'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:01:48 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:01:48 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.71'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:02:27 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:02:27 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.6'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:02:37 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:02:37 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.7'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:02:47 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:02:47 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.6'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:04:40 20-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Mon, 20 Oct 2025 11:04:40 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.71'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[18:46:55 21-10-2025] 18:46:55 21-10-2025 [VBot XiaoZhi] Lỗi khi gửi dữ liệu: name 'session_id' is not defined
+[19:34:42 21-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: [Errno -3] Temporary failure in name resolution
+[19:52:05 21-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: Handshake status 504 Gateway Time-out -+-+- {'date': 'Tue, 21 Oct 2025 12:52:05 GMT', 'content-type': 'text/html', 'content-length': '174', 'connection': 'keep-alive', 'via': 'HTTP/1.1 SLB.71'} -+-+- b'<html>\r\n<head><title>504 Gateway Time-out</title></head>\r\n<body bgcolor="white">\r\n<center><h1>504 Gateway Time-out</h1></center>\r\n<hr><center>alb</center>\r\n</body>\r\n</html>\r\n'
+[21:31:05 21-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: ping/pong timed out
+[22:26:42 21-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[22:26:58 21-10-2025] [VBot XiaoZhi] Kết nối máy chủ không thành công, hủy gửi dữ liệu.
+[18:26:50 22-10-2025] [PodCast] Lỗi khi tìm kiếm dữ liệu cần phát: HTTPSConnectionPool(host='core.ocs.iviet.com', port=443): Max retries exceeded with url: /v1/graphql (Caused by NewConnectionError('<urllib3.connection.VerifiedHTTPSConnection object at 0x60db3280>: Failed to establish a new connection: [Errno 111] Connection refused'))
+[18:39:00 22-10-2025] [Detect Hotword] Có Lỗi Xảy Ra: name 'xiaozhi_music_request_signal' is not defined
+[18:39:00 22-10-2025] [Restart VBot Service] [18:39:00 22-10-2025] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[19:19:03 22-10-2025] 19:19:03 22-10-2025 [VBot XiaoZhi] Lỗi xử lý dữ liệu trả về từ máy chủ: Connection is already closed.
+[21:12:13 22-10-2025] lỗi khi lấy Link/Url âm thanh từ video Youtube: anHyflL623Q is streaming live and cannot be loaded
+[18:17:22 23-10-2025] [18:17:22 23-10-2025] Khởi động thất bại. Cổng Port API: 5002 đã được sử dụng bởi các chương trình sau:
+COMMAND   PID USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+python3.9 534   pi    7u  IPv4  13909      0t0  TCP *:5002 (LISTEN)
+python3.9 534   pi   11u  IPv4  13909      0t0  TCP *:5002 (LISTEN)
+
+[23:21:19 24-10-2025] [Gemini] Không tạo được văn bản: {
+  "error": {
+    "code": 503,
+    "message": "The model is overloaded. Please try again later.",
+    "status": "UNAVAILABLE"
+  }
+}
+
+[21:24:10 25-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: on_open_ws() takes 0 positional arguments but 1 was given
+[21:25:22 25-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: on_open_ws() takes 0 positional arguments but 1 was given
+[21:32:20 25-10-2025] 21:32:19 25-10-2025 [VBot XiaoZhi] Socket Lỗi gửi cấu hình thông số hello tới máy chủ: Connection is already closed.
+[21:32:20 25-10-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi: 'NoneType' object has no attribute 'sock'
+[22:00:54 25-10-2025] 22:00:54 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:04:28 25-10-2025] 22:04:28 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:14:14 25-10-2025] 22:14:14 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:16:39 25-10-2025] 22:16:39 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:18:09 25-10-2025] 22:18:09 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:19:57 25-10-2025] 22:19:57 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:22:37 25-10-2025] 22:22:37 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:23:00 25-10-2025] 22:23:00 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[22:24:26 25-10-2025] 22:24:26 25-10-2025 [VBot XiaoZhi] Đã dừng kết nối và reset trạng thái thành công
+[09:19:35 26-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu:: 'tts_stream_silence_time'
+[09:19:41 26-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu:: 'tts_stream_silence_time'
+[09:19:45 26-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu:: 'tts_stream_silence_time'
+[09:19:52 26-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu:: 'tts_stream_silence_time'
+[09:19:58 26-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu:: 'tts_stream_silence_time'
+[09:20:06 26-10-2025] [VBot XiaoZhi] Lỗi khi gửi dữ liệu:: 'tts_stream_silence_time'

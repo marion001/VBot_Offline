@@ -1,0 +1,100 @@
+{
+	"tools": [
+		{
+		  "name": "%VBot_Volume",
+		  "description": "Điều chỉnh âm lượng của hệ thống VBot — có thể tăng, giảm, hoặc đặt trực tiếp giá trị âm lượng, tất cả mọi yêu cầu điều chỉnh âm lượng",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "volume": {
+				"oneOf": [
+				  {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 100,
+					"description": "Đặt trực tiếp mức âm lượng từ 0 đến 100."
+				  },
+				  {
+					"type": "string",
+					"enum": ["UP", "DOWN", "MIN", "MAX"],
+					"description": "Tăng ('UP') hoặc giảm ('DOWN'), thấp nhất ('MIN') hoặc to nhất ('MAX') âm lượng hiện tại một mức cố định (ví dụ 10%)."
+				  }
+				]
+			  }
+			},
+			"required": ["volume"]
+		  }
+		},
+		{
+		  "name": "%VBot_PodCast",
+		  "description": "Kể hoặc đọc truyện theo yêu cầu",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "topic": {
+				"type": "string",
+				"description": "Tên hoặc chủ đề truyện cần kể."
+			  }
+			},
+			"required": ["topic"]
+		  }
+		},
+		{
+		  "name": "%VBot_PlayMusic",
+		  "description": "Phát, mở nhạc hoặc bài hát theo yêu cầu người dùng",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "song": {
+				"type": "string",
+				"description": "Tên bài hát hoặc ca sĩ cần phát."
+			  }
+			},
+			"required": ["song"]
+		  }
+		},
+		{
+		  "name": "%VBot_PlaylistPlayer",
+		  "description": "Phát danh sách nhạc, playlist, album hoặc tuyển tập bài hát.",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "playlist": {
+				"type": "string",
+				"description": "chỉ cần có yêu cầu phát, mở danh sách nhạc là được, không cần yêu cầu tên, hãy trả về tham số: 'playlist'"
+			  }
+			},
+			"required": ["playlist"]
+		  }
+		},
+		{
+		  "name": "%VBot_PlayLocal",
+		  "description": "Phát nhạc hoặc playlist lưu trữ nội bộ trên thiết bị, ví dụ thẻ nhớ, USB, ổ cứng hoặc thư mục nhạc offline. Dùng khi người dùng yêu cầu phát nhạc từ thẻ nhớ, USB hoặc trong máy, thiết bị này, loa này",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "source": {
+				"type": "string",
+				"description": "Nguồn nhạc nội bộ, ví dụ: 'thẻ nhớ', 'USB', 'nhạc offline', 'nhạc trong máy'. Nếu người dùng chỉ nói phát nhạc offline thì đặt giá trị là 'local'."
+			  }
+			},
+			"required": ["source"]
+		  }
+		},
+		{
+		  "name": "%VBot_MediaControl",
+		  "description": "Điều khiển phát nhạc trên hệ thống VBot — bao gồm tạm dừng, tiếp tục, dừng hẳn, phát tiếp, hoặc chuyển bài.",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "action": {
+				"type": "string",
+				"enum": ["PLAY", "PAUSE", "STOP", "CONTINUE", "NEXT", "PREVIOUS"],
+				"description": "Hành động điều khiển nhạc: PLAY (phát lại), PAUSE (tạm dừng), STOP (dừng hẳn), CONTINUE (tiếp tục phát), NEXT (bài tiếp theo), PREVIOUS (bài trước đó)."
+			  }
+			},
+			"required": ["action"]
+		  }
+		}
+	]
+}
