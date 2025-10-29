@@ -208,6 +208,23 @@ $: <b>sudo raspi-config</b><br/>
             $temperature = shell_exec("cat /sys/class/thermal/thermal_zone0/temp");
             // Chuyển đổi từ mili độ C sang độ C
             $temperatureCelsius = intval($temperature) / 1000;
+			//Xử lý trạng thái nhiệt độ theo thực tế Raspberry Pi Zero 2W
+			if ($temperatureCelsius < 45) {
+				$status = '<span class="text-success">Mát Mẻ</span>';
+				$icon = '<i class="bi bi-thermometer-half text-success"></i>';
+			} elseif ($temperatureCelsius < 60) {
+				$status = '<span class="text-primary">Ổn Định</span>';
+				$icon = '<i class="bi bi-thermometer text-primary"></i>';
+			} elseif ($temperatureCelsius < 70) {
+				$status = '<span class="text-warning">Cảnh Báo Nhiệt</span>';
+				$icon = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
+			} elseif ($temperatureCelsius < 80) {
+				$status = '<span class="text-danger">Nhiệt Độ Cao</span>';
+				$icon = '<i class="bi bi-fire text-danger"></i>';
+			} else {
+				$status = '<span class="text-danger fw-bold">CPU Quá Nóng (Throttling)</span>';
+				$icon = '<i class="bi bi-thermometer-high text-danger"></i>';
+			}
             ?>
             <div class="col-xxl-4 col-xl-12">
               <div class="card info-card customers-card">
@@ -221,7 +238,13 @@ $: <b>sudo raspi-config</b><br/>
                       <h6><?php echo $totalCpuUsage; ?>%</h6>
                       <span class="text-success small pt-1 fw-bold">Số lõi: </span> <span class="text-danger small pt-2 ps-1"><?php echo $cpuCores; ?></span>
                       <br /><span class="text-success small pt-1 fw-bold">Tần số: </span> <span class="text-danger small pt-2 ps-1"><?php echo $cpuMHz; ?>MHz</span>
-                      <br /><span class="text-success small pt-1 fw-bold">Nhiệt độ: </span> <span class="text-danger small pt-2 ps-1"><?php echo $temperatureCelsius; ?>°C</span>
+                      <br />
+					  <span class="text-success small pt-1 fw-bold">Nhiệt độ: </span>
+						<span class="small pt-2 ps-1">
+							<span class="fw-bold text-danger"><?php echo $temperatureCelsius; ?>°C</span>
+							<?php echo $icon; ?>
+							- <?php echo $status; ?>
+						</span>
                     </div>
                   </div>
                 </div>

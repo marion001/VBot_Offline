@@ -178,7 +178,6 @@
     "media_player": {
         "active": true,
         "time_out": 30,
-        "audio_stream_timeout": 1.6,
         "wake_up_in_media_player": false,
         "media_sync_ui": {
             "active": true,

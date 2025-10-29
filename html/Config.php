@@ -293,7 +293,6 @@ if (isset($_POST['all_config_save'])) {
   #Cập Nhật Bật hoặc tắt Sử dụng Media Player
   $Config['media_player']['active'] = isset($_POST['media_player_active']) ? true : false;
   $Config['media_player']['wake_up_in_media_player'] = isset($_POST['wake_up_in_media_player']) ? true : false;
-  $Config['media_player']['audio_stream_timeout'] = floatval($_POST['media_player_audio_stream_timeout']);
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG music_local
   $allowed_formats_str = $_POST['music_local_allowed_formats'];
@@ -728,18 +727,78 @@ if (file_exists($tts_token_google_cloud)) {
 }
 
 #Tự Sinh HTML
-function input_field($id, $label, $value = '', $disabled = false, $type = 'text', $step = '1', $help = '', $extra_class = 'border-success')
-{
-  $disabled_attr = $disabled ? 'disabled' : '';
-  $help_icon = $help ? " <i class='bi bi-question-circle-fill' onclick=\"show_message('$help')\"></i>" : '';
+function input_field(
+  $id,
+  $label,
+  $value = '',
+  $disabled = '',
+  $type = 'text',
+  $step = '',
+  $min = '',
+  $max = '',
+  $help = '',
+  $extra_class = 'border-success',
+  $button_label = '',
+  $button_action = '',
+  $button_class = 'btn btn-success border-success',
+  $button_type = 'onclick',   //'action' = onclick, 'link' = mở URL
+  $button_target = '_blank'  //chỉ dùng cho loại link
+) {
+  //Kiểm tra help có phải HTML hoàn chỉnh
+  $is_full_html = preg_match('/^\s*<[^>]+>.*<\/[^>]+>\s*$/s', $help);
+  if ($is_full_html) {
+    $help_icon = '';
+    $help_html = $help;
+  } else {
+    $safe_help = htmlspecialchars($help, ENT_QUOTES);
+    $help_icon = $help ? " <i class='bi bi-question-circle-fill' style='cursor:pointer;' onclick=\"show_message('$safe_help')\"></i>" : '';
+    $help_html = '';
+  }
+  // Xử lý step, min, max
+  $step_attr = ($type === 'number' && $step !== '') ? "step='$step'" : '';
+  $min_attr  = ($type === 'number' && $min !== '') ? "min='$min'" : '';
+  $max_attr  = ($type === 'number' && $max !== '') ? "max='$max'" : '';
+  //Nếu có button → input-group
+  if (!empty($button_label)) {
+    // Loại button là action (onclick JS)
+    if ($button_type === 'onclick') {
+      $button_html = "<button type='button' class='$button_class' onclick=\"$button_action\">$button_label</button>";
+    }
+    //Loại button là link (href mở URL)
+    elseif ($button_type === 'link') {
+      $safe_url = htmlspecialchars($button_action, ENT_QUOTES);
+      $button_html = "
+                <button type='button' class='$button_class'>
+                    <a href='$safe_url' target='$button_target' style='color:white; text-decoration:none;'>$button_label</a>
+                </button>";
+    }
+    $input_html = "
+        <div class='input-group mb-3'>
+            <input $disabled class='form-control $extra_class' 
+                   type='$type' $step_attr $min_attr $max_attr 
+                   name='$id' id='$id'
+                   value='" . htmlspecialchars($value, ENT_QUOTES) . "'>
+            $button_html
+        </div>";
+  } else {
+    //Không có button → input thường
+    $input_html = "
+        <input $disabled class='form-control $extra_class' 
+               type='$type' $step_attr $min_attr $max_attr 
+               name='$id' id='$id'
+               value='" . htmlspecialchars($value, ENT_QUOTES) . "'>";
+  }
   return "
-	<div class='row mb-3'>
-	  <label for='$id' class='col-sm-3 col-form-label'>$label$help_icon:</label>
-	  <div class='col-sm-9'>
-		<input $disabled_attr class='form-control $extra_class' type='$type' step='$step' name='$id' id='$id' value='" . htmlspecialchars($value) . "'>
-	  </div>
-	</div>";
+    <div class='row mb-3'>
+        <label for='$id' class='col-sm-3 col-form-label'>
+            $label $help_html $help_icon:
+        </label>
+        <div class='col-sm-9'>
+            $input_html
+        </div>
+    </div>";
 }
+
 function select_field($id, $label, $options, $selected)
 {
   $html = "
@@ -843,12 +902,11 @@ include 'html_head.php';
       <section class="section">
         <div class="row">
           <div class="col-lg-12">
-
             <div class="row mb-3 align-items-center">
               <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi')"></i>:</label>
               <div class="col-sm-9">
                 <select class="form-select border-success" name="launch_source" id="launch_source">
-                  <option value="VBot_Assistant" <?php if ($Config['launch_source'] === "VBot_Assistant") echo "selected"; ?>>Chạy VBot Assistant</option>
+                  <option value="VBot_Assistant" <?php if ($Config['launch_source'] === "VBot_Assistant") echo "selected"; ?>>Chạy VBot Assistant (Nên Dùng)</option>
                   <option value="XiaoZhi_AI" <?php if ($Config['launch_source'] === "XiaoZhi_AI") echo "selected"; ?>>Chỉ Chạy XiaoZhi AI</option>
                 </select>
               </div>
@@ -859,27 +917,11 @@ include 'html_head.php';
                   Cấu Hình Kết Nối SSH Server <font color="red"> (Bắt Buộc)</font>:
                 </h5>
                 <div id="collapse_button_ssh" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_ssh">
-                  <div class="row mb-3">
-                    <label for="ssh_port" class="col-sm-3 col-form-label">Cổng kết nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-danger" type="number" name="ssh_port" id="ssh_port" placeholder="<?php echo $Config['ssh_server']['ssh_port']; ?>" value="<?php echo $Config['ssh_server']['ssh_port']; ?>">
-                      <div class="invalid-feedback">Cần nhập cổng kết nối tới máy chủ SSH</div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="ssh_username" class="col-sm-3 col-form-label">Tên đăng nhập <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-danger" type="text" name="ssh_username" id="ssh_username" placeholder="<?php echo $Config['ssh_server']['ssh_username']; ?>" value="<?php echo $Config['ssh_server']['ssh_username']; ?>">
-                      <div class="invalid-feedback">Cần nhập tên đăng nhập của máy chủ SSH</div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="ssh_password" class="col-sm-3 col-form-label">Mật khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-danger" type="text" name="ssh_password" id="ssh_password" placeholder="<?php echo $Config['ssh_server']['ssh_password']; ?>" value="<?php echo $Config['ssh_server']['ssh_password']; ?>">
-                      <div class="invalid-feedback">Cần nhập mật khẩu của máy chủ SSH</div>
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('ssh_port', 'Cổng kết nối', $Config['ssh_server']['ssh_port'] ?? 22, 'required', 'number', '1', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
+                  echo input_field('ssh_username', 'Tài Khoản', $Config['ssh_server']['ssh_username'], 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
+                  echo input_field('ssh_password', 'Mật khẩu', $Config['ssh_server']['ssh_password'], 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
+                  ?>
                   <center><button type="button" class="btn btn-success rounded-pill" onclick="checkSSHConnection('<?php echo $serverIp; ?>')">Kiểm tra kết nối SSH</button></center>
                 </div>
               </div>
@@ -906,16 +948,9 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="webui_path" class="col-sm-3 col-form-label">Path (Đường Dẫn) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input required type="text" class="form-control border-success" name="webui_path" id="webui_path" placeholder="<?php echo htmlspecialchars($directory_path) ?>" value="<?php echo htmlspecialchars($directory_path) ?>">
-                        <div class="invalid-feedback">Cần nhập đường dẫn path hiện tại của giao diện Web UI</div>
-                        <button class="btn btn-success border-success" type="button" title="<?php echo $directory_path; ?>" onclick="update_webui_link('<?php echo $directory_path; ?>')">Cập Nhật</button>
-                      </div>
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('webui_path', 'Path (Đường Dẫn) ', $directory_path, 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Cập Nhật', 'update_webui_link(\'' . $directory_path . '\')', 'btn btn-success border-success', 'onclick', '');
+                  ?>
                 </div>
               </div>
             </div>
@@ -933,16 +968,9 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="api_port" class="col-sm-3 col-form-label">Port API <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input required type="number" class="form-control border-success" name="api_port" id="api_port" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['port']) ?>">
-                        <div class="invalid-feedback">Cần nhập cổng Port dành cho API!</div>
-                        <button class="btn btn-success border-success" type="button" title="<?php echo $Protocol . $serverIp . ':' . $Port_API; ?>"><a title="<?php echo $Protocol . $serverIp . ':' . $Port_API; ?>" style="text-decoration: none; color: inherit;" href="<?php echo $Protocol . $serverIp . ':' . $Port_API; ?>" target="_blank">Kiểm Tra</a></button>
-                      </div>
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('api_port', 'Port API ', htmlspecialchars($Config['api']['port']), 'required', 'number', '1', '', '9999', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "$Protocol$serverIp:$Port_API", 'btn btn-success border-success', 'link', '_blank');
+                  ?>
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Hiển Thị Log API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt hiển thị log của API, Chỉ hiển thị khi Debug trực tiếp trên Console, Terminal')"></i> :</label>
                     <div class="col-sm-9">
@@ -951,36 +979,22 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="max_logs_api" class="col-sm-3 col-form-label">Tối Đa Dòng Logs API <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <input required type="number" class="form-control border-success" name="max_logs_api" id="max_logs_api" max="70" step="1" min="10" placeholder="<?php echo htmlspecialchars($Config['api']['show_log']['max_log']) ?>" value="<?php echo htmlspecialchars($Config['api']['show_log']['max_log']) ?>">
-                      <div class="invalid-feedback">Cần nhập tối đa dòng logs được hiển thị khi đọc qua đường API</div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="api_log_active_log_lever" class="col-sm-3 col-form-label">Mức Độ Hiển Thị Log:</label>
-                    <div class="col-sm-9">
-                      <select name="api_log_active_log_lever" id="api_log_active_log_lever" class="form-select border-success" aria-label="Default select example">
-                        <option value="DEBUG" <?php echo $Config['api']['show_log']['log_lever'] === 'DEBUG' ? 'selected' : ''; ?>>DEBUG (Các thông tin gỡ lỗi)</option>
-                        <option value="INFO" <?php echo $Config['api']['show_log']['log_lever'] === 'INFO' ? 'selected' : ''; ?>>INFO (Các thông tin)</option>
-                        <option value="WARNING" <?php echo $Config['api']['show_log']['log_lever'] === 'WARNING' ? 'selected' : ''; ?>>WARNING (Các cảnh báo lỗi)</option>
-                        <option value="ERROR" <?php echo $Config['api']['show_log']['log_lever'] === 'ERROR' ? 'selected' : ''; ?>>ERROR (Lỗi nghiêm trọng)</option>
-                        <option value="CRITICAL" <?php echo $Config['api']['show_log']['log_lever'] === 'CRITICAL' ? 'selected' : ''; ?>>CRITICAL (Lỗi rất nghiêm trọng)</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Danh Sách Dữ Liệu API:</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input disabled class="form-control border-danger" type="text" value="http://<?php echo $serverIp; ?>/API_List.php">
-                        <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="/API_List.php" target="_blank">Truy Cập</a></button>
-                      </div>
-                    </div>
-                  </div>
-
+                  <?php
+                  echo input_field('max_logs_api', 'Tối Đa Dòng Logs API', $Config['api']['show_log']['max_log'] ?? 30, 'required', 'number', '1', '10', '100', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                  echo select_field(
+                    'api_log_active_log_lever',
+                    'Mức Độ Hiển Thị Log:',
+                    [
+                      'DEBUG' => 'DEBUG (Các thông tin gỡ lỗi)',
+                      'INFO' => 'INFO (Các thông tin)',
+                      'WARNING' => 'WARNING (Các cảnh báo lỗi)',
+                      'ERROR' => 'ERROR (Lỗi nghiêm trọng)',
+                      'CRITICAL' => 'CRITICAL (Lỗi rất nghiêm trọng)'
+                    ],
+                    $Config['api']['show_log']['log_lever']
+                  );
+                  echo input_field('', 'Danh Sách Dữ Liệu API: ', "http://$serverIp/API_List.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/API_List.php", 'btn btn-success border-danger', 'link', '_blank');
+                  ?>
                 </div>
               </div>
             </div>
@@ -999,14 +1013,9 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="streaming_server_connection_protocol" class="col-sm-3 col-form-label">Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <select name="streaming_server_connection_protocol" id="streaming_server_connection_protocol" class="form-select border-success" aria-label="Default select example">
-                        <option value="udp_sock" <?php echo $Config['api']['streaming_server']['connection_protocol'] === 'udp_sock' ? 'selected' : ''; ?>>Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini</option>
-                      </select>
-                    </div>
-                  </div>
+                  <?php
+                  echo select_field('streaming_server_connection_protocol', 'Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['udp_sock' => 'Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini'], $Config['api']['streaming_server']['connection_protocol']);
+                  ?>
 
                   <div class="card accordion" id="accordion_button_udp_server_streaming">
                     <div class="card-body">
@@ -1036,43 +1045,21 @@ include 'html_head.php';
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="port_server_udp_streaming_audio" class="col-sm-3 col-form-label">Port Server <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <input required type="number" class="form-control border-success" name="port_server_udp_streaming_audio" id="port_server_udp_streaming_audio" max="9999" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['port']) ?>">
-                            <div class="invalid-feedback">Cần nhập cổng Port dành cho Server Streaming Audio!</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_maximum_recording_time" class="col-sm-3 col-form-label">Thời Gian Thu Âm Tối Đa (s) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <input required type="number" class="form-control border-success" name="udp_maximum_recording_time" id="udp_maximum_recording_time" max="10" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time']) ?>">
-                            <div class="invalid-feedback">Cần nhập thời gian thu âm tối đa khi được đánh thức</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_maximum_client_connected" class="col-sm-3 col-form-label">Tối Đa Client Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <input required type="number" class="form-control border-success" name="udp_maximum_client_connected" id="udp_maximum_client_connected" max="20" step="1" min="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected']) ?>">
-                            <div class="invalid-feedback">Cần nhập Tối Đa Số Lượng Client Cho Phép Kết Nối</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_time_remove_inactive_clients" class="col-sm-3 col-form-label">Thời gian dọn dẹp Client (s) <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <input required type="number" class="form-control border-success" name="udp_time_remove_inactive_clients" id="udp_time_remove_inactive_clients" step="1" placeholder="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>" value="<?php echo htmlspecialchars($Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients']) ?>">
-                            <div class="invalid-feedback">Cần nhập thời gian dọn dẹp các Client không hoạt động trong một khoảng thời gian</div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_source_stt" class="col-sm-3 col-form-label">Nguồn xử lý âm thanh STT Cho Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <select name="udp_source_stt" id="udp_source_stt" class="form-select border-success" aria-label="Default select example">
-                              <option value="stt_default" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] === 'stt_default' ? 'selected' : ''; ?>>STT Mặc Định VBot (Free)</option>
-                              <option value="stt_ggcloud" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'] === 'stt_ggcloud' ? 'selected' : ''; ?>>STT Google Cloud V1</option>
-                            </select>
-                          </div>
-                        </div>
+                        <?php
+                        echo input_field('port_server_udp_streaming_audio', 'Port Server', $Config['api']['streaming_server']['protocol']['udp_sock']['port'] ?? 5003, 'required', 'number', '1', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo input_field('udp_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo input_field('udp_maximum_client_connected', 'Tối Đa Client Kết Nối', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected'] ?? 3, 'required', 'number', '1', '1', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo input_field('udp_time_remove_inactive_clients', 'Thời gian dọn dẹp Client (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients'] ?? 300, 'required', 'number', '1', '200', '900', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo select_field(
+                          'udp_source_stt',
+                          'Nguồn xử lý âm thanh STT Cho Client',
+                          [
+                            'stt_default' => 'STT Mặc Định VBot (Free)',
+                            'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)'
+                          ],
+                          $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt']
+                        );
+                        ?>
                         <div class="row mb-3">
                           <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                           <div class="col-sm-9">
@@ -1082,46 +1069,21 @@ include 'html_head.php';
                             </select>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="udp_select_wakeup" class="col-sm-3 col-form-label">Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <select name="udp_select_wakeup" id="udp_select_wakeup" class="form-select border-success" aria-label="Default select example">
-                              <option value="porcupine" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Porcupine (WakeUp Client)</option>
-                              <option value="snowboy" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy (WakeUP Client)</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_server_data_client_name" class="col-sm-3 col-form-label">Tệp Dữ Liệu Client:</label>
-                          <div class="col-sm-9">
-                            <input readonly type="text" class="form-control border-danger" name="udp_server_data_client_name" id="udp_server_data_client_name" placeholder="<?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name']; ?>" value="<?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name']; ?>">
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_server_streaming_audio" class="col-sm-3 col-form-label">Server Streaming Audio:</label>
-                          <div class="col-sm-9">
-                            <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio" id="udp_server_streaming_audio" placeholder="<?php echo htmlspecialchars($serverIp . ':' . $Port_Server_Streaming_Audio_UDP); ?>" value="<?php echo htmlspecialchars($serverIp . ':' . $Port_Server_Streaming_Audio_UDP); ?>">
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="udp_server_streaming_audio_local" class="col-sm-3 col-form-label">URL Audio Local:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input readonly type="text" class="form-control border-danger" name="udp_server_streaming_audio_local" id="udp_server_streaming_audio_local" value="<?php echo htmlspecialchars('http://' . $serverIp . '/assets/sound/'); ?>">
-                              <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="<?php echo htmlspecialchars('http://' . $serverIp . '/assets/sound/'); ?>" target="_blank">Truy Cập</a></button>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Flash Firmware URL:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot_Client_Offline" title="https://github.com/marion001/VBot_Client_Offline" value="https://github.com/marion001/VBot_Client_Offline">
-                              <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Client_Offline" target="_blank">Truy Cập</a></button>
-                            </div>
-                          </div>
-                        </div>
+                        <?php
+                        echo select_field(
+                          'udp_select_wakeup',
+                          'Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>',
+                          [
+                            'porcupine' => 'Picovoice/Porcupine WakeUp Client (Nên Dùng)',
+                            'snowboy' => 'Snowboy WakeUP Client'
+                          ],
+                          $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup']
+                        );
+                        echo input_field('udp_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('udp_server_streaming_audio', 'Server Streaming Audio:', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('udp_server_streaming_audio_local', 'URL Audio Local:', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'btn btn-success border-danger', 'link', '_blank');
+                        echo input_field('client_flash_firmware_url', 'Flash Firmware URL:', 'https://github.com/marion001/VBot_Client_Offline', 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Client_Offline', 'btn btn-success border-danger', 'link', '_blank');
+                        ?>
                       </div>
                     </div>
                   </div>
@@ -1137,18 +1099,9 @@ include 'html_head.php';
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a>')"></i> &nbsp;:</h5>
-                      <div class="row mb-3">
-                        <label for="mic_id" class="col-sm-3 col-form-label">ID Mic <i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé')"></i>
-                          <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:
-                        </label>
-                        <div class="col-sm-9">
-                          <div class="input-group mb-3">
-                            <input required class="form-control border-success" type="number" name="mic_id" id="mic_id" placeholder="<?php echo $Config['smart_config']['mic']['id']; ?>" value="<?php echo $Config['smart_config']['mic']['id']; ?>">
-                            <div class="invalid-feedback">Cần nhập ID của Mic!</div>
-                            <button class="btn btn-success border-success" type="button" onclick="scan_audio_devices('scan_mic')">Tìm Kiếm ID Mic</button>
-                          </div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('mic_id', 'ID Mic ', htmlspecialchars($Config['smart_config']['mic']['id']), 'required', 'number', '', '', '', 'Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé', 'border-success', 'Tìm Kiếm ID Mic', "scan_audio_devices('scan_mic')", 'btn btn-success border-success', 'onclick', '_blank');
+                      ?>
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Auto Scan Mic <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ tìm kiếm và liệt kê các ID và Tên của Microphone có trên hệ thống, và hiển thị ra các đường Logs mỗi khi trương trình được khởi chạy')"></i> :</label>
                         <div class="col-sm-9">
@@ -1165,51 +1118,13 @@ include 'html_head.php';
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Âm Lượng (Volume)/Audio Out &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font><br/>Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'> Hướng Dẫn</a>')"></i> &nbsp;:</h5>
-                      <div class="row mb-3">
-                        <label for="alsamixer_name" class="col-sm-3 col-form-label" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer">Tên thiết bị (alsamixer) <i class="bi bi-question-circle-fill" onclick="show_message('Tên của thiết bị âm thanh đầu ra trong alsamixer, cần điền đúng tên thiết bị âm thanh đầu ra hiện tại của alsamixer<br/><br/>- nếu không biết đâu là thiết bị âm thanh đầu ra thì bạn có thể phát 1 bài nhạc bằng vlc ví dụ: <b>$: vlc 1.mp3</b> sau đó vào alsamixer bằng lệnh: <b>$: alsamixer</b> thay đổi âm lượng của các thiết bị có trong đó để xác định xem đâu là tên thiết bị đầu ra')"></i>:</label>
-                        <div class="col-sm-9">
-                          <div class="input-group mb-3">
-                            <input class="form-control border-success" type="text" name="alsamixer_name" id="alsamixer_name" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Tên thiết bị âm thanh đầu ra của hệ thống có trong alsamixer" placeholder="<?php echo $Config['smart_config']['speaker']['system']['alsamixer_name']; ?>" value="<?php echo $Config['smart_config']['speaker']['system']['alsamixer_name']; ?>">
-                            <button class="btn btn-success border-success" type="button" onclick="scan_audio_devices('scan_alsamixer')">Tìm Kiếm</button>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="bot_volume" class="col-sm-3 col-form-label" title="Âm lượng khi chạy lần đầu tiên">Âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình')"></i>
-                          <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :
-                        </label>
-                        <div class="col-sm-9">
-                          <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume" id="bot_volume" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Âm lượng khi chạy lần đầu tiên" placeholder="<?php echo $Config['smart_config']['speaker']['volume']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume']; ?>">
-                          <div class="invalid-feedback">Cần nhập âm lượng khi khởi động!</div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="bot_volume_min" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ giảm xuống thấp nhất">Âm lượng thấp nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0')"></i>
-                          <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :
-                        </label>
-                        <div class="col-sm-9">
-                          <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_min" id="bot_volume_min" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ giảm xuống thấp nhất" placeholder="<?php echo $Config['smart_config']['speaker']['volume_min']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_min']; ?>">
-                          <div class="invalid-feedback">Cần nhập âm lượng hạ xuống thấp nhất khi Bot thay đổi!</div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="bot_volume_max" class="col-sm-3 col-form-label" title="Mức âm lượng sẽ tăng lên cao nhất">Âm lượng cao nhất <i class="bi bi-question-circle-fill" onclick="show_message('Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100')"></i>
-                          <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :
-                        </label>
-                        <div class="col-sm-9">
-                          <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_max" id="bot_volume_max" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ tăng lên cao nhất" placeholder="<?php echo $Config['smart_config']['speaker']['volume_max']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_max']; ?>">
-                          <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="bot_volume_step" class="col-sm-3 col-form-label" title="Bước âm lượng khi được thay đổi">Bước âm lượng <i class="bi bi-question-circle-fill" onclick="show_message('Bước âm lượng thay đổi khi mỗi lần tăng hoặc giảm âm lượng')"></i>
-                          <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :
-                        </label>
-                        <div class="col-sm-9">
-                          <input required class="form-control border-success" step="1" min="0" max="100" type="number" name="bot_volume_step" id="bot_volume_step" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Bước âm lượng khi được thay đổi" placeholder="<?php echo $Config['smart_config']['speaker']['volume_step']; ?>" value="<?php echo $Config['smart_config']['speaker']['volume_step']; ?>">
-                          <div class="invalid-feedback">Cần nhập âm lượng tối đa khi Bot thay đổi!</div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('alsamixer_name', 'Tên thiết bị (alsamixer) ', htmlspecialchars($Config['smart_config']['speaker']['system']['alsamixer_name']), '', 'text', '', '', '', 'Tên của thiết bị âm thanh đầu ra trong alsamixer, cần điền đúng tên thiết bị âm thanh đầu ra hiện tại của alsamixer<br/><br/>- nếu không biết đâu là thiết bị âm thanh đầu ra thì bạn có thể phát 1 bài nhạc bằng vlc ví dụ: <b>$: vlc 1.mp3</b> sau đó vào alsamixer bằng lệnh: <b>$: alsamixer</b> thay đổi âm lượng của các thiết bị có trong đó để xác định xem đâu là tên thiết bị đầu ra', 'border-success', 'Tìm Kiếm', "scan_audio_devices('scan_alsamixer')", 'btn btn-success border-success', 'onclick', '_blank');
+                      echo input_field('bot_volume', 'Âm lượng', $Config['smart_config']['speaker']['volume'] ?? 50, 'required', 'number', '1', '0', '100', 'Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình', 'border-success', '', '', '', '', '');
+                      echo input_field('bot_volume_min', 'Âm lượng thấp nhất', $Config['smart_config']['speaker']['volume_min'] ?? 0, 'required', 'number', '1', '0', '100', 'Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0', 'border-success', '', '', '', '', '');
+                      echo input_field('bot_volume_max', 'Âm lượng cao nhất', $Config['smart_config']['speaker']['volume_max'] ?? 100, 'required', 'number', '1', '0', '100', 'Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100', 'border-success', '', '', '', '', '');
+                      echo input_field('bot_volume_step', 'Bước âm lượng', $Config['smart_config']['speaker']['volume_step'] ?? 10, 'required', 'number', '1', '0', '100', 'Bước âm lượng thay đổi khi mỗi lần nhấn nút tăng hoặc giảm âm lượng', 'border-danger', '', '', '', '', '');
+                      ?>
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Ghi Nhớ Âm Lượng Khi Được Thay Đổi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lưu lại giá trị âm lượng vào tệp Config.json mỗi khi được thay đổi trong quá trình Bot hoạt động')"></i> :</label>
                         <div class="col-sm-9">
@@ -1243,28 +1158,23 @@ include 'html_head.php';
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label for="hotword_select_wakeup" class="col-sm-3 col-form-label">Chọn Nguồn Đánh Thức <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
-                        <div class="col-sm-9">
-                          <select name="hotword_select_wakeup" id="hotword_select_wakeup" class="form-select border-success" aria-label="Default select example" onchange="selectHotwordWakeup()">
-                            <option value="porcupine" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'porcupine' ? 'selected' : ''; ?>>Picovoice/Procupine (Nên Dùng)</option>
-                            <option value="snowboy" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === 'snowboy' ? 'selected' : ''; ?>>Snowboy</option>
-                            <option value="null" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] === null ? 'selected' : ''; ?>>Không Sử Dụng Hotword</option>
-                          </select>
-                        </div>
-                      </div>
+                      <?php
+                      echo select_field(
+                        'hotword_select_wakeup',
+                        'Chọn Nguồn Đánh Thức',
+                        [
+                          'porcupine' => 'Picovoice/Procupine (Nên Dùng)',
+                          'snowboy' => 'Snowboy',
+                          'null' => 'Không Sử Dụng Hotword'
+                        ],
+                        $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup']
+                      );
+                      ?>
                       <!-- nếu hotword được chọn là Picovoice Procupine -->
                       <div id="select_show_picovoice_porcupine">
-                        <div class="row mb-3">
-                          <label for="hotword_engine_key" class="col-sm-3 col-form-label">Picovoice Token Key <font color="red" size="6" title="Bắt Buộc Nhập">*</font> : <i class="bi bi-question-circle-fill" onclick="show_message('Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>')"></i></label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input required class="form-control border-success" type="text" name="hotword_engine_key" id="hotword_engine_key" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['hotword_engine']['key']; ?>">
-                              <div class="invalid-feedback">Cần nhập key Picovoice để gọi Hotword!</div>
-                              <button class="btn btn-success border-success" type="button" onclick="test_key_Picovoice()">Kiểm Tra</button>
-                            </div>
-                          </div>
-                        </div>
+                        <?php
+                        echo input_field('hotword_engine_key', 'Picovoice Token Key ', htmlspecialchars($Config['smart_config']['smart_wakeup']['hotword_engine']['key']), '', 'text', '', '', '', 'Đăng ký, lấy key: <a href=\'https://console.picovoice.ai\' target=\'_bank\'>https://console.picovoice.ai</a>', 'border-success', 'Kiểm Tra', 'test_key_Picovoice()', 'btn btn-success border-success', 'onclick', '_blank');
+                        ?>
                         <div class="form-floating mb-3">
                           <select name="select_hotword_lang" id="select_hotword_lang" class="form-select border-success" aria-label="Default select example">
                             <option value="vi" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'vi' ? 'selected' : ''; ?>>Tiếng việt</option>
@@ -1325,12 +1235,9 @@ include 'html_head.php';
                   Chuyển Giọng Nói Thành Văn Bản - Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> &nbsp;:
                 </h5>
                 <div id="collapse_button_setting_stt" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_stt" style="">
-                  <div class="row mb-3">
-                    <label for="duration_recording" class="col-sm-3 col-form-label" title="Thời gian thu âm tối đa">Thời gian lắng nghe tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian lắng nghe tối đa khi Bot được đánh thức')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="number" step="1" min="4" max="30" name="duration_recording" id="duration_recording" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Thời gian thu âm tối đa" placeholder="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording']; ?>">
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('duration_recording', 'Thời gian lắng nghe tối đa (giây)', $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] ?? 6, 'required', 'number', '1', '3', '10', 'Thời gian lắng nghe tối đa khi Bot được đánh thức', 'border-success', '', '', '', '', '');
+                  ?>
                   <div class="row">
                     <div class="col-lg-6">
                       <div class="card">
@@ -1381,7 +1288,7 @@ include 'html_head.php';
                             <div class="form-floating mb-3">
                               <textarea class="form-control border-success" placeholder="Tệp tin json xác thực" name="stt_ggcloud_json_file_token" id="stt_ggcloud_json_file_token" style="height: 150px;">
 <?php echo htmlspecialchars(trim($read_stt_token_google_cloud)); ?>
-                                </textarea>
+</textarea>
                               <label for="stt_ggcloud_json_file_token">Tệp tin json xác thực: stt_token_google_cloud.json</label>
                             </div>
                             <div class="form-floating mb-3">
@@ -1479,18 +1386,10 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="directory_tts" class="col-sm-3 col-form-label">Thư Mục Chứa TTS:</label>
-                    <div class="col-sm-9">
-                      <input readonly class="form-control border-danger" type="text" name="directory_tts" id="directory_tts" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts']; ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="clean_cache_tts_max_file" class="col-sm-3 col-form-label" title="Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép">Dọn Dẹp TTS Nếu Vượt Quá (file) <i class="bi bi-question-circle-fill" onclick="show_message('Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-danger" step="1" min="0" max="3000" type="number" name="clean_cache_tts_max_file" id="clean_cache_tts_max_file" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-original-title="Mức âm lượng sẽ tăng lên cao nhất" placeholder="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file']; ?>" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file']; ?>">
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('directory_tts', 'Thư Mục Chứa TTS:', $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'], 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('clean_cache_tts_max_file', 'Dọn Dẹp TTS Nếu Vượt Quá (file):', $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'], 'required', 'number', '1', '50', '999', 'Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép', 'border-success', '', '', '', '', '');
+                  ?>
                   <div class="row">
                     <div class="col-lg-6">
                       <div class="card">
@@ -1868,73 +1767,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="hass_long_token" class="col-sm-3 col-form-label" title="Mã token của nhà thông minh Home Assistant">Mã Token (Long Token) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-success" type="text" name="hass_long_token" id="hass_long_token" title="Mã token của nhà thông minh Home Assistant" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['long_token']) ?>">
-                      <div class="invalid-feedback">Cần nhập mã Token của nhà thông minh!</div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="hass_internal_url" class="col-sm-3 col-form-label" title="Địa chỉ url nội bộ">URL nội bộ <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input required class="form-control border-success" type="text" name="hass_internal_url" id="hass_internal_url" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['internal_url']) ?>" title="Địa chỉ url nội bộ" value="<?php echo htmlspecialchars($Config['home_assistant']['internal_url']) ?>">
-                        <div class="invalid-feedback">Cần nhập URL nội bộ của nhà thông minh!</div>
-                        <button class="btn btn-success border-success" type="button" onclick="CheckConnectionHomeAssistant('hass_internal_url')">Kiểm Tra</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="hass_external_url" class="col-sm-3 col-form-label" title="Địa chỉ url bên ngoài">URL bên ngoài <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font>:</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input class="form-control border-success" type="text" name="hass_external_url" id="hass_external_url" title="Địa chỉ url bên ngoài" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['external_url']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['external_url']) ?>">
-                        <button class="btn btn-success border-success" type="button" onclick="CheckConnectionHomeAssistant('hass_external_url')">Kiểm Tra</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="hass_minimum_threshold" class="col-sm-3 col-form-label" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa">Ngưỡng kết quả tối thiểu <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng kết quả cho phép từ 0.1 đến 0.9 ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-success" type="number" step="0.1" min="0.5" max="0.9" name="hass_minimum_threshold" id="hass_minimum_threshold" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['minimum_threshold']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['minimum_threshold']) ?>">
-                      <div class="invalid-feedback">Cần nhập ngưỡng tối thiểu để so sánh tên thiết bị với yêu cầu của bạn!</div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="hass_lowest_to_display_logs" class="col-sm-3 col-form-label" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa">Ngưỡng tối thiểu hiển thị ra logs <i class="bi bi-question-circle-fill" onclick="show_message('Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng 0.35-0.39, chỉ số này cần phải thấp hơn  chỉ số <b>ngưỡng kết quả tối thiểu</b> bên trên')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-danger" type="number" step="0.01" min="0" max="0.45" name="hass_lowest_to_display_logs" id="hass_lowest_to_display_logs" title="Ngưỡng tối thiểu để tìm kiếm và so sánh thiết bị của bạn với từ khóa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['lowest_to_display_logs']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['lowest_to_display_logs']) ?>">
-                      <div class="invalid-feedback">Cần nhập ngưỡng tối thiểu để hiển thị kết quả dưới ngưỡng ra logs!</div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="hass_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Thời gian chờ tối đa (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa khi truy vấn và xử lý dữ liệu')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input required class="form-control border-success" type="number" step="1" min="5" max="60" name="hass_time_out" id="hass_time_out" title="Thời gian chờ phản hồi tối đa" placeholder="<?php echo htmlspecialchars($Config['home_assistant']['time_out']) ?>" value="<?php echo htmlspecialchars($Config['home_assistant']['time_out']) ?>">
-                      <div class="invalid-feedback">Cần nhập thời gian tối đa chờ phản hồi!</div>
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label" title="Liên Kết Loa VBot Với Home Assist (Hass)">Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) <i class="bi bi-question-circle-fill" onclick="show_message('Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component')"></i> : </label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot_Offline_Custom_Component" title="https://github.com/marion001/VBot_Offline_Custom_Component" value="https://github.com/marion001/VBot_Offline_Custom_Component">
-                        <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Offline_Custom_Component" target="_blank">Truy Cập</a></button>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Tích hợp vào Assist (Tác Nhân):</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input disabled class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot-Assist-Conversation" title="https://github.com/marion001/VBot-Assist-Conversation" value="https://github.com/marion001/VBot-Assist-Conversation">
-                        <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot-Assist-Conversation" target="_blank">Truy Cập</a></button>
-                      </div>
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('hass_long_token', 'Mã Token (Long Token)', $Config['home_assistant']['long_token'], '', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
+                  echo input_field('hass_internal_url', 'URL nội bộ ', htmlspecialchars($Config['home_assistant']['internal_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_internal_url')", 'btn btn-success border-success', 'onclick', '_blank');
+                  echo input_field('hass_external_url', 'URL bên ngoài ', htmlspecialchars($Config['home_assistant']['external_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_external_url')", 'btn btn-success border-success', 'onclick', '_blank');
+                  echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.1', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
+                  echo input_field('hass_lowest_to_display_logs', 'Ngưỡng tối thiểu hiển thị ra logs', $Config['home_assistant']['lowest_to_display_logs'] ?? 0.39, 'required', 'number', '0.01', '0', '0.45', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-danger', '', '', '', '', '');
+                  echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-success', '', '', '', '', '');
+                  echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
+                  ?>
                 </div>
               </div>
             </div>
@@ -1960,63 +1801,26 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_host" class="col-sm-3 col-form-label" title="MQTT Host, máy chủ của MQTT cần kết nối tới">Máy Chủ MQTT <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input class="form-control border-success" type="text" name="mqtt_host" id="mqtt_host" title="Địa chỉ Link/Url/Host của MQTT Broker" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_host']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_host']) ?>">
-                        <button class="btn btn-success border-success" type="button" title="Kiểm tra kết nối tới MQTT" onclick="checkMQTTConnection()">Kiểm Tra</button>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_port" class="col-sm-3 col-form-label" title="Thời gian chờ phản hồi tối đa">Cổng PORT <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: </label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="number" name="mqtt_port" id="mqtt_port" title="Cổng Port của MQTT Broker" placeholder="1883" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_port']) ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_username" class="col-sm-3 col-form-label" title="Tài Khoản Kết Nối MQTT">Tài Khoản <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: </label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="text" name="mqtt_username" id="mqtt_username" title="Tài khoản kết nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_username']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_username']) ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_password" class="col-sm-3 col-form-label" title="Mật Khẩu Kết Nối MQTT">Mật Khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: </label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="text" name="mqtt_password" id="mqtt_password" title="Mật khẩu kết nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_password']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_password']) ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_client_name" class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Tên Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Nếu có nhiều hơn 1 thiết bị trong Mạng, bạn cần thay đổi Tên Client cho khác nhau và là duy nhất, ví dụ: <b>VBot1</b> hoặc <b>VBot2</b><br/>Tên Client này sẽ được gắn với <b>state_topic</b> và <b>command_topic</b> trong cấu hình <b>mqtts.yaml</b><br/><br/>Ví dụ tên Client là <b>Vbot1</b>:<br/><b>- state_topic: \'VBot1/switch/mic_on_off/state\'</b> <br/><b>- command_topic: \'VBot1/switch/mic_on_off/set\'</b>')"></i> : </label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="text" name="mqtt_client_name" id="mqtt_client_name" title="Đặt Tên Client Cho Kết Nối MQTT" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']) ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_time_out" class="col-sm-3 col-form-label" title="Thời gian chờ (Time Out) (giây)">Thời gian chờ (Time Out) (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="number" min="20" max="120" step="1" name="mqtt_time_out" id="mqtt_time_out" title="Thời gian chờ (Time Out) (giây)" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_time_out']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_time_out']) ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="mqtt_connection_waiting_time" class="col-sm-3 col-form-label" title="Thời gian chờ kết nối lại (giây)">Thời gian chờ kết nối lại (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công')"></i>: </label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" type="number" min="10" max="9999" step="1" name="mqtt_connection_waiting_time" id="mqtt_connection_waiting_time" title="Thời gian chờ kết nối lại (giây)" placeholder="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time']) ?>" value="<?php echo htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time']) ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">QoS <i class="bi bi-question-circle-fill" onclick="show_message('- QoS 0 (At most once): Tin nhắn được gửi một lần duy nhất mà không có sự xác nhận. Điều này có thể dẫn đến việc mất tin nhắn nếu có sự cố kết nối<br/><br/>- QoS 1 (At least once): Tin nhắn được gửi ít nhất một lần và sẽ có xác nhận từ phía người nhận. Điều này đảm bảo rằng tin nhắn sẽ đến nơi, nhưng có thể nhận được tin nhắn trùng lặp.<br/><br/>- QoS 2 (Exactly once): Tin nhắn sẽ được gửi một lần duy nhất, không trùng lặp và không bị mất. Đây là mức độ bảo mật cao nhất, nhưng cũng đòi hỏi nhiều tài nguyên hơn và độ trễ cao hơn')"></i> :</label>
-                    <div class="col-sm-9">
-                      <div class="input-group">
-                        <select name="mqtt_qos" id="mqtt_qos" class="form-select border-success">
-                          <option value="0" <?php echo $Config['mqtt_broker']['mqtt_qos'] === 0 ? 'selected' : ''; ?>>0</option>
-                          <option value="1" <?php echo $Config['mqtt_broker']['mqtt_qos'] === 1 ? 'selected' : ''; ?>>1</option>
-                          <option value="2" <?php echo $Config['mqtt_broker']['mqtt_qos'] === 2 ? 'selected' : ''; ?>>2</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('mqtt_host', 'Máy Chủ MQTT ', htmlspecialchars($Config['mqtt_broker']['mqtt_host']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "checkMQTTConnection()", 'btn btn-success border-success', 'onclick', '_blank');
+                  echo input_field('mqtt_port', 'Cổng PORT ', htmlspecialchars($Config['mqtt_broker']['mqtt_port'] ?? 1883), '', 'number', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                  echo input_field('mqtt_username', 'Tài Khoản ', htmlspecialchars($Config['mqtt_broker']['mqtt_username']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                  echo input_field('mqtt_password', 'Mật Khẩu ', htmlspecialchars($Config['mqtt_broker']['mqtt_password']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                  echo input_field('mqtt_client_name', 'Tên Client ', htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']), '', 'text', '', '', '', 'Nếu có nhiều hơn 1 thiết bị trong Mạng, bạn cần thay đổi Tên Client cho khác nhau và là duy nhất, ví dụ: <b>VBot1</b> hoặc <b>VBot2</b><br/>Tên Client này sẽ được gắn với <b>state_topic</b> và <b>command_topic</b> trong cấu hình <b>mqtts.yaml</b><br/><br/>Ví dụ tên Client là <b>Vbot1</b>:<br/><b>- state_topic: \'VBot1/switch/mic_on_off/state\'</b> <br/><b>- command_topic: \'VBot1/switch/mic_on_off/set\'</b>', 'border-success', '', '', '', '', '');
+                  echo input_field('mqtt_time_out', 'Thời gian chờ (Time Out) (giây)', htmlspecialchars($Config['mqtt_broker']['mqtt_time_out'] ?? 60), '', 'number', '1', '20', '120', 'Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công', 'border-success', '', '', '', '', '');
+                  echo input_field('mqtt_connection_waiting_time', 'Thời gian chờ kết nối lại (giây)', htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time'] ?? 300), '', 'number', '1', '10', '9999', 'Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công', 'border-success', '', '', '', '', '');
+                  echo select_field(
+                    'mqtt_qos',
+                    'QoS <i class="bi bi-question-circle-fill" onclick="show_message(\'- QoS 0 (At most once): Tin nhắn được gửi một lần duy nhất mà không có sự xác nhận. Điều này có thể dẫn đến việc mất tin nhắn nếu có sự cố kết nối<br/><br/>- QoS 1 (At least once): Tin nhắn được gửi ít nhất một lần và sẽ có xác nhận từ phía người nhận. Điều này đảm bảo rằng tin nhắn sẽ đến nơi, nhưng có thể nhận được tin nhắn trùng lặp.<br/><br/>- QoS 2 (Exactly once): Tin nhắn sẽ được gửi một lần duy nhất, không trùng lặp và không bị mất. Đây là mức độ bảo mật cao nhất, nhưng cũng đòi hỏi nhiều tài nguyên hơn và độ trễ cao hơn\')"></i>',
+                    [
+                      '0' => '0 (At most once)',
+                      '1' => '1 (At least once)',
+                      '2' => '2 (Exactly once)'
+                    ],
+                    $Config['mqtt_broker']['mqtt_qos']
+                  );
+                  ?>
+
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Retain <i class="bi bi-question-circle-fill" onclick="show_message('- retain=True: Khi bạn gửi một tin nhắn với retain=True, MQTT broker sẽ giữ lại tin nhắn đó và gửi lại cho bất kỳ client nào kết nối vào MQTT đó sau này, ngay cả khi client đó đã không nhận dữ liệu ban đầu.<br/><br/>- retain=False: Tin nhắn sẽ không được lưu trữ. Khi client kết nối vào MQTT, nó sẽ không nhận lại tin nhắn cũ')"></i> :</label>
                     <div class="col-sm-9">
@@ -2025,15 +1829,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label" title="Liên Kết Loa VBot Với Home Assist (Hass)">Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) <i class="bi bi-question-circle-fill" onclick="show_message('Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component')"></i> : </label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <input disabled="" class="form-control border-danger" type="text" placeholder="https://github.com/marion001/VBot_Offline_Custom_Component" title="https://github.com/marion001/VBot_Offline_Custom_Component" value="https://github.com/marion001/VBot_Offline_Custom_Component">
-                        <button class="btn btn-success border-danger" type="button"><a style="color: white;" href="https://github.com/marion001/VBot_Offline_Custom_Component" target="_blank">Truy Cập</a></button>
-                      </div>
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) ', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', 'Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'btn btn-success border-danger', 'link', '_blank');
+                  ?>
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Hoặc Tạo File Cấu Hình Thủ Công <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
                     <div class="col-sm-9">
@@ -2062,36 +1860,23 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="led_type_select" class="col-sm-3 col-form-label">Kiểu loại Led <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>')"></i>:</label>
-                    <div class="col-sm-9">
-                      <select name="led_type_select" id="led_type_select" class="form-select border-success" aria-label="Default select example">
-                        <option value="ws281x" <?php echo $Config['smart_config']['led']['led_type'] === 'ws281x' ? 'selected' : ''; ?>>WS281x, SK6812, VBot AIO, Vietbot AIO</option>
-                        <option value="apa102" <?php echo $Config['smart_config']['led']['led_type'] === 'apa102' ? 'selected' : ''; ?>>APA102</option>
-                        <option value="ReSpeaker_Mic_Array_v2.0" <?php echo $Config['smart_config']['led']['led_type'] === 'ReSpeaker_Mic_Array_v2.0' ? 'selected' : ''; ?>>ReSpeaker Mic Array v2.0</option>
-                        <option value="dev_custom_led" <?php echo $Config['smart_config']['led']['led_type'] === 'dev_custom_led' ? 'selected' : ''; ?>>DEV Custom Led: Dev_Led.py (Người dùng tự code)</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="led_gpio" class="col-sm-3 col-form-label" title="Chân GPIO để điều khiển đèn LED">LED Pin GPIO <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" step="1" min="1" max="30" type="number" name="led_gpio" id="led_gpio" value="<?php echo $Config['smart_config']['led']['led_gpio']; ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="number_led" class="col-sm-3 col-form-label" title="Số lượng đèn LED cần sử dụng">Số lượng LED <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" step="1" min="1" max="150" type="number" name="number_led" id="number_led" value="<?php echo $Config['smart_config']['led']['number_led']; ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="led_brightness" class="col-sm-3 col-form-label" title="Độ sáng của đèn LED">Độ sáng đèn LED <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Độ sáng của LED sẽ từ 0 -> 100%')"></i> :</label>
-                    <div class="col-sm-9">
-                      <input class="form-control border-success" step="0" min="1" max="100" type="number" name="led_brightness" id="led_brightness" value="<?php echo intval($Config['smart_config']['led']['brightness'] * 100 / 255); ?>">
-                    </div>
-                  </div>
 
+                  <?php
+                  echo select_field(
+                    'led_type_select',
+                    'Kiểu loại Led <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message(\'Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>\')"></i>',
+                    [
+                      'ws281x' => 'WS281x, SK6812, VBot AIO, Vietbot AIO',
+                      'apa102' => 'APA102',
+                      'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0',
+                      'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'
+                    ],
+                    $Config['smart_config']['led']['led_type']
+                  );
+                  echo input_field('led_gpio', 'LED Pin GPIO', htmlspecialchars($Config['smart_config']['led']['led_gpio'] ?? 10), '', 'number', '1', '0', '60', 'Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO, Mặc định GPIO10 (Không thay đổi được)', 'border-success', '', '', '', '', '_blank');
+                  echo input_field('number_led', 'Số lượng LED', htmlspecialchars($Config['smart_config']['led']['number_led'] ?? 24), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
+                  echo input_field('led_brightness', 'Độ sáng đèn LED', htmlspecialchars(intval(($Config['smart_config']['led']['brightness'] ?? 255) * 100 / 255)), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
+                  ?>
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Ghi Nhớ Độ Sáng Khi Được Thay Đổi <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật sẽ lưu lại giá trị độ sáng của đèn LED khi được thay đổi trong lúc Chương Trình đang hoạt động vào Config.json')"></i> :</label>
                     <div class="col-sm-9">
@@ -2503,37 +2288,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Thời gian im lặng tối đa cho PCM Stream <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian tối đa khi không nhận và phát được âm thanh pcm stream thì sẽ được coi là đã phát xong ở luồng âm thanh Streaming')"></i>:</label>
-                        <div class="col-sm-9">
-                          <input class="form-control border-success" type="number" min="0.5" step="0.1" max="10" name="media_player_audio_stream_timeout" id="media_player_audio_stream_timeout" value="<?php echo $Config['media_player']['audio_stream_timeout']; ?>">
-                        </div>
-                      </div>
                     </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
-                      <div class="row mb-3">
-                        <label for="newspaper_play_mode" class="col-sm-3 col-form-label">Nguồn Báo, Tin Tức:</label>
-                        <div class="col-sm-9">
-                          <select class="form-select border-success" name="newspaper_play_mode" id="newspaper_play_mode">
-                            <option value="">-- Chọn Chế Độ Phát --</option>
-                            <option value="random" <?php if ($Config['media_player']['play_list']['newspaper_play_mode'] === "random") echo "selected"; ?>>random (Ngẫu nhiên)</option>
-                            <option value="sequential" <?php if ($Config['media_player']['play_list']['newspaper_play_mode'] === "sequential") echo "selected"; ?>>sequential (Tuần tự)</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="music_play_mode" class="col-sm-3 col-form-label">Nguồn Âm Nhạc:</label>
-                        <div class="col-sm-9">
-                          <select class="form-select border-success" name="music_play_mode" id="music_play_mode">
-                            <option value="">-- Chọn Chế Độ Phát --</option>
-                            <option value="random" <?php if ($Config['media_player']['play_list']['music_play_mode'] === "random") echo "selected"; ?>>random (Ngẫu nhiên)</option>
-                            <option value="sequential" <?php if ($Config['media_player']['play_list']['music_play_mode'] === "sequential") echo "selected"; ?>>sequential (Tuần tự)</option>
-                          </select>
-                        </div>
-                      </div>
+                      <?php
+                      echo select_field('newspaper_play_mode', 'Nguồn Báo, Tin Tức', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode']);
+                      echo select_field('music_play_mode', 'Nguồn Âm Nhạc', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode']);
+                      ?>
                     </div>
                   </div>
                   <div class="card">
@@ -2547,55 +2310,19 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label for="media_sync_ui_delay_time" class="col-sm-3 col-form-label">Thời gian trễ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian mỗi lần đồng bộ (thường sẽ là 1, mỗi 1 giây sẽ tự động đồng bộ 1 lần)')"></i> : </label>
-                        <div class="col-sm-9">
-                          <input required class="form-control border-success" type="number" min="1" max="5" step="1" name="media_sync_ui_delay_time" id="media_sync_ui_delay_time" placeholder="<?php echo $Config['media_player']['media_sync_ui']['delay_time']; ?>" value="<?php echo $Config['media_player']['media_sync_ui']['delay_time']; ?>">
-                          <div class="invalid-feedback">Cần nhập ngưỡng kết quả tối thiểu khi tìm kiếm bài hát</div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('media_sync_ui_delay_time', 'Thời gian trễ (giây)', htmlspecialchars($Config['media_player']['media_sync_ui']['delay_time'] ?? 2), 'required', 'number', '1', '1', '10', 'Thời gian mỗi lần đồng bộ (thường sẽ là 1, mỗi 1 giây sẽ tự động đồng bộ 1 lần)', 'border-success', '', '', '', '', '');
+                      ?>
                     </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
                       <?php
-                      //Get Ưu tiên Nguồn Phát
-                      $music_source_priority = $Config['media_player']['prioritize_music_source'];
+                      echo select_field('music_source_priority1', 'Top 1:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0]);
+                      echo select_field('music_source_priority2', 'Top 2:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1]);
+                      echo select_field('music_source_priority3', 'Top 3:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2]);
                       ?>
-                      <div class="row mb-3">
-                        <label for="music_source_priority1" class="col-sm-3 col-form-label">Top 1:</label>
-                        <div class="col-sm-9">
-                          <select class="form-select border-success" name="music_source_priority1" id="music_source_priority1">
-                            <option value="">-- Chọn Nguồn Phát --</option>
-                            <option value="music_local" <?php if ($music_source_priority[0] === "music_local") echo "selected"; ?>>Music Local</option>
-                            <option value="zing_mp3" <?php if ($music_source_priority[0] === "zing_mp3") echo "selected"; ?>>ZingMP3</option>
-                            <option value="youtube" <?php if ($music_source_priority[0] === "youtube") echo "selected"; ?>>Youtube</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="music_source_priority2" class="col-sm-3 col-form-label">Top 2:</label>
-                        <div class="col-sm-9">
-                          <select class="form-select border-success" name="music_source_priority2" id="music_source_priority2">
-                            <option value="">-- Chọn Nguồn Phát --</option>
-                            <option value="music_local" <?php if ($music_source_priority[1] === "music_local") echo "selected"; ?>>Music Local</option>
-                            <option value="zing_mp3" <?php if ($music_source_priority[1] === "zing_mp3") echo "selected"; ?>>ZingMP3</option>
-                            <option value="youtube" <?php if ($music_source_priority[1] === "youtube") echo "selected"; ?>>Youtube</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="music_source_priority3" class="col-sm-3 col-form-label">Top 3:</label>
-                        <div class="col-sm-9">
-                          <select class="form-select border-success" name="music_source_priority3" id="music_source_priority3">
-                            <option value="">-- Chọn Nguồn Phát --</option>
-                            <option value="music_local" <?php if ($music_source_priority[2] === "music_local") echo "selected"; ?>>Music Local</option>
-                            <option value="zing_mp3" <?php if ($music_source_priority[2] === "zing_mp3") echo "selected"; ?>>ZingMP3</option>
-                            <option value="youtube" <?php if ($music_source_priority[2] === "youtube") echo "selected"; ?>>Youtube</option>
-                          </select>
-                        </div>
-                      </div>
                     </div>
                   </div>
                 </div>
@@ -2631,15 +2358,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label for="youtube_google_apis_key" class="col-sm-3 col-form-label">Youtube Google Apis Key:</label>
-                        <div class="col-sm-9">
-                          <div class="input-group mb-3">
-                            <input readonly class="form-control border-danger" type="text" name="youtube_google_apis_key" id="youtube_google_apis_key" placeholder="<?php echo $Config['media_player']['youtube']['google_apis_key']; ?>" value="<?php echo $Config['media_player']['youtube']['google_apis_key']; ?>">
-                            <button class="btn btn-success border-success" type="button" disabled>Kiểm Tra</button>
-                          </div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('youtube_google_apis_key', 'Youtube Google Apis Key:', htmlspecialchars($Config['media_player']['youtube']['google_apis_key']), 'readonly', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
+                      ?>
+
                     </div>
                   </div>
                   <div class="card">
@@ -2653,19 +2375,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label for="music_local_path" class="col-sm-3 col-form-label">Đường dẫn thư mục:</label>
-                        <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="text" name="music_local_path" id="music_local_path" placeholder="<?php echo $Config['media_player']['music_local']['path']; ?>" value="<?php echo $Config['media_player']['music_local']['path']; ?>">
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label for="music_local_minimum_threshold" class="col-sm-3 col-form-label">Ngưỡng kết quả tối thiểu:</label>
-                        <div class="col-sm-9">
-                          <input required class="form-control border-success" type="number" min="0.4" max="0.9" step="0.1" name="music_local_minimum_threshold" id="music_local_minimum_threshold" placeholder="<?php echo $Config['media_player']['music_local']['minimum_threshold']; ?>" value="<?php echo $Config['media_player']['music_local']['minimum_threshold']; ?>">
-                          <div class="invalid-feedback">Cần nhập ngưỡng kết quả tối thiểu khi tìm kiếm bài hát</div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('music_local_path', 'Đường dẫn thư mục:', htmlspecialchars($Config['media_player']['music_local']['path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                      echo input_field('music_local_minimum_threshold', 'Ngưỡng kết quả tối thiểu:', htmlspecialchars($Config['media_player']['music_local']['minimum_threshold'] ?? 0.6), 'required', 'number', '0.1', '0.4', '0.9', '', 'border-success', '', '', '', '', '');
+                      ?>
                       <?php
                       $allowed_formats_str = implode(", ", $Config['media_player']['music_local']['allowed_formats']);
                       ?>
@@ -2907,12 +2620,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="default_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="5" step="1" max="90" name="default_assistant_time_out" id="default_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['default_assistant']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['default_assistant']['time_out']; ?>">
-                          </div>
-                        </div>
+                        <?php
+                        echo input_field('default_assistant_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['default_assistant']['time_out'] ?? 10), 'required', 'number', '1', '5', '90', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                        ?>
                         <div class="card-body">
                           <h5 class="card-title">Chuyển đổi thêm kết quả từ âm thanh thành văn bản (text) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi này chỉ áp dụng với trợ lý ảo Default Assistant')"></i> :</h5>
                           <div class="row mb-3">
@@ -2949,18 +2659,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="zalo_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="5" step="1" max="30" name="zalo_assistant_time_out" id="zalo_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['time_out']; ?>">
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="zalo_assistant_set_expiration_time" class="col-sm-3 col-form-label">Đặt thời gian hết hạn Token (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Đặt thời gian hết hạn cho token trung bình đặt 1 ngày tham số tính bằng giây: 86400')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="21600" max="604800" step="1" name="zalo_assistant_set_expiration_time" id="zalo_assistant_set_expiration_time" placeholder="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>" value="<?php echo $Config['virtual_assistant']['zalo_assistant']['set_expiration_time']; ?>">
-                          </div>
-                        </div>
+                        <?php
+                        echo input_field('zalo_assistant_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['zalo_assistant']['time_out'] ?? 15), 'required', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                        echo input_field('zalo_assistant_set_expiration_time', 'Đặt thời gian hết hạn Token (giây)', htmlspecialchars($Config['virtual_assistant']['zalo_assistant']['set_expiration_time'] ?? 86400), 'required', 'number', '1', '21600', '604800', 'Đặt thời gian hết hạn cho token trung bình đặt 1 ngày tham số tính bằng giây: 86400', 'border-success', '', '', '', '', '');
+                        ?>
                       </div>
                     </div>
                   </div>
@@ -2978,36 +2680,19 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="olli_assistant_username" class="col-sm-3 col-form-label">Tài Khoản <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tài Khoản Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
+                        <?php
+                        echo input_field('olli_assistant_username', 'Tài Khoản', htmlspecialchars($Config['virtual_assistant']['olli']['username']), '', 'text', '', '', '', 'Tài Khoản Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký', 'border-success', '', '', '', '', '');
+                        echo input_field('olli_assistant_password', 'Mật Khẩu', htmlspecialchars($Config['virtual_assistant']['olli']['password']), '', 'text', '', '', '', 'Mật Khẩu Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký', 'border-success', '', '', '', '', '');
+                        ?>
+                        <div class="row mb-3"><label class="col-sm-3 col-form-label"></label>
                           <div class="col-sm-9">
-                            <input class="form-control border-success" type="text" name="olli_assistant_username" id="olli_assistant_username" placeholder="Tài Khoản Đăng Nhập Của Bạn, Email hoặc Số Điện Thoại" value="<?php echo $Config['virtual_assistant']['olli']['username']; ?>">
+                            <center><button class="btn btn-success border-success" type="button" onclick="check_info_login_olli()">Kiểm Tra Kết Nối</button></center>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="olli_assistant_password" class="col-sm-3 col-form-label">Mật Khẩu <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mật Khẩu Đăng Nhập được tạo Trên APP Maika<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="text" name="olli_assistant_password" id="olli_assistant_password" placeholder="Mật Khẩu Đăng Nhập Của Bạn" value="<?php echo $Config['virtual_assistant']['olli']['password']; ?>">
-                            <br />
-                            <center><button class="btn btn-success border-success" type="button" onclick="check_info_login_olli()">Kiểm Tra Kết Nối</button>
-                            </center>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="olli_assistant_voice_name" class="col-sm-3 col-form-label">Giọng Đọc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="olli_assistant_voice_name" id="olli_assistant_voice_name">
-                              <option value="vn_north" <?php if ($Config['virtual_assistant']['olli']['voice_name'] === "vn_north") echo "selected"; ?>>Giọng Miền Bắc</option>
-                              <option value="vn_south" <?php if ($Config['virtual_assistant']['olli']['voice_name'] === "vn_south") echo "selected"; ?>>Giọng Miền Nam</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="olli_assistant_time_out" class="col-sm-3 col-form-label">Thời gian chờ tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="5" step="1" max="30" name="olli_assistant_time_out" id="olli_assistant_time_out" placeholder="<?php echo $Config['virtual_assistant']['olli']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['olli']['time_out']; ?>">
-                          </div>
-                        </div>
+                        <?php
+                        echo select_field('olli_assistant_voice_name', 'Giọng Đọc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['vn_north' => 'Giọng Miền Bắc', 'vn_south' => 'Giọng Miền Nam'], $Config['virtual_assistant']['olli']['voice_name']);
+                        echo input_field('olli_assistant_time_out', 'Thời gian chờ tối đa (giây)', htmlspecialchars($Config['virtual_assistant']['olli']['time_out'] ?? 10), 'required', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                        ?>
                         <div class="card-body">
                           <h5 class="card-title">Chuyển đổi thêm kết quả từ âm thanh thành văn bản (text) <i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi này chỉ áp dụng với trợ lý ảo Olli AI Assistant')"></i> :</h5>
                           <div class="row mb-3">
@@ -3044,16 +2729,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="google_gemini_key" class="col-sm-3 col-form-label">Api Keys <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input class="form-control border-success" type="text" name="google_gemini_key" id="google_gemini_key" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['api_key']; ?>">
-                              <button class="btn btn-success border-success" type="button" onclick="test_key_Gemini('xin chào')">Kiểm Tra</button>
-                            </div>
-                          </div>
-                        </div>
                         <?php
+                        echo input_field('google_gemini_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['google_gemini']['api_key']), '', 'text', '', '', '', 'Lấy Key API Google Gemini: <a href="https://aistudio.google.com/api-keys" target="_blank">https://aistudio.google.com/api-keys</a>', 'border-success', 'Kiểm Tra', "test_key_Gemini('xin chào')", 'btn btn-success border-success', 'onclick', '_blank');
                         $gemini_model_list_json_file = $HTML_VBot_Offline . '/includes/other_data/gemini_model_list.json';
                         $selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-2.0-flash';
                         $selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
@@ -3097,28 +2774,16 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         }
                         if (file_exists($gemini_model_list_json_file)) {
                           $data = json_decode(file_get_contents($gemini_model_list_json_file), true);
-                          // Chỉ gemini_models_name mới có nút
+                          //Chỉ gemini_models_name mới có nút
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', $data['gemini_models'] ?? null, $selected_model, $selected_model, true);
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_api_version', 'Phiên Bản API', $data['gemini_api_version'] ?? null, $selected_version, $selected_version);
                         } else {
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', null, $selected_model, $selected_model, true);
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_api_version', 'Phiên Bản API', null, $selected_version, $selected_version);
                         }
+                        echo input_field('google_gemini_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['google_gemini']['time_out'] ?? 25), 'required', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                        echo input_field('gemini_models_path_file', 'Đường dẫn tệp mô hình (Path Model)', htmlspecialchars($gemini_model_list_json_file), 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                         ?>
-
-                        <div class="row mb-3">
-                          <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="5" step="1" max="30" name="google_gemini_time_out" id="google_gemini_time_out" placeholder="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['google_gemini']['time_out']; ?>">
-                          </div>
-                        </div>
-
-                        <div class="row mb-3">
-                          <label for="gemini_models_path_file" class="col-sm-3 col-form-label">Đường dẫn tệp mô hình (Path Model) <i class="bi bi-question-circle-fill" onclick="show_message('Đường dẫn tệp mô hình (Path Model)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-danger" type="text" name="gemini_models_path_file" id="gemini_models_path_file" placeholder="<?php echo $gemini_model_list_json_file; ?>" value="<?php echo $gemini_model_list_json_file; ?>">
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>
@@ -3136,46 +2801,13 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="chat_gpt_key" class="col-sm-3 col-form-label">Api Keys <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input class="form-control border-success" type="text" name="chat_gpt_key" id="chat_gpt_key" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['key_chat_gpt']; ?>">
-                              <button class="btn btn-success border-success" type="button" onclick="test_key_ChatGPT('Chào bạn, bạn tên là gì')">Kiểm Tra</button>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="chat_gpt_model" class="col-sm-3 col-form-label">Model:</label>
-                          <div class="col-sm-9">
-                            <select class="form-select border-success" name="chat_gpt_model" id="chat_gpt_model">
-                              <option value="">-- Chọn Model --</option>
-                              <option value="gpt-3.5-turbo" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-3.5-turbo") echo "selected"; ?>>GPT-3.5 Turbo (Khuyến Nghị)</option>
-                              <option value="gpt-4" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4") echo "selected"; ?>>GPT-4</option>
-                              <option value="gpt-4o" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4o") echo "selected"; ?>>GPT-4o</option>
-                              <option value="gpt-4o-mini" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4o-mini") echo "selected"; ?>>GPT-4o mini</option>
-                              <option value="gpt-4-turbo" <?php if ($Config['virtual_assistant']['chat_gpt']['model'] === "gpt-4-turbo") echo "selected"; ?>>GPT-4 Turbo</option>
-                            </select>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="chat_gpt_role_system_content" class="col-sm-3 col-form-label">Role System Content <i class="bi bi-question-circle-fill" onclick="show_message('Thiết lập hành vi mong muốn của Chat GPT trong cuộc trò chuyện, gán GPT như 1 trợ lý, người, vật, v..v...! làm cho trải nghiệm người dùng phù hợp với mục đích cụ thể của bạn.')"></i>:</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="text" name="chat_gpt_role_system_content" id="chat_gpt_role_system_content" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['role_system_content']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['role_system_content']; ?>">
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="chat_gpt_url_api" class="col-sm-3 col-form-label">URL API <i class="bi bi-question-circle-fill" onclick="show_message('- Hỗ trợ với URL API và API KEY của bên thứ 3<br/><br/>hoặc URL Mặc Định của ChatGPT và Key của ChatGPT: <b>https://api.openai.com/v1/chat/completions</b>')"></i>:</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-danger" type="text" name="chat_gpt_url_api" id="chat_gpt_url_api" placeholder="https://api.openai.com/v1/chat/completions" value="<?php echo $Config['virtual_assistant']['chat_gpt']['url_api']; ?>">
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="chat_gpt_time_out" class="col-sm-3 col-form-label">Thời gian chờ (giây) <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="5" step="1" max="30" name="chat_gpt_time_out" id="chat_gpt_time_out" placeholder="<?php echo $Config['virtual_assistant']['chat_gpt']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['chat_gpt']['time_out']; ?>">
-                          </div>
-                        </div>
+                        <?php
+                        echo input_field('chat_gpt_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['key_chat_gpt']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "test_key_ChatGPT('Chào bạn, bạn tên là gì')", 'btn btn-success border-success', 'onclick', '');
+                        echo select_field('chat_gpt_model', 'Model:', ['' => '-- Chọn Model --', 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Khuyến Nghị)', 'gpt-4' => 'GPT-4', 'gpt-4o' => 'GPT-4o', 'gpt-4o-mini' => 'GPT-4o mini', 'gpt-4-turbo' => 'GPT-4 Turbo'], $Config['virtual_assistant']['chat_gpt']['model']);
+                        echo input_field('chat_gpt_role_system_content', 'Role System Content', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['role_system_content']), '', 'text', '', '', '', 'Thiết lập hành vi mong muốn của Chat GPT trong cuộc trò chuyện, gán GPT như 1 trợ lý, người, vật, v..v...! làm cho trải nghiệm người dùng phù hợp với mục đích cụ thể của bạn.', 'border-success', '', '', '', '', '');
+                        echo input_field('chat_gpt_url_api', 'URL API', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['url_api']), '', 'text', '', '', '', '- Hỗ trợ với URL API và API KEY của bên thứ 3<br/><br/>hoặc URL Mặc Định của ChatGPT và Key của ChatGPT: <b>https://api.openai.com/v1/chat/completions</b>', 'border-danger', '', '', '', '', '');
+                        echo input_field('chat_gpt_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['time_out']), '', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                        ?>
                       </div>
                     </div>
                   </div>
@@ -3201,27 +2833,11 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label for="dify_ai_key" class="col-sm-3 col-form-label">Api Keys <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                          <div class="col-sm-9">
-                            <div class="input-group mb-3">
-                              <input class="form-control border-success" type="text" name="dify_ai_key" id="dify_ai_key" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['api_key']; ?>">
-                              <button class="btn btn-success border-success" type="button" onclick="test_key_difyAI()">Kiểm Tra</button>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="dify_ai_user_id" class="col-sm-3 col-form-label">User ID <i class="bi bi-question-circle-fill" onclick="show_message('Mã định danh người dùng, được sử dụng để xác định danh tính của người dùng cuối để truy xuất và thống kê. Phải được nhà phát triển xác định duy nhất trong ứng dụng, <br/>- Có thể thay thành bất kỳ tên nào bạn muốn')"></i>:</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-danger" type="text" name="dify_ai_user_id" id="dify_ai_user_id" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['user_id']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['user_id']; ?>">
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label for="dify_ai_time_out" class="col-sm-3 col-form-label">Thời gian chờ tối đa (giây) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Thời gian chờ phản hồi tối đa (Giây)')"></i> :</label>
-                          <div class="col-sm-9">
-                            <input class="form-control border-success" type="number" min="5" step="1" max="30" name="dify_ai_time_out" id="dify_ai_time_out" placeholder="<?php echo $Config['virtual_assistant']['dify_ai']['time_out']; ?>" value="<?php echo $Config['virtual_assistant']['dify_ai']['time_out']; ?>">
-                          </div>
-                        </div>
+                        <?php
+                        echo input_field('dify_ai_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['dify_ai']['api_key']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "test_key_difyAI()", 'btn btn-success border-success', 'onclick', '');
+                        echo input_field('dify_ai_user_id', 'User ID', htmlspecialchars($Config['virtual_assistant']['dify_ai']['user_id']), '', 'text', '', '', '', 'Mã định danh người dùng, được sử dụng để xác định danh tính của người dùng cuối để truy xuất và thống kê. Phải được nhà phát triển xác định duy nhất trong ứng dụng, <br/>- Có thể thay thành bất kỳ tên nào bạn muốn', 'border-success', '', '', '', '', '');
+                        echo input_field('dify_ai_time_out', 'Thời gian chờ tối đa (giây)', htmlspecialchars($Config['virtual_assistant']['dify_ai']['time_out']), '', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                        ?>
                       </div>
                     </div>
                   </div>
@@ -3251,82 +2867,60 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_xiaozhiai" aria-expanded="false" aria-controls="collapse_button_xiaozhiai">
                   Cấu Hình Bot/Trợ Lý XiaoZhi AI:</h5>
                 <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
-
                   <?php
-                  //Kích hoạt
-                  echo "
-		<div class='row mb-3'>
-		  <label class='col-sm-3 col-form-label'>Kích hoạt 
-			<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi AI')\"></i> :
-		  </label>
-		  <div class='col-sm-9'>
-			<div class='form-switch'>
-			  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_active' id='xiaozhi_ai_active' " .
+                  echo "<div class='row mb-3'>
+					  <label class='col-sm-3 col-form-label'>Kích hoạt 
+						<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi AI')\"></i> :
+					  </label>
+					  <div class='col-sm-9'>
+						<div class='form-switch'>
+						  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_active' id='xiaozhi_ai_active' " .
                     (!empty($Config['xiaozhi']['active']) ? 'checked' : '') . ">
-			</div>
-		  </div>
-		</div>";
-                  //Link OTA
-                  echo input_field(
-                    'xiaozhi_ota_version_url',
-                    'Link/URL OTA Server',
-                    $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '',
-                    false,
-                    'text',
-                    "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/"
-                  );
-                  //Giao thức
-                  echo select_field(
-                    'xiaozhi_start_the_protocol',
-                    'Giao Thức Kết Nối',
-                    ['websocket' => 'WebSocket', 'udp_mqtt' => 'UDP + MQTT (Chưa hỗ trợ)'],
-                    $Config['xiaozhi']['start_the_protocol'] ?? 'websocket'
-                  );
-                  //Trạng thái liên kết
+						</div>
+					  </div>
+					</div>";
+                  echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
+                  echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp_mqtt' => 'UDP + MQTT (Chưa hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket');
                   $status = $Config['xiaozhi']['activation_status'] ?? false;
                   echo "<div class='row mb-3'>
-		  <label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
-			<i class='bi bi-question-circle-fill' onclick=\"show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')\"></i>:
-		  </label>
-		  <div class='col-sm-9'>";
+					  <label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
+						<i class='bi bi-question-circle-fill' onclick=\"show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')\"></i>:
+					  </label>
+					  <div class='col-sm-9'>";
                   if ($status === true || $status === "true" || $status === 1 || $status === "1") {
                     echo "<span class='text-success fw-bold'><i class='bi bi-check-lg'></i> Đã được liên kết với máy chủ</span>
-			<button type='button' class='btn btn-sm btn-danger ms-2' onclick='xiaozhi_unlink_reset_data()'>
-			  <i class='bi bi-link-45deg'></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu
-			</button>
-			<button type='button' class='btn btn-sm btn-warning ms-2' onclick='xiaozhi_activation_status_false()'>
-			  <i class='bi bi-link-45deg'></i>Liên Kết Xác Thực Lại
-			</button>";
+						<button type='button' class='btn btn-sm btn-danger ms-2' onclick='xiaozhi_unlink_reset_data()'>
+						  <i class='bi bi-link-45deg'></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu
+						</button>
+						<button type='button' class='btn btn-sm btn-warning ms-2' onclick='xiaozhi_activation_status_false()'>
+						  <i class='bi bi-link-45deg'></i>Liên Kết Xác Thực Lại
+						</button>";
                   } else {
                     echo "<span class='text-danger fw-bold'><i class='bi bi-x-circle'></i> Thiết Bị chưa được liên kết với máy chủ</span>
-			<button type='button' class='btn btn-sm btn-success ms-2' onclick='xiaozhi_active_device_info()'>
-			  <i class='bi bi-link-45deg'></i> Liên kết và lấy mã xác nhận
-			</button>";
+						<button type='button' class='btn btn-sm btn-success ms-2' onclick='xiaozhi_active_device_info()'>
+						  <i class='bi bi-link-45deg'></i> Liên kết và lấy mã xác nhận
+						</button>";
                   }
                   echo "</div></div>";
-                  //Các input tĩnh khác
-                  echo input_field('xiaozhi_websocket_url', 'WebSocket Link/URL Server', $Config['xiaozhi']['system_options']['network']['websocket_url'] ?? '', true, 'text', '', 'Ví dụ: wss://api.tenclass.net/xiaozhi/v1/');
-                  echo input_field('xiaozhi_firmware_version', 'Phiên Bản Firmware', $Config['xiaozhi']['system_options']['network']['firmware']['version'] ?? '', true, 'text', '', 'Mặc định sẽ lấy theo Phiên Bản Chương Trình VBot');
-                  echo input_field('xiaozhi_device_id', 'ID Thiết Bị', $Config['xiaozhi']['device_id'] ?? '', true, 'number', '', 'Mã ID định danh của thiết bị');
-                  echo input_field('xiaozhi_serial_number', 'Serial Thiết Bị (SN-****)', $Config['xiaozhi']['serial_number'] ?? '', true, 'text', '', 'Serial Thiết Bị (SN-****)');
-                  echo input_field('xiaozhi_hmac_key', 'HMAC KEY Signature', $Config['xiaozhi']['hmac_key'] ?? '', true, 'text', '', 'HMAC KEY Signature');
-                  echo input_field('xiaozhi_device_activation_code', 'Mã Kích Hoạt Thiết Bị', $Config['xiaozhi']['device_activation_code'] ?? '', true, 'number', '', 'Mã Kích Hoạt Thiết Bị Gồm 6 Số Liên Kết Với Server');
-                  echo input_field('xiaozhi_client_id', 'Client ID', $Config['xiaozhi']['system_options']['client_id'] ?? '', true, 'text', '', 'Mã Định Danh Client ID Của Thiết Bị Này');
-                  echo input_field('xiaozhi_mac_device_id', 'Địa Chỉ MAC', $Config['xiaozhi']['system_options']['device_id'] ?? '', true, 'text', '', 'Địa Chỉ Mac Của Thiết Bị Này');
-                  echo input_field('xiaozhi_websocket_access_token', 'WebSocket Token', $Config['xiaozhi']['system_options']['network']['websocket_access_token'] ?? '', true, 'text', '', 'Mặc định là: test-token');
-                  //MQTT section
-                  $net = $Config['xiaozhi']['system_options']['network']['mqtt_info'] ?? [];
-                  echo input_field('xiaozhi_mqtt_endpoint', 'MQTT Link/URL Server', $net['endpoint'] ?? '', true, 'text', '');
-                  echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $net['client_id'] ?? '', true, 'text', '');
-                  echo input_field('xiaozhi_mqtt_username', 'MQTT Tài Khoản', $net['username'] ?? '', true, 'text', '');
-                  echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $net['password'] ?? '', true, 'text', '');
-                  echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $net['publish_topic'] ?? '', true, 'text', '');
-                  echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $net['subscribe_topic'] ?? '', true, 'text', '');
-                  //Timeout
-                  echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, false, 'number', '0.1', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS');
-                  echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, false, 'number', '1', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại');
-                  echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, false, 'number', '1', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ');
-                  echo input_field('xiaozhi_tts_stream_silence_time', 'Ngưỡng im lặng cho phép tối đa TTS (Giây)', $Config['xiaozhi']['tts_stream_silence_time'] ?? 5, false, 'number', '1', 'là ngưỡng im lặng tối đa mà hệ thống cho phép trong luồng âm thanh TTS — nếu vượt quá thì coi như TTS kết thúc hoặc bị lỗi im lặng');
+                  echo input_field('xiaozhi_websocket_url', 'WebSocket Link/URL Server', $Config['xiaozhi']['system_options']['network']['websocket_url'] ?? '', 'disabled', 'text', '', '', '', 'Ví dụ: wss://api.tenclass.net/xiaozhi/v1/', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_firmware_version', 'Phiên Bản Firmware', $Config['xiaozhi']['system_options']['network']['firmware']['version'] ?? '', 'disabled', 'text', '', '', '', 'Mặc định sẽ lấy theo Phiên Bản Chương Trình VBot', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_device_id', 'ID Thiết Bị', $Config['xiaozhi']['device_id'] ?? '', 'disabled', 'number', '', '', '', 'Mã ID định danh của thiết bị', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_serial_number', 'Serial Thiết Bị (SN-****)', $Config['xiaozhi']['serial_number'] ?? '', 'disabled', 'text', '', '', '', 'Serial Thiết Bị (SN-****)', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_hmac_key', 'HMAC KEY Signature', $Config['xiaozhi']['hmac_key'] ?? '', 'disabled', 'text', '', '', '', 'HMAC KEY Signature', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_device_activation_code', 'Mã Kích Hoạt Thiết Bị', $Config['xiaozhi']['device_activation_code'] ?? '', 'disabled', 'number', '', '', '', 'Mã Kích Hoạt Thiết Bị Gồm 6 Số Liên Kết Với Server', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_client_id', 'Client ID', $Config['xiaozhi']['system_options']['client_id'] ?? '', 'disabled', 'text', '', '', '', 'Mã Định Danh Client ID Của Thiết Bị Này', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mac_device_id', 'Địa Chỉ MAC', $Config['xiaozhi']['system_options']['device_id'] ?? '', 'disabled', 'text', '', '', '', 'Địa Chỉ Mac Của Thiết Bị Này', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_websocket_access_token', 'WebSocket Token', $Config['xiaozhi']['system_options']['network']['websocket_access_token'] ?? '', 'disabled', 'text', '', '', '', 'Mặc định là: test-token', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_endpoint', 'MQTT Link/URL Server', $Config['xiaozhi']['system_options']['network']['mqtt_info']['endpoint'] ?? '', 'disabled', 'text', '', '', '', 'Máy Chủ MQTT', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $Config['xiaozhi']['system_options']['network']['mqtt_info']['client_id'] ?? '', 'disabled', 'text', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_username', 'MQTT Tài Khoản', $Config['xiaozhi']['system_options']['network']['mqtt_info']['username'] ?? '', 'disabled', 'text', '', '', '', 'Tài Khoản MQTT', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $Config['xiaozhi']['system_options']['network']['mqtt_info']['password'] ?? '', 'disabled', 'text', '', '', '', 'Mật Khẩu MQTT', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, '', 'number', '0.1', '', '', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, '', 'number', '1', '', '', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, '', 'number', '1', '', '', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_tts_stream_silence_time', 'Ngưỡng im lặng cho phép tối đa TTS (Giây)', $Config['xiaozhi']['tts_stream_silence_time'] ?? 5, '', 'number', '1', '', '', 'là ngưỡng im lặng tối đa mà hệ thống cho phép trong luồng âm thanh TTS — nếu vượt quá thì coi như TTS kết thúc hoặc bị lỗi im lặng', 'border-success', '', '', '', '', '');
                   ?>
                 </div>
               </div>
@@ -3375,18 +2969,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label for="schedule_data_json_file" class="col-sm-3 col-form-label">Tệp Lưu Trữ Dữ Liệu Cấu Hình:</label>
-                    <div class="col-sm-9">
-                      <input readonly class="form-control border-danger" type="text" name="schedule_data_json_file" id="schedule_data_json_file" placeholder="<?php echo $Config['schedule']['data_json_file']; ?>" value="<?php echo $Config['schedule']['data_json_file']; ?>">
-                    </div>
-                  </div>
-                  <div class="row mb-3">
-                    <label for="schedule_audio_path" class="col-sm-3 col-form-label">Thư Mục Chứa Tệp Âm Thanh:</label>
-                    <div class="col-sm-9">
-                      <input readonly class="form-control border-danger" type="text" name="schedule_audio_path" id="schedule_audio_path" placeholder="<?php echo $Config['schedule']['audio_path']; ?>" value="<?php echo $Config['schedule']['audio_path']; ?>">
-                    </div>
-                  </div>
+                  <?php
+                  echo input_field('schedule_data_json_file', 'Tệp Lưu Trữ Dữ Liệu Cấu Hình:', htmlspecialchars($Config['schedule']['data_json_file']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('schedule_audio_path', 'Thư Mục Chứa Tệp Âm Thanh:', htmlspecialchars($Config['schedule']['audio_path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                  ?>
                   <div class="row mb-3">
                     <b class="text-danger">Yêu Cầu: Cần Nhập Thêm KEY Trợ Lý Gemini Để Có Thể (Hoa Mỹ, Mỹ Miều) Lời Nhắc Khi Lập Lịch</b>
                   </div>
@@ -3442,22 +3028,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Tệp Config.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
-                        <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="text" name="backup_path_config_json" id="backup_path_config_json" value="<?php echo $Config['backup_upgrade']['config_json']['backup_path']; ?>">
-                          <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu Config.json</div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Config, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_files_config_json" id="limit_backup_files_config_json" value="<?php echo $Config['backup_upgrade']['config_json']['limit_backup_files']; ?>">
-                            <div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
-                          </div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('backup_path_config_json', 'Tên Thư Mục Sao Lưu', htmlspecialchars($Config['backup_upgrade']['config_json']['backup_path']), 'readonly', 'text', '', '', '', 'Tên Thư Mục Sao Lưu Tệp Config.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới', 'border-danger', '', '', '', '', '');
+                      echo input_field('limit_backup_files_config_json', 'Giới hạn tệp sao lưu tối đa', htmlspecialchars($Config['backup_upgrade']['config_json']['limit_backup_files'] ?? 5), '', 'number', '1', '1', '20', 'Giới hạn tệp sao lưu tối đa trong thư mục Backup_Config, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất', 'border-success', '', '', '', '', '');
+                      ?>
                     </div>
                   </div>
                   <div class="card">
@@ -3471,22 +3045,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Tệp Home_Assistant_Custom.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
-                        <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="text" name="backup_path_custom_home_assistant" id="backup_path_custom_home_assistant" value="<?php echo $Config['backup_upgrade']['custom_home_assistant']['backup_path']; ?>">
-                          <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu Config.json</div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Custom_HomeAssistant, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_custom_home_assistant" id="limit_backup_custom_home_assistant" value="<?php echo $Config['backup_upgrade']['custom_home_assistant']['limit_backup_files']; ?>">
-                            <div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
-                          </div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('backup_path_custom_home_assistant', 'Tên Thư Mục Sao Lưu', htmlspecialchars($Config['backup_upgrade']['custom_home_assistant']['backup_path']), 'readonly', 'text', '', '', '', 'Tên Thư Mục Sao Lưu Tệp Home_Assistant_Custom.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới', 'border-danger', '', '', '', '', '');
+                      echo input_field('limit_backup_custom_home_assistant', 'Giới hạn tệp sao lưu tối đa', htmlspecialchars($Config['backup_upgrade']['custom_home_assistant']['limit_backup_files'] ?? 5), '', 'number', '1', '1', '20', 'Giới hạn tệp sao lưu tối đa trong thư mục Backup_Custom_HomeAssistant, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất', 'border-success', '', '', '', '', '');
+                      ?>
                     </div>
                   </div>
                   <div class="card">
@@ -3500,22 +3062,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Tên Thư Mục Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('Tên Thư Mục Sao Lưu Tệp Data_Schedule.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới')"></i> : </label>
-                        <div class="col-sm-9">
-                          <input readonly class="form-control border-danger" type="text" name="backup_path_scheduler" id="backup_path_scheduler" value="<?php echo $Config['backup_upgrade']['scheduler']['backup_path']; ?>">
-                          <div class="invalid-feedback">Cần nhập Tên Thư Mục Sao Lưu Config.json</div>
-                        </div>
-                      </div>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Giới hạn tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Giới hạn tệp sao lưu tối đa trong thư mục Backup_Scheduler, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất')"></i> : </label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input required class="form-control border-success" type="number" min="1" step="1" max="20" name="limit_backup_scheduler" id="limit_backup_scheduler" value="<?php echo $Config['backup_upgrade']['scheduler']['limit_backup_files']; ?>">
-                            <div class="invalid-feedback">Nhập giới hạn tệp sao lưu tối đa</div>
-                          </div>
-                        </div>
-                      </div>
+                      <?php
+                      echo input_field('backup_path_scheduler', 'Tên Thư Mục Sao Lưu', htmlspecialchars($Config['backup_upgrade']['scheduler']['backup_path']), 'readonly', 'text', '', '', '', 'Tên Thư Mục Sao Lưu Tệp Data_Schedule.json, Nếu thư mục không tồn tại sẽ tự động được tạo mới', 'border-danger', '', '', '', '', '');
+                      echo input_field('limit_backup_scheduler', 'Giới hạn tệp sao lưu tối đa', htmlspecialchars($Config['backup_upgrade']['scheduler']['limit_backup_files'] ?? 5), '', 'number', '1', '1', '20', 'Giới hạn tệp sao lưu tối đa trong thư mục Backup_Scheduler, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất', 'border-success', '', '', '', '', '');
+                      ?>
                     </div>
                   </div>
                   <div class="card">
@@ -3535,18 +3085,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                 </div>
                               </div>
                             </div>
-                            <div class="row mb-3">
-                              <label for="backup_upgrade_vbot_backup_path" class="col-sm-3 col-form-label">Đường dẫn tệp sao lưu:</label>
-                              <div class="col-sm-9">
-                                <input readonly class="form-control border-danger" type="text" name="backup_upgrade_vbot_backup_path" id="backup_upgrade_vbot_backup_path" placeholder="<?php echo $Config['backup_upgrade']['vbot_program']['backup']['backup_path']; ?>" value="<?php echo $Config['backup_upgrade']['vbot_program']['backup']['backup_path']; ?>">
-                              </div>
-                            </div>
-                            <div class="row mb-3">
-                              <label for="backup_upgrade_vbot_limit_backup_files" class="col-sm-3 col-form-label">Tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tối đa số lượng tệp tin sao lưu trên hệ thống')"></i> :</label>
-                              <div class="col-sm-9">
-                                <input class="form-control border-success" type="number" min="2" step="1" max="10" name="backup_upgrade_vbot_limit_backup_files" id="backup_upgrade_vbot_limit_backup_files" placeholder="<?php echo $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files']; ?>" value="<?php echo $Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files']; ?>">
-                              </div>
-                            </div>
+                            <?php
+                            echo input_field('backup_upgrade_vbot_backup_path', 'Đường dẫn tệp sao lưu:', htmlspecialchars($Config['backup_upgrade']['vbot_program']['backup']['backup_path']), 'readonly', 'text', '', '', '', 'Tên Thư Mục Sao Lưu Tệp. Nếu thư mục không tồn tại sẽ tự động được tạo mới', 'border-danger', '', '', '', '', '');
+                            echo input_field('backup_upgrade_vbot_limit_backup_files', 'Giới hạn tệp sao lưu tối đa', htmlspecialchars($Config['backup_upgrade']['vbot_program']['backup']['limit_backup_files'] ?? 5), '', 'number', '1', '1', '20', 'Tối đa số lượng tệp tin sao lưu trên hệ thống, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất', 'border-success', '', '', '', '', '');
+                            ?>
                             <div class="row mb-3">
                               <label for="backup_upgrade_vbot_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
                               <div class="col-sm-9">
@@ -3645,18 +3187,10 @@ if (!empty($excludeFilesFolder_Vbot_upgrade)) {
                                 </div>
                               </div>
                             </div>
-                            <div class="row mb-3">
-                              <label for="backup_web_interface_backup_path" class="col-sm-3 col-form-label">Đường dẫn tệp sao lưu:</label>
-                              <div class="col-sm-9">
-                                <input readonly class="form-control border-danger" type="text" name="backup_web_interface_backup_path" id="backup_web_interface_backup_path" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_path']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['backup_path']; ?>">
-                              </div>
-                            </div>
-                            <div class="row mb-3">
-                              <label for="backup_web_interface_limit_backup_files" class="col-sm-3 col-form-label">Tệp sao lưu tối đa <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Tối đa số lượng tệp tin sao lưu trên hệ thống')"></i> :</label>
-                              <div class="col-sm-9">
-                                <input class="form-control border-success" type="number" min="2" step="1" max="10" name="backup_web_interface_limit_backup_files" id="backup_web_interface_limit_backup_files" placeholder="<?php echo $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files']; ?>" value="<?php echo $Config['backup_upgrade']['web_interface']['backup']['limit_backup_files']; ?>">
-                              </div>
-                            </div>
+                            <?php
+                            echo input_field('backup_web_interface_backup_path', 'Đường dẫn tệp sao lưu:', htmlspecialchars($Config['backup_upgrade']['web_interface']['backup']['backup_path']), 'readonly', 'text', '', '', '', 'Tên Thư Mục Sao Lưu Tệp, Nếu thư mục không tồn tại sẽ tự động được tạo mới', 'border-danger', '', '', '', '', '');
+                            echo input_field('backup_web_interface_limit_backup_files', 'Giới hạn tệp sao lưu tối đa', htmlspecialchars($Config['backup_upgrade']['web_interface']['backup']['limit_backup_files'] ?? 5), '', 'number', '1', '1', '20', 'Tối đa số lượng tệp tin sao lưu trên hệ thống, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất', 'border-success', '', '', '', '', '');
+                            ?>
                             <div class="row mb-3">
                               <label for="backup_upgrade_web_interface_exclude_files_folder" class="col-sm-3 col-form-label">Bỏ qua file, thư mục không sao lưu <font color="blue" size="6" title="Không Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi thư mục hoặc file sẽ là 1 dòng, nếu là file sẽ cần có đầy đủ đuôi mở rộng của file, ví dụ: <b>123.mp3</b>')"></i> :</label>
                               <div class="col-sm-9">
@@ -3761,33 +3295,9 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 							</div>
 						  </div>
 						</div>";
-
-                      echo input_field(
-                        'gcloud_drive_backup_folder_name',
-                        "Tên Thư Mục Cha Sao Lưu <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>",
-                        $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'],
-                        false,
-                        'text',
-                        "Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới"
-                      );
-
-                      echo input_field(
-                        'gcloud_drive_backup_folder_vbot_name',
-                        "Tên Thư Mục Sao Lưu Chương Trình VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>",
-                        $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'],
-                        false,
-                        'text',
-                        "Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới"
-                      );
-
-                      echo input_field(
-                        'gcloud_drive_backup_folder_interface_name',
-                        "Tên Thư Mục Sao Lưu Giao Diện VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>",
-                        $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'],
-                        false,
-                        'text',
-                        "Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới"
-                      );
+                      echo input_field('gcloud_drive_backup_folder_name', "Tên Thư Mục Cha Sao Lưu <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'], false, 'text', "Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
+                      echo input_field('gcloud_drive_backup_folder_vbot_name', "Tên Thư Mục Sao Lưu Chương Trình VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'], false, 'text', "Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
+                      echo input_field('gcloud_drive_backup_folder_interface_name', "Tên Thư Mục Sao Lưu Giao Diện VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'], false, 'text', "Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
 
                       echo select_field(
                         'gcloud_drive_setAccessType',
@@ -3813,8 +3323,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                         $Config['backup_upgrade']['google_cloud_drive']['setPrompt']
                       );
                       ?>
-
-
                     </div>
                   </div>
                 </div>
@@ -3922,15 +3430,9 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                     </div>
                   </div>
                 </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Số lần đọc: </label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <input required class="form-control border-success" type="number" min="1" step="1" max="5" name="read_information_startup_read_number" id="read_information_startup_read_number" value="<?php echo $Config['smart_config']['read_information_startup']['read_number']; ?>">
-                      <div class="invalid-feedback">Cần nhập số lần đọc thông tin khi khởi động lần đầu tiên</div>
-                    </div>
-                  </div>
-                </div>
+                <?php
+                echo input_field('read_information_startup_read_number', 'Số lần đọc:', htmlspecialchars($Config['smart_config']['read_information_startup']['read_number'] ?? 2), '', 'number', '1', '1', '5', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                ?>
               </div>
             </div>
             <div class="card">
@@ -3965,16 +3467,18 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                     </div>
                   </div>
                 </div>
-                <div class="row mb-3">
-                  <label for="log_display_style" class="col-sm-3 col-form-label">Kiểu Hiển Thị Logs:</label>
-                  <div class="col-sm-9">
-                    <select name="log_display_style" id="log_display_style" class="form-select border-success" aria-label="Default select example">
-                      <option value="console" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'console' ? 'selected' : ''; ?>>console (Hiển thị log ra bảng điều khiển đầu cuối)</option>
-                      <option value="api" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'api' ? 'selected' : ''; ?>>api (Hiển thị log ra API, Web UI)</option>
-                      <option value="all" <?php echo $Config['smart_config']['show_log']['log_display_style'] === 'all' ? 'selected' : ''; ?>>all (Hiển thị log ra tất cả các đường)</option>
-                    </select>
-                  </div>
-                </div>
+                <?php
+                echo select_field(
+                  'log_display_style',
+                  'Kiểu hiển Thị Logs',
+                  [
+                    'console' => 'console (Hiển thị log ra bảng điều khiển đầu cuối)',
+                    'api' => 'api (Hiển thị log ra API, Web UI)',
+                    'all' => 'all (Hiển thị log ra tất cả các đường)'
+                  ],
+                  $Config['smart_config']['show_log']['log_display_style']
+                );
+                ?>
               </div>
             </div>
             <div class="card">

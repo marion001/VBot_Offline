@@ -1,8 +1,8 @@
 {
-    "version": "1.0.65",
+    "version": "1.0.66",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi đồng bộ dữ liệu Xiaozhi các luồng tương thích với VBot",
-    "releaseDate": "26/10/2025-1",
+    "description": "Tối Ưu WebUI, Sửa lỗi đồng bộ dữ liệu Xiaozhi các luồng tương thích với VBot",
+    "releaseDate": "29/10/2025",
     "changes": [
         {
             "type": "feature",
