@@ -1,8 +1,8 @@
 {
-    "version": "1.0.66",
+    "version": "1.0.67",
     "projectName": "WebUI VBot Offline",
-    "description": "Tối Ưu WebUI, Sửa lỗi đồng bộ dữ liệu Xiaozhi các luồng tương thích với VBot",
-    "releaseDate": "29/10/2025",
+    "description": "Thêm Xử Lý Thông Báo Xác Định Vị Trí Lỗi Khi Không Lưu Được Trong Cấu Hình Config > Thiếu, Chưa Nhập Giá Trị",
+    "releaseDate": "30/10/2025",
     "changes": [
         {
             "type": "feature",

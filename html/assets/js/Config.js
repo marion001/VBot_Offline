@@ -1,3 +1,72 @@
+//Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống
+function validateFormVBot() {
+    const requiredInputs = document.querySelectorAll('input[required], select[required], textarea[required]');
+    let firstEmptyInput = null;
+    let emptyFields = [];
+    requiredInputs.forEach(input => {
+        input.classList.remove('empty-field');
+        if (!input.value.trim()) {
+            input.classList.add('empty-field');
+            if (!firstEmptyInput) {
+                firstEmptyInput = input;
+            }
+            const accordionContent = input.closest('.accordion-collapse');
+            if (accordionContent) {
+                const accordionId = accordionContent.id;
+                const accordion = new bootstrap.Collapse(accordionContent, {
+                    show: true
+                });
+                const accordionHeader = document.querySelector('[data-bs-target="#' + accordionId + '"]');
+                const sectionName = accordionHeader ? accordionHeader.textContent.trim() : '';
+                let fieldName = input.getAttribute('placeholder') || 
+                              input.getAttribute('name') ||
+                              input.getAttribute('id') ||
+                              'Trường dữ liệu';
+                              
+                if (sectionName) {
+                    fieldName = '<b class="text-success">'+sectionName+'</b> <b class="text-primary">'+fieldName+'</b>';
+                }
+                emptyFields.push(fieldName);
+            } else {
+                let fieldName = input.getAttribute('placeholder') || 
+                              input.getAttribute('name') ||
+                              input.getAttribute('id') ||
+                              'Trường dữ liệu';
+                const cardHeader = input.closest('.card')?.querySelector('.card-header');
+                if (cardHeader) {
+                    fieldName = '<b class="text-success">'+cardHeader.textContent.trim()+' </b> <b class="text-primary">'+fieldName+'</b>';
+                }
+                emptyFields.push(fieldName);
+            }
+        }
+    });
+    if (firstEmptyInput) {
+        const message = '<br/><center class="text-danger"><b>Vui lòng điền đầy đủ thông tin cho các trường giá trị</b></center><hr><b><center>Các Danh Mục Sau Còn Thiếu Tham Số</center></b><br/>- ' + emptyFields.join('<br>- ');
+        show_message(message);
+        const accordionContent = firstEmptyInput.closest('.accordion-collapse');
+        if (accordionContent) {
+            new bootstrap.Collapse(accordionContent, {
+                show: true
+            });
+            setTimeout(() => {
+                firstEmptyInput.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                firstEmptyInput.focus();
+            }, 350);
+        } else {
+            firstEmptyInput.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            setTimeout(() => firstEmptyInput.focus(), 500);
+        }
+        return false;
+    }
+    return true;
+}
+
 //Ẩn hiển nguồn cài đặt hotword khi được chọn
 function selectHotwordWakeup() {
     var selectedValue = document.getElementById("hotword_select_wakeup").value;

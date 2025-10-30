@@ -857,6 +857,23 @@ include 'html_head.php';
     .scroll-to-top {
       bottom: 60px;
     }
+	.empty-field {
+		border-color: #dc3545 !important;
+		box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.30) !important;
+		animation: shake 0.5s linear;
+	}
+
+	@keyframes shake {
+		0% { transform: translateX(0); }
+		25% { transform: translateX(-5px); }
+		50% { transform: translateX(5px); }
+		75% { transform: translateX(-5px); }
+		100% { transform: translateX(0); }
+	}
+
+	.accordion-collapse {
+		transition: all 0.3s ease-out;
+	}
   </style>
 </head>
 
@@ -887,6 +904,7 @@ include 'html_head.php';
       </div>
       </div>
       -->
+
   <main id="main" class="main">
     <div class="pagetitle">
       <h1>Cấu hình <font color="red" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')">Config.json</font>
@@ -898,7 +916,7 @@ include 'html_head.php';
         </ol>
       </nav>
     </div>
-    <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="">
+    <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="" onsubmit="return validateFormVBot()">
       <section class="section">
         <div class="row">
           <div class="col-lg-12">
