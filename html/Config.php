@@ -741,8 +741,8 @@ function input_field(
   $button_label = '',
   $button_action = '',
   $button_class = 'btn btn-success border-success',
-  $button_type = 'onclick',   //'action' = onclick, 'link' = mở URL
-  $button_target = '_blank'  //chỉ dùng cho loại link
+  $button_type = 'onclick',   	//'action' = onclick, 'link' = mở URL
+  $button_target = '_blank'  	//chỉ dùng cho loại link
 ) {
   //Kiểm tra help có phải HTML hoàn chỉnh
   $is_full_html = preg_match('/^\s*<[^>]+>.*<\/[^>]+>\s*$/s', $help);
@@ -799,20 +799,21 @@ function input_field(
     </div>";
 }
 
-function select_field($id, $label, $options, $selected)
-{
+function select_field($id, $label, $options, $selected, $disabled_options = []){
   $html = "
-	<div class='row mb-3'>
-	  <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
-	  <div class='col-sm-9'>
-		<select class='form-select border-success' name='$id' id='$id'>";
+  <div class='row mb-3'>
+    <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
+    <div class='col-sm-9'>
+      <select class='form-select border-success' name='$id' id='$id'>";
   foreach ($options as $value => $text) {
     $sel = ($value === $selected) ? 'selected' : '';
-    $html .= "<option value='$value' $sel>$text</option>";
+    $dis = (in_array($value, $disabled_options)) ? 'disabled' : '';
+    $html .= "<option value='$value' $sel $dis>$text</option>";
   }
   $html .= "</select></div></div>";
   return $html;
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -1009,7 +1010,8 @@ include 'html_head.php';
                       'ERROR' => 'ERROR (Lỗi nghiêm trọng)',
                       'CRITICAL' => 'CRITICAL (Lỗi rất nghiêm trọng)'
                     ],
-                    $Config['api']['show_log']['log_lever']
+                    $Config['api']['show_log']['log_lever'],
+					[]
                   );
                   echo input_field('', 'Danh Sách Dữ Liệu API: ', "http://$serverIp/API_List.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/API_List.php", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
@@ -1032,7 +1034,7 @@ include 'html_head.php';
                     </div>
                   </div>
                   <?php
-                  echo select_field('streaming_server_connection_protocol', 'Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['udp_sock' => 'Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini'], $Config['api']['streaming_server']['connection_protocol']);
+                  echo select_field('streaming_server_connection_protocol', 'Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['udp_sock' => 'Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini'], $Config['api']['streaming_server']['connection_protocol'], []);
                   ?>
 
                   <div class="card accordion" id="accordion_button_udp_server_streaming">
@@ -1075,7 +1077,8 @@ include 'html_head.php';
                             'stt_default' => 'STT Mặc Định VBot (Free)',
                             'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)'
                           ],
-                          $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt']
+                          $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'],
+						  []
                         );
                         ?>
                         <div class="row mb-3">
@@ -1095,7 +1098,8 @@ include 'html_head.php';
                             'porcupine' => 'Picovoice/Porcupine WakeUp Client (Nên Dùng)',
                             'snowboy' => 'Snowboy WakeUP Client'
                           ],
-                          $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup']
+                          $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'],
+						  []
                         );
                         echo input_field('udp_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                         echo input_field('udp_server_streaming_audio', 'Server Streaming Audio:', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
@@ -1185,7 +1189,8 @@ include 'html_head.php';
                           'snowboy' => 'Snowboy',
                           'null' => 'Không Sử Dụng Hotword'
                         ],
-                        $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup']
+                        $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'],
+						[]
                       );
                       ?>
                       <!-- nếu hotword được chọn là Picovoice Procupine -->
@@ -1835,7 +1840,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       '1' => '1 (At least once)',
                       '2' => '2 (Exactly once)'
                     ],
-                    $Config['mqtt_broker']['mqtt_qos']
+                    $Config['mqtt_broker']['mqtt_qos'],
+					[]
                   );
                   ?>
 
@@ -1889,7 +1895,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0',
                       'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'
                     ],
-                    $Config['smart_config']['led']['led_type']
+                    $Config['smart_config']['led']['led_type'],
+					[]
                   );
                   echo input_field('led_gpio', 'LED Pin GPIO', htmlspecialchars($Config['smart_config']['led']['led_gpio'] ?? 10), '', 'number', '1', '0', '60', 'Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO, Mặc định GPIO10 (Không thay đổi được)', 'border-success', '', '', '', '', '_blank');
                   echo input_field('number_led', 'Số lượng LED', htmlspecialchars($Config['smart_config']['led']['number_led'] ?? 24), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
@@ -2312,8 +2319,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
                       <?php
-                      echo select_field('newspaper_play_mode', 'Nguồn Báo, Tin Tức', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode']);
-                      echo select_field('music_play_mode', 'Nguồn Âm Nhạc', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode']);
+                      echo select_field('newspaper_play_mode', 'Nguồn Báo, Tin Tức', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode'], []);
+                      echo select_field('music_play_mode', 'Nguồn Âm Nhạc', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode'], []);
                       ?>
                     </div>
                   </div>
@@ -2337,9 +2344,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
                       <?php
-                      echo select_field('music_source_priority1', 'Top 1:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0]);
-                      echo select_field('music_source_priority2', 'Top 2:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1]);
-                      echo select_field('music_source_priority3', 'Top 3:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2]);
+                      echo select_field('music_source_priority1', 'Top 1:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0], []);
+                      echo select_field('music_source_priority2', 'Top 2:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1]), [];
+                      echo select_field('music_source_priority3', 'Top 3:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2]), [];
                       ?>
                     </div>
                   </div>
@@ -2708,7 +2715,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                         <?php
-                        echo select_field('olli_assistant_voice_name', 'Giọng Đọc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['vn_north' => 'Giọng Miền Bắc', 'vn_south' => 'Giọng Miền Nam'], $Config['virtual_assistant']['olli']['voice_name']);
+                        echo select_field('olli_assistant_voice_name', 'Giọng Đọc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['vn_north' => 'Giọng Miền Bắc', 'vn_south' => 'Giọng Miền Nam'], $Config['virtual_assistant']['olli']['voice_name'], []);
                         echo input_field('olli_assistant_time_out', 'Thời gian chờ tối đa (giây)', htmlspecialchars($Config['virtual_assistant']['olli']['time_out'] ?? 10), 'required', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
                         ?>
                         <div class="card-body">
@@ -2821,7 +2828,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                         <?php
                         echo input_field('chat_gpt_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['key_chat_gpt']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "test_key_ChatGPT('Chào bạn, bạn tên là gì')", 'btn btn-success border-success', 'onclick', '');
-                        echo select_field('chat_gpt_model', 'Model:', ['' => '-- Chọn Model --', 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Khuyến Nghị)', 'gpt-4' => 'GPT-4', 'gpt-4o' => 'GPT-4o', 'gpt-4o-mini' => 'GPT-4o mini', 'gpt-4-turbo' => 'GPT-4 Turbo'], $Config['virtual_assistant']['chat_gpt']['model']);
+                        echo select_field('chat_gpt_model', 'Model:', ['' => '-- Chọn Model --', 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Khuyến Nghị)', 'gpt-4' => 'GPT-4', 'gpt-4o' => 'GPT-4o', 'gpt-4o-mini' => 'GPT-4o mini', 'gpt-4-turbo' => 'GPT-4 Turbo'], $Config['virtual_assistant']['chat_gpt']['model'], []);
                         echo input_field('chat_gpt_role_system_content', 'Role System Content', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['role_system_content']), '', 'text', '', '', '', 'Thiết lập hành vi mong muốn của Chat GPT trong cuộc trò chuyện, gán GPT như 1 trợ lý, người, vật, v..v...! làm cho trải nghiệm người dùng phù hợp với mục đích cụ thể của bạn.', 'border-success', '', '', '', '', '');
                         echo input_field('chat_gpt_url_api', 'URL API', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['url_api']), '', 'text', '', '', '', '- Hỗ trợ với URL API và API KEY của bên thứ 3<br/><br/>hoặc URL Mặc Định của ChatGPT và Key của ChatGPT: <b>https://api.openai.com/v1/chat/completions</b>', 'border-danger', '', '', '', '', '');
                         echo input_field('chat_gpt_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['time_out']), '', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
@@ -2898,7 +2905,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 					  </div>
 					</div>";
                   echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
-                  echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp_mqtt' => 'UDP + MQTT (Chưa hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket');
+                  echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
                   $status = $Config['xiaozhi']['activation_status'] ?? false;
                   echo "<div class='row mb-3'>
 					  <label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
@@ -3324,7 +3331,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                           'offline' => 'Offline (Tự động làm mới Token)',
                           'online' => 'Online (Làm mới Token thủ công)'
                         ],
-                        $Config['backup_upgrade']['google_cloud_drive']['setAccessType']
+                        $Config['backup_upgrade']['google_cloud_drive']['setAccessType'],
+						[]
                       );
 
                       echo select_field(
@@ -3338,7 +3346,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                           'select_account' => 'Select Account (Chọn tài khoản muốn dùng)',
                           'consent select_account' => 'Consent Select Account (Chọn và Yêu cầu đồng ý cấp quyền)'
                         ],
-                        $Config['backup_upgrade']['google_cloud_drive']['setPrompt']
+                        $Config['backup_upgrade']['google_cloud_drive']['setPrompt'],
+						[]
                       );
                       ?>
                     </div>
@@ -3494,7 +3503,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                     'api' => 'api (Hiển thị log ra API, Web UI)',
                     'all' => 'all (Hiển thị log ra tất cả các đường)'
                   ],
-                  $Config['smart_config']['show_log']['log_display_style']
+                  $Config['smart_config']['show_log']['log_display_style'],
+				  []
                 );
                 ?>
               </div>
