@@ -1,8 +1,8 @@
 {
-    "version": "1.0.67",
+    "version": "1.0.68",
     "projectName": "WebUI VBot Offline",
-    "description": "Thêm Xử Lý Thông Báo Xác Định Vị Trí Lỗi Khi Không Lưu Được Trong Cấu Hình Config > Thiếu, Chưa Nhập Giá Trị",
-    "releaseDate": "30/10/2025",
+    "description": "Sửa Lỗi Câu Lệnh Custom HomeAssistant + Tăng tốc độ xử lý, Thêm Xử Lý Câu Lệnh Điều Khiển (Bật, Tắt, Mở) liên quan tới: Nhạc, Đài Báo, Radio, Tin Tức, PodCast, Truyện",
+    "releaseDate": "03/11/2025",
     "changes": [
         {
             "type": "feature",
