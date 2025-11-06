@@ -244,15 +244,14 @@ function displayResults_Hotword_Snowboy(data) {
 function displayResults_Hotword_dataa(data) {
     const resultsDiv = document.getElementById('results_body_hotword');
     const resultsDiv1 = document.getElementById('results_body_hotword1');
-    // Xóa nội dung hiện tại
     resultsDiv.innerHTML = '';
     resultsDiv1.innerHTML = '';
-    // Hiển thị ngôn ngữ đang được truy vấn
+    //Hiển thị ngôn ngữ đang được truy vấn
     let reponse_lang = data.lang === "vi" ? "Tiếng Việt" : "Tiếng Anh";
     const langDiv = document.getElementById('language_hotwordd');
     langDiv.innerHTML = '<strong>- Ngôn ngữ: </strong> <font color="red" id="data_lang_shows" value=' + data.lang + '>' + reponse_lang + '</font><br/>- File Thư Viện Đang Dùng: <font color="red">' + data.config_lib_pv_to_lang + '</font>';
     const fileList = data.files_lib_pv;
-    // Tạo thẻ <select> một lần với tất cả các tùy chọn
+    //Tạo thẻ <select> một lần với tất cả các tùy chọn
     var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
     selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
     fileList.forEach(function (file) {
@@ -261,7 +260,6 @@ function displayResults_Hotword_dataa(data) {
     });
     selectHtml += '</select><div class="invalid-feedback">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</div> <label for="select_file_lib_pv">Chọn file thư viện Hotword: ' + reponse_lang + '</label></div></td>';
     selectHtml += '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" id="deleteFilePV" title="Xóa file: "><i class="bi bi-trash"></i></button>  <button type="button" class="btn btn-success" id="downloadFilePV" title="Tải xuống file: "><i class="bi bi-download"></i></button> </center></td></tr>';
-
     if (Array.isArray(data.config) && data.config.length > 0) {
         let i_up = 0;
         let tableContent = '';
@@ -327,11 +325,11 @@ function displayResults_Hotword_dataa(data) {
             '</tr>';
         resultsDiv.innerHTML = tableContent;
     }
-    // Lấy giá trị mặc định của thẻ select khi tải trang
+    //Lấy giá trị mặc định của thẻ select khi tải trang
     var selectedValuee = document.getElementById('select_file_lib_pv').value;
     var deleteIconn = document.getElementById('deleteFilePV');
     var downloadIcon = document.getElementById('downloadFilePV');
-    // Thiết lập onclick xóa file trong thẻ select với giá trị mặc định
+    //Thiết lập onclick xóa file trong thẻ select với giá trị mặc định
     deleteIconn.onclick = function () {
         if (selectedValuee) {
             deleteFile(data.path_pv + selectedValuee);
@@ -341,7 +339,7 @@ function displayResults_Hotword_dataa(data) {
             show_message('Cần chọn file thư viện .pv trước khi xóa');
         }
     };
-    // Thiết lập onclick tải xuống file
+    //Thiết lập onclick tải xuống file
     downloadIcon.onclick = function () {
         if (selectedValuee) {
             downloadFile(data.path_pv + selectedValuee);
@@ -349,7 +347,7 @@ function displayResults_Hotword_dataa(data) {
             show_message('Cần chọn file thư viện .pv trước khi tải xuống');
         }
     };
-    // Lắng nghe sự kiện thay đổi trên thẻ select pv để xóa file
+    //Lắng nghe sự kiện thay đổi trên thẻ select pv để xóa file
     document.getElementById('select_file_lib_pv').addEventListener('change', function () {
         var selectedValue = this.value;
         var deleteIcon = document.getElementById('deleteFilePV');
@@ -357,7 +355,7 @@ function displayResults_Hotword_dataa(data) {
         deleteIcon.onclick = function () {
             if (selectedValue) {
                 deleteFile(data.path_pv + selectedValue);
-                // Tải lại dữ liệu hotword ở Config.json
+                //Tải lại dữ liệu hotword ở Config.json
                 loadConfigHotword(data.lang);
             } else {
                 show_message('Cần chọn file thư viện .pv trước khi xóa');
@@ -370,7 +368,7 @@ function displayResults_Hotword_dataa(data) {
                 show_message('Cần chọn file thư viện .pv trước khi tải xuống');
             }
         };
-        // Cập nhật title của icon
+        //Cập nhật title của icon
         deleteIcon.title = 'Xóa file: ' + selectedValue;
         downloadIcon.title = 'Tải xuống file: ' + selectedValue;
     });
@@ -592,25 +590,25 @@ function play_tts_sample_gcloud(id_html) {
 }
 
 //Cập nhật bảng mã màu vào thẻ input
-// Thiết lập giá trị ban đầu cho các thẻ input khi tải trang
+//Thiết lập giá trị ban đầu cho các thẻ input khi tải trang
 window.onload = function () {
-    // Thiết lập màu cho thẻ đầu tiên
+    //Thiết lập màu cho thẻ đầu tiên
     setColorPickerValue('color_led_think', 'led_think');
-    // Thiết lập màu cho thẻ thứ hai
+    //Thiết lập màu cho thẻ thứ hai
     setColorPickerValue('color_led_mutex', 'led_mute');
 };
 
-// Hàm thiết lập màu cho các thẻ colorPicker dựa trên giá trị colorCodeInput
+//Hàm thiết lập màu cho các thẻ colorPicker dựa trên giá trị colorCodeInput
 function setColorPickerValue(colorPickerId, colorCodeInputId) {
     const initialColor = document.getElementById(colorCodeInputId).value;
     document.getElementById(colorPickerId).value = '#' + initialColor;
 }
 
-// Hàm cập nhật mã màu vào thẻ input
+//Hàm cập nhật mã màu vào thẻ input
 function updateColorCode_input(colorPickerId, colorCodeInputId) {
-    // Lấy mã màu từ input color và bỏ dấu '#' ở đầu
+    //Lấy mã màu từ input color và bỏ dấu '#' ở đầu
     const selectedColor = document.getElementById(colorPickerId).value.substring(1);
-    // Cập nhật giá trị của thẻ input với mã màu đã chọn (không có '#')
+    //Cập nhật giá trị của thẻ input với mã màu đã chọn (không có '#')
     document.getElementById(colorCodeInputId).value = selectedColor;
 }
 
@@ -727,7 +725,7 @@ function handleAudioReplyType() {
             '<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_ggcloud\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
             ' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
             '</center>';
-        // Gọi hàm tải danh sách giọng đọc
+        //Gọi hàm tải danh sách giọng đọc
         load_list_GoogleVoices_tts("tts_audio_reply", "ok");
     } else if (type === "wakeup_reply_tts_zalo") {
         contentDiv.innerHTML =
@@ -987,7 +985,6 @@ function xiaozhi_activation_status_true() {
     );
 }
 
-
 //Lấy token zai_did tts_default
 function get_token_tts_default_zai_did() {
     const xhr = new XMLHttpRequest();
@@ -1023,7 +1020,6 @@ function createAudio_Wakeup_reply(source_tts) {
         return;
     }
     let url_tts = "";
-
     if (source_tts === 'tts_ggcloud') {
         const speed = document.getElementById("create_tts_ggcloud_WakeUP_Reply_speed").value;
         const voiceName = document.getElementById("tts_audio_reply_voice_name").value;
@@ -1031,7 +1027,6 @@ function createAudio_Wakeup_reply(source_tts) {
         const encodedVoice = encodeURIComponent(voiceName);
         url_tts = "includes/php_ajax/TTS_Audio_Create.php?create_tts_audio&source_tts=tts_ggcloud&language_code=vi-VN&speaking_rate=" + speed + "&voice_name=" + encodedVoice + "&text=" + encodedText;
     }
-
     else if (source_tts === 'tts_zalo') {
         const speakerId = document.getElementById("create_tts_zalo_WakeUP_Reply_voice_name").value;
         const speakerSpeed = document.getElementById("create_tts_zalo_WakeUP_Reply_speed").value;
@@ -1235,8 +1230,6 @@ function scan_audio_devices(device_name) {
             loading("hide");
             var data = xhr.response;
             if (data && data.success) {
-                //console.log(data.message);
-                //console.log(data.devices);
                 if (device_name === "scan_mic") {
                     var container = document.getElementById('mic_scanner');
                     var tableHTML = '<table class="table table-bordered border-primary">';
@@ -1263,7 +1256,7 @@ function scan_audio_devices(device_name) {
                         tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.id + '</td><td style="vertical-align: middle;">' + (device.name || '') + '</td><td style="vertical-align: middle;">' + (device.capabilities || '') + '</td><td style="vertical-align: middle;">' + (device.playback_channels || '') + '</td><td style="vertical-align: middle;">' + (device.values.length > 0 ? device.values.map(value => (value.channel || '') + ' ' + (value.details || '')).join('<br>') : '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_Alsamixer(\'' + device.name + '\')">Chọn</button></td></td></tr>';
                     });
                     tableHTML += '</tbody></table>';
-                    // Đẩy nội dung bảng vào thẻ div
+                    //Đẩy nội dung bảng vào thẻ div
                     if (container) {
                         showMessagePHP(data.message, 4);
                         container.innerHTML = tableHTML;
@@ -1471,7 +1464,7 @@ function uploadFilesHotwordSnowboy() {
                 const response = JSON.parse(xhr.responseText);
                 let messages = [];
                 if (response.status === 'success') {
-                    // Tổng hợp tất cả thông báo
+                    //Tổng hợp tất cả thông báo
                     messages.push(response.messages + '<br/>');
                 } else {
                     messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
@@ -1723,11 +1716,11 @@ function read_YAML_file_path(fileName) {
         if (xhr.status >= 200 && xhr.status < 300) {
             loading('hide');
             var codeElement = document.getElementById('code_config');
-            // Hiển thị nội dung YAML
+            //Hiển thị nội dung YAML
             codeElement.textContent = xhr.responseText.trim();
-            // Áp dụng lớp cú pháp YAML
+            //Áp dụng lớp cú pháp YAML
             codeElement.className = 'language-yaml';
-            // Kích hoạt Prism.js để lên màu
+            //Kích hoạt Prism.js để lên màu
             Prism.highlightElement(codeElement);
             showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
             document.getElementById('name_file_showzz').textContent = "Tên File: " + fileName.split('/').pop();
