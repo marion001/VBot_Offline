@@ -2,7 +2,7 @@
     "version": "1.0.68",
     "projectName": "Program VBot Offline",
     "description": "Sửa Lỗi Câu Lệnh Custom HomeAssistant + Tăng tốc độ xử lý, Thêm Xử Lý Câu Lệnh Điều Khiển (Bật, Tắt, Mở) liên quan tới: Nhạc, Đài Báo, Radio, Tin Tức, PodCast, Truyện",
-    "releaseDate": "03/11/2025",
+    "releaseDate": "06/11/2025",
     "changes": [
         {
             "type": "feature",

@@ -2983,7 +2983,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
             <div class="card accordion" id="accordion_button_schedule_lich">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_schedule_lich" aria-expanded="false" aria-controls="collapse_button_schedule_lich">
-                  Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo')"></i>:
+                  Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo.<br/>Ví Dụ Câu Lệnh Ra lệnh nhanh: <br/>- Nhắc tôi uống thuốc sau 10 phút nữa<br/>- Nhắc tôi thức dạy lúc 6 giờ sáng mai<br/>- Nhắc tôi làm việc lúc 13 giờ 40 phút hôm nay nhé')"></i>:
                 </h5>
                 <div id="collapse_button_schedule_lich" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_lich">
                   <div class="row mb-3">
