@@ -172,7 +172,7 @@ include 'html_head.php';
       $data = json_decode($json_data, true);
 
       if ($data === null) {
-        echo "Không thể đọc dữ liệu JSON từ tệp, Vui lòng kiểm tra lại định dạng tệp json";
+        echo "<center><h1 class='text-danger'>Không thể đọc dữ liệu JSON từ tệp, Vui lòng kiểm tra lại định dạng tệp json: $json_file</h1></center>";
         exit();
       }
 
@@ -318,7 +318,6 @@ include 'html_head.php';
 
       // Xử lý dữ liệu sau khi người dùng gửi form
       if (isset($_POST['save_all_Scheduler'])) {
-
         #Sao Lưu Dữ Liệu Trước
         if (isset($Config['backup_upgrade']['scheduler']['active']) && $Config['backup_upgrade']['scheduler']['active'] === true) {
           // Đường dẫn gốc và đích
@@ -449,6 +448,18 @@ include 'html_head.php';
         $data['reboot_os']['time'] = array_filter($time_reboot_os);
         $data['reboot_os']['active'] = isset($_POST['reboot_os_active']) ? true : false;
         $data['reboot_os']['date'] = isset($_POST['dates_reboot_os']) ? $_POST['dates_reboot_os'] : [];
+
+        #Lưu dữ liệu Phát danh sách nhạc
+        $time_player_playlist = isset($_POST['time_player_playlist']) ? $_POST['time_player_playlist'] : [];
+        $data['play_play_playlist']['time'] = array_filter($time_player_playlist);
+        $data['play_play_playlist']['active'] = isset($_POST['play_playlist_active']) ? true : false;
+        $data['play_play_playlist']['date'] = isset($_POST['dates_play_playlist_player']) ? $_POST['dates_play_playlist_player'] : [];
+
+        #Lưu dữ liệu Phát toàn bộ nhạc trong thư mục Local
+        $time_player_local = isset($_POST['time_player_local']) ? $_POST['time_player_local'] : [];
+        $data['play_all_music_local']['time'] = array_filter($time_player_local);
+        $data['play_all_music_local']['active'] = isset($_POST['play_all_local_active']) ? true : false;
+        $data['play_all_music_local']['date'] = isset($_POST['dates_play_all_local']) ? $_POST['dates_play_all_local'] : [];
 
         #lưu toàn bộ dữ liệu vào file Json
         file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -721,7 +732,7 @@ include 'html_head.php';
                     <div class="time-inputs_display_screen" id="time-changes_volumes">
                       <?php foreach ($change_volume['time'] as $index => $time): ?>
                         <div class="time-input-container input-group mb-3" id="time-change_volume-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_change_volume[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+                          <input class="form-control border-success" type="text" name="time_change_volume[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <input class="form-control border-primary" type="number" name="volumes_volume_time[]" value="<?= isset($change_volume['volume_time'][$index]) ? htmlspecialchars($change_volume['volume_time'][$index]) : '' ?>" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">
                           <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -735,8 +746,6 @@ include 'html_head.php';
             </div>
           </div>
 
-
-
           <div class="card accordion" id="accordion_button_brightness_change">
             <div class="card-body">
               <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_brightness_change" aria-expanded="false" aria-controls="collapse_button_brightness_change">
@@ -747,9 +756,8 @@ include 'html_head.php';
               </h5>
               <div id="collapse_button_brightness_change" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_brightness_change">
                 <?php
-                // Kiểm tra dữ liệu change_led_brightness và gán giá trị mặc định nếu không có
+                //Kiểm tra dữ liệu change_led_brightness và gán giá trị mặc định nếu không có
                 if (!isset($data['change_led_brightness']) || empty($data['change_led_brightness'])) {
-                  // Gán giá trị mặc định nếu không có dữ liệu change_led_brightness
                   $data['change_led_brightness'] = [
                     'active' => false,
                     'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -787,7 +795,7 @@ include 'html_head.php';
                     <div class="time-inputs_display_screen" id="time-changes_brightness">
                       <?php foreach ($change_led_brightness['time'] as $index => $time): ?>
                         <div class="time-input-container input-group mb-3" id="time-change_led_brightness-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_change_brightness[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+                          <input class="form-control border-success" type="text" name="time_change_brightness[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" value="<?= isset($change_led_brightness['brightness_time'][$index]) ? htmlspecialchars($change_led_brightness['brightness_time'][$index]) : '' ?>" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">
                           <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -801,6 +809,127 @@ include 'html_head.php';
             </div>
           </div>
 
+          <div class="card accordion" id="accordion_button_play_playlist">
+            <div class="card-body">
+              <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_play_playlist" aria-expanded="false" aria-controls="collapse_button_play_playlist">
+                Lập Lịch Phát Danh Sách Nhạc, PlayList:&nbsp;
+                <?php
+                echo isset($data['play_play_playlist']['active']) ? ($data['play_play_playlist']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>';
+                ?>
+              </h5>
+              <div id="collapse_button_play_playlist" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_play_playlist">
+                <?php
+                //Kiểm tra dữ liệu play_play_playlist và gán giá trị mặc định nếu không có
+                if (!isset($data['play_play_playlist']) || empty($data['play_play_playlist'])) {
+                  $data['play_play_playlist'] = [
+                    'active' => false,
+                    'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    'time' => ["17:30"]
+                  ];
+                }
+                $play_play_playlist = $data['play_play_playlist'];
+                ?>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="play_playlist_active" id="play_playlist_active" value="<?php echo $play_play_playlist['active']; ?>" <?= $play_play_playlist['active'] ? 'checked' : '' ?>>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Có Thể Chọn Các Ngày Trong Tuần Để Lên Lịch Dừng Phát Media Player')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <?php foreach ($week_days as $date => $label): ?>
+                        <input class="form-check-input" type="checkbox" name="dates_play_playlist_player[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $play_play_playlist['date']) ? 'checked' : '' ?>>
+                        <label><?= htmlspecialchars($label) ?></label>
+                        <br />
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <div class="col-sm-9">
+                    <div class="time-inputs_play_playlist" id="time-on-play_play_playlist">
+                      <?php foreach ($play_play_playlist['time'] as $index => $time): ?>
+                        <div class="time-input-play_play_playlist input-group mb-3" id="time-play_play_playlist-<?= $index ?>">
+                          <input class="form-control border-success" type="text" name="time_player_playlist[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_play_playlist-<?= $index ?>"><i class="bi bi-trash"></i></button>
+                        </div>
+                      <?php endforeach; ?>
+                      <button class="btn btn-success rounded-pill" type="button" id="add-time-play_play_playlist">Thêm thời gian</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card accordion" id="accordion_button_play_all_local">
+            <div class="card-body">
+              <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_play_all_local" aria-expanded="false" aria-controls="collapse_button_play_all_local">
+                Lập Lịch Phát Toàn Bộ Bài Hát Trong Thẻ Nhớ Nội Bộ, Local: &nbsp;
+                <?php
+                echo isset($data['play_all_music_local']['active']) ? ($data['play_all_music_local']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>';
+                ?>
+              </h5>
+              <div id="collapse_button_play_all_local" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_play_all_local">
+                <?php
+                // Kiểm tra dữ liệu play_all_music_local và gán giá trị mặc định nếu không có
+                if (!isset($data['play_all_music_local']) || empty($data['play_all_music_local'])) {
+                  $data['play_all_music_local'] = [
+                    'active' => false,
+                    'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+                    'time' => ["17:45"]
+                  ];
+                }
+                $play_all_music_local = $data['play_all_music_local'];
+                ?>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <input class="form-check-input" type="checkbox" name="play_all_local_active" id="play_all_local_active" value="<?php echo $play_all_music_local['active']; ?>" <?= $play_all_music_local['active'] ? 'checked' : '' ?>>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Có Thể Chọn Các Ngày Trong Tuần Để Lên Lịch Dừng Phát Media Player')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <?php foreach ($week_days as $date => $label): ?>
+                        <input class="form-check-input" type="checkbox" name="dates_play_all_local[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $play_all_music_local['date']) ? 'checked' : '' ?>>
+                        <label><?= htmlspecialchars($label) ?></label>
+                        <br />
+                      <?php endforeach; ?>
+                    </div>
+                  </div>
+                </div>
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <div class="col-sm-9">
+                    <div class="time-inputs_player_local" id="time-on-play_all_music_local">
+                      <?php foreach ($play_all_music_local['time'] as $index => $time): ?>
+                        <div class="time-input-play_all_music_local input-group mb-3" id="time-play_all_music_local-<?= $index ?>">
+                          <input class="form-control border-success" type="text" name="time_player_local[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_all_music_local-<?= $index ?>"><i class="bi bi-trash"></i></button>
+                        </div>
+                      <?php endforeach; ?>
+                      <button class="btn btn-success rounded-pill" type="button" id="add-time-play_all_music_local">Thêm thời gian</button>
+                    </div>
+                  </div>
+                </div>
+			<div class="row mb-3">
+            <label for="schedule_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn Thư Mục Music Local:</b></label>
+            <div class="col-sm-9">
+              <input disabled="" class="form-control border-danger" type="text" name="schedule_config_path" id="schedule_config_path" value="<?php echo $VBot_Offline.$Config['media_player']['music_local']['path'].'/'; ?>">
+            </div>
+          </div>
+              </div>
+            </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_stop_media_player">
             <div class="card-body">
@@ -814,7 +943,6 @@ include 'html_head.php';
                 <?php
                 // Kiểm tra dữ liệu stop_media_player và gán giá trị mặc định nếu không có
                 if (!isset($data['stop_media_player']) || empty($data['stop_media_player'])) {
-                  // Gán giá trị mặc định nếu không có dữ liệu stop_media_player
                   $data['stop_media_player'] = [
                     'active' => false,
                     'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -849,7 +977,7 @@ include 'html_head.php';
                     <div class="time-inputs_stop_media_player" id="time-on-stop_media_player">
                       <?php foreach ($stop_media_player['time'] as $index => $time): ?>
                         <div class="time-input-stop_media_player input-group mb-3" id="time-stop_media_player-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_stop_media_player[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+                          <input class="form-control border-success" type="text" name="time_stop_media_player[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-stop_media_player-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -860,6 +988,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+
           <div class="card accordion" id="accordion_button_restart_vbot_service">
             <div class="card-body">
               <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_restart_vbot_service" aria-expanded="false" aria-controls="collapse_button_restart_vbot_service">
@@ -872,7 +1001,6 @@ include 'html_head.php';
                 <?php
                 // Kiểm tra dữ liệu restart_vbot và gán giá trị mặc định nếu không có
                 if (!isset($data['restart_vbot']) || empty($data['restart_vbot'])) {
-                  // Gán giá trị mặc định nếu không có dữ liệu restart_vbot
                   $data['restart_vbot'] = [
                     'active' => false,
                     'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -907,7 +1035,7 @@ include 'html_head.php';
                     <div class="time-inputs_restart_vbot" id="time-on-restart_vbot">
                       <?php foreach ($restart_vbot['time'] as $index => $time): ?>
                         <div class="time-input-restart_vbot input-group mb-3" id="time-restart_vbot-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_restart_vbot[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+                          <input class="form-control border-success" type="text" name="time_restart_vbot[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-restart_vbot-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -918,6 +1046,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+
           <div class="card accordion" id="accordion_button_reboot_os">
             <div class="card-body">
               <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_reboot_os" aria-expanded="false" aria-controls="collapse_button_reboot_os">
@@ -930,7 +1059,6 @@ include 'html_head.php';
                 <?php
                 // Kiểm tra dữ liệu reboot_os và gán giá trị mặc định nếu không có
                 if (!isset($data['reboot_os']) || empty($data['reboot_os'])) {
-                  // Gán giá trị mặc định nếu không có dữ liệu reboot_os
                   $data['reboot_os'] = [
                     'active' => false,
                     'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
@@ -965,7 +1093,7 @@ include 'html_head.php';
                     <div class="time-inputs_reboot_os" id="time-on-reboot_os">
                       <?php foreach ($reboot_os['time'] as $index => $time): ?>
                         <div class="time-input-reboot_os input-group mb-3" id="time-reboot_os-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_reboot_os[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+                          <input class="form-control border-success" type="text" name="time_reboot_os[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-reboot_os-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -976,8 +1104,6 @@ include 'html_head.php';
               </div>
             </div>
           </div>
-
-
 
           <center>
             <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
@@ -995,13 +1121,13 @@ include 'html_head.php';
           <div class="row mb-3">
             <label for="schedule_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
             <div class="col-sm-9">
-              <input readonly class="form-control border-danger" type="text" name="schedule_config_path" id="schedule_config_path" value="<?php echo $VBot_Offline . $Config['schedule']['data_json_file']; ?>">
+              <input disabled class="form-control border-danger" type="text" name="schedule_config_path" id="schedule_config_path" value="<?php echo $VBot_Offline . $Config['schedule']['data_json_file']; ?>">
             </div>
           </div>
           <div class="row mb-3">
             <label for="schedule_audio_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Âm Thanh:</b></label>
             <div class="col-sm-9">
-              <input readonly class="form-control border-danger" type="text" name="schedule_audio_path" id="schedule_audio_path" value="<?php echo $VBot_Offline . $Config['schedule']['audio_path'] . '/'; ?>">
+              <input disabled class="form-control border-danger" type="text" name="schedule_audio_path" id="schedule_audio_path" value="<?php echo $VBot_Offline . $Config['schedule']['audio_path'] . '/'; ?>">
             </div>
           </div>
           <hr />
@@ -1661,7 +1787,7 @@ include 'html_head.php';
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
       inputContainer.innerHTML =
-        '<input class="form-control border-success" type="text" name="time_change_volume[]" placeholder="HH:mm">' +
+        '<input class="form-control border-success" type="text" name="time_change_volume[]" placeholder="HH:mm (Giờ:Phút)">' +
         '<input class="form-control border-primary" type="number" name="volumes_volume_time[]" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">' +
         '<button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-' + timeVolumeCounter + '">' +
         '<i class="bi bi-trash"></i>' +
@@ -1681,12 +1807,10 @@ include 'html_head.php';
       const container = document.getElementById('time-changes_brightness');
       const inputContainerId = 'time-change_led_brightness-' + timeBrightnessCounter;
       const inputContainer = document.createElement('div');
-
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
-
       inputContainer.innerHTML =
-        '<input class="form-control border-success" type="text" name="time_change_brightness[]" placeholder="HH:mm">' +
+        '<input class="form-control border-success" type="text" name="time_change_brightness[]" placeholder="HH:mm (Giờ:Phút)">' +
         '<input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">' +
         '<button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-' + timeBrightnessCounter + '">' +
         '<i class="bi bi-trash"></i>' +
@@ -1699,7 +1823,55 @@ include 'html_head.php';
     });
   </script>
 
+  <!-- Scripts Phát danh sách nhạc -->
+  <script>
+    let time_Play_Playlist = <?= count($play_play_playlist['time']) ?>;
+    document.getElementById('add-time-play_play_playlist').addEventListener('click', function() {
+      const timeOnContainer = document.getElementById('time-on-play_play_playlist');
+      const inputContainerId = 'time_player_playlist-' + time_Play_Playlist;
+      const inputContainer = document.createElement('div');
+      inputContainer.id = inputContainerId;
+      inputContainer.classList.add('time-input-play_play_playlist', 'input-group', 'mb-3');
+      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_player_playlist[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_play_playlist-' + time_Play_Playlist + '"><i class="bi bi-trash"></i></button>';
+      timeOnContainer.insertBefore(inputContainer, this);
+      document.getElementById('delete-play_play_playlist-' + time_Play_Playlist).addEventListener('click', function() {
+        document.getElementById(inputContainerId).remove();
+      });
+      time_Play_Playlist++;
+    });
+    document.querySelectorAll('.time-inputs_play_playlist > div > button').forEach(button => {
+      button.addEventListener('click', function() {
+        const container = button.parentElement;
+        container.remove();
+      });
+    });
+  </script>
+  <!--END Scripts Phát danh sách nhạc -->
 
+  <!-- Scripts Phát toàn bộ nhạc có trong thư mục Local -->
+  <script>
+    let time_All_Local = <?= count($play_all_music_local['time']) ?>;
+    document.getElementById('add-time-play_all_music_local').addEventListener('click', function() {
+      const timeOnContainer = document.getElementById('time-on-play_all_music_local');
+      const inputContainerId = 'time_player_local-' + time_All_Local;
+      const inputContainer = document.createElement('div');
+      inputContainer.id = inputContainerId;
+      inputContainer.classList.add('time-input-play_all_music_local', 'input-group', 'mb-3');
+      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_player_local[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_all_music_local-' + time_All_Local + '"><i class="bi bi-trash"></i></button>';
+      timeOnContainer.insertBefore(inputContainer, this);
+      document.getElementById('delete-play_all_music_local-' + time_All_Local).addEventListener('click', function() {
+        document.getElementById(inputContainerId).remove();
+      });
+      time_All_Local++;
+    });
+    document.querySelectorAll('.time-inputs_player_local > div > button').forEach(button => {
+      button.addEventListener('click', function() {
+        const container = button.parentElement;
+        container.remove();
+      });
+    });
+  </script>
+  <!--END Scripts Phát toàn bộ nhạc có trong thư mục Local -->
 
   <!--END Scripts REBOOT OS SYSTEM -->
   <script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>

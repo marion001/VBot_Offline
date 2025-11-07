@@ -39,21 +39,6 @@
             "active": false,
             "connection_protocol": "udp_sock",
             "protocol": {
-                "http_post": {
-                    "port": 5003,
-                    "working_mode": "main_processing",
-                    "notes": "working_mode: main_processing, null",
-                    "source_stt": "stt_default",
-                    "max_stream_audio_empty": 5
-                },
-                "socket": {
-                    "port": 5003,
-                    "maximum_recording_time": 6,
-                    "maximum_client_connected": 5,
-                    "source_stt": "stt_default",
-                    "working_mode": "main_processing",
-                    "select_wakeup": "porcupine"
-                },
                 "udp_sock": {
                     "port": 5003,
                     "maximum_recording_time": 6,

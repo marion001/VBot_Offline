@@ -6,18 +6,17 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 
 #tăng giới hạn bộ nhớ cho PHP
-//ini_set('memory_limit', '512M');
 ini_set('memory_limit', '1G');
 ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
 //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-$Cache_UI_Ver = '1.0.5';
+$Cache_UI_Ver = '1.0.6';
 
-// Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
+//Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;
 
-// Lấy đường dẫn thư mục chứa tệp PHP
+//Lấy đường dẫn thư mục chứa tệp PHP
 $directory_path = dirname(__FILE__);
 
 //Lấy HostName
@@ -26,10 +25,10 @@ $HostName = gethostname();
 //Lấy User Hiện Tại: pi
 $GET_current_USER = get_current_user();
 
-// Lấy địa chỉ IP của máy chủ
+//Lấy địa chỉ IP của máy chủ
 $serverIp = $_SERVER['SERVER_ADDR'];
 
-// Lấy địa chỉ IP của người dùng khi truy cập
+//Lấy địa chỉ IP của người dùng khi truy cập
 $userIp = $_SERVER['REMOTE_ADDR'];
 
 //Đường dẫn ui html /home/pi/VBot_Offline/html
@@ -40,7 +39,7 @@ $VBot_Offline = "/home/pi/VBot_Offline/";
 
 $Backup_dir = $HTML_VBot_Offline . '/Backup_Upgrade/Backup_Config/';
 
-// Đường dẫn đến tệp JSON
+//Đường dẫn đến tệp JSON
 $Config_filePath = $VBot_Offline . 'Config.json';
 
 //địa chỉ URL Repo Github, địa chỉ này sẽ dùng cho cập nhật, không được chỉnh sửa
@@ -180,9 +179,9 @@ $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['ac
 $Port_API = $Config['api']['port'];
 $Port_Server_Streaming_Audio_UDP = $Config['api']['streaming_server']['protocol']['udp_sock']['port'];
 
-// Tìm tất cả các tệp có tên bắt đầu bằng 'avata_user'
+//Tìm tất cả các tệp có tên bắt đầu bằng 'avata_user'
 $files = glob('assets/img/avata_user.*');
-// Kiểm tra xem có tệp nào không
+//Kiểm tra xem có tệp nào không
 if (count($files) > 0) {
     foreach ($files as $file_path) {
         $file_name = basename($file_path);

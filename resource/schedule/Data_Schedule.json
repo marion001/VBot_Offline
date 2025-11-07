@@ -6,21 +6,9 @@
     },
     "display_screen": {
         "active": false,
-        "date": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ],
-        "time_on": [
-            "20:47"
-        ],
-        "time_off": [
-            "18:40"
-        ]
+        "date": [],
+        "time_on": [],
+        "time_off": []
     },
     "restart_vbot": {
         "active": false,
@@ -85,12 +73,43 @@
             "Saturday",
             "Sunday"
         ],
-        "active": true,
+        "active": false,
         "time": [
             "21:17"
         ],
         "brightness_time": [
             "20"
+        ]
+    },
+    "play_play_playlist": {
+        "time": [
+            "18:46",
+            "18:43"
+        ],
+        "active": false,
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ]
+    },
+    "play_all_music_local": {
+        "time": [
+            "19:22"
+        ],
+        "active": false,
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
         ]
     }
 }
