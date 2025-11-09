@@ -3685,7 +3685,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 		  '<td><select class="form-select border-warning" id="radio_select_'+radioIndex+'" style="display:none;" onchange="updateRadioLinkName('+radioIndex+', this)"></select>' +
 		  '<div class="input-group mb-3" id="link-group-'+radioIndex+'">' +
           '<input type="text" class="form-control border-success" placeholder="Nhập link đài" name="radio_link_'+radioIndex+'" id="radio_link_'+radioIndex+'">' +
-		  '<button type="button" class="btn btn-primary" onclick="showRadioSelect(' + radioIndex + ', \'' + '<?php echo $HTML_VBot_Offline; ?>' + '\')"><i class="bi bi-list-task"></i></button>' +
+		  '<button type="button" class="btn btn-primary" onclick="showRadioSelect('+radioIndex+', \'' + '<?php echo $HTML_VBot_Offline; ?>' + '\')"><i class="bi bi-list-task"></i></button>' +
           '</div></td>' +
           '<td style="text-align: center; vertical-align: middle;"><center>' +
           '<button type="button" class="btn btn-danger" id="delete-radio-'+radioIndex+'" onclick="delete_Dai_bao_Radio('+radioIndex+', null)"><i class="bi bi-trash"></i></button>' +
@@ -3706,14 +3706,14 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         const newRow = document.createElement('tr');
         newRow.id = 'newspaper-row-' + newspaperIndex;
         newRow.innerHTML =
-          '<td>' +
-          '<input type="text" class="form-control border-success" placeholder="Nhập tên Báo, Tin Tức" name="newspaper_name_' + newspaperIndex + '" id="newspaper_name_' + newspaperIndex + '">' +
-          '</td>' +
-          '<td>' +
+          '<td><input type="text" class="form-control border-success" placeholder="Nhập tên Báo, Tin Tức" name="newspaper_name_' + newspaperIndex + '" id="newspaper_name_' + newspaperIndex + '"></td>' +
+          '<td><select class="form-select border-warning" id="newspaper_select_'+newspaperIndex+'" style="display:none;" onchange="updateNewsPaperLinkName('+newspaperIndex+', this)"></select>' +
+		  '<div class="input-group mb-3" id="newspaper-link-group-'+newspaperIndex+'">' +
           '<input type="text" class="form-control border-success" placeholder="Nhập link/url Báo, Tin Tức" name="newspaper_link_' + newspaperIndex + '" id="newspaper_link_' + newspaperIndex + '">' +
-          '</td>' +
+		  '<button type="button" class="btn btn-primary" onclick="showNewsPaperSelect('+newspaperIndex+', \'' + '<?php echo $HTML_VBot_Offline; ?>' + '\')"><i class="bi bi-list-task"></i></button>' +
+          '</div></td>' +
           '<td style="text-align: center; vertical-align: middle;"><center>' +
-          '<button type="button" class="btn btn-danger" id="delete-newspaper-' + newspaperIndex + '" onclick="delete_NewsPaper(' + newspaperIndex + ', null)"><i class="bi bi-trash"></i></button>'
+          '<button type="button" class="btn btn-danger" id="delete-newspaper-' + newspaperIndex + '" onclick="delete_NewsPaper(' + newspaperIndex + ', null)"><i class="bi bi-trash"></i></button>' +
         '</center></td>';
         table.appendChild(newRow);
         newspaperIndex++;
