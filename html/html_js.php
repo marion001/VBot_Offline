@@ -559,8 +559,8 @@ $git_repository = $pathParts[1];
     //Hàm để phát nhạc (Media Player)
     function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
         loading("show");
-        // Kiểm tra nếu URL bắt đầu với các domain cần tìm
-        if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/")) {
+        //Kiểm tra nếu URL bắt đầu với các domain cần tìm
+        if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/") || url_media.includes("24h.com.vn")) {
             getAudioLink_newspaper(url_media)
                 .then(function(audioLink) {
                     url_media = audioLink;
@@ -576,7 +576,7 @@ $git_repository = $pathParts[1];
         }
     }
 
-    // Hàm khởi tạo phát nhạc
+    //Hàm khởi tạo phát nhạc
     function startMediaPlayer(url_media, name_media, url_cover, media_source) {
         var data = JSON.stringify({
             "type": 1,
@@ -2537,18 +2537,18 @@ $git_repository = $pathParts[1];
         return '<div style="' + style + '">' + message + '</div>';
     }
 
-    // Map checkbox -> div output
+    //Map checkbox -> div output
     const logCheckboxMap = {
         "fetchLogsCheckbox": "logsOutput",
         "fetchLogsCheckbox_Head": "logsOutput_Head"
     };
 
-    // Gắn sự kiện cho cả 2 checkbox
+    //Gắn sự kiện cho cả 2 checkbox
     document.querySelectorAll("#fetchLogsCheckbox, #fetchLogsCheckbox_Head")
         .forEach(cb => {
             cb.addEventListener("change", function() {
                 if (this.checked) {
-                    // Tắt checkbox còn lại
+                    //Tắt checkbox còn lại
                     document.querySelectorAll("#fetchLogsCheckbox, #fetchLogsCheckbox_Head")
                         .forEach(other => {
                             if (other !== this) {
@@ -2556,17 +2556,17 @@ $git_repository = $pathParts[1];
                                 document.getElementById(logCheckboxMap[other.id]).innerHTML = "";
                             }
                         });
-                    // Bật log cho checkbox này
+                    //Bật log cho checkbox này
                     const outputId = logCheckboxMap[this.id];
                     initLogViewer(this.id, outputId, "<?php echo $URL_API_VBOT; ?>");
                 } else {
-                    // Nếu tắt thì clear interval và clear log
+                    //Nếu tắt thì clear interval và clear log
                     if (window.logInterval) clearInterval(window.logInterval);
                     document.getElementById(logCheckboxMap[this.id]).innerHTML = "";
                 }
             });
         });
-    // Khi click icon đóng thì bỏ tích checkbox Head và clear interval
+    //Khi click icon đóng thì bỏ tích checkbox Head và clear interval
     document.getElementById("Close_Logs_Head").addEventListener("click", function() {
         const cbHead = document.getElementById("fetchLogsCheckbox_Head");
         cbHead.checked = false;

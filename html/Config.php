@@ -1002,7 +1002,7 @@ include 'html_head.php';
                   echo input_field('max_logs_api', 'Tối Đa Dòng Logs API', $Config['api']['show_log']['max_log'] ?? 30, 'required', 'number', '1', '10', '100', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                   echo select_field(
                     'api_log_active_log_lever',
-                    'Mức Độ Hiển Thị Log:',
+                    'Mức Độ Hiển Thị Log',
                     [
                       'DEBUG' => 'DEBUG (Các thông tin gỡ lỗi)',
                       'INFO' => 'INFO (Các thông tin)',
@@ -1013,7 +1013,7 @@ include 'html_head.php';
                     $Config['api']['show_log']['log_lever'],
 					[]
                   );
-                  echo input_field('', 'Danh Sách Dữ Liệu API: ', "http://$serverIp/API_List.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/API_List.php", 'btn btn-success border-danger', 'link', '_blank');
+                  echo input_field('', 'Danh Sách Dữ Liệu API', "http://$serverIp/API_List.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/API_List.php", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
                 </div>
               </div>
@@ -1102,9 +1102,9 @@ include 'html_head.php';
 						  []
                         );
                         echo input_field('udp_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                        echo input_field('udp_server_streaming_audio', 'Server Streaming Audio:', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                        echo input_field('udp_server_streaming_audio_local', 'URL Audio Local:', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'btn btn-success border-danger', 'link', '_blank');
-                        echo input_field('client_flash_firmware_url', 'Flash Firmware URL:', 'https://github.com/marion001/VBot_Client_Offline', 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Client_Offline', 'btn btn-success border-danger', 'link', '_blank');
+                        echo input_field('udp_server_streaming_audio', 'Server Streaming Audio', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('udp_server_streaming_audio_local', 'URL Audio Local', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'btn btn-success border-danger', 'link', '_blank');
+                        echo input_field('client_flash_firmware_url', 'Flash Firmware URL', 'https://github.com/marion001/VBot_Client_Offline', 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Client_Offline', 'btn btn-success border-danger', 'link', '_blank');
                         ?>
                       </div>
                     </div>
@@ -1410,7 +1410,7 @@ include 'html_head.php';
                     </div>
                   </div>
                   <?php
-                  echo input_field('directory_tts', 'Thư Mục Chứa TTS:', $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'], 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('directory_tts', 'Thư Mục Chứa TTS', $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'], 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   echo input_field('clean_cache_tts_max_file', 'Dọn Dẹp TTS Nếu Vượt Quá (file):', $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'], 'required', 'number', '1', '50', '999', 'Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép', 'border-success', '', '', '', '', '');
                   ?>
                   <div class="row">
@@ -1579,6 +1579,10 @@ include 'html_head.php';
 <?php echo htmlspecialchars(trim($read_tts_token_google_cloud)); ?>
 </textarea>
                               <label for="tts_ggcloud_json_file_token">Tệp tin json xác thực: tts_token_google_cloud.json</label>
+                            </div>
+                            <div class="form-floating mb-3">
+                              <input type="text" class="form-control border-danger" name="list_voices_tts_gcloud" id="list_voices_tts_gcloud" value="<?php echo $directory_path.'/includes/other_data/list_voices_tts_gcloud.json'; ?>">
+                              <label for="list_voices_tts_gcloud" class="form-label">Đường Dẫn Danh Sách Giọng Đọc:</label>
                             </div>
                             <div class="form-floating mb-3">
                               <center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline . $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
@@ -2344,9 +2348,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
                       <?php
-                      echo select_field('music_source_priority1', 'Top 1:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0], []);
-                      echo select_field('music_source_priority2', 'Top 2:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1]), [];
-                      echo select_field('music_source_priority3', 'Top 3:', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2]), [];
+                      echo select_field('music_source_priority1', 'Top 1', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0], []);
+                      echo select_field('music_source_priority2', 'Top 2', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1], []);
+                      echo select_field('music_source_priority3', 'Top 3', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2], []);
                       ?>
                     </div>
                   </div>
@@ -2384,9 +2388,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                       <?php
-                      echo input_field('youtube_google_apis_key', 'Youtube Google Apis Key:', htmlspecialchars($Config['media_player']['youtube']['google_apis_key']), 'readonly', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
+                      echo input_field('youtube_google_apis_key', 'Youtube Google Apis Key', htmlspecialchars($Config['media_player']['youtube']['google_apis_key']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                       ?>
-
                     </div>
                   </div>
                   <div class="card">
@@ -2401,8 +2404,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                       <?php
-                      echo input_field('music_local_path', 'Đường dẫn thư mục:', htmlspecialchars($Config['media_player']['music_local']['path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                      echo input_field('music_local_minimum_threshold', 'Ngưỡng kết quả tối thiểu:', htmlspecialchars($Config['media_player']['music_local']['minimum_threshold'] ?? 0.6), 'required', 'number', '0.1', '0.4', '0.9', '', 'border-success', '', '', '', '', '');
+                      echo input_field('music_local_path', 'Đường dẫn thư mục', htmlspecialchars($Config['media_player']['music_local']['path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                      echo input_field('music_local_minimum_threshold', 'Ngưỡng kết quả tối thiểu', htmlspecialchars($Config['media_player']['music_local']['minimum_threshold'] ?? 0.6), 'required', 'number', '0.1', '0.4', '0.9', '', 'border-success', '', '', '', '', '');
                       ?>
                       <?php
                       $allowed_formats_str = implode(", ", $Config['media_player']['music_local']['allowed_formats']);
@@ -2469,52 +2472,49 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                       <?php
-                      // Get Dữ liệu radio từ cấu hình
                       $radio_data = $Config['media_player']['radio_data'];
                       ?>
                       <table class="table table-bordered border-primary" id="radio-table">
                         <thead>
                           <tr>
-                            <th scope="col">
-                              <center>
-                                <font color="red">Tên Đài</font>
-                              </center>
-                            </th>
-                            <th scope="col">
-                              <center>
-                                <font color="red">Link Đài</font>
-                              </center>
-                            </th>
-                            <th scope="col">
-                              <center>
-                                <font color="red">Hành Động</font>
-                              </center>
-                            </th>
+                            <th scope="col"><center><font color="red">Tên Đài</font></center></th>
+                            <th scope="col"><center><font color="red">Link Đài</font></center></th>
+                            <th scope="col"><center><font color="red">Hành Động</font></center></th>
                           </tr>
                         </thead>
                         <tbody>
-                          <?php foreach ($radio_data as $index => $radio) { ?>
-                            <tr id="radio-row-<?php echo $index; ?>">
-                              <td>
-                                <input type="text" class="form-control border-success" name="radio_name_<?php echo $index; ?>" id="radio_name_<?php echo $index; ?>" value="<?php echo htmlspecialchars($radio['name']); ?>">
-                              </td>
-                              <td>
-                                <input type="text" class="form-control border-success" name="radio_link_<?php echo $index; ?>" id="radio_link_<?php echo $index; ?>" value="<?php echo htmlspecialchars($radio['link']); ?>">
-                              </td>
-                              <td>
-                                <center>
-                                  <button type="button" class="btn btn-danger" onclick="delete_Dai_bao_Radio('<?php echo $index; ?>', '<?php echo htmlspecialchars($radio['name']); ?>')">
-                                    <i class="bi bi-trash" type="button" title="Xóa đài: <?php echo htmlspecialchars($radio['name']); ?>"></i>
-                                  </button>
-                                </center>
-                              </td>
-                            </tr>
-                          <?php } ?>
+						<?php foreach ($radio_data as $index => $radio) { ?>
+						<tr id="radio-row-<?php echo $index; ?>">
+						  <td>
+							<input type="text" class="form-control border-success" name="radio_name_<?php echo $index; ?>" id="radio_name_<?php echo $index; ?>" value="<?php echo htmlspecialchars($radio['name']); ?>">
+						  </td>
+						<td>
+							<select class="form-select border-warning" id="radio_select_<?php echo $index; ?>" style="display:none;" onchange="updateRadioLinkName('<?php echo $index; ?>', this)"></select>
+						  <div class="input-group mb-3" id="link-group-<?php echo $index; ?>">
+							<input type="text" class="form-control border-success" name="radio_link_<?php echo $index; ?>" id="radio_link_<?php echo $index; ?>" value="<?php echo htmlspecialchars($radio['link']); ?>">
+							<button type="button" class="btn btn-primary" onclick="showRadioSelect('<?php echo $index; ?>', '<?php echo $HTML_VBot_Offline; ?>')">
+							  <i class="bi bi-list-task"></i>
+							</button>
+						  </div>
+						</td>
+						  <td>
+							<center>
+							  <button type="button" class="btn btn-danger" onclick="delete_Dai_bao_Radio('<?php echo $index; ?>', '<?php echo htmlspecialchars($radio['name']); ?>')">
+								<i class="bi bi-trash" type="button" title="Xóa đài: <?php echo htmlspecialchars($radio['name']); ?>"></i>
+							  </button>
+							</center>
+						  </td>
+						</tr>
+						<?php } ?>
                         </tbody>
                       </table>
+					  <?php
+					  echo input_field('lits_newspaper_radio', 'Dường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+					  ?>
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-radio" onclick="addRadio()">Thêm Đài Mới</button></center>
                     </div>
                   </div>
+
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">
@@ -2569,9 +2569,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <td>
                                 <input type="text" class="form-control border-success" name="newspaper_name_<?php echo $index_newspaper; ?>" id="newspaper_name_<?php echo $index_newspaper; ?>" value="<?php echo htmlspecialchars($newspaper['name']); ?>">
                               </td>
-                              <td>
-                                <input type="text" class="form-control border-success" name="newspaper_link_<?php echo $index_newspaper; ?>" id="newspaper_link_<?php echo $index_newspaper; ?>" value="<?php echo htmlspecialchars($newspaper['link']); ?>">
-                              </td>
+						<td>
+							<select class="form-select border-warning" id="newspaper_select_<?php echo $index_newspaper; ?>" style="display:none;" onchange="updateNewsPaperLinkName('<?php echo $index_newspaper; ?>', this)"></select>
+						  <div class="input-group mb-3" id="newspaper-link-group-<?php echo $index_newspaper; ?>">
+							<input type="text" class="form-control border-success" name="newspaper_link_<?php echo $index_newspaper; ?>" id="newspaper_link_<?php echo $index_newspaper; ?>" value="<?php echo htmlspecialchars($newspaper['link']); ?>">
+							<button type="button" class="btn btn-primary" onclick="showNewsPaperSelect('<?php echo $index_newspaper; ?>', '<?php echo $HTML_VBot_Offline; ?>')">
+							  <i class="bi bi-list-task"></i>
+							</button>
+						  </div>
+						</td>
                               <td>
                                 <center>
                                   <button type="button" class="btn btn-danger" onclick="delete_NewsPaper('<?php echo $index_newspaper; ?>', '<?php echo htmlspecialchars($newspaper['name']); ?>')">
@@ -2583,6 +2589,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <?php } ?>
                         </tbody>
                       </table>
+					  <?php
+					  echo input_field('lits_newspaper_radio', 'Dường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+					  ?>
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-newspaper" onclick="addNewsPaper()">Thêm Báo Mới</button></center>
                     </div>
                   </div>
@@ -3663,25 +3672,23 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         $('#myModal_Config').modal('show');
       }
     }
-
     //Thêm mới đài Radio
     let radioIndex = <?php echo count($radio_data); ?>;
     const maxRadios = <?php echo $Max_Radios; ?>;
-
     function addRadio() {
       if (radioIndex < maxRadios) {
         const table = document.getElementById('radio-table').getElementsByTagName('tbody')[0];
         const newRow = document.createElement('tr');
-        newRow.id = 'radio-row-' + radioIndex;
+        newRow.id = 'radio-row-'+radioIndex;
         newRow.innerHTML =
-          '<td>' +
-          '<input type="text" class="form-control border-success" placeholder="Nhập tên đài" name="radio_name_' + radioIndex + '" id="radio_name_' + radioIndex + '">' +
-          '</td>' +
-          '<td>' +
-          '<input type="text" class="form-control border-success" placeholder="Nhập link đài" name="radio_link_' + radioIndex + '" id="radio_link_' + radioIndex + '">' +
-          '</td>' +
+          '<td><input type="text" class="form-control border-success" placeholder="Nhập tên đài" name="radio_name_'+radioIndex+'" id="radio_name_'+radioIndex+'"></td>' +
+		  '<td><select class="form-select border-warning" id="radio_select_'+radioIndex+'" style="display:none;" onchange="updateRadioLinkName('+radioIndex+', this)"></select>' +
+		  '<div class="input-group mb-3" id="link-group-'+radioIndex+'">' +
+          '<input type="text" class="form-control border-success" placeholder="Nhập link đài" name="radio_link_'+radioIndex+'" id="radio_link_'+radioIndex+'">' +
+		  '<button type="button" class="btn btn-primary" onclick="showRadioSelect(' + radioIndex + ', \'' + '<?php echo $HTML_VBot_Offline; ?>' + '\')"><i class="bi bi-list-task"></i></button>' +
+          '</div></td>' +
           '<td style="text-align: center; vertical-align: middle;"><center>' +
-          '<button type="button" class="btn btn-danger" id="delete-radio-' + radioIndex + '" onclick="delete_Dai_bao_Radio(' + radioIndex + ', null)"><i class="bi bi-trash"></i></button>'
+          '<button type="button" class="btn btn-danger" id="delete-radio-'+radioIndex+'" onclick="delete_Dai_bao_Radio('+radioIndex+', null)"><i class="bi bi-trash"></i></button>' +
         '</center></td>';
         table.appendChild(newRow);
         radioIndex++;
@@ -3693,7 +3700,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
     //Thêm mới Báo, tin tức
     let newspaperIndex = <?php echo count($newspaper_data); ?>;
     const maxNewsPaper = <?php echo $Max_NewsPaper; ?>;
-
     function addNewsPaper() {
       if (newspaperIndex < maxNewsPaper) {
         const table = document.getElementById('newspaper-table').getElementsByTagName('tbody')[0];

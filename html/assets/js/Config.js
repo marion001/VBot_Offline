@@ -1256,7 +1256,6 @@ function scan_audio_devices(device_name) {
                         tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.id + '</td><td style="vertical-align: middle;">' + (device.name || '') + '</td><td style="vertical-align: middle;">' + (device.capabilities || '') + '</td><td style="vertical-align: middle;">' + (device.playback_channels || '') + '</td><td style="vertical-align: middle;">' + (device.values.length > 0 ? device.values.map(value => (value.channel || '') + ' ' + (value.details || '')).join('<br>') : '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_Alsamixer(\'' + device.name + '\')">Chọn</button></td></td></tr>';
                     });
                     tableHTML += '</tbody></table>';
-                    //Đẩy nội dung bảng vào thẻ div
                     if (container) {
                         showMessagePHP(data.message, 4);
                         container.innerHTML = tableHTML;
@@ -1464,7 +1463,6 @@ function uploadFilesHotwordSnowboy() {
                 const response = JSON.parse(xhr.responseText);
                 let messages = [];
                 if (response.status === 'success') {
-                    //Tổng hợp tất cả thông báo
                     messages.push(response.messages + '<br/>');
                 } else {
                     messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
@@ -1504,7 +1502,6 @@ function uploadFilesHotwordPPNandPV() {
                 const response = JSON.parse(xhr.responseText);
                 let messages = [];
                 if (response.status === 'success') {
-                    //Tổng hợp tất cả thông báo
                     messages.push(response.messages + '<br/>');
                 } else {
                     messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
@@ -1716,11 +1713,8 @@ function read_YAML_file_path(fileName) {
         if (xhr.status >= 200 && xhr.status < 300) {
             loading('hide');
             var codeElement = document.getElementById('code_config');
-            //Hiển thị nội dung YAML
             codeElement.textContent = xhr.responseText.trim();
-            //Áp dụng lớp cú pháp YAML
             codeElement.className = 'language-yaml';
-            //Kích hoạt Prism.js để lên màu
             Prism.highlightElement(codeElement);
             showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
             document.getElementById('name_file_showzz').textContent = "Tên File: " + fileName.split('/').pop();
@@ -1766,4 +1760,98 @@ function checkMQTTConnection() {
         show_message('Yêu cầu bị lỗi.')
     };
     xhr.send();
+}
+
+//Hiển thị select khi nhấn icon lits đài radio
+function showRadioSelect(index, path_file) {
+  const select = document.getElementById('radio_select_' + index);
+  if (select.options.length > 0) {
+    select.style.display = 'block';
+    select.focus();
+    return;
+  }
+  fetch('includes/php_ajax/Show_file_path.php?read_file_path&file='+path_file+'/includes/other_data/lits_newspaper_radio.json')
+    .then(response => response.json())
+    .then(json => {
+      if (!json.success || !json.data || !Array.isArray(json.data.radio)) {
+		show_message("Không thể đọc danh sách Đài, Radio");
+        return;
+      }
+      const radioOptions = json.data.radio;
+      select.innerHTML = "";
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = '-- Chọn Đài, Radio --';
+      select.appendChild(defaultOption);
+      radioOptions.forEach(radio => {
+        const option = document.createElement('option');
+        option.value = radio.link;
+        option.textContent = radio.name;
+        option.dataset.name = radio.name;
+        select.appendChild(option);
+      });
+      select.style.display = 'block';
+      select.focus();
+    })
+    .catch(error => {
+	  show_message("Lỗi khi tải danh sách Đài, Radio: "+error);
+    });
+}
+
+//Khi chọn option, update gán giá trị vào input link và name của input đài radio
+function updateRadioLinkName(index, select) {
+  const inputLink = document.getElementById('radio_link_' + index);
+  const inputName = document.getElementById('radio_name_' + index);
+  const selectedOption = select.options[select.selectedIndex];
+  if (!selectedOption) return;
+  inputLink.value = selectedOption.value;
+  inputName.value = selectedOption.dataset.name || '';
+  select.style.display = 'none';
+}
+
+//Hiển thị select khi nhấn icon lits báo, tin tức
+function showNewsPaperSelect(index, path_file) {
+  const select = document.getElementById('newspaper_select_' + index);
+  if (select.options.length > 0) {
+    select.style.display = 'block';
+    select.focus();
+    return;
+  }
+  fetch('includes/php_ajax/Show_file_path.php?read_file_path&file='+path_file+'/includes/other_data/lits_newspaper_radio.json')
+    .then(response => response.json())
+    .then(json => {
+      if (!json.success || !json.data || !Array.isArray(json.data.newspaper)) {
+		show_message("Không thể đọc danh sách Báo, Tin Tức");
+        return;
+      }
+      const newspaperOptions = json.data.newspaper;
+      select.innerHTML = "";
+      const defaultOption = document.createElement('option');
+      defaultOption.value = '';
+      defaultOption.textContent = '-- Chọn Nguồn Báo, Tin Tức --';
+      select.appendChild(defaultOption);
+      newspaperOptions.forEach(newspaper => {
+        const option = document.createElement('option');
+        option.value = newspaper.link;
+        option.textContent = newspaper.name;
+        option.dataset.name = newspaper.name;
+        select.appendChild(option);
+      });
+      select.style.display = 'block';
+      select.focus();
+    })
+    .catch(error => {
+	  show_message("Lỗi khi tải danh sách Báo, Tin Tức: "+error);
+    });
+}
+
+//Khi chọn option, update gán giá trị vào input link và name của input báo, tin tức
+function updateNewsPaperLinkName(index, select) {
+  const inputLink = document.getElementById('newspaper_link_' + index);
+  const inputName = document.getElementById('newspaper_name_' + index);
+  const selectedOption = select.options[select.selectedIndex];
+  if (!selectedOption) return;
+  inputLink.value = selectedOption.value;
+  inputName.value = selectedOption.dataset.name || '';
+  select.style.display = 'none';
 }

@@ -1,0 +1,254 @@
+{
+	"radio": [
+		{
+			"name": "VOV 1",
+			"link": "https://stream.vovmedia.vn/vov-1"
+		},
+		{
+			"name": "VOV 2",
+			"link": "https://stream.vovmedia.vn/vov-2"
+		},
+		{
+			"name": "VOV 3",
+			"link": "https://stream.vovmedia.vn/vov-3"
+		},
+		{
+			"name": "VOV 5",
+			"link": "https://stream.vovmedia.vn/vov5"
+		},
+		{
+			"name": "VOV Giao Thông Hà Nội",
+			"link": "https://stream.vovmedia.vn/vovgt-hn"
+		},
+		{
+			"name": "VOV 247",
+			"link": "https://stream.vovmedia.vn/vov247"
+		},
+		{
+			"name": "VOV MeKong",
+			"link": "https://stream.vovmedia.vn/vovmekong"
+		},
+		{
+			"name": "VOV Miền Trung",
+			"link": "https://stream.vovmedia.vn/vov4mt"
+		},
+		{
+			"name": "VOV Tây Bắc",
+			"link": "https://stream.vovmedia.vn/vov4tb"
+		},
+		{
+			"name": "VOV Đông Bắc",
+			"link": "https://stream.vovmedia.vn/vov4db"
+		},
+		{
+			"name": "VOV Tây Nguyên",
+			"link": "https://stream.vovmedia.vn/vov4tn"
+		},
+		{
+			"name": "VOV Đồng Bằng Sông Cửu Long",
+			"link": "https://stream.vovmedia.vn/vov4dbscl"
+		},
+		{
+			"name": "VOV Giao Thông Hồ Chí Minh",
+			"link": "https://stream.vovmedia.vn/vovgt-hcm"
+		},
+		{
+			"name": "VOV Dyên Hải",
+			"link": "https://stream.vovmedia.vn/gtduyenhai"
+		},
+		{
+			"name": "VOV FM89",
+			"link": "https://stream.vovmedia.vn/fm89"
+		}
+	],
+	"newspaper": [
+		{
+			"name": "Báo Tuổi Trẻ",
+			"link": "https://podcast.tuoitre.vn"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Tin Nhanh Mỗi Ngày",
+			"link": "https://podcast.tuoitre.vn/chu-de/tin-nhanh-moi-ngay-7.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Đất Và Người",
+			"link": "https://podcast.tuoitre.vn/chu-de/dat-va-nguoi-12.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Thể Thao",
+			"link": "https://podcast.tuoitre.vn/chu-de/the-thao-hom-nay-10.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Gia Đình",
+			"link": "https://podcast.tuoitre.vn/chu-de/chuyen-gia-dinh-9.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Món Ngon",
+			"link": "https://podcast.tuoitre.vn/chu-de/mon-ngon-que-minh-8.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Công Nghệ",
+			"link": "https://podcast.tuoitre.vn/chu-de/cong-nghe-5.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Nhịp Sống",
+			"link": "https://podcast.tuoitre.vn/chu-de/nhip-song-muu-sinh-6.htm"
+		},
+		{
+			"name": "Báo Tuổi Trẻ Chủ Đề Sức Khỏe",
+			"link": "https://podcast.tuoitre.vn/chu-de/suc-khoe-cua-ban-4.htm"
+		},
+		{
+			"name": "Báo Việt Nam Nét",
+			"link": "https://vietnamnet.vn/podcast/ban-tin-thoi-su"
+		},
+		{
+			"name": "Báo Việt Nam Nét Chủ Đề Góc Nhìn",
+			"link": "https://vietnamnet.vn/podcast/goc-nhin"
+		},
+		{
+			"name": "Báo Việt Nam Nét Chủ Đề Độc Lạ",
+			"link": "https://vietnamnet.vn/podcast/doc-la"
+		},
+		{
+			"name": "Báo Việt Nam Nét Chủ Đề Sống Trẻ",
+			"link": "https://vietnamnet.vn/podcast/song-tre"
+		},
+		{
+			"name": "Báo Việt Nam Nét Chủ Đề Sách Hay",
+			"link": "https://vietnamnet.vn/podcast/sach-hay"
+		},
+		{
+			"name": "Báo Mới",
+			"link": "https://baomoi.com/audio/thoi-su-3.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Đời Sống",
+			"link": "https://baomoi.com/audio/doi-song-6.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Giải Trí",
+			"link": "https://baomoi.com/audio/giai-tri-10.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Pháp Luật",
+			"link": "https://baomoi.com/audio/phap-luat-13.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Khoa Học",
+			"link": "https://baomoi.com/audio/khoa-hoc-14.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Công Nghệ",
+			"link": "https://baomoi.com/audio/cong-nghe-15.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Kinh Doanh",
+			"link": "https://baomoi.com/audio/kinh-doanh-16.epi"
+		},
+		{
+			"name": "Báo Mới Chủ Đề Thể Thao",
+			"link": "https://baomoi.com/audio/the-thao-17.epi"
+		},
+		{
+			"name": "Báo Tiền Phong",
+			"link": "https://tienphong.vn/podcast/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Chính Trị",
+			"link": "https://tienphong.vn/chinh-tri/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Tin Tức",
+			"link": "https://tienphong.vn/xa-hoi-tin-tuc/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Phóng Sự",
+			"link": "https://tienphong.vn/xa-hoi-phong-su/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Xã Hội",
+			"link": "https://tienphong.vn/xa-hoi/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Kinh Tế",
+			"link": "https://tienphong.vn/kinh-te/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Sức Khỏe",
+			"link": "https://tienphong.vn/suc-khoe/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Giới Trẻ",
+			"link": "https://tienphong.vn/gioi-tre/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Thể Thao",
+			"link": "https://tienphong.vn/the-thao/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Văn Hóa",
+			"link": "https://tienphong.vn/van-hoa/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Xe Cộ",
+			"link": "https://tienphong.vn/xe/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Văn Hóa",
+			"link": "https://tienphong.vn/van-hoa/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Giải Trí",
+			"link": "https://tienphong.vn/giai-tri/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Giáo Dục",
+			"link": "https://tienphong.vn/giao-duc/"
+		},
+		{
+			"name": "Báo Tiền Phong Chủ Đề Khoa Học",
+			"link": "https://tienphong.vn/khoa-hoc/"
+		},
+		{
+			"name": "Báo 24h.com.vn",
+			"link": "https://www.24h.com.vn/tin-tuc-trong-ngay-c46.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Chính Trị, Xã Hội",
+			"link": "https://www.24h.com.vn/chinh-tri-xa-hoi-c981.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Đời Sống Dân Sinh",
+			"link": "https://www.24h.com.vn/doi-song-dan-sinh-c982.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Giao Thông, Đô Thị",
+			"link": "https://www.24h.com.vn/tai-nan-giao-thong-c408.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Tin Nóng Trên Mạng",
+			"link": "https://www.24h.com.vn/nong-tren-mang-c983.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Thời Tiết",
+			"link": "https://www.24h.com.vn/du-bao-thoi-tiet-c568.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Sức Khỏe , Đời Sống",
+			"link": "https://www.24h.com.vn/suc-khoe-doi-song-c62.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Quốc Tế",
+			"link": "https://www.24h.com.vn/tin-tuc-quoc-te-c415.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Xe Cộ",
+			"link": "https://www.24h.com.vn/o-to-c747.html"
+		},
+		{
+			"name": "Báo 24h.com.vn Chủ Đề Kinh Doanh",
+			"link": "https://www.24h.com.vn/kinh-doanh-c161.html"
+		}
+	]
+}

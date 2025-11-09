@@ -6,7 +6,6 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 
 include '../../Configuration.php';
-
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -457,39 +456,44 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 			]);
 		}
 		exit();
-	} else if (strpos($URL, "tienphong.vn") !== false) {
-		$html = file_get_contents($URL);
-		if ($html === false) {
+	}else if (strpos($URL, "tienphong.vn") !== false) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $URL);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36'); // giả lập trình duyệt
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_ENCODING, '');
+		$html = curl_exec($ch);
+		$err = curl_error($ch);
+		$contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+		curl_close($ch);
+		if ($html === false || !$html) {
 			echo json_encode([
 				'success' => false,
-				'message' => 'Lỗi khi lấy dữ liệu từ trang Báo Tiền Phong',
+				'message' => 'Lỗi khi lấy dữ liệu từ trang Báo Tiền Phong: ' . $err,
 				'data' => null
 			]);
 			exit;
 		}
-		// Sử dụng preg_match_all để tìm tất cả các thẻ div có class="hidden-player" và thuộc tính data-src
-		preg_match_all('/<div[^>]*class=["\']hidden-player["\'][^>]*data-src=["\']([^"\']+)["\'][^>]*>/i', $html, $matches);
-		if (!empty($matches[1])) {
-			$dataSrc = $matches[1][0];
+		if (preg_match('/<div[^>]+class=["\']hidden-player["\'][^>]+data-src=["\']([^"\']+)["\']/', $html, $matches)) {
+			$audioLink = $matches[1];
 			echo json_encode([
 				'success' => true,
 				'message' => 'Lấy Link Player Từ Báo Tiền Phong Thành Công',
 				'data' => [
-					'audio_link' => $dataSrc
+					'audio_link' => $audioLink
 				]
 			]);
-			return $dataSrc;
 		} else {
-			// Nếu không tìm thấy data-src, trả về null và hiển thị lỗi
 			echo json_encode([
 				'success' => false,
-				'message' => 'Không tìm thấy dữ liệu Báo Tiền Phòng',
+				'message' => 'Không tìm thấy thẻ audio chứa đường dẫn phát trên Báo Tiền Phong',
 				'data' => null
 			]);
-			return null;
 		}
 		exit();
-	} else if (strpos($URL, "baomoi.com") !== false) {
+	}else if (strpos($URL, "baomoi.com") !== false) {
 		if (strpos($URL, '#') !== false) {
 			$fragments = explode('#', $URL);
 			$last_fragment = end($fragments);
@@ -512,11 +516,9 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => 'GET',
 		));
-		// Gửi yêu cầu cURL
 		$response = curl_exec($curl);
 		$http_code = curl_getinfo($curl, CURLINFO_HTTP_CODE);
 		curl_close($curl);
-		// Kiểm tra mã trạng thái HTTP
 		if ($http_code !== 200 || $response === false) {
 			echo json_encode([
 				'success' => false,
@@ -525,10 +527,8 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 			]);
 			exit;
 		}
-		// Tìm kiếm trường "streamingUrl" trong phản hồi JSON (sử dụng preg_match)
 		if (preg_match('/"streamingUrl"\s*:\s*"([^"]+)"/', $response, $matches)) {
 			$streamingUrl = $matches[1];
-			// Thành công, trả về liên kết âm thanh
 			echo json_encode([
 				'success' => true,
 				'message' => 'Lấy Link Player Từ Báo Mới Thành Công',
@@ -537,16 +537,43 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 				]
 			]);
 		} else {
-			// Không tìm thấy dữ liệu âm thanh
 			echo json_encode([
 				'success' => false,
 				'message' => 'Không tìm thấy dữ liệu âm thanh trong phản hồi.',
 				'data' => null
 			]);
 		}
-
 		exit();
-	} else {
+	}
+	else if (strpos($URL, "24h.com.vn") !== false) {
+		$html = @file_get_contents($URL);
+		if ($html) {
+			if (preg_match('/<source[^>]+src=["\']([^"\']+\.mp3)[^"\']*["\']/i', $html, $m)) {
+				$audio_src = trim($m[1]);
+				$audio_final = preg_replace('/\.mp3$/i', '---nu_bac.mp3', $audio_src);
+				echo json_encode([
+					'success' => true,
+					'message' => 'Lấy Link Player Từ Báo 24h.com.vn Thành Công',
+					'data' => [
+						'audio_link' => $audio_final
+					]
+				]);
+			} else {
+				echo json_encode([
+					'success' => false,
+					'message' => 'Không tìm thấy dữ liệu âm thanh trong phản hồi.',
+					'data' => null
+				]);
+			}
+		} else {
+			echo json_encode([
+				'success' => false,
+				'message' => 'Không tải được dữ liệu từ báo 24h.com.vn',
+				'data' => null
+			]);
+		}
+	}
+	else {
 		echo json_encode([
 			'success' => false,
 			'message' => 'Nguồn Trang Báo, Tin Tức Này Chưa Được Hỗ Trợ',
@@ -697,10 +724,8 @@ if (isset($_GET['Youtube_Search'])) {
 		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		chmod($youtubeJsonPath, 0777);
 	}
-
 	$apiKey = $Config['media_player']['youtube']['google_apis_key'];
 	$searchUrlYoutube = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=" . urlencode($Youtube_Name) . "&maxResults=" . $Youtube_Limit . "&key=" . $apiKey;
-
 	$curlYoutube = curl_init();
 	curl_setopt_array($curlYoutube, [
 		CURLOPT_URL => $searchUrlYoutube,
@@ -709,7 +734,6 @@ if (isset($_GET['Youtube_Search'])) {
 	]);
 	$responseYoutube = curl_exec($curlYoutube);
 	curl_close($curlYoutube);
-
 	if ($responseYoutube === false) {
 		echo json_encode(['error' => 'Yêu cầu cURL không thành công.']);
 	} else {
@@ -725,7 +749,6 @@ if (isset($_GET['Youtube_Search'])) {
 					$videoIds[] = $itemYoutube['id']['videoId'];
 				}
 			}
-
 			// Gọi API videos để lấy duration
 			$durationMap = [];
 			if (!empty($videoIds)) {
@@ -738,7 +761,6 @@ if (isset($_GET['Youtube_Search'])) {
 				]);
 				$responseVideos = curl_exec($curlVideos);
 				curl_close($curlVideos);
-
 				$dataVideos = json_decode($responseVideos, true);
 				if (!empty($dataVideos['items'])) {
 					foreach ($dataVideos['items'] as $video) {
@@ -748,7 +770,6 @@ if (isset($_GET['Youtube_Search'])) {
 					}
 				}
 			}
-
 			$items = [];
 			foreach ($dataYoutube['items'] as $itemYoutube) {
 				$vid = $itemYoutube['id']['videoId'] ?? 'N/A';
@@ -762,14 +783,12 @@ if (isset($_GET['Youtube_Search'])) {
 					'duration' => $durationMap[$vid] ?? ''
 				];
 			}
-
 			$responsez = [
 				'success' => true,
 				'message' => 'Tìm kiếm thành công',
 				'data' => $items
 			];
 			echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
 			file_put_contents($youtubeJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		}
 	}
@@ -1139,11 +1158,9 @@ if (isset($_GET['newspaper'])) {
 		exit;
 	}
 	$filePath = "../cache/" . $Config['media_player']['news_paper']['newspaper_file_name'];
-	// Kiểm tra nếu chuỗi tồn tại trong biến
+	//Báo vnexpress
 	if (strpos($News_Paper, "vnexpress.net") !== false) {
-		// URL API
 		$apiUrl = "https://api3.vnexpress.net/api/article?type=get_topstory&cate_id=1004685&site_id=1000000&showed_area=trangchu_podcast_v2&app_id=9e304d";
-		// Khởi tạo cURL
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $apiUrl);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1184,28 +1201,28 @@ if (isset($_GET['newspaper'])) {
 		} else {
 			$response['message'] = 'Lỗi cURL: ' . $error;
 		}
-	} else if (strpos($News_Paper, "thanhnien.vn") !== false) {
-		// Lấy nội dung HTML từ URL
+		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit();
+	}
+	//Báo Thanh Niên
+	else if (strpos($News_Paper, "thanhnien.vn") !== false) {
 		$response['message'] = "Nguồn dữ liệu Báo Thanh Niên không còn được hỗ trợ";
-	} else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
+	}
+	//Báo tuổi Trẻ
+	else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
 		$html = file_get_contents($News_Paper);
 		if ($html === false) {
 			$response['message'] = "Không thể lấy dữ liệu từ Báo: $News_Paper";
+			echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			exit();
 		}
-		// Định nghĩa mẫu Regex để trích xuất các thuộc tính cần thiết
 		$pattern = '/<a[^>]*data-file="([^"]+)"[^>]*data-title="([^"]+)"[^>]*data-avatar="([^"]+)"[^>]*>/';
-		// Kết quả trích xuất
 		$result = ["data" => []];
-		// Mảng để lưu trữ các tiêu đề đã gặp
 		$titles_seen = [];
 		if (preg_match_all($pattern, $html, $matches, PREG_SET_ORDER)) {
 			foreach ($matches as $match) {
-				// Lấy tiêu đề và giải mã
 				$title = html_entity_decode($match[2], ENT_QUOTES, 'UTF-8');
-				// Kiểm tra nếu tiêu đề đã được gặp trước đó
 				if (!in_array($title, $titles_seen)) {
-					// Nếu chưa gặp, thêm vào mảng kết quả và đánh dấu tiêu đề này là đã gặp
 					$result["data"][] = [
 						"title" => str_replace(["'", "\""], "", $title),
 						"audio" => $match[1],
@@ -1214,11 +1231,9 @@ if (isset($_GET['newspaper'])) {
 						"publish_time" => "N/A",
 						"source" => "Báo Tuổi Trẻ"
 					];
-					// Đánh dấu tiêu đề đã gặp
 					$titles_seen[] = $title;
 				}
 			}
-			// Lưu dữ liệu vào tệp JSON
 			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
 				$response['success'] = true;
 				$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
@@ -1229,44 +1244,54 @@ if (isset($_GET['newspaper'])) {
 		} else {
 			$response['message'] = "Không tìm thấy dữ liệu phù hợp";
 		}
-	} else if (strpos($News_Paper, "tienphong.vn/podcast") !== false) {
-		$html = file_get_contents($News_Paper);
-		if ($html === FALSE) {
-			$response['message'] = "Không thể lấy dữ liệu từ báo: " . $News_Paper;
+		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit();
+	}
+	//Báo Tiền Phong
+	else if (strpos($News_Paper, "tienphong.vn") !== false) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $News_Paper);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/142.0.0.0 Safari/537.36');
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_ENCODING, '');
+		$html = curl_exec($ch);
+		$err = curl_error($ch);
+		curl_close($ch);
+		$response = ['success' => false, 'message' => '', 'data' => []];
+		if ($html === false || !$html) {
+			$response['message'] = "Không thể lấy dữ liệu từ báo: " . $News_Paper . " - Lỗi: " . $err;
+			echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			exit();
 		}
 		$result = ["data" => []];
 		$unique_hrefs = [];
 		$result_data = [];
-		// Biểu thức chính quy để tìm tất cả các liên kết <a> với class="cms-link"
-		preg_match_all('/<a\s+class="cms-link"[^>]*href="([^"]*)"[^>]*title="([^"]*)"[^>]*>.*?<\/a>/is', $html, $matches);
-		// Kiểm tra xem chúng ta có trích xuất được gì từ HTML hay không
+		preg_match_all('/<figure[^>]*>.*?<a\s+class="cms-link"[^>]*href="([^"]+)"[^>]*title="([^"]+)"[^>]*>.*?<\/a>/is', $html, $matches);
 		if (count($matches) > 2) {
 			$links = $matches[1];
 			$titles = $matches[2];
 			foreach ($links as $index => $href) {
 				$href = trim($href);
 				$title = isset($titles[$index]) ? trim($titles[$index]) : 'N/A';
-				// Sử dụng biểu thức chính quy để tìm thẻ <img> với class="lazyload" bên trong <a>
-				preg_match('/<img\s+class="lazyload"[^>]*data-src="([^"]*)"/is', $html, $img_match);
-				// Kiểm tra nếu hình ảnh tồn tại và lấy data-src
-				$data_src = isset($img_match[1]) ? trim($img_match[1]) : 'N/A';
-				// Nếu href duy nhất và có data-src hợp lệ
-				if (!in_array($href, $unique_hrefs) && $data_src !== 'N/A') {
+				$img_src = 'N/A';
+				if (preg_match('/<figure[^>]*>.*?<img[^>]+src=["\']([^"\']+)["\']/is', $matches[0][$index], $img_match)) {
+					$img_src = trim($img_match[1]);
+				}
+				if (!in_array($href, $unique_hrefs)) {
 					$unique_hrefs[] = $href;
 					$result_data[] = [
 						"href" => $href,
 						"title" => $title,
-						"data_src" => $data_src
+						"cover" => $img_src
 					];
 				}
 			}
-			// Lấy tối đa 3 bài viết từ dữ liệu trích xuất
-			foreach (array_slice($result_data, 0, 3) as $data) {
+			foreach (array_slice($result_data, 0, 10) as $data) {
 				$link = $data['href'];
 				$title = $data['title'];
-				$thumb = $data['data_src'];
-				// Chỉ thêm vào nếu thông tin hợp lệ
+				$thumb = $data['cover'];
 				if ($thumb && $title && $link) {
 					$result["data"][] = [
 						"cover" => $thumb,
@@ -1276,7 +1301,6 @@ if (isset($_GET['newspaper'])) {
 					];
 				}
 			}
-			// Lưu dữ liệu vào tệp JSON
 			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
 				$response['success'] = true;
 				$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
@@ -1287,25 +1311,24 @@ if (isset($_GET['newspaper'])) {
 		} else {
 			$response['message'] = "Không tìm thấy liên kết hợp lệ trong trang.";
 		}
-	} else if (strpos($News_Paper, "baomoi.com/audio") !== false) {
+		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit();
+	}
+	//Báo Mới
+	else if (strpos($News_Paper, "baomoi.com/audio") !== false) {
 		$html = file_get_contents($News_Paper);
 		if ($html === FALSE) {
 			$response['message'] = "Không thể lấy dữ liệu từ báo: " . $News_Paper;
+			echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 			exit();
 		}
-		// Tìm thẻ <script> chứa dữ liệu JSON
 		preg_match('/<script\s+id="__NEXT_DATA__"\s+type="application\/json">(.*?)<\/script>/s', $html, $matches);
 		if (!empty($matches[1])) {
-			// Kết quả trích xuất
 			$result = ["data" => []];
-			// Giải mã JSON từ thẻ script
 			$json_data = json_decode($matches[1], true);
-			// Kiểm tra dữ liệu có hợp lệ không
 			if (isset($json_data['props']['pageProps']['resp']['data']['content']['items'])) {
 				$items = $json_data['props']['pageProps']['resp']['data']['content']['items'];
-				// Duyệt qua từng bài viết (ở đây lấy tối đa 3 bài)
 				foreach (array_slice($items, 0, 20) as $item) {
-					// Lấy thông tin từ từng item
 					$title = isset($item['title']) ? $item['title'] : 'N/A';
 					$thumb = isset($item['thumb']) ? $item['thumb'] : 'N/A';
 					$duration = isset($item['duration']) ? $item['duration'] : 'N/A';
@@ -1313,15 +1336,11 @@ if (isset($_GET['newspaper'])) {
 					$id_name = isset($item['id']) ? $item['id'] : 'N/A';
 					$url_item = "https://baomoi.com" . (isset($item['url']) ? $item['url'] : 'N/A');
 					$short_name = isset($item['publisher']['shortName']) ? $item['publisher']['shortName'] : 'N/A';
-					// Chuyển đổi thời gian từ timestamp (nếu có)
 					if ($date) {
-						// Chuyển đổi timestamp thành định dạng mong muốn
 						$formatted_date = date("d/m/Y, H:i", $date);
 					} else {
-						// Nếu không có ngày, gán 'N/A'
 						$formatted_date = 'N/A';
 					}
-					// Nếu có thông tin tiêu đề, id và hình ảnh, lưu vào mảng
 					if ($title && $id_name && $thumb) {
 						$result["data"][] = [
 							"title" => str_replace(["'", "\""], "", $title),
@@ -1335,7 +1354,6 @@ if (isset($_GET['newspaper'])) {
 						];
 					}
 				}
-				// Lưu dữ liệu vào tệp JSON
 				if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
 					$response['success'] = true;
 					$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
@@ -1349,49 +1367,39 @@ if (isset($_GET['newspaper'])) {
 		} else {
 			$response['message'] = "Không tìm thấy thẻ script chứa dữ liệu JSON.";
 		}
-	} else if (strpos($News_Paper, "vietnamnet.vn/podcast") !== false) {
+		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit();
+	}
+	//Báo Việt Nam Nét
+	else if (strpos($News_Paper, "vietnamnet.vn/podcast") !== false) {
 		$html = file_get_contents($News_Paper);
-		// Mảng để lưu tiêu đề đã in
 		$printedTitles = [];
-		// Regex để tìm tất cả các thẻ <div> có class chứa "horizontalPost__avt"
 		$pattern = '/<div\s+class=["\'][^"\']*horizontalPost__avt[^"\']*["\'].*?>.*?<\/div>/s';
 		preg_match_all($pattern, $html, $matches);
-		// Regex để tìm tất cả các thẻ <div> có class chứa "horizontalPost__main-actions"
 		$pattern1 = '/<div\s+class=["\'][^"\']*horizontalPost__main-actions[^"\']*["\'].*?>.*?<\/div>/s';
 		preg_match_all($pattern1, $html, $matches1);
 		if (!empty($matches[0]) && !empty($matches1[0])) {
-			// Kết quả trích xuất
 			$result = ["data" => []];
-			// Duyệt qua tất cả các thẻ đã tìm được, giả sử matches[0] và matches1[0] có cùng số lượng phần tử
 			$count = min(count($matches[0]), count($matches1[0]));
 			for ($i = 0; $i < $count; $i++) {
-				// Thẻ từ matches[0] (horizontalPost__avt)
 				$divAvt = $matches[0][$i];
-				// Lấy liên kết và tiêu đề bài viết từ thẻ <a> trong div
 				preg_match('/<a\s+href=["\'](.*?)["\'].*?title=["\'](.*?)["\']/', $divAvt, $linkMatches);
-				// Lấy hình ảnh từ thẻ  <picture> hoặc <img>
 				preg_match('/<picture.*?>.*?<source[^>]+data-srcset=["\']([^"\']+)["\']/s', $divAvt, $imgMatches);
-				// Thẻ từ matches1[0] (horizontalPost__main-actions)
 				$divMain = $matches1[0][$i];
-				// Lấy thời gian và ngày đăng
 				preg_match('/<span\s+class=["\']total-timer["\']>(.*?)<\/span>/s', $divMain, $timeMatches);
 				preg_match('/<span\s+class=["\']public-date["\']>(.*?)<\/span>/s', $divMain, $dateMatches);
-				// Kiểm tra nếu tiêu đề đã được in, bỏ qua nếu có trong mảng
 				$title = htmlspecialchars(trim($linkMatches[2]));
 				if (in_array($title, $printedTitles)) {
 					continue;
 				}
 				$COVER = null;
-				// Kiểm tra hình ảnh, nếu có trong <picture> sử dụng, nếu không sẽ lấy từ <img> fallback
 				if (!empty($imgMatches)) {
 					$COVER = trim($imgMatches[1]);
 				} else {
-					// Nếu không tìm thấy trong  <picture> , kiểm tra thẻ <img> với data-srcset
 					preg_match('/<img\s+[^>]*data-srcset=["\']([^"\']+)["\']/s', $divAvt, $imgFallbackMatches);
 					if (!empty($imgFallbackMatches)) {
 						$COVER = trim($imgFallbackMatches[1]);
 					} else {
-						// Nếu không tìm thấy data-srcset, kiểm tra src trong thẻ <img>
 						preg_match('/<img\s+[^>]*src=["\']([^"\']+)["\']/s', $divAvt, $imgFallbackMatches);
 						if (!empty($imgFallbackMatches)) {
 							$COVER = trim($imgFallbackMatches[1]);
@@ -1413,10 +1421,8 @@ if (isset($_GET['newspaper'])) {
 					"publish_time" => !empty($publish_time) ? $publish_time : "N/A",
 					"source" => "Báo VietNamNet"
 				];
-				// Thêm tiêu đề vào mảng để tránh in lại
 				$printedTitles[] = $title;
 			}
-			// Lưu dữ liệu vào tệp JSON
 			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
 				$response['success'] = true;
 				$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
@@ -1427,11 +1433,65 @@ if (isset($_GET['newspaper'])) {
 		} else {
 			$response['message'] = "Không tìm thấy thẻ nào với class 'horizontalPost__avt' hoặc 'horizontalPost__main-actions'.\n";
 		}
-	} else {
+		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit();
+	}
+	//Báo 24h.com.vn
+	else if (strpos($News_Paper, "24h.com.vn") !== false) {
+		$html = @file_get_contents($News_Paper);
+		if ($html === false) {
+			$response['message'] = "Không thể lấy dữ liệu từ báo: " . $News_Paper;
+			echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			exit();
+		}
+		$html = preg_replace('/\s+/', ' ', $html);
+		preg_match_all('/<article.*?>.*?<\/article>/i', $html, $articles);
+		$result = ["data" => []];
+		//Tối đa số lượng bài báo
+		$maxItems = 30;
+		$count = 0;
+		foreach ($articles[0] as $article) {
+			if ($count >= $maxItems) break;
+			if (preg_match('/<figure.*?<a[^>]+href="([^"]+)"[^>]*>.*?<img[^>]+>/i', $article, $match)) {
+				$href = html_entity_decode($match[1]);
+				if (preg_match('/<img[^>]+data-original="([^"]+)"[^>]*alt="([^"]*)"[^>]*>/i', $article, $imgMatch)) {
+					$dataOriginal = html_entity_decode($imgMatch[1]);
+					$alt = html_entity_decode($imgMatch[2]);
+					$alt = preg_replace('/[\'"<>\[\]\{\}\(\)\!\@\#\$\%\^\&\*\=\+\|\~`\/\\\\]/u', '', $alt);
+					$alt = trim($alt);
+				} else {
+					$dataOriginal = '';
+					$alt = '';
+				}
+				if ($href && $dataOriginal && strpos($dataOriginal, 'data:image') === false) {
+					$result['data'][] = [
+						'audio'  => $href,
+						'cover'  => $dataOriginal,
+						'title'  => $alt,
+						'source' => 'Báo 24h.com.vn'
+					];
+					$count++;
+				}
+			}
+		}
+		if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+			$response = [
+				'success' => true,
+				'message' => "Dữ liệu đã được lưu vào tệp $filePath",
+				'data'    => $result['data']
+			];
+		} else {
+			$response = [
+				'success' => false,
+				'message' => "Lỗi: Không thể ghi dữ liệu vào tệp $filePath"
+			];
+		}
+	}
+	else {
 		$response['message'] = 'Trang Báo chưa được hỗ trợ';
 	}
-	echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-	exit();
+echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+exit();
 }
 
 // Kiểm tra dữ liệu POST với key zing_download_mp3_to_local

@@ -11,7 +11,7 @@ ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
 //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-$Cache_UI_Ver = '1.0.6';
+$Cache_UI_Ver = '1.0.7';
 
 //Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;
@@ -61,10 +61,10 @@ $Restricted_Extensions = ['html', 'python', 'php', 'so'];
 $allowed_image_types = ["jpg", "png", "jpeg", "gif"];
 
 //Tối đa số lượng kênh đài báo radio được cho phép
-$Max_Radios = 20;
+$Max_Radios = 30;
 
 //Tối đa số lượng trang báo, tin tức
-$Max_NewsPaper = 20;
+$Max_NewsPaper = 50;
 
 //Các định dạng file âm thanh cho phép tìm kiếm, tải lên và lựa chọn khi khởi động
 $Allowed_Extensions_Audio = ['mp3', 'wav', 'ogg', 'aac'];

@@ -1525,7 +1525,7 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
-
+<!-- 
                     <div class="btn-group" disabled>
                       <div class="dropdown">
                         <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" disabled>
@@ -1542,6 +1542,7 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
+-->
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-dark dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
