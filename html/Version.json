@@ -2,7 +2,7 @@
     "version": "1.0.70",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa Lỗi Lập Lịch Lời Nhắc Thông Báo, Thêm Lên Lịch Phát Danh Sách Nhạc. (Bổ Sung Dữ Liệu MQTT: restart VBot, reboot, bật tắt trợ lý ảo XiaoZhi), Tối Ưu Cơ Chế Cấu Hình Danh Sách: Đài, Báo, Tin Tức, Radio",
-    "releaseDate": "09/11/2025",
+    "releaseDate": "09/11/2025-1",
     "changes": [
         {
             "type": "feature",

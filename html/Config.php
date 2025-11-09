@@ -1102,7 +1102,7 @@ include 'html_head.php';
 						  []
                         );
                         echo input_field('udp_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                        echo input_field('udp_server_streaming_audio', 'Server Streaming Audio', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('udp_server_streaming_audio', 'Server Streaming Audio', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                         echo input_field('udp_server_streaming_audio_local', 'URL Audio Local', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'btn btn-success border-danger', 'link', '_blank');
                         echo input_field('client_flash_firmware_url', 'Flash Firmware URL', 'https://github.com/marion001/VBot_Client_Offline', 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Client_Offline', 'btn btn-success border-danger', 'link', '_blank');
                         ?>
@@ -1581,7 +1581,7 @@ include 'html_head.php';
                               <label for="tts_ggcloud_json_file_token">Tệp tin json xác thực: tts_token_google_cloud.json</label>
                             </div>
                             <div class="form-floating mb-3">
-                              <input type="text" class="form-control border-danger" name="list_voices_tts_gcloud" id="list_voices_tts_gcloud" value="<?php echo $directory_path.'/includes/other_data/list_voices_tts_gcloud.json'; ?>">
+                              <input disabled type="text" class="form-control border-danger" name="list_voices_tts_gcloud" id="list_voices_tts_gcloud" value="<?php echo $directory_path.'/includes/other_data/list_voices_tts_gcloud.json'; ?>">
                               <label for="list_voices_tts_gcloud" class="form-label">Đường Dẫn Danh Sách Giọng Đọc:</label>
                             </div>
                             <div class="form-floating mb-3">
@@ -2509,7 +2509,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </tbody>
                       </table>
 					  <?php
-					  echo input_field('lits_newspaper_radio', 'Dường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+					  echo input_field('lits_newspaper_radio_radio', 'Đường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
 					  ?>
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-radio" onclick="addRadio()">Thêm Đài Mới</button></center>
                     </div>
@@ -2590,7 +2590,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </tbody>
                       </table>
 					  <?php
-					  echo input_field('lits_newspaper_radio', 'Dường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+					  echo input_field('lits_newspaper_radio_paper', 'Đường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
 					  ?>
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-newspaper" onclick="addNewsPaper()">Thêm Báo Mới</button></center>
                     </div>
