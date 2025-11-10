@@ -429,34 +429,42 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
-	if (strpos($URL, "vietnamnet.vn") !== false) {
-		$html = file_get_contents($URL);
-		if ($html === false) {
+	if (strpos($URL, "vnexpress.net") !== false) {
+		$ch = curl_init();
+		curl_setopt($ch, CURLOPT_URL, $URL);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
+		$html = curl_exec($ch);
+		$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+		curl_close($ch);
+		if ($html === false || $http_code != 200) {
 			echo json_encode([
 				'success' => false,
-				'message' => 'Lỗi khi lấy dữ liệu từ trang VietNamNet',
+				'message' => 'Lỗi khi lấy dữ liệu từ trang VnExpress (HTTP ' . $http_code . ')',
 				'data' => null
 			]);
 			exit;
 		}
-		preg_match('/<div class="vnn-audio podcast-audio">.*?<source src="([^"]+)"/s', $html, $matches);
-		if (!empty($matches[1])) {
+		if (preg_match('/<audio[^>]+src="([^"]+\.(?:mp3|m4a|aac|wav))"/i', $html, $matches)) {
 			echo json_encode([
 				'success' => true,
-				'message' => 'Thành Link từ báo VietNamNet Thành Công',
+				'message' => 'Lấy link audio từ VnExpress thành công',
 				'data' => [
-					'audio_link' => $matches[1]
+					'audio_link' => html_entity_decode($matches[1])
 				]
 			]);
 		} else {
 			echo json_encode([
 				'success' => false,
-				'message' => 'Không tìm thấy âm thanh trong trang',
+				'message' => 'Không tìm thấy đường dẫn audio (.mp3, .m4a, .aac, .wav) trong trang',
 				'data' => null
 			]);
 		}
 		exit();
-	}else if (strpos($URL, "tienphong.vn") !== false) {
+	} else if (strpos($URL, "tienphong.vn") !== false) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $URL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -588,7 +596,6 @@ if (isset($_GET['podcast_Search'])) {
 	// Bây giờ bạn có thể sử dụng $tokenData['data']['access_token'] để gửi các yêu cầu API khác
 	$podcast_Name = isset($_GET['PodCastName']) ? $_GET['PodCastName'] : '';
 	$podcast_Limit = isset($_GET['Limit']) ? $_GET['Limit'] : '1';
-
 	// Kiểm tra nếu biến Song_Name không có dữ liệu
 	if (empty($podcast_Name)) {
 		$response = array(
@@ -605,12 +612,10 @@ if (isset($_GET['podcast_Search'])) {
 		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		chmod($podcastJsonPath, 0777);
 	}
-
 	if (isTokenExpired_podcast($Config)) {
 		// Nếu token đã hết hạn, làm mới token
 		refreshToken_podcast($Config, $VBot_Offline);
 	}
-
 	$curl = curl_init();
 	curl_setopt_array($curl, array(
 		CURLOPT_URL => 'https://core.ocs.iviet.com/v1/graphql',
@@ -637,17 +642,15 @@ if (isset($_GET['podcast_Search'])) {
 			'x-apollo-operation-name: Search'
 		),
 	));
-
 	$response_podcast = curl_exec($curl);
 	curl_close($curl);
 	//echo $response_podcast;
 	$podcast_Data = json_decode($response_podcast, true);
 	$result = [
-		'success' => false, // Mặc định là false, sẽ cập nhật thành true nếu có dữ liệu hợp lệ
-		'message' => ' không có dữ liệu', // Thông báo mặc định khi không có dữ liệu
+		'success' => false,
+		'message' => ' không có dữ liệu',
 		'data' => []
 	];
-
 	// Kiểm tra và trích xuất thông tin từ phần 'search'
 	if (isset($podcast_Data['data']['search']) && is_array($podcast_Data['data']['search'])) {
 		$baseUrl = "https://cdn-ocs.iviet.com/";
@@ -657,31 +660,26 @@ if (isset($_GET['podcast_Search'])) {
 				$coverUrl = $entry['episode']['media']['cover'] ?? 'N/A';
 				$duration = $entry['episode']['duration'] ?? 'N/A';
 				$description = $entry['episode']['media']['content_type']['description'] ?? 'N/A';
-				// Kiểm tra nếu audio không bắt đầu bằng "http"
 				if ($audioUrl !== 'N/A' && strpos($audioUrl, 'http') !== 0) {
 					$audioUrl = $baseUrl . $audioUrl;
 				}
-				// Kiểm tra nếu cover không bắt đầu bằng "http"
 				if ($coverUrl !== 'N/A' && strpos($coverUrl, 'http') !== 0) {
 					$coverUrl = $baseUrl . $coverUrl;
 				}
-				// Định dạng lại duration
 				$formattedDuration = formatDuration($duration);
 				$result['data'][] = [
-					//'title' => $entry['episode']['title'] ?? 'N/A',
 					'title' => str_replace(["'", '"'], '', $entry['episode']['title'] ?? 'N/A'),
 					'cover' => $coverUrl,
 					'audio' => $audioUrl,
 					'duration' => $formattedDuration,
 					'description' => $description
 				];
-				$result['success'] = true; // Cập nhật success thành true nếu tìm thấy dữ liệu
+				$result['success'] = true;
 			}
 		}
 		if ($result['success']) {
 			$result['message'] = 'Dữ liệu được truy xuất thành công';
 		}
-		//Cache Ghi đè toàn bộ nội dung vào file ZingMP3.json
 		file_put_contents($podcastJsonPath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 	}
 	echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -692,7 +690,6 @@ if (isset($_GET['podcast_Search'])) {
 if (isset($_GET['Cache_PodCast'])) {
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		chmod($podcastJsonPath, 0777);
 	}
@@ -827,7 +824,6 @@ if (isset($_GET['GetLink_Youtube'])) {
 	}
 	$title = "N/A (Không Xác Định Được Tên)";
 	$thumbnails = "https://img.youtube.com/vi/$Youtube_ID/0.jpg";
-
 	$url_api_ytb = 'https://www.googleapis.com/youtube/v3/videos?part=snippet&id=' . $Youtube_ID . '&key=' . $Config['media_player']['youtube']['google_apis_key'];
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url_api_ytb);
@@ -844,10 +840,7 @@ if (isset($_GET['GetLink_Youtube'])) {
 		$title = $data_api_ytb['items'][0]['snippet']['title'];
 		$thumbnails = $data_api_ytb['items'][0]['snippet']['thumbnails']['high']['url'];
 	}
-
-	// Câu lệnh gọi Python script
 	$CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Get_Link_Youtube.py $Youtube_ID");
-	// Kết nối SSH
 	$connection = ssh2_connect($ssh_host, $ssh_port);
 	if (!$connection) {
 		$response = array(
@@ -867,7 +860,6 @@ if (isset($_GET['GetLink_Youtube'])) {
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
-	// Thực thi câu lệnh Python trên máy chủ SSH
 	$stream = ssh2_exec($connection, $CMD);
 	if (!$stream) {
 		$response = array(
@@ -1117,17 +1109,12 @@ if (isset($_GET['playlist_DELETE'])) {
 
 //Xóa cache dữ liệu bài hát
 if (isset($_GET['cache_delete']) && in_array($_GET['cache_delete'], ['ZingMP3', 'Youtube', 'PodCast'])) {
-	// Khởi tạo mảng phản hồi
 	$response = array('success' => false, 'message' => '');
-	// Đường dẫn đến file JSON dựa trên giá trị 'cache_delete'
 	$cacheType = $_GET['cache_delete'];
 	$jsonFilePath = '../cache/' . $cacheType . '.json';
-	// Kiểm tra xem file có tồn tại không
 	if (file_exists($jsonFilePath)) {
-		// Mở file JSON ở chế độ ghi
 		$fileHandle = fopen($jsonFilePath, 'w');
 		if ($fileHandle) {
-			// Ghi một mảng rỗng vào file
 			fwrite($fileHandle, '[]');
 			fclose($fileHandle);
 			$response['success'] = true;
@@ -1158,49 +1145,57 @@ if (isset($_GET['newspaper'])) {
 		exit;
 	}
 	$filePath = "../cache/" . $Config['media_player']['news_paper']['newspaper_file_name'];
+
 	//Báo vnexpress
 	if (strpos($News_Paper, "vnexpress.net") !== false) {
-		$apiUrl = "https://api3.vnexpress.net/api/article?type=get_topstory&cate_id=1004685&site_id=1000000&showed_area=trangchu_podcast_v2&app_id=9e304d";
 		$ch = curl_init();
-		curl_setopt($ch, CURLOPT_URL, $apiUrl);
+		curl_setopt($ch, CURLOPT_URL, $News_Paper);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+		curl_setopt($ch, CURLOPT_TIMEOUT, 20);
 		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		$apiResponse = curl_exec($ch);
+		$html = curl_exec($ch);
 		$error = curl_error($ch);
 		curl_close($ch);
-		if ($apiResponse !== false) {
-			$data = json_decode($apiResponse, true);
-			if (isset($data['error']) && $data['error'] === 0) {
-				if (isset($data['data']['trangchu_podcast']) && is_array($data['data']['trangchu_podcast'])) {
-					$result = ["data" => []];
-					foreach ($data['data']['trangchu_podcast'] as $podcast) {
-						$result["data"][] = [
-							//"title" => $podcast['title'],
-							"title" => str_replace(["'", "\""], "", $podcast['title']),
-							"audio" => $podcast['podcast']['path'],
-							"cover" => $podcast['podcast']['thumb_url'],
-							"duration" => isset($podcast['podcast']['duration']) ? formatDuration($podcast['podcast']['duration']) : "N/A",
-							"publish_time" => isset($podcast['publish_time']) ? date("d/m/Y, H:i", $podcast['publish_time']) : "N/A",
-							"source" => "Báo VnExpress"
-						];
-					}
-					if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
-						$response['success'] = true;
-						$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
-						$response['data'] = $result["data"];
-					} else {
-						$response['message'] = "Lỗi: Không thể ghi dữ liệu vào tệp $filePath";
-					}
+		$response = ["success" => false, "message" => "", "data" => []];
+		if ($html !== false) {
+			preg_match_all('/<article\b[^>]*>(.*?)<\/article>/is', $html, $articles);
+			$articles_list = array_slice($articles[1], 0, 40); // Giới hạn 40
+			$result = ["data" => []];
+			foreach ($articles_list as $article_html) {
+				if (preg_match('/<a[^>]+href="([^"]+)"[^>]*title="([^"]+)"[^>]*>/i', $article_html, $m_a)) {
+					$href = html_entity_decode($m_a[1]);
+					$title = html_entity_decode($m_a[2]);
 				} else {
-					$response['message'] = 'Không tìm thấy dữ liệu podcast';
+					continue;
+				}
+				$image = "";
+				if (preg_match('/<source[^>]+srcset="([^"]+)"/i', $article_html, $m_src)) {
+					$image = trim(explode(' ', html_entity_decode($m_src[1]))[0]);
+				} elseif (preg_match('/<img[^>]+src="([^"]+)"/i', $article_html, $m_img)) {
+					$image = html_entity_decode($m_img[1]);
+				}
+				$result["data"][] = [
+					"title" => $title,
+					"href"  => $href,
+					"image" => $image,
+					"source" => "Báo VnExpress"
+				];
+			}
+			if (!empty($result["data"])) {
+				if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+					$response['success'] = true;
+					$response['message'] = "Đã lưu dữ liệu vào $filePath";
+					$response['data'] = $result["data"];
+				} else {
+					$response['message'] = "Lỗi: Không thể ghi dữ liệu vào file $filePath";
 				}
 			} else {
-				$response['message'] = 'Lỗi từ API hoặc không thể lấy dữ liệu';
+				$response['message'] = "Không tìm thấy bài viết nào trong HTML";
 			}
 		} else {
-			$response['message'] = 'Lỗi cURL: ' . $error;
+			$response['message'] = "Lỗi cURL: $error";
 		}
+		header('Content-Type: application/json; charset=utf-8');
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit();
 	}

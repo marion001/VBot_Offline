@@ -249,6 +249,50 @@
 		{
 			"name": "Báo 24h.com.vn Chủ Đề Kinh Doanh",
 			"link": "https://www.24h.com.vn/kinh-doanh-c161.html"
+		},
+		{
+			"name": "Báo VnExpress",
+			"link": "https://vnexpress.net/vne-go/podcast"
+		},
+		{
+			"name": "Báo VnExpress Tin Trong Ngày",
+			"link": "https://vnexpress.net/vne-go/podcast/vnexpress-hom-nay"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Giải Mã",
+			"link": "https://vnexpress.net/vne-go/podcast/giai-ma"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Bí Ẩn, Hộp Đen",
+			"link": "https://vnexpress.net/vne-go/podcast/hop-den"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Hồ Sơ, Tội Ác",
+			"link": "https://vnexpress.net/vne-go/podcast/ho-so-toi-ac"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Tài Chính",
+			"link": "https://vnexpress.net/vne-go/podcast/tai-chinh-ca-nhan"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Thì Thầm",
+			"link": "https://vnexpress.net/vne-go/podcast/tham-thi"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Họ Nói Gì",
+			"link": "https://vnexpress.net/vne-go/podcast/ho-noi-gi"
+		},
+		{
+			"name": "Báo VnExpress Chủ Đề Bạn Ổn Không",
+			"link": "https://vnexpress.net/vne-go/podcast/ban-on-khong"
+		},
+		{
+			"name": "Báo VnExpress Điểm Tin Mới Nhất",
+			"link": "https://vnexpress.net/vne-go/podcast/diem-tin"
+		},		{
+			"name": "Báo VnExpress Chủ Đề Tôi Kể",
+			"link": "https://vnexpress.net/vne-go/podcast/toi-ke"
 		}
+
 	]
 }

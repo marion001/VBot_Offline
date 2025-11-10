@@ -198,32 +198,24 @@
                 "link": "https://podcast.tuoitre.vn"
             },
             {
-                "name": "Việt Nam ExPress",
-                "link": "https://vnexpress.net/"
+                "name": "Việt Nam VN ExPress",
+                "link": "https://vnexpress.net/vne-go/podcast"
             },
             {
                 "name": "Việt Nam Nét",
                 "link": "https://vietnamnet.vn/podcast/ban-tin-thoi-su"
             },
             {
-                "name": "Việt Nam Nét chủ đề góc nhìn",
-                "link": "https://vietnamnet.vn/podcast/goc-nhin"
-            },
-            {
                 "name": "Báo Mới",
                 "link": "https://baomoi.com/audio/thoi-su-3.epi"
-            },
-            {
-                "name": "Báo Mới về đời sống",
-                "link": "https://baomoi.com/audio/doi-song-6.epi"
             },
             {
                 "name": "Tiền Phong",
                 "link": "https://tienphong.vn/podcast/"
             },
             {
-                "name": "Tiền Phong Xã Hội",
-                "link": "https://tienphong.vn/xa-hoi-tin-tuc/"
+                "name": "Báo 24h.com.vn",
+                "link": "https://www.24h.com.vn/tin-tuc-trong-ngay-c46.html"
             },
             {
                 "name": "Tiền Phong Chính Trị",
@@ -245,19 +237,19 @@
         "radio_data": [
             {
                 "name": "vov2",
-                "link": "https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8"
+                "link": "https://stream.vovmedia.vn/vov-2"
             },
             {
                 "name": "vov giao thông hà nội",
-                "link": "https://str.vov.gov.vn/vovlive/vovGTHN.sdp_aac/playlist.m3u8"
+                "link": "https://stream.vovmedia.vn/vovgt-hn"
             },
             {
                 "name": "vov1",
-                "link": "https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8"
+                "link": "https://stream.vovmedia.vn/vov-1"
             },
             {
                 "name": "vov3",
-                "link": "https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8"
+                "link": "https://stream.vovmedia.vn/vov-3"
             }
         ],
         "music_local": {
