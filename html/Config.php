@@ -1411,7 +1411,7 @@ include 'html_head.php';
                   </div>
                   <?php
                   echo input_field('directory_tts', 'Thư Mục Chứa TTS', $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'], 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                  echo input_field('clean_cache_tts_max_file', 'Dọn Dẹp TTS Nếu Vượt Quá (file):', $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'], 'required', 'number', '1', '50', '999', 'Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép', 'border-success', '', '', '', '', '');
+                  echo input_field('clean_cache_tts_max_file', 'Dọn Dẹp TTS Nếu Vượt Quá (file):', $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'], 'required', 'number', '1', '50', '', 'Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép', 'border-success', '', '', '', '', '');
                   ?>
                   <div class="row">
                     <div class="col-lg-6">
