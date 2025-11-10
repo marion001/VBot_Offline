@@ -588,7 +588,7 @@
                     "active": false
                 },
                 "directory_tts": "TTS_Audio",
-                "clean_cache_tts_max_file": 1000
+                "clean_cache_tts_max_file": 900
             }
         },
         "auto_restart_program_error": true,
