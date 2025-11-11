@@ -26,6 +26,31 @@
 		  }
 		},
 		{
+		  "name": "%VBot_Led_Brightness",
+		  "description": "Điều chỉnh độ sáng của đèn LED trên loa VBot — có thể tăng, giảm, hoặc đặt trực tiếp giá trị từ 0 đến 100.",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {
+			  "brightness": {
+				"oneOf": [
+				  {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 100,
+					"description": "Đặt trực tiếp độ sáng LED từ 0 đến 100."
+				  },
+				  {
+					"type": "string",
+					"enum": ["UP", "DOWN", "MIN", "MAX"],
+					"description": "Tăng ('UP') hoặc giảm ('DOWN'), thấp nhất ('MIN') hoặc cao nhất ('MAX') độ sáng hiện tại theo bước nhảy 10."
+				  }
+				]
+			  }
+			},
+			"required": ["brightness"]
+		  }
+		},
+		{
 		  "name": "%VBot_PodCast",
 		  "description": "Kể hoặc đọc truyện theo yêu cầu",
 		  "inputSchema": {
@@ -94,6 +119,15 @@
 			  }
 			},
 			"required": ["action"]
+		  }
+		},
+		{
+		  "name": "%Wifi_Info",
+		  "description": "Trả về thông tin Mạng WiFi, địa chỉ IP hiện tại của thiết bị nếu có yêu cầu. MCP này không cần tham số đầu vào, đọc thông tin liền mạch không được ngắt câu hoặc ngắt từ",
+		  "inputSchema": {
+			"type": "object",
+			"properties": {},
+			"required": []
 		  }
 		}
 	]

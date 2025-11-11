@@ -2908,32 +2908,26 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 					  </label>
 					  <div class='col-sm-9'>
 						<div class='form-switch'>
-						  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_active' id='xiaozhi_ai_active' " .
-                    (!empty($Config['xiaozhi']['active']) ? 'checked' : '') . ">
+						  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_active' id='xiaozhi_ai_active' " . (!empty($Config['xiaozhi']['active']) ? 'checked' : '') . ">
 						</div>
 					  </div>
 					</div>";
-                  echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
+                  echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
                   echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
                   $status = $Config['xiaozhi']['activation_status'] ?? false;
-                  echo "<div class='row mb-3'>
-					  <label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
+                  echo "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
 						<i class='bi bi-question-circle-fill' onclick=\"show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')\"></i>:
-					  </label>
-					  <div class='col-sm-9'>";
+					  </label><div class='col-sm-9'>";
                   if ($status === true || $status === "true" || $status === 1 || $status === "1") {
                     echo "<span class='text-success fw-bold'><i class='bi bi-check-lg'></i> Đã được liên kết với máy chủ</span>
 						<button type='button' class='btn btn-sm btn-danger ms-2' onclick='xiaozhi_unlink_reset_data()'>
-						  <i class='bi bi-link-45deg'></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu
-						</button>
+						  <i class='bi bi-link-45deg'></i>Hủy Liên Kết Và Đặt Lại Dữ Liệu</button>
 						<button type='button' class='btn btn-sm btn-warning ms-2' onclick='xiaozhi_activation_status_false()'>
-						  <i class='bi bi-link-45deg'></i>Liên Kết Xác Thực Lại
-						</button>";
+						  <i class='bi bi-link-45deg'></i>Liên Kết Xác Thực Lại</button>";
                   } else {
                     echo "<span class='text-danger fw-bold'><i class='bi bi-x-circle'></i> Thiết Bị chưa được liên kết với máy chủ</span>
 						<button type='button' class='btn btn-sm btn-success ms-2' onclick='xiaozhi_active_device_info()'>
-						  <i class='bi bi-link-45deg'></i> Liên kết và lấy mã xác nhận
-						</button>";
+						  <i class='bi bi-link-45deg'></i> Liên kết và lấy mã xác nhận</button>";
                   }
                   echo "</div></div>";
                   echo input_field('xiaozhi_websocket_url', 'WebSocket Link/URL Server', $Config['xiaozhi']['system_options']['network']['websocket_url'] ?? '', 'disabled', 'text', '', '', '', 'Ví dụ: wss://api.tenclass.net/xiaozhi/v1/', 'border-danger', '', '', '', '', '');

@@ -806,7 +806,8 @@ async function xiaozhi_active_device_info() {
                 elf_sha256: deviceInfo.hmac_key,
             },
             board: {
-                type: "demo",
+                //type: "demo",
+                type: deviceInfo.device_model,
                 name: deviceInfo.device_model,
                 ip: deviceInfo.ip_address,
                 mac: deviceInfo.mac_address,
@@ -854,52 +855,60 @@ async function xiaozhi_active_device_info() {
                     showMessagePHP("Đang chờ nhập mã kích hoạt: " + active_number_code, 5);
                     show_message("<b class='text-danger'>Mã Kích Hoạt Thiết Bị Của Bạn Là: <h5><center>" + active_number_code + "</center> Vui Lòng truy Cập: " + (result.activation.message.replace(/(\r?\n|\\n)(.*)/, " và nhập mã: $2")) + "</h5></b>-Vui Lòng Nhập Mã Kích Hoạt Này Trên Trang Chủ Của Server");
                     await new Promise(r => setTimeout(r, 3000));
-                } else if (activateResp.status === 200) {
-                    loading("hide");
-                    const activateResult = await activateResp.json();
-                    //console.log("activateResult:", JSON.stringify(activateResult, null, 2));
-                    activationCode = activateResult.activation?.code || null;
-                    waiting = false;
-                    show_message("<b class='text-success'>Đã Kích Hoạt, Liên Kết Thiết Bị Này Thành Công</b>");
-                    const logData = {
-                        firmware_version: result.firmware.version,
-                        activation_status: true,
-                        client_id: deviceInfo.machine_id,
-                        mac_address: deviceInfo.mac_address,
-                        websocket_token: result.websocket.token,
-                        websocket_url: result.websocket.url,
-                        mqtt: result.mqtt,
-                        activation_code: active_number_code,
-                        device_id: activateResult.device_id,
-                        serial_number: deviceInfo.serial_number,
-                        hmac_signature: hmacData.signature
-                    };
-                    fetch("includes/php_ajax/Scanner.php", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                        body: new URLSearchParams({
-                            xiaozhi: "1",
-                            action: "active_success_save_data",
-                            json_data: JSON.stringify(logData)
-                        }),
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            loading("hide");
-                            if (data.success) {
-                                show_message("<b class='text-success'>" + (data.message || "Đã lưu dữ liệu kích hoạt thành công") + "</b>");
-                            } else {
-                                show_message("<b class='text-danger'>" + (data.message || "Không thể lưu dữ liệu kích hoạt") + "</b>");
-                            }
-                        })
-                        .catch(err => {
-                            loading("hide");
-                            show_message('Kích hoạt thành công, Lỗi khi lưu dữ liệu kich hoạt vào Config.json:' + err);
-                        });
-
-                } else {
+                }
+				else if (activateResp.status === 200) {
+					loading("hide");
+					const textResponse = await activateResp.text();
+					const trimmed = textResponse.trim();
+					let activateResult = {};
+					let isJson = false;
+					if ((trimmed.startsWith("{") && trimmed.endsWith("}")) || (trimmed.startsWith("[") && trimmed.endsWith("]"))) {
+						try {
+							activateResult = JSON.parse(trimmed);
+							isJson = true;
+						} catch (err) {
+							show_message('Lỗi giải mã dữ liệu json trả về khi kích hoạt thiết bị tới máy chủ Servver: '+err);
+						}
+					}
+					if (isJson || trimmed.toLowerCase() === "success") {
+						waiting = false;
+						show_message("<b class='text-success'>Đã Kích Hoạt, Liên Kết Thiết Bị Này Thành Công Với Máy Chủ Server: "+activateUrl+"</b>");
+						const logData = {
+							firmware_version: result.firmware.version,
+							activation_status: true,
+							client_id: deviceInfo.machine_id,
+							mac_address: deviceInfo.mac_address,
+							websocket_token: result.websocket.token,
+							websocket_url: result.websocket.url,
+							mqtt: result.mqtt,
+							activation_code: active_number_code,
+							device_id: activateResult.device_id || "",
+							serial_number: deviceInfo.serial_number,
+							hmac_signature: hmacData.signature
+						};
+						fetch("includes/php_ajax/Scanner.php", {
+							method: "POST",
+							headers: { "Content-Type": "application/x-www-form-urlencoded" },
+							body: new URLSearchParams({xiaozhi: "1", action: "active_success_save_data", json_data: JSON.stringify(logData)}),
+						})
+						.then(res => res.json().catch(() => ({})))
+						.then(data => {
+							loading("hide");
+							if (data?.success) {
+								show_message('<b class="text-success">' + (data.message || 'Đã lưu dữ liệu kích hoạt thành công') + '</b>');
+							} else {
+								show_message('<b class="text-danger">' + (data?.message || 'Không thể lưu dữ liệu kích hoạt') + '</b>');
+							}
+						})
+						.catch(err => {
+							loading("hide");
+							show_message('<b class="text-warning">Kích hoạt thành công, nhưng lỗi khi lưu dữ liệu: ' + err + '</b>');
+						});
+					} else {
+						show_message("<b class='text-danger'>Lỗi xác thực kích hoạt: Dữ liệu phản hồi không hợp lệ</b>: "+textResponse);
+					}
+				}
+				else {
                     loading("hide");
                     const errText = await activateResp.text();
                     waiting = false;
