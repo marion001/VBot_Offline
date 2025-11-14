@@ -1,7 +1,6 @@
 {
     "intents": [
         {
-            "active": true,
             "name": "Tắt Đèn Ngủ",
             "reply": "biết rồi",
             "data_yaml": {
@@ -12,9 +11,10 @@
                 }
             },
             "questions": [
-                "tắt hộ cái đèn ngủ bạn ơi",
+                "tắt hộ cái đèn ngủ",
                 "đèn ngủ tắt hộ đi"
-            ]
+            ],
+            "active": false
         },
         {
             "name": "Bật Đèn Ngủ",
@@ -68,23 +68,6 @@
                 "Mở rèm phòng khách một nửa"
             ],
             "active": false
-        },
-        {
-            "active": true,
-            "name": "tets set nhiệt độ điều hòa",
-            "reply": "đã thực hiện xong",
-            "data_yaml": {
-                "action": "climate.set_temperature",
-                "data": {
-                    "temperature": 25
-                },
-                "target": {
-                    "entity_id": "climate.dieu_hoa_phong_ngu"
-                }
-            },
-            "questions": [
-                "bật máy điều hòa"
-            ]
         }
     ]
 }

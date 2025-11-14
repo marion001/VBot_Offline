@@ -1,8 +1,8 @@
 {
-    "version": "1.0.72",
+    "version": "1.0.73",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi Cơ Chế Reconnect, Mất Kết Nối MQTT VBot",
-    "releaseDate": "11/11/2025",
+    "description": "Sửa lỗi Xử Lý Dữ Liệu Client, Cập Nhật Xiaozhi MCP Server System VBot",
+    "releaseDate": "14/11/2025",
     "changes": [
         {
             "type": "feature",

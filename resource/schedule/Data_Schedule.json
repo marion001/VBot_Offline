@@ -1,5 +1,28 @@
 {
-    "notification_schedule": [],
+    "notification_schedule": [
+        {
+            "name": "bbbb",
+            "create_words": "vbot_interface",
+            "data": {
+                "message": "hhh",
+                "audio_file": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em (WM Remix).mp3",
+                "repeat": 1
+            },
+            "date": [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday"
+            ],
+            "time": [
+                "11:00"
+            ],
+            "active": false
+        }
+    ],
     "send_notify_upgrade_vbot_home_assistant": {
         "active": false,
         "time": "03:01"
@@ -83,7 +106,7 @@
     },
     "play_play_playlist": {
         "time": [
-            "18:46",
+            "19:46",
             "18:43"
         ],
         "active": false,

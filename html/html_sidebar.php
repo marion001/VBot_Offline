@@ -138,7 +138,7 @@
   <li class="nav-item" onclick="loading('show')">
     <a class="nav-link collapsed" href="XiaoZhi_MCP.php">
       <i class="bi bi-server"></i>
-      <span>XiaoZhi MCP Server</span>
+      <span>XiaoZhi MCP</span>
     </a>
   </li>
 

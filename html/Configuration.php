@@ -11,7 +11,7 @@ ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
 //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-$Cache_UI_Ver = '1.1.0';
+$Cache_UI_Ver = '1.1.1';
 
 //Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;

@@ -501,6 +501,7 @@ if (isset($_POST['all_config_save'])) {
 
   #Cập nhật XiaoZhi AI
   $Config['xiaozhi']['active'] = isset($_POST['xiaozhi_ai_active']) ? true : false;
+  $Config['xiaozhi']['mcp_system_control'] = isset($_POST['xiaozhi_ai_mcp_system']) ? true : false;
   $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
   $Config['xiaozhi']['tts_time_out'] = intval($_POST['xiaozhi_tts_time_out']);
   $Config['xiaozhi']['reconnection_timeout'] = intval($_POST['xiaozhi_reconnection_timeout']);
@@ -639,7 +640,8 @@ if (isset($_POST['save_hotword_snowboy'])) {
       $sensitive_key = 'snowboy_sensitive_' . $index;
       $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
       $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
-      $sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
+      #$sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
+	  $sensitive = (isset($_POST[$sensitive_key]) && $_POST[$sensitive_key] !== '') ? floatval($_POST[$sensitive_key]) : 0.5;
       if ($file_name !== '') {
         $updatedConfig[] = [
           "active" => $active,
@@ -673,7 +675,8 @@ if (isset($_POST['save_hotword_theo_lang'])) {
           $sensitive_key = 'sensitive_' . $index;
           $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
           $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
-          $sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
+          #$sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
+		  $sensitive = (isset($_POST[$sensitive_key]) && $_POST[$sensitive_key] !== '') ? floatval($_POST[$sensitive_key]) : 0.5;
           if ($file_name !== '') {
             $updatedConfig[] = [
               "active" => $active,
@@ -888,8 +891,6 @@ include 'html_head.php';
     $allMessages = implode("\\n", $safeMessages);
     echo "<script>showMessagePHP('$allMessages');</script>";
   }
-  ?>
-  <?php
   include 'html_header_bar.php';
   include 'html_sidebar.php';
   ?>
@@ -2909,9 +2910,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 					  <div class='col-sm-9'>
 						<div class='form-switch'>
 						  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_active' id='xiaozhi_ai_active' " . (!empty($Config['xiaozhi']['active']) ? 'checked' : '') . ">
-						</div>
-					  </div>
-					</div>";
+						</div></div></div>";
+                  echo "<div class='row mb-3'>
+					  <label class='col-sm-3 col-form-label'>MCP VBot System Control 
+						<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi tương tác ngược với hệ thống và chức năng của VBot thông qua MCP Có Sẵn Của VBot')\"></i> :
+					  </label>
+					  <div class='col-sm-9'>
+						<div class='form-switch'>
+						  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_mcp_system' id='xiaozhi_ai_mcp_system' " . (!empty($Config['xiaozhi']['mcp_system_control']) ? 'checked' : '') . ">
+						</div></div></div>";
                   echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
                   echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
                   $status = $Config['xiaozhi']['activation_status'] ?? false;

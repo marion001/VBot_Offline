@@ -726,6 +726,7 @@
     },
     "xiaozhi": {
         "active": false,
+        "mcp_system_control": true,
         "activation_status": false,
         "time_out_output_stream": 0.5,
         "start_the_protocol": "websocket",

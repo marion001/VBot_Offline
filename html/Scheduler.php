@@ -8,7 +8,6 @@ include 'Configuration.php';
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -128,38 +127,45 @@ include 'html_head.php';
         </ol>
       </nav>
     </div>
-    <form method="POST" class="row g-3 needs-validation" action="" enctype="multipart/form-data" novalidate>
+    <form method="POST" class="row g-3 needs-validation" action="" enctype="multipart/form-data" novalidate onsubmit="return validateFormVBot()">
       <?php
       $json_file = $VBot_Offline . $Config['schedule']['data_json_file'];
-      // Mảng lưu thông báo lỗi
+      //Mảng lưu thông báo lỗi
       $errorMessages = [];
       $successMessage = [];
-      function generate_audio_select($directory, $field_name, $selected_value = '')
-      {
-        if (!is_dir($directory)) {
-          echo "<p style='color: red;'>Thư mục không tồn tại.</p>";
-          return;
-        }
-        // Lọc các tệp âm thanh (mp3, wav, flac, ogg, aac)
-        $audioFiles = array_filter(scandir($directory), function ($file) use ($directory) {
-          // Kiểm tra định dạng tệp
-          return preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $file) && !is_dir($directory . '/' . $file);
-        });
-        echo '<select class="form-select border-success" name="' . htmlspecialchars($field_name) . '" id="' . htmlspecialchars($field_name) . '">';
-        echo '<option value="">Chọn tệp âm thanh</option>';
-        foreach ($audioFiles as $audioFile) {
-          $selected = ($directory . '/' . $audioFile == $selected_value) ? 'selected' : '';
-          echo '<option value="' . htmlspecialchars($directory . '/' . $audioFile) . '" ' . $selected . '>' . htmlspecialchars($audioFile) . '</option>';
-        }
-        echo '</select>';
-      }
+		function generate_audio_select($directories, $field_name, $selected_value = '') {
+			if (!is_array($directories)) {
+				$directories = [$directories];
+			}
+			$audioFiles = [];
+			foreach ($directories as $directory) {
+				if (!is_dir($directory)) {
+					echo "<p style='color: red;'>Thư mục $directory không tồn tại.</p>";
+					continue;
+				}
+				// Lọc các tệp âm thanh
+				$files = array_filter(scandir($directory), function ($file) use ($directory) {
+					return preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $file) && !is_dir($directory . '/' . $file);
+				});
+				foreach ($files as $file) {
+					$audioFiles[] = $directory . '/' . $file;
+				}
+			}
+			echo '<select class="form-select border-success" name="' . htmlspecialchars($field_name) . '" id="' . htmlspecialchars($field_name) . '">';
+			echo '<option value="">Chọn tệp âm thanh</option>';
+			foreach ($audioFiles as $audioFile) {
+				$selected = ($audioFile == $selected_value) ? 'selected' : '';
+				$baseName = basename($audioFile);
+				echo '<option value="' . htmlspecialchars($audioFile) . '" ' . $selected . '>' . htmlspecialchars($baseName) . '</option>';
+			}
+			echo '</select>';
+		}
 
       $directory = dirname($json_file);
       if (!is_dir($directory)) {
         mkdir($directory, 0777, true);
         chmod($directory, 0777);
       }
-
       if (!file_exists($json_file)) {
         $default_data = [
           'notification_schedule' => []
@@ -236,8 +242,6 @@ include 'html_head.php';
         if ($return_chmod !== 0) {
           $errorMessages[] = 'Không thể thiết lập quyền cho thư mục ' . $file_save_directory . '. Chi tiết: ' . implode("\n", $output_chmod);
         }
-
-
 
         $data_recovery_type = $_POST['Scheduler_Upload_Audio_Submit'];
         if ($data_recovery_type === "Scheduler_Upload_Audio") {
@@ -543,7 +547,7 @@ include 'html_head.php';
                               // Kiểm tra và gán giá trị mặc định nếu phần tử không tồn tại
                               $audio_file = isset($notification['data']['audio_file']) ? htmlspecialchars($notification['data']['audio_file']) : "";
                               // Gọi hàm để tạo dropdown cho trường âm thanh này
-                              generate_audio_select($VBot_Offline . $Config['schedule']['audio_path'], 'notification_schedule[' . $index . '][data][audio_file]', $audio_file);
+                              generate_audio_select([$VBot_Offline . $Config['schedule']['audio_path'], $VBot_Offline.$Config['media_player']['music_local']['path']], 'notification_schedule[' . $index . '][data][audio_file]', $audio_file);
                               ?>
                               <button class="btn btn-success border-success" onclick="playAudio_Schedule('notification_schedule[<?php echo $index; ?>][data][audio_file]')" type="button"><i class="bi bi-play-circle"></i></button>
                             </div>
@@ -567,22 +571,22 @@ include 'html_head.php';
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <?php
-                              // Mảng các ngày đã chọn
+                              //Mảng các ngày đã chọn
                               $selected_days = $notification['date'];
-                              // Kiểm tra xem có ngày tháng cụ thể trong dữ liệu hay không
+                              //Kiểm tra xem có ngày tháng cụ thể trong dữ liệu hay không
                               $specific_dates = array_filter($selected_days, function ($day) {
-                                // Kiểm tra xem giá trị có phải là ngày tháng (dd/mm/yyyy) không
+                                //Kiểm tra xem giá trị có phải là ngày tháng (dd/mm/yyyy) không
                                 return preg_match('/\d{2}\/\d{2}\/\d{4}/', $day);
                               });
-                              // Lọc bỏ các ngày tháng cụ thể, chỉ lấy các ngày trong tuần
+                              //Lọc bỏ các ngày tháng cụ thể, chỉ lấy các ngày trong tuần
                               $week_days_selected = array_diff($selected_days, $specific_dates);
-                              // Hiển thị checkbox cho các ngày trong tuần
+                              //Hiển thị checkbox cho các ngày trong tuần
                               foreach ($week_days as $key => $label) {
                                 $checked = in_array($key, $week_days_selected) ? 'checked' : '';
                                 echo '<input type="checkbox" class="form-check-input" id="date-' . $index . '-' . $key . '" name="notification_schedule[' . $index . '][date][]" value="' . $key . '" ' . $checked . '> ';
                                 echo '<label for="date-' . $index . '-' . $key . '">' . $label . '</label><br/>';
                               }
-                              // Hiển thị ô input cho các ngày tháng cụ thể (dd/mm/yyyy) và nút xóa
+                              //Hiển thị ô input cho các ngày tháng cụ thể (dd/mm/yyyy) và nút xóa
                               foreach ($specific_dates as $specific_date) {
                                 echo '<div class="mt-3 input-group" id="date-group-' . $index . '-' . $specific_date . '">';
                                 echo '<input type="text" class="form-control border-success" name="notification_schedule[' . $index . '][date][]" id="date-specific-' . $index . '-' . $specific_date . '" value="' . $specific_date . '" placeholder="Nhập ngày tháng (dd/mm/yyyy)" required>';
@@ -1341,39 +1345,41 @@ include 'html_head.php';
       }
     }
 
-    function loadAudioFiles(selectId) {
-      const xhr = new XMLHttpRequest();
-      const url = "includes/php_ajax/Show_file_path.php?show_all_file&directory_path=<?php echo $VBot_Offline . $Config['schedule']['audio_path'] ?>";
-      xhr.open("GET", url, true);
-      xhr.onreadystatechange = function() {
-        if (xhr.readyState === 4) {
-          const selectElem = document.getElementById(selectId);
-          if (!selectElem) return;
+function loadAudioFiles(selectId) {
+  const directories = [
+    "<?php echo $VBot_Offline . $Config['schedule']['audio_path'] ?>",
+    "<?php echo $VBot_Offline . $Config['media_player']['music_local']['path'] ?>"
+  ];
 
-          if (xhr.status === 200) {
-            try {
-              const response = JSON.parse(xhr.responseText);
-              if (response.success && Array.isArray(response.data)) {
-                selectElem.innerHTML = "<option value=''>Chọn tệp âm thanh</option>";
-                response.data.forEach(file => {
-                  let opt = document.createElement("option");
-                  opt.value = file.path;
-                  opt.textContent = file.name + " (" + file.size + ")";
-                  selectElem.appendChild(opt);
-                });
-              } else {
-                selectElem.innerHTML = "<option value=''>Không tìm thấy file âm thanh</option>";
-              }
-            } catch (e) {
-              selectElem.innerHTML = "<option value=''>Lỗi phân tích JSON</option>";
-            }
-          } else {
-            selectElem.innerHTML = "<option value=''>Không tải được dữ liệu thư mục chứa file âm thanh</option>";
+  const selectElem = document.getElementById(selectId);
+  if (!selectElem) return;
+
+  selectElem.innerHTML = "<option value=''>Chọn tệp âm thanh</option>";
+
+  directories.forEach(dir => {
+    const xhr = new XMLHttpRequest();
+    const url = "includes/php_ajax/Show_file_path.php?show_all_file&directory_path=" + encodeURIComponent(dir);
+    xhr.open("GET", url, true);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (response.success && Array.isArray(response.data)) {
+            response.data.forEach(file => {
+              let opt = document.createElement("option");
+              opt.value = file.path;
+              opt.textContent = file.name + " (" + file.size + ")";
+              selectElem.appendChild(opt);
+            });
           }
-        }
-      };
-      xhr.send();
-    }
+        } catch (e) { console.error(e); }
+      }
+    };
+    xhr.send();
+  });
+}
+
+
   </script>
   <script>
     // Hiển thị modal xem nội dung file json Home_Assistant.json
@@ -1872,6 +1878,77 @@ include 'html_head.php';
     });
   </script>
   <!--END Scripts Phát toàn bộ nhạc có trong thư mục Local -->
+
+  <script>
+//Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống
+function validateFormVBot() {
+    const requiredInputs = document.querySelectorAll('input[required], select[required], textarea[required]');
+    let firstEmptyInput = null;
+    let emptyFields = [];
+    requiredInputs.forEach(input => {
+        input.classList.remove('empty-field');
+        if (!input.value.trim()) {
+            input.classList.add('empty-field');
+            if (!firstEmptyInput) {
+                firstEmptyInput = input;
+            }
+            const accordionContent = input.closest('.accordion-collapse');
+            if (accordionContent) {
+                const accordionId = accordionContent.id;
+                const accordion = new bootstrap.Collapse(accordionContent, {
+                    show: true
+                });
+                const accordionHeader = document.querySelector('[data-bs-target="#' + accordionId + '"]');
+                const sectionName = accordionHeader ? accordionHeader.textContent.trim() : '';
+                let fieldName = input.getAttribute('placeholder') || 
+                              input.getAttribute('name') ||
+                              input.getAttribute('id') ||
+                              'Trường dữ liệu';
+                              
+                if (sectionName) {
+                    fieldName = '<b class="text-success">'+sectionName+'</b> <b class="text-primary">'+fieldName+'</b>';
+                }
+                emptyFields.push(fieldName);
+            } else {
+                let fieldName = input.getAttribute('placeholder') || 
+                              input.getAttribute('name') ||
+                              input.getAttribute('id') ||
+                              'Trường dữ liệu';
+                const cardHeader = input.closest('.card')?.querySelector('.card-header');
+                if (cardHeader) {
+                    fieldName = '<b class="text-success">'+cardHeader.textContent.trim()+' </b> <b class="text-primary">'+fieldName+'</b>';
+                }
+                emptyFields.push(fieldName);
+            }
+        }
+    });
+    if (firstEmptyInput) {
+        const message = '<br/><center class="text-danger"><b>Vui lòng điền đầy đủ thông tin cho các trường giá trị</b></center><hr><b><center>Các Danh Mục Sau Còn Thiếu Tham Số</center></b><br/>- ' + emptyFields.join('<br>- ');
+        show_message(message);
+        const accordionContent = firstEmptyInput.closest('.accordion-collapse');
+        if (accordionContent) {
+            new bootstrap.Collapse(accordionContent, {
+                show: true
+            });
+            setTimeout(() => {
+                firstEmptyInput.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+                firstEmptyInput.focus();
+            }, 350);
+        } else {
+            firstEmptyInput.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
+            });
+            setTimeout(() => firstEmptyInput.focus(), 500);
+        }
+        return false;
+    }
+    return true;
+}
+  </script>
 
   <!--END Scripts REBOOT OS SYSTEM -->
   <script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
