@@ -80,12 +80,10 @@ include 'Configuration.php';
     }
 
     @keyframes wave {
-
       0%,
       100% {
         height: 10px;
       }
-
       50% {
         height: 30px;
       }
@@ -108,6 +106,35 @@ include 'Configuration.php';
       background-color: #bcffcd;
       color: #0b7beb;
     }
+
+	#searchResults {
+		max-height: 300px;
+		overflow-y: auto;
+		max-width: 600px;
+		width: 100%;
+		padding: 0;
+	}
+
+	#searchResults .dropdown-item {
+		white-space: normal;
+		word-wrap: break-word;
+		border-bottom: 1px solid rgba(0,0,0,0.1);
+		padding: 5px 10px;
+	}
+
+	#searchResults .dropdown-item:last-child {
+		border-bottom: none;
+	}
+
+	#searchResults .dropdown-item:hover {
+		background-color: #fff9c4;
+		color: #000;
+		cursor: pointer;
+	}
+
+	.highlight {
+		background-color: #c8e6c9 !important; /* xanh nhạt */
+	}
   </style>
 </head>
 <header id="header" class="header fixed-top d-flex align-items-center">
@@ -119,6 +146,15 @@ include 'Configuration.php';
     <i class="bi bi-list toggle-sidebar-btn"></i>
   </div>
   <!-- End Logo -->
+<!-- Tìm kiếm -->
+  <div class="search-bar">
+<div class="input-group flex-nowrap" title="Tìm kiếm nội dung trong trang">
+  <input class="form-control border-success" type="text" id="searchInput" placeholder="Nhập nội dung tìm kiếm">
+  <span class="input-group-text border-success" id="addon-wrapping"><i class="bi bi-search text-success"></i></span>
+  </div>
+ <ul class="dropdown-menu w-100 border-success" id="searchResults"></ul>
+</div>
+<!--END  Tìm kiếm -->
   <nav id="vbot_header_bar" class="header-nav ms-auto">
     <ul class="d-flex align-items-center">
       <div id="container_time" class="border-success pe-3">
@@ -137,7 +173,6 @@ include 'Configuration.php';
         ?>
       </li>
       <!-- End Notification Nav -->
-
       <!-- Scan VBot trong cùng Lớp Mạng-->
       <li class="nav-item nav-icon" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng">
         <i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="get_vbotScanDevices()"></i>
@@ -154,9 +189,9 @@ include 'Configuration.php';
                 <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
               </div>
             </div>
-            <br />
+            <br/>
             <button type="button" class="btn btn-warning" onclick="scan_VBot_Device()"><i class="bi bi-radar"></i> Quét Thiết Bị</button>
-            <br />
+            <br/>
             <div class="input-group mb-3">
               <span class="input-group-text border-success">Thêm Thủ Công:</span>
               <input type="text" id="add_ip_vbot_server" class="form-control border-success" placeholder="Nhập địa chỉ ip thiết bị loa VBot, VD: 192.168.1.107">
@@ -166,7 +201,6 @@ include 'Configuration.php';
           </div>
         </div>
       </div>
-
 
       <!-- Scan Show Logs API-->
       <li class="nav-item nav-icon" title="Hiển Thị Dữ Liệu Logs VBot Assistant Theo Thời Gian Thực">
@@ -181,7 +215,7 @@ include 'Configuration.php';
                 <i class="bi bi-arrows-fullscreen pe-3" id="Show_LogsAPI_fullscreen" onclick="Logs_API_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
                 <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" id="Close_Logs_Head" title="Đóng"></i>
               </div>
-            </div><br />
+            </div><br/>
             <center>
               <button type="button" class="btn btn-primary">
                 <input class="form-check-input" title="Bật để hiển thị Logs" type="checkbox" id="fetchLogsCheckbox_Head">

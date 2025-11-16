@@ -103,31 +103,43 @@ include 'html_head.php';
     <section class="section">
       <div class="row" style="width: 100%;">
         <div style="width: 100%;">
-          <select class="form-select border-success" id="file_selector">
-            <option value="" selected>Chọn File JSON Cần Sửa, Đọc</option>
-            <option value="<?php echo $Config_filePath; ?>">Config.json</option>
-            <option value="<?php echo $VBot_Offline . 'Action.json'; ?>">Action.json</option>
-            <option value="<?php echo $VBot_Offline . 'Adverbs.json'; ?>">Adverbs.json</option>
-            <option value="<?php echo $VBot_Offline . 'Object.json'; ?>">Object.json</option>
-            <option value="<?php echo $VBot_Offline . 'BackList.json'; ?>">BackList.json</option>
-            <option value="<?php echo $VBot_Offline . 'stt_token_google_cloud.json'; ?>">stt_token_google_cloud.json</option>
-            <option value="<?php echo $VBot_Offline . 'tts_token_google_cloud.json'; ?>">tts_token_google_cloud.json</option>
-            <option value="<?php echo $VBot_Offline . 'resource/hass/Home_Assistant_Custom.json'; ?>">Home_Assistant_Custom.json</option>
-            <option value="<?php echo $VBot_Offline . 'resource/schedule/Data_Schedule.json'; ?>">Data_Schedule.json</option>
-            <option value="<?php echo $VBot_Offline . 'Media/News_Paper/News_Paper.json'; ?>">VBot Báo, Tin Tức News_Paper.json</option>
-            <option value="<?php echo $directory_path . '/includes/other_data/list_voices_tts_gcloud.json'; ?>">list_voices_tts_gcloud.json</option>
-            <option value="<?php echo $directory_path . '/includes/VBot_Client_Data/Data_VBot_Client.json'; ?>">Data_VBot_Client.json</option>
-            <option value="<?php echo $directory_path . '/includes/VBot_Server_Data/VBot_Devices_Network.json'; ?>">VBot_Devices_Network.json</option>
-            <option value="<?php echo $directory_path . '/includes/Google_Driver_PHP/client_secret.json'; ?>">Google Driver client_secret.json</option>
-            <option value="<?php echo $directory_path . '/includes/Google_Driver_PHP/verify_token.json'; ?>">Google Driver verify_token.json</option>
-            <option value="<?php echo $directory_path . '/includes/cache/PlayList.json'; ?>">Danh Sách Nhạc PlayList.json</option>
-            <option value="<?php echo $directory_path . '/includes/cache/PodCast.json'; ?>">PodCast.json</option>
-            <option value="<?php echo $directory_path . '/includes/cache/Youtube.json'; ?>">Youtube.json</option>
-            <option value="<?php echo $directory_path . '/includes/cache/ZingMP3.json'; ?>">ZingMP3.json</option>
-            <option value="<?php echo $directory_path . '/includes/cache/News_Paper.json'; ?>">WebUI Báo, Tin Tức News_Paper.json</option>
-            <option value="<?php echo $VBot_Offline . 'Version.json'; ?>">VBot Version.json</option>
-            <option value="<?php echo $directory_path . '/Version.json'; ?>">WebUI Version.json</option>
-          </select>
+<select class="form-select border-success" id="file_selector">
+    <option value="" selected>Chọn File JSON Cần Sửa, Đọc</option>
+    <?php
+    $excludeDirs  = ['vendor', '.git', 'node_modules']; // các thư mục muốn bỏ qua
+    $excludeFiles = ['composer.json', 'ignore.json'];  // các file muốn bỏ qua
+    //Hàm đệ quy lấy tất cả file JSON, loại trừ theo mảng
+    function getJsonFiles($dir, $excludeDirs = [], $excludeFiles = []) {
+        $files = [];
+        $items = scandir($dir);
+        foreach ($items as $item) {
+            if ($item === '.' || $item === '..') continue;
+            $path = $dir . DIRECTORY_SEPARATOR . $item;
+            //Loại trừ thư mục
+            if (is_dir($path) && in_array(strtolower($item), array_map('strtolower', $excludeDirs))) {
+                continue;
+            }
+            if (is_dir($path)) {
+                //Đệ quy vào thư mục con
+                $files = array_merge($files, getJsonFiles($path, $excludeDirs, $excludeFiles));
+            } elseif (is_file($path)
+                && pathinfo($path, PATHINFO_EXTENSION) === 'json'
+                && !in_array(strtolower($item), array_map('strtolower', $excludeFiles))) {
+                $files[] = $path;
+            }
+        }
+        return $files;
+    }
+    $jsonFiles = getJsonFiles($VBot_Offline, $excludeDirs, $excludeFiles);
+    foreach ($jsonFiles as $file) {
+        $relativePath = str_replace($VBot_Offline, '', $file);
+        echo '<option value="' . $file . '">' . ltrim($relativePath, DIRECTORY_SEPARATOR) . '</option>';
+    }
+    ?>
+</select>
+<div class="editor" id="editor"></div>
+<div class="editor" id="editor"></div>
+
           <div class="editor" id="editor"></div>
         </div>
       </div>

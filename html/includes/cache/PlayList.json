@@ -3,39 +3,15 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "1CDAE0",
-            "title": "TAY TRÁI CHỈ TRĂNG - DJ TRIỆU MUZIK FT CM REMIX - 左手指月 - Upwards To The Moon",
-            "cover": "https://i.ytimg.com/vi/Pemu_FbzLEs/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=Pemu_FbzLEs",
-            "duration": null,
-            "description": "BẢN FULL 1 TIẾNG: https://youtu.be/YGtVf1q3VAQ?si=5vJdPaUhBmdvKEFp LIÊ...",
-            "source": "Youtube",
-            "id": "Pemu_FbzLEs",
-            "channelTitle": "DJ Triệu Muzik Official",
-            "artist": null
-        },
-        {
-            "ids_list": "CAE18C",
-            "title": "Tay Trái Chỉ Trăng Remix  ( Dj QT Mix )",
-            "cover": "https://i.ytimg.com/vi/wDYn39p3S0U/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=wDYn39p3S0U",
-            "duration": null,
-            "description": "Facebook :https://www.facebook.com/TikTok-QT-Dj-QT-Official-1021176583...",
-            "source": "Youtube",
-            "id": "wDYn39p3S0U",
-            "channelTitle": "Dj QT Mix Official",
-            "artist": null
-        },
-        {
-            "ids_list": "800359",
-            "title": "Nhạc Trung Remix - Tay Trái Chỉ Trăng - Tát Đỉnh Đỉnh - Nhạc Hot TikTok 2021 😅😁",
-            "cover": "https://i.ytimg.com/vi/aHtsBkxP0UY/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=aHtsBkxP0UY",
-            "duration": "00:04:01",
-            "description": "Nhạc Trung Remix - Tay Trái Chỉ Trăng - Tát Đỉnh Đỉnh - Nhạc Hot TikTo...",
-            "source": "Youtube",
-            "id": "aHtsBkxP0UY",
-            "channelTitle": "Lỉnk Music ♡",
+            "ids_list": "50696D",
+            "title": "Thuyền Quyên.mp3",
+            "cover": "http://192.168.14.173/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Thuyền Quyên.mp3",
+            "duration": "2.98 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Thuyền Quyên.mp3",
+            "channelTitle": null,
             "artist": null
         }
     ]

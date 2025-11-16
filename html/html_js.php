@@ -2572,4 +2572,87 @@ $git_repository = $pathParts[1];
         cbHead.checked = false;
         if (logInterval) clearInterval(logInterval);
     });
+
+	//Tìm kiếm dữ liệu trong trang
+	document.addEventListener('DOMContentLoaded', function() {
+	  var searchResults = [];
+	  function findParentH5(el) {
+		var parent = el.parentElement;
+		while(parent) {
+		  var h5 = parent.querySelector('h5');
+		  if(h5) return h5;
+		  parent = parent.parentElement;
+		}
+		return null;
+	  }
+	  function findElementsWithText(keyword) {
+		searchResults = [];
+		var seenTexts = new Set();
+		keyword = keyword.toLowerCase();
+		var elements = document.querySelectorAll('label, button, font');
+		elements.forEach(el => {
+		  var textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
+		  var visibleText = textNodes.map(n => n.textContent)
+									 .map(t => t.split('\n').filter(l => !l.trim().startsWith('//')).join(' '))
+									 .join(' ')
+									 .trim();
+		  if (visibleText.toLowerCase().includes(keyword) && visibleText !== '') {
+			if (!seenTexts.has(visibleText)) {
+			  var parentH5 = findParentH5(el);
+			  searchResults.push({el: el, parentH5: parentH5});
+			  seenTexts.add(visibleText);
+			}
+		  }
+		});
+	  }
+	  function updateDropdown() {
+		var dropdown = document.getElementById('searchResults');
+		dropdown.innerHTML = '';
+		if (searchResults.length === 0) {
+		  dropdown.classList.remove('show');
+		  return;
+		}
+	searchResults.forEach((item, index) => {
+	  var li = document.createElement('li');
+	  li.classList.add('dropdown-item');
+	  var parentH5Text = item.parentH5 ? item.parentH5.textContent.trim() : '';
+	  var elText = item.el.textContent.trim().substring(0,100);
+	  li.textContent = parentH5Text + ' -> ' + elText;
+	  li.addEventListener('click', function() {
+		var el = item.el;
+		var parent = el.parentElement;
+		while(parent) {
+		  if(parent.classList.contains('collapse') && !parent.classList.contains('show')) {
+			var instance = bootstrap.Collapse.getOrCreateInstance(parent);
+			instance.show();
+		  }
+		  parent = parent.parentElement;
+		}
+		setTimeout(function(target){
+			target.scrollIntoView({behavior:'smooth', block:'center'});
+			
+			target.style.backgroundColor = '#c8e6c9'; //xanh nhạt
+			
+			setTimeout(() => {
+				target.style.backgroundColor = '';
+			}, 1500);
+		}, 300, el);
+		dropdown.classList.remove('show'); 
+	  });
+	  dropdown.appendChild(li);
+	});
+		dropdown.classList.add('show');
+	  }
+	  var input = document.getElementById('searchInput');
+	  input.addEventListener('input', function() {
+		var keyword = this.value.trim();
+		if(keyword) {
+		  findElementsWithText(keyword);
+		  updateDropdown();
+		} else {
+		  searchResults = [];
+		  updateDropdown();
+		}
+	  });
+	});
 </script>

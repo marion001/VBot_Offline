@@ -1174,7 +1174,7 @@ include 'html_head.php';
                     <div class="card-body">
                       <h5 class="card-title">Hotword / Từ Nóng Đánh Thức <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
                       <div class="row mb-3">
-                        <label for="continue_running_if_hotword_initialization_fails" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup: <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
+                        <label for="continue_running_if_hotword_initialization_fails" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="continue_running_if_hotword_initialization_fails" id="continue_running_if_hotword_initialization_fails" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] ? 'checked' : ''; ?>>
@@ -1412,7 +1412,7 @@ include 'html_head.php';
                   </div>
                   <?php
                   echo input_field('directory_tts', 'Thư Mục Chứa TTS', $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'], 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                  echo input_field('clean_cache_tts_max_file', 'Dọn Dẹp TTS Nếu Vượt Quá (file):', $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'], 'required', 'number', '1', '50', '', 'Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép', 'border-success', '', '', '', '', '');
+                  echo input_field('clean_cache_tts_max_file', 'Dọn Dẹp TTS Nếu Vượt Quá (file)', $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'], 'required', 'number', '1', '50', '', 'Tự động dọn dẹp tts nếu số lượng tệp tin vượt quá ngưỡng cho phép', 'border-success', '', '', '', '', '');
                   ?>
                   <div class="row">
                     <div class="col-lg-6">
@@ -1934,7 +1934,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   </div>
                   <h5 class="card-title">Hiệu Ứng, Màu Sắc:</h5>
                   <div class="row mb-3">
-                    <label for="led_think" class="col-sm-3 col-form-label" title="Màu LED Khi Lắng Nghe">LED Think <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
+                    <label for="led_think" class="col-sm-3 col-form-label" title="Màu LED Khi Lắng Nghe">LED Think <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="input-group">
                         <input class="form-control border-success" type="text" name="led_think" id="led_think" value="<?php echo $Config['smart_config']['led']['effect']['led_think']; ?>">
@@ -1944,7 +1944,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label for="led_mute" class="col-sm-3 col-form-label" title="Màu LED khi Microphone được tắt">LED Mute <font color="red" size="6" title="Bắt Buộc Nhập">*</font>: <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
+                    <label for="led_mute" class="col-sm-3 col-form-label" title="Màu LED khi Microphone được tắt">LED Mute <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="input-group">
                         <input class="form-control border-success" type="text" name="led_mute" id="led_mute" value="<?php echo $Config['smart_config']['led']['effect']['led_mute']; ?>">
@@ -2205,7 +2205,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i> :</h5>
                       <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi chương trình khởi động')"></i> :</label>
+                        <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi chương trình khởi động')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="sound_welcome_active" id="sound_welcome_active" <?php echo $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] ? 'checked' : ''; ?>>
@@ -2838,7 +2838,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                         <?php
                         echo input_field('chat_gpt_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['key_chat_gpt']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "test_key_ChatGPT('Chào bạn, bạn tên là gì')", 'btn btn-success border-success', 'onclick', '');
-                        echo select_field('chat_gpt_model', 'Model:', ['' => '-- Chọn Model --', 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Khuyến Nghị)', 'gpt-4' => 'GPT-4', 'gpt-4o' => 'GPT-4o', 'gpt-4o-mini' => 'GPT-4o mini', 'gpt-4-turbo' => 'GPT-4 Turbo'], $Config['virtual_assistant']['chat_gpt']['model'], []);
+                        echo select_field('chat_gpt_model', 'Model', ['' => '-- Chọn Model --', 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Khuyến Nghị)', 'gpt-4' => 'GPT-4', 'gpt-4o' => 'GPT-4o', 'gpt-4o-mini' => 'GPT-4o mini', 'gpt-4-turbo' => 'GPT-4 Turbo'], $Config['virtual_assistant']['chat_gpt']['model'], []);
                         echo input_field('chat_gpt_role_system_content', 'Role System Content', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['role_system_content']), '', 'text', '', '', '', 'Thiết lập hành vi mong muốn của Chat GPT trong cuộc trò chuyện, gán GPT như 1 trợ lý, người, vật, v..v...! làm cho trải nghiệm người dùng phù hợp với mục đích cụ thể của bạn.', 'border-success', '', '', '', '', '');
                         echo input_field('chat_gpt_url_api', 'URL API', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['url_api']), '', 'text', '', '', '', '- Hỗ trợ với URL API và API KEY của bên thứ 3<br/><br/>hoặc URL Mặc Định của ChatGPT và Key của ChatGPT: <b>https://api.openai.com/v1/chat/completions</b>', 'border-danger', '', '', '', '', '');
                         echo input_field('chat_gpt_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['time_out']), '', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
@@ -3029,7 +3029,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Khởi Động Lại VBot: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, Chương trình sẽ khởi động lại VBot khi quá trình cập nhật Nâng Cấp VBot thành công')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Khởi Động Lại VBot <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, Chương trình sẽ khởi động lại VBot khi quá trình cập nhật Nâng Cấp VBot thành công')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="restart_vbot_upgrade" id="restart_vbot_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['restart_vbot'] ? 'checked' : ''; ?>>
@@ -3037,7 +3037,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Thông Báo Âm Thanh: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ thông báo bằng âm thanh khi quá trình Cập Nhật, Nâng Cấp Giao Diện Web hoặc chương trình VBot thành công')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Thông Báo Âm Thanh <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ thông báo bằng âm thanh khi quá trình Cập Nhật, Nâng Cấp Giao Diện Web hoặc chương trình VBot thành công')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="sound_notification_backup_upgrade" id="sound_notification_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['sound_notification'] ? 'checked' : ''; ?>>
@@ -3045,7 +3045,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Tải Lại Giao Diện Web: <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ tải lại giao diện Web khi Nâng Cấp, Cập Nhật web ui thành công')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Tải Lại Giao Diện Web <i class="bi bi-question-circle-fill" onclick="show_message('Nếu được bật, sẽ tải lại giao diện Web khi Nâng Cấp, Cập Nhật web ui thành công')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="refresh_page_ui_backup_upgrade" id="refresh_page_ui_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] ? 'checked' : ''; ?>>
@@ -3056,7 +3056,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">Sao Lưu Config.json</h5>
                       <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Config.json mỗi khi lưu hoặc thay đổi cấu hình Config.json')"></i> :</label>
+                        <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Config.json mỗi khi lưu hoặc thay đổi cấu hình Config.json')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="backup_config_json_active" id="backup_config_json_active" <?php echo $Config['backup_upgrade']['config_json']['active'] ? 'checked' : ''; ?>>
@@ -3822,7 +3822,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         showMessagePHP("Không tìm thấy thẻ select tts gcloud được chọn", 5);
         return;
       }
-
       function loadJSON(url, useRaw = false) {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", url, true);
@@ -3870,18 +3869,16 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         };
         xhr.send();
       }
-      // Gọi GitHub trước, nếu lỗi sẽ tự động fallback
       loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
     }
-    // Đặt sự kiện khi DOM đã được tải hoàn toàn
     document.addEventListener('DOMContentLoaded', function() {
-      //cập nhật giá tị khi select thay đổi vào  play_Audio_Welcome
       updateButton_Audio_Welcome();
       document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)
-      // Gọi hàm để cập nhật trạng thái ban đầu lựa chọn nguồn hotword đánh thức
       selectHotwordWakeup();
     });
+
   </script>
+
 </body>
 
 </html>

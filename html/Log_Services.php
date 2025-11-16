@@ -75,64 +75,68 @@ include 'html_head.php';
   include 'html_footer.php';
   ?>
   <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
-  <script>
-    document.getElementById('select_log_file_red').addEventListener('click', function() {
-      var selectedFile = document.getElementById('logFileSelect').value;
-      if (selectedFile) {
-        var fileName = selectedFile.split('/').pop();
-        var xhr = new XMLHttpRequest();
-        xhr.open('GET', 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(selectedFile), true);
-        xhr.onload = function() {
-          if (xhr.status === 200) {
-            var response = JSON.parse(xhr.responseText);
-            if (response.success) {
-              showMessagePHP("Đã tải dữ liệu log", 3);
-              if (response.data.trim() !== "") {
-                document.getElementById('logsOutput').innerHTML = response.data;
-              } else {
-                document.getElementById('logsOutput').innerHTML = 'Không có dữ liệu trong file log: ' + fileName;
-              }
-            }
-          } else {
-            document.getElementById('logsOutput').innerHTML = 'Không thể tải dữ liệu từ server.';
-          }
-        };
-        xhr.send();
-      } else {
-        document.getElementById('logsOutput').innerHTML = 'Vui lòng chọn file Logs để xem';
-        show_message('Vui lòng chọn file Logs để xem');
-      }
-    });
-
-    //Xóa Logs
-    function delete_logs() {
-      var selectElement = document.getElementById('logFileSelect');
-      var selectedValue = selectElement.value;
-      if (!selectedValue) {
-        show_message('Vui Lòng Chọn File Logs để xóa dữ liệu');
-      } else {
-        ;
-        var xhr = new XMLHttpRequest();
-        var url = "includes/php_ajax/Show_file_path.php?empty_the_file&file_path=" + encodeURIComponent(selectedValue);
-        xhr.open("GET", url);
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            try {
-              var response = JSON.parse(xhr.responseText);
-              if (response.success) {
-                showMessagePHP(response.message, 3);
-              } else {
-                showMessagePHP(response.message, 3);
-              }
-            } catch (e) {
-              show_message('Lỗi khi phân tích JSON!' + e);
+<script>
+  //Hàm xử lý load log file
+  function loadLogFile() {
+    var selectedFile = document.getElementById('logFileSelect').value;
+    if (selectedFile) {
+      var fileName = selectedFile.split('/').pop();
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(selectedFile), true);
+      xhr.onload = function() {
+        if (xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            showMessagePHP("Đã tải dữ liệu log", 3);
+            if (response.data.trim() !== "") {
+              document.getElementById('logsOutput').innerHTML = response.data;
+            } else {
+              document.getElementById('logsOutput').innerHTML = 'Không có dữ liệu trong file log: ' + fileName;
             }
           }
-        };
-        xhr.send();
-      }
+        } else {
+          document.getElementById('logsOutput').innerHTML = 'Không thể tải dữ liệu từ server.';
+        }
+      };
+      xhr.send();
+    } else {
+      document.getElementById('logsOutput').innerHTML = 'Vui lòng chọn file Logs để xem';
+      show_message('Vui lòng chọn file Logs để xem');
     }
-  </script>
+  }
+  // Gán event click cho button
+  document.getElementById('select_log_file_red').addEventListener('click', loadLogFile);
+  // Hàm xóa logs
+  function delete_logs() {
+    var selectElement = document.getElementById('logFileSelect');
+    var selectedValue = selectElement.value;
+    if (!selectedValue) {
+      show_message('Vui Lòng Chọn File Logs để xóa dữ liệu');
+      return;
+    }
+    var xhr = new XMLHttpRequest();
+    var url = "includes/php_ajax/Show_file_path.php?empty_the_file&file_path=" + encodeURIComponent(selectedValue);
+    xhr.open("GET", url);
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        try {
+          var response = JSON.parse(xhr.responseText);
+          if (response.success) {
+            showMessagePHP(response.message, 3);
+          } else {
+            showMessagePHP(response.message, 3);
+          }
+          // Sau khi xóa xong, load lại dữ liệu log
+          loadLogFile();
+        } catch (e) {
+          show_message('Lỗi khi phân tích JSON!' + e);
+        }
+      }
+    };
+    xhr.send();
+  }
+</script>
+
   <?php
   include 'html_js.php';
   ?>
