@@ -321,7 +321,7 @@ if (isset($_GET['ZingMP3_GetLink'])) {
 	}
 }
 
-// tìm kiếm Zingmp3
+//tìm kiếm Zingmp3
 if (isset($_GET['ZingMP3_Search'])) {
 	$Song_Name = isset($_GET['SongName']) ? urlencode($_GET['SongName']) : '';
 	// Kiểm tra nếu biến Song_Name không có dữ liệu
@@ -398,7 +398,7 @@ if (isset($_GET['ZingMP3_Search'])) {
 	exit();
 }
 
-// get dữ liệu cache Zing
+//get dữ liệu cache Zing
 if (isset($_GET['Cache_ZingMP3'])) {
 	$zingmp3JsonPath = "../cache/ZingMP3.json";
 	if (!file_exists($zingmp3JsonPath)) {
@@ -407,6 +407,102 @@ if (isset($_GET['Cache_ZingMP3'])) {
 		chmod($zingmp3JsonPath, 0777);
 	}
 	$jsonData = file_get_contents($zingmp3JsonPath);
+	$data = json_decode($jsonData, true);
+	if (json_last_error() === JSON_ERROR_NONE) {
+		echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	} else {
+		echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	}
+	exit();
+}
+
+//Get dữ liệu Nhạc Của Tui
+if (isset($_GET['NhacCuaTui_Search'])) {
+    $Song_Name = isset($_GET['SongName']) ? $_GET['SongName'] : '';
+	if (empty($Song_Name)) {
+		$response = array(
+			'success' => false,
+			'message' => 'Tên bài hát không được cung cấp.',
+			'results' => []
+		);
+		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit;
+	}
+	$nhaccuatuiJsonPath = '../cache/NhacCuaTui.json';
+	if (!file_exists($nhaccuatuiJsonPath)) {
+		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		chmod($nhaccuatuiJsonPath, 0777);
+	}
+    $url = "https://graph.nhaccuatui.com/api/v3/search/all?keyword=".urlencode($Song_Name)."&correct=false&timestamp=".round(microtime(true) * 1000);
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $response = curl_exec($ch);
+    if ($response === false) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Lỗi cURL: " . curl_error($ch),
+			"results" => []
+        ], JSON_UNESCAPED_UNICODE);
+    } else {
+        $data = json_decode($response, true);
+        $songs = isset($data['data']['songs']) ? $data['data']['songs'] : [];
+        if (!$songs) {
+            echo json_encode([
+                "success" => false,
+                "message" => "Không tìm thấy bài hát",
+				"results" => []
+            ], JSON_UNESCAPED_UNICODE);
+        } else {
+            $results = [];
+            $count = 0;
+            foreach ($songs as $song) {
+                if ($count >= 10) break; // chỉ lấy 10 bài gần nhất
+                $name = isset($song['name']) ? $song['name'] : '';
+                $image = isset($song['image']) ? $song['image'] : '';
+                $duration = isset($song['duration']) ? $song['duration'] : 0;
+                $artistName = isset($song['artistName']) ? $song['artistName'] : '';
+                $stream = null;
+                if (isset($song['streamURL']) && is_array($song['streamURL'])) {
+                    $stream_320 = null;
+                    $stream_128 = null;
+                    foreach ($song['streamURL'] as $s) {
+                        if (isset($s['type']) && $s['type'] === '320') {
+                            $stream_320 = isset($s['stream']) ? $s['stream'] : null;
+                        }
+                        if (isset($s['type']) && $s['type'] === '128') {
+                            $stream_128 = isset($s['stream']) ? $s['stream'] : null;
+                        }
+                    }
+                    $stream = $stream_320 ? $stream_320 : $stream_128;
+                }
+                $results[] = [
+                    "name" => $name,
+                    "thumb" => $image,
+                    "duration" => str_pad(floor($duration / 60), 2, '0', STR_PAD_LEFT) . ':' . str_pad($duration % 60, 2, '0', STR_PAD_LEFT),
+                    "artist" => $artistName,
+                    "url" => $stream
+                ];
+                $count++;
+            }
+            echo json_encode(["success" => true, "results" => $results], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+			file_put_contents($nhaccuatuiJsonPath, json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        }
+    }
+    curl_close($ch);
+	exit();
+}
+
+//get dữ liệu cache NhacCuaTui
+if (isset($_GET['Cache_NhacCuaTui'])) {
+	$nhaccuatuiJsonPath = "../cache/NhacCuaTui.json";
+	if (!file_exists($nhaccuatuiJsonPath)) {
+		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
+		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		chmod($nhaccuatuiJsonPath, 0777);
+	}
+	$jsonData = file_get_contents($nhaccuatuiJsonPath);
 	$data = json_decode($jsonData, true);
 	if (json_last_error() === JSON_ERROR_NONE) {
 		echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

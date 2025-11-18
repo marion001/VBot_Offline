@@ -782,6 +782,71 @@ $git_repository = $pathParts[1];
         xhr.send();
     }
 
+    //Hiển thị dữ liệu cache NhacCuaTui
+    function cacheNhacCuaTui() {
+        var inputElement = document.getElementById("tim_kiem_bai_hat_all");
+        if (inputElement) {
+            inputElement.style.display = "";
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_NhacCuaTui', true);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                var nhaccuatuiDataDiv = document.getElementById('show_list_NhacCuaTui');
+                if (!nhaccuatuiDataDiv) {
+                    nhaccuatuiDataDiv = document.getElementById('tableContainer');
+                }
+                try {
+                    nhaccuatuiDataDiv.innerHTML = '';
+                    if (!document.getElementById("song_name_value")) {
+                        nhaccuatuiDataDiv.innerHTML += '<div class="input-group mb-3">' +
+                            '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">' +
+                            '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+                            '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'NhacCuaTui\')"><i class="bi bi-search"></i></button>' +
+                            '<button type="button" class="btn btn-primary border-success" onclick="cacheNhacCuaTui()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+                        //Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
+                        setTimeout(function() {
+                            if (document.getElementById('song_name_value')) {
+                                document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
+                            }
+                        }, 0);
+                    }
+                    var data = JSON.parse(xhr.responseText);
+                    //Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
+                    if (Array.isArray(data) && data.length > 0) {
+                        nhaccuatuiDataDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache NhacCuaTui" onclick="cache_delete(\'NhacCuaTui\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
+                        //Duyệt qua dữ liệu và tạo danh sách các bài hát
+                        data.forEach(function(cache_nct) {
+                            var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+                            fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+                            fileInfo += '<img src="' + cache_nct.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + cache_nct.name + '</font></p>';
+                            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + cache_nct.artist + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (cache_nct.duration || 'N/A') + '</font></p>';
+                            fileInfo += '<button class="btn btn-success" title="Phát: ' + cache_nct.name + '" onclick="startMediaPlayer(\'' + cache_nct.url + '\', \'' + cache_nct.name + '\', \'' + cache_nct.thumb + '\', \'NhacCuaTui\')"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + cache_nct.name + '" onclick="addToPlaylist(\'' + cache_nct.name + '\', \'' + cache_nct.thumb + '\', \'' + cache_nct.url + '\', \'' + (cache_nct.duration || 'N/A') + '\', null, \'NhacCuaTui\', \'' + cache_nct.url + '\', null, \'' + cache_nct.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
+                            fileInfo += ` <button class="btn btn-warning" title="Tải Xuống: ${cache_nct.name}" onclick="downloadFile('${cache_nct.url.substring(0, cache_nct.url.indexOf('.mp3') + 4)}')"><i class="bi bi-download"></i></button>`;
+                            fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: ' + cache_nct.name + '" onclick="download_Link_url_to_local(\'' + cache_nct.url + '\', \'' + cache_nct.name + '\')"><i class="bi bi-save2"></i></button>';
+                            fileInfo += '</div></div>';
+                            nhaccuatuiDataDiv.innerHTML += fileInfo;
+                            adjustContainerStyle_tableContainer();
+                        });
+                    } else {
+                        nhaccuatuiDataDiv.innerHTML += '<center>Không có dữ liệu NhacCuaTui từ bộ nhớ cache</center>';
+                    }
+                } catch (e) {
+                    show_message('Lỗi phân tích cache NhacCuaTui JSON: ' + e);
+                }
+            } else {
+                show_message('Không thể tải dữ liệu cache NhacCuaTui. Trạng thái: ' + xhr.status);
+            }
+        };
+        xhr.onerror = function() {
+            show_message('Lỗi khi thực hiện yêu cầu cache NhacCuaTui');
+        };
+        xhr.send();
+    }
+
     //Hiển thị dữ liệu cache PodCast nếu có
     function cachePodCast() {
         var inputElement = document.getElementById("tim_kiem_bai_hat_all");
@@ -1074,6 +1139,9 @@ $git_repository = $pathParts[1];
             case 'ZingMP3':
                 url = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_Search&SongName=' + searchInput;
                 break;
+            case 'NhacCuaTui':
+                url = 'includes/php_ajax/Media_Player_Search.php?NhacCuaTui_Search&SongName=' + searchInput;
+                break;
             case 'PodCast':
                 url = 'includes/php_ajax/Media_Player_Search.php?podcast_Search&PodCastName=' + searchInput + '&Limit=1';
                 break;
@@ -1100,6 +1168,9 @@ $git_repository = $pathParts[1];
                             break;
                         case 'ZingMP3':
                             processZingMP3Data(data);
+                            break;
+                        case 'NhacCuaTui':
+                            processNhacCuaTuiData(data);
                             break;
                         case 'PodCast':
                             processPodCastData(data);
@@ -2370,6 +2441,7 @@ $git_repository = $pathParts[1];
         };
         xhr.send();
     }
+
 
     // Tải file MP3 từ URL vào thư mục local trên server
     function download_Link_url_to_local(url_audio, songName) {

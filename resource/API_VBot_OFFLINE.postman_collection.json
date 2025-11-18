@@ -682,6 +682,62 @@
 			"response": []
 		},
 		{
+			"name": "Kích Hoạt Nguồn Phát NhacCuaTui",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"nhaccuatui\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.173:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"173"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Vô Hiệu Nguồn Phát NhacCuaTui",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"nhaccuatui\",\r\n    \"action\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.173:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"173"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Kích Hoạt Nguồn Phát Nhạc Local",
 			"request": {
 				"method": "POST",

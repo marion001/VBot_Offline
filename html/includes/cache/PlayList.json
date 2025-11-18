@@ -13,6 +13,54 @@
             "id": "/home/pi/VBot_Offline/Media/Music_Local/Thuyền Quyên.mp3",
             "channelTitle": null,
             "artist": null
+        },
+        {
+            "ids_list": "02FD15",
+            "title": "Tấm Cám",
+            "cover": "https://cdn-ocs.iviet.com/cover/2022/August/dce88ab5-a725-47c6-8ecc-b0094f2026ad.jpeg",
+            "audio": "https://cdn-ocs.iviet.com/audio/2022/May/ad0c47fd-be62-4db8-b658-f12eb566d731.mp3",
+            "duration": "00:22:45",
+            "description": "Truyện",
+            "source": "PodCast",
+            "id": "https://cdn-ocs.iviet.com/audio/2022/May/ad0c47fd-be62-4db8-b658-f12eb566d731.mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "F69C86",
+            "title": "Thuyền Quyên (Lofi Ver)",
+            "cover": "https://image-cdn.nct.vn/song/2023/01/09/f/5/7/7/1673239503736.jpg",
+            "audio": "https://stream.nct.vn/NhacCuaTui2034/ThuyenQuyenLofiVer-DieuKienCaoTri-8520916_hq.mp3?st=81JrH29qsyfgSbJDMaC4uw&e=1763991187&a=1&p=0&r=3ad92f5d288d334c3a27f146562921f9",
+            "duration": "03:31",
+            "description": null,
+            "source": "NhacCuaTui",
+            "id": "https://stream.nct.vn/NhacCuaTui2034/ThuyenQuyenLofiVer-DieuKienCaoTri-8520916_hq.mp3?st=81JrH29qsyfgSbJDMaC4uw&e=1763991187&a=1&p=0&r=3ad92f5d288d334c3a27f146562921f9",
+            "channelTitle": null,
+            "artist": "Diệu Kiên, CaoTri"
+        },
+        {
+            "ids_list": "841235",
+            "title": "Tuyệt Duyên - Thương Ly Biệt 2",
+            "cover": "https://image-cdn.nct.vn/song/2024/01/31/c/9/2/3/1706683664922.jpg",
+            "audio": "https://stream.nct.vn/NCTSong/2401/3c/81/vkqq4mujfz_hq.mp3?st=JddOZEGOAv6_BLtka1042Q&e=1763995898&a=1&p=0&r=04b7e5f4cb0681afe93ea4594ed518c9",
+            "duration": "04:50",
+            "description": null,
+            "source": "NhacCuaTui",
+            "id": "https://stream.nct.vn/NCTSong/2401/3c/81/vkqq4mujfz_hq.mp3?st=JddOZEGOAv6_BLtka1042Q&e=1763995898&a=1&p=0&r=04b7e5f4cb0681afe93ea4594ed518c9",
+            "channelTitle": null,
+            "artist": "Ngân Ngân"
+        },
+        {
+            "ids_list": "4A5E2D",
+            "title": "Tình Khúc Vàng",
+            "cover": "https://image-cdn.nct.vn/song/2014/02/12/4/5/5/0/1392176726976.jpg",
+            "audio": "https://stream.nct.vn/NhacCuaTui161/TinhKhucVang-DanTruong_36yvf_hq.mp3?st=6ImqX0ErlxD6fsZPBb4_cA&e=1763996201&a=1&p=0&r=88c3e73e164f19f79a7cf34b4e0068db",
+            "duration": "05:08",
+            "description": null,
+            "source": "NhacCuaTui",
+            "id": "https://stream.nct.vn/NhacCuaTui161/TinhKhucVang-DanTruong_36yvf_hq.mp3?st=6ImqX0ErlxD6fsZPBb4_cA&e=1763996201&a=1&p=0&r=88c3e73e164f19f79a7cf34b4e0068db",
+            "channelTitle": null,
+            "artist": "Đan Trường"
         }
     ]
 }

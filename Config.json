@@ -187,6 +187,9 @@
             "authentication_zmp3_rqid": "Ew",
             "expire_time": 1746610000
         },
+        "nhaccuatui": {
+            "active": true
+        },
         "news_paper": {
             "active": true,
             "path": "Media/News_Paper",

@@ -118,6 +118,9 @@ include 'html_head.php';
                   <button class="nav-link w-100" id="zing-tab" name="ZingMP3" data-bs-toggle="tab" data-bs-target="#bordered-justified-zing" type="button" role="tab" aria-controls="zing" aria-selected="false" tabindex="-1" onclick="cacheZingMP3()">ZingMP3</button>
                 </li>
                 <li class="nav-item flex-fill" role="presentation">
+                  <button class="nav-link w-100" id="nhaccuatui-tab" name="NhacCuaTui" data-bs-toggle="tab" data-bs-target="#bordered-justified-nhaccuatui" type="button" role="tab" aria-controls="nhaccuatui" aria-selected="false" tabindex="-1" onclick="cacheNhacCuaTui()">NhacCuaTui</button>
+                </li>
+                <li class="nav-item flex-fill" role="presentation">
                   <button class="nav-link w-100" id="youtube-tab" name="Youtube" data-bs-toggle="tab" data-bs-target="#bordered-justified-youtube" type="button" role="tab" aria-controls="youtube" aria-selected="false" tabindex="-1" onclick="cacheYoutube()">Youtube</button>
                 </li>
                 <li class="nav-item flex-fill" role="presentation">
@@ -152,6 +155,9 @@ include 'html_head.php';
                 </div>
                 <div class="tab-pane fade" id="bordered-justified-zing" role="tabpanel" aria-labelledby="zing-tab">
                   <div id="show_list_ZingMP3" style="max-height: 700px; overflow: auto;"></div>
+                </div>
+                <div class="tab-pane fade" id="bordered-justified-nhaccuatui" role="tabpanel" aria-labelledby="nhaccuatui-tab">
+                  <div id="show_list_NhacCuaTui" style="max-height: 700px; overflow: auto;"></div>
                 </div>
                 <div class="tab-pane fade" id="bordered-justified-youtube" role="tabpanel" aria-labelledby="youtube-tab">
                   <div id="show_list_Youtube" style="max-height: 700px; overflow: auto;"></div>
@@ -247,7 +253,7 @@ include 'html_head.php';
                   fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: ' + playlist.title + '" onclick="download_zingMp3_to_local(\'' + playlist.id + '\', \'' + playlist.title + '\')"><i class="bi bi-save2"></i></button>';
                   fileInfo += ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: ' + playlist.title + '" onclick="deleteFromPlaylist(\'delete_some\', \'' + playlist.ids_list + '\')"><i class="bi bi-trash"></i></button>';
                   fileInfo += '</div></div>';
-                } else if (playlist.source === "PodCast") {
+                }else if (playlist.source === "PodCast") {
                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
                   fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color="green">' + playlist.title + '</font></p>';

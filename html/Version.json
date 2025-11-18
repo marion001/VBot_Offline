@@ -1,8 +1,8 @@
 {
-    "version": "1.0.73",
+    "version": "1.0.74",
     "projectName": "WebUI VBot Offline",
-    "description": "Thêm Tính Năng Tìm Kiếm Trong Trang, Sửa lỗi Xử Lý Dữ Liệu Client, Cập Nhật Xiaozhi MCP Server System VBot",
-    "releaseDate": "16/11/2025",
+    "description": "Cập Nhật Thêm Nguồn Nhạc: NhacCuaTui - NCT, Sửa lỗi Xử Lý Dữ Liệu Client, Cập Nhật Xiaozhi MCP Server System VBot",
+    "releaseDate": "18/11/2025",
     "changes": [
         {
             "type": "feature",

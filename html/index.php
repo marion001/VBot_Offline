@@ -218,7 +218,7 @@ include 'html_head.php';
               <div class="card">
                 <div class="card-body">
                   <div class="card-title">
-                    <label>Trình Phát Đa Phương Tiện:</label>
+                    <label>Trình Phát Đa Phương Tiện - Media Player:</label>
                   </div>
                   <div id="media-container">
                     <img id="media-cover" src="assets/img/Error_Null_Media_Player.png" alt="Media Cover">
@@ -275,6 +275,7 @@ include 'html_head.php';
                     <option value="Local">Local (Nội bộ)</option>
                     <option value="Youtube">Youtube</option>
                     <option value="ZingMP3">ZingMP3</option>
+                    <option value="NhacCuaTui">NhacCuaTui</option>
                     <option value="PodCast">PodCast</option>
                     <option value="Radio">Đài, Radio</option>
                     <option value="NewsPaper">Báo, Tin Tức</option>
@@ -554,6 +555,12 @@ include 'html_head.php';
                         <input class="form-check-input border-success" value="zing_mp3_active" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" onclick="change_to_another_mode('zing_mp3', this.checked)" <?php if ($Config['media_player']['zing_mp3']['active'] === true) echo "checked"; ?>>
                         <label class="form-check-label">
                           Zing MP3
+                        </label>
+                      </div>
+                      <div class="form-check">
+                        <input class="form-check-input border-success" value="nhaccuatui_active" type="checkbox" name="nhaccuatui_active" id="nhaccuatui_active" onclick="change_to_another_mode('nhaccuatui', this.checked)" <?php if ($Config['media_player']['nhaccuatui']['active'] === true) echo "checked"; ?>>
+                        <label class="form-check-label">
+                          NhacCuaTui - NCT
                         </label>
                       </div>
                       <div class="form-check">
@@ -1010,6 +1017,7 @@ include 'html_head.php';
             document.getElementById('wake_up_in_media_player').checked = data.media_player.wake_up_in_media_player ? true : false;
             document.getElementById('music_local_active').checked = data.media_player.music_local_active ? true : false;
             document.getElementById('zing_mp3_active').checked = data.media_player.zing_mp3_active ? true : false;
+            document.getElementById('nhaccuatui_active').checked = data.media_player.nhaccuatui_active ? true : false;
             document.getElementById('youtube_active').checked = data.media_player.youtube_active ? true : false;
             document.getElementById('news_paper_active').checked = data.news_paper_active ? true : false;
             //document.getElementById('display_screen_active').checked = data.display_screen_active ? true : false;
@@ -1370,7 +1378,12 @@ include 'html_head.php';
                   '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="get_ZingMP3_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'' + playlist.artist + '\')"><i class="bi bi-play-circle"></i></button>' : '') +
                 (playlist.source === 'PodCast' ?
                   '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
-                  '<a href="' + playlist.audio + '" target="_blank">' +
+                  '<a href="' + playlist.audio + '" target="_blank"> ' +
+                  '<button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
+                  '</a>' : '') +
+                (playlist.source === 'NhacCuaTui' ?
+                  '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
+                  '<a href="' + playlist.audio + '" target="_blank"> ' +
                   '<button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
                   '</a>' : '') +
                 (playlist.source === 'Local' ?
@@ -1437,6 +1450,10 @@ include 'html_head.php';
         document.getElementById('NewsPaper_Select').style.display = 'none';
         document.getElementById('tableContainer').style.display = '';
         cacheZingMP3();
+      }else if (selectedValue_cache_media === "NhacCuaTui") {
+        document.getElementById('NewsPaper_Select').style.display = 'none';
+        document.getElementById('tableContainer').style.display = '';
+        cacheNhacCuaTui();
       } else if (selectedValue_cache_media === "PodCast") {
         document.getElementById('NewsPaper_Select').style.display = 'none';
         document.getElementById('tableContainer').style.display = '';
@@ -1449,7 +1466,6 @@ include 'html_head.php';
         document.getElementById('NewsPaper_Select').style.display = '';
         document.getElementById('tableContainer').style.display = '';
         cache_NewsPaper()
-
       }
     });
 

@@ -280,7 +280,8 @@ if (isset($_POST['all_config_save'])) {
   $music_source_priority_1 = isset($_POST['music_source_priority1']) ? $_POST['music_source_priority1'] : '';
   $music_source_priority_2 = isset($_POST['music_source_priority2']) ? $_POST['music_source_priority2'] : '';
   $music_source_priority_3 = isset($_POST['music_source_priority3']) ? $_POST['music_source_priority3'] : '';
-  $Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3];
+  $music_source_priority_4 = isset($_POST['music_source_priority4']) ? $_POST['music_source_priority4'] : '';
+  $Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3, $music_source_priority_4];
 
   #Cập nhật cấu hình PlayList
   $Config['media_player']['play_list']['newspaper_play_mode'] = isset($_POST['newspaper_play_mode']) ? $_POST['newspaper_play_mode'] : 'sequential';
@@ -311,6 +312,9 @@ if (isset($_POST['all_config_save'])) {
 
   #Cập nhật giá trị Zingmp3 xem có kích hoạt hay không
   $Config['media_player']['zing_mp3']['active'] = isset($_POST['zing_mp3_active']) ? true : false;
+
+  #Cập nhật giá trị nhaccuatui xem có được kích hoạt hay không
+  $Config['media_player']['nhaccuatui']['active'] = isset($_POST['nhaccuatui_active']) ? true : false;
 
   #cẬP NHẬT GIÁ TRỊ Trợ Lý Ảo/Assistant:
   $Config['virtual_assistant']['google_gemini']['api_key'] = $_POST['google_gemini_key'];
@@ -2349,9 +2353,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
                       <?php
-                      echo select_field('music_source_priority1', 'Top 1', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0], []);
-                      echo select_field('music_source_priority2', 'Top 2', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1], []);
-                      echo select_field('music_source_priority3', 'Top 3', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2], []);
+                      echo select_field('music_source_priority1', 'Top 1', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0], []);
+                      echo select_field('music_source_priority2', 'Top 2', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1], []);
+                      echo select_field('music_source_priority3', 'Top 3', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2], []);
+                      echo select_field('music_source_priority4', 'Top 4', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][3], []);
                       ?>
                     </div>
                   </div>
@@ -2372,6 +2377,19 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="zing_mp3_active" id="zing_mp3_active" <?php echo $Config['media_player']['zing_mp3']['active'] ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">NhacCuaTui - NCT:</h5>
+                      <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc NhacCuaTui - NCT')"></i> :</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="nhaccuatui_active" id="nhaccuatui_active" <?php echo $Config['media_player']['nhaccuatui']['active'] ? 'checked' : ''; ?>>
                           </div>
                         </div>
                       </div>
@@ -2947,7 +2965,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   echo input_field('xiaozhi_mac_device_id', 'Địa Chỉ MAC', $Config['xiaozhi']['system_options']['device_id'] ?? '', 'disabled', 'text', '', '', '', 'Địa Chỉ Mac Của Thiết Bị Này', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_websocket_access_token', 'WebSocket Token', $Config['xiaozhi']['system_options']['network']['websocket_access_token'] ?? '', 'disabled', 'text', '', '', '', 'Mặc định là: test-token', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_mqtt_endpoint', 'MQTT Link/URL Server', $Config['xiaozhi']['system_options']['network']['mqtt_info']['endpoint'] ?? '', 'disabled', 'text', '', '', '', 'Máy Chủ MQTT', 'border-danger', '', '', '', '', '');
-                  echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $Config['xiaozhi']['system_options']['network']['mqtt_info']['client_id'] ?? '', 'disabled', 'text', '', '', '', 'border-danger', '', '', '', '', '');
+                  echo input_field('xiaozhi_mqtt_client_id', 'MQTT Client ID', $Config['xiaozhi']['system_options']['network']['mqtt_info']['client_id'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_mqtt_username', 'MQTT Tài Khoản', $Config['xiaozhi']['system_options']['network']['mqtt_info']['username'] ?? '', 'disabled', 'text', '', '', '', 'Tài Khoản MQTT', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $Config['xiaozhi']['system_options']['network']['mqtt_info']['password'] ?? '', 'disabled', 'text', '', '', '', 'Mật Khẩu MQTT', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');

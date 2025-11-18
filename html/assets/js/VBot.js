@@ -54,11 +54,9 @@ function updateDate() {
     var year = d.getFullYear();
     var day = d.getDay();
     var dayarr = ["Chủ Nhật", "Thứ 2", "Thứ 3", "Thứ 4", "Thứ 5", "Thứ 6", "Thứ 7"];
-
     if (document.getElementById("days")) {
         document.getElementById("days").innerHTML = dayarr[day];
     }
-
     if (document.getElementById("dates")) {
         document.getElementById("dates").innerHTML = date + "/" + montharr[month] + "/" + year;
     }
@@ -128,6 +126,8 @@ function checkInput_MediaPlayer() {
                 actionButton.setAttribute('onclick', 'media_player_search("Youtube")');
             } else if (selectedValue === 'ZingMP3') {
                 actionButton.setAttribute('onclick', 'media_player_search("ZingMP3")');
+            }else if (selectedValue === 'NhacCuaTui') {
+                actionButton.setAttribute('onclick', 'media_player_search("NhacCuaTui")');
             } else if (selectedValue === 'PodCast') {
                 actionButton.setAttribute('onclick', 'media_player_search("PodCast")');
             } else {
@@ -211,6 +211,39 @@ function processZingMP3Data(data_media_ZingMP3) {
             fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + zing.name + '" onclick="addToPlaylist(\'' + zing.name + '\', \'' + zing.thumb + '\', \'' + zing.id + '\', \'' + (zing.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + zing.id + '\', null, \'' + zing.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
             fileInfo += ' <button class="btn btn-warning" title="Tải Xuống: ' + zing.name + '" onclick="dowload_ZingMP3_ID(\'' + zing.id + '\', \'' + zing.name + '\')"><i class="bi bi-download"></i></button>';
             fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: ' + zing.name + '" onclick="download_zingMp3_to_local(\'' + zing.id + '\', \'' + zing.name + '\')"><i class="bi bi-save2"></i></button>';
+            fileInfo += '</div></div>';
+            fileListDiv.innerHTML += fileInfo;
+        });
+    }
+}
+
+function processNhacCuaTuiData(data_media_NhacCuaTui) {
+    var fileListDiv = document.getElementById('show_list_NhacCuaTui');
+    if (!fileListDiv) {
+        fileListDiv = document.getElementById('tableContainer');
+    }
+    if (!data_media_NhacCuaTui || !Array.isArray(data_media_NhacCuaTui.results) || data_media_NhacCuaTui.results.length === 0) {
+        show_message('<p>Không có dữ liệu bài hát tương ứng với từ khóa trên NhacCuaTui</p>');
+    } else {
+        fileListDiv.innerHTML = '';
+        if (!document.getElementById("song_name_value")) {
+            fileListDiv.innerHTML += '<div class="input-group mb-3">' +
+                '<input required class="form-control border-success" type="text" name="song_name" id="song_name_value" placeholder="Tìm kiếm bài hát" title="Nhập tên bài hát cần tìm kiếm" value="">' +
+                '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
+                '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'NhacCuaTui\')"><i class="bi bi-search"></i></button>' +
+                '<button type="button" class="btn btn-primary border-success" onclick="cacheNhacCuaTui()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
+        }
+        data_media_NhacCuaTui.results.forEach(function (nct) {
+            var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
+            fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
+            fileInfo += '<img src="' + nct.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + nct.name + '</font></p>';
+            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + nct.artist + '</font></p>';
+            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (nct.duration || 'N/A') + '</font></p>';
+            fileInfo += '<button class="btn btn-success" title="Phát: ' + nct.name + '" onclick="startMediaPlayer(\'' + nct.url + '\', \'' + nct.name + '\', \'' + nct.thumb + '\', \'NhacCuaTui\')"><i class="bi bi-play-circle"></i></button>';
+            fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + nct.name + '" onclick="addToPlaylist(\'' + nct.name + '\', \'' + nct.thumb + '\', \'' + nct.url + '\', \'' + (nct.duration || 'N/A') + '\', null, \'NhacCuaTui\', \'' + nct.url + '\', null, \'' + nct.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
+            fileInfo += ` <button class="btn btn-warning" title="Tải Xuống: ${nct.name}" onclick="downloadFile('${nct.url.substring(0, nct.url.indexOf('.mp3') + 4)}')"><i class="bi bi-download"></i></button>`;
+            fileInfo += ' <button class="btn btn-info" title="Tải Vào Thư Mục Local: ' + nct.name + '" onclick="download_Link_url_to_local(\'' + nct.url + '\', \'' + nct.name + '\')"><i class="bi bi-save2"></i></button>';
             fileInfo += '</div></div>';
             fileListDiv.innerHTML += fileInfo;
         });
