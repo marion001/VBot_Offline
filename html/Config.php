@@ -2353,10 +2353,34 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <div class="card-body">
                       <h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
                       <?php
-                      echo select_field('music_source_priority1', 'Top 1', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][0], []);
-                      echo select_field('music_source_priority2', 'Top 2', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][1], []);
-                      echo select_field('music_source_priority3', 'Top 3', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][2], []);
-                      echo select_field('music_source_priority4', 'Top 4', ['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'], $Config['media_player']['prioritize_music_source'][3], []);
+						echo select_field(
+							'music_source_priority1',
+							'Top 1',
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							isset($Config['media_player']['prioritize_music_source'][0]) ? $Config['media_player']['prioritize_music_source'][0] : '',
+							[]
+						);
+						echo select_field(
+							'music_source_priority2',
+							'Top 2',
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							isset($Config['media_player']['prioritize_music_source'][1]) ? $Config['media_player']['prioritize_music_source'][1] : '',
+							[]
+						);
+						echo select_field(
+							'music_source_priority3',
+							'Top 3',
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							isset($Config['media_player']['prioritize_music_source'][2]) ? $Config['media_player']['prioritize_music_source'][2] : '',
+							[]
+						);
+						echo select_field(
+							'music_source_priority4',
+							'Top 4',
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							isset($Config['media_player']['prioritize_music_source'][3]) ? $Config['media_player']['prioritize_music_source'][3] : '',
+							[]
+						);
                       ?>
                     </div>
                   </div>
