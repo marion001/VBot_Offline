@@ -11,7 +11,6 @@ include 'Configuration.php';
 $output_notify = ''; // Biến tạm để lưu nội dung
 $i_count = 0; // Khai báo biến toàn cục để đếm
 
-// Hàm sử dụng cURL để lấy nội dung từ URL
 function fetchContent($url)
 {
   $curl = curl_init();
@@ -31,33 +30,36 @@ function fetchContent($url)
 
 function checkPermissions($dir)
 {
-  global $output_notify, $i_count, $excluded_items_chmod;
-  $items = scandir($dir);
-  foreach ($items as $item) {
-    //if ($item == '.' || $item == '..') continue;
-    if (in_array($item, $excluded_items_chmod)) continue;
-    $path = $dir . '/' . $item;
-    $permissions = substr(sprintf('%o', fileperms($path)), -3);
-    // Kiểm tra quyền có phải là 777 hay không
-    if ($permissions != '777') {
-      $i_count++;
-      $output_notify .= '
-  			<li>
-                <hr class="dropdown-divider">
-              </li><li class="notification-item">
-                <i class="bi bi-exclamation-circle text-warning"></i>
-                <div>
-                  <h4>Cấp Quyền Chmod</h4>
-                  <p>Một số file, thư mục chưa được cấp quyền</p>
-                  <p class="text-danger" onclick="command_php(\'chmod_vbot\', true)">Cấp Quyền</p>
-                </div>
-              </li>';
+    global $output_notify, $i_count, $excluded_items_chmod;
+    $items = scandir($dir);
+    foreach ($items as $item) {
+        if ($item == '.' || $item == '..') continue;
+        if (in_array($item, $excluded_items_chmod)) continue;
+        $path = $dir . '/' . $item;
+        $permissions = substr(sprintf('%o', fileperms($path)), -3);
+        if ($permissions != '777') {
+            $i_count++;
+        }
+        if (is_dir($path)) {
+            checkPermissions($path);
+        }
     }
-    // Nếu là thư mục, đệ quy để kiểm tra các thư mục con
-    if (is_dir($path)) {
-      checkPermissions($path);
+    static $printed = false;
+    if (!$printed && $i_count > 0) {
+        $printed = true;
+        $output_notify .= '
+        <li>
+            <hr class="dropdown-divider">
+        </li>
+        <li class="notification-item">
+            <i class="bi bi-exclamation-circle text-warning"></i>
+            <div>
+                <h4 class="text-danger">Cấp Quyền Chmod</h4>
+                <p class="text-primary">Có: <b>' . $i_count . '</b> file, thư mục chưa được cấp quyền thao tác</p>
+                <p class="text-success" onclick="command_php(\'chmod_vbot\', true)" style="cursor: pointer;">Nhấn Để Cấp Quyền</p>
+            </div>
+        </li>';
     }
-  }
 }
 
 $real_directory_path = realpath($directory_path . '/');
@@ -72,9 +74,7 @@ if ($real_directory_path !== false && strpos($real_directory_path, $real_base_pa
 ?>
 <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" title="Thông báo">
   <i class="bi bi-bell text-success"></i>
-  <span id="number_notification" class="badge bg-primary badge-number"><?php if ($i_count != 0) {
-                                                                          echo $i_count;
-                                                                        } ?></span>
+  <span id="number_notification" class="badge bg-primary badge-number"><?php if ($i_count != 0) { echo $i_count; } ?></span>
 </a>
 <!-- End Notification Icon -->
 <ul id="notification" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="max-height:400px; overflow-y: auto; width: auto; height: auto;">
