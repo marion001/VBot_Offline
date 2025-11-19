@@ -3,6 +3,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Các Bạn Có Nhu Cầu Mua Mạch VBot Assistant AIO, hoặc Nguyên 1 Chiếc Loa Liên Hệ Mình Nhé: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
 - Mạch được thiết kế dùng với Loa Xiaodu Donkey Kong
 - Group Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
+- @Email: VBot.Assistant@gmail.com
 - Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
 ------------------------------------------------
 - HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W (IMG có sẵn được Build trên Raspberry Pi Zero 2W)
