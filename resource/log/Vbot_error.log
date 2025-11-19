@@ -1,2 +1,6 @@
 [19:05:08 17-11-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi:: ping/pong timed out
 [19:23:16 17-11-2025] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi:: ping/pong timed out
+[20:35:23 19-11-2025] [PodCast] Kết nối dữ liệu thất bại:  {'code': 1290, 'message': 'Your account is blocked', 'data': {'block_in_hour': '1', 'user_unlock_at_utc': '2025-11-19T14:11:30Z'}, 'errors': [{'reason': 'User is blocked'}]}
+[20:35:23 19-11-2025] [PodCast] Kết nối dữ liệu thất bại:  {'code': 1290, 'message': 'Your account is blocked', 'data': {'block_in_hour': '1', 'user_unlock_at_utc': '2025-11-19T14:11:30Z'}, 'errors': [{'reason': 'User is blocked'}]}
+[20:35:23 19-11-2025] Tất cả trợ lý ảo đều không có phản hồi, hoặc không được kích hoạt
+[20:35:46 19-11-2025] [PodCast] Kết nối dữ liệu thất bại:  {'code': 1290, 'message': 'Your account is blocked', 'data': {'block_in_hour': '1', 'user_unlock_at_utc': '2025-11-19T14:11:30Z'}, 'errors': [{'reason': 'User is blocked'}]}

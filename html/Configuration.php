@@ -4,6 +4,7 @@
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
 #Facebook Group: https://www.facebook.com/groups/1148385343358824
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
+#Email: VBot.Assistant@gmail.com
 
 #tăng giới hạn bộ nhớ cho PHP
 ini_set('memory_limit', '1G');
@@ -11,7 +12,7 @@ ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
 //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-$Cache_UI_Ver = '1.1.1';
+$Cache_UI_Ver = '1.1.2';
 
 //Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;

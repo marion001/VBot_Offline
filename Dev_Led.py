@@ -1,6 +1,9 @@
-"""
-Custom Led
-"""
+'''
+Code By: Vũ Tuyển
+GitHub VBot: https://github.com/marion001/VBot_Offline.git
+Facebook Group: https://www.facebook.com/groups/1148385343358824
+Facebook: https://www.facebook.com/TWFyaW9uMDAx
+'''
 
 #Code Mẫu sử dụng Led WS2812
 #Các Hàm hiệu ứng def cần được giữ nguyên, code sửa đổi hiệu ứng thay đổi bên trong hàm đó

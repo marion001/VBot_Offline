@@ -190,6 +190,9 @@
         "nhaccuatui": {
             "active": true
         },
+        "dev_custom_music": {
+            "active": false
+        },
         "news_paper": {
             "active": true,
             "path": "Media/News_Paper",

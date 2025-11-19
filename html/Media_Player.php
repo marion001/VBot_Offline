@@ -4,10 +4,11 @@
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
 #Facebook Group: https://www.facebook.com/groups/1148385343358824
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
+#Email: VBot.Assistant@gmail.com
+
 include 'Configuration.php';
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  //Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))

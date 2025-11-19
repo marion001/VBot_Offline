@@ -4,6 +4,7 @@
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
 #Facebook Group: https://www.facebook.com/groups/1148385343358824
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
+#Email: VBot.Assistant@gmail.com
 
 include '../../Configuration.php';
 header("Access-Control-Allow-Origin: *");
@@ -88,10 +89,8 @@ function isTokenExpired_podcast($Config)
 	return $current_time > $expire_time;
 }
 
-// Hàm lấy lại token từ API
 function refreshToken_podcast($Config, $VBot_Offline)
 {
-	//echo "Đang lấy lại token...\n";
 	$curl = curl_init();
 	curl_setopt_array($curl, array(
 		CURLOPT_URL => "https://users.iviet.com/v1/auth/login",
@@ -127,8 +126,8 @@ function refreshToken_podcast($Config, $VBot_Offline)
 	//echo $response;
 	// Giải mã JSON để chuyển thành mảng PHP
 	$responseData = json_decode($response, true);
+	//echo $response;
 	if ($responseData['code'] === 200) {
-		// Lấy thời gian hiện tại tính bằng giây kể từ Epoch
 		$currentTimestamp = time();
 		$newTimestamp = $currentTimestamp + (12 * 3600);
 		//echo $responseData['data']['access_token'];
@@ -156,7 +155,6 @@ if (isset($_GET['Local'])) {
 	function bytesToMB($bytes)
 	{
 		return number_format($bytes / 1048576, 2); // 1 MB = 1048576 bytes, định dạng với 2 chữ số thập phân
-
 	}
 	// Tìm tất cả các tệp âm thanh trong thư mục chính
 	$items = scandir($directory);
@@ -515,7 +513,7 @@ if (isset($_GET['Cache_NhacCuaTui'])) {
 //GetLink Các Trang Báo
 if (isset($_GET['Get_Link_NewsPaper'])) {
 	$URL = isset($_GET['url']) ? $_GET['url'] : '';
-	// Kiểm tra nếu biến URL không có dữ liệu
+	//Kiểm tra nếu biến URL không có dữ liệu
 	if (empty($URL)) {
 		$response = array(
 			'success' => false,

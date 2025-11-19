@@ -4,11 +4,12 @@
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
 #Facebook Group: https://www.facebook.com/groups/1148385343358824
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
+#Email: VBot.Assistant@gmail.com
+
 include 'Configuration.php';
 
 $filePath_Data = 'includes/other_data/WebUI_Login_Security/Login_Data.json';
 $dirPath_Data  = dirname($filePath_Data);
-
 $logDir  = $VBot_Offline . 'resource/log';
 $logFile = $logDir . "/Vbot_error.log";
 if (!file_exists($logDir)) {
@@ -329,6 +330,9 @@ include 'html_head.php';
                   <!-- End Default Tabs -->
                 </div>
               </div>
+  <div class="copyright">
+	 <p>@Email: <a href="mailto:vbot.assistant@gmail.com" target="_blank">VBot.Assistant@gmail.com</a></p>
+  </div>
               <div class="credits">
                 Code by <a href="https://www.facebook.com/TWFyaW9uMDAx" target="_bank">(<i class="bi bi-facebook"></i> Vũ Tuyển)</a>, <a href="https://www.facebook.com/groups/1148385343358824" target="_bank"><i class="bi bi-facebook"></i> Group Facebook</a>, <a href="https://github.com/marion001/VBot_Offline" target="_bank"><i class="bi bi-github"></i> GitHub</a>, <a href="https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ" target="_bank"><i class="bi bi-folder2-open"></i> VBot IMG</a>, Designed by: <a href="https://bootstrapmade.com/" target="_bank">BootstrapMade</a>
               </div>

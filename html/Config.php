@@ -4,6 +4,8 @@
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
 #Facebook Group: https://www.facebook.com/groups/1148385343358824
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
+#Email: VBot.Assistant@gmail.com
+
 include 'Configuration.php';
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -281,7 +283,8 @@ if (isset($_POST['all_config_save'])) {
   $music_source_priority_2 = isset($_POST['music_source_priority2']) ? $_POST['music_source_priority2'] : '';
   $music_source_priority_3 = isset($_POST['music_source_priority3']) ? $_POST['music_source_priority3'] : '';
   $music_source_priority_4 = isset($_POST['music_source_priority4']) ? $_POST['music_source_priority4'] : '';
-  $Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3, $music_source_priority_4];
+  $music_source_priority_5 = isset($_POST['music_source_priority5']) ? $_POST['music_source_priority5'] : '';
+  $Config['media_player']['prioritize_music_source'] = [$music_source_priority_1, $music_source_priority_2, $music_source_priority_3, $music_source_priority_4, $music_source_priority_5];
 
   #Cập nhật cấu hình PlayList
   $Config['media_player']['play_list']['newspaper_play_mode'] = isset($_POST['newspaper_play_mode']) ? $_POST['newspaper_play_mode'] : 'sequential';
@@ -302,9 +305,12 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['music_local']['minimum_threshold'] = floatval($_POST['music_local_minimum_threshold']);
   $Config['media_player']['music_local']['allowed_formats'] = array_map('trim', explode(',', $allowed_formats_str));
 
-  #Cập nhật giá trị đọc truyện, kể truyện 
+  #Cập nhật giá trị đọc truyện, kể truyện
   $Config['media_player']['podcast']['active'] = isset($_POST['podcast_active']) ? true : false;
   $Config['media_player']['podcast']['allows_priority_use_of_virtual_assistants'] = isset($_POST['podcast_virtual_assistants_active']) ? true : false;
+
+  #Cập nhật giá trị Dev custom music
+  $Config['media_player']['dev_custom_music']['active'] = isset($_POST['dev_custom_music_active']) ? true : false;
 
   #cẬP NHẬT GIÁ TRỊ youtube
   $Config['media_player']['youtube']['google_apis_key'] = $_POST['youtube_google_apis_key'];
@@ -2356,29 +2362,36 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 						echo select_field(
 							'music_source_priority1',
 							'Top 1',
-							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube', 'dev_custom_music' => 'DEV Custom Music'],
 							isset($Config['media_player']['prioritize_music_source'][0]) ? $Config['media_player']['prioritize_music_source'][0] : '',
 							[]
 						);
 						echo select_field(
 							'music_source_priority2',
 							'Top 2',
-							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube', 'dev_custom_music' => 'DEV Custom Music'],
 							isset($Config['media_player']['prioritize_music_source'][1]) ? $Config['media_player']['prioritize_music_source'][1] : '',
 							[]
 						);
 						echo select_field(
 							'music_source_priority3',
 							'Top 3',
-							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube', 'dev_custom_music' => 'DEV Custom Music'],
 							isset($Config['media_player']['prioritize_music_source'][2]) ? $Config['media_player']['prioritize_music_source'][2] : '',
 							[]
 						);
 						echo select_field(
 							'music_source_priority4',
 							'Top 4',
-							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube'],
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube', 'dev_custom_music' => 'DEV Custom Music'],
 							isset($Config['media_player']['prioritize_music_source'][3]) ? $Config['media_player']['prioritize_music_source'][3] : '',
+							[]
+						);
+						echo select_field(
+							'music_source_priority5',
+							'Top 5',
+							['' => '-- Chọn Nguồn Phát --', 'music_local' => 'Music Local', 'zing_mp3' => 'ZingMP3', 'nhaccuatui' => 'NhacCuaTui - NCT', 'youtube' => 'Youtube', 'dev_custom_music' => 'DEV Custom Music'],
+							isset($Config['media_player']['prioritize_music_source'][4]) ? $Config['media_player']['prioritize_music_source'][4] : '',
 							[]
 						);
                       ?>
@@ -2483,6 +2496,20 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 
                   <div class="card">
                     <div class="card-body">
+                      <h5 class="card-title">DEV Custom Music: Dev_Music.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code bổ sung thêm nguồn cung cấp dữ liệu nhạc, bài hát theo ý muốn, Bạn sẽ cần code ở file: Dev_Music.py')"></i> :</h5>
+                      <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc do người dùng tự code, bạn sẽ cần code ở file: Dev_Music.py')"></i> :</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="dev_custom_music_active" id="dev_custom_music_active" <?php echo $Config['media_player']['dev_custom_music']['active'] ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="card">
+                    <div class="card-body">
                       <h5 class="card-title">Đọc Truyện, Kể Truyện, PodCast:</h5>
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng Đọc Truyện')"></i> :</label>
@@ -2493,7 +2520,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Cho phép dùng ưu tiên trợ lý ảo: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Kích hoạt, sẽ sử dụng dữ liệu từ chế độ: Ưu tiên trợ lý ảo')"></i> :</label>
+                        <label class="col-sm-3 col-form-label">Cho phép dùng ưu tiên trợ lý ảo <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Kích hoạt, sẽ sử dụng dữ liệu từ chế độ: Ưu tiên trợ lý ảo')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="podcast_virtual_assistants_active" id="podcast_virtual_assistants_active" <?php echo $Config['media_player']['podcast']['allows_priority_use_of_virtual_assistants'] ? 'checked' : ''; ?>>
@@ -2963,6 +2990,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 						</div></div></div>";
                   echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
                   echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
+                  echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, '', 'number', '0.1', '', '', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, '', 'number', '1', '', '', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, '', 'number', '1', '', '', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_tts_stream_silence_time', 'Ngưỡng im lặng cho phép tối đa TTS (Giây)', $Config['xiaozhi']['tts_stream_silence_time'] ?? 5, '', 'number', '1', '', '', 'là ngưỡng im lặng tối đa mà hệ thống cho phép trong luồng âm thanh TTS — nếu vượt quá thì coi như TTS kết thúc hoặc bị lỗi im lặng', 'border-success', '', '', '', '', '');
                   $status = $Config['xiaozhi']['activation_status'] ?? false;
                   echo "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 
 						<i class='bi bi-question-circle-fill' onclick=\"show_message('Hiển thị trạng thái đã hoặc chưa liên kết với máy chủ')\"></i>:
@@ -2994,10 +3025,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   echo input_field('xiaozhi_mqtt_password', 'MQTT Mật Khẩu', $Config['xiaozhi']['system_options']['network']['mqtt_info']['password'] ?? '', 'disabled', 'text', '', '', '', 'Mật Khẩu MQTT', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_mqtt_publish_topic', 'MQTT Publish Topic', $Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                  echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, '', 'number', '0.1', '', '', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS', 'border-success', '', '', '', '', '');
-                  echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, '', 'number', '1', '', '', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại', 'border-success', '', '', '', '', '');
-                  echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, '', 'number', '1', '', '', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ', 'border-success', '', '', '', '', '');
-                  echo input_field('xiaozhi_tts_stream_silence_time', 'Ngưỡng im lặng cho phép tối đa TTS (Giây)', $Config['xiaozhi']['tts_stream_silence_time'] ?? 5, '', 'number', '1', '', '', 'là ngưỡng im lặng tối đa mà hệ thống cho phép trong luồng âm thanh TTS — nếu vượt quá thì coi như TTS kết thúc hoặc bị lỗi im lặng', 'border-success', '', '', '', '', '');
                   ?>
                 </div>
               </div>
