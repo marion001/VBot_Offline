@@ -2866,6 +2866,34 @@
 			"response": []
 		},
 		{
+			"name": "Lấy PodCast Token",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"podcast_token\",\r\n    \"value\": \"token\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.173:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"173"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "RESTART VBot Service",
 			"request": {
 				"method": "GET",

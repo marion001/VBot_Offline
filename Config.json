@@ -24,8 +24,7 @@
     "ssh_server": {
         "ssh_port": 22,
         "ssh_username": "pi",
-        "ssh_password": "vbot123",
-        "notes": "bắt buộc phải điền cấu hình thông tin đăng nhập ssh"
+        "ssh_password": "vbot123"
     },
     "api": {
         "active": true,
@@ -175,8 +174,7 @@
         ],
         "play_list": {
             "music_play_mode": "random",
-            "newspaper_play_mode": "sequential",
-            "notes": "play_mode Có các giá trị: random, sequential"
+            "newspaper_play_mode": "sequential"
         },
         "youtube": {
             "active": true,
@@ -384,9 +382,7 @@
             "speak_to_text": {
                 "stt_select": "stt_default",
                 "duration_recording": 6,
-                "stt_default": {
-                    "notes": "Không cần cấu hình gì cả ở đây"
-                },
+                "stt_default": [],
                 "stt_viettel": {
                     "api_key": [
                         "111111111111111111111111111111111",

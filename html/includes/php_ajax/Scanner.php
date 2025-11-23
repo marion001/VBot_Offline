@@ -14,12 +14,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
-    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
     ) {
-        // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
         session_unset();
         session_destroy();
         echo json_encode([
@@ -31,9 +29,7 @@ if ($Config['contact_info']['user_login']['active']) {
 }
 
 if (isset($_GET['scan_mic'])) {
-    // Câu lệnh gọi Python script
     $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Scan_Mic.py");
-    // Kết nối SSH
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $response['message'] = 'Không thể kết nối tới máy chủ SSH';
@@ -45,8 +41,6 @@ if (isset($_GET['scan_mic'])) {
         echo json_encode($response);
         exit();
     }
-
-    // Thực thi câu lệnh và lấy kết quả
     $stream = ssh2_exec($connection, $CMD);
     if (!$stream) {
         $response['message'] = 'Không thể thực thi lệnh trên máy chủ SSH.';
@@ -56,10 +50,7 @@ if (isset($_GET['scan_mic'])) {
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $output = stream_get_contents($stream_out);
-
-    // Hiển thị kết quả
     echo $output;
-
     exit();
 }
 
@@ -240,7 +231,6 @@ if (isset($_GET['VBot_Device_Scaner'])) {
                     if (!file_put_contents($json_file_path, json_encode(array_values($existing_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
                         throw new Exception('Không thể ghi dữ liệu vào file JSON.');
                     }
-                    #chmod($json_file_path, 0777);
                     shell_exec("chmod 0777 " . escapeshellarg($json_file_path));
                 } catch (Exception $e) {
                     echo json_encode([
@@ -387,7 +377,7 @@ if (isset($_GET['XiaoZhi_Active'])) {
     exit();
 }
 
-// Kiểm tra nếu có dữ liệu POST với showJsonData_Client
+//Kiểm tra nếu có dữ liệu POST với showJsonData_Client
 if (isset($_POST['showJsonData_Client'])) {
     $ip_address = $_POST['showJsonData_Client'];
     if (empty($ip_address)) {
@@ -546,3 +536,4 @@ if (isset($_POST['showJsonData_Client'])) {
     }
     exit();
 }
+?>

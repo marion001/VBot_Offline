@@ -13,12 +13,10 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json; charset=utf-8');
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
-    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
     ) {
-        // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
         session_unset();
         session_destroy();
         echo json_encode([
@@ -37,22 +35,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
         exit;
     }
     $action = $actionData['action'];
-    //$data = isset($actionData['data']) ? $actionData['data'] : [];
     $target = $actionData['target'];
     $entity_id = $target['entity_id'];
     list($domain, $service) = explode('.', $action);
-    /*
-      if (is_string($entity_id)) {
-  		#Nếu là chuỗi
-          $payload = ['entity_id' => [$entity_id]];
-      } elseif (is_array($entity_id)) {
-          //Nếu là Mảng
-          $payload = ['entity_id' => $entity_id];
-      } else {
-          // Còn lại gắn mảng rỗng
-          $payload = ['entity_id' => []];
-      }
-	  */
     //Bảo đảm $data là mảng trước
     $data = is_array($actionData['data'] ?? null) ? $actionData['data'] : [];
     if (is_string($entity_id)) {
@@ -96,7 +81,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
                 return ['success' => false, 'message' => 'Lỗi: ' . $statusCode];
         }
     }
-
     //Chạy URL Nội Bộ
     $response = sendRequest($Config['home_assistant']['internal_url'] . '/api/services/' . $domain . '/' . $service, $headers, $payload);
     //Chạy URL Ngoài Nếu Lỗi
@@ -106,7 +90,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
     echo json_encode($response);
     exit;
 }
-
 
 #Kiểm tra trạng thái các thiết bị chạy Vbot Server trong mạng lan
 if (isset($_GET['check_status_vbot_server_in_lan'])) {
@@ -135,7 +118,6 @@ if (isset($_GET['check_status_vbot_server_in_lan'])) {
     curl_close($curl);
     $success = false;
     $message = "";
-    // Kiểm tra phản hồi từ server
     if ($response) {
         $json_response = json_decode($response, true);
         if (isset($json_response['success']) && $json_response['success'] === true) {
@@ -149,7 +131,6 @@ if (isset($_GET['check_status_vbot_server_in_lan'])) {
         echo json_encode(['success' => false, 'message' => 'Không nhận được phản hồi']);
         exit;
     }
-    // Trả về kết quả cuối cùng
     echo json_encode(['success' => $success, 'message' => $message, 'ip_address' => $ip, 'port_api' => $port]);
     exit;
 }
@@ -469,7 +450,6 @@ if (isset($_GET['check_hass'])) {
     exit();
 }
 
-
 if (isset($_GET['get_hass_all'])) {
     $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
     $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
@@ -510,7 +490,6 @@ if (isset($_GET['get_hass_all'])) {
     }
     exit();
 }
-
 
 if (isset($_GET['del_get_hass_all'])) {
     $response = [
@@ -636,6 +615,7 @@ if (isset($_GET['Picovoice_Version'])) {
     curl_close($ch);
     exit();
 }
+
 #Chatbox Check_Connection.php?vbot_chatbox&ip=192.168.14.113&port=5002&text=tên%20bạn%20là%20gì
 if (isset($_GET['vbot_chatbox'])) {
     if (!isset($_GET['ip_port']) || !isset($_GET['text'])) {
@@ -647,7 +627,6 @@ if (isset($_GET['vbot_chatbox'])) {
     }
     $ip_port = $_GET['ip_port'];
     $text = $_GET['text'];
-    //$url = "http://".$ip_port;
     $curl = curl_init();
     $postData = json_encode([
         'type' => 3,
@@ -761,3 +740,4 @@ if (isset($_GET['get_token_tts_default_zai_did'])) {
     }
     exit();
 }
+?>

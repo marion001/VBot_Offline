@@ -12,12 +12,10 @@ header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header('Content-Type: application/json; charset=utf-8');
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
-    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
     ) {
-        // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
         session_unset();
         session_destroy();
         echo json_encode([
@@ -27,8 +25,6 @@ if ($Config['contact_info']['user_login']['active']) {
         exit;
     }
 }
-?>
-<?php
 
 if (isset($_GET['Delete_Wifi'])) {
     if (isset($_POST['action']) && $_POST['action'] == 'delete_wifi' && isset($_POST['wifiName'])) {
@@ -42,12 +38,8 @@ if (isset($_GET['Delete_Wifi'])) {
             ]);
             exit;
         }
-
-        // Sử dụng các mẫu chính quy để trích xuất thông tin từ kết quả
         preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
         $wifiData_ESSID = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
-
-        // Kiểm tra xem tên Wi-Fi từ POST có khớp với ESSID từ iwconfig không
         if ($wifiName !== $wifiData_ESSID) {
             $connection = ssh2_connect($ssh_host, $ssh_port);
             if (!$connection) {
@@ -215,6 +207,7 @@ if (isset($_GET['Scan_Wifi_List'])) {
     ]);
     exit;
 }
+
 if (isset($_GET['Get_Password_Wifi'])) {
     $response = ['success' => false, 'message' => '', 'data' => []];
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -316,7 +309,6 @@ if (isset($_GET['Wifi_Network_Information'])) {
         exit;
     }
     $wifiData = [];
-
     // Sử dụng các mẫu chính quy để trích xuất thông tin từ kết quả
     preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
     preg_match('/Frequency:([\d\.]+)\sGHz/', $wifiInfo, $frequencyMatches);
@@ -335,7 +327,6 @@ if (isset($_GET['Wifi_Network_Information'])) {
     preg_match('/Tx excessive retries:(\d+)/', $wifiInfo, $txExcessiveRetriesMatches);
     preg_match('/Invalid misc:(\d+)/', $wifiInfo, $invalidMiscMatches);
     preg_match('/Missed beacon:(\d+)/', $wifiInfo, $missedBeaconMatches);
-
     // Lưu kết quả vào mảng
     $wifiData['ESSID'] = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
     $wifiData['Frequency'] = isset($frequencyMatches[1]) ? $frequencyMatches[1] . ' GHz' : 'N/A';

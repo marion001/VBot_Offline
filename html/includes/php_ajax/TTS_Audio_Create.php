@@ -7,7 +7,6 @@
 #Email: VBot.Assistant@gmail.com
 
 include '../../Configuration.php';
-//Cấu hình tiêu đề CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -15,12 +14,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']) {
 	session_start();
-	// Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
 	if (
 		!isset($_SESSION['user_login']) ||
 		(isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
 	) {
-		// Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
 		session_unset();
 		session_destroy();
 		echo json_encode([
@@ -65,8 +62,7 @@ function sanitize_filename($text)
 	$text = preg_replace('/\s+/', '_', trim($text));
 	return 'create_audio_' . $text . '.mp3';
 }
-?>
-<?php
+
 if (isset($_GET['create_tts_audio'])) {
 	$required_params = ['source_tts', 'text'];
 	foreach ($required_params as $param) {
@@ -77,7 +73,6 @@ if (isset($_GET['create_tts_audio'])) {
 	}
 	$source = $_GET['source_tts'];
 	$text = trim($_GET['text']);
-
 	if ($source === 'tts_ggcloud') {
 		// Kiểm tra thêm thông tin đầu vào
 		$required_params = ['language_code', 'voice_name', 'speaking_rate'];
@@ -87,7 +82,6 @@ if (isset($_GET['create_tts_audio'])) {
 				exit;
 			}
 		}
-
 		$lang = $_GET['language_code'];
 		$voice_name = $_GET['voice_name'];
 		$speakingRate = $_GET['speaking_rate'];
@@ -97,7 +91,6 @@ if (isset($_GET['create_tts_audio'])) {
 		if (!file_exists($extraSavePath)) {
 			mkdir($extraSavePath, 0777, true);
 		}
-
 		// Hàm lấy Access Token
 		function getAccessTokenFromJson($jsonKeyPath)
 		{

@@ -16,8 +16,8 @@ def get_first_ppn_file(directory):
     if not ppn_files:
         return None
     return random.choice(ppn_files)
-    
-# Kiểm tra xem có đủ tham số được truyền không
+
+#Kiểm tra xem có đủ tham số được truyền không
 if len(sys.argv) > 3:
     key = sys.argv[1]
     lang = sys.argv[2]
@@ -27,7 +27,7 @@ else:
     lang = input("Vui lòng nhập ngôn ngữ (ví dụ: 'vi' cho tiếng Việt, 'eng' cho tiếng anh): ")
     model_file = input("Vui lòng nhập đường dẫn tệp mô hình file.pv: ")
 
-# Đường dẫn chứa các tệp .ppn
+#Đường dẫn chứa các tệp .ppn
 model_path = f'{lang}'
 model_file_path = f'{model_file}'
 

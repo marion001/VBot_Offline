@@ -14,12 +14,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']) {
 	session_start();
-	// Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
 	if (
 		!isset($_SESSION['user_login']) ||
 		(isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
 	) {
-		// Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
 		session_unset();
 		session_destroy();
 		echo json_encode([
@@ -35,13 +33,12 @@ if ($Config['contact_info']['user_login']['active']) {
 //ini_set('display_errors', 1);
 
 //Lấy giao thức (http hoặc https)
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+//$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $Cover_URL_Local = dirname(dirname(dirname($Current_URL)));
 
 //Chuyển đổi thời gian
 function formatDuration($duration)
 {
-	// Nếu duration là số (chứa toàn bộ ký tự là số)
 	if (ctype_digit($duration)) {
 		$hours = floor($duration / 3600);
 		$minutes = floor(($duration % 3600) / 60);
@@ -78,7 +75,7 @@ function formatDuration_youtube($duration)
 	return $duration;
 }
 
-// Hàm kiểm tra xem token podcast đã hết hạn chưa
+//Hàm kiểm tra xem token podcast đã hết hạn chưa
 function isTokenExpired_podcast($Config)
 {
 	$expire_time = $Config['media_player']['podcast']['expire_time'];
@@ -89,52 +86,44 @@ function isTokenExpired_podcast($Config)
 	return $current_time > $expire_time;
 }
 
-function refreshToken_podcast($Config, $VBot_Offline)
+function refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Port_API)
 {
+	$url = $Protocol.$serverIp.':'.$Port_API;
+	$postData = json_encode([
+		"type"  => 3,
+		"data"  => "podcast_token",
+		"value" => "token"
+	], JSON_UNESCAPED_UNICODE);
 	$curl = curl_init();
 	curl_setopt_array($curl, array(
-		CURLOPT_URL => "https://users.iviet.com/v1/auth/login",
+		CURLOPT_URL => $url,
 		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_ENCODING => '',
-		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 0,
-		CURLOPT_FOLLOWLOCATION => true,
-		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		CURLOPT_CUSTOMREQUEST => 'POST',
-		CURLOPT_POSTFIELDS => '{"email":"' . base64_decode('dmlldGJvdHNtYXJ0c3BlYWtlckBnbWFpbC5jb20=') . '","password":"' . base64_decode('VmlldGJvdEAx') . '"}',
+		CURLOPT_POST => true,
 		CURLOPT_HTTPHEADER => array(
-			'Host: users.iviet.com',
-			'pragma: no-cache',
-			'cache-control: no-cache',
-			'sec-ch-ua: "Not A(Brand";v="99", "Google Chrome";v="121", "Chromium";v="121"',
-			'accept: application/json, text/plain, */*',
-			'content-type: application/json',
-			'dnt: 1',
-			'sec-ch-ua-mobile: ?0',
-			'user-agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-			'sec-ch-ua-platform: "Windows"',
-			'origin: https://app.maika.ai',
-			'sec-fetch-site: cross-site',
-			'sec-fetch-mode: cors',
-			'sec-fetch-dest: empty',
-			'referer: https://app.maika.ai/',
-			'accept-language: vi'
+			'Content-Type: application/json',
+			'Content-Length: ' . strlen($postData)
 		),
+		CURLOPT_POSTFIELDS => $postData
 	));
 	$response = curl_exec($curl);
 	curl_close($curl);
-	//echo $response;
-	// Giải mã JSON để chuyển thành mảng PHP
 	$responseData = json_decode($response, true);
-	//echo $response;
-	if ($responseData['code'] === 200) {
-		$currentTimestamp = time();
-		$newTimestamp = $currentTimestamp + (12 * 3600);
-		//echo $responseData['data']['access_token'];
-		$Config['media_player']['podcast']['access_token'] = $responseData['data']['access_token'];
-		$Config['media_player']['podcast']['expire_time'] = $newTimestamp;
-		file_put_contents($VBot_Offline . 'Config.json', json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+	if (!$responseData || !isset($responseData['success'])) {
+		return false;
 	}
+	if ($responseData['success'] === true) {
+		$token = $responseData['message'] ?? null;
+		if (!$token) {
+			return false;
+		}
+		$currentTimestamp = time();
+		$newTimestamp = $currentTimestamp + (12 * 3600); //12 tiếng
+		#$Config['media_player']['podcast']['access_token'] = $token;
+		#$Config['media_player']['podcast']['expire_time'] = $newTimestamp;
+		#file_put_contents($VBot_Offline . 'Config.json', json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		return $token;
+	}
+	return false;
 }
 
 //Get danh sách các bài hát trong Local
@@ -687,10 +676,8 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 
 //Tìm kiếm podcast
 if (isset($_GET['podcast_Search'])) {
-	// Bây giờ bạn có thể sử dụng $tokenData['data']['access_token'] để gửi các yêu cầu API khác
 	$podcast_Name = isset($_GET['PodCastName']) ? $_GET['PodCastName'] : '';
 	$podcast_Limit = isset($_GET['Limit']) ? $_GET['Limit'] : '1';
-	// Kiểm tra nếu biến Song_Name không có dữ liệu
 	if (empty($podcast_Name)) {
 		$response = array(
 			'success' => false,
@@ -702,13 +689,11 @@ if (isset($_GET['podcast_Search'])) {
 	}
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		chmod($podcastJsonPath, 0777);
 	}
 	if (isTokenExpired_podcast($Config)) {
-		// Nếu token đã hết hạn, làm mới token
-		refreshToken_podcast($Config, $VBot_Offline);
+		refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Port_API);
 	}
 	$curl = curl_init();
 	curl_setopt_array($curl, array(
@@ -745,7 +730,6 @@ if (isset($_GET['podcast_Search'])) {
 		'message' => ' không có dữ liệu',
 		'data' => []
 	];
-	// Kiểm tra và trích xuất thông tin từ phần 'search'
 	if (isset($podcast_Data['data']['search']) && is_array($podcast_Data['data']['search'])) {
 		$baseUrl = "https://cdn-ocs.iviet.com/";
 		foreach ($podcast_Data['data']['search'] as $entry) {
@@ -780,7 +764,7 @@ if (isset($_GET['podcast_Search'])) {
 	exit();
 }
 
-// get dữ liệu cache PodCast
+//get dữ liệu cache PodCast
 if (isset($_GET['Cache_PodCast'])) {
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
@@ -1678,3 +1662,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit;
 }
+?>

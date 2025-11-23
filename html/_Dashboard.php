@@ -11,7 +11,6 @@ include 'Configuration.php';
 <?php
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
-    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -81,7 +80,7 @@ include 'html_head.php';
         }
     }
 
-    // Hàm xóa thư mục và nội dung bên trong chỉ dùng cho lúc cập nhật, không để Logs
+    //Hàm xóa thư mục và nội dung bên trong chỉ dùng cho lúc cập nhật, không để Logs
     function deleteDir($dirPath)
     {
         if (!is_dir($dirPath)) return;
@@ -177,21 +176,20 @@ include 'html_head.php';
         // Mở thư mục nguồn
         $dir = opendir($source);
         while (($file = readdir($dir)) !== false) {
-            // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
+            //Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
             if ($file != '.' && $file != '..') {
-                // Đường dẫn đầy đủ của tệp hoặc thư mục
                 $srcPath = rtrim($source, '/') . '/' . $file;
                 $destPath = rtrim($destination, '/') . '/' . $file;
-                // Bỏ qua nếu file hoặc thư mục nằm trong danh sách cần giữ lại
+                //Bỏ qua nếu file hoặc thư mục nằm trong danh sách cần giữ lại
                 if (in_array($file, $keepList)) {
                     $messages[] = "<font color=orange>- Bỏ qua tệp/thư mục: </font><font color=blue><b>$file</b></font>";
                     continue;
                 }
-                // Nếu là thư mục, gọi đệ quy
+                //Nếu là thư mục, gọi đệ quy
                 if (is_dir($srcPath)) {
                     copyFiles($srcPath, $destPath, $keepList);
                 } else {
-                    // Sao chép tệp
+                    //Sao chép tệp
                     if (copy($srcPath, $destPath)) {
                         $messages[] = "<font color=blue>- Đã sao chép tệp: </font><font color=blue><b>" . basename($srcPath) . "</b></font>";
                     } else {
@@ -231,10 +229,8 @@ include 'html_head.php';
     #function Sao lưu Giao diện Web UI
     function backup_interface($Exclude_Files_Folder, $Exclude_File_Format)
     {
-
         global $Config, $messages, $HTML_VBot_Offline, $Limit_Backup_Files_Web, $Backup_Dir_Save_Web, $Version_VBot_Interface;
-
-        // Kiểm tra nếu thư mục chưa tồn tại
+        //Kiểm tra nếu thư mục chưa tồn tại
         if (!is_dir($Backup_Dir_Save_Web)) {
             if (mkdir($Backup_Dir_Save_Web, 0777, true)) {
                 $messages[] = "Thư mục đã được tạo: $Backup_Dir_Save_Web";

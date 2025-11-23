@@ -14,12 +14,10 @@ header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
-    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
     ) {
-        // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
         session_unset();
         session_destroy();
         echo json_encode([
@@ -37,17 +35,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 
 $hash_bypass_OTA = "441018525208457705bf09a8ee3c1093";
 
-// [1] Bypass nâng cấp firmware (Gửi yêu cầu đến thiết bị)
+//[1] Bypass nâng cấp firmware (Gửi yêu cầu đến thiết bị)
 if (isset($_GET['bypass_upgrade_firmware']) && !empty($_GET['ip'])) {
     $ip = $_GET['ip'];
     $targetUrl = 'http://' . $ip . '/ota/start?mode=fr&hash=' . $hash_bypass_OTA;
-    // Thêm các tham số khác (nếu có)
     $params = $_GET;
     unset($params['bypass_upgrade_firmware'], $params['ip']);
     if (!empty($params)) {
         $targetUrl .= "?" . http_build_query($params);
     }
-    // Gửi request qua cURL
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $targetUrl);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -55,7 +51,6 @@ if (isset($_GET['bypass_upgrade_firmware']) && !empty($_GET['ip'])) {
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     curl_close($ch);
-    // Trả về JSON
     if ($response === false) {
         http_response_code(500);
         echo json_encode(["success" => false, "message" => "Lỗi kết nối tới thiết bị: " . $error]);
@@ -71,7 +66,6 @@ elseif (isset($_GET['start_upgrade_firmware'], $_GET['ip'], $_GET['url_firmware'
     $ip = $_GET['ip'];
     $url_firmware = $_GET['url_firmware'];
     $temp_file = tempnam(sys_get_temp_dir(), 'firmware_');
-    // Tải file firmware về máy chủ
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url_firmware);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -85,9 +79,7 @@ elseif (isset($_GET['start_upgrade_firmware'], $_GET['ip'], $_GET['url_firmware'
         echo json_encode(["success" => false, "message" => "Lỗi tải xuống Firmware: " . $error]);
         exit;
     }
-    // Lưu file vào bộ nhớ tạm
     file_put_contents($temp_file, $file_content);
-    // Gửi firmware tới thiết bị
     $upload_url = 'http://' . $ip . '/ota/upload';
     $firmware_filename = "VBot_Client_FW_" . basename($url_firmware);
     $post_data = ['file' => new CURLFile($temp_file, 'application/octet-stream', $firmware_filename)];
@@ -100,7 +92,7 @@ elseif (isset($_GET['start_upgrade_firmware'], $_GET['ip'], $_GET['url_firmware'
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     curl_close($ch);
-    unlink($temp_file); // Xóa file tạm
+    unlink($temp_file);
     if ($response === false) {
         http_response_code(500);
         echo json_encode(["success" => false, "message" => "Lỗi tải lên Firmware: " . $error]);
@@ -116,17 +108,14 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && i
     $ip_address = $_POST['ip_address'];
     $tmpDir = sys_get_temp_dir();
     $tmpFile = $tmpDir . '/' . basename($_FILES['firmware']['name']);
-
     if (pathinfo($tmpFile, PATHINFO_EXTENSION) !== 'bin') {
         echo json_encode(["success" => false, "message" => "Chỉ chấp nhận file .bin"]);
         exit;
     }
-
     if (!move_uploaded_file($_FILES['firmware']['tmp_name'], $tmpFile)) {
         echo json_encode(["success" => false, "message" => "Lỗi khi lưu file vào bộ nhớ tạm."]);
         exit;
     }
-    // Gửi yêu cầu bắt đầu nâng cấp firmware
     $ota_start_url = 'http://' . $ip_address . '/ota/start?mode=fr&hash=' . $hash_bypass_OTA;
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $ota_start_url);
@@ -140,7 +129,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && i
         echo json_encode(["success" => false, "message" => "Lỗi khi bỏ qua xác thực OTA gửi yêu cầu nâng cấp: " . $error]);
         exit;
     }
-    // Gửi firmware tới thiết bị
     $upload_url = 'http://' . $ip_address . '/ota/upload';
     $firmware_filename = "VBot_Client_FW_" . basename($_FILES['firmware']['name']);
     $post_data = ['file' => new CURLFile($tmpFile, 'application/octet-stream', $firmware_filename)];
@@ -164,10 +152,8 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['firmware']) && i
 
 //Lưu dữ liệu Client Data
 elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET['action'] === 'save_data_vbot_client') {
-    // Đường dẫn file JSON trên server
     $json_file = $directory_path . '/includes/other_data/VBot_Client_Data/' . $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'];
     $directory = dirname($json_file);
-    // Kiểm tra và tạo thư mục nếu chưa tồn tại
     if (!is_dir($directory)) {
         if (!mkdir($directory, 0777, true)) {
             echo json_encode(['success' => false, 'message' => 'Không thể tạo thư mục']);
@@ -175,7 +161,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET
         }
         chmod($directory, 0777);
     }
-    // Kiểm tra và tạo file nếu chưa tồn tại
     if (!file_exists($json_file)) {
         if (file_put_contents($json_file, '{}') === false) {
             echo json_encode(['success' => false, 'message' => 'Không thể tạo file JSON']);
@@ -183,18 +168,15 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET
         }
         chmod($json_file, 0777);
     }
-    // Kiểm tra quyền ghi file
     if (!is_writable($json_file)) {
         echo json_encode(['success' => false, 'message' => 'Không có quyền ghi vào file']);
         exit;
     }
-    // Nhận dữ liệu từ request
     $data = json_decode(file_get_contents('php://input'), true);
     if ($data === null) {
         echo json_encode(['success' => false, 'message' => 'Dữ liệu JSON không hợp lệ']);
         exit;
     }
-    // Lưu dữ liệu vào file
     $result = file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     if ($result !== false) {
         echo json_encode(['success' => true, 'message' => 'Dữ liệu đã được lưu thành công']);
@@ -205,7 +187,6 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET
 // Khôi phục dữ liệu file json
 elseif (isset($_POST['client_upload_restore_settings'])) {
     $ip_address = $_POST['client_upload_restore_settings'];
-    // Kiểm tra nếu client_upload_restore_settings rỗng hoặc không hợp lệ
     if (empty($ip_address)) {
         echo json_encode([
             'success' => false,
@@ -213,7 +194,6 @@ elseif (isset($_POST['client_upload_restore_settings'])) {
         ]);
         exit;
     }
-    // Kiểm tra định dạng IP (bảo mật)
     if (!filter_var($ip_address, FILTER_VALIDATE_IP)) {
         echo json_encode([
             'success' => false,
@@ -221,7 +201,6 @@ elseif (isset($_POST['client_upload_restore_settings'])) {
         ]);
         exit;
     }
-    // Kiểm tra nếu có file config_file
     if (!isset($_FILES['config_file'])) {
         echo json_encode([
             'success' => false,
@@ -230,7 +209,6 @@ elseif (isset($_POST['client_upload_restore_settings'])) {
         exit;
     }
     $file = $_FILES['config_file'];
-    // Kiểm tra lỗi file
     if ($file['error'] !== UPLOAD_ERR_OK) {
         echo json_encode([
             'success' => false,
@@ -238,7 +216,6 @@ elseif (isset($_POST['client_upload_restore_settings'])) {
         ]);
         exit;
     }
-    // Kiểm tra định dạng file (chỉ cho phép JSON)
     $fileExtension = pathinfo($file['name'], PATHINFO_EXTENSION);
     if (strtolower($fileExtension) !== 'json') {
         echo json_encode([
@@ -247,57 +224,45 @@ elseif (isset($_POST['client_upload_restore_settings'])) {
         ]);
         exit;
     }
-    // Tạo URL mục tiêu
     $targetUrl = 'http://' . $ip_address . '/upload_nvs_config';
     try {
-        // Khởi tạo cURL
         $ch = curl_init($targetUrl);
-        // Tạo dữ liệu multipart cho file
         $postData = [
             'file' => new CURLFile($file['tmp_name'], $file['type'], $file['name'])
         ];
-        // Cấu hình cURL
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Trả về dữ liệu
-        curl_setopt($ch, CURLOPT_POST, true); // Sử dụng POST
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData); // Gửi file
-        curl_setopt($ch, CURLOPT_TIMEOUT, 30); // Thời gian chờ tối đa (30 giây)
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Theo dõi chuyển hướng
-        // Thực thi yêu cầu
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $postData);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         $response = curl_exec($ch);
-        // Kiểm tra lỗi cURL
         if ($response === false) {
             throw new Exception('Không thể kết nối tới client: ' . curl_error($ch));
         }
-        // Lấy mã trạng thái HTTP
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($httpCode !== 200) {
             throw new Exception('Phản hồi từ client không thành công. Mã trạng thái: ' . $httpCode);
         }
-        // Đóng cURL
         curl_close($ch);
-        // Trả về phản hồi thành công
         echo json_encode([
             'success' => true,
             'message' => 'Tải lên tệp khôi phục cấu hình thành công'
         ]);
     } catch (Exception $e) {
-        // Đóng cURL nếu có lỗi
         if (isset($ch)) {
             curl_close($ch);
         }
-        // Trả về lỗi
         echo json_encode([
             'success' => false,
             'error' => $e->getMessage()
         ]);
     }
 }
+
 // Kiểm tra nếu có dữ liệu POST với client_ctrl_act_vbot
 elseif (isset($_POST['client_ctrl_act_vbot'])) {
     $ip_address = $_POST['client_ctrl_act_vbot'];
     $action = isset($_POST['action']) ? $_POST['action'] : '';
-
-    // Kiểm tra nếu ip_address rỗng hoặc không hợp lệ
     if (empty($ip_address)) {
         echo json_encode([
             'success' => false,
@@ -305,8 +270,6 @@ elseif (isset($_POST['client_ctrl_act_vbot'])) {
         ]);
         exit;
     }
-
-    // Kiểm tra định dạng IP (bảo mật)
     if (!filter_var($ip_address, FILTER_VALIDATE_IP)) {
         echo json_encode([
             'success' => false,
@@ -314,8 +277,6 @@ elseif (isset($_POST['client_ctrl_act_vbot'])) {
         ]);
         exit;
     }
-
-    // Kiểm tra nếu action rỗng hoặc không hợp lệ
     if (empty($action)) {
         echo json_encode([
             'success' => false,
@@ -323,8 +284,6 @@ elseif (isset($_POST['client_ctrl_act_vbot'])) {
         ]);
         exit;
     }
-
-    // Kiểm tra action hợp lệ
     $valid_actions = ['restart', 'resetwifi', 'cleanNVS'];
     if (!in_array($action, $valid_actions)) {
         echo json_encode([
@@ -333,55 +292,35 @@ elseif (isset($_POST['client_ctrl_act_vbot'])) {
         ]);
         exit;
     }
-
-    // Tạo URL mục tiêu
     $targetUrl = 'http://' . $ip_address . '/' . $action;
-
     try {
-        // Khởi tạo cURL
         $ch = curl_init($targetUrl);
-
-        // Cấu hình cURL
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Trả về dữ liệu
-        curl_setopt($ch, CURLOPT_POST, true); // Sử dụng POST
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 5); // Thời gian chờ 5 giây (đồng bộ với xhr.timeout)
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); // Theo dõi chuyển hướng
-
-        // Thực thi yêu cầu
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         $response = curl_exec($ch);
-
-        // Kiểm tra lỗi cURL
         if ($response === false) {
             throw new Exception('Không thể kết nối tới client: ' . curl_error($ch));
         }
-
-        // Lấy mã trạng thái HTTP
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         if ($httpCode !== 200) {
             throw new Exception('Phản hồi từ client không thành công. Mã trạng thái: ' . $httpCode);
         }
-
-        // Đóng cURL
         curl_close($ch);
-
-        // Trả về phản hồi thành công
         echo json_encode([
             'success' => true,
             'message' => 'Gửi yêu cầu ' . $action . ' thành công'
         ]);
     } catch (Exception $e) {
-        // Đóng cURL nếu có lỗi
         if (isset($ch)) {
             curl_close($ch);
         }
-        // Trả về lỗi
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage()
-        ]);
+        echo json_encode(['success' => false, 'error' => $e->getMessage()]);
     }
 }
+
 // Kiểm tra nếu có dữ liệu POST với client_save_config
 elseif (isset($_POST['client_save_config'])) {
     $ip_address = $_POST['client_save_config'];
@@ -464,7 +403,6 @@ elseif (isset($_POST['client_save_config'])) {
         ]);
         exit;
     }
-    // Gửi dữ liệu POST tới client
     $postData = http_build_query($params);
     $targetUrl = 'http://' . $ip_address . '/save';
     try {
@@ -567,6 +505,7 @@ elseif (isset($_POST['client_play_audio'])) {
         ]);
     }
 }
+
 // Kiểm tra nếu có dữ liệu POST với client_download_config
 elseif (isset($_POST['client_download_config'])) {
     $ip_address = $_POST['client_download_config'];
@@ -623,3 +562,4 @@ elseif (isset($_POST['client_download_config'])) {
     echo json_encode(["success" => false, "message" => "Yêu cầu không hợp lệ"]);
     exit;
 }
+?>

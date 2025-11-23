@@ -197,3 +197,4 @@ if ($Config['web_interface']['external']['active'] === true) {
 } else {
     $URL_API_VBOT = $Protocol . $serverIp . ':' . $Port_API . '/';
 }
+?>

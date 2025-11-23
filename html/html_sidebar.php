@@ -142,8 +142,6 @@
       <span>XiaoZhi MCP</span>
     </a>
   </li>
-
-
   </li>
 
   <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
@@ -170,6 +168,11 @@
       <li title="Tùy chỉnh nâng cao cho DEV tự code Custom LED">
         <a href="DEV_Led.php">
           <i class="bi bi-circle"></i><span>DEV LED (Custom LED)</span>
+        </a>
+      </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Music">
+        <a href="Dev_Music.php">
+          <i class="bi bi-circle"></i><span>DEV Music (Custom Music)</span>
         </a>
       </li>
     </ul>
