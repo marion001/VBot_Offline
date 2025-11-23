@@ -2663,7 +2663,7 @@ $git_repository = $pathParts[1];
 		searchResults = [];
 		var seenTexts = new Set();
 		keyword = keyword.toLowerCase();
-		var elements = document.querySelectorAll('label, button, font');
+		var elements = document.querySelectorAll('label, button, font, a.list-group-item.list-group-item-action');
 		elements.forEach(el => {
 		  var textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
 		  var visibleText = textNodes.map(n => n.textContent)
