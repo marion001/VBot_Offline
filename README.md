@@ -27,6 +27,8 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Liên kết và tương tác, ra lệnh với các thiết bị chạy VBot trong cùng lớp mạng (Loa 1 ra lệnh Control, điều khiển, phát nhạc, đọc báo, tin tức, tới Loa 2, Client Loa 1 ra lệnh tới Loa 2, V..v....)
 - Tích hợp với trợ lý ảo Assist của Home Assistant (Làm Tác Nhân)
       : https://github.com/marion001/VBot-Assist-Conversation
+- Liên Kết Loa VBot Vào Home Assistant
+      : https://github.com/marion001/VBot_Offline_Custom_Component
 
 - Thiết Lập Diy VBot Client Kết Nối Tới Loa VBot
       : https://github.com/marion001/VBot_Client_Offline
