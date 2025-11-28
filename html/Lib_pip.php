@@ -173,7 +173,7 @@ include 'html_head.php';
             }
             echo "</tbody></table>";
           } else {
-            echo "<h5 class='card-title'><center><font color=green>Tất cả các thư viện python pip cần thiết đều đã được cài đặt</font></center></h5>";
+            echo "<h4 class='card-title text-success'><center>Tất cả các thư viện python pip cần thiết đều đã được cài đặt</center></h4>";
           }
           // Hiển thị thư viện sai phiên bản
           if (!empty($wrongVersionPackages)) {
@@ -198,7 +198,36 @@ include 'html_head.php';
             }
             echo "</tbody></table>";
           } else {
-            echo "<h5 class='card-title'><center><font color=green>Tất cả các thư viện python pip đều đúng phiên bản</font></center></h5>";
+            echo "<h4 class='card-title text-success'><center>Tất cả các thư viện python pip đều đúng phiên bản</center></h4>";
+
+//$filePath = $VBot_Offline . 'resource/pip_list_lib_user.txt';
+
+$packages = parsePipFile($filePath);
+
+echo '<table class="table table-striped table-hover table-bordered border-primary">
+    <tr>
+        <th colspan="3" class="text-danger" style="text-align: center; vertical-align: middle;">Danh Sách Thư Viện Python pip</th>
+    </tr>
+    <tr>
+        <th style="text-align: center; vertical-align: middle;">STT</th>
+        <th style="text-align: center; vertical-align: middle;">Tên thư viện</th>
+        <th style="text-align: center; vertical-align: middle;">Phiên bản hiện tại</th>
+    </tr>
+';
+
+$stt = 1;
+foreach ($packages as $name => $version) {
+    echo '
+    <tr>
+        <td class="lib_pip" style="text-align: center; vertical-align: middle;">'.$stt.'</td>
+        <td class="lib_pip" style="text-align: center; vertical-align: middle;">'.$name.'</td>
+        <td class="lib_pip" style="text-align: center; vertical-align: middle;">'.$version.'</td>
+    </tr>
+    ';
+    $stt++;
+}
+
+echo "</table>";
           }
         }
         ?>

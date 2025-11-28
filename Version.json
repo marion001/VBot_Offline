@@ -1,8 +1,8 @@
 {
-    "version": "1.0.76",
+    "version": "1.0.77",
     "projectName": "Program VBot Offline",
-    "description": "Bổ Sung DEV Custom Music, người dùng có thể tự code nguồn nhạc theo ý muốn ở file: Dev_Music.py",
-    "releaseDate": "23/11/2025",
+    "description": "Hỗ Trợ Thông Báo Cập Nhật Khi Có Phiên Bản Mới Tới Hass, Đồng Bộ Với VBot Custom HASS",
+    "releaseDate": "28/11/2025",
     "changes": [
         {
             "type": "feature",

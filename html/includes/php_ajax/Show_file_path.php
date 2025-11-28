@@ -7,7 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include '../../Configuration.php';
-// Cấu hình tiêu đề CORS
+//Cấu hình tiêu đề CORS
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
@@ -20,17 +20,38 @@ if ($Config['contact_info']['user_login']['active']) {
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
   ) {
-    // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
-    session_unset();
-    session_destroy();
-    echo json_encode([
-      'success' => false,
-      'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    exit;
+	if (isset($_GET['file']) && !empty($_GET['file'])) {
+		$requested_file = $_GET['file'];
+		if ($requested_file === $VBot_Offline.'Version.json' || $requested_file === $VBot_Offline.'html/Version.json') {
+			$file_path = $requested_file;
+			$response = [
+				'success' => true,
+				'message' => 'Đọc file thành công',
+				'data' => file_get_contents($requested_file)
+			];
+			echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			exit;
+		} else{
+		session_unset();
+		session_destroy();
+		echo json_encode([
+		  'success' => false,
+		  'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
+		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit;
+	  }
+	}
+	else{
+		session_unset();
+		session_destroy();
+		echo json_encode([
+		  'success' => false,
+		  'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
+		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		exit;
+	  }
   }
 }
-
 
 // Hàm để quy đổi kích thước file
 function formatSize($size)
@@ -100,7 +121,6 @@ function encodeFileToBase64($filePath)
     return json_encode(['success' => false, 'error' => 'File not found']);
   }
 }
-
 
 
 //Tìm Kiếm Âm Thanh Trong Thư Mục Music_Local
@@ -182,34 +202,25 @@ function updateValueByPath(&$data, $path, $newValue)
 
 // Kiểm tra và xử lý xóa giá trị nếu tham số 'delete_data_backlist' và 'path' được truyền
 if (isset($_GET['delete_data_backlist']) && isset($_GET['path'])) {
-
   #1.php?delete_data_backlist&path=backlist->tts_zalo->backlist_limit&value_type=null
-
   $response = [
     'success' => false,
     'message' => '',
     'data' => null
   ];
-  //Lấy đường dẫn cần cập nhật
   $path_to_update = $_GET['path'];
-  // Lấy loại giá trị
   $value_type = isset($_GET['value_type']) ? $_GET['value_type'] : null;
-  //Chuyển đổi giá trị loại
   if ($value_type === 'null') {
     $newValue = null;
   } elseif ($value_type === '{}') {
-    //Mảng trống
     $newValue = [];
   } elseif ($value_type === '[]') {
     $newValue = [];
   } else {
-    //Nếu không có value_type, lấy giá trị từ tham số 'value'
     $newValue = $_GET['value_type'] ?? null;
   }
-  // Đọc nội dung của tệp vào biến
   if (file_exists($Backlist_File_Name)) {
     $fileContents = file_get_contents($Backlist_File_Name);
-    // Kiểm tra nếu tệp đọc thành công
     if ($fileContents !== false) {
       $data = json_decode($fileContents, true);
       if ($data !== null) {
