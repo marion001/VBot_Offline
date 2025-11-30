@@ -124,13 +124,13 @@ Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://driv
                                     ▼
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                    1. KHỞI TẠO CÁC MODULE                                   │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │   Hardware   │  │   Network    │  │  Media Player│  │ Virtual Asst │     │
-│  │ - LED        │  │ - Home Asst  │  │ - Music      │  │ - Zalo       │     │
-│  │ - Buttons    │  │ - MQTT       │  │ - Radio      │  │ - ChatGPT    │     │
-│  │ - Microphone │  │ - OpenWeather│  │ - News       │  │ - Gemini     │     │
-│  │ - Speaker    │  └──────────────┘  │ - Podcast    │  └──────────────┘     │
-│  └──────────────┘                    └──────────────┘                       │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
+│  │   Hardware   │  │   Network    │  │  Media Player│  │ Virtual Asstant │  │
+│  │ - LED        │  │ - Home Asst  │  │ - Music      │  │ - Zalo          │  │
+│  │ - Buttons    │  │ - MQTT       │  │ - Radio      │  │ - ChatGPT       │  │
+│  │ - Microphone │  │ - OpenWeather│  │ - News       │  │ - Gemini        │  │
+│  │ - Speaker    │  └──────────────┘  │ - Podcast    │  │ - XiaoZhi       │  │
+│  └──────────────┘                    └──────────────┘  └─────────────────┘  │
 └─────────────────────────────────────────────────────────────────────────────┘
                                     │
                                     ▼
