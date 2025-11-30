@@ -52,7 +52,6 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 		- Yêu Cầu: Đã Flash IMG VBot Vào Thẻ Nhớ Dùng Cho Raspberry  pi
 		- Cần Dừng Chạy VBot Tự Động Trước Bằng Lệnh:
 		$:> systemctl --user stop VBot_Offline.service
-
 		- Sau Đó Chạy Thủ Công:
         $:> cd VBot_Offline
         $:> python3 Start.py
