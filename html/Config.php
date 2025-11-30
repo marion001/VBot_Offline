@@ -1184,7 +1184,7 @@ include 'html_head.php';
                     <div class="card-body">
                       <h5 class="card-title">Hotword / Từ Nóng Đánh Thức <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
                       <div class="row mb-3">
-                        <label for="continue_running_if_hotword_initialization_fails" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
+                        <label for="" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="continue_running_if_hotword_initialization_fails" id="continue_running_if_hotword_initialization_fails" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] ? 'checked' : ''; ?>>
@@ -1847,17 +1847,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   echo input_field('mqtt_client_name', 'Tên Client ', htmlspecialchars($Config['mqtt_broker']['mqtt_client_name']), '', 'text', '', '', '', 'Nếu có nhiều hơn 1 thiết bị trong Mạng, bạn cần thay đổi Tên Client cho khác nhau và là duy nhất, ví dụ: <b>VBot1</b> hoặc <b>VBot2</b><br/>Tên Client này sẽ được gắn với <b>state_topic</b> và <b>command_topic</b> trong cấu hình <b>mqtts.yaml</b><br/><br/>Ví dụ tên Client là <b>Vbot1</b>:<br/><b>- state_topic: \'VBot1/switch/mic_on_off/state\'</b> <br/><b>- command_topic: \'VBot1/switch/mic_on_off/set\'</b>', 'border-success', '', '', '', '', '');
                   echo input_field('mqtt_time_out', 'Thời gian chờ (Time Out) (giây)', htmlspecialchars($Config['mqtt_broker']['mqtt_time_out'] ?? 60), '', 'number', '1', '20', '120', 'Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công', 'border-success', '', '', '', '', '');
                   echo input_field('mqtt_connection_waiting_time', 'Thời gian chờ kết nối lại (giây)', htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time'] ?? 300), '', 'number', '1', '10', '9999', 'Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công', 'border-success', '', '', '', '', '');
-                  echo select_field(
-                    'mqtt_qos',
+                  echo select_field('mqtt_qos',
                     'QoS <i class="bi bi-question-circle-fill" onclick="show_message(\'- QoS 0 (At most once): Tin nhắn được gửi một lần duy nhất mà không có sự xác nhận. Điều này có thể dẫn đến việc mất tin nhắn nếu có sự cố kết nối<br/><br/>- QoS 1 (At least once): Tin nhắn được gửi ít nhất một lần và sẽ có xác nhận từ phía người nhận. Điều này đảm bảo rằng tin nhắn sẽ đến nơi, nhưng có thể nhận được tin nhắn trùng lặp.<br/><br/>- QoS 2 (Exactly once): Tin nhắn sẽ được gửi một lần duy nhất, không trùng lặp và không bị mất. Đây là mức độ bảo mật cao nhất, nhưng cũng đòi hỏi nhiều tài nguyên hơn và độ trễ cao hơn\')"></i>',
-                    [
-                      '0' => '0 (At most once)',
-                      '1' => '1 (At least once)',
-                      '2' => '2 (Exactly once)'
-                    ],
-                    $Config['mqtt_broker']['mqtt_qos'],
-					[]
-                  );
+                    ['0' => '0 (At most once)', '1' => '1 (At least once)', '2' => '2 (Exactly once)'],
+                    $Config['mqtt_broker']['mqtt_qos'], []);
                   ?>
 
                   <div class="row mb-3">
@@ -1871,6 +1864,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   <?php
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) ', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', 'Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'btn btn-success border-danger', 'link', '_blank');
                   ?>
+				  <!--
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Hoặc Tạo File Cấu Hình Thủ Công <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
                     <div class="col-sm-9">
@@ -1882,6 +1876,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+				  -->
                 </div>
               </div>
             </div>
@@ -1901,8 +1896,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   </div>
 
                   <?php
-                  echo select_field(
-                    'led_type_select',
+                  echo select_field('led_type_select',
                     'Kiểu loại Led <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message(\'Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>\')"></i>',
                     [
                       'ws281x' => 'WS281x, SK6812, VBot AIO, Vietbot AIO',
@@ -1910,9 +1904,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0',
                       'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'
                     ],
-                    $Config['smart_config']['led']['led_type'],
-					[]
-                  );
+                    $Config['smart_config']['led']['led_type'], []);
                   echo input_field('led_gpio', 'LED Pin GPIO', htmlspecialchars($Config['smart_config']['led']['led_gpio'] ?? 10), '', 'number', '1', '0', '60', 'Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO, Mặc định GPIO10 (Không thay đổi được)', 'border-success', '', '', '', '', '_blank');
                   echo input_field('number_led', 'Số lượng LED', htmlspecialchars($Config['smart_config']['led']['number_led'] ?? 24), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
                   echo input_field('led_brightness', 'Độ sáng đèn LED', htmlspecialchars(intval(($Config['smart_config']['led']['brightness'] ?? 255) * 100 / 255)), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
@@ -1980,21 +1972,16 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-
                   <center><button type="button" class="btn btn-danger rounded-pill" name="led_off" id="led_off" value="led_off" onclick="test_led('led_off')">Dừng Kiểm Tra/Dừng Test LED</button></center>
                 </div>
               </div>
             </div>
-
-
 
             <div class="card accordion" id="accordion_button_multype_button_config">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
                   Cấu Hình Sử Dụng Nút Nhấn:</h5>
                 <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
-
-
 
                   <div class="card accordion" id="accordion_button_setting_bton">
                     <div class="card-body">
@@ -2190,7 +2177,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                 </div>
                               </td>
                               <td colspan="4">
-
                               </td>
                             </tr>
                           </tbody>
@@ -2203,7 +2189,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
               </div>
             </div>
-
 
             <div class="card accordion" id="accordion_button_Sound_System">
               <div class="card-body">
@@ -2272,33 +2257,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-
-                  <!--
-                    <div class="card accordion" id="accordion_button_setting">
-                      <div class="card-body">
-                        <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting" aria-expanded="false" aria-controls="collapse_button_setting">
-                          Âm Thanh Khác/Mặc Định:
-                        </h5>
-                        <div id="collapse_button_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting" style="">
-                          <?php
-                          /* foreach ($Config['smart_config']['smart_wakeup']['sound']['default'] as $key => $value) {
-                                echo "
-                                <div class='row mb-3'>
-                                    <label for='sound_{$key}' class='col-sm-3 col-form-label'>{$key}:</label>
-                                    <div class='col-sm-9'>
-                                        <div class='input-group'>
-                                            <input readonly class='form-control border-danger' type='text' name='sound_{$key}_file_path' id='sound_{$key}_file_path' placeholder='{$value}' value='{$value}'>
-                                            <button class='btn btn-success border-danger' onclick=\"playAudio('{$VBot_Offline}{$value}')\" type='button'><i class='bi bi-play-circle'></i></button>
-                                        </div>
-                                    </div>
-                                </div>";
-                            }
-							*/
-                          ?>
-                        </div>
-                      </div>
-                    </div>
-					-->
 
                 </div>
               </div>
@@ -3945,7 +3903,9 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
       document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)
       selectHotwordWakeup();
     });
-
+	document.getElementById("hotword_select_wakeup").addEventListener("change", function () {
+    selectHotwordWakeup();
+	});
   </script>
 
 </body>

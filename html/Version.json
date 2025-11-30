@@ -1,8 +1,8 @@
 {
     "version": "1.0.77",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ Trợ Thông Báo Cập Nhật Khi Có Phiên Bản Mới Tới Hass, Đồng Bộ Với VBot Custom HASS",
-    "releaseDate": "28/11/2025",
+    "description": "Sửa Lỗi Lựa Chọn Nguồn Đánh Thức Hotword, Hỗ Trợ Thông Báo Cập Nhật Khi Có Phiên Bản Mới Tới Hass, Đồng Bộ Với VBot Custom HASS",
+    "releaseDate": "30/11/2025",
     "changes": [
         {
             "type": "feature",
