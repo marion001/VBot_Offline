@@ -116,6 +116,7 @@ Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://driv
 
 ```txt
 ##Cấu Trúc Sơ Đồ Luồng Xử Lý VBot Assistant:
+Sơ Đồ Chi Tiết: https://drive.google.com/drive/folders/1E2H53HDxZ_ZCtOhyUcr7Yi6PfeiXXhEZ
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              VBot Assistant                                 │
 │                           Khởi động hệ thống                                │
