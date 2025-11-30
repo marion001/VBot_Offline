@@ -49,6 +49,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
         $:> pass: vbot123
   
 - Chạy VBot thủ công:
+
 		- Yêu Cầu: Đã Flash IMG VBot Vào Thẻ Nhớ Dùng Cho Raspberry  pi
 		- Cần Dừng Chạy VBot Tự Động Trước Bằng Lệnh:
 		$:> systemctl --user stop VBot_Offline.service
@@ -62,6 +63,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
         - Code Custom Skill: Dev_Customization.py
         - Code Hiệu Ứng Đèn Led: Dev_Led.py
         - Code Chuyển Văn Bản Thành Giọng Nói: Dev_TTS.py
+        - Code Nguồn Âm Nhạc: Dev_Music.py
 
 
 Link Download IMG FLASH (IMG Được Build Trên Raspberry Pi Zero 2W): https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
