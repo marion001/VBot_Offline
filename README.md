@@ -1,3 +1,4 @@
+
 VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khiển nhà thông minh, trả lời câu hỏi, nhắc nhở, phát nhạc và nhiều tiện ích khác. Với thiết kế tinh tế và khả năng hiểu ngôn ngữ tự nhiên, VBot mang đến sự tiện nghi và trải nghiệm hiện đại, gần gũi cho mọi gia đình Việt.
 -----
 - Các Bạn Có Nhu Cầu Mua Mạch VBot Assistant AIO, hoặc Nguyên 1 Chiếc Loa Liên Hệ Mình Nhé: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
@@ -5,6 +6,7 @@ VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khi�
 - Group Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
 - @Email: VBot.Assistant@gmail.com
 - Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
+- Sơ Đồ Mạch Chế Cháo DIY -> Kéo Xuống Cuối Cùng Nhé
 ------------------------------------------------
 - HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W (IMG có sẵn được Build trên Raspberry Pi Zero 2W)
 - Mạch Mic ReSpeaker 2-Mics Pi HAT v1 (sử dụng ic WM8960), ReSpeaker Mic Array v2.0, Mic USB, V..v...
@@ -106,6 +108,114 @@ Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://driv
       Copyright (c) 2012 Broadcom
       version 82f3750a65fadae9a38077e3c2e217ad158c8d54 (clean) (release) (start_cd)
 
+<hr/>
+
+```txt
+Cấu Trúc Luồng Xử Lý VBot Assistant:
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                              VBot Assistant                                 │
+│                           Khởi động hệ thống                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    1. KHỞI TẠO CÁC MODULE                                   │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │   Hardware   │  │   Network    │  │  Media Player│  │ Virtual Asst │     │
+│  │ - LED        │  │ - Home Asst  │  │ - Music      │  │ - Zalo       │     │
+│  │ - Buttons    │  │ - MQTT       │  │ - Radio      │  │ - ChatGPT    │     │
+│  │ - Microphone │  │ - OpenWeather│  │ - News       │  │ - Gemini     │     │
+│  │ - Speaker    │  └──────────────┘  │ - Podcast    │  └──────────────┘     │
+│  └──────────────┘                    └──────────────┘                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    2. CHỜ SẴN SANG NGHE                                     │
+│                       Hotword Detection                                     │
+│  ┌──────────────┐                                                           │
+│  │ Porcupine    │  Hotwords: "Ê cu", "E cu", "Hey Google", etc.             │
+│  │ Snowboy      │                                                           │
+│  └──────────────┘                                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+                    ┌───────────────YES──────────────┐
+                    │                                │
+                    ▼                                ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3. XỬ LÝ LỆNH (Khi phát hiện Hotword)                    │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3.1. THU ÂM CÂU LỆNH VÀ CHUYỂN VĂN BẢN                   │
+│  ┌──────────────┐                                                           │
+│  │   RECORD     │  ┌──────────────┐  ┌──────────────┐                       │
+│  │ Duration: 6s │  │ STT Default  │  │ STT Viettel  │                       │
+│  │ Silence: 3s  │  │ STT Google   │  │ STT Zalo     │                       │
+│  └──────────────┘  └──────────────┘  └──────────────┘                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3.2. PHÂN TÍCH VÀ XỬ LÝ LỆNH                             │
+│                             PRIORITY ORDER:                                 │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
+│  │ Default Asst │  │ Zalo Asst    │  │ ChatGPT      │  │ Gemini       │     │
+│  │ (Active)     │  │ (Active)     │  │ (Inactive)   │  │ (Inactive)   │     │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘     │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3.3. PHÂN LOẠI VÀ THỰC HIỆN LỆNH                         │
+└─────────────────────────────────────────────────────────────────────────────┘
+           │
+           ├─────────────────┬─────────────────┬──────────────────┤
+           │                 │                 │                  │
+           ▼                 ▼                 ▼                  ▼
+┌───────────┐ ┌─────────────┐ ┌───────────────┐ ┌─────────────┐ ┌─────────────┐
+│  MEDIA    │ │ HOME ASSIST │ │   WEATHER     │ │   CUSTOM    │ │   DEFAULT   │
+│ - Music   │ │ - Lights    │ │ - Temperature │ │   SKILLS    │ │ Processing  │
+│ - Radio   │ │ - Devices   │ │ - Forecast    │ │             │ │             │
+│ - News    │ │ - Automation│ │               │ │             │ │             │
+│ - Podcast │ └─────────────┘ └───────────────┘ └─────────────┘ └─────────────┘
+└───────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3.4. CHUYỂN VĂN BẢN THÀNH GIỌNG NÓI                      │
+│                             Text-to-Speech                                  │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                       │
+│  │   TTS Edge   │  │  TTS Zalo    │  │ TTS Default  │                       │
+│  │ (Active)     │  │              │  │              │                       │
+│  └──────────────┘  └──────────────┘  └──────────────┘                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    3.5. PHÁT ÂM VÀ HIỂN THỊ KẾT QUẢ                         │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                       │
+│  │   SPEAKER    │  │    SCREEN    │  │    LED       │                       │
+│  │ Volume: 50   │  │ LCD I2C/SPI  │  │ WS281x       │                       │
+│  └──────────────┘  └──────────────┘  └──────────────┘                       │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                    │
+                                    ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                    4. TRẠNG THÁI SAU KHI XỬ LÝ                              │
+└─────────────────────────────────────────────────────────────────────────────┘
+                    │
+       ┌────────────┼────────────┐
+       │            │            │
+       ▼            ▼            ▼
+┌─────────────┐ ┌─────────────┐ ┌─────────────┐
+│  CONVERSA-  │ │   BACK TO   │ │  PLAYBACK   │
+│ TION MODE   │ │ LISTENING   │ │  CONTROL    │
+│ (Active)    │ │   (Hotword) │ │ (Buttons)   │
+└─────────────┘ └─────────────┘ └─────────────┘
+```
 <hr/>
 
 ![Alt text](https://github.com/user-attachments/assets/05b0eafa-6b73-42b9-ae65-e3e114faec01) 
