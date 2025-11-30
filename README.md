@@ -114,7 +114,7 @@ Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://driv
 <hr/>
 
 ```txt
-Cấu Trúc Luồng Xử Lý VBot Assistant:
+##Cấu Trúc Sơ Đồ Luồng Xử Lý VBot Assistant:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                              VBot Assistant                                 │
 │                           Khởi động hệ thống                                │
