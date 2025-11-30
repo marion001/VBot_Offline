@@ -9,7 +9,6 @@
 include 'Configuration.php';
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -23,7 +22,6 @@ if ($Config['contact_info']['user_login']['active']) {
 
 if ($Config['backup_upgrade']['config_json']['active'] === true) {
   $directoryPath_Backup_Config = $Config['backup_upgrade']['config_json']['backup_path'];
-  //Kiểm tra xem thư mục Backup_Config có tồn tại hay không
   if (!is_dir($directoryPath_Backup_Config)) {
     if (mkdir($directoryPath_Backup_Config, 0777, true)) {
       chmod($directoryPath_Backup_Config, 0777);
@@ -1051,7 +1049,7 @@ include 'html_head.php';
                   <div class="card accordion" id="accordion_button_udp_server_streaming">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-                        Cấu hình sử dụng: ESP32, ESP32S3, ESP32 D1 Mini, Raspberry Pi:</h5>
+                        Cấu hình sử dụng Client: ESP32, ESP32S3, ESP32 D1 Mini:</h5>
                       <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 
                         <div class="row mb-3">
@@ -1459,7 +1457,7 @@ include 'html_head.php';
                               'disabled' => true,
                             ],
                             'tts_ggcloud' => [
-                              'label' => 'TTS Google Cloud (Authentication.json) <font color=red>Nên sử dụng</font>',
+                              'label' => 'TTS Google Cloud (Authentication.json) <font color=green>Khuyến Khích Nên sử dụng</font>',
                               'help'  => "Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/><br/>-Link: <a href='https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ' target='_bank'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>",
                             ],
                             'tts_ggcloud_key' => [
@@ -2279,7 +2277,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                       <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Cho Phép Đánh Thức Khi Đang Phát Media player: </label>
+                        <label class="col-sm-3 col-form-label">Cho Phép Đánh Thức Khi Đang Phát Media player <i class="bi bi-question-circle-fill" onclick="show_message('Lưu Ý: Tính năng này được bật có thể gây nhiễu Hotword tự động đánh thức, Nên tắt để tránh nhiễu tạp âm từ loa thu vào MIC')"></i>: </label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="wake_up_in_media_player" id="wake_up_in_media_player" <?php echo $Config['media_player']['wake_up_in_media_player'] ? 'checked' : ''; ?>>
@@ -3360,18 +3358,11 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                       echo input_field('gcloud_drive_backup_folder_name', "Tên Thư Mục Cha Sao Lưu <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'], false, 'text', "Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
                       echo input_field('gcloud_drive_backup_folder_vbot_name', "Tên Thư Mục Sao Lưu Chương Trình VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'], false, 'text', "Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
                       echo input_field('gcloud_drive_backup_folder_interface_name', "Tên Thư Mục Sao Lưu Giao Diện VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'], false, 'text', "Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
-
                       echo select_field(
                         'gcloud_drive_setAccessType',
                         "Kiểu Loại Truy Cập <i class='bi bi-question-circle-fill' onclick=\"show_message('- Để giá trị là offline thì sẽ tự động làm mới lại mã token xác thực khi hết hạn<br/>- Để giá trị là online thì mỗi lần mã token xác thực hết hạn bạn cần lấy lại bằng thao tác thủ công')\"></i>",
-                        [
-                          'offline' => 'Offline (Tự động làm mới Token)',
-                          'online' => 'Online (Làm mới Token thủ công)'
-                        ],
-                        $Config['backup_upgrade']['google_cloud_drive']['setAccessType'],
-						[]
-                      );
-
+                        ['offline' => 'Offline (Tự động làm mới Token) - Mặc Định', 'online' => 'Online (Làm mới Token thủ công)'],
+                        $Config['backup_upgrade']['google_cloud_drive']['setAccessType'], []);
                       echo select_field(
                         'gcloud_drive_setPrompt',
                         "Đặt Lời Nhắc Khi Xác Thực 
@@ -3379,13 +3370,10 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 								onclick=\"show_message('- none: Không hiển thị bất kỳ trang yêu cầu quyền nào từ Google.<br/><br/>Nếu người dùng đã đăng nhập và đã cấp quyền, họ sẽ được chuyển hướng ngay lập tức.<br/><br/>Nếu không có quyền hoặc người dùng chưa đăng nhập, yêu cầu sẽ trả về lỗi.<br/><br/>- consent: Luôn yêu cầu người dùng đồng ý cấp quyền.<br/><br/>- select_account: Hiển thị danh sách tài khoản Google để người dùng chọn.<br/><br/>- consent select_account: Hiển thị cả hộp chọn tài khoản và yêu cầu người dùng xác nhận lại quyền.')\"></i>",
                         [
                           'none' => 'None (Không hiển thị)',
-                          'consent' => 'Consent (Yêu cầu đồng ý cấp quyền)',
+                          'consent' => 'Consent (Yêu cầu đồng ý cấp quyền) - Mặc Định',
                           'select_account' => 'Select Account (Chọn tài khoản muốn dùng)',
                           'consent select_account' => 'Consent Select Account (Chọn và Yêu cầu đồng ý cấp quyền)'
-                        ],
-                        $Config['backup_upgrade']['google_cloud_drive']['setPrompt'],
-						[]
-                      );
+                        ], $Config['backup_upgrade']['google_cloud_drive']['setPrompt'], []);
                       ?>
                     </div>
                   </div>
@@ -3429,7 +3417,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                   </table>
 
                   <div style="display: none;" id="displayResults_create_audio_WakeUP_Reply">
-
                     <div class="input-group mb-3">
                       <span class="input-group-text border-success text-danger" id="basic-addon1">Nguồn Tạo Tệp Âm Thanh:</span>
                       <select id="audio_reply_type" onchange="handleAudioReplyType()" class="form-select border-success">
@@ -3539,10 +3526,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                     'console' => 'console (Hiển thị log ra bảng điều khiển đầu cuối)',
                     'api' => 'api (Hiển thị log ra API, Web UI)',
                     'all' => 'all (Hiển thị log ra tất cả các đường)'
-                  ],
-                  $Config['smart_config']['show_log']['log_display_style'],
-				  []
-                );
+                  ], $Config['smart_config']['show_log']['log_display_style'], []);
                 ?>
               </div>
             </div>
