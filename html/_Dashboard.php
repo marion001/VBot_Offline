@@ -7,8 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
-?>
-<?php
+
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
     if (
@@ -40,7 +39,6 @@ if (file_exists($Version_VBot_Interface_filePath)) {
 <?php
 include 'html_head.php';
 ?>
-
 <head>
     <style>
         .limited-height {

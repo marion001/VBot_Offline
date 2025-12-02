@@ -11,19 +11,15 @@ include 'Configuration.php';
 <?php
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
   ) {
-    // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
     session_unset();
     session_destroy();
     header('Location: Login.php');
     exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
 }
 ?>
 <?php
@@ -1442,6 +1438,150 @@ if (isset($_POST['fix_time_zones'])) {
   $output .=  stream_get_contents($stream_out);
   $output .=  stream_get_contents($stream_out1);
 }
+
+if (isset($_POST['cloudflared_tunnel_start'])) {
+$output_check = [];
+$return_var = 0;
+exec("systemctl list-units --type=service | grep cloudflared", $output_check, $return_var);
+if (!empty($output_check)) {
+  $CMD = "sudo systemctl start cloudflared";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+} else {
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  "Cloudflared Tunnel Chưa Được thiết lập, không tồn tại tệp cloudflared.service";
+}
+}
+
+if (isset($_POST['cloudflared_tunnel_stop'])) {
+$output_check = [];
+$return_var = 0;
+exec("systemctl list-units --type=service | grep cloudflared", $output_check, $return_var);
+if (!empty($output_check)) {
+  $CMD = "sudo systemctl stop cloudflared";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+} else {
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  "Cloudflared Tunnel Chưa Được thiết lập, không tồn tại tệp cloudflared.service";
+}
+}
+
+if (isset($_POST['cloudflared_tunnel_disable'])) {
+$output_check = [];
+$return_var = 0;
+exec("systemctl list-units --type=service | grep cloudflared", $output_check, $return_var);
+if (!empty($output_check)) {
+  $CMD = "sudo systemctl disable cloudflared";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+} else {
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  "Cloudflared Tunnel Chưa Được thiết lập, không tồn tại tệp cloudflared.service";
+}
+}
+
+if (isset($_POST['cloudflared_tunnel_enable'])) {
+$output_check = [];
+$return_var = 0;
+exec("systemctl list-units --type=service | grep cloudflared", $output_check, $return_var);
+if (!empty($output_check)) {
+  $CMD = "sudo systemctl enable cloudflared";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+} else {
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  "Cloudflared Tunnel Chưa Được thiết lập, không tồn tại tệp cloudflared.service";
+}
+}
+
+if (isset($_POST['cloudflared_tunnel_status'])) {
+$output_check = [];
+$return_var = 0;
+exec("systemctl list-units --type=service | grep cloudflared", $output_check, $return_var);
+if (!empty($output_check)) {
+  $CMD = "systemctl status cloudflared";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+} else {
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  "Cloudflared Tunnel Chưa Được thiết lập, không tồn tại tệp cloudflared.service";
+}
+}
+
+if (isset($_POST['cloudflared_tunnel_list'])) {
+$output_check = [];
+$return_var = 0;
+exec("systemctl list-units --type=service | grep cloudflared", $output_check, $return_var);
+if (!empty($output_check)) {
+  $CMD = "cloudflared tunnel list";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+} else {
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  "Cloudflared Tunnel Chưa Được thiết lập, không tồn tại tệp cloudflared.service";
+}
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -1599,6 +1739,22 @@ include 'html_head.php';
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_status" type="submit" title="alsamixer_soundcard_status">ALSA SoundCard Status</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_to_alsamixer" type="submit" title="save_asound_to_alsamixer">Save Alsamixer SoundCard</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_asound_to_alsamixer" type="submit" title="alsamixer_asound_to_alsamixer">Restore ALSA SoundCard Driver Default</button></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="btn-group">
+                      <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
+                          Cloudflare Tunnel
+                        </button>
+                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_start" type="submit" title="Chạy ">Chạy</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_stop" type="submit" title="Dừng Chạy Tạm thời">Dừng</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_disable" type="submit" title="Dừng Chạy Cloudflare Tunnel Khi pi Khởi Động">Vô Hiệu</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_enable" type="submit" title="Cho Phép Chạy Cloudflare Tunnel Khi pi Khởi Động">Kích hoạt</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_status" type="submit" title="Kiểm Tra Trạng Thái Cloudflare Tunnel">Kiểm Tra Trạng Thái</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_list" type="submit" title="Xem Danh Sách Tunnel List">Xem Danh Sách Tunnel List</button></li>
+                          <li><a href="FAQ.php"><button onclick="loading('show')" class="dropdown-item text-danger" type="button" title="Xem Hướng Dẫn">Hướng Dẫn</button></a></li>
                         </ul>
                       </div>
                     </div>

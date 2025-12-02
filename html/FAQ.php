@@ -32,12 +32,20 @@ if ($Config['contact_info']['user_login']['active']) {
 <?php
 include 'html_head.php';
 ?>
-
+<style>
+        .code-block, .output-block {
+            font-family: 'JetBrains Mono', Consolas, monospace;
+            font-size: 0.94rem;
+        }
+        .cmd { color: #28a745; font-weight: 500; }
+        .path { color: #dc3545; }
+    </style>
 <body>
   <!-- ======= Header ======= -->
   <?php
   include 'html_header_bar.php';
   ?>
+  
   <!-- End Header -->
   <!-- ======= Sidebar ======= -->
   <?php
@@ -166,6 +174,139 @@ include 'html_head.php';
                   </div>
                 </div>
               </div>
+            <div class="card accordion" id="accordion_button_Cloudflare_Tunnel">
+            <div class="card-body">
+            <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Cloudflare_Tunnel" aria-expanded="false" aria-controls="collapse_button_Cloudflare_Tunnel">
+            Truy Cập bằng Domain, Tên Miền: (DNS, NAT & Forwarding - Cloudflare Tunnel)</h5>
+            <div id="collapse_button_Cloudflare_Tunnel" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Cloudflare_Tunnel">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white text-center">
+            <h3 class="mb-0">HƯỚNG DẪN CÀI CLOUDFLARED TUNNEL TRÊN RASPBERRY PI ZERO 2W 32BIT (ARM)</h3>
+        </div>
+		
+        <div class="card-body">
+			<h5 class="border-bottom border-primary pb-2 mt-4">0. Yêu Cầu: Cần Truy Cập Login SSH Để Thực Thi Các Lệnh</h5>
+            <h5 class="border-bottom border-primary pb-2 mt-4">1. Tải và cài đặt Cloudflared Cho RASPBERRY PI ZERO 2W 32 bit (ARM)</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-armhf.deb<br><br>
+                <span class="cmd">$</span> sudo dpkg -i cloudflared-linux-armhf.deb
+            </div>
+            <small class="text-muted">Output mẫu:</small>
+            <div class="bg-black rounded p-3 output-block text-light small">
+                Selecting previously unselected package cloudflared...<br>
+                Unpacking cloudflared (2025.11.1) ...<br>
+                Setting up cloudflared (2025.11.1) ...
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">2. Kiểm tra phiên bản Cloudflare Tunnel </h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> cloudflared --version
+            </div>
+            <div class="bg-black rounded p-3 output-block text-light small">
+                cloudflared version 2025.11.1 (built 2025-11-07-16:59 UTC)
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">3. Đăng nhập Cloudflare (lấy cert)</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> cloudflared tunnel login
+            </div>
+            <div class="alert alert-info small mt-2">
+                Mở link hiện ra trên trình duyệt → đăng nhập Cloudflare → chọn domain đã được liên kết với cloudflared (ví dụ domain của mình đã liên kết là: vutuyen.com)
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">4. Tạo tunnel (ví dụ tên: vbot_domain_tunnel)</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> cloudflared tunnel create vbot_domain_tunnel
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">5. Gắn subdomain vào tunnel</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> cloudflared tunnel route dns vbot_domain_tunnel vbot.vutuyen.com
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">6. Tạo thư mục và file config</h5>
+            <div class="bg-dark rounded p-3 code-block text-light mb-2">
+                <span class="cmd">$</span> mkdir -p /home/pi/Cloud_Flare<br>
+                <span class="cmd">$</span> chmod 0777 /home/pi/Cloud_Flare<br>
+                <span class="cmd">$</span> nano /home/pi/Cloud_Flare/config.yml<br/>
+            </div>
+			<small class="text-muted">Nội Dung File config.yml Bên Dưới, Thay Đổi Giá Trị Cho Phù Hợp:</small>
+			<small class="text-muted">Cần thay đổi giá trị của: <b>hostname</b> và <b>credentials-file</b> :</small>
+            <div class="bg-secondary rounded p-3 text-light small">
+                tunnel: vbot_domain_tunnel<br>
+                credentials-file: /home/pi/.cloudflared/000f2d49-5f13-449d-bd50-b1692156562c.json<br><br>
+                ingress:<br>
+                &nbsp;&nbsp;- hostname: vbot.vutuyen.com<br>
+                &nbsp;&nbsp;&nbsp;&nbsp;service: http://localhost:80<br>
+                &nbsp;&nbsp;- service: http_status:404
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">7. Chạy thử thủ công</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> cloudflared tunnel --config /home/pi/Cloud_Flare/config.yml run vbot_domain_tunnel
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">8. Cài đặt chạy tự động (systemd service)</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> sudo ln -s /home/pi/Cloud_Flare/config.yml /etc/cloudflared/config.yml<br>
+                <span class="cmd">$</span> sudo cloudflared service install<br>
+                <span class="cmd">$</span> sudo systemctl enable cloudflared<br>
+                <span class="cmd">$</span> sudo systemctl start cloudflared
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">9. Quản lý service</h5>
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+                <div class="col">
+                    <div class="bg-dark rounded p-3 code-block text-light small">
+                        <span class="cmd">$</span> sudo systemctl stop cloudflared
+                    </div>
+                    <small class="text-muted">Dừng tạm thời</small>
+                </div>
+                <div class="col">
+                    <div class="bg-dark rounded p-3 code-block text-light small">
+                        <span class="cmd">$</span> sudo systemctl disable cloudflared
+                    </div>
+                    <small class="text-muted">Tắt khởi động cùng hệ thống</small>
+                </div>
+                <div class="col">
+                    <div class="bg-dark rounded p-3 code-block text-light small">
+                        <span class="cmd">$</span> systemctl status cloudflared
+                    </div>
+                    <small>Kiểm tra trạng thái</small>
+                </div>
+				<!-- 
+                <div class="col">
+                    <div class="bg-dark rounded p-3 code-block text-light small">
+                        <span class="cmd">$</span> sudo cloudflared service install --config /home/pi/Cloud_Flare/config.yml
+                    </div>
+                    <small>Cài lại service có config</small>
+                </div>
+				-->
+                <div class="col">
+                    <div class="bg-dark rounded p-3 code-block text-light small">
+                        <span class="cmd">$</span> sudo systemctl enable cloudflared
+                    </div>
+                    <small>Bật khởi động cùng hệ thống</small>
+                </div>
+				
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">10. Xóa hoàn toàn service</h5>
+            <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> sudo systemctl stop cloudflared<br>
+                <span class="cmd">$</span> sudo systemctl disable cloudflared<br>
+                <span class="cmd">$</span> sudo rm /etc/systemd/system/cloudflared.service<br>
+                <span class="cmd">$</span> sudo systemctl daemon-reload
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">11. Xem danh sách & thông tin tunnel</h5>
+            <div class="bg-dark rounded p-3 code-block text-light mb-2">
+                <span class="cmd">$</span> cloudflared tunnel list<br>
+                <span class="cmd">$</span> cloudflared tunnel info vbot_domain_tunnel
+            </div>
+            <h5 class="border-bottom border-primary pb-2 mt-4">12. Xóa tunnel hoàn toàn trên Cloudflare</h5>
+            <div class="bg-dark rounded p-3 code-block text-light mb-2">
+                <span class="cmd">$</span> cloudflared tunnel list<br>
+                <span class="cmd">$</span> cloudflared tunnel delete "tunnel_name"
+            </div>
+            <div class="alert alert-warning mt-4">
+                <strong>Lưu ý quan trọng:</strong> Giữ bí mật file <code class="path">~/.cloudflared/*.json</code> – nếu lộ sẽ bị chiếm quyền điều khiển tunnel!
+            </div>
+        </div>
+    </div>
+            </div>
+            </div>
+            </div>
               <div class="card accordion" id="accordion_button_3">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_3" aria-expanded="false">
@@ -377,7 +518,6 @@ include 'html_head.php';
                 </div>
               </div>
 
-
               <div class="card accordion" id="accordion_button_6">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_6" aria-expanded="false">
@@ -449,10 +589,10 @@ include 'html_head.php';
               <div class="card accordion" id="accordion_button_add_vbot_assist_hass">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_add_vbot_assist_hass" aria-expanded="false" aria-controls="collapse_button_add_vbot_assist_hass">
-                    Tích Hợp Vào Trợ Lý Assist của Home Assistant Làm Tác Nhân:
+                    Liên Kết VBot Vào Hass - Home Assistant:
                   </h5>
                   <div id="collapse_button_add_vbot_assist_hass" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_add_vbot_assist_hass">
-                    Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot-Assist-Conversation" target="_blank">https://github.com/marion001/VBot-Assist-Conversation</a>
+                    Truy Cập Tài Liệu: <a href="https://github.com/marion001/VBot_Offline_Custom_Component" target="_blank">https://github.com/marion001/VBot_Offline_Custom_Component</a>
                   </div>
                 </div>
               </div>
