@@ -89,30 +89,89 @@ include 'html_head.php';
                     Cách Cài Đặt Kiểm Tra Mic Và Scan Lấy ID Mic:
                   </h5>
                   <div id="collapse_button_mic_tetser" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mic_tetser">
-                    - Đầu tiên chạy lệnh sau để di chuyển tới thư mục <b>test_device</b>:<br />
-                    <b>$:> cd /home/pi/VBot_Offline/resource/test_device</b><br />
-                    - Chạy file <b>Scan_Mic.py</b> để tiến hành liệt kê mic và ID<br />
-                    <b>$:> python3 Scan_Mic.py</b><br />
-                    - Trên giao diện Terminal sẽ hiển thị các ID và Tên Tên Thiết Bị tương ứng<br />
-                    - Thay lần lượt ID vừa scan đó vào trong file <b>Test_Mic.py</b> (ở dòng số 12 có giá trị <b>device_index=14</b>, hãy thay số 14 thành ID mic của bạn)<br />
-                    - Sau đó chạy file <b>Test_Mic.py</b> để kiểm tra Mic có đúng và hoạt động không:<br />
-                    <b>$:> python3 Test_Mic.py</b><br />
-                    - File đó sẽ thu âm trong khoảng 6 giây, bạn cần nói vào Mic khi thu âm xong sẽ xuất ra file <b>Test_Microphone.wav</b><br />
-                    - Bạn cần mở file đó và nghe xem có âm thanh được thu không hoặc chạy lệnh sau:<br />
-                    <b>$:> vlc Test_Microphone.wav</b><br />
-                    - Nếu không được bạn cần thử lần lượt các ID được scan và kiểm tra lại driver được cài tương ứng với MIC của bạn chưa<br />
-                    - Nếu thành công bạn hãy điền ID Mic đó vào trong cấu hình Config rồi lưu Config lại là được
-                    <br /><br />
-                    <b>Thay đổi âm lượng Mic/Microphone:</b><br />
-                    <b>- B1:</b> Chạy lệnh sau: <b>$:> alsamixer</b> -> nhấn phím <b> Tab hoặc F4</b> tìm tới tên thiết bị (Tùy từng kiểu loại Mic, Driver): ví dụ với Mạch AIO tên là: <b>Captue</b> chỉnh khoảng 35 là trung bình, trong quá trình sử dụng nếu thấy nhạy quá cần chính xuống thấp hơn<br />
-                    <b>- B2:</b> Di chuyển tới Tab: <b>Command/Terminal</b> -> <b>VM8960-SoundCard</b> -> <b>Save Alsamixer To VM8960 SoundCard Driver</b><br /><br />
-                    <b>+ Hoặc Thao Tác Thay Đổi Âm Lượng Mic Thủ Công:</b><br />
-                    <b>- B1:</b> Chạy lệnh sau: <b>$:> alsamixer</b> -> nhấn phím <b> Tab hoặc F4</b> tìm tới tên thiết bị (Tùy từng kiểu loại Mic, Driver): ví dụ với Mạch AIO tên là: <b>Captue</b> chỉnh khoảng 35 là trung bình, trong quá trình sử dụng nếu thấy nhạy quá cần chính xuống thấp hơn
-                    <br /><b>- B2:</b> Chạy Lệnh sau để lưu cấu hình alsamixer: <b>$:> sudo alsactl store</b><br />
-                    <b>- B3:</b> Sao Lưu Lại Cấu Hình Gốc m8960-soundcard: <b>$:> sudo mv /etc/wm8960-soundcard/wm8960_asound.state /etc/wm8960-soundcard/wm8960_asound_default.state</b><br />
-                    <b>- B4:</b>Chạy lệnh sau để sao chép tệp cấu hình alsamixer đã lưu ở <b>B2</b> vào hệ thống driver m8960-soundcard: <b>$:> sudo cp /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state</b>
-                    <br /><br />
-                    - Lưu Ý: Nếu sử dụng Mic i2s: <b>INMP441</b> kếp hợp với <b>MAX9857</b> thì bạn cần Flash <b>'IMG VBot I2S'</b> và thiết lập ID MIC Bắt Buộc là: '<b>-1</b>' Nhé
+  <div class="card-body">
+
+    <h5 class="border-bottom border-primary pb-2 mt-3">Bước 1: Di chuyển tới thư mục test_device</h5>
+    <div class="code-block">
+      <span class="cmd">$</span> cd /home/pi/VBot_Offline/resource/test_device
+    </div>
+
+    <h5 class="border-bottom border-primary pb-2 mt-4">Bước 2: Scan danh sách Microphone</h5>
+    <div class="code-block">
+      <span class="cmd">$</span> python3 Scan_Mic.py
+    </div>
+    <div class="alert alert-info mt-2 small">
+      Terminal sẽ hiển thị danh sách các thiết bị âm thanh kèm <strong>ID</strong> và <strong>tên thiết bị</strong>
+    </div>
+
+    <h5 class="border-bottom border-primary pb-2 mt-4">Bước 3: Kiểm tra Mic theo ID</h5>
+    <div class="code-block">
+      <span class="cmd">$</span> nano Test_Mic.py<br>
+      <small class="text-muted"># Tìm dòng device_index = 14 → thay 14 bằng ID mic vừa scan được</small><br><br>
+      <span class="cmd">$</span> python3 Test_Mic.py
+    </div>
+
+    <div class="alert alert-success mt-3">
+      <strong>Thao tác:</strong> Nói to và rõ vào mic trong vòng <strong>6 giây</strong><br>
+      → File <code>Test_Microphone.wav</code> sẽ được tạo ra trong thư mục hiện tại
+    </div>
+
+    <h5 class="border-bottom border-primary pb-2 mt-4">Bước 4: Nghe lại file thu âm</h5>
+    <div class="code-block">
+      <span class="cmd">$</span> vlc Test_Microphone.wav
+    </div>
+    <p>Nếu nghe rõ tiếng nói → Mic đã hoạt động tốt!</p>
+
+    <div class="alert alert-warning">
+      <strong>Nếu không nghe được gì:</strong><br>
+      → Thử lần lượt các ID khác từ kết quả scan<br>
+      → Kiểm tra driver mic đã được cài đúng chưa (AIO, USB, ReSpeaker, v.v.)
+    </div>
+
+    <div class="alert alert-success mt-3">
+      <strong>Thành công?</strong><br>
+      → Vào <strong>WebUI → Cấu hình Config → Microphone → ID Mic</strong><br>
+      → Điền đúng ID vừa kiểm tra xong → <strong>Lưu Config</strong>
+    </div>
+
+    <!-- PHẦN ĐIỀU CHỈNH ÂM LƯỢNG MIC -->
+    <h5 class="border-bottom border-primary pb-2 mt-5">Điều Chỉnh Âm Lượng Microphone</h5>
+
+    <div class="row">
+      <div class="col-lg-6">
+        <h6 class="text-success fw-bold">Cách 1: Dùng giao diện WebUI (khuyên dùng)</h6>
+        <p>→ Vào tab <strong>Command/Terminal</strong><br>
+        → Chọn <strong>VM8960-SoundCard</strong> → <strong>Save Alsamixer To VM8960 SoundCard Driver</strong></p>
+      </div>
+      <div class="col-lg-6">
+        <h6 class="text-primary fw-bold">Cách 2: Điều chỉnh thủ công qua Terminal</h6>
+        <div class="code-block">
+          <span class="cmd">$</span> alsamixer
+        </div>
+        <ul class="mt-2">
+          <li>Nhấn <kbd>F4</kbd> để vào chế độ <strong>Capture</strong></li>
+          <li>Tìm cột có tên <strong>Capture</strong> hoặc tên driver mic</li>
+          <li>Dùng phím mũi tên ↑↓ để chỉnh mức ~<strong>30–40</strong> (tránh nhạy quá)</li>
+        </ul>
+      </div>
+    </div>
+
+    <h6 class="mt-4 fw-bold">Lưu cấu hình thủ công (nếu dùng driver WM8960/AIO)</h6>
+    <div class="code-block">
+      <span class="cmd">$</span> sudo alsactl store<br>
+      <span class="cmd">$</span> sudo mv /etc/wm8960-soundcard/wm8960_asound.state /etc/wm8960-soundcard/wm8960_asound_default.state<br>
+      <span class="cmd">$</span> sudo cp /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state
+    </div>
+
+    <!-- LƯU Ý MIC I2S -->
+    <div class="alert alert-danger mt-4 text-center fw-bold">
+      <u>ĐẶC BIỆT CHÚ Ý</u><br><br>
+      Nếu dùng <strong>Mic I2S INMP441 + MAX9857</strong>:<br>
+      → Phải flash đúng <strong>IMG VBot I2S</strong><br>
+      → Bắt buộc đặt <strong>ID Mic = -1</strong> trong Config
+    </div>
+
+  </div>
                   </div>
                 </div>
               </div>
@@ -122,16 +181,110 @@ include 'html_head.php';
                     Hướng Dẫn Cài Đặt, Kiểm Tra Loa, Âm Thanh Đầu Ra:
                   </h5>
                   <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
-                    - Nếu Là Mạch DAC i2s có thể tham khảo cách cài Driver theo Link Sau:<br />
-                    - <a href="https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU" target="_blank">https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU</a>
-                    <br /><br />
-                    - Bạn cần phát 1 file âm thanh bằng VLC, có thể tải lên file âm thanh của bạn như XXX.mp3 vào <b>/home/pi</b> chẳng hạn<br />
-                    - Tiếp tới hãy chạy file âm thanh đó bằng lệnh sau:<br />
-                    <b>$:> vlc XXX.mp3</b><br />
-                    - Nếu có âm thanh được phát ra là xong, không cần cấu hình gì nữa cả<br />
-                    - Nếu không có âm thanh được phát ra bạn cần cài cấu hình và sét đầu ra âm thanh mặc định trong <b>alsamixer</b> (tùy mỗi thiết bị mà có cấu hình khác nhau)<br />
-                    - Sau đó bạn cần chạy lệnh <b>$:> alsamixer</b> và xác định xem thiết bị đó có tên là gì<br />
-                    - Khi đã xác định được tên thiết bị bạn cần điền tên đó vào trong tab <b>Cấu Hình config</b>: <b>Tên thiết bị (alsamixer)</b> (được dùng để sét âm lượng đầu tiên khi chạy chương trình, trong quá trình chạy VBot sẽ chỉ thay đổi âm lượng cửa vlc mà không ảnh hưởng gì tới âm lượng trên hệ thống của bạn)
+
+
+            <h1 class="text-center text-primary mb-5">
+                <i class="bi bi-volume-up-fill me-2"></i>Hướng dẫn cấu hình âm thanh DAC I2S cho VBot
+            </h1>
+
+            <!-- Bước 1 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-1-circle-fill me-2"></i>Bước 1: Cài driver cho mạch DAC I2S
+                </div>
+                <div class="card-body">
+                    <p>Nếu chưa cài driver, tải tại link Google Drive sau:</p>
+                    <a href="https://drive.google.com/drive/folders/1KJIuovEbRGv82uc5FCfi5p0sY1o5W5vU" 
+                       target="_blank" class="btn btn-success btn-lg">
+                        <i class="bi bi-download"></i> Tải driver DAC I2S ngay
+                    </a>
+                </div>
+            </div>
+
+            <!-- Bước 2 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-2-circle-fill me-2"></i>Bước 2: Kiểm tra phát nhạc bằng VLC
+                </div>
+                <div class="card-body">
+                    <p>Copy file nhạc bất kỳ vào thư mục <code>/home/pi</code>:</p>
+                    <pre class="bg-dark text-white p-3 rounded"><code>cp /đường_dẫn/nhac_test.mp3 /home/pi/</code></pre>
+
+                    <p>Phát thử bằng lệnh:</p>
+                    <pre class="bg-dark text-white p-3 rounded"><code>vlc /home/pi/nhac_test.mp3</code></pre>
+                </div>
+            </div>
+
+            <!-- Có tiếng → Xong -->
+            <div class="card border-success shadow-sm mb-4">
+                <div class="card-header bg-success text-white fs-5">
+                    <i class="bi bi-check2-all me-2"></i>Nếu CÓ TIẾNG → HOÀN TẤT!
+                </div>
+                <div class="card-body text-success">
+                    <h4 class="fw-bold"><i class="bi bi-emoji-laughing-fill"></i> Không cần làm gì thêm!</h4>
+                    <p class="lead">VBot sẽ hoạt động ngay lập tức.</p>
+                </div>
+            </div>
+
+            <!-- Không có tiếng → Tiếp tục -->
+            <div class="card border-danger shadow-sm mb-4">
+                <div class="card-header bg-danger text-white fs-5">
+                    <i class="bi bi-x-octagon-fill me-2"></i>Nếu KHÔNG có tiếng → Làm tiếp các bước dưới
+                </div>
+            </div>
+
+            <!-- Bước 3 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-3-circle-fill me-2"></i>Bước 3: Cấu hình alsamixer
+                </div>
+                <div class="card-body">
+                    <pre class="bg-dark text-white p-3 rounded"><code>alsamixer</code></pre>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item"><kbd>F6</kbd> → Chọn đúng card DAC I2S</li>
+                        <li class="list-group-item"><kbd>F4</kbd> → Xem các kênh Playback</li>
+                        <li class="list-group-item">Chọn <code>Master</code> hoặc <code>PCM</code> → nhấn <kbd>M</kbd> để bật (<code>OO</code>)</li>
+                        <li class="list-group-item">Dùng phím ↑ để tăng âm lượng</li>
+                        <li class="list-group-item">Nhấn <kbd>Esc</kbd> để thoát</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bước 4 -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-4-circle-fill me-2"></i>Bước 4: Xác định tên card âm thanh
+                </div>
+                <div class="card-body">
+                    <pre class="bg-dark text-white p-3 rounded mb-2"><code>aplay -l</code></pre>
+                    <pre class="bg-dark text-white p-3 rounded"><code>cat /proc/asound/cards</code></pre>
+
+                    <div class="alert alert-info mt-3">
+                        <strong>Tên thường gặp:</strong> sndrpihifiberry, IQaudIO, hifiberrydac, Generic, AudioInjecter...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bước 5 -->
+            <div class="card shadow-sm mb-5">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-5-circle-fill me-2"></i>Bước 5: Điền tên vào VBot
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item">Mở VBot → Tab <strong>Cấu hình</strong></li>
+                        <li class="list-group-item">Tìm mục <strong>Tên thiết bị (alsamixer)</strong></li>
+                        <li class="list-group-item">Điền đúng tên card vừa tìm được</li>
+                        <li class="list-group-item">Nhấn <strong>Lưu</strong></li>
+                    </ol>
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-info-circle-fill"></i>
+                        Tên này chỉ dùng để set âm lượng lúc khởi động.<br>
+                        Khi chạy, VBot <strong>chỉ điều chỉnh âm lượng VLC</strong>, không ảnh hưởng hệ thống.
+                    </div>
+                </div>
+            </div>
+
                   </div>
                 </div>
               </div>
@@ -141,9 +294,98 @@ include 'html_head.php';
                     Nâng Cấp Full Dung Lượng Cho Thẻ Nhớ:
                   </h5>
                   <div id="collapse_button_1" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_1">
-                    - Đăng nhập vào ssh rồi gõ lệnh sau:<br />
-                    $: <b>sudo raspi-config</b><br />
-                    - Chọn: <b>(6)Advance Options</b> -> <b>(A1)Expand File System</b> đợi vài giây -> <b>OK</b> -> <b>Fish</b> -> <b>Yes</b> để rebot
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-terminal-fill me-2"></i> Các bước thực hiện
+                </div>
+                <div class="card-body">
+
+                    <ol class="list-group list-group-numbered">
+
+                        <li class="list-group-item py-3">
+                            <strong>Đăng nhập vào Raspberry Pi qua SSH</strong><br>
+                            (hoặc mở Terminal trực tiếp trên Pi)
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            <strong>Chạy lệnh cấu hình</strong>
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo raspi-config</code></pre>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-md-1 text-center">
+                                    <span class="badge bg-primary fs-6">1</span>
+                                </div>
+                                <div class="col-md-11">
+                                    Chọn <strong>6 Advanced Options</strong> → nhấn <kbd>Enter</kbd>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-md-1 text-center">
+                                    <span class="badge bg-primary fs-6">2</span>
+                                </div>
+                                <div class="col-md-11">
+                                    Chọn <strong>A1 Expand Filesystem</strong> → nhấn <kbd>Enter</kbd>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            <div class="row align-items-center">
+                                <div class="col-md-1 text-center">
+                                    <span class="badge bg-success fs-6">3</span>
+                                </div>
+                                <div class="col-md-11">
+                                    Xuất hiện thông báo <strong>“Root partition has been resized...”</strong><br>
+                                    → Chọn <strong>OK</strong>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-md-1 text-center">
+                                    <span class="badge bg-warning fs-6">4</span>
+                                </div>
+                                <div class="col-md-11">
+                                    Nhấn phím <kbd>Tab</kbd> để di chuyển đến <strong>< Finish ></strong> → nhấn <kbd>Enter</kbd>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            <div class="row">
+                                <div class="col-md-1 text-center">
+                                    <span class="badge bg-danger text-white fs-6">5</span>
+                                </div>
+                                <div class="col-md-11">
+                                    Khi hỏi <strong>“Would you like to reboot now?”</strong><br>
+                                    → Chọn <strong>< Yes ></strong> và nhấn <kbd>Enter</kbd>
+                                </div>
+                            </div>
+                        </li>
+
+                    </ol>
+
+                    <div class="alert alert-success mt-4">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        <strong>Xong!</strong> Sau khi khởi động lại, toàn bộ dung lượng thẻ nhớ sẽ được sử dụng.
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle-fill me-2"></i>
+                        Để kiểm tra dung lượng mới, sau khi reboot xong bạn gõ lệnh:
+                        <pre class="bg-dark text-white p-2 rounded d-inline ms-2"><code>df -h</code></pre>
+                    </div>
+
+                </div>
+            </div>
+
                   </div>
                 </div>
               </div>
@@ -153,24 +395,88 @@ include 'html_head.php';
                     Thay Đổi Đường Dẫn (Path) Của Apache2:
                   </h5>
                   <div id="collapse_button_2" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_2">
-                    <font color=red>Thay Đổi Tự Động:</font><br />
-                    Di chuyển tới thư mục sau bằng lệnh:<br />
-                    $:> <b>cd /home/pi/VBot_Offline/resource/test_device/</b><br /><br />
-                    - Chạy file Change_Path_Apache2.py bằng quyền sudo bằng lệnh:<br />
-                    $:> <b>sudo python3 Change_Path_Apache2.py</b><br /><br />
-                    - Hệ thống sẽ yêu cầu nhập đường dẫn path trỏ tới WebUI mới, bạn hãy nhập dòng sau và nhấn Enter là xong:<br />
-                    <b>/home/pi/VBot_Offline/html</b>
-                    <hr />
-                    <font color=red>Nếu bạn muốn thay đổi bằng tay</font><br />
-                    - Đăng nhập vào ssh rồi gõ lệnh sau:<br /><br />
-                    $: <b>sudo nano /etc/apache2/sites-available/000-default.conf</b><br />
-                    - Thay dòng: <b>DocumentRoot /home/pi/VBot_Offline/html</b> thành đường dẫn muốn đổi, ví dụ thay thành: <b>DocumentRoot /var/www/html</b>
-                    <br />- lưu lại file: <b>Ctrl + x => y => Enter</b><br /><br />
-                    - Tiếp theo chạy lệnh:<br />
-                    $: <b>sudo nano /etc/apache2/apache2.conf</b><br />
-                    - Thay dòng: <b>Directory /home/pi/VBot_Offline/ </b> thành: <b>Directory /var/www/html/</b><br /><br />
-                    - Sau đó restart lại appache2 bằng lệnh sau:<br />
-                    $: <b>sudo systemctl restart apache2</b>
+
+            <!-- Cách 1: Tự động (khuyên dùng) -->
+            <div class="card shadow-sm mb-4 border-success">
+                <div class="card-header bg-success text-white fs-5">
+                    <i class="bi bi-magic me-2"></i> Cách 1 – THAY ĐỔI TỰ ĐỘNG (chỉ 1 lệnh + 1 dòng nhập)
+                </div>
+                <div class="card-body">
+
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item py-3">
+                            Di chuyển vào thư mục script:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>cd /home/pi/VBot_Offline/resource/test_device/</code></pre>
+                        </li>
+                        <li class="list-group-item py-3">
+                            Chạy script thay đổi tự động:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo python3 Change_Path_Apache2.py</code></pre>
+                        </li>
+                        <li class="list-group-item py-3">
+                            Khi được hỏi, nhập đường dẫn mới rồi nhấn <kbd>Enter</kbd><br>
+                            <strong>Ví dụ (đường dẫn mặc định của VBot):</strong>
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>/home/pi/VBot_Offline/html</code></pre>
+                        </li>
+                    </ol>
+
+                    <div class="alert alert-success mt-4">
+                        <i class="bi bi-check2-all me-2"></i>
+                        Xong! Script sẽ tự động sửa 2 file cấu hình và restart Apache2 cho bạn.
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5">
+
+            <!-- Cách 2: Thay đổi thủ công -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark fs-5">
+                    <i class="bi bi-wrench-adjustable-circle me-2"></i> Cách 2 – THAY ĐỔI THỦ CÔNG (nếu muốn tự làm từng bước)
+                </div>
+                <div class="card-body">
+
+                    <ol class="list-group list-group-numbered">
+
+                        <li class="list-group-item py-3">
+                            Mở file cấu hình site:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo nano /etc/apache2/sites-available/000-default.conf</code></pre>
+                            Tìm và sửa dòng:<br>
+                            <code>DocumentRoot /home/pi/VBot_Offline/html</code><br>
+                            → thành đường dẫn bạn muốn, ví dụ:<br>
+                            <code class="text-success">DocumentRoot /var/www/html</code>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            Lưu file: <kbd>Ctrl</kbd> + <kbd>X</kbd> → <kbd>Y</kbd> → <kbd>Enter</kbd>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            Mở file cấu hình Apache2:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo nano /etc/apache2/apache2.conf</code></pre>
+                            Tìm khối <code>&lt;Directory /home/pi/VBot_Offline/&gt;</code><br>
+                            → sửa thành:<br>
+                            <code class="text-success">&lt;Directory /var/www/html/&gt;</code><br>
+                            (sửa cả 3 dòng bên trong khối nếu có)
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            Lưu lại: <kbd>Ctrl</kbd> + <kbd>X</kbd> → <kbd>Y</kbd> → <kbd>Enter</kbd>
+                        </li>
+
+                        <li class="list-group-item py-3">
+                            Restart Apache2:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo systemctl restart apache2</code></pre>
+                        </li>
+
+                    </ol>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="bi bi-check-circle-fill me-2"></i>
+                        Hoàn tất! Truy cập lại địa chỉ IP của Pi để kiểm tra WebUI ở vị trí mới.
+                    </div>
+                </div>
+            </div>
+
                   </div>
                 </div>
               </div>
@@ -313,10 +619,58 @@ include 'html_head.php';
                     Tăng Giới Hạn Tải Lên File Trên WebUI:
                   </h5>
                   <div id="collapse_button_3" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_3">
-                    - Chạy 2 lệnh sau:<br />
-                    $: <b>sudo nano sudo sed -i 's/upload_max_filesize = .*/upload_max_filesize = 300M/' /etc/php/7.4/apache2/php.ini</b><br />
-                    $: <b>sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /etc/php/7.4/apache2/php.ini</b><br /><br />
-                    - Lưu Ý: <b>Bạn cần chỉnh sửa đường dẫn /etc/php/7.4/apache2/php.ini trong câu lệnh cho phù hợp với phiên bản và đường dẫn file php.ini của bạn</b>
+<div class="card shadow-sm">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-rocket-takeoff-fill me-2"></i> Cách nhanh nhất – Chỉ 3 lệnh (khuyên dùng)
+                </div>
+                <div class="card-body">
+
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-triangle-fill"></i>
+                        <strong>Trước tiên kiểm tra đúng đường dẫn php.ini của bạn:</strong>
+                        <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>php -i | grep "Loaded Configuration File"</code></pre>
+                        Kết quả sẽ hiện ra đường dẫn chính xác, ví dụ:<br>
+                        <code>/etc/php/8.1/apache2/php.ini</code> hoặc <code>/etc/php/7.4/apache2/php.ini</code>
+                    </div>
+
+                    <p>Sau khi đã biết đúng đường dẫn, chạy 2 lệnh dưới đây (thay <mark>/đường/dẫn/của/bạn/php.ini</mark> cho phù hợp):</p>
+
+                    <pre class="bg-dark text-white p-3 rounded"><code>sudo sed -i 's/upload_max_filesize = .*/upload_max_filesize = 300M/' /đường/dẫn/của/bạn/php.ini
+sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/bạn/php.ini</code></pre>
+
+                    <p>Và cuối cùng restart Apache2:</p>
+                    <pre class="bg-dark text-white p-3 rounded"><code>sudo systemctl restart apache2</code></pre>
+
+                    <div class="alert alert-success mt-4">
+                        <i class="bi bi-check2-all me-2"></i>
+                        Xong! Giờ bạn có thể upload file lớn tới ~300 MB thoải mái.
+                    </div>
+                </div>
+            </div>
+
+            <hr class="my-5">
+
+            <div class="card shadow-sm">
+                <div class="card-header bg-secondary text-white fs-5">
+                    <i class="bi bi-pencil-square me-2"></i> Cách thủ công (nếu thích sửa tay)
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item">Mở file php.ini:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo nano /đường/dẫn/của/bạn/php.ini</code></pre>
+                        </li>
+                        <li class="list-group-item">Tìm và sửa 2 dòng:
+                            <code>upload_max_filesize = 300M</code><br>
+                            <code>post_max_size = 350M</code>
+                        </li>
+                        <li class="list-group-item">Lưu: <kbd>Ctrl</kbd>+<kbd>X</kbd> → <kbd>Y</kbd> → <kbd>Enter</kbd></li>
+                        <li class="list-group-item">Restart Apache2:
+                            <pre class="bg-dark text-white p-3 rounded mt-2 mb-0"><code>sudo systemctl restart apache2</code></pre>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
                   </div>
                 </div>
               </div>
@@ -326,12 +680,88 @@ include 'html_head.php';
                     Đăng Nhập, Đặt Mật Khẩu, Quên Mật Khẩu WebUI:
                   </h5>
                   <div id="collapse_button_4" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_4">
-                    - Bật Đăng Nhập Vào WebUI:<br />
-                    - Thao Tác: Nhấn vào Avatar trên cùng bên phải chọn: <b>Cá nhân => Cài đặt => Đăng nhập Web UI => (Bật Lên Là Được)</b><br /><br />
-                    - Đặt Mật Khẩu Đăng Nhập WebUI:<br />
-                    - Thao Tác: Nhấn vào Avatar trên cùng bên phải chọn: <b>Cá nhân => Chỉnh sửa hồ sơ => Mật khẩu Web UI => (Điền Mật Khẩu Của Bạn)</b><br />
-                    - Lưu Ý: <b>Bạn cần nhập cả địa chỉ Email để dùng cho trường hợp Quên Mật Khẩu</b><br /><br />
-                    <b>- Quên Mật Khẩu và Đổi Mật Khẩu Cũng Nằm Trên Thanh Tác Vụ, Tương Tự Thao Tác Như Trên.</b><br />
+<div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white fs-5">
+                    <i class="bi bi-toggle-on me-2"></i> Bật tính năng đăng nhập WebUI
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item py-3">
+                            Nhấn vào <strong>Avatar</strong> ở góc trên bên phải
+                        </li>
+                        <li class="list-group-item py-3">
+                            Chọn <strong>Cá nhân</strong> → <strong>Cài đặt</strong>
+                        </li>
+                        <li class="list-group-item py-3">
+                            Tìm mục <strong>Đăng nhập Web UI</strong> → <strong>Bật lên</strong>
+                            <div class="text-center mt-3">
+                                <i class="bi bi-toggle-on text-success fs-1"></i>
+                            </div>
+                        </li>
+                    </ol>
+                    <div class="alert alert-success mt-3">
+                        <i class="bi bi-check2-all"></i> Xong! Lần sau truy cập WebUI sẽ yêu cầu đăng nhập.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Đặt mật khẩu -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-key-fill me-2"></i> Đặt mật khẩu đăng nhập WebUI
+                </div>
+                <div class="card-body">
+                    <ol class="list-group list-group-numbered">
+                        <li class="list-group-item py-3">
+                            Nhấn vào <strong>Avatar</strong> góc trên bên phải
+                        </li>
+                        <li class="list-group-item py-3">
+                            Chọn <strong>Cá nhân</strong> → <strong>Chỉnh sửa hồ sơ</strong>
+                        </li>
+                        <li class="list-group-item py-3">
+                            Tìm mục <strong>Mật khẩu Web UI</strong> → nhập mật khẩu mới của bạn
+                        </li>
+                        <li class="list-group-item py-3">
+                            <strong>Bắt buộc</strong> phải nhập <strong>địa chỉ Email</strong> (dùng để lấy lại mật khẩu nếu quên)
+                        </li>
+                        <li class="list-group-item py-3 text-success fw-bold">
+                            Nhấn <strong>Lưu</strong>
+                        </li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Quên / Đổi mật khẩu -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white fs-5">
+                    <i class="bi bi-arrow-repeat me-2"></i> Quên mật khẩu hoặc muốn đổi mật khẩu mới
+                </div>
+                <div class="card-body">
+                    <p class="lead text-center">Chỉ cần làm tương tự như trên:</p>
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <div class="card border-primary h-100">
+                                <div class="card-body">
+                                    <i class="bi bi-shield-exclamation fs-1 text-primary"></i>
+                                    <h5 class="mt-3">Quên mật khẩu</h5>
+                                    <p>Avatar → Cá nhân → <strong>Quên mật khẩu</strong><br>
+                                    Nhập Email đã khai báo → hệ thống sẽ hiển thị mật khẩu</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success h-100">
+                                <div class="card-body">
+                                    <i class="bi bi-shield-check fs-1 text-success"></i>
+                                    <h5 class="mt-3">Đổi mật khẩu</h5>
+                                    <p>Avatar → Cá nhân → <strong>Chỉnh sửa hồ sơ</strong><br>
+                                    → Nhập mật khẩu mới → Lưu</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
                   </div>
                 </div>
               </div>
@@ -347,157 +777,159 @@ include 'html_head.php';
                         <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_faq_nut_nhan_thuong" aria-expanded="false" aria-controls="collapse_button_faq_nut_nhan_thuong">
                           Nút Nhấn Thường (Nhấn Nhả):</h5>
                         <div id="collapse_button_faq_nut_nhan_thuong" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_faq_nut_nhan_thuong">
-                          <ul>
-                            <li>
-                              <b>Nút nhấn up</b>
-                              <ul>
-                                <li>
-                                  Nhấn Nhả:
-                                  <ul>
-                                    <li>Tăng âm lượng (Tăng theo bước nhấn, được thiết lập trong Config.json)</li>
-                                  </ul>
-                                </li>
-                                <li>
-                                  Nhấn Giữ:
-                                  <ul>
-                                    <li>Tăng âm lượng cao nhất (Giá trị cao nhất được thiết lập trong Config.json)</li>
-                                  </ul>
-                                </li>
-                              </ul>
-                            </li>
-                            <br />
-                            <li>
-                              <b>Nút nhấn down</b>
-                              <ul>
-                                <li>
-                                  Nhấn Nhả:
-                                  <ul>
-                                    <li>Giảm âm lượng (Giảm theo bước nhấn, được thiết lập trong Config.json)</li>
-                                  </ul>
-                                </li>
-                                <li>
-                                  Nhấn Giữ:
-                                  <ul>
-                                    <li>Giảm âm lượng xuống thấp nhất (Giá trị thấp nhất được thiết lập trong Config.json)</li>
-                                  </ul>
-                                </li>
-                              </ul>
-                            </li>
-                            <br />
-                            <li>
-                              <b>Nút nhấn mic</b>
-                              <ul>
-                                <li>
-                                  <font color="green">Ở Trạng Thái Chờ Được Đánh Thức:</font>
-                                  <ul>
-                                    <font color="blue">
-                                      <li>
-                                        Nhấn Nhả:
-                                        <ul>
-                                          <li>Bật, Tắt Microphone</li>
-                                        </ul>
-                                      </li>
-                                      <li>
-                                        Nhấn Giữ:
-                                        <ul>
-                                          <li>Bật, Tắt chế độ câu phản hồi</li>
-                                        </ul>
-                                      </li>
-                                    </font>
-                                  </ul>
-                                </li>
-                                <li>
-                                  <font color="green">Ở Trạng Thái Đang Phát Nhạc (Media Player):</font>
-                                  <ul>
-                                    <font color="blue">
-                                      <li>
-                                        Nhấn Nhả:
-                                        <ul>
-                                          <li>Tạm Dừng hoặc Tiếp Tục phát nhạc</li>
-                                        </ul>
-                                      </li>
-                                      <li>
-                                        Nhấn Giữ:
-                                        <ul>
-                                          <li>Dừng phát nhạc</li>
-                                        </ul>
-                                      </li>
-                                    </font>
-                                  </ul>
-                                </li>
-                                <li>
-                                  <font color="green">Ở Trạng Thái Đang Phát Câu Trả Lời, TTS:</font>
-                                  <ul>
-                                    <font color="blue">
-                                      <li>
-                                        Nhấn Nhả + Nhấn Giữ:
-                                        <ul>
-                                          <li>Dừng Phát Câu Trả Lời, TTS</li>
-                                        </ul>
-                                      </li>
-                                    </font>
-                                  </ul>
-                                </li>
-                              </ul>
-                            </li>
-                            <br />
-                            <li>
-                              <b>Nút nhấn Wake Up</b>
-                              <ul>
-                                <li>
-                                  <font color="green">Ở Trạng Thái Chờ Được Đánh Thức:</font>
-                                  <ul>
-                                    <font color="blue">
-                                      <li>
-                                        Nhấn Nhả:
-                                        <ul>
-                                          <li>Đánh Thức Bot, Wake Up</li>
-                                        </ul>
-                                      </li>
-                                      <li>
-                                        Nhấn Giữ:
-                                        <ul>
-                                          <li>Bật, Tắt chế độ hội thoại (hỏi đáp liên tục)</li>
-                                        </ul>
-                                      </li>
-                                    </font>
-                                  </ul>
-                                </li>
-                                <li>
-                                  <font color="green">Ở Trạng Thái Đang Phát Nhạc (Media Player):</font>
-                                  <ul>
-                                    <font color="blue">
-                                      <li>
-                                        Nhấn Nhả:
-                                        <ul>
-                                          <li>Tạm Dừng phát nhạc đồng thời đánh thức Bot (Wake Up) để nghe lệnh</li>
-                                        </ul>
-                                      </li>
-                                      <li>
-                                        Nhấn Giữ:
-                                        <ul>
-                                          <li>Dừng Phát Nhạc</li>
-                                        </ul>
-                                      </li>
-                                    </font>
-                                  </ul>
-                                </li>
-                                <li>
-                                  <font color="green">Ở Trạng Thái Đang Phát Câu Trả Lời, TTS:</font>
-                                  <ul>
-                                    <font color="blue">
-                                      <li>
-                                        Nhấn Nhả + Nhấn Giữ:
-                                        <ul>
-                                          <li>Dừng Phát Câu Trả Lời, TTS</li>
-                                        </ul>
-                                      </li>
-                                    </font>
-                                  </ul>
-                                </li>
-                              </ul>
-                            </li>
-                          </ul>
+
+<!-- Nút UP -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-volume-up-fill me-2"></i> Nút UP (Tăng âm lượng)
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <div class="border rounded p-4 bg-light">
+                                <h5 class="text-primary"><i class="bi bi-hand-index"></i> Nhấn – Nhả</h5>
+                                <p class="lead fw-bold">Tăng âm lượng từng bước</p>
+                                <small class="text-muted">(bước tăng được thiết lập trong Config.json)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-4 bg-light">
+                                <h5 class="text-danger"><i class="bi bi-hand-index-fill"></i> Nhấn Giữ</h5>
+                                <p class="lead fw-bold">Tăng âm lượng lên tối đa ngay lập tức</p>
+                                <small class="text-muted">(giá trị max trong Config.json)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút DOWN -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-primary text-white fs-5">
+                    <i class="bi bi-volume-down-fill me-2"></i> Nút DOWN (Giảm âm lượng)
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-6">
+                            <div class="border rounded p-4 bg-light">
+                                <h5 class="text-primary"><i class="bi bi-hand-index"></i> Nhấn – Nhả</h5>
+                                <p class="lead fw-bold">Giảm âm lượng từng bước</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="border rounded p-4 bg-light">
+                                <h5 class="text-danger"><i class="bi bi-hand-index-fill"></i> Nhấn Giữ</h5>
+                                <p class="lead fw-bold">Giảm âm lượng xuống thấp nhất ngay</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút MIC -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white fs-5">
+                    <i class="bi bi-mic-fill me-2"></i> Nút MIC
+                </div>
+                <div class="card-body">
+
+                    <div class="accordion" id="accordionMic">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#micStandby">
+                                    <strong>Trạng thái chờ được đánh thức</strong>
+                                </button>
+                            </h2>
+                            <div id="micStandby" class="accordion-collapse collapse show" data-bs-parent="#accordionMic">
+                                <div class="accordion-body">
+                                    <strong>Nhấn – Nhả:</strong> Bật/Tắt Microphone<br>
+                                    <strong>Nhấn Giữ:</strong> Bật/Tắt chế độ câu phản hồi (feedback)
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#micMusic">
+                                    Đang phát nhạc (Media Player)
+                                </button>
+                            </h2>
+                            <div id="micMusic" class="accordion-collapse collapse" data-bs-parent="#accordionMic">
+                                <div class="accordion-body">
+                                    <strong>Nhấn – Nhả:</strong> Tạm dừng / Tiếp tục phát nhạc<br>
+                                    <strong>Nhấn Giữ:</strong> Dừng phát nhạc hoàn toàn
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#micTTS">
+                                    Đang phát câu trả lời (TTS)
+                                </button>
+                            </h2>
+                            <div id="micTTS" class="accordion-collapse collapse" data-bs-parent="#accordionMic">
+                                <div class="accordion-body">
+                                    <strong>Nhấn Nhả hoặc Nhấn Giữ:</strong> Dừng ngay câu trả lời đang phát
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút WAKE UP -->
+            <div class="card shadow-sm mb-5">
+                <div class="card-header bg-warning text-dark fs-5">
+                    <i class="bi bi-chat-dots-fill me-2"></i> Nút WAKE UP (Đánh thức Bot)
+                </div>
+                <div class="card-body">
+
+                    <div class="accordion" id="accordionWake">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#wakeStandby">
+                                    <strong>Trạng thái chờ được đánh thức</strong>
+                                </button>
+                            </h2>
+                            <div id="wakeStandby" class="accordion-collapse collapse show" data-bs-parent="#accordionWake">
+                                <div class="accordion-body">
+                                    <strong>Nhấn – Nhả:</strong> Đánh thức Bot (Wake Up)<br>
+                                    <strong>Nhấn Giữ:</strong> Bật/Tắt chế độ hội thoại liên tục
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#wakeMusic">
+                                    Đang phát nhạc
+                                </button>
+                            </h2>
+                            <div id="wakeMusic" class="accordion-collapse collapse" data-bs-parent="#accordionWake">
+                                <div class="accordion-body">
+                                    <strong>Nhấn – Nhả:</strong> Tạm dừng nhạc + Đánh thức Bot để nghe lệnh<br>
+                                    <strong>Nhấn Giữ:</strong> Dừng nhạc hoàn toàn
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="accordion-item">
+                            <h2 class="accordion-header">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#wakeTTS">
+                                    Đang phát câu trả lời (TTS)
+                                </button>
+                            </h2>
+                            <div id="wakeTTS" class="accordion-collapse collapse" data-bs-parent="#accordionWake">
+                                <div class="accordion-body">
+                                    <strong>Nhấn Nhả hoặc Nhấn Giữ:</strong> Dừng ngay câu trả lời
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+						  
                         </div>
                       </div>
                     </div>
