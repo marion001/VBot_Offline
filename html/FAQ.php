@@ -7,24 +7,18 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
-?>
-<?php
+
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
   ) {
-
-    // Nếu chưa đăng nhập hoặc đã quá 12 tiếng, hủy session và chuyển hướng đến trang đăng nhập
     session_unset();
     session_destroy();
     header('Location: Login.php');
     exit;
   }
-  // Cập nhật lại thời gian đăng nhập để kéo dài thời gian session
-  //$_SESSION['user_login']['login_time'] = time();
 }
 ?>
 <!DOCTYPE html>
