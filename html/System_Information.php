@@ -214,14 +214,14 @@ $: <b>sudo raspi-config</b><br/>
 			if ($temperatureCelsius < 45) {
 				$status = '<span class="text-success">Mát Mẻ</span>';
 				$icon = '<i class="bi bi-thermometer-half text-success"></i>';
-			} elseif ($temperatureCelsius < 60) {
+			} elseif ($temperatureCelsius < 64) {
 				$status = '<span class="text-primary">Ổn Định</span>';
 				$icon = '<i class="bi bi-thermometer text-primary"></i>';
 			} elseif ($temperatureCelsius < 70) {
 				$status = '<span class="text-warning">Cảnh Báo Nhiệt</span>';
 				$icon = '<i class="bi bi-exclamation-triangle-fill text-warning"></i>';
 			} elseif ($temperatureCelsius < 80) {
-				$status = '<span class="text-danger">Nhiệt Độ Cao</span>';
+				$status = '<span class="text-danger">Nhiệt Độ Quá Cao</span>';
 				$icon = '<i class="bi bi-fire text-danger"></i>';
 			} else {
 				$status = '<span class="text-danger fw-bold">CPU Quá Nóng (Throttling)</span>';
