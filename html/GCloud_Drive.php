@@ -615,6 +615,9 @@ include 'html_head.php';
                 </div>';
                 }
                 ?>
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cấu Hình Tải Lên Bản Sao Lưu Dữ Liệu - Cloud Backup</b> -> <b>Google Cloud Drive</b> -> <b>Kích Hoạt</b>
+</div>
                 <form method="post" onsubmit="return confirmDelete();">
                   <center><button class="btn btn-danger border-danger rounded-pill" type="submit" name="del_all_data_gcloud_drive">Xóa toàn bộ Dữ Liệu</button></center>
                 </form>

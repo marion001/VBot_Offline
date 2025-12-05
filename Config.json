@@ -60,6 +60,10 @@
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
+    "voice_command_system": {
+        "active": false,
+        "minimum_result_threshold": 0.74
+    },
     "home_assistant": {
         "active": false,
         "minimum_threshold": 0.6,

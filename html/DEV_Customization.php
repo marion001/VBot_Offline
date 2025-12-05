@@ -117,10 +117,14 @@ include 'html_head.php';
                                                                     }
                                                                     ?></textarea>
       <br>
+	  
       <center>
         <button disabled type="submit" name="run_code" class="btn btn-success rounded-pill" title="Run Code" onclick="loading('show')">Chạy Code</button>
         <button type="submit" name="save_code" class="btn btn-primary rounded-pill" title="Lưu Code" onclick="loading('show')">Lưu Code</button>
-      </center>
+      </center><br/>
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>DEV Customization: Custom Skill, Dev_Customization.py(Người Dùng Tự Code)</b> -> <b>Chế độ DEV: Dev_Customization.py (Custom Skill)</b>
+</div>
     </form>
   </main>
   <!-- ======= Footer ======= -->

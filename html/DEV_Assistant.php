@@ -116,7 +116,10 @@ include 'html_head.php';
       <center>
         <button disabled type="submit" name="run_code" class="btn btn-success rounded-pill" title="Run Code" onclick="loading('show')">Chạy Code</button>
         <button type="submit" name="save_code" class="btn btn-primary rounded-pill" title="Lưu Code" onclick="loading('show')">Lưu Code</button>
-      </center>
+      </center><br/>
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cấu Hình Trợ Lý Ảo/Assistant</b> -> <b>Cấu Hình Trợ Lý => DEV Assistant: Dev_Assistant.py (Custom Assistant, Người dùng tự code)</b> -> <b>Kích Hoạt</b>
+<br/>- Cần chọn ưu tiên trợ lý ảo này là <b>TOP 1</b></div>
     </form>
   </main>
   <!-- ======= Footer ======= -->

@@ -1,0 +1,58 @@
+{
+    "voice_command_system_control": [
+        {
+            "value_key": "read_ip_address",
+            "name": "Đọc Địa Chỉ IP Đang Kết Nối",
+            "active": true,
+            "command_when_speaking": "đọc địa chỉ ip"
+        },
+        {
+            "value_key": "restart_vbot",
+            "name": "Khởi Động Lại Chương Trình VBot",
+            "active": true,
+            "command_when_speaking": "khởi động lại chương trình"
+        },
+        {
+            "value_key": "reboot_os",
+            "name": "Khởi Động Lại Hệ Điều Hành SYSTEM",
+            "active": true,
+            "command_when_speaking": "khởi động lại hệ điều hành"
+        },
+        {
+            "value_key": "restart_interface",
+            "name": "Khởi Động Lại Giao Diện WebUI VBot",
+            "active": true,
+            "command_when_speaking": "khởi động lại giao diện"
+        },
+        {
+            "value_key": "stop_interface",
+            "name": "Dừng Chạy Giao Diện WebUI VBot",
+            "active": false,
+            "command_when_speaking": "đừng chạy giao diện"
+        },
+        {
+            "value_key": "start_interface",
+            "name": "Chạy Giao Diện WebUI VBot",
+            "active": false,
+            "command_when_speaking": "tiến hành chạy giao diện"
+        },
+        {
+            "value_key": "read_wifi_network_name",
+            "name": "Đọc Tên Mạng Wifi Đang Kết Nối",
+            "active": true,
+            "command_when_speaking": "đọc tên mạng wi-fi"
+        },
+        {
+            "value_key": "read_cpu_temperature",
+            "name": "Đọc, Kiểm Tra Nhiệt Độ CPU",
+            "active": true,
+            "command_when_speaking": "đọc nhiệt độ cpu"
+        },
+        {
+            "value_key": "read_system_uptime",
+            "name": "Đọc, Kiểm Tra Thời Gian Khởi Động UP-Time",
+            "active": true,
+            "command_when_speaking": "đọc thời gian khởi động"
+        }
+    ]
+}

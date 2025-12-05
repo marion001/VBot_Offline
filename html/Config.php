@@ -496,6 +496,10 @@ if (isset($_POST['all_config_save'])) {
   $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
   $Config['developer_customization']['if_custom_skill_can_not_handle']['vbot_processing'] = isset($_POST['developer_customization_vbot_processing']) ? true : false;
 
+  #lệnh điều khiển hệ thống System
+  $Config['voice_command_system']['active'] = isset($_POST['voice_command_system_active']) ? true : false;
+  $Config['voice_command_system']['minimum_result_threshold'] = floatval($_POST['voice_command_system_threshold']);
+
   #Cập Nhật STT Google Cloud V2
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['recognizer_id'] = $_POST['stt_ggcloud_v2_recognizer_id'];
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['time_out'] = intval($_POST['stt_ggcloud_v2_time_out']);
@@ -950,6 +954,9 @@ include 'html_head.php';
                   echo input_field('ssh_username', 'Tài Khoản', $Config['ssh_server']['ssh_username'], 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
                   echo input_field('ssh_password', 'Mật khẩu', $Config['ssh_server']['ssh_password'], 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
                   ?>
+                  <div class="row mb-3">
+                    <b class="text-danger">Bạn Muốn Truy Cập Thẳng Vào Thiết Bị Raspberry Pi: <a href="https://bitvise.com/ssh-client-download" target="_blank">Hãy Tải Và Cài Đặt Phần Mềm Truy Cập Bằng SSH Trên Máy Tính Tại Đây</a></b>
+                  </div>
                   <center><button type="button" class="btn btn-success rounded-pill" onclick="checkSSHConnection('<?php echo $serverIp; ?>')">Kiểm tra kết nối SSH</button></center>
                 </div>
               </div>
@@ -979,6 +986,9 @@ include 'html_head.php';
                   <?php
                   echo input_field('webui_path', 'Path (Đường Dẫn) ', $directory_path, 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Cập Nhật', 'update_webui_link(\'' . $directory_path . '\')', 'btn btn-success border-success', 'onclick', '');
                   ?>
+                  <div class="row mb-3">
+                    <b class="text-danger">Nếu sử dụng Cloudflared Tunnel Để Gắn Tên Miền/Domain Truy Cập Bên Ngoài Internet: <a href="FAQ.php" target="_blank">hãy nhấn vào đây để xem hướng dẫn</a></b>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1129,9 +1139,9 @@ include 'html_head.php';
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                   <div class="card">
                     <div class="card-body">
-                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a>')"></i> &nbsp;:</h5>
+                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé')"></i> &nbsp;:</h5>
                       <?php
-                      echo input_field('mic_id', 'ID Mic ', htmlspecialchars($Config['smart_config']['mic']['id']), 'required', 'number', '', '', '', 'Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé', 'border-success', 'Tìm Kiếm ID Mic', "scan_audio_devices('scan_mic')", 'btn btn-success border-success', 'onclick', '_blank');
+                      echo input_field('mic_id', 'ID Mic', htmlspecialchars($Config['smart_config']['mic']['id']), 'required', 'number', '', '', '', 'Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé', 'border-success', 'Tìm Kiếm ID Mic', "scan_audio_devices('scan_mic')", 'btn btn-success border-success', 'onclick', '_blank');
                       ?>
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Auto Scan Mic <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ tìm kiếm và liệt kê các ID và Tên của Microphone có trên hệ thống, và hiển thị ra các đường Logs mỗi khi trương trình được khởi chạy')"></i> :</label>
@@ -1807,7 +1817,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   echo input_field('hass_long_token', 'Mã Token (Long Token)', $Config['home_assistant']['long_token'], '', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
                   echo input_field('hass_internal_url', 'URL nội bộ ', htmlspecialchars($Config['home_assistant']['internal_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_internal_url')", 'btn btn-success border-success', 'onclick', '_blank');
                   echo input_field('hass_external_url', 'URL bên ngoài ', htmlspecialchars($Config['home_assistant']['external_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_external_url')", 'btn btn-success border-success', 'onclick', '_blank');
-                  echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.1', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
+                  echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
                   echo input_field('hass_lowest_to_display_logs', 'Ngưỡng tối thiểu hiển thị ra logs', $Config['home_assistant']['lowest_to_display_logs'] ?? 0.39, 'required', 'number', '0.01', '0', '0.45', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-danger', '', '', '', '', '');
                   echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
@@ -1988,7 +1998,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </h5>
                       <div id="collapse_button_setting_bton" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_bton" style="">
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn hoặc không sử dụng')"></i> :</label>
+                          <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn hoặc không sử dụng, <a href=\'https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074\' target=\'_blank\'>Xem Sơ Đồ Mạch Nút Nhấn</a>')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input class="form-check-input border-success" type="checkbox" name="button_active" id="button_active" <?php echo $Config['smart_config']['button_active']['active'] ? 'checked' : ''; ?>>
@@ -2068,6 +2078,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             ?>
                           </tbody>
                         </table>
+                  <div class="row mb-3">
+                    <b class="text-danger">Sơ Đồ 4 Nút Nhấn Nhả: <a href="https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074" target="_blank">Nhấn Vào Đây Để Xem Sơ Đồ</a></b>
+                  </div>
                       </div>
                     </div>
                   </div>
@@ -2417,7 +2430,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                       <?php
                       echo input_field('music_local_path', 'Đường dẫn thư mục', htmlspecialchars($Config['media_player']['music_local']['path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                      echo input_field('music_local_minimum_threshold', 'Ngưỡng kết quả tối thiểu', htmlspecialchars($Config['media_player']['music_local']['minimum_threshold'] ?? 0.6), 'required', 'number', '0.1', '0.4', '0.9', '', 'border-success', '', '', '', '', '');
+                      echo input_field('music_local_minimum_threshold', 'Ngưỡng kết quả tối thiểu', htmlspecialchars($Config['media_player']['music_local']['minimum_threshold'] ?? 0.6), 'required', 'number', '0.01', '0.4', '0.9', '', 'border-success', '', '', '', '', '');
                       ?>
                       <?php
                       $allowed_formats_str = implode(", ", $Config['media_player']['music_local']['allowed_formats']);
@@ -3374,6 +3387,9 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                           'select_account' => 'Select Account (Chọn tài khoản muốn dùng)',
                           'consent select_account' => 'Consent Select Account (Chọn và Yêu cầu đồng ý cấp quyền)'
                         ], $Config['backup_upgrade']['google_cloud_drive']['setPrompt'], []);
+
+				echo input_field('gcloud_drive_backup_url_ui', 'Giao Diện Cấu Hình Xác Thực', "http://$serverIp/GCloud_Drive.php", 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-arrow-return-right"></i> Đi Tới', "GCloud_Drive.php", 'btn btn-success border-danger', 'link', '_blank');
+
                       ?>
                     </div>
                   </div>
@@ -3409,7 +3425,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                           </label>
                           <div class="input-group">
                             <input class="form-control border-success" type="file" name="upload_files_wakeup_reply[]" id="upload_files_wakeup_reply" accept=".mp3" multiple>
-                            <button class="btn btn-primary border-success" type="button" onclick="uploadFilesWakeUP_Reply()">Tải Lên</button>
+                            <button class="btn btn-primary border-success" type="button" onclick="uploadFilesWakeUP_Reply()"><i class="bi bi-arrow-bar-up"></i> Tải Lên</button>
                           </div>
                         </td>
                       </tr>
@@ -3432,6 +3448,30 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 </div>
               </div>
             </div>
+
+      <div class="card accordion" id="accordion_button_sys_speak_cmd">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sys_speak_cmd" aria-expanded="false" aria-controls="collapse_button_sys_speak_cmd">
+      Lệnh Điều Khiển Hệ Thống SYSTEM <i class="bi bi-question-circle-fill" onclick="show_message('Sử dụng câu lệnh tương ứng để điều khiển 1 số chức năng trong hệ thống SYSTEM mà chương trình cho phép')"></i>:</h5>
+      <div id="collapse_button_sys_speak_cmd" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sys_speak_cmd">
+
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng các lệnh bằng giọng nói để điều khiển, can thiệp vào hệ thống SYSTEM')"></i> :</label>
+                  <div class="col-sm-9">
+                    <div class="form-switch">
+                      <input class="form-check-input border-success" type="checkbox" name="voice_command_system_active" id="voice_command_system_active" <?php echo $Config['voice_command_system']['active'] ? 'checked' : ''; ?>>
+                    </div>
+                  </div>
+                </div>
+				<?php
+				echo input_field('voice_command_system_threshold', "Ngưỡng Kết Quả Tối Thiểu <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", htmlspecialchars($Config['voice_command_system']['minimum_result_threshold'] ?? 0.75), 'required', 'number', '0.01', '0.01', '1.0', 'Ngưỡng so sánh câu lệnh với kết quả tối thiểu', 'border-success', '', '', '', '', '');
+				echo input_field('voice_command_file_json', 'Đường Dẫn Tệp Dữ Liệu', htmlspecialchars($VBot_Offline.'resource/SYS_CMD.json'), 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i> Xem File', 'readJSON_file_path(\'' . $VBot_Offline . '/resource/SYS_CMD.json\')', 'btn btn-success border-danger', 'onclick', '');
+				echo input_field('voice_command_url_ui', 'Quản Lý, Cấu Hình Lệnh', "http://$serverIp/Sys_Cmd.php", 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-arrow-return-right"></i> Đi Tới', "Sys_Cmd.php", 'btn btn-success border-danger', 'link', '_blank');
+				?>
+      </div>
+      </div>
+      </div>
+
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Chế Độ Hội Thoại/Trò Chuyện Liên Tục <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật Bạn chỉ cần gọi Bot 1 lần, sau khi bot trả lời xong sẽ tự động lắng nghe tiếp và lặp lại (cho tới khi Bạn không còn yêu cầu nào nữa)')"></i> :</h5>

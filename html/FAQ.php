@@ -868,6 +868,7 @@ sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/
                                 </div>
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -923,7 +924,9 @@ sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/
                     </div>
                 </div>
             </div>
-						  
+                  <div class="row mb-3">
+                    <b class="text-danger">Sơ Đồ 4 Nút Nhấn Nhả: <a href="https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074" target="_blank">Nhấn Vào Đây Để Xem Sơ Đồ</a></b>
+                  </div>
                         </div>
                       </div>
                     </div>

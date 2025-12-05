@@ -1,8 +1,8 @@
 {
-    "version": "1.0.77",
+    "version": "1.0.78",
     "projectName": "Program VBot Offline",
     "description": "Hỗ Trợ Thông Báo Cập Nhật Khi Có Phiên Bản Mới Tới Hass, Đồng Bộ Với VBot Custom HASS",
-    "releaseDate": "28/11/2025",
+    "releaseDate": "05/12/2025",
     "changes": [
         {
             "type": "feature",

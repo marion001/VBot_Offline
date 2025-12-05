@@ -1111,6 +1111,10 @@ include 'html_head.php';
             </div>
           </div>
 
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule)</b> -> <b>Kích Hoạt</b>
+</div>
+
           <center>
             <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
             <button type="button" class="btn btn-success rounded-pill" onclick="addNewTask()">Thêm mới tác vụ</button>

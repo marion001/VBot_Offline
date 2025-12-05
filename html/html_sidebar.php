@@ -57,7 +57,6 @@
             <i class="bi bi-circle"></i><span>Home Assistant Customize Command</span>
           </a>
         </li>
-
         <li title="Danh Sách API VBot">
           <a href="API_List.php">
             <i class="bi bi-circle"></i><span>Giao Tiếp API (API REST)</span>
@@ -76,6 +75,11 @@
         <li title="Chỉnh sửa nội dung các tệp Json">
           <a href="View_Edit_Json.php">
             <i class="bi bi-circle"></i><span>Chỉnh Sửa Tệp JSON</span>
+          </a>
+        </li>
+        <li title="Câu Lệnh Điều Khiển Hệ Thống SYSTEM">
+          <a href="Sys_Cmd.php">
+            <i class="bi bi-circle"></i><span>Câu Lệnh Điều Khiển Hệ Thống SYSTEM</span>
           </a>
         </li>
       </ul>

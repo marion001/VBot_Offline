@@ -485,6 +485,9 @@ include 'html_head.php';
                     ?>
                     <!-- Các phần tử mới sẽ được thêm vào đây -->
                     <div id="accordion-container"></div>
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cấu Hình Kết Nối Tới Home Assistant (HASS)</b> -> <b>Lệnh tùy chỉnh</b>
+</div>
                     <center>
                         <button class="btn btn-primary  rounded-pill" type="submit" name="save_custom_home_assistant"><i class="bi bi-save"></i> Lưu thay đổi</button>
                         <button type="button" class="btn btn-success rounded-pill" onclick="addNewSection()">Thêm Mới Tác Vụ</button>

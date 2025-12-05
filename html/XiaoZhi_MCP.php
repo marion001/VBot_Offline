@@ -202,6 +202,11 @@ echo '</tbody></table>';
               <input disabled="" class="form-control border-danger" type="text" name="file_xiaozhi_tools" id="file_xiaozhi_tools" value="<?php echo $mcp_json_file; ?>">
             </div>
           </div>
+
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cấu Hình Bot/Trợ Lý XiaoZhi AI</b> -> <b>Kích Hoạt</b>
+</div>
+
 <div class="row mb-3">
  <center><button type="submit" class="btn btn-primary rounded-pill" name="save_mcp"> <i class="bi bi-save"></i> Lưu thay đổi</button>
  <button type="button" class="btn btn-success rounded-pill" name="save_mcp" onclick="downloadFile('<?php echo $mcp_json_file; ?>')"><i class="bi bi-download"></i> Tải Xuống</button>

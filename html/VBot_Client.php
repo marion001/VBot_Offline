@@ -143,6 +143,9 @@ if ($Config['contact_info']['user_login']['active']) {
             <div class="row">
                 <div id="vbot_Client_Scan_devices"></div>
             </div>
+<div class="alert alert-primary" role="alert">
+Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Streming Audio Server (VBot Client, Client - Server)</b> -> <b>Kích Hoạt</b>
+</div>
         </section>
     </main>
 
