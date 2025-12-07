@@ -198,7 +198,7 @@
   <li class="nav-item" onclick="loading('show')">
     <a class="nav-link collapsed" href="Wifi.php">
       <i class="bi bi-wifi"></i>
-      <span>Wifi</span>
+      <span>Wifi Network</span>
     </a>
   </li>
   <li class="nav-item" onclick="loading('show')">
