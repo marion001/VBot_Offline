@@ -7,8 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
-?>
-<?php
+
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
   // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
@@ -22,47 +21,47 @@ if ($Config['contact_info']['user_login']['active']) {
     exit;
   }
 }
-?>
-<?php
-// Chuyển đổi danh sách định dạng hình ảnh thành chuỗi cho thuộc tính accept
+
+//Chuyển đổi danh sách định dạng hình ảnh thành chuỗi cho thuộc tính accept
 $accept_types = implode(", ", array_map(function ($type) {
   return ".{$type}";
 }, $allowed_image_types));
 
 if (isset($_POST['save_change_info_name'])) {
 
+$jsonFilePath = $VBot_Offline . 'resource/VietNam_Localtion.json';
+$jsonData = file_get_contents($jsonFilePath);
+$data = json_decode($jsonData, true);
 
-  $jsonFilePath = $VBot_Offline . 'resource/VietNam_Localtion.json';
-  $jsonData = file_get_contents($jsonFilePath);
-  $data = json_decode($jsonData, true);
-  // Lấy danh sách các tỉnh và quận từ mảng data
-  $provinces = isset($data['province']) ? $data['province'] : [];
-  $districts = isset($data['district']) ? $data['district'] : [];
-  // Lấy ID tỉnh/quận từ POST
-  $provinceId = $_POST['province_name'];
-  $districtId = $_POST['district_name'];
-  // Tìm kiếm tên tỉnh từ ID
-  $selectedProvinceName = '';
-  foreach ($provinces as $province) {
-    if ($province['idProvince'] == $provinceId) {
-      $selectedProvinceName = $province['name'];
-      break;
-    }
-  }
-  // Tìm tên quận từ ID
-  $selectedDistrictName = '';
-  foreach ($districts as $district) {
-    if ($district['idDistrict'] == $districtId) {
-      $selectedDistrictName = $district['name'];
-      break;
-    }
-  }
+//ID tỉnh – xã/phường được gửi từ form
+$provinceId = $_POST['province_name'];
+$wardId     = $_POST['district_name'];
 
-  // Lưu lại tên tỉnh, quận và ID vào mảng $Config
-  $Config['contact_info']['address']['province'] = $selectedProvinceName;
-  $Config['contact_info']['address']['district'] = $selectedDistrictName;
-  $Config['contact_info']['address']['id_province'] = $provinceId;
-  $Config['contact_info']['address']['id_district'] = $districtId;
+//Tìm TỈNH (theo matinhBNV)
+$selectedProvinceName = '';
+$selectedWardName = '';
+foreach ($data as $province) {
+    if ($province['matinhBNV'] == $provinceId) {
+        $selectedProvinceName = $province['tentinhmoi'];
+        // Tìm XÃ / PHƯỜNG / THỊ TRẤN
+        if (isset($province['phuongxa']) && is_array($province['phuongxa'])) {
+            foreach ($province['phuongxa'] as $ward) {
+                if ($ward['maphuongxa'] == $wardId) {
+                    $selectedWardName = $ward['tenphuongxa'];
+                    break;
+                }
+            }
+        }
+
+        break;
+    }
+}
+
+	//Cập nhật thông tin địa giới hành chính
+	$Config['contact_info']['address']['province']     = $selectedProvinceName;
+	$Config['contact_info']['address']['district']     = $selectedWardName;
+	$Config['contact_info']['address']['id_province']  = $provinceId;
+	$Config['contact_info']['address']['id_district']  = $wardId;
 
   #CẬP NHẬT Thông tin người dùng
   $Config['contact_info']['full_name'] = $_POST['full_name'];
@@ -193,12 +192,12 @@ include 'html_head.php';
                         </div>
                         <div class="input-group mb-3 border-success">
                           <div class="input-group-prepend">
-                            <span class="input-group-text border-success" for="district_name">Huyện: </span>
+                            <span class="input-group-text border-success" for="district_name">Xã: </span>
                           </div>
                           <select required id="district-town" name="district_name" class="form-select border-success">
-                            <option value="0">-- Chọn Quận/Huyện --</option>
+                            <option value="0">-- Chọn Xã, Phường, Thị Trấn --</option>
                           </select>
-                          <div class="invalid-feedback">Vui lòng chọn Quận, Huyện, Thị Xã của bạn</div>
+                          <div class="invalid-feedback">Vui lòng chọn Xã, Phường, Thị Trấn của bạn</div>
                         </div>
                       </div>
                     </div>
@@ -458,50 +457,78 @@ include 'html_head.php';
       xhr.send();
     }
 
-    //Lựa chọn địa danh
-    const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + '<?php echo $VBot_Offline; ?>' + 'resource/VietNam_Localtion.json';
-    $(document).ready(function() {
-      $.get(apiURL, function(response) {
+const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' +
+               '<?php echo $VBot_Offline; ?>' + 'resource/VietNam_Localtion.json';
+
+$(document).ready(function () {
+
+    $.get(apiURL, function (response) {
+
         if (response.success && response.data) {
-          const data = response.data;
-          //console.log(data);
-          const $provinceSelect = $('#city-province');
-          const provinces = data.province || [];
-          provinces.sort((a, b) => a.name.localeCompare(b.name));
-          //dropdown tỉnh
-          provinces.forEach(province => {
-            const isSelectedProvince = (province.idProvince == '<?php echo $Config['contact_info']['address']['id_province']; ?>') ? 'selected' : '';
-            $provinceSelect.append('<option value="' + province.idProvince + '" ' + isSelectedProvince + '>' + province.name + '</option>');
-          });
-          //Kiểm tra nếu đã có tỉnh được chọn thì load quận tương ứng
-          const selectedProvinceId = '<?php echo $Config['contact_info']['address']['id_province']; ?>';
-          loadDistricts(data.district || [], selectedProvinceId);
-          // Thêm sự kiện cho tỉnh được chọn
-          $provinceSelect.on('change', function() {
-            const idProvince = $(this).val();
-            loadDistricts(data.district || [], idProvince);
-          });
+
+            const allData = response.data;   // <-- LƯU JSON TẠI ĐÂY
+            const $provinceSelect = $('#city-province');
+            const selectedProvince = '<?php echo $Config['contact_info']['address']['id_province']; ?>';
+            const selectedDistrict = '<?php echo $Config['contact_info']['address']['id_district']; ?>';
+
+            // ===== LOAD TỈNH =====
+            const provinces = allData.sort((a, b) =>
+                a.tentinhmoi.localeCompare(b.tentinhmoi)
+            );
+
+            provinces.forEach(p => {
+                const isSelected = (p.matinhBNV == selectedProvince) ? 'selected' : '';
+                $provinceSelect.append(
+                    `<option value="${p.matinhBNV}" ${isSelected}>${p.tentinhmoi}</option>`
+                );
+            });
+
+            // Nếu có tỉnh đã chọn → load xã/phường
+            if (selectedProvince) {
+                loadPhuongXa(allData, selectedProvince, selectedDistrict);
+            }
+
+            // Sự kiện chọn tỉnh
+            $provinceSelect.on('change', function () {
+                loadPhuongXa(allData, $(this).val(), null);
+            });
+
         } else {
-          showMessagePHP('Dữ liệu không hợp lệ: ' + (response.message || 'Không có thông tin chi tiết.'), 5);
+            showMessagePHP('Dữ liệu không hợp lệ', 5);
         }
-      }).fail(function(error) {
-        showMessagePHP('Lỗi khi tải dữ liệu thông tin địa chỉ: ' + error, 5);
-      });
-      // Load các quận/huyện cho tỉnh đã chọn
-      function loadDistricts(districtList, idProvince) {
-        const $districtSelect = $('#district-town');
-        $districtSelect.empty().append('<option value="">-- Chọn Quận/Huyện --</option>');
-        // Lọc và sắp xếp các quận/huyện theo tỉnh
-        const filteredDistricts = districtList
-          .filter(d => d.idProvince == idProvince)
-          .sort((a, b) => a.name.localeCompare(b.name));
-        //Thêm các option cho quận, và thêm thuộc tính selected nếu quận đã chọn
-        filteredDistricts.forEach(district => {
-          const isSelectedDistrict = (district.idDistrict == '<?php echo $Config['contact_info']['address']['id_district']; ?>') ? 'selected' : '';
-          $districtSelect.append('<option value="' + district.idDistrict + '" ' + isSelectedDistrict + '>' + district.name + '</option>');
-        });
-      }
+
+    }).fail(function (error) {
+        showMessagePHP('Lỗi khi tải dữ liệu: ' + error, 5);
     });
+
+
+    // ============================
+    // HÀM LOAD PHƯỜNG / XÃ
+    // ============================
+    function loadPhuongXa(allData, idProvince, selectedDistrict) {
+
+        const $districtSelect = $('#district-town');
+        $districtSelect.empty()
+            .append('<option value="">-- Chọn Xã / Phường / Thị Trấn --</option>');
+
+        // Tìm tỉnh tương ứng trong mảng allData
+        const province = allData.find(p => p.matinhBNV == idProvince);
+        if (!province) return;
+
+        const wards = (province.phuongxa || []).sort((a, b) =>
+            a.tenphuongxa.localeCompare(b.tenphuongxa)
+        );
+
+        wards.forEach(w => {
+            const isSelected = (w.maphuongxa == selectedDistrict) ? 'selected' : '';
+            $districtSelect.append(
+                `<option value="${w.maphuongxa}" ${isSelected}>${w.tenphuongxa}</option>`
+            );
+        });
+    }
+
+});
+
 
     //Lấy vị trí hiện tại
     function getLocationData() {

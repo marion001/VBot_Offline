@@ -388,9 +388,7 @@ include 'html_head.php';
                                 echo '</ul>';
                                 echo '</div>';
                             }
-
                             // Hiển thị thông báo thành công nếu có
-
                             if (!empty($successMessage)) {
                                 echo '<div class="alert alert-success alert-dismissible fade show" id="message_error" role="alert">';
                                 echo '<ul style="color: green;">';
@@ -411,7 +409,8 @@ include 'html_head.php';
                                             <font color="Fuchsia"><?= htmlspecialchars($intent['name']) ?>, &nbsp;</font> Trạng Thái: &nbsp;<?= !empty($intent['active']) ? ' <font color=green>Bật</font>' : ' <font color=red>Tắt</font>' ?>
                                         </h5>
                                         <div id="collapse_button_custom_hass_<?= $index + 1 ?>" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_custom_hass_<?= $index + 1 ?>">
-                                            <!-- Active trạng thái -->
+                                            <div class="alert alert-success" role="alert">
+											<!-- Active trạng thái -->
                                             <div class="row mb-3">
                                                 <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này')"></i> :</label>
                                                 <div class="col-sm-9">
@@ -469,6 +468,7 @@ include 'html_head.php';
                                             </center>
                                         </div>
                                     </div>
+                                </div>
                                 </div>
                             <?php endforeach; ?>
                     <?php
@@ -625,18 +625,16 @@ include 'html_head.php';
     </script>
     <script>
         let sectionCounter = <?= count($intents) + 1; ?>;
-        // Tạo mới HTML cho các phần tử
+        //Tạo mới HTML cho các phần tử
         function addNewSection() {
-            // Tạo ID duy nhất cho mỗi phần tử
+            //Tạo ID duy nhất cho mỗi phần tử
             const sectionID = 'section_custom_hass_' + sectionCounter;
             const newSection =
                 '<div class="card" id="' + sectionID + '">' +
                 '<div class="card-body">' +
-                '<h5 class="card-title">' +
-                '<font color="green">Thêm Mới Tác Vụ:</font>' +
-                '</h5>' +
+                '<h5 class="card-title text-danger">Thêm Mới Tác Vụ:</h5>' +
 
-                '<div class="row mb-3">' +
+                '<div class="alert alert-primary" role="alert"><div class="row mb-3">' +
                 '<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message(\'Bật hoặc Tắt để kích hoạt hành động này\')"></i>:</label>' +
                 '<div class="col-sm-9">' +
                 '<div class="form-switch">' +
@@ -681,7 +679,7 @@ include 'html_head.php';
                 'Xóa Tác Vụ' +
                 '</button>' +
                 '</center>' +
-                '</div>' +
+                '</div></div>' +
                 '</div>';
             document.getElementById('accordion-container').insertAdjacentHTML('beforeend', newSection);
             sectionCounter++;

@@ -281,7 +281,7 @@ include 'html_head.php';
         $data_recovery_type = $_POST['start_recovery_Scheduler'];
         if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len") {
           $uploadOk = 1;
-          // Kiểm tra xem tệp có được gửi không
+          //Kiểm tra xem tệp có được gửi không
           if (isset($_FILES["fileToUpload_Scheduler_restore"])) {
             $fileName = basename($_FILES["fileToUpload_Scheduler_restore"]["name"]);
             if (!preg_match('/\.json$/', $fileName)) {
@@ -291,7 +291,7 @@ include 'html_head.php';
             if ($uploadOk == 0) {
               $errorMessages[] = "- Tệp sao lưu không được tải lên";
             } else {
-              // Di chuyển tệp vào thư mục đích
+              //Di chuyển tệp vào thư mục đích
               if (move_uploaded_file($_FILES["fileToUpload_Scheduler_restore"]["tmp_name"], $json_file)) {
                 $successMessage[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục dữ liệu Custom Home Assistant thành công";
               } else {
@@ -322,30 +322,30 @@ include 'html_head.php';
         echo '<script>window.location.href = "Scheduler.php";</script>';
       }
 
-      // Xử lý dữ liệu sau khi người dùng gửi form
+      //Xử lý dữ liệu sau khi người dùng gửi form
       if (isset($_POST['save_all_Scheduler'])) {
         #Sao Lưu Dữ Liệu Trước
         if (isset($Config['backup_upgrade']['scheduler']['active']) && $Config['backup_upgrade']['scheduler']['active'] === true) {
-          // Đường dẫn gốc và đích
+          //Đường dẫn gốc và đích
           $sourceFile = $VBot_Offline . $Config['schedule']['data_json_file'];
           $destinationDir = $directory_path . '/' . $Config['backup_upgrade']['scheduler']['backup_path'];
           $destinationFile = $destinationDir . "/Data_Schedule_" . date('dmY_His') . ".json";
-          // Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
+          //Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
           if (!is_dir($destinationDir)) {
             mkdir($destinationDir, 0777, true);
             chmod($destinationDir, 0777);
             $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
           }
-          // Sao chép tệp mới
+          //Sao chép tệp mới
           if (copy($sourceFile, $destinationFile)) {
             chmod($destinationFile, 0777);
             //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
-            // Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
+            //Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
             $jsonFiles = glob($destinationDir . "/*.json");
             usort($jsonFiles, function ($a, $b) {
               return filemtime($a) - filemtime($b);
             });
-            // Xóa các tệp cũ nhất nếu số lượng tệp vượt quá 5
+            //Xóa các tệp cũ nhất nếu số lượng tệp vượt quá 5
             if (count($jsonFiles) > $Config['backup_upgrade']['scheduler']['limit_backup_files']) {
               foreach (array_slice($jsonFiles, 0, count($jsonFiles) - $Config['backup_upgrade']['scheduler']['limit_backup_files']) as $oldFile) {
                 unlink($oldFile);
@@ -365,18 +365,18 @@ include 'html_head.php';
             $task['create_words'] = isset($task['create_words']) && !empty($task['create_words']) ? $task['create_words'] : 'vbot_interface';
             $task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
             $task['data']['audio_file'] = isset($task['data']['audio_file']) && !empty($task['data']['audio_file']) ? $task['data']['audio_file'] : "";
-            // Kiểm tra các điều kiện cơ bản của task
+            //Kiểm tra các điều kiện cơ bản của task
             if (
               !empty($task['name']) &&
               isset($task['time']) && is_array($task['time']) && count($task['time']) > 0 && // Kiểm tra time có mảng không
               !empty($task['date']) &&
               (!empty($task['data']['message']) || !empty($task['data']['audio_file']))
             ) {
-              // Lọc các giá trị thời gian hợp lệ (không phải chuỗi trống)
+              //Lọc các giá trị thời gian hợp lệ (không phải chuỗi trống)
               $task['time'] = array_filter($task['time'], function ($time) {
                 return !empty($time);
               });
-              // Nếu danh sách time sau khi lọc vẫn có ít nhất một giá trị
+              //Nếu danh sách time sau khi lọc vẫn có ít nhất một giá trị
               if (!empty($task['time'])) {
                 $updated_schedule[] = $task;
               }
@@ -505,7 +505,7 @@ include 'html_head.php';
                       <font color="Fuchsia"><?= htmlspecialchars($notification['name']) ?></font>, &nbsp;</font> Trạng Thái: &nbsp;<?= !empty($notification['active']) ? ' <font color=green>Bật</font>' : ' <font color=red>Tắt</font>' ?>
                     </h5>
                     <div id="collapse_button_schedule_<?= $index ?>" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_<?= $index ?>">
-                      <div id="task-<?= $index ?>">
+                     <div class="alert alert-success" role="alert">  <div id="task-<?= $index ?>">
                         <div class="row mb-3">
                           <label for="active-<?= $index ?>" class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này')"></i>:</label>
                           <div class="col-sm-9">
@@ -631,6 +631,7 @@ include 'html_head.php';
                     </div>
                   </div>
                 </div>
+                </div>
               <?php endforeach; ?>
             <?php else : ?>
               <p class="text-danger">
@@ -655,7 +656,7 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_send_notify_upgrade_vbot_hass" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_send_notify_upgrade_vbot_hass">
-                <div class="row mb-3">
+               <div class="alert alert-success" role="alert"> <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">
                     Kích Hoạt
                     <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này<br/><br/>Yêu Cầu:<br/> - Phải Kích Hoạt Home Assistant<br/>- Phải Kích Hoạt Thông Báo Lời Nhắc')"></i>:
@@ -687,6 +688,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_volume_change">
             <div class="card-body">
@@ -697,7 +699,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_volume_change" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_change">
-                <?php
+              <div class="alert alert-success" role="alert">
+			  <?php
                 // Kiểm tra dữ liệu change_volume và gán giá trị mặc định nếu không có
                 if (!isset($data['change_volume']) || empty($data['change_volume'])) {
                   // Gán giá trị mặc định nếu không có dữ liệu change_volume
@@ -751,6 +754,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_brightness_change">
             <div class="card-body">
@@ -761,7 +765,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_brightness_change" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_brightness_change">
-                <?php
+             <div class="alert alert-success" role="alert">
+			 <?php
                 //Kiểm tra dữ liệu change_led_brightness và gán giá trị mặc định nếu không có
                 if (!isset($data['change_led_brightness']) || empty($data['change_led_brightness'])) {
                   $data['change_led_brightness'] = [
@@ -814,6 +819,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_play_playlist">
             <div class="card-body">
@@ -824,7 +830,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_play_playlist" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_play_playlist">
-                <?php
+               <div class="alert alert-success" role="alert">
+			   <?php
                 //Kiểm tra dữ liệu play_play_playlist và gán giá trị mặc định nếu không có
                 if (!isset($data['play_play_playlist']) || empty($data['play_play_playlist'])) {
                   $data['play_play_playlist'] = [
@@ -872,6 +879,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_play_all_local">
             <div class="card-body">
@@ -882,7 +890,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_play_all_local" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_play_all_local">
-                <?php
+              <div class="alert alert-success" role="alert">
+			  <?php
                 // Kiểm tra dữ liệu play_all_music_local và gán giá trị mặc định nếu không có
                 if (!isset($data['play_all_music_local']) || empty($data['play_all_music_local'])) {
                   $data['play_all_music_local'] = [
@@ -936,6 +945,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_stop_media_player">
             <div class="card-body">
@@ -946,7 +956,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_stop_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_stop_media_player">
-                <?php
+               <div class="alert alert-success" role="alert">
+			   <?php
                 // Kiểm tra dữ liệu stop_media_player và gán giá trị mặc định nếu không có
                 if (!isset($data['stop_media_player']) || empty($data['stop_media_player'])) {
                   $data['stop_media_player'] = [
@@ -994,6 +1005,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_restart_vbot_service">
             <div class="card-body">
@@ -1004,7 +1016,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_restart_vbot_service" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_restart_vbot_service">
-                <?php
+               <div class="alert alert-success" role="alert">
+			   <?php
                 // Kiểm tra dữ liệu restart_vbot và gán giá trị mặc định nếu không có
                 if (!isset($data['restart_vbot']) || empty($data['restart_vbot'])) {
                   $data['restart_vbot'] = [
@@ -1052,6 +1065,7 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
 
           <div class="card accordion" id="accordion_button_reboot_os">
             <div class="card-body">
@@ -1062,7 +1076,8 @@ include 'html_head.php';
                 ?>
               </h5>
               <div id="collapse_button_reboot_os" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_reboot_os">
-                <?php
+               <div class="alert alert-success" role="alert">
+			   <?php
                 // Kiểm tra dữ liệu reboot_os và gán giá trị mặc định nếu không có
                 if (!isset($data['reboot_os']) || empty($data['reboot_os'])) {
                   $data['reboot_os'] = [
@@ -1109,6 +1124,7 @@ include 'html_head.php';
                 </div>
               </div>
             </div>
+          </div>
           </div>
 
 <div class="alert alert-primary" role="alert">
@@ -1233,7 +1249,6 @@ include 'html_head.php';
     function playAudio_Schedule(id_select_DOM) {
       var element = document.getElementById(id_select_DOM);
       if (element) {
-        // Kiểm tra phần tử có thuộc tính 'value' hay không
         if ('value' in element) {
           playAudio(element.value);
         } else {
@@ -1258,15 +1273,10 @@ include 'html_head.php';
           var response = xhr.response;
           if (Array.isArray(response)) {
             loading("hide");
-            // Lấy phần tử <div> với id "du_lieu_audio_schedule"
             var audioScheduleDiv = document.getElementById("du_lieu_audio_schedule");
-            // Làm trống nội dung thẻ div trước khi thêm dữ liệu mới
             audioScheduleDiv.innerHTML = '';
-            // Tạo bảng HTML để hiển thị tên và kích thước tệp
             var table = document.createElement('table');
-            // Thêm lớp CSS để làm đẹp bảng class="table table-bordered border-primary"
             table.classList.add('table', 'table-bordered', 'border-primary');
-            // Tạo tiêu đề bảng
             var thead = document.createElement('thead');
             var headerRow = document.createElement('tr');
             headerRow.innerHTML = '<th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Kích thước (MB)</th><th style="text-align: center; vertical-align: middle;">Hành Động</th>';
@@ -1283,9 +1293,7 @@ include 'html_head.php';
                 '</td>';
               tbody.appendChild(row);
             });
-            // Thêm phần thân bảng vào bảng
             table.appendChild(tbody);
-            // Thêm bảng vào trong <div id="du_lieu_audio_schedule">
             audioScheduleDiv.appendChild(table);
           } else {
             loading("hide");
@@ -1356,12 +1364,9 @@ function loadAudioFiles(selectId) {
     "<?php echo $VBot_Offline . $Config['schedule']['audio_path'] ?>",
     "<?php echo $VBot_Offline . $Config['media_player']['music_local']['path'] ?>"
   ];
-
   const selectElem = document.getElementById(selectId);
   if (!selectElem) return;
-
   selectElem.innerHTML = "<option value=''>Chọn tệp âm thanh</option>";
-
   directories.forEach(dir => {
     const xhr = new XMLHttpRequest();
     const url = "includes/php_ajax/Show_file_path.php?show_all_file&directory_path=" + encodeURIComponent(dir);
@@ -1384,11 +1389,9 @@ function loadAudioFiles(selectId) {
     xhr.send();
   });
 }
-
-
   </script>
   <script>
-    // Hiển thị modal xem nội dung file json Home_Assistant.json
+    //Hiển thị modal xem nội dung file json Home_Assistant.json
     ['openModalBtn_laplich_thongbao'].forEach(function(id) {
       document.getElementById(id).addEventListener('click', function() {
         var file_name_hassJSON = "<?php echo $json_file; ?>";
@@ -1399,15 +1402,10 @@ function loadAudioFiles(selectId) {
     });
   </script>
   <script>
-    // Chỉ số bắt đầu cho tác vụ mới
     let newTaskIndex = <?= count($data['notification_schedule']) ?>;
-    // Biến lưu trữ các tác vụ đã xóa
     let deletedTasks = [];
-    // Hàm tải lại dữ liệu vào DOM (tải lại các ngày có sẵn từ server hoặc từ mảng hiện tại)
     function createDateElement(index, specific_date, container) {
-      // Tạo ID đặc biệt cho mỗi ngày
       const dateGroupId = index + '-' + specific_date;
-      // Tạo HTML chứa input và nút xóa, sử dụng innerHTML
       const dateElementHTML =
         '<div class="mt-3 input-group" id="date-group-' + dateGroupId + '">' +
         '<input type="text" ' +
@@ -1423,27 +1421,23 @@ function loadAudioFiles(selectId) {
         '<i class="bi bi-trash"></i>' +
         '</button>' +
         '</div>';
-      // Thêm HTML vào container
       container.innerHTML += dateElementHTML;
     }
 
     // Hàm thêm nút "Thêm ngày" vào cuối container
     function addAddButton(container, index) {
-      // Xóa thẻ div chứa các phần tử bên trong
       const id_button_ban_dau = document.getElementById('button_hien_thi_ngay_' + index);
       if (id_button_ban_dau) {
         id_button_ban_dau.remove();
       }
-      // Xóa tất cả các nút "Thêm ngày" cũ trước khi thêm nút mới
       const existingAddButton = container.querySelector('input[type="button"]');
       if (existingAddButton) {
         existingAddButton.remove();
       }
-      // Thêm nút "Thêm ngày" mới vào cuối cùng của container
       container.innerHTML += '<div class="mt-3"><input type="button" class="btn btn-info rounded-pill" value="Thêm ngày cụ thể" onclick="addDateInput(' + index + ')"></div>';
     }
 
-    // Hàm thêm một ngày mới vào container
+    //Hàm thêm một ngày mới vào container
     function addDateInput(index) {
       const currentDate = new Date();
       const day = ("0" + currentDate.getDate()).slice(-2);
@@ -1451,46 +1445,36 @@ function loadAudioFiles(selectId) {
       const year = currentDate.getFullYear();
       const formattedDate = day + '/' + month + '/' + year;
       const container = document.querySelector('#date-container-' + index);
-      // Tạo và thêm phần tử ngày vào container
       createDateElement(index, formattedDate, container);
-      // Thêm nút "Thêm ngày" vào cuối container sau khi thêm ngày mới
       addAddButton(container, index);
     }
 
-    // Hàm xóa ngày khi người dùng nhấn nút xóa
+    //Hàm xóa ngày khi người dùng nhấn nút xóa
     function removeDateInput(dateGroupId) {
       const dateGroup = document.getElementById('date-group-' + dateGroupId);
       if (dateGroup) {
-        // Xóa thẻ div chứa input và nút xóa
         dateGroup.remove();
       }
     }
 
-    // Xóa một tác vụ
+    //Xóa một tác vụ
     function deleteTask(taskIndex) {
       if (confirm("Bạn có chắc muốn xóa tác vụ này?")) {
         const taskDiv = document.getElementById("task-" + taskIndex);
-        // Lưu tác vụ vào mảng deletedTasks
         deletedTasks.push({
           index: taskIndex,
-          // Lưu nội dung của tác vụ để phục hồi
           content: taskDiv.innerHTML
         });
-        // Xóa nội dung hiện tại và hiển thị thông báo
         taskDiv.innerHTML = '<div style="color: red;">Đã xóa tác vụ thứ tự: <b>' + taskIndex + '</b> Chờ lưu thay đổi để áp dụng. <button class="btn btn-warning rounded-pill" type="button" onclick="restoreTask(' + taskIndex + ')">Khôi Phục</button></div>';
       }
     }
 
-    // Phục hồi một tác vụ
+    //Phục hồi một tác vụ
     function restoreTask(taskIndex) {
-      // Tìm tác vụ đã xóa từ mảng deletedTasks
       const task = deletedTasks.find(task => task.index === taskIndex);
       if (task) {
-        // Tạo lại thẻ div cho tác vụ đã xóa và thay thế nội dung
         const taskDiv = document.getElementById("task-" + taskIndex);
-        // Phục hồi nội dung cũ
         taskDiv.innerHTML = task.content;
-        // Xóa tác vụ khỏi mảng deletedTasks
         deletedTasks = deletedTasks.filter(task => task.index !== taskIndex);
       }
     }
@@ -1499,7 +1483,7 @@ function loadAudioFiles(selectId) {
       const taskContainer = document.getElementById('task-container');
       let taskHtml =
         "<hr/><div class='card accordion'><div class='card-body'><div id='task-" + newTaskIndex + "'>" +
-        "<h5 class='card-title'>Lập Lịch, Tác Vụ Thông Báo Mới:</h5>" +
+        "<h5 class='card-title text-danger'>Lập Lịch, Tác Vụ Thông Báo Mới:</h5><div class='alert alert-primary' role='alert'>" +
 
         "<div class='row mb-3'>" +
         "<label for='active-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Kích hoạt:</label>" +
@@ -1579,15 +1563,14 @@ function loadAudioFiles(selectId) {
         "</div>" +
         "</div>" +
         "</div>" +
-        "</div>" +
+        "</div></div>" +
         "</div>";
       taskContainer.innerHTML += taskHtml;
 
-      // Sau khi chèn vào DOM -> gọi API để fill dữ liệu
+      //Sau khi chèn vào DOM -> gọi API để fill dữ liệu
       loadAudioFiles("audio_file-" + newTaskIndex);
 
-
-      // Tự động cuộn đến task mới và focus input
+      //Tự động cuộn đến task mới và focus input
       const newTaskElem = document.getElementById("task-" + newTaskIndex);
       if (newTaskElem) {
         newTaskElem.scrollIntoView({
@@ -1597,39 +1580,33 @@ function loadAudioFiles(selectId) {
         const firstInput = newTaskElem.querySelector("input[type='text']");
         if (firstInput) firstInput.focus();
       }
-
-      // Tăng index để tạo tác vụ mới tiếp theo
       newTaskIndex++
       showMessagePHP("Đã Thêm Ô Nhập Liệu Tác Vụ Lập Lịch Mới, Hãy Điền Thông Tin Vào", 6);
-
     }
 
-    // Xóa input thời gian
+    //Xóa input thời gian
     function removeTimeInput(taskIndex, buttonElement) {
       const timeContainer = document.getElementById('time-container-' + taskIndex);
       timeContainer.removeChild(buttonElement.parentElement);
-      // Cập nhật hiển thị nút "Xóa" sau khi xóa một input
       updateRemoveButtonVisibility(taskIndex);
     }
 
-    // Cập nhật hiển thị nút "Xóa" khi có ít nhất 2 input
+    //Cập nhật hiển thị nút "Xóa" khi có ít nhất 2 input
     function updateRemoveButtonVisibility(taskIndex) {
       const timeContainer = document.getElementById('time-container-' + taskIndex);
       const timeInputs = timeContainer.getElementsByTagName('div');
       const removeButtons = timeContainer.getElementsByTagName('button');
-      // Nếu chỉ còn một input thời gian, ẩn nút "Xóa", nếu có hơn một input thì hiển thị
       for (let i = 0; i < removeButtons.length; i++) {
         removeButtons[i].style.display = timeInputs.length > 1 ? 'inline' : 'none';
       }
     }
-    // Gọi updateRemoveButtonVisibility cho mỗi tác vụ khi tải trang
+    //Gọi updateRemoveButtonVisibility cho mỗi tác vụ khi tải trang
     document.addEventListener("DOMContentLoaded", function() {
       <?php foreach ($data['notification_schedule'] as $index => $notification) : ?>
         updateRemoveButtonVisibility(<?= $index ?>);
       <?php endforeach; ?>
     });
-  </script>
-  <script>
+
     // Thêm input thời gian mới
     function addTimeInput(taskIndex) {
       const timeContainer = document.getElementById('time-container-' + taskIndex);
@@ -1639,10 +1616,9 @@ function loadAudioFiles(selectId) {
         "<button type='button' class='btn btn-danger border-success' onclick='removeTimeInput(" + taskIndex + ", this)' title='Xóa Thời Gian'><i class='bi bi-trash'></i></button>" +
         "</div>";
       timeContainer.innerHTML += timeInputHtml;
-      // Cập nhật hiển thị nút "Xóa" khi có ít nhất 2 input
       updateRemoveButtonVisibility(taskIndex);
     }
-    // Tạo danh sách giờ
+    //Tạo danh sách giờ
     function generateHourSuggestions() {
       const hours = [];
       for (let hour = 0; hour < 24; hour++) {
@@ -1651,43 +1627,41 @@ function loadAudioFiles(selectId) {
       }
       return hours;
     }
-    // Tạo danh sách phút
+
+    //Tạo danh sách phút
     function generateMinuteSuggestions() {
       const minutes = [];
-      // Tăng mỗi 1 phút
       for (let minute = 0; minute < 60; minute += 1) {
         const m = minute.toString().padStart(2, '0');
         minutes.push(m);
       }
       return minutes;
     }
-    // Hiển thị danh sách gợi ý giờ
+
+    //Hiển thị danh sách gợi ý giờ
     function showHourSuggestions(input) {
       const container = input.nextElementSibling;
       const hours = generateHourSuggestions();
-      container.innerHTML = ''; // Xóa gợi ý cũ
+      container.innerHTML = '';
       hours.forEach(hour => {
         const option = document.createElement('div');
         option.className = 'suggestion-item';
         option.innerText = hour + ' giờ';
         option.onclick = () => {
-          // Lưu giờ được chọn tạm thời
           input.dataset.selectedHour = hour;
-          // Chỉ cập nhật giờ, giữ chỗ cho phút
           input.value = hour + ':--';
-          // Chuyển sang chọn phút
           showMinuteSuggestions(input);
         };
         container.appendChild(option);
       });
-      // Hiển thị danh sách
       container.style.display = 'block';
     }
-    // Hiển thị danh sách gợi ý phút
+
+    //Hiển thị danh sách gợi ý phút
     function showMinuteSuggestions(input) {
       const container = input.nextElementSibling;
       const minutes = generateMinuteSuggestions();
-      container.innerHTML = ''; // Xóa gợi ý cũ
+      container.innerHTML = '';
       minutes.forEach(minute => {
         const option = document.createElement('div');
         option.className = 'suggestion-item';
@@ -1695,14 +1669,13 @@ function loadAudioFiles(selectId) {
         option.onclick = () => {
           const selectedHour = input.dataset.selectedHour || '00';
           input.value = selectedHour + ':' + minute;
-          // Ẩn danh sách sau khi chọn phút
           container.style.display = 'none';
         };
         container.appendChild(option);
       });
-      // Hiển thị danh sách
       container.style.display = 'block';
     }
+
     // Ẩn danh sách gợi ý khi nhấp ra ngoài
     document.addEventListener('click', function(event) {
       const isInput = event.target.classList.contains('time-input');

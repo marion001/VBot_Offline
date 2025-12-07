@@ -15,18 +15,6 @@
             "artist": null
         },
         {
-            "ids_list": "02FD15",
-            "title": "Tấm Cám",
-            "cover": "https://cdn-ocs.iviet.com/cover/2022/August/dce88ab5-a725-47c6-8ecc-b0094f2026ad.jpeg",
-            "audio": "https://cdn-ocs.iviet.com/audio/2022/May/ad0c47fd-be62-4db8-b658-f12eb566d731.mp3",
-            "duration": "00:22:45",
-            "description": "Truyện",
-            "source": "PodCast",
-            "id": "https://cdn-ocs.iviet.com/audio/2022/May/ad0c47fd-be62-4db8-b658-f12eb566d731.mp3",
-            "channelTitle": null,
-            "artist": null
-        },
-        {
             "ids_list": "F69C86",
             "title": "Thuyền Quyên (Lofi Ver)",
             "cover": "https://image-cdn.nct.vn/song/2023/01/09/f/5/7/7/1673239503736.jpg",
@@ -61,6 +49,42 @@
             "id": "https://stream.nct.vn/NhacCuaTui161/TinhKhucVang-DanTruong_36yvf_hq.mp3?st=6ImqX0ErlxD6fsZPBb4_cA&e=1763996201&a=1&p=0&r=88c3e73e164f19f79a7cf34b4e0068db",
             "channelTitle": null,
             "artist": "Đan Trường"
+        },
+        {
+            "ids_list": "B0BBB6",
+            "title": "Cảm Ơn Em (WM Remix).mp3",
+            "cover": "http://192.168.14.175/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em (WM Remix).mp3",
+            "duration": "3.46 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em (WM Remix).mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "7D0AD6",
+            "title": "Thuyền Quyên (Lofi Ver).mp3",
+            "cover": "http://192.168.14.175/assets/img/icon_audio_local.png",
+            "audio": "/home/pi/VBot_Offline/Media/Music_Local/Thuyền Quyên (Lofi Ver).mp3",
+            "duration": "8.19 MB",
+            "description": null,
+            "source": "Local",
+            "id": "/home/pi/VBot_Offline/Media/Music_Local/Thuyền Quyên (Lofi Ver).mp3",
+            "channelTitle": null,
+            "artist": null
+        },
+        {
+            "ids_list": "1F3AEC",
+            "title": "Cảm Ơn Em (WM Remix)",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/2/f/c/d/2fcd98614479eb84a804483ae6fb5fcd.jpg",
+            "audio": "Z7EIC7UI",
+            "duration": "03:51",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z7EIC7UI",
+            "channelTitle": null,
+            "artist": "Đặng Thiên Chí"
         }
     ]
 }

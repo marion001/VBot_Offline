@@ -129,6 +129,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['home_assistant']['long_token'] = $_POST['hass_long_token'];
   $Config['home_assistant']['active'] = isset($_POST['hass_active']) ? true : false;
   $Config['home_assistant']['custom_commands']['active'] = isset($_POST['hass_custom_commands_active']) ? true : false;
+  $Config['home_assistant']['custom_commands']['minimum_threshold'] = floatval($_POST['hass_custom_commands_threshold']);
 
   #Cập nhật các giá trị trong MQTT Broker
   $Config['mqtt_broker']['mqtt_active'] = isset($_POST['mqtt_active']) ? true : false;
@@ -949,6 +950,7 @@ include 'html_head.php';
                   Cấu Hình Kết Nối SSH Server <font color="red"> (Bắt Buộc)</font>:
                 </h5>
                 <div id="collapse_button_ssh" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_ssh">
+				<div class="alert alert-success" role="alert">
                   <?php
                   echo input_field('ssh_port', 'Cổng kết nối', $Config['ssh_server']['ssh_port'] ?? 22, 'required', 'number', '1', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
                   echo input_field('ssh_username', 'Tài Khoản', $Config['ssh_server']['ssh_username'], 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', '', '', '', '', '');
@@ -961,13 +963,14 @@ include 'html_head.php';
                 </div>
               </div>
             </div>
+            </div>
             <div class="card accordion" id="accordion_button_webui_path">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
                   Cấu Hình Web Interface (Giao Diện):
                 </h5>
                 <div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
-                  <div class="row mb-3">
+                <div class="alert alert-success" role="alert">   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Hiển Thị Lỗi <i class="bi bi-question-circle-fill" onclick="show_message('Chức Năng Này Chỉ Dành Cho Nhà Phát Triển DEV Debug')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -992,13 +995,14 @@ include 'html_head.php';
                 </div>
               </div>
             </div>
+            </div>
             <div class="card accordion" id="accordion_button_setting_API">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_API" aria-expanded="false" aria-controls="collapse_button_setting_API">
                   Cấu Hình API VBot Server:
                 </h5>
                 <div id="collapse_button_setting_API" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_API">
-                  <div class="row mb-3">
+                  <div class="alert alert-success" role="alert"> <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích Hoạt API <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng và giao tiếp với VBot thông qua API')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -1037,13 +1041,14 @@ include 'html_head.php';
                 </div>
               </div>
             </div>
+            </div>
 
             <div class="card accordion" id="accordion_button_streaming_server_audio">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
                   Streming Audio Server <font color=red> (VBot Client, Client - Server) </font><i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
                 <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
-
+				<div class="alert alert-success" role="alert">
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng thiết bị chạy chương trình VBot làm Server')"></i> :</label>
                     <div class="col-sm-9">
@@ -1061,7 +1066,7 @@ include 'html_head.php';
                       <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
                         Cấu hình sử dụng Client: ESP32, ESP32S3, ESP32 D1 Mini:</h5>
                       <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
-
+						<div class="alert alert-primary" role="alert">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Flash Firmware:</label>
                           <div class="col-sm-9">
@@ -1128,19 +1133,23 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
                   Cấu Hình Âm Thanh Volume/Mic:
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
-                  <div class="card">
+                 <div class="alert alert-success" role="alert"> <div class="card">
                     <div class="card-body">
                       <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé')"></i> &nbsp;:</h5>
-                      <?php
+                      <div class="alert alert-primary" role="alert">
+					  <?php
                       echo input_field('mic_id', 'ID Mic', htmlspecialchars($Config['smart_config']['mic']['id']), 'required', 'number', '', '', '', 'Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé', 'border-success', 'Tìm Kiếm ID Mic', "scan_audio_devices('scan_mic')", 'btn btn-success border-success', 'onclick', '_blank');
                       ?>
                       <div class="row mb-3">
@@ -1155,11 +1164,13 @@ include 'html_head.php';
                         <div id="mic_scanner"></div>
                       </div>
                     </div>
+                    </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Âm Lượng (Volume)/Audio Out &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('<font color=green>- Trương trình sẽ tương tác và thay đổi âm lượng của trình phát VLC <br/>- Sẽ không can thiệp vào âm lượng trên hệ thống của thiết bị (Trương trình sẽ bị giới hạn mức âm lượng, nếu âm lượng của hệ thống alsamixer đầu ra bị hạn chế hoặc được đặt ở mức thấp)</font><br/>Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'> Hướng Dẫn</a>')"></i> &nbsp;:</h5>
-                      <?php
+                      <div class="alert alert-primary" role="alert">
+					  <?php
                       echo input_field('alsamixer_name', 'Tên thiết bị (alsamixer) ', htmlspecialchars($Config['smart_config']['speaker']['system']['alsamixer_name']), '', 'text', '', '', '', 'Tên của thiết bị âm thanh đầu ra trong alsamixer, cần điền đúng tên thiết bị âm thanh đầu ra hiện tại của alsamixer<br/><br/>- nếu không biết đâu là thiết bị âm thanh đầu ra thì bạn có thể phát 1 bài nhạc bằng vlc ví dụ: <b>$: vlc 1.mp3</b> sau đó vào alsamixer bằng lệnh: <b>$: alsamixer</b> thay đổi âm lượng của các thiết bị có trong đó để xác định xem đâu là tên thiết bị đầu ra', 'border-success', 'Tìm Kiếm', "scan_audio_devices('scan_alsamixer')", 'btn btn-success border-success', 'onclick', '_blank');
                       echo input_field('bot_volume', 'Âm lượng', $Config['smart_config']['speaker']['volume'] ?? 50, 'required', 'number', '1', '0', '100', 'Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình', 'border-success', '', '', '', '', '');
                       echo input_field('bot_volume_min', 'Âm lượng thấp nhất', $Config['smart_config']['speaker']['volume_min'] ?? 0, 'required', 'number', '1', '0', '100', 'Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0', 'border-success', '', '', '', '', '');
@@ -1179,19 +1190,22 @@ include 'html_head.php';
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_hotword_engine">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_hotword_engine" aria-expanded="false" aria-controls="collapse_button_hotword_engine">
                   Cấu Hình WakeUP Hotword Engine (Từ Đánh Thức) Picovoice/Snowboy:
                 </h5>
                 <div id="collapse_button_hotword_engine" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_hotword_engine" style="">
-                  <div class="card">
+                  <div class="alert alert-success" role="alert"> <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Hotword / Từ Nóng Đánh Thức <i class="bi bi-question-circle-fill" onclick="show_message('Danh sách file thư viện Porcupine: <a href=\'https://github.com/Picovoice/porcupine/tree/master/lib/common\' target=\'_bank\'>Github</a><br/>Mẫu các từ khóa đánh thức: <a href=\'https://github.com/Picovoice/porcupine/tree/master/resources\' target=\'_bank\'>Github</a>')"></i> :</h5>
-                      <div class="row mb-3">
+                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label for="" class="col-sm-3 col-form-label">Cho Phép Chạy Chương Trình Khi Lỗi Khởi Tạo Hotword, Wakeup <i class="bi bi-question-circle-fill" onclick="show_message('Cho Phép Chương Trình Tiếp Tục Khởi Chạy Khi Tiến Trình khởi Tạo Từ Đánh Thức Wake Up Gặp Lỗi. (Và sẽ không dùng được Từ nóng Hotword để đánh thức)')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -1267,17 +1281,21 @@ include 'html_head.php';
                         </table>
                       </div>
                     </div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_setting_stt">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_stt" aria-expanded="false" aria-controls="collapse_button_setting_stt">
                   Chuyển Giọng Nói Thành Văn Bản - Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> &nbsp;:
                 </h5>
                 <div id="collapse_button_setting_stt" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_stt" style="">
-                  <?php
+               <div class="alert alert-success" role="alert">
+			   <?php
                   echo input_field('duration_recording', 'Thời gian lắng nghe tối đa (giây)', $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] ?? 6, 'required', 'number', '1', '3', '10', 'Thời gian lắng nghe tối đa khi Bot được đánh thức', 'border-success', '', '', '', '', '');
                   ?>
                   <div class="row">
@@ -1285,6 +1303,7 @@ include 'html_head.php';
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn STT (Speak To Text) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :</h5>
+						  <div class="alert alert-primary" role="alert">
                           <?php
                           $GET_stt_select = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'];
                           if ($GET_stt_select === "stt_default") {
@@ -1315,11 +1334,13 @@ include 'html_head.php';
                           </div>
                         </div>
                       </div>
+                      </div>
                     </div>
                     <div class="col-lg-6">
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title">Cấu hình STT:</h5>
+						  <div class="alert alert-primary" role="alert">
                           <!-- ẩn hiện cấu hình select_stt_ggcloud_html -->
                           <div id="select_stt_ggcloud_html" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
@@ -1407,19 +1428,22 @@ include 'html_head.php';
                             Không cần cấu hình
                           </div>
                         </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_setting_tts">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_tts" aria-expanded="false" aria-controls="collapse_button_setting_tts">
                   Chuyển Văn Bản Thành Giọng Nói - Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi kết quả từ văn bản thành giọng nói để phát ra loa')"></i> &nbsp;:
                 </h5>
                 <div id="collapse_button_setting_tts" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_tts" style="">
-                  <div class="row mb-3">
+                 <div class="alert alert-success" role="alert"> <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích hoạt Cache lại TTS:</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -1437,7 +1461,8 @@ include 'html_head.php';
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title" title="Chuyển giọng nói thành văn bản">Lựa chọn TTS (Text To Speak) <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Cần lựa chọn TTS bên dưới để sử dụng hoặc cấu hình cài đặt cho TTS đó')"></i> :</h5>
-                          <?php
+                          <div class="alert alert-primary" role="alert">
+						  <?php
                           $GET_tts_select = $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'];
                           if ($GET_tts_select === "tts_default") {
                             $replace_text_tts = "Mặc Định";
@@ -1519,12 +1544,14 @@ include 'html_head.php';
                             <?php endforeach; ?>
                           </div>
                         </div>
+                        </div>
                       </div>
                     </div>
                     <div class="col-lg-6">
                       <div class="card">
                         <div class="card-body">
                           <h5 class="card-title">Cấu hình TTS:</h5>
+						  <div class="alert alert-primary" role="alert">
                           <!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
                           <div id="select_tts_default_html" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
@@ -1785,19 +1812,22 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                           <!-- ẩn hiện cấu hình select_tts_ggcloud_key style="display: none;" -->
                         </div>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_setting_homeassistant">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_homeassistant" aria-expanded="false" aria-controls="collapse_button_setting_homeassistant">
                   Cấu Hình Kết Nối Tới Home Assistant (HASS):
                 </h5>
                 <div id="collapse_button_setting_homeassistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_homeassistant">
-                  <div class="row mb-3">
+                 <div class="alert alert-success" role="alert">  <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng điều khiển nhà thông minh Home Assistant')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -1805,14 +1835,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
-                    <div class="col-sm-9">
-                      <div class="form-switch">
-                        <input class="form-check-input border-success" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" <?php echo $Config['home_assistant']['custom_commands']['active'] ? 'checked' : ''; ?>>
-                      </div>
-                    </div>
-                  </div>
+
                   <?php
                   echo input_field('hass_long_token', 'Mã Token (Long Token)', $Config['home_assistant']['long_token'], '', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
                   echo input_field('hass_internal_url', 'URL nội bộ ', htmlspecialchars($Config['home_assistant']['internal_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_internal_url')", 'btn btn-success border-success', 'onclick', '_blank');
@@ -1822,8 +1845,23 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
+				<div class="alert alert-primary" role="alert">
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" <?php echo $Config['home_assistant']['custom_commands']['active'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+				  <?php
+				echo input_field('hass_custom_commands_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['custom_commands']['minimum_threshold'] ?? 0.85, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 1</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
+				  ?>
+				</div>
+                </div>
                 </div>
               </div>
+			  
             </div>
             <div class="card accordion" id="accordion_button_mqtt_tuyen">
               <div class="card-body">
@@ -1831,7 +1869,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   Cấu Hình Kết Nối MQTT Broker:
                 </h5>
                 <div id="collapse_button_mqtt_tuyen" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mqtt_tuyen">
-                  <div class="row mb-3">
+                <div class="alert alert-success" role="alert">   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt sử dụng giao thức MQTT')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -1888,13 +1926,14 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
               </div>
             </div>
+            </div>
             <div class="card accordion" id="accordion_button_setting_led">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_led" aria-expanded="false" aria-controls="collapse_button_setting_led">
                   Cấu Hình Sử Dụng Đèn Led:
                 </h5>
                 <div id="collapse_button_setting_led" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_led">
-                  <div class="row mb-3">
+                 <div class="alert alert-success" role="alert"> <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích hoạt đèn Led <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng đèn led trạng thái')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -1984,20 +2023,22 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
               </div>
             </div>
+            </div>
 
             <div class="card accordion" id="accordion_button_multype_button_config">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
                   Cấu Hình Sử Dụng Nút Nhấn:</h5>
+				  
                 <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
-
+<div class="alert alert-success" role="alert">
                   <div class="card accordion" id="accordion_button_setting_bton">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_bton" aria-expanded="false" aria-controls="collapse_button_setting_bton">
                         Cấu Hình Nút Nhấn Dạng Thường <font color=red> (Nhấn Nhả)</font>:
                       </h5>
                       <div id="collapse_button_setting_bton" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_bton" style="">
-                        <div class="row mb-3">
+                        <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn hoặc không sử dụng, <a href=\'https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074\' target=\'_blank\'>Xem Sơ Đồ Mạch Nút Nhấn</a>')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2082,6 +2123,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     <b class="text-danger">Sơ Đồ 4 Nút Nhấn Nhả: <a href="https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074" target="_blank">Nhấn Vào Đây Để Xem Sơ Đồ</a></b>
                   </div>
                       </div>
+                      </div>
                     </div>
                   </div>
 
@@ -2090,7 +2132,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Encoder_Rotary" aria-expanded="false" aria-controls="collapse_button_Encoder_Rotary">
                         Cấu Hình Nút Nhấn Dạng Xoay <font color=red> (Sử Dụng Encoder Rotary)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Sử Dụng Nút Nhấn Dạng Xoay Encoder, Tương Thích Với Các Module Encoder Có 5 Chân Trên Thị Trường Như:  <b>KY-040 RV09 EC11</b><br/>- Khuyến Nghị Chỉ Nên Kích Hoạt Sử Dụng 1 Trong 2 Kiểu Nút Nhấn Là: <b> Nút Nhấn Dạng Xoay Encoder</b> Hoặc <b>Nút Nhấn Nhả Dạng Thường</b>')"></i>:</h5>
                       <div id="collapse_button_Encoder_Rotary" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Encoder_Rotary">
-                        <div class="row mb-3">
+                        <div class="alert alert-info" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn dạng Encoder Rotary hoặc không sử dụng')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2194,9 +2236,11 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </table>
 
                       </div>
+                      </div>
                     </div>
                   </div>
 
+                </div>
                 </div>
               </div>
             </div>
@@ -2207,10 +2251,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   Âm Thanh Hệ Thống:
                 </h5>
                 <div id="collapse_button_Sound_System" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_Sound_System" style="">
-                  <div class="card">
+                <div class="alert alert-success" role="alert"> <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i> :</h5>
-                      <div class="row mb-3">
+                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi chương trình khởi động')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -2267,21 +2311,23 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </table>
                       </div>
                     </div>
+                    </div>
                   </div>
-
                 </div>
               </div>
             </div>
+            </div>
+			
             <div class="card accordion" id="accordion_button_media_player">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
                   Cấu Hình Phát Nhạc, Câu Trả Lời - Media Player:
                 </h5>
                 <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
-                  <div class="card">
+                 <div class="alert alert-success" role="alert"> <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Kích hoạt Media Player <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để kích hoạt sử dụng trình phát nhạc Media Player<br/>Khi được tắt sẽ không ra lệnh phát được Bài Hát, PodCast, Radio')"></i> :</h5>
-                      <div class="row mb-3">
+                     <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt: </label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -2298,20 +2344,23 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                     </div>
+                    </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
+					  <div class="alert alert-primary" role="alert">
                       <?php
                       echo select_field('newspaper_play_mode', 'Nguồn Báo, Tin Tức', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode'], []);
                       echo select_field('music_play_mode', 'Nguồn Âm Nhạc', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode'], []);
                       ?>
                     </div>
                   </div>
+                  </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Đồng bộ trạng thái Media với Web UI <i class="bi bi-question-circle-fill" onclick="show_message('Chế độ đồng bộ này sẽ sử dụng giao tiếp qua API, nếu bạn tắt Kích Hoạt APi thì sẽ không đồng bộ được nhé')"></i> :</h5>
-                      <div class="row mb-3">
+                     <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt tự động đồng bộ khi truy cập vào Web UI')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -2324,10 +2373,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       ?>
                     </div>
                   </div>
+                  </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Ưu tiên nguồn phát/tìm kiếm Media <i class="bi bi-question-circle-fill" onclick="show_message('Ưu tiên nguồn tìm kiếm bài hát khi Bot xử lý dữ liệu. (xử lý lần lượt theo thứ tự khi nguồn trước đó không có kết quả)')"></i> :</h5>
-                      <?php
+                      <div class="alert alert-primary" role="alert"> 
+					  <?php
 						echo select_field(
 							'music_source_priority1',
 							'Top 1',
@@ -2366,18 +2417,22 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       ?>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_media_player_source">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
                   Nguồn Phát Media Player: Nhạc, Radio, Kể Truyện, PodCast, Đọc Báo Tin tức:
                 </h5>
                 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
-                  <div class="card">
+                 <div class="alert alert-success" role="alert">  <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Zing MP3:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc Zing MP3')"></i> :</label>
                         <div class="col-sm-9">
@@ -2387,10 +2442,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                     </div>
+                    </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">NhacCuaTui - NCT:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc NhacCuaTui - NCT')"></i> :</label>
                         <div class="col-sm-9">
@@ -2401,9 +2458,11 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Youtube:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc Youtube')"></i> :</label>
                         <div class="col-sm-9">
@@ -2417,9 +2476,11 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       ?>
                     </div>
                   </div>
+                  </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Music Local:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc Local')"></i> :</label>
                         <div class="col-sm-9">
@@ -2462,11 +2523,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">DEV Custom Music: Dev_Music.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Người dùng sẽ tự code bổ sung thêm nguồn cung cấp dữ liệu nhạc, bài hát theo ý muốn, Bạn sẽ cần code ở file: Dev_Music.py')"></i> :</h5>
-                      <div class="row mb-3">
+                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng nguồn phát nhạc do người dùng tự code, bạn sẽ cần code ở file: Dev_Music.py')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -2476,10 +2538,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Đọc Truyện, Kể Truyện, PodCast:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt sử dụng Đọc Truyện')"></i> :</label>
                         <div class="col-sm-9">
@@ -2498,10 +2562,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Đài, Radio:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng nguồn phát radio')"></i> :</label>
                         <div class="col-sm-9">
@@ -2553,6 +2619,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-radio" onclick="addRadio()">Thêm Đài Mới</button></center>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card">
                     <div class="card-body">
@@ -2567,9 +2634,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             - https://baomoi.com/audio/thoi-su-3.epi<br/>\
                             - https://tienphong.vn/podcast/<br/>\
                             ')">
-                        </i>
-                        :
-                      </h5>
+                        </i>:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng nguồn phát radio')"></i> :</label>
                         <div class="col-sm-9">
@@ -2585,21 +2651,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <table class="table table-bordered border-primary" id="newspaper-table">
                         <thead>
                           <tr>
-                            <th scope="col">
-                              <center>
-                                <font color="red">Tên Báo</font>
-                              </center>
-                            </th>
-                            <th scope="col">
-                              <center>
-                                <font color="red">Link Báo</font>
-                              </center>
-                            </th>
-                            <th scope="col">
-                              <center>
-                                <font color="red">Hành Động</font>
-                              </center>
-                            </th>
+                            <th scope="col"><center><font color="red">Tên Báo</font></center></th>
+                            <th scope="col"><center><font color="red">Link Báo</font></center></th>
+                            <th scope="col"><center><font color="red">Hành Động</font></center></th>
                           </tr>
                         </thead>
                         <tbody>
@@ -2634,9 +2688,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-newspaper" onclick="addNewsPaper()">Thêm Báo Mới</button></center>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_virtual_assistant">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_virtual_assistant" aria-expanded="false" aria-controls="collapse_button_virtual_assistant">
@@ -2644,7 +2701,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </h5>
                 <div id="collapse_button_virtual_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_virtual_assistant" style="">
                   <div class="card">
-                    <div class="card-body">
+				  
+                    <div class="card-body"><div class="alert alert-success" role="alert">
                       <h5 class="card-title">Ưu tiên trợ lý ảo:</h5>
                       <?php
                       //Get Ưu tiên Nguồn Phát
@@ -2678,6 +2736,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       }
                       ?>
                     </div>
+                    </div>
                   </div>
 
                   <div class="card accordion" id="accordion_button_cfg_default_assistant">
@@ -2685,6 +2744,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_default_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_default_assistant">
                         Cấu Hình Trợ Lý => Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i>:</h5>
                       <div id="collapse_button_cfg_default_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_default_assistant">
+					  <div class="alert alert-primary" role="alert">
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Default Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
@@ -2716,6 +2776,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                         </div>
                       </div>
+                      </div>
                     </div>
                   </div>
 
@@ -2724,7 +2785,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_zaloai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_zaloai_assistant">
                         Cấu Hình Trợ Lý => Zalo AI Assistant:</h5>
                       <div id="collapse_button_cfg_zaloai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_zaloai_assistant">
-                        <div class="row mb-3">
+                       <div class="alert alert-info" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2738,6 +2799,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         ?>
                       </div>
                     </div>
+                    </div>
                   </div>
 
                   <div class="card accordion" id="accordion_button_cfg_olliai_assistant">
@@ -2745,7 +2807,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_olliai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_olliai_assistant">
                         Cấu Hình Trợ Lý => Olli AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
                       <div id="collapse_button_cfg_olliai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_olliai_assistant">
-                        <div class="row mb-3">
+                        <div class="alert alert-warning" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Olli AI Assistant')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2787,6 +2849,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                         </div>
                       </div>
                     </div>
+                    </div>
                   </div>
 
                   <div class="card accordion" id="accordion_button_cfg_gemini_assistant">
@@ -2794,7 +2857,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_gemini_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_gemini_assistant">
                         Cấu Hình Trợ Lý => Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i>:</h5>
                       <div id="collapse_button_cfg_gemini_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_gemini_assistant">
-                        <div class="row mb-3">
+                        <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Gemini')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2860,13 +2923,14 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card accordion" id="accordion_button_cfg_chatgpt_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_chatgpt_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_chatgpt_assistant">
                         Cấu Hình Trợ Lý => Chat GPT:</h5>
                       <div id="collapse_button_cfg_chatgpt_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_chatgpt_assistant">
-                        <div class="row mb-3">
+                        <div class="alert alert-info" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Chat GPT')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2884,13 +2948,14 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card accordion" id="accordion_button_cfg_difyai_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_difyai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_difyai_assistant">
                         Cấu Hình Trợ Lý => Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
                       <div id="collapse_button_cfg_difyai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_difyai_assistant">
-                        <div class="row mb-3">
+                        <div class="alert alert-warning" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2914,13 +2979,14 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
 
                   <div class="card accordion" id="accordion_button_cfg_devassistant_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_devassistant_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_devassistant_assistant">
                         Cấu Hình Trợ Lý => DEV Assistant: Dev_Assistant.py <font color=red>(Custom Assistant, Người dùng tự code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:</h5>
                       <div id="collapse_button_cfg_devassistant_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_devassistant_assistant">
-                        <div class="row mb-3">
+                        <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
@@ -2931,6 +2997,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -2940,6 +3007,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_xiaozhiai" aria-expanded="false" aria-controls="collapse_button_xiaozhiai">
                   Cấu Hình Bot/Trợ Lý XiaoZhi AI:</h5>
                 <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
+				<div class="alert alert-success" role="alert">
                   <?php
                   echo "<div class='row mb-3'>
 					  <label class='col-sm-3 col-form-label'>Kích hoạt 
@@ -2998,13 +3066,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_collapse_button_developer_customization">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" title="chế độ tùy chỉnh cho các lập trình viên, DEV" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_developer_customization" aria-expanded="false" aria-controls="collapse_button_developer_customization">
                   DEV Customization: Custom Skill, Dev_Customization.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> :
                 </h5>
                 <div id="collapse_button_developer_customization" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_developer_customization">
-                  <div class="row mb-3">
+                  <div class="alert alert-success" role="alert"> <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Chế độ DEV: Dev_Customization.py (Custom Skill) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ để vào và sử dụng chế độ Custom Skill cho các bạn Dev thoải mái xử lý dữ liệu lập trình và tùy biến')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -3015,6 +3085,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Nếu Custom Skill: Dev_Customization.py không thể xử lý:</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Tiếp tục sử dụng VBot xử lý <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng VBot xử lý dữ liệu khi mà Custom Skill không xử lý được')"></i> :</label>
                         <div class="col-sm-9">
@@ -3025,15 +3096,19 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
+                  </div>
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_schedule_lich">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_schedule_lich" aria-expanded="false" aria-controls="collapse_button_schedule_lich">
                   Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo.<br/>Ví Dụ Câu Lệnh Ra lệnh nhanh: <br/>- Nhắc tôi uống thuốc sau 10 phút nữa<br/>- Nhắc tôi thức dạy lúc 6 giờ sáng mai<br/>- Nhắc tôi làm việc lúc 13 giờ 40 phút hôm nay nhé')"></i>:
                 </h5>
                 <div id="collapse_button_schedule_lich" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_lich">
+				<div class="alert alert-success" role="alert">
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để khởi động Phát lời nhắc, Thông báo khi VBot được khởi chạy')"></i> :</label>
                     <div class="col-sm-9">
@@ -3052,13 +3127,15 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
               </div>
             </div>
+            </div>
+
             <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_cap_nhat" aria-expanded="false" aria-controls="collapse_button_sao_luu_cap_nhat">
                   Cấu Hình Cài Đặt Sao Lưu/Cập Nhật:
                 </h5>
                 <div id="collapse_button_sao_luu_cap_nhat" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sao_luu_cap_nhat">
-                  <div class="row mb-3">
+                  <div class="alert alert-success" role="alert"> <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Tự Động Kiểm Tra Bản Cập Nhật <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ tự động kiểm tra cập nhật mới khi truy cập vào giao diện web ui')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
@@ -3093,6 +3170,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Sao Lưu Config.json</h5>
+					  <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Config.json mỗi khi lưu hoặc thay đổi cấu hình Config.json')"></i> :</label>
                         <div class="col-sm-9">
@@ -3107,10 +3185,11 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       ?>
                     </div>
                   </div>
+                  </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Sao Lưu Custom Home Assistant (Home_Assistant_Custom.json)</h5>
-                      <div class="row mb-3">
+                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Home_Assistant_Custom.json mỗi khi lưu hoặc thay đổi cấu hình Home_Assistant_Custom.json')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -3123,11 +3202,12 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       echo input_field('limit_backup_custom_home_assistant', 'Giới hạn tệp sao lưu tối đa', htmlspecialchars($Config['backup_upgrade']['custom_home_assistant']['limit_backup_files'] ?? 5), '', 'number', '1', '1', '20', 'Giới hạn tệp sao lưu tối đa trong thư mục Backup_Custom_HomeAssistant, nếu nhiều hơn giới hạn cho phép sẽ tự động xóa file cũ nhất', 'border-success', '', '', '', '', '');
                       ?>
                     </div>
+                    </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Sao Lưu Cấu Hình Lời Nhắc, Thông Báo (Scheduler)</h5>
-                      <div class="row mb-3">
+                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng sao lưu tệp Data_Schedule.json mỗi khi lưu hoặc thay đổi lưu cấu hình')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -3141,16 +3221,18 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       ?>
                     </div>
                   </div>
+                  </div>
                   <div class="card">
                     <div class="card-body">
-                      <h5 class="card-title">VBot Program<i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình Cài Đặt khi Sao Lưu và Cập Nhật trương trình')"></i> :</h5>
+                      <h5 class="card-title">Chương Trình/VBot Program <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình Cài Đặt khi Sao Lưu và Cập Nhật trương trình')"></i>:</h5>
+					  <div class="alert alert-info" role="alert"> 
                       <div class="card accordion" id="accordion_button_cau_hinh_sao_luu_vbot">
                         <div class="card-body">
                           <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cau_hinh_sao_luu_vbot" aria-expanded="false" aria-controls="collapse_button_cau_hinh_sao_luu_vbot">
                             Sao Lưu Chương Trình VBot:
                           </h5>
                           <div id="collapse_button_cau_hinh_sao_luu_vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cau_hinh_sao_luu_vbot">
-                            <div class="row mb-3">
+                           <div class="alert alert-primary" role="alert">  <div class="row mb-3">
                               <label class="col-sm-3 col-form-label">Đồng bộ lên Google Drive: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu sẽ được tải lên Google Drive')"></i> :</label>
                               <div class="col-sm-9">
                                 <div class="form-switch">
@@ -3204,6 +3286,7 @@ if (!empty($backup_upgrade_vbot_exclude_file)) {
                               <div class="limited-height" id="show_all_file_folder_Backup_Program"></div>
                             </center>
                           </div>
+                          </div>
                         </div>
                       </div>
                       <div class="card accordion" id="accordion_button_cau_hinh_Cap_nhat_Vbot">
@@ -3212,7 +3295,7 @@ if (!empty($backup_upgrade_vbot_exclude_file)) {
                             Cập Nhật Chương Trình VBot:
                           </h5>
                           <div id="collapse_button_cau_hinh_Cap_nhat_Vbot" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cau_hinh_Cap_nhat_Vbot">
-                            <div class="row mb-3">
+                            <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                               <label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu được tạo ra trước khi cập nhật sẽ được tải lên Google Drive')"></i> :</label>
                               <div class="col-sm-9">
                                 <div class="form-switch">
@@ -3239,20 +3322,23 @@ if (!empty($excludeFilesFolder_Vbot_upgrade)) {
                               </div>
                             </div>
                           </div>
+                          </div>
                         </div>
                       </div>
+                    </div>
                     </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
-                      <h5 class="card-title">Giao diện Web <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình Cài Đặt khi Sao Lưu và Cập Nhật Giao diện Web')"></i> :</h5>
-                      <div class="card accordion" id="accordion_button_sao_luu_giao_dien">
+                      <h5 class="card-title">Giao diện Web <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình Cài Đặt khi Sao Lưu và Cập Nhật Giao diện Web')"></i>:</h5>
+                <div class="alert alert-info" role="alert">       <div class="card accordion" id="accordion_button_sao_luu_giao_dien">
+					  
                         <div class="card-body">
                           <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_giao_dien" aria-expanded="false" aria-controls="collapse_button_sao_luu_giao_dien">
                             Sao Lưu Giao Diện WebUI VBot:
                           </h5>
                           <div id="collapse_button_sao_luu_giao_dien" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sao_luu_giao_dien">
-                            <div class="row mb-3">
+                          <div class="alert alert-primary" role="alert">  <div class="row mb-3">
                               <label class="col-sm-3 col-form-label">Đồng bộ lên Google Drive: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu sẽ được tải lên Google Drive')"></i> :</label>
                               <div class="col-sm-9">
                                 <div class="form-switch">
@@ -3301,6 +3387,7 @@ if (!empty($backup_upgrade_web_interface_exclude_file)) {
                               </div>
                             </div>
                           </div>
+                          </div>
                         </div>
                       </div>
                       <div class="card accordion" id="accordion_button_cap_nhat_giao_dien">
@@ -3309,7 +3396,7 @@ if (!empty($backup_upgrade_web_interface_exclude_file)) {
                             Cập Nhật Giao Diện WebUI VBot:
                           </h5>
                           <div id="collapse_button_cap_nhat_giao_dien" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cap_nhat_giao_dien">
-                            <div class="row mb-3">
+                          <div class="alert alert-primary" role="alert">  <div class="row mb-3">
                               <label class="col-sm-3 col-form-label">Tạo Bản Sao Lưu Trước Khi Cập Nhật: <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Bản sao lưu được tạo ra trước khi cập nhật sẽ được tải lên Google Drive')"></i> :</label>
                               <div class="col-sm-9">
                                 <div class="form-switch">
@@ -3338,9 +3425,12 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                           </div>
                         </div>
                       </div>
+                      </div>
                     </div>
                   </div>
+                  </div>
                 </div>
+              </div>
               </div>
             </div>
             <div class="card accordion" id="accordion_button_Cloud_backup">
@@ -3349,10 +3439,10 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                   Cấu Hình Tải Lên Bản Sao Lưu Dữ Liệu - Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:
                 </h5>
                 <div id="collapse_button_Cloud_Backup" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Cloud_Backup">
-                  <div class="card">
+                 <div class="alert alert-success" role="alert"> <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Google Cloud Drive <i class="bi bi-question-circle-fill" onclick="show_message('Cấu hình thiết lập đồng bộ dữ liệu lên Google Cloud Drive<br/>- Nếu có nhiều thiết bị cần đồng bộ lên Google Cloud Drive thì cần thay đổi tên của 3 thư mục để tránh bị trùng lặp với dữ liệu của thiết bị khác<br/><a href=\'https://docs.google.com/document/d/1-VTi9MOAgQoR8jZrhN9FlZxjWsq2vDuy/edit?usp=drive_link&ouid=106149318613102395200&rtpof=true&sd=true\' target=\'_bank\'><b>Hướng dẫn tạo file json</b></a>')"></i> | <a href="GCloud_Drive.php" title="Truy Cập"> <i class="bi bi-box-arrow-up-right"></i> Truy Cập</a> :</h5>
-
+					<div class="alert alert-primary" role="alert">
                       <?php
                       echo "
 						<div class='row mb-3'>
@@ -3392,9 +3482,11 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 
                       ?>
                     </div>
+                    </div>
                   </div>
                 </div>
               </div>
+            </div>
             </div>
 
             <div class="card accordion" id="accordion_button_wakeup_reply_source">
@@ -3402,7 +3494,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_wakeup_reply_source" aria-expanded="false" aria-controls="collapse_button_wakeup_reply_source">
                   Chế Độ Câu Phản Hồi (Khi Được Đánh Thức) <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Đánh thức Bot bằng giọng nói thì Bot sẽ phản hồi lại bằng file âm thanh Audio khi lần đầu tiên được đánh thức<br/> Chỉ chấp nhận file âm thanh .mp3')"></i> :</h5>
                 <div id="collapse_button_wakeup_reply_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_wakeup_reply_source">
-
+				<div class="alert alert-success" role="alert">
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Kích hoạt chế độ câu phản hồi <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ câu phản hồi')"></i> :</label>
                     <div class="col-sm-9">
@@ -3448,13 +3540,14 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 </div>
               </div>
             </div>
+            </div>
 
       <div class="card accordion" id="accordion_button_sys_speak_cmd">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sys_speak_cmd" aria-expanded="false" aria-controls="collapse_button_sys_speak_cmd">
       Lệnh Điều Khiển Hệ Thống SYSTEM <i class="bi bi-question-circle-fill" onclick="show_message('Sử dụng câu lệnh tương ứng để điều khiển 1 số chức năng trong hệ thống SYSTEM mà chương trình cho phép')"></i>:</h5>
       <div id="collapse_button_sys_speak_cmd" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sys_speak_cmd">
-
+<div class="alert alert-success" role="alert">
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng các lệnh bằng giọng nói để điều khiển, can thiệp vào hệ thống SYSTEM')"></i> :</label>
                   <div class="col-sm-9">
@@ -3471,11 +3564,12 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
       </div>
       </div>
       </div>
+      </div>
 
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Chế Độ Hội Thoại/Trò Chuyện Liên Tục <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật Bạn chỉ cần gọi Bot 1 lần, sau khi bot trả lời xong sẽ tự động lắng nghe tiếp và lặp lại (cho tới khi Bạn không còn yêu cầu nào nữa)')"></i> :</h5>
-                <div class="row mb-3">
+                <div class="alert alert-success" role="alert"> <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Kích hoạt chế độ hội thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ hội thoại')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
@@ -3485,11 +3579,13 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 </div>
               </div>
             </div>
+            </div>
 
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Chế Độ Xử Lý Đa Lệnh Trong 1 Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh trong 1 câu: <b>và, sau đó, rồi</b> trong file: <b>Adverbs.json</b>')"></i> :</h5>
-                <div class="row mb-3">
+               <div class="alert alert-success" role="alert">
+			   <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Kích hoạt chế độ xử lý đa lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ đa lệnh trong 1 câu')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
@@ -3497,23 +3593,22 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                     </div>
                   </div>
                 </div>
-
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Tiếp tục được đánh thức, lắng nghe khi xử lý xong đa lệnh: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để tự động được đánh thức và lắng nghe câu lệnh tiếp theo, khi xử lý xong đa lệnh trong 1 câu<br/> - Yêu cầu Chế Độ Hội Thoại phải được kích hoạt để sử dụng')"></i> :</label>
-                  <div class="col-sm-9">
+                 <div class="col-sm-9">
                     <div class="form-switch">
                       <input class="form-check-input border-success" type="checkbox" name="continue_listening_after_commands" id="continue_listening_after_commands" <?php echo $Config['multiple_command']['continue_listening_after_commands'] ? 'checked' : ''; ?>>
                     </div>
                   </div>
                 </div>
-
+              </div>
               </div>
             </div>
 
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Đọc thông tin khi khởi động:</h5>
-                <div class="row mb-3">
+               <div class="alert alert-success" role="alert"> <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Bật, Tắt đọc thông tin <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt đọc thông tin khi Chương trình khởi động như: Địa chỉ ip của thiết bị, v..v...')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
@@ -3526,10 +3621,12 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 ?>
               </div>
             </div>
+            </div>
+			
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title text-danger">Xử Lý Lỗi:</h5>
-                <div class="row mb-3">
+                <div class="alert alert-success" role="alert"> <div class="row mb-3">
                   <label class="col-sm-3 col-form-label text-danger">Khởi động lại hệ thống khi gặp sự cố hoặc lỗi bất ngờ: <i class="bi bi-question-circle-fill" onclick="show_message('Tự động khởi động lại chương trình VBot khi gặp sự cố hoặc có lỗi xảy ra bất ngờ, Sẽ chỉ hoạt động ở chế độ đang chạy Auto')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
@@ -3547,10 +3644,12 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 </div>
               </div>
             </div>
+            </div>
+			
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Log Hệ Thống:</h5>
-                <div class="row mb-3">
+               <div class="alert alert-success" role="alert">  <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Bật, Tắt Logs Hệ Thống <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt log của toàn bộ chương trình khi được chạy')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
@@ -3570,10 +3669,12 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 ?>
               </div>
             </div>
+            </div>
+			
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Khôi Phục Config.json <i class="bi bi-question-circle-fill" onclick="show_message('Khôi Phục Config.json từ tệp sao lưu trên hệ thống')"></i>:</h5>
-                <div class="row mb-3">
+                <div class="alert alert-success" role="alert"> <div class="row mb-3">
                   <label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>
                   <div class="col-sm-9">
                     <div class="input-group">
@@ -3617,6 +3718,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                 </div>
               </div>
             </div>
+            </div>
+			
             <div class="row mb-3">
               <center>
                 <button type="submit" name="all_config_save" value="" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
