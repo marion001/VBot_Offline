@@ -7,11 +7,9 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
-?>
-<?php
+
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
-    // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -22,6 +20,59 @@ if ($Config['contact_info']['user_login']['active']) {
         exit;
     }
 }
+
+function networkInfo($connectionName = null) {
+    if (empty($connectionName)) {
+        return [
+            "ipMode" => "N/A",
+            "ip" => "N/A",
+            "dns" => "N/A",
+            "dnsSource" => "N/A",
+            "gateway" => "N/A",
+            "gatewaySource" => "N/A"
+        ];
+    }
+    $raw = shell_exec('nmcli connection show "'.$connectionName.'"');
+    $method = "";
+    $ip = "";
+    $gateway = "";
+    $dnsList = [];
+    $ignoreAutoDNS = "";
+    foreach (explode("\n", $raw) as $line) {
+        $line = trim($line);
+        if (strpos($line, "ipv4.method:") === 0) {
+            $method = trim(substr($line, strlen("ipv4.method:")));
+        }
+        if (strpos($line, "IP4.ADDRESS[1]:") === 0) {
+            $ip = trim(substr($line, strlen("IP4.ADDRESS[1]:")));
+        }
+        if (strpos($line, "IP4.GATEWAY:") === 0) {
+            $gateway = trim(substr($line, strlen("IP4.GATEWAY:")));
+        }
+        if (strpos($line, "IP4.DNS[") === 0) {
+            $dns = trim(substr($line, strpos($line, ":") + 1));
+            if (!empty($dns)) $dnsList[] = $dns;
+        }
+        if (strpos($line, "ipv4.ignore-auto-dns:") === 0) {
+            $ignoreAutoDNS = trim(substr($line, strlen("ipv4.ignore-auto-dns:")));
+        }
+    }
+	$ipMode = ($method === "manual") ? "Đang dùng IP tĩnh" : "Đang dùng DHCP (IP động)";
+	$ipDisplay = !empty($ip) ? $ip : "N/A";                     // IP
+	$dnsDisplay = !empty($dnsList) ? implode(", ", $dnsList) : "N/A";  // DNS
+	$dnsSource = !empty($dnsList) ? (($ignoreAutoDNS === "yes") ? "DNS thủ công" : "DNS do DHCP cấp") : "N/A"; // nguồn DNS
+	$gatewayDisplay = !empty($gateway) ? $gateway : "N/A";     // Gateway
+	$gatewaySource = !empty($gateway) ? (($method === "manual") ? "Đặt thủ công" : "DHCP cấp") : "N/A"; // nguồn Gateway
+    return [
+        "ipMode" => $ipMode,
+        "ip" => $ipDisplay,
+        "dns" => $dnsDisplay,
+        "dnsSource" => $dnsSource,
+        "gateway" => $gatewayDisplay,
+        "gatewaySource" => $gatewaySource
+    ];
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -48,21 +99,101 @@ include 'html_head.php';
             <div class="row">
                 <div class="col-lg-12">
                     <div class="card">
-                        <div class="card-body">
-                            <br />
+                        <div class="card-body"><br/>
+<div id="wifiInfoResult"></div>
                             <center>
-                                <div id="wifiInfoResult"></div>
-                                <br />
                                 <button id="loadWifiButton" name="loadWifiButton" class="btn btn-primary rounded-pill" onclick="Show_Wifi_List()">Danh Sách Wifi Đã Kết Nối</button>
-                                <button id="scanWifiButton" class="btn btn-secondary rounded-pill" onclick="fetchAndDisplayWifiList()">Quét Mạng Wifi</button>
-                                <button id="resetAllWifi" class="btn btn-danger rounded-pill" onclick="reset_All_Wifi()">Đặt Lại Cấu Hình Wifi</button>
+                                <button id="scanWifiButton" class="btn btn-success rounded-pill" onclick="fetchAndDisplayWifiList()">Quét Mạng Wifi</button>
+								<button type="button" class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#exampleModal_ipDong">Cấu Hình IP</button>
+								<button type="button" class="btn btn-secondary rounded-pill" data-bs-toggle="modal" data-bs-target="#exampleModal_dns_only">Cấu hình DNS</button>
+								<button id="resetAllWifi" class="btn btn-danger rounded-pill" onclick="reset_All_Wifi()">Đặt Lại Cấu Hình Wifi</button>
                             </center>
-                            <br />
+                            <br/>
                             <div id="hienthiketqua"></div>
                         </div>
                     </div>
                 </div>
             </div>
+
+<!-- Modal Cấu Hình IP Tĩnh -->
+<div class="modal fade" id="exampleModal_ipDong" tabindex="-1" aria-labelledby="exampleModalLabel_ipDong" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel_ipDong">Cấu Hình Địa Chỉ IP Cho Kết Nối Mạng Này</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+<div class="form-floating mb-3">
+<input type="text" readonly class="form-control border-danger" title="Tên Mạng Đang kết Nối" name="connected_network_name" id="connected_network_name" value="Địa Chỉ IP Tĩnh Cần Đặt">
+<label for="connected_network_name">Tên Mạng Đang Kết Nối:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input type="text" class="form-control border-success" title="Nhập Địa Chỉ IP Tĩnh Bạn Muốn Đặt" name="dia_chi_ip_tinh" id="dia_chi_ip_tinh" value="Địa Chỉ IP Tĩnh Cần Đặt">
+<label for="dia_chi_ip_tinh">Nhập Địa Chỉ IP Tĩnh:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input type="text" class="form-control border-success" title="Nhập Địa Chỉ IP Của Gateway, Modem, Route" name="ip_gateway_modem" id="ip_gateway_modem" value="Địa Chỉ IP Của Gateway, Modem, Route">
+<label for="ip_gateway_modem">Nhập IP Gateway, Modem, Route:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input type="text" class="form-control border-success" title="Nhập Địa Chỉ DNS 1 Ví Dụ: 8.8.8.8" name="set_dns_1" id="set_dns_1" value="8.8.8.8">
+<label for="set_dns_1">Nhập DNS 1:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input type="text" class="form-control border-success" title="Nhập Địa Chỉ DNS 2 Ví Dụ: 8.8.4.4" name="set_dns_2" id="set_dns_2" value="8.8.4.4">
+<label for="set_dns_2">Nhập DNS 2:</label>
+</div>
+
+      </div>
+      <div class="modal-footer">
+	  <button type="button" class="btn btn-primary rounded-pill" onclick="set_static_ip()">Áp Dụng Cấu Hình IP Tĩnh</button>
+	  <button type="button" class="btn btn-info rounded-pill" onclick="set_dhcp_mode()">Cấu Hình Auto DHCP (IP động)</button>
+        <button type="button" class="btn btn-danger rounded-pill" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Cấu Hình DNS -->
+<div class="modal fade" id="exampleModal_dns_only" tabindex="-1" aria-labelledby="exampleModalLabel_dns_only" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel_dns_only">Cấu Hình DNS Cho Kết Nối Mạng Này</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+
+<div class="form-floating mb-3">
+<input type="text" readonly class="form-control border-danger" title="Tên Mạng Đang kết Nối" name="connected_network_name1" id="connected_network_name1" value="Địa Chỉ IP Tĩnh Cần Đặt">
+<label for="connected_network_name1">Tên Mạng Đang Kết Nối:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input type="text" class="form-control border-success" title="Nhập Địa Chỉ DNS 1 Ví Dụ: 8.8.8.8" name="set_dns_only_1" id="set_dns_only_1" value="8.8.8.8">
+<label for="set_dns_only_1">Nhập DNS 1:</label>
+</div>
+
+<div class="form-floating mb-3">
+<input type="text" class="form-control border-success" title="Nhập Địa Chỉ DNS 2 Ví Dụ: 8.8.4.4" name="set_dns_only_2" id="set_dns_only_2" value="8.8.4.4">
+<label for="set_dns_only_2">Nhập DNS 2:</label>
+</div>
+      </div>
+      <div class="modal-footer">
+	  <button class="btn btn-primary rounded-pill" onclick="set_dns_only();">Áp Dụng Cấu hình DNS</button>
+	  <button class="btn btn-warning rounded-pill" onclick="resetDNS_DHCP()">Dùng DNS mặc định (DHCP Modem, Route Cấp)</button>
+        <button type="button" class="btn btn-danger rounded-pill" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Đóng</button>
+      </div>
+    </div>
+  </div>
+</div>
+
         </section>
     </main>
     <?php
@@ -91,7 +222,6 @@ include 'html_head.php';
                 xhr.send();
             }
         }
-
 
         //Hiển thị dang sách wifi đã kết nối
         function Show_Wifi_List() {
@@ -204,11 +334,9 @@ include 'html_head.php';
             loading("show");
             var password = '';
             var hiddenSSID = '';
-            // Nếu security rỗng hoặc null, yêu cầu xác nhận kết nối
             if (security === '' || security === null) {
                 var confirmConnect = confirm('Mạng không có mật khẩu. Bạn có chắc chắn muốn kết nối?');
                 if (!confirmConnect) {
-                    //console.log('Kết nối bị hủy');
                     loading("hide");
                     return;
                 }
@@ -398,9 +526,21 @@ include 'html_head.php';
                             var response = JSON.parse(xhr.responseText);
                             if (response.success) {
                                 //console.log('Dữ liệu Wi-Fi:' +xhr.responseText);
-                                var tableHTML = "<b>Mạng Wifi Đang Kết Nối: ";
-                                tableHTML += '<font color=red>' + response.data.ESSID + '</font></b>';
-                                fileListDiv.innerHTML = tableHTML;
+								var tableHTML = '<table class="table table-bordered border-primary"><thead>';
+								tableHTML += '<tr><th colspan="4" style="text-align: center; vertical-align: middle;">Mạng Wifi Đang Kết Nối: <font color=red>' + response.data.ESSID + '</font></th></tr>';
+    tableHTML += '<tr><th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Thông Tin DHCP</th>';
+      tableHTML += '<th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">IP Hiện Tại</th>';
+      tableHTML += '<th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">DNS</th>';
+      tableHTML += '<th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Gateway</th></tr></thead>';
+  tableHTML += '<tbody><tr style="text-align: center; vertical-align: middle;"><td class="text-success">'+response.data.DHCP_Mode+'</td><td class="text-success">'+response.data.IP+'</td><td><p class="text-success">'+response.data.DNS+'</p><hr/><p class="text-primary">'+response.data.DNS_Mode+'</p></td><td><p class="text-success">'+response.data.Gateway+'</p><hr/> <p class="text-primary">'+response.data.Gateway_Mode+'</p></td></tr></tbody></table>';
+                            fileListDiv.innerHTML = tableHTML;
+							document.getElementById('connected_network_name').value = response.data.ESSID;
+							document.getElementById('connected_network_name1').value = response.data.ESSID;
+							document.getElementById('dia_chi_ip_tinh').value = response.data.IP.split('/')[0] || '';
+							document.getElementById('ip_gateway_modem').value = response.data.Gateway;
+							const dnsArray = response.data.DNS.split(',').map(d => d.trim());
+							if (dnsArray.length > 0) document.getElementById('set_dns_1').value = dnsArray[0];
+							if (dnsArray.length > 1) document.getElementById('set_dns_2').value = dnsArray[1];
                             } else {
                                 show_message('Lỗi:' + response.message);
                             }
@@ -418,7 +558,210 @@ include 'html_head.php';
             xhr.send();
         }
         getWifiNetworkInformation();
-    </script>
+
+//Đóng modal
+function close_ip_modal() {
+    var modalEl = document.getElementById('exampleModal_ipDong');
+    var modal = bootstrap.Modal.getInstance(modalEl);
+    if (!modal) {
+        modal = new bootstrap.Modal(modalEl);
+    }
+    modal.hide();
+}
+
+//Đặt Địa Chỉ IP Tĩnh
+function set_static_ip() {
+    if (!confirm("Bạn có chắc muốn thiết lập IP tĩnh cho thiết bị này không?\n - Hãy Cẩn Thận Vì Rất Có Thể Bạn Sẽ Không Truy Cập Được Vào Thiết Bị Này Khi Cấu Hình IP Tĩnh Sai")) {
+        return;
+    }
+    const ipField = document.getElementById("dia_chi_ip_tinh");
+    const gatewayField = document.getElementById("ip_gateway_modem");
+    const dns1Field = document.getElementById("set_dns_1");
+    const dns2Field = document.getElementById("set_dns_2");
+    const connected_network_name = document.getElementById('connected_network_name').value.trim();
+    let ip = ipField.value.trim();
+    let gateway = gatewayField.value.trim();
+    let dns1 = dns1Field.value.trim();
+    let dns2 = dns2Field.value.trim();
+    if (connected_network_name === '') {
+		show_message("Tên mạng đang kết nối không được để trống!");
+        return;
+    }
+    if (!ip || !gateway) {
+		show_message("Vui lòng nhập đầy đủ thông tin IP tĩnh, Gateway");
+        return;
+    }
+    if (!dns1 && !dns2) {
+        dns1 = "8.8.8.8";
+        dns2 = "8.8.4.4";
+        dns1Field.value = dns1;
+        dns2Field.value = dns2;
+    }
+    const ipRegex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
+    if (!ipRegex.test(ip)) {
+        show_message("Địa chỉ ip không hợp lệ.");
+        return;
+    }
+    if (!ipRegex.test(gateway)) {
+		show_message("Gateway không hợp lệ.");
+        return;
+    }
+    if (dns1 && !ipRegex.test(dns1)) {
+        show_message("DNS 1 không hợp lệ.");
+        return;
+    }
+    if (dns2 && !ipRegex.test(dns2)) {
+		show_message("DNS 2 không hợp lệ.");
+        return;
+    }
+	if (!confirm(
+		'Bạn có chắc muốn thiết lập IP tĩnh với các tham số:\n' +
+		'Tên mạng: ' + connected_network_name + '\n' +
+		'Địa Chỉ IP Tĩnh: ' + ip + '\n' +
+		'Gateway Modem Route: ' + gateway + '\n' +
+		'DNS 1: ' + dns1 + '\n' +
+		'DNS 2: ' + dns2
+	)) {
+		return;
+	}
+	loading("show");
+    let formData = new FormData();
+    formData.append("action", "set_static_ip");
+    formData.append("connected_network_name", connected_network_name);
+    formData.append("ip", ip);
+    formData.append("gateway", gateway);
+    formData.append("dns1", dns1);
+    formData.append("dns2", dns2);
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			loading("hide");
+			try {
+				var res = JSON.parse(xhr.responseText);
+				if (res.success === true) {
+					close_ip_modal();
+					show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+				} else {
+					show_message("Lỗi: " + (res.message || "Không xác định"));
+				}
+			} catch (e) {
+				show_message("Lỗi phân tích phản hồi từ server: "+xhr.responseText);
+			}
+		}
+		else {
+			show_message("Lỗi xảy ra, không thể gửi yêu cầu");
+		}
+    };
+    xhr.send(formData);
+}
+
+//Đặt lại DHCP Động Do Modem Route cấp phát
+function set_dhcp_mode() {
+	var connected_network_name = document.getElementById("connected_network_name").value.trim();
+    if (connected_network_name === "") {
+        alert("Không xác định được tên mạng đang kết nối.");
+        return;
+    }
+    if (!confirm(connected_network_name+" Bạn có chắc muốn chuyển sang DHCP (IP động do Modem, Route Cung Cấp)?")) {
+        return;
+    }
+	loading("show");
+    var formData = new FormData();
+    formData.append("action", "use_dhcp_automatically");
+    formData.append("connected_network_name", connected_network_name);
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.onload = function () {
+        if (xhr.status === 200) {
+			loading("hide");
+            try {
+                var res = JSON.parse(xhr.responseText);
+                if (res.success) {
+					close_ip_modal();
+                    show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+                } else {
+                    show_message("Lỗi: " + res.message);
+                }
+            } catch (e) {
+				show_message("Lỗi phản hồi từ server: "+e);
+            }
+        } else {
+			loading("hide");
+            show_message("Lỗi xảy ra, không thể gửi yêu cầu");
+        }
+    };
+    xhr.send(formData);
+}
+
+//Cấu Hình DNS
+function set_dns_only() {
+    const dns1 = document.getElementById("set_dns_only_1").value.trim();
+    const dns2 = document.getElementById("set_dns_only_2").value.trim();
+    const connectionName = document.getElementById("connected_network_name").value.trim();
+    let d1 = dns1 !== "" ? dns1 : "8.8.8.8";
+    let d2 = dns2 !== "" ? dns2 : "8.8.4.4";
+    if (!confirm(
+        'Bạn có chắc muốn thiết lập DNS cho '+connectionName+':\n' +
+        'DNS 1: ' + d1 + '\nDNS 2: ' + d2
+    )) {return;}
+	loading("show");
+    let formData = new FormData();
+    formData.append("action", "set_dns_only");
+    formData.append("connection_name", connectionName);
+    formData.append("dns1", d1);
+    formData.append("dns2", d2);
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4) {
+            loading("hide");
+            try {
+                const res = JSON.parse(xhr.responseText);
+                if (res.success) {
+                    let modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal_dns_only'));
+                    if (modal) modal.hide();
+					show_message(res.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+                } else {
+					show_message("Lỗi: "+res.message);
+                }
+            } catch (e) {
+				show_message("Lỗi không xác định: "+xhr.responseText);
+            }
+        }
+    };
+    xhr.send(formData);
+}
+
+//Đặt DNS Mặc Định DHCP MODEM, Route Cấp
+function resetDNS_DHCP() {
+    if (!confirm("Bạn có chắc muốn dùng DNS mặc định từ DHCP Modem, Route Cấp Phát?")) return;
+    loading("show");
+    let formData = new FormData();
+	const connectionName = document.getElementById("connected_network_name").value.trim();
+    formData.append("action", "reset_dns_dhcp");
+    formData.append("connection_name", connectionName);
+    let xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.onload = function () {
+        let resp = {};
+        try { resp = JSON.parse(xhr.responseText); } catch (e) {
+			loading("hide");
+			show_message("Lỗi không xác định: "+xhr.responseText);
+		}
+        if (resp.success) {
+			let modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal_dns_only'));
+			if (modal) modal.hide();
+			loading("hide");
+            show_message(resp.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+        } else {
+			loading("hide");
+			show_message("Lỗi: " + resp.message + "\nCMD: " + resp.cmd);
+        }
+    };
+    xhr.send(formData);
+}
+</script>
 </body>
 
 </html>

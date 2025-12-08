@@ -74,7 +74,7 @@
         "time_out": 15,
         "custom_commands": {
             "active": false,
-            "minimum_threshold": 0.90,
+            "minimum_threshold": 0.9,
             "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
         }
     },

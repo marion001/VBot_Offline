@@ -26,6 +26,60 @@ if ($Config['contact_info']['user_login']['active']) {
     }
 }
 
+//Kiểm tra thông tin mạng
+function networkInfo($connectionName = null) {
+    if (empty($connectionName)) {
+        return [
+            "ipMode" => "N/A",
+            "ip" => "N/A",
+            "dns" => "N/A",
+            "dnsSource" => "N/A",
+            "gateway" => "N/A",
+            "gatewaySource" => "N/A"
+        ];
+    }
+    $raw = shell_exec('nmcli connection show "'.$connectionName.'"');
+    $method = "";
+    $ip = "";
+    $gateway = "";
+    $dnsList = [];
+    $ignoreAutoDNS = "";
+    foreach (explode("\n", $raw) as $line) {
+        $line = trim($line);
+        if (strpos($line, "ipv4.method:") === 0) {
+            $method = trim(substr($line, strlen("ipv4.method:")));
+        }
+        if (strpos($line, "IP4.ADDRESS[1]:") === 0) {
+            $ip = trim(substr($line, strlen("IP4.ADDRESS[1]:")));
+        }
+        if (strpos($line, "IP4.GATEWAY:") === 0) {
+            $gateway = trim(substr($line, strlen("IP4.GATEWAY:")));
+        }
+        if (strpos($line, "IP4.DNS[") === 0) {
+            $dns = trim(substr($line, strpos($line, ":") + 1));
+            if (!empty($dns)) $dnsList[] = $dns;
+        }
+        if (strpos($line, "ipv4.ignore-auto-dns:") === 0) {
+            $ignoreAutoDNS = trim(substr($line, strlen("ipv4.ignore-auto-dns:")));
+        }
+    }
+	$ipMode = ($method === "manual") ? "Đang Dùng IP Tĩnh" : "IP Động Được DHCP Modem, Route Cấp Phát";
+	$ipDisplay = !empty($ip) ? $ip : "N/A";                     // IP
+	$dnsDisplay = !empty($dnsList) ? implode(", ", $dnsList) : "N/A";  // DNS
+	$dnsSource = !empty($dnsList) ? (($ignoreAutoDNS === "yes") ? "DNS Được Cấu Hình Thủ Công" : "DNS Được Route, Modem Cấp Phát") : "N/A"; // nguồn DNS
+	$gatewayDisplay = !empty($gateway) ? $gateway : "N/A";     // Gateway
+	$gatewaySource = !empty($gateway) ? (($method === "manual") ? "Gateway Được Cấu Hình Thủ Công" : "Gateway Được Route, Modem Cấp Phát") : "N/A"; // nguồn Gateway
+    return [
+        "ipMode" => $ipMode,
+        "ip" => $ipDisplay,
+        "dns" => $dnsDisplay,
+        "dnsSource" => $dnsSource,
+        "gateway" => $gatewayDisplay,
+        "gatewaySource" => $gatewaySource
+    ];
+}
+
+//Xóa Wifi
 if (isset($_GET['Delete_Wifi'])) {
     if (isset($_POST['action']) && $_POST['action'] == 'delete_wifi' && isset($_POST['wifiName'])) {
         $wifiName = $_POST['wifiName'];
@@ -68,6 +122,7 @@ if (isset($_GET['Delete_Wifi'])) {
     exit();
 }
 
+//Kết Nối Wifi
 if (isset($_GET['Connect_Wifi'])) {
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
@@ -208,6 +263,7 @@ if (isset($_GET['Scan_Wifi_List'])) {
     exit;
 }
 
+#Lấy Mật Khẩu Wifi Đã Kết Nối
 if (isset($_GET['Get_Password_Wifi'])) {
     $response = ['success' => false, 'message' => '', 'data' => []];
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -243,7 +299,6 @@ if (isset($_GET['Get_Password_Wifi'])) {
             preg_match('/uuid=(.*)/', $configContent, $uuidMatches);
             preg_match('/timestamp=(.*)/', $configContent, $timestampMatches);
             preg_match('/seen-bssids=(.*)/', $configContent, $bssidMatches);
-            // Chuyển đổi timestamp sang định dạng ngày giờ
             $formattedTimestamp = !empty($timestampMatches[1]) ? date("H:i:s d-m-Y", $timestampMatches[1]) : null;
             if (!empty($ssidMatches[1]) && strpos($ssidMatches[1], $desiredSSID) !== false) {
                 $wifiInfo = [
@@ -309,7 +364,6 @@ if (isset($_GET['Wifi_Network_Information'])) {
         exit;
     }
     $wifiData = [];
-    // Sử dụng các mẫu chính quy để trích xuất thông tin từ kết quả
     preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
     preg_match('/Frequency:([\d\.]+)\sGHz/', $wifiInfo, $frequencyMatches);
     preg_match('/Access Point: ([0-9A-Fa-f:]{17})/', $wifiInfo, $accessPointMatches);
@@ -327,7 +381,7 @@ if (isset($_GET['Wifi_Network_Information'])) {
     preg_match('/Tx excessive retries:(\d+)/', $wifiInfo, $txExcessiveRetriesMatches);
     preg_match('/Invalid misc:(\d+)/', $wifiInfo, $invalidMiscMatches);
     preg_match('/Missed beacon:(\d+)/', $wifiInfo, $missedBeaconMatches);
-    // Lưu kết quả vào mảng
+    //Lưu kết quả vào mảng
     $wifiData['ESSID'] = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
     $wifiData['Frequency'] = isset($frequencyMatches[1]) ? $frequencyMatches[1] . ' GHz' : 'N/A';
     $wifiData['Access_Point'] = isset($accessPointMatches[1]) ? $accessPointMatches[1] : 'N/A';
@@ -345,11 +399,201 @@ if (isset($_GET['Wifi_Network_Information'])) {
     $wifiData['Tx_Excessive_Retries'] = isset($txExcessiveRetriesMatches[1]) ? $txExcessiveRetriesMatches[1] : 'N/A';
     $wifiData['Invalid_Misc'] = isset($invalidMiscMatches[1]) ? $invalidMiscMatches[1] : 'N/A';
     $wifiData['Missed_Beacon'] = isset($missedBeaconMatches[1]) ? $missedBeaconMatches[1] : 'N/A';
+	$net = networkInfo(isset($essidMatches[1]) ? $essidMatches[1] : null);
+	$wifiData['DHCP_Mode'] = $net['ipMode'];
+	$wifiData['IP'] = $net['ip'];
+	$wifiData['DNS'] =  $net['dns'];
+	$wifiData['DNS_Mode'] =  $net['dnsSource'];
+	$wifiData['Gateway'] = $net['gateway'];
+	$wifiData['Gateway_Mode'] = $net['gatewaySource'];
     echo json_encode([
         'success' => true,
         'message' => 'Dữ liệu đã được lấy thành công.',
         'data' => $wifiData
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit();
+}
+
+#Đặt IP Tĩnh
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'set_static_ip') {
+    $connectionName = $_POST['connected_network_name'] ?? '';
+    $ip = $_POST['ip'] ?? '';
+    $gateway = $_POST['gateway'] ?? '';
+    $dns1 = $_POST['dns1'] ?? '8.8.8.8';
+    $dns2 = $_POST['dns2'] ?? '8.8.4.4';
+    if ($connectionName === '' || $ip === '' || $gateway === '') {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Thiếu tham số: Connection Name, IP hoặc Gateway'
+        ]);
+        exit;
+    }
+    if (strpos($ip, '/') !== false) {$ip = explode('/', $ip)[0];}
+    $ip_cidr = $ip . "/24";
+    $dnsString = $dns1;
+    if ($dns2 !== '') {$dnsString .= "," . $dns2;}
+	$fullCmd = 'sudo nmcli connection modify "' . $connectionName . '" '
+			 . 'ipv4.addresses "' . $ip_cidr . '" '
+			 . 'ipv4.gateway "' . $gateway . '" '
+			 . 'ipv4.dns "' . $dnsString . '" '
+			 . 'ipv4.method manual';
+	$connection = ssh2_connect($ssh_host, $ssh_port);
+	if (!$connection) {
+		echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.']);
+		exit;
+	}
+	if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+		echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại.']);
+		exit;
+	}
+	$stream = ssh2_exec($connection, $fullCmd);
+	if (!$stream) {
+		echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh nmcli.']);
+		exit;
+	}
+	stream_set_blocking($stream, true);
+	$stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+	$stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+	$result_out = stream_get_contents($stdout);
+	$result_err = stream_get_contents($stderr);
+	fclose($stdout);
+	fclose($stderr);
+	if (!empty($result_err)) {
+		echo json_encode([
+			'success' => false,
+			'message' => 'Không thể áp dụng IP tĩnh.',
+			'error_output' => $result_err,
+			'cmd' => $fullCmd
+		]);
+		exit;
+	}
+	echo json_encode([
+		'success' => true,
+		'message' => 'Thiết Lập IP Tĩnh Thành Công cho: <b>'.$connectionName.'</b>, Bạn Hãy REBOOT - Khởi Động lại Thiết Bị Để Được Áp Dụng',
+		'output' => $result_out,
+		'cmd' => $fullCmd
+	]);
+	exit;
+}
+
+//Đặt lại IP Động
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'use_dhcp_automatically') {
+    $connectionName = $_POST['connected_network_name'] ?? '';
+    if ($connectionName === '') {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Thiếu tên mạng WiFi (connectionName)'
+        ]);
+        exit;
+    }
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối SSH']);
+        exit;
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại']);
+        exit;
+    }
+    $fullCmd =
+        'sudo nmcli connection modify "' . $connectionName . '" ' .
+        'ipv4.method auto ' .
+        'ipv4.addresses "" ' .
+        'ipv4.gateway "" ' .
+        'ipv4.dns "8.8.8.8 8.8.4.4" ' .
+        'ipv4.ignore-auto-dns yes';
+    $stream = ssh2_exec($connection, $fullCmd);
+    if (!$stream) {
+        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh để chuyển sang DHCP ip động']);
+        exit;
+    }
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $output = stream_get_contents($stream_out);
+    echo json_encode([
+        'success' => true,
+        'message' => "Đã chuyển sang DHCP (IP động) thành công cho: <b>$connectionName</b>, Bạn Hãy REBOOT - Khởi Động lại Thiết Bị Để Được Áp Dụng",
+        'cmd' => $fullCmd,
+        'output' => $output
+    ]);
+    exit;
+}
+
+#Cấu Hình DNS
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'set_dns_only') {
+    $connectionName = $_POST['connection_name'] ?? '';
+    $dns1 = $_POST['dns1'] ?? '8.8.8.8';
+    $dns2 = $_POST['dns2'] ?? '8.8.4.4';
+    if ($connectionName === '') {
+        echo json_encode(['success' => false, 'message' => 'Thiếu Connection Name']);
+        exit;
+    }
+    $dnsString = $dns1 . ' ' . $dns2;
+    $fullCmd =
+        'sudo nmcli connection modify "' . $connectionName . '" ' .
+        'ipv4.dns "' . $dnsString . '" ' .
+        'ipv4.ignore-auto-dns yes';
+    $conn = ssh2_connect($ssh_host, $ssh_port);
+    if (!$conn) {
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối SSH']);
+        exit;
+    }
+    if (!ssh2_auth_password($conn, $ssh_user, $ssh_password)) {
+        echo json_encode(['success' => false, 'message' => 'Sai Tài Khoản hoặc Mật Khẩu Đăng Nhập SSH']);
+        exit;
+    }
+    $stream = ssh2_exec($conn, $fullCmd);
+    if (!$stream) {
+        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh cấu hình DNS']);
+        exit;
+    }
+    stream_set_blocking($stream, true);
+    $result = stream_get_contents($stream);
+    echo json_encode([
+        'success' => true,
+        'message' => "Đã thiết lập cấu hình DNS: $dnsString cho: <b>$connectionName</b><br/>Hãy REBOOT, Khởi Động Lại Hệ Thống Để Áp Dụng DNS Mới",
+        'cmd' => $fullCmd,
+        'output' => $result
+    ]);
+    exit;
+}
+
+#Đặt Lại DNS SẼ DO DHCP CUNG CẤP DNS
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reset_dns_dhcp') {
+    $connectionName = $_POST['connection_name'] ?? '';
+    if ($connectionName === '') {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Thiếu tên kết nối WiFi'
+        ]);
+        exit;
+    }
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode(['success' => false, 'message' => 'Không thể kết nối SSH']);
+        exit;
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại']);
+        exit;
+    }
+    $fullCmd = 'sudo nmcli connection modify "' . $connectionName . '" '
+             . 'ipv4.dns "" '
+             . 'ipv4.ignore-auto-dns no';
+    $stream = ssh2_exec($connection, $fullCmd);
+    if (!$stream) {
+        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh cấu hình DNS mặc định do DHCP Modem, Route cấp phát']);
+        exit;
+    }
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $output = stream_get_contents($stream_out);
+    echo json_encode([
+        'success' => true,
+        'message' => "Đã chuyển về dùng DNS mặc định từ DHCP Modem, Route cấp phát cho: <b>$connectionName</b><br/>Hãy REBOOT, Khởi Động Lại Hệ Thống Để Áp Dụng DNS Mới",
+        'cmd' => $fullCmd,
+        'response' => $output
+    ]);
+    exit;
 }
 ?>
