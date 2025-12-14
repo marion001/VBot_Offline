@@ -207,14 +207,17 @@ include 'html_head.php';
         //Reset cấu hình wifi
         function reset_All_Wifi() {
             if (confirm("Bạn có chắc chắn muốn xóa tất cả các kết nối Wi-Fi không?\nHành động này sẽ làm mất kết nối mạng hiện tại!\n\nVà hệ thống sẽ tạo điểm truy cập Wifi mới với tên: 'VBot Assistant' để bạn kết nối và cấu hình")) {
-                const xhr = new XMLHttpRequest();
+                loading("show");
+				const xhr = new XMLHttpRequest();
                 xhr.open("GET", "includes/php_ajax/Wifi_Act.php?Reset_Wifi=true", true);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
+							loading("hide");
                             const response = JSON.parse(xhr.responseText);
                             show_message(response.message);
                         } else {
+							loading("hide");
                             show_message("Lỗi khi gửi yêu cầu đặt lại cấu hình wifi");
                         }
                     }
@@ -222,7 +225,6 @@ include 'html_head.php';
                 xhr.send();
             }
         }
-
         //Hiển thị dang sách wifi đã kết nối
         function Show_Wifi_List() {
             loading("show");

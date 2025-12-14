@@ -1,8 +1,8 @@
 {
-    "version": "1.0.80",
+    "version": "1.0.81",
     "projectName": "Program VBot Offline",
     "description": "Cập Nhật Địa Giới Hành Chính Mới, Nới Lỏng Custom Home Assistant Cho Phép Thiết Lập Ngưỡng So Sánh Kết Quả, Phát Danh sách Nhạc Sẽ Chuyển Bài Khi Nhấn Buton UP - DOWN, Hỗ Trợ Một Vài Câu Lệnh Điều Khiển Tác Vụ Của Hệ Thống, Và Một Vài Thay Đổi Khác",
-    "releaseDate": "08/12/2025",
+    "releaseDate": "14/12/2025",
     "changes": [
         {
             "type": "feature",

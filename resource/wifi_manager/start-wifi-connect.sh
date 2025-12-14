@@ -12,6 +12,20 @@ TIME_AP_CONNECT=90
 #Lưu lại tên wifi lần đầu
 OLD_SSID_SAVE=$(iwgetid -r)
 
+#Lấy interface Wi-Fi
+WIFI_IF=$(iw dev 2>/dev/null | awk '$1=="Interface"{print $2; exit}')
+WIFI_IF=${WIFI_IF:-wlan0}
+
+#Lấy 4 ký tự cuối MAC
+MAC_LAST4=$(v=$(tr -d ':\n' </sys/class/net/$WIFI_IF/address 2>/dev/null | tail -c 4 | tr 'a-f' 'A-F'); [ -n "$v" ] && echo "$v" || tr -dc 'A-F0-9' </dev/urandom | head -c 4)
+
+#Nếu không lấy được MAC random 4 ký tự
+if [ -z "$MAC_LAST4" ]; then
+    MAC_LAST4=$(tr -dc 'A-Z0-9' </dev/urandom | head -c 4)
+fi
+
+SSID="VBot_Assistant_${MAC_LAST4}"
+
 #Kiểm tra kết nối gateway
 check_local_ping() {
     GATEWAY_IP=$(ip route | grep default | awk '{print $3}')
@@ -40,15 +54,15 @@ start_ap() {
 				sleep 5
 			fi
 		done
-		# Nếu vẫn đang chạy sau 3 lần thử thì reboot
+		#Nếu vẫn đang chạy sau 3 lần thử thì reboot
 		if sudo systemctl is-active --quiet apache2; then
 			printf "Apache2 vẫn đang chạy sau 3 lần thử. Đang khởi động lại hệ thống!\n"
 			sleep 2
 			sudo reboot
 		fi
 	fi
-    printf "Tiến hành phát điểm truy cập Wifi: VBot_Assistant\n"
-    wifi-connect -s VBot_Assistant -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
+    printf "Tiến hành phát điểm truy cập Wifi: $SSID\n"
+    wifi-connect -s "$SSID" -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
     WIFI_CONNECT_PID=$!
     sleep "$TIME_AP"
     CONNECTED_DEVICES=$(ip neigh | grep '192.168.4' | grep REACHABLE)
@@ -78,7 +92,7 @@ start_ap() {
                 printf "Không thể kết nối lại Wifi cũ: %s\n" "$OLD_SSID_SAVE"
             fi
         fi
-        # Nếu không có hoặc không kết nối được Wi-Fi cũ, thử các mạng đã lưu
+        #Nếu không có hoặc không kết nối được Wi-Fi cũ, thử các mạng đã lưu
         printf "Thử các Wi-Fi đã lưu trong hệ thống...\n"
         SAVED_NETWORKS=$(nmcli connection show | grep wifi | awk '{print $1}')
         for NET in $SAVED_NETWORKS; do
@@ -96,7 +110,7 @@ start_ap() {
     fi
 }
 
-# Kiểm tra kết nối mạng
+#Kiểm tra kết nối mạng
 while true; do
     #Lấy lại IP và Wi-Fi mỗi vòng lặp
     OLD_SSID=$(iwgetid -r)

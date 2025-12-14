@@ -76,6 +76,9 @@ include 'html_head.php';
             <div class="card-body">
               <div class="alert alert-success" role="alert">
                 Link Tải Xuống IMG: <a href="https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ" target="_blank">https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>
+<hr/>Hướng Dẫn Flash Chương Trình Vào Thẻ Nhớ: <a href="https://docs.google.com/document/d/1hCE1206JfP0bvoL7BKOAPvLkTM5JrrfS/edit" target="_blank">https://docs.google.com/document/d/1hCE1206JfP0bvoL7BKOAPvLkTM5JrrfS</a>
+<hr/>Hướng Dẫn Tháo Lắp Mạch VBot AIO: <a href="https://docs.google.com/document/d/1X_xGqGQt0HfPNDXM6c_joUwHxwr-mGiS/edit" target="_blank">https://docs.google.com/document/d/1X_xGqGQt0HfPNDXM6c_joUwHxwr-mGiS</a>
+<hr/>Hướng Dẫn Cấu Hình Ban Đầu: <a href="https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M/edit" target="_blank">https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M</a>
               </div>
               <div class="card accordion" id="accordion_button_mic_tetser">
                 <div class="card-body">
