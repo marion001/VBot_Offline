@@ -544,6 +544,7 @@ include 'html_head.php';
             </div>
             <h5 class="border-bottom border-primary pb-2 mt-4">8. Cài đặt chạy tự động (systemd service)</h5>
             <div class="bg-dark rounded p-3 code-block text-light">
+                <span class="cmd">$</span> sudo mkdir -p /etc/cloudflared<br>
                 <span class="cmd">$</span> sudo ln -s /home/pi/Cloud_Flare/config.yml /etc/cloudflared/config.yml<br>
                 <span class="cmd">$</span> sudo cloudflared service install<br>
                 <span class="cmd">$</span> sudo systemctl enable cloudflared<br>
