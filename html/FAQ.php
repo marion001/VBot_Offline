@@ -945,8 +945,9 @@ sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/
                         </div>
                       </div>
                     </div>
-
-
+<div class="alert alert-success mt-3">
+Ghi Chú: Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi
+                    </div>
                   </div>
                 </div>
               </div>

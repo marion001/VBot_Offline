@@ -2033,7 +2033,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
                   Cấu Hình Sử Dụng Nút Nhấn:</h5>
-				  
                 <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
 <div class="alert alert-success" role="alert">
                   <div class="card accordion" id="accordion_button_setting_bton">
@@ -2245,6 +2244,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   </div>
 
                 </div>
+<div class="alert alert-primary mt-3">
+Ghi Chú: Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi
+                    </div>
                 </div>
               </div>
             </div>
