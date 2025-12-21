@@ -2245,7 +2245,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 
                 </div>
 <div class="alert alert-primary mt-3">
-Ghi Chú: Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi
+Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại
                     </div>
                 </div>
               </div>
