@@ -78,6 +78,13 @@
             "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
         }
     },
+    "broadlink": {
+        "remote": {
+            "active": false,
+            "minimum_threshold": 0.85
+        },
+        "json_file": "resource/broadlink/broadlink.json"
+    },
     "mqtt_broker": {
         "mqtt_active": false,
         "mqtt_host": "192.168.14.17",
@@ -647,6 +654,7 @@
                     "Home_Assistant.json",
                     "Home_Assistant_Custom.json",
                     "Data_Schedule.json",
+                    "broadlink.json",
                     "News_Paper.json",
                     "PlayList.json",
                     "PodCast.json",
@@ -656,6 +664,7 @@
                     "Dev_Assistant.py",
                     "Dev_TTS.py",
                     "Dev_Led.py",
+                    "Dev_Music.py",
                     "Dev_Customization.py",
                     "eng",
                     "vi",

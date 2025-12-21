@@ -54,6 +54,33 @@ if (isset($_GET['scan_mic'])) {
     exit();
 }
 
+#Quét thiết bị Broadlink Remote Trong Lan
+if (isset($_GET['scan_broadlink_remote_device'])) {
+    $CMD = escapeshellcmd('python3 '.$VBot_Offline.'resource/broadlink/Broadlink.py scan');
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        $response['message'] = 'Không thể kết nối tới máy chủ SSH';
+        echo json_encode($response);
+        exit();
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        $response['message'] = 'Xác thực SSH không thành công.';
+        echo json_encode($response);
+        exit();
+    }
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        $response['message'] = 'Không thể thực thi lệnh trên máy chủ SSH.';
+        echo json_encode($response);
+        exit();
+    }
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $output = stream_get_contents($stream_out);
+    echo $output;
+    exit();
+}
+
 if (isset($_GET['scan_alsamixer'])) {
     $CMD = 'amixer';
     $response = [

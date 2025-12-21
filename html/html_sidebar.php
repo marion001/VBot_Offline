@@ -148,7 +148,20 @@
   </li>
   </li>
 
+
   <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
+  <li class="nav-item">
+    <a class="nav-link collapsed" data-bs-target="#icons-tbdv" data-bs-toggle="collapse" href="#">
+      <i class="bi bi-share-fill"></i><span>Liên Kết Thiết Bị, Dịch Vụ</span><i class="bi bi-chevron-down ms-auto"></i>
+    </a>
+    <ul id="icons-tbdv" class="nav-content collapse " data-bs-parent="#sidebar-tbdv">
+      <li>
+        <a href="BroadLink_Remote.php">
+          <i class="bi bi-circle"></i><span>BroadLink Remote</span>
+        </a>
+      </li>
+    </ul>
+  </li>
   <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#setting-dev-nav" data-bs-toggle="collapse" href="#" title="Nâng Cao Dành Cho Người Dùng Cá Nhân Tự Code Và Phát Triển Theo Ý Muốn">
       <i class="bi bi-file-code-fill"></i><span>DEV Custom VBot</span><i class="bi bi-chevron-down ms-auto"></i>

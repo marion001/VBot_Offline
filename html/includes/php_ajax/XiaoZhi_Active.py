@@ -122,7 +122,6 @@ def main():
         serial = generate_serial_number(mac)
         hmac_key = generate_hmac_key(hostname, mac, machine_id)
         version_program = get_release_date()
-
         #Nếu có --sign "challenge"
         if len(sys.argv) >= 3 and sys.argv[1] == "--sign":
             challenge = sys.argv[2]
@@ -137,7 +136,6 @@ def main():
                 "machine_id": machine_id
             }, ensure_ascii=False, indent=4))
             return
-
         #Ngược lại: trả thông tin thiết bị
         data = {
             "success": True,
@@ -152,7 +150,6 @@ def main():
             "version_program": version_program
         }
         print(json.dumps(data, ensure_ascii=False, indent=4))
-
     except Exception as e:
         print(json.dumps({
             "success": False,

@@ -33,6 +33,7 @@ if ($Config['contact_info']['user_login']['active']) {
 
 //Sử Dụng MEthod POST
 $filePath = isset($_POST['filePath']) ? $_POST['filePath'] : '';
+
 if (empty($filePath)) {
     echo json_encode([
         'status' => 'error',

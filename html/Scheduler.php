@@ -276,51 +276,86 @@ include 'html_head.php';
         }
       }
 
-      //Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
-      if (isset($_POST['start_recovery_Scheduler'])) {
-        $data_recovery_type = $_POST['start_recovery_Scheduler'];
-        if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len") {
-          $uploadOk = 1;
-          //Kiểm tra xem tệp có được gửi không
-          if (isset($_FILES["fileToUpload_Scheduler_restore"])) {
-            $fileName = basename($_FILES["fileToUpload_Scheduler_restore"]["name"]);
-            if (!preg_match('/\.json$/', $fileName)) {
-              $errorMessages[] = "- Chỉ chấp nhận tệp .json, dành cho Home_Assistant_Custom.json";
-              $uploadOk = 0;
-            }
-            if ($uploadOk == 0) {
-              $errorMessages[] = "- Tệp sao lưu không được tải lên";
-            } else {
-              //Di chuyển tệp vào thư mục đích
-              if (move_uploaded_file($_FILES["fileToUpload_Scheduler_restore"]["tmp_name"], $json_file)) {
-                $successMessage[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục dữ liệu Custom Home Assistant thành công";
-              } else {
-                $errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
-              }
-            }
-          } else {
-            $errorMessages[] = "- Không có tệp sao lưu nào được tải lên";
-          }
-        } else if ($data_recovery_type === "khoi_phuc_file_he_thong") {
-          $start_recovery_custom_hass = $_POST['backup_scheduler_json_files'];
-          if (!empty($start_recovery_custom_hass)) {
-            if (file_exists($start_recovery_custom_hass)) {
-              $command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($json_file);
-              exec($command, $output, $resultCode);
-              if ($resultCode === 0) {
-                $successMessage[] = "Đã khôi phục dữ liệu Custom Home Assistant từ tệp sao lưu trên hệ thống thành công";
-              } else {
-                $errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Custom Home Assistant Mã lỗi: " . $resultCode;
-              }
-            } else {
-              $errorMessages[] = "Lỗi: Tệp " . basename($start_recovery_custom_hass) . " không tồn tại trên hệ thống";
-            }
-          } else {
-            $errorMessages[] = "Không có tệp sao lưu Custom Home Assistant nào được chọn để khôi phục!";
-          }
-        }
-        echo '<script>window.location.href = "Scheduler.php";</script>';
-      }
+	// Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
+	if (isset($_POST['start_recovery_Scheduler'])) {
+		$data_recovery_type = $_POST['start_recovery_Scheduler'];
+		if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len") {
+			$uploadOk = 1;
+			if (
+				!isset($_FILES["fileToUpload_Scheduler_restore"]) ||
+				$_FILES["fileToUpload_Scheduler_restore"]["error"] === UPLOAD_ERR_NO_FILE ||
+				empty($_FILES["fileToUpload_Scheduler_restore"]["name"])
+			) {
+				$errorMessages[] = "- Tệp chưa được chọn để tải lên khôi phục dữ liệu Scheduler";
+				$uploadOk = 0;
+			}
+			if ($uploadOk === 1) {
+				$fileName = basename($_FILES["fileToUpload_Scheduler_restore"]["name"]);
+				if (!preg_match('/\.json$/i', $fileName)) {
+					$errorMessages[] = "- Chỉ chấp nhận tệp .json cho Scheduler";
+					$uploadOk = 0;
+				}
+			}
+			if ($uploadOk === 1) {
+				$jsonContent = file_get_contents($_FILES["fileToUpload_Scheduler_restore"]["tmp_name"]);
+				$data = json_decode($jsonContent, true);
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					$errorMessages[] = "- Nội dung tệp JSON không hợp lệ";
+					$uploadOk = 0;
+				} else {
+					$requiredKeys = ['restart_vbot', 'stop_media_player', 'change_led_brightness'];
+					foreach ($requiredKeys as $key) {
+						if (!isset($data[$key]) || !is_array($data[$key])) {
+							$errorMessages[] =
+								"- Tệp Scheduler không đúng cấu trúc (thiếu key: {$key})";
+							$uploadOk = 0;
+							break;
+						}
+					}
+				}
+			}
+			if ($uploadOk === 1) {
+				if (move_uploaded_file($_FILES["fileToUpload_Scheduler_restore"]["tmp_name"], $json_file)) {
+					$successMessage[] =
+						"- Tệp " . htmlspecialchars($fileName) .
+						" đã được tải lên và khôi phục dữ liệu Scheduler thành công";
+					echo '<script>alert("Đã khôi phục dữ liệu Scheduler từ tệp tải lên thành công");</script>';
+					echo '<script>window.location.href = "Scheduler.php";</script>';
+				} else {
+					$errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu Scheduler";
+				}
+			} else {
+				$errorMessages[] = "- Tệp sao lưu Scheduler không hợp lệ, không thể khôi phục";
+			}
+		}
+		else if ($data_recovery_type === "khoi_phuc_file_he_thong") {
+			$start_recovery_custom_hass = $_POST['backup_scheduler_json_files'];
+			if (!empty($start_recovery_custom_hass)) {
+				if (file_exists($start_recovery_custom_hass)) {
+					$jsonContent = file_get_contents($start_recovery_custom_hass);
+					$data = json_decode($jsonContent, true);
+					if (json_last_error() !== JSON_ERROR_NONE || !isset($data['restart_vbot']) || !isset($data['stop_media_player']) || !isset($data['change_led_brightness'])) {
+						$errorMessages[] = "- Tệp Scheduler hệ thống không đúng cấu trúc dữ liệu";
+					} else {
+						$command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($json_file);
+						exec($command, $output, $resultCode);
+						if ($resultCode === 0) {
+							$successMessage[] = "Đã khôi phục dữ liệu Scheduler từ tệp sao lưu trên hệ thống thành công";
+							echo '<script>alert("Đã khôi phục dữ liệu Scheduler từ tệp sao lưu trên hệ thống thành công");</script>';
+							echo '<script>window.location.href = "Scheduler.php";</script>';
+						} else {
+							$errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu Scheduler. Mã lỗi: " . $resultCode;
+						}
+					}
+				} else {
+					$errorMessages[] = "Lỗi: Tệp " . basename($start_recovery_custom_hass) . " không tồn tại trên hệ thống";
+				}
+			} else {
+				$errorMessages[] = "Không có tệp Scheduler nào được chọn để khôi phục!";
+			}
+		}
+		
+	}
 
       //Xử lý dữ liệu sau khi người dùng gửi form
       if (isset($_POST['save_all_Scheduler'])) {

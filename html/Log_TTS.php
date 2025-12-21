@@ -100,14 +100,10 @@ include 'html_head.php';
                   $files = scandir($directory);
                   $i = 0;
                   $size_all = 0;
-                  // Lọc bỏ các thư mục đặc biệt '.' và '..'
                   $files = array_diff($files, array('.', '..'));
-                  // Hiển thị từng tệp dưới dạng dòng trong bảng
                   foreach ($files as $file) {
                     $filePath = $directory . '/' . $file;
-                    // Lấy kích thước file
                     $size = formatSizeUnits(filesize($filePath));
-                    // Lấy thời gian tạo file và định dạng lại
                     $date = date("d-m-Y H:i:s", filemtime($filePath));
                     $i++;
                     $size_all += filesize($filePath);

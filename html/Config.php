@@ -431,6 +431,10 @@ if (isset($_POST['all_config_save'])) {
   #Câu Phản Hồi
   $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] = isset($_POST['wakeup_reply_active']) ? true : false;
 
+  #broadlink
+  $Config['broadlink']['remote']['active'] = isset($_POST['broadlink_remote_active']) ? true : false;
+  $Config['broadlink']['remote']['minimum_threshold'] = floatval($_POST['broadlink_remote_minimum_threshold']);
+
   #Cập nhật giao diện vbot
   $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_interface']) ? true : false;
 
@@ -3101,6 +3105,30 @@ echo htmlspecialchars($textareaContent_tts_viettel);
               </div>
             </div>
             </div>
+
+		  <div class="card accordion" id="accordion_button_broadlink">
+		  <div class="card-body">
+		  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_broadlink" aria-expanded="false" aria-controls="collapse_button_broadlink">
+		  Liên Kết Broadlink Control, Remote Send IR/RF:</h5>
+		  <div id="collapse_button_broadlink" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_broadlink">
+				<div class="alert alert-success" role="alert">
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để sử dụng Broadlink Control Remote, cần liên kết thiết bị Broadlink Remote với VBot và học lệnh trên giao diện WebUI VBot<br/> Truy Cập: <b>Liên Kết Thiết Bị, Dịch Vụ</b> -> <b>Broadlink Remote</b>')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="broadlink_remote_active" id="broadlink_remote_active" <?php echo $Config['broadlink']['remote']['active'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <?php
+				  echo input_field('broadlink_remote_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['broadlink']['remote']['minimum_threshold'] ?? 0.85, 'required', 'number', '0.01', '0.5', '1.0', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác câu lệnh thực thi cao', 'border-success', '', '', '', '', '');
+                  echo input_field('schedule_data_json_file', 'Tệp Lưu Trữ Dữ Liệu Cấu Hình ', htmlspecialchars($Config['broadlink']['json_file']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+				  echo input_field('gcloud_drive_backup_url_ui', 'Trang Cấu Hình Chi tiết', "http://$serverIp/BroadLink_Remote.php", 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-arrow-return-right"></i> Đi Tới', "BroadLink_Remote.php", 'btn btn-success border-danger', 'link', '_blank');
+                  ?>
+                </div>
+		  </div>
+		  </div>
+		  </div>
 
             <div class="card accordion" id="accordion_button_schedule_lich">
               <div class="card-body">
