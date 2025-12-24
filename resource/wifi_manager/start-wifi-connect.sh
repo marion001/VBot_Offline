@@ -12,19 +12,7 @@ TIME_AP_CONNECT=90
 #Lưu lại tên wifi lần đầu
 OLD_SSID_SAVE=$(iwgetid -r)
 
-#Lấy interface Wi-Fi
-WIFI_IF=$(iw dev 2>/dev/null | awk '$1=="Interface"{print $2; exit}')
-WIFI_IF=${WIFI_IF:-wlan0}
-
-#Lấy 4 ký tự cuối MAC
-MAC_LAST4=$(v=$(tr -d ':\n' </sys/class/net/$WIFI_IF/address 2>/dev/null | tail -c 4 | tr 'a-f' 'A-F'); [ -n "$v" ] && echo "$v" || tr -dc 'A-F0-9' </dev/urandom | head -c 4)
-
-#Nếu không lấy được MAC random 4 ký tự
-if [ -z "$MAC_LAST4" ]; then
-    MAC_LAST4=$(tr -dc 'A-Z0-9' </dev/urandom | head -c 4)
-fi
-
-SSID="VBot_Assistant_${MAC_LAST4}"
+SSID="VBot_Assistant"
 
 #Kiểm tra kết nối gateway
 check_local_ping() {

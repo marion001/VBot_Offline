@@ -164,15 +164,12 @@ include 'html_head.php';
   include 'html_header_bar.php';
   ?>
   <!-- End Header -->
-
   <!-- ======= Sidebar ======= -->
   <?php
   include 'html_sidebar.php';
   ?>
   <!-- End Sidebar-->
-
   <main id="main" class="main">
-
     <div class="pagetitle">
       <h1>Điều Khiển Thiết Bị IR/RF BroadLink</h1>
       <nav>
@@ -210,20 +207,21 @@ if (!empty($successMessage)) {
 <table id="deviceTable" class="table table-bordered border-primary">
     <thead>
         <tr>
-            <th style="text-align: center; vertical-align: middle;" colspan="6">
+            <th style="text-align: center; vertical-align: middle;" colspan="7">
 <button type="button" title="Tìm kiếm thiết bị Broadlink trong mạng nội bộ" class="btn btn-success rounded-pill" onclick="scanBroadlinkDevices()"><i class="bi bi-radar"></i> Quét Thiết Bị BroadLink IR/RF</button>
 <button type="button" class="btn btn-danger rounded-pill" onclick="deleteAllDevicesRemote()" title="Xóa Toàn Bộ Thiết Bị Broadlink Remote"><i class="bi bi-trash"></i> Xóa Toàn Bộ Thiết Bị</button>
 			</th>
         </tr>
         <tr>
-            <th class="text-success" style="text-align: center; vertical-align: middle;" colspan="6">Danh Sách Thiết Bị BroadLink Remote</th>
+            <th class="text-success" style="text-align: center; vertical-align: middle;" colspan="7">Danh Sách Thiết Bị BroadLink Remote</th>
         </tr>
         <tr>
             <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">Tên Thân Thiện</th>
+            <th style="text-align: center; vertical-align: middle;">Tên Thân Thiện <i class="bi bi-question-circle-fill" onclick="show_message('Tên Định Danh Cho Thiết Bị Này (Do Bạn Đặt Cho Dễ Nhớ)')"></i></th>
             <th style="text-align: center; vertical-align: middle;">Mã Kiểu Loại</th>
             <th style="text-align: center; vertical-align: middle;">Địa Chỉ IP</th>
             <th style="text-align: center; vertical-align: middle;">Địa Chỉ MAC</th>
+            <th style="text-align: center; vertical-align: middle;">Học Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Cách Học Lệnh IR:<br/> - Khi đèn trên thiết bị Broadlink sáng, vui lòng nhấn nhả nút trên Remote hướng vào thiết bị để học lệnh<hr/>Cách Học Lệnh RF (2 Bước):<br/> - Bước 1: Khi đèn trên thiết bị Broadlink sáng nhấn giữ nút trên remote khoảng 2-3 giây rồi nhả ra. <br/><br/>- Bước 2: Đèn trên thiết bị sẽ tắt rồi sáng lại hãy nhấn nhả nút trên remote 1 lần là xong<hr/>Lưu Ý: Học Lệnh RF đôi chút có thể bị nhiễu tín hiệu vô tuyến nhận mã lệnh sai, Bạn cần Test Lệnh Trước khi Lưu, nếu không đúng lệnh bạn cần thao tác học lại lệnh nhé')"></i></th>
             <th style="text-align: center; vertical-align: middle;">Hành Động</th>
         </tr>
     </thead>
@@ -236,26 +234,28 @@ if (!empty($successMessage)) {
       <table class="table table-bordered border-primary datatable_broadlink" id="cmdTable">
         <thead>
           <tr>
-            <th style="text-align: center; vertical-align: middle;" colspan="6">
+            <th style="text-align: center; vertical-align: middle;" colspan="8">
 	<button type="button" class="btn btn-info rounded-pill" onclick="loadLearnedCommandsEditable()">Tải Lại Danh Sách</button>
 	<button type="button" class="btn btn-danger rounded-pill" onclick="deleteAllCmdDevicesRemote()" title="Xóa Toàn Bộ Lệnh Đã Học"><i class="bi bi-trash"></i> Xóa Toàn Bộ Lệnh</button></center>
 			</th>
           </tr>
 		   <tr>
-		   <th style="text-align: center; vertical-align: middle;" colspan="6" class="text-success">Danh sách lệnh đã học</th>
+		   <th style="text-align: center; vertical-align: middle;" colspan="8" class="text-success">Danh sách lệnh đã học</th>
 		    </tr>
           <tr>
             <th style="text-align: center; vertical-align: middle;">#</th>
-            <th style="text-align: center; vertical-align: middle;">Tên Câu Lệnh</th>
-            <th style="text-align: center; vertical-align: middle;">Thiết Bị Thực Thi</th>
+            <th style="text-align: center; vertical-align: middle;">Tên Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Đặt Tên Câu Lệnh Để Thực Thi, Kích Hoạt Mã Lệnh Này')"></i></th>
+            <th style="text-align: center; vertical-align: middle;">Câu Phản Hồi <i class="bi bi-question-circle-fill" onclick="show_message('Câu Phản Hồi Này Sẽ Phát Ra Loa Khi Mã Lệnh Được Thực Thi Xong')"></i></th>
+            <th style="text-align: center; vertical-align: middle;">Thiết Bị Thực Thi <i class="bi bi-question-circle-fill" onclick="show_message('Thiết bị nào không hỗ trợ lệnh RF sẽ không chọn được')"></i></th>
             <th style="text-align: center; vertical-align: middle;">Kích Hoạt</th>
+            <th style="text-align: center; vertical-align: middle;">Kiểu Dữ Liệu</th>
             <th style="text-align: center; vertical-align: middle;">Mã Lệnh</th>
             <th style="text-align: center; vertical-align: middle;">Hành Động</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td colspan="6" class="text-center text-muted"><button type="button" class="btn btn-primary" onclick="loadLearnedCommandsEditable()">Nhấn Để Tải Dữ Liệu</button></td>
+            <td colspan="7" class="text-center text-muted"><button type="button" class="btn btn-primary" onclick="loadLearnedCommandsEditable()">Nhấn Để Tải Dữ Liệu</button></td>
           </tr>
         </tbody>
       </table>
@@ -310,7 +310,7 @@ if (!empty($successMessage)) {
       </div>
       <div class="modal-body">
         <!-- Thông báo trạng thái -->
-        <div class="mb-2 text-muted" id="learn_status"><center class="text-danger">Khi đèn trên thiết bị Broadlink sáng, vui lòng bấm nút trên Remote hướng vào thiết bị để học lệnh</center></div>
+        <div class="mb-2 text-danger" id="learn_status"><center class="text-danger">Học Lệnh Broadlink</center></div>
 
 <div class="form-floating mb-3">
 <textarea id="learned_command_data" class="form-control border-success" rows="6" readonly style="height: 100px;"></textarea>
@@ -320,7 +320,7 @@ if (!empty($successMessage)) {
     <div id="learn_command_extra_fields"></div>
       </div>
       <div class="modal-footer" id="learn_modal_footer">
-        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"> Đóng</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"><i class="bi bi-x-circle"></i> Đóng</button>
       </div>
     </div>
   </div>
@@ -370,8 +370,7 @@ var broadlinkDevices = [];
 var currentLearnDeviceMac = null;
 
 //Mở Modal Học Lệnh
-function openLearnCommandModal() {
-    bootstrap.Modal.getOrCreateInstance(document.getElementById("exampleModal_learn_commands")).show();
+function openLearnCommandModal() {bootstrap.Modal.getOrCreateInstance(document.getElementById("exampleModal_learn_commands")).show();
 }
 
 //Đóng Modal Học Lệnh
@@ -379,14 +378,17 @@ function closeLearnCommandModal() {bootstrap.Modal.getOrCreateInstance(document.
 }
 
 //Hiển Thị, Tạo Nút Lưu Lệnh Đã Học
-function showSaveLearnCommandButton() {
+function showSaveLearnCommandButton(ip, mac, devtype, wave_type) {
     const footer = document.getElementById("learn_modal_footer");
     if (!footer) {
 		show_message('Lỗi không tìm thấy id: learn_modal_footer');
         return;
     }
     if (document.getElementById("btn_save_learned_command")) return;
-    footer.insertAdjacentHTML("afterbegin", '<button type="button" id="btn_save_learned_command" class="btn btn-success me-2" onclick="saveLearnedCommandToJson()"><i class="bi bi-floppy"></i> Lưu lệnh</button>');
+    footer.insertAdjacentHTML("afterbegin", 
+	'<div class="d-flex gap-2 align-items-center"><button type="button" id="btn_test_learned_command" class="btn btn-primary" onclick="test_cmd_learn(\''+ip+'\', \''+mac+'\', \''+devtype+'\', \''+wave_type+'\')"><i class="bi bi-send-check"></i> Test Lệnh</button>' +
+	'<button type="button" id="btn_re_learned_command" class="btn btn-warning" onclick="learn_Command(\''+ip+'\', \''+mac+'\', \''+devtype+'\', \''+wave_type+'\', \'\', \'\')"><i class="bi bi-arrow-counterclockwise"></i> Học Lại</button>'+
+	'<button type="button" id="btn_save_learned_command" class="btn btn-success" onclick="saveLearnedCommandToJson(\''+wave_type+'\')"><i class="bi bi-floppy"></i> Lưu lệnh</button></div>');
 }
 
 //Thẻ Select Và Input khi học xong lệnh
@@ -396,10 +398,12 @@ function showLearnCommandExtraFields() {
     if (document.getElementById("learn_command_name")) return;
 	box.innerHTML =
 		'<div class="form-floating mb-3">' +
-			'<input type="text" ' +
-				   'id="learn_command_name" ' +
-				   'class="form-control border-success">' +
+			'<input type="text" id="learn_command_name" class="form-control border-success">' +
 			'<label for="learn_command_name">Đặt tên câu lệnh này:</label>' +
+		'</div>' +
+		'<div class="form-floating mb-3">' +
+			'<input type="text" id="learn_command_reply" class="form-control border-success">' +
+			'<label for="learn_command_reply">Văn Bản, Câu Phản Hồi Tùy Chỉnh</label>' +
 		'</div>' +
 		'<div class="form-floating mb-3">' +
 			'<select id="learn_command_device" class="form-select border-success"></select>' +
@@ -439,62 +443,90 @@ function scanBroadlinkDevices() {
     xhr.send();
 }
 
-//Tải dữ liệu thiết bị broadlink
+//KIỂM TRA THIẾT BỊ CÓ RF HAY KHÔNG
+function broadlinkHasRF(devtype) {
+    if (!devtype) return false;
+    var dt = devtype.toString().toLowerCase();
+    var rfTypes = [
+        '0x2737', // RM Pro
+        '0x279d', // RM Pro+
+        '0x27c2', // RM4 Pro
+        '0x27bb'  // RM4 Pro (variant)
+    ];
+    return rfTypes.includes(dt);
+}
+
+// TẢI DANH SÁCH THIẾT BỊ BROADLINK
 function loadBroadlinkDevices() {
-	loading('show');
+    loading('show');
     var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $broadlink_json_file; ?>';
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            if (xhr.status !== 200) {
-				show_message("Lỗi HTTP: "+xhr.status);
-				loading('hide');
+        if (xhr.readyState !== 4) return;
+        loading('hide');
+        if (xhr.status !== 200) {
+            show_message('Lỗi HTTP: ' + xhr.status);
+            return;
+        }
+        try {
+            var res = JSON.parse(xhr.responseText);
+            if (!res.success) {
+                show_message('Server trả về lỗi: ' + res.message);
                 return;
             }
-            try {
-				loading('hide');
-                var res = JSON.parse(xhr.responseText);
-                if (!res.success) {
-                    show_message('Server trả về lỗi: ' +res.message);
-                    return;
+            if (!res.data || !res.data.devices_remote || res.data.devices_remote.length === 0) {
+                var tbodyEmpty = document.querySelector('#deviceTable tbody');
+                if (tbodyEmpty) {
+                    tbodyEmpty.innerHTML =
+                        '<tr><td colspan="9" class="text-center text-danger">' +
+                        '<b>Không có dữ liệu thiết bị Broadlink Remote</b></td></tr>';
                 }
-				if (!res.data || !res.data.devices_remote || res.data.devices_remote.length === 0) {
-					var tbody = document.querySelector('#deviceTable tbody');
-					if (tbody) {
-						tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; vertical-align: middle;" class="text-danger"><b>Không có dữ liệu thiết bị Broadlink Remote</b></td></tr>';
-					}
-					return;
-				}
-                var devices = res.data.devices_remote;
-				broadlinkDevices = devices;
-                var tbody = document.querySelector('#deviceTable tbody');
-                if (!tbody) {
-					showMessagePHP("Không tìm thấy #deviceTable tbody", 5);
-                    return;
-                }
-                tbody.innerHTML = '';
-                for (var i = 0; i < devices.length; i++) {
-                    var dev = devices[i];
-                    var rowId = 'dev_' + i;
-                    var tr = document.createElement('tr');
-                    tr.innerHTML =
-                        '<td style="text-align: center; vertical-align: middle;" id="' + rowId + '_index">' + (i + 1) + '</td>' +
-                        '<td style="text-align: center; vertical-align: middle;" id="' + rowId + '_friendly">' + dev.friendly_name + '</td>' +
-                        '<td style="text-align: center; vertical-align: middle;" id="' + rowId + '_model">' + dev.model + '</td>' +
-                        '<td style="text-align: center; vertical-align: middle;" id="' + rowId + '_ip">' + dev.ip + '</td>' +
-                        '<td style="text-align: center; vertical-align: middle;" id="' + rowId + '_mac">' + dev.mac + '</td>' +
-                        '<td style="text-align: center; vertical-align: middle;" id="' + rowId + '_action">' +
-                            ' <button type="button" class="btn btn-primary" title="Học Lệnh Từ Thiết Bị: '+dev.friendly_name+'" onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')"><i class="bi bi-plus-circle-dotted"></i> Học Lệnh</button> ' + 
-							' <button type="button" class="btn btn-success" title="Đổi Tên Định Danh Thiết Bị" onclick="renameDevice(\'' + dev.mac + '\')"><i class="bi bi-pencil-square"></i></button> '+
-                            ' <button type="button" class="btn btn-danger" title="Xóa thiết bị này: '+dev.friendly_name+'" onclick="deleteDeviceByMac(\'' + dev.friendly_name + '\', \'' + dev.mac + '\', \'' + dev.ip + '\', \'' + dev.model + '\')"><i class="bi bi-trash"></i></button> ' +
-                        '</td>';
-                    tbody.appendChild(tr);
-                }
-            } catch (e) {
-				loading('hide');
-				show_message('Lỗi giải mã json: ' +e+ ', ' +xhr.responseText);
+                return;
             }
+            var devices = res.data.devices_remote;
+            broadlinkDevices = devices;
+            var tbody = document.querySelector('#deviceTable tbody');
+            if (!tbody) {
+                showMessagePHP('Không tìm thấy #deviceTable tbody', 5);
+                return;
+            }
+            tbody.innerHTML = '';
+            for (var i = 0; i < devices.length; i++) {
+                var dev = devices[i];
+                var tr = document.createElement('tr');
+                //CỘT HỌC LỆNH
+                var learnButtons =
+                    '<button type="button" class="btn btn-primary me-1" ' +
+                    'title="Học Lệnh IR từ: ' + dev.friendly_name + '" ' +
+                    'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'ir\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
+                    '<i class="bi bi-broadcast"></i> IR</button>';
+                if (broadlinkHasRF(dev.devtype)) {
+                    learnButtons +=
+                        '<button type="button" class="btn btn-warning me-1" ' +
+                        'title="Học Lệnh RF từ: ' + dev.friendly_name + '" ' +
+                        'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'rf\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
+                        '<i class="bi bi-broadcast-pin"></i> RF</button>';
+                }
+                //CỘT HÀNH ĐỘNG
+                var actionButtons =
+                    '<button type="button" class="btn btn-success me-1" title="Đổi Tên Thiết Bị" onclick="renameDevice(\'' + dev.mac + '\')"><i class="bi bi-pencil-square"></i></button>' +
+                    '<button type="button" class="btn btn-danger" ' +
+                    'title="Xóa thiết bị: ' + dev.friendly_name + '" ' +
+                    'onclick="deleteDeviceByMac(\'' + dev.friendly_name + '\', \'' + dev.mac + '\', \'' + dev.ip + '\', \'' + dev.model + '\')">' +
+                    '<i class="bi bi-trash"></i></button>';
+                tr.innerHTML =
+                    '<td class="text-center">' + (i + 1) + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + dev.friendly_name + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + dev.model + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + dev.ip + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + dev.mac + '</td>' +
+                    '<td class="text-center">' + learnButtons + '</td>' +
+                    '<td class="text-center">' + actionButtons + '</td>';
+                tbody.appendChild(tr);
+            }
+        } catch (e) {
+            show_message('Lỗi giải mã JSON: ' + e + '<br>' + xhr.responseText);
         }
     };
     xhr.send();
@@ -503,8 +535,8 @@ function loadBroadlinkDevices() {
 //Tải dữ liệu các lệnh đã học
 function loadLearnedCommandsEditable() {
     loading('show');
-    const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $broadlink_json_file; ?>';
-    const xhr = new XMLHttpRequest();
+    var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $broadlink_json_file; ?>';
+    var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
@@ -513,66 +545,74 @@ function loadLearnedCommandsEditable() {
             show_message("Lỗi HTTP: " + xhr.status);
             return;
         }
-        let res;
+        var res;
         try {
             res = JSON.parse(xhr.responseText);
         } catch (e) {
-            show_message("JSON lỗi: " +e);
+            show_message("JSON lỗi: " + e);
             return;
         }
-        const tbody = document.querySelector('#cmdTable tbody');
+        var tbody = document.querySelector('#cmdTable tbody');
         tbody.innerHTML = '';
-        if (!res.success || !res.data?.cmd_devices_remote) {
+        if (!res.success || !res.data || !res.data.cmd_devices_remote) {
             tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger"><b>Chưa có dữ liệu các mã lệnh đã học</b></td></tr>';
             return;
         }
-        const cmds = res.data.cmd_devices_remote;
-		if (Object.keys(cmds).length === 0) {
-			tbody.innerHTML =
-				'<tr><td colspan="6" class="text-center text-danger">' +
-				'<b>Chưa có dữ liệu các mã lệnh đã học</b>' +
-				'</td></tr>';
-			return;
-		}
-        const devices = res.data.devices_remote || [];
-        let rowNum = 1;
-        for (const mac in cmds) {
-            cmds[mac].forEach((cmd, index) => {
-                const tr = document.createElement('tr');
+        var cmds = res.data.cmd_devices_remote;
+        if (Object.keys(cmds).length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger"><b>Chưa có dữ liệu các mã lệnh đã học</b></td></tr>';
+            return;
+        }
+        var devices = res.data.devices_remote || [];
+        var rowNum = 1;
+        for (var mac in cmds) {
+            cmds[mac].forEach(function(cmd, index) {
+                var tr = document.createElement('tr');
                 tr.dataset.cmdMac = mac;
                 tr.dataset.cmdIndex = index;
-				let options = '';
-				const macUpper = mac.toUpperCase();
-				const deviceExists = devices.some(
-					dev => dev.mac.toUpperCase() === macUpper
-				);
-				if (!deviceExists) {
-					options += '<option value="" selected class="text-danger">⚠ Không có thiết bị tương ứng (Hoặc đã bị xóa)</option>';
-				}
-				devices.forEach(dev => {
-					const isSelected = deviceExists && dev.mac.toUpperCase() === macUpper;
-					options +=
-						'<option value="' + dev.mac + '" ' +
-						'data-devtype="' + dev.devtype + '" ' +
-						(isSelected ? 'selected' : '') + '>' +
-						dev.friendly_name + ' (' + dev.ip + ' - ' + dev.mac + ')' +
-						'</option>';
-				});
-				tr.innerHTML =
-					'<td class="text-center">' + (rowNum++) + '</td>' +
-					'<td><input class="form-control border-success cmd_name" value="' + (cmd.name || '') + '"></td>' +
-					'<td><select class="form-select border-success cmd_device_select">' + options +'</select></td>' +
-					'<td class="text-center">' +
-						'<div class="form-switch">' +
-							'<input type="checkbox" class="cmd_active form-check-input border-success" ' + (cmd.active ? 'checked' : '') + '>' +
-						'</div>' +
-					'</td>' +
-					'<td><textarea class="form-control border-success cmd_data" rows="2">' + (cmd.data || '') + '</textarea></td>' +
-					'<td class="text-center">' +
-						'<button class="btn btn-success" onclick="saveLearnedCommandRow(this.closest(\'tr\'))"><i class="bi bi-save2"></i> Lưu</button> ' +
-						'<button class="btn btn-primary" onclick="sendLearnedCommandRow(this.closest(\'tr\'))" title="Gửi Lệnh"><i class="bi bi-send-check"></i></button> ' +
-						'<button class="btn btn-danger" onclick="deleteLearnedCommandRow(this.closest(\'tr\'))"><i class="bi bi-trash"></i></button>' +
-					'</td>';
+                //Kiểm tra wave
+                var hasWaveKey = cmd.hasOwnProperty('wave');
+                var waveValue = (hasWaveKey && cmd.wave) ? cmd.wave : null;
+                var waveText = (!waveValue || waveValue.trim() === '') ? 'N/A' : waveValue.toUpperCase();
+                var waveClass = (!waveValue || waveValue.trim() === '') ? 'text-muted' : waveValue === 'ir' ? 'text-success' : waveValue === 'rf' ? 'text-danger' : '';
+                var isRFCommand = hasWaveKey && waveValue === 'rf';
+                //select device
+                var options = '';
+                var macUpper = mac.toUpperCase();
+                var deviceExists = devices.some(function(dev) {
+                    return dev.mac.toUpperCase() === macUpper;
+                });
+                if (!deviceExists) {
+                    options += '<option value="" selected class="text-danger">⚠ Không có thiết bị tương ứng (Hoặc đã bị xóa)</option>';
+                }
+                devices.forEach(function(dev) {
+                    var isSelected = deviceExists && dev.mac.toUpperCase() === macUpper;
+                    var devHasRF = broadlinkHasRF(dev.devtype);
+                    var disabledAttr = (isRFCommand && !devHasRF) ? 'disabled' : '';
+                    //var rfNote = (isRFCommand && !devHasRF) ? ' ❌ (Không hỗ trợ RF)' : '';
+                    var rfNote = (isRFCommand && !devHasRF) ? '' : '';
+                    options += '<option value="' + dev.mac + '" ' + 'data-devtype="' + dev.devtype + '" ' + (isSelected ? 'selected' : '') + ' ' + disabledAttr + '>' +dev.friendly_name + ' (' + dev.ip + ' - ' + dev.mac + ')' +rfNote +'</option>';
+                });
+                //innerHTML
+                tr.innerHTML =
+                    '<td class="text-center">' + (rowNum++) + '</td>' +
+                    '<td><textarea class="form-control border-success cmd_name">' + (cmd.name || '') + '</textarea></td>' +
+                    '<td><textarea class="form-control border-success cmd_reply">' + (cmd.reply || '') + '</textarea></td>' +
+                    '<td><select class="form-select border-success cmd_device_select">' + options + '</select></td>' +
+                    '<td class="text-center">' +
+                        '<div class="form-switch">' +
+                            '<input type="checkbox" class="cmd_active form-check-input border-success" ' + (cmd.active ? 'checked' : '') + '>' +
+                        '</div>' +
+                    '</td>' +
+                    '<td style="text-align: center;">' +
+                        '<b class="' + waveClass + '">' + waveText + '</b>' +
+                    '</td>' +
+                    '<td><textarea class="form-control border-success cmd_data" rows="2">' + (cmd.data || '') + '</textarea></td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' +
+                        '<button class="btn btn-success" onclick="saveLearnedCommandRow(this.closest(\'tr\'))"><i class="bi bi-save2"></i> Lưu</button> ' +
+                        '<button class="btn btn-primary" onclick="sendLearnedCommandRow(this.closest(\'tr\'))" title="Gửi Lệnh"><i class="bi bi-send-check"></i></button> ' +
+                        '<button class="btn btn-danger" onclick="deleteLearnedCommandRow(this.closest(\'tr\'))"><i class="bi bi-trash"></i></button>' +
+                    '</td>';
                 tbody.appendChild(tr);
             });
         }
@@ -647,13 +687,26 @@ function renameDevice(mac) {
 }
 
 //Học Lệnh
-function learn_Command(ip, mac, devtype, friendly_name, model) {
+function learn_Command(ip, mac, devtype, wave_type, friendly_name, model) {
     if (!ip || !mac || !devtype) {
         show_message('Lỗi Xảy Ra, Thiếu tham số thiết bị: ip, mac, devtype');
         return;
     }
-	if (!confirm('Bạn có chắc muốn học lệnh từ thiết bị: "'+friendly_name+'" này không')) return;
+	if (friendly_name !== '') {
+		if (!confirm('Bạn có chắc muốn học lệnh từ thiết bị: "'+friendly_name+'" không?')) {
+			return;
+		}
+	} else {
+		if (!confirm('Bạn có chắc chắn muốn học lại lệnh này không?')) {
+			return;
+		}
+		}
 	loading('show');
+	if (wave_type === "rf") {
+		document.getElementById("learn_status").innerHTML = "<center>Học Lệnh RF (2 Bước)</center><br/>- Bước 1: Khi đèn trên thiết bị Broadlink sáng nhấn giữ nút trên remote khoảng 2-3 giây rồi nhả ra.<br/><br/>- Bước 2: Đèn trên thiết bị sẽ tắt rồi sáng lại hãy nhấn nhả nút trên remote 1 lần là xong<hr/>Lưu Ý: Học Lệnh RF đôi chút có thể bị nhiễu tín hiệu vô tuyến nhận mã lệnh sai, Bạn cần Test Lệnh Trước khi Lưu, nếu không đúng lệnh bạn cần thao tác học lại lệnh nhé";
+	} else if (wave_type === "ir") {
+		document.getElementById("learn_status").innerHTML = "<center>Học Lệnh IR</center><br/>Khi đèn trên thiết bị Broadlink sáng, vui lòng nhấn nhả nút trên Remote hướng vào thiết bị để học lệnh";
+	}
     const nameInput = document.getElementById('learn_command_name');
 	const dataTextarea = document.getElementById('learned_command_data');
     if (nameInput) nameInput.value = '';
@@ -666,6 +719,7 @@ function learn_Command(ip, mac, devtype, friendly_name, model) {
     formData.append("learn_command_broadlink", "1");
     formData.append("ip", ip);
     formData.append("mac", mac);
+    formData.append("wave_type", wave_type);
     formData.append("devtype", devtype);
     fetch("includes/php_ajax/BroadLink.php", {
         method: "POST",
@@ -682,7 +736,7 @@ function learn_Command(ip, mac, devtype, friendly_name, model) {
                     textarea.value = data.data; // IR:xxxx hoặc RF:xxxx
 					showLearnCommandExtraFields();
 					fillLearnCommandDeviceSelect();
-					showSaveLearnCommandButton();
+					showSaveLearnCommandButton(ip, mac, devtype, wave_type);
                 }
                 showMessagePHP(data.message, 5);
             } else {
@@ -722,8 +776,9 @@ function fillLearnCommandDeviceSelect() {
 }
 
 //Lưu thông tin khi học xong lệnh
-function saveLearnedCommandToJson() {
+function saveLearnedCommandToJson(wave_type) {
     const name = document.getElementById("learn_command_name")?.value.trim();
+    const reply = document.getElementById("learn_command_reply")?.value.trim();
     const mac = document.getElementById("learn_command_device")?.value;
     const data = document.getElementById("learned_command_data")?.value;
     if (!name || !mac || !data) {
@@ -735,6 +790,8 @@ function saveLearnedCommandToJson() {
     formData.append("command_name", name);
     formData.append("device_mac", mac);
     formData.append("command_data", data);
+    formData.append("command_reply", reply);
+    formData.append("wave_type", wave_type);
     fetch("includes/php_ajax/BroadLink.php", {
         method: "POST",
         body: formData
@@ -763,6 +820,7 @@ function saveLearnedCommandRow(row) {
     fd.append('index', row.dataset.cmdIndex);
     fd.append('mac_new', row.querySelector('.cmd_device_select').value);
     fd.append('name', row.querySelector('.cmd_name').value.trim());
+    fd.append('reply', row.querySelector('.cmd_reply').value.trim());
     fd.append('data', row.querySelector('.cmd_data').value.trim());
     fd.append('active', row.querySelector('.cmd_active').checked ? '1' : '0');
     const xhr = new XMLHttpRequest();
@@ -872,6 +930,21 @@ function sendLearnedCommandRow(tr) {
         return;
     }
 	showMessagePHP('Đang tiến hành gửi lệnh Remote từ thiết bị');
+    sendBroadlinkCommand(ip, mac, devtype, code);
+}
+
+function test_cmd_learn(ip, mac, devtype, wave_type) {
+    const textarea = document.getElementById("learned_command_data");
+    const data = textarea.value;
+    if (data === null || data === undefined) {
+		alert("Dữ liệu lệnh không hợp lệ");
+        return;
+    }
+    const code = data.trim();
+    if (code === "") {
+		alert("Không có dữ liệu Lệnh, Mã Code");
+        return;
+    }
     sendBroadlinkCommand(ip, mac, devtype, code);
 }
 

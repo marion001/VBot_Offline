@@ -472,6 +472,24 @@ include 'html_head.php';
         $data['change_led_brightness']['time'] = $filtered_times_brightness;
         $data['change_led_brightness']['brightness_time'] = $filtered_brightness;
 
+		//LƯU LỊCH BẬT / TẮT MIC
+		$mic_times   = $_POST['mic_on_off_time']   ?? [];
+		$mic_actions = $_POST['mic_on_off_action'] ?? [];
+		$filtered_times_mic   = [];
+		$filtered_actions_mic = [];
+		foreach ($mic_times as $index => $time) {
+			$time   = trim($time);
+			$action = trim($mic_actions[$index] ?? '');
+			if ($time !== '' && preg_match('/^\d{2}:\d{2}$/', $time) && in_array($action, ['on', 'off'], true)) {
+				$filtered_times_mic[]   = $time;
+				$filtered_actions_mic[] = $action;
+			}
+		}
+		$data['mic_on_off']['active'] = isset($_POST['change_mic_on_off_active']);
+		$data['mic_on_off']['date'] = isset($_POST['mic_on_off_date']) ? array_values($_POST['mic_on_off_date']): [];
+		$data['mic_on_off']['time']   = $filtered_times_mic;
+		$data['mic_on_off']['action'] = $filtered_actions_mic;
+
         #Lưu dữ liệu dừng phát media Player
         $time_stop_media_player = isset($_POST['time_stop_media_player']) ? $_POST['time_stop_media_player'] : [];
         $data['stop_media_player']['time'] = array_filter($time_stop_media_player);
@@ -855,6 +873,77 @@ include 'html_head.php';
             </div>
           </div>
           </div>
+
+		<!-- lên lịch Bật tắt Mic -->
+          <div class="card accordion" id="accordion_button_mic_on_off">
+            <div class="card-body">
+              <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_mic_on_off" aria-expanded="false" aria-controls="collapse_button_mic_on_off">
+                <font color="Blue">Lập Lịch Thay Đổi Trạng Thái Bật/Tắt Mic</font>, Trạng Thái:&nbsp;
+                <?php
+                echo isset($data['mic_on_off']['active']) ? ($data['mic_on_off']['active'] ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>') : '<font color=gray> Không xác định</font>';
+                ?>
+              </h5>
+              <div id="collapse_button_mic_on_off" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mic_on_off">
+             <div class="alert alert-success" role="alert">
+			<?php
+			// Dữ liệu mặc định nếu chưa có
+			if (!isset($data['mic_on_off']) || empty($data['mic_on_off'])) {
+				$data['mic_on_off'] = [
+					'active' => false,
+					'date'   => ["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"],
+					'time'   => ["23:59"],
+					'action' => ["off"]];
+			}
+			$change_mic_on_off = $data['mic_on_off'];
+			?>
+			<div class="row mb-3">
+			  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i>:</label>
+			  <div class="col-sm-9">
+			  <div class="form-switch">
+				<input type="checkbox" class="form-check-input" name="change_mic_on_off_active" value="1" <?= $change_mic_on_off['active'] ? 'checked' : '' ?>>
+			  </div>
+			  </div>
+			</div>
+			<!-- NGÀY TRONG TUẦN -->
+			<div class="row mb-3">
+			<label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Mic')"></i> :</label>
+			  <div class="col-sm-9">
+			  <div class="form-switch">
+				<?php foreach ($week_days as $date => $label): ?>
+				  <div class="form-check">
+					<input class="form-check-input" type="checkbox" name="mic_on_off_date[]" value="<?= $date ?>" <?= in_array($date, $change_mic_on_off['date']) ? 'checked' : '' ?>>
+					<label class="form-check-label"><?= $label ?></label>
+				  </div>
+				<?php endforeach; ?>
+			  </div>
+			  </div>
+			</div>
+
+			<div class="row mb-3">
+			  <label class="col-sm-3 col-form-label">Thời gian: Bật/Tắt</label>
+			  <div class="col-sm-9">
+				<div id="time-mic_on_off">
+				  <?php foreach ($change_mic_on_off['time'] as $i => $time): ?>
+					<div class="input-group mb-2 time-row" id="mic-row-<?= $i ?>">
+					  <input type="text" class="form-control border-success" name="mic_on_off_time[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+					  <select class="form-select border-success" name="mic_on_off_action[]">
+						<option value="on"  <?= ($change_mic_on_off['action'][$i] ?? '') === 'on'  ? 'selected' : '' ?>>Bật Mic</option>
+						<option value="off" <?= ($change_mic_on_off['action'][$i] ?? '') === 'off' ? 'selected' : '' ?>>Tắt Mic</option>
+					  </select>
+					  <button type="button"class="btn btn-danger border-success" onclick="removeMicRow('mic-row-<?= $i ?>')"><i class="bi bi-trash"></i></button>
+					</div>
+				  <?php endforeach; ?>
+				</div>
+				<button type="button" class="btn btn-success rounded-pill" id="add-mic-time">Thêm thời gian</button>
+			  </div>
+			</div>
+
+
+              </div>
+            </div>
+          </div>
+          </div>
+		  
 
           <div class="card accordion" id="accordion_button_play_playlist">
             <div class="card-body">
@@ -1519,7 +1608,6 @@ function loadAudioFiles(selectId) {
       let taskHtml =
         "<hr/><div class='card accordion'><div class='card-body'><div id='task-" + newTaskIndex + "'>" +
         "<h5 class='card-title text-danger'>Lập Lịch, Tác Vụ Thông Báo Mới:</h5><div class='alert alert-primary' role='alert'>" +
-
         "<div class='row mb-3'>" +
         "<label for='active-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Kích hoạt:</label>" +
         "<div class='col-sm-9'>" +
@@ -1528,7 +1616,6 @@ function loadAudioFiles(selectId) {
         "</div>" +
         "</div>" +
         "</div>" +
-
         "<div class='row mb-3'>" +
         "<label for='name-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tên tác vụ <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
@@ -1536,14 +1623,12 @@ function loadAudioFiles(selectId) {
         "<div class='invalid-feedback'>Cần đặt tên định danh cho tác vụ này</div>" +
         "</div>" +
         "</div>" +
-
         "<div class='row mb-3'>" +
         "<label for='message-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Nội Dung Thông Báo <font color='blue' size='6' title='Có thể nhập, lựa chọn hoặc để trống'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
         "<textarea type='text' rows='3' class='form-control border-success' id='message-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][message]' placeholder='Cần nhập nội dung thông báo, Nếu bỏ trống thì cần chọn dữ liệu tệp âm thanh'></textarea>" +
         "</div>" +
         "</div>" +
-
         "<div class='row mb-3'>" +
         "<label for='audio_file-" + newTaskIndex + "' class='col-sm-3 col-form-label'>" +
         "Tệp Âm Thanh (Link,URL/PATH) " +
@@ -1559,8 +1644,6 @@ function loadAudioFiles(selectId) {
         "</div>" +
         "</div>" +
         "</div>" +
-
-
         "<div class='row mb-3'>" +
         "<label for='repeat-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Số lần lặp lại <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
@@ -1568,7 +1651,6 @@ function loadAudioFiles(selectId) {
         "<div class='invalid-feedback'>Cần điền số lần lặp lại thông báo</div>" +
         "</div>" +
         "</div>" +
-
         "<div class='row mb-3'>" +
         "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
@@ -1582,7 +1664,6 @@ function loadAudioFiles(selectId) {
         "<button type='button' class='mt-3 btn btn-info rounded-pill' id='button_hien_thi_ngay_" + newTaskIndex + "' onclick='addDateInput(" + newTaskIndex + ")'>Thêm ngày cụ thể</button>" +
         "</div>" +
         "</div></div>" +
-
         "<div class='row mb-3'>" +
         "<label class='col-sm-3 col-form-label'>Thời gian (HH:MM) <i class='bi bi-question-circle-fill' onclick='show_message(\"Thời gian theo định dạng giờ, phút phải có dấu : ở giữa, định dạng nhập là 24h: từ 00:00 tới 23:59\")'></i> <font color='red' size='6' title='Bắt Buộc Nhập'>*</font> :</label><br>" +
         "<div class='col-sm-9'>" +
@@ -1721,10 +1802,8 @@ function loadAudioFiles(selectId) {
         });
       }
     });
-  </script>
 
-  <!-- Scripts Restart VBot -->
-  <script>
+<!-- Scripts Restart VBot -->
     let time_Restart_VBot = <?= count($restart_vbot['time']) ?>;
     document.getElementById('add-time-restart_vbot').addEventListener('click', function() {
       const timeOnContainer = document.getElementById('time-on-restart_vbot');
@@ -1745,11 +1824,9 @@ function loadAudioFiles(selectId) {
         container.remove();
       });
     });
-  </script>
   <!--END Scripts Restart VBot -->
 
-  <!-- Scripts stop media Player -->
-  <script>
+ <!-- Scripts stop media Player -->
     let time_Stop_Media_Player = <?= count($stop_media_player['time']) ?>;
     document.getElementById('add-time-stop_media_player').addEventListener('click', function() {
       const timeOnContainer = document.getElementById('time-on-stop_media_player');
@@ -1770,10 +1847,8 @@ function loadAudioFiles(selectId) {
         container.remove();
       });
     });
-  </script>
   <!--END Scripts stop media Player -->
 
-  <script>
     //Reboot OS
     let time_REboot_OS = <?= count($reboot_os['time']) ?>;
     document.getElementById('add-time-reboot_os').addEventListener('click', function() {
@@ -1795,9 +1870,7 @@ function loadAudioFiles(selectId) {
         container.remove();
       });
     });
-  </script>
 
-  <script>
     //Thay Đổi ÂM Lượng
     let timeVolumeCounter = <?= count($change_volume['time']) ?>;
     document.getElementById('add-time-change_volume').addEventListener('click', function() {
@@ -1818,9 +1891,7 @@ function loadAudioFiles(selectId) {
       });
       timeVolumeCounter++;
     });
-  </script>
 
-  <script>
     //Thay đổi độ sáng LED
     let timeBrightnessCounter = <?= count($change_led_brightness['time']) ?>;
     document.getElementById('add-time-change_led_brightness').addEventListener('click', function() {
@@ -1841,10 +1912,7 @@ function loadAudioFiles(selectId) {
       });
       timeBrightnessCounter++;
     });
-  </script>
-
-  <!-- Scripts Phát danh sách nhạc -->
-  <script>
+ <!-- Scripts Phát danh sách nhạc -->
     let time_Play_Playlist = <?= count($play_play_playlist['time']) ?>;
     document.getElementById('add-time-play_play_playlist').addEventListener('click', function() {
       const timeOnContainer = document.getElementById('time-on-play_play_playlist');
@@ -1865,11 +1933,9 @@ function loadAudioFiles(selectId) {
         container.remove();
       });
     });
-  </script>
-  <!--END Scripts Phát danh sách nhạc -->
+<!--END Scripts Phát danh sách nhạc -->
 
   <!-- Scripts Phát toàn bộ nhạc có trong thư mục Local -->
-  <script>
     let time_All_Local = <?= count($play_all_music_local['time']) ?>;
     document.getElementById('add-time-play_all_music_local').addEventListener('click', function() {
       const timeOnContainer = document.getElementById('time-on-play_all_music_local');
@@ -1890,10 +1956,33 @@ function loadAudioFiles(selectId) {
         container.remove();
       });
     });
-  </script>
-  <!--END Scripts Phát toàn bộ nhạc có trong thư mục Local -->
+ <!--END Scripts Phát toàn bộ nhạc có trong thư mục Local -->
 
-  <script>
+//Bật Tắt MIC
+let micIndex = <?= count($change_mic_on_off['time']) ?>;
+document.getElementById('add-mic-time').addEventListener('click', function () {
+    const container = document.getElementById('time-mic_on_off');
+    const rowId = 'mic-row-' + micIndex;
+    const div = document.createElement('div');
+    div.className = 'input-group mb-2 time-row';
+    div.id = rowId;
+	div.innerHTML =
+		'<input type="text" class="form-control border-success" name="mic_on_off_time[]" placeholder="HH:mm">' +
+		'<select class="form-select border-success" name="mic_on_off_action[]">' +
+			'<option value="on">Bật</option>' +
+			'<option value="off">Tắt</option>' +
+		'</select>' +
+		'<button type="button" class="btn btn-danger" onclick="removeMicRow(\'' + rowId + '\')">' +
+			'<i class="bi bi-trash"></i>' +
+		'</button>';
+    container.appendChild(div);
+    micIndex++;
+});
+function removeMicRow(id) {
+    const el = document.getElementById(id);
+    if (el) el.remove();
+}
+
 //Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống
 function validateFormVBot() {
     const requiredInputs = document.querySelectorAll('input[required], select[required], textarea[required]');
@@ -1914,11 +2003,7 @@ function validateFormVBot() {
                 });
                 const accordionHeader = document.querySelector('[data-bs-target="#' + accordionId + '"]');
                 const sectionName = accordionHeader ? accordionHeader.textContent.trim() : '';
-                let fieldName = input.getAttribute('placeholder') || 
-                              input.getAttribute('name') ||
-                              input.getAttribute('id') ||
-                              'Trường dữ liệu';
-                              
+                let fieldName = input.getAttribute('placeholder') || input.getAttribute('name') || input.getAttribute('id') || 'Trường dữ liệu';
                 if (sectionName) {
                     fieldName = '<b class="text-success">'+sectionName+'</b> <b class="text-primary">'+fieldName+'</b>';
                 }
@@ -1963,6 +2048,7 @@ function validateFormVBot() {
     return true;
 }
   </script>
+
 
   <!--END Scripts REBOOT OS SYSTEM -->
   <script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>

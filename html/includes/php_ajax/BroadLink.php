@@ -125,6 +125,7 @@ else if (isset($_POST['learn_command_broadlink'])) {
 	];
     $ip = $_POST['ip'] ?? '';
     $mac = $_POST['mac'] ?? '';
+    $wave_type = $_POST['wave_type'] ?? 'ir';
     $devtype = $_POST['devtype'] ?? '';
     if (!$ip || !$mac || !$devtype) {
         $response['message'] = 'Thiếu tham số thiết bị';
@@ -134,9 +135,10 @@ else if (isset($_POST['learn_command_broadlink'])) {
     $ip = escapeshellarg($ip);
     $mac = escapeshellarg($mac);
     $devtype = escapeshellarg($devtype);
+	$wave_type = escapeshellarg($wave_type);
 	$CMD = "python3 "
 		 . $VBot_Offline . "resource/broadlink/Broadlink.py learn"
-		 . " --ip $ip --mac $mac --devtype $devtype";
+		 . " --ip $ip --mac $mac --devtype $devtype --wavetype $wave_type";
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $response['message'] = 'Không thể kết nối tới máy chủ SSH';
@@ -171,6 +173,8 @@ else if (isset($_POST['save_learned_command'])) {
     $command_name = trim($_POST['command_name'] ?? '');
     $device_mac   = strtoupper(trim($_POST['device_mac'] ?? ''));
     $command_data = trim($_POST['command_data'] ?? '');
+    $command_reply = trim($_POST['command_reply'] ?? '');
+    $wave_type = trim($_POST['wave_type'] ?? '');
     if ($command_name === '' || $device_mac === '' || $command_data === '') {
         $response['message'] = 'Dữ liệu gửi lên không hợp lệ';
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
@@ -199,6 +203,8 @@ else if (isset($_POST['save_learned_command'])) {
     $data['cmd_devices_remote'][$device_mac][] = [
         "active" => true,
         "name" => $command_name,
+        "reply" => $command_reply,
+        "wave" => $wave_type,
         "data" => $command_data,
         "created_at" => date('H:i:s d-m-Y')
     ];
@@ -223,6 +229,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_learned_com
     $macNew = strtoupper($_POST['mac_new'] ?? '');
     $index  = isset($_POST['index']) ? intval($_POST['index']) : -1;
     $name   = trim($_POST['name'] ?? '');
+    $reply   = trim($_POST['reply'] ?? '');
     $data   = trim($_POST['data'] ?? '');
     $active = !empty($_POST['active']);
     if ($macOld === '' || $macNew === '' || $index < 0) {
@@ -240,6 +247,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_learned_com
     }
     $cmd = $cmds[$macOld][$index];
     $cmd['name'] = $name;
+    $cmd['reply'] = $reply;
     $cmd['data'] = $data;
     $cmd['active'] = $active;
     $cmd['created_at'] = $cmd['created_at'] ?? date('Y-m-d H:i:s');

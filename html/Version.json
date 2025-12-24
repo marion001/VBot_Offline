@@ -1,8 +1,8 @@
 {
-    "version": "1.0.82",
+    "version": "1.0.83",
     "projectName": "WebUI VBot Offline",
-    "description": "Tích hợp liên kết với các thiết bị Broadlink Remote Send IR, RF học lệnh, điều khiển thiết bị trong mạng nội bộ Local, Bổ Sung nhấn giữ bất kỳ nút nhấn trong 20 giây để Reset đặt lại cấu hình wifi, nhấn giữ 10 giây rồi nhả ra để đọc địa chỉ ip",
-    "releaseDate": "21/12/2025-1",
+    "description": "Sửa Lỗi Học và Phát Lệnh RF Khi Sử Dụng Liên Kết Broadlink",
+    "releaseDate": "24/12/2025",
     "changes": [
         {
             "type": "feature",

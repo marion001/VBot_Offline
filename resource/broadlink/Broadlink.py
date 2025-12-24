@@ -20,6 +20,7 @@ p_learn = sub.add_parser("learn")
 p_learn.add_argument("--ip", required=True)
 p_learn.add_argument("--mac", required=True)
 p_learn.add_argument("--devtype", required=True)
+p_learn.add_argument("--wavetype", required=True)
 
 #Gửi Lệnh
 p_send = sub.add_parser("send")
@@ -36,11 +37,17 @@ try:
         result = Broadlink_VBot.scan_broadlink_devices('/home/pi/VBot_Offline/resource/broadlink/broadlink.json')
     elif args.action == "learn":
         rm = Broadlink_VBot.create_device(args.ip, args.mac, args.devtype)
-        proto, data = Broadlink_VBot.learn_auto(rm)
+
+        if args.wavetype == "ir":
+            data = Broadlink_VBot.learn_ir(rm)
+        elif args.wavetype == "rf":
+            data = Broadlink_VBot.learn_rf(rm)
+        else:
+            raise Exception("wavetype không hợp lệ (ir | rf)")
         if data:
             result["success"] = True
-            result["message"] = f"Học lệnh thành công ({proto})"
-            result["data"] = Broadlink_VBot.base64.b64encode(data).decode()
+            result["message"] = f"Học lệnh thành công ({args.wavetype.upper()})"
+            result["data"] = data
         else:
             result["message"] = "Hết thời gian chờ học lệnh"
     elif args.action == "send":
