@@ -53,7 +53,8 @@ start_ap() {
     wifi-connect -s "$SSID" -g 192.168.4.1 -d 192.168.4.2,192.168.4.5 &
     WIFI_CONNECT_PID=$!
     sleep "$TIME_AP"
-    CONNECTED_DEVICES=$(ip neigh | grep '192.168.4' | grep REACHABLE)
+    #CONNECTED_DEVICES=$(ip neigh | grep '192.168.4' | grep REACHABLE)
+	CONNECTED_DEVICES=$(ip neigh | grep '192.168.4' | grep -Ev 'FAILED|INCOMPLETE')
     sudo kill "$WIFI_CONNECT_PID" 2>/dev/null
     if [ -n "$CONNECTED_DEVICES" ]; then
         printf "Đã có thiết bị kết nối. Đợi %d giây rồi reboot...\n" "$TIME_AP_CONNECT"
@@ -72,7 +73,7 @@ start_ap() {
             printf "Thử kết nối lại Wi-Fi trước đó: %s\n" "$OLD_SSID_SAVE"
             if nmcli dev wifi connect "$OLD_SSID_SAVE"; then
                 sleep 5
-                if iwgetid -r > /dev/null; then
+				if [ -n "$(iwgetid -r)" ]; then
                     printf "Kết nối lại Wifi cũ thành công: %s\n" "$OLD_SSID_SAVE"
                     return
                 fi
@@ -82,12 +83,13 @@ start_ap() {
         fi
         #Nếu không có hoặc không kết nối được Wi-Fi cũ, thử các mạng đã lưu
         printf "Thử các Wi-Fi đã lưu trong hệ thống...\n"
-        SAVED_NETWORKS=$(nmcli connection show | grep wifi | awk '{print $1}')
+        #SAVED_NETWORKS=$(nmcli connection show | grep wifi | awk '{print $1}')
+		SAVED_NETWORKS=$(nmcli -t -f NAME,TYPE connection show | grep ':wifi' | cut -d: -f1)
         for NET in $SAVED_NETWORKS; do
             printf "Thử kết nối Wifi đã lưu: %s\n" "$NET"
             if nmcli connection up "$NET"; then
                 sleep 5
-                if iwgetid -r > /dev/null; then
+				if [ -n "$(iwgetid -r)" ]; then
                     printf "Kết nối thành công với Wifi: %s\n" "$NET"
                     return
                 fi
@@ -101,27 +103,18 @@ start_ap() {
 #Kiểm tra kết nối mạng
 while true; do
     #Lấy lại IP và Wi-Fi mỗi vòng lặp
-    OLD_SSID=$(iwgetid -r)
     OLD_IP=$(cat /home/pi/ip.txt 2>/dev/null)
     OLD_WIFI=$(cat /home/pi/wifi.txt 2>/dev/null)
     CURRENT_IP=$(hostname -I | awk '{print $1}')
-    if iwgetid -r > /dev/null; then
+	CURRENT_SSID=$(iwgetid -r)
+	if [ -n "$CURRENT_SSID" ]; then
         if check_local_ping; then
             #Nếu IP hoặc Wi-Fi thay đổi, lưu lại và gọi Python
-			if [ "$OLD_IP" != "$CURRENT_IP" ] || [ "$OLD_WIFI" != "$OLD_SSID" ]; then
-				#Lọc IP không phải localhost và không phải hostname, ip phải ở dạng số
-				if [ "$CURRENT_IP" != "127.0.0.1" ] && [ "$CURRENT_IP" != "$(hostname)" ] && [ "$CURRENT_IP" != "$(hostname -f)" ]; then
-					#Kiểm tra IP chỉ chứa số và dấu chấm
-					if echo "$CURRENT_IP" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$'; then
-						printf "%s\n" "$CURRENT_IP" > /home/pi/ip.txt
-						printf "%s\n" "$OLD_SSID" > /home/pi/wifi.txt
-						sudo -u pi python3 /home/pi/_VBot_IP.py
-					else
-						printf "Địa chỉ IP không hợp lệ: $CURRENT_IP\n"
-					fi
-				else
-					printf "IP localhost hoặc hostname. Không lưu: $CURRENT_IP\n"
-				fi
+			if [ "$OLD_IP" != "$CURRENT_IP" ] || [ "$OLD_WIFI" != "$CURRENT_SSID" ]; then
+				printf "%s\n" "$CURRENT_IP" > /home/pi/ip.txt
+				printf "%s\n" "$CURRENT_SSID" > /home/pi/wifi.txt
+				#Nếu đọc địa chỉ ip
+				sudo -u pi python3 /home/pi/_VBot_IP.py
 			fi
 			#Kiểm tra Apache2 để chạy
 			if ! sudo systemctl is-active --quiet apache2; then
