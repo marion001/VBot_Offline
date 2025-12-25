@@ -20,7 +20,6 @@ if ($Config['contact_info']['user_login']['active']) {
     exit;
   }
 }
-
 $Schedule_Audio_dir = $VBot_Offline . $Config['schedule']['audio_path'];
 if (!file_exists($Schedule_Audio_dir)) {
   if (mkdir($Schedule_Audio_dir, 0777, true)) {
@@ -1254,14 +1253,9 @@ include 'html_head.php';
 <div class="alert alert-primary" role="alert">
 Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule)</b> -> <b>Kích Hoạt</b>
 </div>
-
           <center>
             <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
             <button type="button" class="btn btn-success rounded-pill" onclick="addNewTask()">Thêm mới tác vụ</button>
-            <button type="button" class="btn btn-info rounded-pill" title="Tải Xuống file: <?php echo $json_file; ?>" onclick="downloadFile('<?php echo $json_file; ?>')">
-              <i class="bi bi-download"></i> Tải Xuống</button>
-            <button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_laplich_thongbao">
-              <i class="bi bi-eye"></i>Xem dữ liệu Cấu Hình</button>
             <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_Scheduler" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Lời Nhắc, Thông Báo không')">
               <i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
           </center>
@@ -1271,7 +1265,11 @@ include 'html_head.php';
           <div class="row mb-3">
             <label for="schedule_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
             <div class="col-sm-9">
+			<div class="input-group">
               <input disabled class="form-control border-danger" type="text" name="schedule_config_path" id="schedule_config_path" value="<?php echo $VBot_Offline . $Config['schedule']['data_json_file']; ?>">
+<button type="button" class="btn btn-success border-danger" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_laplich_thongbao"><i class="bi bi-eye"></i></button>
+<button type="button" class="btn btn-info border-danger" title="Tải Xuống file: <?php echo $json_file; ?>" onclick="downloadFile('<?php echo $json_file; ?>')"><i class="bi bi-download"></i></button>
+            </div>
             </div>
           </div>
           <div class="row mb-3">

@@ -499,10 +499,6 @@ include 'html_head.php';
                     <center>
                         <button class="btn btn-primary  rounded-pill" type="submit" name="save_custom_home_assistant"><i class="bi bi-save"></i> Lưu thay đổi</button>
                         <button type="button" class="btn btn-success rounded-pill" onclick="addNewSection()">Thêm Mới Tác Vụ</button>
-                        <button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_Home_Assistant">
-                            <i class="bi bi-eye"></i>Xem dữ liệu Cấu Hình</button>
-                        <button type="button" class="btn btn-info rounded-pill" title="Tải Xuống file: <?php echo $jsonFilePath; ?>" onclick="downloadFile('<?php echo $jsonFilePath; ?>')">
-                            <i class="bi bi-download"></i> Tải Xuống</button>
                         <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_custom_home_assistant" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Custom Home Assistant không')"><i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
                     </center>
                     <h5 class="card-title">
@@ -511,8 +507,12 @@ include 'html_head.php';
                     <div class="row mb-3">
                         <label for="custom_home_assistant_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
                         <div class="col-sm-9">
-                            <input readonly class="form-control border-danger" type="text" name="custom_home_assistant_config_path" id="custom_home_assistant_config_path" value="<?php echo $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file']; ?>">
-                        </div>
+						<div class="input-group">
+                            <input disabled class="form-control border-danger" type="text" name="custom_home_assistant_config_path" id="custom_home_assistant_config_path" value="<?php echo $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file']; ?>">
+                        <button type="button" class="btn btn-success border-danger" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_Home_Assistant"><i class="bi bi-eye"></i></button>
+                        <button type="button" class="btn btn-info border-danger" title="Tải Xuống file: <?php echo $jsonFilePath; ?>" onclick="downloadFile('<?php echo $jsonFilePath; ?>')"><i class="bi bi-download"></i></button>
+						</div>
+						</div>
                     </div>
                     <hr />
                     <h5 class="card-title">
@@ -553,8 +553,6 @@ include 'html_head.php';
                   <button type="button" class="btn btn-danger border-primary" title="Xóa Tệp Sao Lưu Custom Home Assistant" onclick="delete_file_backup_hass_custom(\'get_value_backup_config\')"><i class="bi bi-trash"></i></button>
                   </div>';
                             }
-
-
                             ?>
                         </div>
                     </div>

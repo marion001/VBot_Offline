@@ -43,7 +43,7 @@ distro                       1.5.0
 docutils                     0.16
 dominate                     2.6.0
 drumhat                      0.1.0
-edge-tts                     7.2.0
+edge-tts                     7.2.7
 enum34                       1.1.10
 envirophat                   1.0.0
 exceptiongroup               1.1.2

@@ -35,6 +35,28 @@ $json_data = file_get_contents($broadlink_json_file);
 $data = json_decode($json_data, true);
 $broadlink_devices = $data['devices_remote'] ?? [];
 
+#Backup cấu hình dữ liệu Broadlink
+function backupBroadlinkJson($Config, $broadlink_json_file){
+	$backup_dir  = $Config['web_interface']['path'].'/'.$Config['broadlink']['backup_path'];
+	if (file_exists($broadlink_json_file)) {
+		if (!is_dir($backup_dir)) {
+			mkdir($backup_dir, 0777, true);
+			shell_exec('chmod 0777 ' . escapeshellarg($backup_dir));
+		}
+		$files = glob($backup_dir . '/broadlink_*.json');
+		if (count($files) >= 7) {
+			usort($files, function ($a, $b) {
+				return filemtime($a) - filemtime($b);
+			});
+			unlink($files[0]);
+		}
+		$backup_file = $backup_dir.'/broadlink_'.date('dmY_His').'.json';
+		$cmd = 'cp ' . escapeshellarg($broadlink_json_file) . ' ' . escapeshellarg($backup_file);
+		shell_exec($cmd);
+		shell_exec('chmod 0777 ' . escapeshellarg($backup_file));
+	}
+}
+
 //Khôi Phục Dữ liệu bằng tải lên hoặc tệp hệ thống
 if (isset($_POST['start_recovery_broadlink'])) {
 	$data_recovery_type = $_POST['start_recovery_broadlink'];
@@ -65,20 +87,18 @@ if (isset($_POST['start_recovery_broadlink'])) {
 				$hasDevices = isset($data['devices_remote']) && is_array($data['devices_remote']);
 				$hasCmds    = isset($data['cmd_devices_remote']) && is_array($data['cmd_devices_remote']);
 				if (!$hasDevices && !$hasCmds) {
-					$errorMessages[] =
-						"- Tệp JSON không đúng dữ liệu Broadlink (thiếu devices_remote hoặc cmd_devices_remote)";
+					$errorMessages[] = "- Tệp JSON không đúng dữ liệu Broadlink (thiếu devices_remote hoặc cmd_devices_remote)";
 					$uploadOk = 0;
 				}
 			}
 		}
 		if ($uploadOk === 1) {
+			#backupBroadlinkJson($Config, $broadlink_json_file);
 			if (move_uploaded_file(
 				$_FILES["fileToUpload_broadlink"]["tmp_name"],
 				$broadlink_json_file
 			)) {
-				$successMessage[] =
-					"- Tệp " . htmlspecialchars($fileName) .
-					" đã được tải lên và khôi phục dữ liệu Broadlink thành công";
+				$successMessage[] = "- Tệp " . htmlspecialchars($fileName) ." đã được tải lên và khôi phục dữ liệu Broadlink thành công";
 			} else {
 				$errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
 			}
@@ -86,30 +106,26 @@ if (isset($_POST['start_recovery_broadlink'])) {
 			$errorMessages[] = "- Tệp sao lưu không hợp lệ, không thể khôi phục";
 		}
 	}
-	/*
+
 	else if ($data_recovery_type === "khoi_phuc_file_he_thong") {
-		$start_recovery_custom_hass = $_POST['backup_custom_hass_json_files'] ?? '';
+		$start_recovery_custom_hass = $_POST['backup_broadlink_json_files'] ?? '';
 		if (!empty($start_recovery_custom_hass)) {
 			if (file_exists($start_recovery_custom_hass)) {
+				#backupBroadlinkJson($Config, $broadlink_json_file);
 				$command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($broadlink_json_file);
 				exec($command, $output, $resultCode);
 				if ($resultCode === 0) {
-					$successMessage[] =
-						"Đã khôi phục dữ liệu từ tệp sao lưu trên hệ thống thành công";
+					$successMessage[] = "Đã khôi phục dữ liệu từ tệp sao lưu trên hệ thống thành công";
 				} else {
-					$errorMessages[] =
-						"Lỗi xảy ra khi khôi phục dữ liệu tệp Mã lỗi: " . $resultCode;
+					$errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Mã lỗi: " . $resultCode;
 				}
 			} else {
-				$errorMessages[] =
-					"Lỗi: Tệp " . basename($start_recovery_custom_hass) . " không tồn tại trên hệ thống";
+				$errorMessages[] = "Lỗi: Tệp " . basename($start_recovery_custom_hass) . " không tồn tại trên hệ thống";
 			}
 		} else {
-			$errorMessages[] =
-				"Không có tệp sao lưu nào được chọn để khôi phục!";
+			$errorMessages[] = "Không có tệp sao lưu nào được chọn để khôi phục!";
 		}
 	}
-	*/
 }
 
 ?>
@@ -235,7 +251,7 @@ if (!empty($successMessage)) {
         <thead>
           <tr>
             <th style="text-align: center; vertical-align: middle;" colspan="8">
-	<button type="button" class="btn btn-info rounded-pill" onclick="loadLearnedCommandsEditable()">Tải Lại Danh Sách</button>
+	<button type="button" class="btn btn-info rounded-pill" onclick="loadLearnedCommandsEditable()"><i class="bi bi-arrow-clockwise"></i> Tải Lại Danh Sách</button>
 	<button type="button" class="btn btn-danger rounded-pill" onclick="deleteAllCmdDevicesRemote()" title="Xóa Toàn Bộ Lệnh Đã Học"><i class="bi bi-trash"></i> Xóa Toàn Bộ Lệnh</button></center>
 			</th>
           </tr>
@@ -265,23 +281,20 @@ if (!empty($successMessage)) {
 <h5 class="card-title">
 <font color="green">Dữ Liệu Cấu Hình:</font>
 </h5>
-
-<center>
-<button type="button" class="btn btn-warning rounded-pill" title="Xem dữ liệu Đã cấu hình VBot Broadlink" id="openModalBtn_Home_Assistant"><i class="bi bi-eye"></i>Xem dữ liệu Cấu Hình</button>
-<button type="button" class="btn btn-info rounded-pill" title="Tải Xuống file: <?php echo $broadlink_json_file; ?>" onclick="downloadFile('<?php echo $broadlink_json_file; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button>
-</center><br/><br/>
                     <div class="row mb-3">
                         <label for="broadlink_json_file" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
                         <div class="col-sm-9">
-                            <input readonly class="form-control border-danger" type="text" name="broadlink_json_file" id="broadlink_json_file" value="<?php echo $VBot_Offline . $Config['broadlink']['json_file']; ?>">
+						<div class="input-group">
+                            <input disabled class="form-control border-danger" type="text" name="broadlink_json_file" id="broadlink_json_file" value="<?php echo $VBot_Offline . $Config['broadlink']['json_file']; ?>">
+<button type="button" class="btn btn-success border-danger" title="Xem dữ liệu Đã cấu hình VBot Broadlink" id="openModalBtn_Home_Assistant"><i class="bi bi-eye"></i></button>
+<button type="button" class="btn btn-info border-danger" title="Tải Xuống file: <?php echo $broadlink_json_file; ?>" onclick="downloadFile('<?php echo $broadlink_json_file; ?>')"><i class="bi bi-download"></i></button>
+                        </div>
                         </div>
                     </div>
-
 <form class="row g-3 needs-validation" novalidate method="POST" enctype="multipart/form-data" action="">
 <h5 class="card-title">
 	<font color="green">Khôi Phục Dữ Liệu:</font>
 </h5>
-
 <div class="row mb-3">
 	<label class="col-sm-3 col-form-label"><b>Tải Lên Tệp Và Khôi Phục:</b></label>
 	<div class="col-sm-9">
@@ -291,6 +304,37 @@ if (!empty($successMessage)) {
 		</div>
 	</div>
 </div>
+
+          <div class="row mb-3">
+            <label class="col-sm-3 col-form-label"><b>Hoặc Chọn Tệp Khôi Phục:</b></label>
+            <div class="col-sm-9">
+              <?php
+              $jsonFiles = glob($Config['broadlink']['backup_path'] . '/*.json');
+              $co_tep_BackUp_customhass = true;
+              if (empty($jsonFiles)) {
+                $co_tep_BackUp_customhass = false;
+                echo '<select class="form-select border-primary" name="backup_broadlink_json_files" id="backup_broadlink_json_files">';
+                echo '<option selected value="">Không có tệp khôi phục dữ liệu Config nào</option>';
+                echo '</select>';
+              } else {
+                $co_tep_BackUp_customhass = true;
+                echo '<div class="input-group"><select class="form-select border-primary" name="backup_broadlink_json_files" id="backup_broadlink_json_files">';
+                echo '<option selected value="">Chọn Tệp Khôi Phục Dữ Liệu Broadlink</option>';
+                foreach ($jsonFiles as $file) {
+                  $fileName = basename($file);
+                  echo '<option value="' . htmlspecialchars($Config['broadlink']['backup_path'] . '/' . $fileName) . '">' . htmlspecialchars($fileName) . '</option>';
+                }
+                echo '</select>
+                  <button class="btn btn-warning border-primary" type="submit" name="start_recovery_broadlink" value="khoi_phuc_file_he_thong">Khôi Phục</button>
+                  <button type="button" class="btn btn-info border-primary" title="Tải Xuống Tệp Sao Lưu Custom Home Assistant" onclick="dowlaod_file_backup_scheduler(\'get_value_backup_config\')"><i class="bi bi-download"></i></button>
+                  <button type="button" class="btn btn-success border-primary" title="Xem Tệp Sao Lưu Custom Home Assistant" onclick="readJSON_file_path(\'get_value_backup_config\')"><i class="bi bi-eye"></i></button>
+                  <button type="button" class="btn btn-danger border-primary" title="Xóa Tệp Sao Lưu Custom Home Assistant" onclick="delete_file_backup_scheduler(\'get_value_backup_config\')"><i class="bi bi-trash"></i></button>
+                  </div>';
+              }
+              ?>
+            </div>
+          </div>
+
 </form>
 <div class="alert alert-primary" role="alert">
 Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Liên Kết Broadlink Control, Remote Send IR/RF</b> -> <b>Kích Hoạt</b>
@@ -414,7 +458,7 @@ function showLearnCommandExtraFields() {
 //Scan Thiết Bị Broadlink
 function scanBroadlinkDevices() {
 	loading('show');
-    var url = 'includes/php_ajax/Scanner.php?scan_broadlink_remote_device';
+    var url = 'includes/php_ajax/BroadLink.php?scan_broadlink_remote_device';
     showMessagePHP('Đang quét thiết bị Broadlink Remote trong mạng...', 3);
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -933,6 +977,7 @@ function sendLearnedCommandRow(tr) {
     sendBroadlinkCommand(ip, mac, devtype, code);
 }
 
+//Test Lệnh Code Khi Học
 function test_cmd_learn(ip, mac, devtype, wave_type) {
     const textarea = document.getElementById("learned_command_data");
     const data = textarea.value;
@@ -984,6 +1029,55 @@ function sendBroadlinkCommand(ip, mac, devtype, code) {
         "&devtype=" + encodeURIComponent(devtype) +
         "&code=" + encodeURIComponent(code);
     xhr.send(params);
+}
+
+//onclick xem nội dung file json
+function readJSON_file_path(filePath) {
+  if (filePath === "get_value_backup_config") {
+	var get_value_backup_config = document.getElementById('backup_broadlink_json_files').value;
+	if (get_value_backup_config === "") {
+	  showMessagePHP("Không có tệp nào được chọn để xem nội dung");
+	} else {
+	  filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+	  read_loadFile(filePath);
+	  document.getElementById('name_file_showzz').textContent = "Tên File: " + filePath.split('/').pop();
+	  $('#myModal_Home_Assistant').modal('show');
+	}
+  } else {
+	read_loadFile(filePath);
+	document.getElementById('name_file_showzz').textContent = "Tên File: " + filePath.split('/').pop();
+	$('#myModal_Home_Assistant').modal('show');
+  }
+}
+
+//Tải xuống file backup Config
+function dowlaod_file_backup_scheduler(filePath) {
+  if (filePath === "get_value_backup_config") {
+	var get_value_backup_config = document.getElementById('backup_broadlink_json_files').value;
+	if (get_value_backup_config === "") {
+	  showMessagePHP("Không có tệp nào được chọn để tải xuống");
+	} else {
+	  filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+	  downloadFile(filePath);
+	}
+  } else {
+	showMessagePHP("Không có tệp nào được chọn để tải xuống.");
+  }
+}
+
+//Xóa file backup Config
+function delete_file_backup_scheduler(filePath) {
+  if (filePath === "get_value_backup_config") {
+	var get_value_backup_config = document.getElementById('backup_broadlink_json_files').value;
+	if (get_value_backup_config === "") {
+	  showMessagePHP("Không có tệp nào được chọn để tải xuống");
+	} else {
+	  filePath = "<?php echo $directory_path; ?>/" + get_value_backup_config;
+	  deleteFile(filePath);
+	}
+  } else {
+	showMessagePHP("Không có tệp nào được chọn để tải xuống.");
+  }
 }
 
 // Hiển thị modal xem nội dung file json Home_Assistant.json

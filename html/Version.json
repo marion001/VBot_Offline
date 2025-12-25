@@ -2,7 +2,7 @@
     "version": "1.0.83",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa Lỗi Học và Phát Lệnh RF Khi Sử Dụng Liên Kết Broadlink",
-    "releaseDate": "24/12/2025",
+    "releaseDate": "25/12/2025",
     "changes": [
         {
             "type": "feature",

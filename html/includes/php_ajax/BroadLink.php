@@ -35,6 +35,28 @@ if (!file_exists($broadlink_json)) {
     shell_exec('chmod 0777 ' . escapeshellarg($broadlink_json));
 }
 
+#Backup cấu hình dữ liệu Broadlink
+function backupBroadlinkJson($Config, $broadlink_json){
+	$backup_dir  = $Config['web_interface']['path'].'/'.$Config['broadlink']['backup_path'];
+	if (file_exists($broadlink_json)) {
+		if (!is_dir($backup_dir)) {
+			mkdir($backup_dir, 0777, true);
+			shell_exec('chmod 0777 ' . escapeshellarg($backup_dir));
+		}
+		$files = glob($backup_dir . '/broadlink_*.json');
+		if (count($files) >= 7) {
+			usort($files, function ($a, $b) {
+				return filemtime($a) - filemtime($b);
+			});
+			unlink($files[0]);
+		}
+		$backup_file = $backup_dir.'/broadlink_'.date('dmY_His').'.json';
+		$cmd = 'cp ' . escapeshellarg($broadlink_json) . ' ' . escapeshellarg($backup_file);
+		shell_exec($cmd);
+		shell_exec('chmod 0777 ' . escapeshellarg($backup_file));
+	}
+}
+
 //Xóa device broadlink
 if (isset($_POST['delete_device_broadlink_remote']) && !empty($_POST['mac'])) {
     $result = [
@@ -69,12 +91,41 @@ if (isset($_POST['delete_device_broadlink_remote']) && !empty($_POST['mac'])) {
         echo json_encode($result);
         exit;
     }
+	backupBroadlinkJson($Config, $broadlink_json);
     $data['devices_remote'] = array_values($devices);
     file_put_contents($broadlink_json, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     $result['success'] = true;
     $result['message'] = 'Đã xóa thiết bị Broadlink có địa chỉ MAC: ' . $mac;
     echo json_encode($result);
     exit;
+}
+
+#Quét thiết bị Broadlink Remote Trong Lan
+else if (isset($_GET['scan_broadlink_remote_device'])) {
+    $CMD = escapeshellcmd('python3 '.$VBot_Offline.'resource/broadlink/Broadlink.py scan');
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        $response['message'] = 'Không thể kết nối tới máy chủ SSH';
+        echo json_encode($response);
+        exit();
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        $response['message'] = 'Xác thực SSH không thành công.';
+        echo json_encode($response);
+        exit();
+    }
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        $response['message'] = 'Không thể thực thi lệnh trên máy chủ SSH.';
+        echo json_encode($response);
+        exit();
+    }
+    stream_set_blocking($stream, true);
+    $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $output = stream_get_contents($stream_out);
+	backupBroadlinkJson($Config, $broadlink_json);
+    echo $output;
+    exit();
 }
 
 #Đổi Tên friendly_name
@@ -110,6 +161,7 @@ else if (isset($_POST['rename_device_broadlink_remote']) && !empty($_POST['mac']
         echo json_encode($result);
         exit;
     }
+	backupBroadlinkJson($Config, $broadlink_json);
     file_put_contents($broadlink_json, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     $result['success'] = true;
     $result['message'] = 'Đã đổi tên thiết bị thành công';
@@ -208,6 +260,7 @@ else if (isset($_POST['save_learned_command'])) {
         "data" => $command_data,
         "created_at" => date('H:i:s d-m-Y')
     ];
+	backupBroadlinkJson($Config, $broadlink_json);
     if (file_put_contents($broadlink_json, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
         $response['message'] = 'Không thể ghi file JSON';
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
@@ -262,6 +315,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_learned_com
     } else {
         $cmds[$macOld][$index] = $cmd;
     }
+	backupBroadlinkJson($Config, $broadlink_json);
     file_put_contents($broadlink_json, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
     echo json_encode(['success' => true, 'message' => 'Đã lưu dữ liệu thông tin: "' .$name. '" thành công']);
     exit;
@@ -284,6 +338,7 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_learned_c
         echo json_encode(['success' => false, 'message' => 'Lệnh không tồn tại']);
         exit;
     }
+	backupBroadlinkJson($Config, $broadlink_json);
     unset($json['cmd_devices_remote'][$mac][$index]);
     $json['cmd_devices_remote'][$mac] = array_values($json['cmd_devices_remote'][$mac]);
     file_put_contents($broadlink_json, json_encode($json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), LOCK_EX);
@@ -300,6 +355,7 @@ else if (isset($_POST['deleteAllDevicesRemote'])) {
             $data = [];
         }
     }
+	backupBroadlinkJson($Config, $broadlink_json);
     $data['devices_remote'] = [];
     file_put_contents($broadlink_json, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     echo json_encode(['success' => true, 'message' => 'Đã xóa toàn bộ thiết bị Broadlink Remote' ], JSON_UNESCAPED_UNICODE);
@@ -319,6 +375,7 @@ else if (isset($_POST['deleteAllCmdDevicesRemote'])) {
         exit;
     }
     //$data['cmd_devices_remote'] = [];
+	backupBroadlinkJson($Config, $broadlink_json);
 	$data['cmd_devices_remote'] = new stdClass();
     file_put_contents($broadlink_json, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
     echo json_encode([
@@ -328,6 +385,7 @@ else if (isset($_POST['deleteAllCmdDevicesRemote'])) {
     exit;
 }
 
+//Gửi Test Lệnh
 else if (isset($_POST['sendBroadlink']) && isset($_POST['ip'], $_POST['mac'], $_POST['devtype'], $_POST['code'])) {
     $response = [
         "success" => false,
