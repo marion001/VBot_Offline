@@ -15,8 +15,8 @@ systemctl disable cups.service cups-browsed.service cups.path saned.service sane
 systemctl stop cups.service cups-browsed.service cups.path saned.service saned@.service cups.socket
 
 # Bluetooth - nếu không dùng
-systemctl disable bluetooth.service hciuart.service
-systemctl stop bluetooth.service hciuart.service
+#systemctl disable bluetooth.service hciuart.service
+#systemctl stop bluetooth.service hciuart.service
 
 # Modem / 3G/4G - nếu không dùng USB modem
 systemctl disable ModemManager.service
