@@ -1,8 +1,8 @@
 {
-    "version": "1.0.83",
+    "version": "1.0.84",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Học và Phát Lệnh RF Khi Sử Dụng Liên Kết Broadlink",
-    "releaseDate": "25/12/2025-1",
+    "description": "Thêm Cấu Hình Thiết Lập Wifi Thông Qua Bluetooth sử dụng App BTBerryWifi, Chi tiết Xem Trong Mục 'Hướng Dẫn' Của Giao Diện WebUI, Hoặc Truy Cập SSH Và Chạy Lệnh: $:> bash /home/pi/VBot_Offline/resource/set_wifi_via_ble/btwifisetInstall.sh",
+    "releaseDate": "27/12/2025",
     "changes": [
         {
             "type": "feature",
