@@ -1,0 +1,94 @@
+Bước 1: Sửa sources.list:
+
+	- Chạy lệnh sau:
+		$:> sudo nano /etc/apt/sources.list
+
+	- Chú thích dòng này (Thêm Dấu # vào Trước)
+		#deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi
+
+	- Sau đó thêm mới dòng này:
+		deb http://archive.raspbian.org/raspbian bullseye main contrib non-free
+		- Nhấn Ctrl + X => nhấn phím chữ "y" => nhấn phím "Enter"
+
+	- Chạy 2 lệnh sau để áp dụng:
+		$:> sudo apt clean
+		$:> sudo apt update
+
+Bước 2: Bật Bluetooth
+	- Chạy 3 Lệnh Sau:
+		$:> sudo systemctl enable bluetooth.service
+		$:> sudo systemctl enable hciuart.service
+		$:> sudo reboot
+	- Hệ thống sẽ khởi động lại
+
+	- Chạy lệnh sau để kiểm tra Bluetooth dã chạy trên rasperpi2w Chưa:
+		$:> hciconfig
+
+	- Hiện như này là được:
+		pi@VBot-Assistant:~ $ hciconfig
+		hci0:   Type: Primary  Bus: UART
+				BD Address: B8:27:EB:5F:E9:C4  ACL MTU: 1021:8  SCO MTU: 64:1
+				UP RUNNING PSCAN ISCAN
+				RX bytes:2123 acl:16 sco:0 events:137 errors:0
+				TX bytes:4252 acl:49 sco:0 commands:107 errors:0
+
+	- Các lệnh khác kiểm tra thêm:
+		$:> systemctl status hciuart
+			pi@VBot-Assistant:~ $ systemctl status hciuart
+			● hciuart.service - Configure Bluetooth Modems connected by UART
+				 Loaded: loaded (/lib/systemd/system/hciuart.service; enabled; vendor preset: enabled)
+				 Active: active (running) since Fri 2025-12-26 20:31:14 +07; 44s ago
+				Process: 329 ExecStart=/usr/bin/btuart (code=exited, status=0/SUCCESS)
+			   Main PID: 572 (hciattach)
+				  Tasks: 1 (limit: 521)
+					CPU: 171ms
+				 CGroup: /system.slice/hciuart.service
+						 └─572 /usr/bin/hciattach /dev/serial1 bcm43xx 3000000 flow - b8:27:eb:46:7e:62
+
+			Dec 26 20:31:08 VBot-Assistant systemd[1]: Starting Configure Bluetooth Modems connected by UART...
+			Dec 26 20:31:14 VBot-Assistant btuart[406]: bcm43xx_init
+			Dec 26 20:31:14 VBot-Assistant btuart[406]: Flash firmware /lib/firmware/brcm/BCM43430A1.raspberryp>
+			Dec 26 20:31:14 VBot-Assistant btuart[406]: Set BDADDR UART: b8:27:eb:46:7e:62
+			Dec 26 20:31:14 VBot-Assistant btuart[406]: Set Controller UART speed to 3000000 bit/s
+			Dec 26 20:31:14 VBot-Assistant btuart[406]: Device setup complete
+			Dec 26 20:31:14 VBot-Assistant systemd[1]: Started Configure Bluetooth Modems connected by UART.
+
+
+		$:> systemctl status bluetooth
+			pi@VBot-Assistant:~ $ systemctl status bluetooth
+			● bluetooth.service - Bluetooth service
+				 Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; vendor preset: enabled)
+				 Active: active (running) since Fri 2025-12-26 20:31:15 +07; 53s ago
+				   Docs: man:bluetoothd(8)
+			   Main PID: 587 (bluetoothd)
+				 Status: "Running"
+				  Tasks: 1 (limit: 521)
+					CPU: 107ms
+				 CGroup: /system.slice/bluetooth.service
+						 └─587 /usr/libexec/bluetooth/bluetoothd
+
+			Dec 26 20:31:15 VBot-Assistant systemd[1]: Starting Bluetooth service...
+			Dec 26 20:31:15 VBot-Assistant bluetoothd[587]: Bluetooth daemon 5.55
+			Dec 26 20:31:15 VBot-Assistant systemd[1]: Started Bluetooth service.
+			Dec 26 20:31:15 VBot-Assistant bluetoothd[587]: Starting SDP server
+			Dec 26 20:31:15 VBot-Assistant bluetoothd[587]: Bluetooth management interface 1.22 initialized
+			Dec 26 20:31:15 VBot-Assistant bluetoothd[587]: profiles/sap/server.c:sap_server_register() Sap dri>
+			Dec 26 20:31:15 VBot-Assistant bluetoothd[587]: sap-server: Operation not permitted (1)
+			Dec 26 20:31:15 VBot-Assistant bluetoothd[587]: Failed to set privacy: Rejected (0x0b)
+
+Bước 3: Cài Rpi-SetWiFi-viaBluetooth
+	- Chạy lệnh sau:
+		$:> curl  -L https://raw.githubusercontent.com/nksan/Rpi-SetWiFi-viaBluetooth/main/btwifisetInstall.sh | bash
+		
+	- Khi được hỏi: Specify btwifiset service install location
+		sẽ nhấn enter để cài thư mục mặc định
+
+	- Khi được hỏi: Bluetooth password (encryption key) [Default: VBot-Assistant]:
+		sẽ nhập: vbot123
+
+	- Khi được hỏi: btwifiset needs your WiFi Country code
+		sẽ nhập: vn
+
+	- Nhập Xong Chương trình sẽ bắt đầu cài Rpi-SetWiFi-viaBluetooth
+	- Khi cài thành công nhập lệnh sau để khởi động lại hệ thống:
+		$:> sudo reboot
