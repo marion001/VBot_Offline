@@ -969,7 +969,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               <div class="card accordion" id="accordion_button_7">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_7" aria-expanded="false">
-                    Cấu Hình Auto Kết Nối Wifi hoặc Tạo Điểm Truy Cập AP :
+                    Cấu Hình Auto Kết Nối Wifi hoặc Tạo Điểm Truy Cập AP:
                   </h5>
                   <div id="collapse_button_7" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_7">
                     - Truy Cập Tab: <b>Command/Terminal</b> -> <b>OS Wifi</b>
@@ -985,10 +985,186 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   </div>
                 </div>
               </div>
+            <div class="card accordion" id="accordion_button_wifi_via_ble">
+            <div class="card-body">
+            <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_wifi_via_ble" aria-expanded="false" aria-controls="collapse_button_wifi_via_ble">
+            Cài Đặt Cấu Hình Wifi Qua Bluetooth:</h5>
+            <div id="collapse_button_wifi_via_ble" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_wifi_via_ble">
+
+  <div class="alert alert-info">
+    <strong>Hướng dẫn:</strong> Cấu hình Bluetooth & cài đặt <b>Rpi-SetWiFi-viaBluetooth</b> trên Raspberry Pi
+  </div>
+
+  <!-- BƯỚC 1 -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+      🔧 Bước 1: Sửa file <code>/etc/apt/sources.list</code>
+    </div>
+    <div class="card-body">
+      <p><b>1. Mở file cấu hình:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>sudo nano /etc/apt/sources.list</code></pre>
+      <p><b>2. Chú thích dòng sau (thêm <code>#</code> phía trước):</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>#deb http://raspbian.raspberrypi.org/raspbian/ bullseye main contrib non-free rpi</code></pre>
+      <p><b>3. Thêm dòng mới:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>deb http://archive.raspbian.org/raspbian bullseye main contrib non-free</code></pre>
+      <p class="text-muted">
+        Nhấn <kbd>Ctrl</kbd> + <kbd>X</kbd> → <kbd>Y</kbd> → <kbd>Enter</kbd> để lưu
+      </p>
+      <p><b>4. Áp dụng thay đổi:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>
+sudo apt clean
+sudo apt update
+      </code></pre>
+    </div>
+  </div>
+  <!-- BƯỚC 2 -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-success text-white">
+      📡 Bước 2: Bật & kiểm tra Bluetooth
+    </div>
+    <div class="card-body">
+      <p><b>1. Kích hoạt dịch vụ Bluetooth:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>
+sudo systemctl enable bluetooth.service
+sudo systemctl enable hciuart.service
+sudo reboot
+      </code></pre>
+      <span class="badge bg-warning text-dark mb-3">Hệ thống sẽ tự khởi động lại</span>
+      <p class="mt-3"><b>2. Kiểm tra Bluetooth đã hoạt động:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>hciconfig</code></pre>
+      <p><b>Kết quả đúng sẽ giống như:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>
+hci0:   Type: Primary  Bus: UART
+        UP RUNNING PSCAN ISCAN
+      </code></pre>
+      <hr>
+      <p><b>3. Kiểm tra chi tiết dịch vụ:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>systemctl status hciuart</code></pre>
+      <pre class="bg-dark text-light p-3 rounded"><code>systemctl status bluetooth</code></pre>
+    </div>
+  </div>
+  <!-- BƯỚC 3 -->
+  <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-dark text-white">
+      📶 Bước 3: Cài Rpi-SetWiFi-viaBluetooth
+    </div>
+    <div class="card-body">
+      <p><b>1. Chạy lệnh cài đặt:</b></p>
+      <pre class="bg-dark text-light p-3 rounded"><code>
+curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/main/btwifisetInstall.sh | bash
+      </code></pre>
+<div class="alert alert-secondary mt-3">
+  <b>📌 Trong quá trình cài đặt, chương trình sẽ lần lượt hỏi:</b>
+</div>
+
+<div class="table-responsive">
+  <table class="table table-bordered align-middle">
+    <thead class="table-light">
+      <tr>
+        <th style="width:50%">Câu hỏi</th>
+        <th>Giá trị cần nhập</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>
+          Specify <b>btwifiset</b> service install location
+        </td>
+        <td>
+          <span class="badge bg-info text-dark">Nhấn Enter</span>
+          <div class="text-muted small">
+            (Sử dụng thư mục mặc định)
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Bluetooth password (encryption key)
+          <br>
+          <span class="text-muted small">
+            [Default: VBot-Assistant]
+          </span>
+        </td>
+        <td>
+          <code class="text-danger fw-bold">vbot123</code>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          btwifiset needs your WiFi Country code
+        </td>
+        <td>
+          <code class="fw-bold">vn</code>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+<div class="alert alert-success mt-3 mb-0">
+  ✔ Sau khi nhập xong các thông tin trên, chương trình sẽ tự động cài đặt
+  <b>Rpi-SetWiFi-viaBluetooth</b>
+</div><br/>
+      <p class="text-success">
+        ✔ Sau khi cài đặt hoàn tất, khởi động lại hệ thống bằng lệnh
+      </p>
+      <pre class="bg-dark text-light p-3 rounded"><code>sudo reboot</code></pre>
+    </div>
+<!-- APP KẾT NỐI BLUETOOTH -->
+<div class="card mb-4 shadow-sm">
+  <div class="card-header bg-warning text-dark">
+    📱 APP Kết Nối Bluetooth Với Loa VBot
+  </div>
+  <div class="card-body">
+    <p class="text-center">
+      Tên ứng dụng:
+      <span class="fw-bold text-danger">BTBerryWifi</span>
+    </p>
+    <div class="row">
+      <div class="col-md-6 mb-2">
+        <div class="border rounded p-3 h-100">
+          <h6 class="text-primary mb-2">🍎 IOS</h6>
+          <a href="https://apps.apple.com/us/app/btberrywifi/id1596978011" target="_blank" class="btn btn-outline-primary btn-sm">Mở App Store</a>
+          <div class="small text-muted mt-2">
+            https://apps.apple.com/us/app/btberrywifi/id1596978011
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 mb-2">
+        <div class="border rounded p-3 h-100">
+          <h6 class="text-success mb-2">🤖 Android</h6>
+          <a href="https://play.google.com/store/apps/details?id=com.bluepieapps.btberrywifi" target="_blank" class="btn btn-outline-success btn-sm">
+            Mở Google Play
+          </a>
+          <div class="small text-muted mt-2">
+            https://play.google.com/store/apps/details?id=com.bluepieapps.btberrywifi
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="alert alert-info mt-3 mb-0">
+      📌 Dùng ứng dụng <b>BTBerryWifi</b> để kết nối Bluetooth và cấu hình WiFi cho <b>Loa VBot</b>
+    </div>
+  </div>
+</div>
+<div class="alert alert-warning mt-3">
+  ⏱️ <b>Lưu ý:</b> Bluetooth sẽ tự động bật trong khoảng
+  <b>15 – 20 phút</b> kể từ khi loa được cấp nguồn,
+  sau đó sẽ <b>tự tắt</b>.
+  <br>
+  <span class="text-muted">
+    (Khoảng thời gian này đủ để cấu hình WiFi cho loa)
+  </span>
+</div>
+  </div>
+            </div>
+            </div>
+            </div>
+			
+			  
               <div class="card accordion" id="accordion_button_oled_i2c">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_oled_i2c" aria-expanded="false" aria-controls="collapse_button_oled_i2c">
-                    Kết Nối Màn Hình I2C:
+                    Kết Nối Màn Hình I2C (<font color=red>Không còn được hỗ trợ</font>):
                   </h5>
                   <div id="collapse_button_oled_i2c" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_oled_i2c">
                     Loại Màn Hình Đang Được Hỗ Trợ: <b>OLED 128X64 0.96 INCH 1306 giao tiếp I2C</b><br />
