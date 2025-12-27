@@ -1,0 +1,3 @@
+chạy lệnh sau để cài đặt tự động cấu hình wifi thông qua bluetooth trên pi bằng app: BTBerryWifi 
+
+$:> bash btwifisetInstall.sh
