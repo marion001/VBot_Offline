@@ -992,11 +992,60 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div id="collapse_button_wifi_via_ble" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_wifi_via_ble">
 
   <div class="alert alert-info">
-    <strong>Hướng dẫn:</strong> Cấu hình Bluetooth & cài đặt <b>Rpi-SetWiFi-viaBluetooth</b> trên Raspberry Pi
+    <strong>Hướng dẫn:</strong> Cấu hình Bluetooth & cài đặt <b>Rpi-SetWiFi-viaBluetooth</b> trên Raspberry Pi<br/>
+<br/>
+<b>Hướng Dẫn Sử Dụng APP BTBerryWifi Cấu Hình Wifi Cho Loa VBot: <a href="https://docs.google.com/document/d/1qX4mNQAQWzEbEEpk4AWL95_nlinlArLg/edit" target="_blank">https://docs.google.com/document/d/1qX4mNQAQWzEbEEpk4AWL95_nlinlArLg</a></b>
+	
   </div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="bi bi-terminal"></i> Hướng dẫn cài đặt WiFi qua Bluetooth (Tự động)
+    </div>
+
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="bi bi-shield-lock-fill"></i>
+            <b>Yêu cầu bắt buộc:</b>  
+            Cần <b>truy cập SSH</b> vào Raspberry Pi để thực hiện các lệnh cài đặt bên dưới.
+        </div>
+
+        <p class="mb-3">
+            Hệ thống hỗ trợ <b>cấu hình WiFi qua Bluetooth hoàn toàn tự động</b>.  
+            Sau khi đăng nhập SSH vào thiết bị, thực hiện các bước sau:
+        </p>
+
+        <ol class="mb-4">
+            <li class="mb-3">
+                <b>Bước 1:</b> Di chuyển đến thư mục cài đặt
+                <pre class="bg-dark text-light p-3 rounded mt-2"><code>$:> cd /home/pi/VBot_Offline/resource/set_wifi_via_ble</code></pre>
+            </li>
+
+            <li class="mb-3">
+                <b>Bước 2:</b> Chạy script cài đặt
+                <pre class="bg-dark text-light p-3 rounded mt-2"><code>$:> bash btwifisetInstall.sh</code></pre>
+            </li>
+
+            <li class="mb-3">
+                <b>Bước 3:</b> Khởi động lại hệ thống sau khi cài đặt thành công
+                <pre class="bg-dark text-light p-3 rounded mt-2"><code>$:> sudo reboot</code></pre>
+            </li>
+        </ol>
+
+        <div class="alert alert-success mb-0">
+            <i class="bi bi-check-circle-fill"></i>
+            Sau khi khởi động lại, hệ thống sẵn sàng cấu hình WiFi qua Bluetooth.
+        </div>
+    </div>
+</div>
+
+
 
   <!-- BƯỚC 1 -->
   <div class="card mb-4 shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <i class="bi bi-terminal"></i> Hướng dẫn cài đặt WiFi qua Bluetooth (Thủ Công)
+    </div>
     <div class="card-header bg-primary text-white">
       🔧 Bước 1: Sửa file <code>/etc/apt/sources.list</code>
     </div>
