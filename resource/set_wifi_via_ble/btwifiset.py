@@ -150,7 +150,7 @@ class WifiUtil:
         return int((freq - 2407) / 5)
      #this returns 5 GHZ channels
      return int(freq/5 - 1000)
-    
+
     @staticmethod
     def scan_for_channel():
         #each ssid is dictionary with keys: frequency,signalStrength,channel,ssid
@@ -175,6 +175,52 @@ class WifiUtil:
             pass
         return found_ssids
 
+    @staticmethod
+    def vbot_ble_display_name():
+        CONFIG_PATH = "/home/pi/VBot_Offline/Config.json"
+        PREFIX = "VBot: "
+        config_name = None
+        current_alias = None
+        hostname = None
+        try:
+            if os.path.exists(CONFIG_PATH):
+                with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                config_name = data.get("contact_info", {}).get("full_name")
+                if isinstance(config_name, str):
+                    config_name = config_name.strip()
+                else:
+                    config_name = None
+        except Exception as e:
+            mLOG.log(f"Read Config.json VBot failed: {e}")
+        try:
+            result = subprocess.run(["bluetoothctl", "show"], capture_output=True, text=True)
+            for line in result.stdout.splitlines():
+                if "Alias:" in line:
+                    current_alias = line.split("Alias:", 1)[1].strip()
+                    break
+        except Exception as e:
+            mLOG.log(f"Read Bluetooth Alias failed: {e}")
+        try:
+            result = subprocess.run(["hostname"], capture_output=True, text=True)
+            hostname = result.stdout.strip()
+        except:
+            hostname = None
+        if config_name:
+            final_name = f"{PREFIX}{config_name}"
+        elif current_alias:
+            final_name = current_alias
+        elif hostname:
+            final_name = hostname
+        else:
+            final_name = "VBot-Assistant"
+        try:
+            if final_name and final_name != current_alias:
+                subprocess.run(["sudo", "bluetoothctl", "system-alias", final_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                mLOG.log(f"Bluetooth Alias updated → {final_name}")
+        except Exception as e:
+            mLOG.log(f"Set Bluetooth Alias failed: {e}", level=mLOG.CRITICAL)
+        return final_name
 
     @staticmethod
     def get_hostname():
@@ -3104,6 +3150,10 @@ class BLEManager:
         mLOG.log("** Version date: March 10 2025 **\n")
         mLOG.log(f'BTwifiSet timeout: {int(ConfigData.TIMEOUT/60)} minutes')
         mLOG.log("starting BLE Server")
+        
+        vbot_ble_name = WifiUtil.vbot_ble_display_name()
+        mLOG.log(f"BLE VBot display name: {vbot_ble_name}")
+        
         ConfigData.reset_timeout()
         
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)

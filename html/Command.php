@@ -967,6 +967,38 @@ if (isset($_POST['restart_btwifiset'])) {
   $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['start_btwifiset'])) {
+  $CMD = "sudo systemctl start btwifiset";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['stop_btwifiset'])) {
+  $CMD = "sudo systemctl stop btwifiset";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
 if (isset($_POST['enable_btwifiset'])) {
   $CMD = "sudo systemctl enable btwifiset";
   $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -1033,6 +1065,22 @@ if (isset($_POST['status_btwifiset'])) {
 
 if (isset($_POST['pass_crypto_btwifiset'])) {
   $CMD = "cat /usr/local/btwifiset/crypto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['update_btwifiset_py'])) {
+  $CMD = "sudo cp /home/pi/VBot_Offline/resource/set_wifi_via_ble/btwifiset.py /usr/local/btwifiset/btwifiset.py";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1840,14 +1888,15 @@ include 'html_head.php';
                           BT Wifi Set
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                          <li>
-                            <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_btwifiset" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto btwifiset</button>
-                          </li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="start_btwifiset" type="submit" title="Chạy Services Auto btwifiset">Start btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_btwifiset" type="submit" title="Dừng Services Auto btwifiset">Stop btwifiset</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_btwifiset" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto btwifiset</button>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_btwifiset" type="submit" title="Kích Hoạt Services Auto btwifiset">Enable Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_btwifiset" type="submit" title="Vô Hiệu Services Auto btwifiset">Disabled Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_btwifiset" type="submit" title="Xem Logs Auto btwifiset">Logs Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="status_btwifiset" type="submit" title="Kiêm tra trạng thái btwifiset">Status Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="pass_crypto_btwifiset" type="submit" title="Xem Mật Khẩu Mã Hóa Tín Hiệu btwifiset">Password Crypto btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="update_btwifiset_py" type="submit" title="Cập nhật mới file btwifiset.py từ resource">UPDATE btwifiset.py</button></li>
                         </ul>
                       </div>
                     </div>
