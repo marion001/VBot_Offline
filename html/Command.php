@@ -7,8 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
-?>
-<?php
+
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
   if (
@@ -21,8 +20,7 @@ if ($Config['contact_info']['user_login']['active']) {
     exit;
   }
 }
-?>
-<?php
+
 // Khởi tạo biến để lưu output
 $output = '';
 
@@ -359,8 +357,6 @@ if (isset($_POST['enabled_vbot_api_external'])) {
     ProxyPass /vbot_api_external/ http://localhost:{$Port_API}/
     ProxyPassReverse /vbot_api_external/ http://localhost:{$Port_API}/
 EOT;
-
-  // Thực hiện SSH kết nối
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -368,16 +364,14 @@ EOT;
   if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
     die($SSH2_AUTH_ERROR);
   }
-  // Đọc file cấu hình
   $cmd_read = "cat /etc/apache2/sites-available/000-default.conf";
   $stream = ssh2_exec($connection, $cmd_read);
   stream_set_blocking($stream, true);
   $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
   $conf_content = stream_get_contents($stream_out);
   fclose($stream);
-  // Ghi log lệnh đọc file
   $output = "$GET_current_USER@$HostName:~ $ $cmd_read\n";
-  // Tìm khối <VirtualHost *:80>
+  //Tìm khối <VirtualHost *:80>
   if (!preg_match('/<VirtualHost\s*\*:80\s*>\s*(.*?)\s*<\/VirtualHost>/s', $conf_content, $matches)) {
     die("Không tìm thấy khối <VirtualHost *:80> trong file cấu hình Apache2");
   }
@@ -386,43 +380,43 @@ EOT;
   // Kiểm tra sự tồn tại của ProxyPass và ProxyPassReverse (bao gồm cả dòng bị bình luận)
   $has_proxy_pass = preg_match('/^\s*(#)?\s*ProxyPass \/vbot_api_external\//m', $virtual_host_content, $proxy_pass_match);
   $has_proxy_pass_reverse = preg_match('/^\s*(#)?\s*ProxyPassReverse \/vbot_api_external\//m', $virtual_host_content, $proxy_pass_reverse_match);
-  // Xử lý nội dung trong khối VirtualHost
+  //Xử lý nội dung trong khối VirtualHost
   if ($has_proxy_pass || $has_proxy_pass_reverse) {
-    // Thay thế hoặc uncomment các dòng hiện có
+    //Thay thế hoặc uncomment các dòng hiện có
     $new_vhost_content = $virtual_host_content;
     if ($has_proxy_pass) {
-      // Nếu dòng ProxyPass tồn tại (có hoặc không có #), thay thế hoặc uncomment
+      //Nếu dòng ProxyPass tồn tại (có hoặc không có #), thay thế hoặc uncomment
       $new_vhost_content = preg_replace(
         '/^\s*#?\s*ProxyPass \/vbot_api_external\/.*?$/m',
         '    ProxyPass /vbot_api_external/ http://localhost:' . $Port_API . '/',
         $new_vhost_content
       );
     } else {
-      // Nếu không có ProxyPass, thêm mới vào cuối khối
+      //Nếu không có ProxyPass, thêm mới vào cuối khối
       $new_vhost_content = rtrim($new_vhost_content) . "\n    ProxyPass /vbot_api_external/ http://localhost:" . $Port_API . "/";
     }
     if ($has_proxy_pass_reverse) {
-      // Nếu dòng ProxyPassReverse tồn tại (có hoặc không có #), thay thế hoặc uncomment
+      //Nếu dòng ProxyPassReverse tồn tại (có hoặc không có #), thay thế hoặc uncomment
       $new_vhost_content = preg_replace(
         '/^\s*#?\s*ProxyPassReverse \/vbot_api_external\/.*?$/m',
         '    ProxyPassReverse /vbot_api_external/ http://localhost:' . $Port_API . '/',
         $new_vhost_content
       );
     } else {
-      // Nếu không có ProxyPassReverse, thêm mới vào cuối khối
+      //Nếu không có ProxyPassReverse, thêm mới vào cuối khối
       $new_vhost_content = rtrim($new_vhost_content) . "\n    ProxyPassReverse /vbot_api_external/ http://localhost:" . $Port_API . "/";
     }
   } else {
-    // Nếu không có cả hai, thêm cả hai vào cuối khối
+    //Nếu không có cả hai, thêm cả hai vào cuối khối
     $new_vhost_content = rtrim($virtual_host_content) . "\n" . $proxyConfig;
   }
-  // Cập nhật toàn bộ nội dung file với khối VirtualHost đã chỉnh sửa
+  //Cập nhật toàn bộ nội dung file với khối VirtualHost đã chỉnh sửa
   $new_conf = preg_replace(
     '/<VirtualHost\s*\*:80\s*>\s*.*?\s*<\/VirtualHost>/s',
     "<VirtualHost *:80>\n$new_vhost_content\n</VirtualHost>",
     $conf_content
   );
-  // Tạo file tạm trên server
+  //Tạo file tạm trên server
   $remote_temp_file = '/tmp/apache_conf_temp.conf';
   $cmd_touch = "touch $remote_temp_file";
   $stream_touch = ssh2_exec($connection, $cmd_touch);
@@ -431,21 +425,21 @@ EOT;
   $result_touch = stream_get_contents($stream_touch_out);
   fclose($stream_touch);
   $output .= "$GET_current_USER@$HostName:~ $ $cmd_touch\n";
-  // Ghi nội dung mới vào file tạm
+  //Ghi nội dung mới vào file tạm
   $cmd_write = "echo " . escapeshellarg($new_conf) . " > $remote_temp_file";
   $stream_write = ssh2_exec($connection, $cmd_write);
   stream_set_blocking($stream_write, true);
   $stream_write_out = ssh2_fetch_stream($stream_write, SSH2_STREAM_STDIO);
   $result_write = stream_get_contents($stream_write_out);
   fclose($stream_write);
-  // Sao chép file tạm vào vị trí cấu hình
+  //Sao chép file tạm vào vị trí cấu hình
   $cmd_replace = "sudo cp $remote_temp_file /etc/apache2/sites-available/000-default.conf";
   $stream_replace = ssh2_exec($connection, $cmd_replace);
   stream_set_blocking($stream_replace, true);
   $stream_replace_out = ssh2_fetch_stream($stream_replace, SSH2_STREAM_STDIO);
   $result_replace = stream_get_contents($stream_replace_out);
   fclose($stream_replace);
-  // Kích hoạt Modules proxy và proxy_http
+  //Kích hoạt Modules proxy và proxy_http
   $cmd_proxy = "sudo a2enmod proxy";
   $cmd_proxy_http = "sudo a2enmod proxy_http";
   $stream_proxy = ssh2_exec($connection, $cmd_proxy);
@@ -458,7 +452,7 @@ EOT;
   $result_proxy_http = stream_get_contents($stream_proxy_http_out);
   fclose($stream_proxy);
   fclose($stream_proxy_http);
-  // Ghi log các lệnh
+  //Ghi log các lệnh
   $output .= "$GET_current_USER@$HostName:~ $ $cmd_replace\n";
   $output .= "$GET_current_USER@$HostName:~ $ $cmd_proxy\n";
   $output .= $result_proxy . "\n";
@@ -475,27 +469,27 @@ if (isset($_POST['disable_vbot_api_external'])) {
   if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
     die($SSH2_AUTH_ERROR);
   }
-  // Đọc file cấu hình
+  //Đọc file cấu hình
   $cmd_read = "cat /etc/apache2/sites-available/000-default.conf";
   $stream = ssh2_exec($connection, $cmd_read);
   stream_set_blocking($stream, true);
   $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
   $conf_content = stream_get_contents($stream_out);
   fclose($stream);
-  // Ghi log lệnh đọc file
+  //Ghi log lệnh đọc file
   $output = "pi@VBot-Assistant:~ $ $cmd_read\n";
-  // Tìm khối <VirtualHost *:80>
+  //Tìm khối <VirtualHost *:80>
   if (!preg_match('/<VirtualHost\s*\*:80\s*>\s*(.*?)\s*<\/VirtualHost>/s', $conf_content, $matches)) {
     die("Không tìm thấy khối <VirtualHost *:80> trong file cấu hình Apache2");
   }
-  // Nội dung bên trong <VirtualHost *:80>
+  //Nội dung bên trong <VirtualHost *:80>
   $virtual_host_content = $matches[1];
-  // Xóa tất cả các dòng ProxyPass và ProxyPassReverse (có hoặc không có #)
+  //Xóa tất cả các dòng ProxyPass và ProxyPassReverse (có hoặc không có #)
   $new_vhost_content = preg_replace('/^\s*#?\s*ProxyPass\s+\/vbot_api_external\/.*$/m', '', $virtual_host_content);
   $new_vhost_content = preg_replace('/^\s*#?\s*ProxyPassReverse\s+\/vbot_api_external\/.*$/m', '', $new_vhost_content);
-  // Cập nhật toàn bộ nội dung file với khối VirtualHost đã chỉnh sửa
+  //Cập nhật toàn bộ nội dung file với khối VirtualHost đã chỉnh sửa
   $new_conf = preg_replace('/<VirtualHost\s*\*:80\s*>\s*.*?\s*<\/VirtualHost>/s', "<VirtualHost *:80>\n$new_vhost_content\n</VirtualHost>", $conf_content);
-  // Tạo file tạm trên server
+  //Tạo file tạm trên server
   $remote_temp_file = '/tmp/apache_conf_temp.conf';
   $cmd_touch = "touch $remote_temp_file";
   $stream_touch = ssh2_exec($connection, $cmd_touch);
@@ -503,23 +497,20 @@ if (isset($_POST['disable_vbot_api_external'])) {
   $stream_touch_out = ssh2_fetch_stream($stream_touch, SSH2_STREAM_STDIO);
   $result_touch = stream_get_contents($stream_touch_out);
   fclose($stream_touch);
-  // Ghi log lệnh touch
   $output .= "pi@VBot-Assistant:~ $ $cmd_touch\n";
-  // Ghi nội dung mới vào file tạm
   $cmd_write = "echo " . escapeshellarg($new_conf) . " > $remote_temp_file";
   $stream_write = ssh2_exec($connection, $cmd_write);
   stream_set_blocking($stream_write, true);
   $stream_write_out = ssh2_fetch_stream($stream_write, SSH2_STREAM_STDIO);
   $result_write = stream_get_contents($stream_write_out);
   fclose($stream_write);
-  // Sao chép file tạm vào vị trí cấu hình
+  //Sao chép file tạm vào vị trí cấu hình
   $cmd_replace = "sudo cp $remote_temp_file /etc/apache2/sites-available/000-default.conf";
   $stream_replace = ssh2_exec($connection, $cmd_replace);
   stream_set_blocking($stream_replace, true);
   $stream_replace_out = ssh2_fetch_stream($stream_replace, SSH2_STREAM_STDIO);
   $result_replace = stream_get_contents($stream_replace_out);
   fclose($stream_replace);
-  // Ghi log các lệnh
   $output .= "pi@VBot-Assistant:~ $ $cmd_replace\n";
   $output .= $result_replace . "\n";
   $output .= "Đã vô hiệu cấu hình WebUI ra Internet thành công, Vui lòng Restart lại Apache2 hoặc Reboot lại hệ thống để áp dụng";
@@ -631,10 +622,7 @@ if (isset($_POST['auto_wifi_manager_and_speaker_ip'])) {
 }
 
 if (isset($_POST['config_auto'])) {
-  // Đường dẫn đến file service
   $serviceFilePath = "{$VBot_Offline}resource/VBot_Offline.service";
-
-  // Nội dung của file service với biến
   $serviceContent = <<<EOD
   [Unit]
   Description=VBot_Offline
@@ -654,8 +642,6 @@ if (isset($_POST['config_auto'])) {
   [Install]
   WantedBy=default.target
   EOD;
-
-  // Tạo hoặc ghi đè file service
   file_put_contents($serviceFilePath, $serviceContent);
   $CMD1 = "cp {$VBot_Offline}resource/VBot_Offline.service /home/$ssh_user/.config/systemd/user/VBot_Offline.service";
   $CMD2 = "sudo chmod 0777 {$VBot_Offline}resource/VBot_Offline.service";
@@ -690,7 +676,6 @@ if (isset($_POST['config_auto'])) {
   $output .= "$GET_current_USER@$HostName:~ $ $CMD4\n";
   $output .= stream_get_contents($stream_out4);
 }
-
 
 //Cài Đặt Hành Động Với LCD
 if (isset($_POST['lcd_auto_start'])) {
@@ -790,10 +775,7 @@ if (isset($_POST['lcd_auto_restart'])) {
 }
 
 if (isset($_POST['lcd_config_auto'])) {
-  // Đường dẫn đến file service
   $serviceFilePath = "{$VBot_Offline}resource/VBot_LCD_OLED.service";
-
-  // Nội dung của file service với biến
   $serviceContent = <<<EOD
   [Unit]
   Description=VBot_LCD_OLED
@@ -805,8 +787,6 @@ if (isset($_POST['lcd_config_auto'])) {
   [Install]
   WantedBy=default.target
   EOD;
-
-  // Tạo hoặc ghi đè file service
   file_put_contents($serviceFilePath, $serviceContent);
   $CMD1 = "cp {$VBot_Offline}resource/VBot_LCD_OLED.service /home/$ssh_user/.config/systemd/user/VBot_LCD_OLED.service";
   $CMD2 = "sudo chmod 0777 {$VBot_Offline}resource/VBot_LCD_OLED.service";
@@ -957,6 +937,102 @@ if (isset($_POST['reboot_os'])) {
 
 if (isset($_POST['reload_services'])) {
   $CMD = "sudo systemctl daemon-reload";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['restart_btwifiset'])) {
+  $CMD = "sudo systemctl restart btwifiset";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['enable_btwifiset'])) {
+  $CMD = "sudo systemctl enable btwifiset";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['disabled_btwifiset'])) {
+  $CMD = "sudo systemctl disable btwifiset";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['logs_btwifiset'])) {
+  $CMD = "journalctl -u btwifiset -e";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['status_btwifiset'])) {
+  $CMD = "sudo systemctl status btwifiset";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['pass_crypto_btwifiset'])) {
+  $CMD = "cat /usr/local/btwifiset/crypto";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1755,6 +1831,23 @@ include 'html_head.php';
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_status" type="submit" title="Kiểm Tra Trạng Thái Cloudflare Tunnel">Kiểm Tra Trạng Thái</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_list" type="submit" title="Xem Danh Sách Tunnel List">Xem Danh Sách Tunnel List</button></li>
                           <li><a href="FAQ.php"><button onclick="loading('show')" class="dropdown-item text-danger" type="button" title="Xem Hướng Dẫn">Hướng Dẫn</button></a></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="btn-group">
+                      <div class="dropdown">
+                        <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Wifi Thông Qua Bluetooth">
+                          BT Wifi Set
+                        </button>
+                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <li>
+                            <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_btwifiset" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto btwifiset</button>
+                          </li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_btwifiset" type="submit" title="Kích Hoạt Services Auto btwifiset">Enable Auto btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_btwifiset" type="submit" title="Vô Hiệu Services Auto btwifiset">Disabled Auto btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_btwifiset" type="submit" title="Xem Logs Auto btwifiset">Logs Auto btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_btwifiset" type="submit" title="Kiêm tra trạng thái btwifiset">Status Auto btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="pass_crypto_btwifiset" type="submit" title="Xem Mật Khẩu Mã Hóa Tín Hiệu btwifiset">Password Crypto btwifiset</button></li>
                         </ul>
                       </div>
                     </div>
