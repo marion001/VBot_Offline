@@ -2246,6 +2246,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
 <div class="alert alert-primary mt-3">
 Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth (Khi đã được cấu hình -> <a href='FAQ.php' target='_blank'>Nhấn Để Xem Chi Tiết</a>)<br/>
 - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại
                     </div>
                 </div>

@@ -947,6 +947,7 @@ sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/
                     </div>
 <div class="alert alert-primary mt-3">
 Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth (Khi đã được cấu hình Xem Chi Tiết Bên Dưới: <b>Cài Đặt Cấu Hình Wifi Qua Bluetooth</b>)<br/>
 - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại
                     </div>
                   </div>
