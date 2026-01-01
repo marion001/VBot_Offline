@@ -620,7 +620,7 @@ function loadLearnedCommandsEditable() {
         var tbody = document.querySelector('#cmdTable tbody');
         tbody.innerHTML = '';
         if (!res.success || !res.data || !res.data.cmd_devices_remote) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-danger"><b>Chưa có dữ liệu các mã lệnh đã học</b></td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" class="text-center text-danger"><b>Chưa có dữ liệu các mã lệnh đã học</b></td></tr>';
             return;
         }
         var cmds = res.data.cmd_devices_remote;
