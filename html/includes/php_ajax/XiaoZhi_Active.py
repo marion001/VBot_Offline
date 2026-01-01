@@ -22,6 +22,7 @@ from pathlib import Path
 import psutil
 import platform
 import uuid
+import os
 
 try:
     import machineid
@@ -60,6 +61,22 @@ def get_mac_address() -> str:
         return mac
     except Exception as e:
         return "00:00:00:00:00:00"
+
+#Fake Mac
+def get_mac_from_config(config_path="/home/pi/VBot_Offline/Config.json") -> str:
+    if not os.path.exists(config_path):
+        return get_mac_address()
+    try:
+        with open(config_path, "r", encoding="utf-8") as f:
+            config = json.load(f)
+        fake_cfg = config.get("xiaozhi", {}).get("fake_mac", {})
+        if fake_cfg.get("active") is True:
+            address = fake_cfg.get("address")
+            if address:
+                return address.lower()
+        return get_mac_address()
+    except Exception:
+        return get_mac_address()
 
 #Đọc file Version.json và trả về giá trị releaseDate.
 def get_release_date(file_path="VBot_Offline/Version.json"):
@@ -114,7 +131,8 @@ def sign_challenge(hmac_key: str, challenge: str) -> str:
 
 def main():
     try:
-        mac = get_mac_address()
+        #mac = get_mac_address()
+        mac = get_mac_from_config()
         get_ip_address = get_local_ip()
         hostname = socket.gethostname()
         machine_id = get_machine_id()

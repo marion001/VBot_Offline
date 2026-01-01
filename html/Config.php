@@ -519,6 +519,8 @@ if (isset($_POST['all_config_save'])) {
   #Cập nhật XiaoZhi AI
   $Config['xiaozhi']['active'] = isset($_POST['xiaozhi_ai_active']) ? true : false;
   $Config['xiaozhi']['mcp_system_control'] = isset($_POST['xiaozhi_ai_mcp_system']) ? true : false;
+  $Config['xiaozhi']['fake_mac']['active'] = isset($_POST['xiaozhi_fakemac_active']) ? true : false;
+  $Config['xiaozhi']['fake_mac']['address'] = $_POST['xiaozhi_mac_fake'];
   $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
   $Config['xiaozhi']['tts_time_out'] = intval($_POST['xiaozhi_tts_time_out']);
   $Config['xiaozhi']['reconnection_timeout'] = intval($_POST['xiaozhi_reconnection_timeout']);
@@ -3072,6 +3074,18 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   echo input_field('xiaozhi_mqtt_subscribe_topic', 'MQTT Subscribe Topic', $Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic'] ?? '', 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   ?>
                 </div>
+				<div class="alert alert-primary">
+				<div class='row mb-3'>
+				<label class='col-sm-3 col-form-label'>Fake Mac Verification <i class='bi bi-question-circle-fill' onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng địa chỉ Mac giả, để Kích hoạt xác thực với Server Xiaozhi khi bạn quên tài khoản đăng nhập liên kết thiết bị này trên server của Xiaozhi')"></i> :</label>
+				<div class='col-sm-9'>
+				<div class='form-switch'>
+				<input class='form-check-input border-success' type='checkbox' name='xiaozhi_fakemac_active' id='xiaozhi_fakemac_active' <?php echo $Config['xiaozhi']['fake_mac']['active'] ? 'checked' : ''; ?>>
+				</div></div></div>
+				<?php
+				echo input_field('xiaozhi_mac_fake', 'Địa Chỉ MAC Giả ', htmlspecialchars($Config['xiaozhi']['fake_mac']['address']), 'readonly', 'text', '', '', '', '', 'border-danger', 'Tạo MAC Giả', "random_mac_address('xiaozhi_mac_fake')", 'btn btn-danger border-danger', 'onclick', '_blank');
+				?>
+				- Lưu Ý: Khi Chức Năng Này Được Bật Bạn Cần: <b>Hủy Liên Kết Và Đặt Lại Dữ Liệu</b> Ở Bên Trên Để Tiến Hành Xác Thực Lại Với Server Xiaozhi Bằng Địa Chỉ MAC Giả Này Nhé
+				</div>
               </div>
             </div>
             </div>
@@ -4057,6 +4071,31 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
       }
       loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
     }
+
+	//Tạo Mac Giả
+	function random_mac_address(inputId) {
+		const input = document.getElementById(inputId);
+		if (!input) {
+			show_message("không tìm thấy thẻ input có id là: "+inputId);
+			return;
+		}
+		const hex = "0123456789abcdef";
+		let mac = [];
+		for (let i = 0; i < 6; i++) {
+			mac.push(
+				hex[Math.floor(Math.random() * 16)] +
+				hex[Math.floor(Math.random() * 16)]
+			);
+		}
+		let firstByte = parseInt(mac[0], 16);
+		firstByte = (firstByte | 0x02) & 0xFE;
+		mac[0] = firstByte.toString(16).padStart(2, "0");
+		mac_fake = mac.join(":");
+		input.value = mac_fake
+		showMessagePHP("Tạo địa chỉ MAC giả thành công: " +mac_fake, 5);
+		show_message("Tạo địa chỉ MAC giả thành công: <b>" +mac_fake+ "</b> Bạn cần bật kích hoạt: <b>Fake Mac Verification</b> và <b>Lưu Cài Đặt</b> trước, sau đó mới nhấn nút: <b>Hủy Liên Kết Và Đặt Lại Dữ Liệu</b> để tiến hành xác thực kích hoạt lại với máy chủ Xiaozhi");
+	}
+
     document.addEventListener('DOMContentLoaded', function() {
       updateButton_Audio_Welcome();
       document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)

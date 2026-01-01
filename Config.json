@@ -84,7 +84,7 @@
             "minimum_threshold": 0.85
         },
         "json_file": "resource/broadlink/broadlink.json",
-		"backup_path": "Backup_Upgrade/Backup_Broadlink" 
+        "backup_path": "Backup_Upgrade/Backup_Broadlink"
     },
     "mqtt_broker": {
         "mqtt_active": false,
@@ -775,6 +775,10 @@
                     "subscribe_topic": ""
                 }
             }
+        },
+        "fake_mac": {
+            "active": false,
+            "address": "ee:29:06:d4:b9:4a"
         }
     }
 }

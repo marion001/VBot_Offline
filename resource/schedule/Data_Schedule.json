@@ -5,7 +5,7 @@
             "create_words": "vbot_interface",
             "data": {
                 "message": "hhh",
-                "audio_file": "/home/pi/VBot_Offline/Media/Music_Local/Cảm Ơn Em (WM Remix).mp3",
+                "audio_file": "",
                 "repeat": 1
             },
             "date": [
@@ -133,6 +133,28 @@
             "Friday",
             "Saturday",
             "Sunday"
+        ]
+    },
+    "mic_on_off": {
+        "date": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+        ],
+        "active": false,
+        "time": [
+            "21:47",
+            "21:49",
+            "21:51"
+        ],
+        "action": [
+            "off",
+            "on",
+            "off"
         ]
     }
 }

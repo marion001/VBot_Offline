@@ -2810,34 +2810,6 @@
 			"response": []
 		},
 		{
-			"name": "REBOOT OS SYSTEM (Khi Bot Đang Chạy)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"reboot_os\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.30:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "Nhiệt Độ CPU Hiện Tại",
 			"request": {
 				"method": "POST",
@@ -2845,6 +2817,62 @@
 				"body": {
 					"mode": "raw",
 					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"cpu_temperature\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.175:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"175"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Bật Bluetooth (Thiết lập Wifi Qua Bluetooth)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth_on\",\r\n    \"action\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.175:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"175"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Tắt Bluetooth (Thiết lập Wifi Qua Bluetooth)",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth_off\",\r\n    \"action\": true\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"

@@ -68,6 +68,21 @@
                 "Mở rèm phòng khách một nửa"
             ],
             "active": false
+        },
+        {
+            "name": "scripts tốc độ quạt",
+            "reply": "",
+            "data_yaml": {
+                "action": "script.turn_on",
+                "data": "{}",
+                "target": {
+                    "entity_id": "script.irsend_quat_phong_ngu_toc_do_quat"
+                }
+            },
+            "questions": [
+                "quạt chạy nhé"
+            ],
+            "active": false
         }
     ]
 }

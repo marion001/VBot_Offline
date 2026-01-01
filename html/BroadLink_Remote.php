@@ -21,7 +21,7 @@ if ($Config['contact_info']['user_login']['active']) {
   }
 }
 
-// Mảng lưu thông báo
+//Mảng lưu thông báo
 $errorMessages = [];
 $successMessage = [];
 
@@ -264,8 +264,8 @@ if (!empty($successMessage)) {
             <th style="text-align: center; vertical-align: middle;">Câu Phản Hồi <i class="bi bi-question-circle-fill" onclick="show_message('Câu Phản Hồi Này Sẽ Phát Ra Loa Khi Mã Lệnh Được Thực Thi Xong')"></i></th>
             <th style="text-align: center; vertical-align: middle;">Thiết Bị Thực Thi <i class="bi bi-question-circle-fill" onclick="show_message('Thiết bị nào không hỗ trợ lệnh RF sẽ không chọn được')"></i></th>
             <th style="text-align: center; vertical-align: middle;">Kích Hoạt</th>
-            <th style="text-align: center; vertical-align: middle;">Kiểu Dữ Liệu</th>
-            <th style="text-align: center; vertical-align: middle;">Mã Lệnh</th>
+            <th style="text-align: center; vertical-align: middle;">Kiểu Lệnh</th>
+            <th style="text-align: center; vertical-align: middle;">Mã Lệnh, Code</th>
             <th style="text-align: center; vertical-align: middle;">Hành Động</th>
           </tr>
         </thead>
@@ -436,23 +436,39 @@ function showSaveLearnCommandButton(ip, mac, devtype, wave_type) {
 }
 
 //Thẻ Select Và Input khi học xong lệnh
-function showLearnCommandExtraFields() {
-    const box = document.getElementById("learn_command_extra_fields");
+function showLearnCommandExtraFields(handmade) {
+    const box = document.getElementById('learn_command_extra_fields');
     if (!box) return;
-    if (document.getElementById("learn_command_name")) return;
-	box.innerHTML =
-		'<div class="form-floating mb-3">' +
-			'<input type="text" id="learn_command_name" class="form-control border-success">' +
-			'<label for="learn_command_name">Đặt tên câu lệnh này:</label>' +
-		'</div>' +
-		'<div class="form-floating mb-3">' +
-			'<input type="text" id="learn_command_reply" class="form-control border-success">' +
-			'<label for="learn_command_reply">Văn Bản, Câu Phản Hồi Tùy Chỉnh</label>' +
-		'</div>' +
-		'<div class="form-floating mb-3">' +
-			'<select id="learn_command_device" class="form-select border-success"></select>' +
-			'<label class="form-label">Chọn thiết bị thực thi lệnh:</label>' +
-		'</div>';
+    if (handmade === 'clear') {
+        box.innerHTML = '';
+        return;
+    }
+    let html = '';
+    if (handmade === 'handmade') {
+        html +=
+			'<div class="form-floating mb-3" id="handmade_code_type_box">' +
+				'<select id="handmade_code_type" class="form-select border-success">' +
+					'<option value="">Chọn Kiểu Loại Mã Lệnh: ir/rf</option>' +
+					'<option value="ir">Mã Lệnh IR</option>' +
+					'<option value="rf">Mã Lệnh RF</option>' +
+				'</select>' +
+				'<label for="handmade_code_type">Chọn Kiểu Loại Lệnh Tương Ứng:</label>' +
+			'</div>';
+    }
+    html +=
+        '<div class="form-floating mb-3">' +
+            '<input type="text" id="learn_command_name" class="form-control border-success">' +
+            '<label for="learn_command_name">Đặt tên câu lệnh này:</label>' +
+        '</div>' +
+        '<div class="form-floating mb-3">' +
+            '<input type="text" id="learn_command_reply" class="form-control border-success">' +
+            '<label for="learn_command_reply">Văn Bản, Câu Phản Hồi Tùy Chỉnh</label>' +
+        '</div>' +
+        '<div class="form-floating mb-3">' +
+            '<select id="learn_command_device" class="form-select border-success"></select>' +
+            '<label class="form-label">Chọn thiết bị thực thi lệnh:</label>' +
+        '</div>';
+    box.innerHTML = html;
 }
 
 //Scan Thiết Bị Broadlink
@@ -552,6 +568,11 @@ function loadBroadlinkDevices() {
                         'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'rf\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
                         '<i class="bi bi-broadcast-pin"></i> RF</button>';
                 }
+				learnButtons +=
+					'<button type="button" class="btn btn-info me-1" ' +
+					'title="Thêm Lệnh Thủ Công Từ: ' + dev.friendly_name + '" ' +
+					'onclick="learn_Command_handmade(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'handmade\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
+					'<i class="bi bi-plus-circle-dotted"></i> Thêm Thủ Công</button>';
                 //CỘT HÀNH ĐỘNG
                 var actionButtons =
                     '<button type="button" class="btn btn-success me-1" title="Đổi Tên Thiết Bị" onclick="renameDevice(\'' + dev.mac + '\')"><i class="bi bi-pencil-square"></i></button>' +
@@ -753,9 +774,11 @@ function learn_Command(ip, mac, devtype, wave_type, friendly_name, model) {
 	}
     const nameInput = document.getElementById('learn_command_name');
 	const dataTextarea = document.getElementById('learned_command_data');
+	showLearnCommandExtraFields('clear');
     if (nameInput) nameInput.value = '';
     if (dataTextarea) dataTextarea.value = '';
 	currentLearnDeviceMac = mac;
+	dataTextarea.readOnly = true;
 	openLearnCommandModal();
 	document.getElementById("exampleModalLabellearn_commands").textContent = "Học lệnh thiết bị: " + friendly_name;
     showMessagePHP('Đang tiến hành học lệnh trên thiết bị: ' + friendly_name,5);
@@ -801,6 +824,40 @@ function learn_Command(ip, mac, devtype, wave_type, friendly_name, model) {
     });
 }
 
+//thêm lệnh Thủ Công
+function learn_Command_handmade(ip, mac, devtype, wave_type, friendly_name, model) {
+    if (!ip || !mac || !devtype) {
+        show_message('Lỗi Xảy Ra, Thiếu tham số thiết bị: ip, mac, devtype');
+        return;
+    }
+	if (friendly_name !== '') {
+		if (!confirm('Bạn có chắc muốn thêm lệnh thủ công từ thiết bị: "'+friendly_name+'" không?')) {
+			return;
+		}
+	} else {
+		if (!confirm('Bạn có chắc chắn muốn học lại lệnh này không?')) {
+			return;
+		}
+		}
+	if (wave_type === "handmade") {
+		document.getElementById("learn_status").innerHTML = "<center>Hãy <b>Nhập</b> mã lệnh đã có của bạn vào ô dưới đây sau đó chọn loại lệnh là RF hoặc IR tương ứng</center>";
+	}
+    const nameInput = document.getElementById('learn_command_name');
+	const dataTextarea = document.getElementById('learned_command_data');
+    if (nameInput) nameInput.value = '';
+    if (dataTextarea) dataTextarea.value = '';
+	currentLearnDeviceMac = mac;
+	showLearnCommandExtraFields('handmade');
+	openLearnCommandModal();
+	document.getElementById("exampleModalLabellearn_commands").textContent = "Học lệnh thiết bị: " + friendly_name;
+    showMessagePHP('Đang tiến hành học lệnh trên thiết bị: ' + friendly_name,5);
+	document.getElementById("learned_command_data").removeAttribute("readonly");
+	
+	fillLearnCommandDeviceSelect();
+	showSaveLearnCommandButton(ip, mac, devtype, wave_type);
+
+}
+
 //Thẻ Select Chọn Device thực thi lệnh
 function fillLearnCommandDeviceSelect() {
     const select = document.getElementById("learn_command_device");
@@ -825,6 +882,13 @@ function saveLearnedCommandToJson(wave_type) {
     const reply = document.getElementById("learn_command_reply")?.value.trim();
     const mac = document.getElementById("learn_command_device")?.value;
     const data = document.getElementById("learned_command_data")?.value;
+	if (wave_type == 'handmade'){
+		wave_type = document.getElementById("handmade_code_type")?.value;
+        if (!wave_type) {
+            alert('Vui lòng chọn kiểu loại mã lệnh (IR hoặc RF)');
+            return;
+        }
+	}
     if (!name || !mac || !data) {
         alert("Thiếu Dữ Liệu Để Lưu: Vui lòng nhập đầy đủ thông tin tên lệnh, thiết bị thực thi");
         return;
