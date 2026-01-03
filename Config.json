@@ -304,7 +304,7 @@
         "webrtcvad": {
             "active": false,
             "vad_mode": 2,
-            "rms_threshold": 220
+            "rms_threshold": 190
         },
         "mic": {
             "id": 14,
