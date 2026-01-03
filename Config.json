@@ -301,6 +301,11 @@
             "log_display_style": "console",
             "notes": "display_screen, console, all, api"
         },
+        "webrtcvad": {
+            "active": false,
+            "vad_mode": 2,
+            "rms_threshold": 220
+        },
         "mic": {
             "id": 14,
             "scan_on_boot": false

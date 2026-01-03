@@ -205,6 +205,11 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_did'] = $_POST['authentication_zai_did'];
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_did'] = $_POST['expires_zai_did'];
 
+  #Cập nhật VAD
+  $Config['smart_config']['webrtcvad']['active'] = isset($_POST['webrtcvad_active']) ? true : false;
+  $Config['smart_config']['webrtcvad']['vad_mode'] = intval($_POST['vad_mode']);
+  $Config['smart_config']['webrtcvad']['rms_threshold'] = intval($_POST['vad_rms']);
+
   #cập nhật giá trị trong tts tts_edge
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed'] = floatval($_POST['tts_edge_speaking_speed']);
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['voice_name'] = $_POST['tts_edge_voice_name'];
@@ -1148,15 +1153,36 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic:
+                  Cấu Hình Âm Thanh Volume/Mic, <font color=red> VAD</font>:
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
-                 <div class="alert alert-success" role="alert"> <div class="card">
+                 <div class="alert alert-success" role="alert">
+
+					<div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Lọc Nhiễu Âm Thanh Đầu Vào (VAD) <i class="bi bi-question-circle-fill" onclick="show_message('VAD WebRTC đây là chế độ lọc nhiễu đầu vào âm thanh của Microphone, Dùng để lọc giọng nói của Con Người. mức độ lọc nhiễu càng cao thì càng khó tính → dễ bỏ sót giọng nhỏ<hr/>- Lọc Thấp Nhất = Phòng rất yên tĩnh<br/>- Lọc Nhẹ = Dùng chung, an toàn<br/>- Lọc Trung Bình = Phòng có quạt, TV<br/>- Lọc Mạnh = Môi trường ồn')"></i> &nbsp;:</h5>
+                      <div class="alert alert-primary" role="alert">
+                      <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt tính năng lọc nhiễu âm thanh đầu vào')"></i> :</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="webrtcvad_active" id="webrtcvad_active" <?php echo $Config['smart_config']['webrtcvad']['active'] ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+					  <?php
+                      echo select_field('vad_mode', 'Mức Độ Lọc Nhiễu', ['0' => 'Lọc Thấp Nhất', '1' => 'Lọc Nhẹ (Khuyên Dùng)', '2' => 'Lọc Trung Bình (Khuyên Dùng)', '3' => 'Lọc Mạnh'], $Config['smart_config']['webrtcvad']['vad_mode'], []);
+					  echo input_field('vad_rms', 'Ngưỡng RMS Tối Thiếu', $Config['smart_config']['webrtcvad']['rms_threshold'] ?? 220, 'required', 'number', '1', '0', '1200', 'Ngưỡng biên độ RMS Của Mic, Dữ liệu biên độ âm thanh khi Mic thu âm được dưới ngưỡng tối thiếu được thiết lập sẽ bị bỏ qua, chỉ chấp nhận biên độ RMS trên ngưỡng được thiết lập, giá trị thiết lập ngưỡng còn phụ thuộc vào âm thanh môi trường thực tế. trung bình khoảng 200-300', 'border-success', '', '', '', '', '');
+                      ?>
+                    </div>
+                    </div>
+                  </div>
+				 <div class="card">
                     <div class="card-body">
                       <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Cài Đặt Mic &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé')"></i> &nbsp;:</h5>
                       <div class="alert alert-primary" role="alert">
 					  <?php
-                      echo input_field('mic_id', 'ID Mic', htmlspecialchars($Config['smart_config']['mic']['id']), 'required', 'number', '', '', '', 'Bạn có thể tham khảo hướng dẫn tại đây: <a href=\'FAQ.php\' target=\'_bank\'>Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé', 'border-success', 'Tìm Kiếm ID Mic', "scan_audio_devices('scan_mic')", 'btn btn-success border-success', 'onclick', '_blank');
+                      echo input_field('mic_id', 'ID Mic', $Config['smart_config']['mic']['id'] ?? -1, 'required', 'number', '', '', '', 'Bạn có thể tham khảo hướng dẫn tại đây: <a href="FAQ.php" target="_bank">Hướng Dẫn</a> <br/> Lưu Ý: Nếu Bạn Sử Dụng Mic I2S: INMP441 kết hợp với MAX98357 Thì Cần Flash IMG (VBot I2S) Và Phải Đặt ID Mic Luôn Luôn Là (-1) Nhé', 'border-success', 'Tìm Kiếm ID Mic', "scan_audio_devices('scan_mic')", 'btn btn-success border-success', 'onclick', '_blank');
                       ?>
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Auto Scan Mic <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ tìm kiếm và liệt kê các ID và Tên của Microphone có trên hệ thống, và hiển thị ra các đường Logs mỗi khi trương trình được khởi chạy')"></i> :</label>
@@ -1220,9 +1246,7 @@ include 'html_head.php';
                         </div>
                       </div>
                       <?php
-                      echo select_field(
-                        'hotword_select_wakeup',
-                        'Chọn Nguồn Đánh Thức',
+                      echo select_field('hotword_select_wakeup', 'Chọn Nguồn Đánh Thức',
                         [
                           'porcupine' => 'Picovoice/Procupine (Nên Dùng)',
                           'snowboy' => 'Snowboy',

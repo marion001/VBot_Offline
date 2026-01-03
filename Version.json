@@ -1,12 +1,12 @@
 {
-    "version": "1.0.84",
+    "version": "1.0.85",
     "projectName": "Program VBot Offline",
-    "description": "Thêm Cấu Hình Thiết Lập Wifi Thông Qua Bluetooth sử dụng App BTBerryWifi, Chi tiết Xem Trong Mục 'Hướng Dẫn' Của Giao Diện WebUI, Hoặc Truy Cập SSH Và Chạy Lệnh: $:> bash /home/pi/VBot_Offline/resource/set_wifi_via_ble/btwifisetInstall.sh",
-    "releaseDate": "01/01/2026",
+    "description": "Hỗ trợ cơ chế lọc nhiễu âm thanh đầu vào từ Microphone khi chờ được đánh thức WakeUP, hỗ trợ Random Fake Mac khi xác thực với xiaozhi",
+    "releaseDate": "03/01/2026",
     "changes": [
         {
             "type": "feature",
-            "description": "Cần Cài Bổ Sung Thư Viện Sau: 'pip install broadlink==0.19.0'"
+            "description": "Cần Cài Bổ Sung Thư Viện Sau: 'pip install webrtcvad-wheels==2.0.14'"
         },
         {
             "type": "fix",
