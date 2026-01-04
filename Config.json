@@ -303,7 +303,7 @@
         },
         "webrtcvad": {
             "active": false,
-            "vad_mode": 2,
+            "vad_mode": 1,
             "rms_threshold": 100
         },
         "mic": {
