@@ -161,7 +161,6 @@ include 'html_head.php';
 			}
 			echo '</select>';
 		}
-
       $directory = dirname($json_file);
       if (!is_dir($directory)) {
         mkdir($directory, 0777, true);
@@ -174,15 +173,12 @@ include 'html_head.php';
         file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         chmod($json_file, 0777);
       }
-
       $json_data = file_get_contents($json_file);
       $data = json_decode($json_data, true);
-
       if ($data === null) {
         echo "<center><h1 class='text-danger'>Không thể đọc dữ liệu JSON từ tệp, Vui lòng kiểm tra lại định dạng tệp json: $json_file</h1></center>";
         exit();
       }
-
       // Các ngày trong tuần
       $week_days = [
         "Monday" => "Thứ Hai",
@@ -193,7 +189,6 @@ include 'html_head.php';
         "Saturday" => "Thứ Bảy",
         "Sunday" => "Chủ Nhật"
       ];
-
       if (isset($_POST['delete_all_Scheduler'])) {
         if (file_exists($json_file)) {
           if (unlink($json_file)) {
@@ -203,7 +198,6 @@ include 'html_head.php';
             if (file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false) {
               chmod($json_file, 0777);
               $successMessage[] = "Toàn bộ dữ liệu cấu hình đã được xóa thành công";
-              // Tải lại trang bằng header
               echo '<script>window.location.href = "Scheduler.php";</script>';
               exit;
             } else {
@@ -677,6 +671,7 @@ include 'html_head.php';
                           </div>
                         </div>
                         <center>
+                          <button class="btn btn-primary rounded-pill" type="button" onclick="run_test_task('<?= htmlspecialchars($notification['name']) ?>', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i> Chạy, Test Tác Vụ</button>
                           <button class="btn btn-danger rounded-pill" type="button" onclick="deleteTask(<?= $index ?>)"><i class="bi bi-trash" title="Xóa bỏ tác vụ này"></i> Xóa tác vụ này</button>
                         </center>
                       </div>
@@ -795,6 +790,7 @@ include 'html_head.php';
                         <div class="time-input-container input-group mb-3" id="time-change_volume-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_change_volume[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <input class="form-control border-primary" type="number" name="volumes_volume_time[]" value="<?= isset($change_volume['volume_time'][$index]) ? htmlspecialchars($change_volume['volume_time'][$index]) : '' ?>" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">
+						<button class="btn btn-primary" type="button" onclick="run_test_task('change_volume', '<?= isset($change_volume['volume_time'][$index]) ? htmlspecialchars($change_volume['volume_time'][$index]) : '' ?>')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -802,7 +798,7 @@ include 'html_head.php';
                     </div>
                   </div>
                 </div>
-                <hr />
+                <hr/>
               </div>
             </div>
           </div>
@@ -860,6 +856,7 @@ include 'html_head.php';
                         <div class="time-input-container input-group mb-3" id="time-change_led_brightness-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_change_brightness[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
                           <input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" value="<?= isset($change_led_brightness['brightness_time'][$index]) ? htmlspecialchars($change_led_brightness['brightness_time'][$index]) : '' ?>" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">
+							<button class="btn btn-primary" type="button" onclick="run_test_task('change_led_brightness', '<?= isset($change_led_brightness['brightness_time'][$index]) ? htmlspecialchars($change_led_brightness['brightness_time'][$index]) : '' ?>')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -929,6 +926,7 @@ include 'html_head.php';
 						<option value="on"  <?= ($change_mic_on_off['action'][$i] ?? '') === 'on'  ? 'selected' : '' ?>>Bật Mic</option>
 						<option value="off" <?= ($change_mic_on_off['action'][$i] ?? '') === 'off' ? 'selected' : '' ?>>Tắt Mic</option>
 					  </select>
+					<button class="btn btn-primary" type="button" onclick="run_test_task('mic_on_off', '<?= isset($change_mic_on_off['action'][$i]) ? htmlspecialchars($change_mic_on_off['action'][$i]) : '' ?>')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
 					  <button type="button"class="btn btn-danger border-success" onclick="removeMicRow('mic-row-<?= $i ?>')"><i class="bi bi-trash"></i></button>
 					</div>
 				  <?php endforeach; ?>
@@ -937,12 +935,10 @@ include 'html_head.php';
 			  </div>
 			</div>
 
-
               </div>
             </div>
           </div>
           </div>
-		  
 
           <div class="card accordion" id="accordion_button_play_playlist">
             <div class="card-body">
@@ -992,6 +988,7 @@ include 'html_head.php';
                       <?php foreach ($play_play_playlist['time'] as $index => $time): ?>
                         <div class="time-input-play_play_playlist input-group mb-3" id="time-play_play_playlist-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_player_playlist[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+						  <button class="btn btn-primary" type="button" onclick="run_test_task('play_play_playlist', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_play_playlist-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -999,6 +996,8 @@ include 'html_head.php';
                     </div>
                   </div>
                 </div>
+				<hr/>
+				
               </div>
             </div>
           </div>
@@ -1052,6 +1051,7 @@ include 'html_head.php';
                       <?php foreach ($play_all_music_local['time'] as $index => $time): ?>
                         <div class="time-input-play_all_music_local input-group mb-3" id="time-play_all_music_local-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_player_local[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+						  <button class="btn btn-primary" type="button" onclick="run_test_task('play_all_music_local', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_all_music_local-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -1118,6 +1118,7 @@ include 'html_head.php';
                       <?php foreach ($stop_media_player['time'] as $index => $time): ?>
                         <div class="time-input-stop_media_player input-group mb-3" id="time-stop_media_player-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_stop_media_player[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+						  <button class="btn btn-primary" type="button" onclick="run_test_task('stop_media_player', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-stop_media_player-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -1178,6 +1179,7 @@ include 'html_head.php';
                       <?php foreach ($restart_vbot['time'] as $index => $time): ?>
                         <div class="time-input-restart_vbot input-group mb-3" id="time-restart_vbot-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_restart_vbot[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+						  <button class="btn btn-primary" type="button" onclick="run_test_task('restart_vbot', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-restart_vbot-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -1238,6 +1240,7 @@ include 'html_head.php';
                       <?php foreach ($reboot_os['time'] as $index => $time): ?>
                         <div class="time-input-reboot_os input-group mb-3" id="time-reboot_os-<?= $index ?>">
                           <input class="form-control border-success" type="text" name="time_reboot_os[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+						  <button class="btn btn-primary" type="button" onclick="run_test_task('reboot_os', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-reboot_os-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
                       <?php endforeach; ?>
@@ -1979,6 +1982,40 @@ document.getElementById('add-mic-time').addEventListener('click', function () {
 function removeMicRow(id) {
     const el = document.getElementById(id);
     if (el) el.remove();
+}
+
+//Chạy Test tác vụ
+function run_test_task(value, parameter = null) {
+	loading('show');
+    const data = {
+        type: 3,
+        data: "scheduler",
+        value: value
+    };
+    if (parameter !== null && parameter !== undefined) {
+        data.parameter = parameter;
+    }
+    const xhr = new XMLHttpRequest();
+    xhr.withCredentials = true;
+    xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4) {
+			try {
+				loading('hide');
+				const res = JSON.parse(xhr.responseText);
+				if (res.success === true) {
+					showMessagePHP(res.message || "Thao tác thành công");
+				} else {
+					show_message(res.message || "Thao tác thất bại");
+				}
+			} catch (e) {
+				loading('hide');
+				show_message('Lỗi phản hồi từ Server: '+xhr.responseText);
+			}
+		}
+    };
+    xhr.open("POST", "<?php echo $Protocol.$serverIp.':'.$Port_API; ?>");
+    xhr.setRequestHeader("Content-Type", "application/json");
+    xhr.send(JSON.stringify(data));
 }
 
 //Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống

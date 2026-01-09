@@ -61,3 +61,67 @@
         topic: "VBot_DEV/script/main_processing/set"
         payload: "Mấy giờ rồi"
   mode: single
+
+
+#Automation VBot Phát toàn bộ bài nhạc nội bộ Local
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: 7912y9430593fkhu44tdmi34223r2d3
+  alias: VBot - Phát Nhạc Toàn Bộ Nhạc Local Lúc 21h43
+  trigger:
+    - platform: time
+      at: "21:43:00"
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/script/playlist_control/set"
+        payload: "LOCAL"
+  mode: single
+
+
+#Automation VBot Phát toàn bộ danh sách nhạc playlist
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: 98734563785843fm4htf434343td4r
+  alias: VBot - Phát Danh Sách Nhạc, Playlist Lúc 21h47
+  trigger:
+    - platform: time
+      at: "21:47:00"
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/script/playlist_control/set"
+        payload: "PLAY"
+  mode: single
+
+
+#Automation VBot Thay đổi độ sáng đèn led trên loa
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: 653b654098u6bv458jbjkdhfgjv3443
+  alias: VBot - Thay đổi độ sáng đèn led trên Loa Lúc 21h50
+  trigger:
+    - platform: time
+      at: "21:50:00"
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/number/led_brightness/set"
+        payload: 50
+  mode: single
+
+
+#Automation VBot Thay đổi Âm lượng trên loa
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: y546k43vkj43kuvk394uijdsds0000324
+  alias: VBot - Thay đổi âm lượng của loa lúc 21h52
+  trigger:
+    - platform: time
+      at: "21:52:00"
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/number/volume/set"
+        payload: 65
+  mode: single

@@ -2978,6 +2978,34 @@
 			"response": []
 		},
 		{
+			"name": "Kiểm Tra, Thực Thi Lên Lịch, Thông Báo",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"scheduler\",\r\n    \"value\": \"test thông báo bằng link http\",\r\n    \"parameter\": \"40\",\r\n    \"notes\": \"value sẽ tương ứng với tên tác vụ được thiết lập của bạn\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://192.168.14.175:5002",
+					"protocol": "http",
+					"host": [
+						"192",
+						"168",
+						"14",
+						"175"
+					],
+					"port": "5002"
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "Lấy PodCast Token",
 			"request": {
 				"method": "POST",
