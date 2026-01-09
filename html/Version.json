@@ -2,7 +2,7 @@
     "version": "1.0.86",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa lỗi mqtt phát nhạc, hỗ trợ lên lịch phát nhạc trực tiếp từ các link/url nguồn nhạc online",
-    "releaseDate": "09/01/2026",
+    "releaseDate": "09/01/2026-1",
     "changes": [
         {
             "type": "feature",
