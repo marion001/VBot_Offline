@@ -354,7 +354,10 @@ if (isset($_GET['Show_Wifi_List'])) {
 
 #kiểm tra thông tin mạng wifi đang kết nối
 if (isset($_GET['Wifi_Network_Information'])) {
-    $wifiInfo = shell_exec('iwconfig wlan0');
+	#$wifiInfo = shell_exec('LANG=C.UTF-8 iwconfig wlan0');
+	$wifiInfo = shell_exec('LANG=C.UTF-8 iwconfig wlan0 2>&1');
+    #$wifiInfo = shell_exec('iwconfig wlan0');
+	#$wifiInfo = iconv('ISO-8859-1', 'UTF-8//IGNORE', $wifiInfo); //Nếu tên wifi có dấu tiếng việt
     if (empty($wifiInfo)) {
         echo json_encode([
             'success' => false,

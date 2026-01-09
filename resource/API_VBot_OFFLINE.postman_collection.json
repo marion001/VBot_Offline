@@ -13,7 +13,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"http://192.168.14.194/assets/sound/Music_Local/thuyền quyên - diệu kiên.mp3\",\r\n    \"media_name\": \"Thủ tướng Phạm Minh Chính dự Lễ khánh thành công trình tái thiết khu dân cư Làng Nủ\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"Báo Mới\"\r\n}",
+					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://www.youtube.com/watch?v=33X_LhEUaZc\",\r\n    \"media_name\": \"\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"\",\r\n    \"notes\": \"hỗ trợ các link youtube, zingmp3, nhaccuatui, link nhạc mp3 - stream trực tiếp, tên bài hát - text\"\r\n\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -21,13 +21,13 @@
 					}
 				},
 				"url": {
-					"raw": "http://192.168.14.113:5002",
+					"raw": "http://192.168.14.175:5002",
 					"protocol": "http",
 					"host": [
 						"192",
 						"168",
 						"14",
-						"113"
+						"175"
 					],
 					"port": "5002"
 				}

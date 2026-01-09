@@ -58,7 +58,7 @@ include 'html_head.php';
     <section class="section">
       <div class="row">
         <form method="post">
-          <center><button type="submit" class="btn btn-primary rounded-pill" onclick="loading('show')" name="check_versions">Kiểm tra danh sách thư viện python pip</button></center>
+          <center><button type="submit" class="btn btn-primary rounded-pill" onclick="loading('show')" name="check_versions">Kiểm tra danh sách thư viện python pip Còn Thiếu</button></center>
         </form>
         <?php
         // Hàm đọc và phân tích file thành mảng File Local

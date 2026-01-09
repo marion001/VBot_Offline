@@ -1,1 +1,0 @@
-#Vbot Assistant

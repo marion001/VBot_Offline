@@ -1,0 +1,63 @@
+#Đây là Demo Sử Dụng Tương Tác Với VBot Khi Đã Được Liên Kết Với Hass, Home Assistrant
+#Các Bạn Có Thể Tùy Biến Tạo Automation, Script theo nhu cầu sử dụng cho phù hợp
+
+
+#AUTOMATION VBot Ví Dụ Phát nhạc Youtube, Zingmp3, Nhaccuatui, Text với tham số media_link là url, hoặc text = tên bài hát
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: hfiun7hcm4t943yt9349y956vy56yh56y9023k
+  alias: VBot - Phát nhạc chỉ định bài hát lúc 21:30
+  description: Tự động phát nhạc cho VBot lúc 21:30
+  mode: single
+  trigger:
+    - platform: time
+      at: "21:30:00"
+  condition: []
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/script/media_control/set"
+        payload: >
+          {{
+            {
+              "action": "play",
+              "media_link": "https://www.youtube.com/watch?v=sLisXCL-jtk",
+              "media_name": "Thay Duyên Đổi Phận",
+              "media_cover": "",
+              "media_player_source": "Youtube"
+            } | tojson
+          }}
+        qos: 1
+        retain: false
+
+
+#AUTOMATION VBot Ví Dụ Phát Thông Báo TTS Tới Loa VBot
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: 48398579t38f5j23049358097m39457b9v8
+  alias: VBot - Phát TTS Theo Mẫu Lúc 21h35
+  trigger:
+    - platform: time
+      at: "21:31:00"
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/script/vbot_tts/set"
+        payload: "Bây giờ là 21 giờ 35 phút, chúc bạn ngủ ngon"
+  mode: single
+
+
+#AUTOMATION Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay tên topic: VBot_DEV thành đúng tên Client trong cấu hình mqtt VBot cho phù hợp
+#Thay điều kiện trigger đúng với điều kiện theo ý bạn cho phù hợp với yêu cầu sử dụng
+- id: 7365834685jegfjke845754867546mu2grm34
+  alias: VBot - Chạy Xử Lý Dữ Liệu Chính Lúc 21h38
+  trigger:
+    - platform: time
+      at: "21:38:00"
+  action:
+    - service: mqtt.publish
+      data:
+        topic: "VBot_DEV/script/main_processing/set"
+        payload: "Mấy giờ rồi"
+  mode: single

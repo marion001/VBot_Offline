@@ -1928,7 +1928,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     ['0' => '0 (At most once)', '1' => '1 (At least once)', '2' => '2 (Exactly once)'],
                     $Config['mqtt_broker']['mqtt_qos'], []);
                   ?>
-
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Retain <i class="bi bi-question-circle-fill" onclick="show_message('- retain=True: Khi bạn gửi một tin nhắn với retain=True, MQTT broker sẽ giữ lại tin nhắn đó và gửi lại cho bất kỳ client nào kết nối vào MQTT đó sau này, ngay cả khi client đó đã không nhận dữ liệu ban đầu.<br/><br/>- retain=False: Tin nhắn sẽ không được lưu trữ. Khi client kết nối vào MQTT, nó sẽ không nhận lại tin nhắn cũ')"></i> :</label>
                     <div class="col-sm-9">
@@ -1939,20 +1938,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   </div>
                   <?php
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass) ', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', 'Liên Kết Loa VBot Lên Home Assist Bằng HACS Custom Component', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'btn btn-success border-danger', 'link', '_blank');
+				  echo input_field('', 'Mẫu Code Automation Yaml Hass, Home Assistant', 'https://github.com/marion001/VBot_Offline/blob/main/resource/hass/mqtt_yaml_code_sample.yaml', 'disabled', 'text', '', '', '', 'Mẫu cấu trúc code Automation Home Assistant tương tác lại với VBot thông qua giao thức MQTT', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline/blob/main/resource/hass/mqtt_yaml_code_sample.yaml", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
-				  <!--
-                  <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label" title="Đặt Tên Client Cho Kết Nối MQTT">Hoặc Tạo File Cấu Hình Thủ Công <i class="bi bi-question-circle-fill" onclick="show_message('Hệ thống sẽ tự động tạo các File cấu hình MQTT theo Tên Client mà bạn đã đặt mà không cần chỉnh sửa thủ công, Sao chép toàn bộ nội dung được tạo vào file cấu hình của bạn là xong')"></i> : </label>
-                    <div class="col-sm-9">
-                      <div class="input-group mb-3">
-                        <button class="btn btn-primary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('mqtts.yaml')">mqtts.yaml</button>
-                        <button class="btn btn-success border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('scripts.yaml')">scripts.yaml</button>
-                        <button class="btn btn-secondary border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('input_text.yaml')">input_text.yaml</button>
-                        <button class="btn btn-info border-success" type="button" title="Hiển thị cấu hình mqtts.yaml để liên kết VBot với Home Assistant" onclick="read_YAML_file_path('lovelace_entities')">lovelace</button>
-                      </div>
-                    </div>
-                  </div>
-				  -->
                 </div>
               </div>
             </div>
@@ -1971,16 +1958,10 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-
                   <?php
                   echo select_field('led_type_select',
                     'Kiểu loại Led <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message(\'Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>\')"></i>',
-                    [
-                      'ws281x' => 'WS281x, SK6812, VBot AIO, Vietbot AIO',
-                      'apa102' => 'APA102',
-                      'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0',
-                      'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'
-                    ],
+                    ['ws281x' => 'WS281x, SK6812, VBot AIO, Vietbot AIO', 'apa102' => 'APA102', 'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0', 'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'],
                     $Config['smart_config']['led']['led_type'], []);
                   echo input_field('led_gpio', 'LED Pin GPIO', htmlspecialchars($Config['smart_config']['led']['led_gpio'] ?? 10), '', 'number', '1', '0', '60', 'Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO, Mặc định GPIO10 (Không thay đổi được)', 'border-success', '', '', '', '', '_blank');
                   echo input_field('number_led', 'Số lượng LED', htmlspecialchars($Config['smart_config']['led']['number_led'] ?? 24), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');

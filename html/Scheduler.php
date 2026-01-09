@@ -582,11 +582,11 @@ include 'html_head.php';
                           </div>
                         </div>
                         <div class="row mb-3">
-                          <label for="message-<?= $index ?>" class="col-sm-3 col-form-label">Nội Dung Thông Báo <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập nội dung thông báo, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)')"></i>
+                          <label for="message-<?= $index ?>" class="col-sm-3 col-form-label">Nội Dung Thông Báo <i class="bi bi-question-circle-fill" onclick="show_message('Cần nhập nội dung thông báo, nếu không nhập nội dung thì cần phải cấu hình nhập file âm thanh, bắt buộc phải có 1 trong 2 thì mới cho lưu dữ liệu (hệ thống sẽ ưu tiên phát thông báo văn bản, nếu văn bản trống thì sẽ phát âm thanh từ file)<hr/>Hỗ trợ nhập các link Youtube, zingmp3.vn, nhaccuatui.com, và các đường link có đuôi âm thanh như .mp3')"></i>
                             <font color="blue" size="6" title="Có thể nhập, lựa chọn hoặc để trống">*</font> :
                           </label>
                           <div class="col-sm-9">
-                            <textarea type="text" rows="3" class="form-control border-success" id="message-<?= $index ?>" name="notification_schedule[<?= $index ?>][data][message]" placeholder="Nhập nội dung thông báo, Nếu bỏ trống thì cần chọn dữ liệu tệp âm thanh"><?= htmlspecialchars($notification['data']['message']) ?></textarea>
+                            <textarea type="text" rows="3" class="form-control border-success" id="message-<?= $index ?>" name="notification_schedule[<?= $index ?>][data][message]" placeholder="Nhập nội dung thông báo, Hỗ trợ nhập cả các link: Youtube, zingmp3.vn, nhaccuatui.com, các link nhạc có đuôi âm thanh .mp3, Nếu bỏ trống thì cần chọn dữ liệu tệp âm thanh"><?= htmlspecialchars($notification['data']['message']) ?></textarea>
                           </div>
                         </div>
                         <div class="row mb-3">
@@ -1624,7 +1624,7 @@ function loadAudioFiles(selectId) {
         "<div class='row mb-3'>" +
         "<label for='message-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Nội Dung Thông Báo <font color='blue' size='6' title='Có thể nhập, lựa chọn hoặc để trống'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
-        "<textarea type='text' rows='3' class='form-control border-success' id='message-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][message]' placeholder='Cần nhập nội dung thông báo, Nếu bỏ trống thì cần chọn dữ liệu tệp âm thanh'></textarea>" +
+        "<textarea type='text' rows='3' class='form-control border-success' id='message-" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][data][message]' placeholder='Cần nhập nội dung thông báo, Hỗ trợ nhập cả các link: Youtube, zingmp3.vn, nhaccuatui.com, các link nhạc có đuôi âm thanh .mp3, Nếu bỏ trống thì cần chọn dữ liệu tệp âm thanh'></textarea>" +
         "</div>" +
         "</div>" +
         "<div class='row mb-3'>" +
