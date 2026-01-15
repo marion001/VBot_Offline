@@ -60,6 +60,9 @@
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
+    "zeroconf_mdns": {
+        "active": true
+    },
     "voice_command_system": {
         "active": false,
         "minimum_result_threshold": 0.74

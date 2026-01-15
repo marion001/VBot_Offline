@@ -1,8 +1,8 @@
 {
-    "version": "1.0.86",
+    "version": "1.0.87",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi mqtt phát nhạc, hỗ trợ lên lịch phát nhạc trực tiếp từ các link/url nguồn nhạc online",
-    "releaseDate": "09/01/2026-1",
+    "description": "Cập nhật mDNS đồng bộ với VBot Custom Component Home Assistant",
+    "releaseDate": "15/01/2026",
     "changes": [
         {
             "type": "feature",
