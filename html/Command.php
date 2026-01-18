@@ -1095,6 +1095,230 @@ if (isset($_POST['update_btwifiset_py'])) {
   $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['start_airplay'])) {
+  $CMD = "sudo systemctl start shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['stop_airplay'])) {
+  $CMD = "sudo systemctl stop shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['restart_airplay'])) {
+  $CMD = "sudo systemctl restart shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['enable_airplay'])) {
+  $CMD = "sudo systemctl enable shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['disabled_airplay'])) {
+  $CMD = "sudo systemctl disable shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['logs_airplay'])) {
+  $CMD = "journalctl -u shairport-sync -e";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['status_airplay'])) {
+  $CMD = "sudo systemctl status shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['start_mosquitto'])) {
+  $CMD = "sudo systemctl start mosquitto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['stop_mosquitto'])) {
+  $CMD = "sudo systemctl stop mosquitto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['restart_mosquitto'])) {
+  $CMD = "sudo systemctl restart mosquitto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['enable_mosquitto'])) {
+  $CMD = "sudo systemctl enable mosquitto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['disabled_mosquitto'])) {
+  $CMD = "sudo systemctl disable mosquitto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['logs_mosquitto'])) {
+  $CMD = "journalctl -u mosquitto -e";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['status_mosquitto'])) {
+  $CMD = "sudo systemctl status mosquitto";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
 if (isset($_POST['restart_auto_wifi'])) {
   $CMD = "sudo systemctl restart wifi-connect.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -1748,7 +1972,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-danger dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          VBot Auto
+                         <i class="bi bi-robot"></i> VBot Auto
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_start" type="submit" title="Chạy lại trương trình">Chạy</button></li>
@@ -1764,7 +1988,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          OS Wifi
+                         <i class="bi bi-wifi"></i> OS Wifi
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li>
@@ -1781,7 +2005,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình WebUI Ra Internet">
-                          WebUI External
+                         <i class="bi bi-browser-safari"></i> WebUI External
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="enabled_vbot_api_external" type="submit" title="Cấu Hình WebUI Ra Internet">Kích Hoạt WebUI Ra Internet</button></li>
@@ -1812,7 +2036,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-dark dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          Hệ Thống
+                         <i class="bi bi-gear"></i> Hệ Thống
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="apache_restart" type="submit" title="Khởi động lại apache2">Restart Apache2</button></li>
@@ -1841,7 +2065,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-success dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          Thư Viện
+                         <i class="bi bi-list-check"></i> Thư Viện
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="pip_show_all_lib" type="submit" title="Liệt kê các thư viện đã cài bằng pip">pip show all lib</button></li>
@@ -1853,7 +2077,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          ALSA SoundCard
+                         <i class="bi bi-pci-card-sound"></i> ALSA SoundCard
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_start" type="submit" title="alsamixer_soundcard_start">ALSA SoundCard Start</button></li>
@@ -1869,7 +2093,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                          Cloudflare Tunnel
+                         <i class="bi bi-cloud-fill"></i> Cloudflare Tunnel
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_start" type="submit" title="Chạy ">Chạy</button></li>
@@ -1885,7 +2109,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Wifi Thông Qua Bluetooth">
-                          BT Wifi Set
+                         <i class="bi bi-bluetooth"></i> BT Wifi Set
                         </button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="start_btwifiset" type="submit" title="Chạy Services Auto btwifiset">Start btwifiset</button></li>
@@ -1894,9 +2118,41 @@ include 'html_head.php';
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_btwifiset" type="submit" title="Kích Hoạt Services Auto btwifiset">Enable Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_btwifiset" type="submit" title="Vô Hiệu Services Auto btwifiset">Disabled Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_btwifiset" type="submit" title="Xem Logs Auto btwifiset">Logs Auto btwifiset</button></li>
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_btwifiset" type="submit" title="Kiêm tra trạng thái btwifiset">Status Auto btwifiset</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_btwifiset" type="submit" title="Kiểm tra trạng thái btwifiset">Status Auto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="pass_crypto_btwifiset" type="submit" title="Xem Mật Khẩu Mã Hóa Tín Hiệu btwifiset">Password Crypto btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="update_btwifiset_py" type="submit" title="Cập nhật mới file btwifiset.py từ resource">UPDATE btwifiset.py</button></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="btn-group">
+                      <div class="dropdown">
+                        <button class="btn btn-success dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình AirPlay tương thích với Iphone, Ipad">
+                          <i class="bi bi-apple"></i> AirPlay
+                        </button>
+                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="start_airplay" type="submit" title="Chạy Services Auto AirPlay">Start AirPlay</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_airplay" type="submit" title="Dừng Services Auto AirPlay">Stop AirPlay</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_airplay" type="submit" title="Khởi động lại Services AirPlay">Restart Auto AirPlay</button>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_airplay" type="submit" title="Kích Hoạt Services Auto AirPlay">Enable Auto AirPlay</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_airplay" type="submit" title="Vô Hiệu Services Auto AirPlay">Disabled Auto AirPlay</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_airplay" type="submit" title="Xem Logs Auto AirPlay">Logs Auto AirPlay</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_airplay" type="submit" title="Kiểm tra trạng thái AirPlay">Status Auto AirPlay</button></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="btn-group">
+                      <div class="dropdown">
+                        <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Mosquitto hệ thống">
+                         <i class="bi bi-radar"></i> Mosquitto
+                        </button>
+                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="start_mosquitto" type="submit" title="Chạy Services Auto Mosquitto">Start Mosquitto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_mosquitto" type="submit" title="Dừng Services Auto Mosquitto">Stop Mosquitto</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_mosquitto" type="submit" title="Khởi động lại Services Mosquitto">Restart Auto Mosquitto</button>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_mosquitto" type="submit" title="Kích Hoạt Services Auto Mosquitto">Enable Auto Mosquitto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_mosquitto" type="submit" title="Vô Hiệu Services Auto Mosquitto">Disabled Auto Mosquitto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_mosquitto" type="submit" title="Xem Logs Auto Mosquitto">Logs Auto Mosquitto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_mosquitto" type="submit" title="Kiểm tra trạng thái Mosquitto">Status Auto Mosquitto</button></li>
                         </ul>
                       </div>
                     </div>
