@@ -1,0 +1,37 @@
+Dự án này sử dụng hệ thống hai tập lệnh để cài đặt an toàn và đáng tin cậy:
+
+pre_check_airplay_on_pi.sh: Một tập lệnh không xâm phạm, kiểm tra hệ thống của bạn về các sự cố thường gặp mà không thực hiện bất kỳ thay đổi nào. Nếu tất cả các kiểm tra đều đạt, nó sẽ tự động tải xuống và chạy trình cài đặt chính.
+
+install_airplay_v3.sh: Trình cài đặt chính mạnh mẽ thực hiện tất cả các hành động cần thiết để xây dựng và cấu hình phần mềm AirPlay 2 (Shairport-Sync và nqptp).
+
+build lại shairport:
+$:> cd shairport-sync
+$:> make clean
+$:> autoreconf -fi
+$:> ./configure --with-mqtt-client --sysconfdir=/etc --with-alsa \
+    --with-soxr --with-avahi --with-ssl=openssl --with-systemd --with-airplay-2
+$:> make
+$:> sudo make install
+
+$:> sudo systemctl daemon-reload
+$:> sudo systemctl restart shairport-sync
+$:> sudo systemctl status shairport-sync
+
+#Tạm dừng shairport khi đang chạy tự động
+$:> sudo systemctl stop shairport-sync
+
+#bật tắt tiếng
+mosquitto_pub -h localhost -t "shairport/vbot/remote" -m "mute"
+mosquitto_pub -h localhost -t "shairport/vbot/remote" -m "unmute"
+#Set âm lượng
+mosquitto_pub -t "shairport/vbot/remote" -m "volumeset 70"
+
+Chạy shairport thủ công xem logs
+$:> shairport-sync -vv
+
+📋 Useful commands:
+   View live logs:    sudo journalctl -u shairport-sync -f
+   Restart service:   sudo systemctl restart shairport-sync
+   Check status:      sudo systemctl status shairport-sync
+   Edit config:       sudo nano /etc/shairport-sync.conf
+   Installation log:  /tmp/airplay_install_20260118_105020.log
