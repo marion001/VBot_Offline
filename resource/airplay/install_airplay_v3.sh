@@ -608,6 +608,13 @@ main() {
         sudo systemctl start avahi-daemon
     fi
 
+	# Hãy đảm bảo rằng mosquitto (MQTT broker) đang chạy
+	if ! systemctl is-active --quiet mosquitto; then
+		cecho "yellow" "Khởi động mosquitto (MQTT broker)..."
+		sudo systemctl enable mosquitto
+		sudo systemctl start mosquitto
+	fi
+
     #Cài đặt NQPTP
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     cecho "blue" "   Cài đặt NQPTP (Hệ thống thời gian định thời)..."
