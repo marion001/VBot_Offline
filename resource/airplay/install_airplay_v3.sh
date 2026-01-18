@@ -771,17 +771,25 @@ FALLBACK_EOF
 
     #Thiết lập thiết bị đầu ra - bỏ dấu chú thích và thiết lập nó.
     log "Cấu hình đầu ra âm thanh: $audio_device_plug"
-    sudo sed -i "s|^[[:space:]]*output_device = .*|        output_device = \"$audio_device_plug\";|" /etc/shairport-sync.conf
-    sudo sed -i "s|^//[[:space:]]*output_device = .*|        output_device = \"$audio_device_plug\";|" /etc/shairport-sync.conf
+    #sudo sed -i "s|^[[:space:]]*output_device = .*|        output_device = \"$audio_device_plug\";|" /etc/shairport-sync.conf
+	#sudo sed -i "s|^//[[:space:]]*output_device = .*|        output_device = \"$audio_device_plug\";|" /etc/shairport-sync.conf
+	#nếu dùng mạch VBot chạy WM8960 đặt mặc định default
+    sudo sed -i "s|^[[:space:]]*output_device = .*|        output_device = \"default\";|" /etc/shairport-sync.conf
+    sudo sed -i "s|^//[[:space:]]*output_device = .*|        output_device = \"default\";|" /etc/shairport-sync.conf
 
     #Đặt bộ điều khiển máy trộn âm lượng nếu có sẵn.
     if [ -n "$mixer_control" ]; then
         log "Cấu hình điều khiển bộ trộn âm thanh: $mixer_control on hw:$card_number"
-        sudo sed -i "s|^//[[:space:]]*mixer_control_name = .*|        mixer_control_name = \"none\";|" /etc/shairport-sync.conf
-        sudo sed -i "s|^[[:space:]]*mixer_control_name = .*|        mixer_control_name = \"none\";|" /etc/shairport-sync.conf
+        #sudo sed -i "s|^//[[:space:]]*mixer_control_name = .*|        mixer_control_name = \"none\";|" /etc/shairport-sync.conf
+        #sudo sed -i "s|^[[:space:]]*mixer_control_name = .*|        mixer_control_name = \"none\";|" /etc/shairport-sync.conf
+
         #Ngoài ra, hãy thiết lập mixer_device nếu cần (thường được chú thích mặc định).
-        sudo sed -i "s|^//[[:space:]]*mixer_device = .*|        mixer_device = \"default\";|" /etc/shairport-sync.conf
-        sudo sed -i "s|^[[:space:]]*mixer_device = .*|        mixer_device = \"default\";|" /etc/shairport-sync.conf
+        #sudo sed -i "s|^//[[:space:]]*mixer_device = .*|        mixer_device = \"default\";|" /etc/shairport-sync.conf
+        #sudo sed -i "s|^[[:space:]]*mixer_device = .*|        mixer_device = \"default\";|" /etc/shairport-sync.conf
+
+		#Comment thêm // đằng trước để không sử dụng
+		sudo sed -i 's|^[[:space:]]*\(//\)\?[[:space:]]*mixer_control_name = .*|        // mixer_control_name = "none";|' /etc/shairport-sync.conf
+		sudo sed -i 's|^[[:space:]]*\(//\)\?[[:space:]]*mixer_device = .*|        // mixer_device = "default";|' /etc/shairport-sync.conf
     fi
 
 	#general
@@ -812,6 +820,7 @@ FALLBACK_EOF
 	sudo sed -i 's|^[[:space:]]*//[[:space:]]*active_state_timeout = .*|        active_state_timeout = 0.5;|' /etc/shairport-sync.conf
 	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_before_play_begins = .*|        run_this_before_play_begins = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
 	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_after_play_ends = .*|        run_this_after_play_ends = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_stop.sh";|' /etc/shairport-sync.conf
+	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_if_an_unfixable_error_is_detected = .*|        run_this_if_an_unfixable_error_is_detected = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_stop.sh";|' /etc/shairport-sync.conf
 
     #Set output format
     sudo sed -i "s|^//[[:space:]]*output_rate = .*|        output_rate = \"auto\";|" /etc/shairport-sync.conf
