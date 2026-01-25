@@ -2214,6 +2214,7 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
+					<!--
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Mosquitto hệ thống">
@@ -2229,6 +2230,7 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
+					-->
               </form>
               <!-- 
                   <div class="btn-group">
