@@ -1,15 +1,39 @@
 Dự án này sử dụng hệ thống hai tập lệnh để cài đặt an toàn và đáng tin cậy:
 
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+Cài đặt:
+#Chạy lệnh sau để đi tới thư mục cài đặt:
+	$:> cd /home/pi/VBot_Offline/resource/airplay
+
+#Chạy lệnh sau để kiểm tra có đủ điều kiện cài đặt không
+	$:> ./pre_check_airplay_on_pi.sh
+
+#Nếu đủ điều kiện thì chạy tiếp lệnh sau để cài đặt
+	$:> ./install_airplay_v3.sh
+
+#Trong quá trình cài đặt sẽ làm theo các bước được yêu cầu
+
+>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+
+
+
+BUILD, CÀI ĐẶT THỦ CÔNG
+
+$:> dos2unix install_airplay_v3.sh
+$:> dos2unix pre_check_airplay_on_pi.sh
 pre_check_airplay_on_pi.sh: Một tập lệnh không xâm phạm, kiểm tra hệ thống của bạn về các sự cố thường gặp mà không thực hiện bất kỳ thay đổi nào. Nếu tất cả các kiểm tra đều đạt, nó sẽ tự động tải xuống và chạy trình cài đặt chính.
 
 install_airplay_v3.sh: Trình cài đặt chính mạnh mẽ thực hiện tất cả các hành động cần thiết để xây dựng và cấu hình phần mềm AirPlay 2 (Shairport-Sync và nqptp).
 
 build lại shairport:
+$:> git clone https://github.com/marion001/shairport-sync.git
 $:> cd shairport-sync
 $:> make clean
 $:> autoreconf -fi
 $:> ./configure --with-mqtt-client --sysconfdir=/etc --with-alsa \
-    --with-soxr --with-avahi --with-ssl=openssl --with-systemd --with-airplay-2
+    --with-soxr --with-avahi --with-dbus-interface --with-ssl=openssl --with-systemd --with-airplay-2
 $:> make
 $:> sudo make install
 
@@ -20,11 +44,8 @@ $:> sudo systemctl status shairport-sync
 #Tạm dừng shairport khi đang chạy tự động
 $:> sudo systemctl stop shairport-sync
 
-#bật tắt tiếng
-mosquitto_pub -h localhost -t "shairport/vbot/remote" -m "mute"
-mosquitto_pub -h localhost -t "shairport/vbot/remote" -m "unmute"
-#Set âm lượng
-mosquitto_pub -t "shairport/vbot/remote" -m "volumeset 70"
+#Kiểm tra cái nào đang chiếm quyền sử dụng alsa
+$:> sudo lsof /dev/snd/*
 
 Chạy shairport thủ công xem logs
 $:> shairport-sync -vv
@@ -35,3 +56,29 @@ $:> shairport-sync -vv
    Check status:      sudo systemctl status shairport-sync
    Edit config:       sudo nano /etc/shairport-sync.conf
    Installation log:  /tmp/airplay_install_20260118_105020.log
+
+kiểm tra cái nào đang chiếm quyền alsa:
+    $:> sudo lsof /dev/snd/*
+
+DBUS (Mặc Định Tương Tác Với VBot Assistant):
+    #Tắt tiếng
+    $:> dbus-send --system --print-reply --dest=org.gnome.ShairportSync /org/gnome/ShairportSync org.gnome.ShairportSync.RemoteControl.Mute
+
+    #Bật tiếng
+    $:> dbus-send --system --print-reply --dest=org.gnome.ShairportSync /org/gnome/ShairportSync org.gnome.ShairportSync.RemoteControl.Unmute
+
+    #Thay đổi âm lượng
+    $:> dbus-send --system --print-reply --dest=org.gnome.ShairportSync /org/gnome/ShairportSync org.gnome.ShairportSync.RemoteControl.ChangeVolume double:10
+
+    Bật chiếm quyền alsa
+    $:> dbus-send --system --print-reply --dest=org.gnome.ShairportSync /org/gnome/ShairportSync org.gnome.ShairportSync.RemoteControl.EnableOpenALSA
+
+    Tắt sử dụng quyền alsa
+    $:> dbus-send --system --print-reply --dest=org.gnome.ShairportSync /org/gnome/ShairportSync org.gnome.ShairportSync.RemoteControl.DisableOpenALSA
+
+MQTT:
+    #bật tắt tiếng
+    mosquitto_pub -h localhost -t "shairport/vbot/remote" -m "mute"
+    mosquitto_pub -h localhost -t "shairport/vbot/remote" -m "unmute"
+    #Set âm lượng
+    mosquitto_pub -t "shairport/vbot/remote" -m "volumeset 70"

@@ -23,7 +23,6 @@
             "active": false
         },
         {
-            "active": true,
             "name": "test thông báo bằng link http",
             "create_words": "vbot_interface",
             "data": {
@@ -42,7 +41,8 @@
             ],
             "time": [
                 "21:24"
-            ]
+            ],
+            "active": false
         }
     ],
     "send_notify_upgrade_vbot_home_assistant": {

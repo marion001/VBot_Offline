@@ -1369,6 +1369,91 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
                 </div>
               </div>
 
+            <div class="card accordion" id="accordion_button_airport">
+            <div class="card-body">
+            <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_airport" aria-expanded="false" aria-controls="collapse_button_airport">
+            Cài Đặt, Thiết Lập AirPlay - shairport-sync:</h5>
+            <div id="collapse_button_airport" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_airport">
+
+
+      <!-- Card chính -->
+      <div class="card shadow-lg border-primary mb-4">
+        <div class="card-header bg-primary text-white fs-5">
+          <i class="bi bi-gear-fill me-2"></i>Cài đặt Shairport
+        </div>
+        <div class="card-body">
+
+          <h5 class="mt-4 mb-3 text-success">
+            Cần truy cập vào giao diện SSH của PI để chạy các lệnh cài đặt bên dưới
+          </h5>
+
+          <h5 class="mt-4 mb-3 text-success">
+            <i class="bi bi-1-circle-fill me-2"></i>Di chuyển đến thư mục cài đặt
+          </h5>
+          <div class="terminal">
+            <span class="prompt">$:&gt;</span> <b>cd /home/pi/VBot_Offline/resource/airplay</b>
+          </div>
+
+          <h5 class="mt-4 mb-3 text-success">
+            <i class="bi bi-2-circle-fill me-2"></i>Kiểm tra điều kiện cài đặt
+          </h5>
+          <div class="terminal">
+            <span class="prompt">$:&gt;</span> <b>./pre_check_airplay_on_pi.sh</b>
+            <br><span class="code-comment"># Script sẽ báo bạn đủ điều kiện hay thiếu gói nào</span>
+          </div>
+
+          <div class="alert alert-info mt-3">
+            <i class="bi bi-info-circle-fill me-2"></i>
+            Nếu script báo <strong>OK / đủ điều kiện</strong> → tiếp tục bước tiếp theo.<br>
+            Nếu thiếu gói → cài bổ sung theo hướng dẫn của script (thường là sudo apt install …).
+          </div>
+
+          <h5 class="mt-5 mb-3 text-success">
+            <i class="bi bi-3-circle-fill me-2"></i>Chạy lệnh cài đặt chính
+          </h5>
+          <div class="terminal">
+            <span class="prompt">$:&gt;</span> <b>./install_airplay_v3.sh</b>
+          </div>
+
+          <div class="alert alert-warning mt-3">
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+            <strong>Trong quá trình cài đặt:</strong><br>
+            • Làm theo hướng dẫn trên màn hình<br>
+            • Có thể mất 5–15 phút tùy tốc độ Pi và mạng<br>
+            • Không tắt máy hoặc Ctrl+C giữa chừng
+          </div>
+
+          <h5 class="mt-5 mb-3 text-success">
+            <i class="bi bi-check2-circle me-2"></i>Sau khi cài xong
+          </h5>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">→ Khởi động lại Raspberry Pi: <code>sudo reboot</code></li>
+            <li class="list-group-item">→ Vào Settings trên iPhone/iPad/Mac → AirPlay → chọn thiết bị mới xuất hiện (thường tên máy Pi hoặc tên bạn đặt)</li>
+            <li class="list-group-item">→ Phát nhạc thử → âm thanh phải ra loa ngay</li>
+          </ul>
+
+        </div> <!-- card-body -->
+      </div> <!-- card -->
+
+      <!-- Card lưu ý cuối -->
+      <div class="card shadow border-info">
+        <div class="card-header bg-info text-white">
+          <i class="bi bi-lightbulb-fill me-2"></i>Lưu ý quan trọng
+        </div>
+        <div class="card-body">
+          <ul class="mb-0">
+            <li>Đảm bảo Raspberry Pi kết nối mạng ổn định (WiFi hoặc LAN)</li>
+            <li>Nên dùng nguồn 5V/3A trở lên để tránh lỗi âm thanh rè</li>
+            <li>Nếu muốn đổi tên thiết bị Airplay → chỉnh trong file config (thường là /etc/shairport-sync.conf)<br/> hoặc di chuyển tới: <b>Command/Terminal</b> => <b>AirPlay</b> => <b>Đổi Tên AirPlay</b></li>
+            <li>Chạy <code>sudo systemctl status shairport-sync</code> để kiểm tra dịch vụ có chạy không</li>
+          </ul>
+        </div>
+      </div>
+
+            </div>
+            </div>
+            </div>
+
 
             </div>
           </div>

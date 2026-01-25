@@ -1,12 +1,12 @@
 {
-    "version": "1.0.87",
+    "version": "1.0.88",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật mDNS đồng bộ với VBot Custom Component Home Assistant",
-    "releaseDate": "15/01/2026",
+    "description": "Cập nhật AirPlay truyền dữ liệu âm thanh từ iphone, ipad ra loa (Xem Cài Đặt Trong Hướng Dẫn). Tối ưu sửa lỗi Media Player",
+    "releaseDate": "25/01/2026",
     "changes": [
         {
             "type": "feature",
-            "description": "Cần Cài Bổ Sung Thư Viện Sau: 'pip install broadlink==0.19.0'"
+            "description": "Cần Cài Bổ Sung Thư Viện Sau: 'pip install pydbus==0.6.0'"
         },
         {
             "type": "fix",

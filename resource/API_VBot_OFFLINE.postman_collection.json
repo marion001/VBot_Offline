@@ -1,3239 +1,3463 @@
 {
-	"info": {
-		"_postman_id": "58f72f5d-a02d-4514-9c04-11d627bca493",
-		"name": "API_VBot_OFFLINE",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "9797110"
-	},
-	"item": [
-		{
-			"name": "Phát Nhạc Player",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://www.youtube.com/watch?v=33X_LhEUaZc\",\r\n    \"media_name\": \"\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"\",\r\n    \"notes\": \"hỗ trợ các link youtube, zingmp3, nhaccuatui, link nhạc mp3 - stream trực tiếp, tên bài hát - text\"\r\n\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tạm Dừng Phát Nhạc",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"pause\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tiếp Tục Phát Nhạc",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"resume\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Dừng Phát Nhạc",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"stop\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tua Khi Đang Phát Player",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"set_time\",\r\n    \"set_duration\": 54216\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Phát Nhạc Ở PlayList",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Phát Toàn Bộ Bài Hát Có Trong Thư Mục Local",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"local\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Truyền PlayList Dạng json Để Phát",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"json\",\r\n    \"json_file\": \"http://192.168.14.113/includes/cache/PlayList.json\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "PlayList Qua Bài (Next)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"control\": \"next\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "PlayList Quay Lại Bài Trước Đó (Prev)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"control\": \"prev\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Thiết Lập Âm Lượng",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"setup\",\r\n    \"value\":99\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002/",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002",
-					"path": [
-						""
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tăng Âm Lượng",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"up\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Giảm Âm Lượng",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"down\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tăng âm Lượng Tối Đa",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"max\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Giảm Âm Lượng Tối Đa",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"min\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Bật Chế Độ Hội Thoại",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"conversation_mode\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tắt Chế Độ Hội Thoại",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"conversation_mode\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Phát Báo, Tin Tức",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"newspaper\",\r\n    \"newspaper_name\": \"thanh niên chủ đề thời sự\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát Báo, Tin Tức",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"news_paper\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát Báo, Tin Tức",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"news_paper\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát Youtube",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"youtube\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát Youtube",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"youtube\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát Zingmp3",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zing_mp3\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát Zingmp3",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zing_mp3\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát NhacCuaTui",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"nhaccuatui\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.173:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"173"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát NhacCuaTui",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"nhaccuatui\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.173:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"173"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát Nhạc Local",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"music_local\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát Nhạc Local",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"music_local\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát PodCast",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"podcast\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát PodCast",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"podcast\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Nguồn Phát Radio",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"radio\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Nguồn Phát Radio",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"radio\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trình Phát MediaPlayer",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"media_player_active\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trình Phát MediaPlayer",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"media_player_active\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Chế Độ Custom Câu Lệnh Hass",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"hass_custom_active\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Chế Độ Custom Câu Lệnh Hass",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"hass_custom_active\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Chế Độ VBot Xử Lý Cho DEV Custom Skill",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_vbot\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Chế Độ VBot Xử Lý Cho DEV Custom Skill",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_vbot\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Chế Độ DEV Custom Skill",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Chế Độ DEV Custom Skill",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Điều Khiển Hass",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"home_assistant\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Điều Khiển Hass",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"home_assistant\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Chế Độ Cache Lại TTS",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"cache_tts\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Chế Độ Cache Lại TTS",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"cache_tts\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo Google Gemini",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"google_gemini\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo Google Gemini",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"google_gemini\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo Default Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"default_assistant\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo Default Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"default_assistant\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo Chat GPT",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"chat_gpt\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo Chat GPT",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"chat_gpt\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo Zalo AI Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zalo_assistant\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo Zalo AI Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zalo_assistant\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo Difi AI",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dify_ai\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.30:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo Difi AI",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dify_ai\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.30:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo Olli AI Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"olli\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo Olli AI Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"olli\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo XiaoZhi",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"xiaozhi\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo XiaoZhi Copy",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"xiaozhi\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Trợ Lý Ảo DEV Custom Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_assistant\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Trợ Lý Ảo DEV Custom Assistant Copy",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_assistant\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Chế Độ Câu Phản Hồi",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"wakeup_reply\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Chế Độ Câu Phản Hồi",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"wakeup_reply\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Chế Độ Đa Lệnh Trong 1 Câu Lệnh",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"multiple_command\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Chế Độ Đa Lệnh Trong 1 Câu Lệnh Copy",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"multiple_command\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kích Hoạt Tiếp Tục Được Đánh Thức, Lắng Nghe Khi Xử Lý Xong Đa Lệnh",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"continue_listening_after_commands\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Vô Hiệu Tiếp Tục Được Đánh Thức, Lắng Nghe Khi Xử Lý Xong Đa Lệnh",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"continue_listening_after_commands\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Bật Mic, Microphone",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"mic_on_off\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tắt Mic, Microphone",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"mic_on_off\",\r\n    \"action\": false\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Đánh Thức Bot (Waku Up)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"wake_up\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Thay Đổi Độ Sáng LED",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"brightness\",\r\n    \"value\": 51,\r\n    \"notes\": \"độ sáng có giá trị từ 0 -> 100\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "LED OFF (Tắt Đèn LED)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"off\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED THINK",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"think\",\r\n    \"value\": \"FF0000\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED MUTE",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"mute\",\r\n    \"value\": \"FBFF00\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED SPEAK",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"speak\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED PAUSE",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"pause\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED LOADING",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"loading\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED STARTUP",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"startup\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "(Hiệu Ứng) LED ERROR",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"error\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Thay Đổi Kiểu Hiển Thị Logs",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"all\",\r\n    \"notes\": \"value: all, console, api\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Bật Chế Độ Hiển Thị Logs",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"on\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tắt Chế Độ Hiển Thị Logs",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"off\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Bật Logs Encoder Rotary Khi Xoay",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"encode_rotating_show_logs\",\r\n    \"value\": \"on\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tắt Logs Encoder Rotary Khi Xoay",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"encode_rotating_show_logs\",\r\n    \"value\": \"off\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Xóa Logs Đường API",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"clear_api\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Phát Thông Báo TTS",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"notify\",\r\n    \"value\": \"Chào tuyển nhé\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gửi Thông Báo Tới Hass, Home Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"home_assistant\",\r\n    \"title\": \"VBot Messenger\",\r\n    \"messenger\": \"Chào tuyển nhé\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "ChatBot",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"chatbot\",\r\n    \"value\": \"lịch âm hôm nay\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Chạy Câu Lệnh Custom Home Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"custom_home_assistant\",\r\n    \"value\": \"tắt hộ cái đèn ngủ.\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo Google Gemini",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"google_gemini\",\r\n    \"value\": \"thông báo cho tôi ngày mai uống thuốc lúc 7 giờ 10 phút\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo Chat GPT",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"gpt_assistant\",\r\n    \"value\": \"chào bạn, bạn tên là gì\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo Zalo AI Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"zalo_assistant\",\r\n    \"value\": \"nhắc tôi uống thuốc sau 2 phút nữa\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo Default Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"default_assistant\",\r\n    \"value\": \"nhắc tôi đi ngủ sau 2 phút nữa\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo Olli Maika Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"olli_assistant\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo DEV Assistant (Người Dùng Tự Code)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"dev_assistant\",\r\n    \"value\": \"chào bạn\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gọi Trợ Lý Ảo Theo Ưu Tiên Trong Config.json",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"prioritize_virtual_assistants\",\r\n    \"value\": \"hôm nay là thứ mấy\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Gửi Thông Báo Tới Home Assistant",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"home_assistant\",\r\n    \"title\": \"VBot Assistant\",\r\n    \"messenger\": \"Chào bạn! Mình là VBot trợ lý của bạn\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kiểm Tra Cập Nhật Giao Diện",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"check_for_updates\",\r\n    \"action\": \"interface\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kiểm Tra Cập Nhật Chương Trình",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"check_for_updates\",\r\n    \"action\": \"program\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.113:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "RESTART VBOT (Khi Bot Đang Chạy)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"restart_vbot\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.169:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"169"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "RESTART Giao Diện VBot interface",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"restart_interface\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Nhiệt Độ CPU Hiện Tại",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"cpu_temperature\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Bật Bluetooth (Thiết lập Wifi Qua Bluetooth)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth_on\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Tắt Bluetooth (Thiết lập Wifi Qua Bluetooth)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth_off\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Thời Gian Khởi Động",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"system_uptime\",\r\n    \"action\": true\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "VBot Xử Lý Chính (VBot Processing)",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Đặt Lời Nhắc Nhanh",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"reminder\",\r\n    \"value\": \"nhắc tôi đi ngủ sau 3 phút nữa\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.194:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"194"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Kiểm Tra, Thực Thi Lên Lịch, Thông Báo",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"scheduler\",\r\n    \"value\": \"test thông báo bằng link http\",\r\n    \"parameter\": \"40\",\r\n    \"notes\": \"value sẽ tương ứng với tên tác vụ được thiết lập của bạn\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.175:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"175"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Lấy PodCast Token",
-			"request": {
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"podcast_token\",\r\n    \"value\": \"token\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://192.168.14.173:5002",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"173"
-					],
-					"port": "5002"
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "RESTART VBot Service",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?restart_vbot_service",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"path": [
-						"includes",
-						"php_ajax",
-						"Check_Connection.php"
-					],
-					"query": [
-						{
-							"key": "restart_vbot_service",
-							"value": null
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "REBOOT OS SYSTEM",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?reboot_os",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"path": [
-						"includes",
-						"php_ajax",
-						"Check_Connection.php"
-					],
-					"query": [
-						{
-							"key": "reboot_os",
-							"value": null
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "STOPS VBot Service",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?stop_vbot_service",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"path": [
-						"includes",
-						"php_ajax",
-						"Check_Connection.php"
-					],
-					"query": [
-						{
-							"key": "stop_vbot_service",
-							"value": null
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "START VBOT Service",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?start_vbot_service",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"30"
-					],
-					"path": [
-						"includes",
-						"php_ajax",
-						"Check_Connection.php"
-					],
-					"query": [
-						{
-							"key": "start_vbot_service",
-							"value": null
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "?type=1&data=media_player",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.113:5002/?type=1&data=media_player",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002",
-					"path": [
-						""
-					],
-					"query": [
-						{
-							"key": "type",
-							"value": "1"
-						},
-						{
-							"key": "data",
-							"value": "media_player"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "?type=1&data=all_info",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.113:5002/?type=1&data=all_info",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002",
-					"path": [
-						""
-					],
-					"query": [
-						{
-							"key": "type",
-							"value": "1"
-						},
-						{
-							"key": "data",
-							"value": "all_info"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "/logs",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://192.168.14.113:5002/logs",
-					"protocol": "http",
-					"host": [
-						"192",
-						"168",
-						"14",
-						"113"
-					],
-					"port": "5002",
-					"path": [
-						"logs"
-					]
-				}
-			},
-			"response": []
-		}
-	]
+  "info": {
+    "_postman_id": "58f72f5d-a02d-4514-9c04-11d627bca493",
+    "name": "API_VBot_OFFLINE",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "9797110"
+  },
+  "item": [
+    {
+      "name": "Phát Nhạc Player",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://www.youtube.com/watch?v=33X_LhEUaZc\",\r\n    \"media_name\": \"\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"\",\r\n    \"notes\": \"hỗ trợ các link youtube, zingmp3, nhaccuatui, link nhạc mp3 - stream trực tiếp, tên bài hát - text\"\r\n\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tạm Dừng Phát Nhạc",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"pause\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tiếp Tục Phát Nhạc",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"resume\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Dừng Phát Nhạc",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"stop\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tua Khi Đang Phát Player",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"set_time\",\r\n    \"set_duration\": 54216\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Phát Nhạc Ở PlayList",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Phát Toàn Bộ Bài Hát Có Trong Thư Mục Local",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"local\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Truyền PlayList Dạng json Để Phát",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"json\",\r\n    \"json_file\": \"http://192.168.14.113/includes/cache/PlayList.json\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PlayList Qua Bài (Next)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"control\": \"next\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "PlayList Quay Lại Bài Trước Đó (Prev)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"control\": \"prev\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Thiết Lập Âm Lượng",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"setup\",\r\n    \"value\":99\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002/",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002",
+          "path": [
+            ""
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tăng Âm Lượng",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"up\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Giảm Âm Lượng",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"down\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tăng âm Lượng Tối Đa",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"max\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Giảm Âm Lượng Tối Đa",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"min\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bật Chế Độ Hội Thoại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"conversation_mode\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tắt Chế Độ Hội Thoại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"conversation_mode\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Phát Báo, Tin Tức",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"newspaper\",\r\n    \"newspaper_name\": \"thanh niên chủ đề thời sự\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát Báo, Tin Tức",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"news_paper\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát Báo, Tin Tức",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"news_paper\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát Youtube",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"youtube\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát Youtube",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"youtube\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát Zingmp3",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zing_mp3\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát Zingmp3",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zing_mp3\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát NhacCuaTui",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"nhaccuatui\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.173:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "173"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát NhacCuaTui",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"nhaccuatui\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.173:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "173"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát Nhạc Local",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"music_local\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát Nhạc Local",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"music_local\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát PodCast",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"podcast\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát PodCast",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"podcast\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Nguồn Phát Radio",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"radio\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Nguồn Phát Radio",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"radio\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trình Phát MediaPlayer",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"media_player_active\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trình Phát MediaPlayer",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"media_player_active\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Chế Độ Custom Câu Lệnh Hass",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"hass_custom_active\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Chế Độ Custom Câu Lệnh Hass",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"hass_custom_active\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Chế Độ VBot Xử Lý Cho DEV Custom Skill",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_vbot\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Chế Độ VBot Xử Lý Cho DEV Custom Skill",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_vbot\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Chế Độ DEV Custom Skill",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Chế Độ DEV Custom Skill",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Điều Khiển Hass",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"home_assistant\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Điều Khiển Hass",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"home_assistant\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Chế Độ Cache Lại TTS",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"cache_tts\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Chế Độ Cache Lại TTS",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"cache_tts\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo Google Gemini",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"google_gemini\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo Google Gemini",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"google_gemini\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo Default Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"default_assistant\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo Default Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"default_assistant\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo Chat GPT",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"chat_gpt\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo Chat GPT",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"chat_gpt\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo Zalo AI Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zalo_assistant\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo Zalo AI Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"zalo_assistant\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo Difi AI",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dify_ai\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.30:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "30"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo Difi AI",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dify_ai\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.30:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "30"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo Olli AI Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"olli\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo Olli AI Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"olli\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo XiaoZhi",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"xiaozhi\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo XiaoZhi Copy",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"xiaozhi\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Trợ Lý Ảo DEV Custom Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_assistant\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Trợ Lý Ảo DEV Custom Assistant Copy",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"dev_custom_assistant\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Chế Độ Câu Phản Hồi",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"wakeup_reply\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Chế Độ Câu Phản Hồi",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"wakeup_reply\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Chế Độ Đa Lệnh Trong 1 Câu Lệnh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"multiple_command\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Chế Độ Đa Lệnh Trong 1 Câu Lệnh Copy",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"multiple_command\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kích Hoạt Tiếp Tục Được Đánh Thức, Lắng Nghe Khi Xử Lý Xong Đa Lệnh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"continue_listening_after_commands\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Vô Hiệu Tiếp Tục Được Đánh Thức, Lắng Nghe Khi Xử Lý Xong Đa Lệnh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"continue_listening_after_commands\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bật Mic, Microphone",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"mic_on_off\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tắt Mic, Microphone",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"mic_on_off\",\r\n    \"action\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Đánh Thức Bot (Waku Up)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"wake_up\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Thay Đổi Độ Sáng LED",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"brightness\",\r\n    \"value\": 51,\r\n    \"notes\": \"độ sáng có giá trị từ 0 -> 100\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "LED OFF (Tắt Đèn LED)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"off\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED THINK",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"think\",\r\n    \"value\": \"FF0000\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED MUTE",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"mute\",\r\n    \"value\": \"FBFF00\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED SPEAK",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"speak\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED PAUSE",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"pause\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED LOADING",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"loading\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED STARTUP",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"startup\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED ERROR",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"error\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Thay Đổi Kiểu Hiển Thị Logs",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"all\",\r\n    \"notes\": \"value: all, console, api\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bật Chế Độ Hiển Thị Logs",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"on\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tắt Chế Độ Hiển Thị Logs",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"change_log\",\r\n    \"value\": \"off\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bật Logs Encoder Rotary Khi Xoay",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"encode_rotating_show_logs\",\r\n    \"value\": \"on\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tắt Logs Encoder Rotary Khi Xoay",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"encode_rotating_show_logs\",\r\n    \"value\": \"off\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Xóa Logs Đường API",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"logs\",\r\n    \"action\": \"clear_api\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Phát Thông Báo TTS",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"notify\",\r\n    \"value\": \"Chào tuyển nhé\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gửi Thông Báo Tới Hass, Home Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"home_assistant\",\r\n    \"title\": \"VBot Messenger\",\r\n    \"messenger\": \"Chào tuyển nhé\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ChatBot",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"chatbot\",\r\n    \"value\": \"lịch âm hôm nay\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Chạy Câu Lệnh Custom Home Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"custom_home_assistant\",\r\n    \"value\": \"tắt hộ cái đèn ngủ.\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo Google Gemini",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"google_gemini\",\r\n    \"value\": \"thông báo cho tôi ngày mai uống thuốc lúc 7 giờ 10 phút\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo Chat GPT",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"gpt_assistant\",\r\n    \"value\": \"chào bạn, bạn tên là gì\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo Zalo AI Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"zalo_assistant\",\r\n    \"value\": \"nhắc tôi uống thuốc sau 2 phút nữa\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo Default Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"default_assistant\",\r\n    \"value\": \"nhắc tôi đi ngủ sau 2 phút nữa\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo Olli Maika Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"olli_assistant\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo DEV Assistant (Người Dùng Tự Code)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"dev_assistant\",\r\n    \"value\": \"chào bạn\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gọi Trợ Lý Ảo Theo Ưu Tiên Trong Config.json",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"prioritize_virtual_assistants\",\r\n    \"value\": \"hôm nay là thứ mấy\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Gửi Thông Báo Tới Home Assistant",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"tts\",\r\n    \"action\": \"home_assistant\",\r\n    \"title\": \"VBot Assistant\",\r\n    \"messenger\": \"Chào bạn! Mình là VBot trợ lý của bạn\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kiểm Tra Cập Nhật Giao Diện",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"check_for_updates\",\r\n    \"action\": \"interface\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kiểm Tra Cập Nhật Chương Trình",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"check_for_updates\",\r\n    \"action\": \"program\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "RESTART VBOT (Khi Bot Đang Chạy)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"restart_vbot\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.169:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "RESTART Giao Diện VBot interface",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"restart_interface\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Nhiệt Độ CPU Hiện Tại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"cpu_temperature\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bật Bluetooth (Thiết lập Wifi Qua Bluetooth)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth_on\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Tắt Bluetooth (Thiết lập Wifi Qua Bluetooth)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"bluetooth_off\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Thời Gian Khởi Động",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 4,\r\n    \"data\":\"system_uptime\",\r\n    \"action\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "VBot Xử Lý Chính (VBot Processing)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Đặt Lời Nhắc Nhanh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"reminder\",\r\n    \"value\": \"nhắc tôi đi ngủ sau 3 phút nữa\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.194:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "194"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Kiểm Tra, Thực Thi Lên Lịch, Thông Báo",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"scheduler\",\r\n    \"value\": \"test thông báo bằng link http\",\r\n    \"parameter\": \"40\",\r\n    \"notes\": \"value sẽ tương ứng với tên tác vụ được thiết lập của bạn\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy PodCast Token",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"podcast_token\",\r\n    \"value\": \"token\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.173:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "173"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Kiểm Tra Trạng Thái Phát",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"player_status\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Lấy Thông Tin Đang Phát Player",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"info_player\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Lấy Toàn Bộ Dữ Liệu Kết Nối Hiện Tại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"info_all\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Tắt Âm Thanh Mute",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"mute\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Bật Âm Thanh Un-Mute",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"unmute\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Kích Hoạt Truyền Âm Thanh Vào ALSA",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"enable_alsa\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Vô Hiệu Truyền Âm Thanh Vào ALSA Copy",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"disable_alsa\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Thay Đổi Âm Lượng",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"airplay\",\r\n    \"action\": \"volume\",\r\n    \"value\": 90\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "RESTART VBot Service",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?restart_vbot_service",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "30"
+          ],
+          "path": [
+            "includes",
+            "php_ajax",
+            "Check_Connection.php"
+          ],
+          "query": [
+            {
+              "key": "restart_vbot_service",
+              "value": null
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "REBOOT OS SYSTEM",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?reboot_os",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "30"
+          ],
+          "path": [
+            "includes",
+            "php_ajax",
+            "Check_Connection.php"
+          ],
+          "query": [
+            {
+              "key": "reboot_os",
+              "value": null
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "STOPS VBot Service",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?stop_vbot_service",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "30"
+          ],
+          "path": [
+            "includes",
+            "php_ajax",
+            "Check_Connection.php"
+          ],
+          "query": [
+            {
+              "key": "stop_vbot_service",
+              "value": null
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "START VBOT Service",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.30/includes/php_ajax/Check_Connection.php?start_vbot_service",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "30"
+          ],
+          "path": [
+            "includes",
+            "php_ajax",
+            "Check_Connection.php"
+          ],
+          "query": [
+            {
+              "key": "start_vbot_service",
+              "value": null
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "?type=1&data=media_player",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.113:5002/?type=1&data=media_player",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002",
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "1"
+            },
+            {
+              "key": "data",
+              "value": "media_player"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "?type=1&data=all_info",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.113:5002/?type=1&data=all_info",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002",
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "1"
+            },
+            {
+              "key": "data",
+              "value": "all_info"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "/logs",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.113:5002/logs",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002",
+          "path": [
+            "logs"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
 }

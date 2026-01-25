@@ -1080,7 +1080,7 @@ if (isset($_POST['pass_crypto_btwifiset'])) {
 }
 
 if (isset($_POST['update_btwifiset_py'])) {
-  $CMD = "sudo cp /home/pi/VBot_Offline/resource/set_wifi_via_ble/btwifiset.py /usr/local/btwifiset/btwifiset.py";
+  $CMD = 'sudo cp '.$VBot_Offline.'resource/set_wifi_via_ble/btwifiset.py /usr/local/btwifiset/btwifiset.py';
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1093,6 +1093,40 @@ if (isset($_POST['update_btwifiset_py'])) {
   $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
   $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .=  stream_get_contents($stream_out);
+}
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_rename_airplay'])) {
+    $airplay_name_raw = trim($_POST['airplay_name_change'] ?? '');
+    if ($airplay_name_raw === '') {
+        $output = "$GET_current_USER@$HostName:~> Tên AirPlay không được để trống";
+    }
+	else {
+		$airplay_name = preg_replace('/[\/\\\\\'"`;|&<>]/u', '', $airplay_name_raw);
+		$airplay_name = trim($airplay_name);
+		$airplay_name = preg_replace('/\s+/u', ' ', $airplay_name);
+		if ($airplay_name === '') {
+			$output = "$GET_current_USER@$HostName:~> Tên AirPlay không hợp lệ";
+		} else {
+			$airplay_name_safe = addcslashes($airplay_name, '\\"');
+			$commandnd = <<<CMD
+			sudo sed -i "s|^[[:space:]]*\\(//[[:space:]]*\\)\\?name[[:space:]]*=.*|        name = \"$airplay_name_safe\";|g" /etc/shairport-sync.conf
+			sudo systemctl restart shairport-sync
+			CMD;
+			$connection = ssh2_connect($ssh_host, $ssh_port);
+			if (!$connection) {
+				die($SSH_CONNECT_ERROR);
+			}
+			if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+				die($SSH2_AUTH_ERROR);
+			}
+			$stream = ssh2_exec($connection, $commandnd);
+			stream_set_blocking($stream, true);
+			$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+			$output  = "$GET_current_USER@$HostName:~ $ $commandnd\n";
+			$output .= stream_get_contents($stream_out);
+			$output .= "\n[VBot] Đã đổi tên AirPlay thành: $airplay_name";
+		}
+	}
 }
 
 if (isset($_POST['start_airplay'])) {
@@ -1204,6 +1238,52 @@ if (isset($_POST['status_airplay'])) {
   stream_set_blocking($stream, true);
   $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
   $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['fix_asound_airplay'])) {
+	$output = '';
+    $checkFile = "/os_image_created.txt";
+    $basePath  = $VBot_Offline.'resource/asound_conf/';
+
+    $i2sConf   = $basePath . "default_i2s_asound.conf";
+    $wm8960Conf = $basePath . "default_wm8960_asound.conf";
+    $target    = "/etc/asound.conf";
+
+    if (!file_exists($checkFile)) {
+		$output .= "Lỗi không tìm thấy file: {$checkFile}\n";
+        return false;
+    }
+    $content = file_get_contents($checkFile);
+    if ($content === false) {
+        $output .= "[ERROR] Không đọc được {$checkFile}\n";
+        return false;
+    }
+    $hasI2S = stripos($content, "i2s") !== false;
+    if ($hasI2S) {
+        $output .= "[INFO] Phát hiện i2s trong {$checkFile}\n";
+        $src = $i2sConf;
+    } else {
+        //$output .= "[INFO] Không phát hiện i2s trong {$checkFile}, sử dụng file cấu hình mặc định WM8960\n";
+        $output .= "[INFO] Sử dụng file cấu hình mặc định WM8960\n";
+        $src = $wm8960Conf;
+    }
+    if (!file_exists($src)) {
+        $output .= "[ERROR] File nguồn không tồn tại: {$src}\n";
+        return false;
+    }
+  $CMD = 'sudo cp ' . escapeshellarg($src) . ' ' . escapeshellarg($target);
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output .= "$GET_current_USER@$HostName:~ $ $CMD\n";
   $output .=  stream_get_contents($stream_out);
 }
 
@@ -1972,8 +2052,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-danger dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                         <i class="bi bi-robot"></i> VBot Auto
-                        </button>
+                         <i class="bi bi-robot"></i> VBot Auto</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_start" type="submit" title="Chạy lại trương trình">Chạy</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="auto_restart" type="submit" title="Tạm dừng trương trình đang chạy">Khởi động lại</button></li>
@@ -1988,8 +2067,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                         <i class="bi bi-wifi"></i> OS Wifi
-                        </button>
+                         <i class="bi bi-wifi"></i> OS Wifi</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li>
                             <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_auto_wifi" type="submit" title="Khởi động lại Services Auto Wifi Manaager">Restart Auto Wifi Manager</button>
@@ -2005,8 +2083,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình WebUI Ra Internet">
-                         <i class="bi bi-browser-safari"></i> WebUI External
-                        </button>
+                         <i class="bi bi-browser-safari"></i> WebUI External</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="enabled_vbot_api_external" type="submit" title="Cấu Hình WebUI Ra Internet">Kích Hoạt WebUI Ra Internet</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="disable_vbot_api_external" type="submit" title="Cấu Hình WebUI Ra Internet">Vô Hiệu WebUI Ra Internet</button></li>
@@ -2036,8 +2113,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-dark dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                         <i class="bi bi-gear"></i> Hệ Thống
-                        </button>
+                         <i class="bi bi-gear"></i> Hệ Thống</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="apache_restart" type="submit" title="Khởi động lại apache2">Restart Apache2</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="logs_apache2" type="submit" title="Khởi động lại apache2">Logs Apache2</button></li>
@@ -2065,8 +2141,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-success dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                         <i class="bi bi-list-check"></i> Thư Viện
-                        </button>
+                         <i class="bi bi-list-check"></i> Thư Viện</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="pip_show_all_lib" type="submit" title="Liệt kê các thư viện đã cài bằng pip">pip show all lib</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="pvporcupine_info" type="submit" title="Kiểm tra thông tin thư viện pvporcupine">Thông tin pvporcupine</button></li>
@@ -2086,15 +2161,14 @@ include 'html_head.php';
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_enable" type="submit" title="alsamixer_soundcard_enable">ALSA SoundCard Enable</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_soundcard_status" type="submit" title="alsamixer_soundcard_status">ALSA SoundCard Status</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="save_asound_to_alsamixer" type="submit" title="save_asound_to_alsamixer">Save Alsamixer SoundCard</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_asound_to_alsamixer" type="submit" title="alsamixer_asound_to_alsamixer">Restore ALSA SoundCard Driver Default</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="alsamixer_asound_to_alsamixer" type="submit" title="alsamixer_asound_to_alsamixer">Restore WM8960 ALSA SoundCard Driver Default</button></li>
                         </ul>
                       </div>
                     </div>
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
-                         <i class="bi bi-cloud-fill"></i> Cloudflare Tunnel
-                        </button>
+                         <i class="bi bi-cloud-fill"></i> Cloudflare Tunnel</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_start" type="submit" title="Chạy ">Chạy</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="cloudflared_tunnel_stop" type="submit" title="Dừng Chạy Tạm thời">Dừng</button></li>
@@ -2109,8 +2183,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Wifi Thông Qua Bluetooth">
-                         <i class="bi bi-bluetooth"></i> BT Wifi Set
-                        </button>
+                         <i class="bi bi-bluetooth"></i> BT Wifi Set</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="start_btwifiset" type="submit" title="Chạy Services Auto btwifiset">Start btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_btwifiset" type="submit" title="Dừng Services Auto btwifiset">Stop btwifiset</button></li>
@@ -2127,9 +2200,9 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-success dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình AirPlay tương thích với Iphone, Ipad">
-                          <i class="bi bi-apple"></i> AirPlay
-                        </button>
+                          <i class="bi bi-apple"></i> AirPlay</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <button class="dropdown-item text-danger" name="rename_airplay" type="button" onclick="rename_airplayyy()" title="Đổi tên thiết bị AirPlay">Đổi Tên AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="start_airplay" type="submit" title="Chạy Services Auto AirPlay">Start AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_airplay" type="submit" title="Dừng Services Auto AirPlay">Stop AirPlay</button></li>
 						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_airplay" type="submit" title="Khởi động lại Services AirPlay">Restart Auto AirPlay</button>
@@ -2137,14 +2210,14 @@ include 'html_head.php';
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_airplay" type="submit" title="Vô Hiệu Services Auto AirPlay">Disabled Auto AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_airplay" type="submit" title="Xem Logs Auto AirPlay">Logs Auto AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="status_airplay" type="submit" title="Kiểm tra trạng thái AirPlay">Status Auto AirPlay</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="fix_asound_airplay" type="submit" title="Tự động sửa lỗi âm thanh ở /etc/asound.conf khi sử dụng mạch: WM8960 hoặc I2S">Fix /etc/asound.conf AirPlay</button></li>
                         </ul>
                       </div>
                     </div>
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Mosquitto hệ thống">
-                         <i class="bi bi-radar"></i> Mosquitto
-                        </button>
+                         <i class="bi bi-radar"></i> Mosquitto</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="start_mosquitto" type="submit" title="Chạy Services Auto Mosquitto">Start Mosquitto</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_mosquitto" type="submit" title="Dừng Services Auto Mosquitto">Stop Mosquitto</button></li>
@@ -2207,7 +2280,16 @@ include 'html_head.php';
             </div>
           </form>
           <hr />
-
+		  
+<form method="POST" action="">
+<div id="rename_airplay-box" style="display: none;">
+<div class="input-group mb-3">
+<span class="input-group-text border-success" id="basic-addon1">Tên AirPlay:</span>
+<input type="text" class="form-control border-success" id="airplay_name_change" name="airplay_name_change" placeholder="Nhập Tên AirPlay cần thay đổi" aria-label="Username" aria-describedby="basic-addon1">
+<button type="submit" name="submit_rename_airplay" class="btn btn-success border-success"><i class="bi bi-save"></i> Lưu</button>
+</div>
+</div>
+</form>
           <form method="POST" action="">
             <div class="row g-3 d-flex justify-content-center">
 
@@ -2358,6 +2440,19 @@ include 'html_head.php';
       };
       xhr.send();
     }
+
+
+function rename_airplayyy() {
+    const box = document.getElementById("rename_airplay-box");
+
+    if (box.style.display === "none" || box.style.display === "") {
+        box.style.display = "block";
+    } else {
+        box.style.display = "none";
+    }
+}
+
+
     //lấy dữ liệu phiên bản picovoice khi trang được tải toàn bộ
     window.onload = function() {
       get_picovoice_version();

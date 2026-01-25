@@ -24,7 +24,7 @@ LOG_FILE="/tmp/airplay_install_$(date +%Y%m%d_%H%M%S).log"
 BACKUP_DIR="/tmp/airplay_backup_$(date +%Y%m%d_%H%M%S)"
 INSTALLATION_FAILED=0
 
-#Các biến cấu hình âm thanh
+#Các biến cấu hình
 audio_device=""
 audio_device_plug=""
 card_number=""
@@ -33,6 +33,90 @@ mixer_control=""
 selected_device=""
 airplay_name=""
 disable_wifi_pm=false
+
+VBOT_BOARD_TYPE=""
+
+VBot_FULL_NAME=false
+
+CONFIG_FILE="/home/pi/VBot_Offline/Config.json"
+
+#Lấy Tên Trong Config VBot Làm Tên AirPlay
+load_vbot_full_name() {
+    VBot_FULL_NAME=false
+    if [ ! -f "$CONFIG_FILE" ]; then
+        echo "[VBot] Không tìm thấy file config: $CONFIG_FILE"
+        return 1
+    fi
+    if ! command -v jq >/dev/null 2>&1; then
+        echo "[VBot] jq chưa được cài → đang cài đặt..."
+        #if ! sudo apt-get update -y >/dev/null 2>&1; then
+            #echo "[VBot] Lỗi apt-get update"
+            #return 1
+        #fi
+        if ! sudo apt-get install -y jq >/dev/null 2>&1; then
+            echo "[VBot] Cài jq thất bại"
+            return 1
+        fi
+        if ! command -v jq >/dev/null 2>&1; then
+            echo "[VBot] jq vẫn không khả dụng sau khi cài"
+            return 1
+        fi
+        echo "[VBot] Đã cài jq thành công"
+    fi
+    if ! jq empty "$CONFIG_FILE" >/dev/null 2>&1; then
+        echo "[VBot] File JSON bị lỗi cú pháp"
+        return 1
+    fi
+    local FULL_NAME
+    FULL_NAME=$(jq -r '.contact_info.full_name // empty' "$CONFIG_FILE")
+    if [ -z "$FULL_NAME" ] || [ "$FULL_NAME" = "null" ]; then
+        echo "[VBot] Không có contact_info.full_name trong config"
+        return 1
+    fi
+    VBot_FULL_NAME="$FULL_NAME"
+    echo "[VBot] Đã load tên trong Config: $VBot_FULL_NAME"
+    return 0
+}
+
+#Kiểm tra dùng mạch i2s hay là wm8960
+apply_asound_conf_vbot() {
+    OS_FILE="/os_image_created.txt"
+    DEST_CONF="/etc/asound.conf"
+
+    WM8960_CONF="/home/pi/VBot_Offline/resource/asound_conf/wm8960_asound.conf"
+    I2S_CONF="/home/pi/VBot_Offline/resource/asound_conf/i2s_asound.conf"
+
+    # Kiểm tra file OS tồn tại
+    if [ ! -f "$OS_FILE" ]; then
+        echo "Không tìm thấy: $OS_FILE"
+        return 1
+    fi
+
+    #Đọc nội dung
+    OS_CONTENT=$(cat "$OS_FILE")
+    echo "📄 Nội dung $OS_FILE:"
+    echo "$OS_CONTENT"
+    echo "-------------------------"
+
+    #Kiểm tra i2s
+    if echo "$OS_CONTENT" | grep -qi "i2s"; then
+        #echo "Phát hiện dùng IMG i2s"
+		VBOT_BOARD_TYPE="i2s"
+        #sudo cp "$I2S_CONF" "$DEST_CONF"
+    else
+        #echo "Không phát hiện IMG i2s → dùng wm8960_asound.conf"
+		VBOT_BOARD_TYPE="wm8960"
+        #sudo cp "$WM8960_CONF" "$DEST_CONF"
+    fi
+
+    #Kiểm tra kết quả
+    #if [ $? -eq 0 ]; then
+        #echo "Đã cập nhật $DEST_CONF thành công"
+    #else
+        #echo "Lỗi khi sao chép thay đổi file cấu hình: /etc/asound.conf"
+        #return 1
+    #fi
+}
 
 #Xử lý dọn dẹp
 cleanup() {
@@ -254,10 +338,10 @@ pre_flight_checks() {
     local available_mem
     available_mem=$(free -m | awk '/^Mem:/{print $7}')
     if [ "$available_mem" -lt 100 ]; then
-        cecho "yellow" "⚠ Cảnh báo: Bộ nhớ khả dụng thấp ($available_mem MB)"
+        cecho "yellow" "⚠ Cảnh báo: Bộ nhớ RAM khả dụng thấp ($available_mem MB)"
         cecho "yellow" "   Hãy cân nhắc đóng các ứng dụng khác.."
     else
-        cecho "green" "✓ Bộ nhớ khả dụng: $available_mem MB"
+        cecho "green" "✓ Bộ nhớ RAM khả dụng: $available_mem MB"
     fi
 
     #Kiểm tra các công cụ cơ bản cần thiết
@@ -312,11 +396,11 @@ select_audio_device() {
     mapfile -t external_devices < <(echo "$all_cards" | grep -iv 'bcm2835\|Headphones\|vc4-hdmi' || true)
 
     if [ ${#external_devices[@]} -eq 0 ]; then
-        cecho "yellow" "⚠ Không phát hiện thấy DAC USB ngoài.!"
+        cecho "yellow" "⚠ Không phát hiện thấy DAC USB âm thanh ngoài.!"
         cecho "yellow" "   Chỉ tìm thấy âm thanh tích hợp sẵn.."
         echo
-        read -p "Bạn muốn sử dụng âm thanh tích hợp sẵn? (y/N): " use_builtin || true
-
+        #read -p "Hãy sử dụng âm thanh tích hợp sẵn? (Y/n): " use_builtin || true
+		use_builtin="Y"
         if [[ "$use_builtin" =~ ^[Yy]$ ]]; then
             mapfile -t external_devices < <(echo "$all_cards")
         else
@@ -343,8 +427,13 @@ select_audio_device() {
 
         local device_choice
         while true; do
-            read -p "Nhập số ID âm thanh [0-$((${#external_devices[@]}-1))]: " device_choice || true
-
+			if [ "$VBOT_BOARD_TYPE" = "i2s" ]; then
+				device_choice=0
+			elif [ "$VBOT_BOARD_TYPE" = "wm8960" ]; then
+				device_choice=0
+			else
+				read -p "Nhập số ID CARD âm thanh [0-$((${#external_devices[@]}-1))]: " device_choice || true
+			fi
             if [[ "$device_choice" =~ ^[0-9]+$ ]] && [ "$device_choice" -lt "${#external_devices[@]}" ]; then
                 break
             fi
@@ -382,7 +471,6 @@ select_audio_device() {
     #Tìm các nút điều khiển bộ trộn âm lượng khả dụng cho card này.
     cecho "blue" "Phát hiện các nút điều chỉnh âm lượng..."
     mapfile -t mixers < <(amixer -c "$card_number" scontrols 2>/dev/null | grep -oP "Simple mixer control '\K[^']+" || true)
-
     if [ ${#mixers[@]} -eq 0 ]; then
         cecho "yellow" "⚠ Không tìm thấy nút điều khiển bộ trộn. Chức năng điều chỉnh âm lượng sẽ bị vô hiệu hóa.."
         mixer_control=""
@@ -391,10 +479,9 @@ select_audio_device() {
         for mixer in "${mixers[@]}"; do
             echo "  - $mixer"
         done
-
         # Hãy cố gắng tìm bộ điều khiển trộn âm lượng tốt nhất
         mixer_control=""
-        for preferred in "PCM" "Master" "Speaker" "Headphone" "Digital"; do
+        for preferred in "PCM" "Master" "Speaker" "Headphone" "Digital" "VBot_DAC_Speaker"; do
             for mixer in "${mixers[@]}"; do
                 if [[ "$mixer" == "$preferred" ]]; then
                     mixer_control="$mixer"
@@ -402,12 +489,10 @@ select_audio_device() {
                 fi
             done
         done
-
         # Nếu không tìm thấy trộn âm lượng nào phù hợp, hãy sử dụng máy trộn đầu tiên.
         if [ -z "$mixer_control" ]; then
             mixer_control="${mixers[0]}"
         fi
-
         cecho "green" "✓ Điều khiển âm lượng: $mixer_control"
     fi
     echo
@@ -422,22 +507,32 @@ get_airplay_name() {
     echo
     cecho "cyan" "⏸  VUI LÒNG TRẢ LỜI YÊU CẦU NÀY ⏸"
     echo
-
     local hostname
     hostname=$(hostname)
-    cecho "blue" "Đây là tên sẽ hiển thị trên iPhone/iPad của bạn."
+    cecho "blue" "Đây là tên sẽ hiển thị AirPlay trên iPhone/iPad của bạn."
     cecho "blue" "Ví dụ: Loa phòng khách, loa phòng ngủ, hệ thống âm thanh nhà bếp."
     echo
+	#Xác định tên mặc định hiển thị
+	if [ -n "$VBot_FULL_NAME" ] && [ "$VBot_FULL_NAME" != "false" ]; then
+		default_name="$VBot_FULL_NAME"
+	else
+		default_name="$hostname AirPlay"
+	fi
     cecho "green" ">>> "
-    read -p "Nhập tên (hoặc nhấn Enter cho '$hostname AirPlay'): " airplay_name || true
-
+    read -p "Nhập tên (hoặc nhấn Enter đặt mặc định là: '$default_name'): " airplay_name || true
+    #USER NHẤN ENTER
     if [ -z "$airplay_name" ]; then
-        airplay_name="$hostname AirPlay"
+        if [ -n "$VBot_FULL_NAME" ] && [ "$VBot_FULL_NAME" != "false" ]; then
+            airplay_name="$VBot_FULL_NAME"
+            cecho "cyan" "→ Dùng tên từ config: $airplay_name"
+        else
+            airplay_name="$hostname AirPlay"
+            cecho "cyan" "→ Dùng tên mặc định: $airplay_name"
+        fi
     fi
-
     #Làm sạch tên (loại bỏ các ký tự đặc biệt có thể gây ra sự cố)
-    airplay_name=$(echo "$airplay_name" | sed 's/[^a-zA-Z0-9 _-]//g')
-
+    #airplay_name=$(echo "$airplay_name" | sed 's/[^a-zA-Z0-9 _-]//g')
+	airplay_name=$(echo "$airplay_name" | sed 's/[\"\\]/_/g')
     cecho "green" "✓ Tên AirPlay: '$airplay_name'"
     echo
 }
@@ -465,8 +560,8 @@ configure_wifi() {
     cecho "blue" "Việc tắt chức năng này đảm bảo quá trình phát lại diễn ra mượt mà và không bị gián đoạn.."
     echo
     cecho "green" ">>> "
-    read -p "Tắt chế độ tiết kiệm điện Wi-Fi? (Y/n): " wifi_choice || true
-
+    #read -p "Tắt chế độ tiết kiệm điện Wi-Fi? (Y/n): " wifi_choice || true
+	wifi_choice="Y"
     if [[ -z "$wifi_choice" || "$wifi_choice" =~ ^[Yy]$ ]]; then
         disable_wifi_pm=true
         cecho "green" "✓ Chức năng quản lý nguồn Wi-Fi sẽ bị vô hiệu hóa."
@@ -504,15 +599,17 @@ main() {
     echo
 
     #Kiểm tra xem có đang chạy tương tác SSH hay không
-    if [ -t 0 ]; then
-        read -p "Nhấn Enter để bắt đầu..." || true
-    else
-        cecho "yellow" "⚠ Đã phát hiện chế độ không tương tác - đang sử dụng cài đặt mặc định"
-        sleep 2
-    fi
-    echo
+    #if [ -t 0 ]; then
+        #read -p "Nhấn Enter để bắt đầu..." || true
+    #else
+        #cecho "yellow" "⚠ Đã phát hiện chế độ không tương tác - đang sử dụng cài đặt mặc định"
+        #sleep 2
+    #fi
+    #echo
 
     #Thực hiện tất cả các bước thiết lập
+	load_vbot_full_name
+	apply_asound_conf_vbot
     pre_flight_checks
     select_audio_device
     get_airplay_name
@@ -533,16 +630,16 @@ main() {
     cecho "blue" "Quá trình cài đặt sẽ mất từ ​​10 đến 30 phút tùy thuộc vào kiểu máy Raspberry Pi của bạn."
     cecho "blue" "(Pi Zero 2 sẽ chậm hơn, Pi 4/5 sẽ nhanh hơn.)"
     echo
-    echo
-    cecho "cyan" "⏸  XÁC NHẬN CUỐI CÙNG - NHẤN ENTER ĐỂ TIẾP TỤC ⏸"
-    echo
-    if [ -t 0 ]; then
-        read -p "Nhấn Enter để bắt đầu cài đặt, hoặc Ctrl+C để hủy bỏ..." || true
-    else
-        cecho "yellow" "Tự động khởi động sau 5 giây (ở chế độ không tương tác)..."
-        sleep 5
-    fi
-    echo
+    #echo
+    #cecho "cyan" "⏸  XÁC NHẬN CUỐI CÙNG - NHẤN ENTER ĐỂ TIẾP TỤC ⏸"
+    #echo
+    #if [ -t 0 ]; then
+        #read -p "Nhấn Enter để bắt đầu cài đặt, hoặc Ctrl+C để hủy bỏ..." || true
+    #else
+        #cecho "yellow" "Tự động khởi động sau 5 giây (ở chế độ không tương tác)..."
+        #sleep 5
+    #fi
+    #echo
 
     INSTALLATION_FAILED=1  #Đánh dấu rằng quá trình cài đặt đã bắt đầu.
 
@@ -554,7 +651,7 @@ main() {
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     cecho "blue" "   Cập nhật các gói hệ thống..."
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    log "Cập nhật danh sách gói..."
+    log "Đang cập nhật danh sách gói: $:> sudo apt-get update"
 
     if ! sudo apt-get update -qq 2>&1 | tee -a "$LOG_FILE"; then
         cecho "red" "❌ Không thể cập nhật danh sách gói."
@@ -601,6 +698,19 @@ main() {
     cecho "green" "✓ Các phần phụ thuộc đã được cài đặt"
     echo
 
+	#Cài pydbus qua pip (cho Python 3)
+    cecho "blue" "Đang cài đặt pydbus qua pip: $:> pip install pydbus"
+    if python3 -m pip show pydbus > /dev/null 2>&1; then
+        cecho "yellow" "pydbus đã được cài đặt, bỏ qua..."
+    else
+        if pip install pydbus; then
+            cecho "green" "✓ pydbus đã cài đặt thành công"
+        else
+            cecho "red" "❌ Không thể cài pydbus. Kiểm tra log hoặc mạng."
+            exit 1
+        fi
+    fi
+
     #Hãy đảm bảo rằng avahi-daemon đang chạy.
     if ! systemctl is-active --quiet avahi-daemon; then
         cecho "yellow" "Khởi động avahi-daemon..."
@@ -609,11 +719,11 @@ main() {
     fi
 
 	# Hãy đảm bảo rằng mosquitto (MQTT broker) đang chạy
-	if ! systemctl is-active --quiet mosquitto; then
-		cecho "yellow" "Khởi động mosquitto (MQTT broker)..."
-		sudo systemctl enable mosquitto
-		sudo systemctl start mosquitto
-	fi
+	#if ! systemctl is-active --quiet mosquitto; then
+		#cecho "yellow" "Khởi động mosquitto (MQTT broker)..."
+		#sudo systemctl enable mosquitto
+		#sudo systemctl start mosquitto
+	#fi
 
     #Cài đặt NQPTP
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -682,16 +792,16 @@ main() {
 
     #Cài đặt Shairport-Sync
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    cecho "blue" "   Cài đặt Shairport-Sync..."
+    cecho "blue" "   Cài đặt Shairport-Sync từ nguồn VBot Assistant..."
     cecho "blue" "   (Quá trình này mất 10-20 phút trên các máy Raspberry Pi có cấu hình chậm hơn.)"
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    log "Đang sao chép kho lưu trữ Shairport-Sync..."
+    log "Đang sao chép kho lưu trữ Shairport-Sync từ nguồn VBot Assistant..."
 
     safe_cd /tmp
     rm -rf shairport-sync 2>/dev/null || true
 
     if ! git clone https://github.com/marion001/shairport-sync.git 2>&1 | tee -a "$LOG_FILE"; then
-        cecho "red" "❌ Không thể sao chép kho lưu trữ Shairport-Sync."
+        cecho "red" "❌ Không thể sao chép kho lưu trữ Shairport-Sync từ nguồn VBot Assistant."
         cecho "yellow" "   Nguyên nhân có thể:"
         cecho "yellow" "   - Không có kết nối internet"
         cecho "yellow" "   - GitHub đang gặp sự cố."
@@ -709,9 +819,9 @@ main() {
 
     cecho "yellow" "Cấu hình bản dựng..."
     if ! ./configure --with-mqtt-client --sysconfdir=/etc --with-alsa --with-avahi \
-        --with-ssl=openssl --with-soxr --with-systemd \
+        --with-ssl=openssl --with-soxr --with-dbus-interface --with-systemd \
         --with-airplay-2 2>&1 | tee -a "$LOG_FILE"; then
-        cecho "red" "❌ Cấu hình Shairport-Sync thất bại"
+        cecho "red" "❌ Cấu hình Shairport-Sync thất bại từ nguồn VBot Assistant"
         exit 1
     fi
 
@@ -726,7 +836,7 @@ main() {
 
     #Chờ quá trình sản xuất hoàn tất và kiểm tra trạng thái.
     if ! wait $make_pid; then
-        cecho "red" "❌ Quá trình biên dịch Shairport-Sync thất bại"
+        cecho "red" "❌ Quá trình biên dịch Shairport-Sync thất bại từ nguồn VBot Assistant"
         cecho "yellow" "20 dòng cuối của nhật ký xây dựng:"
         tail -20 "$make_log" 2>/dev/null || echo "  (Tệp nhật ký không khả dụng)"
         exit 1
@@ -740,19 +850,19 @@ main() {
 
     # What matters is that the binary was installed
     if ! command_exists shairport-sync; then
-        cecho "red" "❌ Không tìm thấy tệp nhị phân Shairport-Sync sau khi cài đặt."
+        cecho "red" "❌ Không tìm thấy tệp nhị phân Shairport-Sync từ nguồn VBot Assistant sau khi cài đặt."
         cecho "yellow" "   Vị trí dự kiến: /usr/local/bin/shairport-sync"
         cecho "yellow" "   Quá trình 'make install' có thể đã thất bại - hãy kiểm tra nhật ký."
         exit 1
     fi
 
-    cecho "green" "✓ Shairport-Sync đã được biên dịch và cài đặt."
+    cecho "green" "✓ Shairport-Sync đã được biên dịch và cài đặt từ nguồn VBot Assistant."
     log "Lưu ý: Lệnh `make install` có thể hiển thị lỗi liên quan đến dịch vụ systemd - điều này là bình thường."
     echo
 
     #Cấu hình Shairport-Sync
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    cecho "blue" "   Cấu hình Shairport-Sync..."
+    cecho "blue" "   Cấu hình Shairport-Sync đồng bộ với VBot Assistant..."
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     log "Tạo tệp cấu hình từ mẫu..."
 
@@ -774,7 +884,8 @@ FALLBACK_EOF
     log "Cấu hình tên AirPlay: $airplay_name"
 
     #Đặt tên thiết bị AirPlay - bỏ dấu chú thích và đặt tên.
-    sudo sed -i "s|^//[[:space:]]*name = .*|        name = \"$airplay_name\";|" /etc/shairport-sync.conf
+    #sudo sed -i "s|^//[[:space:]]*name = .*|        name = \"$airplay_name\";|" /etc/shairport-sync.conf
+	sudo sed -i "s|^[[:space:]]*\(//[[:space:]]*\)\?name[[:space:]]*=.*|        name = \"$airplay_name\";|g" /etc/shairport-sync.conf
 
     #Thiết lập thiết bị đầu ra - bỏ dấu chú thích và thiết lập nó.
     log "Cấu hình đầu ra âm thanh: $audio_device_plug"
@@ -800,17 +911,17 @@ FALLBACK_EOF
     fi
 
 	#general
-	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*ignore_volume_control = .*|        ignore_volume_control = "yes";|' /etc/shairport-sync.conf
+	sudo sed -i 's|^[[:space:]]*//[[:space:]]*dbus_service_bus = .*|        dbus_service_bus = "system";|' /etc/shairport-sync.conf
 
 	#MQTT Set Giá Trị
-	sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ {
-		s|^[[:space:]]*//[[:space:]]*enabled = .*|        enabled = "yes";|
-		s|^[[:space:]]*//[[:space:]]*hostname = .*|        hostname = "localhost";|
-		s|^[[:space:]]*//[[:space:]]*port = .*|        port = 1883;|
-		s|^[[:space:]]*//[[:space:]]*topic = .*|        topic = "shairport/vbot";|
-		s|^[[:space:]]*//[[:space:]]*enable_remote = .*|        enable_remote = "yes";|
-		s|^[[:space:]]*//[[:space:]]*publish_cover = .*|        publish_cover = "yes";|
-	}' /etc/shairport-sync.conf
+	#sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*//[[:space:]]*enabled = .*| enabled = "yes";|' /etc/shairport-sync.conf
+	#sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*enabled[[:space:]]*=[[:space:]]*"no";| enabled = "yes";|' /etc/shairport-sync.conf
+	sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*//[[:space:]]*hostname = .*| hostname = "localhost";|' /etc/shairport-sync.conf
+	sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*//[[:space:]]*port = .*| port = 1883;|' /etc/shairport-sync.conf
+	sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*//[[:space:]]*topic = .*| topic = "shairport/vbot";|' /etc/shairport-sync.conf
+	sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*//[[:space:]]*enable_remote = .*| enable_remote = "yes";|' /etc/shairport-sync.conf
+	sudo sed -i '/^mqtt[[:space:]]*=/,/^};/ s|^[[:space:]]*//[[:space:]]*publish_cover = .*| publish_cover = "yes";|' /etc/shairport-sync.conf
+
 
 	#Metadata Set Giá trị
 	sudo sed -i '/^metadata[[:space:]]*=/,/^};/ {
@@ -822,12 +933,13 @@ FALLBACK_EOF
 	}' /etc/shairport-sync.conf
 
 	#sessioncontrol
-	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_before_entering_active_state = .*|        run_this_before_entering_active_state = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
-	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_after_exiting_active_state = .*|        run_this_after_exiting_active_state = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
-	sudo sed -i 's|^[[:space:]]*//[[:space:]]*active_state_timeout = .*|        active_state_timeout = 0.5;|' /etc/shairport-sync.conf
-	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_before_play_begins = .*|        run_this_before_play_begins = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
-	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_after_play_ends = .*|        run_this_after_play_ends = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_stop.sh";|' /etc/shairport-sync.conf
-	sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_if_an_unfixable_error_is_detected = .*|        run_this_if_an_unfixable_error_is_detected = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_stop.sh";|' /etc/shairport-sync.conf
+	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_before_entering_active_state = .*|        run_this_before_entering_active_state = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
+	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_after_exiting_active_state = .*|        run_this_after_exiting_active_state = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
+	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*active_state_timeout = .*|        active_state_timeout = 0.5;|' /etc/shairport-sync.conf
+	sudo sed -i 's|^[[:space:]]*//\?[[:space:]]*active_state_timeout[[:space:]]*=.*|        active_state_timeout = 0.5;|' /etc/shairport-sync.conf
+	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_before_play_begins = .*|        run_this_before_play_begins = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_play.sh";|' /etc/shairport-sync.conf
+	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_after_play_ends = .*|        run_this_after_play_ends = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_stop.sh";|' /etc/shairport-sync.conf
+	#sudo sed -i 's|^[[:space:]]*//[[:space:]]*run_this_if_an_unfixable_error_is_detected = .*|        run_this_if_an_unfixable_error_is_detected = "/home/pi/VBot_Offline/resource/airplay/vbot_airplay_stop.sh";|' /etc/shairport-sync.conf
 
     #Set output format
     sudo sed -i "s|^//[[:space:]]*output_rate = .*|        output_rate = \"auto\";|" /etc/shairport-sync.conf
@@ -846,7 +958,7 @@ FALLBACK_EOF
         exit 1
     fi
 
-    cecho "green" "✓ Tệp cấu hình đã được tạo và tùy chỉnh."
+    cecho "green" "✓ Tệp cấu hình đã được tạo và tùy chỉnh đồng bộ với VBot Assistant"
 
     #Nếu có thể, hãy đặt âm lượng bộ trộn ở mức tối đa.
     if [ -n "$mixer_control" ]; then
@@ -862,7 +974,7 @@ FALLBACK_EOF
 
     #Tạo/Cập nhật dịch vụ Systemd
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-    cecho "blue" "   Thiết lập dịch vụ tự khởi động..."
+    cecho "blue" "   Thiết lập dịch vụ tự khởi động cùng hệ thống..."
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     log "Tạo người dùng và nhóm shairport-sync..."
 
@@ -973,7 +1085,8 @@ EOF
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     echo
 
-    read -p "Bạn có muốn kiểm tra đầu ra âm thanh không?? (Y/n): " test_audio || true
+    #read -p "Bạn có muốn kiểm tra đầu ra âm thanh không?? (Y/n): " test_audio || true
+	test_audio="Y"
     if [[ -z "$test_audio" || "$test_audio" =~ ^[Yy]$ ]]; then
         cecho "yellow" "Phát âm thanh thử nghiệm sau 2 giây..."
         cecho "yellow" "(Bạn sẽ nghe thấy một giọng nói nói rằng: 'Front Left', 'Front Right')"
@@ -982,7 +1095,8 @@ EOF
         if timeout 10 speaker-test -D "$audio_device_plug" -c 2 -t wav -l 1 > /dev/null 2>&1; then
             echo
             cecho "green" "✓ Đã hoàn tất kiểm tra âm thanh!"
-            read -p "Bạn có nghe thấy âm thanh thử nghiệm không? (y/N): " heard_sound || true
+            #read -p "Bạn có nghe thấy âm thanh thử nghiệm không? (y/N): " heard_sound || true
+			heard_sound="Y"
             if [[ ! "$heard_sound" =~ ^[Yy]$ ]]; then
                 cecho "yellow" "⚠ Nếu bạn không nghe thấy âm thanh, hãy kiểm tra:"
                 cecho "yellow" "  - Kết nối loa/tai nghe"
@@ -1048,13 +1162,13 @@ EOF
     cecho "blue" "   nhật ký cài đặt:  $LOG_FILE"
     echo
 
-    read -p "Nhấn Enter để khởi động lại ngay (khuyến nghị), hoặc Ctrl+C để khởi động lại sau..." || {
-        echo
-        cecho "yellow" "Quá trình khởi động lại đã bị hủy bỏ. Hãy nhớ khởi động lại sau bằng lệnh: sudo reboot"
-        exit 0
-    }
+    #read -p "Nhấn Enter để khởi động lại ngay (khuyến nghị), hoặc Ctrl+C để khởi động lại sau..." || {
+        #echo
+        #cecho "yellow" "Quá trình khởi động lại đã bị hủy bỏ. Hãy nhớ khởi động lại sau bằng lệnh: sudo reboot"
+        #exit 0
+    #}
 
-    log "Khởi động lại do người dùng thực hiện"
+    #log "Khởi động lại do người dùng thực hiện"
     cecho "yellow" "Khởi động lại sau 3 giây..."
     sleep 3
     sudo reboot
