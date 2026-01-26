@@ -2724,7 +2724,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                       $virtual_assistant_priority = $Config['virtual_assistant']['prioritize_virtual_assistants'];
                       $assistant_options = [
                         "default_assistant" => "Default Assistant",
-                        "olli" => "Olli AI Assistant (Khuyến Nghị)",
+                        "olli" => "Olli Maika AI Assistant (Khuyến Nghị)",
                         "google_gemini" => "Google Gemini",
                         "chat_gpt" => "Chat GPT",
                         "zalo_assistant" => "Zalo AI Assistant",
@@ -2820,7 +2820,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_olliai_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_olliai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_olliai_assistant">
-                        Cấu Hình Trợ Lý => Olli AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
+                        Cấu Hình Trợ Lý => Olli MaiKa AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
                       <div id="collapse_button_cfg_olliai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_olliai_assistant">
                         <div class="alert alert-warning" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Olli AI Assistant')"></i> :</label>
