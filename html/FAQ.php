@@ -1449,10 +1449,94 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
           </ul>
         </div>
       </div>
+            </div>
+            </div>
+            </div>
 
-            </div>
-            </div>
-            </div>
+
+<div class="card accordion" id="accordion_button_zram">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_zram" aria-expanded="false" aria-controls="collapse_button_zram">
+Tối Ưu Ram zram-tools:</h5>
+<div id="collapse_button_zram" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_zram">
+  <div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+      <h5 class="mb-0">🚀 Hướng dẫn cài đặt & cấu hình ZRAM, Tối Ưu Ram</h5>
+    </div>
+    <div class="card-body">
+      <!-- Cài đặt -->
+      <h6 class="mt-2">
+        <span class="badge bg-success">Bước 1</span> Cài đặt ZRAM
+      </h6>
+      <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo apt update
+$:> sudo apt install zram-tools -y</code>
+      </pre>
+      <!-- Tự động -->
+      <h6 class="mt-4">
+        <span class="badge bg-info">Bước 2</span> Cấu hình ZRAM tự động (Nếu cấu hình tự động thì bỏ qua bước 3)
+      </h6>
+      <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo sed -i 's/^[[:space:]]*#?[[:space:]]*PERCENT=.*/PERCENT=40/' /etc/default/zramswap
+$:> sudo sed -i 's/^[[:space:]]*#?[[:space:]]*ALGO=.*/ALGO=lz4/' /etc/default/zramswap</code>
+      </pre>
+      <!-- Thủ công -->
+      <h6 class="mt-4">
+        <span class="badge bg-warning text-dark">Bước 3</span>Hoặc cấu hình ZRAM thủ công (nếu làm thủ công thì bỏ qua bước 2)
+      </h6>
+      <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo nano /etc/default/zramswap</code>
+      </pre>
+      <div class="alert alert-warning">
+        ✏️ Sửa <strong>2 tham số sau</strong> (nhớ bỏ dấu <code>#</code> phía trước):
+        <pre class="mt-2 mb-0 bg-light text-dark p-2 rounded">
+PERCENT=40
+ALGO=lz4
+        </pre>
+      </div>
+      <!-- Restart -->
+      <h6 class="mt-4">
+        <span class="badge bg-secondary">Bước 4</span> Khởi động lại ZRAM và kiểm tra trạng thái đang chạy
+      </h6>
+      <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo systemctl restart zramswap</code>
+<code>$:> sudo systemctl status zramswap</code>
+      </pre>
+      <!-- Check -->
+      <h6 class="mt-4">
+        <span class="badge bg-primary">Bước 5</span> Kiểm tra Priority
+      </h6>
+      <pre class="bg-dark text-light p-3 rounded">
+<code>$:> swapon --show</code>
+      </pre>
+<pre class="bg-dark text-light p-3 rounded">
+<code>pi@VBot-Assistant:~ $ swapon --show
+NAME       TYPE        SIZE USED PRIO
+/var/swap  file        1.2G   0B   -2
+/dev/zram0 partition 189.7M   0B  100</code>
+</pre>
+      <div class="alert alert-info">
+        ℹ️ <strong>ZRAM phải có Priority cao hơn Swap SD (cột PRIO có tham số càng cao sẽ được dùng trước)</strong><br>
+        Nếu không, kernel sẽ swap xuống SD trước → ZRAM không được sử dụng.
+      </div>
+      <!-- Disable swap SD -->
+      <h6 class="mt-4">
+        <span class="badge bg-danger">Tuỳ chọn</span> Tắt Swap SD (chỉ khi cần, cột PRIO có tham số càng cao sẽ được dùng trước)
+      </h6>
+      <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo systemctl stop dphys-swapfile
+$:> sudo systemctl disable dphys-swapfile</code>
+      </pre>
+      <div class="alert alert-danger">
+        ⚠️ Chỉ tắt Swap SD khi bạn đã xác nhận ZRAM hoạt động ổn định
+      </div>
+    </div>
+  </div>
+
+
+</div>
+</div>
+</div>
 
 
             </div>

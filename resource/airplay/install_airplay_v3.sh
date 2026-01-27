@@ -678,7 +678,7 @@ main() {
         avahi-daemon libavahi-client-dev libssl-dev
         libsoxr-dev libplist-dev libsodium-dev
         libavutil-dev libavcodec-dev libavformat-dev
-        uuid-dev libgcrypt20-dev xxd alsa-utils libmosquitto-dev mosquitto mosquitto-clients
+        uuid-dev libgcrypt20-dev xxd alsa-utils libmosquitto-dev mosquitto mosquitto-clients zram-tools
     )
 
     if ! sudo apt-get install -y "${dependencies[@]}" 2>&1 | tee -a "$LOG_FILE"; then
@@ -951,6 +951,11 @@ FALLBACK_EOF
     sudo sed -i "s|^//[[:space:]]*volume_max_db = .*|        volume_max_db = 4.0;|" /etc/shairport-sync.conf
     sudo sed -i "s|^//[[:space:]]*default_airplay_volume = .*|        default_airplay_volume = -6.0;|" /etc/shairport-sync.conf
     sudo sed -i "s|^//[[:space:]]*high_volume_idle_timeout_in_minutes = .*|        high_volume_idle_timeout_in_minutes = 1;|" /etc/shairport-sync.conf
+
+	#zram-tools Tối Ưu Ram
+	sudo sed -i 's/^[[:space:]]*#\?[[:space:]]*PERCENT=.*/PERCENT=40/' /etc/default/zramswap
+	sudo sed -i 's/^[[:space:]]*#\?[[:space:]]*ALGO=.*/ALGO=lz4/' /etc/default/zramswap
+	sudo systemctl restart zramswap
 
     #Xác minh tệp cấu hình đã được tạo.
     if [ ! -f /etc/shairport-sync.conf ]; then
