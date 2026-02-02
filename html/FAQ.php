@@ -1532,7 +1532,115 @@ $:> sudo systemctl disable dphys-swapfile</code>
       </div>
     </div>
   </div>
+</div>
+</div>
+</div>
 
+
+<div class="card accordion" id="accordion_button_logs2ram">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_logs2ram" aria-expanded="false" aria-controls="collapse_button_logs2ram">
+log2ram Ghi Logs vào Ram, Giảm ghi thẻ nhớ, tăng độ bền, hệ thống chạy ổn định 24/7:</h5>
+<div id="collapse_button_logs2ram" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_logs2ram">
+
+    <!-- STEP 2 -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold">
+            1: Xác nhận thư mục đang chứa log
+        </div>
+        <div class="card-body">
+            <pre><code>$:> sudo du -sh /var/hdd.log /var/log</code></pre>
+            <p class="text-muted mb-0">
+                Nếu log quá lớn (vài trăm MB hoặc GB), cần xóa trước khi bật log2ram.
+            </p>
+        </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold text-danger">
+            2: Xóa toàn bộ log cũ trên thẻ nhớ
+        </div>
+        <div class="card-body">
+            <pre><code>$:> sudo rm -rf /var/hdd.log/*
+$:> sudo rm -rf /var/log/journal/*</code></pre>
+            <p class="text-warning mb-0">
+                ⚠️ Chỉ xóa log, không ảnh hưởng hệ thống.
+            </p>
+        </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold">
+            3: Cài đặt log2ram (chuẩn & gọn)
+        </div>
+        <div class="card-body">
+            <pre><code>$:> sudo apt update
+$:> sudo apt install rsync -y
+$:> git clone https://github.com/azlux/log2ram.git
+$:> cd log2ram
+$:> sudo ./install.sh
+$:> sudo reboot</code></pre>
+        </div>
+    </div>
+
+    <!-- STEP 5 -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold">
+            4: Cấu hình log2ram (RẤT QUAN TRỌNG)
+        </div>
+        <div class="card-body">
+            <p>Mở file cấu hình:</p>
+            <pre><code>$:> sudo nano /etc/log2ram.conf</code></pre>
+            <p class="mt-3 mb-1 fw-bold">Cấu hình khuyến nghị cho Pi Zero 2W:</p>
+            <pre><code>SIZE=32M
+USE_RSYNC=false
+ZL2R=false
+COMP_ALG=lz4
+LOG_DISK_SIZE=80M</code></pre>
+        </div>
+    </div>
+
+    <!-- STEP 6 -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold">
+            5: Kiểm tra sau khi reboot
+        </div>
+        <div class="card-body">
+            <pre><code>$:> df -h /var/log
+$:> free -h</code></pre>
+        </div>
+    </div>
+
+    <!-- STEP 7 -->
+    <div class="card mb-3">
+        <div class="card-header fw-bold text-success">
+            6: Gợi ý tối ưu thêm (rất nên làm)
+        </div>
+        <div class="card-body">
+            <p class="fw-bold">Giảm log journald:</p>
+            <pre><code>$:> sudo nano /etc/systemd/journald.conf</code></pre>
+            <pre><code>Storage=volatile
+RuntimeMaxUse=20M
+RuntimeKeepFree=10M
+SystemMaxUse=20M
+SystemKeepFree=50M</code></pre>
+            <pre><code>$:> sudo systemctl restart systemd-journald
+$:> sudo systemctl restart log2ram</code></pre>
+        </div>
+    </div>
+
+    <!-- STEP 8 -->
+    <div class="card mb-4">
+        <div class="card-header fw-bold">
+            7: Kiểm tra cuối cùng
+        </div>
+        <div class="card-body">
+            <pre><code>$:> journalctl --disk-usage
+$:> df -h /var/log</code></pre>
+        </div>
+    </div>
 
 </div>
 </div>
