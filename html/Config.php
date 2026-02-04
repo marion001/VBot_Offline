@@ -407,6 +407,9 @@ if (isset($_POST['all_config_save'])) {
   $virtual_assistant_priority_7 = isset($_POST['virtual_assistant_priority7']) ? $_POST['virtual_assistant_priority7'] : '';
   $Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5, $virtual_assistant_priority_6, $virtual_assistant_priority_7];
 
+  #Cache trợ lý ảo:
+  $Config['virtual_assistant']['cache_active'] = isset($_POST['virtual_assistant_cache_active']) ? true : false;
+
   #Cập nhật sao lưu trương trình VBot
   $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
   $Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] = isset($_POST['automatically_check_for_updates']) ? true : false;
@@ -2716,8 +2719,21 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                 </h5>
                 <div id="collapse_button_virtual_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_virtual_assistant" style="">
                   <div class="card">
-				  
-                    <div class="card-body"><div class="alert alert-success" role="alert">
+                    <div class="card-body">
+
+
+                      <div class="row mb-3 alert alert-primary" role="alert">
+                        <label class="col-sm-3 col-form-label">Kích Hoạt Cache Trợ Lý <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lấy dữ liệu từ cache trước đó để trả lời nếu cấu hỏi tương đồng với dữ liệu)"></i>: </label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="virtual_assistant_cache_active" id="virtual_assistant_cache_active" <?php echo $Config['virtual_assistant']['cache_active'] ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+						
+                      </div>
+                      </div>
+					<div class="card-body">
+					<div class="alert alert-success" role="alert">
                       <h5 class="card-title">Ưu tiên trợ lý ảo:</h5>
                       <?php
                       //Get Ưu tiên Nguồn Phát
