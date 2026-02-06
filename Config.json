@@ -104,7 +104,7 @@
         "mqtt_show_logs_reconnect": false
     },
     "virtual_assistant": {
-        "cache_active": true,
+        "cache_active": false,
         "prioritize_virtual_assistants": [
             "default_assistant",
             "olli",
