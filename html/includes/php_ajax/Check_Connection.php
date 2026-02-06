@@ -173,11 +173,11 @@ if (isset($_GET['add_ip_vbot_server'])) {
     $dir_path = dirname($json_path);
     if (!is_dir($dir_path)) {
         mkdir($dir_path, 0777, true);
-        chmod($dir_path, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($dir_path));
     }
     if (!file_exists($json_path)) {
         file_put_contents($json_path, "[]");
-        chmod($json_path, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($json_path));
     }
     $devices = [];
     if (file_exists($json_path)) {
@@ -215,11 +215,11 @@ if (isset($_GET['delete_ip_vbot_server'])) {
     $dir_path = dirname($json_path);
     if (!is_dir($dir_path)) {
         mkdir($dir_path, 0777, true);
-        chmod($dir_path, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($dir_path));
     }
     if (!file_exists($json_path)) {
         file_put_contents($json_path, "[]");
-        chmod($json_path, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($json_path));
     }
     $devices = [];
     if (file_exists($json_path)) {
@@ -473,7 +473,7 @@ if (isset($_GET['get_hass_all'])) {
                 $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
                 if (!file_exists($filePath_HASS)) {
                     file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-                    chmod($filePath_HASS, 0777);
+					shell_exec('chmod 0777 ' . escapeshellarg($filePath_HASS));
                 }
                 $existingData['get_hass_all'] = json_decode($response);
                 $jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
@@ -499,7 +499,7 @@ if (isset($_GET['del_get_hass_all'])) {
     $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
     if (!file_exists($filePath_HASS)) {
         file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        chmod($filePath_HASS, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($filePath_HASS));
     }
     $existingData = json_decode(file_get_contents($filePath_HASS), true);
     if ($existingData === null) {
@@ -740,4 +740,130 @@ if (isset($_GET['get_token_tts_default_zai_did'])) {
     }
     exit();
 }
+
+//Lấy danh sách giọng đọc của google cloud
+if (isset($_GET['get_ggcloud_voice_name'])) {
+    $CMD = 'python3 ' .$Config['web_interface']['path'].'/includes/php_ajax/Get_Voice_Name_GCloud.py';
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối SSH'
+        ]);
+        exit;
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Xác thực SSH thất bại'
+        ]);
+        exit;
+    }
+    $stream = ssh2_exec($connection, $CMD);
+    stream_set_blocking($stream, true);
+    $output = stream_get_contents(
+        ssh2_fetch_stream($stream, SSH2_STREAM_STDIO)
+    );
+    echo trim($output);
+    exit;
+}
+
+//Lấy danh sách model trợ lý google gemini
+if (isset($_GET['get_model_gemini'])) {
+    $apiKey     = $_GET['apikey'] ?? '';
+    $versionAPI = $_GET['version_api'] ?? 'v1beta'; // mặc định
+    if (empty($apiKey)) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Thiếu tham số apikey"
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if (!in_array($versionAPI, ['v1', 'v1beta'], true)) {
+        echo json_encode([
+            "success" => false,
+            "message" => "version_api không hợp lệ (chỉ v1 hoặc v1beta)"
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $url = "https://generativelanguage.googleapis.com/{$versionAPI}/models?key={$apiKey}";
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_TIMEOUT => 15,
+    ]);
+    $response  = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error     = curl_error($ch);
+    curl_close($ch);
+    if ($response === false) {
+        echo json_encode([
+            "success" => false,
+            "message" => $error
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if ($http_code !== 200) {
+        echo $response;
+        exit;
+    }
+    $json = json_decode($response, true);
+    if (!isset($json['models']) || !is_array($json['models'])) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Dữ liệu Gemini không hợp lệ"
+        ], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    $modelList = [];
+	foreach ($json['models'] as $model) {
+		if (empty($model['name'])) {
+			continue;
+		}
+		$name = preg_replace('#^models/#', '', $model['name']);
+		//CHỈ LẤY GEMINI CHAT
+		if (strpos($name, 'gemini-') !== 0) {
+			continue;
+		}
+		//loại embedding / image / video / robotics / exp
+		if (
+			strpos($name, 'embedding') !== false ||
+			strpos($name, 'image') !== false ||
+			strpos($name, 'video') !== false ||
+			strpos($name, 'robotics') !== false ||
+			strpos($name, 'exp') !== false
+		) {
+			continue;
+		}
+		$modelList[] = $name;
+	}
+    $modelList = array_values(array_unique($modelList));
+    sort($modelList);
+	$outputFile = "/home/pi/VBot_Offline/html/includes/other_data/gemini_model_list.json";
+	$existingData = [];
+	if (file_exists($outputFile)) {
+		$existingData = json_decode(file_get_contents($outputFile), true);
+		if (!is_array($existingData)) {
+			$existingData = [];
+		}
+	}
+	$existingData['gemini_models'] = $modelList;
+	if (file_put_contents($outputFile, json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+		echo json_encode([
+			"success" => false,
+			"message" => "Không ghi được file JSON"
+		], JSON_UNESCAPED_UNICODE);
+		exit;
+	}
+    echo json_encode([
+        "success" => true,
+        "count" => count($modelList),
+		"message" => "Lấy dữ liệu Model Gemini thành công"
+        #"output_file" => $outputFile
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 ?>

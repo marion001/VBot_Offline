@@ -159,14 +159,14 @@ elseif ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action']) && $_GET
             echo json_encode(['success' => false, 'message' => 'Không thể tạo thư mục']);
             exit;
         }
-        chmod($directory, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($directory));
     }
     if (!file_exists($json_file)) {
         if (file_put_contents($json_file, '{}') === false) {
             echo json_encode(['success' => false, 'message' => 'Không thể tạo file JSON']);
             exit;
         }
-        chmod($json_file, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($json_file));
     }
     if (!is_writable($json_file)) {
         echo json_encode(['success' => false, 'message' => 'Không có quyền ghi vào file']);

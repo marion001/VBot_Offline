@@ -133,7 +133,7 @@ if (isset($_GET['VBot_Device_Scaner'])) {
     if (!is_dir($json_dir_path)) {
         try {
             mkdir($json_dir_path, 0777, true);
-            chmod($json_dir_path, 0777);
+			shell_exec("chmod 0777 " . escapeshellarg($json_dir_path));
         } catch (Exception $e) {
             echo json_encode([
                 'success' => false,
@@ -147,7 +147,8 @@ if (isset($_GET['VBot_Device_Scaner'])) {
     if (!file_exists($json_file_path)) {
         try {
             file_put_contents($json_file_path, json_encode([]));
-            chmod($json_file_path, 0777);
+            #chmod($json_file_path, 0777);
+			shell_exec("chmod 0777 " . escapeshellarg($json_file_path));
         } catch (Exception $e) {
             echo json_encode([
                 'success' => false,
@@ -270,7 +271,8 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
         if (file_put_contents($json_file_path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) === false) {
             throw new Exception('Không thể ghi dữ liệu vào file json');
         }
-        chmod($json_file_path, 0777);
+        //chmod($json_file_path, 0777);
+		shell_exec("chmod 0777 " . escapeshellarg($json_file_path));
         echo json_encode([
             'success' => true,
             'message' => 'Đã xóa dữ liệu thành công',

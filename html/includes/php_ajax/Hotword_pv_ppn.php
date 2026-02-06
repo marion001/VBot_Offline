@@ -104,7 +104,7 @@ if (isset($_POST['action_ppn_pv']) && $_POST['action_ppn_pv'] === 'upload_files_
                 $uploadFile = $uploadDirHotword . $lang . '/' . $name;
                 $moveResult = move_uploaded_file($tmpName, $uploadFile);
                 if ($moveResult) {
-                    chmod($uploadFile, 0777);
+					shell_exec('chmod 0777 ' . escapeshellarg($uploadFile));
                     if (in_array($name, $existingFiles)) {
                         $responseMessages[] = "Tệp tin: '$name' đã tải lên thành công vào '$uploadFile' nhưng đã tồn tại trong ngôn ngữ '$lang', không cần cập nhật Config.json \n";
                     } else {
@@ -175,7 +175,7 @@ if (isset($_POST['action_hotword_snowboy']) && $_POST['action_hotword_snowboy'] 
             $name = basename($fileName);
             $destinationPath = $uploadDirHotword . $name;
             if (move_uploaded_file($fileTmpPath, $destinationPath)) {
-                chmod($destinationPath, 0777);
+				shell_exec('chmod 0777 ' . escapeshellarg($destinationPath));
                 $uploadSuccess[] = "Tệp tin '$fileName' đã tải lên thành công vào: '$uploadDirHotword' và được thêm vào Config.json";
                 if (!in_array($name, $existingFiles)) {
                     $updatedConfig[] = ["active" => true, "file_name" => $name, "sensitive" => 0.5];

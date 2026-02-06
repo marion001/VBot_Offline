@@ -325,7 +325,7 @@ if (isset($_GET['ZingMP3_Search'])) {
 	if (!file_exists($zingJsonPath)) {
 		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($zingJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($zingJsonPath));
 	}
 	$curl = curl_init();
 	curl_setopt_array($curl, array(
@@ -391,7 +391,7 @@ if (isset($_GET['Cache_ZingMP3'])) {
 	if (!file_exists($zingmp3JsonPath)) {
 		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($zingmp3JsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($zingmp3JsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($zingmp3JsonPath));
 	}
 	$jsonData = file_get_contents($zingmp3JsonPath);
 	$data = json_decode($jsonData, true);
@@ -418,7 +418,7 @@ if (isset($_GET['NhacCuaTui_Search'])) {
 	$nhaccuatuiJsonPath = '../cache/NhacCuaTui.json';
 	if (!file_exists($nhaccuatuiJsonPath)) {
 		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($nhaccuatuiJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($nhaccuatuiJsonPath));
 	}
     $url = "https://graph.nhaccuatui.com/api/v3/search/all?keyword=".urlencode($Song_Name)."&correct=false&timestamp=".round(microtime(true) * 1000);
     $ch = curl_init();
@@ -487,7 +487,7 @@ if (isset($_GET['Cache_NhacCuaTui'])) {
 	if (!file_exists($nhaccuatuiJsonPath)) {
 		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($nhaccuatuiJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($nhaccuatuiJsonPath));
 	}
 	$jsonData = file_get_contents($nhaccuatuiJsonPath);
 	$data = json_decode($jsonData, true);
@@ -690,7 +690,7 @@ if (isset($_GET['podcast_Search'])) {
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
 		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($podcastJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($podcastJsonPath));
 	}
 	if (isTokenExpired_podcast($Config)) {
 		refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Port_API);
@@ -769,7 +769,7 @@ if (isset($_GET['Cache_PodCast'])) {
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
 		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($podcastJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($podcastJsonPath));
 	}
 	$jsonData = file_get_contents($podcastJsonPath);
 	$data = json_decode($jsonData, true);
@@ -797,7 +797,7 @@ if (isset($_GET['Youtube_Search'])) {
 	$youtubeJsonPath = '../cache/Youtube.json';
 	if (!file_exists($youtubeJsonPath)) {
 		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($youtubeJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($youtubeJsonPath));
 	}
 	$apiKey = $Config['media_player']['youtube']['google_apis_key'];
 	$searchUrlYoutube = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=" . urlencode($Youtube_Name) . "&maxResults=" . $Youtube_Limit . "&key=" . $apiKey;
@@ -874,7 +874,7 @@ if (isset($_GET['Cache_Youtube'])) {
 	$youtubeJsonPath = '../cache/Youtube.json';
 	if (!file_exists($youtubeJsonPath)) {
 		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($youtubeJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($youtubeJsonPath));
 	}
 	$jsonData = file_get_contents($youtubeJsonPath);
 	$data = json_decode($jsonData, true);
@@ -985,7 +985,7 @@ if (isset($_GET['Cache_NewsPaper'])) {
 		];
 		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($newspaperJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($newspaperJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($newspaperJsonPath));
 	}
 	$jsonData = file_get_contents($newspaperJsonPath);
 	$data = json_decode($jsonData, true);
@@ -1008,7 +1008,7 @@ if (isset($_GET['Cache_PlayList'])) {
 		];
 		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($playlistJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($playlistJsonPath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($playlistJsonPath));
 	}
 	$jsonData = file_get_contents($playlistJsonPath);
 	$data = json_decode($jsonData, true);
@@ -1032,7 +1032,7 @@ if (isset($_GET['playlist_ADD'])) {
 		];
 		// Ghi dữ liệu mặc định vào file và thiết lập quyền 777
 		file_put_contents($filePath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		chmod($filePath, 0777);
+		shell_exec('chmod 0777 ' . escapeshellarg($filePath));
 	}
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$requiredFields = ['title', 'cover', 'audio', 'duration', 'description', 'source', 'id', 'channelTitle', 'artist'];
@@ -1637,7 +1637,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						];
 					} else {
 						if (file_put_contents($fullPath, $fileContent) !== false) {
-							chmod($fullPath, 0777);
+							shell_exec('chmod 0777 ' . escapeshellarg($fullPath));
 							$response = [
 								'success' => true,
 								'message' => "Đã tải: " . basename($songName) . " vào thư mục nhạc Local"

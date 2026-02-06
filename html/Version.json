@@ -1,8 +1,8 @@
 {
-    "version": "1.0.89",
+    "version": "1.0.90",
     "projectName": "WebUI VBot Offline",
-    "description": "Cập nhật AirPlay truyền dữ liệu âm thanh từ iphone, ipad ra loa (Xem Cài Đặt Trong Hướng Dẫn). Tối ưu sửa lỗi Media Player",
-    "releaseDate": "27/01/2026",
+    "description": "Tối ưu code hệ thống, hỗ trợ tối ưu zram-tools và log2ram xem chi tiết thiếp lập trong: Hướng Dẫn",
+    "releaseDate": "06/02/2026",
     "changes": [
         {
             "type": "feature",

@@ -57,7 +57,7 @@ if (isset($_GET['upload_Music_Local'])) {
                     $filePath = $targetDirectory . basename($fileName);
                     // Di chuyển file vào thư mục
                     if (move_uploaded_file($fileTmpName, $filePath)) {
-                        chmod($filePath, 0777);
+						shell_exec('chmod 0777 ' . escapeshellarg($filePath));
                         $messages[] = 'Tải lên thành công: ' . $fileName;
                     } else {
                         $success = false;
@@ -107,7 +107,7 @@ if (isset($_GET['upload_Sound_Welcome'])) {
                     $filePath = $targetDirectory . basename($fileName);
                     // Di chuyển file vào thư mục
                     if (move_uploaded_file($fileTmpName, $filePath)) {
-                        chmod($filePath, 0777);
+						shell_exec('chmod 0777 ' . escapeshellarg($filePath));
                         $messages[] = 'Tải lên thành công: ' . $fileName;
                     } else {
                         $success = false;
@@ -168,7 +168,7 @@ if (isset($_GET['upload_avata'])) {
             $response["message"] = "Xin lỗi, tệp của bạn không được tải lên.";
         } else {
             if (move_uploaded_file($_FILES["fileToUpload_avata"]["tmp_name"], $target_file)) {
-                chmod($target_file, 0777);
+				shell_exec('chmod 0777 ' . escapeshellarg($target_file));
                 $response["success"] = true;
                 $response["message"] = "Tệp đã được tải lên thành công với tên mới: avata_user." . $imageFileType;
             } else {

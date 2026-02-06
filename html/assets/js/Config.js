@@ -1019,6 +1019,132 @@ function get_token_tts_default_zai_did() {
     xhr.send();
 }
 
+//Lấy danh sách giọng đọc của Google từ web
+function voice_name_gcloud_get() {
+	loading('show');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?get_ggcloud_voice_name', true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+					loading('hide');
+                    showMessagePHP(response.message, 5);
+					load_list_GoogleVoices_tts('tts_ggcloud', 'ok')
+					load_list_GoogleVoices_tts('tts_ggcloud_key', 'ok')
+                } else {
+					loading('hide');
+                    show_message(response.message);
+                }
+            } catch (e) {
+				loading('hide');
+                show_message(e);
+            }
+        }
+    };
+    xhr.send();
+}
+
+//Lấy Model Gemini
+function get_model_gemini() {
+    const keyInput = document.getElementById("google_gemini_key");
+    const versionSelect = document.getElementById("gemini_api_version");
+    if (!keyInput) {
+		show_message("Không tìm thấy input ID: google_gemini_key");
+        return;
+    }
+    if (!versionSelect) {
+        show_message("Không tìm thấy select ID: gemini_api_version");
+        return;
+    }
+    const geminiKey = keyInput.value.trim();
+    const geminiVersion = versionSelect.value;
+    if (!geminiKey) {
+        show_message("Gemini API Key chưa được nhập hoặc không hợp lệ!");
+        return;
+    }
+    if (!geminiVersion) {
+        show_message("Gemini Phiên Bản API chưa được nhập hoặc không hợp lệ!");
+        return;
+    }
+	loading('show');
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?get_model_gemini&apikey='+geminiKey+'&version_api='+geminiVersion, true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+					loading('hide');
+					loadGeminiModelsXHR();
+                    showMessagePHP(response.message, 5);
+                } else {
+					loading('hide');
+                    show_message(response.message);
+                }
+            } catch (e) {
+				loading('hide');
+                show_message(e);
+            }
+        }
+    };
+    xhr.send();
+}
+
+//Load Gemini Model cập nhật vào thẻ select
+function loadGeminiModelsXHR() {
+    const url = "includes/php_ajax/Show_file_path.php?read_file_path&file=/home/pi/VBot_Offline/html/includes/other_data/gemini_model_list.json";
+    const selectEl = document.getElementById("gemini_models_name");
+    if (!selectEl) {
+        show_message("Không tìm thấy thẻ select có ID: gemini_models_name");
+        return;
+    }
+    loading('show');
+    const currentValue = selectEl.value;
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.setRequestHeader("Cache-Control", "no-cache");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        loading('hide');
+        if (xhr.status !== 200) {
+            show_message("Không tải được file JSON: " + xhr.status);
+            return;
+        }
+        let response;
+        try {
+            response = JSON.parse(xhr.responseText);
+        } catch (e) {
+            show_message("JSON không hợp lệ: " + e.message);
+            return;
+        }
+        if (
+            !response.data ||
+            !response.data.gemini_models ||
+            !Array.isArray(response.data.gemini_models)
+        ) {
+            show_message("Không có gemini_models trong JSON");
+            return;
+        }
+        const models = response.data.gemini_models;
+        selectEl.innerHTML = "";
+        models.forEach(function (model) {
+            const opt = document.createElement("option");
+            opt.value = model;
+            opt.textContent = model;
+            if (model === currentValue) {
+                opt.selected = true;
+            }
+            selectEl.appendChild(opt);
+        });
+        if (!selectEl.value && selectEl.options.length > 0) {
+            selectEl.selectedIndex = 0;
+        }
+    };
+    xhr.send(null);
+}
+
 //Tạo file âm thanh tts gcloud
 function createAudio_Wakeup_reply(source_tts) {
     loading('show');

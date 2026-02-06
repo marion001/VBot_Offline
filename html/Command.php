@@ -52,8 +52,7 @@ function picovoice_version($noi_dung_tep, $ten_lop, $ten_phuong_thuc)
     return "Lỗi xử lý tệp.";
   }
 }
-function porcupine_version($file_path, $skip_count = 9)
-{
+function porcupine_version($file_path, $skip_count = 9){
   try {
     $file = fopen($file_path, 'r');
     // Đọc và bỏ qua 9 ký tự đầu

@@ -1648,6 +1648,7 @@ include 'html_head.php';
                               </div>
                               <button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
                               <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_voice_name')"><i class="bi bi-play-circle"></i></button>
+								<button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud" id="get_voice_name_gcloud" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="form-floating mb-3">
                               <input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_gcloud_speaking_speed" id="tts_gcloud_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['speaking_speed']; ?>">
@@ -1837,6 +1838,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               </div>
                               <button type="button" name="load_list_gcloudkey_tts" id="load_list_gcloudkey_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud_key', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
                               <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_key_voice_name')"><i class="bi bi-play-circle"></i></button>
+                              <button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud" id="get_voice_name_gcloud" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="form-floating mb-3">
                               <input type="text" class="form-control border-danger" name="tts_ggcloud_key_language_code" id="tts_ggcloud_key_language_code" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code']; ?>">
@@ -2632,7 +2634,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </tbody>
                       </table>
 					  <?php
-					  echo input_field('lits_newspaper_radio_radio', 'Đường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+					  $radio_lits_newspaper_radio = htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json');
+					  echo input_field('lits_newspaper_radio_radio', 'Đường Dẫn Tệp Dữ Liệu', $radio_lits_newspaper_radio, 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$radio_lits_newspaper_radio')", 'btn btn-success border-danger', 'onclick', '');
 					  ?>
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-radio" onclick="addRadio()">Thêm Đài Mới</button></center>
                     </div>
@@ -2701,7 +2704,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </tbody>
                       </table>
 					  <?php
-					  echo input_field('lits_newspaper_radio_paper', 'Đường Dẫn Tệp Dữ Liệu', htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json'), 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+					  $paper_lits_newspaper_radio = htmlspecialchars($directory_path.'/includes/other_data/lits_newspaper_radio.json');
+					  echo input_field('lits_newspaper_radio_paper', 'Đường Dẫn Tệp Dữ Liệu', $paper_lits_newspaper_radio, 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$paper_lits_newspaper_radio')", 'btn btn-success border-danger', 'onclick', '');
 					  ?>
                       <center> <button type="button" class="btn btn-success rounded-pill" id="add-newspaper" onclick="addNewsPaper()">Thêm Báo Mới</button></center>
                     </div>
@@ -2723,7 +2727,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 
 
                       <div class="row mb-3 alert alert-primary" role="alert">
-                        <label class="col-sm-3 col-form-label">Kích Hoạt Cache Trợ Lý <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lấy dữ liệu từ cache trước đó để trả lời nếu cấu hỏi tương đồng với dữ liệu)"></i>: </label>
+                        <label class="col-sm-3 col-form-label">Kích Hoạt Cache Trợ Lý <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật hệ thống sẽ lấy dữ liệu từ cache trước đó để trả lời nếu cấu hỏi tương đồng với dữ liệu')"></i>: </label>
                         <div class="col-sm-9">
                           <div class="form-switch">
                             <input class="form-check-input border-success" type="checkbox" name="virtual_assistant_cache_active" id="virtual_assistant_cache_active" <?php echo $Config['virtual_assistant']['cache_active'] ? 'checked' : ''; ?>>
@@ -2916,7 +2920,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                                 echo '<option value="' . htmlspecialchars($item) . '"' . $selected . '>' . htmlspecialchars($item) . '</option>';
                               }
                               echo '</select>';
-                              echo '<button class="btn btn-primary" type="button" id="btn_' . $id . '" title="' . htmlspecialchars($gemini_model_list_json_file, ENT_QUOTES) . '" onclick="readJSON_file_path(\'' . addslashes($gemini_model_list_json_file) . '\')">Tệp Dữ Liệu Mô Hình</button>';
+                              echo '<button class="btn btn-primary border-danger" type="button" id="btn_' . $id . '" title="' . htmlspecialchars($gemini_model_list_json_file, ENT_QUOTES) . '" onclick="readJSON_file_path(\'' . addslashes($gemini_model_list_json_file) . '\')"><i class="bi bi-eye"></i></button>';
+                              echo '<button class="btn btn-info border-danger" title="Cập nhật mới các Model của Gemini đang có" type="button" id="model_gemini_get" name="model_gemini_get" onclick="get_model_gemini()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>';
                               echo '</div>';
                             } else {
                               echo '<select name="' . $id . '" id="' . $id . '" class="form-select border-danger" aria-label="Default select example">';
@@ -2931,7 +2936,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                             if ($withButton) {
                               echo '<div class="input-group">';
                               echo '<input class="form-control border-danger" type="text" name="' . $id . '" id="' . $id . '" placeholder="' . htmlspecialchars($placeholder) . '" value="' . htmlspecialchars($selectedValue) . '">';
-                              echo '<button class="btn btn-primary" type="button" id="btn_' . $id . '" title="' . $gemini_model_list_json_file . '">Tệp Dữ Liệu Mô Hình</button>';
+                              echo '<button class="btn btn-primary border-danger" type="button" id="btn_' . $id . '" title="' . $gemini_model_list_json_file . '"><i class="bi bi-eye"></i></button>';
+							  echo '<button class="btn btn-info border-danger" title="Cập nhật mới các Model của Gemini đang có" type="button" id="model_gemini_get" name="model_gemini_get" onclick="get_model_gemini()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>';
                               echo '</div>';
                             } else {
                               echo '<input class="form-control border-danger" type="text" name="' . $id . '" id="' . $id . '" placeholder="' . htmlspecialchars($placeholder) . '" value="' . htmlspecialchars($selectedValue) . '">';
@@ -2949,7 +2955,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_api_version', 'Phiên Bản API', null, $selected_version, $selected_version);
                         }
                         echo input_field('google_gemini_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['google_gemini']['time_out'] ?? 25), 'required', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
-                        echo input_field('gemini_models_path_file', 'Đường dẫn tệp mô hình (Path Model)', htmlspecialchars($gemini_model_list_json_file), 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('gemini_models_path_file', 'Đường dẫn tệp mô hình (Path Model)', htmlspecialchars($gemini_model_list_json_file), 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$gemini_model_list_json_file')", 'btn btn-success border-danger', 'onclick', '');
                         ?>
                       </div>
                     </div>
@@ -2971,10 +2977,22 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </div>
                         <?php
                         echo input_field('chat_gpt_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['key_chat_gpt']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "test_key_ChatGPT('Chào bạn, bạn tên là gì')", 'btn btn-success border-success', 'onclick', '');
-                        echo select_field('chat_gpt_model', 'Model', ['' => '-- Chọn Model --', 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (Khuyến Nghị)', 'gpt-4' => 'GPT-4', 'gpt-4o' => 'GPT-4o', 'gpt-4o-mini' => 'GPT-4o mini', 'gpt-4-turbo' => 'GPT-4 Turbo'], $Config['virtual_assistant']['chat_gpt']['model'], []);
+						$model_file = $HTML_VBot_Offline.'/includes/other_data/chatgpt_model_list.json';
+						$model_options = ['' => '-- Chọn Model --'];
+						if (file_exists($model_file)) {
+							$json_data = file_get_contents($model_file);
+							$models = json_decode($json_data, true);
+							if (isset($models['chatgpt_models']) && is_array($models['chatgpt_models'])) {
+								foreach ($models['chatgpt_models'] as $model) {
+									$model_options[$model] = $model;
+								}
+							}
+						}
+						echo select_field('chat_gpt_model', 'Model', $model_options, $Config['virtual_assistant']['chat_gpt']['model'], []);
                         echo input_field('chat_gpt_role_system_content', 'Role System Content', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['role_system_content']), '', 'text', '', '', '', 'Thiết lập hành vi mong muốn của Chat GPT trong cuộc trò chuyện, gán GPT như 1 trợ lý, người, vật, v..v...! làm cho trải nghiệm người dùng phù hợp với mục đích cụ thể của bạn.', 'border-success', '', '', '', '', '');
                         echo input_field('chat_gpt_url_api', 'URL API', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['url_api']), '', 'text', '', '', '', '- Hỗ trợ với URL API và API KEY của bên thứ 3<br/><br/>hoặc URL Mặc Định của ChatGPT và Key của ChatGPT: <b>https://api.openai.com/v1/chat/completions</b>', 'border-danger', '', '', '', '', '');
                         echo input_field('chat_gpt_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['chat_gpt']['time_out']), '', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+						echo input_field('chat_gpt_models_path_file', 'Đường dẫn tệp mô hình (Path Model)', htmlspecialchars($model_file), 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$model_file')", 'btn btn-success border-danger', 'onclick', '');
                         ?>
                       </div>
                     </div>
@@ -3185,8 +3203,9 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     </div>
                   </div>
                   <?php
-                  echo input_field('schedule_data_json_file', 'Tệp Lưu Trữ Dữ Liệu Cấu Hình:', htmlspecialchars($Config['schedule']['data_json_file']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
-                  echo input_field('schedule_audio_path', 'Thư Mục Chứa Tệp Âm Thanh:', htmlspecialchars($Config['schedule']['audio_path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+				  $schedule_json_file = htmlspecialchars($VBot_Offline.$Config['schedule']['data_json_file']);
+                  echo input_field('schedule_data_json_file', 'Tệp Lưu Trữ Dữ Liệu Cấu Hình', $schedule_json_file, 'readonly', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$schedule_json_file')", 'btn btn-success border-danger', 'onclick', '');
+                  echo input_field('schedule_audio_path', 'Thư Mục Chứa Tệp Âm Thanh', htmlspecialchars($Config['schedule']['audio_path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   ?>
                   <div class="row mb-3">
                     <b class="text-danger">Yêu Cầu: Cần Nhập Thêm KEY Trợ Lý Gemini Để Có Thể (Hoa Mỹ, Mỹ Miều) Lời Nhắc Khi Lập Lịch</b>
@@ -4090,7 +4109,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         };
         xhr.send();
       }
-      loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
+      //loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
+      loadJSON("includes/other_data/list_voices_tts_gcloud.json");
     }
 
 	//Tạo Mac Giả
