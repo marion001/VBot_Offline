@@ -1156,7 +1156,7 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic, <font color=red> VAD</font>:
+                  Cấu Hình Âm Thanh Volume/Mic, <font color=red>  VAD, Lọc Nhiễu Noise Suppression</font>:
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
@@ -1176,6 +1176,8 @@ include 'html_head.php';
 					  <?php
                       echo select_field('vad_mode', 'Mức Độ Lọc Nhiễu', ['0' => 'Lọc Thấp Nhất', '1' => 'Lọc Nhẹ (Khuyên Dùng)', '2' => 'Lọc Trung Bình (Khuyên Dùng)', '3' => 'Lọc Mạnh'], $Config['smart_config']['webrtcvad']['vad_mode'], []);
 					  echo input_field('vad_rms', 'Ngưỡng RMS Tối Thiếu', $Config['smart_config']['webrtcvad']['rms_threshold'] ?? 220, 'required', 'number', '1', '0', '1200', 'Ngưỡng biên độ RMS Của Mic, Dữ liệu biên độ âm thanh khi Mic thu âm được dưới ngưỡng tối thiếu được thiết lập sẽ bị bỏ qua, chỉ chấp nhận biên độ RMS trên ngưỡng được thiết lập, giá trị thiết lập ngưỡng còn phụ thuộc vào âm thanh môi trường thực tế. trung bình khoảng 200-300', 'border-success', '', '', '', '', '');
+						echo input_field('', 'Cài Lọc Nhiễu Noise Suppression', "http://$serverIp/FAQ.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/FAQ.php", 'btn btn-success border-danger', 'link', '_blank');
+
                       ?>
                     </div>
                     </div>

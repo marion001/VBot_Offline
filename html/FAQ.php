@@ -1536,7 +1536,6 @@ $:> sudo systemctl disable dphys-swapfile</code>
 </div>
 </div>
 
-
 <div class="card accordion" id="accordion_button_logs2ram">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_logs2ram" aria-expanded="false" aria-controls="collapse_button_logs2ram">
@@ -1645,6 +1644,52 @@ $:> df -h /var/log</code></pre>
 </div>
 </div>
 </div>
+
+
+<div class="card accordion" id="accordion_button_NoiseSuppression">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_NoiseSuppression" aria-expanded="false" aria-controls="collapse_button_NoiseSuppression">
+Cài Đặt NoiseSuppression Giảm Nhiễu Nền Ở Mic Thu Âm (Noise Suppression SpeexDSP):</h5>
+<div id="collapse_button_NoiseSuppression" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_NoiseSuppression">
+      <div class="d-flex align-items-start mb-4">
+        <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">1</span>
+        <div class="flex-grow-1">
+          <h5 class="mb-3">Clone repository về máy</h5>
+          <pre class="bg-dark text-white p-3 rounded"><code>$:> git clone https://github.com/TeaPoly/speexdsp-ns-python.git</code></pre>
+        </div>
+      </div>
+      <div class="d-flex align-items-start mb-4">
+        <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">2</span>
+        <div class="flex-grow-1">
+          <h5 class="mb-3">Di chuyển vào thư mục vừa clone</h5>
+          <pre class="bg-dark text-white p-3 rounded"><code>$:> cd speexdsp-ns-python</code></pre>
+        </div>
+      </div>
+      <div class="d-flex align-items-start mb-4">
+        <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">3</span>
+        <div class="flex-grow-1">
+          <h5 class="mb-3">Cài đặt thư viện</h5>
+          <pre class="bg-dark text-white p-3 rounded"><code>$:> sudo python3 setup.py install</code></pre>
+        </div>
+      </div>
+      <div class="d-flex align-items-start mb-3">
+        <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">4</span>
+        <div class="flex-grow-1">
+          <h5 class="mb-3">Kiểm tra cài đặt thành công</h5>
+          <pre class="bg-dark text-white p-3 rounded"><code>python3 - << 'EOF'
+from speexdsp_ns import NoiseSuppression
+print("SpeexDSP NS READY")
+EOF</code></pre>
+          <div class="alert alert-success mt-3">
+            <strong>Thành công nếu thấy dòng:</strong><br>
+            <code>SpeexDSP NS READY</code>
+          </div>
+        </div>
+      </div>
+</div>
+</div>
+
+
 
 
             </div>
