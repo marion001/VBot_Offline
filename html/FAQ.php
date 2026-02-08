@@ -1669,7 +1669,10 @@ Cài Đặt NoiseSuppression Giảm Nhiễu Nền Ở Mic Thu Âm (Noise Suppres
         <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">3</span>
         <div class="flex-grow-1">
           <h5 class="mb-3">Cài đặt thư viện</h5>
-          <pre class="bg-dark text-white p-3 rounded"><code>$:> sudo python3 setup.py install</code></pre>
+          <pre class="bg-dark text-white p-3 rounded"><code>
+$:> sudo apt install libspeexdsp-dev -y
+$:> sudo apt install swig -y
+$:> sudo python3 setup.py install</code></pre>
         </div>
       </div>
       <div class="d-flex align-items-start mb-3">
