@@ -1673,7 +1673,7 @@ Cài Đặt NoiseSuppression Giảm Nhiễu Nền Ở Mic Thu Âm (Noise Suppres
 $:> sudo apt update
 $:> sudo apt install libspeexdsp-dev -y
 $:> sudo apt install swig -y
-$:> sudo python3 setup.py install</code></pre>
+$:> sudo python3 -m pip install .</code></pre>
         </div>
       </div>
       <div class="d-flex align-items-start mb-3">
