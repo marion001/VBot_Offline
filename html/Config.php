@@ -2270,13 +2270,11 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_Sound_System">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Sound_System" aria-expanded="false" aria-controls="collapse_button_Sound_System">
-                  Âm Thanh Hệ Thống:
+                  Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i>:
                 </h5>
                 <div id="collapse_button_Sound_System" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_Sound_System" style="">
-                <div class="alert alert-success" role="alert"> <div class="card">
-                    <div class="card-body">
-                      <h5 class="card-title">Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i> :</h5>
-                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
+				<div class="alert alert-success" role="alert">
+                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt âm thanh thông báo khi chương trình khởi động')"></i> :</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -2331,10 +2329,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                           <tbody>
                           </tbody>
                         </table>
-                      </div>
-                    </div>
-                    </div>
-                  </div>
+                </div>
                 </div>
               </div>
             </div>
