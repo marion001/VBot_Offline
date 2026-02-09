@@ -2,7 +2,7 @@
     "version": "1.0.90",
     "projectName": "Program VBot Offline",
     "description": "Lọc Nhiễu Nền Noise, Tối ưu code hệ thống, hỗ trợ tối ưu zram-tools và log2ram xem chi tiết thiếp lập trong: Hướng Dẫn",
-    "releaseDate": "08/02/2026-1",
+    "releaseDate": "09/02/2026",
     "changes": [
         {
             "type": "feature",

@@ -1156,14 +1156,14 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic, <font color=red>  VAD, Lọc Nhiễu Noise Suppression</font>:
+                  Cấu Hình Âm Thanh Volume/Mic, <font color=red> Lọc Nhiễu Mic: VAD +  Noise Suppression</font>:
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
 
 					<div class="card">
                     <div class="card-body">
-                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Lọc Nhiễu Âm Thanh Đầu Vào (VAD) <i class="bi bi-question-circle-fill" onclick="show_message('VAD WebRTC đây là chế độ lọc nhiễu đầu vào âm thanh của Microphone, Dùng để lọc giọng nói của Con Người. mức độ lọc nhiễu càng cao thì càng khó tính → dễ bỏ sót giọng nhỏ<hr/>- Lọc Thấp Nhất = Phòng rất yên tĩnh<br/>- Lọc Nhẹ = Dùng chung, an toàn<br/>- Lọc Trung Bình = Phòng có quạt, TV<br/>- Lọc Mạnh = Môi trường ồn<hr/> - Có thể khó đánh thức WakeUP với âm thanh nhỏ')"></i> &nbsp;:</h5>
+                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Lọc Nhiễu Âm Thanh Đầu Vào MIC (VAD + Noise Suppression) <i class="bi bi-question-circle-fill" onclick="show_message('VAD WebRTC + Noise Suppression đây là chế độ lọc nhiễu đầu vào âm thanh của Microphone, Dùng để lọc giọng nói của Con Người. mức độ lọc nhiễu càng cao thì càng khó tính → dễ bỏ sót giọng nhỏ<hr/>- Lọc Thấp Nhất = Phòng rất yên tĩnh<br/>- Lọc Nhẹ = Dùng chung, an toàn<br/>- Lọc Trung Bình = Phòng có quạt, TV<br/>- Lọc Mạnh = Môi trường ồn<hr/> - Có thể khó đánh thức WakeUP với âm thanh nhỏ')"></i> &nbsp;:</h5>
                       <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt tính năng lọc nhiễu âm thanh đầu vào<br/> Có thể đánh thức loa khó hơn với âm thanh nhỏ')"></i> :</label>

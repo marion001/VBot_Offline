@@ -154,6 +154,18 @@ include 'html_head.php';
           }
           // Hiển thị thư viện thiếu
           if (!empty($missingPackages)) {
+			$manualBuildPackages = [
+				'speexdsp-ns' => [
+					'url' => 'FAQ.php',
+					'note' => 'Thư viện cần build thủ công từ source'
+				],
+				'snowboy' => [
+					'url' => 'FAQ.php',
+					'note' => 'Thư viện cần build thủ công từ source'
+				],
+				// thêm thư viện khác ở đây nếu cần
+			];
+
             echo "<h5 class='card-title text-danger'>Thư Viện Còn Thiếu:</h5>";
             echo "<table class='table table-bordered border-primary'><thead>
             		<tr>
@@ -163,14 +175,41 @@ include 'html_head.php';
             		<th style='text-align: center; vertical-align: middle;'>Hành Động</th>
             		</tr>
             		</thead><tbody>";
-            foreach ($missingPackages as $name => $version) {
-              $Command_pip = base64_encode('pip install ' . $name . '==' . $version);
-              echo "<tr><td style='text-align: center; vertical-align: middle;'>$name <a href='https://pypi.org/project/$name/' target='_bank' title='Kiểm tra thư viện: $name'><i class='bi bi-box-arrow-up-right'></i></a></td>
-            			<td style='text-align: center; vertical-align: middle;'>$version</td>
-            			<td style='text-align: center; vertical-align: middle;'><font color=blue>pip install $name==$version</font></td>
-            			<td style='text-align: center; vertical-align: middle;'><button type='button' class='btn btn-success rounded-pill' onclick='VBot_Command(" . json_encode($Command_pip) . ")'>Cài Đặt</button></td>
-            			</tr>";
-            }
+
+			foreach ($missingPackages as $name => $version) {
+				$isManual = isset($manualBuildPackages[$name]);
+				if ($isManual) {
+					// Thư viện build thủ công
+					$guideUrl = $manualBuildPackages[$name]['url'];
+					$installCmd = "<span class='text-warning'>Build thủ công</span>";
+					$actionBtn = "<a href='{$guideUrl}' target='_blank' class='btn btn-warning rounded-pill'>Xem hướng dẫn</a>";
+				} else {
+					//Thư viện cài bằng pip
+					$Command_pip = base64_encode("pip install {$name}=={$version}");
+					$installCmd = "<font color='blue'>pip install {$name}=={$version}</font>";
+					$actionBtn = "
+						<button type='button'
+								class='btn btn-success rounded-pill'
+								onclick='VBot_Command(" . json_encode($Command_pip) . ")'>
+							Cài Đặt
+						</button>";
+				}
+				echo "<tr>
+					<td style='text-align: center; vertical-align: middle;'>
+						{$name}
+						<a href='https://pypi.org/project/{$name}/'
+						   target='_blank'
+						   title='Kiểm tra thư viện: {$name}'>
+						   <i class='bi bi-box-arrow-up-right'></i>
+						</a>
+					</td>
+					<td style='text-align: center; vertical-align: middle;'>{$version}</td>
+					<td style='text-align: center; vertical-align: middle;'>{$installCmd}</td>
+					<td style='text-align: center; vertical-align: middle;'>{$actionBtn}</td>
+				</tr>";
+			}
+
+
             echo "</tbody></table>";
           } else {
             echo "<h4 class='card-title text-success'><center>Tất cả các thư viện python pip cần thiết đều đã được cài đặt</center></h4>";
