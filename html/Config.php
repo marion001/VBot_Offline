@@ -209,6 +209,9 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['webrtcvad']['active'] = isset($_POST['webrtcvad_active']) ? true : false;
   $Config['smart_config']['webrtcvad']['vad_mode'] = intval($_POST['vad_mode']);
   $Config['smart_config']['webrtcvad']['rms_threshold'] = intval($_POST['vad_rms']);
+  $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['active'] = isset($_POST['webrtc_noise_gain_active']) ? true : false;
+  $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['auto_gain_dbfs'] = intval($_POST['auto_gain_dbfs']);
+  $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['noise_suppression_level'] = intval($_POST['noise_suppression_level']);
 
   #cập nhật giá trị trong tts tts_edge
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed'] = floatval($_POST['tts_edge_speaking_speed']);
@@ -1013,7 +1016,7 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_setting_API">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_API" aria-expanded="false" aria-controls="collapse_button_setting_API">
-                  Cấu Hình API VBot Server:
+                  Cấu Hình API VBot Server: <?php echo $Config['api']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_setting_API" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_API">
                   <div class="alert alert-success" role="alert"> <div class="row mb-3">
@@ -1060,7 +1063,9 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_streaming_server_audio">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_streaming_server_audio" aria-expanded="false" aria-controls="collapse_button_streaming_server_audio">
-                  Streming Audio Server <font color=red> (VBot Client, Client - Server) </font><i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:</h5>
+                  Streming Audio Server <font color=red> (VBot Client, Client - Server) </font><i class="bi bi-question-circle-fill" onclick="show_message('Kiểm Tra Và Test Hãy Truy Cập Vào Trang <b>Hướng Dẫn</b> Hoặc <a href=\'FAQ.php\' target=\'_bank\'>Nhấn Vào Đây</a>')"></i>:
+				  <?php echo $Config['api']['streaming_server']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
+				  </h5>
                 <div id="collapse_button_streaming_server_audio" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_streaming_server_audio">
 				<div class="alert alert-success" role="alert">
                   <div class="row mb-3">
@@ -1156,14 +1161,14 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic, <font color=red> Lọc Nhiễu Mic: VAD +  Noise Suppression</font>:
+                  Cấu Hình Âm Thanh Volume/Mic, <font color=red>(Lọc Nhiễu Mic: VAD, Noise Suppression, Auto Gain - AGC: <?php echo $Config['smart_config']['webrtcvad']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
 
 					<div class="card">
                     <div class="card-body">
-                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Lọc Nhiễu Âm Thanh Đầu Vào MIC (VAD + Noise Suppression) <i class="bi bi-question-circle-fill" onclick="show_message('VAD WebRTC + Noise Suppression đây là chế độ lọc nhiễu đầu vào âm thanh của Microphone, Dùng để lọc giọng nói của Con Người. mức độ lọc nhiễu càng cao thì càng khó tính → dễ bỏ sót giọng nhỏ<hr/>- Lọc Thấp Nhất = Phòng rất yên tĩnh<br/>- Lọc Nhẹ = Dùng chung, an toàn<br/>- Lọc Trung Bình = Phòng có quạt, TV<br/>- Lọc Mạnh = Môi trường ồn<hr/> - Có thể khó đánh thức WakeUP với âm thanh nhỏ')"></i> &nbsp;:</h5>
+                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Lọc Nhiễu Âm Thanh Đầu Vào MIC (VAD, Noise Suppression, Auto Gain - AGC) <font color=red>Nên Sử Dụng</font> <i class="bi bi-question-circle-fill" onclick="show_message('VAD WebRTC + Noise Suppression đây là chế độ lọc nhiễu đầu vào âm thanh của Microphone, Dùng để lọc giọng nói của Con Người. mức độ lọc nhiễu càng cao thì càng khó tính → dễ bỏ sót giọng nhỏ<hr/>- Lọc Thấp Nhất = Phòng rất yên tĩnh<br/>- Lọc Nhẹ = Dùng chung, an toàn<br/>- Lọc Trung Bình = Phòng có quạt, TV<br/>- Lọc Mạnh = Môi trường ồn<hr/> - Có thể khó đánh thức WakeUP với âm thanh nhỏ')"></i> &nbsp;:</h5>
                       <div class="alert alert-primary" role="alert">
                       <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt tính năng lọc nhiễu âm thanh đầu vào<br/> Có thể đánh thức loa khó hơn với âm thanh nhỏ')"></i> :</label>
@@ -1176,8 +1181,24 @@ include 'html_head.php';
 					  <?php
                       echo select_field('vad_mode', 'Mức Độ Lọc Nhiễu', ['0' => 'Lọc Thấp Nhất', '1' => 'Lọc Nhẹ (Khuyên Dùng)', '2' => 'Lọc Trung Bình (Khuyên Dùng)', '3' => 'Lọc Mạnh'], $Config['smart_config']['webrtcvad']['vad_mode'], []);
 					  echo input_field('vad_rms', 'Ngưỡng RMS Tối Thiếu', $Config['smart_config']['webrtcvad']['rms_threshold'] ?? 220, 'required', 'number', '1', '0', '1200', 'Ngưỡng biên độ RMS Của Mic, Dữ liệu biên độ âm thanh khi Mic thu âm được dưới ngưỡng tối thiếu được thiết lập sẽ bị bỏ qua, chỉ chấp nhận biên độ RMS trên ngưỡng được thiết lập, giá trị thiết lập ngưỡng còn phụ thuộc vào âm thanh môi trường thực tế. trung bình khoảng 200-300', 'border-success', '', '', '', '', '');
-						echo input_field('', 'Cài Lọc Nhiễu Noise Suppression', "http://$serverIp/FAQ.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/FAQ.php", 'btn btn-success border-danger', 'link', '_blank');
-
+					?>
+					<div class="alert alert-success" role="alert"><h5 class="card-title ">Chế Độ Tự Động Điều Chỉnh Cân Bằng Âm Thanh Thu Vào Từ Mic, <font color=red>Nên Sử Dụng </font> <i class="bi bi-question-circle-fill" onclick="show_message('Tự động tăng/giảm âm thanh thu được từ mic để giữ giọng nói luôn ở mức dễ nghe, không quá nhỏ – không bị vỡ khi nói to, <br/>- Nói xa → âm thanh thu vào được kéo to lên<br/>- Nói gần → âm thanh thu vào được hạ xuống<br/>Âm lượng ổn định → VAD, Wakeup, STT chính xác hơn')"></i></h5>
+                      <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Tự động tăng/giảm âm thanh thu được từ mic để giữ giọng nói luôn ở mức dễ nghe, không quá nhỏ – không bị vỡ khi nói to, <br/>- Nói xa → âm thanh thu vào được kéo to lên<br/>- Nói gần → âm thanh thu vào được hạ xuống<br/>Âm lượng ổn định → VAD, Wakeup, STT chính xác hơn')"></i> :</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="webrtc_noise_gain_active" id="webrtc_noise_gain_active" <?php echo $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['active'] ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+					<?php
+					echo input_field('auto_gain_dbfs', 'Ngưỡng tự động cân bằng âm thanh AGC (Auto Gain Control)', $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['auto_gain_dbfs'] ?? 4, 'required', 'number', '1', '0', '31', 'Ngưỡng có giá trị từ [0-31], 0=disabled (tắt tự động cân bằng âm thanh Mic). Giá trị hợp lý dùng chuẩn cho giọng nói trong khoảng từ [3-5], Mặc định là 4', 'border-success', '', '', '', '', '');
+                    echo select_field('noise_suppression_level', 'Mức khử nhiễu nền (Noise Suppression Level) <i class="bi bi-question-circle-fill" onclick="show_message(\'Ngưỡng có giá trị từ [0-4], 0=disabled (tắt khử nhiễu). Giá trị mặc định hợp lý nên dùng là 2.<br/><br/>0 => Tắt khử nhiễu<br/>1 => Khử nhiễu nhẹ<br/>2 => Khử nhiễu trung bình<br/>3 => Khử nhiễu mạnh<br/>4 => Khử nhiễu cực mạnh\')"></i>',
+                        ['0' => '0 => Tắt Khử Nhiễu', '1' => '1 => Khử Nhiễu Nhẹ', '2' => '2 => Khử Nhiễu Trung Bình (Khuyên Dùng)', '3' => '3 => Khử Nhiễu Mạnh', '4' => '4 => Khử Nhiễu Cực Mạnh'], $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['noise_suppression_level'], []);
+					?>
+					</div>
+					<?php
+					echo input_field('', 'Cài Lọc Nhiễu Noise Suppression và Noise Gain', "http://$serverIp/FAQ.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/FAQ.php", 'btn btn-success border-danger', 'link', '_blank');
                       ?>
                     </div>
                     </div>
@@ -1541,6 +1562,7 @@ include 'html_head.php';
                             'tts_viettel' => [
                               'label' => 'TTS Viettel (Api Keys)',
                               'help'  => "Cần sử dụng Api keys của Viettel càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href='https://viettelai.vn/dashboard/token' target='_bank'>https://viettelai.vn/dashboard/token</a>",
+							  'disabled' => true,
                             ],
                             'tts_edge' => [
                               'label' => 'TTS Microsoft Edge (Free) <font color=green>(Khuyến Khích Nên Sử Dụng)</font>',
@@ -1861,7 +1883,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
             <div class="card accordion" id="accordion_button_setting_homeassistant">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_homeassistant" aria-expanded="false" aria-controls="collapse_button_setting_homeassistant">
-                  Cấu Hình Kết Nối Tới Home Assistant (HASS):
+                  Cấu Hình Kết Nối Tới Home Assistant (HASS): <?php echo $Config['home_assistant']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_setting_homeassistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_setting_homeassistant">
                  <div class="alert alert-success" role="alert">  <div class="row mb-3">
@@ -1872,7 +1894,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </div>
                     </div>
                   </div>
-
                   <?php
                   echo input_field('hass_long_token', 'Mã Token (Long Token)', $Config['home_assistant']['long_token'], '', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
                   echo input_field('hass_internal_url', 'URL nội bộ ', htmlspecialchars($Config['home_assistant']['internal_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_internal_url')", 'btn btn-success border-success', 'onclick', '_blank');
@@ -1903,7 +1924,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
             <div class="card accordion" id="accordion_button_mqtt_tuyen">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_mqtt_tuyen" aria-expanded="false" aria-controls="collapse_button_mqtt_tuyen">
-                  Cấu Hình Kết Nối MQTT Broker:
+                  Cấu Hình Kết Nối MQTT Broker: <?php echo $Config['mqtt_broker']['mqtt_active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_mqtt_tuyen" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_mqtt_tuyen">
                 <div class="alert alert-success" role="alert">   <div class="row mb-3">
@@ -1954,7 +1975,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
             <div class="card accordion" id="accordion_button_setting_led">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_led" aria-expanded="false" aria-controls="collapse_button_setting_led">
-                  Cấu Hình Sử Dụng Đèn Led:
+                  Cấu Hình Sử Dụng Đèn Led: <?php echo $Config['smart_config']['led']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_setting_led" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_led">
                  <div class="alert alert-success" role="alert"> <div class="row mb-3">
@@ -2046,7 +2067,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
             <div class="card accordion" id="accordion_button_multype_button_config">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
-                  Cấu Hình Sử Dụng Nút Nhấn:</h5>
+                  Cấu Hình Sử Dụng Nút Nhấn: [Dạng Thường <?php echo $Config['smart_config']['button_active']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>] [Dạng Xoay Encoder <?php echo $Config['smart_config']['button_active']['encoder_rotary']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>]</h5>
                 <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
 <div class="alert alert-success" role="alert">
                   <div class="card accordion" id="accordion_button_setting_bton">
@@ -2270,7 +2291,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_Sound_System">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Sound_System" aria-expanded="false" aria-controls="collapse_button_Sound_System">
-                  Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i>:
+                  Âm Thanh Khi Khởi Động <i class="bi bi-question-circle-fill" onclick="show_message('Âm thanh thông báo khi chương trình khởi chạy thành công')"></i>: <?php echo $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_Sound_System" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_Sound_System" style="">
 				<div class="alert alert-success" role="alert">
@@ -2338,7 +2359,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_media_player">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
-                  Cấu Hình Phát Nhạc, Câu Trả Lời - Media Player:
+                  Cấu Hình Phát Nhạc, Câu Trả Lời - Media Player: <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
                  <div class="alert alert-success" role="alert"> <div class="card">
@@ -3051,7 +3072,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_xiaozhiai">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_xiaozhiai" aria-expanded="false" aria-controls="collapse_button_xiaozhiai">
-                  Cấu Hình Bot/Trợ Lý XiaoZhi AI:</h5>
+                  Cấu Hình Bot/Trợ Lý XiaoZhi AI: <?php echo $Config['xiaozhi']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                 <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
 				<div class="alert alert-success" role="alert">
                   <?php
@@ -3129,7 +3150,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_collapse_button_developer_customization">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" title="chế độ tùy chỉnh cho các lập trình viên, DEV" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_developer_customization" aria-expanded="false" aria-controls="collapse_button_developer_customization">
-                  DEV Customization: Custom Skill, Dev_Customization.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> :
+                  DEV Customization: Custom Skill, Dev_Customization.py <font color=red>(Người Dùng Tự Code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Cơ chế hoạt động:<br/>- Chế độ được kích hoạt, khi được đánh thức Wake UP, chương trình sẽ truyền dữ liệu văn bản được chuyển đổi từ Speak to Text vào File Dev_Customization.py để cho các bạn tự lập trình và xử lý dữ liệu, Khi kết thúc xử lý sẽ cần phải có return để trả về true hoặc false')"></i> : <?php echo $Config['developer_customization']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_developer_customization" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_developer_customization">
                   <div class="alert alert-success" role="alert"> <div class="row mb-3">
@@ -3163,7 +3184,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 		  <div class="card accordion" id="accordion_button_broadlink">
 		  <div class="card-body">
 		  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_broadlink" aria-expanded="false" aria-controls="collapse_button_broadlink">
-		  Liên Kết Broadlink Control, Remote Send IR/RF:</h5>
+		  Liên Kết Broadlink Control, Remote Send IR/RF: <?php echo $Config['broadlink']['remote']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
 		  <div id="collapse_button_broadlink" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_broadlink">
 				<div class="alert alert-success" role="alert">
                   <div class="row mb-3">
@@ -3188,6 +3209,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_schedule_lich" aria-expanded="false" aria-controls="collapse_button_schedule_lich">
                   Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule) <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần di chuyển tới: <b>Thiết Lập Nâng Cao -> Lên Lịch: Lời Nhắc, Thông Báo (Scheduler)</b> để tiến hành thiết lập thông báo.<br/>Ví Dụ Câu Lệnh Ra lệnh nhanh: <br/>- Nhắc tôi uống thuốc sau 10 phút nữa<br/>- Nhắc tôi thức dạy lúc 6 giờ sáng mai<br/>- Nhắc tôi làm việc lúc 13 giờ 40 phút hôm nay nhé')"></i>:
+				  <?php echo $Config['schedule']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_schedule_lich" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_schedule_lich">
 				<div class="alert alert-success" role="alert">
@@ -3520,6 +3542,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Cloud_Backup" aria-expanded="false" aria-controls="collapse_button_Cloud_Backup">
                   Cấu Hình Tải Lên Bản Sao Lưu Dữ Liệu - Cloud Backup&nbsp;<i class="bi bi-cloud-check"></i>&nbsp;:
+				  <?php echo $Config['backup_upgrade']['google_cloud_drive']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_Cloud_Backup" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Cloud_Backup">
                  <div class="alert alert-success" role="alert"> <div class="card">
@@ -3575,7 +3598,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
             <div class="card accordion" id="accordion_button_wakeup_reply_source">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_wakeup_reply_source" aria-expanded="false" aria-controls="collapse_button_wakeup_reply_source">
-                  Chế Độ Câu Phản Hồi (Khi Được Đánh Thức) <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Đánh thức Bot bằng giọng nói thì Bot sẽ phản hồi lại bằng file âm thanh Audio khi lần đầu tiên được đánh thức<br/> Chỉ chấp nhận file âm thanh .mp3')"></i> :</h5>
+                  Chế Độ Câu Phản Hồi (Khi Được Đánh Thức) <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật, Đánh thức Bot bằng giọng nói thì Bot sẽ phản hồi lại bằng file âm thanh Audio khi lần đầu tiên được đánh thức<br/> Chỉ chấp nhận file âm thanh .mp3')"></i> :
+				  <?php echo $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                 <div id="collapse_button_wakeup_reply_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_wakeup_reply_source">
 				<div class="alert alert-success" role="alert">
                   <div class="row mb-3">
@@ -3618,7 +3642,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                     </div>
                     <div id="tts_audio_reply_options"></div>
                   </div>
-
                   <div id="displayResults_wakeup_reply"></div>
                 </div>
               </div>
@@ -3628,7 +3651,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
       <div class="card accordion" id="accordion_button_sys_speak_cmd">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sys_speak_cmd" aria-expanded="false" aria-controls="collapse_button_sys_speak_cmd">
-      Lệnh Điều Khiển Hệ Thống SYSTEM <i class="bi bi-question-circle-fill" onclick="show_message('Sử dụng câu lệnh tương ứng để điều khiển 1 số chức năng trong hệ thống SYSTEM mà chương trình cho phép')"></i>:</h5>
+      Lệnh Điều Khiển Hệ Thống SYSTEM <i class="bi bi-question-circle-fill" onclick="show_message('Sử dụng câu lệnh tương ứng để điều khiển 1 số chức năng trong hệ thống SYSTEM mà chương trình cho phép')"></i>:
+	  <?php echo $Config['voice_command_system']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
       <div id="collapse_button_sys_speak_cmd" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_sys_speak_cmd">
 <div class="alert alert-success" role="alert">
                 <div class="row mb-3">
@@ -3741,9 +3765,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                   </div>
                 </div>
                 <?php
-                echo select_field(
-                  'log_display_style',
-                  'Kiểu hiển Thị Logs',
+                echo select_field('log_display_style', 'Kiểu hiển Thị Logs',
                   [
                     'console' => 'console (Hiển thị log ra bảng điều khiển đầu cuối)',
                     'api' => 'api (Hiển thị log ra API, Web UI)',
@@ -3787,7 +3809,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                       }
                       echo '</select>';
                     }
-
                     if ($co_tep_BackUp_ConfigJson === true) {
                       echo '
                         <button class="btn btn-primary border-primary" name="start_recovery_config_json" value="khoi_phuc_tu_tep_he_thong" type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu Config từ tệp sao lưu trên hệ thống\')">Khôi Phục</button>

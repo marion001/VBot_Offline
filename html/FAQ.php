@@ -1651,10 +1651,19 @@ $:> df -h /var/log</code></pre>
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_NoiseSuppression" aria-expanded="false" aria-controls="collapse_button_NoiseSuppression">
 Cài Đặt NoiseSuppression Giảm Nhiễu Nền Ở Mic Thu Âm (Noise Suppression SpeexDSP):</h5>
 <div id="collapse_button_NoiseSuppression" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_NoiseSuppression">
+
+      <div class="d-flex align-items-start mb-4">
+        <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">0</span>
+        <div class="flex-grow-1">
+          <h5 class="mb-3 text-success">Nếu Cài Tự Động</h5>
+          <pre class="bg-dark text-white p-3 rounded"><code>$:> sudo python3 -m pip install /home/pi/VBot_Offline/resource/whl_build_file/speexdsp_ns-0.1.2-cp39-cp39-linux_armv7l.whl --force-reinstall</code></pre>
+        </div>
+      </div>
+<hr/>
       <div class="d-flex align-items-start mb-4">
         <span class="badge bg-primary rounded-pill fs-5 me-3" style="min-width: 2.5rem; height: 2.5rem; line-height: 2.5rem; padding: 0;">1</span>
         <div class="flex-grow-1">
-          <h5 class="mb-3">Clone repository về máy</h5>
+          <h5 class="mb-3">Nếu Cài Thủ Công: Clone repository về máy</h5>
           <pre class="bg-dark text-white p-3 rounded"><code>$:> git clone https://github.com/TeaPoly/speexdsp-ns-python.git</code></pre>
         </div>
       </div>
@@ -1692,11 +1701,101 @@ EOF</code></pre>
       </div>
 </div>
 </div>
+</div>
 
 
 
-
+<div class="card accordion" id="accordion_button_webrtc_noise_gain">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webrtc_noise_gain" aria-expanded="false" aria-controls="collapse_button_webrtc_noise_gain">
+Cài Đặt Webrtc Noise Gain (webrtc_noise_gain) tự động điều chỉnh âm thanh mic thu được khi ở xa hoặc gần mic (nói to hoặc nói nhỏ):</h5>
+<div id="collapse_button_webrtc_noise_gain" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webrtc_noise_gain">
+          <!-- Cách 1: Cài tự động (khuyên dùng nếu có file .whl sẵn) -->
+          <h5 class="mt-2 mb-3 text-primary">Cách 1: Cài nhanh (tự động) – đã có sẵn file .whl trong VBot</h5>
+          <div class="alert alert-info mb-4">
+            Dùng khi bạn đã build hoặc tải được file wheel phù hợp (ở đây là phiên bản 1.2.5 cho cp39 armv7l)
+          </div>
+          <pre class="bg-dark text-light p-3 rounded mb-4"><code>$:> sudo python3 -m pip install /home/pi/VBot_Offline/resource/whl_build_file/webrtc_noise_gain-1.2.5-cp39-cp39-linux_armv7l.whl --force-reinstall</code></pre>
+          <!-- Cách 2: Cài thủ công (build từ source) -->
+          <h5 class="mt-5 mb-3 text-primary">Cách 2: Cài thủ công (build từ mã nguồn)</h5>
+          <div class="accordion" id="installManual">
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1">
+                  Bước 1: Cập nhật hệ thống & cài công cụ cần thiết
+                </button>
+              </h2>
+              <div id="step1" class="accordion-collapse collapse show" data-bs-parent="#installManual">
+                <div class="accordion-body">
+                  <pre class="bg-dark text-light p-3 rounded mb-0"><code>$:> sudo apt update
+$:> sudo apt install -y python3 python3-dev python3-pip build-essential</code></pre>
+                </div>
+              </div>
             </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step2">
+                  Bước 2: Tải source code từ GitHub
+                </button>
+              </h2>
+              <div id="step2" class="accordion-collapse collapse" data-bs-parent="#installManual">
+                <div class="accordion-body">
+                  <pre class="bg-dark text-light p-3 rounded mb-0"><code>$:> git clone https://github.com/rhasspy/webrtc-noise-gain.git
+$:> cd webrtc-noise-gain</code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step3">
+                  Bước 3: Cài công cụ build wheel
+                </button>
+              </h2>
+              <div id="step3" class="accordion-collapse collapse" data-bs-parent="#installManual">
+                <div class="accordion-body">
+                  <pre class="bg-dark text-light p-3 rounded mb-0"><code>$:> sudo python3 -m pip install wheel build</code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step4">
+                  Bước 4: Build wheel
+                </button>
+              </h2>
+              <div id="step4" class="accordion-collapse collapse" data-bs-parent="#installManual">
+                <div class="accordion-body">
+                  <pre class="bg-dark text-light p-3 rounded mb-0"><code>$:> sudo python3 -m build --wheel</code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="accordion-item">
+              <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step5">
+                  Bước 5: Cài đặt wheel vừa build
+                </button>
+              </h2>
+              <div id="step5" class="accordion-collapse collapse" data-bs-parent="#installManual">
+                <div class="accordion-body">
+                  <pre class="bg-dark text-light p-3 rounded mb-0"><code>$:> sudo python3 -m pip install dist/*.whl</code></pre>
+                </div>
+              </div>
+            </div>
+          </div> <!-- end accordion -->
+          <!-- Kiểm tra cài đặt thành công -->
+          <h5 class="mt-5 mb-3 text-success">Kiểm tra xem đã cài thành công chưa</h5>
+          <pre class="bg-dark text-light p-3 rounded"><code>python3 - <<'EOF'
+from webrtc_noise_gain import AudioProcessor
+print("OK")
+EOF</code></pre>
+          <div class="alert alert-success mt-4">
+            Nếu thấy dòng <strong>OK</strong> hiện ra → cài đặt thành công!
+          </div>
+</div>
+</div>
+</div>
+
+
           </div>
     </section>
   </main>

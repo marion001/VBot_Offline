@@ -156,12 +156,10 @@ include 'html_head.php';
           if (!empty($missingPackages)) {
 			$manualBuildPackages = [
 				'speexdsp-ns' => [
-					'url' => 'FAQ.php',
-					'note' => 'Thư viện cần build thủ công từ source'
+					'url' => 'FAQ.php'
 				],
 				'snowboy' => [
-					'url' => 'FAQ.php',
-					'note' => 'Thư viện cần build thủ công từ source'
+					'url' => 'FAQ.php'
 				],
 				// thêm thư viện khác ở đây nếu cần
 			];
@@ -181,7 +179,7 @@ include 'html_head.php';
 				if ($isManual) {
 					// Thư viện build thủ công
 					$guideUrl = $manualBuildPackages[$name]['url'];
-					$installCmd = "<span class='text-warning'>Build thủ công</span>";
+					$installCmd = "<span class='text-danger'>Cần Build Thủ Công</span>";
 					$actionBtn = "<a href='{$guideUrl}' target='_blank' class='btn btn-warning rounded-pill'>Xem hướng dẫn</a>";
 				} else {
 					//Thư viện cài bằng pip

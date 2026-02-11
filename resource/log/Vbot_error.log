@@ -1,0 +1,45 @@
+[22:00:46 25-01-2026] [VBot XiaoZhi] Lỗi kết nối Socket với địa chỉ: wss://api.tenclass.net/xiaozhi/v1/, Mã Lỗi:: [Errno 111] Connection refused
+[17:39:05 26-01-2026] [VBot AirPlay] Lỗi: org.freedesktop.DBus.Error.ServiceUnknown: The name :1.11 was not provided by any .service files
+[17:44:55 26-01-2026] [VBot AirPlay] Lỗi: org.freedesktop.DBus.Error.ServiceUnknown: The name :1.11 was not provided by any .service files
+[17:44:57 26-01-2026] [VBot AirPlay] Lỗi: org.freedesktop.DBus.Error.ServiceUnknown: The name :1.11 was not provided by any .service files
+[17:57:05 26-01-2026] [Detect Hotword] Có Lỗi Xảy Ra: 'NoneType' object has no attribute 'lower'
+[17:57:05 26-01-2026] [Restart VBot Service] [17:57:05 26-01-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[18:35:40 26-01-2026] [STT GCloud V2] Lỗi: 404 Unable to find Recognizer vbot-stt-v2 from project 59197889509.
+[18:53:13 26-01-2026] Lỗi chuyển đổi file âm thanh sang văn bản Google Cloud: name 'speech' is not defined
+[18:53:22 26-01-2026] [MAIN] Có Lỗi Xảy Ra: There is no current event loop in thread 'MainThread'.
+[18:53:22 26-01-2026] [Restart VBot Service] [18:53:22 26-01-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[18:54:55 26-01-2026] [MAIN] Có Lỗi Xảy Ra: There is no current event loop in thread 'MainThread'.
+[18:54:55 26-01-2026] [Restart VBot Service] [18:54:55 26-01-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[19:25:36 26-01-2026] [STT GCloud V1] Đã xảy ra lỗi: 400 Audio Timeout Error: Long duration elapsed without audio. Audio should be sent close to real time.
+[21:13:55 26-01-2026] [Detect Hotword] Có Lỗi Xảy Ra: name 'asyncio' is not defined
+[21:13:55 26-01-2026] [Restart VBot Service] [21:13:55 26-01-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[22:49:38 26-01-2026] Lỗi khi khởi tạo Picovoice/Porcupine Initialization failed:
+  [0] d3ff828 0000006A: Keyword file (.ppn) file belongs to a different version of the library. File is `3.0.0` while library is `4.0.0`.
+  [1] d3ff828 000001FE: Loading keyword file at `resource/hotword/eng/hey siri_raspberry-pi.ppn` failed with `INVALID_ARGUMENT`.
+[19:07:47 02-02-2026] Tất cả trợ lý ảo đều không có phản hồi, hoặc không được kích hoạt
+[19:20:20 08-02-2026] [Detect Hotword] Có Lỗi Xảy Ra: Failed to read from device.
+[19:20:20 08-02-2026] [Restart VBot Service] [19:20:20 08-02-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[21:37:12 08-02-2026] Lỗi khi khởi tạo Snowboy: No module named 'snowboy'
+[21:37:38 08-02-2026] Lỗi khi khởi tạo Snowboy: No module named 'snowboy'
+[21:39:28 08-02-2026] Lỗi khi khởi tạo Snowboy: No module named 'snowboy'
+[19:34:38 09-02-2026] [Detect Hotword] Có Lỗi Xảy Ra: vad_is_speech() takes 1 positional argument but 2 were given
+[19:34:38 09-02-2026] [Restart VBot Service] [19:34:38 09-02-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[19:47:42 09-02-2026] [Olli] Lỗi xử lý trợ lý ảo: Hết thời gian chờ khi kết nối
+[20:00:14 10-02-2026] [Detect Hotword] Có Lỗi Xảy Ra: name 'webrtc_processor' is not defined
+[20:00:14 10-02-2026] [Restart VBot Service] [20:00:14 10-02-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[20:01:00 10-02-2026] [Detect Hotword] Có Lỗi Xảy Ra: Input and output buffers must be 320 bytes (10 ms)
+[20:01:00 10-02-2026] [Restart VBot Service] [20:01:00 10-02-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[20:07:37 10-02-2026] [Detect Hotword] Có Lỗi Xảy Ra: Expected 160 samples (10ms), got 320
+[20:07:37 10-02-2026] [Restart VBot Service] [20:07:37 10-02-2026] VBot_Offline.service không chạy ở chế độ Auto. Không có hành động restart nào được thực hiện.
+
+[18:46:59 11-02-2026] [TTS EDGE] Lỗi: rate must be str
+[18:56:51 11-02-2026] [Media Player] Lỗi khi phát câu trả lời Play_Answer: Dữ liệu phát Play_Answer không hợp lệ
+[18:57:00 11-02-2026] [Media Player] Lỗi khi phát câu trả lời Play_Answer: Dữ liệu phát Play_Answer không hợp lệ

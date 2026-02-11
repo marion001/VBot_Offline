@@ -1,0 +1,5 @@
+Mẫu Lệnh:
+$:> sudo python3 -m pip install speexdsp_ns-0.1.2-cp39-cp39-linux_armv7l.whl --force-reinstall
+
+
+$:> sudo python3 -m pip install /home/pi/VBot_Offline/resource/whl_build_file/speexdsp_ns-0.1.2-py3.9-linux-armv7l.egg --force-reinstall

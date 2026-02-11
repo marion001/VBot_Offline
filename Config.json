@@ -307,7 +307,12 @@
         "webrtcvad": {
             "active": false,
             "vad_mode": 1,
-            "rms_threshold": 100
+            "rms_threshold": 100,
+            "webrtc_noise_gain": {
+                "active": true,
+                "auto_gain_dbfs": 4,
+                "noise_suppression_level": 2
+            }
         },
         "mic": {
             "id": 14,
