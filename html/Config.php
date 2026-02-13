@@ -1258,6 +1258,15 @@ include 'html_head.php';
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_hotword_engine" aria-expanded="false" aria-controls="collapse_button_hotword_engine">
                   Cấu Hình WakeUP Hotword Engine (Từ Đánh Thức) Picovoice/Snowboy:
+				  <?php
+					$options_hotword = [
+						'porcupine' => '<font color=green>Picovoice/Procupine</font>',
+						'snowboy'   => '<font color=green>Snowboy</font>',
+						'null'      => '<font color=red>Đang Tắt</font>'
+					];
+					$selected_hotword = $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] ?? null;
+					if (isset($options_hotword[$selected_hotword])) {echo '&nbsp;'.$options_hotword[$selected_hotword];}
+					?>
                 </h5>
                 <div id="collapse_button_hotword_engine" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_hotword_engine" style="">
                   <div class="alert alert-success" role="alert"> <div class="card">
@@ -1277,10 +1286,7 @@ include 'html_head.php';
                           'porcupine' => 'Picovoice/Procupine (Nên Dùng)',
                           'snowboy' => 'Snowboy',
                           'null' => 'Không Sử Dụng Hotword'
-                        ],
-                        $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'],
-						[]
-                      );
+                        ], $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'], []);
                       ?>
                       <!-- nếu hotword được chọn là Picovoice Procupine -->
                       <div id="select_show_picovoice_porcupine">
@@ -1348,6 +1354,15 @@ include 'html_head.php';
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_stt" aria-expanded="false" aria-controls="collapse_button_setting_stt">
                   Chuyển Giọng Nói Thành Văn Bản - Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> &nbsp;:
+				  <?php
+					$options_tts_zz = [
+						'stt_default' => '<font color=green>Mặc Định (VBot Free)</font>',
+						'stt_ggcloud'   => '<font color=green>GCloud V1</font>',
+						'stt_ggcloud_v2'      => '<font color=green>GCloud V2</font>'
+					];
+					$selected_tts_zzz = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] ?? null;
+					if (isset($options_tts_zz[$selected_tts_zzz])) {echo '&nbsp;'.$options_tts_zz[$selected_tts_zzz];}
+					?>
                 </h5>
                 <div id="collapse_button_setting_stt" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_stt" style="">
                <div class="alert alert-success" role="alert">
@@ -1497,6 +1512,19 @@ include 'html_head.php';
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_tts" aria-expanded="false" aria-controls="collapse_button_setting_tts">
                   Chuyển Văn Bản Thành Giọng Nói - Text To Speak (TTS) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi kết quả từ văn bản thành giọng nói để phát ra loa')"></i> &nbsp;:
+				  <?php
+					$options_TTSss = [
+						'tts_default' => '<font color=green>Default Free</font>',
+						'tts_ggcloud'   => '<font color=green>GCloud</font>',
+						'tts_viettel'   => '<font color=green>Viettel</font>',
+						'tts_edge'   => '<font color=green>Edge</font>',
+						'tts_ggcloud_key'   => '<font color=green>GCloud Key</font>',
+						'tts_dev_customize'   => '<font color=green>DEV Custom</font>',
+						'tts_zalo'      => '<font color=green>Zalo</font>'
+					];
+					$selected_TTS_sss = $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] ?? null;
+					if (isset($options_TTSss[$selected_TTS_sss])) {echo '&nbsp;'.$options_TTSss[$selected_TTS_sss];}
+					?>
                 </h5>
                 <div id="collapse_button_setting_tts" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_tts" style="">
                  <div class="alert alert-success" role="alert"> <div class="row mb-3">
@@ -1562,7 +1590,6 @@ include 'html_head.php';
                             'tts_viettel' => [
                               'label' => 'TTS Viettel (Api Keys)',
                               'help'  => "Cần sử dụng Api keys của Viettel càng nhiều Keys càng tốt, Mỗi Keys một dòng<br/>Key Lỗi hoặc Hết giới hạn dùng miễn phí sẽ tự động chuyển vào file BackList, và sẽ tự động làm mới nội dung BackList vào hôm sau<br/>Trang Chủ: <a href='https://viettelai.vn/dashboard/token' target='_bank'>https://viettelai.vn/dashboard/token</a>",
-							  'disabled' => true,
                             ],
                             'tts_edge' => [
                               'label' => 'TTS Microsoft Edge (Free) <font color=green>(Khuyến Khích Nên Sử Dụng)</font>',
@@ -2738,6 +2765,20 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_virtual_assistant" aria-expanded="false" aria-controls="collapse_button_virtual_assistant">
                   Cấu Hình Trợ Lý Ảo/Assistant:
+				  <?php
+					$options_assistant = [
+						'default_assistant' => '<font color=green>Default</font>',
+						'olli'   => '<font color=green>Olli Maika</font>',
+						'google_gemini'   => '<font color=green>Gemini</font>',
+						'chat_gpt'   => '<font color=green>ChatGPT</font>',
+						'zalo_assistant'   => '<font color=green>Zalo AI</font>',
+						'dify_ai'   => '<font color=green>Dify AI</font>',
+						'xiaozhi'   => '<font color=green>XiaoZhi</font>',
+						'customize_developer_assistant'      => '<font color=green>Custom Assistant</font>'
+					];
+					$selected_assitant = $Config['virtual_assistant']['prioritize_virtual_assistants'][0] ?? null;
+					if (isset($options_assistant[$selected_assitant])) {echo '&nbsp;'.$options_assistant[$selected_assitant];}
+					?>
                 </h5>
                 <div id="collapse_button_virtual_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_virtual_assistant" style="">
                   <div class="card">
@@ -2795,7 +2836,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_default_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_default_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_default_assistant">
-                        Cấu Hình Trợ Lý => Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i>:</h5>
+                        Cấu Hình Trợ Lý => Default Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Trợ lý ảo mang tên Default Assistant')"></i>:
+						<?php echo $Config['virtual_assistant']['default_assistant']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_default_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_default_assistant">
 					  <div class="alert alert-primary" role="alert">
                         <div class="row mb-3">
@@ -2836,7 +2878,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_zaloai_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_zaloai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_zaloai_assistant">
-                        Cấu Hình Trợ Lý => Zalo AI Assistant:</h5>
+                        Cấu Hình Trợ Lý => Zalo AI Assistant: <?php echo $Config['virtual_assistant']['zalo_assistant']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_zaloai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_zaloai_assistant">
                        <div class="alert alert-info" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Zalo Assistant<br/>- Phiên ID Chat của trợ lý này sẽ được tạo mới mỗi khi chương trình VBot được khởi động')"></i> :</label>
@@ -2858,7 +2900,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_olliai_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_olliai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_olliai_assistant">
-                        Cấu Hình Trợ Lý => Olli MaiKa AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:</h5>
+                        Cấu Hình Trợ Lý => Olli MaiKa AI Assistant <i class="bi bi-question-circle-fill" onclick="show_message('Bạn cần đăng ký tài khoản Trên APP: Maika để sử dụng<br/>- Có thể dùng địa chỉ Email hoặc SĐT đã được đăng ký để điền vào ô bên dưới')"></i>:
+						<?php echo $Config['virtual_assistant']['olli']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_olliai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_olliai_assistant">
                         <div class="alert alert-warning" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Olli AI Assistant')"></i> :</label>
@@ -2908,7 +2951,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_gemini_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_gemini_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_gemini_assistant">
-                        Cấu Hình Trợ Lý => Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i>:</h5>
+                        Cấu Hình Trợ Lý => Google Gemini <i class="bi bi-question-circle-fill" onclick="show_message('Lấy Key/Api: <a href=\'https://aistudio.google.com/app/apikey\' target=\'_bank\'>https://aistudio.google.com/app/apikey</a> ')"></i>:
+						<?php echo $Config['virtual_assistant']['google_gemini']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_gemini_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_gemini_assistant">
                         <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Gemini')"></i> :</label>
@@ -2983,7 +3027,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_chatgpt_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_chatgpt_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_chatgpt_assistant">
-                        Cấu Hình Trợ Lý => Chat GPT:</h5>
+                        Cấu Hình Trợ Lý => Chat GPT: <?php echo $Config['virtual_assistant']['chat_gpt']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_chatgpt_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_chatgpt_assistant">
                         <div class="alert alert-info" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng trợ lý ảo Chat GPT')"></i> :</label>
@@ -3020,7 +3064,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_difyai_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_difyai_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_difyai_assistant">
-                        Cấu Hình Trợ Lý => Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>:</h5>
+                        Cấu Hình Trợ Lý => Difi.ai | <a href="https://cloud.dify.ai" target="_blank">cloud.dify.ai</a>: <?php echo $Config['virtual_assistant']['dify_ai']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_difyai_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_difyai_assistant">
                         <div class="alert alert-warning" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Dify AI ')"></i> :</label>
@@ -3051,7 +3095,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   <div class="card accordion" id="accordion_button_cfg_devassistant_assistant">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_devassistant_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_devassistant_assistant">
-                        Cấu Hình Trợ Lý => DEV Assistant: Dev_Assistant.py <font color=red>(Custom Assistant, Người dùng tự code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:</h5>
+                        Cấu Hình Trợ Lý => DEV Assistant: Dev_Assistant.py <font color=red>(Custom Assistant, Người dùng tự code)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i>:
+						<?php echo $Config['virtual_assistant']['customize_developer_assistant']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                       <div id="collapse_button_cfg_devassistant_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_cfg_devassistant_assistant">
                         <div class="alert alert-primary" role="alert"> <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Custom Assistant, Người dùng tự code trợ lý ảo, tùy biến hoặc sử dụng theo nhu cầu riêng ở tệp <b>Dev_Assistant.py</b>, nếu sử dụng hãy kích hoạt và chọn ưu tiên trợ lý ảo này')"></i> :</label>
