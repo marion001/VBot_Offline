@@ -1,8 +1,8 @@
 {
-    "version": "1.0.90",
+    "version": "1.0.91",
     "projectName": "Program VBot Offline",
-    "description": "Lọc Nhiễu Nền Noise, Tối ưu code hệ thống, hỗ trợ tối ưu zram-tools và log2ram xem chi tiết thiếp lập trong: Hướng Dẫn",
-    "releaseDate": "11/02/2026",
+    "description": "Hỗ Trợ Custom DEV STT trong file Dev_STT.py và Chế độ khởi chạy toàn bộ chương trình Custom DEV Xử Lý Chính trong file Dev_Processing.py",
+    "releaseDate": "20/02/2026",
     "changes": [
         {
             "type": "feature",

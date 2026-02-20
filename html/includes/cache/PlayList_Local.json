@@ -3,9 +3,9 @@
     "message": "Danh sách phát PlayList Local",
     "data": [
         {
-            "title": "Thuyền Quyên.mp3",
+            "title": "1.mp3",
             "cover": "http://192.168.14.175/assets/img/icon_audio_local.png",
-            "audio": "Media/Music_Local/Thuyền Quyên.mp3",
+            "audio": "Media/Music_Local/1.mp3",
             "source": "Local"
         }
     ]

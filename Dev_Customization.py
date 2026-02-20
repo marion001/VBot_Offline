@@ -19,7 +19,7 @@ Thêm thư viện Lib
 import Led
 """
 #thêm thư viện Đèn LED
-#sử dụng thư viện Led: Led.LED("OFF"), Led.LED("SPEAK") có các tham số: SPEAK, THINK, LOADING, MUTE, STARTUP, PAUSE, OFF, SOCKET_ERROR, OFF
+#sử dụng thư viện Led: Led.LED("OFF"), Led.LED("SPEAK") có các tham số: SPEAK, THINK, LOADING, MUTE, STARTUP, PAUSE, OFF, ERROR
 #Hiện tại chỉ hỗ trợ led WS281x nhé
 """
 
@@ -44,6 +44,12 @@ from Media_Player import media_player
 #Tham số để Tua khi đang phát Play_Media:  media_player.media_player.set_time(124587) 124587 là ví dụ về thời gian cần tua, dưới dạng số nguyên dương của vlc
 
 #Các tham số khác khi sử dụng media_player: Lib.audio_media_title, Lib.audio_media_url, Lib.media_player_source, Lib.audio_media_cover
+
+#Biến: Lib.audio_media_url = '/home/pi/nhac.mp3' (Dùng để gán dữ liệu nguồn phát âm thanh)
+#Biến: Lib.audio_media_title = 'Hoa Cỏ Lau' (Cần Gán Tên Bài Hát, tiêu đề nhạc, vào Biến Này Trước Khi Phát Nhạc)
+#Biến: Lib.audio_media_cover = 'http://1.jpg' (Cần Gán URL Hình Ảnh Bài Hát trước khi Phát Nhạc, Để Trống nếu không có)
+#Biến: Lib.media_player_source = 'Youtube'      (Đặt tên cho nguồn, dữ liệu nhạc từ youtube, hay zingmp3, hay bất kỳ từ đâu)
+#Khi phát nhạc, bạn cần gán đầy đủ tham số cho 4 biến trên
 """
 
 

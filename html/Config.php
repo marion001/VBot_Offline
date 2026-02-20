@@ -532,6 +532,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['xiaozhi']['mcp_system_control'] = isset($_POST['xiaozhi_ai_mcp_system']) ? true : false;
   $Config['xiaozhi']['fake_mac']['active'] = isset($_POST['xiaozhi_fakemac_active']) ? true : false;
   $Config['xiaozhi']['fake_mac']['address'] = $_POST['xiaozhi_mac_fake'];
+  $Config['xiaozhi']['version_active'] = $_POST['xiaozhi_version_active'];
   $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
   $Config['xiaozhi']['tts_time_out'] = intval($_POST['xiaozhi_tts_time_out']);
   $Config['xiaozhi']['reconnection_timeout'] = intval($_POST['xiaozhi_reconnection_timeout']);
@@ -952,15 +953,18 @@ include 'html_head.php';
       <section class="section">
         <div class="row">
           <div class="col-lg-12">
+		<div class="alert alert-danger" role="alert">
             <div class="row mb-3 align-items-center">
-              <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi')"></i>:</label>
+              <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi<br/>- Người dùng tự code, xử lý dữ liệu, các bạn sẽ cần phải tự code xử lý ở file: <b>Dev_Processing.py</b>')"></i>:</label>
               <div class="col-sm-9">
                 <select class="form-select border-success" name="launch_source" id="launch_source">
                   <option value="VBot_Assistant" <?php if ($Config['launch_source'] === "VBot_Assistant") echo "selected"; ?>>Chạy VBot Assistant (Nên Dùng)</option>
                   <option value="XiaoZhi_AI" <?php if ($Config['launch_source'] === "XiaoZhi_AI") echo "selected"; ?>>Chỉ Chạy XiaoZhi AI</option>
+                  <option value="DEV_Processing" <?php if ($Config['launch_source'] === "DEV_Processing") echo "selected"; ?>>Người Dùng Tự Code Xử Lý Dữ Liệu - Dev_Processing.py</option>
                 </select>
               </div>
             </div>
+		</div>
             <div class="card accordion" id="accordion_button_ssh">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_ssh" aria-expanded="false" aria-controls="collapse_button_ssh">
@@ -1356,9 +1360,10 @@ include 'html_head.php';
                   Chuyển Giọng Nói Thành Văn Bản - Speak To Text (STT) &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Chuyển đổi giọng nói thành văn bản để chương trình xử lý dữ liệu')"></i> &nbsp;:
 				  <?php
 					$options_tts_zz = [
-						'stt_default' => '<font color=green>Mặc Định (VBot Free)</font>',
-						'stt_ggcloud'   => '<font color=green>GCloud V1</font>',
-						'stt_ggcloud_v2'      => '<font color=green>GCloud V2</font>'
+						'stt_default'	=> '<font color=green>Mặc Định (VBot Free)</font>',
+						'stt_ggcloud'	=> '<font color=green>GCloud V1</font>',
+						'stt_ggcloud_v2'	=> '<font color=green>GCloud V2</font>',
+						'stt_dev'	=> '<font color=green>DEV STT Customize (Dev_STT.py)</font>'
 					];
 					$selected_tts_zzz = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] ?? null;
 					if (isset($options_tts_zz[$selected_tts_zzz])) {echo '&nbsp;'.$options_tts_zz[$selected_tts_zzz];}
@@ -1383,6 +1388,8 @@ include 'html_head.php';
                             $replace_text_stt = "Google Cloud V1";
                           } else if ($GET_stt_select === "stt_ggcloud_v2") {
                             $replace_text_stt = "Google Cloud V2";
+                          }else if ($GET_stt_select === "stt_dev") {
+                            $replace_text_stt = "DEV STT Customize (Dev_STT.py Người Dùng Tự Code)";
                           } else {
                             $replace_text_stt = "Không có dữ liệu";
                           }
@@ -1401,6 +1408,10 @@ include 'html_head.php';
                             <div class="form-check">
                               <input class="form-check-input border-success" type="radio" name="stt_select" id="stt_ggcloud_v2" value="stt_ggcloud_v2" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_ggcloud_v2' ? 'checked' : ''; ?>>
                               <label class="form-check-label" for="stt_ggcloud_v2">STT Google Cloud V2 (Authentication.json) <i class="bi bi-question-circle-fill" onclick="show_message('Hướng Dẫn Đăng Ký Hãy Xem Ở Hướng Dẫn Sau Trong Thư  Mục <b>Guide</b> -> <b>Tạo STT Google Cloud</b><br/>Lệnh Update Cập Nhật Lib: <b>$:> pip install --upgrade google-cloud-speech</b><br/><br/>-Link: <a href=\'https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ\' target=\'_bank\'>https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ</a>')"></i></label>
+                            </div>
+                            <div class="form-check">
+                              <input class="form-check-input border-success" type="radio" name="stt_select" id="stt_dev" value="stt_dev" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] === 'stt_dev' ? 'checked' : ''; ?>>
+                              <label class="form-check-label text-danger" for="stt_dev">DEV STT Customize (<b>Dev_STT.py</b> Người Dùng Tự Code) <i class="bi bi-question-circle-fill" onclick="show_message('Khi được chọn, Người dùng tự code ở file <b>Dev_STT.py</b> để sử dụng dịch vụ chuyển giọng nói thành văn bản theo ý muốn')"></i></label>
                             </div>
                           </div>
                         </div>
@@ -1496,7 +1507,16 @@ include 'html_head.php';
                                 <font color=red>STT Default</font>
                               </center>
                             </h4>
-                            Không cần cấu hình
+                            <center>Không cần cấu hình</center>
+                          </div>
+                          <!-- ẩn hiện cấu hình stt_dev -->
+                          <div id="select_stt_dev_html" class="col-12" style="display: none;">
+                            <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
+                              <center>
+                                <font color=red>DEV STT Customize (Dev_STT.py Người Dùng Tự Code)</font>
+                              </center>
+                            </h4>
+                            <center>Không Cần Cấu Hình, Bạn Cần Tự Code Ở File: Dev_STT.py</center>
                           </div>
                         </div>
                         </div>
@@ -3139,6 +3159,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 						</div></div></div>";
                   echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
                   echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
+                  echo input_field('xiaozhi_version_active', 'Phiên bản Firmware', $Config['xiaozhi']['version_active'] ?? '2.2.3', '', 'text', '', '', '', 'Phiên bản Version khi xác thực đăng ký và hiển thị trên trang chủ của XiaoZhi, Nhập bất kỳ phiên bản, văn bản nào cũng được', 'border-success', '', '', '', '', '');
                   echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, '', 'number', '0.1', '', '', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS', 'border-success', '', '', '', '', '');
                   echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, '', 'number', '1', '', '', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại', 'border-success', '', '', '', '', '');
                   echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, '', 'number', '1', '', '', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ', 'border-success', '', '', '', '', '');
@@ -3759,9 +3780,9 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">Đọc thông tin khi khởi động:</h5>
+                <h5 class="card-title">Đọc địa chỉ IP khi chương trình VBot khởi chạy:</h5>
                <div class="alert alert-success" role="alert"> <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Bật, Tắt đọc thông tin <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt đọc thông tin khi Chương trình khởi động như: Địa chỉ ip của thiết bị, v..v...')"></i> :</label>
+                  <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt đọc thông tin khi Chương trình VBot khởi động như: Địa chỉ ip của thiết bị, v..v...')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
                       <input class="form-check-input border-success" type="checkbox" name="read_information_startup" id="read_information_startup" <?php echo $Config['smart_config']['read_information_startup']['active'] ? 'checked' : ''; ?>>

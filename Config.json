@@ -428,7 +428,8 @@
                         "model": "short",
                         "time_out": 60
                     }
-                }
+                },
+                "stt_dev": []
             },
             "conversation_mode": true,
             "sound": {
@@ -767,6 +768,7 @@
         "tts_time_out": 13,
         "reconnection_timeout": 3,
         "tts_stream_silence_time": 5,
+        "version_active": "2.2.3",
         "call_tools_file": "resource/xiaozhi/xiaozhi_tools.json",
         "system_options": {
             "client_id": "",

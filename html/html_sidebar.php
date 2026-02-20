@@ -148,7 +148,6 @@
   </li>
   </li>
 
-
   <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
   <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#icons-tbdv" data-bs-toggle="collapse" href="#">
@@ -182,6 +181,11 @@
           <i class="bi bi-circle"></i><span>DEV Text To Speak (Custom TTS)</span>
         </a>
       </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Speak To Text">
+        <a href="DEV_STT.php">
+          <i class="bi bi-circle"></i><span>DEV Speak To Text (Custom STT)</span>
+        </a>
+      </li>
       <li title="Tùy chỉnh nâng cao cho DEV tự code Custom LED">
         <a href="DEV_Led.php">
           <i class="bi bi-circle"></i><span>DEV LED (Custom LED)</span>
@@ -190,6 +194,11 @@
       <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Music">
         <a href="Dev_Music.php">
           <i class="bi bi-circle"></i><span>DEV Music (Custom Music)</span>
+        </a>
+      </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Processing - Xử Lý Chính">
+        <a href="DEV_Processing.php">
+          <i class="bi bi-circle"></i><span>DEV Processing (Custom Xử Lý Chính)</span>
         </a>
       </li>
     </ul>

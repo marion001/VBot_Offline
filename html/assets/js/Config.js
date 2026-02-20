@@ -98,6 +98,7 @@ document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
         const div_select_stt_ggcloud_html = document.getElementById('select_stt_ggcloud_html');
         const div_select_stt_default_html = document.getElementById('select_stt_default_html');
         const div_select_stt_ggcloud_v2_html = document.getElementById('select_stt_ggcloud_v2_html');
+        const div_select_stt_dev_html = document.getElementById('select_stt_dev_html');
         if (document.getElementById('stt_ggcloud').checked) {
             div_select_stt_ggcloud_html.style.display = 'block'; // Hiển thị div
         } else {
@@ -107,6 +108,11 @@ document.querySelectorAll('input[name="stt_select"]').forEach(radio => {
             div_select_stt_default_html.style.display = 'block';
         } else {
             div_select_stt_default_html.style.display = 'none';
+        }
+        if (document.getElementById('stt_dev').checked) {
+            div_select_stt_dev_html.style.display = 'block';
+        } else {
+            div_select_stt_dev_html.style.display = 'none';
         }
         if (document.getElementById('stt_ggcloud_v2').checked) {
             div_select_stt_ggcloud_v2_html.style.display = 'block';
