@@ -25,7 +25,6 @@ from Media_Player import media_player
 #Biến: Lib.conversation_mode_flag           =>  (Khi quay về chờ được đánh thức, nếu là True sẽ tự động Đánh Thức WakeUP Để Thu Âm, False = Ngược Lại. Thường kết hợp với biến: Lib.conversation_mode)
 #Biến: Lib.main_vbot_processing             =>  (Gắn Cờ Báo Hệ Thống Xử LÝ Dữ Liệu True = Đang Xử Lý, False Không Xử Lý)
 #Biến: status = Lib.active_client           =>  (Streming Audio Server VBot Client, Client - Server, True = Đang bật sử dụng Client như esp32, False tắt tính năng)
-#Biến: status = Lib.is_playing_playlist     =>  (True = Đang Được Phát Danh Sách Nhạc, False Ngược Lại)
 #Hàm:  text_tts = Lib.tts_string(msg_text)  =>  (tạo tên file âm thanh tts bằng kết quả text được xử lý các ký tự)
 #Biến: status = Lib.mic_on_off              =>  (True = Bật Mic, False Ngược lại)
 #Hàm:  Lib.restart_vbot()                   =>  (Khởi động lại chương trình VBot khi chạy tự động)
@@ -37,6 +36,8 @@ from Media_Player import media_player
 #Biến: Lib.device_mac                       =>  (Lấy Địa Chỉ Mac)
 #biến: Lib.device_model                     =>  (Lấy Tên Thiết Bị Board Mạch)
 #Hàm: Lib.reset_all_wifi()                  =>  (Đặt lại toàn bộ cấu hình mạng Wifi)
+#Biến: Lib.stt_transcript                   =>  (Lưu giá trị STT Speak To Text Cuối)
+#Biến: Lib.mic_id                           =>  (Lấy ID Hiện Tại Của Mic, Microphone)
 """
 
 #Điều Khiển Âm Lượng
@@ -74,6 +75,7 @@ from Media_Player import media_player
 #Biến: Lib.audio_playing                            =>      (True = Đang phát âm thanh bao gồm nhạc, TTS, False = ngược lại không phát gì cả hoặc đang được tạm dừng nhạc)
 #Biến: Lib.Play_Answer_Flag                         =>      (True = Đang phát âm thanh TTS, False = ngược lại)
 #Biến: Lib.pause_media_flag                         =>      (True = Nhạc đang được tạm dừng, False = ngược lại)
+#Biến: status = Lib.is_playing_playlist             =>      (True = Đang Được Phát Danh Sách Nhạc, False Ngược Lại)
 """
 
 #AirPlay
@@ -90,6 +92,7 @@ status = Lib.shairport_sync_player                  =>  (True đang phát AirPla
 text = Lib.shairport_song_name                      =>  (Tên Bài hát Đang Phát ở AirPlay)
 status = Lib.shairport_mute_on_off                  =>  (True đang bật tiếng Un-Mutex, False Đang Được Tắt Tiếng Mutex)
 status = Lib.shairport_sync_active                  =>  (True AirPlay đang được Kích Hoạt, False Không được kích hoạt)
+Lib.shairport_sync_active                           =>  (True = Được ài trên hệ thống, None Không cài)
 """
 
 #Điều Khiển Đèn LED
