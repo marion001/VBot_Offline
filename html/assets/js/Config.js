@@ -808,7 +808,8 @@ async function xiaozhi_active_device_info() {
         };
         const payload = {
             application: {
-                version: "VBot-" + deviceInfo.version_program,
+                //version: "VBot-" + deviceInfo.version_program,
+                version: deviceInfo.version_program,
                 elf_sha256: deviceInfo.hmac_key,
             },
             board: {
@@ -902,6 +903,7 @@ async function xiaozhi_active_device_info() {
 							loading("hide");
 							if (data?.success) {
 								show_message('<b class="text-success">' + (data.message || 'Đã lưu dữ liệu kích hoạt thành công') + '</b>');
+								setTimeout(() => location.reload(), 5000);
 							} else {
 								show_message('<b class="text-danger">' + (data?.message || 'Không thể lưu dữ liệu kích hoạt') + '</b>');
 							}
@@ -998,6 +1000,31 @@ function xiaozhi_activation_status_true() {
             showMessagePHP(msg, 5);
         }
     );
+}
+
+//Xiaozhi Lấy Phiên Bản Client Mới Nhất
+function xiaozhi_getLatestVersion() {
+	loading('show');
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "https://api.github.com/repos/78/xiaozhi-esp32/releases/latest", true);
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                var version = (data.tag_name || "").replace(/^v/i, "");
+                var input = document.getElementById("xiaozhi_version_active");
+                if (input) {
+                    input.value = version;
+                }
+				showMessagePHP('XiaoZhi Phiên Bản Client Mới Nhất: '+version, 5);
+				loading('hide');
+            } catch (e) {
+				loading('hide');
+				show_message('Lỗi giải mã dữ liệu json: '+e);
+            }
+        }
+    };
+    xhr.send();
 }
 
 //Lấy token zai_did tts_default

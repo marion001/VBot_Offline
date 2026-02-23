@@ -79,11 +79,27 @@ def get_mac_from_config(config_path="/home/pi/VBot_Offline/Config.json") -> str:
         return get_mac_address()
 
 #Đọc file Version.json và trả về giá trị releaseDate.
-def get_release_date(file_path="VBot_Offline/Version.json"):
+"""
+def get_release_date(file_path="/home/pi/VBot_Offline/Version.json"):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)
         release_date = data.get("releaseDate")
+        if release_date:
+            return release_date
+        else:
+            return "N/A"
+    except FileNotFoundError:
+        return "N/A"
+    except json.JSONDecodeError:
+        return "N/A"
+"""
+
+def get_release_date(file_path="/home/pi/VBot_Offline/Config.json"):
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        release_date = data.get("xiaozhi", {}).get("version_active")
         if release_date:
             return release_date
         else:
