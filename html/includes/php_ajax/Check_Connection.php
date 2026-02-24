@@ -404,9 +404,10 @@ if (isset($_GET['reboot_os'])) {
     ];
     if ($connection) {
         if (ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-            $stream = ssh2_exec($connection, $CMD);
-            stream_set_blocking($stream, true);
-            $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+            #$stream = ssh2_exec($connection, $CMD);
+            #stream_set_blocking($stream, true);
+            #$output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+			ssh2_exec($connection, $CMD);
             $result['success'] = true;
             $result['message'] = 'Đang khởi động lại toàn bộ hệ thống';
         } else {
