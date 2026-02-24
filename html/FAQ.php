@@ -977,9 +977,9 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     <br />
                     <b>- Restart Auto Wifi Manager:</b> Khởi động lại Services Auto Wifi Manaager đang chạy trên hệ thống<br />
                     <b>- Enable Auto Wifi Manager:</b> Kích Hoạt Services Auto Wifi Manaager trên hệ thống (Mặc định là đã kích hoạt từ trước rồi)<br />
-                    <b>- Install Auto Wifi Manager:</b> Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP, Tự động kết nối lại khi mất mạng hoặc hệ thống mạng khởi động sau Vbot<br />
+                    <b>- Install Auto Wifi Manager:</b> Chỉ Cài Đặt Auto Wifi Manager Và Tạo Điểm truy Cập AP, Tự động kết nối lại khi mất mạng hoặc hệ thống mạng khởi động sau VBot<br />
                     <b>- Install Auto Wifi Manager + Đọc IP:</b> Cài Đặt Auto Wifi Manager + Đọc Địa Chỉ IP Ra Loa Và Tạo Điểm truy Cập AP,
-                    Tự động kết nối lại khi mất mạng hoặc hệ thống mạng khởi động sau Vbot,
+                    Tự động kết nối lại khi mất mạng hoặc hệ thống mạng khởi động sau VBot,
                     Nếu phát hiện địa chỉ IP Local bị thay đổi hoặc mạng wifi trước đo bị thay đổi sẽ tự đọc địa chỉ ip local mới<br />
                     <b>- Logs Auto Wifi Manager:</b> Kiểm Tra Logs Quá Trình Hoạt Động<br />
                     <b>- Status Auto Wifi Manager:</b> Kiểm tra trạng thái xem là: đang hoạt động hay không<br />
@@ -1285,13 +1285,13 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
                       $:> sudo cp /home/pi/VBot_Offline/resource/snowboy/common.res /usr/local/lib/python3.9/dist-packages/snowboy-1.3.0-py3.9.egg/snowboy/</b>
                     <hr />
                     <b>- Train Hotword:</b> Lần Lượt Các Bước Sau<br />
-                    - <b>Lưu Ý: Cần Sử dụng 1 thiết bị khác không chạy Vbot để Train</b><br /><br>
+                    - <b>Lưu Ý: Cần Sử dụng 1 thiết bị khác không chạy VBot để Train</b><br /><br>
                     B1: <b>Cài Docker trên thiết bị (Cách cài các bạn tham khảo trên google nhé)</b><br /><br />
                     B2: Chạy lệnh sau: <b>$:> sudo docker pull rhasspy/snowboy-seasalt</b><br /><br />
                     B3: Chạy tiếp lệnh sau: <b>$:> docker run -it -p 8899:8000 rhasspy/snowboy-seasalt</b><br /><br />
                     B4: Docker sẽ khởi chạy rhasspy/snowboy-seasalt, hãy kiểm tra xem đã chạy thành công chưa bằng cách truy cập: http://ip:8899<br />
                     nếu cập được vào và hiển thị giao diện để Train là OK<br /><br />
-                    B5: Cần Stop, không cho chạy Vbot. Sau đó Truy cập vào SHH với thiết bị chạy VBot rồi chạy lệnh sau:<br />
+                    B5: Cần Stop, không cho chạy VBot. Sau đó Truy cập vào SHH với thiết bị chạy VBot rồi chạy lệnh sau:<br />
                     - <b>$:> cd /home/pi/VBot_Offline/resource/test_device</b><br /><br />
                     B6: Mở file <b>Trail_Hotword_Snowboy.py</b> điền địa chỉ ip của thiết bị chạy Docker rhasspy/snowboy-seasalt là dòng số 14 là: <b>server_url = "http://192.168.14.17:8899"</b> thay địa chỉ ip vào, xong lưu lại file<br /><br />
                     B7: Chạy file <b>Trail_Hotword_Snowboy.py</b> bằng lệnh: <b>$:> python3 Trail_Hotword_Snowboy.py</b> nhập tên file hotword cần tạo và nói vào Microphone lần lượt 7 lần<br /><br />

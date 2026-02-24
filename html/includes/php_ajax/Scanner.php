@@ -81,19 +81,15 @@ if (isset($_GET['scan_alsamixer'])) {
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $controls = stream_get_contents($stream_out);
-    // Sử dụng regex để tìm từng điều khiển và các thuộc tính
     preg_match_all("/Simple mixer control '([^']*)',(\d+)[\s\S]*?(?=Simple mixer control|$)/", $controls, $control_blocks, PREG_SET_ORDER);
     $control_data = [];
     foreach ($control_blocks as $block) {
-        // Lấy tên điều khiển và id
         $name = $block[1];
-        $control_id = (int)$block[2];  // Chuyển đổi id thành số nguyên
-        // Tìm các thông số trong block
+        $control_id = (int)$block[2];
         preg_match("/Capabilities: ([^\n]*)/", $block[0], $capabilities);
         preg_match("/Playback channels: ([^\n]*)/", $block[0], $playback_channels);
         preg_match("/Capture channels: ([^\n]*)/", $block[0], $capture_channels);
         preg_match("/Limits: ([^\n]*)/", $block[0], $limits);
-        // Lấy giá trị cho từng kênh (nếu có)
         $values = [];
         preg_match_all("/(Front Left|Front Right|Mono): ([^\n]*)/", $block[0], $value_matches, PREG_SET_ORDER);
         foreach ($value_matches as $match) {
@@ -103,24 +99,20 @@ if (isset($_GET['scan_alsamixer'])) {
             ];
             $values[] = $value_info;
         }
-        // Đưa các thông số vào một mảng
         $final_output = [
-            "id" => $control_id,  // Lưu ID điều khiển
-            "name" => $name,  // Sử dụng trực tiếp tên control
+            "id" => $control_id,
+            "name" => $name,
             "capabilities" => isset($capabilities[1]) ? trim($capabilities[1]) : null,
             "playback_channels" => isset($playback_channels[1]) ? trim($playback_channels[1]) : null,
             "capture_channels" => isset($capture_channels[1]) ? trim($capture_channels[1]) : null,
             "limits" => isset($limits[1]) ? trim($limits[1]) : null,
             "values" => $values
         ];
-        // Thêm vào danh sách điều khiển
         $control_data[] = $final_output;
     }
-    // Cập nhật phản hồi
     $response['success'] = true;
     $response['message'] = 'Danh sách điều khiển âm thanh có trong alsamixer';
     $response['devices'] = $control_data;
-    // Chuyển đổi sang định dạng JSON và trả về
     echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit();
 }
@@ -129,7 +121,6 @@ if (isset($_GET['scan_alsamixer'])) {
 if (isset($_GET['VBot_Device_Scaner'])) {
     $json_file_path = "$directory_path/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json";
     $json_dir_path = dirname($json_file_path);
-    // Kiểm tra và tạo thư mục nếu chưa tồn tại
     if (!is_dir($json_dir_path)) {
         try {
             mkdir($json_dir_path, 0777, true);
@@ -143,11 +134,9 @@ if (isset($_GET['VBot_Device_Scaner'])) {
             exit;
         }
     }
-    // Kiểm tra và tạo file JSON nếu chưa tồn tại
     if (!file_exists($json_file_path)) {
         try {
             file_put_contents($json_file_path, json_encode([]));
-            #chmod($json_file_path, 0777);
 			shell_exec("chmod 0777 " . escapeshellarg($json_file_path));
         } catch (Exception $e) {
             echo json_encode([
@@ -202,30 +191,24 @@ if (isset($_GET['VBot_Device_Scaner'])) {
     $json_output = json_decode($output, true);
     if (json_last_error() === JSON_ERROR_NONE) {
         if ($json_output['success']) {
-            //Lọc dữ liệu hoàn chỉnh (tất cả trường không được null)
             $complete_data = array_filter($json_output['data'], function ($device) {
                 return !is_null($device['ip_address']) &&
                     !is_null($device['port_api']) &&
                     !is_null($device['host_name']) &&
                     !is_null($device['user_name']);
             });
-            //Lưu dữ liệu hoàn chỉnh vào file JSON
             if (!empty($complete_data)) {
                 try {
                     $existing_data = json_decode(file_get_contents($json_file_path), true);
                     if (!is_array($existing_data)) {
-                        //Khởi tạo mảng rỗng nếu file JSON lỗi
                         $existing_data = [];
                     }
-                    //Gộp dữ liệu mới, loại bỏ trùng lặp dựa trên ip_address
                     $ip_addresses = array_column($existing_data, 'ip_address');
                     foreach ($complete_data as $new_device) {
                         $index = array_search($new_device['ip_address'], $ip_addresses);
                         if ($index !== false) {
-                            //Cập nhật nếu đã tồn tại
                             $existing_data[$index] = $new_device;
                         } else {
-                            //Thêm mới nếu chưa có
                             $existing_data[] = $new_device;
                         }
                     }
@@ -267,11 +250,9 @@ if (isset($_GET['Clean_VBot_Device_Scaner'])) {
         exit;
     }
     try {
-        // Ghi mảng rỗng vào file JSON
         if (file_put_contents($json_file_path, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) === false) {
             throw new Exception('Không thể ghi dữ liệu vào file json');
         }
-        //chmod($json_file_path, 0777);
 		shell_exec("chmod 0777 " . escapeshellarg($json_file_path));
         echo json_encode([
             'success' => true,
@@ -348,10 +329,8 @@ if (isset($_GET['VBot_Client_Device_Scaner'])) {
 if (isset($_GET['XiaoZhi_Active'])) {
     $action = isset($_GET['action']) ? $_GET['action'] : '';
     if ($action === 'get_device_info') {
-        //Lấy thông tin thiết bị
         $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/XiaoZhi_Active.py");
     } elseif ($action === 'signature_hmac') {
-        //Tạo chữ ký HMAC cho challenge
         $challenge = isset($_GET['challenge']) ? escapeshellarg($_GET['challenge']) : "''";
         $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/XiaoZhi_Active.py") . " --sign $challenge";
     } else {

@@ -29,7 +29,6 @@ if ($Config['contact_info']['user_login']['active']) {
 
 #Lấy danh sách hotword, và lib theo tùy chọn lang trong Config.json và hiển thị
 if (isset($_GET['hotword'])) {
-    //Lấy giá trị ngôn ngữ từ GET
     $lang_get_HOTWORD = isset($_GET['lang']) ? $_GET['lang'] : '';
     if ($lang_get_HOTWORD === 'vi' || $lang_get_HOTWORD === 'eng') {
         $directory = $VBot_Offline . 'resource/picovoice/library';
@@ -150,7 +149,6 @@ if (isset($_POST['action_hotword_snowboy']) && $_POST['action_hotword_snowboy'] 
     }
     $uploadSuccess = [];
     $uploadErrors = [];
-    //Kiểm tra nếu có file được tải lên
     if (!empty($_FILES['upload_files_hotword_snowboy']['name'][0])) {
         foreach ($_FILES['upload_files_hotword_snowboy']['name'] as $key => $fileName) {
             $fileTmpPath = $_FILES['upload_files_hotword_snowboy']['tmp_name'][$key];
@@ -160,14 +158,12 @@ if (isset($_POST['action_hotword_snowboy']) && $_POST['action_hotword_snowboy'] 
                 $uploadErrors[] = "Lỗi tải file: $fileName (Mã lỗi: $fileError)";
                 continue;
             }
-            //Kiểm tra định dạng file hợp lệ
             $allowedExtensions = ['pmdl', 'umdl'];
             $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
             if (!in_array($fileExtension, $allowedExtensions)) {
                 $uploadErrors[] = "File không hợp lệ: $fileName (Chỉ hỗ trợ .pmdl, .umdl)";
                 continue;
             }
-            //Kiểm tra dung lượng file (giới hạn 5MB)
             if ($fileSize > 5 * 1024 * 1024) {
                 $uploadErrors[] = "File quá lớn: $fileName (Tối đa 5MB)";
                 continue;
@@ -199,12 +195,10 @@ if (isset($_POST['action_hotword_snowboy']) && $_POST['action_hotword_snowboy'] 
 
 #cập nhật lại hotword picovoice eng và vi trong Config.json tương ứng với tất cả các file .ppn trong 2 thư mục eng và vi
 if (isset($_GET['reload_hotword_config'])) {
-    #$directories = ['/home/pi/VBot_Offline/resource/hotword/eng', '/home/pi/VBot_Offline/resource/hotword/vi'];
     $directories = [
         $VBot_Offline . "resource/hotword/eng",
         $VBot_Offline . "resource/hotword/vi"
     ];
-    //Khởi tạo cấu hình mặc định
     $newPorcupineConfig = [
         'vi' => $config['smart_config']['smart_wakeup']['hotword']['porcupine']['vi'] ?? [],
         'eng' => $config['smart_config']['smart_wakeup']['hotword']['porcupine']['eng'] ?? []
@@ -217,7 +211,6 @@ if (isset($_GET['reload_hotword_config'])) {
         foreach ($files as $file) {
             $parts = explode('/', $file);
             $fileName = end($parts);
-            #echo $fileName;
             $lang = strpos($directory, 'eng') !== false ? 'eng' : 'vi';
             $exists = false;
             foreach ($newPorcupineConfig[$lang] as $item) {
@@ -245,7 +238,6 @@ if (isset($_GET['reload_hotword_config_snowboy'])) {
     $directory = $VBot_Offline . "resource/snowboy/hotword";
     $newSnowboyConfig = [];
     if (is_dir($directory)) {
-        //Lấy danh sách file .pmdl và .umdl
         $files = array_merge(glob("$directory/*.pmdl"), glob("$directory/*.umdl"));
         foreach ($files as $file) {
             $parts = explode('/', $file);
@@ -272,9 +264,7 @@ if (isset($_GET['reload_hotword_config_snowboy'])) {
 if (isset($_GET['reload_wakeup_reply'])) {
     $relativePath = "resource/sound/wakeup_reply";
     $absolutePath = $VBot_Offline . $relativePath;
-    //Tìm tất cả các file mp3 trong thư mục
     $files = glob($absolutePath . "/*.mp3");
-    //$files = array_merge(glob($absolutePath . "/*.mp3"), glob($absolutePath . "/*.wav"));
     $soundFiles = [];
     foreach ($files as $file) {
         $parts = explode('/', $file);
@@ -309,7 +299,6 @@ if (isset($_GET['reload_wakeup_reply'])) {
 if (isset($_POST['wakeup_reply_upload']) && $_POST['wakeup_reply_upload'] === 'upload_files_wakeup_reply') {
     $targetDir = $VBot_Offline . 'resource/sound/wakeup_reply/';
     $response = ['status' => 'error', 'messages' => ['Không có file nào được xử lý.']];
-
     if (!empty($_FILES['upload_files_wakeup_reply'])) {
         $uploadedFiles = $_FILES['upload_files_wakeup_reply'];
         $successCount = 0;
@@ -317,7 +306,6 @@ if (isset($_POST['wakeup_reply_upload']) && $_POST['wakeup_reply_upload'] === 'u
         $errorMessages = [];
         for ($i = 0; $i < count($uploadedFiles['name']); $i++) {
             $tmpName = $uploadedFiles['tmp_name'][$i];
-            //Lấy tên file dùng explode với dấu '/'
             $nameParts = explode('/', $uploadedFiles['name'][$i]);
             $fileName = end($nameParts);
             $fileType = mime_content_type($tmpName);
@@ -334,19 +322,15 @@ if (isset($_POST['wakeup_reply_upload']) && $_POST['wakeup_reply_upload'] === 'u
             }
         }
         if ($successCount > 0) {
-            //Đọc config hiện tại (nếu chưa đọc trước đó)
             $configContent = file_get_contents($Config_filePath);
             $Config = json_decode($configContent, true);
-            //Mảng hiện tại trong config (có thể chưa tồn tại)
             $existingFiles = $Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] ?? [];
-            //Lấy danh sách tên file hiện có để kiểm tra trùng
             $existingFileNames = [];
             foreach ($existingFiles as $item) {
                 if (isset($item['file_name'])) {
                     $existingFileNames[] = $item['file_name'];
                 }
             }
-            //Duyệt từng file upload thành công, thêm mới nếu chưa có
             foreach ($successFiles as $fileName) {
                 $relativePath = "resource/sound/wakeup_reply/" . $fileName;
                 if (!in_array($relativePath, $existingFileNames)) {

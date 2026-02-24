@@ -38,7 +38,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
     $target = $actionData['target'];
     $entity_id = $target['entity_id'];
     list($domain, $service) = explode('.', $action);
-    //Bảo đảm $data là mảng trước
     $data = is_array($actionData['data'] ?? null) ? $actionData['data'] : [];
     if (is_string($entity_id)) {
         $payload = array_merge(['entity_id' => [$entity_id]], $data);
@@ -81,9 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
                 return ['success' => false, 'message' => 'Lỗi: ' . $statusCode];
         }
     }
-    //Chạy URL Nội Bộ
     $response = sendRequest($Config['home_assistant']['internal_url'] . '/api/services/' . $domain . '/' . $service, $headers, $payload);
-    //Chạy URL Ngoài Nếu Lỗi
     if (!$response['success']) {
         $response = sendRequest($Config['home_assistant']['external_url'] . '/api/services/' . $domain . '/' . $service, $headers, $payload);
     }
@@ -282,6 +279,7 @@ if (isset($_GET['check_ssh'])) {
     exit();
 }
 
+#Lệnh Command SSH
 if (isset($_GET['VBot_CMD'])) {
     $Command = $_GET['Command'] ?? '';
     if (empty($Command)) {
@@ -321,6 +319,7 @@ if (isset($_GET['VBot_CMD'])) {
     exit();
 }
 
+#Chạy Chương trình VBot
 if (isset($_GET['start_vbot_service'])) {
     $CMD = "systemctl --user start VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -345,6 +344,7 @@ if (isset($_GET['start_vbot_service'])) {
     exit;
 }
 
+#Dừng Chương trình VBot
 if (isset($_GET['stop_vbot_service'])) {
     $CMD = "systemctl --user stop VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -369,6 +369,7 @@ if (isset($_GET['stop_vbot_service'])) {
     exit;
 }
 
+#Khởi động lại Chương trình VBot
 if (isset($_GET['restart_vbot_service'])) {
     $CMD = "systemctl --user restart VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -393,6 +394,7 @@ if (isset($_GET['restart_vbot_service'])) {
     exit;
 }
 
+#Khởi động lại toàn bộ hệ thống
 if (isset($_GET['reboot_os'])) {
     $CMD = "sudo reboot";
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -417,6 +419,7 @@ if (isset($_GET['reboot_os'])) {
     exit;
 }
 
+#kiểm tra Kết Nối Hass
 if (isset($_GET['check_hass'])) {
     $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
     $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
@@ -450,6 +453,7 @@ if (isset($_GET['check_hass'])) {
     exit();
 }
 
+#Lấy dữ liệu Hass
 if (isset($_GET['get_hass_all'])) {
     $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
     $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
@@ -491,6 +495,7 @@ if (isset($_GET['get_hass_all'])) {
     exit();
 }
 
+#Xóa dữ liệu Hass đã lấy
 if (isset($_GET['del_get_hass_all'])) {
     $response = [
         'success' => false,
@@ -520,6 +525,7 @@ if (isset($_GET['del_get_hass_all'])) {
     echo json_encode($response);
 }
 
+#Kiểm tra key Picovoice
 if (isset($_GET['check_key_picovoice'])) {
     $key =  str_replace(' ', '+', @$_GET['key']);
     $lang = $VBot_Offline . 'resource/hotword/' . @$_GET['lang'];
@@ -558,6 +564,7 @@ if (isset($_GET['check_key_picovoice'])) {
     exit();
 }
 
+#Kiểm tra Kết Nối MQTT
 if (isset($_GET['check_mqtt'])) {
     if (isset($_GET['host'], $_GET['port'], $_GET['user'], $_GET['pass'])) {
         require('./phpMQTT.php');
@@ -589,6 +596,7 @@ if (isset($_GET['check_mqtt'])) {
     exit();
 }
 
+#Lấy Phiên Bản Picovoice
 if (isset($_GET['Picovoice_Version'])) {
     $url = 'https://pypi.org/rss/project/picovoice/releases.xml';
     $ch = curl_init();

@@ -21,7 +21,6 @@ if ($Config['contact_info']['user_login']['active']) {
   }
 }
 
-//Mảng lưu thông báo
 $errorMessages = [];
 $successMessage = [];
 

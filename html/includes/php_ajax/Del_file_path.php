@@ -28,10 +28,6 @@ if ($Config['contact_info']['user_login']['active']) {
     }
 }
 
-#$SSH_CONNECT_ERROR = "<center><h1><font color='red'>Không thể kết nối tới máy chủ SSH, Hãy Kiểm Tra Lại</font><br/><a href='Command.php'>Quay Lại</a></h1></center>";
-#$SSH2_AUTH_ERROR = "<center><h1><font color='red'>Xác thực SSH không thành công, Hãy kiểm tra lại thông tin đăng nhập SSH</font> <br/><a href='Command.php'>Quay Lại</a></h1></center>";
-
-//Sử Dụng MEthod POST
 $filePath = isset($_POST['filePath']) ? $_POST['filePath'] : '';
 
 if (empty($filePath)) {
@@ -41,32 +37,7 @@ if (empty($filePath)) {
     ]);
     exit();
 }
-/*
-if (strpos($filePath, ".cloudflared") !== false) {
-	$fileName = basename($filePath);
-    $CMD = "sudo rm " . escapeshellarg($filePath);
-    $connection = ssh2_connect($ssh_host, $ssh_port);
-    if (!$connection) die($SSH_CONNECT_ERROR);
-    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) die($SSH2_AUTH_ERROR);
-    $stream = ssh2_exec($connection, $CMD);
-    if ($stream) {
-        stream_set_blocking($stream, true);
-        $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-        $output = stream_get_contents($stream_out);
-        fclose($stream_out);
-        fclose($stream);
-        echo json_encode([
-            'status'  => 'success',
-            'message' => "File: $fileName đã được xóa qua SSH."
-        ]);
-    } else {
-        echo json_encode([
-            'status'  => 'error',
-            'message' => "Không thể thực thi lệnh SSH xóa file: $fileName."
-        ]);
-    }
-}
-*/
+
 if (file_exists($filePath)) {
     $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
     $fileName = basename($filePath);

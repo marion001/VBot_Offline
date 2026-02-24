@@ -66,10 +66,8 @@ $git_repository = $pathParts[1];
                     list_audio_show_path('scan_Audio_Startup')
                 } else if (langg === "media_player_search") {
                     if (document.getElementById("local-tab")) {
-                        //Nếu trong Dom có ID local-tab thì sẽ chạy
                         media_player_search();
                     } else if (document.getElementById("select_cache_media")) {
-                        //Hoặc nếu có id "select_cache_media"trong DOM thì sẽ chạy
                         media_player_search("Local");
                     }
                 }
@@ -79,13 +77,14 @@ $git_repository = $pathParts[1];
         };
         xhr.send('filePath=' + encodeURIComponent(filePath));
     }
+
     //Hàm tải xuống file theo đường dẫn
     function downloadFile(filePath) {
         var link = document.createElement('a');
         link.href = 'includes/php_ajax/Download_file_path.php?file=' + encodeURIComponent(filePath);
         link.target = '_blank';
-        link.download = filePath.substring(filePath.lastIndexOf('/') + 1); // Lấy tên file từ đường dẫn
-        link.style.display = 'none'; // Ẩn liên kết
+        link.download = filePath.substring(filePath.lastIndexOf('/') + 1);
+        link.style.display = 'none';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -109,17 +108,15 @@ $git_repository = $pathParts[1];
                     }
                     if (response.success) {
                         showMessagePHP(response.message);
-                        //console.log(response);
-                        // Tạo bảng để hiển thị thông tin tệp
                         var table = '<table class="table table-bordered border-primary">';
                         table += '<tr><th colspan="5" class="text-primary" style="text-align: center; vertical-align: middle;">' + source_backup + '</th></tr>';
                         table += '<tr><th style="text-align: center; vertical-align: middle;">STT</th><th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Thời gian tạo</th><th style="text-align: center; vertical-align: middle;">Kích thước</th><th style="text-align: center; vertical-align: middle;">Hành động</th></tr>';
                         response.data.forEach(function(file, index) {
                             table += '<tr>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>'; // STT
-                            table += '<td style="text-align: center; vertical-align: middle;">' + file.name + '</td>'; // Tên tệp
-                            table += '<td style="text-align: center; vertical-align: middle;">' + file.created_at + '</td>'; // Thời gian tạo
-                            table += '<td style="text-align: center; vertical-align: middle;">' + file.size + '</td>'; // Kích thước
+                            table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>';
+                            table += '<td style="text-align: center; vertical-align: middle;">' + file.name + '</td>';
+                            table += '<td style="text-align: center; vertical-align: middle;">' + file.created_at + '</td>';
+                            table += '<td style="text-align: center; vertical-align: middle;">' + file.size + '</td>';
                             table += '<td style="text-align: center; vertical-align: middle;">';
                             table += '<form method="POST" action=""><button type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu từ bản sao lưu trên hệ thống: ' + file.name + '\')" name="Restore_Backup" value="' + file.path + '" class="btn btn-primary" title="Khôi phục dữ liệu: ' + file.name + '"><i class="bi bi-arrow-counterclockwise" title="Khôi phục dữ liệu: ' + file.name + '"></i></button> </form> ';
                             table += ' <button type="button" class="btn btn-success" title="Xem cấu trúc bên trong tệp: ' + file.name + '" onclick="read_file_backup(\'' + file.path + '\')"><i class="bi bi-eye"></i></button> ';
@@ -152,15 +149,13 @@ $git_repository = $pathParts[1];
                 if (xhr.status === 200) {
                     loading("hide");
                     var response = JSON.parse(xhr.responseText);
-                    var resultDiv_show_all_File = document.getElementById(resultDiv_Id); // Sử dụng ID được truyền vào
+                    var resultDiv_show_all_File = document.getElementById(resultDiv_Id);
                     if (!resultDiv_show_all_File) {
                         showMessagePHP('Không tìm thấy phần tử có id là: ' + resultDiv_Id + ' để hiển thị kết quả.');
                         return;
                     }
                     if (response.success) {
                         showMessagePHP(response.message, 3);
-                        //console.log(response);
-                        // Tạo bảng để hiển thị thông tin tệp
                         var table = '<table class="table table-bordered border-primary">';
                         table += '<tr><th colspan="5" class="text-primary"><center>' + source_backup + '</center></th></tr>';
                         table += '<tr><th><center>STT</center></th><th><center>Tên tệp</center></th><th><center>Thời gian tạo</center></th><th><center>Kích thước</center></th><th><center>Hành động</center></th></tr>';
@@ -175,7 +170,6 @@ $git_repository = $pathParts[1];
                             table += ' <button type="button" class="btn btn-danger" onclick="deleteFile_gcloud(\'' + file.id + '\', \'' + file.name + '\', \'' + folder_name + '\', \'Tệp Sao Lưu Chương Trình Trên Google Cloud Drive\', \'' + resultDiv_Id + '\')"><i class="bi bi-trash"></i></button> </td>';
                             table += '</tr>';
                         });
-
                         table += '</table>';
                         resultDiv_show_all_File.innerHTML = table;
                     } else {
@@ -204,10 +198,8 @@ $git_repository = $pathParts[1];
                 if (xhr.status === 200) {
                     loading("hide");
                     var response = JSON.parse(xhr.responseText);
-                    //console.log(response);
                     if (response.success) {
                         showMessagePHP(response.message, 3);
-                        //Nếu trong Dom có ID của biến div_resultDiv_Id thì sẽ chạy
                         if (document.getElementById(div_resultDiv_Id)) {
                             gcloud_scan(gcloud_folder_name, source_backup_name, div_resultDiv_Id);
                         }
@@ -232,9 +224,7 @@ $git_repository = $pathParts[1];
             if (xhr.status === 200) {
                 try {
                     var response = JSON.parse(xhr.responseText);
-                    // Hiển thị thông báo
                     document.getElementById('message_LoadConfigJson').textContent = response.message_LoadConfigJson;
-                    // Hiển thị dữ liệu
                     var codeElement = document.getElementById('code_config');
                     if (response.success) {
                         if (typeof response.data === 'object') {
@@ -273,17 +263,14 @@ $git_repository = $pathParts[1];
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
                         loading('hide');
-                        // Tạo bảng để hiển thị thông tin tệp
                         var table = '<table class="table table-bordered border-primary">';
                         table += '<tr><th colspan="3"  class="text-success"><center>Cấu Trúc Tệp: ' + fileName + '</center></th></tr>';
                         table += '<tr><th><center>STT</center></th><th><center>Tên tệp</center></th><th><center>Hành động</center></th></tr>';
-                        // Duyệt qua danh sách các tệp trong response.data
                         response.data.forEach(function(file, index) {
                             table += '<tr>';
                             table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>';
                             table += '<td style="vertical-align: middle;"><font color=blue>' + file + '</font></td>';
                             table += '<td style="text-align: center; vertical-align: middle;">';
-                            // Hành động: Bạn có thể thêm các nút hoặc liên kết hành động tại đây
                             table += '<button type="button" class="btn btn-success" onclick="read_files_in_backup(\'' + path_backup_file + '\', \'' + file + '\')" title="Xem nội dung tệp tin: \'' + file + '\'"><i class="bi bi-eye"></i> Xem</button>';
                             table += '</td>';
                             table += '</tr>';
@@ -353,6 +340,7 @@ $git_repository = $pathParts[1];
         };
         xhr.send();
     }
+
     //tìm lại mật khẩu
     function forgotPassword() {
         loading("show");
@@ -419,7 +407,6 @@ $git_repository = $pathParts[1];
     function upload_File(key_path) {
         loading("show");
         var fileInput = document.getElementById(key_path);
-        // Lấy tất cả các file
         var files = fileInput.files;
         var formData = new FormData();
         if (files.length > 0) {
@@ -438,11 +425,8 @@ $git_repository = $pathParts[1];
                                 media_player_search();
                             }
                         } else if (document.getElementById("select_cache_media")) {
-                            //Hoặc nếu có id "select_cache_media"trong DOM thì sẽ chạy
-                            //Tab index.php
                             media_player_search("Local");
                         } else if (document.getElementById("show_mp3_music_local")) {
-                            //Tab Config.php
                             list_audio_show_path('scan_Music_Local')
                         }
                         show_message(response.messages.join('<br/>'));
@@ -561,7 +545,6 @@ $git_repository = $pathParts[1];
     //Hàm để phát nhạc (Media Player)
     function send_Media_Play_API(url_media, name_media = "", url_cover = "<?php echo $URL_Address; ?>/assets/img/icon_audio_local.png", media_source = "N/A") {
         loading("show");
-        //Kiểm tra nếu URL bắt đầu với các domain cần tìm
         if (url_media.startsWith("https://baomoi.com/") || url_media.startsWith("https://tienphong.vn/") || url_media.startsWith("https://vietnamnet.vn/") || url_media.includes("24h.com.vn")) {
             getAudioLink_newspaper(url_media)
                 .then(function(audioLink) {
@@ -728,9 +711,7 @@ $git_repository = $pathParts[1];
         xhr.onload = function() {
             if (xhr.status === 200) {
                 var zingDataDiv = document.getElementById('show_list_ZingMP3');
-                // Nếu không tìm thấy phần tử 'show_list_ZingMP3'
                 if (!zingDataDiv) {
-                    // Sử dụng phần tử với ID 'tableContainer'
                     zingDataDiv = document.getElementById('tableContainer');
                 }
                 try {
@@ -741,7 +722,6 @@ $git_repository = $pathParts[1];
                             '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
                             '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'ZingMP3\')"><i class="bi bi-search"></i></button>' +
                             '<button type="button" class="btn btn-primary border-success" onclick="cacheZingMP3()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
-                        // Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
                         setTimeout(function() {
                             if (document.getElementById('song_name_value')) {
                                 document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
@@ -749,10 +729,8 @@ $git_repository = $pathParts[1];
                         }, 0);
                     }
                     var data = JSON.parse(xhr.responseText);
-                    // Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
                     if (Array.isArray(data) && data.length > 0) {
                         zingDataDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache ZingMP3" onclick="cache_delete(\'ZingMP3\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
-                        // Duyệt qua dữ liệu và tạo danh sách các bài hát
                         data.forEach(function(cache_ZING) {
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
@@ -806,7 +784,6 @@ $git_repository = $pathParts[1];
                             '<div class="invalid-feedback">Cần nhập tên bài hát cần tìm kiếm</div>' +
                             '<button id="actionButton_Media" title="Tìm kiếm" class="btn btn-success border-success" type="button" onclick="media_player_search(\'NhacCuaTui\')"><i class="bi bi-search"></i></button>' +
                             '<button type="button" class="btn btn-primary border-success" onclick="cacheNhacCuaTui()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
-                        //Lắng nghe sự kiện thay đổi trong input tìm kiếm bài hát
                         setTimeout(function() {
                             if (document.getElementById('song_name_value')) {
                                 document.getElementById('song_name_value').addEventListener('input', checkInput_MediaPlayer);
@@ -814,10 +791,8 @@ $git_repository = $pathParts[1];
                         }, 0);
                     }
                     var data = JSON.parse(xhr.responseText);
-                    //Kiểm tra xem dữ liệu có phải là mảng và có phần tử không
                     if (Array.isArray(data) && data.length > 0) {
                         nhaccuatuiDataDiv.innerHTML += 'Xóa dữ liệu Cache: <button class="btn btn-danger" title="Xóa dữ liệu cache NhacCuaTui" onclick="cache_delete(\'NhacCuaTui\')"><i class="bi bi-trash"></i> Xóa</button><br/>';
-                        //Duyệt qua dữ liệu và tạo danh sách các bài hát
                         data.forEach(function(cache_nct) {
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
@@ -860,9 +835,7 @@ $git_repository = $pathParts[1];
         xhr.onload = function() {
             if (xhr.status === 200) {
                 var fileListDiv = document.getElementById('show_list_PodCast');
-                // Nếu không tìm thấy phần tử 'show_list_PodCast'
                 if (!fileListDiv) {
-                    // Sử dụng phần tử với ID 'tableContainer'
                     fileListDiv = document.getElementById('tableContainer');
                 }
                 try {
@@ -930,10 +903,8 @@ $git_repository = $pathParts[1];
                 try {
                     var response = JSON.parse(xhr.responseText);
                     if (Array.isArray(response.data) && response.data.length > 0) {
-                        // Lấy phần tử DOM để hiển thị danh sách newspaper
                         var fileListDiv = document.getElementById('show_list_news_paper');
                         if (!fileListDiv) {
-                            // Nếu không tồn tại, thay thế bằng phần tử với ID 'tableContainer' dành cho index.php
                             fileListDiv = document.getElementById('tableContainer');
                             document.getElementById('tableContainer').style.display = '';
                             document.getElementById('tableContainer').style.height = '400px';
@@ -950,7 +921,6 @@ $git_repository = $pathParts[1];
                             fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (news_paper.duration || 'N/A') + '</font></p>';
                             fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + (news_paper.source || 'N/A') + '</font></p>';
                             fileInfo += '<button class="btn btn-success" title="Phát: ' + news_paper.title + '" onclick="send_Media_Play_API(\'' + news_paper.audio + '\', \'' + news_paper.title + '\', \'' + news_paper.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-                            //fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + news_paper.title + '" onclick="addToPlaylist(\'' + news_paper.title + '\', \'' + news_paper.cover + '\', \'' + news_paper.audio + '\', \'' + (news_paper.duration || 'N/A') + '\', \'' + (news_paper.description || 'N/A') + '\', \''+news_paper.source+'\', \'' + news_paper.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
                             fileInfo += ' <a href="' + news_paper.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + news_paper.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
                             fileListDiv.innerHTML += fileInfo;
@@ -985,7 +955,6 @@ $git_repository = $pathParts[1];
             if (xhr.status === 200) {
                 var fileListDiv = document.getElementById('show_list_Youtube');
                 if (!fileListDiv) {
-                    // Sử dụng phần tử với ID 'show_list_Youtube'
                     fileListDiv = document.getElementById('tableContainer');
                 }
                 try {
@@ -1018,7 +987,6 @@ $git_repository = $pathParts[1];
                             fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', \'' + (youtube.duration || 'N/A') + '\', \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
                             fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
-                            // Thêm thông tin vào phần tử danh sách
                             fileListDiv.innerHTML += fileInfo;
                             adjustContainerStyle_tableContainer();
                         });
@@ -1049,7 +1017,6 @@ $git_repository = $pathParts[1];
             if (xhr.readyState === XMLHttpRequest.DONE) {
                 if (xhr.status === 200) {
                     loading("hide");
-                    //console.log(xhr.responseText);
                     var response = JSON.parse(xhr.responseText);
                     if (response.success) {
                         showMessagePHP("Đã thêm " + title + " vào PlayList thành công!");
@@ -1088,7 +1055,6 @@ $git_repository = $pathParts[1];
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
-                // Nếu hàm loadPlayList() tồn tại, gọi hàm đó
                 if (typeof loadPlayList === "function") {
                     loadPlayList();
                 } else {
@@ -1352,7 +1318,6 @@ $git_repository = $pathParts[1];
                 loading("hide");
                 try {
                     const text = this.responseText.trim();
-                    // Kiểm tra xem dữ liệu trả về có phải JSON không
                     if (text.startsWith("{") || text.startsWith("[")) {
                         const response = JSON.parse(text);
                         if (response.success) {
@@ -1380,7 +1345,6 @@ $git_repository = $pathParts[1];
     //xử lý Nghe thử các file âm thanh
     function playAudio(filePath) {
         loading("show");
-
         function getMimeType(extension) {
             const mimeTypes = {
                 'mp3': 'audio/mpeg',
@@ -1430,17 +1394,15 @@ $git_repository = $pathParts[1];
         xhr.send();
     }
 </script>
-<!-- Chatbot -->
+
 <script>
-    //Dữ liệu nguồn chatbot của thẻ select
+    //Chatbox
     const select_Element_api_chatbox = document.getElementById('source_chatbot_api');
-    //gửi yêu cầu POST Chatbox và xử lý phản hồi
     function sendRequest(message) {
         const selectedValue_api_chatbox = select_Element_api_chatbox.value;
         const selectedOption_api_chatbox = select_Element_api_chatbox.options[select_Element_api_chatbox.selectedIndex];
         const fullName_VBot_api_chatbox = selectedOption_api_chatbox.getAttribute('data-full_name_chatbot_api');
         console.log(fullName_VBot_api_chatbox);
-        // Kiểm tra cả thẻ select và giá trị cùng lúc
         if (!select_Element_api_chatbox || !selectedValue_api_chatbox || selectedValue_api_chatbox.trim() === '') {
             selectedValue_api_chatbox = "<?php echo $URL_API_VBOT; ?>";
         }
@@ -1556,12 +1518,10 @@ $git_repository = $pathParts[1];
 
         }
     }
-
     // Xử lý sự kiện khi nhấn nút gửi
     const sendButton = document.getElementById('send_button_chatbox');
     if (sendButton) {
         sendButton.addEventListener('click', function() {
-            // Đặt lại cờ nếu không phải nhấn tự động
             if (!isAutoClick_btn_send_msg) {
                 flag_mic_recording = false;
                 isAutoClick_btn_send_msg = false;
@@ -1615,7 +1575,7 @@ $git_repository = $pathParts[1];
             isAutoClick_btn_send_msg = false;
             recognition.stop();
         }
-        recognition.lang = 'vi-VN'; //ngôn ngữ tiếng việt
+        recognition.lang = 'vi-VN';
         recognition.interimResults = true; //Hiển thị kết quả tạm thời
         recognition.continuous = false; //tự động phát hiện kết thúc câu
         const inputField = document.getElementById('user_input_chatbox');
@@ -1720,9 +1680,8 @@ $git_repository = $pathParts[1];
         xhr.send();
     }
 
-    // Hàm gửi yêu cầu tới Command.php
+    //Hàm gửi yêu cầu tới Command.php
     function command_php(command_line, reload_page = null) {
-        // Kiểm tra nếu command_line không có giá trị
         if (!command_line) {
             showMessagePHP('Vui lòng nhập lệnh hợp lệ để thực thi.');
             return;
@@ -1790,7 +1749,6 @@ $git_repository = $pathParts[1];
     function ui_check_update() {
         const localFileUrl_ui = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $HTML_VBot_Offline; ?>/Version.json';
         const remoteFileUrl_ui = 'https://api.github.com/repos/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/contents/html/Version.json?ref=main';
-
         function fetchRemoteData(url, callback) {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
@@ -1874,7 +1832,6 @@ $git_repository = $pathParts[1];
     function vbot_check_update() {
         const localFileUrl_ui = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $VBot_Offline; ?>Version.json';
         const remoteFileUrl_ui = 'https://api.github.com/repos/<?php echo $git_username; ?>/<?php echo $git_repository; ?>/contents/Version.json?ref=main';
-
         function fetchRemoteData(url, callback) {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', url, true);
@@ -1942,7 +1899,6 @@ $git_repository = $pathParts[1];
                                 var countElement = document.querySelector('#number_notification');
                                 var countElement_1 = document.querySelector('#number_notification_1');
                                 var currentCount = parseInt(countElement.innerText) || 0;
-                                // Lấy giá trị từ thẻ <font> và chuyển sang số
                                 var currentCount_1 = parseInt(countElement_1.innerText.replace(/[^0-9]/g, '')) || 0;
                                 countElement.innerText = currentCount + 1;
                                 countElement_1.innerHTML = "Bạn có <b>" + (currentCount_1 + 1) + "</b> thông báo mới";
@@ -2085,7 +2041,7 @@ $git_repository = $pathParts[1];
         });
     }
 
-    //Lấy dữ liệu Các thiết bị chạy Vbot trong mạng lan đã được Scan
+    //Lấy dữ liệu Các thiết bị chạy VBot trong mạng lan đã được Scan
     function get_vbotScanDevices() {
         loading('show');
         const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path . "/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json"; ?>';
@@ -2257,78 +2213,6 @@ $git_repository = $pathParts[1];
         xhr.send();
     }
 
-    //Bật, tắt, Command bluetooth
-    function bluetooth_control(Action, Value) {
-        loading('show');
-        var data = JSON.stringify({
-            "type": 4,
-            "data": 'bluetooth',
-            "action": Action,
-            "value": Value
-        });
-        var xhr = new XMLHttpRequest();
-        xhr.addEventListener("readystatechange", function() {
-            if (this.readyState === 4) {
-                try {
-                    if (this.status === 0) {
-                        loading('hide');
-                        show_message('Lỗi: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
-                        return;
-                    } else if (this.status !== 200) {
-                        loading('hide');
-                        show_message('Lỗi: Mã trạng thái HTTP ' + this.status);
-                        return;
-                    }
-                    var response = JSON.parse(this.responseText);
-                    if (response.success) {
-                        loading('hide');
-                        if (Action === 'power') {
-                            showMessagePHP(response.message, 5);
-                        } else if (Value === 'AT+PAIR') {
-                            var data = JSON.parse(response.message);
-                            var tableHTML = '<br/><table class="table table-bordered border-primary" cellspacing="0" cellpadding="5"><tr><th style="text-align: center; vertical-align: middle;">Địa Chỉ Mac</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr>';
-                            var seenMacAddresses = [];
-                            data.forEach(function(dataItem) {
-                                var dataItemContent = dataItem.data;
-                                if (dataItemContent && dataItemContent.includes("MacAdd") && dataItemContent.includes("Name")) {
-                                    var macAddMatch = dataItemContent.match(/MacAdd:([0-9a-fA-F]+)/);
-                                    var nameMatch = dataItemContent.match(/Name:([^,]+)/);
-                                    if (macAddMatch && nameMatch) {
-                                        var macAdd = macAddMatch[1];
-                                        if (!seenMacAddresses.includes(macAdd)) {
-                                            seenMacAddresses.push(macAdd);
-                                            tableHTML += "<tr><td style='text-align: center; vertical-align: middle;'>" + macAdd + "</td><td style='text-align: center; vertical-align: middle;'>" + nameMatch[1] + "</td><td style='text-align: center; vertical-align: middle;'><button type='button' class='btn btn-success' onclick=\"bluetooth_control('connect', '" + macAdd + "|" + nameMatch[1] + "')\"><i class='bi bi-arrows-angle-contract'> Kết Nối</i></button></td></tr>";
-                                        }
-                                    }
-                                }
-                            });
-                            tableHTML += "</table>";
-                            document.getElementById("Bluetooth_Scan_devices").innerHTML = tableHTML;
-                            localStorage.setItem('bluetoothDevices_Vbot', JSON.stringify(data));
-                        } else if (Action === 'connect') {
-                            var data = JSON.parse(response.message);
-                            var jsonString = JSON.stringify(data, null, 2);
-                            show_message('<b><pre class="text-success">' + jsonString + '</pre></b>');
-                        } else {
-                            var data = JSON.parse(response.message);
-                            var jsonString = JSON.stringify(data, null, 2);
-                            show_message('<b><pre class="text-success">' + jsonString + '</pre></b>');
-                        }
-                    } else {
-                        loading('hide');
-                        show_message('Lỗi: ' + response.message);
-                    }
-                } catch (error) {
-                    loading('hide');
-                    show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
-                }
-            }
-        });
-        xhr.open("POST", "<?php echo $URL_API_VBOT; ?>");
-        xhr.setRequestHeader("Content-Type", "application/json");
-        xhr.send(data);
-    }
-
     //Tải xuống bài hát Zingmp3
     function dowload_ZingMP3_ID(zing_id, zing_name) {
         loading("show");
@@ -2380,7 +2264,7 @@ $git_repository = $pathParts[1];
         xhr.send();
     }
 
-    // Tải Nhạc ZingMP3 Vào Thư Mục Local
+    //Tải Nhạc ZingMP3 Vào Thư Mục Local
     function download_zingMp3_to_local(IDzing, songName) {
         if (!IDzing || !songName) {
             show_message('Lỗi: ID Zing hoặc tên bài hát không được để trống.');
@@ -2444,8 +2328,7 @@ $git_repository = $pathParts[1];
         xhr.send();
     }
 
-
-    // Tải file MP3 từ URL vào thư mục local trên server
+    //Tải file MP3 từ URL vào thư mục local trên server
     function download_Link_url_to_local(url_audio, songName) {
         if (!url_audio || !songName) {
             show_message('Lỗi: URL âm thanh hoặc tên bài hát không được để trống.');
@@ -2494,10 +2377,9 @@ $git_repository = $pathParts[1];
     }
 </script>
 <script>
-    // Kiểm tra điều kiện và thông báo cập nhật
+    //Kiểm tra điều kiện và thông báo cập nhật
     <?php if ($Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] === true) { ?>
         window.onload = function() {
-            // Nếu URL không chứa "Login.php", thực hiện các hàm sau
             if (!window.location.href.includes("Login.php")) {
                 vbot_check_update();
                 ui_check_update();
@@ -2507,14 +2389,12 @@ $git_repository = $pathParts[1];
 </script>
 
 <script>
-    // Hàm khởi tạo log viewer (gọi API thật sự)
+    //Hàm khởi tạo log viewer
     function initLogViewer(checkboxId, outputId, apiUrl) {
         const checkboxEl = document.getElementById(checkboxId);
         const outputEl = document.getElementById(outputId);
         if (!checkboxEl || !outputEl) return;
-        // Xoá interval cũ trước khi tạo mới
         if (window.logInterval) clearInterval(window.logInterval);
-
         function fetchLogs() {
             const xhr = new XMLHttpRequest();
             xhr.onerror = function() {
@@ -2552,60 +2432,24 @@ $git_repository = $pathParts[1];
             xhr.open("GET", apiUrl + "logs");
             xhr.send();
         }
-        // bắt đầu interval
         window.logInterval = setInterval(fetchLogs, 1000);
     }
 
-    // Màu cho log messages
+    //Màu cho log messages
     function formatLogMessage(message) {
-        const logStyles = [{
-                keyword: '[BOT] Đang thu âm',
-                style: 'color: rgb(255, 105, 97);'
-            },
-            {
-                keyword: '[BOT]',
-                style: 'color: rgb(255, 214, 10);'
-            },
-            {
-                keyword: '[HUMAN]',
-                style: 'color: rgb(0, 255, 0);'
-            },
-            {
-                keyword: 'Đang chờ được đánh thức.',
-                style: 'color: rgb(0, 255, 0);'
-            },
-            {
-                keyword: 'dữ liệu âm thanh',
-                style: 'color: rgb(144, 238, 144);'
-            },
-            {
-                keyword: 'Không có giọng nói được truyền vào',
-                style: 'color: rgb(221, 160, 221);'
-            },
-            {
-                keyword: 'Đã được đánh thức.',
-                style: 'color: rgb(255, 182, 193);'
-            },
-            {
-                keyword: 'Đang phát',
-                style: 'color: rgb(255, 165, 0);'
-            },
-            {
-                keyword: '[Custom skills',
-                style: 'color: rgb(64, 224, 208);'
-            },
-            {
-                keyword: 'ERROR',
-                style: 'color: rgb(255, 69, 58);'
-            },
-            {
-                keyword: 'WARNING',
-                style: 'color: rgb(255, 140, 0);'
-            },
-            {
-                keyword: 'SUCCESS',
-                style: 'color: rgb(50, 205, 50);'
-            },
+        const logStyles = [
+			{keyword: '[BOT] Đang thu âm', style: 'color: rgb(255, 105, 97);'},
+            {keyword: '[BOT]', style: 'color: rgb(255, 214, 10);'},
+            {keyword: '[HUMAN]', style: 'color: rgb(0, 255, 0);'},
+            {keyword: 'Đang chờ được đánh thức.', style: 'color: rgb(0, 255, 0);'},
+            {keyword: 'dữ liệu âm thanh', style: 'color: rgb(144, 238, 144);'},
+            {keyword: 'Không có giọng nói được truyền vào', style: 'color: rgb(221, 160, 221);'},
+            {keyword: 'Đã được đánh thức.', style: 'color: rgb(255, 182, 193);'},
+            {keyword: 'Đang phát', style: 'color: rgb(255, 165, 0);'},
+            {keyword: '[Custom skills', style: 'color: rgb(64, 224, 208);'},
+            {keyword: 'ERROR', style: 'color: rgb(255, 69, 58);'},
+            {keyword: 'WARNING', style: 'color: rgb(255, 140, 0);'},
+            {keyword: 'SUCCESS', style: 'color: rgb(50, 205, 50);'},
         ];
         const style = logStyles.find(log => message.includes(log.keyword))?.style || 'color: white;';
         return '<div style="' + style + '">' + message + '</div>';
@@ -2622,7 +2466,6 @@ $git_repository = $pathParts[1];
         .forEach(cb => {
             cb.addEventListener("change", function() {
                 if (this.checked) {
-                    //Tắt checkbox còn lại
                     document.querySelectorAll("#fetchLogsCheckbox, #fetchLogsCheckbox_Head")
                         .forEach(other => {
                             if (other !== this) {
@@ -2630,16 +2473,15 @@ $git_repository = $pathParts[1];
                                 document.getElementById(logCheckboxMap[other.id]).innerHTML = "";
                             }
                         });
-                    //Bật log cho checkbox này
                     const outputId = logCheckboxMap[this.id];
                     initLogViewer(this.id, outputId, "<?php echo $URL_API_VBOT; ?>");
                 } else {
-                    //Nếu tắt thì clear interval và clear log
                     if (window.logInterval) clearInterval(window.logInterval);
                     document.getElementById(logCheckboxMap[this.id]).innerHTML = "";
                 }
             });
         });
+
     //Khi click icon đóng thì bỏ tích checkbox Head và clear interval
     document.getElementById("Close_Logs_Head").addEventListener("click", function() {
         const cbHead = document.getElementById("fetchLogsCheckbox_Head");
@@ -2704,9 +2546,7 @@ $git_repository = $pathParts[1];
 		}
 		setTimeout(function(target){
 			target.scrollIntoView({behavior:'smooth', block:'center'});
-			
-			target.style.backgroundColor = '#c8e6c9'; //xanh nhạt
-			
+			target.style.backgroundColor = '#c8e6c9';
 			setTimeout(() => {
 				target.style.backgroundColor = '';
 			}, 1500);

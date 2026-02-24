@@ -11,7 +11,6 @@ include 'Configuration.php';
 <?php
 if ($Config['contact_info']['user_login']['active']){
 session_start();
-// Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
 if (!isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))) {
     session_unset();
@@ -173,20 +172,11 @@ if (!isset($_SESSION['user_login']) ||
 <?php
 include 'html_head.php';
 ?>
-
 <body>
-<!-- ======= Header ======= -->
 <?php
 include 'html_header_bar.php'; 
-?>
-<!-- End Header -->
-
-  <!-- ======= Sidebar ======= -->
-<?php
 include 'html_sidebar.php';
 ?>
-<!-- End Sidebar-->
-
   <main id="main" class="main">
     <div class="pagetitle">
       <h1>Danh Sách API</h1>
@@ -197,29 +187,23 @@ include 'html_sidebar.php';
 &nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['api']['active'] ? '<p class="text-success" title="API đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="API không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
         </ol>
       </nav>
-    </div><!-- End Page Title -->
+    </div>
 	    <section class="section">
         <div class="row">
 
 <?php
-// Đường dẫn đến file JSON
 $jsonFile = $VBot_Offline . 'resource/API_VBot_OFFLINE.postman_collection.json';
-// Kiểm tra file tồn tại
 if (!file_exists($jsonFile)) {
 echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fade show"role="alert">Tệp dữ liệu API không tồn tại: '.$jsonFile.'</div></div>';
 } else {
-    // Đọc file JSON
     $jsonData = file_get_contents($jsonFile);
-    // Giải mã JSON
     $data = json_decode($jsonData, true);
-    // Kiểm tra dữ liệu JSON có hợp lệ hay không
     if (!$data || !isset($data['item'])) {
 echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fade show"role="alert">Dữ liệu tệp API không hợp lệ hoặc lỗi cấu trúc</div></div>';
     } else {
         $info = $data['info'];
         $items = $data['item'];
 		?>
-
         <!-- Hiển thị thông tin từ mục info -->
         <div class="card mb-4">
             <div class="card-header">
@@ -397,10 +381,7 @@ function showDetails(index) {
     const urlzz = item.request.url.raw; 
 	const url = urlzz.replace(/(^https?:\/\/)[^\/]+/, '$1<?php echo $Domain . ":" . $Config["api"]["port"]; ?>');
     const body = item.request.body?.raw || '';
-    
-    // Tạo mã cURL cho API
     let curl = "curl -X " + method + " '" + url + "'" + (body ? " -H 'Content-Type: application/json' --data '" + body.replace(/'/g, "\\'") + "'" : "");
-
     // Cập nhật nội dung hiển thị chi tiết API
     document.getElementById('detailsContainer').innerHTML =
         "<h5><strong><p class='text-primary'>Tên API: " + item.name + "</p></strong></h5>" +
@@ -539,7 +520,6 @@ function updateCodeDisplay(index) {
 		"echo $response;\n" +
 		"?>\n";
 
-    // Hiển thị mã dựa trên lựa chọn của người dùng
     const codeContainer = document.getElementById('code' + index);
     let codeContent = '';
 
@@ -568,7 +548,6 @@ function updateCodeDisplay(index) {
         default:
             codeContent = curl;
     }
-	// Cập nhật hiển thị giá trị  và replace đối với python True, False, None
     codeContainer.innerHTML = codeContent.replace(/"True"/g, 'True').replace(/"False"/g, 'False').replace(/"None"/g, 'None');
 }
 
@@ -579,7 +558,7 @@ function updateCodeDisplay(index) {
 			show_message('Không tìm thấy nội dung để sao chép!');
             return;
         }
-        const text = content.innerText || content.textContent; // Lấy nội dung văn bản
+        const text = content.innerText || content.textContent;
         if (navigator.clipboard && navigator.clipboard.writeText) {
             navigator.clipboard.writeText(text.trim())
                 .then(() => showMessagePHP('Đã sao chép vào clipboard!', 3))

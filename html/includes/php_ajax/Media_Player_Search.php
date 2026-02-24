@@ -28,12 +28,6 @@ if ($Config['contact_info']['user_login']['active']) {
 	}
 }
 
-//Bật Logs php
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
-
-//Lấy giao thức (http hoặc https)
-//$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $Cover_URL_Local = dirname(dirname(dirname($Current_URL)));
 
 //Chuyển đổi thời gian
@@ -45,7 +39,6 @@ function formatDuration($duration)
 		$seconds = $duration % 60;
 		return sprintf("%02d:%02d:%02d", $hours, $minutes, $seconds);
 	}
-	// Nếu đã là định dạng HH:mm:ss, trả về nguyên bản
 	return $duration;
 }
 
@@ -117,10 +110,7 @@ function refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Por
 			return false;
 		}
 		$currentTimestamp = time();
-		$newTimestamp = $currentTimestamp + (12 * 3600); //12 tiếng
-		#$Config['media_player']['podcast']['access_token'] = $token;
-		#$Config['media_player']['podcast']['expire_time'] = $newTimestamp;
-		#file_put_contents($VBot_Offline . 'Config.json', json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		$newTimestamp = $currentTimestamp + (12 * 3600);
 		return $token;
 	}
 	return false;
@@ -128,32 +118,24 @@ function refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Por
 
 //Get danh sách các bài hát trong Local
 if (isset($_GET['Local'])) {
-	// Đường dẫn đến thư mục cần tìm kiếm
 	$directory = $VBot_Offline . 'Media/Music_Local';
-	// Các phần mở rộng tệp được phép
-	$allowed_extensions = $Allowed_Extensions_Audio;
-	// Mảng để lưu trữ kết quả
 	$files_info = [];
-	// Hàm kiểm tra phần mở rộng tệp
-	function hasAllowedExtension($filename, $allowed_extensions)
+	function hasAllowedExtension($filename, $Allowed_Extensions_Audio)
 	{
 		$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-		return in_array($extension, $allowed_extensions);
+		return in_array($extension, $Allowed_Extensions_Audio);
 	}
-	// Hàm chuyển đổi byte sang MB
 	function bytesToMB($bytes)
 	{
-		return number_format($bytes / 1048576, 2); // 1 MB = 1048576 bytes, định dạng với 2 chữ số thập phân
+		return number_format($bytes / 1048576, 2);
 	}
-	// Tìm tất cả các tệp âm thanh trong thư mục chính
 	$items = scandir($directory);
 	foreach ($items as $item) {
 		if ($item === '.' || $item === '..') {
 			continue;
 		}
 		$path = $directory . '/' . $item;
-		if (is_file($path) && hasAllowedExtension($item, $allowed_extensions)) {
-			// Nếu là tệp và có phần mở rộng được phép
+		if (is_file($path) && hasAllowedExtension($item, $Allowed_Extensions_Audio)) {
 			$files_info[] = ['name' => $item, 'cover' => $Cover_URL_Local . '/assets/img/icon_audio_local.png', 'full_path' => $path, 'size' => bytesToMB(filesize($path))];
 		}
 	}
@@ -162,38 +144,27 @@ if (isset($_GET['Local'])) {
 }
 
 if (isset($_GET['audio_schedule'])) {
-	//Đường dẫn đến thư mục cần tìm kiếm
 	$directory = $VBot_Offline . $Config['schedule']['audio_path'];
-	//Các phần mở rộng tệp được phép
-	$allowed_extensions = $Allowed_Extensions_Audio;
-	//Mảng để lưu trữ kết quả
 	$files_info = [];
-	//Hàm kiểm tra phần mở rộng tệp
-	function hasAllowedExtension($filename, $allowed_extensions)
+	function hasAllowedExtension($filename, $Allowed_Extensions_Audio)
 	{
 		$extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
-		return in_array($extension, $allowed_extensions);
+		return in_array($extension, $Allowed_Extensions_Audio);
 	}
-	// Hàm chuyển đổi byte sang MB
 	function bytesToMB($bytes)
 	{
-		// 1 MB = 1048576 bytes, định dạng với 2 chữ số thập phân
 		return number_format($bytes / 1048576, 2);
 	}
-	// Tìm tất cả các tệp âm thanh trong thư mục chính
 	$items = scandir($directory);
 	foreach ($items as $item) {
 		if ($item === '.' || $item === '..') {
 			continue;
 		}
 		$path = $directory . '/' . $item;
-		if (is_file($path) && hasAllowedExtension($item, $allowed_extensions)) {
-			// Nếu là tệp và có phần mở rộng được phép
+		if (is_file($path) && hasAllowedExtension($item, $Allowed_Extensions_Audio)) {
 			$files_info[] = ['name' => $item, 'cover' => $Cover_URL_Local . '/assets/img/icon_audio_local.png', 'full_path' => $path, 'size' => bytesToMB(filesize($path))];
 		}
 	}
-	// Trả về kết quả dưới dạng JSON
-	//header('Content-Type: application/json');
 	echo json_encode($files_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit();
 }
@@ -226,16 +197,13 @@ function getZmp3RqidCookie()
 
 function getLinkZingMP3($song_id, $Cookie_Zing)
 {
-	//echo "Cookie zmp3_rqid: " . $result_cookieZINGMP3['zmp3_rqid'] . "\n";
 	$VERSION = "1.6.34";
 	$path = "/api/v2/song/get/streaming";
 	$SECRET_KEY = "2aa2d1c561e809b267f3638c4a307aab";
 	$API_KEY = "88265e23d4284f25963e6eedac8fbfa3";
 	$ctime = strval(time());
-	// Tạo chuỗi hash
 	$str_hash = "ctime={$ctime}id={$song_id}version={$VERSION}";
 	$hash256 = hash('sha256', $str_hash);
-	// Tạo HMAC signature
 	$hmac_signature = hash_hmac('sha512', $path . $hash256, $SECRET_KEY);
 	$url = "https://zingmp3.vn/api/v2/song/get/streaming?id={$song_id}&ctime={$ctime}&version={$VERSION}&sig={$hmac_signature}&apiKey={$API_KEY}";
 	$curl = curl_init();
@@ -254,17 +222,13 @@ function getLinkZingMP3($song_id, $Cookie_Zing)
 	));
 	$response = curl_exec($curl);
 	curl_close($curl);
-	// Chuyển đổi phản hồi JSON thành mảng
 	$response_data = json_decode($response, true);
-	// Kiểm tra và xử lý kết quả
 	if (isset($response_data['err']) && $response_data['err'] == 0 && isset($response_data['data']['128'])) {
 		$url_128 = $response_data['data']['128'];
-		//return ['success' => true, 'url' => $url_128, 'full_data' => $response_data];
 		return ['success' => true, 'url' => $url_128];
 	} else {
 		return [
 			'success' => false,
-			//'error_message' => "Không lấy được link bài hát từ Zingmp3. Dữ liệu phản hồi: " . print_r($response_data, true)
 			'error_message' => print_r($response_data['msg'], true)
 		];
 	}
@@ -272,13 +236,11 @@ function getLinkZingMP3($song_id, $Cookie_Zing)
 
 //Get các đài báo Radio
 if (isset($_GET['Radio'])) {
-	// Mảng chứa thông tin radio
 	$radio_info = [];
 	if ($Config['media_player']['radio_data'] && isset($Config['media_player']['radio_data'])) {
 		foreach ($Config['media_player']['radio_data'] as $radio) {
 			$name = $radio['name'];
 			$link = $radio['link'];
-			// Thêm dữ liệu vào mảng $radio_info
 			$radio_info[] = [
 				'name' => $name,
 				'cover' => null,
@@ -287,7 +249,6 @@ if (isset($_GET['Radio'])) {
 			];
 		}
 	}
-	//header('Content-Type: application/json');
 	echo json_encode($radio_info, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit();
 }
@@ -311,9 +272,7 @@ if (isset($_GET['ZingMP3_GetLink'])) {
 //tìm kiếm Zingmp3
 if (isset($_GET['ZingMP3_Search'])) {
 	$Song_Name = isset($_GET['SongName']) ? urlencode($_GET['SongName']) : '';
-	// Kiểm tra nếu biến Song_Name không có dữ liệu
 	if (empty($Song_Name)) {
-		// Tạo mảng thông báo lỗi
 		$response = array(
 			'success' => false,
 			'message' => 'Tên bài hát không được cung cấp.'
@@ -323,7 +282,6 @@ if (isset($_GET['ZingMP3_Search'])) {
 	}
 	$zingJsonPath = '../cache/ZingMP3.json';
 	if (!file_exists($zingJsonPath)) {
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		shell_exec('chmod 0777 ' . escapeshellarg($zingJsonPath));
 	}
@@ -349,7 +307,6 @@ if (isset($_GET['ZingMP3_Search'])) {
 	}
 	curl_close($curl);
 	$data = json_decode($response, true);
-	//echo $response;
 	if ($data['result'] && isset($data['data'][0]['song'])) {
 		$songs = $data['data'][0]['song'];
 		$results = array();
@@ -359,10 +316,8 @@ if (isset($_GET['ZingMP3_Search'])) {
 			$ZingMP3_artist = $songData['artist'] ?? $songData['artists'] ?? 'N/A';
 			$ZingMP3_duration = $songData['duration'];
 			$ZingMP3_thumb = 'https://photo-zmp3.zmdcdn.me/' . $songData['thumb'];
-			// Gọi hàm getLinkZingMP3 để lấy liên kết
 			$results[] = array(
 				'id' => $ZingMP3_id,
-				//'name' => $ZingMP3_name,
 				'name' => str_replace(["'", '"'], '', $ZingMP3_name ?? 'N/A'),
 				'artist' => $ZingMP3_artist,
 				'duration' => str_pad(floor($ZingMP3_duration / 60), 2, '0', STR_PAD_LEFT) . ':' . str_pad($ZingMP3_duration % 60, 2, '0', STR_PAD_LEFT),
@@ -374,7 +329,6 @@ if (isset($_GET['ZingMP3_Search'])) {
 			'success' => true,
 			'results' => $results
 		));
-		//Cache Ghi đè toàn bộ nội dung vào file ZingMP3.json
 		file_put_contents($zingJsonPath, json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 	} else {
 		echo json_encode(array(
@@ -389,7 +343,6 @@ if (isset($_GET['ZingMP3_Search'])) {
 if (isset($_GET['Cache_ZingMP3'])) {
 	$zingmp3JsonPath = "../cache/ZingMP3.json";
 	if (!file_exists($zingmp3JsonPath)) {
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($zingmp3JsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		shell_exec('chmod 0777 ' . escapeshellarg($zingmp3JsonPath));
 	}
@@ -485,7 +438,6 @@ if (isset($_GET['NhacCuaTui_Search'])) {
 if (isset($_GET['Cache_NhacCuaTui'])) {
 	$nhaccuatuiJsonPath = "../cache/NhacCuaTui.json";
 	if (!file_exists($nhaccuatuiJsonPath)) {
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		shell_exec('chmod 0777 ' . escapeshellarg($nhaccuatuiJsonPath));
 	}
@@ -502,7 +454,6 @@ if (isset($_GET['Cache_NhacCuaTui'])) {
 //GetLink Các Trang Báo
 if (isset($_GET['Get_Link_NewsPaper'])) {
 	$URL = isset($_GET['url']) ? $_GET['url'] : '';
-	//Kiểm tra nếu biến URL không có dữ liệu
 	if (empty($URL)) {
 		$response = array(
 			'success' => false,
@@ -723,7 +674,6 @@ if (isset($_GET['podcast_Search'])) {
 	));
 	$response_podcast = curl_exec($curl);
 	curl_close($curl);
-	//echo $response_podcast;
 	$podcast_Data = json_decode($response_podcast, true);
 	$result = [
 		'success' => false,
@@ -824,7 +774,7 @@ if (isset($_GET['Youtube_Search'])) {
 					$videoIds[] = $itemYoutube['id']['videoId'];
 				}
 			}
-			// Gọi API videos để lấy duration
+			//Gọi API videos để lấy duration
 			$durationMap = [];
 			if (!empty($videoIds)) {
 				$videosUrl = "https://www.googleapis.com/youtube/v3/videos?part=contentDetails&id=" . implode(",", $videoIds) . "&key=" . $apiKey;
@@ -888,9 +838,7 @@ if (isset($_GET['Cache_Youtube'])) {
 
 #get Link Youtube
 if (isset($_GET['GetLink_Youtube'])) {
-	// Lấy ID video YouTube từ request
 	$Youtube_ID = isset($_GET['Youtube_ID']) ? $_GET['Youtube_ID'] : '';
-	// Kiểm tra xem ID video có được cung cấp hay không
 	if (empty($Youtube_ID)) {
 		$response = array(
 			'success' => false,
@@ -948,7 +896,6 @@ if (isset($_GET['GetLink_Youtube'])) {
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
-	// Chuyển sang chế độ đồng bộ để đợi kết quả
 	stream_set_blocking($stream, true);
 	$stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
 	$output = stream_get_contents($stream_out);
@@ -983,7 +930,6 @@ if (isset($_GET['Cache_NewsPaper'])) {
 			'message' => 'Danh sách báo, tin tức',
 			'data' => []
 		];
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($newspaperJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		shell_exec('chmod 0777 ' . escapeshellarg($newspaperJsonPath));
 	}
@@ -1006,7 +952,6 @@ if (isset($_GET['Cache_PlayList'])) {
 			'message' => 'Danh sách phát tổng hợp',
 			'data' => []
 		];
-		// Nếu không tồn tại, tạo tệp mới với nội dung mặc định (mảng rỗng)
 		file_put_contents($playlistJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		shell_exec('chmod 0777 ' . escapeshellarg($playlistJsonPath));
 	}
@@ -1020,7 +965,7 @@ if (isset($_GET['Cache_PlayList'])) {
 	exit();
 }
 
-// Thêm bài hát vào playlist
+//Thêm bài hát vào playlist
 if (isset($_GET['playlist_ADD'])) {
 	$filePath = '../cache/PlayList.json';
 	$response = [];
@@ -1030,7 +975,6 @@ if (isset($_GET['playlist_ADD'])) {
 			'message' => 'Danh sách phát tổng hợp',
 			'data' => []
 		];
-		// Ghi dữ liệu mặc định vào file và thiết lập quyền 777
 		file_put_contents($filePath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 		shell_exec('chmod 0777 ' . escapeshellarg($filePath));
 	}
@@ -1048,17 +992,14 @@ if (isset($_GET['playlist_ADD'])) {
 			echo json_encode($response);
 			exit;
 		}
-		// Tạo ID ngẫu nhiên với 6 ký tự
 		function generateRandomId($length = 6)
 		{
 			return strtoupper(bin2hex(random_bytes($length / 2)));
 		}
-		// Hàm để kiểm tra và chuyển đổi các giá trị "null" và rỗng thành null
 		function convertToNull($value)
 		{
 			return $value === 'null' || $value === '' ? null : $value;
 		}
-		// Lấy dữ liệu từ form và đặt giá trị "null" nếu không tồn tại hoặc rỗng
 		$newEntry = [
 			'ids_list' => generateRandomId(),
 			'title' => convertToNull($_POST['title']),
@@ -1073,7 +1014,6 @@ if (isset($_GET['playlist_ADD'])) {
 		];
 		$jsonData = file_get_contents($filePath);
 		$data = json_decode($jsonData, true);
-		// Kiểm tra trùng lặp
 		$isDuplicate = false;
 		foreach ($data['data'] as $entry) {
 			if ($entry['title'] === $newEntry['title'] && $entry['source'] === $newEntry['source'] && $entry['artist'] === $newEntry['artist'] && $entry['cover'] === $newEntry['cover']) {
@@ -1085,11 +1025,8 @@ if (isset($_GET['playlist_ADD'])) {
 			$response['success'] = false;
 			$response['message'] = ' Bài hát ' . $_POST['title'] . ' đã tồn tại trong danh sách phát ở nguồn ' . $_POST['source'];
 		} else {
-			// Thêm dữ liệu mới vào mảng "data"
 			$data['data'][] = $newEntry;
-			// Chuyển đổi mảng thành JSON
 			$jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			// Ghi dữ liệu JSON vào file
 			if (file_put_contents($filePath, $jsonData)) {
 				$response['success'] = true;
 				$response['message'] = 'Dữ liệu đã được ghi vào file JSON thành công.';
@@ -1112,11 +1049,9 @@ if (isset($_GET['playlist_DELETE'])) {
 	if (file_exists($filePath)) {
 		$jsonData = file_get_contents($filePath);
 		$data = json_decode($jsonData, true);
-		// Đảm bảo rằng 'data' là một mảng
 		if (!isset($data['data']) || !is_array($data['data'])) {
 			$data['data'] = [];
 		}
-		// Xử lý yêu cầu xóa
 		$action = isset($_POST['action']) ? $_POST['action'] : null;
 		$idsToDelete = isset($_POST['ids_list']) ? $_POST['ids_list'] : null;
 		$updatedData = $data['data'];
@@ -1124,14 +1059,11 @@ if (isset($_GET['playlist_DELETE'])) {
 		$deletedIds = [];
 		$idsNotFound = [];
 		if ($action === 'delete_all') {
-			// Xóa toàn bộ nội dung trong 'data'
 			$updatedData = [];
 			$deletedIds = array_column($data['data'], 'ids_list');
 		} elseif ($action === 'delete_some' && !empty($idsToDelete)) {
-			// Xóa các mục theo 'ids_list'
 			$existingIds = array_column($updatedData, 'ids_list');
 			$idsNotFound = array_diff($idsToDelete, $existingIds);
-			// Lọc các mục không nằm trong danh sách 'idsToDelete'
 			foreach ($idsToDelete as $id) {
 				if (in_array($id, $existingIds)) {
 					$deletedIds[] = $id;
@@ -1140,10 +1072,8 @@ if (isset($_GET['playlist_DELETE'])) {
 			$updatedData = array_filter($updatedData, function ($entry) use ($idsToDelete) {
 				return !in_array($entry['ids_list'], $idsToDelete);
 			});
-			// Đặt lại chỉ số của mảng
 			$updatedData = array_values($updatedData);
 		} else {
-			// Nếu yêu cầu không hợp lệ
 			$response = [
 				'success' => false,
 				'message' => 'Yêu cầu không hợp lệ.',
@@ -1157,7 +1087,6 @@ if (isset($_GET['playlist_DELETE'])) {
 			'data' => $updatedData
 		];
 		if (file_put_contents($filePath, json_encode($fileContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
-			// Phản hồi với thông tin về các mục đã xóa và các ID không tìm thấy
 			$response = [
 				'success' => true,
 				'message' => 'Danh sách phát đã được cập nhật.',
@@ -1175,7 +1104,6 @@ if (isset($_GET['playlist_DELETE'])) {
 			echo json_encode($responsexx);
 		}
 	} else {
-		// Nếu file không tồn tại
 		$responsezz = [
 			'success' => false,
 			'message' => 'File không tồn tại.'
@@ -1569,7 +1497,6 @@ exit();
 
 // Kiểm tra dữ liệu POST với key zing_download_mp3_to_local
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-	// Đọc dữ liệu JSON từ body (phải ở ngoài để xác định $postData)
 	$input = file_get_contents('php://input');
 	$postData = json_decode($input, true);
 	if (json_last_error() !== JSON_ERROR_NONE) {
@@ -1579,27 +1506,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
-	// Xử lý khi zing_download_mp3_to_local tồn tại và là mảng
 	if (isset($postData['zing_download_mp3_to_local']) && is_array($postData['zing_download_mp3_to_local'])) {
 		$response = ['success' => false, 'message' => 'Dữ liệu POST không hợp lệ hoặc thiếu zing_download_mp3_to_local.'];
 		$data = $postData['zing_download_mp3_to_local'];
 		$mp3Url = isset($data['url']) ? filter_var($data['url'], FILTER_SANITIZE_URL) : '';
 		$songName = isset($data['name']) ? trim($data['name']) : '';
-		// Kiểm tra dữ liệu đầu vào
 		if (empty($mp3Url) || empty($songName) || !filter_var($mp3Url, FILTER_VALIDATE_URL)) {
 			$response = [
 				'success' => false,
 				'message' => 'URL hoặc tên bài hát không hợp lệ.'
 			];
 		} else {
-			// Đảm bảo tên file có đuôi .mp3
 			if (!preg_match('/\.mp3$/i', $songName)) {
 				$songName .= '.mp3';
 			}
-			// Thư mục đích để lưu file
 			$savePath = $VBot_Offline . $Config['media_player']['music_local']['path'] . '/';
 			$fullPath = $savePath . basename($songName);
-			// Kiểm tra thư mục đích
 			if (!is_dir($savePath)) {
 				if (!mkdir($savePath, 0777, true)) {
 					$response = [
@@ -1617,9 +1539,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 				curl_setopt_array($ch, [
 					CURLOPT_RETURNTRANSFER => true,
 					CURLOPT_FOLLOWLOCATION => true,
-					CURLOPT_TIMEOUT => 90, // Tăng timeout cho file lớn
+					CURLOPT_TIMEOUT => 90,
 					CURLOPT_FAILONERROR => true,
-					CURLOPT_SSL_VERIFYPEER => false, // Bỏ qua SSL nếu cần
+					CURLOPT_SSL_VERIFYPEER => false,
 					CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
 				]);
 				$fileContent = curl_exec($ch);

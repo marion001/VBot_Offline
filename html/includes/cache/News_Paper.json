@@ -1,166 +1,184 @@
 {
     "data": [
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/diem-danh-5-dai-an-duoc-xet-xu-ngay-sau-ky-nghi-tet-duong-lich-2026-c46a1726908.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04//adt1767508849-toa-an-nhan-dan-ha-noi-1012__anh_cat_3_2.jpg",
-            "title": "Điểm danh 5 “đại án” được xét xử ngay sau kỳ nghỉ Tết Dương lịch 2026",
-            "source": "Báo 24h.com.vn"
+            "title": "Bệnh viện Đà Nẵng thực hiện ca ghép gan chuyển giao kỹ thuật đầu tiên",
+            "id": 53399306,
+            "audio": "https://baomoi.com/benh-vien-da-nang-thuc-hien-ca-ghep-gan-chuyen-giao-ky-thuat-dau-tien-a53399306.epi#undefined#53399306",
+            "duration": "04:26",
+            "publish_time": "03/10/2025, 20:05",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53399306/07773c313778de268769.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/chi-tiet-lich-nghi-dai-ky-luc-dip-tet-nguyen-dan-2026-c46a1726886.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/1767503551-960-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Chi tiết lịch nghỉ dài kỷ lục dịp Tết Nguyên đán 2026",
-            "source": "Báo 24h.com.vn"
+            "title": "Ông Nguyễn Trọng Nghĩa dự Đại hội Đảng bộ tỉnh Gia Lai lần thứ I",
+            "id": 53396736,
+            "audio": "https://baomoi.com/ong-nguyen-trong-nghia-du-dai-hoi-dang-bo-tinh-gia-lai-lan-thu-i-a53396736.epi#undefined#53396736",
+            "duration": "04:30",
+            "publish_time": "03/10/2025, 15:12",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53396736/9f2952a359eab0b4e9fb.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/mang-luoi-cap-phieu-thu-nghiem-gia-cho-keo-kera-sua-hiup-sap-ra-toa-c46a1726841.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/9-1767490744-85-width740height495.jpg",
-            "title": "Mạng lưới cấp phiếu thử nghiệm giả cho kẹo Kera, sữa Hiup sắp ra tòa",
-            "source": "Báo 24h.com.vn"
+            "title": "Đại tướng Lương Tam Quang dự khai mạc Đại hội Đảng bộ thành phố Huế",
+            "id": 53396134,
+            "audio": "https://baomoi.com/dai-tuong-luong-tam-quang-du-khai-mac-dai-hoi-dang-bo-thanh-pho-hue-a53396134.epi#undefined#53396134",
+            "duration": "03:39",
+            "publish_time": "03/10/2025, 14:20",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53396134/47ba3a3c3175d82b8164.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/viet-nam-len-tieng-ve-tinh-hinh-venezuela-c46a1726821.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/1767483991-616-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Việt Nam lên tiếng về tình hình Venezuela",
-            "source": "Báo 24h.com.vn"
+            "title": "Đại tướng Phan Văn Giang dự và chỉ đạo Đại hội Đảng bộ tỉnh An Giang",
+            "id": 53393835,
+            "audio": "https://baomoi.com/dai-tuong-phan-van-giang-du-va-chi-dao-dai-hoi-dang-bo-tinh-an-giang-a53393835.epi#undefined#53393835",
+            "duration": "04:02",
+            "publish_time": "03/10/2025, 10:00",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53393835/743f71eb7aa293fccab3.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/boc-tran-loat-vu-my-pham-sua-thuc-pham-chuc-nang-gia-c46a1726716.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-03/255x170/1767428767-721-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Bóc trần loạt vụ mỹ phẩm, sữa, thực phẩm chức năng giả",
-            "source": "Báo 24h.com.vn"
+            "title": "Gắn kết sản phẩm OCOP để phát triển du lịch cộng đồng, du lịch trải nghiệm",
+            "id": 53393297,
+            "audio": "https://baomoi.com/gan-ket-san-pham-ocop-de-phat-trien-du-lich-cong-dong-du-lich-trai-nghiem-a53393297.epi#undefined#53393297",
+            "duration": "05:50",
+            "publish_time": "03/10/2025, 09:17",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53393297/8a1631d83a91d3cf8a80.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/6-si-quan-cap-cao-duoc-thang-ham-thuong-tuong-cong-an-trong-nam-2025-vua-qua-c46a1726482.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-02/255x170/1767328759-958-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "6 sĩ quan cấp cao được thăng hàm Thượng tướng Công an trong năm 2025 vừa qua",
-            "source": "Báo 24h.com.vn"
+            "title": "Sắp xếp trường đại học công lập: Tinh gọn để lớn mạnh hơn",
+            "id": 53391819,
+            "audio": "https://baomoi.com/sap-xep-truong-dai-hoc-cong-lap-tinh-gon-de-lon-manh-hon-a53391819.epi#undefined#53391819",
+            "duration": "25:01",
+            "publish_time": "03/10/2025, 06:21",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53391819/4873b699bdd0548e0dc1.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/nguoi-hut-thuoc-la-dien-tu-se-bi-phat-den-5-trieu-dong-c46a1726387.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/adt1767285012-1-2144-2853-png-32-5226-7595-3549__anh_cat_3_2.webp",
-            "title": "Người hút thuốc lá điện tử sẽ bị phạt đến 5 triệu đồng",
-            "source": "Báo 24h.com.vn"
+            "title": "Du lịch An Giang đa dạng sản phẩm, vươn tầm quốc tế",
+            "id": 53391402,
+            "audio": "https://baomoi.com/du-lich-an-giang-da-dang-san-pham-vuon-tam-quoc-te-a53391402.epi#undefined#53391402",
+            "duration": "07:06",
+            "publish_time": "03/10/2025, 06:01",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53391402/0eaa7f4874019d5fc410.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/giam-doc-doanh-nghiep-dat-tui-tien-10-ty-dong-sau-cua-nha-quyen-cuc-truong-c46a1726310.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767249352-692-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Giám đốc doanh nghiệp đặt túi tiền 10 tỷ đồng sau cửa nhà quyền cục trưởng",
-            "source": "Báo 24h.com.vn"
+            "title": "Tầm nhìn chiến lược của Quảng Ninh trên hành trình mới",
+            "id": 53391414,
+            "audio": "https://baomoi.com/tam-nhin-chien-luoc-cua-quang-ninh-tren-hanh-trinh-moi-a53391414.epi#undefined#53391414",
+            "duration": "05:59",
+            "publish_time": "03/10/2025, 05:40",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53391414/0e3747d54c9ca5c2fc8d.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/ky-tich-hon-3000km-cao-toc-duoc-dau-tu-buoc-tien-lon-ve-ha-tang-c46a1726247.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767248262-339-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Kỳ tích hơn 3.000km cao tốc được đầu tư: Bước tiến lớn về hạ tầng",
-            "source": "Báo 24h.com.vn"
+            "title": "Người dân An Giang kỳ vọng ở Đại hội một tầm nhìn-một ý chí-một niềm tin thắng lợi",
+            "id": 53391413,
+            "audio": "https://baomoi.com/nguoi-dan-an-giang-ky-vong-o-dai-hoi-mot-tam-nhin-mot-y-chi-mot-niem-tin-thang-loi-a53391413.epi#undefined#53391413",
+            "duration": "03:20",
+            "publish_time": "03/10/2025, 05:05",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_03_65_53391413/cf92997092397b672228.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/hang-chuc-trieu-nguoi-duoc-giam-thue-thu-nhap-ca-nhan-c46a1726289.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767240334-705-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Hàng chục triệu người được giảm thuế thu nhập cá nhân",
-            "source": "Báo 24h.com.vn"
+            "title": "Ông Nguyễn Đức Trung tái đắc cử Bí thư Tỉnh ủy Nghệ An",
+            "id": 53389143,
+            "audio": "https://baomoi.com/ong-nguyen-duc-trung-tai-dac-cu-bi-thu-tinh-uy-nghe-an-a53389143.epi#undefined#53389143",
+            "duration": "04:14",
+            "publish_time": "02/10/2025, 17:55",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_02_65_53389143/7d58987b92327b6c2223.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/dieu-dac-biet-ve-3-nu-uy-vien-trung-uong-vua-duoc-dieu-dong-cong-tac-moi-c46a1726261.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767237820-994-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Điều đặc biệt về 3 nữ ủy viên Trung ương vừa được điều động công tác mới",
-            "source": "Báo 24h.com.vn"
+            "title": "Đa dạng hóa thị trường để đạt mục tiêu xuất khẩu tăng 12%",
+            "id": 53386022,
+            "audio": "https://baomoi.com/da-dang-hoa-thi-truong-de-dat-muc-tieu-xuat-khau-tang-12-a53386022.epi#undefined#53386022",
+            "duration": "04:01",
+            "publish_time": "02/10/2025, 12:10",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_02_65_53386022/5d51d0c8da8133df6a90.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/nhung-chinh-sach-noi-bat-co-hieu-luc-tu-thang-1-2026-c46a1726260.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767234315-537-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Những chính sách nổi bật có hiệu lực từ tháng 12026",
-            "source": "Báo 24h.com.vn"
+            "title": "Đà Nẵng: Tìm cơ hội kết nối giao thương, xúc tiến xuất khẩu",
+            "id": 53385909,
+            "audio": "https://baomoi.com/da-nang-tim-co-hoi-ket-noi-giao-thuong-xuc-tien-xuat-khau-a53385909.epi#undefined#53385909",
+            "duration": "03:39",
+            "publish_time": "02/10/2025, 12:09",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_02_65_53385909/f9d86c43660a8f54d61b.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/thu-tuong-yeu-cau-gop-2-thang-luong-huu-chi-tra-vao-dip-tet-nguyen-dan-c46a1726240.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767229251-826-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Thủ tướng yêu cầu gộp 2 tháng lương hưu chi trả vào dịp Tết Nguyên đán",
-            "source": "Báo 24h.com.vn"
+            "title": "Xây dựng An Giang phát triển bền vững, cùng đất nước bước vào kỷ nguyên mới",
+            "id": 53383757,
+            "audio": "https://baomoi.com/xay-dung-an-giang-phat-trien-ben-vung-cung-dat-nuoc-buoc-vao-ky-nguyen-moi-a53383757.epi#undefined#53383757",
+            "duration": "05:16",
+            "publish_time": "02/10/2025, 08:52",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_02_65_53383757/8666a4cfae8647d81e97.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/mo-duong-phat-trien-dat-nuoc-c46a1726219.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767226504-891-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Mở đường phát triển đất nước",
-            "source": "Báo 24h.com.vn"
+            "title": "Đắk Lắk đầu tư mạnh tay nâng cấp hạ tầng số",
+            "id": 53382152,
+            "audio": "https://baomoi.com/dak-lak-dau-tu-manh-tay-nang-cap-ha-tang-so-a53382152.epi#undefined#53382152",
+            "duration": "04:07",
+            "publish_time": "02/10/2025, 05:00",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_02_65_53382152/5bee52385871b12fe860.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/thu-truong-bo-cong-an-gioi-thieu-ve-luat-an-ninh-mang-co-hieu-luc-tu-1-7-2026-c46a1726131.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767204090-929-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Thứ trưởng Bộ Công an giới thiệu về Luật An ninh mạng có hiệu lực từ 1-7-2026",
-            "source": "Báo 24h.com.vn"
+            "title": "Chính quyền địa phương 2 cấp: Khuyến nông thay đổi để gần dân, sát dân",
+            "id": 53381705,
+            "audio": "https://baomoi.com/chinh-quyen-dia-phuong-2-cap-khuyen-nong-thay-doi-de-gan-dan-sat-dan-a53381705.epi#undefined#53381705",
+            "duration": "04:17",
+            "publish_time": "01/10/2025, 20:42",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_01_65_53381705/d34386bc8cf565ab3ce4.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/ong-tran-duc-thanh-duoc-giao-quyen-tong-giam-doc-mobifone-c46a1726203.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767204673-278-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Ông Trần Đức Thành được giao quyền Tổng Giám đốc MobiFone",
-            "source": "Báo 24h.com.vn"
+            "title": "Ông Trần Cẩm Tú kiểm tra khắc phục hậu quả bão số 10 tại tỉnh Quảng Trị",
+            "id": 53379854,
+            "audio": "https://baomoi.com/ong-tran-cam-tu-kiem-tra-khac-phuc-hau-qua-bao-so-10-tai-tinh-quang-tri-a53379854.epi#undefined#53379854",
+            "duration": "03:48",
+            "publish_time": "01/10/2025, 17:34",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_01_65_53379854/0638a337aa7e43201a6f.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/quy-dinh-moi-ve-tieu-chuan-dan-so-va-dien-tich-cua-tinh-thanh-pho-xa-phuong-c46a1726186.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767202968-315-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Quy định mới về tiêu chuẩn dân số và diện tích của tỉnh, thành phố, xã, phường",
-            "source": "Báo 24h.com.vn"
+            "title": "Tập trung khắc phục hậu quả sau hoàn lưu bão số 10 ở Sơn La",
+            "id": 53379669,
+            "audio": "https://baomoi.com/tap-trung-khac-phuc-hau-qua-sau-hoan-luu-bao-so-10-o-son-la-a53379669.epi#undefined#53379669",
+            "duration": "03:00",
+            "publish_time": "01/10/2025, 17:21",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_01_65_53379669/8163ab61a2284b761239.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         },
         {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/man-nhan-man-ban-phao-hoa-ruc-ro-chao-don-nam-moi-2026-tren-khap-ca-nuoc-c46a1726193.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-01/255x170/1767201731-168-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Mãn nhãn màn bắn pháo hoa rực rỡ chào đón năm mới 2026 trên khắp cả nước",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/cuu-chu-tich-tong-cong-ty-xi-mang-viet-nam-da-lang-phi-tien-nha-nuoc-nhu-the-nao-c46a1726184.html",
-            "cover": "https://cdn.24h.com.vn/upload/4-2025/images/2025-12-31/255x170/adt1767192160-bi_can_le_van_chung_cuu_chu_tich-1__anh_cat_3_2.jpg",
-            "title": "Cựu Chủ tịch Tổng Công ty Xi măng Việt Nam đã lãng phí tiền Nhà nước như thế nào?",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/viet-nam-len-tieng-ve-tinh-hinh-venezuela-c46a1726821.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/1767483991-616-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Việt Nam lên tiếng về tình hình Venezuela",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/lap-xuan-2026-la-ngay-nao-c46a1726578.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-02/255x170/1767364567-773-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Lập xuân 2026 là ngày nào?",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/ly-do-2-xe-khach-lieu-linh-chan-dau-xe-dang-chay-tren-quoc-lo-14c-c46a1726770.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-03//image_dai_dien_gifezgif-60febf56489c9e5d-1767441667-532-width740height495-gif2mp4_anh_cat_4_3.jpg",
-            "title": "Lý do 2 xe khách liều lĩnh chặn đầu xe đang chạy trên Quốc lộ 14C",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/tin-tuc-trong-ngay/mien-bac-don-dot-ret-dai-nhat-tu-dau-mua-c46a1726606.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-03/255x170/adt1767398127-ret-3003__anh_cat_3_2.webp",
-            "title": "Miền Bắc đón đợt rét dài nhất từ đầu mùa",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/an-ninh-xa-hoi/thong-tin-nhoi-long-vu-nu-sinh-lop-7-o-ca-mau-bi-sat-hai-c51a1726912.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/adt1767511244-hinh-12-4498-0-0-329-526-crop-0984__anh_cat_3_2.jpg",
-            "title": "Thông tin nhói lòng vụ nữ sinh lớp 7 ở Cà Mau bị sát hại",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/an-ninh-xa-hoi/nghi-pham-cuop-tiem-vang-o-cho-nhan-co-vua-bi-bat-khi-chuan-bi-vuot-bien-c51a1726891.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/1767502275-537-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Nghi phạm cướp tiệm vàng ở chợ Nhân Cơ vừa bị bắt khi chuẩn bị vượt biên",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/an-ninh-xa-hoi/nam-thanh-nien-22-tuoi-nhieu-lan-gan-gui-be-gai-12-tuoi-biet-kho-thoat-toi-nen-thu-nhan-tat-ca-c51a1726872.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-04/255x170/1767500497-627-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Nam thanh niên 22 tuổi nhiều lần gần gũi bé gái 12 tuổi, biết khó thoát tội nên thú nhận tất cả",
-            "source": "Báo 24h.com.vn"
-        },
-        {
-            "audio": "https://www.24h.com.vn/an-ninh-xa-hoi/chu-tiem-vang-ke-khoanh-khac-ke-cuop-giat-vang-trong-chop-mat-c51a1726790.html",
-            "cover": "https://cdn.24h.com.vn/upload/1-2026/images/2026-01-03/255x170/1767449781-817-thumbnail-width740height495_anh_cat_3_2.jpg",
-            "title": "Chủ tiệm vàng kể khoảnh khắc kẻ cướp giật vàng trong chớp mắt",
-            "source": "Báo 24h.com.vn"
+            "title": "Tổng thống Trump đặt thời hạn chót cho Hamas về kế hoạch hòa bình",
+            "id": 53379665,
+            "audio": "https://baomoi.com/tong-thong-trump-dat-thoi-han-chot-cho-hamas-ve-ke-hoach-hoa-binh-a53379665.epi#undefined#53379665",
+            "duration": "03:00",
+            "publish_time": "01/10/2025, 17:18",
+            "cover": "https://photo-baomoi.bmcdn.me/w300_r3x2/2025_10_01_65_53379665/4c097e0b77429e1cc753.jpg",
+            "short_name": "VOV",
+            "source": "Báo Mới"
         }
     ]
 }

@@ -313,9 +313,7 @@ include 'html_head.php';
     }
     //Cập nhật thông tin GET từ API
     function fetchData_Media_Player() {
-      //Kiểm tra nếu checkbox được tích hoặc sync_active là true
       const syncCheckbox = document.getElementById('sync_checkbox');
-      //Không thực hiện fetchData_Media_Player nếu checkbox không được tích
       if (!syncCheckbox.checked) {
         return;
       }
@@ -329,13 +327,22 @@ include 'html_head.php';
         .then(data => {
           if (data.success) {
             document.getElementById('div_message_error').style.display = 'none';
-            //Cập nhật các phần tử khác
-            document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' + (data.media_name ? data.media_name : 'N/A') + '</font>';
+            //Media Player
+			document.getElementById('media-name').innerHTML =
+			  'Tên bài hát: <font color="blue">' +
+			  ((!data.media_name || String(data.media_name).trim() === 'N/A')
+				? (data.airplay_playing === true
+					? (data.airplay_song_name && String(data.airplay_song_name).trim() !== 'N/A'
+						? data.airplay_song_name
+						: 'N/A')
+					: 'N/A')
+				: data.media_name) +
+			  '</font>';
+			
             document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + data.volume + '%</font>';
-            document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : 'Không') + '</font>';
-            document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + data.media_player_source + '</font>';
-            //Cập nhật ảnh cover
-            document.getElementById('media-cover').src = data.media_cover ? data.media_cover : 'assets/img/Error_Null_Media_Player.png';
+			document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : data.airplay_playing ? 'Có' : 'Không') + '</font>';
+			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player_source === 'N/A' ? (data.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player_source) +'</font>';
+			document.getElementById('media-cover').src = (data.audio_playing ? data.media_cover : data.airplay_playing ? 'assets/img/AirPlay_Cover.jpg?t='+Date.now() : 'assets/img/Error_Null_Media_Player.png');
             //Cập nhật giá trị full time
             fullTime = data.full_time;
             //Cập nhật thanh trượt chỉ khi không đang hover
@@ -346,7 +353,7 @@ include 'html_head.php';
               let timeInfo = document.getElementById('time-info');
               timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(data.current_duration) + '</font> / ' + formatTime_Player(fullTime);
             }
-            if (data.audio_playing) {
+            if (data.audio_playing || data.airplay_playing) {
               updateDisplay_SongNhac(true);
             } else {
               updateDisplay_SongNhac(false);

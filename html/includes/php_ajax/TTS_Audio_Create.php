@@ -74,7 +74,6 @@ if (isset($_GET['create_tts_audio'])) {
 	$source = $_GET['source_tts'];
 	$text = trim($_GET['text']);
 	if ($source === 'tts_ggcloud') {
-		// Kiểm tra thêm thông tin đầu vào
 		$required_params = ['language_code', 'voice_name', 'speaking_rate'];
 		foreach ($required_params as $param) {
 			if (empty($_GET[$param])) {
@@ -157,7 +156,6 @@ if (isset($_GET['create_tts_audio'])) {
 			}
 			return false;
 		}
-		// Xử lý chính
 		$accessToken = getAccessTokenFromJson($jsonKeyPath);
 		$filename = sanitize_filename($text);
 		$outputFile = $extraSavePath . '/' . $filename;
@@ -176,7 +174,6 @@ if (isset($_GET['create_tts_audio'])) {
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit();
 	} else if ($source === 'tts_zalo') {
-		// Kiểm tra thêm thông tin đầu vào
 		$required_params = ['encode_type', 'speaker_speed', 'speaker_id'];
 		foreach ($required_params as $param) {
 			if (empty($_GET[$param])) {

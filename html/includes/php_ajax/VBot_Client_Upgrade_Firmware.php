@@ -463,15 +463,6 @@ elseif (isset($_POST['client_play_audio'])) {
         exit;
     }
     $fileExtension = pathinfo(parse_url($audio_url, PHP_URL_PATH), PATHINFO_EXTENSION);
-    /*
-    if (strtolower($fileExtension) !== 'mp3') {
-        echo json_encode([
-            'success' => false,
-            'error' => 'URL âm thanh phải có định dạng .mp3'
-        ]);
-        exit;
-    }
-	*/
     $targetUrl = 'http://' . $ip_address . '/play_audio';
     $postData = 'url=' . urlencode($audio_url);
     try {

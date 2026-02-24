@@ -75,17 +75,13 @@ function convertSize($bytes)
 
 #Nếu activve_show = true thì sẽ khởi tạo
 if ($activve_show === true) {
-    //Khởi tạo Google Client
     $client = new Client();
     $client->setAuthConfig($authConfigPath);
     $client->setAccessType('offline');
     $client->setIncludeGrantedScopes(true);
     $client->addScope(Drive::DRIVE_READONLY);
-
-    //Tải token từ file nếu đã tồn tại
     if (file_exists($tokenPath)) {
         $accessToken = json_decode(file_get_contents($tokenPath), true);
-        //Kiểm tra xem token có hợp lệ hay không
         if (json_last_error() === JSON_ERROR_NONE && isset($accessToken['access_token'])) {
             $client->setAccessToken($accessToken);
         }
@@ -95,22 +91,15 @@ if ($activve_show === true) {
         echo json_encode($responseData);
         exit();
     }
-
     //Kiểm tra và làm mới token nếu cần
     if ($client->isAccessTokenExpired()) {
-        //Kiểm tra xem có Refresh Token hay không
         if ($client->getRefreshToken()) {
-            //Nếu đã có Refresh Token, cố gắng làm mới Access Token
             $newAccessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-            //Kiểm tra xem có access token mới không
             if (isset($newAccessToken['access_token'])) {
                 //echo "Làm mới token thành công";
-                // Cập nhật token mới vào biến accessToken
                 $accessToken = array_merge($accessToken, $newAccessToken);
-                //Lưu token mới vào tệp
                 file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
                 $responseData['gcloud_notification'] = "Làm mới mã Token thành công";
-                //Thiết lập token mới cho client
                 $client->setAccessToken($accessToken);
             } else {
                 $responseData['message'] = "Token xác thực đã hết hạn và không thể làm mới, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình";
@@ -127,10 +116,9 @@ if ($activve_show === true) {
     }
 }
 
+#Scan thư mục trong GDriver
 if (isset($_GET['Scan'])) {
-    //Kiểm tra folderName
     if (isset($_GET['Folder_Name']) && !empty($_GET['Folder_Name'])) {
-        //Lấy tên thư mục từ tham số
         $folderName = $_GET['Folder_Name'];
     } else {
         $responseData['success'] = false;
@@ -138,26 +126,21 @@ if (isset($_GET['Scan'])) {
         echo json_encode($responseData);
         exit();
     }
-    //Khởi tạo Google Drive Service
     $driveService = new Drive($client);
-    //Tìm kiếm thư mục với tên được cung cấp
     $response = $driveService->files->listFiles([
         'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s'", $folderName),
         'fields' => 'files(id, name)',
-        'pageSize' => 1, //Tìm một thư mục
+        'pageSize' => 1,
     ]);
     if (count($response->getFiles()) == 0) {
         $responseData['message'] = "Không tìm thấy thư mục: $folderName trên Google Cloud Drive";
     } else {
-        //Lấy ID của thư mục
         $folderId = $response->getFiles()[0]->getId();
-        //Tìm tất cả các tệp bên trong thư mục bằng ID của thư mục cha
         $filesResponse = $driveService->files->listFiles([
             'q' => sprintf("'%s' in parents", $folderId),
             'fields' => 'files(id, name, mimeType, size)',
             'pageSize' => 100, //Điều chỉnh số lượng kết quả cần tìm
         ]);
-        //Kiểm tra và hiển thị danh sách tệp tìm thấy trong thư mục
         if (count($filesResponse->getFiles()) == 0) {
             $responseData['message'] = "Không tìm thấy tệp sao lưu nào trong thư mục: $folderName trên Google Cloud Drive";
         } else {
@@ -184,20 +167,15 @@ if (isset($_GET['Scan'])) {
 
 //Hàm Xóa file theo id
 if (isset($_GET['Delete'])) {
-    //Kiểm tra biến folderName
     if (isset($_GET['id_file']) && !empty($_GET['id_file'])) {
-        //Lấy tên thư mục từ tham số
         $id_file = $_GET['id_file'];
     } else {
-        //Nếu không có dữ liệu, xử lý lỗi
         $responseData['success'] = false;
         $responseData['message'] = "Cần Nhập ID Của Tệp Cần Xóa";
         echo json_encode($responseData);
         exit();
     }
-    //Khởi tạo Drive
     $driveService = new Drive($client);
-    //Kiểm tra tệp có tồn tại trước khi xóa
     try {
         $file = $driveService->files->get($id_file, ['fields' => 'id, name']);
         if ($file) {
@@ -224,15 +202,4 @@ if (isset($_GET['Delete'])) {
     $responseData['message'] = "ID tệp không được cung cấp";
     echo json_encode($responseData);
 }
-
-/*
-  else{
-      // Nếu không có dữ liệu, xử lý lỗi
-      $responseData['success'] = false;
-      $responseData['message'] = "Cần Nhập Đầy Đủ Tham Số Cần Truy Vấn";
-      echo json_encode($responseData);
-      exit();
-  	
-  }
-  */
 ?>

@@ -35,13 +35,11 @@ if (filter_var($file, FILTER_VALIDATE_URL)) {
     $headerSize = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $headerSize);
     $body = substr($response, $headerSize);
-    //Mặc định
     $contentType = 'application/octet-stream';
     $contentLength = strlen($body);
     if (preg_match('/Content-Type:\s*(\S+)/i', $header, $matches)) {
         $contentType = $matches[1];
     }
-    //Thiết lập header cho tải xuống
     header('Content-Description: File Transfer');
     header('Content-Type: ' . $contentType);
     header('Content-Disposition: attachment; filename="' . basename($file) . '"');
@@ -53,7 +51,6 @@ if (filter_var($file, FILTER_VALIDATE_URL)) {
     curl_close($ch);
     exit;
 } else {
-    //Xử lý đường dẫn tệp cục bộ nếu không phải URL
     if (file_exists($file)) {
         $fileExtension = pathinfo($file, PATHINFO_EXTENSION);
         //Kiểm tra xem đuôi file có nằm trong danh sách bị cấm không
@@ -62,7 +59,6 @@ if (filter_var($file, FILTER_VALIDATE_URL)) {
             http_response_code(403);
             exit;
         }
-        //Thiết lập header cho quá trình tải xuống
         header('Content-Description: File Transfer');
         header('Content-Type: application/octet-stream');
         header('Content-Disposition: attachment; filename="' . basename($file) . '"');

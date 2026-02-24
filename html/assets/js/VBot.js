@@ -37,7 +37,6 @@ function updateTime() {
     if (document.getElementById("times")) {
         document.getElementById('times').innerHTML = formatTime(hour) + ':' + formatTime(min) + ':' + formatTime(sec);
     }
-    //console.log(formatTime(hour) + ":" + formatTime(min) + ":" + formatTime(sec))
 }
 
 //Chuyển đổi thời gian
@@ -45,7 +44,7 @@ function formatTime(unit) {
     return unit < 10 ? "0" + unit : unit;
 }
 
-// Cập nhật ngày và thứ chỉ một lần khi trang tải
+//Cập nhật ngày và thứ chỉ một lần khi trang tải
 function updateDate() {
     var d = new Date();
     var date = d.getDate();
@@ -162,7 +161,6 @@ function media_player_url() {
             show_message('URL YouTube không hợp lệ.');
         }
     }
-    //Nếu đường link, url có đuôi tệp cuối dùng
     else if (isAudio) {
         var fileName = "";
         var fileExtension = "";
@@ -479,7 +477,6 @@ function iframeModal_toggleFullScreen() {
 //Hiển thị thẻ modal iframe
 function showIframeModal(ipAddress, source_text_device) {
     loading('show');
-    // Kiểm tra mạng nội bộ và không phải HTTPS
     const hostname = location.hostname;
     const isLocalNetwork = (
         hostname === 'localhost' ||
@@ -523,9 +520,7 @@ function updateIframeSize() {
     const modalHeader = modalContent.querySelector('.modal-header');
     const modalBody = modalContent.querySelector('.modal-body');
     const iframe = document.getElementById('contentIframe');
-    // Tính chiều cao header động
     const headerHeight = modalHeader ? modalHeader.offsetHeight : 0;
-    // Đặt chiều cao modal-body và iframe bằng inline styles
     modalBody.style.height = `calc(100% - ${headerHeight}px)`;
     iframe.style.width = '100%';
     iframe.style.height = '100%';
@@ -533,7 +528,7 @@ function updateIframeSize() {
     iframe.style.display = 'block';
 }
 
-//  hàm cuộn xuống dưới cùng tin nhắn
+// hàm cuộn xuống dưới cùng tin nhắn
 function scrollToBottom() {
     const chatbox = document.getElementById('chatbox');
     chatbox.scrollTop = chatbox.scrollHeight;
@@ -573,7 +568,6 @@ function deleteMessage(index) {
 // Hàm tải tin nhắn từ localStorage
 function loadMessages() {
     const chatbox = document.getElementById('chatbox');
-    // Nếu không có chatbox thì thoát luôn
     if (!chatbox) return;
     const messages = JSON.parse(localStorage.getItem('messages')) || [];
     chatbox.innerHTML = '';
@@ -598,7 +592,6 @@ function loadMessages() {
         chatbox.innerHTML += messageHTML;
     });
     scrollToBottom();
-    // Gán sự kiện xóa tin nhắn
     document.querySelectorAll('.delete_message_chatbox').forEach(function (button) {
         button.addEventListener('click', function () {
             const index = parseInt(this.getAttribute('data-index'), 10);
@@ -626,7 +619,6 @@ function deleteMessage(index) {
 
 // Hàm để dừng tất cả các phần tử audio đang phát
 function stopAllAudio() {
-    //console.log("dừng audio");
     var audios = document.querySelectorAll('audio');
     audios.forEach(function (audio) {
         audio.pause();
@@ -713,53 +705,6 @@ function cacheNewsPaper() {
     } else {
         showMessagePHP('Không tìm thấy phần tử với id "tim_kiem_bai_hat_all"', 3);
     }
-}
-
-// Bluetooth command khi được nhập lệnh thủ công ở thẻ input
-function bluetooth_command_at_input() {
-    var inputValue = document.getElementById('ble_Command_UI').value.trim();
-    if (inputValue === "") {
-        return;
-    }
-    if (!inputValue.startsWith("AT+")) {
-        showMessagePHP("Lệnh Không Đúng", 3);
-        return;
-    }
-    bluetooth_control('command', inputValue);
-}
-
-// Lấy dữ liệu BLE từ localStorage
-function loadBluetoothDevices() {
-    var storedData = localStorage.getItem('bluetoothDevices_Vbot');
-    if (storedData) {
-        var data = JSON.parse(storedData);
-        var tableHTML = '<p class="card-title"> Dữ liệu được tìm kiếm trước đó: <i class="bi bi-trash text-danger" title="Xóa dữ liệu Tìm Kiếm" onclick="clearBluetoothDevices()"></i></p><table class="table table-bordered border-primary" cellspacing="0" cellpadding="5"><tr><th style="text-align: center; vertical-align: middle;">Địa Chỉ Mac</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr>';
-        var seenMacAddresses = [];
-        data.forEach(function (dataItem) {
-            var dataItemContent = dataItem.data;
-            if (dataItemContent && dataItemContent.includes("MacAdd") && dataItemContent.includes("Name")) {
-                var macAddMatch = dataItemContent.match(/MacAdd:([0-9a-fA-F]+)/);
-                var nameMatch = dataItemContent.match(/Name:([^,]+)/);
-                if (macAddMatch && nameMatch) {
-                    var macAdd = macAddMatch[1];
-                    if (!seenMacAddresses.includes(macAdd)) {
-                        seenMacAddresses.push(macAdd);
-                        tableHTML += "<tr><td style='text-align: center; vertical-align: middle;'>" + macAdd + "</td><td style='text-align: center; vertical-align: middle;'>" + nameMatch[1] + "</td><td style='text-align: center; vertical-align: middle;'><button type='button' class='btn btn-success' onclick=\"bluetooth_control('connect', '" + macAdd + "|" + nameMatch[1] + "')\"><i class='bi bi-arrows-angle-contract'> Kết Nối</i></button></td></tr>";
-                    }
-                }
-            }
-        });
-        tableHTML += "</table>";
-        document.getElementById("Bluetooth_Scan_devices").innerHTML = tableHTML;
-    } else {
-        document.getElementById("Bluetooth_Scan_devices").innerHTML = "<center><h5 class='card-title text-danger'>Không có danh sách thiết bị Bluetooth nào được tìm thấy</h5></center>";
-    }
-}
-
-//Bluetooth xóa dữ liệu được lưu trong localStorage
-function clearBluetoothDevices() {
-    localStorage.removeItem('bluetoothDevices_Vbot');
-    document.getElementById("Bluetooth_Scan_devices").innerHTML = "<center><h5 class='card-title text-danger'>Không có danh sách thiết bị Bluetooth nào được tìm thấy</h5></center>";
 }
 
 //Tải xuống tệp âm thanh từ url/Link online

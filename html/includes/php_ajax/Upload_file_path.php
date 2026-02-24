@@ -29,16 +29,10 @@ if ($Config['contact_info']['user_login']['active']) {
 }
 
 if (isset($_GET['upload_Music_Local'])) {
-    // Định nghĩa các định dạng file được phép tải lên
-    //$allowedExtensions = ['mp3', 'wav', 'flac'];
-    // Thư mục lưu trữ file tải lên
-    $targetDirectory = $VBot_Offline . 'Media/Music_Local/';
-    // Kiểm tra nếu thư mục không tồn tại thì tạo mới
+    $targetDirectory = $VBot_Offline . $Config['media_player']['music_local']['path'].'/';
     if (!file_exists($targetDirectory)) {
         mkdir($targetDirectory, 0777, true);
     }
-
-    // Kiểm tra xem có file nào được tải lên không
     if (!empty($_FILES['fileUpload']['name'][0])) {
         $messages = [];
         $success = true;
@@ -47,15 +41,11 @@ if (isset($_GET['upload_Music_Local'])) {
             $fileSize = $_FILES['fileUpload']['size'][$index];
             $fileError = $_FILES['fileUpload']['error'][$index];
             $fileType = $_FILES['fileUpload']['type'][$index];
-            // Xử lý lỗi file
             if ($fileError === UPLOAD_ERR_OK) {
                 $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                 if (in_array($fileExtension, $Allowed_Extensions_Audio)) {
-                    // Xử lý tên file
-                    //$fileName = preg_replace('/[^a-zA-Z0-9.]/', '', strtolower($fileName));
                     $fileName = strtolower($fileName);
                     $filePath = $targetDirectory . basename($fileName);
-                    // Di chuyển file vào thư mục
                     if (move_uploaded_file($fileTmpName, $filePath)) {
 						shell_exec('chmod 0777 ' . escapeshellarg($filePath));
                         $messages[] = 'Tải lên thành công: ' . $fileName;
@@ -80,15 +70,10 @@ if (isset($_GET['upload_Music_Local'])) {
 }
 
 if (isset($_GET['upload_Sound_Welcome'])) {
-    // Định nghĩa các định dạng file được phép tải lên
-    //$allowedExtensions = ['mp3', 'wav', 'flac'];
-    // Thư mục lưu trữ file tải lên
     $targetDirectory = $VBot_Offline . 'resource/sound/welcome/';
-    // Kiểm tra nếu thư mục không tồn tại thì tạo mới
     if (!file_exists($targetDirectory)) {
         mkdir($targetDirectory, 0777, true);
     }
-    // Kiểm tra xem có file nào được tải lên không
     if (!empty($_FILES['fileUpload']['name'][0])) {
         $messages = [];
         $success = true;
@@ -97,15 +82,11 @@ if (isset($_GET['upload_Sound_Welcome'])) {
             $fileSize = $_FILES['fileUpload']['size'][$index];
             $fileError = $_FILES['fileUpload']['error'][$index];
             $fileType = $_FILES['fileUpload']['type'][$index];
-            // Xử lý lỗi file
             if ($fileError === UPLOAD_ERR_OK) {
                 $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
                 if (in_array($fileExtension, $Allowed_Extensions_Audio)) {
-                    // Xử lý tên file
-                    //$fileName = preg_replace('/[^a-zA-Z0-9.]/', '', strtolower($fileName));
                     $fileName = strtolower($fileName);
                     $filePath = $targetDirectory . basename($fileName);
-                    // Di chuyển file vào thư mục
                     if (move_uploaded_file($fileTmpName, $filePath)) {
 						shell_exec('chmod 0777 ' . escapeshellarg($filePath));
                         $messages[] = 'Tải lên thành công: ' . $fileName;
@@ -129,28 +110,23 @@ if (isset($_GET['upload_Sound_Welcome'])) {
     exit();
 }
 
-#Tải lên hình ảnh avatag
+#Tải lên hình ảnh avata
 if (isset($_GET['upload_avata'])) {
     $response = [
         "success" => false,
         "message" => ""
     ];
     $target_dir = "../../assets/img/";
-    // Danh sách các định dạng hình ảnh hợp lệ
     $allowed_image_types = ["jpg", "png", "jpeg", "gif"];
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES["fileToUpload_avata"])) {
-        // Xóa tất cả các tệp có tên là 'avata_user' bất kể định dạng
         foreach (glob($target_dir . "avata_user.*") as $file_path) {
             if (file_exists($file_path)) {
-                unlink($file_path); // Xóa tệp
+                unlink($file_path);
             }
         }
-        // Lấy thông tin tệp từ form upload
         $imageFileType = strtolower(pathinfo($_FILES["fileToUpload_avata"]["name"], PATHINFO_EXTENSION));
-        // Đổi tên tệp thành 'avata_user' với định dạng giữ nguyên
         $target_file = $target_dir . "avata_user." . $imageFileType;
         $uploadOk = 1;
-        // Kiểm tra xem tệp có phải là hình ảnh không
         $check = getimagesize($_FILES["fileToUpload_avata"]["tmp_name"]);
         if ($check !== false) {
             $response["message"] = "File là hình ảnh - " . $check["mime"] . ".";

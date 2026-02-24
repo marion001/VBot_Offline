@@ -1034,7 +1034,6 @@ include 'html_head.php';
           if (data.success) {
             //console.log(data);
             document.getElementById('div_message_error').style.display = 'none';
-            // Cập nhật các phần tử khác led_brightness
             document.getElementById('show_conversation_mode').checked = data.conversation_mode ? true : false;
             document.getElementById('show_wakeup_reply').checked = data.wakeup_reply ? true : false;
             document.getElementById('multiple_command_active').checked = data.multiple_command_active ? true : false;
@@ -1049,7 +1048,6 @@ include 'html_head.php';
             document.getElementById('nhaccuatui_active').checked = data.media_player.nhaccuatui_active ? true : false;
             document.getElementById('youtube_active').checked = data.media_player.youtube_active ? true : false;
             document.getElementById('news_paper_active').checked = data.news_paper_active ? true : false;
-            //document.getElementById('display_screen_active').checked = data.display_screen_active ? true : false;
             document.getElementById('home_assistant_active').checked = data.home_assistant_active ? true : false;
             document.getElementById('hass_custom_commands_active').checked = data.hass_custom_commands_active ? true : false;
             document.getElementById('default_assistant_active').checked = data.default_assistant_active ? true : false;
@@ -1062,13 +1060,9 @@ include 'html_head.php';
             document.getElementById('dev_custom_assistant_active').checked = data.dev_custom_assistant ? true : false;
             document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
             document.getElementById('developer_customization_vbot_processing').checked = data.dev_custom_vbot ? true : false;
-			
             document.getElementById('airplay_mute_unmute').checked = data.media_player.airplay_mute_on_off ? true : false;
             document.getElementById('airplay_active').checked = data.media_player.airplay_active ? true : false;
-            //document.getElementById('show_wake_up').checked = false;
             //Media Player
-            //document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' + (data.media_player.media_name ? data.media_player.media_name : 'N/A') + '</font>';
-
 			document.getElementById('media-name').innerHTML =
 			  'Tên bài hát: <font color="blue">' +
 			  ((!data.media_player.media_name || String(data.media_player.media_name).trim() === 'N/A')
@@ -1079,16 +1073,12 @@ include 'html_head.php';
 					: 'N/A')
 				: data.media_player.media_name) +
 			  '</font>';
-
             document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.media_player.audio_playing ? 'Có' : data.media_player.airplay_playing ? 'Có' : 'Không') + '</font>';
-            //document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + data.media_player.media_player_source + '</font>';
 			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player.media_player_source === 'N/A' ? (data.media_player.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player.media_player_source) +'</font>';
-
             // Cập nhật ảnh cover bài hát
-            document.getElementById('media-cover').src = data.media_player.media_cover ? data.media_player.media_cover : 'assets/img/Error_Null_Media_Player.png';
+            document.getElementById('media-cover').src = (data.media_player.audio_playing ? data.media_player.media_cover : data.media_player.airplay_playing ? 'assets/img/AirPlay_Cover.jpg?t='+Date.now() : 'assets/img/Error_Null_Media_Player.png');
             // Cập nhật giá trị full time
             fullTime = data.media_player.full_time;
-
             if (data.media_player.audio_playing || data.media_player.airplay_playing) {
               updateDisplay_SongNhac(true);
             } else {

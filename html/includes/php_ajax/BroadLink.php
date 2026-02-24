@@ -374,7 +374,6 @@ else if (isset($_POST['deleteAllCmdDevicesRemote'])) {
         echo json_encode(['success' => false, 'message' => 'File JSON không hợp lệ'], JSON_UNESCAPED_UNICODE);
         exit;
     }
-    //$data['cmd_devices_remote'] = [];
 	backupBroadlinkJson($Config, $broadlink_json);
 	$data['cmd_devices_remote'] = new stdClass();
     file_put_contents($broadlink_json, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -391,23 +390,19 @@ else if (isset($_POST['sendBroadlink']) && isset($_POST['ip'], $_POST['mac'], $_
         "success" => false,
         "message" => ""
     ];
-
     $ip      = $_POST['ip'] ?? '';
     $mac     = $_POST['mac'] ?? '';
     $devtype = $_POST['devtype'] ?? '';
     $code    = $_POST['code'] ?? '';
-
     if (!$ip || !$mac || !$devtype || !$code) {
         $response['message'] = 'Thiếu tham số gửi lệnh';
         echo json_encode($response, JSON_UNESCAPED_UNICODE);
         exit();
     }
-
     $ip      = escapeshellarg($ip);
     $mac     = escapeshellarg($mac);
     $devtype = escapeshellarg($devtype);
     $code    = escapeshellarg($code);
-
     $CMD = "python3 "
          . $VBot_Offline . "resource/broadlink/Broadlink.py send"
          . " --ip $ip --mac $mac --devtype $devtype --code $code";

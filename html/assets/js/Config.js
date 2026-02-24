@@ -180,15 +180,12 @@ document.querySelectorAll('input[name="tts_select"]').forEach(radio => {
 function displayResults_Hotword_Snowboy(data) {
     const resultsDiv_snowboy = document.getElementById('results_body_hotword_snowboy');
     const resultsDiv_snowboy1 = document.getElementById('results_body_hotword_snowboy1');
-    // Kiểm tra nếu không tìm thấy phần tử để tránh lỗi
     if (!resultsDiv_snowboy || !resultsDiv_snowboy1) {
         console.error('Không tìm thấy phần tử HTML cần thiết.');
         return;
     }
-    // Xóa nội dung cũ
     resultsDiv_snowboy.innerHTML = '';
     resultsDiv_snowboy1.innerHTML = '';
-    // Tạo biến selectHtml để tránh lỗi biến chưa được khai báo
     let selectHtml = '';
     if (Array.isArray(data.config) && data.config.length > 0) {
         let tableContent = '';
@@ -219,7 +216,6 @@ function displayResults_Hotword_Snowboy(data) {
                 '</td>' +
                 '</tr>';
         });
-        // Thêm nút nút lưu vào thẻ <tr>
         tableContent +=
             '<tr>' +
             '<td colspan="5" style="text-align: center;">' +
@@ -252,12 +248,10 @@ function displayResults_Hotword_dataa(data) {
     const resultsDiv1 = document.getElementById('results_body_hotword1');
     resultsDiv.innerHTML = '';
     resultsDiv1.innerHTML = '';
-    //Hiển thị ngôn ngữ đang được truy vấn
     let reponse_lang = data.lang === "vi" ? "Tiếng Việt" : "Tiếng Anh";
     const langDiv = document.getElementById('language_hotwordd');
     langDiv.innerHTML = '<strong>- Ngôn ngữ: </strong> <font color="red" id="data_lang_shows" value=' + data.lang + '>' + reponse_lang + '</font><br/>- File Thư Viện Đang Dùng: <font color="red">' + data.config_lib_pv_to_lang + '</font>';
     const fileList = data.files_lib_pv;
-    //Tạo thẻ <select> một lần với tất cả các tùy chọn
     var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
     selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
     fileList.forEach(function (file) {
@@ -281,7 +275,6 @@ function displayResults_Hotword_dataa(data) {
                 '  <button type="button" class="btn btn-success" title="Tải xuống file: ' + item.file_name + '"  onclick="downloadFile(\'' + data.path_ppn + item.file_name + '\')"><i class="bi bi-download"></i></button></center></td>' +
                 '</tr>';
         });
-        // Thêm nút tải lên và nút lưu vào thẻ <tr>
         tableContent +=
             '<tr>' +
             '<td colspan="5" style="text-align: center;">' +
@@ -331,15 +324,12 @@ function displayResults_Hotword_dataa(data) {
             '</tr>';
         resultsDiv.innerHTML = tableContent;
     }
-    //Lấy giá trị mặc định của thẻ select khi tải trang
     var selectedValuee = document.getElementById('select_file_lib_pv').value;
     var deleteIconn = document.getElementById('deleteFilePV');
     var downloadIcon = document.getElementById('downloadFilePV');
-    //Thiết lập onclick xóa file trong thẻ select với giá trị mặc định
     deleteIconn.onclick = function () {
         if (selectedValuee) {
             deleteFile(data.path_pv + selectedValuee);
-            // Tải lại dữ liệu hotword ở Config.json
             loadConfigHotword(data.lang);
         } else {
             show_message('Cần chọn file thư viện .pv trước khi xóa');
@@ -361,7 +351,6 @@ function displayResults_Hotword_dataa(data) {
         deleteIcon.onclick = function () {
             if (selectedValue) {
                 deleteFile(data.path_pv + selectedValue);
-                //Tải lại dữ liệu hotword ở Config.json
                 loadConfigHotword(data.lang);
             } else {
                 show_message('Cần chọn file thư viện .pv trước khi xóa');
@@ -374,7 +363,6 @@ function displayResults_Hotword_dataa(data) {
                 show_message('Cần chọn file thư viện .pv trước khi tải xuống');
             }
         };
-        //Cập nhật title của icon
         deleteIcon.title = 'Xóa file: ' + selectedValue;
         downloadIcon.title = 'Tải xuống file: ' + selectedValue;
     });
@@ -547,9 +535,7 @@ function test_key_Gemini(text) {
 
 //tách lấy tên file và đuôi từ đường dẫn path
 function getFileNameFromPath(filePath) {
-    // Tách đường dẫn bằng dấu '/'
     var parts = filePath.split('/');
-    // Lấy phần cuối cùng của mảng, đó là tên tệp với phần mở rộng
     var fileNameWithExtension = parts.pop();
     return fileNameWithExtension;
 }
@@ -598,9 +584,7 @@ function play_tts_sample_gcloud(id_html) {
 //Cập nhật bảng mã màu vào thẻ input
 //Thiết lập giá trị ban đầu cho các thẻ input khi tải trang
 window.onload = function () {
-    //Thiết lập màu cho thẻ đầu tiên
     setColorPickerValue('color_led_think', 'led_think');
-    //Thiết lập màu cho thẻ thứ hai
     setColorPickerValue('color_led_mutex', 'led_mute');
 };
 
@@ -612,9 +596,7 @@ function setColorPickerValue(colorPickerId, colorCodeInputId) {
 
 //Hàm cập nhật mã màu vào thẻ input
 function updateColorCode_input(colorPickerId, colorCodeInputId) {
-    //Lấy mã màu từ input color và bỏ dấu '#' ở đầu
     const selectedColor = document.getElementById(colorPickerId).value.substring(1);
-    //Cập nhật giá trị của thẻ input với mã màu đã chọn (không có '#')
     document.getElementById(colorCodeInputId).value = selectedColor;
 }
 
@@ -627,7 +609,6 @@ function check_info_login_olli() {
     var username = rawUsername;
     if (!isEmail) {
         if (/^\+84\d{9}$/.test(username)) {
-            //Đúng định dạng
         } else if (/^0\d{9}$/.test(username)) {
             username = '+84' + username.substring(1);
         } else if (/^\d{9}$/.test(username)) {
@@ -1484,7 +1465,6 @@ function list_audio_show_path(id_path_music) {
     xhr.open('POST', 'includes/php_ajax/Show_file_path.php?' + encodeURIComponent(id_path_music), true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
-            //console.log(xhr.responseText)
             var data = JSON.parse(xhr.responseText);
             if (id_path_music === "scan_Music_Local") {
                 var tableBody = document.getElementById('show_mp3_music_local').getElementsByTagName('tbody')[0];
@@ -1620,7 +1600,6 @@ function uploadFilesHotwordSnowboy() {
     }
     for (let i = 0; i < files.length; i++) {
         formData.append('upload_files_hotword_snowboy[]', files[i]);
-        //console.log(files);
     }
     formData.append('action_hotword_snowboy', 'upload_files_hotword_snowboy');
     const xhr = new XMLHttpRequest();
@@ -1635,7 +1614,6 @@ function uploadFilesHotwordSnowboy() {
                 } else {
                     messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
                 }
-                //Tải lại dữ liệu hotword ở Config.json
                 loadConfigHotword(lang)
                 show_message(messages.join('<br/>'));
             } catch (e) {
@@ -1674,7 +1652,6 @@ function uploadFilesHotwordPPNandPV() {
                 } else {
                     messages.push('Trạng thái phản hồi không mong đợi: ' + response.status);
                 }
-                //Tải lại dữ liệu hotword ở Config.json
                 loadConfigHotword(lang)
                 show_message(messages.join('<br/>'));
             } catch (e) {

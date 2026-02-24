@@ -1,8 +1,8 @@
 {
-    "version": "1.0.92",
+    "version": "1.0.93",
     "projectName": "WebUI VBot Offline",
     "description": "Hỗ Trợ Custom DEV STT trong file Dev_STT.py và Chế độ khởi chạy toàn bộ chương trình Custom DEV Xử Lý Chính trong file Dev_Processing.py",
-    "releaseDate": "22/02/2026",
+    "releaseDate": "24/02/2026",
     "changes": [
         {
             "type": "feature",

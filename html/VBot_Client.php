@@ -1435,7 +1435,7 @@ if ($Config['contact_info']['user_login']['active']) {
                     loading('hide');
                     if (Array.isArray(devices) && devices.length > 0) {
                         displayDeviceData(devices);
-                        showMessagePHP('Đã tải dữ liệu Vbot Client được lưu từ Server', 5);
+                        showMessagePHP('Đã tải dữ liệu VBot Client được lưu từ Server', 5);
                     } else {
                         document.getElementById('vbot_Client_Scan_devices').innerHTML = '<center>Không có dữ liệu thiết bị nào được lưu trữ trên server.</center>';
                     }

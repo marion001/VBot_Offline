@@ -81,9 +81,7 @@ if (isset($_POST['start_recovery_config_json'])) {
 
 #Lưu lại các giá trị Config.json
 if (isset($_POST['all_config_save'])) {
-
   if ($Config['backup_upgrade']['config_json']['active'] === true) {
-    // Lấy ngày và giờ hiện tại
     $dateTime = new DateTime();
     $newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
     $destinationFile_Backup_Config = $directoryPath_Backup_Config . '/' . $newFileName;
@@ -91,11 +89,9 @@ if (isset($_POST['all_config_save'])) {
       chmod($destinationFile_Backup_Config, 0777);
       $files_ConfigJso_BUP = glob($directoryPath_Backup_Config . '/*.json');
       if (count($files_ConfigJso_BUP) > $Config['backup_upgrade']['config_json']['limit_backup_files']) {
-        // Sắp xếp các file theo thời gian tạo (cũ nhất trước)
         usort($files_ConfigJso_BUP, function ($a, $b) {
           return filemtime($a) - filemtime($b);
         });
-        // Xóa file cũ nhất
         $oldestFile_configBaup = array_shift($files_ConfigJso_BUP);
         if (unlink($oldestFile_configBaup)) {
           // echo "Đã xóa file cũ nhất: $oldestFile_configBaup\n";
@@ -543,13 +539,12 @@ if (isset($_POST['all_config_save'])) {
   $Config['launch_source'] = !empty($_POST['launch_source']) ? $_POST['launch_source'] : 'VBot_Assistant';
 
   ##############################################
-  // Cập nhật radio_data từ POST
+  //Cập nhật radio_data từ POST
   $updated_radio_data = [];
   foreach ($_POST as $key => $value) {
     if (strpos($key, 'radio_name_') === 0) {
       $index = str_replace('radio_name_', '', $key);
       $link_key = 'radio_link_' . $index;
-      // Kiểm tra cả tên đài và link đài đều có dữ liệu
       if (isset($_POST[$link_key]) && !empty(trim($_POST[$key])) && !empty(trim($_POST[$link_key]))) {
         $updated_radio_data[] = [
           "name" => $_POST[$key],
@@ -562,14 +557,12 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['radio_data'] = $updated_radio_data;
   ##########################################
 
-  // Khởi tạo mảng newspaper đã cập nhật
-  // Cập nhật newspaper
+  //Cập nhật newspaper
   $updated_news_paper_data = [];
   foreach ($_POST as $key_newspaper => $value) {
     if (strpos($key_newspaper, 'newspaper_name_') === 0) {
       $index = str_replace('newspaper_name_', '', $key_newspaper);
       $link_key_newspaper = 'newspaper_link_' . $index;
-      // Kiểm tra cả tên đài và link đài đều có dữ liệu
       if (isset($_POST[$link_key_newspaper]) && !empty(trim($_POST[$key_newspaper])) && !empty(trim($_POST[$link_key_newspaper]))) {
         $updated_news_paper_data[] = [
           "name" => $_POST[$key_newspaper],
@@ -588,13 +581,10 @@ if (isset($_POST['all_config_save'])) {
     $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_json_file_token'];
     json_decode($json_data_goolge_cloud_stt);
     if (json_last_error() === JSON_ERROR_NONE) {
-      // Nếu dữ liệu là null hoặc rỗng, thay thế bằng {}
       if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
         $json_data_goolge_cloud_stt = '{}';
       }
-      // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
       $json_data_goolge_cloud_stt = trim($json_data_goolge_cloud_stt);
-      // Lưu dữ liệu vào file
       file_put_contents($stt_token_google_cloud, $json_data_goolge_cloud_stt);
       //$messages[] = 'Dữ liệu stt_token_google_cloud đã được lưu vào file thành công.';
     } else {
@@ -606,7 +596,6 @@ if (isset($_POST['all_config_save'])) {
     $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_v2_json_file_token'];
     json_decode($json_data_goolge_cloud_stt);
     if (json_last_error() === JSON_ERROR_NONE) {
-      // Nếu dữ liệu là null hoặc rỗng, thay thế bằng {}
       if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
         $json_data_goolge_cloud_stt = '{}';
       }
@@ -622,11 +611,9 @@ if (isset($_POST['all_config_save'])) {
   $json_data_goolge_cloud_tts = $_POST['tts_ggcloud_json_file_token'];
   json_decode($json_data_goolge_cloud_tts);
   if (json_last_error() === JSON_ERROR_NONE) {
-    // Nếu dữ liệu là null hoặc rỗng, thay thế bằng {}
     if (empty($json_data_goolge_cloud_tts) || $json_data_goolge_cloud_tts === null) {
       $json_data_goolge_cloud_tts = '{}';
     }
-    // Xóa bỏ các khoảng trắng không mong muốn ở đầu và cuối chuỗi
     $json_data_goolge_cloud_tts = trim($json_data_goolge_cloud_tts);
     file_put_contents($tts_token_google_cloud, $json_data_goolge_cloud_tts);
     //$messages[] = 'Dữ liệu tts_token_google_cloud đã được lưu vào file thành công.';
@@ -671,7 +658,6 @@ if (isset($_POST['save_hotword_snowboy'])) {
       $sensitive_key = 'snowboy_sensitive_' . $index;
       $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
       $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
-      #$sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
 	  $sensitive = (isset($_POST[$sensitive_key]) && $_POST[$sensitive_key] !== '') ? floatval($_POST[$sensitive_key]) : 0.5;
       if ($file_name !== '') {
         $updatedConfig[] = [
@@ -695,7 +681,6 @@ if (isset($_POST['save_hotword_theo_lang'])) {
   if (empty($Lib_modelFilePath)) {
     $messages[] = "Lỗi, Cần chọn file thư viện Hotword .pv";
   } else {
-    // Kiểm tra giá trị của biến $lang
     if ($lang !== 'eng' && $lang !== 'vi') {
       $messages[] = "Thất bại, Giá trị ngôn ngữ không có hoặc không phải là 'eng' hay 'vi'";
     } else {
@@ -706,7 +691,6 @@ if (isset($_POST['save_hotword_theo_lang'])) {
           $sensitive_key = 'sensitive_' . $index;
           $active = isset($_POST[$active_key]) && $_POST[$active_key] === 'on';
           $file_name = isset($_POST[$key]) ? $_POST[$key] : '';
-          #$sensitive = isset($_POST[$sensitive_key]) ? floatval($_POST[$sensitive_key]) : 0.5;
 		  $sensitive = (isset($_POST[$sensitive_key]) && $_POST[$sensitive_key] !== '') ? floatval($_POST[$sensitive_key]) : 0.5;
           if ($file_name !== '') {
             $updatedConfig[] = [
@@ -728,7 +712,6 @@ if (isset($_POST['save_hotword_theo_lang'])) {
 #Lưu các giá trị trong câu phản hồi
 if (isset($_POST['save_config_wakeup_reply'])) {
   $newSoundFileList = [];
-  // Tìm tất cả các key có định dạng save_wakeup_reply_file_name_#
   foreach ($_POST as $key => $value) {
     if (strpos($key, 'save_wakeup_reply_file_name_') === 0) {
       $index = str_replace('save_wakeup_reply_file_name_', '', $key);
@@ -761,24 +744,13 @@ if (file_exists($tts_token_google_cloud)) {
 }
 
 #Tự Sinh HTML
-function input_field(
-  $id,
-  $label,
-  $value = '',
-  $disabled = '',
-  $type = 'text',
-  $step = '',
-  $min = '',
-  $max = '',
-  $help = '',
+function input_field($id, $label, $value = '', $disabled = '', $type = 'text', $step = '', $min = '', $max = '', $help = '',
   $extra_class = 'border-success',
   $button_label = '',
   $button_action = '',
   $button_class = 'btn btn-success border-success',
-  $button_type = 'onclick',   	//'action' = onclick, 'link' = mở URL
-  $button_target = '_blank'  	//chỉ dùng cho loại link
-) {
-  //Kiểm tra help có phải HTML hoàn chỉnh
+  $button_type = 'onclick',
+  $button_target = '_blank') {
   $is_full_html = preg_match('/^\s*<[^>]+>.*<\/[^>]+>\s*$/s', $help);
   if ($is_full_html) {
     $help_icon = '';
@@ -788,49 +760,23 @@ function input_field(
     $help_icon = $help ? " <i class='bi bi-question-circle-fill' style='cursor:pointer;' onclick=\"show_message('$safe_help')\"></i>" : '';
     $help_html = '';
   }
-  // Xử lý step, min, max
   $step_attr = ($type === 'number' && $step !== '') ? "step='$step'" : '';
   $min_attr  = ($type === 'number' && $min !== '') ? "min='$min'" : '';
   $max_attr  = ($type === 'number' && $max !== '') ? "max='$max'" : '';
-  //Nếu có button → input-group
   if (!empty($button_label)) {
-    // Loại button là action (onclick JS)
     if ($button_type === 'onclick') {
       $button_html = "<button type='button' class='$button_class' onclick=\"$button_action\">$button_label</button>";
     }
-    //Loại button là link (href mở URL)
     elseif ($button_type === 'link') {
       $safe_url = htmlspecialchars($button_action, ENT_QUOTES);
-      $button_html = "
-                <button type='button' class='$button_class'>
-                    <a href='$safe_url' target='$button_target' style='color:white; text-decoration:none;'>$button_label</a>
-                </button>";
+      $button_html = "<button type='button' class='$button_class'><a href='$safe_url' target='$button_target' style='color:white; text-decoration:none;'>$button_label</a></button>";
     }
-    $input_html = "
-        <div class='input-group mb-3'>
-            <input $disabled class='form-control $extra_class' 
-                   type='$type' $step_attr $min_attr $max_attr 
-                   name='$id' id='$id'
-                   value='" . htmlspecialchars($value, ENT_QUOTES) . "'>
-            $button_html
-        </div>";
+    $input_html = "<div class='input-group mb-3'><input $disabled class='form-control $extra_class' type='$type' $step_attr $min_attr $max_attr name='$id' id='$id' value='" . htmlspecialchars($value, ENT_QUOTES) . "'>$button_html</div>";
   } else {
-    //Không có button → input thường
-    $input_html = "
-        <input $disabled class='form-control $extra_class' 
-               type='$type' $step_attr $min_attr $max_attr 
-               name='$id' id='$id'
-               value='" . htmlspecialchars($value, ENT_QUOTES) . "'>";
+    $input_html = "<input $disabled class='form-control $extra_class' type='$type' $step_attr $min_attr $max_attr name='$id' id='$id' value='" . htmlspecialchars($value, ENT_QUOTES) . "'>";
   }
   return "
-    <div class='row mb-3'>
-        <label for='$id' class='col-sm-3 col-form-label'>
-            $label $help_html $help_icon:
-        </label>
-        <div class='col-sm-9'>
-            $input_html
-        </div>
-    </div>";
+    <div class='row mb-3'><label for='$id' class='col-sm-3 col-form-label'>$label $help_html $help_icon:</label><div class='col-sm-9'>$input_html</div></div>";
 }
 
 function select_field($id, $label, $options, $selected, $disabled_options = []){
@@ -1117,16 +1063,7 @@ include 'html_head.php';
                         echo input_field('udp_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_maximum_client_connected', 'Tối Đa Client Kết Nối', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected'] ?? 3, 'required', 'number', '1', '1', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_time_remove_inactive_clients', 'Thời gian dọn dẹp Client (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients'] ?? 300, 'required', 'number', '1', '200', '900', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
-                        echo select_field(
-                          'udp_source_stt',
-                          'Nguồn xử lý âm thanh STT Cho Client',
-                          [
-                            'stt_default' => 'STT Mặc Định VBot (Free)',
-                            'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)'
-                          ],
-                          $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'],
-						  []
-                        );
+                        echo select_field('udp_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)'], $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'], []);
                         ?>
                         <div class="row mb-3">
                           <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
@@ -1138,16 +1075,8 @@ include 'html_head.php';
                           </div>
                         </div>
                         <?php
-                        echo select_field(
-                          'udp_select_wakeup',
-                          'Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>',
-                          [
-                            'porcupine' => 'Picovoice/Porcupine WakeUp Client (Nên Dùng)',
-                            'snowboy' => 'Snowboy WakeUP Client'
-                          ],
-                          $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'],
-						  []
-                        );
+                        echo select_field('udp_select_wakeup', 'Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>',
+                          ['porcupine' => 'Picovoice/Porcupine WakeUp Client (Nên Dùng)', 'snowboy' => 'Snowboy WakeUP Client'], $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'], []);
                         echo input_field('udp_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                         echo input_field('udp_server_streaming_audio', 'Server Streaming Audio', $serverIp . ':' . $Port_Server_Streaming_Audio_UDP, 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                         echo input_field('udp_server_streaming_audio_local', 'URL Audio Local', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'btn btn-success border-danger', 'link', '_blank');
@@ -1263,11 +1192,7 @@ include 'html_head.php';
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_hotword_engine" aria-expanded="false" aria-controls="collapse_button_hotword_engine">
                   Cấu Hình WakeUP Hotword Engine (Từ Đánh Thức) Picovoice/Snowboy:
 				  <?php
-					$options_hotword = [
-						'porcupine' => '<font color=green>Picovoice/Procupine</font>',
-						'snowboy'   => '<font color=green>Snowboy</font>',
-						'null'      => '<font color=red>Đang Tắt</font>'
-					];
+					$options_hotword = ['porcupine' => '<font color=green>Picovoice/Procupine</font>', 'snowboy' => '<font color=green>Snowboy</font>', 'null' => '<font color=red>Đang Tắt</font>'];
 					$selected_hotword = $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] ?? null;
 					if (isset($options_hotword[$selected_hotword])) {echo '&nbsp;'.$options_hotword[$selected_hotword];}
 					?>
@@ -1285,12 +1210,7 @@ include 'html_head.php';
                         </div>
                       </div>
                       <?php
-                      echo select_field('hotword_select_wakeup', 'Chọn Nguồn Đánh Thức',
-                        [
-                          'porcupine' => 'Picovoice/Procupine (Nên Dùng)',
-                          'snowboy' => 'Snowboy',
-                          'null' => 'Không Sử Dụng Hotword'
-                        ], $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'], []);
+                      echo select_field('hotword_select_wakeup', 'Chọn Nguồn Đánh Thức', ['porcupine' => 'Picovoice/Procupine (Nên Dùng)', 'snowboy' => 'Snowboy', 'null' => 'Không Sử Dụng Hotword'], $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'], []);
                       ?>
                       <!-- nếu hotword được chọn là Picovoice Procupine -->
                       <div id="select_show_picovoice_porcupine">
@@ -1781,7 +1701,6 @@ echo htmlspecialchars($textareaContent_tts_zalo);
                               <button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content')" title="Làm mới nội dung tts_zalo trong Backlist"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
                             </center>
                           </div>
-                          <!-- ẩn hiện cấu hình select_tts_zalo_html style="display: none;" -->
                           <!-- ẩn hiện cấu hình select_tts_viettel_html style="display: none;" -->
                           <div id="select_tts_viettel_html" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
@@ -1859,7 +1778,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content')" title="Làm mới nội dung tts_viettel trong Backlist"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
                             </center>
                           </div>
-                          <!-- ẩn hiện cấu hình select_tts_viettel_html style="display: none;" -->
                           <!-- ẩn hiện cấu hình select_tts_edge_html style="display: none;" -->
                           <div id="select_tts_edge_html" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
@@ -1883,7 +1801,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <label for="tts_edge_language_code" class="form-label">Ngôn Ngữ:</label>
                             </div>
                           </div>
-                          <!-- ẩn hiện cấu hình select_tts_edge_html style="display: none;" -->
                           <!-- ẩn hiện cấu hình select_tts_ggcloud_key style="display: none;" -->
                           <div id="select_tts_ggcloud_key" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
