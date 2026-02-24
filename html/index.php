@@ -1075,8 +1075,16 @@ include 'html_head.php';
 			  '</font>';
             document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.media_player.audio_playing ? 'Có' : data.media_player.airplay_playing ? 'Có' : 'Không') + '</font>';
 			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player.media_player_source === 'N/A' ? (data.media_player.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player.media_player_source) +'</font>';
-            // Cập nhật ảnh cover bài hát
-            document.getElementById('media-cover').src = (data.media_player.audio_playing ? data.media_player.media_cover : data.media_player.airplay_playing ? 'assets/img/AirPlay_Cover.jpg?t='+Date.now() : 'assets/img/Error_Null_Media_Player.png');
+            //Cập nhật ảnh cover bài hát
+			document.getElementById('media-cover').src =
+				(data.media_player.audio_playing
+					? (data.media_player.media_player_source === 'Local' && !data.media_player.media_cover
+						? 'assets/img/icon_audio_local.png'
+						: (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png'))
+					: data.media_player.airplay_playing
+						? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
+						: 'assets/img/Error_Null_Media_Player.png'
+				);
             // Cập nhật giá trị full time
             fullTime = data.media_player.full_time;
             if (data.media_player.audio_playing || data.media_player.airplay_playing) {

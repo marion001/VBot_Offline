@@ -1244,34 +1244,35 @@ if (isset($_POST['fix_asound_airplay'])) {
 	$output = '';
     $checkFile = "/os_image_created.txt";
     $basePath  = $VBot_Offline.'resource/asound_conf/';
-
     $i2sConf   = $basePath . "default_i2s_asound.conf";
     $wm8960Conf = $basePath . "default_wm8960_asound.conf";
     $target    = "/etc/asound.conf";
-
     if (!file_exists($checkFile)) {
-		$output .= "Lỗi không tìm thấy file: {$checkFile}\n";
+		$output .= "$GET_current_USER@$HostName:~ $> Lỗi không tìm thấy file: {$checkFile}\n";
         return false;
     }
     $content = file_get_contents($checkFile);
     if ($content === false) {
-        $output .= "[ERROR] Không đọc được {$checkFile}\n";
+        $output .= "$GET_current_USER@$HostName:~ $> Không đọc được {$checkFile}\n";
         return false;
     }
     $hasI2S = stripos($content, "i2s") !== false;
     if ($hasI2S) {
-        $output .= "[INFO] Phát hiện i2s trong {$checkFile}\n";
+        //$output .= "Phát hiện đang sủ dụng IMG i2s trong {$checkFile}\n";
+        $output .= "$GET_current_USER@$HostName:~ $> Phát hiện đang sử dụng IMG i2s\n";
         $src = $i2sConf;
     } else {
         //$output .= "[INFO] Không phát hiện i2s trong {$checkFile}, sử dụng file cấu hình mặc định WM8960\n";
-        $output .= "[INFO] Sử dụng file cấu hình mặc định WM8960\n";
+        $output .= "$GET_current_USER@$HostName:~ $> Sử dụng file cấu hình mặc định WM8960\n";
         $src = $wm8960Conf;
     }
     if (!file_exists($src)) {
-        $output .= "[ERROR] File nguồn không tồn tại: {$src}\n";
+        $output .= "$GET_current_USER@$HostName:~ $> File nguồn không tồn tại: {$src}\n";
         return false;
     }
+  $output .= "$GET_current_USER@$HostName:~ $> Đang Tiến Hành Khôi Phục Lại Dữ Liệu File Cấu Hình Âm Thanh, Mic: /etc/asound.conf\n";
   $CMD = 'sudo cp ' . escapeshellarg($src) . ' ' . escapeshellarg($target);
+  $CMD2 = 'sudo systemctl restart alsa-state';
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1280,10 +1281,15 @@ if (isset($_POST['fix_asound_airplay'])) {
     die($SSH2_AUTH_ERROR);
   }
   $stream = ssh2_exec($connection, $CMD);
+  $stream2 = ssh2_exec($connection, $CMD2);
   stream_set_blocking($stream, true);
+  stream_set_blocking($stream2, true);
   $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $stream_out2 = ssh2_fetch_stream($stream2, SSH2_STREAM_STDIO);
   $output .= "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .= "$GET_current_USER@$HostName:~ $ $CMD2\n";
   $output .=  stream_get_contents($stream_out);
+  $output .= stream_get_contents($stream_out2);
 }
 
 if (isset($_POST['start_mosquitto'])) {
@@ -2120,6 +2126,7 @@ include 'html_head.php';
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="reboot_os" type="submit" title="Khởi động lại hệ thống">Reboot OS</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="chmod_vbot" type="submit" title="Chmod VBot và UI HTML thành 0777">Chmod 0777</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="owner_vbot" type="submit" title="Thay đổi quyền sở hữu các file thành của người dùng SSH">Owner Change</button></li>
+                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="fix_asound_airplay" type="submit" title="Khôi Phục lại dữ liệu cấu hình file /etc/asound.conf">Khôi Phục /etc/asound.conf</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="reload_services" type="submit" title="Re-load lại các Services">Re-load Services</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="ifconfig_os" type="submit" title="Kiểm tra thông tin mạng">Thông tin mạng</button></li>
                           <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lscpu_os" type="submit" title="Kiểm tra thông CPU">Thông tin CPU</button></li>

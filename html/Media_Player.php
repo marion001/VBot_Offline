@@ -338,11 +338,18 @@ include 'html_head.php';
 					: 'N/A')
 				: data.media_name) +
 			  '</font>';
-			
             document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + data.volume + '%</font>';
 			document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : data.airplay_playing ? 'Có' : 'Không') + '</font>';
 			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player_source === 'N/A' ? (data.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player_source) +'</font>';
-			document.getElementById('media-cover').src = (data.audio_playing ? data.media_cover : data.airplay_playing ? 'assets/img/AirPlay_Cover.jpg?t='+Date.now() : 'assets/img/Error_Null_Media_Player.png');
+			document.getElementById('media-cover').src =
+				(data.audio_playing
+					? (data.media_player_source === 'Local' && !data.media_cover
+						? 'assets/img/icon_audio_local.png'
+						: (data.media_cover || 'assets/img/Error_Null_Media_Player.png'))
+					: data.airplay_playing
+						? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
+						: 'assets/img/Error_Null_Media_Player.png'
+				);
             //Cập nhật giá trị full time
             fullTime = data.full_time;
             //Cập nhật thanh trượt chỉ khi không đang hover
