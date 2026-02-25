@@ -88,6 +88,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
     exit;
 }
 
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ping_status'])) {
+    if (!isset($_POST['ip']) || empty($_POST['ip'])) {
+        echo json_encode([
+            "success" => false,
+            "message" => "Không có IP nào được cung cấp",
+            "data" => []
+        ]);
+        exit;
+    }
+    $ip_input = $_POST['ip'];
+    if (is_array($ip_input)) {
+        $ip_input = implode(",", $ip_input);
+    }
+    $ip_input = escapeshellarg($ip_input);
+    $CMD = 'python3 '.$Config['web_interface']['path'].'/includes/php_ajax/Ping.py '.$ip_input;
+    $result = [
+        'success' => false,
+        'message' => '',
+        'data' => []
+    ];
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        $result['message'] = "Kết nối SSH không thành công";
+        echo json_encode($result);
+        exit;
+    }
+    if (!@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        $result['message'] = "Xác thực SSH không thành công";
+        echo json_encode($result);
+        exit;
+    }
+    $stream = ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        $result['message'] = "Không thể thực thi lệnh.";
+        echo json_encode($result);
+        exit;
+    }
+    stream_set_blocking($stream, true);
+    $output = stream_get_contents($stream);
+    fclose($stream);
+    if (!$output) {
+        $result['message'] = "Phản hồi trống từ Python";
+        echo json_encode($result);
+        exit;
+    }
+    $decoded = json_decode($output, true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        $result['message'] = "JSON không hợp lệ từ Python";
+        $result['raw'] = $output;
+        echo json_encode($result);
+        exit;
+    }
+    echo json_encode($decoded);
+    exit;
+}
+
 #Kiểm tra trạng thái các thiết bị chạy Vbot Server trong mạng lan
 if (isset($_GET['check_status_vbot_server_in_lan'])) {
     $ip = isset($_GET['ip']) ? $_GET['ip'] : '';

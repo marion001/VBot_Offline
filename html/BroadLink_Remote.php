@@ -515,7 +515,10 @@ function broadlinkHasRF(devtype) {
     return rfTypes.includes(dt);
 }
 
-// TẢI DANH SÁCH THIẾT BỊ BROADLINK
+//Biến toàn cục lưu ip
+var globalIpList = [];
+
+//TẢI DANH SÁCH THIẾT BỊ BROADLINK
 function loadBroadlinkDevices() {
     loading('show');
     var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $broadlink_json_file; ?>';
@@ -551,37 +554,45 @@ function loadBroadlinkDevices() {
                 return;
             }
             tbody.innerHTML = '';
+			globalIpList = [];
             for (var i = 0; i < devices.length; i++) {
                 var dev = devices[i];
+				if (dev.ip) {
+					globalIpList.push(dev.ip);
+				}
                 var tr = document.createElement('tr');
                 //CỘT HỌC LỆNH
                 var learnButtons =
                     '<button type="button" class="btn btn-primary me-1" ' +
                     'title="Học Lệnh IR từ: ' + dev.friendly_name + '" ' +
+					'data-disable="' + dev.ip + '" ' +
                     'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'ir\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
                     '<i class="bi bi-broadcast"></i> IR</button>';
                 if (broadlinkHasRF(dev.devtype)) {
                     learnButtons +=
                         '<button type="button" class="btn btn-warning me-1" ' +
                         'title="Học Lệnh RF từ: ' + dev.friendly_name + '" ' +
+						'data-disable="' + dev.ip + '" ' +
                         'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'rf\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
                         '<i class="bi bi-broadcast-pin"></i> RF</button>';
                 }
 				learnButtons +=
 					'<button type="button" class="btn btn-info me-1" ' +
 					'title="Thêm Lệnh Thủ Công Từ: ' + dev.friendly_name + '" ' +
+					'data-disable="' + dev.ip + '" ' +
 					'onclick="learn_Command_handmade(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'handmade\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
 					'<i class="bi bi-plus-circle-dotted"></i> Thêm Thủ Công</button>';
                 //CỘT HÀNH ĐỘNG
                 var actionButtons =
-                    '<button type="button" class="btn btn-success me-1" title="Đổi Tên Thiết Bị" onclick="renameDevice(\'' + dev.mac + '\')"><i class="bi bi-pencil-square"></i></button>' +
+                    '<button type="button" class="btn btn-success me-1" title="Đổi Tên Thiết Bị" onclick="renameDevice(\'' + dev.mac + '\')"><i class="bi bi-pencil-square"></i></button>' + 
+					'<button class="btn btn-info" title="Kiểm tra trạng thái" onclick="sendPing(\'' + dev.ip + '\', \'show_noti\')"><i class="bi bi-wifi"></i></button> ' + 
                     '<button type="button" class="btn btn-danger" ' +
                     'title="Xóa thiết bị: ' + dev.friendly_name + '" ' +
                     'onclick="deleteDeviceByMac(\'' + dev.friendly_name + '\', \'' + dev.mac + '\', \'' + dev.ip + '\', \'' + dev.model + '\')">' +
                     '<i class="bi bi-trash"></i></button>';
                 tr.innerHTML =
                     '<td class="text-center">' + (i + 1) + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;">' + dev.friendly_name + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;" data-ip="'+dev.ip+'">' + dev.friendly_name + '</td>' +
                     '<td style="text-align: center; vertical-align: middle;">' + dev.model + '</td>' +
                     '<td style="text-align: center; vertical-align: middle;">' + dev.ip + '</td>' +
                     '<td style="text-align: center; vertical-align: middle;">' + dev.mac + '</td>' +
@@ -589,6 +600,7 @@ function loadBroadlinkDevices() {
                     '<td class="text-center">' + actionButtons + '</td>';
                 tbody.appendChild(tr);
             }
+			sendPing(globalIpList.join(","));
         } catch (e) {
             show_message('Lỗi giải mã JSON: ' + e + '<br>' + xhr.responseText);
         }
@@ -1141,6 +1153,94 @@ function delete_file_backup_scheduler(filePath) {
   } else {
 	showMessagePHP("Không có tệp nào được chọn để tải xuống.");
   }
+}
+
+//Disabled button khi thiết bị Offline
+function applyPingResult(pingData) {
+    document.querySelectorAll('[data-disable]').forEach(function(btn) {
+        btn.removeAttribute("disabled");
+    });
+    for (var ip in pingData) {
+        if (!pingData[ip].success) {
+            document.querySelectorAll('[data-disable="' + ip + '"]').forEach(function(btn) {
+                btn.setAttribute("disabled", "disabled");
+            });
+        }
+    }
+}
+
+//Cập nhật trạng thái online, offline
+function updateDeviceStatus(ip, isOnline) {
+    var cell = document.querySelector('[data-ip="' + ip + '"]');
+    if (!cell) return;
+    var oldIcon = cell.querySelector(".ping-icon");
+    if (oldIcon) {
+        oldIcon.remove();
+    }
+    var icon = document.createElement("i");
+    icon.className = "bi bi-circle-fill ping-icon me-2";
+    if (isOnline) {
+        icon.classList.add("text-success");
+		icon.title = " Thiết bị đang trực tuyến";
+    } else {
+        icon.classList.add("text-danger");
+		icon.title = "Thiết bị ngoại tuyến";
+    }
+    cell.insertBefore(icon, cell.firstChild);
+}
+
+//Ping Thiết Bị
+function sendPing(ipList, noti = '') {
+    if (!ipList || ipList.length === 0) {
+        showMessagePHP("Không có IP để kiểm tra trạng thái Online");
+        return;
+    }
+    if (Array.isArray(ipList)) {
+        ipList = ipList.join(",");
+    }
+	if (noti === 'show_noti') {
+		loading('show');
+	}
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "includes/php_ajax/Check_Connection.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            try {
+                var data = JSON.parse(xhr.responseText);
+                if (!data.success) {
+                    showMessagePHP('Lỗi kiểm tra trạng thái Online: ' + data.message);
+                    return;
+                }
+                var results = data.data;
+                applyPingResult(results);
+                for (var ip in results) {
+                    var status = results[ip].success;
+                    updateDeviceStatus(ip, status);
+                    if (noti === 'show_noti') {
+						loading('hide');
+                        if (status) {
+                            showMessagePHP("<font color=green>Thiết bị " + ip + " đang trực tuyến</font>");
+                        } else {
+                            showMessagePHP("<font color=red>Thiết bị " + ip + " ngoại tuyến</font>");
+                        }
+                    }
+                }
+            } catch (e) {
+                showMessagePHP('Lỗi JSON kiểm tra trạng thái Online: ' + xhr.responseText);
+            }
+        }
+    };
+    var params = "ping_status=1&ip=" + encodeURIComponent(ipList);
+    xhr.send(params);
+}
+
+//Ping Lại
+function pingAgain() {
+    if (globalIpList.length > 0) {
+        sendPing(globalIpList.join(","));
+		showMessagePHP('Đã kiểm tra lại trạng thái Online của thiết bị');
+    }
 }
 
 // Hiển thị modal xem nội dung file json Home_Assistant.json
