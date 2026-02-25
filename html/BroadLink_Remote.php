@@ -646,20 +646,18 @@ function loadLearnedCommandsEditable() {
                 var tr = document.createElement('tr');
                 tr.dataset.cmdMac = mac;
                 tr.dataset.cmdIndex = index;
-                //Kiểm tra wave
                 var hasWaveKey = cmd.hasOwnProperty('wave');
                 var waveValue = (hasWaveKey && cmd.wave) ? cmd.wave : null;
                 var waveText = (!waveValue || waveValue.trim() === '') ? 'N/A' : waveValue.toUpperCase();
                 var waveClass = (!waveValue || waveValue.trim() === '') ? 'text-muted' : waveValue === 'ir' ? 'text-success' : waveValue === 'rf' ? 'text-danger' : '';
                 var isRFCommand = hasWaveKey && waveValue === 'rf';
-                //select device
                 var options = '';
                 var macUpper = mac.toUpperCase();
                 var deviceExists = devices.some(function(dev) {
                     return dev.mac.toUpperCase() === macUpper;
                 });
                 if (!deviceExists) {
-                    options += '<option value="" selected class="text-danger">⚠ Không có thiết bị tương ứng (Hoặc đã bị xóa)</option>';
+                    options += '<option value="" selected class="text-danger"><i class="bi bi-exclamation-triangle"></i> Không có thiết bị tương ứng (Hoặc đã bị xóa)</option>';
                 }
                 devices.forEach(function(dev) {
                     var isSelected = deviceExists && dev.mac.toUpperCase() === macUpper;
@@ -669,11 +667,10 @@ function loadLearnedCommandsEditable() {
                     var rfNote = (isRFCommand && !devHasRF) ? '' : '';
                     options += '<option value="' + dev.mac + '" ' + 'data-devtype="' + dev.devtype + '" ' + (isSelected ? 'selected' : '') + ' ' + disabledAttr + '>' +dev.friendly_name + ' (' + dev.ip + ' - ' + dev.mac + ')' +rfNote +'</option>';
                 });
-                //innerHTML
                 tr.innerHTML =
                     '<td class="text-center">' + (rowNum++) + '</td>' +
                     '<td><textarea class="form-control border-success cmd_name">' + (cmd.name || '') + '</textarea></td>' +
-                    '<td><textarea class="form-control border-success cmd_reply">' + (cmd.reply || '') + '</textarea></td>' +
+                    '<td><textarea class="form-control border-success cmd_reply" placeholder="Để trống nếu không sử dụng câu phản hồi tùy chỉnh">' + (cmd.reply || '') + '</textarea></td>' +
                     '<td><select class="form-select border-success cmd_device_select">' + options + '</select></td>' +
                     '<td class="text-center">' +
                         '<div class="form-switch">' +
