@@ -1010,18 +1010,38 @@ if (isset($_POST['Check_For_Upgrade'])) {
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mb-3">
-                                    <label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">Giữ lại tệp, thư mục <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp, thư mục không cho cập nhật, ghi đè. <b>Áp dụng cho những tệp, thư mục lưu trữ cấu hình, thông tin Cá Nhân (Có tính chất Riêng Tư)</b><br/><br/>- Thiết lập thêm bớt file và thư mục trong tab: <b>Cấu Hình Config</b>')"></i> :</label>
-                                    <div class="col-sm-9">
-                                        <div class="input-group mb-3">
-                                            <?php
-                                            foreach ($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] as $keep_the_file_folder_tuyen) {
-                                                echo '<input type="checkbox" class="form-check-input border-success" name="keep_the_file_folder[]" id="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" value="' . htmlspecialchars($keep_the_file_folder_tuyen) . '" checked>&nbsp;<label for="' . htmlspecialchars($keep_the_file_folder_tuyen) . '">' . htmlspecialchars($keep_the_file_folder_tuyen) . '</label>&emsp;&emsp;';
-                                            }
-                                            ?>
-                                        </div>
-                                    </div>
-                                </div>
+
+<div class="row mb-3">
+    <label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">
+        Giữ lại tệp, thư mục
+        <i class="bi bi-question-circle-fill" onclick="show_message('Giữ lại tệp, thư mục không cho cập nhật, ghi đè. <b>Áp dụng cho những tệp, thư mục lưu trữ cấu hình, thông tin Cá Nhân (Có tính chất Riêng Tư)</b><br/><br/>- Thiết lập thêm bớt file và thư mục trong tab: <b>Cấu Hình Config</b>')"></i> :
+    </label>
+    <div class="col-sm-9">
+        <div class="input-group mb-2">
+            <input type="checkbox" class="form-check-input border-primary" id="check_all_keep_folder_vbot" checked>
+            &nbsp;
+            <label for="check_all_keep_folder_vbot" class="text-danger">
+                <b>Chọn / Bỏ chọn tất cả</b>
+            </label>
+        </div>
+        <div class="input-group mb-3">
+            <?php
+            foreach ($Config['backup_upgrade']['vbot_program']['upgrade']['keep_file_directory'] as $keep_the_file_folder_tuyen) {
+                echo '<input type="checkbox"
+                        class="form-check-input border-success keep-folder-vbot"
+                        name="keep_the_file_folder[]"
+                        id="vbot_' . htmlspecialchars($keep_the_file_folder_tuyen) . '"
+                        value="' . htmlspecialchars($keep_the_file_folder_tuyen) . '"
+                        checked>
+                      &nbsp;
+                      <label for="vbot_' . htmlspecialchars($keep_the_file_folder_tuyen) . '">'
+                        . htmlspecialchars($keep_the_file_folder_tuyen) .
+                      '</label>&emsp;&emsp;';
+            }
+            ?>
+        </div>
+    </div>
+</div>
                                 <center>
                                     <button type="submit" name="Check_For_Upgrade" class="btn btn-primary rounded-pill" onclick="loading('show')">Kiểm Tra Bản Cập Nhật</button>
                                     <button type="submit" name="Backup_Upgrade_Program" value="yes_vbot_upgrade" class="btn btn-success rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản chương trình VBot mới?')">Cập Nhật Chương Trình</button>
@@ -1047,30 +1067,61 @@ if (isset($_POST['Check_For_Upgrade'])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="row mb-3">
-                                <label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">Loại Trừ File/Thư Mục Không Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('thêm hoặc loại bỏ file, thư mục sẽ được cấu hình trong <b>Config.json</b> hoặc chỉnh sửa trong tab <b>Cấu Hình Config</b>')"></i> :</label>
-                                <div class="col-sm-9">
-                                    <div class="input-group mb-3">
-                                        <?php
-                                        foreach ($Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder'] as $exclude_files_folderr) {
-                                            echo '<input type="checkbox" class="form-check-input border-success" name="exclude_files_folder[]" id="' . htmlspecialchars($exclude_files_folderr) . '" value="' . htmlspecialchars($exclude_files_folderr) . '" checked>&nbsp;<label for="' . htmlspecialchars($exclude_files_folderr) . '">' . htmlspecialchars($exclude_files_folderr) . '</label>&emsp;&emsp;';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row mb-3">
-                                <label for="loai_tru_dinh_dang_file" class="col-sm-3 col-form-label">Loại Trừ Định Dạng File Không Sao Lưu <i class="bi bi-question-circle-fill" onclick="show_message('thêm hoặc loại bỏ định dạng file sẽ được cấu hình trong <b>Config.json</b> hoặc chỉnh sửa trong tab <b>Cấu Hình Config</b>')"></i> :</label>
-                                <div class="col-sm-9">
-                                    <div class="input-group mb-3">
-                                        <?php
-                                        foreach ($Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] as $exclude_file_formatt) {
-                                            echo '<input type="checkbox" class="form-check-input border-success" name="exclude_file_format[]" id="' . htmlspecialchars($exclude_file_formatt) . '" value="' . htmlspecialchars($exclude_file_formatt) . '" checked>&nbsp;<label for="' . htmlspecialchars($exclude_file_formatt) . '">' . htmlspecialchars($exclude_file_formatt) . '</label>&emsp;&emsp;';
-                                        }
-                                        ?>
-                                    </div>
-                                </div>
-                            </div>
+
+<div class="row mb-3">
+    <label for="loai_tru_file_thu_muc" class="col-sm-3 col-form-label">
+        Loại Trừ File/Thư Mục Không Sao Lưu
+        <i class="bi bi-question-circle-fill" onclick="show_message('thêm hoặc loại bỏ file, thư mục sẽ được cấu hình trong <b>Config.json</b> hoặc chỉnh sửa trong tab <b>Cấu Hình Config</b>')"></i> :
+    </label>
+    <div class="col-sm-9">
+        <div class="input-group mb-2">
+            <input type="checkbox" class="form-check-input border-primary" id="check_all_exclude_backup" checked>
+            &nbsp;<label for="check_all_exclude_backup" class="text-danger"><b>Chọn / Bỏ chọn tất cả</b></label>
+        </div>
+        <div class="input-group mb-3">
+            <?php
+            foreach ($Config['backup_upgrade']['vbot_program']['backup']['exclude_files_folder'] as $exclude_files_folderr) {
+                echo '<input type="checkbox"
+                        class="form-check-input border-success exclude-backup-item"
+                        name="exclude_files_folder[]"
+                        id="exclude_' . htmlspecialchars($exclude_files_folderr) . '"
+                        value="' . htmlspecialchars($exclude_files_folderr) . '"
+                        checked>
+                      &nbsp;
+                      <label for="exclude_' . htmlspecialchars($exclude_files_folderr) . '">'
+                        . htmlspecialchars($exclude_files_folderr) .
+                      '</label>&emsp;&emsp;';
+            }
+            ?>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-3">
+    <label for="loai_tru_dinh_dang_file" class="col-sm-3 col-form-label">
+        Loại Trừ Định Dạng File Không Sao Lưu
+        <i class="bi bi-question-circle-fill" onclick="show_message('thêm hoặc loại bỏ định dạng file sẽ được cấu hình trong <b>Config.json</b> hoặc chỉnh sửa trong tab <b>Cấu Hình Config</b>')"></i> :
+    </label>
+    <div class="col-sm-9">
+        <div class="input-group mb-2">
+            <input type="checkbox" class="form-check-input border-primary" id="check_all_exclude_format" checked>
+            &nbsp;
+            <label for="check_all_exclude_format" class="text-danger"><b>Chọn / Bỏ chọn tất cả</b></label>
+        </div>
+        <div class="input-group mb-3">
+            <?php
+            foreach ($Config['backup_upgrade']['vbot_program']['backup']['exclude_file_format'] as $exclude_file_formatt) {
+                echo '<input type="checkbox" class="form-check-input border-success exclude-format-item" name="exclude_file_format[]"
+                        id="format_' . htmlspecialchars($exclude_file_formatt) . '" value="' . htmlspecialchars($exclude_file_formatt) . '" checked>
+                      &nbsp;
+                      <label for="format_' . htmlspecialchars($exclude_file_formatt) . '">'
+                        . htmlspecialchars($exclude_file_formatt) .
+                      '</label>&emsp;&emsp;';
+            }
+            ?>
+        </div>
+    </div>
+</div>
                             <h5 class="card-title">Tải File Sao Lưu Lên Drive:</h5>
                             <div class="row mb-3">
                                 <label for="google_gemini_time_out" class="col-sm-3 col-form-label">Nguồn:</label>
@@ -1151,6 +1202,78 @@ if (isset($_POST['Check_For_Upgrade'])) {
     <?php
     include 'html_js.php';
     ?>
+	<script>
+	//Giữ lại tệp, thư mục
+	document.addEventListener("DOMContentLoaded", function () {
+		const checkAllVbot = document.getElementById("check_all_keep_folder_vbot");
+		const checkboxesVbot = document.querySelectorAll(".keep-folder-vbot");
+		checkAllVbot.addEventListener("change", function () {
+			checkboxesVbot.forEach(function (checkbox) {
+				checkbox.checked = checkAllVbot.checked;
+			});
+		});
+		checkboxesVbot.forEach(function (checkbox) {
+			checkbox.addEventListener("change", function () {
+				if (!this.checked) {
+					checkAllVbot.checked = false;
+				} else {
+					const allChecked = Array.from(checkboxesVbot).every(cb => cb.checked);
+					checkAllVbot.checked = allChecked;
+				}
+			});
+		});
+
+	});
+	</script>
+	<script>
+	//Loại Trừ File/Thư Mục Không Sao Lưu
+	document.addEventListener("DOMContentLoaded", function () {
+		const checkAllExclude = document.getElementById("check_all_exclude_backup");
+		const excludeItems = document.querySelectorAll(".exclude-backup-item");
+		if (!checkAllExclude) return;
+		checkAllExclude.addEventListener("change", function () {
+			excludeItems.forEach(function (item) {
+				item.checked = checkAllExclude.checked;
+			});
+		});
+		excludeItems.forEach(function (item) {
+			item.addEventListener("change", function () {
+
+				if (!this.checked) {
+					checkAllExclude.checked = false;
+					return;
+				}
+				const allChecked = Array.from(excludeItems).every(cb => cb.checked);
+				checkAllExclude.checked = allChecked;
+			});
+		});
+
+	});
+	</script>
+	<script>
+	//Loại Trừ Định Dạng File Không Sao Lưu
+	document.addEventListener("DOMContentLoaded", function () {
+		const checkAllFormat = document.getElementById("check_all_exclude_format");
+		const formatItems = document.querySelectorAll(".exclude-format-item");
+		if (!checkAllFormat) return;
+		checkAllFormat.addEventListener("change", function () {
+			formatItems.forEach(function (item) {
+				item.checked = checkAllFormat.checked;
+			});
+		});
+		formatItems.forEach(function (item) {
+			item.addEventListener("change", function () {
+				if (!this.checked) {
+					checkAllFormat.checked = false;
+					return;
+				}
+				const allChecked = Array.from(formatItems).every(cb => cb.checked);
+				checkAllFormat.checked = allChecked;
+			});
+		});
+
+	});
+	</script>
 </body>
 
 </html>
