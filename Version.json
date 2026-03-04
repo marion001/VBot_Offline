@@ -1,7 +1,7 @@
 {
     "version": "1.0.93",
     "projectName": "Program VBot Offline",
-    "description": "Hỗ Trợ câu lệnh: 'Thiết lập' -> điều khiển: fan, light kèm thông số. VD: (Thiết lập <quạt phòng ngủ> 15%, Thiết lập độ sáng <đèn ngủ> 70%)",
+    "description": "Hỗ Trợ câu lệnh: 'Thiết lập' -> điều khiển: fan, light kèm thông số. VD: (Thiết lập >quạt phòng ngủ< 15%, Thiết lập độ sáng >đèn ngủ< 70%)",
     "releaseDate": "04/03/2026",
     "changes": [
         {
