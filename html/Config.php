@@ -1164,8 +1164,8 @@ include 'html_head.php';
 					  <?php
                       echo input_field('alsamixer_name', 'Tên thiết bị (alsamixer) ', htmlspecialchars($Config['smart_config']['speaker']['system']['alsamixer_name']), '', 'text', '', '', '', 'Tên của thiết bị âm thanh đầu ra trong alsamixer, cần điền đúng tên thiết bị âm thanh đầu ra hiện tại của alsamixer<br/><br/>- nếu không biết đâu là thiết bị âm thanh đầu ra thì bạn có thể phát 1 bài nhạc bằng vlc ví dụ: <b>$: vlc 1.mp3</b> sau đó vào alsamixer bằng lệnh: <b>$: alsamixer</b> thay đổi âm lượng của các thiết bị có trong đó để xác định xem đâu là tên thiết bị đầu ra', 'border-success', 'Tìm Kiếm', "scan_audio_devices('scan_alsamixer')", 'btn btn-success border-success', 'onclick', '_blank');
                       echo input_field('bot_volume', 'Âm lượng', $Config['smart_config']['speaker']['volume'] ?? 50, 'required', 'number', '1', '0', '100', 'Đặt mức âm lượng mặc định khi bắt đầu khởi chạy chương trình', 'border-success', '', '', '', '', '');
-                      echo input_field('bot_volume_min', 'Âm lượng thấp nhất', $Config['smart_config']['speaker']['volume_min'] ?? 0, 'required', 'number', '1', '0', '100', 'Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0', 'border-success', '', '', '', '', '');
-                      echo input_field('bot_volume_max', 'Âm lượng cao nhất', $Config['smart_config']['speaker']['volume_max'] ?? 100, 'required', 'number', '1', '0', '100', 'Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100', 'border-success', '', '', '', '', '');
+                      echo input_field('bot_volume_min', 'Giới hạn âm lượng thấp nhất', $Config['smart_config']['speaker']['volume_min'] ?? 0, 'required', 'number', '1', '0', '100', 'Mức âm lượng thấp nhất cho phép khi giảm âm lượng, thấp nhất là 0', 'border-success', '', '', '', '', '');
+                      echo input_field('bot_volume_max', 'Giới hạn âm lượng cao nhất', $Config['smart_config']['speaker']['volume_max'] ?? 100, 'required', 'number', '1', '0', '100', 'Mức âm lượng cao nhất khi tăng âm lương, cao nhất là 100', 'border-success', '', '', '', '', '');
                       echo input_field('bot_volume_step', 'Bước âm lượng', $Config['smart_config']['speaker']['volume_step'] ?? 10, 'required', 'number', '1', '0', '100', 'Bước âm lượng thay đổi khi mỗi lần nhấn nút tăng hoặc giảm âm lượng', 'border-danger', '', '', '', '', '');
                       ?>
                       <div class="row mb-3">
@@ -1835,6 +1835,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           </div>
                           <!-- ẩn hiện cấu hình select_tts_ggcloud_key style="display: none;" -->
                         </div>
+
                         </div>
                       </div>
                     </div>
@@ -1862,9 +1863,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   echo input_field('hass_long_token', 'Mã Token (Long Token)', $Config['home_assistant']['long_token'], '', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
                   echo input_field('hass_internal_url', 'URL nội bộ ', htmlspecialchars($Config['home_assistant']['internal_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_internal_url')", 'btn btn-success border-success', 'onclick', '_blank');
                   echo input_field('hass_external_url', 'URL bên ngoài ', htmlspecialchars($Config['home_assistant']['external_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_external_url')", 'btn btn-success border-success', 'onclick', '_blank');
-                  echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
+                  echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác từ khóa cao khi VBot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
                   echo input_field('hass_lowest_to_display_logs', 'Ngưỡng tối thiểu hiển thị ra logs', $Config['home_assistant']['lowest_to_display_logs'] ?? 0.39, 'required', 'number', '0.01', '0', '0.45', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-danger', '', '', '', '', '');
-                  echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-success', '', '', '', '', '');
+                  echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Thời gian chờ phản hồi tối đa khi kết nối với Hass, Home Assistant', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
 				<div class="alert alert-primary" role="alert">
