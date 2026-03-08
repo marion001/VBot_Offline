@@ -1,8 +1,8 @@
 {
-    "version": "1.0.93",
+    "version": "1.0.94",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ Trợ Custom DEV STT trong file Dev_STT.py và Chế độ khởi chạy toàn bộ chương trình Custom DEV Xử Lý Chính trong file Dev_Processing.py",
-    "releaseDate": "24/02/2026-1",
+    "description": "Tối ưu xử lý - tùy chỉnh thông số đánh thức Hotword WakeUP, hỗ trợ cấu hình thông số khuếch đại Gain Hotword WakeUP",
+    "releaseDate": "08/03/2026",
     "changes": [
         {
             "type": "feature",
