@@ -1,7 +1,7 @@
 {
     "version": "1.0.94",
     "projectName": "WebUI VBot Offline",
-    "description": "Tối ưu xử lý - tùy chỉnh thông số đánh thức Hotword WakeUP, hỗ trợ cấu hình thông số khuếch đại Gain Hotword WakeUP",
+    "description": "Tối ưu xử lý - tùy chỉnh thông số đánh thức Hotword WakeUP, hỗ trợ cấu hình thông số khuếch đại Gain Hotword WakeUP tăng độ nhạy",
     "releaseDate": "08/03/2026",
     "changes": [
         {
