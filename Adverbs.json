@@ -51,10 +51,12 @@
     ],
     "maximum":[
         "tối đa",
+		"cao nhất",
         "full"
     ],
     "minimum":[
-        "tối thiểu"
+        "tối thiểu",
+		"thấp nhất"
     ],
     "bigger": [
         "to hơn",
