@@ -408,6 +408,10 @@
             "speak_to_text": {
                 "stt_select": "stt_default",
                 "duration_recording": 6,
+                "gain": {
+                    "active": false,
+                    "value_float": 1.4
+                },
                 "stt_default": [],
                 "stt_viettel": {
                     "api_key": [

@@ -159,7 +159,9 @@ if (isset($_POST['all_config_save'])) {
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
-
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] = floatval($_POST['stt_gain']);
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] = isset($_POST['stt_gain_active']) ? true : false;
+  
   #Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
   $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['conversation_mode']) ? true : false;
 
@@ -1320,6 +1322,20 @@ include 'html_head.php';
 				<?php
                   echo input_field('duration_recording', 'Thời gian lắng nghe tối đa (giây)', $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] ?? 6, 'required', 'number', '1', '3', '10', 'Thời gian lắng nghe tối đa khi Bot được đánh thức', 'border-success', '', '', '', '', '');
                   ?>
+				<div class="alert alert-primary" role="alert">
+				<h5 class="card-title">Khuếch Đại Âm Thanh STT <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt Khuếch đại âm thanh khi thu âm câu lệnh Speak To Text. Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại)')"></i> :</h5>
+			<div class="row mb-3">
+			<label for="" class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khuếch đại âm thanh khi thu âm câu lệnh Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại. Lớn hơn 3.0 có thể sẽ bị méo tiếng, gây nhiễu, nhận diện kém)')"></i> :</label>
+			<div class="col-sm-9">
+			  <div class="form-switch">
+				<input class="form-check-input border-success" type="checkbox" name="stt_gain_active" id="stt_gain_active" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] ? 'checked' : ''; ?>>
+			  </div>
+			</div>
+		  </div>
+			  <?php
+			  echo input_field('stt_gain', 'Mức Nhân Khuếch Đại (Gain)', $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] ?? 1.4, 'required', 'number', '0.1', '1.0', '', 'Khuếch đại âm thanh từ Mic để thu âm câu lệnh, Nên có giá trị từ 1.1 -> 2.5, nếu đặt là <b>1, 1.0, dưới 1</b> sẽ không khuếch đại', 'border-success', '', '', '', '', '');
+			  ?>
+				</div>
                   <div class="row">
                     <div class="col-lg-6">
                       <div class="card">

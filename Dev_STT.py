@@ -23,6 +23,9 @@ Lib.os.environ["GRPC_POLL_STRATEGY"] = "epoll1"
 #Thời gian thu âm STT tối đa
 maximum_recording_time = Lib.config["smart_config"]["smart_wakeup"]["speak_to_text"]["duration_recording"]
 
+#Tham số cấu hình nhân Gain, khuếch đại âm thanh thu từ Mic
+STT_GAIN_VALUE_FLOAT = float(Lib.config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'])
+
 #Mỗi giây ghi lại 16.000 giá trị âm thanh (16 kHz)
 RATE = 16000
 
@@ -60,6 +63,10 @@ async def dev_stt():
                 #Chuyển dữ liệu audio dạng số nguyên (list/int array) thành bytes PCM 16-bit
                 pcm_bytes = Lib.array.array('h', audio_frame).tobytes()
 
+                #Nhân Khuếch Đại Gain Mic
+                if Lib.stt_gain_active:
+                    pcm_bytes = Lib.audioop.mul(pcm_bytes, 2, STT_GAIN_VALUE_FLOAT)
+
                 #Nếu bật lọc nhiễu âm thanh đầu vào Mic: Noise + AGC 
                 if Lib.Noise_Auto_Gain:
 
@@ -70,8 +77,8 @@ async def dev_stt():
                     while len(agc_buffer) >= 320:  #10ms @16kHz
 
                         #Lấy 320 bytes đầu tiên (1 frame 10ms) để xử lý
-                        chunk = bytes(agc_buffer[:320])
-
+                        chunk = agc_buffer[:320]
+                        
                         #Xóa phần đã lấy khỏi buffer để chuẩn bị cho frame tiếp theo
                         del agc_buffer[:320]
 
