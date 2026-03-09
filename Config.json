@@ -309,7 +309,7 @@
             "vad_mode": 1,
             "rms_threshold": 100,
             "webrtc_noise_gain": {
-                "active": true,
+                "active": false,
                 "auto_gain_dbfs": 4,
                 "noise_suppression_level": 2
             }
