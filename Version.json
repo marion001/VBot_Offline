@@ -2,7 +2,7 @@
     "version": "1.0.95",
     "projectName": "Program VBot Offline",
     "description": "Tối ưu xử lý - tùy chỉnh thông số đánh thức Hotword WakeUP + STT, hỗ trợ cấu hình thông số khuếch đại Gain Hotword WakeUP + STT tăng độ nhạy",
-    "releaseDate": "09/03/2026",
+    "releaseDate": "11/03/2026",
     "changes": [
         {
             "type": "feature",
