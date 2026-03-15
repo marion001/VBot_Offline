@@ -319,7 +319,8 @@ include 'html_head.php';
             $tarCommand .= " --exclude=" . escapeshellarg($item);
         }
         foreach ($Exclude_File_Format as $ext) {
-            $tarCommand .= " --exclude=*" . escapeshellarg($ext);
+            #$tarCommand .= " --exclude=*" . escapeshellarg($ext);
+			$tarCommand .= " --exclude=" . escapeshellarg("*$ext");
         }
         #$tarCommand .= " . --warning=all 2>&1";
 		$tarCommand .= " . --ignore-failed-read --warning=no-file-changed 2>&1";
@@ -357,7 +358,7 @@ include 'html_head.php';
             return $Backup_File_Name;
         } else {
             #$messages[] = '<br/></font color=red>- Lỗi khi nén thư mục. Mã lỗi: ' . $returnCode . '</font>';
-			$messages[] = "<pre>$tarCommand</pre>";
+			$messages[] = "$:> $tarCommand<br/>";
 			$messages[] = '<br/><font color=red>Lỗi khi nén thư mục. Mã lỗi: ' 
               . $returnCode . ', ' 
               . implode("<br>", $output)
