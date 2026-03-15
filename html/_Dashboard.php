@@ -224,7 +224,8 @@ include 'html_head.php';
         foreach ($Exclude_File_Format as $ext) {
             $tarCommand .= " --exclude=*" . escapeshellarg($ext);
         }
-        $tarCommand .= " . --warning=all 2>&1";
+        #$tarCommand .= " . --warning=all 2>&1";
+		$tarCommand .= " . --ignore-failed-read --warning=no-file-changed 2>&1";
         exec($tarCommand, $output, $returnCode);
         if ($returnCode === 0) {
             chmod($Backup_File_Name_Web, 0777);
