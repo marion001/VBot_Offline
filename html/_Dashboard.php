@@ -258,7 +258,12 @@ include 'html_head.php';
             }
             return $Backup_File_Name_Web;
         } else {
-            $messages[] = '<br/></font color=red>Lỗi khi nén thư mục. Mã lỗi: ' . $returnCode . ', ' . $output . '</font>';
+            //$messages[] = '<br/></font color=red>Lỗi khi nén thư mục. Mã lỗi: ' . $returnCode . ', ' . $output . '</font>';
+			$messages[] = "<pre>$tarCommand</pre>";
+			$messages[] = '<br/><font color=red>Lỗi khi nén thư mục. Mã lỗi: ' 
+              . $returnCode . ', ' 
+              . implode("<br>", $output)
+              . '</font>';
             return null;
         }
     }
