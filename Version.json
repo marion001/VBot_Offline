@@ -1,8 +1,8 @@
 {
     "version": "1.0.95",
     "projectName": "Program VBot Offline",
-    "description": "Sửa các lỗi vặt, tối ưu cấu trúc xử lý thu âm",
-    "releaseDate": "11/03/2026",
+    "description": "Sửa Lỗi Thu Âm Câu Lệnh STT, Speak To Text",
+    "releaseDate": "15/03/2026",
     "changes": [
         {
             "type": "feature",

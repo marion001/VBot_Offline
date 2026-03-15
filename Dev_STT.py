@@ -83,7 +83,7 @@ async def dev_stt():
                         del agc_buffer[:320]
 
                         #Đưa frame 10ms vào bộ xử lý AGC
-                        result = Lib.Noise_Auto_Gain.Process10ms(chunk)
+                        result = Lib.Noise_Auto_Gain.Process10ms(bytes(chunk))
                         
                         #Gửi frame audio đã xử lý vào Google Streaming STT
                         yield speech.StreamingRecognizeRequest(audio_content=result.audio)
