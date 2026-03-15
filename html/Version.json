@@ -1,8 +1,8 @@
 {
-    "version": "1.0.95",
+    "version": "1.0.96",
     "projectName": "WebUI VBot Offline",
-    "description": "Tối ưu xử lý - tùy chỉnh thông số đánh thức Hotword WakeUP + STT, hỗ trợ cấu hình thông số khuếch đại Gain Hotword WakeUP + STT tăng độ nhạy",
-    "releaseDate": "09/03/2026",
+    "description": "Hỗ Trợ Dev_Logs.py (Người dùng tự code hiển thị Logs theo ý muốn như: tích hợp màn hình, gửi logs tới api, V..v...), Sửa Lỗi Thu Âm Câu Lệnh STT, Speak To Text",
+    "releaseDate": "15/03/2026",
     "changes": [
         {
             "type": "feature",

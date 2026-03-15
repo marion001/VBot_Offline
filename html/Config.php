@@ -3795,7 +3795,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                   [
                     'console' => 'console (Hiển thị log ra bảng điều khiển đầu cuối)',
                     'api' => 'api (Hiển thị log ra API, Web UI)',
-                    'all' => 'all (Hiển thị log ra tất cả các đường)'
+                    'all' => 'all (Hiển thị log ra tất cả các đường trừ Dev_Logs.py)',
+                    'dev_custom' => 'dev_custom (Dev_Logs.py Người Dùng Tự Code)'
                   ], $Config['smart_config']['show_log']['log_display_style'], []);
                 ?>
               </div>

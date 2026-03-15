@@ -302,7 +302,7 @@
         "show_log": {
             "active": true,
             "log_display_style": "console",
-            "notes": "display_screen, console, all, api"
+            "notes": "dev_custom, console, all, api"
         },
         "webrtcvad": {
             "active": false,
