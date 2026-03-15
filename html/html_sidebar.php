@@ -201,6 +201,11 @@
           <i class="bi bi-circle"></i><span>DEV Processing (Custom Xử Lý Chính)</span>
         </a>
       </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Logs">
+        <a href="DEV_Logs.php">
+          <i class="bi bi-circle"></i><span>DEV Logs (Custom Xử Lý Logs)</span>
+        </a>
+      </li>
     </ul>
   </li>
 
