@@ -408,6 +408,7 @@
             "speak_to_text": {
                 "stt_select": "stt_default",
                 "duration_recording": 6,
+                "interim_results": false,
                 "gain": {
                     "active": false,
                     "value_float": 1.4
@@ -425,7 +426,6 @@
                     "channels": 1,
                     "chunk": 4096,
                     "language_code": "vi-VN",
-                    "interim_results": true,
                     "single_utterance": true,
                     "stt_ggcloud_v2": {
                         "recognizer_id": "điền id recogines của bạn",

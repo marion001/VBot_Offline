@@ -161,6 +161,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] = floatval($_POST['stt_gain']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] = isset($_POST['stt_gain_active']) ? true : false;
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['interim_results'] = isset($_POST['stt_interim_results']) ? true : false;
   
   #Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
   $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['conversation_mode']) ? true : false;
@@ -1322,6 +1323,14 @@ include 'html_head.php';
 				<?php
                   echo input_field('duration_recording', 'Thời gian lắng nghe tối đa (giây)', $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] ?? 6, 'required', 'number', '1', '3', '10', 'Thời gian lắng nghe tối đa khi Bot được đánh thức', 'border-success', '', '', '', '', '');
                   ?>
+			<div class="row mb-3">
+			<label for="" class="col-sm-3 col-form-label">Hiển Thi Logs Dữ Liệu Tạm Thời <i class="bi bi-question-circle-fill" onclick="show_message('Hiển Thị Logs Trung gian dữ liệu (kết quả tạm thời) trong quá trình thu âm chuyển đổi từ STT sang Text')"></i> :</label>
+			<div class="col-sm-9">
+			  <div class="form-switch">
+				<input class="form-check-input border-success" type="checkbox" name="stt_interim_results" id="stt_interim_results" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['interim_results'] ? 'checked' : ''; ?>>
+			  </div>
+			</div>
+		  </div>
 				<div class="alert alert-primary" role="alert">
 				<h5 class="card-title">Khuếch Đại Âm Thanh STT <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt Khuếch đại âm thanh khi thu âm câu lệnh Speak To Text. Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại)')"></i> :</h5>
 			<div class="row mb-3">
