@@ -3,40 +3,28 @@
     "message": "Danh sách phát tổng hợp",
     "data": [
         {
-            "ids_list": "1CDAE0",
-            "title": "TAY TRÁI CHỈ TRĂNG - DJ TRIỆU MUZIK FT CM REMIX - 左手指月 - Upwards To The Moon",
-            "cover": "https://i.ytimg.com/vi/Pemu_FbzLEs/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=Pemu_FbzLEs",
-            "duration": null,
-            "description": "BẢN FULL 1 TIẾNG: https://youtu.be/YGtVf1q3VAQ?si=5vJdPaUhBmdvKEFp LIÊ...",
-            "source": "Youtube",
-            "id": "Pemu_FbzLEs",
-            "channelTitle": "DJ Triệu Muzik Official",
-            "artist": null
+            "ids_list": "1D413E",
+            "title": "Thuyền Quyên",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/2/e/c/5/2ec51983dbff681cc3cb7af20b4c7ad2.jpg",
+            "audio": "ZZDD86BZ",
+            "duration": "03:13",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "ZZDD86BZ",
+            "channelTitle": null,
+            "artist": "Diệu Kiên"
         },
         {
-            "ids_list": "CAE18C",
-            "title": "Tay Trái Chỉ Trăng Remix  ( Dj QT Mix )",
-            "cover": "https://i.ytimg.com/vi/wDYn39p3S0U/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=wDYn39p3S0U",
-            "duration": null,
-            "description": "Facebook :https://www.facebook.com/TikTok-QT-Dj-QT-Official-1021176583...",
-            "source": "Youtube",
-            "id": "wDYn39p3S0U",
-            "channelTitle": "Dj QT Mix Official",
-            "artist": null
-        },
-        {
-            "ids_list": "800359",
-            "title": "Nhạc Trung Remix - Tay Trái Chỉ Trăng - Tát Đỉnh Đỉnh - Nhạc Hot TikTok 2021 😅😁",
-            "cover": "https://i.ytimg.com/vi/aHtsBkxP0UY/hqdefault.jpg",
-            "audio": "https://www.youtube.com/watch?v=aHtsBkxP0UY",
-            "duration": "00:04:01",
-            "description": "Nhạc Trung Remix - Tay Trái Chỉ Trăng - Tát Đỉnh Đỉnh - Nhạc Hot TikTo...",
-            "source": "Youtube",
-            "id": "aHtsBkxP0UY",
-            "channelTitle": "Lỉnk Music ♡",
-            "artist": null
+            "ids_list": "49AF60",
+            "title": "Hoa Cỏ Lau (Ballad)",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/7/8/0/6/7806c3ae887611fe0c4a66ff6464338a.jpg",
+            "audio": "Z6DOZCO8",
+            "duration": "03:34",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z6DOZCO8",
+            "channelTitle": null,
+            "artist": "Ngân Ngân"
         }
     ]
 }

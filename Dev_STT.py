@@ -23,6 +23,8 @@ Lib.os.environ["GRPC_POLL_STRATEGY"] = "epoll1"
 #Thời gian thu âm STT tối đa
 maximum_recording_time = Lib.config["smart_config"]["smart_wakeup"]["speak_to_text"]["duration_recording"]
 
+dev_stt_interim_results = Lib.config["smart_config"]["smart_wakeup"]["speak_to_text"]["interim_results"]
+
 #Tham số cấu hình nhân Gain, khuếch đại âm thanh thu từ Mic
 STT_GAIN_VALUE_FLOAT = float(Lib.config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'])
 
@@ -112,7 +114,7 @@ async def dev_stt():
         )
         streaming_config = speech.StreamingRecognitionConfig(
             config=config,
-            interim_results=True,   #Hiển Thị Kết quả trung gian (True là bật, False là tắt) (bật True chỉ dùng để Debug)
+            interim_results=dev_stt_interim_results,   #Hiển Thị Kết quả trung gian (True là bật, False là tắt) (bật True chỉ dùng để Debug)
             single_utterance=True   #Kích hoạt chế độ ngắt tự động khi phát hiện dừng nói (True = Bật, False = Tắt)
         )
         requests = audio_generator()
