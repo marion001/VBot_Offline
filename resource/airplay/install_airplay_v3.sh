@@ -676,8 +676,8 @@ main() {
         build-essential git autoconf automake libtool pkg-config
         libpopt-dev libconfig-dev libasound2-dev
         avahi-daemon libavahi-client-dev libssl-dev
-        libsoxr-dev libplist-dev libsodium-dev
-        libavutil-dev libavcodec-dev libavformat-dev
+        libsoxr-dev libplist-dev libsodium-dev libgcrypt-dev
+        libavutil-dev libavcodec-dev libavformat-dev libplist-utils
         uuid-dev libgcrypt20-dev xxd alsa-utils libmosquitto-dev mosquitto mosquitto-clients zram-tools
     )
 
@@ -818,8 +818,8 @@ main() {
     fi
 
     cecho "yellow" "Cấu hình bản dựng..."
-    if ! ./configure --with-mqtt-client --sysconfdir=/etc --with-alsa --with-avahi \
-        --with-ssl=openssl --with-soxr --with-dbus-interface --with-systemd \
+    if ! ./configure --with-mqtt-client --sysconfdir=/etc --with-alsa \
+        --with-soxr --with-avahi --with-dbus-interface --with-ssl=openssl --with-systemd-startup \
         --with-airplay-2 2>&1 | tee -a "$LOG_FILE"; then
         cecho "red" "❌ Cấu hình Shairport-Sync thất bại từ nguồn VBot Assistant"
         exit 1
