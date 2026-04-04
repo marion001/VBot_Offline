@@ -791,16 +791,18 @@ main() {
     echo
 
     #Cài đặt Shairport-Sync
+	git_vbot_shairport_sync="https://github.com/marion001/shairport-sync.git"
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     cecho "blue" "   Cài đặt Shairport-Sync từ nguồn VBot Assistant..."
     cecho "blue" "   (Quá trình này mất 10-20 phút trên các máy Raspberry Pi có cấu hình chậm hơn.)"
     cecho "blue" "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
     log "Đang sao chép kho lưu trữ Shairport-Sync từ nguồn VBot Assistant..."
+	log "$git_vbot_shairport_sync"
 
     safe_cd /tmp
     rm -rf shairport-sync 2>/dev/null || true
 
-    if ! git clone https://github.com/marion001/shairport-sync.git 2>&1 | tee -a "$LOG_FILE"; then
+    if ! git clone "$git_vbot_shairport_sync" 2>&1 | tee -a "$LOG_FILE"; then
         cecho "red" "❌ Không thể sao chép kho lưu trữ Shairport-Sync từ nguồn VBot Assistant."
         cecho "yellow" "   Nguyên nhân có thể:"
         cecho "yellow" "   - Không có kết nối internet"
@@ -811,6 +813,12 @@ main() {
 
     safe_cd shairport-sync
     log "Xây dựng Shairport-Sync..."
+
+	#Fix quyền và CRLF
+	chmod +x verify-gitversion
+	dos2unix verify-gitversion 2>/dev/null || true
+	find . -type f -exec sed -i 's/\r$//' {} +
+	chmod +x xml_plist_codegen.sh
 
     if ! autoreconf -fi 2>&1 | tee -a "$LOG_FILE"; then
         cecho "red" "❌ Shairport-Sync tự động cấu hình lại thất bại"
@@ -845,14 +853,25 @@ main() {
 
     cecho "yellow" "Cài đặt..."
     # Lưu ý: lệnh `make install` có thể thất bại khi cài đặt dịch vụ systemd, nhưng điều đó không sao.
-    # Chúng ta sẽ tạo tệp dịch vụ theo cách thủ công sau.
-    sudo make install 2>&1 | tee -a "$LOG_FILE" || true
+
+	#Dừng nếu đang chạy shairport-sync
+	#log "Dừng: systemctl stop shairport-sync"
+	#sudo systemctl stop shairport-sync 2>/dev/null || true
+	#sleep 1
+	#sudo killall shairport-sync 2>/dev/null || true
+	#log "Xóa dữ liệu cũ: rm -f /usr/local/bin/shairport-sync"
+	#sudo rm -f /usr/local/bin/shairport-sync
+
+	if ! sudo make install 2>&1 | tee -a "$LOG_FILE"; then
+		echo "⚠️ make install báo lỗi, kiểm tra lại..."
+	fi
 
     # What matters is that the binary was installed
     if ! command_exists shairport-sync; then
         cecho "red" "❌ Không tìm thấy tệp nhị phân Shairport-Sync từ nguồn VBot Assistant sau khi cài đặt."
         cecho "yellow" "   Vị trí dự kiến: /usr/local/bin/shairport-sync"
         cecho "yellow" "   Quá trình 'make install' có thể đã thất bại - hãy kiểm tra nhật ký."
+		sudo systemctl restart shairport-sync
         exit 1
     fi
 

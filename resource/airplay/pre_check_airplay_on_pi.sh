@@ -147,7 +147,7 @@ if [ $CHECKS_FAILED -eq 0 ]; then
     echo "✅ Hệ thống đã sẵn sàng để cài đặt!"
     echo
     echo "Để cài đặt, hãy chạy lệnh sau:"
-    echo "  bash install_airplay_v3.sh"
+    echo "$:> bash install_airplay_v3.sh"
     exit 0
 else
     echo "❌ Vui lòng sửa các lỗi kiểm tra trước khi cài đặt."

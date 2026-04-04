@@ -14,18 +14,18 @@ Cài đặt Tự ĐỘng:
 
 	install_airplay_v3.sh: Trình cài đặt chính mạnh mẽ thực hiện tất cả các hành động cần thiết để xây dựng và cấu hình phần mềm AirPlay 2 (Shairport-Sync và nqptp).
 
-
-	$:> dos2unix install_airplay_v3.sh
-	$:> dos2unix pre_check_airplay_on_pi.sh
-
 	#Chạy lệnh sau để đi tới thư mục cài đặt:
 	$:> cd /home/pi/VBot_Offline/resource/airplay
+
+	#Chạy 2 lệnh sau để forrmat file cài đặt
+	$:> dos2unix install_airplay_v3.sh
+	$:> dos2unix pre_check_airplay_on_pi.sh
 
 	#Chạy lệnh sau để kiểm tra có đủ điều kiện cài đặt không
 	$:> ./pre_check_airplay_on_pi.sh
 
 	#Nếu đủ điều kiện thì chạy tiếp lệnh sau để cài đặt
-	$:> ./install_airplay_v3.sh
+	$:> bash install_airplay_v3.sh
 
 #Trong quá trình cài đặt sẽ làm theo các bước được yêu cầu
 >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
