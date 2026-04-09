@@ -2480,7 +2480,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"google_gemini\",\r\n    \"value\": \"thông báo cho tôi ngày mai uống thuốc lúc 7 giờ 10 phút\"\r\n}",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"call_assistant\",\r\n    \"assistant_name\": \"google_gemini\",\r\n    \"value\": \"chào nhé\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -2488,13 +2488,13 @@
           }
         },
         "url": {
-          "raw": "http://192.168.14.194:5002",
+          "raw": "http://192.168.14.175:5002",
           "protocol": "http",
           "host": [
             "192",
             "168",
             "14",
-            "194"
+            "175"
           ],
           "port": "5002"
         }
@@ -2928,7 +2928,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"mấy giờ rồi\"\r\n}",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"main_processing\",\r\n    \"action\": \"processing\",\r\n    \"value\": \"thiết lập quạt hiên nhà 10%\"\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -3062,6 +3062,34 @@
       "response": []
     },
     {
+      "name": "AirPlay Restart Khởi Động Lại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"restart\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "AirPlay Lấy Thông Tin Đang Phát Player",
       "request": {
         "method": "POST",
@@ -3174,6 +3202,34 @@
       "response": []
     },
     {
+      "name": "AirPlay Ngắt Phiên Kết Nối Hiện Tại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"airplay\",\r\n    \"action\": \"drop_session\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "AirPlay Kích Hoạt Truyền Âm Thanh Vào ALSA",
       "request": {
         "method": "POST",
@@ -3230,13 +3286,41 @@
       "response": []
     },
     {
-      "name": "AirPlay Thay Đổi Âm Lượng",
+      "name": "AirPlay Thay Đổi Âm Lượng Theo Số 0->100",
       "request": {
         "method": "POST",
         "header": [],
         "body": {
           "mode": "raw",
           "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"airplay\",\r\n    \"action\": \"volume\",\r\n    \"value\": 90\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "AirPlay Thay Đổi Âm Lượng Theo dB",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"airplay\",\r\n    \"action\": \"volume_db\",\r\n    \"value\": -10\r\n}",
           "options": {
             "raw": {
               "language": "json"
