@@ -408,6 +408,7 @@
             "speak_to_text": {
                 "stt_select": "stt_default",
                 "duration_recording": 6,
+                "timeout_connect": 7,
                 "interim_results": false,
                 "gain": {
                     "active": false,
