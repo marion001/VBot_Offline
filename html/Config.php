@@ -159,6 +159,7 @@ if (isset($_POST['all_config_save'])) {
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect'] = intval($_POST['timeout_connect']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] = floatval($_POST['stt_gain']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] = isset($_POST['stt_gain_active']) ? true : false;
   $Config['smart_config']['smart_wakeup']['speak_to_text']['interim_results'] = isset($_POST['stt_interim_results']) ? true : false;
@@ -1322,6 +1323,8 @@ include 'html_head.php';
                <div class="alert alert-success" role="alert">
 				<?php
                   echo input_field('duration_recording', 'Thời gian lắng nghe tối đa (giây)', $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] ?? 6, 'required', 'number', '1', '3', '10', 'Thời gian lắng nghe tối đa khi Bot được đánh thức', 'border-success', '', '', '', '', '');
+                  echo input_field('timeout_connect', 'Hết thời gian kết nối', $Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect'] ?? 7, 'required', 'number', '1', '3', '20', 'Thời kết nối tôi đa khi không có phản hồi từ Server, Máy Chủ như: (Mất kết nối mạng, Lỗi kết nối tới máy chủ, V..v...)', 'border-success', '', '', '', '', '');
+
                   ?>
 			<div class="row mb-3">
 			<label for="" class="col-sm-3 col-form-label">Hiển Thi Logs Dữ Liệu Tạm Thời <i class="bi bi-question-circle-fill" onclick="show_message('Hiển Thị Logs Trung gian dữ liệu (kết quả tạm thời) trong quá trình thu âm chuyển đổi từ STT sang Text')"></i> :</label>
