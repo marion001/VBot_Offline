@@ -336,8 +336,11 @@
             "notes_led_type": "ReSpeaker_Mic_Array_v2.0, ws281x, apa102, dev_custom_led",
             "number_led": 24,
             "brightness": 255,
+            "led_freq_hz": 800000,
+            "led_dma": 10,
             "remember_last_brightness": true,
             "led_invert": false,
+            "led_reversed": false,
             "led_starting_up": true,
             "effect": {
                 "led_think": "0000FF",

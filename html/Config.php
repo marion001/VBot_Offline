@@ -283,6 +283,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
   $Config['smart_config']['led']['brightness'] = intval(min(100, max(0, intval($_POST['led_brightness']))) * 255 / 100);
   $Config['smart_config']['led']['led_invert'] = isset($_POST['led_invert']) ? true : false;
+  $Config['smart_config']['led']['led_reversed'] = isset($_POST['led_reversed']) ? true : false;
   $Config['smart_config']['led']['remember_last_brightness'] = isset($_POST['remember_last_brightness']) ? true : false;
   $Config['smart_config']['led']['led_starting_up'] = isset($_POST['led_starting_up']) ? true : false;
   $Config['smart_config']['led']['effect']['led_think'] = $_POST['led_think'];
@@ -2024,7 +2025,17 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                   </div>
 
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Đảo ngược đầu LED <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược đầu (Bắt Đầu) sáng của đèn LED')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Đảo Ngược Chiều LED Sáng<i class="bi bi-question-circle-fill" onclick="show_message('Đảo Ngược Chiều Sáng Của Đèn LED, Nếu được bật sẽ sáng từ điểm cuối của LED trở về')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="led_reversed" id="led_reversed" <?php echo $Config['smart_config']['led']['led_reversed'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Đảo Ngược Tín Hiệu (Signal Invert) <i class="bi bi-question-circle-fill" onclick="show_message('Đảo ngược tín hiệu (signal invert). Khi bạn dùng level shifter (bộ chuyển mức logic) kiểu inverting (đảo pha)'+
+					' Dùng transistor NPN (hoặc MOSFET cấu hình inverting) để chuyển từ 3.3V lên 5V. Một số level shifter 74HCxx hoặc IC inverting khác. Nếu không invert mà dùng level shifter inverting thì LED sẽ không sáng hoặc hoạt động sai.<br/>')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="led_invert" id="led_invert" <?php echo $Config['smart_config']['led']['led_invert'] ? 'checked' : ''; ?>>
