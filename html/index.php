@@ -648,6 +648,10 @@ include 'html_head.php';
                         </label>
                       </div>
                       <div class="form-check">
+                        <input class="form-check-input border-danger" disabled value="dev_custom" type="radio" name="select_log_display_style" id="log_display_style_dev_custom" onclick="change_og_display_style('change_log', 'dev_custom', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "dev_custom") echo "checked"; ?>>
+                        <label class="form-check-label text-danger">DEV Custom Logs</label>
+                      </div>
+                      <div class="form-check">
                         <input class="form-check-input border-success" value="all" type="radio" name="select_log_display_style" id="log_display_style_both" onclick="change_og_display_style('change_log', 'all', this.checked)" <?php if ($Config['smart_config']['show_log']['log_display_style'] === "all") echo "checked"; ?>>
                         <label class="form-check-label">
                           ALL (Tất Cả) <a href="<?php echo $URL_API_VBOT ?>logs" target="_bank" title="Mở URL Logs API trong tab mới"> <i class="bi bi-box-arrow-up-right"></i></a>
