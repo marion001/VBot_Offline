@@ -1106,6 +1106,9 @@ include 'html_head.php';
             } else if (data.log_display_style === "all") {
               document.getElementById('log_display_style_both').checked = true;
               rlc_log_display_style = "ALL";
+            } else if (data.log_display_style === "dev_custom") {
+              document.getElementById('log_display_style_dev_custom').checked = true;
+              rlc_log_display_style = "DEV Custom Logs";
             }
             document.getElementById('show_log_name_log_display_style').innerHTML = ' | <font color=green>' + rlc_log_display_style + '</font>';
             if (!isHovering_led_brightness) {

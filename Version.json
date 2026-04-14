@@ -1,8 +1,8 @@
 {
-    "version": "1.0.97",
+    "version": "1.0.98",
     "projectName": "Program VBot Offline",
-    "description": "Tôi ưu hệ luồng xử lý dữ liệu và một vài sửa đổi khác",
-    "releaseDate": "22/03/2026",
+    "description": "Sửa lỗi vặt, tối ưu hóa hệ thống",
+    "releaseDate": "14/04/2026",
     "changes": [
         {
             "type": "feature",
