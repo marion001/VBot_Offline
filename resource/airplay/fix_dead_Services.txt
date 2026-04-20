@@ -1,0 +1,4 @@
+$:> sudo nano /lib/systemd/system/shairport-sync.service
+
+sửa thành:
+Restart=always
