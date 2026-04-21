@@ -1256,6 +1256,22 @@ if (isset($_POST['version_airplay'])) {
   $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['fix_airplay_services'])) {
+  $CMD = "sudo cp ".$VBot_Offline."resource/airplay/shairport-sync.service /lib/systemd/system/shairport-sync.service && sudo systemctl daemon-reload && sudo systemctl restart shairport-sync";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
 if (isset($_POST['fix_asound_airplay'])) {
 	$output = '';
     $checkFile = "/os_image_created.txt";
@@ -2233,6 +2249,7 @@ include 'html_head.php';
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_airplay" type="submit" title="Xem Logs Auto AirPlay">Logs Auto AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="status_airplay" type="submit" title="Kiểm tra trạng thái AirPlay">Status Auto AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="version_airplay" type="submit" title="Kiểm tra phiên bản AirPlay">Phiên Bản AirPlay</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="fix_airplay_services" type="submit" title="Tự động sửa lỗi AirPlay khi lỗi bị treo không tự động chạy lại">Fix shairport-sync.service AirPlay</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="fix_asound_airplay" type="submit" title="Tự động sửa lỗi âm thanh ở /etc/asound.conf khi sử dụng mạch: WM8960 hoặc I2S">Fix /etc/asound.conf AirPlay</button></li>
                         </ul>
                       </div>

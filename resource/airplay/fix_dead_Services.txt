@@ -2,3 +2,7 @@ $:> sudo nano /lib/systemd/system/shairport-sync.service
 
 sửa thành:
 Restart=always
+
+
+#Hoặc dùng lệnh:
+	$:> sudo cp /home/pi/VBot_Offline/resource/airplay/shairport-sync.service /lib/systemd/system/shairport-sync.service && sudo systemctl daemon-reload && sudo systemctl restart shairport-sync
