@@ -1,8 +1,8 @@
 {
-    "version": "1.0.98",
+    "version": "1.0.99",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi vặt, tối ưu hóa hệ thống",
-    "releaseDate": "14/04/2026",
+    "description": "Sửa Lỗi TTS Default, Tối Ưu Media Player, TTS và một vài sửa lỗi, thay đổi khác",
+    "releaseDate": "24/04/2026",
     "changes": [
         {
             "type": "feature",

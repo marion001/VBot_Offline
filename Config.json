@@ -602,8 +602,8 @@
                     "speaking_speed": 0.9,
                     "quality": 0,
                     "voice_name": 1,
-                    "authentication_zai_did": "8k9uAj3FNiTevcSSryzXoYYo6Kp1ncB7ARWLJJGq",
-                    "expires_zai_did": "2026-04-28T14:10:27+00:00"
+                    "authentication_zai_did": "8k9uAj3FNiTevcSSryzXoYYo6K_3pcND9hCTI3ao",
+                    "expires_zai_did": "2027-04-24T11:41:57+00:00"
                 },
                 "tts_zalo": {
                     "api_key": [
@@ -625,7 +625,8 @@
                 "tts_edge": {
                     "voice_name": "vi-VN-HoaiMyNeural",
                     "language_code": "vi-VN",
-                    "speaking_speed": 1.2
+                    "speaking_speed": 1.2,
+                    "retry": 4
                 },
                 "tts_dev_customize": {
                     "active": false

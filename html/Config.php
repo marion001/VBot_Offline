@@ -157,13 +157,21 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['speaker']['remember_last_volume'] = isset($_POST['remember_last_volume']) ? true : false;
 
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $_POST['stt_select'];
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect'] = intval($_POST['timeout_connect']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] = floatval($_POST['stt_gain']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] = isset($_POST['stt_gain_active']) ? true : false;
   $Config['smart_config']['smart_wakeup']['speak_to_text']['interim_results'] = isset($_POST['stt_interim_results']) ? true : false;
-  
+	if (isset($_POST['stt_select'])) {
+		$stt = $_POST['stt_select'];
+		$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_select'] = $stt;
+		if ($stt === 'stt_ggcloud') {
+			$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code'] = $_POST['stt_ggcloud_language_code'];
+		} elseif ($stt === 'stt_ggcloud_v2') {
+			$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code'] = $_POST['stt_ggcloud_language_code_v2'];
+		}
+	}
+
   #Cập nhật Chế Độ Hội Thoại/Trò Chuyện Liên Tục conversation_mode:
   $Config['smart_config']['smart_wakeup']['conversation_mode'] = isset($_POST['conversation_mode']) ? true : false;
 
@@ -1398,6 +1406,29 @@ include 'html_head.php';
                         <div class="card-body">
                           <h5 class="card-title">Cấu hình STT:</h5>
 						  <div class="alert alert-primary" role="alert">
+
+						<?php
+						$gstt_languages = [
+						  "vi-VN" => "Tiếng Việt",
+						  "en-US" => "English (United States)",
+						  "en-GB" => "English (United Kingdom)",
+						  "zh-CN" => "中文 (Giản thể - Trung Quốc)",
+						  "zh-TW" => "中文 (Phồn thể - Đài Loan)",
+						  "ja-JP" => "日本語 (Nhật Bản)",
+						  "ko-KR" => "한국어 (Hàn Quốc)",
+						  "th-TH" => "ไทย (Thái Lan)",
+						  "id-ID" => "Bahasa Indonesia",
+						  "fr-FR" => "Français (Pháp)",
+						  "de-DE" => "Deutsch (Đức)",
+						  "es-ES" => "Español (Tây Ban Nha)",
+						  "es-MX" => "Español (Mexico)",
+						  "pt-BR" => "Português (Brazil)",
+						  "ru-RU" => "Русский (Nga)",
+						  "hi-IN" => "हिन्दी (Ấn Độ)"
+						];
+						$current_gcloud_language_code = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code'] ?? 'vi-VN';
+						?>
+
                           <!-- ẩn hiện cấu hình select_stt_ggcloud_html -->
                           <div id="select_stt_ggcloud_html" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển giọng nói thành văn bản">
@@ -1415,8 +1446,15 @@ include 'html_head.php';
                               <center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline . $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
                             </div>
                             <div class="form-floating mb-3">
-                              <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_language_code" id="stt_ggcloud_language_code" placeholder="vi-VN" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code']; ?>">
-                              <label for="stt_ggcloud_language_code">Ngôn Ngữ:</label>
+                              <select name="stt_ggcloud_language_code" id="stt_ggcloud_language_code" class="form-select border-success" aria-label="Default select example">
+								<?php
+								foreach ($gstt_languages as $code_gstt => $nameGstt) {
+								  $selected = ($current_gcloud_language_code === $code_gstt) ? 'selected' : '';
+								  echo "<option value='$code_gstt' $selected>$code_gstt - $nameGstt</option>";
+								}
+								?>
+                              </select>
+                              <label for="stt_ggcloud_language_code">Ngôn ngữ:</label>
                             </div>
                             <div class="form-floating mb-3">
                               <input readonly type="number" class="form-control border-danger" min="0" step="1" name="stt_ggcloud_rate" id="stt_ggcloud_rate" placeholder="16000" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['rate']; ?>">
@@ -1455,8 +1493,15 @@ include 'html_head.php';
                               <center><button type="button" class="btn btn-success" title="Tải xuống" onclick="downloadFile('<?php echo $VBot_Offline . $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file']; ?>')"><i class="bi bi-download"></i> Tải Xuống Tệp Json</button></center>
                             </div>
                             <div class="form-floating mb-3">
-                              <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_language_code" id="stt_ggcloud_language_code" placeholder="vi-VN" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code']; ?>">
-                              <label for="stt_ggcloud_language_code">Ngôn Ngữ:</label>
+                              <select name="stt_ggcloud_language_code_v2" id="stt_ggcloud_language_code_v2" class="form-select border-success" aria-label="Default select example">
+								<?php
+								foreach ($gstt_languages as $code_gstt => $nameGstt) {
+								  $selected = ($current_gcloud_language_code === $code_gstt) ? 'selected' : '';
+								  echo "<option value='$code_gstt' $selected>$code_gstt - $nameGstt</option>";
+								}
+								?>
+                              </select>
+                              <label for="stt_ggcloud_language_code_v2">Ngôn ngữ:</label>
                             </div>
                             <div class="form-floating mb-3">
                               <input readonly type="text" class="form-control border-danger" name="stt_ggcloud_v2_model" id="stt_ggcloud_v2_model" placeholder="short" value="<?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['model']; ?>">
@@ -1566,9 +1611,9 @@ include 'html_head.php';
                           <?php
                           $tts_list_select = [
                             'tts_default' => [
-                              'label' => 'TTS Mặc Định (Free) <font color=red>Đang Bị Lỗi</font>',
+                              'label' => 'TTS Mặc Định (Free)',
                               'help'  => "Với tts_default này sẽ không mất phí với người dùng và vẫn đảm bảo chất lượng cao, ổn định",
-                              'disabled' => true,
+                              //'disabled' => true,
                             ],
                             'tts_ggcloud' => [
                               'label' => 'TTS Google Cloud (Authentication.json) <font color=green>Khuyến Khích Nên sử dụng</font>',

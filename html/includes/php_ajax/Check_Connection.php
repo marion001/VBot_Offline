@@ -758,7 +758,7 @@ if (isset($_GET['vbot_chatbox'])) {
 
 //Lấy token zai_did tts_default
 if (isset($_GET['get_token_tts_default_zai_did'])) {
-    $ch = curl_init(base64_decode('aHR0cHM6Ly9haS56YWxvLmNsb3VkLw=='));
+    $ch = curl_init(base64_decode('aHR0cHM6Ly9haS56YWxvLnNvbHV0aW9ucw'));
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
