@@ -1323,7 +1323,7 @@ $git_repository = $pathParts[1];
                         if (response.success) {
                             showMessagePHP(response.message, 3);
                         } else {
-                            show_message("Lỗi xảy ra: " + JSON.stringify(response));
+                            showMessagePHP(response.message, 5);
                         }
                     } else {
                         show_message("Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Error: Dữ liệu phản hồi không phải JSON");

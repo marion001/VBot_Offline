@@ -190,7 +190,8 @@
         ],
         "play_list": {
             "music_play_mode": "random",
-            "newspaper_play_mode": "sequential"
+            "newspaper_play_mode": "sequential",
+            "loop": true
         },
         "youtube": {
             "active": true,
