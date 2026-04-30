@@ -36,11 +36,13 @@
         <span>Cấu hình Config</span>
       </a>
     </li>
+	<!--
     <li class="nav-item" onclick="loading('show')">
       <a class="nav-link collapsed" href="Media_Player.php">
         <i class="bi bi-music-note-list"></i><span>Media Player</span>
       </a>
     </li>
+	-->
     <li class="nav-item" onclick="loading('show')">
       <a class="nav-link collapsed" href="Command.php">
         <i class="bi bi-terminal-fill"></i>

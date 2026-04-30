@@ -203,6 +203,90 @@
       "response": []
     },
     {
+      "name": "Phát Toàn Bộ Bài Hát Dữ Liệu Tìm Kiếm Youtube",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"youtube\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Phát Toàn Bộ Bài Hát Dữ Liệu Tìm Kiếm ZingMP3",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"zingmp3\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Phát Toàn Bộ Bài Hát Dữ Liệu Tìm Kiếm NhacCuaTui",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play_list\",\r\n    \"source_playlist\": \"nhaccuatui\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Truyền PlayList Dạng json Để Phát",
       "request": {
         "method": "POST",

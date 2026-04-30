@@ -318,7 +318,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['wake_up_in_media_player'] = isset($_POST['wake_up_in_media_player']) ? true : false;
   
   #Phát lặp lại danh sách nhạc
-  $Config['media_player']['play_list']['loop'] = isset($_POST['play_list_loop']) ? true : false;
+  $Config['media_player']['play_list']['loop'] = in_array(strtolower(trim($_POST['play_list_loop'] ?? '')), ['true','1']);
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG music_local
   $allowed_formats_str = $_POST['music_local_allowed_formats'];
@@ -809,6 +809,51 @@ function select_field($id, $label, $options, $selected, $disabled_options = []){
     $dis = (in_array($value, $disabled_options)) ? 'disabled' : '';
     $html .= "<option value='$value' $sel $dis>$text</option>";
   }
+  $html .= "</select></div></div>";
+  return $html;
+}
+
+#Select nhận giá trị bool
+function select_field_bool($id, $label, $options, $selected, $disabled_options = []) {
+
+  // normalize selected về 'true' / 'false' / ''
+  function norm($v) {
+    if (is_bool($v)) return $v ? 'true' : 'false';
+
+    $v = strtolower(trim((string)$v));
+
+    if (in_array($v, ['1','true','on','yes'])) return 'true';
+    if (in_array($v, ['0','false','off','no',''])) return 'false';
+
+    return $v;
+  }
+
+  $selected_norm = norm($selected);
+
+  $html = "
+  <div class='row mb-3'>
+    <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
+    <div class='col-sm-9'>
+      <select class='form-select border-success' name='$id' id='$id'>";
+
+  foreach ($options as $value => $text) {
+    //xử lý key true/false bị PHP convert
+    if ($value === 1 || $value === '1') {
+      $value_norm = 'true';
+    } elseif ($value === 0 || $value === '0') {
+      $value_norm = 'false';
+    } elseif ($value === '') {
+      $value_norm = '';
+    } else {
+      $value_norm = norm($value);
+    }
+
+    $sel = ($value_norm === $selected_norm) ? 'selected' : '';
+    $dis = in_array($value, $disabled_options, true) ? 'disabled' : '';
+
+    $html .= "<option value='$value_norm' $sel $dis>$text</option>";
+  }
+
   $html .= "</select></div></div>";
   return $html;
 }
@@ -2467,20 +2512,10 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                       <h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
 					  <div class="alert alert-primary" role="alert">
                       <?php
-                      echo select_field('newspaper_play_mode', 'Nguồn Báo, Tin Tức', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode'], []);
-                      echo select_field('music_play_mode', 'Nguồn Âm Nhạc', ['' => '-- Chọn Chế Độ Phát --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode'], []);
+                      echo select_field('newspaper_play_mode', 'Chế Độ Phát Báo, Tin Tức', ['' => '-- Chọn Chế Độ --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode'], []);
+                      echo select_field('music_play_mode', 'Chế Độ Phát Nhạc', ['' => '-- Chọn Chế Độ --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode'], []);
+					  echo select_field_bool('play_list_loop', 'Chế Độ Khi Phát PlayList', ['' => '-- Chọn Chế Độ --', true => 'Lặp Lại PlayList', false => 'Chỉ 1 Lần'], $Config['media_player']['play_list']['loop'], []);
                       ?>
-
-
-						<div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Phát Lặp Lại Danh Sách Nhạc <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật: phát xong danh sách nhạc sẽ phát đi - lặp lại từ đầu. Khi được tắt sẽ chỉ phát danh sách nhạc 1 lần')"></i>:</label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input class="form-check-input border-success" type="checkbox" name="play_list_loop" id="play_list_loop" <?php echo $Config['media_player']['play_list']['loop'] ? 'checked' : ''; ?>>
-                          </div>
-                        </div>
-                      </div>
-					  
                     </div>
                   </div>
                   </div>

@@ -9,7 +9,6 @@
 include 'Configuration.php';
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -189,7 +188,6 @@ include 'html_head.php';
                 <div class="card-body">
                   <div class="d-flex justify-content-around">
                     <div class="ps-3" title="Kéo để thay đổi âm lượng của thiết bị">
-                      <!-- <font color="blue">Âm lượng</font> -->
                       <div class="volume-control">
                         <div class="volume-slider" id="volume-slider">
                           <div class="volume-percentage" id="volume-percentage"></div>
@@ -200,7 +198,6 @@ include 'html_head.php';
                       </div>
                     </div>
                     <div class="ps-3" title="Kéo để thay đổi độ sáng đèn Led của thiết bị">
-                      <!-- <font color="blue">Độ sáng</font> -->
                       <div class="led_brightness-control">
                         <div class="led_brightness-slider" id="led_brightness-slider">
                           <div class="led_brightness-percentage" id="led_brightness-percentage"></div>
@@ -225,11 +222,11 @@ include 'html_head.php';
                   <div id="media-container">
                     <img id="media-cover" src="assets/img/Error_Null_Media_Player.png" alt="Media Cover">
                     <div id="media-info">
-                      <p id="media-name">Tên bài hát: <font color="blue">N/A</font>
+                      <p id="media-name">Tên Bài Hát: <font color="blue">N/A</font>
                       </p>
-                      <p id="audio-playing">Trạng thái: <font color="blue">N/A</font>
+                      <p id="audio-playing">Trạng Thái: <font color="blue">N/A</font>
                       </p>
-                      <p id="audio-source">Nguồn Media: <font color="blue">N/A</font>
+                      <p id="audio-source">Nguồn Phát: <font color="blue">N/A</font>
                       </p>
                     </div>
 
@@ -246,54 +243,46 @@ include 'html_head.php';
                     </div>
                   </div>
                   <center>
-                    <!--
-                        <button type="button" id="volumeDOWN_Button" name="volumeDOWN_Button" title="Giảm âm lượng" class="btn btn-primary" onclick="control_volume('down')"><i class="bi bi-volume-down-fill"></i>
-                                             </button>
-                        -->
                     <button type="button" id="play_Button" name="play_Button" title="Phát nhạc" class="btn btn-success" onclick="control_media('resume')"><i class="bi bi-play-circle"></i>
                     </button>
                     <button type="button" id="pause_Button" name="pause_Button" title="Tạm dừng phát nhạc" class="btn btn-warning" onclick="control_media('pause')"><i class="bi bi-pause-circle"></i>
                     </button>
                     <button type="button" id="stop_Button" name="stop_Button" title="Dừng phát nhạc" class="btn btn-danger" onclick="control_media('stop')"><i class="bi bi-stop-circle"></i>
                     </button>
-                    <button type="button" class="btn btn-primary" title="Hiển thị PlayList, Danh sách phát" onclick="loadPlayList()">
-                      <i class="bi bi-music-note-list"></i>
-                    </button>
-                    <!--
-                        <button type="button" id="volumeUP_Button" name="volumeUP_Button" title="Tăng âm lượng" class="btn btn-primary" onclick="control_volume('up')"><i class="bi bi-volume-up-fill"></i>
-                        </button>
-                        -->
                   </center>
                   <br />
-                  <center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
-                    <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
-                    <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
+                  <center>
+				  <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success rounded-pill" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
+                    <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
+                    <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success rounded-pill" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
                   </center>
                 </div>
                 <hr />
                 <div class="card-body">
+				<div class="input-group">
+				 <span class="input-group-text border-success">Nguồn Nhạc:</span>
                   <select class="form-select border-success" title="Chọn nguồn nhạc để phát hoặc tìm kiếm" id="select_cache_media">
-                    <option value="" selected>Chọn nguồn nhạc</option>
+                    <option value="" selected>--- Chọn Nguồn Nhạc ---</option>
+					<option value="Link_URL">Nhập URL/Link Nguồn Âm Thanh</option>
                     <option value="Local">Local (Nội bộ)</option>
                     <option value="Youtube">Youtube</option>
                     <option value="ZingMP3">ZingMP3</option>
                     <option value="NhacCuaTui">NhacCuaTui</option>
+                    <option value="PlayList_List">PlayList, Danh Sách Phát</option>
                     <option value="PodCast">PodCast</option>
                     <option value="Radio">Đài, Radio</option>
                     <option value="NewsPaper">Báo, Tin Tức</option>
                   </select>
                 </div>
+                </div>
                 <div class="card-body">
                   <!--  <div id="show_list_ZingMP3"></div> -->
                   <div id="NewsPaper_Select" style="display: none;">
                     <?php
-                    // Kiểm tra nếu mảng news_paper_data tồn tại
                     if (isset($Config['media_player']['news_paper_data']) && is_array($Config['media_player']['news_paper_data'])) {
-                      // Bắt đầu thẻ <select>
                       echo '<div class="input-group form-floating mb-3">	<select class="form-select border-success" name="news_paper" id="news_paper">';
                       echo '<option value="">-- Chọn Báo, Tin Tức --</option>';
                       foreach ($Config['media_player']['news_paper_data'] as $newsPaper) {
-                        // Kiểm tra và lấy các trường `name` và `link`
                         $name = isset($newsPaper['name']) ? htmlspecialchars($newsPaper['name']) : 'Không rõ tên';
                         $link = isset($newsPaper['link']) ? htmlspecialchars($newsPaper['link']) : '#';
                         echo '<option value="' . $link . '" title="Báo: ' . $name . '">' . $name . '</option>';
@@ -625,10 +614,6 @@ include 'html_head.php';
                     <div class="form-switch">
                       <div class="form-check">
                         <input class="form-check-input border-success" value="on_off_display_logs" type="checkbox" name="on_off_display_logs" id="on_off_display_logs" onclick="change_og_display_style('change_log', this.checked ? 'on' : 'off', true)" <?php if ($Config['smart_config']['show_log']['active'] === true) echo "checked"; ?>>
-                        <!-- <label class="form-check-label">
-                            Xóa Log API
-                            </label>
-                            -->
                       </div>
                     </div>
                   </li>
@@ -700,39 +685,37 @@ include 'html_head.php';
   ?>
   <script>
     //hàm để hiển thị thông tin vị trí và thời tiết
-    function getLocationAndWeather() {
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener('readystatechange', function() {
-        if (this.readyState === 4) {
-          var data = JSON.parse(this.responseText);
-          var city = data.city;
-          var loc = data.loc;
-          var country = data.country;
-          var locArray = loc.split(',');
-          var lat = locArray[0];
-          var lon = locArray[1];
-          var xhrWeather = new XMLHttpRequest();
-          xhrWeather.addEventListener('readystatechange', function() {
-            if (this.readyState === 4) {
-              var weatherData = JSON.parse(this.responseText);
-              var icon = 'https://openweathermap.org/img/w/' + weatherData.weather[0].icon + '.png';
-              document.getElementById('show_weather').textContent = weatherData.main.temp + '°C';
-              document.getElementById('show_humidity').textContent = weatherData.main.humidity + '%';
-              document.getElementById('show_description').textContent = ' ' + weatherData.weather[0].description;
-              document.getElementById('show_windSpeed').textContent = weatherData.wind.speed + ' m/s';
-              document.getElementById('weather-icon').src = icon;
-              document.getElementById('show_city').innerHTML = city + ', <span>' + weatherData.sys.country + '</span>';
-            }
-          });
-          var weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=8473858601dabd3d2cbb24fb50840686&units=metric&lang=vi';
-          xhrWeather.open('GET', weatherUrl);
-          xhrWeather.send();
-        }
-      });
-      xhr.open('GET', 'https://ipinfo.io/json');
-      xhr.send();
-    }
-    // Gọi hàm để hiển thị thông tin vị trí và thời tiết
+	async function getLocationAndWeather() {
+	  try {
+		const locRes = await fetch('https://ipinfo.io/json');
+		if (!locRes.ok) throw new Error('Lỗi lấy location');
+		const locData = await locRes.json();
+		var locArray = locData.loc.split(',');
+		var lat = locArray[0];
+		var lon = locArray[1];
+		var city = locData.city;
+		var weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=8473858601dabd3d2cbb24fb50840686&units=metric&lang=vi';
+		const weatherRes = await fetch(weatherUrl);
+		if (!weatherRes.ok) throw new Error('Lỗi lấy weather');
+		var w = await weatherRes.json();
+		var elTemp = document.getElementById('show_weather');
+		var elHumidity = document.getElementById('show_humidity');
+		var elDesc = document.getElementById('show_description');
+		var elWind = document.getElementById('show_windSpeed');
+		var elIcon = document.getElementById('weather-icon');
+		var elCity = document.getElementById('show_city');
+		elTemp.textContent = w.main.temp + '°C';
+		elHumidity.textContent = w.main.humidity + '%';
+		elDesc.textContent = ' ' + w.weather[0].description;
+		elWind.textContent = w.wind.speed + ' m/s';
+		elIcon.src = 'https://openweathermap.org/img/w/' + w.weather[0].icon + '.png';
+		elCity.innerHTML = city + ', <span>' + w.sys.country + '</span>';
+	  } catch (err) {
+		console.error(err);
+		show_message('Không thể lấy thông tin thời tiết');
+	  }
+	}
+    //Gọi hàm để hiển thị thông tin vị trí và thời tiết
     getLocationAndWeather();
 
     //Cập nhật và hiển thị giá trị led vào thẻ html 
@@ -748,10 +731,8 @@ include 'html_head.php';
       brightnessPercentage.textContent = Math.round(percentage) + '%';
     }
 
-
     //Cập nhật giá trị volume vào id="volume-slider" html
     function set_Volume_HTML(volume) {
-      // Lấy các phần tử từ ID
       const volumeSlider = document.getElementById('volume-slider');
       const volumeBar = document.getElementById('volume-bar');
       const volumeKnob = document.getElementById('volume-knob');
@@ -762,7 +743,7 @@ include 'html_head.php';
       volumePercentage.textContent = Math.round(volume) + '%';
     }
 
-    // Định dạng thời gian thành HH:MM:SS
+    //Định dạng thời gian thành HH:MM:SS
     function formatTime_Player(milliseconds) {
       let totalSeconds = Math.floor(milliseconds / 1000);
       let hours = Math.floor(totalSeconds / 3600);
@@ -774,248 +755,214 @@ include 'html_head.php';
     }
 
     //Dùng để tua bài hát
-    function sendSetTime_duration(set_duration) {
-      var data = JSON.stringify({
-        "type": 1,
-        "data": "media_control",
-        "action": "set_time",
-        "set_duration": set_duration
-      });
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-          try {
-            if (this.status === 0) {
-              showMessagePHP('Lỗi Tua Dữ Liệu Media Palyer: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
-              return;
-            } else if (this.status !== 200) {
-              showMessagePHP('Lỗi Tua Dữ Liệu Media Palyer: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
-              return;
-            }
-            var response = JSON.parse(this.responseText);
-            if (response.success) {
-              showMessagePHP(response.message, 5);
-            } else {
-              showMessagePHP('Lỗi: ' + response.message);
-            }
-          } catch (error) {
-            showMessagePHP('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
-          }
-        }
-      });
-      xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(data);
-    }
+	function sendSetTime_duration(set_duration) {
+	  const url = "<?php echo $URL_API_VBOT ?>";
+	  const payload = {
+		type: 1,
+		data: "media_control",
+		action: "set_time",
+		set_duration: set_duration
+	  };
+	  fetch(url, {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify(payload)
+	  })
+	  .then(res => {
+		if (!res.ok) {
+		  throw new Error("HTTP: " + res.status);
+		}
+		return res.json();
+	  })
+	  .then(response => {
+		if (!response.success) {
+		  throw new Error(response.message || "Không rõ lỗi");
+		}
+		showMessagePHP(response.message, 5);
+	  })
+	  .catch(err => {
+		showMessagePHP("Lỗi Tua Media Player: " + err.message + ". Kiểm tra mạng, API hoặc Bot");
+	  });
+	}
 
     //Thay đổi giá trị của biến toàn cục, chế độ hội thoại, chế độ phản hồi, Mic, Wakeup
-    function change_to_another_mode(type, dataKey, actionValue) {
-      var data = JSON.stringify({
-        "type": type,
-        "data": dataKey,
-        "action": actionValue // true hoặc false tùy vào giá trị truyền vào
-      });
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-          try {
-            if (this.status === 0) {
-              show_message('Lỗi Thay Đổi Chế Độ: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
-              return;
-            } else if (this.status !== 200) {
-              show_message('Lỗi Thay Đổi Chế Độ: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
-              return;
-            }
-            // Nếu dataKey là "wake_up", bỏ chọn checkbox
-            if (dataKey === "wake_up") {
-              document.getElementById('show_wake_up').checked = false;
-            }
-            var response = JSON.parse(this.responseText);
-            if (response.success) {
-              showMessagePHP(response.message, 5);
-            } else {
-              show_message('Lỗi: ' + response.message);
-            }
-          } catch (error) {
-            show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
-          }
-        }
-      });
-      xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(data);
-    }
+	function change_to_another_mode(type, dataKey, actionValue) {
+	  const url = "<?php echo $URL_API_VBOT ?>";
+	  const payload = {
+		type: type,
+		data: dataKey,
+		action: actionValue
+	  };
+	  fetch(url, {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify(payload)
+	  })
+	  .then(res => {
+		if (!res.ok) {
+		  throw new Error("HTTP: " + res.status);
+		}
+		return res.json();
+	  })
+	  .then(response => {
+		if (!response.success) {
+		  throw new Error(response.message || "Không rõ lỗi");
+		}
+		if (dataKey === "wake_up") {
+			document.getElementById('show_wake_up') && (document.getElementById('show_wake_up').checked = false);
+		}
+		showMessagePHP(response.message, 5);
+	  })
+	  .catch(err => {
+		show_message("Lỗi Thay Đổi Chế Độ: " + err.message + ". Kiểm tra mạng, API hoặc Bot");
+	  });
+	}
 
     //Gửi dữ liệu thay đổi volume tới Bot
-    function set_Volume_Data(volume) {
-      var data = JSON.stringify({
-        "type": 2,
-        "data": "volume",
-        "action": "setup",
-        "value": volume
-      });
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-          try {
-            if (this.status === 0) {
-              show_message('Lỗi Thay Đổi Âm Lượng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
-              return;
-            } else if (this.status !== 200) {
-              show_message('Lỗi Thay Đổi Âm Lượng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
-              return;
-            }
-            var response = JSON.parse(this.responseText);
-            if (response.success) {
-              // Cập nhật lại thanh trượt với giá trị từ phản hồi
-              set_Volume_HTML(response.volume);
-              showMessagePHP("Âm lượng đã được thay đổi thành: " + response.volume + "%", 5);
-            } else {
-              show_message('Lỗi: ' + response.message);
-            }
-          } catch (error) {
-            show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
-          }
-        }
-      });
-      xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(data);
-    }
+	function set_Volume_Data(volume) {
+	  const url = "<?php echo $URL_API_VBOT ?>";
+	  const payload = {
+		type: 2,
+		data: "volume",
+		action: "setup",
+		value: volume
+	  };
+	  clearTimeout(set_Volume_Data._t);
+	  set_Volume_Data._t = setTimeout(() => {
+		fetch(url, {
+		  method: "POST",
+		  headers: {"Content-Type": "application/json"},
+		  body: JSON.stringify(payload)
+		})
+		.then(res => {
+		  if (!res.ok) throw new Error("HTTP: " + res.status);
+		  return res.json();
+		})
+		.then(response => {
+		  if (!response.success) {
+			throw new Error(response.message || "Không rõ lỗi");
+		  }
+		  set_Volume_HTML(response.volume);
+		  showMessagePHP("Âm lượng đã được thay đổi thành: " + response.volume + "%", 5);
+		})
+		.catch(err => {
+		  show_message("Lỗi Thay Đổi Âm Lượng: " + err.message + ". Kiểm tra mạng, API hoặc Bot");
+		});
+	  }, 150);
+	}
 
     //Thay đổi độ sáng đèn led
-    function sendBrightnessData(value) {
-      var data = JSON.stringify({
-        "type": 2,
-        "data": "led",
-        "action": "brightness",
-        "value": value
-      });
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-          try {
-            if (this.status === 0) {
-              show_message('Lỗi Thay Đổi Độ Sáng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
-              return;
-            } else if (this.status !== 200) {
-              show_message('Lỗi Thay Đổi Độ Sáng: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa. Mã trạng thái HTTP: ' + this.status);
-              return;
-            }
-            var response = JSON.parse(this.responseText);
-            if (response.success) {
-              showMessagePHP(response.message, 5);
-            } else {
-              show_message('Lỗi: ' + response.message);
-            }
-          } catch (error) {
-            show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
-          }
-        }
-      });
-      xhr.open("POST", "<?php echo $URL_API_VBOT ?>");
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(data);
-    }
+	function sendBrightnessData(value) {
+	  const url = "<?php echo $URL_API_VBOT ?>";
+	  const payload = {
+		type: 2,
+		data: "led",
+		action: "brightness",
+		value: value
+	  };
+	  fetch(url, {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify(payload)
+	  })
+	  .then(res => {
+		if (!res.ok) {
+		  throw new Error("HTTP: " + res.status);
+		}
+		return res.json();
+	  })
+	  .then(response => {
+		if (!response.success) {
+		  throw new Error(response.message || "Không rõ lỗi");
+		}
+		showMessagePHP(response.message, 5);
+	  })
+	  .catch(err => {
+		show_message("Lỗi Thay Đổi Độ Sáng: " + err.message + ". Kiểm tra mạng, API hoặc Bot");
+	  });
+	}
 
-    //Phát TTS notify phát thông báo
-    function tts_speaker_notify_send(del_text_input = null) {
-      var text_input = document.getElementById('tts_speaker_notify');
-      var source_text_to_speak_api = document.getElementById('source_text_to_speak_api').value;
-      if (del_text_input === "delete_text_tts") {
-        text_input.value = '';
-        showMessagePHP("Đã xóa nội dung trong nhập liệu thông báo", 5);
-        return;
-      }
-      if (!text_input.value) {
-        show_message("Hãy nhập nội dung cần phát thông báo");
-        return;
-      }
-      loading("show")
-      if (source_text_to_speak_api === 'send_notify_home_assistant') {
-        var data = JSON.stringify({
-          "type": 3,
-          "data": "tts",
-          "action": "home_assistant",
-          "title": "VBot - <?php echo $Config['contact_info']['full_name']; ?>",
-          "messenger": text_input.value
-        });
-        source_text_to_speak_api = '<?php echo $URL_API_VBOT ?>';
-      } else {
-        var data = JSON.stringify({
-          "type": 3,
-          "data": "tts",
-          "action": "notify",
-          "value": text_input.value
-        });
-      }
-      var xhr = new XMLHttpRequest();
-      xhr.addEventListener("readystatechange", function() {
-        if (this.readyState === 4) {
-          try {
-            if (this.status === 0) {
-              loading("hide")
-              show_message('Lỗi Phát TTS: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa');
-              return;
-            } else if (this.status !== 200) {
-              loading("hide")
-              show_message('Lỗi Phát TTS: Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng, API, và Bot đã hoạt động chưa, Mã trạng thái HTTP: ' + this.status);
-              return;
-            }
-            var response = JSON.parse(this.responseText);
-            if (response.success) {
-              loading("hide")
-              if (!response?.text_tts?.trim()) {
-                showMessagePHP("Đã phát thông báo: " + response.text_messenger + '. Tới Home Assistant', 7);
-              } else {
-                showMessagePHP("Đã phát thông báo: " + response.text_tts, 7);
-              }
-              // Cập nhật onclick của nút download với đường dẫn tệp âm thanh
-              var audioPath_tts = response.audio_tts;
-              //console.log(audioPath_tts);
-              if (typeof audioPath_tts === "string") {
-                //là string offline
-                if (audioPath_tts.startsWith("TTS_Audio")) {
-                  audioPath_tts = "<?php echo $VBot_Offline; ?>" + audioPath_tts;
-                }
-              } else if (Array.isArray(audioPath_tts)) {
-                //là mảng link online
-                audioPath_tts = audioPath_tts[0];
-                //console.log("Online TTS link:", audioPath_tts);
-              }
-              // Cập nhật onclick của nút download với đường dẫn tệp âm thanh
-              var downloadButton = document.getElementById('download_tts_audio');
-              var playAudio_tts_audio = document.getElementById('playAudio_tts_audio');
-              downloadButton.setAttribute('onclick', "downloadFile('" + audioPath_tts + "')");
-              playAudio_tts_audio.setAttribute('onclick', "playAudio('" + audioPath_tts + "')");
-            } else {
-              loading("hide")
-              show_message('Lỗi: ' + response.message);
-            }
-          } catch (error) {
-            loading("hide")
-            show_message('Đã xảy ra lỗi trong quá trình xử lý: ' + error.message);
-          }
-        }
-      });
-      xhr.open("POST", source_text_to_speak_api);
-      xhr.setRequestHeader("Content-Type", "application/json");
-      xhr.send(data);
-    }
+	//Phát thông báo TTS
+	function tts_speaker_notify_send(del_text_input = null) {
+	  const textEl = document.getElementById('tts_speaker_notify');
+	  const sourceEl = document.getElementById('source_text_to_speak_api');
+	  if (del_text_input === "delete_text_tts") {
+		textEl.value = '';
+		showMessagePHP("Đã xóa nội dung trong nhập liệu thông báo", 5);
+		return;
+	  }
+	  const text = textEl.value?.trim();
+	  if (!text) {
+		show_message("Hãy nhập nội dung cần phát thông báo");
+		return;
+	  }
+	  loading("show");
+	  let url = sourceEl.value;
+	  let payload;
+	  if (url === 'send_notify_home_assistant') {
+		url = '<?php echo $URL_API_VBOT ?>';
+		payload = {
+		  type: 3,
+		  data: "tts",
+		  action: "home_assistant",
+		  title: "VBot - <?php echo $Config['contact_info']['full_name']; ?>",
+		  messenger: text
+		};
+	  } else {
+		payload = {
+		  type: 3,
+		  data: "tts",
+		  action: "notify",
+		  value: text
+		};
+	  }
+	  fetch(url, {
+		method: "POST",
+		headers: {"Content-Type": "application/json"},
+		body: JSON.stringify(payload)
+	  })
+	  .then(res => {
+		if (!res.ok) {
+		  throw new Error("Lỗi HTTP: " + res.status);
+		}
+		return res.json();
+	  })
+	  .then(response => {
+		if (!response.success) {
+		  throw new Error(response.message || "Không rõ lỗi");
+		}
+		const msg = response?.text_tts?.trim() ? response.text_tts : response.text_messenger + '. Tới Home Assistant';
+		showMessagePHP("Đã phát thông báo: " + msg, 7);
+		let audioPath = response.audio_tts;
+		if (Array.isArray(audioPath)) {
+		  audioPath = audioPath[0];
+		} else if (typeof audioPath === "string" && audioPath.startsWith("TTS_Audio")) {
+		  audioPath = "<?php echo $VBot_Offline; ?>" + audioPath;
+		}
+		if (audioPath) {
+		  document.getElementById('download_tts_audio') ?.setAttribute('onclick', `downloadFile('${audioPath}')`);
+		  document.getElementById('playAudio_tts_audio') ?.setAttribute('onclick', `playAudio('${audioPath}')`);
+		}
+	  })
+	  .catch(err => {
+		show_message('Lỗi Phát TTS: ' + err.message + '. Kiểm tra mạng, API, hoặc Bot');
+	  })
+	  .finally(() => loading("hide"));
+	}
   </script>
   <script>
     //script liên quan tới API GET Media Player
     let isHovering = false;
     let isHovering_volume_slide = false;
     let isHovering_led_brightness = false;
-    let fullTime = 0; // lưu trữ toàn bộ thời gian bài nhạc
+    let fullTime = 0;
     let intervalId;
-    // Cập nhật thông tin GET từ API
+    //Cập nhật thông tin GET từ API
     function fetchData_all_info() {
-      // Kiểm tra nếu checkbox được tích hoặc sync_active là true
+      //Kiểm tra nếu checkbox được tích hoặc sync_active là true
       const syncCheckbox = document.getElementById('sync_checkbox');
       var rlc_log_display_style;
-      // Không thực hiện fetchData_Media_Player nếu checkbox không được tích
+      //Không thực hiện fetchData_Media_Player nếu checkbox không được tích
       if (!syncCheckbox.checked) {
         return;
       }
@@ -1025,7 +972,6 @@ include 'html_head.php';
             document.getElementById('div_message_error').style.display = 'block';
             document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + response.status;
           }
-          // Kiểm tra Content-Type
           const contentType = response.headers.get('content-type');
           if (!contentType || !contentType.includes('application/json')) {
             return response.text().then(text => {
@@ -1077,8 +1023,8 @@ include 'html_head.php';
 					: 'N/A')
 				: data.media_player.media_name) +
 			  '</font>';
-            document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.media_player.audio_playing ? 'Có' : data.media_player.airplay_playing ? 'Có' : 'Không') + '</font>';
-			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player.media_player_source === 'N/A' ? (data.media_player.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player.media_player_source) +'</font>';
+            document.getElementById('audio-playing').innerHTML = 'Đang Phát: <font color=blue>' + (data.media_player.audio_playing ? 'Có' : data.media_player.airplay_playing ? 'Có' : 'Không') + '</font>';
+			document.getElementById('audio-source').innerHTML = 'Nguồn Phát: <font color=blue>' + (data.media_player.media_player_source === 'N/A' ? (data.media_player.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player.media_player_source) +'</font>';
             //Cập nhật ảnh cover bài hát
 			document.getElementById('media-cover').src =
 				(data.media_player.audio_playing
@@ -1202,7 +1148,7 @@ include 'html_head.php';
       volumePercentage.textContent = Math.round(percentage) + '%';
     }
   </script>
-  <!-- Xử lý thanh trượt Volume -->
+
   <script>
     //Thay đổi và cập nhật volume khi trượt thanh slide html sự kiện chuột
     function setupVolumeControl() {
@@ -1244,7 +1190,6 @@ include 'html_head.php';
         updateBrightness(percentage);
         return percentage;
       }
-
       const brightnessSlider = document.getElementById('led_brightness-slider');
       let isDragging = false;
       //Khi nhấn chuột
@@ -1306,10 +1251,9 @@ include 'html_head.php';
   </script>
   <script>
     //Lắng nghe và thực hiện khi có thay đổi trong Dom khi tải trang xong
+	//Touch Kéo Slide volume trên Mobile cảm ứng
     document.addEventListener('DOMContentLoaded', function() {
-      //Touch Kéo Slide volume trên Mobile cảm ứng
       const volumeSlider_mb = document.getElementById('volume-slider');
-
       function handleTouch_volume(e) {
         const touch_vl = e.touches[0];
         updateVolume(touch_vl);
@@ -1322,7 +1266,6 @@ include 'html_head.php';
         const offsetY_vl = touch_vl.clientY - rect_vl.top;
         const height = rect_vl.height;
         const percentage = Math.max(0, Math.min(100, ((height - offsetY_vl) / height) * 100));
-
         // Cập nhật âm lượng và gửi dữ liệu khi nhả tay ra
         set_Volume_Data(Math.round(percentage));
       });
@@ -1330,7 +1273,6 @@ include 'html_head.php';
 
       //Touch Kéo Slide độ sáng trên Mobile cảm ứng
       const brightnessSlider_mb = document.getElementById('led_brightness-slider');
-
       function handleTouch_bright(e) {
         const rect = brightnessSlider_mb.getBoundingClientRect();
         const touch = e.touches[0];
@@ -1340,7 +1282,6 @@ include 'html_head.php';
         const percentage = Math.round(((height - clampedOffsetY) / height) * 100);
         updateBrightness(percentage);
       }
-
       function handleTouchEnd_bright(e) {
         const rect = brightnessSlider_mb.getBoundingClientRect();
         const touch = e.changedTouches[0];
@@ -1351,7 +1292,6 @@ include 'html_head.php';
         updateBrightness(percentage);
         sendBrightnessData(percentage);
       }
-
       brightnessSlider_mb.addEventListener('touchstart', handleTouch_bright);
       brightnessSlider_mb.addEventListener('touchmove', handleTouch_bright);
       brightnessSlider_mb.addEventListener('touchend', handleTouchEnd_bright);
@@ -1368,7 +1308,13 @@ include 'html_head.php';
       loading('show');
       var tableContainer = document.getElementById('tableContainer');
       var tableHTML =
-        '<h5 class="card-title">PlayList, Danh Sách Nhạc  <span>| Media Player</span></h5><button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa Toàn Bộ Bài Hát Trong Danh Sách Nhạc</button><table class="table table-borderless datatable" id="playlistTable">' +
+        '<h5 class="card-title">PlayList, Danh Sách Nhạc: ' +
+		' <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary btn-sm" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>' +
+		' <button type="button" class="btn btn-warning btn-sm" title="Tải Xuống Danh Sách Nhạc" onclick="downloadFile(\'<?php echo $HTML_VBot_Offline.'/includes/cache/PlayList.json'; ?>\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-download"></i></button> ' +
+		' <button class="btn btn-danger btn-sm" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-trash"></i></button> ' +
+		'</h5>' +
+		'<div class="input-group"><span class="input-group-text border-success">Tải Lên PlayList.json</span><input type="file" class="form-control border-success" id="fileInput_PlayList" accept=".json"><button class="btn btn-primary border-success" type="button" onclick="uploadFile_PlayList(\'index.php\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-upload"></i> Tải Lên</button></div>' +
+		'<table class="table table-borderless datatable" id="playlistTable">' +
         '<thead>' +
         '<tr>' +
         '<th scope="col" style="text-align: center; vertical-align: middle;">STT</th>' +
@@ -1421,25 +1367,25 @@ include 'html_head.php';
                 '</td>' +
                 '<td style="text-align: center; vertical-align: middle;">' +
                 (playlist.source === 'Youtube' ?
-                  '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="get_Youtube_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\')"><i class="bi bi-play-circle"></i></button>' +
+                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="get_Youtube_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\')"><i class="bi bi-play-circle"></i></button>' +
                   '<a href="https://www.youtube.com/watch?v=' + playlist.id + '" target="_blank">' +
-                  '<button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
+                  '<button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
                   '</a>' : '') +
                 (playlist.source === 'ZingMP3' ?
-                  '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="get_ZingMP3_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'' + playlist.artist + '\')"><i class="bi bi-play-circle"></i></button>' : '') +
+                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="get_ZingMP3_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'' + playlist.artist + '\')"><i class="bi bi-play-circle"></i></button>' : '') +
                 (playlist.source === 'PodCast' ?
-                  '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
+                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
                   '<a href="' + playlist.audio + '" target="_blank"> ' +
-                  '<button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
+                  '<button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
                   '</a>' : '') +
                 (playlist.source === 'NhacCuaTui' ?
-                  '<button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
+                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
                   '<a href="' + playlist.audio + '" target="_blank"> ' +
-                  '<button class="btn btn-info" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
+                  '<button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
                   '</a>' : '') +
                 (playlist.source === 'Local' ?
-                  ' <button class="btn btn-success" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button>' : '') +
-                ' <button class="btn btn-danger" title="Xóa khỏi danh sách phát: ' + playlist.title + '" onclick="deleteFromPlaylist(\'delete_some\', \'' + playlist.ids_list + '\')"><i class="bi bi-trash"></i></button>' +
+                  ' <button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button>' : '') +
+                ' <button class="btn btn-danger btn-sm" title="Xóa khỏi danh sách phát: ' + playlist.title + '" onclick="deleteFromPlaylist(\'delete_some\', \'' + playlist.ids_list + '\')"><i class="bi bi-trash"></i></button>' +
                 '</td>' +
                 '</tr>';
             });
@@ -1450,18 +1396,16 @@ include 'html_head.php';
           tableBody.innerHTML = fileInfo;
           try {
             new simpleDatatables.DataTable(table, {
-              //Tùy chọn phân trang
               perPageSelect: [5, 10, 15, ['All', -1]],
-              //Thiết lập số lượng trang mặc định là 5
               perPage: 5,
               columns: [{
                   select: 0,
                   sortSequence: ['asc', 'desc']
-                }, //Sắp xếp cột thứ 1 (STT)
+                },
                 {
                   select: 1,
                   sortSequence: ['asc', 'desc']
-                } //Sắp xếp cột thứ 2 (Bài Hát)
+				}
               ]
             });
           } catch (e) {
@@ -1483,42 +1427,27 @@ include 'html_head.php';
     }
   </script>
   <script>
-    //Kiểm tra thẻ select_cache_media nếu được chọn giá trị
-    var selectElement_select_cache_media = document.getElementById('select_cache_media');
-    // Thêm sự kiện lắng nghe thay đổi giá trị
-    selectElement_select_cache_media.addEventListener('change', function() {
-      // Lấy giá trị được chọn
-      var selectedValue_cache_media = selectElement_select_cache_media.value;
-      if (selectedValue_cache_media === "Local") {
-        document.getElementById('NewsPaper_Select').style.display = 'none';
-        document.getElementById('tableContainer').style.display = '';
-        media_player_search('Local');
-      } else if (selectedValue_cache_media === "Youtube") {
-        document.getElementById('NewsPaper_Select').style.display = 'none';
-        document.getElementById('tableContainer').style.display = '';
-        cacheYoutube();
-      } else if (selectedValue_cache_media === "ZingMP3") {
-        document.getElementById('NewsPaper_Select').style.display = 'none';
-        document.getElementById('tableContainer').style.display = '';
-        cacheZingMP3();
-      }else if (selectedValue_cache_media === "NhacCuaTui") {
-        document.getElementById('NewsPaper_Select').style.display = 'none';
-        document.getElementById('tableContainer').style.display = '';
-        cacheNhacCuaTui();
-      } else if (selectedValue_cache_media === "PodCast") {
-        document.getElementById('NewsPaper_Select').style.display = 'none';
-        document.getElementById('tableContainer').style.display = '';
-        cachePodCast()
-      } else if (selectedValue_cache_media === "Radio") {
-        document.getElementById('NewsPaper_Select').style.display = 'none';
-        document.getElementById('tableContainer').style.display = '';
-        media_player_search('Radio');
-      } else if (selectedValue_cache_media === "NewsPaper") {
-        document.getElementById('NewsPaper_Select').style.display = '';
-        document.getElementById('tableContainer').style.display = '';
-        cache_NewsPaper()
-      }
-    });
+	//Select Nguồn nhạc
+	const selectEl = document.getElementById('select_cache_media');
+	const newsEl = document.getElementById('NewsPaper_Select');
+	const tableEl = document.getElementById('tableContainer');
+	const actions = {
+	  Local: () => media_player_search('Local'),
+	  Youtube: cacheYoutube,
+	  ZingMP3: cacheZingMP3,
+	  NhacCuaTui: cacheNhacCuaTui,
+	  PodCast: cachePodCast,
+	  Radio: () => media_player_search('Radio'),
+	  NewsPaper: cache_NewsPaper,
+	  Link_URL: cache_Link_URL,
+	  PlayList_List: loadPlayList
+	};
+	selectEl?.addEventListener('change', () => {
+	  const value = selectEl.value;
+	  tableEl.style.display = '';
+	  newsEl.style.display = (value === 'NewsPaper') ? '' : 'none';
+	  actions[value]?.();
+	});
 
     //Phát Thông báo tts tới loa được chọn (điền dữ liệu vào thẻ select)
     function fetchAndPopulateDevices_tts() {
@@ -1637,7 +1566,7 @@ include 'html_head.php';
       currentStatus_SongNHAC = status_SN;
     }
 
-    // Khởi động vòng vẽ sóng và list thiết bị dùng cho tts
+    //Khởi động vòng vẽ sóng và list thiết bị dùng cho tts
     window.addEventListener("DOMContentLoaded", () => {
       drawWaves();
       fetchAndPopulateDevices_tts();

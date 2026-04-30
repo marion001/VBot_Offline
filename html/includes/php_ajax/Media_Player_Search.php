@@ -322,14 +322,17 @@ if (isset($_GET['ZingMP3_Search'])) {
 				'artist' => $ZingMP3_artist,
 				'duration' => str_pad(floor($ZingMP3_duration / 60), 2, '0', STR_PAD_LEFT) . ':' . str_pad($ZingMP3_duration % 60, 2, '0', STR_PAD_LEFT),
 				'thumb' => $ZingMP3_thumb,
-				'url' => null
+				'url' => null,
+				'source' => 'ZingMP3'
 			);
 		}
-		echo json_encode(array(
+		$responsez = [
 			'success' => true,
-			'results' => $results
-		));
-		file_put_contents($zingJsonPath, json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+			'message' => 'Tìm kiếm thành công',
+			'data' => $results
+			];
+		echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		file_put_contents($zingJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
 	} else {
 		echo json_encode(array(
 			'success' => false,
@@ -383,7 +386,7 @@ if (isset($_GET['NhacCuaTui_Search'])) {
         echo json_encode([
             "success" => false,
             "message" => "Lỗi cURL: " . curl_error($ch),
-			"results" => []
+			"data" => []
         ], JSON_UNESCAPED_UNICODE);
     } else {
         $data = json_decode($response, true);
@@ -392,13 +395,13 @@ if (isset($_GET['NhacCuaTui_Search'])) {
             echo json_encode([
                 "success" => false,
                 "message" => "Không tìm thấy bài hát",
-				"results" => []
+				"data" => []
             ], JSON_UNESCAPED_UNICODE);
         } else {
             $results = [];
             $count = 0;
             foreach ($songs as $song) {
-                if ($count >= 10) break; // chỉ lấy 10 bài gần nhất
+                if ($count >= 20) break; // chỉ lấy 20 bài gần nhất
                 $name = isset($song['name']) ? $song['name'] : '';
                 $image = isset($song['image']) ? $song['image'] : '';
                 $duration = isset($song['duration']) ? $song['duration'] : 0;
@@ -422,12 +425,18 @@ if (isset($_GET['NhacCuaTui_Search'])) {
                     "thumb" => $image,
                     "duration" => str_pad(floor($duration / 60), 2, '0', STR_PAD_LEFT) . ':' . str_pad($duration % 60, 2, '0', STR_PAD_LEFT),
                     "artist" => $artistName,
-                    "url" => $stream
+                    "url" => $stream,
+					"source" => "NhacCuaTui"
                 ];
                 $count++;
             }
-            echo json_encode(["success" => true, "results" => $results], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-			file_put_contents($nhaccuatuiJsonPath, json_encode($results, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+			$responsez = [
+				'success' => true,
+				'message' => 'Tìm kiếm thành công',
+				'data' => $results
+				];
+			echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			file_put_contents($nhaccuatuiJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
         }
     }
     curl_close($ch);
@@ -805,7 +814,8 @@ if (isset($_GET['Youtube_Search'])) {
 					'link' => $vid !== 'N/A' ? "https://www.youtube.com/watch?v=" . $vid : '',
 					'cover' => $itemYoutube['snippet']['thumbnails']['high']['url'] ?? '',
 					'description' => $itemYoutube['snippet']['description'] ?? '',
-					'duration' => $durationMap[$vid] ?? ''
+					'duration' => $durationMap[$vid] ?? '',
+					'source' => 'Youtube'
 				];
 			}
 			$responsez = [

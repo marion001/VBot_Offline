@@ -57,11 +57,16 @@ include 'html_head.php';
                 echo '<div class="input-group">';
                 echo '<select class="form-select border-success" name="logFileSelect" id="logFileSelect">';
                 echo '<option value="">-- Chọn một file log --</option>';
-                foreach ($logFiles as $file) {
-                  $fileName = basename($file);
-                  echo '<option value="' . htmlspecialchars($file) . '">' . htmlspecialchars($fileName) . '</option>';
-                }
-                echo '</select><button class="btn btn-success border-success" type="button" name="select_log_file_red" id="select_log_file_red"><i class="bi bi-eye"></i> Xem</button><button class="btn btn-danger border-success" type="button" onclick="delete_logs()"><i class="bi bi-trash"></i> Xóa Logs</button></div>';
+				foreach ($logFiles as $file) {
+					$fileName = basename($file);
+					$selected = ($fileName === 'Vbot_error.log') ? ' selected' : '';
+					echo '<option value="' . htmlspecialchars($file) . '"' . $selected . '>' 
+						. htmlspecialchars($fileName) . 
+						'</option>';
+				}
+                echo '</select><button class="btn btn-success border-success" type="button" name="select_log_file_red" id="select_log_file_red"><i class="bi bi-eye"></i> Xem</button>';
+				echo '<button class="btn btn-warning border-success" type="button" name="select_log_download" id="select_log_download" onclick="select_download_logs()"><i class="bi bi-download"></i></button>';
+				echo '<button class="btn btn-danger border-success" type="button" onclick="delete_logs()"><i class="bi bi-trash"></i> Xóa Logs</button></div>';
                 echo '<br/><textarea class="form-control border-success text-info bg-dark" name="logsOutput" id="logsOutput" rows="17" readonly></textarea>';
               } else {
                 echo '<p>Chưa Có File Log Nào Được Sinh Ra</p>';
@@ -128,7 +133,6 @@ include 'html_head.php';
           } else {
             showMessagePHP(response.message, 3);
           }
-          // Sau khi xóa xong, load lại dữ liệu log
           loadLogFile();
         } catch (e) {
           show_message('Lỗi khi phân tích JSON!' + e);
@@ -137,6 +141,23 @@ include 'html_head.php';
     };
     xhr.send();
   }
+
+  //Tải file Logs được chọn
+function select_download_logs() {
+    const selectElement = document.getElementById("logFileSelect");
+    if (!selectElement) {
+		show_message("Không tìm thấy phần tử có id: #logFileSelect");
+        return;
+    }
+    const value = selectElement.value;
+	const text = selectElement.options[selectElement.selectedIndex]?.text;
+    if (value && value !== "None") {
+        downloadFile(value);
+		showMessagePHP('Đã thao tác tải xuống tệp: '+text, 3);
+    } else {
+		show_message("Giá trị chọn không hợp lệ: " +value);
+    }
+}
 </script>
 
   <?php

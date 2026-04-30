@@ -155,4 +155,36 @@ if (isset($_GET['upload_avata'])) {
         exit();
     }
 }
+
+#Tải lên file json PlayList
+if (isset($_POST['json_file_playlist'])) {
+    $response = [
+        "success" => false,
+        "message" => ""
+    ];
+    $target_file = $VBot_Offline."html/includes/cache/PlayList.json";
+    if (!isset($_FILES["select_json_file_playlist"])) {
+        $response["message"] = "Không có file!";
+    }
+    elseif ($_FILES["select_json_file_playlist"]["error"] !== UPLOAD_ERR_OK) {
+        $response["message"] = "Lỗi tải lên file!";
+    }
+    else {
+        $content = file_get_contents($_FILES["select_json_file_playlist"]["tmp_name"]);
+        json_decode($content);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $response["message"] = "File JSON không hợp lệ!";
+        }
+	elseif (move_uploaded_file($_FILES["select_json_file_playlist"]["tmp_name"], $target_file)) {
+		$original_name = basename($_FILES["select_json_file_playlist"]["name"]);
+		$response["success"] = true;
+		$response["message"] = "Tải lên thành công: " . $original_name . " -> PlayList.json";
+	}
+        else {
+            $response["message"] = "Không thể lưu file!";
+        }
+    }
+    echo json_encode($response);
+	exit();
+}
 ?>

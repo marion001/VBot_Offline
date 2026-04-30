@@ -102,6 +102,8 @@ include 'html_head.php';
               <center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
                 <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
                 <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
+                <button class="btn btn-danger rounded-pill" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist('delete_all')"><i class="bi bi-trash"></i></button>
+                <button type="button" class="btn btn-success rounded-pill" title="Tải Xuống Danh Sách Nhạc" onclick="downloadFile('<?php echo $HTML_VBot_Offline.'/includes/cache/PlayList.json'; ?>')"><i class="bi bi-download"></i></button>
               </center>
             </div>
           </div>
@@ -163,6 +165,9 @@ include 'html_head.php';
                 <div class="tab-pane fade" id="bordered-justified-youtube" role="tabpanel" aria-labelledby="youtube-tab">
                   <div id="show_list_Youtube" style="max-height: 700px; overflow: auto;"></div>
                 </div>
+                <div class="tab-pane fade" id="bordered-justified-youtube" role="tabpanel" aria-labelledby="youtube-tab">
+                  <div id="show_list_Link_URL" style="max-height: 700px; overflow: auto;"></div>
+                </div>
                 <div class="tab-pane fade" id="bordered-justified-podcast" role="tabpanel" aria-labelledby="podcast-tab">
                   <div id="show_list_PodCast" style="max-height: 700px; overflow: auto;"></div>
                 </div>
@@ -221,15 +226,20 @@ include 'html_head.php';
         if (xhr.status === 200) {
           var fileListDiv = document.getElementById('show_list_Playlist');
           try {
-            fileListDiv.innerHTML = '<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button></center>';
-            fileListDiv.innerHTML += '<hr/><center><button class="btn btn-danger" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i> Xóa Toàn Bộ Danh Sách Phát</button></center><hr/>';
+            fileListDiv.innerHTML = '<center><button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success" onclick="playlist_media_control(\'prev\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>' +
+			' <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>' +
+			' <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success" onclick="playlist_media_control(\'next\')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>' +
+			' <button class="btn btn-danger rounded-pill" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-trash"></i></button> ' +
+			' <button type="button" class="btn btn-success rounded-pill" title="Tải Xuống Danh Sách Nhạc" onclick="downloadFile(\'<?php echo $HTML_VBot_Offline.'/includes/cache/PlayList.json'; ?>\')"><i class="bi bi-download"></i></button> ' +
+			'<br/><br/><div class="input-group"><span class="input-group-text border-success">Tải Lên PlayList.json</span><input type="file" class="form-control border-success" id="fileInput_PlayList" accept=".json"><button class="btn btn-primary border-success" type="button" onclick="uploadFile_PlayList(\'Media_Player.php\')"> <i class="bi bi-upload"></i> Tải Lên</button></div>' +
+			'</center><hr/>';
             var data = JSON.parse(xhr.responseText);
             if (Array.isArray(data.data) && data.data.length > 0) {
-              // Xử lý và hiển thị từng playlist
+              //Xử lý và hiển thị từng playlist
               data.data.forEach(function(playlist) {
                 var description = playlist.description ? playlist.description.length > 70 ? playlist.description.substring(0, 70) + '...' : playlist.description : 'N/A';
                 var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
-                // Xử lý theo nguồn
+                //Xử lý theo nguồn
                 if (playlist.source === "Youtube") {
                   fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                   fileInfo += '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';

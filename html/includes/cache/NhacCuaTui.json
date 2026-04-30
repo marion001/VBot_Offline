@@ -1,9 +1,54 @@
-[
-    {
-        "name": "Địa Đàng (Remix)",
-        "thumb": "https://image-cdn.nct.vn/song/2025/02/19/6/2/f/b/1739964064820.jpg",
-        "duration": "04:58",
-        "artist": "Hoàng Oanh",
-        "url": "https://a01.nct.vn/NCTSong/2502/a3/2e/32akx9wy00_hq.mp3?st=bwyU7YRaQtNQQneExwfFhQ&e=1764075448&a=1&p=0&r=b497d118474e4b657f0a435fa47fbfb1"
-    }
-]
+{
+    "success": true,
+    "message": "Tìm kiếm thành công",
+    "data": [
+        {
+            "name": "Thuyền Quyên",
+            "thumb": "https://image-cdn.nct.vn/song/2022/07/26/9/d/5/c/1658817580020.jpg",
+            "duration": "03:13",
+            "artist": "Diệu Kiên",
+            "url": "https://stream.nct.vn/NhacCuaTui2023/ThuyenQuyen-DieuKien-7583420_hq.mp3?st=0vZRlxla1dFuSOZFoT_gAg&e=1778069604&a=1&p=0&r=59e113015102d54545fca99200f209bd",
+            "source": "NhacCuaTui"
+        },
+        {
+            "name": "Thuyền Quyên (Orinn Remix)",
+            "thumb": "https://image-cdn.nct.vn/song/2023/01/05/c/a/8/d/1672900660542.jpg",
+            "duration": "04:38",
+            "artist": "Diệu Kiên",
+            "url": "https://stream.nct.vn/NhacCuaTui2027/ThuyenQuyenOrinnRemix-DieuKien-7805774_hq.mp3?st=oQaYJuSOxCMyB4xni5I10A&e=1778069604&a=1&p=0&r=59e113015102d54545fca99200f209bd",
+            "source": "NhacCuaTui"
+        },
+        {
+            "name": "Thuyền Quyên (AM Remix)",
+            "thumb": "https://image-cdn.nct.vn/song/2023/01/05/c/a/8/d/1672900678048.jpg",
+            "duration": "03:31",
+            "artist": "Diệu Kiên",
+            "url": "https://a01.nct.vn/NhacCuaTui2027/ThuyenQuyenAmRemix-DieuKien-7805775_hq.mp3?st=PEaEuwQl_b0n5OivcXAPQg&e=1778069604&a=1&p=0&r=59e113015102d54545fca99200f209bd",
+            "source": "NhacCuaTui"
+        },
+        {
+            "name": "Thuyền Quyên (Lofi Ver)",
+            "thumb": "https://image-cdn.nct.vn/song/2023/01/09/f/5/7/7/1673239503736.jpg",
+            "duration": "03:31",
+            "artist": "Diệu Kiên, CaoTri",
+            "url": "https://stream.nct.vn/NhacCuaTui2034/ThuyenQuyenLofiVer-DieuKienCaoTri-8520916_hq.mp3?st=G8H4njxDSub3OmKl5-7bkw&e=1778069604&a=1&p=0&r=59e113015102d54545fca99200f209bd",
+            "source": "NhacCuaTui"
+        },
+        {
+            "name": "Thuyền Quyên (Remix)",
+            "thumb": "https://image-cdn.nct.vn/song/2025/08/13/b/a/d/6/1755072862176.jpg",
+            "duration": "02:58",
+            "artist": "Diệu Kiên",
+            "url": "https://stream.nct.vn/resa/2508/38/61/3bocc7o027_hq.mp3?st=_BneSXL6dTGuHyhnyLExDQ&e=1778069604&a=1&p=0&r=59e113015102d54545fca99200f209bd",
+            "source": "NhacCuaTui"
+        },
+        {
+            "name": "Thuyền Quyên (Remix House)",
+            "thumb": "https://image-cdn.nct.vn/song/2024/04/25/c/e/f/d/1714034855160.jpg",
+            "duration": "03:58",
+            "artist": "H2O Houselak, Diệu Kiên",
+            "url": "https://stream.nct.vn/NCTSong/2404/a3/b7/sr1h2s5jel_hq.mp3?st=y1Rrcv9jqrCe7OIB8daa3Q&e=1778069604&a=1&p=0&r=59e113015102d54545fca99200f209bd",
+            "source": "NhacCuaTui"
+        }
+    ]
+}
