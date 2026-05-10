@@ -1013,29 +1013,18 @@ include 'html_head.php';
             document.getElementById('airplay_mute_unmute').checked = data.media_player.airplay_mute_on_off ? true : false;
             document.getElementById('airplay_active').checked = data.media_player.airplay_active ? true : false;
             //Media Player
-			document.getElementById('media-name').innerHTML =
-			  'Tên bài hát: <font color="blue">' +
-			  ((!data.media_player.media_name || String(data.media_player.media_name).trim() === 'N/A')
-				? (data.media_player.airplay_playing === true
-					? (data.media_player.airplay_song_name && String(data.media_player.airplay_song_name).trim() !== 'N/A'
-						? data.media_player.airplay_song_name
-						: 'N/A')
-					: 'N/A')
-				: data.media_player.media_name) +
-			  '</font>';
-            document.getElementById('audio-playing').innerHTML = 'Đang Phát: <font color=blue>' + (data.media_player.audio_playing ? 'Có' : data.media_player.airplay_playing ? 'Có' : 'Không') + '</font>';
-			document.getElementById('audio-source').innerHTML = 'Nguồn Phát: <font color=blue>' + (data.media_player.media_player_source === 'N/A' ? (data.media_player.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player.media_player_source) +'</font>';
+			document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' +
+			  (data.media_player.airplay_playing === true ? (data.media_player.airplay_song_name && String(data.media_player.airplay_song_name).trim() !== 'N/A' ? data.media_player.airplay_song_name : 'N/A')
+				  : ((data.media_player.audio_playing === true || data.media_player.pause_media_flag === true) && data.media_player.media_name && String(data.media_player.media_name).trim() !== 'N/A' ? data.media_player.media_name : 'N/A')) + '</font>';
+			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (data.media_player.audio_playing === true || data.media_player.airplay_playing === true ? 'Đang phát' : (data.media_player.pause_media_flag === true ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
+			document.getElementById('audio-source').innerHTML = 'Nguồn Phát: <font color=blue>' + (
+				data.media_player.airplay_playing === true ? 'AirPlay' : ((data.media_player.audio_playing === true || data.media_player.pause_media_flag === true) ? (data.media_player.media_player_source && String(data.media_player.media_player_source).trim() !== 'N/A' ? data.media_player.media_player_source : 'Local Audio') : 'N/A')) + '</font>';
             //Cập nhật ảnh cover bài hát
 			document.getElementById('media-cover').src =
-				(data.media_player.audio_playing
-					? (data.media_player.media_player_source === 'Local' && !data.media_player.media_cover
-						? 'assets/img/icon_audio_local.png'
-						: (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png'))
-					: data.media_player.airplay_playing
-						? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
-						: 'assets/img/Error_Null_Media_Player.png'
-				);
-            // Cập nhật giá trị full time
+			  (data.media_player.airplay_playing === true ? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now() : ((data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+						? (data.media_player.media_player_source === 'Local' && (!data.media_player.media_cover || String(data.media_player.media_cover).trim() === '' || String(data.media_player.media_cover).trim() === 'N/A')
+							  ? 'assets/img/icon_audio_local.png' : (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png')) : 'assets/img/Error_Null_Media_Player.png'));
+            //Cập nhật giá trị full time
             fullTime = data.media_player.full_time;
             if (data.media_player.audio_playing || data.media_player.airplay_playing) {
               updateDisplay_SongNhac(true);
@@ -1061,7 +1050,7 @@ include 'html_head.php';
               const brightnessPercentzz = Math.round(Math.max(0, Math.min(255, data.led_brightness)) * 100 / 255);
               updateBrightness(brightnessPercentzz);
             }
-            // Cập nhật thanh trượt chỉ khi không đang hover
+            //Cập nhật thanh trượt chỉ khi không đang hover
             if (!isHovering_volume_slide) {
               set_Volume_HTML(data.volume);
             }
