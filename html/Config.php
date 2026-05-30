@@ -415,6 +415,16 @@ if (isset($_POST['all_config_save'])) {
   $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
   $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] = isset($_POST['udp_sock_music_playback_on_client']) ? true : false;
 
+  #Cập nhật Socket Streaming
+  $Config['api']['streaming_server']['protocol']['socket']['port'] = intval($_POST['port_server_socket_streaming_audio']);
+  $Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time'] = intval($_POST['socket_maximum_recording_time']);
+  $Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected'] = intval($_POST['socket_maximum_client_connected']);
+  $Config['api']['streaming_server']['protocol']['socket']['source_stt'] = $_POST['socket_source_stt'];
+  $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] = $_POST['socket_select_wakeup'];
+  $Config['api']['streaming_server']['protocol']['socket']['data_client_name'] = $_POST['socket_server_data_client_name'];
+  $Config['api']['streaming_server']['protocol']['socket']['client_conversation_mode'] = isset($_POST['socket_client_conversation_mode']) ? true : false;
+  $Config['api']['streaming_server']['protocol']['socket']['music_playback_on_client'] = isset($_POST['socket_music_playback_on_client']) ? true : false;
+
   #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
   $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
   $virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $_POST['virtual_assistant_priority2'] : '';
@@ -1091,13 +1101,13 @@ include 'html_head.php';
                     </div>
                   </div>
                   <?php
-                  echo select_field('streaming_server_connection_protocol', 'Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['udp_sock' => 'Sử dụng ESP32, ESP32 D1 Mini, ESP32S3, ESP32S3 Supper Mini'], $Config['api']['streaming_server']['connection_protocol'], []);
+                  echo select_field('streaming_server_connection_protocol', 'Kiểu Loại Kết Nối <font color="red" size="6" title="Bắt Buộc Nhập">*</font>', ['udp_sock' => 'UDP (User Datagram Protocol) [Ngừng phát triển]', 'socket' => 'Socket (Khuyến nghị, nên sử dụng)'], $Config['api']['streaming_server']['connection_protocol'], []);
                   ?>
 
                   <div class="card accordion" id="accordion_button_udp_server_streaming">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_udp_server_streaming" aria-expanded="false" aria-controls="collapse_button_udp_server_streaming">
-                        Cấu hình sử dụng Client: ESP32, ESP32S3, ESP32 D1 Mini:</h5>
+                        Cấu Hình Kiểu Kết Nối UDP:</h5>
                       <div id="collapse_button_udp_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_udp_server_streaming">
 						<div class="alert alert-primary" role="alert">
                         <div class="row mb-3">
@@ -1127,14 +1137,15 @@ include 'html_head.php';
                         echo input_field('udp_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_maximum_client_connected', 'Tối Đa Client Kết Nối', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected'] ?? 3, 'required', 'number', '1', '1', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_time_remove_inactive_clients', 'Thời gian dọn dẹp Client (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients'] ?? 300, 'required', 'number', '1', '200', '900', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
-                        echo select_field('udp_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)'], $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'], []);
+                        echo select_field('udp_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)', 'stt_ggcloud_v2' => 'STT Google Cloud V2'], $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'], []);
                         ?>
                         <div class="row mb-3">
                           <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                           <div class="col-sm-9">
                             <select name="udp_working_mode" id="udp_working_mode" class="form-select border-success" aria-label="Default select example">
                               <option value="main_processing" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'main_processing' ? 'selected' : ''; ?>>main_processing (Loa Server chạy VBot xử lý và thực thi)</option>
-                              <option disabled value="null" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'null' ? 'selected' : ''; ?>>null (Chỉ xử lý STT to Text)</option>
+                              <option value="chatbot" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'chatbot' ? 'selected' : ''; ?>>chatbot (Xử lý dữ liệu luồng chatbot)</option>
+                              <option value="stt_to_tts" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['working_mode'] === 'stt_to_tts' ? 'selected' : ''; ?>>STT To TTS (Chỉ chuyển đổi STT to Text)</option>
                             </select>
                           </div>
                         </div>
@@ -1150,6 +1161,54 @@ include 'html_head.php';
                     </div>
                   </div>
                   </div>
+
+                  <div class="card accordion" id="accordion_button_socket_server_streaming">
+                    <div class="card-body">
+                      <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_socket_server_streaming" aria-expanded="false" aria-controls="collapse_button_socket_server_streaming">
+                        Cấu Hình Kiểu Kết Nối Socket:</h5>
+                      <div id="collapse_button_socket_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_streaming">
+						<div class="alert alert-primary" role="alert">
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Flash Firmware Socket:</label>
+                          <div class="col-sm-9">
+                            <a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION" target="_blank"> ESP32, ESP32S3, ESP32 D1 Mini, ESP32S3 Supper Mini <i class="bi bi-github"></i></a>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Chế Độ Hội Thoại <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng chế độ hội thoại, trò chuyện liên tục')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input border-success" type="checkbox" name="socket_client_conversation_mode" id="socket_client_conversation_mode" <?php echo $Config['api']['streaming_server']['protocol']['socket']['client_conversation_mode'] ? 'checked' : ''; ?>>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Phát Nhạc Local Trên Client: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để phát nhạc, các bài hát Local trên Client')"></i> :</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input border-success" type="checkbox" name="socket_music_playback_on_client" id="socket_music_playback_on_client" <?php echo $Config['api']['streaming_server']['protocol']['socket']['music_playback_on_client'] ? 'checked' : ''; ?>>
+                            </div>
+                          </div>
+                        </div>
+                        <?php
+                        echo input_field('port_server_socket_streaming_audio', 'Port Server', $Config['api']['streaming_server']['protocol']['socket']['port'] ?? 5003, 'required', 'number', '1', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo input_field('socket_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo input_field('socket_maximum_client_connected', 'Tối Đa Client Kết Nối', $Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected'] ?? 3, 'required', 'number', '1', '1', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
+                        echo select_field('socket_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)', 'stt_ggcloud_v2' => 'STT Google Cloud V2'], $Config['api']['streaming_server']['protocol']['socket']['source_stt'], []);
+                        echo select_field('socket_select_wakeup', 'Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>',
+                          ['porcupine' => 'Picovoice/Porcupine WakeUp Client (Nên Dùng)', 'snowboy' => 'Snowboy WakeUP Client'], $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'], []);
+                        echo input_field('socket_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['socket']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('socket_server_streaming_audio', 'Server Streaming Audio', 'ws://'.$serverIp . ':' . $Port_Server_Streaming_Audio_Socket, 'disabled', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                        echo input_field('socket_server_streaming_audio_local', 'URL Audio Local', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', htmlspecialchars('http://' . $serverIp . '/assets/sound/'), 'btn btn-success border-danger', 'link', '_blank');
+                        echo input_field('client_flash_firmware_url', 'Flash Firmware Socket URL', 'https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION', 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', 'https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION', 'btn btn-success border-danger', 'link', '_blank');
+                        ?>
+                      </div>
+                    </div>
+                  </div>
+                  </div>
+
+
+
                 </div>
               </div>
             </div>

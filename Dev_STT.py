@@ -124,7 +124,8 @@ async def dev_stt():
 
                 #Kết quả dữ liệu văn bản từ âm thanh STT
                 if result.is_final:
-                    print(f"Kết quả cuối cùng: {result.alternatives[0].transcript}")
+                    #print(f"Kết quả cuối cùng: {result.alternatives[0].transcript}")
+                    Lib.show_log(f"Kết quả cuối cùng: {result.alternatives[0].transcript}", color=Lib.Color.GREEN)
 
                     #Biến: Lib.stt_transcript sẽ lưu giá trị chuyển đổi được từ STT sang Text để hệ thống xử lý
                     #Bắt buộc phải gán giá trị cuối được chuyển đổi từ STT vào biến: Lib.stt_transcript
@@ -134,7 +135,8 @@ async def dev_stt():
 
                 #Nếu kết quả trung gian bên trên được đặt là True: interim_results = True
                 else:
-                    print(f"Kết quả STT trung gian tạm thời: {result.alternatives[0].transcript}")
+                    #print(f"Kết quả STT trung gian tạm thời: {result.alternatives[0].transcript}")
+                    Lib.show_log(f"[STT-Logs] {result.alternatives[0].transcript}", color=Lib.Color.CYAN)
     #Xử lý Lỗi
     except Exception as e:
         Msg_ERROR = f"[DEV STT] Đã xảy ra lỗi: {e}"
@@ -142,7 +144,7 @@ async def dev_stt():
         #Lưu Logs Vào File nếu Có Lỗi Xảy Ra
         Lib.Logs_VBot(Msg_ERROR)
         
-        #Hiển Thị Logs ra Nguồn Được Chọn
+        #Hiển Thị Logs lỗi ra Nguồn Được Chọn
         Lib.show_log(Msg_ERROR, color=Lib.Color.RED)
         
         #Thông Báo Âm Thanh Khi Lỗi STT

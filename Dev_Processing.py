@@ -18,6 +18,12 @@ import TTS_Processing
 import Def_Processing
 from Media_Player import media_player
 
+def tts_client_url(filename):
+    if not filename:
+        return None
+    safe_name = Lib.quote(Lib.os.path.basename(filename))
+    return f"http://{Lib.get_my_ip}/assets/sound/{Lib.directory_tts}/{safe_name}"
+
 
 #Một Số Biến Toàn Cục, Hàm Trong Hệ Thống Dùng Chung
 """
@@ -151,7 +157,7 @@ def dev_handle_cache_tts(msg_text):
         #Xử lý và Tìm kiếm file âm thanh tts khi bật cache
         mp3_file = Def_Processing.cache_results_tts_mp3(tts_key)
         if mp3_file:
-            result_url = f"http://{Lib.get_my_ip}/assets/sound/{mp3_file}"
+            result_url = tts_client_url(mp3_file)
 
     #Nếu chưa có cache TTS thì tạo mới
     if not result_url:
@@ -161,7 +167,7 @@ def dev_handle_cache_tts(msg_text):
             #Nếu Ở Client Chuyển Sang MP3 để Phát TTS
             mp3_file = Def_Processing.convert_audio_to_mp3(tts_data)
             if mp3_file:
-                result_url = f"http://{Lib.get_my_ip}/assets/sound/{mp3_file}"
+                result_url = tts_client_url(mp3_file)
     Lib.tts_client_result = result_url  #Trả dữ liệu File âm thanh Về Client để Client phát TTS
     Lib.main_vbot_processing = False    #Gắn Cờ False Báo Hệ Thống Đã Xử LÝ Xong Dữ Liệu (True = Đang Xử Lý, False Không Xử Lý)
     return result_url
@@ -355,7 +361,7 @@ async def dev_processing(text_input):
             tts_client = Def_Processing.convert_audio_to_mp3(audio_data)
             if tts_client:
                 #Trả dữ liệu âm thanh về cho loa Client
-                Lib.tts_client_result = f"http://{Lib.get_my_ip}/assets/sound/{tts_client}"
+                Lib.tts_client_result = tts_client_url(tts_client)
 
     #Kiểm tra xử lý cuối => quay về chờ được đánh thức
     dev_finish_processing()

@@ -65,12 +65,18 @@ def dev_assistant(text_input, used_for=None):
     headers = {'Content-Type': 'application/json'}
 
     try:
-        response = requests.post(url_api, json=data, headers=headers)
+        response = requests.post(url_api, json=data, headers=headers, timeout=Lib.time_out_google_gemini)
         if response.status_code == 200:
             response_data = response.json()
 
             #Lấy kết quả trả về của Gemini
-            text_gemini = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
+            candidates = response_data.get('candidates', [])
+            parts = candidates[0].get('content', {}).get('parts', []) if candidates else []
+            text_gemini = parts[0].get('text', '').strip() if parts else ''
+            if not text_gemini:
+                TEXT_ERROR = "[DEV Assistant] Gemini không trả về nội dung hợp lệ"
+                Lib.show_log(TEXT_ERROR, color=Lib.Color.RED)
+                return None, TEXT_ERROR
 
             #hiển thị dữ liệu text Gemini trả về
             Lib.show_log(f"[DEV Assistant] Kết quả Gemini: {text_gemini}", color=Lib.Color.GREEN)
@@ -94,7 +100,11 @@ def dev_assistant(text_input, used_for=None):
             #Nếu Có Lỗi sử dụng return
             return None, f'[DEV Assistant] Lỗi: {response.text}'
 
-    except Exception as e:
+    except requests.exceptions.RequestException as e:
+        TEXT_ERROR = f"[DEV Assistant] Lỗi kết nối API: {e}"
+        Lib.show_log(TEXT_ERROR, color=Lib.Color.RED)
+        return None, TEXT_ERROR
+    except (ValueError, KeyError, IndexError, TypeError) as e:
         TEXT_ERROR = f"[DEV Assistant] Có lỗi xảy ra: {e}"
         Lib.show_log(TEXT_ERROR, color=Lib.Color.RED)
 

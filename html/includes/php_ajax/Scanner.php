@@ -405,7 +405,9 @@ if (isset($_POST['showJsonData_Client'])) {
         ]);
     }
     exit();
-} else if (isset($_POST['xiaozhi'])) {
+}
+
+else if (isset($_POST['xiaozhi'])) {
     $action = isset($_POST['action']) ? trim($_POST['action']) : '';
     if ($action === 'unlink_reset_data') {
         $Config['xiaozhi']['activation_status'] = false;

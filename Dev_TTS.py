@@ -20,6 +20,8 @@ Thêm thư viện Lib
 
 import requests
 
+DEV_TTS_TIMEOUT = float(Lib.config.get("xiaozhi", {}).get("tts_time_out", 20))
+
 #Demo sử dụng Zalo TTS:
 #https://ai.zalo.cloud/docs/api/text-to-audio-converter
 
@@ -45,9 +47,18 @@ def dev_tts(text_input):
       'apikey': API_KEY_ZALO,
       'Content-Type': 'application/x-www-form-urlencoded'
     }
-    response = requests.request("POST", "https://api.zalo.ai/v1/tts/synthesize", headers=headers, data=payload)
+    try:
+        response = requests.request("POST", "https://api.zalo.ai/v1/tts/synthesize", headers=headers, data=payload, timeout=DEV_TTS_TIMEOUT)
+        response.raise_for_status()
+    except Exception as e:
+        Lib.show_log(f"[DEV TTS] Lỗi gọi API TTS: {e}", color=Lib.Color.RED)
+        return None
     #Chuyển dữ liệu  trả về thành json
-    response_data = response.json()
+    try:
+        response_data = response.json()
+    except ValueError as e:
+        Lib.show_log(f"[DEV TTS] Phản hồi API không phải JSON hợp lệ: {e}", color=Lib.Color.RED)
+        return None
     #Kiểm tra dữ liệu trả về
     if response_data.get('error_code') == 0:
 
@@ -56,12 +67,19 @@ def dev_tts(text_input):
         Lib.show_log(f"[DEV TTS] URL Phát TTS Trực Tiếp: {audio_url}", color=Lib.Color.YELLOW)
 
         try:
-            audio_response = Lib.requests.get(audio_url)
+            audio_response = Lib.requests.get(audio_url, timeout=DEV_TTS_TIMEOUT)
             audio_response.raise_for_status()
 
             #Nếu muốn lưu lại Tệp âm thanh TTS
-            with open(output_file_path, 'wb') as audio_file:
+            tmp_file = f"{output_file_path}.{Lib.uuid.uuid4().hex[:8]}.tmp"
+            with open(tmp_file, 'wb') as audio_file:
                 audio_file.write(audio_response.content)
+            if Lib.os.path.getsize(tmp_file) < 128:
+                Lib.os.remove(tmp_file)
+                Lib.show_log("[DEV TTS] File âm thanh tải xuống không hợp lệ", color=Lib.Color.RED)
+                return audio_url
+            Lib.os.replace(tmp_file, output_file_path)
+            Lib.os.chmod(output_file_path, 0o777)
             Lib.show_log(f"[DEV TTS] File được tải xuống thành công tại: {output_file_path}", color=Lib.Color.GREEN)
             #Trả dữ liệu về cho chương trình phát TTS (đường dẫn path)
             return output_file_path

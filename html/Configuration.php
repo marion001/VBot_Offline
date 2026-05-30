@@ -179,6 +179,7 @@ $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['ac
 //Cổng port của đường API
 $Port_API = $Config['api']['port'];
 $Port_Server_Streaming_Audio_UDP = $Config['api']['streaming_server']['protocol']['udp_sock']['port'];
+$Port_Server_Streaming_Audio_Socket = $Config['api']['streaming_server']['protocol']['socket']['port'];
 
 //Tìm tất cả các tệp có tên bắt đầu bằng 'avata_user'
 $files = glob('assets/img/avata_user.*');

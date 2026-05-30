@@ -78,7 +78,7 @@ include 'html_head.php';
         <ol class="breadcrumb">
           <li class="breadcrumb-item" onclick="loading('show')"><a href="index.php">Trang Chủ</a></li>
           <li class="breadcrumb-item active">Dev_Assistant.py</li>
-          &nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['developer_customization']['active'] ? '<p class="text-success" title="Developers Assistant đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Developers Assistant không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
+          &nbsp;| Trạng Thái Kích Hoạt: <?php echo $Config['virtual_assistant']['customize_developer_assistant']['active'] ? '<p class="text-success" title="Developers Assistant đang được kích hoạt">&nbsp;Đang Bật</p>' : '<p class="text-danger" title="Developers Assistant không được kích hoạt">&nbsp;Đang Tắt</p>'; ?>
         </ol>
       </nav>
     </div>

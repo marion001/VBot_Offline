@@ -47,7 +47,15 @@
                     "working_mode": "main_processing",
                     "select_wakeup": "porcupine",
                     "client_conversation_mode": true,
-                    "music_playback_on_client": true,
+                    "data_client_name": "Data_VBot_Client.json"
+                },
+                "socket": {
+                    "port": 5003,
+                    "maximum_recording_time": 5,
+                    "maximum_client_connected": 3,
+                    "source_stt": "stt_ggcloud",
+                    "select_wakeup": "snowboy",
+                    "client_conversation_mode": true,
                     "data_client_name": "Data_VBot_Client.json"
                 }
             }
