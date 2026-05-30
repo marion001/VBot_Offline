@@ -1169,9 +1169,15 @@ include 'html_head.php';
                       <div id="collapse_button_socket_server_streaming" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_socket_server_streaming">
 						<div class="alert alert-primary" role="alert">
                         <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Flash Firmware Socket:</label>
+                          <label class="col-sm-3 col-form-label">Flash Firmware (Client ESP):</label>
                           <div class="col-sm-9">
-                            <a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION" target="_blank"> ESP32, ESP32S3, ESP32 D1 Mini, ESP32S3 Supper Mini <i class="bi bi-github"></i></a>
+                            <a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION" target="_blank"> ESP32, ESP32S3, ESP32 D1 Mini, ESP32S3 Supper Mini (Chạy VBot Client)<i class="bi bi-github"></i></a>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Flash Firmware (Client Phicomm-R1):</label>
+                          <div class="col-sm-9">
+                            <a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION/Phicomm_R1" target="_blank"> Loa Phicomm-R1 (Chạy VBot Client)<i class="bi bi-github"></i></a>
                           </div>
                         </div>
                         <div class="row mb-3">
