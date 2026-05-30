@@ -1177,7 +1177,7 @@ include 'html_head.php';
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Flash Firmware (Client Phicomm-R1):</label>
                           <div class="col-sm-9">
-                            <a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION/Phicomm_R1" target="_blank"> Loa Phicomm-R1 (Chạy VBot Client)<i class="bi bi-github"></i></a>
+                            <a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION/Phicomm_R1" target="_blank"> Loa Phicomm-R1 (Chạy VBot Client) <i class="bi bi-github"></i></a>
                           </div>
                         </div>
                         <div class="row mb-3">
