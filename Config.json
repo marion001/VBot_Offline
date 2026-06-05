@@ -29,6 +29,10 @@
     "api": {
         "active": true,
         "port": 5002,
+        "auth": {
+            "active": false,
+            "api_key": ""
+        },
         "show_log": {
             "active": false,
             "max_log": 30,
