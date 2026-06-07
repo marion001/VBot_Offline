@@ -413,7 +413,6 @@ if (isset($_POST['all_config_save'])) {
   $Config['api']['streaming_server']['protocol']['udp_sock']['select_wakeup'] = $_POST['udp_select_wakeup'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['data_client_name'] = $_POST['udp_server_data_client_name'];
   $Config['api']['streaming_server']['protocol']['udp_sock']['client_conversation_mode'] = isset($_POST['udp_sock_client_conversation_mode']) ? true : false;
-  $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] = isset($_POST['udp_sock_music_playback_on_client']) ? true : false;
 
   #Cập nhật Socket Streaming
   $Config['api']['streaming_server']['protocol']['socket']['port'] = intval($_POST['port_server_socket_streaming_audio']);
@@ -423,7 +422,6 @@ if (isset($_POST['all_config_save'])) {
   $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'] = $_POST['socket_select_wakeup'];
   $Config['api']['streaming_server']['protocol']['socket']['data_client_name'] = $_POST['socket_server_data_client_name'];
   $Config['api']['streaming_server']['protocol']['socket']['client_conversation_mode'] = isset($_POST['socket_client_conversation_mode']) ? true : false;
-  $Config['api']['streaming_server']['protocol']['socket']['music_playback_on_client'] = isset($_POST['socket_music_playback_on_client']) ? true : false;
 
   #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
   $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
@@ -1124,14 +1122,6 @@ include 'html_head.php';
                             </div>
                           </div>
                         </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Phát Nhạc Local Trên Client: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để phát nhạc, các bài hát Local trên Client')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="form-switch">
-                              <input class="form-check-input border-success" type="checkbox" name="udp_sock_music_playback_on_client" id="udp_sock_music_playback_on_client" <?php echo $Config['api']['streaming_server']['protocol']['udp_sock']['music_playback_on_client'] ? 'checked' : ''; ?>>
-                            </div>
-                          </div>
-                        </div>
                         <?php
                         echo input_field('port_server_udp_streaming_audio', 'Port Server', $Config['api']['streaming_server']['protocol']['udp_sock']['port'] ?? 5003, 'required', 'number', '1', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
@@ -1185,14 +1175,6 @@ include 'html_head.php';
                           <div class="col-sm-9">
                             <div class="form-switch">
                               <input class="form-check-input border-success" type="checkbox" name="socket_client_conversation_mode" id="socket_client_conversation_mode" <?php echo $Config['api']['streaming_server']['protocol']['socket']['client_conversation_mode'] ? 'checked' : ''; ?>>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Phát Nhạc Local Trên Client: <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để phát nhạc, các bài hát Local trên Client')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="form-switch">
-                              <input class="form-check-input border-success" type="checkbox" name="socket_music_playback_on_client" id="socket_music_playback_on_client" <?php echo $Config['api']['streaming_server']['protocol']['socket']['music_playback_on_client'] ? 'checked' : ''; ?>>
                             </div>
                           </div>
                         </div>
