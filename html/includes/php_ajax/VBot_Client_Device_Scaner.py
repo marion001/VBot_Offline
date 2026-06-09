@@ -31,8 +31,10 @@ def read_info_startup(iface_name="wlan0"):
     except Exception:
         return None
 
+"""Kiểm tra xem thiết bị có chạy VBot Client không"""
+"""
 def check_device(ip):
-    """Kiểm tra xem thiết bị có chạy VBot Client không"""
+    
     url = f"http://{ip}/VBot_Client_Info"
     try:
         response = requests.get(url, timeout=1)
@@ -43,9 +45,37 @@ def check_device(ip):
     except requests.exceptions.RequestException:
         pass
     return None
+"""
 
+def check_device(ip, port):
+    """Kiểm tra thiết bị VBot Client theo IP + port"""
+
+    if port == 80:
+        url = f"http://{ip}/VBot_Client_Info"
+    else:
+        url = f"http://{ip}:{port}/VBot_Client_Info"
+
+    try:
+        response = requests.get(url, timeout=1.5)
+
+        if response.status_code == 200:
+            data = response.json()
+
+            if data.get("success") is True:
+                data["ip"] = ip
+                data["port"] = port
+                data["_url"] = url
+                return data
+
+    except Exception:
+        pass
+
+    return None
+
+"""Quét mạng bằng nmap và kiểm tra thiết bị VBot Client"""
+"""
 def scan_network(ip_address):
-    """Quét mạng bằng nmap và kiểm tra thiết bị VBot Client"""
+    
     nm = nmap.PortScanner()
     # Quét subnet /24 với ping scan (-sn) để tìm các host đang hoạt động
     network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
@@ -58,6 +88,59 @@ def scan_network(ip_address):
         with ThreadPoolExecutor(max_workers=20) as executor:
             results = executor.map(check_device, active_ips)
             found_devices = [result for result in results if result is not None]
+
+    return found_devices
+"""
+
+def scan_network(ip_address):
+    """Quét mạng bằng nmap rồi kiểm tra API VBot Client"""
+
+    network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
+    nm = nmap.PortScanner()
+
+    found_devices = []
+
+    try:
+        nm.scan(
+            hosts=str(network),
+            arguments='-Pn -T4 -p 80,8081 --open'
+        )
+    except Exception as e:
+        print(json.dumps({
+            "success": False,
+            "messager": f"Lỗi khi quét nmap: {str(e)}",
+            "data": {}
+        }, indent=4, ensure_ascii=False))
+        return []
+
+    targets = []
+
+    for host in nm.all_hosts():
+        if 'tcp' not in nm[host]:
+            continue
+
+        for port in (80, 8081):
+            if port in nm[host]['tcp']:
+                if nm[host]['tcp'][port]['state'] == 'open':
+                    targets.append((host, port))
+
+    # Nếu nmap không tìm thấy gì, fallback thử toàn bộ dải IP
+    if not targets:
+        for ip in network.hosts():
+            ip = str(ip)
+            targets.append((ip, 80))
+            targets.append((ip, 8081))
+
+    with ThreadPoolExecutor(max_workers=40) as executor:
+        futures = []
+
+        for ip, port in targets:
+            futures.append(executor.submit(check_device, ip, port))
+
+        for future in futures:
+            result = future.result()
+            if result is not None:
+                found_devices.append(result)
 
     return found_devices
 

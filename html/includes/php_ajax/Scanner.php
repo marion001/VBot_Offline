@@ -359,6 +359,7 @@ if (isset($_GET['XiaoZhi_Active'])) {
 }
 
 //Kiểm tra nếu có dữ liệu POST với showJsonData_Client
+// Kiểm tra nếu có dữ liệu POST với showJsonData_Client
 if (isset($_POST['showJsonData_Client'])) {
     $ip_address = $_POST['showJsonData_Client'];
     if (empty($ip_address)) {
@@ -375,35 +376,47 @@ if (isset($_POST['showJsonData_Client'])) {
         ]);
         exit;
     }
-    $targetUrl = 'http://' . $ip_address . '/VBot_Client_Info';
-    try {
-        $ch = curl_init($targetUrl);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-        $response = curl_exec($ch);
-        if ($response === false) {
-            throw new Exception('Không thể kết nối tới client: ' . curl_error($ch));
-        }
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        if ($httpCode !== 200) {
-            throw new Exception('Phản hồi từ client không thành công. Mã trạng thái: ' . $httpCode);
-        }
-        curl_close($ch);
-        $data = json_decode($response, true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new Exception('Dữ liệu JSON không hợp lệ từ client: ' . $ip_address);
-        }
-        echo json_encode(array_merge(['success' => true], $data));
-    } catch (Exception $e) {
-        if (isset($ch)) {
+    $urls = [
+        'http://' . $ip_address . '/VBot_Client_Info',
+        'http://' . $ip_address . ':8081/VBot_Client_Info'
+    ];
+    $lastError = '';
+    foreach ($urls as $targetUrl) {
+        try {
+            $ch = curl_init($targetUrl);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            $response = curl_exec($ch);
+            if ($response === false) {
+                throw new Exception(curl_error($ch));
+            }
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            if ($httpCode !== 200) {
+                throw new Exception('HTTP ' . $httpCode);
+            }
             curl_close($ch);
+            $data = json_decode($response, true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                throw new Exception('JSON không hợp lệ');
+            }
+            echo json_encode(array_merge([
+                'success' => true,
+                'source_url' => $targetUrl
+            ], $data));
+            exit();
+        } catch (Exception $e) {
+            $lastError = $e->getMessage();
+            if (isset($ch)) {
+                curl_close($ch);
+            }
         }
-        echo json_encode([
-            'success' => false,
-            'error' => $e->getMessage()
-        ]);
     }
+    echo json_encode([
+        'success' => false,
+        'error' => 'Không thể kết nối tới client trên cả port 80 và 8081. Lỗi cuối: ' . $lastError
+    ]);
     exit();
 }
 

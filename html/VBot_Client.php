@@ -290,8 +290,17 @@ if ($Config['contact_info']['user_login']['active']) {
                 tableHTML +=
                     '<tr>' +
                     '<td style="text-align: center; vertical-align: middle;"><span class="status-dot" id="status-' + index + '"></span>' + (device.client_name || '') + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.ip_address || device.ip || '') + '" target="_blank">' + (device.ip_address || device.ip || '') + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
-                    '<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.server.vbot_server_ip || device.server.host) + '" target="_blank">' + (device.server.vbot_server_ip || device.server.socket) + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
+
+					'<td style="text-align: center; vertical-align: middle;">' +
+					'<a href="' +
+					'http://' + (device.ip_address || device.ip || '') +
+					(((device.chip?.manufacturer || '').toLowerCase() === 'phicomm') ? ':8081' : '') +
+					'" target="_blank">' +
+					(device.ip_address || device.ip || '') +
+					//(((device.chip?.manufacturer || '').toLowerCase() === 'phicomm') ? ':8081' : '') +
+					' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
+
+					'<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.server.vbot_server_ip || device.server.host) + '" target="_blank">' + (device.server.vbot_server_ip || device.server.socket) + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
                     '<td style="text-align: center; vertical-align: middle;" id="device-version-' + index + '">' + (device.version || '') + '</td>' +
                     '<td style="text-align: center; vertical-align: middle;">' + (device.chip_model || device.chip.model) + ' ' + (device.chip_suffix || '') + '</td>' +
                     '<td style="text-align: center; vertical-align: middle;">' +
@@ -447,6 +456,38 @@ if ($Config['contact_info']['user_login']['active']) {
                 showMessagePHP("Đã hủy nâng cấp Firmware", 5);
                 return;
             }
+
+		// Nếu file cập nhật là APK thì hướng dẫn cập nhật qua ADB
+		if ((url_firmware || '').toLowerCase().split('?')[0].endsWith('.apk')) {
+			show_message(
+				'<div style="text-align:left; line-height:1.6;">' +
+					'<b>Có phiên bản mới.</b><br><br>' +
+					'<a href="https://github.com/marion001/VBot_Client_Offline/tree/main/SOCKET_CONNECTION/Phicomm_R1" target="_blank">Hướng Dẫn Cập Nhật Đầy Đủ -> Github</a><br><br>' +
+					'<b>Tải công cụ ADB:</b><br>' +
+					'<a href="https://github.com/marion001/VBot_Client_Offline/blob/main/SOCKET_CONNECTION/Phicomm_R1/adb_tools.zip" target="_blank">adb_tools.zip</a><br><br>' +
+					'<b>Hướng dẫn cập nhật qua ADB:</b><br>' +
+					'Bật ADB trên loa Phicomm R1 (Đã được bật sẵn).<br><br>' +
+					'<b>Kết nối tới thiết bị:</b><br>' +
+					'<code>adb connect ' + ip_address + ':5555</code><br><br>' +
+					'<b>Tải xuống file .apk mới tại đây:</b><br>' +
+					'<b>APK:</b> <a href="' + url_firmware + '" target="_blank">PhicommR1_VBotClient.apk</a><br><br>' +
+					'<b>Đẩy APK vào thiết bị (điền đầy đủ đường dẫn file .apk đã tải xuống):</b><br>' +
+					'<code>adb -s ' + ip_address + ':5555 push PhicommR1_VBotClient.apk /data/local/tmp/vbot.apk</code><br><br>' +
+					'<b>Cài đặt, cập nhật ứng dụng app:</b><br>' +
+					'<code>adb -s ' + ip_address + ':5555 shell pm install -r /data/local/tmp/vbot.apk</code><br><br>' +
+					'<b>Xóa file .apk tạm trước đó:</b><br>' +
+					'<code>adb -s ' + ip_address + ':5555 shell rm /data/local/tmp/vbot.apk</code><br><br>' +
+					'<b>Khởi động lại ứng dụng, App:</b><br>' +
+					'<code>adb -s ' + ip_address + ':5555 shell am start -n com.vbot_client.phicommr1/.MainActivity</code><br><br>' +
+					'<b>Lưu ý:</b><br>' +
+					'Thay <code>&lt;ip&gt;</code> bằng địa chỉ IP của loa Phicomm R1 tương ứng của bạn.<br>' +
+					'Đảm bảo các thiết bị kết nối cùng một mạng LAN.<br>' +
+					'Nếu lỗi kết nối, hãy khởi động lại ADB hoặc khởi động lại loa.' +
+				'</div>'
+			);
+			return;
+		}
+
             loading('show');
             //Kiểm tra định dạng IP (ví dụ: 192.168.x.x)
             var ipRegex = /^192\.168\.\d{1,3}\.\d{1,3}$/;
