@@ -1866,7 +1866,8 @@ $:> sudo ldconfig</code></pre>
                 <div id="step3" class="accordion-collapse collapse">
                     <div class="accordion-body">
 
-<pre class="bg-dark text-light p-3 rounded"><code>$:> git clone https://github.com/arkq/bluez-alsa.git
+<pre class="bg-dark text-light p-3 rounded"><code>$:> cd ~
+$:> git clone https://github.com/arkq/bluez-alsa.git
 $:> cd ~/bluez-alsa
 $:> sudo apt update && sudo apt install -y \
 	git build-essential automake autoconf libtool pkg-config \
