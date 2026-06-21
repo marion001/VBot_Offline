@@ -60,7 +60,7 @@ import Assistant
 #ví dụ sử dụng trợ lý ảo: Sử Dụng Trợ Lý Ảo Theo Chế ĐỘ Ưu Tiên lần Lượt: Assistant.Call(input_text, True)
 #Assistant.Call(input_text, True) có đối số thứ 2 là True hoặc False để chuyển đổi dữ liệu âm thanh sang văn bản Text, True để chuyển đổi, False không chuyển đổi
 
-Assistant_Audio, Assistant_Text = Assistant.Call(input_text, True)
+Assistant_Audio, Assistant_Text = await Assistant.Call_async(input_text, True)
 print(f"Assistant Audio: {Assistant_Audio}")
 print(f"Assistant Text: {Assistant_Text}")
 
@@ -68,7 +68,7 @@ print(f"Assistant Text: {Assistant_Text}")
 #Gọi Trực Tiếp Tới 1 Trợ Lý Ảo Nào Đó: Các Trợ Lý Ảo: gemini_assistant, gpt_assistant, default_assistant, zalo_assistant
 #Có đối số thứ 2 là True hoặc False để chuyển đổi dữ liệu âm thanh sang văn bản Text, True để chuyển đổi, False không chuyển đổi
 #Ví Dụ Gọi Trợ Lý ảo gemini_assistant:
-Assistant_Audio, Assistant_Text = Assistant.gemini_assistant(input_text, True)
+Assistant_Audio, Assistant_Text = await Assistant.gemini_assistant_async(input_text, True)
 print(f"Assistant Audio: {Assistant_Audio}")
 print(f"Assistant Text: {Assistant_Text}")
 
@@ -80,7 +80,7 @@ Cần giữ nguyên hàm, function: def dev_skill(input_text):
 Mọi tùy biến và xử lý dữ liệu các bạn dev sẽ code bên trong hàm "def dev_skill(input_text):"
 biến input_text = dữ liệu text được chuyển đổi Speak to text
 """
-def dev_skill(input_text):
+async def dev_skill(input_text):
 
     
     Lib.show_log(f"Dữ liệu STT truyền vào CUstom Skill: {input_text}", color=Lib.Color.GREEN)
@@ -110,7 +110,7 @@ def dev_skill(input_text):
     #Ví dụ sử dụng trợ lý ảo
     """
     
-    Assistant_Audio, Assistant_Text = Assistant.Call(input_text, False)
+    Assistant_Audio, Assistant_Text = await Assistant.Call_async(input_text, False)
     if Assistant_Text:
         Lib.show_log(f"[BOT]: {Assistant_Text}", color=Lib.Color.GREEN)
     else:
@@ -131,7 +131,7 @@ def dev_skill(input_text):
     #ví dụ chuyển dữ liệu text, văn bản thành file âm thanh audio
     """
     
-    test_tts_to_audio = TTS_Processing.Select_TTS(input_text)
+    test_tts_to_audio = await TTS_Processing.Select_TTS_async(input_text)
     if test_tts_to_audio:
         Lib.show_log(f"dữ liệu âm thanh đã được chuyển đổi từ văn bản: {test_tts_to_audio}", color=Lib.Color.GREEN)
     else:

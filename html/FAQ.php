@@ -1703,8 +1703,6 @@ EOF</code></pre>
 </div>
 </div>
 
-
-
 <div class="card accordion" id="accordion_button_webrtc_noise_gain">
 <div class="card-body">
 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webrtc_noise_gain" aria-expanded="false" aria-controls="collapse_button_webrtc_noise_gain">
@@ -1791,6 +1789,348 @@ EOF</code></pre>
           <div class="alert alert-success mt-4">
             Nếu thấy dòng <strong>OK</strong> hiện ra → cài đặt thành công!
           </div>
+</div>
+</div>
+</div>
+
+
+<div class="card accordion" id="accordion_button_bluetooth_guide">
+<div class="card-body">
+<h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_bluetooth_guide" aria-expanded="false" aria-controls="collapse_button_bluetooth_guide">
+Hướng Dẫn Cài Đặt Bluetooth Audio:</h5>
+<div id="collapse_button_bluetooth_guide" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_bluetooth_guide">
+
+<div class="card shadow-sm">
+        <div class="accordion" id="bluetoothGuide">
+            <!-- BƯỚC 1 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#step1">
+                        Bước 1: Nâng cấp Bluetooth và các thư viện cần thiết
+                    </button>
+                </h2>
+                <div id="step1" class="accordion-collapse collapse show">
+                    <div class="accordion-body">
+                        <p>Chạy lệnh nâng cấp Bluetooth và các thư viện cần thiết trước khi build BlueALSA:</p>
+<pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo apt-get update
+$:> sudo apt-get install -y autoconf automake libtool
+$:> sudo apt update
+$:> sudo apt install --reinstall raspberrypi-bootloader raspberrypi-kernel bluez-firmware
+$:> sudo reboot</code></pre>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BƯỚC 2 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step2">
+                        Bước 2: Cài đặt thư viện âm thanh FDK-AAC
+                    </button>
+                </h2>
+
+                <div id="step2" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+                        <div class="alert alert-warning">
+                            Cần cài thủ công thư viện FDK-AAC từ source trước khi build BlueALSA.
+                        </div>
+<pre class="bg-dark text-light p-3 rounded">
+<code>$:> git clone https://github.com/mstorsjo/fdk-aac.git
+$:> cd fdk-aac
+$:> autoreconf -fiv
+$:> ./configure --prefix=/usr
+$:> make -j2
+$:> sudo make install
+$:> sudo ldconfig</code></pre>
+<h6>Kiểm tra cài đặt thành công:</h6>
+
+<pre class="bg-dark text-light p-3 rounded"><code>$:> pkg-config --modversion fdk-aac</code></pre>
+
+                        <p>Hoặc Lệnh:</p>
+
+<pre class="bg-dark text-light p-3 rounded"><code>$:> ls /usr/lib*/pkgconfig/fdk-aac.pc</code></pre>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- BƯỚC 3 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step3">
+                        Bước 3: Build và cài đặt BlueALSA
+                    </button>
+                </h2>
+
+                <div id="step3" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+
+<pre class="bg-dark text-light p-3 rounded"><code>$:> git clone https://github.com/arkq/bluez-alsa.git
+$:> cd ~/bluez-alsa
+$:> sudo apt update && sudo apt install -y \
+	git build-essential automake autoconf libtool pkg-config \
+	libasound2-dev libbluetooth-dev libglib2.0-dev \
+	libsbc-dev libreadline-dev libsystemd-dev
+$:> autoreconf --install
+$:> ./configure \
+	--enable-aac \
+	--enable-cli \
+	--enable-rfcomm \
+	--enable-systemd
+$:> make -j2
+$:> sudo make install
+$:> sudo ldconfig</code></pre>
+<h6>Kiểm tra build thành công:</h6>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> bluealsad -V
+$:> bluealsad --help</code></pre>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- BƯỚC 4 -->
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step4">
+                        Bước 4: Cấu hình Service
+                    </button>
+                </h2>
+
+                <div id="step4" class="accordion-collapse collapse">
+                    <div class="accordion-body">
+
+                        <h5>Cấu hình file xử lý Bluetooth</h5>
+
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluetooth_agent.py /usr/local/bin/bluetooth_agent.py
+$:> sudo chmod 0777 /usr/local/bin/bluetooth_agent.py
+$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/bthelper /usr/bin/bthelper</code></pre><hr>
+<h5>Cấu hình bluealsa.service</h5><p>Sao chép file service:</p>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluealsa.service /etc/systemd/system/bluealsa.service</code></pre>
+<p>Hoặc bạn muốn tạo thủ công bằng tay:</p>
+<pre class="bg-secondary text-light p-3 rounded"><code>$:> sudo nano /etc/systemd/system/bluealsa.service</code></pre>
+
+<pre class="bg-secondary text-light p-3 rounded"><code>[Unit]
+Description=BlueALSA daemon
+Wants=bluetooth.service
+After=bluetooth.service dbus.service systemd-udevd.service
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/bluealsad -p a2dp-sink --keep-alive=5
+Restart=on-failure
+RestartSec=3
+StartLimitIntervalSec=0
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<hr><h5>Cấu hình vbot-bluetooth-agent.service</h5><p>Sao chép file service:</p>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/vbot-bluetooth-agent.service /etc/systemd/system/vbot-bluetooth-agent.service</code></pre>
+<p>Hoặc bạn muốn tạo thủ công bằng tay:</p>
+<pre class="bg-secondary text-light p-3 rounded"><code>$:> sudo nano /etc/systemd/system/vbot-bluetooth-agent.service</code></pre>
+<pre class="bg-secondary text-light p-3 rounded"><code>[Unit]
+Description=VBot Bluetooth DBus Agent
+Documentation=https://github.com/marion001/VBot_Offline
+
+Wants=bluetooth.service dbus.service bluealsa.service
+After=bluetooth.service dbus.service bluealsa.service systemd-udevd.service
+
+Requires=bluetooth.service
+
+[Service]
+Type=simple
+
+ExecStart=/usr/bin/python3 /usr/local/bin/bluetooth_agent.py
+
+Restart=always
+RestartSec=2
+
+Environment=PYTHONUNBUFFERED=1
+Environment=DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+
+User=root
+Group=root
+
+KillMode=process
+TimeoutStopSec=10
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+<hr><h5>Tải lại Systemd</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo systemctl daemon-reload</code></pre>
+<h5>Bật tự khởi động cùng hệ thống</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo systemctl enable bluealsa.service
+$:> sudo systemctl enable vbot-bluetooth-agent.service</code></pre>
+<h5>Khởi động Service</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo systemctl start bluealsa.service
+$:> sudo systemctl start vbot-bluetooth-agent.service</code></pre>
+<h5>Kiểm tra trạng thái</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> systemctl status bluealsa.service
+$:> sudo systemctl status vbot-bluetooth-agent.service</code></pre>
+</div></div></div>
+
+<!-- BƯỚC 5 -->
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step5">
+            Bước 5: nâng cấp BlueZ lên phiên bản 5.86
+        </button>
+    </h2>
+
+    <div id="step5" class="accordion-collapse collapse">
+        <div class="accordion-body">
+
+            <p><strong>Cài đặt các gói phụ thuộc:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo apt update
+$:> sudo apt install -y \
+	build-essential \
+	libdbus-1-dev \
+	libglib2.0-dev \
+	libudev-dev \
+	libical-dev \
+	libreadline-dev \
+	libasound2-dev \
+	libjson-c-dev \
+	wget
+$:> sudo apt install libsystemd-dev
+$:> sudo apt install -y autoconf automake libtool</code></pre>
+            <p><strong>Tải và giải nén BlueZ 5.86:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> cd /usr/src
+$:> sudo wget https://www.kernel.org/pub/linux/bluetooth/bluez-5.86.tar.xz
+$:> sudo tar xf bluez-5.86.tar.xz
+$:> cd bluez-5.86</code></pre>
+
+            <p><strong>Cấu hình và build:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded">
+<code>$:> sudo ./configure \
+	--prefix=/usr \
+	--sysconfdir=/etc \
+	--localstatedir=/var \
+	--enable-library \
+	--enable-experimental
+$:> sudo make -j$(nproc)</code></pre>
+
+            <p><strong>Kiểm tra binary sau khi build:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> ./src/bluetoothd -v</code></pre>
+            <p>Kỳ vọng hiển thị phiên bản: <code>5.86</code></p>
+            <p><strong>Cài đặt BlueZ 5.86 vào hệ thống:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> sudo systemctl stop bluetooth
+$:> sudo make install</code></pre>
+
+            <p><strong>Kiểm tra sau khi cài:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> bluetoothd -v</code></pre>
+            <p>Kỳ vọng hiển thị phiên bản: <code>5.86</code></p>
+            <p><strong>Khởi động lại hệ thống:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> sudo reboot</code></pre>
+            <p><strong>Kiểm tra service:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> systemctl status bluetooth
+$:> systemctl status bluealsa</code></pre>
+            <p><strong>Kiểm tra sau khi kết nối thiết bị (iPhone):</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> busctl tree org.bluez | grep player</code></pre>
+
+        </div>
+    </div>
+</div>
+
+<!-- FIX TREO -->
+<div class="accordion-item border-danger">
+<h2 class="accordion-header">
+<button class="accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#fixBluetooth">Fix Bluetooth bị treo (Mục này bỏ qua, Mặc định khi cài Bluetooth sao chép các file đã Fix sẵn rồi)</button></h2>
+<div id="fixBluetooth" class="accordion-collapse collapse">
+<div class="accordion-body">
+<div class="alert alert-danger">Nếu Bluetooth hoạt động không ổn định hoặc bị treo, hãy chỉnh sửa file bthelper.</div>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo nano /usr/bin/bthelper</code></pre>
+<p>Tìm dòng sau:</p><pre class="bg-dark text-light p-3 rounded"><code>/usr/bin/hcitool -i $dev cmd 0x3f 0x1c 0x01 0x02 0x00 0x01 0x01 > /dev/null</code></pre>
+<p>Thêm dấu <strong>#</strong> ở đầu dòng để comment lại:</p>
+<pre class="bg-dark text-light p-3 rounded"><code># /usr/bin/hcitool -i $dev cmd 0x3f 0x1c 0x01 0x02 0x00 0x01 0x01 > /dev/null</code></pre>
+<p>Sau đó thực hiện:</p><pre class="bg-dark text-light p-3 rounded"><code>$:> sudo reboot</code></pre>
+</div></div></div></div>
+
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#bluetoothCommands">
+            Các Lệnh Điều Khiển Bluetooth (Command) Tương tác với hệ thống SYSTEM
+        </button>
+</h2>
+<div id="bluetoothCommands" class="accordion-collapse collapse">
+<div class="accordion-body">
+<div class="alert alert-info">
+Thay địa chỉ <strong>dev_08_87_C7_DB_05_5C</strong> bằng địa chỉ thiết bị Bluetooth thực tế đang kết nối.
+</div><h5>Xem Logs thời gian thực</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> sudo journalctl -u vbot-bluetooth-agent.service -f</code></pre>
+<h5>Xem đường dẫn Path các thiết bị đã kết nối</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl tree org.bluealsa</code></pre>
+<h5>Lấy thiết bị đang phát hiện tại</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl tree org.bluealsa | grep a2dpsnk/source</code></pre>
+<hr><h5>Tắt SoftVolume</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl set-property org.bluealsa \
+/org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+org.bluealsa.PCM1 SoftVolume b false</code></pre>
+<h5>Bật SoftVolume</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl set-property org.bluealsa \
+/org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+org.bluealsa.PCM1 SoftVolume b true</code></pre>
+<h5>Kiểm tra SoftVolume</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl get-property org.bluealsa \
+/org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+org.bluealsa.PCM1 SoftVolume</code></pre><hr>
+<h5>Mute</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl set-property org.bluealsa \
+/org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+org.bluealsa.PCM1 Volume ay 2 0 0</code></pre>
+<h5>Thay đổi âm lượng</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl set-property org.bluealsa \
+/org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+org.bluealsa.PCM1 Volume ay 2 127 127</code></pre>
+<h5>Kiểm tra mức Volume hiện tại</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl get-property org.bluealsa \
+/org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+org.bluealsa.PCM1 Volume</code></pre>
+<hr><h5>Play</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 Play</code></pre>
+<h5>Pause</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 Pause</code></pre>
+<h5>Stop</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 Stop</code></pre>
+<h5>Next</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 Next</code></pre>
+<h5>Previous</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 Previous</code></pre>
+<hr><div class="alert alert-warning">
+Hai lệnh dưới đây không được VBot sử dụng. Nên điều chỉnh âm lượng thông qua API VBot Assistant.
+</div>
+<h5>Volume Up (Không dùng)</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 VolumeUp</code></pre>
+<h5>Volume Down (Không dùng)</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.MediaControl1 VolumeDown</code></pre>
+<hr><h5>Ngắt kết nối Bluetooth</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.Device1 Disconnect</code></pre>
+<h5>Kết nối lại (Không dùng)</h5>
+<pre class="bg-dark text-light p-3 rounded"><code>$:> busctl call org.bluez \
+/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+org.bluez.Device1 Connect</code></pre></div></div></div>
+
+</div>
+
 </div>
 </div>
 </div>

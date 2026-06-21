@@ -309,6 +309,9 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['play_list']['newspaper_play_mode'] = isset($_POST['newspaper_play_mode']) ? $_POST['newspaper_play_mode'] : 'sequential';
   $Config['media_player']['play_list']['music_play_mode'] = isset($_POST['music_play_mode']) ? $_POST['music_play_mode'] : 'random';
 
+  #Cập nhật cấu hình nguồn xử lý thời tiết
+  $Config['weather']['source'] = isset($_POST['weather_source']) ? $_POST['weather_source'] : 'virtual_assistant';
+
   #cập nhật đồng bộ hóa media với web ui
   $Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
   $Config['media_player']['media_sync_ui']['delay_time'] = intval($_POST['media_sync_ui_delay_time']);
@@ -3423,6 +3426,23 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               </div>
             </div>
             </div>
+
+
+		  <div class="card accordion" id="accordion_button_weather_cfg">
+		  <div class="card-body">
+		  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_weather_cfg" aria-expanded="false" aria-controls="collapse_button_weather_cfg">
+		  Cấu Hình Thời Tiết, Weather:</h5>
+		  <div id="collapse_button_weather_cfg" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_weather_cfg">
+
+		  <div class="alert alert-primary" role="alert">
+		  <?php
+			echo select_field('weather_source', 'Nguồn xử lý dữ liệu thời tiết', ['virtual_assistant' => 'Sử Dụng Trợ Lý Ảo Assistant', 'vbot_system' => 'Sử Dụng Hệ Thống VBot', 'dev_weather' => 'Người Dùng Tự Code [Dev_Weather.py]'], $Config['weather']['source'], []);
+		  ?>
+		</div>
+
+		  </div>
+		  </div>
+		  </div>
 
             <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
               <div class="card-body">

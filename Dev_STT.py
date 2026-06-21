@@ -148,6 +148,8 @@ async def dev_stt():
         Lib.show_log(Msg_ERROR, color=Lib.Color.RED)
         
         #Thông Báo Âm Thanh Khi Lỗi STT
-        media_player.Play_Sound(Lib.config['smart_config']['smart_wakeup']['sound']['default']['stt_to_text_error'])
+        await media_player.play_sound_async(
+            Lib.config['smart_config']['smart_wakeup']['sound']['default']['stt_to_text_error']
+        )
         return None
     return None

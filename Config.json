@@ -179,8 +179,8 @@
             "active": false
         }
     },
-    "openweathermap": {
-        "key_openweathermap": "99999999999999999999999999999999999999"
+    "weather": {
+        "source": "virtual_assistant"
     },
     "schedule": {
         "active": false,

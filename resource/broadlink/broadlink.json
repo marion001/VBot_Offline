@@ -1,0 +1,43 @@
+{
+    "devices_remote": [
+        {
+            "friendly_name": "Broadlink RM pro+",
+            "name": "Broadlink RM pro+",
+            "model": "RM pro+",
+            "devtype": "0x279d",
+            "ip": "192.168.14.112",
+            "port": 80,
+            "mac": "780F775A39AE"
+        },
+        {
+            "friendly_name": "Broadlink RM4C mini",
+            "name": "Broadlink RM4C mini",
+            "model": "RM4C mini",
+            "devtype": "0x62be",
+            "ip": "192.168.14.9",
+            "port": 80,
+            "mac": "24DFA73113A8"
+        }
+    ],
+    "cmd_devices_remote": {
+        "24DFA73113A8": [],
+        "780F775A39AE": [
+            {
+                "active": true,
+                "name": "Bật Đèn Sưởi Nhà Tắm",
+                "reply": "đã bật đèn sưởi nhà tắm thành công",
+                "wave": "rf",
+                "data": "sgw0ACIKDCANIA0gDSAiCgwAAUwiCwwgIgsMICILDSAiCiILIgsiCiILDCAiCg0gIgsiCgwgIgsAAAAA",
+                "created_at": "21:03:02 24-12-2025"
+            },
+            {
+                "active": true,
+                "name": "Tắt đèn sưởi nhà tắm",
+                "reply": "đã tắt đèn sưởi nhà tắm rồi nhé",
+                "wave": "rf",
+                "data": "sRs0ACELCyELIQshIQwLIQsAAU0hCwwhIQwLISELCyEhCyEMIQshDCELCyEhDAshIQwhDAshIQsAAAAA",
+                "created_at": "16:46:49 04-01-2026"
+            }
+        ]
+    }
+}

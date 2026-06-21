@@ -1,0 +1,139 @@
+Hướng Dẫn Cài Đặt Bluetooth Audio trên loa thông minh VBot Assistant
+
+Bước 1:
+	- Nâng cấp Bluetooth và các thư viện cần khi build:
+		$:> sudo apt-get update
+		$:> sudo apt-get install -y autoconf automake libtool
+		
+		$:> sudo apt update
+		$:> sudo apt install --reinstall raspberrypi-bootloader raspberrypi-kernel bluez-firmware
+		$:> sudo reboot
+	
+Bước 2:
+- cài libfdk-aac-dev FDK-AAC thủ công từ source trước rồi mới build BlueALSA.
+	$:> git clone https://github.com/mstorsjo/fdk-aac.git
+	$:> cd fdk-aac
+	$:> autoreconf -fiv
+	$:> ./configure --prefix=/usr
+	$:> make -j2
+	$:> sudo make install
+	$:> sudo ldconfig
+	
+	- Kiểm tra đã cài thành công:
+		$:> pkg-config --modversion fdk-aac
+		- Hoặc Lệnh:
+			$:> ls /usr/lib*/pkgconfig/fdk-aac.pc
+Bước 3:
+- Cài BlueALSA:
+	$:> git clone https://github.com/arkq/bluez-alsa.git
+	$:> cd ~/bluez-alsa
+	$:> sudo apt update && sudo apt install -y \
+		git build-essential automake autoconf libtool pkg-config \
+		libasound2-dev libbluetooth-dev libglib2.0-dev \
+		libsbc-dev libreadline-dev libsystemd-dev
+	$:> autoreconf --install
+	$:> ./configure \
+		--enable-aac \
+		--enable-cli \
+		--enable-rfcomm \
+		--enable-systemd
+	$:> make -j2
+	$:> sudo make install
+	$:> sudo ldconfig
+	- Kiểm tra Build thành công:
+		$:> bluealsad -V
+		$:> bluealsad --help
+
+Bước 4 cấu hình service:
+- Cấu Hình file xử lý Bluetooth
+	$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluetooth_agent.py /usr/local/bin/bluetooth_agent.py
+	$:> sudo chmod 0777 /usr/local/bin/bluetooth_agent.py
+	$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/bthelper /usr/bin/bthelper
+
+- Cấu Hình bluealsa.service để khởi động cùng hệ thống:
+	- Sao chép file bluealsa.service để khởi động cùng hệ thống:
+	$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluealsa.service /etc/systemd/system/bluealsa.service
+
+	Hoặc tạo mới file thủ công:
+	$:> sudo nano /etc/systemd/system/bluealsa.service
+
+		[Unit]
+		Description=BlueALSA daemon
+		Wants=bluetooth.service
+		After=bluetooth.service dbus.service systemd-udevd.service
+
+		[Service]
+		Type=simple
+		ExecStart=/usr/bin/bluealsad -p a2dp-sink --keep-alive=5
+		Restart=on-failure
+		RestartSec=3
+		StartLimitIntervalSec=0
+
+		[Install]
+		WantedBy=multi-user.target
+
+- Cấu Hình vbot-bluetooth-agent.service
+	- Sao chép file vbot-bluetooth-agent.service để khởi động cùng hệ thống:
+	$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/vbot-bluetooth-agent.service /etc/systemd/system/vbot-bluetooth-agent.service
+
+	- Hoặc tạo mới file thủ công:
+	$:> sudo nano /etc/systemd/system/vbot-bluetooth-agent.service
+
+		[Unit]
+		Description=VBot Bluetooth DBus Agent
+		Documentation=https://github.com/marion001/VBot_Offline
+
+		Wants=bluetooth.service dbus.service bluealsa.service
+		After=bluetooth.service dbus.service bluealsa.service systemd-udevd.service
+
+		Requires=bluetooth.service
+
+		[Service]
+		Type=simple
+
+		# chạy Python trực tiếp
+		ExecStart=/usr/bin/python3 /usr/local/bin/bluetooth_agent.py
+
+		# restart nếu crash
+		Restart=always
+		RestartSec=2
+
+		# DBus + GLib
+		Environment=PYTHONUNBUFFERED=1
+		Environment=DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+
+		# chạy dưới root để access BlueZ full quyền
+		User=root
+		Group=root
+
+		# tránh treo systemd khi GLib loop lỗi
+		KillMode=process
+		TimeoutStopSec=10
+
+		[Install]
+		WantedBy=multi-user.target
+
+
+- Tải lại systemd:
+	$:> sudo systemctl daemon-reload
+
+- Bật tự khởi động cùng hệ thống 2 service vừa tạo:
+	$:> sudo systemctl enable bluealsa.service
+	$:> sudo systemctl enable vbot-bluetooth-agent.service
+
+- Khởi động ngay 2 service vừa tạo:
+	$:> sudo systemctl start bluealsa.service
+	$:> sudo systemctl start vbot-bluetooth-agent.service
+
+- Kiểm tra trạng thái khởi động thành công:
+	$:> systemctl status bluealsa.service
+	$:> sudo systemctl status vbot-bluetooth-agent.service
+
+
+Fix bluetooth bị treo:
+	$:> sudo nano /usr/bin/bthelper
+	Bỏ đi dòng dòng (Thêm Comment # đầu tiên): /usr/bin/hcitool -i $dev cmd 0x3f 0x1c 0x01 0x02 0x00 0x01 0x01 > /dev/null
+	Sau khi sửa:
+	$:> sudo pkill -9 hcitool
+	$:> sudo systemctl restart bthelper@hci0
+	$:> sudo hciconfig hci0 reset

@@ -1,113 +1,93 @@
-'''
-Code By: Vũ Tuyển
-GitHub VBot: https://github.com/marion001/VBot_Offline.git
-Facebook Group: https://www.facebook.com/groups/1148385343358824
-Facebook: https://www.facebook.com/TWFyaW9uMDAx
-Mail: VBot.Assistant@gmail.com
-'''
-
 """
-Phần xử lý dữ liệu các bạn sẽ tự code và xử lý theo ý, sở thích và tùy biến của bạn
-Tôi sẽ cung cấp các tài liệu và ví dụ đủ để các bạn xây dựng và phát triển thỏa mãn mày mò, học hỏi
-Các dữ liệu và tài nguyên khác có thể tham khảo ở file: Dev_Customization.py
+Custom async TTS implementation.
+
+Network I/O is native async. File operations remain synchronous helpers and
+are executed through asyncio.to_thread.
 """
 
-#Thư Viện VBot: Lib
 import Lib
-"""
-Thêm thư viện Lib
-"""
+import aiohttp
 
-import requests
 
 DEV_TTS_TIMEOUT = float(Lib.config.get("xiaozhi", {}).get("tts_time_out", 20))
 
-#Demo sử dụng Zalo TTS:
-#https://ai.zalo.cloud/docs/api/text-to-audio-converter
 
-"""
-hàm dev_tts cần được giữ nguyên, 
-Mọi tùy biến và xử lý dữ liệu các bạn dev sẽ code bên trong hàm này
-"""
-def dev_tts(text_input):
-    #Lib.show_log(f"[DEV TTS] Dữ liệu truyền vào để chuyển đổi là: {text_input}", color=Lib.Color.GREEN)
+def _write_audio_file(output_file_path, content):
+    tmp_file = f"{output_file_path}.{Lib.uuid.uuid4().hex[:8]}.tmp"
+    try:
+        with open(tmp_file, "wb") as audio_file:
+            audio_file.write(content)
+        if Lib.os.path.getsize(tmp_file) < 128:
+            Lib.os.remove(tmp_file)
+            return None
+        Lib.os.replace(tmp_file, output_file_path)
+        Lib.os.chmod(output_file_path, 0o777)
+        return output_file_path
+    except Exception:
+        if Lib.os.path.exists(tmp_file):
+            Lib.os.remove(tmp_file)
+        raise
 
-    #Đường Dẫn Path Lưu File TTS (Giữ Nguyên dòng output_file_path này)
-    output_file_path = Lib.directory_tts+"/"+Lib.tts_string(text_input)+".mp3"
 
-    #Nhập API KEY TTS ZALO
-    API_KEY_ZALO = "11111111111111111111111111"
+async def dev_tts(text_input):
+    text_input = (text_input or "").strip()
+    if not text_input:
+        return None
 
-    #Tốc độ đọc TTS
-    SPEED_TTS = 0.9
-    #Giọng Đọc
-    SPEAKER_ID = 4
-    payload = f"speaker_id={SPEAKER_ID}&speed={SPEED_TTS}&input={requests.utils.quote(text_input)}"
-    headers = {
-      'apikey': API_KEY_ZALO,
-      'Content-Type': 'application/x-www-form-urlencoded'
+    output_file_path = Lib.os.path.join(
+        Lib.directory_tts,
+        Lib.tts_string(text_input) + ".mp3",
+    )
+    payload = {
+        "speaker_id": 4,
+        "speed": 0.9,
+        "input": text_input,
     }
+    headers = {
+        "apikey": "11111111111111111111111111",
+        "Content-Type": "application/x-www-form-urlencoded",
+    }
+    timeout = aiohttp.ClientTimeout(total=DEV_TTS_TIMEOUT)
+
     try:
-        response = requests.request("POST", "https://api.zalo.ai/v1/tts/synthesize", headers=headers, data=payload, timeout=DEV_TTS_TIMEOUT)
-        response.raise_for_status()
-    except Exception as e:
-        Lib.show_log(f"[DEV TTS] Lỗi gọi API TTS: {e}", color=Lib.Color.RED)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(
+                "https://api.zalo.ai/v1/tts/synthesize",
+                headers=headers,
+                data=payload,
+            ) as response:
+                response.raise_for_status()
+                response_data = await response.json(content_type=None)
+
+            if response_data.get("error_code") != 0:
+                Lib.show_log(f"[DEV TTS] API error: {response_data}", color=Lib.Color.RED)
+                return None
+
+            audio_url = response_data.get("data", {}).get("url")
+            if not audio_url:
+                Lib.show_log("[DEV TTS] Missing audio URL", color=Lib.Color.RED)
+                return None
+
+            async with session.get(audio_url) as audio_response:
+                audio_response.raise_for_status()
+                audio_content = await audio_response.read()
+    except (aiohttp.ClientError, Lib.asyncio.TimeoutError, ValueError) as exc:
+        Lib.show_log(f"[DEV TTS] API error: {exc}", color=Lib.Color.RED)
         return None
-    #Chuyển dữ liệu  trả về thành json
+
     try:
-        response_data = response.json()
-    except ValueError as e:
-        Lib.show_log(f"[DEV TTS] Phản hồi API không phải JSON hợp lệ: {e}", color=Lib.Color.RED)
-        return None
-    #Kiểm tra dữ liệu trả về
-    if response_data.get('error_code') == 0:
+        saved_file = await Lib.asyncio.to_thread(
+            _write_audio_file,
+            output_file_path,
+            audio_content,
+        )
+    except OSError as exc:
+        Lib.show_log(f"[DEV TTS] File error: {exc}", color=Lib.Color.RED)
+        return audio_url
 
-        #Link/URL TTS Online
-        audio_url = response_data['data']['url']
-        Lib.show_log(f"[DEV TTS] URL Phát TTS Trực Tiếp: {audio_url}", color=Lib.Color.YELLOW)
+    if not saved_file:
+        Lib.show_log("[DEV TTS] Downloaded audio is invalid", color=Lib.Color.RED)
+        return audio_url
 
-        try:
-            audio_response = Lib.requests.get(audio_url, timeout=DEV_TTS_TIMEOUT)
-            audio_response.raise_for_status()
-
-            #Nếu muốn lưu lại Tệp âm thanh TTS
-            tmp_file = f"{output_file_path}.{Lib.uuid.uuid4().hex[:8]}.tmp"
-            with open(tmp_file, 'wb') as audio_file:
-                audio_file.write(audio_response.content)
-            if Lib.os.path.getsize(tmp_file) < 128:
-                Lib.os.remove(tmp_file)
-                Lib.show_log("[DEV TTS] File âm thanh tải xuống không hợp lệ", color=Lib.Color.RED)
-                return audio_url
-            Lib.os.replace(tmp_file, output_file_path)
-            Lib.os.chmod(output_file_path, 0o777)
-            Lib.show_log(f"[DEV TTS] File được tải xuống thành công tại: {output_file_path}", color=Lib.Color.GREEN)
-            #Trả dữ liệu về cho chương trình phát TTS (đường dẫn path)
-            return output_file_path
-
-            #Hoặc có thể trả luôn dữ liệu URL TTS bên trên mà không cần tải xuống Tệp TTS
-            #return audio_url
-
-        except Exception as e:
-            Lib.show_log(f"[DEV TTS] Lỗi khi tải xuống âm thanh: {e}", color=Lib.Color.RED)
-            #Nếu Lỗi Sẽ Trả Về Link TTS Online
-            return audio_url
-    else:
-        Lib.show_log(f"[DEV TTS] Có Lỗi Xảy Ra: {response_data}", color=Lib.Color.RED)
-        #Trả về None Nếu Lỗi
-        return None
-    return None
-
-"""
-
-Dữ liệu trả về cho chương trình sẽ chấp nhận các dạng sau:
-- đường dẫn path: /home/pi/VBot_Offline/TTS_Audio/zxcvbn.mp3 (wav, ogg, v..v....)
-    return /home/pi/VBot_Offline/TTS_Audio/zxcvbn.mp3
-
-- Url Âm Thanh: https://vutuyen.dev/zxcvbn.mp3 (wav, ogg, v..v....)
-    return https://vutuyen.dev/zxcvbn.mp3
-
-- Nhiều dữ liệu âm thanh PATH: ['/home/pi/VBot_Offline/TTS_Audio/1.mp3', '/home/pi/VBot_Offline/TTS_Audio/2.mp3', '/home/pi/VBot_Offline/TTS_Audio/3.mp3']
-- Nhiều dữ liệu âm thanh LINK/URL: ['https://vutuyen.dev/1.mp3', 'https://vutuyen.dev/2.mp3', 'https://vutuyen.dev/3.mp3']
-    return ['https://vutuyen.dev/1.mp3', 'https://vutuyen.dev/2.mp3', 'https://vutuyen.dev/3.mp3']
-
-"""
+    Lib.show_log(f"[DEV TTS] Saved: {saved_file}", color=Lib.Color.GREEN)
+    return saved_file

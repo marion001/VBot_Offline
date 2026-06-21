@@ -135,7 +135,7 @@ def dev_finish_processing():
 
 #Xử lý cache TTS và phát luôn âm thanh nếu có (Mẫu Demo)
 #Giữ nguyên hàm này, không được sửa
-def dev_handle_cache_tts(msg_text):
+async def dev_handle_cache_tts(msg_text):
     if not msg_text or not isinstance(msg_text, str):
         return False
     tts_key = Lib.tts_string(msg_text)  #Lib.tts_string(msg_text) tạo tên file âm thanh tts bằng kết quả text được xử lý các ký tự
@@ -144,28 +144,28 @@ def dev_handle_cache_tts(msg_text):
     #Nếu Phát TTS ở Loa VBot Server
     if not Lib.active_client:
         #Xử lý và Tìm kiếm file âm thanh tts trước đó khi bật cache và trùng dữ liệu
-        tts_data = Def_Processing.cache_results_tts(tts_key) if Lib.cache_tts_active else None
+        tts_data = await Def_Processing.cache_results_tts_async(tts_key) if Lib.cache_tts_active else None
         if not tts_data:
             #Chuyển văn bản thành âm thanh TTS
-            tts_data = TTS_Processing.Select_TTS(msg_text)
+            tts_data = await TTS_Processing.Select_TTS_async(msg_text)
         Lib.main_vbot_processing = False
         #Phát TTS
-        return media_player.Play_Answer(tts_data)
+        return await media_player.play_answer_async(tts_data)
 
     #Nếu Phát TTS ở Client ESP
     if Lib.cache_tts_active:
         #Xử lý và Tìm kiếm file âm thanh tts khi bật cache
-        mp3_file = Def_Processing.cache_results_tts_mp3(tts_key)
+        mp3_file = await Def_Processing.cache_results_tts_mp3_async(tts_key)
         if mp3_file:
             result_url = tts_client_url(mp3_file)
 
     #Nếu chưa có cache TTS thì tạo mới
     if not result_url:
         #Chuyển văn bản thành âm thanh TTS
-        tts_data = TTS_Processing.Select_TTS(msg_text)
+        tts_data = await TTS_Processing.Select_TTS_async(msg_text)
         if tts_data:
             #Nếu Ở Client Chuyển Sang MP3 để Phát TTS
-            mp3_file = Def_Processing.convert_audio_to_mp3(tts_data)
+            mp3_file = await Def_Processing.convert_audio_to_mp3_async(tts_data)
             if mp3_file:
                 result_url = tts_client_url(mp3_file)
     Lib.tts_client_result = result_url  #Trả dữ liệu File âm thanh Về Client để Client phát TTS
@@ -177,7 +177,10 @@ def dev_handle_cache_tts(msg_text):
 async def dev_execute_value_key_sys(command_input: str):
     func = globals().get(command_input)
     if func:
-        result = func()
+        if Lib.asyncio.iscoroutinefunction(func):
+            result = await func()
+        else:
+            result = await Lib.asyncio.to_thread(func)
         if result:
             return True
         else:
@@ -207,14 +210,14 @@ async def dev_processing(text_input):
     #Có thể xóa bỏ đoạn này nếu không sử dụng Custom Home Asistant
     if Lib.hass_custom_commands_active:
         #Gọi Custom Home Asistant xử lý
-        status, msg_text = Def_Processing.execute_custom_home_assistant(text_input_lower)
+        status, msg_text = await Def_Processing.execute_custom_home_assistant_async(text_input_lower)
 
         #Nếu Custom Home Asistant xử lý thành công
         if status:
             Lib.show_log(f"[Custom HomeAssistant] {msg_text}", color=Lib.Color.GREEN)
             
             #Gọi kiểm tra và phát tts
-            dev_handle_cache_tts(msg_text)
+            await dev_handle_cache_tts(msg_text)
             
             #Kiểm tra xử lý cuối => quay về chờ được đánh thức (Chỉ sử dụng khi muốn quay về chờ được đánh thức, đặt trên dòng return)
             dev_finish_processing()
@@ -234,8 +237,7 @@ async def dev_processing(text_input):
         cmd_info = Def_Processing.broadlink_get_command(text_input_lower)
         if cmd_info:
             try:
-                device = Def_Processing.get_broadlink_device(cmd_info["mac"], cmd_info["ip"], cmd_info["port"], cmd_info["devtype"])
-                device.send_data(Lib.base64.b64decode(cmd_info["data"]))
+                await Def_Processing.send_broadlink_command_async(cmd_info)
                 print(f"[DEV Customization] Đã gửi lệnh '{cmd_info['command_name']}' tới thiết bị '{cmd_info['device_name']}' ({cmd_info['ip']}) thành công")
                 reply = cmd_info.get('command_reply')
                 if reply:
@@ -243,7 +245,7 @@ async def dev_processing(text_input):
                 else:
                     msg_text = f"[DEV Customization] Đã gửi lệnh Remote '{cmd_info['command_name']}' thành công"
                 Lib.show_log(f"[DEV Customization] Broadlink Remote {msg_text}", color=Lib.Color.GREEN)
-                dev_handle_cache_tts(msg_text)
+                await dev_handle_cache_tts(msg_text)
                 dev_finish_processing()
                 return True
             except Exception as e:
@@ -259,7 +261,7 @@ async def dev_processing(text_input):
     #Có thể xóa đoạn này nếu không sử dụng
     if Lib.developer_customization:
         Lib.show_log(f"[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
-        response_dev_skill = Dev_Customization.dev_skill(text_input_lower)
+        response_dev_skill = await Dev_Customization.dev_skill(text_input_lower)
         #Nếu Dev Skill có dữ liệu trả về hoặc là true
         if response_dev_skill:
             if Lib.conversation_mode:   #Nếu Chế Độ Hội Thoại/Trò Chuyện Liên Tục được bật
@@ -306,7 +308,7 @@ async def dev_processing(text_input):
     #Bạn Có Thể Xử Lý Dữ Liệu Theo ý Muốn Ở Đây (xử lý điều khiển nhà thông minh, xử lý phát nhạc, gọi các API, V..v....)
     """
     #Ví Dụ phát tts văn bản đó và hiển thị
-    dev_handle_cache_tts(text_input_lower)
+    await dev_handle_cache_tts(text_input_lower)
 
     #Hiển thị dữ liệu Logs
     Lib.show_log(f"[DEV Processing] Dữ liệu đã được xử lý xong: {text_input_lower}", color=Lib.Color.GREEN)
@@ -331,7 +333,7 @@ async def dev_processing(text_input):
 
     #Gọi trợ lý ảo đã xử lý sẵn cả text và dữ liệu âm thanh trả về 2 giá trị
     #Ưu tiên gọi trợ lý ảo TOP 1 đầu tiên
-    Assistant_Audio, Assistant_Text = Assistant.Call(text_input_lower, False)
+    Assistant_Audio, Assistant_Text = await Assistant.Call_async(text_input_lower, False)
 
     #Nếu có dữ liệu văn bản trả về từ trợ lý ảo in ra logs
     if Assistant_Text:
@@ -353,12 +355,12 @@ async def dev_processing(text_input):
         #Nếu ở Loa VBot Yêu Cầu
         if not Lib.active_client:
             #Phát âm thanh Kết Quả TTS ở Loa VBot
-            media_player.Play_Answer(audio_data)
+            await media_player.play_answer_async(audio_data)
         
         #Nếu Yêu Cầu Ở Client
         else:
             #Chuyển Sang MP3 để Phát TTS
-            tts_client = Def_Processing.convert_audio_to_mp3(audio_data)
+            tts_client = await Def_Processing.convert_audio_to_mp3_async(audio_data)
             if tts_client:
                 #Trả dữ liệu âm thanh về cho loa Client
                 Lib.tts_client_result = tts_client_url(tts_client)

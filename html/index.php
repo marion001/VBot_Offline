@@ -216,8 +216,12 @@ include 'html_head.php';
             <div class="col-12">
               <div class="card">
                 <div class="card-body">
-                  <div class="card-title">
+                  <div class="card-title d-flex justify-content-between align-items-center">
                     <label>Trình Phát Đa Phương Tiện - Media Player:</label>
+					<span class="d-none" id="ble_active">
+						<i class="bi bi-bluetooth text-primary"></i> 
+						<span id="bluetooth_status" class="text-success"></span>
+					</span>
                   </div>
                   <div id="media-container">
                     <img id="media-cover" src="assets/img/Error_Null_Media_Player.png" alt="Media Cover">
@@ -437,6 +441,35 @@ include 'html_head.php';
                 </div>
               </div>
             </div>
+			
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-bluetooth"></i> Bluetooth > <a href="FAQ.php" target="_blank"><i class="bi bi-patch-question-fill"></i></a>:</span></h5>
+              <div class="activity">
+                <div class="activity-item d-flex">
+                  <div class="form-switch">
+                    <input class="form-check-input border-danger" disabled type="checkbox" name="bluetooth_active" id="bluetooth_active">
+                  </div>
+                  <i class="bi bi-dash-lg"></i>
+                  <div class="activity-content">
+                    <b>
+                      <font color="red"> Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Tự Động Kiểm Tra Bluetooth Có Được Kích Hoạt Và Tồn Tại Trên Hệ Thống')"></i></font>
+                    </b>
+                  </div>
+                </div>
+                <div class="activity-item d-flex">
+                  <div class="form-switch">
+                    <input class="form-check-input border-success" title="Bật, Tắt Âm Thanh Bluetooth (Mute, Un-Mute)" type="checkbox" name="bluetooth_mute_unmute" id="bluetooth_mute_unmute" onclick="change_to_another_mode(1, 'bluetooth_mute', this.checked)">
+                  </div>
+                  <i class="bi bi-dash-lg"></i>
+                  <div class="activity-content">
+                    <b>
+                      <font color="green"><i class="bi bi-volume-up"></i> Bật, Tắt Âm Thanh <i class="bi bi-question-circle-fill" onclick="show_message('Bật, Tắt Âm Thanh AirPlay (Mute, Un-Mute)')"></i></font>
+                    </b>
+                  </div>
+                </div>
+                </div>
+			  </div>
+			
             <div class="card-body">
               <h5 class="card-title"><i class="bi bi-apple"></i> AirPlay > <a href="FAQ.php" target="_blank"><i class="bi bi-patch-question-fill"></i></a>:</span></h5>
               <div class="activity">
@@ -788,11 +821,16 @@ include 'html_head.php';
     //Thay đổi giá trị của biến toàn cục, chế độ hội thoại, chế độ phản hồi, Mic, Wakeup
 	function change_to_another_mode(type, dataKey, actionValue) {
 	  const url = "<?php echo $URL_API_VBOT ?>";
-	  const payload = {
-		type: type,
-		data: dataKey,
-		action: actionValue
-	  };
+		let payload;
+		if (dataKey === "bluetooth_mute") {
+			if (actionValue) {
+				payload = {type: type, data: "bluetooth", action: "unmute"};
+			} else {
+				payload = {type: type, data: "bluetooth", action: "mute"};
+			}
+		} else {
+			payload = {type: type, data: dataKey, action: actionValue};
+		}
 	  fetch(url, {
 		method: "POST",
 		headers: {"Content-Type": "application/json"},
@@ -950,6 +988,106 @@ include 'html_head.php';
 	  .finally(() => loading("hide"));
 	}
   </script>
+  
+  <script>
+//Command bluetooth api
+function bluetooth_control(action, value) {
+    if (action === "disconnect") {
+        if (!confirm("Bạn có chắc chắn muốn ngắt kết nối Bluetooth không?")) {
+            return;
+        }
+    }
+	loading('show');
+    const payload = {
+        type: 1,
+        data: 'bluetooth',
+        action: action
+    };
+    if (value !== undefined && value !== null) {
+        payload.value = value;
+    }
+    return fetch('<?php echo $URL_API_VBOT; ?>', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+    })
+	.then(function(response) {
+		loading('hide');
+		if (!response.ok) {
+			throw new Error('Lỗi HTTP: ' + response.status);
+		}
+		return response.json();
+	})
+	.then(function(data) {
+		loading('hide');
+		if (data.success) {
+			showMessagePHP(data.message, 5);
+		} else {
+			show_message('Bluetooth Lỗi Control:' + data.message);
+		}
+	})
+    .catch(function(error) {
+		loading('hide');
+        show_message('Lỗi API Bluetooth: ' +error);
+        return {
+            success: false,
+            message: error.message
+        };
+    });
+}
+
+//Ẩn hiện id ble_active
+function renderBluetoothActive(bluetooth) {
+    const el = document.getElementById('ble_active');
+    if (!el) return;
+    if (bluetooth && bluetooth.active === true) {
+        el.classList.remove('d-none');
+    } else {
+        el.classList.add('d-none');
+    }
+}
+
+//Cập nhật hiển thị danh sách thiết bị bluetooth đang kết nối
+let bluetoothSelectOpen = false;
+function renderBluetoothStatus(bluetooth) {
+	renderBluetoothActive(bluetooth);
+    const statusEl = document.getElementById('bluetooth_status');
+    if (!statusEl) {
+        return;
+    }
+    const currentSelect = document.getElementById('bluetooth_device_select');
+
+    if (bluetoothSelectOpen || (currentSelect && document.activeElement === currentSelect)) {
+        return;
+    }
+    const devices = Object.values(bluetooth.bluetooth_devices || {});
+    if (!bluetooth.is_connected || devices.length === 0) {
+        statusEl.innerHTML = '<span class="text-danger">Chưa kết nối</span>';
+        return;
+    }
+    if (devices.length === 1) {
+        statusEl.innerHTML ='<span class="text-success">' + devices[0].name + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;">Ngắt kết nối</button>';
+        return;
+    }
+
+    let html = '<select ' +
+				'id="bluetooth_device_select" ' +
+				'class="form-select form-select-sm border-success" ' +
+				'style="width:auto; min-width:220px;" ' +
+				'onfocus="bluetoothSelectOpen=true" ' +
+				'onblur="bluetoothSelectOpen=false" ' +
+				'onchange="bluetooth_control(\'receive_signal\', this.value)">';
+
+    devices.forEach(function(device) {
+        html += '<option value="' + device.path + '"' + (device.path === bluetooth.device_path ? ' selected' : '') + '>' + device.name + '</option>';
+    });
+    html += '</select>';
+    statusEl.innerHTML = html;
+}
+  </script>
+  
   <script>
     //script liên quan tới API GET Media Player
     let isHovering = false;
@@ -1011,22 +1149,106 @@ include 'html_head.php';
             document.getElementById('developer_customization_active').checked = data.dev_custom ? true : false;
             document.getElementById('developer_customization_vbot_processing').checked = data.dev_custom_vbot ? true : false;
             document.getElementById('airplay_mute_unmute').checked = data.media_player.airplay_mute_on_off ? true : false;
+            document.getElementById('bluetooth_mute_unmute').checked = data.bluetooth.bluetooth_mute_unmute ? true : false;
             document.getElementById('airplay_active').checked = data.media_player.airplay_active ? true : false;
+            document.getElementById('bluetooth_active').checked = data.bluetooth.active ? true : false;
+			renderBluetoothStatus(data.bluetooth);
             //Media Player
-			document.getElementById('media-name').innerHTML = 'Tên bài hát: <font color="blue">' +
-			  (data.media_player.airplay_playing === true ? (data.media_player.airplay_song_name && String(data.media_player.airplay_song_name).trim() !== 'N/A' ? data.media_player.airplay_song_name : 'N/A')
-				  : ((data.media_player.audio_playing === true || data.media_player.pause_media_flag === true) && data.media_player.media_name && String(data.media_player.media_name).trim() !== 'N/A' ? data.media_player.media_name : 'N/A')) + '</font>';
-			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (data.media_player.audio_playing === true || data.media_player.airplay_playing === true ? 'Đang phát' : (data.media_player.pause_media_flag === true ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
-			document.getElementById('audio-source').innerHTML = 'Nguồn Phát: <font color=blue>' + (
-				data.media_player.airplay_playing === true ? 'AirPlay' : ((data.media_player.audio_playing === true || data.media_player.pause_media_flag === true) ? (data.media_player.media_player_source && String(data.media_player.media_player_source).trim() !== 'N/A' ? data.media_player.media_player_source : 'Local Audio') : 'N/A')) + '</font>';
+
+document.getElementById('media-name').innerHTML =
+	'Tên bài hát: <font color="blue">' +
+	(
+		data.media_player.airplay_playing === true
+			? (
+				data.media_player.airplay_song_name &&
+				String(data.media_player.airplay_song_name).trim() !== 'N/A'
+					? data.media_player.airplay_song_name
+					: 'N/A'
+			)
+			: (
+				(() => {
+					const devices = data.bluetooth?.bluetooth_devices;
+					let btName = null;
+
+					if (devices) {
+						for (const k in devices) {
+							const d = devices[k];
+
+							if (d.connected && d.playing) {
+								btName =
+									data.bluetooth.song_name ||
+									data.bluetooth.song_artist ||
+									data.bluetooth.device_name ||
+									d.name ||
+									'N/A';
+								break;
+							}
+						}
+					}
+
+					return btName ||
+						(
+							(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+								&& data.media_player.media_name &&
+								String(data.media_player.media_name).trim() !== 'N/A'
+								? data.media_player.media_name
+								: 'N/A'
+						);
+				})()
+			)
+	) +
+	'</font>';
+
+			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (data.media_player.audio_playing === true || data.bluetooth.playing === true || data.media_player.airplay_playing === true ? 'Đang phát' : (data.media_player.pause_media_flag === true ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
+
+			//Cập nhật nguồn phát nhạc
+			document.getElementById('audio-source').innerHTML =
+				'Nguồn Phát: <font color=blue>' +
+				(
+					data.bluetooth?.playing === true
+						? ('<i class="bi bi-bluetooth"></i>' + (data.bluetooth.device_name ? ' - ' + data.bluetooth.device_name : ''))
+						: (
+							data.media_player.airplay_playing === true
+								? 'AirPlay'
+								: (
+									(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+										? (
+											data.media_player.media_player_source &&
+											String(data.media_player.media_player_source).trim() !== 'N/A'
+												? data.media_player.media_player_source
+												: 'Local Audio'
+										)
+										: 'N/A'
+								)
+						)
+				) +
+				'</font>';
+	
             //Cập nhật ảnh cover bài hát
 			document.getElementById('media-cover').src =
-			  (data.media_player.airplay_playing === true ? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now() : ((data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
-						? (data.media_player.media_player_source === 'Local' && (!data.media_player.media_cover || String(data.media_player.media_cover).trim() === '' || String(data.media_player.media_cover).trim() === 'N/A')
-							  ? 'assets/img/icon_audio_local.png' : (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png')) : 'assets/img/Error_Null_Media_Player.png'));
+			(
+				data.bluetooth?.playing === true && data.bluetooth?.is_connected === true
+					? 'assets/img/bluetooth_icon.png'
+					: (
+						data.media_player.airplay_playing === true
+							? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
+							: (
+								(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+									? (
+										data.media_player.media_player_source === 'Local' &&
+										(!data.media_player.media_cover ||
+										 String(data.media_player.media_cover).trim() === '' ||
+										 String(data.media_player.media_cover).trim() === 'N/A')
+											? 'assets/img/icon_audio_local.png'
+											: (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png')
+									)
+									: 'assets/img/Error_Null_Media_Player.png'
+							)
+					)
+			);
             //Cập nhật giá trị full time
             fullTime = data.media_player.full_time;
-            if (data.media_player.audio_playing || data.media_player.airplay_playing) {
+            if (data.media_player.audio_playing || data.media_player.airplay_playing || data.bluetooth.playing) {
               updateDisplay_SongNhac(true);
             } else {
               updateDisplay_SongNhac(false);

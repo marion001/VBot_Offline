@@ -1,0 +1,55 @@
+Thay Địa Chỉ dev_08_87_C7_DB_05_5C thành địa chỉ thiết bị đã kết nối tương ứng
+
+Lệnh Xem Logs thời gian thực thiết bị:
+$:> sudo journalctl -u vbot-bluetooth-agent.service -f
+
+Lệnh Xem Đường Dẫn Path các thiết bị đã kết nối:
+$:> busctl tree org.bluealsa
+
+Lệnh Lấy Thiết Bị Đang Phát Hiện Tại:
+$:> busctl tree org.bluealsa | grep a2dpsnk/source
+
+Tắt SoftVolume:
+$:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume b false
+
+Bật SoftVolume:
+$:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume b true
+
+Kiểm tra SoftVolume được bật hay chưa
+$:> busctl get-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume
+
+Mute:
+$:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume ay 2 0 0
+
+thay đổi âm lượng:
+$> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume ay 2 127 127
+
+Kiểm tra mức Volume hiện tại:
+$:> busctl get-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume
+
+Play:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Play
+
+Pause:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Pause
+
+Stop:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Stop
+
+Next:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Next
+
+Previous:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Previous
+
+Volume Up (Không Dùng, Dùng API VBot):
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 VolumeUp
+
+Volume Down (Không Dùng, Dùng API VBot):
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 VolumeDown
+
+Ngắt kết nối Bluetooth:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.Device1 Disconnect
+
+Kết nối lại (Không Dùng):
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.Device1 Connect

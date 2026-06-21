@@ -3454,6 +3454,482 @@
       "response": []
     },
     {
+      "name": "Bluetooth Phát Nhạc (Play)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"play\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Tạm Dừng (Pause)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"pause\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Dừng Nhạc (Stop)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"stop\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Chuyển Bài Kế Tiếp (Next)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"next\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Chuyển Bài Trước Đó (Previous)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"previous\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Volume Up (Không Dùng)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"volume_up\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Volume Down (Không Dùng)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"volume_down\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Tắt tiếng Mute (Volume=0)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"mute\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Bỏ Tắt Tiếng UnMute",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"unmute\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Lấy Âm Lượng Hiện Tại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"volume\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Thiết Lập Âm Lượng (0-100)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"volume\",\r\n    \"value\": 100\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Kiểm Tra Trạng Thái SoftVolume",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"softvolume\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Kích Hoạt Sử Dụng SoftVolume",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"softvolume\",\r\n    \"value\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Vô Hiệu Sử Dụng SoftVolume",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"softvolume\",\r\n    \"value\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Chỉ Định Thiết Bị Nhận Tín Hiệu Âm Thanh",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"receive_signal\",\r\n    \"value\": \"/org/bluez/hci0/dev_48_A9_1C_4D_E5_9B\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Ngắt Kết Nối Thiết Bị Hiện Tại",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"disconnect\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Bluetooth Kết Nối Thiết Bị Hiện Tại (Experiment)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"connect\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "RESTART VBot Service",
       "request": {
         "method": "GET",
@@ -3570,7 +4046,7 @@
       "response": []
     },
     {
-      "name": "?type=1&data=media_player",
+      "name": "(Chỉ Lấy Media Player) ?type=1&data=media_player",
       "request": {
         "method": "GET",
         "header": [],
@@ -3602,7 +4078,7 @@
       "response": []
     },
     {
-      "name": "?type=1&data=all_info",
+      "name": "(Lấy Toàn Bộ Thông Tin Dùng Cho WebUI) ?type=1&data=all_info",
       "request": {
         "method": "GET",
         "header": [],
@@ -3634,7 +4110,39 @@
       "response": []
     },
     {
-      "name": "/logs",
+      "name": "(Lấy Toàn Bộ Thông Tin Bluetooth) ?type=1&data=bluetooth",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.175:5002/?type=1&data=bluetooth",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002",
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "1"
+            },
+            {
+              "key": "data",
+              "value": "bluetooth"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Lấy Logs Dữ Liệu VBot) /logs",
       "request": {
         "method": "GET",
         "header": [],

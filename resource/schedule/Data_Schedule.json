@@ -1,10 +1,11 @@
 {
     "notification_schedule": [
         {
-            "name": "bbbb",
+            "active": true,
+            "name": "test thông báo",
             "create_words": "vbot_interface",
             "data": {
-                "message": "hhh",
+                "message": "chào bạn tuyển nhé",
                 "audio_file": "",
                 "repeat": 1
             },
@@ -18,9 +19,8 @@
                 "Sunday"
             ],
             "time": [
-                "11:00"
-            ],
-            "active": false
+                "18:09"
+            ]
         },
         {
             "name": "test thông báo bằng link http",
