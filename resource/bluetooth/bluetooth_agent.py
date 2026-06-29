@@ -44,7 +44,7 @@ active_playback_process = None  # process ID của bluealsa-aplay đang chạy
 device_names_cache = {}  # cache tên thiết bị để tránh gọi bluetoothctl info nhiều lần
 
 def log(msg):
-    ts = datetime.now().strftime("%d/%m/%Y - %H:%M:%S")
+    ts = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
     print(f"[{ts}] [VBot-Bluetooth] {msg}", flush=True)
 
 def run(cmd):
@@ -97,6 +97,28 @@ def get_device_name(mac):
 def device_info_str(mac):
     name = get_device_name(mac)
     return f"{mac} ({name})" if name != mac else mac
+
+#Bật SoftVolume trực tiếp cho thiết bị BlueALSA
+def set_softvolume_true(mac):
+    if not mac: return False
+    bluealsa_path = f"/org/bluealsa/hci0/dev_{mac.replace(':', '_')}/a2dpsnk/source"
+    log(f"Kích hoạt bật SoftVolume cho thiết bị: {bluealsa_path}")
+    try:
+        #Sử dụng lệnh shell busctl trực tiếp để tránh lỗi DBus Interface cache trong Python
+        cmd = f"busctl set-property org.bluealsa {bluealsa_path} org.bluealsa.PCM1 SoftVolume b true"
+        subprocess.run(cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        
+        #Kiểm tra lại sau 1 giây
+        time.sleep(1)
+        check_cmd = f"busctl get-property org.bluealsa {bluealsa_path} org.bluealsa.PCM1 SoftVolume"
+        result = subprocess.run(check_cmd, shell=True, capture_output=True, text=True)
+        if "true" in result.stdout.lower():
+            log(f"Đã bật thành công SoftVolume cho thiết bị: {mac}")
+        else:
+            log(f"Thất bại khi bật SoftVolume cho thiết bị: {mac}, SoftVolume vẫn là false")
+    except Exception as e:
+        log(f"Lỗi khi bật SoftVolume cho thiết bị: {mac}: {e}")
+    return False
 
 def get_info(mac): return run(f"bluetoothctl info {mac}")
 
@@ -242,6 +264,9 @@ def watchdog(interface, changed, invalidated, path):
             last_connected_at[mac] = now
             connected_devices[mac] = now
             log(f"Đã kết nối với thiết bị: {device_info_str(mac)}")
+
+            #Bật SoftVolume sau 2 giây thiết bị kết nối
+            GLib.timeout_add_seconds(2, set_softvolume_true, mac)
 
             visibility_timer = GLib.timeout_add_seconds(15, _delayed_hide_visibility, mac)
 

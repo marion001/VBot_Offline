@@ -130,6 +130,60 @@ Bước 4 cấu hình service:
 	$:> sudo systemctl status vbot-bluetooth-agent.service
 
 
+Nâng cấp phiên bản bluez BlueZ 5.86:
+
+$:> sudo apt update
+$:> sudo apt install -y \
+	build-essential \
+	libdbus-1-dev \
+	libglib2.0-dev \
+	libudev-dev \
+	libical-dev \
+	libreadline-dev \
+	libasound2-dev \
+	libjson-c-dev \
+	wget
+$:> sudo apt install libsystemd-dev
+$:> sudo apt install -y autoconf automake libtool
+$:> cd /usr/src
+$:> sudo wget https://www.kernel.org/pub/linux/bluetooth/bluez-5.86.tar.xz
+$:> sudo tar xf bluez-5.86.tar.xz
+$:> cd bluez-5.86
+$:> sudo ./configure \
+	  --prefix=/usr \
+	  --sysconfdir=/etc \
+	  --localstatedir=/var \
+	  --enable-library \
+	  --enable-experimental
+$:> sudo make -j$(nproc)
+
+Trước tiên xác nhận binary đã được build:
+$:> ./src/bluetoothd -v
+
+Kỳ vọng:5.86
+
+
+Cài BlueZ 5.86 Nếu mọi thứ ổn:
+$:> sudo systemctl stop bluetooth
+$:> sudo make install
+
+Kiểm tra ngay sau khi cài:
+$:> bluetoothd -v 
+
+Nếu thấy: 5.86 thì việc cài đặt thành công.
+
+Reboot hệ thống:
+$:> sudo reboot
+
+Kiểm tra:
+$:> systemctl status bluetooth
+$:> systemctl status bluealsa
+
+Sau khi Bluetooth hoạt động
+Ghép lại iPhone và kiểm tra:
+$:> busctl tree org.bluez | grep player
+
+
 Fix bluetooth bị treo:
 	$:> sudo nano /usr/bin/bthelper
 	Bỏ đi dòng dòng (Thêm Comment # đầu tiên): /usr/bin/hcitool -i $dev cmd 0x3f 0x1c 0x01 0x02 0x00 0x01 0x01 > /dev/null

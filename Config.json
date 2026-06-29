@@ -40,7 +40,7 @@
         },
         "streaming_server": {
             "active": false,
-            "connection_protocol": "udp_sock",
+            "connection_protocol": "socket",
             "protocol": {
                 "udp_sock": {
                     "port": 5003,

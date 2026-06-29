@@ -1,7 +1,7 @@
 {
     "tools": [
         {
-            "name": "%VBot_Volume",
+            "name": "_VBot_Volume",
             "active": true,
             "description": "Điều chỉnh âm lượng của hệ thống VBot — có thể tăng, giảm, hoặc đặt trực tiếp giá trị âm lượng, tất cả mọi yêu cầu điều chỉnh âm lượng",
             "inputSchema": {
@@ -34,7 +34,7 @@
             }
         },
         {
-            "name": "%VBot_Led_Brightness",
+            "name": "_VBot_Led_Brightness",
             "active": true,
             "description": "Điều chỉnh độ sáng của đèn LED trên loa VBot — có thể tăng, giảm, hoặc đặt trực tiếp giá trị từ 0 đến 100.",
             "inputSchema": {
@@ -67,7 +67,7 @@
             }
         },
         {
-            "name": "%VBot_PodCast",
+            "name": "_VBot_PodCast",
             "active": true,
             "description": "Kể hoặc đọc truyện theo yêu cầu",
             "inputSchema": {
@@ -84,7 +84,7 @@
             }
         },
         {
-            "name": "%VBot_PlayMusic",
+            "name": "_VBot_PlayMusic",
             "active": true,
             "description": "Phát, mở nhạc hoặc bài hát theo yêu cầu người dùng",
             "inputSchema": {
@@ -101,7 +101,7 @@
             }
         },
         {
-            "name": "%VBot_PlaylistPlayer",
+            "name": "_VBot_PlaylistPlayer",
             "active": true,
             "description": "Phát danh sách nhạc, playlist, album hoặc tuyển tập bài hát.",
             "inputSchema": {
@@ -118,7 +118,7 @@
             }
         },
         {
-            "name": "%VBot_PlayLocal",
+            "name": "_VBot_PlayLocal",
             "active": true,
             "description": "Phát nhạc hoặc playlist lưu trữ nội bộ trên thiết bị, ví dụ thẻ nhớ, USB, ổ cứng hoặc thư mục nhạc offline. Dùng khi người dùng yêu cầu phát nhạc từ thẻ nhớ, USB hoặc trong máy, thiết bị này, loa này",
             "inputSchema": {
@@ -135,7 +135,7 @@
             }
         },
         {
-            "name": "%VBot_MediaControl",
+            "name": "_VBot_MediaControl",
             "active": true,
             "description": "Điều khiển phát nhạc trên hệ thống VBot — bao gồm tạm dừng, tiếp tục, dừng hẳn, phát tiếp, hoặc chuyển bài.",
             "inputSchema": {
@@ -160,12 +160,12 @@
             }
         },
         {
-            "name": "%VBot_Wifi_Info",
+            "name": "_VBot_Wifi_Info",
             "active": true,
             "description": "Trả về thông tin Mạng WiFi, địa chỉ IP hiện tại của thiết bị nếu có yêu cầu. MCP này không cần tham số đầu vào, đọc thông tin liền mạch không được ngắt câu hoặc ngắt từ",
             "inputSchema": {
                 "type": "object",
-                "properties": [],
+                "properties": {},
                 "required": []
             }
         }

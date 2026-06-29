@@ -1062,6 +1062,294 @@ if (isset($_POST['status_btwifiset'])) {
   $output .=  stream_get_contents($stream_out);
 }
 
+if (isset($_POST['start_vbot_bluetooth_agent'])) {
+  $CMD = "sudo systemctl start vbot-bluetooth-agent";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['stop_vbot_bluetooth_agent'])) {
+  $CMD = "sudo systemctl stop vbot-bluetooth-agent";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['restart_vbot_bluetooth_agent'])) {
+  $CMD = "sudo systemctl restart vbot-bluetooth-agent";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['enable_vbot_bluetooth_agent'])) {
+  $CMD = "sudo systemctl enable vbot-bluetooth-agent";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['disabled_vbot_bluetooth_agent'])) {
+  $CMD = "sudo systemctl disable vbot-bluetooth-agent";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['status_vbot_bluetooth_agent'])) {
+  $CMD = "sudo systemctl status vbot-bluetooth-agent";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['logs_vbot_bluetooth_agent'])) {
+  $CMD = "journalctl -u vbot-bluetooth-agent -e";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['start_bluealsa'])) {
+  $CMD = "sudo systemctl start bluealsa";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['stop_bluealsa'])) {
+  $CMD = "sudo systemctl stop bluealsa";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['restart_bluealsa'])) {
+  $CMD = "sudo systemctl restart bluealsa";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['enable_bluealsa'])) {
+  $CMD = "sudo systemctl enable bluealsa";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['disabled_bluealsa'])) {
+  $CMD = "sudo systemctl disable bluealsa";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['status_bluealsa'])) {
+  $CMD = "sudo systemctl status bluealsa";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['logs_bluealsa'])) {
+  $CMD = "journalctl -u bluealsa -e";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['install_bluetooth_agent_py'])) {
+  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluetooth_agent.py /usr/local/bin/bluetooth_agent.py && sudo chmod 0777 /usr/local/bin/bluetooth_agent.py";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['install_bthelper'])) {
+  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/bthelper /usr/bin/bthelper";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['install_bluealsa'])) { 
+  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluealsa.service /etc/systemd/system/bluealsa.service && sudo systemctl daemon-reload && sudo systemctl enable bluealsa.service && sudo systemctl start bluealsa.service";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['install_bluetooth_agent_service'])) { 
+  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/vbot-bluetooth-agent.service /etc/systemd/system/vbot-bluetooth-agent.service && sudo systemctl daemon-reload && sudo systemctl enable vbot-bluetooth-agent.service && sudo systemctl start vbot-bluetooth-agent.service";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
 if (isset($_POST['pass_crypto_btwifiset'])) {
   $CMD = "cat /usr/local/btwifiset/crypto";
   $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -1706,50 +1994,15 @@ if (isset($_POST['os_image_created'])) {
     $stream = ssh2_exec($connection, $CMD);
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-    #$output = "$GET_current_USER@$HostName:~ $ $CMD\n";
     $output = stream_get_contents($stream_out);
   } else {
     $output = "Không lấy được thông tin phiên bản OS IMG";
   }
-  #echo nl2br(htmlspecialchars($output));
 }
 
 
 //check_version_picovoice_porcupine
 if (isset($_POST['check_version_picovoice_porcupine'])) {
-
-  /*
-  $remotePath = "/home/$ssh_user/.local/lib/python3.9/site-packages/";
-  $pattern = '/^pvporcupine-(\d+\.\d+\.\d+)\.dist-info$/m';
-  // Thực hiện lệnh ls để lấy danh sách thư mục
-  $connection = ssh2_connect($ssh_host, $ssh_port);
-  if (!$connection) {die($SSH_CONNECT_ERROR);}
-  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
-  $stream = ssh2_exec($connection, "ls $remotePath");
-  stream_set_blocking($stream, true);
-  $outputhh = stream_get_contents($stream);
-  fclose($stream);
-  $output .= "$GET_current_USER@$HostName:~ssh$:\n";
-  // Kiểm tra xem có thư mục nào khớp với biểu thức chính quy không
-  if (preg_match($pattern, $outputhh, $matches)) {
-      $foundVersion = $matches[1];
-      $output .= "Phiên bản Picovoice: $foundVersion\n";
-  } else {
-      //echo "Không tìm thấy thư mục pvporcupine-X.X.X.dist-info.";
-  $path_picovoice = "/home/$ssh_user/.local/lib/python3.9/site-packages/picovoice/_picovoice.py";
-  $connection = ssh2_connect($ssh_host, $ssh_port);
-  if (!$connection) {die($SSH_CONNECT_ERROR);}
-  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {die($SSH2_AUTH_ERROR);}
-  $stream = ssh2_exec($connection, "cat $path_picovoice");
-  stream_set_blocking($stream, true);
-  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-  $output =  stream_get_contents($stream_out);
-  //echo $output;
-  $text_picovoice_version = picovoice_version($output, 'Picovoice', 'version');
-  $firstThreeCharspicovoice_version = substr($text_picovoice_version, 0, 3);
-  $output .= "Phiên bản Picovoice: $text_picovoice_version\n";
-  }
-  */
 
   $CMD = "pip show picovoice pvporcupine";
   $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -1818,16 +2071,11 @@ if (isset($_POST['install_porcupine'])) {
     if ($zip->open($zipFilePath) === TRUE) {
       $fileNamesToCopy = ["$fileNameZip/porcupine_params.pv", "$fileNameZip/porcupine_params_vn.pv"];
       foreach ($fileNamesToCopy as $fileNameInZip) {
-        // Kiểm tra xem file có tồn tại trong ZIP hay không
         $index = $zip->locateName($fileNameInZip);
         if ($index !== false) {
-          // Đọc nội dung của file từ ZIP
           $fileContent = $zip->getFromIndex($index);
-          // Đường dẫn đến thư mục đích
           $destinationFilee = $destinationPath . '/' . basename($fileNameInZip);
-          // Ghi nội dung của file vào thư mục đích
           file_put_contents($destinationFilee, $fileContent);
-          //$output .= 'Porcupine:> File '.basename($fileNameInZip).' đã được đưa vào thư mục lib có chứa tệp .pv | ';
         } else {
           $output .= 'Porcupine:> File ' . basename($fileNameInZip) . 'không tồn tại | ';
         }
@@ -2085,7 +2333,7 @@ include 'html_head.php';
               <form method="POST" action="">
                 <br />
                 <div class="row g-3 d-flex justify-content-center">
-                  <div class="col-auto">
+                  <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-danger dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
@@ -2129,24 +2377,7 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
-<!-- 
-                    <div class="btn-group" disabled>
-                      <div class="dropdown">
-                        <button class="btn btn-info dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" disabled>
-                          LCD OLED Auto
-                        </button>
-                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_start" type="submit" title="Chạy lại trương trình">Chạy</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_restart" type="submit" title="Tạm dừng trương trình đang chạy">Khởi động lại</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_stop" type="submit" title="Tạm dừng trương trình đang chạy">Dừng</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_status" type="submit" title="Tạm dừng trương trình đang chạy">Trạng thái</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_enable" type="submit" title="Tự động chạy trương trình khi hệ thống khởi động">Kích hoạt</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_auto_disable" type="submit" title="Vô hiệu hóa trương trình, không cho tự động chạy">Vô hiệu</button></li>
-                          <li><button onclick="loading('show')" class="dropdown-item text-danger" name="lcd_config_auto" type="submit" title="Tự Động Cài Đặt Các File Cấu Hình LCD OLED để tự động chạy cùng hệ thống">Install Auto Start LCD on Boot</button></li>
-                        </ul>
-                      </div>
-                    </div>
--->
+
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-dark dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
@@ -2221,7 +2452,7 @@ include 'html_head.php';
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Wifi Thông Qua Bluetooth">
-                         <i class="bi bi-bluetooth"></i> BT Wifi Set</button>
+                         <i class="bi bi-bluetooth"></i> Set Wifi Via BLE</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="start_btwifiset" type="submit" title="Chạy Services Auto btwifiset">Start btwifiset</button></li>
                           <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_btwifiset" type="submit" title="Dừng Services Auto btwifiset">Stop btwifiset</button></li>
@@ -2254,42 +2485,44 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
-					<!--
                     <div class="btn-group">
                       <div class="dropdown">
-                        <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Mosquitto hệ thống">
-                         <i class="bi bi-radar"></i> Mosquitto</button>
+                        <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Bluetooth Audio">
+                         <i class="bi bi-bluetooth"></i> Bluetooth Audio</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="start_mosquitto" type="submit" title="Chạy Services Auto Mosquitto">Start Mosquitto</button></li>
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_mosquitto" type="submit" title="Dừng Services Auto Mosquitto">Stop Mosquitto</button></li>
-						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_mosquitto" type="submit" title="Khởi động lại Services Mosquitto">Restart Auto Mosquitto</button>
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_mosquitto" type="submit" title="Kích Hoạt Services Auto Mosquitto">Enable Auto Mosquitto</button></li>
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_mosquitto" type="submit" title="Vô Hiệu Services Auto Mosquitto">Disabled Auto Mosquitto</button></li>
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_mosquitto" type="submit" title="Xem Logs Auto Mosquitto">Logs Auto Mosquitto</button></li>
-                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_mosquitto" type="submit" title="Kiểm tra trạng thái Mosquitto">Status Auto Mosquitto</button></li>
+
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="start_vbot_bluetooth_agent" type="submit" title="Khởi động lại vbot-bluetooth-agent.service">vbot-bluetooth-agent Start</button>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_vbot_bluetooth_agent" type="submit" title="Khởi động lại vbot-bluetooth-agent.service">vbot-bluetooth-agent Stop</button>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_vbot_bluetooth_agent" type="submit" title="Khởi động lại vbot-bluetooth-agent.service">vbot-bluetooth-agent Restart</button>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_vbot_bluetooth_agent" type="submit" title="Kích Hoạt Services Auto vbot-bluetooth-agent.service">vbot-bluetooth-agent Enable Auto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_vbot_bluetooth_agent" type="submit" title="Vô Hiệu Services Auto vbot-bluetooth-agent.service">vbot-bluetooth-agent Disabled Auto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_vbot_bluetooth_agent" type="submit" title="Kiểm tra trạng thái vbot-bluetooth-agent.service">vbot-bluetooth-agent Status Auto</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_vbot_bluetooth_agent" type="submit" title="Xem Logs Auto vbot-bluetooth-agent.service">vbot-bluetooth-agent Logs Auto</button></li>
+
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="start_bluealsa" type="submit" title="Chạy bluealsa.service">bluealsa Start</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="stop_bluealsa" type="submit" title="Dừng bluealsa.service">bluealsa Stop</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="restart_bluealsa" type="submit" title="Khởi động lại bluealsa.service">bluealsa Restart</button>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="enable_bluealsa" type="submit" title="Kích Hoạt Services Auto bluealsa.service">bluealsa Enable Auto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="disabled_bluealsa" type="submit" title="Vô Hiệu Services Auto bluealsa.service">bluealsa Disabled Auto</button></li>
+                          <button onclick="loading('show')" class="dropdown-item text-danger" name="status_bluealsa" type="submit" title="Kiểm tra trạng thái bluealsa.service">bluealsa Status Auto</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="logs_bluealsa" type="submit" title="Xem Logs Auto bluealsa.service">bluealsa Logs Auto</button></li>
+
+
+
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bluetooth_agent_py" type="submit" title="Cài đặt bluetooth_agent.py">install bluetooth_agent.py</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bthelper" type="submit" title="Cài đặt bthelper">install bthelper</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bluealsa" type="submit" title="Cài đặt bluealsa.service">install bluealsa.service</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bluetooth_agent_service" type="submit" title="Cài đặt vbot-bluetooth-agent.service">install vbot-bluetooth-agent.service</button></li>
                         </ul>
                       </div>
                     </div>
-					-->
               </form>
-              <!-- 
-                  <div class="btn-group">
-                  <form method="POST" action="">
-                  <button class="btn btn-primary rounded-pill" name="setting_apache2" type="button" title="Cấu hình apache2">Cấu hình apache2</button><br/>
-                  <div class="input-group mb-3">
-                  <input required="" class="form-control border-success" type="text" name="setting_apache2_path" id="setting_apache2_path" placeholder="/home/pi/VBot_Offline/html" title="Ví dụ: /home/pi/VBot_Offline/html">
-                  <div class="invalid-feedback">Cần nhập đường dẫn path cần cấu hình apache2</div>
-                  <button class="btn btn-success border-success" type="submit">Cấu hình</button>
-                  </div>
-                  </form>  
-                  </div>
-                  -->
             </div>
           </div>
           <hr />
           <form method="POST" action="">
             <div class="row g-3 d-flex justify-content-center">
-              <div class="col-auto">
+              <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                 <div class="input-group">
                   <span class="input-group-text text-success">Nâng/Hạ Cấp Picovoice</span>
                   <select class="btn btn-success dropdown-toggle" data-toggle="dropdown" id="versions_picovoice_install" name="versions_picovoice_install">
@@ -2297,7 +2530,7 @@ include 'html_head.php';
                   </select>
                 </div>
               </div>
-              <div class="col-auto">
+              <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                 <div class="input-group-append">
                   <button class="btn btn-danger" onclick="loading('show')" name="install_picovoice" title="Cài đặt Picovoice" type="submit">Cài Đặt Picovoice</button>
                   <button type='submit' onclick="loading('show')" name='check_version_picovoice_porcupine' class='btn btn-primary' title='Kiểm tra phiên bản Picovoice và Porcupine'>Kiểm tra phiên bản</button>
@@ -2306,7 +2539,7 @@ include 'html_head.php';
             </div>
             <br />
             <div class="row g-3 d-flex justify-content-center">
-              <div class="col-auto">
+              <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                 <div class="input-group">
                   <span class="input-group-text text-success">Thư Viện Porcupine (.pv)</span>
                   <select class="btn btn-success dropdown-toggle" data-toggle="dropdown" id="versions_porcupine_install" name="versions_porcupine_install">
@@ -2314,7 +2547,7 @@ include 'html_head.php';
                   </select>
                 </div>
               </div>
-              <div class="col-auto">
+              <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                 <div class="input-group-append">
                   <button class="btn btn-danger" onclick="loading('show')" name="install_porcupine" title="Cài đặt Porcupine" type="submit">Cài Đặt Porcupine</button>
                 </div>
@@ -2335,7 +2568,7 @@ include 'html_head.php';
           <form method="POST" action="">
             <div class="row g-3 d-flex justify-content-center">
 
-              <div class="col-auto">
+              <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                 <div class="btn-group">
                   <div class="dropdown">
                     <button class="btn btn-secondary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Thiết Lập Múi Giờ, Thời Gian Cho Hệ Thống">

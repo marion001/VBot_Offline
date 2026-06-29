@@ -14,9 +14,13 @@ $:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2
 
 Bật SoftVolume:
 $:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume b true
+- Lệnh DBUS:
+$:> dbus-send --system --dest=org.bluealsa --type=method_call /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.freedesktop.DBus.Properties.Set string:"org.bluealsa.PCM1" string:"SoftVolume" variant:boolean:true
 
 Kiểm tra SoftVolume được bật hay chưa
 $:> busctl get-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume
+-Lệnh DBUS:
+$:> dbus-send --system   --print-reply   --dest=org.bluealsa   /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source   org.freedesktop.DBus.Properties.Get   string:"org.bluealsa.PCM1"   string:"SoftVolume"
 
 Mute:
 $:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume ay 2 0 0
