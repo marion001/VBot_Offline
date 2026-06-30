@@ -1,8 +1,8 @@
 {
     "version": "1.1.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Chuyển hệ thống sang ASYNC, Thêm mới hỗ trợ Bluetooth Audio (Chi tiết cài đặt xem trong mục: Hướng Dẫn), Hỗ trợ Custom DEV thời tiết (Dev_Weather.py)",
-    "releaseDate": "29/06/2026",
+    "description": "Sủa lỗi Media Player, Chuyển hệ thống sang ASYNC, Thêm mới hỗ trợ Bluetooth Audio (Chi tiết cài đặt xem trong mục: Hướng Dẫn), Hỗ trợ Custom DEV thời tiết (Dev_Weather.py)",
+    "releaseDate": "30/06/2026",
     "changes": [
         {
             "type": "feature",

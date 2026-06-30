@@ -1,5 +1,5 @@
 '''
-Code By: Vu Tuyen
+Code By: Vũ Tuyển
 GitHub VBot: https://github.com/marion001/VBot_Offline.git
 Facebook Group: https://www.facebook.com/groups/1148385343358824
 Facebook: https://www.facebook.com/TWFyaW9uMDAx
@@ -13,7 +13,6 @@ from pathlib import Path
 DEFAULT_JSON_FILE = str(Path(__file__).with_name("broadlink.json"))
 DEFAULT_PORT = 80
 
-
 try:
     import Broadlink_VBot
 except ModuleNotFoundError as import_error:
@@ -22,13 +21,11 @@ except ModuleNotFoundError as import_error:
 else:
     BROADLINK_IMPORT_ERROR = None
 
-
 def make_result(success=False, message="", data=None):
     result = {"success": success, "message": message}
     if data is not None:
         result["data"] = data
     return result
-
 
 def build_parser():
     parser = argparse.ArgumentParser(description="Broadlink Tool (scan / learn / send)")
@@ -55,20 +52,16 @@ def build_parser():
     p_send.add_argument("--devtype", required=True)
     p_send.add_argument("--port", type=int, default=getattr(Broadlink_VBot, "DEFAULT_PORT", DEFAULT_PORT))
     p_send.add_argument("--code", required=True)
-
     return parser
-
 
 def require_broadlink_module():
     if Broadlink_VBot is None:
-        raise RuntimeError(f"Khong the import Broadlink_VBot: {BROADLINK_IMPORT_ERROR}")
+        raise RuntimeError(f"Không thể import Broadlink_VBot: {BROADLINK_IMPORT_ERROR}")
     return Broadlink_VBot
-
 
 def handle_scan(args):
     broadlink_vbot = require_broadlink_module()
     return broadlink_vbot.scan_broadlink_devices(args.json_file)
-
 
 def handle_learn(args):
     broadlink_vbot = require_broadlink_module()
@@ -78,29 +71,20 @@ def handle_learn(args):
         data = broadlink_vbot.learn_ir(rm, timeout=timeout)
     else:
         data = broadlink_vbot.learn_rf(rm, timeout=timeout)
-
     if not data:
-        return make_result(False, "Het thoi gian cho hoc lenh")
-
-    return make_result(
-        True,
-        f"Hoc lenh thanh cong ({args.wavetype.upper()})",
-        data,
-    )
-
+        return make_result(False, "Hết thời gian chờ học lệnh")
+    return make_result(True, f"Học lệnh thành công ({args.wavetype.upper()})", data)
 
 def handle_send(args):
     broadlink_vbot = require_broadlink_module()
     rm = broadlink_vbot.create_device(args.ip, args.mac, args.devtype, args.port)
     if not broadlink_vbot.send_command(rm, args.code):
-        return make_result(False, "Gui lenh IR/RF that bai")
-    return make_result(True, "Da gui lenh IR/RF thanh cong")
-
+        return make_result(False, "Gửi lệnh IR/RF thất bại")
+    return make_result(True, "Đã gửi lệnh IR/RF thành công")
 
 def main(argv=None):
     parser = build_parser()
     args = parser.parse_args(argv)
-
     try:
         if args.action == "scan":
             result = handle_scan(args)
@@ -109,15 +93,13 @@ def main(argv=None):
         elif args.action == "send":
             result = handle_send(args)
         else:
-            result = make_result(False, "action khong hop le")
+            result = make_result(False, "action không hợp lệ")
     except KeyboardInterrupt:
-        result = make_result(False, "Da huy thao tac")
+        result = make_result(False, "Đã hủy thao tác")
     except Exception as e:
         result = make_result(False, str(e))
-
     print(json.dumps(result, ensure_ascii=False))
     return 0 if result.get("success") else 1
-
 
 if __name__ == "__main__":
     raise SystemExit(main())
