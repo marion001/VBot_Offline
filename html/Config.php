@@ -1353,6 +1353,7 @@ include 'html_head.php';
                           <select name="select_hotword_lang" id="select_hotword_lang" class="form-select border-success" aria-label="Default select example">
                             <option value="vi" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'vi' ? 'selected' : ''; ?>>Tiếng việt</option>
                             <option value="eng" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'eng' ? 'selected' : ''; ?>>Tiếng anh</option>
+                            <option value="customize" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['lang'] === 'customize' ? 'selected' : ''; ?>>Customize, Người dùng tự tùy chỉnh (Dev_Picovoice.py)</option>
                           </select>
                           <label for="select_hotword_lang">Chọn ngôn ngữ để gọi, đánh thức Bot:</label>
                         </div>
@@ -2454,8 +2455,9 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
 <div class="alert alert-primary mt-3">
 Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi<br/>
-- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth (Khi đã được cấu hình -> <a href='FAQ.php' target='_blank'>Nhấn Để Xem Chi Tiết</a>)<br/>
-- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth cấu hình Wifi (Khi đã được cấu hình -> <a href='FAQ.php' target='_blank'>Nhấn Để Xem Chi Tiết</a>)<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 6 giây rồi nhả ra để ngắt kết nối bluetooth với thiết bị đang được kết nối (Khi đã được cài trên hệ thống <a href='FAQ.php' target='_blank'>Nhấn Để Xem Chi Tiết</a>)
                     </div>
                 </div>
               </div>

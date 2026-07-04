@@ -247,14 +247,15 @@ include 'html_head.php';
                     </div>
                   </div>
                   <center>
-                    <button type="button" id="play_Button" name="play_Button" title="Phát nhạc" class="btn btn-success" onclick="control_media('resume')"><i class="bi bi-play-circle"></i>
-                    </button>
-                    <button type="button" id="pause_Button" name="pause_Button" title="Tạm dừng phát nhạc" class="btn btn-warning" onclick="control_media('pause')"><i class="bi bi-pause-circle"></i>
-                    </button>
-                    <button type="button" id="stop_Button" name="stop_Button" title="Dừng phát nhạc" class="btn btn-danger" onclick="control_media('stop')"><i class="bi bi-stop-circle"></i>
-                    </button>
+					<button type="button" id="play_Button" name="play_Button" title="Phát nhạc" class="btn btn-success" onclick="control_media('resume')"><i class="bi bi-play-circle"></i></button>
+                    <button type="button" id="pause_Button" name="pause_Button" title="Tạm dừng phát nhạc" class="btn btn-warning" onclick="control_media('pause')"><i class="bi bi-pause-circle"></i></button>
+                    <button type="button" id="stop_Button" name="stop_Button" title="Dừng phát nhạc" class="btn btn-danger" onclick="control_media('stop')"><i class="bi bi-stop-circle"></i></button>
+					
+					<button type="button" id="ble_prev_Button" name="ble_prev_Button" title="Bluetooth: Chuyển bài trước đó" class="btn btn-primary" onclick="bluetooth_control('previous')"><i class="bi bi-bluetooth"></i> <i class="bi bi-skip-backward"></i></button>
+					<button type="button" id="ble_next_Button" name="ble_next_Button" title="Bluetooth: Chuyển bài kế tiếp" class="btn btn-primary" onclick="bluetooth_control('next')"><i class="bi bi-skip-forward"></i> <i class="bi bi-bluetooth"></i></button>
+
                   </center>
-                  <br />
+                  <br/>
                   <center>
 				  <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success rounded-pill" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
                     <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
@@ -1049,6 +1050,16 @@ function renderBluetoothActive(bluetooth) {
     }
 }
 
+//Bật tắt 2 button next và prev tương ứng khi kết nối bluetooth
+function setBleButtons(enabled) {
+    ["ble_prev_Button", "ble_next_Button", "bluetooth_mute_unmute"].forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.disabled = !enabled;
+        }
+    });
+}
+
 //Cập nhật hiển thị danh sách thiết bị bluetooth đang kết nối
 let bluetoothSelectOpen = false;
 function renderBluetoothStatus(bluetooth) {
@@ -1065,13 +1076,14 @@ function renderBluetoothStatus(bluetooth) {
     const devices = Object.values(bluetooth.bluetooth_devices || {});
     if (!bluetooth.is_connected || devices.length === 0) {
         statusEl.innerHTML = '<span class="text-danger">Chưa kết nối</span>';
+		setBleButtons(false);
         return;
     }
     if (devices.length === 1) {
         statusEl.innerHTML ='<span class="text-success">' + devices[0].name + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;">Ngắt kết nối</button>';
+		setBleButtons(true);
         return;
     }
-
     let html = '<select ' +
 				'id="bluetooth_device_select" ' +
 				'class="form-select form-select-sm border-success" ' +
@@ -1085,6 +1097,7 @@ function renderBluetoothStatus(bluetooth) {
     });
     html += '</select>';
     statusEl.innerHTML = html;
+	setBleButtons(true);
 }
   </script>
   

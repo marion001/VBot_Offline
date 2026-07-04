@@ -172,52 +172,57 @@
   </li>
   <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#setting-dev-nav" data-bs-toggle="collapse" href="#" title="Nâng Cao Dành Cho Người Dùng Cá Nhân Tự Code Và Phát Triển Theo Ý Muốn">
-      <i class="bi bi-file-code-fill"></i><span>DEV Custom VBot</span><i class="bi bi-chevron-down ms-auto"></i>
+      <i class="bi bi-file-code-fill"></i><span>DEV Customize VBot</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="setting-dev-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Skill">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Skill">
         <a href="DEV_Customization.php">
-          <i class="bi bi-circle"></i><span>DEV Customization (Custom Skill)</span>
+          <i class="bi bi-circle"></i><span>DEV Customize Skill (Customize Skill)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Assistant">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Assistant">
         <a href="DEV_Assistant.php">
-          <i class="bi bi-circle"></i><span>DEV Assistant (Custom Assistant)</span>
+          <i class="bi bi-circle"></i><span>DEV Assistant (Customize Assistant)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Text To Speak">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Text To Speak">
         <a href="DEV_TTS.php">
-          <i class="bi bi-circle"></i><span>DEV Text To Speak (Custom TTS)</span>
+          <i class="bi bi-circle"></i><span>DEV Text To Speak (Customize TTS)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Speak To Text">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Speak To Text">
         <a href="DEV_STT.php">
-          <i class="bi bi-circle"></i><span>DEV Speak To Text (Custom STT)</span>
+          <i class="bi bi-circle"></i><span>DEV Speak To Text (Customize STT)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom LED">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize LED">
         <a href="DEV_Led.php">
-          <i class="bi bi-circle"></i><span>DEV LED (Custom LED)</span>
+          <i class="bi bi-circle"></i><span>DEV LED (Customize LED)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Music">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Music">
         <a href="Dev_Music.php">
-          <i class="bi bi-circle"></i><span>DEV Music (Custom Music)</span>
+          <i class="bi bi-circle"></i><span>DEV Music (Customize Music)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Processing - Xử Lý Chính">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Processing - Xử Lý Chính">
         <a href="DEV_Processing.php">
-          <i class="bi bi-circle"></i><span>DEV Processing (Custom Xử Lý Chính)</span>
+          <i class="bi bi-circle"></i><span>DEV Processing (Customize Xử Lý Chính)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Weather">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Weather">
         <a href="DEV_Weather.php">
-          <i class="bi bi-circle"></i><span>DEV Weather (Custom Xử Lý Thời Tiết)</span>
+          <i class="bi bi-circle"></i><span>DEV Weather (Customize Xử Lý Thời Tiết)</span>
         </a>
       </li>
-      <li title="Tùy chỉnh nâng cao cho DEV tự code Custom Logs">
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Picovoice Hotword WakeUP">
+        <a href="DEV_Picovoice.php">
+          <i class="bi bi-circle"></i><span>DEV Picovoice (Customize Xử Lý Picovoice Hotword WakeUP)</span>
+        </a>
+      </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Logs">
         <a href="DEV_Logs.php">
-          <i class="bi bi-circle"></i><span>DEV Logs (Custom Xử Lý Logs)</span>
+          <i class="bi bi-circle"></i><span>DEV Logs (Customize Xử Lý Logs)</span>
         </a>
       </li>
     </ul>

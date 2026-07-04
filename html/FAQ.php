@@ -947,8 +947,9 @@ sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/
                     </div>
 <div class="alert alert-primary mt-3">
 Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi<br/>
-- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth (Khi đã được cấu hình Xem Chi Tiết Bên Dưới: <b>Cài Đặt Cấu Hình Wifi Qua Bluetooth</b>)<br/>
-- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth cấu hình Wifi (Khi đã được cấu hình Xem Chi Tiết Bên Dưới: <b>Cài Đặt Cấu Hình Wifi Qua Bluetooth</b>)<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại<br/>
+- Nhấn giữ bất kỳ nút nhấn nào trong khoảng 6 giây rồi nhả ra để ngắt kết nối bluetooth với thiết bị đang được kết nối (Khi đã được cài trên hệ thống <a href='FAQ.php' target='_blank'>Nhấn Để Xem Chi Tiết</a>)
                     </div>
                   </div>
                 </div>

@@ -595,6 +595,11 @@ if (isset($_GET['check_key_picovoice'])) {
         echo json_encode($response);
         exit();
     }
+	if (!in_array($lang, ['vi', 'eng'], true)) {
+		$response['message'] = 'Chỉ hỗ trợ kiểm tra key với ngôn ngữ là (vi = Tiếng Việt) hoặc (eng = Tiếng Anh)';
+		echo json_encode($response);
+		exit();
+	}
     $modelFilePath = $VBot_Offline . 'resource/picovoice/library/' . $Config['smart_config']['smart_wakeup']['hotword']['library'][$_GET['lang']]['modelFilePath'];
     $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Check_Key_Picovoice.py $key $lang $modelFilePath");
     $connection = ssh2_connect($ssh_host, $ssh_port);
