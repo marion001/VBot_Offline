@@ -472,7 +472,7 @@ include 'html_head.php';
 			  </div>
 			
             <div class="card-body">
-              <h5 class="card-title"><i class="bi bi-apple"></i> AirPlay > <a href="FAQ.php" target="_blank"><i class="bi bi-patch-question-fill"></i></a>:</span></h5>
+              <h5 class="card-title"><i class="bi bi-apple"></i> AirPlay > <a href="FAQ.php" target="_blank"><i class="bi bi-patch-question-fill"></i></a>:</span> | <button type="button" style="font-size: 0.75rem;" class="btn btn-outline-primary btn-sm py-0 px-2" onclick="check_version_airplay()" title="Nhấn để kiểm tra phiên bản cập nhật mới">Kiểm tra cập nhật</button></h5>
               <div class="activity">
                 <div class="activity-item d-flex">
                   <div class="form-switch">
@@ -804,7 +804,7 @@ include 'html_head.php';
 	  })
 	  .then(res => {
 		if (!res.ok) {
-		  throw new Error("HTTP: " + res.status);
+		  throw new Error("Lỗi HTTP: " + res.status);
 		}
 		return res.json();
 	  })
@@ -888,6 +888,38 @@ include 'html_head.php';
 		  show_message("Lỗi Thay Đổi Âm Lượng: " + err.message + ". Kiểm tra mạng, API hoặc Bot");
 		});
 	  }, 150);
+	}
+
+	//Kiểm tra phiên bản AirPlay
+	function check_version_airplay() {
+		loading("show");
+		fetch("includes/php_ajax/Check_Connection.php?check_version_airplay", {cache: "no-store"})
+		.then(function(response) {
+			return response.json();
+		})
+		.then(function(data) {
+			if (!data.success) {
+				show_message("AirPlay Lỗi kiểm tra cập nhật:" +data.message);
+				return;
+			}
+			var msg =
+				"<center><b>AirPlay Kiểm Tra Phiên Bản Mới</b></center><br/>" +
+				"- Phiên bản hiện tại của bạn: <b>" + data.current_version + "</b><br/>" +
+				"- Phiên bản đang phát hành: <b>" + data.latest_version + "</b><br/>" +
+				"- Nội dung bản đang phát hành: <b>" + data.description + "</b><br/><br/>";
+			if (data.update) {
+				msg += "<hr/>- AirPlay Có bản cập nhật mới!<br/><br/><a href='/FAQ.php' target='_blank'>- Nhấn vào đây để Cập Nhật, Cài Đặt, Thiết Lập AirPlay</a>";
+			} else {
+				msg += "- <b>" +data.message+ "</b>";
+			}
+			show_message(msg);
+		})
+		.catch(function(error) {
+			show_message("AirPlay Không thể kiểm tra phiên bản mới:" +error);
+		})
+		.finally(function() {
+			loading("hide");
+		});
 	}
 
     //Thay đổi độ sáng đèn led
@@ -1080,7 +1112,7 @@ function renderBluetoothStatus(bluetooth) {
         return;
     }
     if (devices.length === 1) {
-        statusEl.innerHTML ='<span class="text-success">' + devices[0].name + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;">Ngắt kết nối</button>';
+        statusEl.innerHTML ='<span class="text-success">' + devices[0].name + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;" title="Nhấn để ngắt kết nối Bluetooth với thiết bị đang kết nối hiện tại">Ngắt kết nối</button>';
 		setBleButtons(true);
         return;
     }

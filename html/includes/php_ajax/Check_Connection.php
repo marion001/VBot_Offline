@@ -375,6 +375,71 @@ if (isset($_GET['VBot_CMD'])) {
     exit();
 }
 
+//Kiểm tra phiên bản AirPlay
+if (isset($_GET['check_version_airplay'])) {
+    $result = [
+        'success' => false,
+        'current_version' => '',
+        'latest_version'  => '',
+        'description'     => '',
+        'update'          => false,
+        'message'         => 'Không có bản cập nhật mới nào'
+    ];
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        $result['message'] = 'Không thể kết nối SSH.';
+        echo json_encode($result);
+        exit;
+    }
+    if (!@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        $result['message'] = 'Xác thực SSH thất bại.';
+        echo json_encode($result);
+        exit;
+    }
+    $stream = ssh2_exec($connection, "shairport-sync -V");
+    stream_set_blocking($stream, true);
+    $current = trim(stream_get_contents($stream));
+    if (preg_match('/^(VBot_[^-]+-[0-9.]+)/', $current, $match)) {
+        $current_version = $match[1];
+    } else {
+        $current_version = $current;
+    }
+    $result['current_version'] = $current_version;
+    $url = "https://api.github.com/repos/marion001/shairport-sync/contents/Version.json";
+    $context = stream_context_create([
+        "http" => [
+            "header" =>
+                "User-Agent: VBot\r\n" .
+                "Accept: application/vnd.github+json\r\n"
+        ]
+    ]);
+    $response = @file_get_contents($url, false, $context);
+    if ($response === false) {
+        $result['message'] = 'Không lấy được dữ liệu từ GitHub.';
+        echo json_encode($result);
+        exit;
+    }
+    $github = json_decode($response, true);
+    if (!isset($github['content'])) {
+        $result['message'] = 'Version.json không hợp lệ.';
+        echo json_encode($result);
+        exit;
+    }
+    $json = base64_decode(str_replace("\n", "", $github['content']));
+    $version = json_decode($json, true);
+    if (!$version) {
+        $result['message'] = 'Không đọc được Version.json.';
+        echo json_encode($result);
+        exit;
+    }
+    $result['latest_version'] = $version['build_date'];
+    $result['description'] = $version['description'];
+    $result['update'] = ($current_version !== $version['build_date']);
+    $result['success'] = true;
+    echo json_encode($result);
+    exit;
+}
+
 #Chạy Chương trình VBot
 if (isset($_GET['start_vbot_service'])) {
     $CMD = "systemctl --user start VBot_Offline.service";
