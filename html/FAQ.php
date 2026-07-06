@@ -1373,14 +1373,14 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
             <div class="card accordion" id="accordion_button_airport">
             <div class="card-body">
             <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_airport" aria-expanded="false" aria-controls="collapse_button_airport">
-            Cài Đặt, Thiết Lập AirPlay - shairport-sync:</h5>
+            Cài Đặt, Nâng Cấp, Thiết Lập AirPlay - shairport-sync:</h5>
             <div id="collapse_button_airport" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_airport">
 
 
       <!-- Card chính -->
       <div class="card shadow-lg border-primary mb-4">
         <div class="card-header bg-primary text-white fs-5">
-          <i class="bi bi-gear-fill me-2"></i>Cài đặt Shairport
+          <i class="bi bi-gear-fill me-2"></i>Cài đặt mới Shairport
         </div>
         <div class="card-body">
 
@@ -1435,6 +1435,88 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
 
         </div> <!-- card-body -->
       </div> <!-- card -->
+
+<!-- Card nâng cấp -->
+<div class="card shadow-lg border-warning mb-4">
+  <div class="card-header bg-warning text-dark fs-5">
+    <i class="bi bi-arrow-up-circle-fill me-2"></i>Nâng cấp Shairport Sync
+  </div>
+
+  <div class="card-body">
+
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle-fill me-2"></i>
+      Chức năng này dùng để nâng cấp <strong>Shairport Sync</strong> lên phiên bản mới nhất mà không cần cài đặt, chạy lại toàn bộ
+    </div>
+
+    <h5 class="mt-4 mb-3 text-success">
+      <i class="bi bi-terminal-fill me-2"></i>Nâng cấp tự động (Khuyến nghị)
+    </h5>
+
+    <p>
+      Chỉ cần truy cập SSH vào Raspberry Pi và chạy:
+    </p>
+
+    <div class="terminal">
+      <span class="prompt">$:&gt;</span>
+      <b>cd /home/pi/VBot_Offline/resource/airplay</b>
+      <br>
+      <span class="prompt">$:&gt;</span>
+      <b>./start_auto_airplay_upgrade.sh</b>
+    </div>
+
+    <div class="alert alert-success mt-3">
+      <i class="bi bi-check-circle-fill me-2"></i>
+      Script sẽ tự động:
+      <ul class="mb-0 mt-2">
+        <li>Xóa source cũ</li>
+        <li>Tải source mới nhất từ GitHub</li>
+        <li>Build lại Shairport Sync</li>
+        <li>Cài đặt phiên bản mới</li>
+        <li>Khởi động lại dịch vụ</li>
+        <li>Hiển thị phiên bản sau khi nâng cấp</li>
+      </ul>
+    </div>
+
+    <hr class="my-5">
+
+    <h5 class="mb-3 text-success">
+      <i class="bi bi-tools me-2"></i>Nâng cấp thủ công
+    </h5>
+
+    <p>Nếu muốn thực hiện từng bước, chạy lần lượt các lệnh sau:</p>
+
+    <div class="terminal">
+<span class="prompt">$:&gt;</span> <b>cd ~</b><br>
+<span class="prompt">$:&gt;</span> <b>sudo rm -rf shairport-sync</b><br>
+<span class="prompt">$:&gt;</span> <b>git clone https://github.com/marion001/shairport-sync</b><br>
+<span class="prompt">$:&gt;</span> <b>cd shairport-sync</b><br>
+<span class="prompt">$:&gt;</span> <b>chmod +x verify-gitversion</b><br>
+<span class="prompt">$:&gt;</span> <b>dos2unix verify-gitversion</b><br>
+<span class="prompt">$:&gt;</span> <b>make clean</b><br>
+<span class="prompt">$:&gt;</span> <b>autoreconf -fi</b><br>
+<span class="prompt">$:&gt;</span> <b>./configure --with-mqtt-client --sysconfdir=/etc --with-alsa --with-soxr --with-avahi --with-dbus-interface --with-ssl=openssl --with-systemd-startup --with-airplay-2</b><br>
+<span class="prompt">$:&gt;</span> <b>make</b><br>
+<span class="prompt">$:&gt;</span> <b>sudo make install</b><br><br>
+
+<span class="prompt">$:&gt;</span> <b>sudo systemctl daemon-reload</b><br>
+<span class="prompt">$:&gt;</span> <b>sudo systemctl restart shairport-sync</b><br>
+<span class="prompt">$:&gt;</span> <b>sudo systemctl status shairport-sync</b><br>
+<span class="prompt">$:&gt;</span> <b>shairport-sync -V</b>
+    </div>
+
+    <div class="alert alert-warning mt-4">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      <strong>Lưu ý:</strong>
+      <ul class="mb-0 mt-2">
+        <li>Quá trình build có thể mất từ 5–15 phút.</li>
+        <li>Không tắt Raspberry Pi hoặc nhấn <code>Ctrl + C</code> khi đang biên dịch.</li>
+        <li>Sau khi hoàn tất, kiểm tra phiên bản bằng lệnh <code>shairport-sync -V</code>.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
 
       <!-- Card lưu ý cuối -->
       <div class="card shadow border-info">
