@@ -28,6 +28,8 @@ if ($Config['contact_info']['user_login']['active']) {
 
 //Kiểm tra thông tin mạng
 function networkInfo($connectionName = null) {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     if (empty($connectionName)) {
         return [
             "ipMode" => "N/A",
@@ -81,6 +83,8 @@ function networkInfo($connectionName = null) {
 
 //Xóa Wifi
 if (isset($_GET['Delete_Wifi'])) {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     if (isset($_POST['action']) && $_POST['action'] == 'delete_wifi' && isset($_POST['wifiName'])) {
         $wifiName = $_POST['wifiName'];
         $wifiInfo = shell_exec('iwconfig wlan0');
@@ -124,6 +128,8 @@ if (isset($_GET['Delete_Wifi'])) {
 
 //Kết Nối Wifi
 if (isset($_GET['Connect_Wifi'])) {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
         if (isset($_POST['ssid']) && isset($_POST['password'])) {
@@ -166,6 +172,8 @@ if (isset($_GET['Connect_Wifi'])) {
 
 //Đặt lại cấu hình Wifi
 if (isset($_GET['Reset_Wifi'])) {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         echo json_encode([
@@ -198,6 +206,8 @@ if (isset($_GET['Reset_Wifi'])) {
 
 #Quét các mạng wifi xung quanh
 if (isset($_GET['Scan_Wifi_List'])) {
+	putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         echo json_encode([
@@ -265,6 +275,8 @@ if (isset($_GET['Scan_Wifi_List'])) {
 
 #Lấy Mật Khẩu Wifi Đã Kết Nối
 if (isset($_GET['Get_Password_Wifi'])) {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $response = ['success' => false, 'message' => '', 'data' => []];
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
@@ -325,28 +337,34 @@ if (isset($_GET['Get_Password_Wifi'])) {
 
 #Hiển thị các mạng wifi đã kết nối
 if (isset($_GET['Show_Wifi_List'])) {
-    $result = shell_exec('nmcli -t -f NAME,UUID,DEVICE con show');
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
+    $result = shell_exec("LANG=C.UTF-8 LC_ALL=C.UTF-8 nmcli -t -f NAME,UUID,DEVICE con show");
     if ($result !== null) {
-        $savedWifiInfo = explode("\n", trim($result));
-        $savedWifiInfo = array_filter($savedWifiInfo);
+        //Nếu chuỗi không phải UTF-8 thì chuyển sang UTF-8
+        if (!mb_check_encoding($result, "UTF-8")) {
+            $result = mb_convert_encoding($result, "UTF-8");
+        }
+        $savedWifiInfo = array_filter(explode("\n", trim($result)));
         $formattedWifiInfo = array_map(function ($item) {
             $parts = explode(':', $item);
             return [
-                "ssid" => $parts[0],
-                "uuid" => $parts[1],
-                "interface" => $parts[2]
+                "ssid"      => $parts[0] ?? "",
+                "uuid"      => $parts[1] ?? "",
+                "interface" => $parts[2] ?? ""
             ];
         }, $savedWifiInfo);
         echo json_encode([
-            'success' => true,
-            'message' => 'Lấy danh sách WiFi thành công.',
-            'data' => $formattedWifiInfo
+            "success" => true,
+            "message" => "Lấy danh sách WiFi thành công.",
+            "data"    => $formattedWifiInfo
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     } else {
+
         echo json_encode([
-            'success' => false,
-            'message' => 'Không thể lấy danh sách WiFi.',
-            'data' => []
+            "success" => false,
+            "message" => "Không thể lấy danh sách WiFi.",
+            "data"    => []
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     }
     exit();
@@ -354,6 +372,8 @@ if (isset($_GET['Show_Wifi_List'])) {
 
 #kiểm tra thông tin mạng wifi đang kết nối
 if (isset($_GET['Wifi_Network_Information'])) {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
 	#$wifiInfo = shell_exec('LANG=C.UTF-8 iwconfig wlan0');
 	$wifiInfo = shell_exec('LANG=C.UTF-8 iwconfig wlan0 2>&1');
     #$wifiInfo = shell_exec('iwconfig wlan0');
@@ -419,6 +439,8 @@ if (isset($_GET['Wifi_Network_Information'])) {
 
 #Đặt IP Tĩnh
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'set_static_ip') {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connected_network_name'] ?? '';
     $ip = $_POST['ip'] ?? '';
     $gateway = $_POST['gateway'] ?? '';
@@ -481,6 +503,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 //Đặt lại IP Động
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'use_dhcp_automatically') {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connected_network_name'] ?? '';
     if ($connectionName === '') {
         echo json_encode([
@@ -524,6 +548,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 #Cấu Hình DNS
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'set_dns_only') {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connection_name'] ?? '';
     $dns1 = $_POST['dns1'] ?? '8.8.8.8';
     $dns2 = $_POST['dns2'] ?? '8.8.4.4';
@@ -563,6 +589,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 #Đặt Lại DNS SẼ DO DHCP CUNG CẤP DNS
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reset_dns_dhcp') {
+    putenv("LANG=C.UTF-8");
+    putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connection_name'] ?? '';
     if ($connectionName === '') {
         echo json_encode([
