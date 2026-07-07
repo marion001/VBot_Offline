@@ -2,7 +2,7 @@
     "version": "1.1.5",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa lỗi, tối ưu hệ thống, bổ sung tùy chỉnh ngôn ngữ hotword picovoice",
-    "releaseDate": "04/07/2026",
+    "releaseDate": "07/07/2026",
     "changes": [
         {
             "type": "feature",
