@@ -201,7 +201,7 @@
         </a>
       </li>
       <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Music">
-        <a href="Dev_Music.php">
+        <a href="DEV_Music.php">
           <i class="bi bi-circle"></i><span>DEV Music (Customize Music)</span>
         </a>
       </li>
