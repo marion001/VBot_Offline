@@ -471,8 +471,8 @@ include 'html_head.php';
 
 			<div class="activity-item d-flex">
 				<div class="activity-content">
-					<b class="fs-6">
-						Phiên bản: <span class="text-danger" id="version_bluetooth">N/A</span>
+					<b class="fw-bold">
+						Phiên bản: <span class="text-muted" id="version_bluetooth">N/A</span>
 					</b>
 				</div>
 			</div>
@@ -507,8 +507,8 @@ include 'html_head.php';
 
 			<div class="activity-item d-flex">
 				<div class="activity-content">
-					<b class="fs-6">
-						Phiên bản: <span class="text-danger" id="version_airplay">N/A</span>
+					<b class="fw-bold">
+						Phiên bản: <span class="text-muted" id="version_airplay">N/A</span>
 					</b>
 				</div>
 			</div>
