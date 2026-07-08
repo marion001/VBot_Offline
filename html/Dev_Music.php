@@ -11,7 +11,6 @@ include 'Configuration.php';
 <?php
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
-  // Kiểm tra xem người dùng đã đăng nhập chưa và thời gian đăng nhập
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
