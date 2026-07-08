@@ -468,6 +468,14 @@ include 'html_head.php';
                     </b>
                   </div>
                 </div>
+
+			<div class="activity-item d-flex">
+				<div class="activity-content">
+					<b class="fs-6">
+						Phiên bản: <span class="text-danger" id="version_bluetooth">N/A</span>
+					</b>
+				</div>
+			</div>
                 </div>
 			  </div>
 			
@@ -496,6 +504,15 @@ include 'html_head.php';
                     </b>
                   </div>
                 </div>
+
+			<div class="activity-item d-flex">
+				<div class="activity-content">
+					<b class="fs-6">
+						Phiên bản: <span class="text-danger" id="version_airplay">N/A</span>
+					</b>
+				</div>
+			</div>
+
                 </div>
 			  </div>
           </div>
@@ -749,8 +766,6 @@ include 'html_head.php';
 		show_message('Không thể lấy thông tin thời tiết');
 	  }
 	}
-    //Gọi hàm để hiển thị thông tin vị trí và thời tiết
-    getLocationAndWeather();
 
     //Cập nhật và hiển thị giá trị led vào thẻ html 
     function updateBrightness(value) {
@@ -1199,53 +1214,48 @@ function renderBluetoothStatus(bluetooth) {
             document.getElementById('bluetooth_active').checked = data.bluetooth.active ? true : false;
 			renderBluetoothStatus(data.bluetooth);
             //Media Player
-
-document.getElementById('media-name').innerHTML =
-	'Tên bài hát: <font color="blue">' +
-	(
-		data.media_player.airplay_playing === true
-			? (
-				data.media_player.airplay_song_name &&
-				String(data.media_player.airplay_song_name).trim() !== 'N/A'
-					? data.media_player.airplay_song_name
-					: 'N/A'
-			)
-			: (
-				(() => {
-					const devices = data.bluetooth?.bluetooth_devices;
-					let btName = null;
-
-					if (devices) {
-						for (const k in devices) {
-							const d = devices[k];
-
-							if (d.connected && d.playing) {
-								btName =
-									data.bluetooth.song_name ||
-									data.bluetooth.song_artist ||
-									data.bluetooth.device_name ||
-									d.name ||
-									'N/A';
-								break;
-							}
-						}
-					}
-
-					return btName ||
-						(
-							(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
-								&& data.media_player.media_name &&
-								String(data.media_player.media_name).trim() !== 'N/A'
-								? data.media_player.media_name
+			document.getElementById('media-name').innerHTML =
+				'Tên bài hát: <font color="blue">' +
+				(
+					data.media_player.airplay_playing === true
+						? (
+							data.media_player.airplay_song_name &&
+							String(data.media_player.airplay_song_name).trim() !== 'N/A'
+								? data.media_player.airplay_song_name
 								: 'N/A'
-						);
-				})()
-			)
-	) +
-	'</font>';
+						)
+						: (
+							(() => {
+								const devices = data.bluetooth?.bluetooth_devices;
+								let btName = null;
+								if (devices) {
+									for (const k in devices) {
+										const d = devices[k];
+										if (d.connected && d.playing) {
+											btName =
+												data.bluetooth.song_name ||
+												data.bluetooth.song_artist ||
+												data.bluetooth.device_name ||
+												d.name ||
+												'N/A';
+											break;
+										}
+									}
+								}
+								return btName ||
+									(
+										(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+											&& data.media_player.media_name &&
+											String(data.media_player.media_name).trim() !== 'N/A'
+											? data.media_player.media_name
+											: 'N/A'
+									);
+							})()
+						)
+				) +
+				'</font>';
 
 			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (data.media_player.audio_playing === true || data.bluetooth.playing === true || data.media_player.airplay_playing === true ? 'Đang phát' : (data.media_player.pause_media_flag === true ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
-
 			//Cập nhật nguồn phát nhạc
 			document.getElementById('audio-source').innerHTML =
 				'Nguồn Phát: <font color=blue>' +
@@ -1268,7 +1278,7 @@ document.getElementById('media-name').innerHTML =
 						)
 				) +
 				'</font>';
-	
+
             //Cập nhật ảnh cover bài hát
 			document.getElementById('media-cover').src =
 			(
@@ -1472,6 +1482,34 @@ document.getElementById('media-name').innerHTML =
     }
   </script>
   <script>
+	//Kiểm tra phiên bản Bluetooth hoặc AirPlay
+	function check_version(type) {
+		fetch("includes/php_ajax/Scanner.php?check_version=" + encodeURIComponent(type), {
+			cache: "no-store"
+		})
+		.then(function(response) {
+			if (!response.ok) {
+				throw new Error("Lỗi HTTP: " + response.status);
+			}
+			return response.json();
+		})
+		.then(function(data) {
+			if (data.success) {
+				if (type === "bluetooth") {
+					document.getElementById("version_bluetooth").textContent = (data.version || "").split("-")[0];
+				} else if (type === "airplay") {
+					const parts = data.version.split("-");
+					document.getElementById("version_airplay").textContent = parts.length >= 2 ? parts.slice(0, 2).join("-") : data.version;
+				}
+			} else {
+				show_message(data.message);
+			}
+		})
+		.catch(function(error) {
+			show_message("Không thể kiểm tra phiên bản: " + type + ", " +error);
+		});
+	}
+
     //Lấy thông tin mạng đang kết nối
     function getWifiNetworkInformation() {
       var xhr = new XMLHttpRequest();
@@ -1503,7 +1541,6 @@ document.getElementById('media-name').innerHTML =
       };
       xhr.send();
     }
-    getWifiNetworkInformation();
   </script>
   <script>
     //Lắng nghe và thực hiện khi có thay đổi trong Dom khi tải trang xong
@@ -1841,6 +1878,20 @@ document.getElementById('media-name').innerHTML =
         }
       }
     });
+  </script>
+  
+  <script>
+	document.addEventListener("DOMContentLoaded", function () {
+		//Gọi hàm để hiển thị thông tin vị trí và thời tiết
+		getLocationAndWeather();
+
+		//Thông tin Wifi
+		getWifiNetworkInformation();
+		
+		//Thông tin phiên bản bluetooth và airplay
+		check_version("bluetooth");
+		check_version("airplay");
+	});
   </script>
 </body>
 

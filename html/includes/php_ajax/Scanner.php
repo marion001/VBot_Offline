@@ -325,6 +325,74 @@ if (isset($_GET['VBot_Client_Device_Scaner'])) {
     exit;
 }
 
+//Kiểm tra phiên bản Bluetooth hoặc AirPlay
+if (isset($_GET['check_version'])) {
+    $type = strtolower(trim($_GET['check_version']));
+    switch ($type) {
+        case "bluetooth":
+            $CMD = "bluealsad -V";
+            break;
+        case "airplay":
+            $CMD = "shairport-sync --version";
+            break;
+        default:
+            echo json_encode([
+                'success' => false,
+                'message' => 'Tham số không hợp lệ. Chỉ hỗ trợ bluetooth hoặc airplay.',
+                'data' => []
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            exit;
+    }
+    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể kết nối tới máy chủ SSH.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Xác thực SSH không thành công.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    $stream = ssh2_exec($connection, escapeshellcmd($CMD));
+    if (!$stream) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    stream_set_blocking($stream, true);
+    $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+    $output = trim(stream_get_contents($stdout));
+    $error_output = trim(stream_get_contents($stderr));
+    fclose($stdout);
+    fclose($stderr);
+    fclose($stream);
+    if (!empty($error_output)) {
+        echo json_encode([
+            'success' => false,
+            'message' => $error_output,
+            'data' => []
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        exit;
+    }
+    echo json_encode([
+        'success' => true,
+        'message' => 'Lấy phiên bản ' . $type . ' thành công.',
+        'version' => $output
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
 #Xác Thực, Liên Kết Với XiaoZhi
 if (isset($_GET['XiaoZhi_Active'])) {
     $action = isset($_GET['action']) ? $_GET['action'] : '';
