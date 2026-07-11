@@ -2000,3 +2000,27 @@ function updateNewsPaperLinkName(index, select) {
   inputName.value = selectedOption.dataset.name || '';
   select.style.display = 'none';
 }
+
+//Tạo Mac Giả
+function random_mac_address(inputId) {
+	const input = document.getElementById(inputId);
+	if (!input) {
+		show_message("không tìm thấy thẻ input có id là: "+inputId);
+		return;
+	}
+	const hex = "0123456789abcdef";
+	let mac = [];
+	for (let i = 0; i < 6; i++) {
+		mac.push(
+			hex[Math.floor(Math.random() * 16)] +
+			hex[Math.floor(Math.random() * 16)]
+		);
+	}
+	let firstByte = parseInt(mac[0], 16);
+	firstByte = (firstByte | 0x02) & 0xFE;
+	mac[0] = firstByte.toString(16).padStart(2, "0");
+	mac_fake = mac.join(":");
+	input.value = mac_fake
+	showMessagePHP("Tạo địa chỉ MAC giả thành công: " +mac_fake, 5);
+	show_message("Tạo địa chỉ MAC giả thành công: <b>" +mac_fake+ "</b> Bạn cần bật kích hoạt: <b>Fake Mac Verification</b> và <b>Lưu Cài Đặt</b> trước, sau đó mới nhấn nút: <b>Hủy Liên Kết Và Đặt Lại Dữ Liệu</b> để tiến hành xác thực kích hoạt lại với máy chủ Xiaozhi");
+}

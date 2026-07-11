@@ -11,8 +11,8 @@
             "id_province": "05"
         },
         "location": {
-            "latitude": 15.99999,
-            "longitude": 126.88888
+            "latitude": 20.9751762,
+            "longitude": 105.3230922
         },
         "user_login": {
             "active": false,
@@ -31,7 +31,7 @@
         "port": 5002,
         "auth": {
             "active": false,
-            "api_key": ""
+            "api_key": "vbot123"
         },
         "show_log": {
             "active": false,

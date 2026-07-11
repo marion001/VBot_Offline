@@ -402,7 +402,14 @@
       "name": "Thiết Lập Âm Lượng",
       "request": {
         "method": "POST",
-        "header": [],
+        "header": [
+          {
+            "key": "VBot-API-Key",
+            "value": "vbot123",
+            "type": "text",
+            "disabled": true
+          }
+        ],
         "body": {
           "mode": "raw",
           "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"volume\",\r\n    \"action\":\"setup\",\r\n    \"value\":99\r\n}",
@@ -413,13 +420,13 @@
           }
         },
         "url": {
-          "raw": "http://192.168.14.113:5002/",
+          "raw": "http://192.168.14.175:5002/",
           "protocol": "http",
           "host": [
             "192",
             "168",
             "14",
-            "113"
+            "175"
           ],
           "port": "5002",
           "path": [
@@ -3796,7 +3803,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"softvolume\",\r\n    \"value\": true\r\n}",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\": \"bluetooth\",\r\n    \"action\": \"softvolume\",\r\n    \"value\": 1\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -4078,7 +4085,7 @@
       "response": []
     },
     {
-      "name": "(Lấy Toàn Bộ Thông Tin Dùng Cho WebUI) ?type=1&data=all_info",
+      "name": "HTTP (Lấy Toàn Bộ Thông Tin Dùng Cho WebUI) ?type=1&data=all_info",
       "request": {
         "method": "GET",
         "header": [],
@@ -4103,6 +4110,57 @@
             {
               "key": "data",
               "value": "all_info"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "SSE (Lấy Toàn Bộ Thông Tin Dùng Cho WebUI) ?type=1&data=all_info",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "accept",
+            "value": "text/event-stream",
+            "type": "text"
+          },
+          {
+            "key": "connection",
+            "value": "keep-alive",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "http://192.168.14.175:5002/?type=1&data=all_info&stream=sse&interval=1",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002",
+          "path": [
+            ""
+          ],
+          "query": [
+            {
+              "key": "type",
+              "value": "1"
+            },
+            {
+              "key": "data",
+              "value": "all_info"
+            },
+            {
+              "key": "stream",
+              "value": "sse"
+            },
+            {
+              "key": "interval",
+              "value": "1"
             }
           ]
         }

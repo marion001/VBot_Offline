@@ -1,8 +1,8 @@
 {
-    "version": "1.1.5",
+    "version": "1.1.6",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi, tối ưu hệ thống, bổ sung tùy chỉnh ngôn ngữ hotword picovoice",
-    "releaseDate": "07/07/2026",
+    "description": "Sửa lỗi MediaPlayer và các lỗi hệ thống khác, Nâng cấp giao thức SSE tương tác với WebUI",
+    "releaseDate": "11/07/2026",
     "changes": [
         {
             "type": "feature",

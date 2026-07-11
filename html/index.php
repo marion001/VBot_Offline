@@ -141,24 +141,31 @@ include 'html_head.php';
         <div class="col-lg-8">
           <div class="row">
             <div class="col-xxl-4 col-md-6">
-              <div class="card info-card revenue-card" style="background-color: #f8f9fa;">
-                <div class="card-body">
-                  <h5 class="card-title" id="show_city">N/A</h5>
-                  <font color=green>
-                    <div id="show_description"></div>
-                  </font>
-                  <div class="d-flex align-items-center">
-                    <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
-                      <img id="weather-icon"></img>
-                    </div>
-                    <div class="ps-3">
-                      <h6 id="show_weather">N/A</h6>
-                      <span class="text-muted small pt-2 ps-1">Độ ẩm: </span> <span class="text-success small pt-1 fw-bold" id="show_humidity">N/A</span>
-                      <br /><span class="text-muted small pt-2 ps-1">Gió: </span> <span class="text-success small pt-1 fw-bold" id="show_windSpeed">N/A</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+			<div class="card info-card revenue-card position-relative" style="background-color: #f8f9fa;">
+			  <i class="bi bi-info-circle-fill position-absolute top-0 end-0 mt-2 me-2 text-primary" id="weather_info" style="cursor: pointer; font-size: 1.1rem;" onclick="show_message('Dữ liệu thời tiết này được lấy từ openweathermap sử dụng vị trí tọa độ: (Vĩ độ - latitude) và (Kinh độ - longitude) được cấu hình trong: <b>Cá nhân -> <a href=\'Users_Profile.php\'>Chỉnh sửa hồ sơ</a></b>')"></i>
+
+			  <div class="card-body">
+				<h5 class="card-title" id="show_city">N/A</h5>
+				<font color="green">
+				  <div id="show_description"></div>
+				</font>
+				<div class="d-flex align-items-center">
+				  <div class="card-icon rounded-circle d-flex align-items-center justify-content-center">
+					<img id="weather-icon">
+				  </div>
+				  <div class="ps-3">
+					<h6 id="show_weather">N/A</h6>
+					<span class="text-muted small pt-2 ps-1">Độ ẩm: </span>
+					<span class="text-success small pt-1 fw-bold" id="show_humidity">N/A</span>
+					<br />
+					<span class="text-muted small pt-2 ps-1">Gió: </span>
+					<span class="text-success small pt-1 fw-bold" id="show_windSpeed">N/A</span>
+				  </div>
+				</div>
+			  </div>
+			</div>
+
             </div>
             <!-- End Revenue Card -->
             <div class="col-xxl-4 col-md-6">
@@ -391,9 +398,13 @@ include 'html_head.php';
                   </div>
                   <i class="bi bi-dash-lg"></i>
                   <div class="activity-content">
-                    <b>
-                      <font color="green"><i class="bi bi-mic"></i> Mic, Microphone <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Mic tạm thời')"></i></font>
-                    </b>
+<b id="mic_status">
+    <font id="mic_status_text" color="green">
+        <i id="mic_icon" class="bi bi-mic"></i>
+        Mic, Microphone
+        <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Mic tạm thời')"></i>
+    </font>
+</b>
                   </div>
                 </div>
                 <div class="activity-item d-flex">
@@ -738,16 +749,20 @@ include 'html_head.php';
     //hàm để hiển thị thông tin vị trí và thời tiết
 	async function getLocationAndWeather() {
 	  try {
-		const locRes = await fetch('https://ipinfo.io/json');
-		if (!locRes.ok) throw new Error('Lỗi lấy location');
-		const locData = await locRes.json();
-		var locArray = locData.loc.split(',');
-		var lat = locArray[0];
-		var lon = locArray[1];
-		var city = locData.city;
+
+		//const locRes = await fetch('https://ipinfo.io/json');
+		//if (!locRes.ok) throw new Error('Lỗi lấy location');
+		//const locData = await locRes.json();
+		//var locArray = locData.loc.split(',');
+		//var lat = locArray[0];
+		//var lon = locArray[1];
+
+		var lat = "<?php echo $Config['contact_info']['location']['latitude']; ?>";
+		var lon = "<?php echo $Config['contact_info']['location']['longitude']; ?>";
+
 		var weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=8473858601dabd3d2cbb24fb50840686&units=metric&lang=vi';
 		const weatherRes = await fetch(weatherUrl);
-		if (!weatherRes.ok) throw new Error('Lỗi lấy weather');
+		if (!weatherRes.ok) throw new Error('Lỗi lấy thông tin thời tiết');
 		var w = await weatherRes.json();
 		var elTemp = document.getElementById('show_weather');
 		var elHumidity = document.getElementById('show_humidity');
@@ -760,7 +775,7 @@ include 'html_head.php';
 		elDesc.textContent = ' ' + w.weather[0].description;
 		elWind.textContent = w.wind.speed + ' m/s';
 		elIcon.src = 'https://openweathermap.org/img/w/' + w.weather[0].icon + '.png';
-		elCity.innerHTML = city + ', <span>' + w.sys.country + '</span>';
+		elCity.innerHTML = w.name + ', <span>' + w.sys.country + '</span>';
 	  } catch (err) {
 		console.error(err);
 		show_message('Không thể lấy thông tin thời tiết');
@@ -1149,43 +1164,29 @@ function renderBluetoothStatus(bluetooth) {
   </script>
   
   <script>
-    //script liên quan tới API GET Media Player
-    let isHovering = false;
-    let isHovering_volume_slide = false;
-    let isHovering_led_brightness = false;
-    let fullTime = 0;
-    let intervalId;
-    //Cập nhật thông tin GET từ API
-    function fetchData_all_info() {
-      //Kiểm tra nếu checkbox được tích hoặc sync_active là true
-      const syncCheckbox = document.getElementById('sync_checkbox');
-      var rlc_log_display_style;
-      //Không thực hiện fetchData_Media_Player nếu checkbox không được tích
-      if (!syncCheckbox.checked) {
-        return;
-      }
-      fetch("<?php echo $URL_API_VBOT ?>?type=1&data=all_info")
-        .then(response => {
-          if (!response.ok) {
-            document.getElementById('div_message_error').style.display = 'block';
-            document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + response.status;
-          }
-          const contentType = response.headers.get('content-type');
-          if (!contentType || !contentType.includes('application/json')) {
-            return response.text().then(text => {
-              throw new Error('Dữ liệu phản hồi không phải JSON');
-            });
-          }
-          return response.json();
-        })
-        .then(data => {
+
+function update_index_data(data){
           if (data.success) {
             //console.log(data);
             document.getElementById('div_message_error').style.display = 'none';
             document.getElementById('show_conversation_mode').checked = data.conversation_mode ? true : false;
             document.getElementById('show_wakeup_reply').checked = data.wakeup_reply ? true : false;
             document.getElementById('multiple_command_active').checked = data.multiple_command_active ? true : false;
-            document.getElementById('show_mic_on_off').checked = data.mic_on_off ? true : false;
+			
+			//Mic
+            //document.getElementById('show_mic_on_off').checked = data.mic_on_off ? true : false;
+			const micOn = data.mic_on_off;
+			document.getElementById('show_mic_on_off').checked = micOn;
+			const micIcon = document.getElementById('mic_icon');
+			const micText = document.getElementById('mic_status_text');
+			if (micOn) {
+				micIcon.className = 'bi bi-mic';
+				micText.color = 'green';
+			} else {
+				micIcon.className = 'bi bi-mic-mute';
+				micText.color = 'red';
+			}
+
             document.getElementById('on_off_display_logs').checked = data.log_display_active ? true : false;
             document.getElementById('mqtt_show_logs_reconnect').checked = data.mqtt_show_logs_reconnect ? true : false;
             document.getElementById('cache_tts').checked = data.cache_tts_active ? true : false;
@@ -1344,6 +1345,39 @@ function renderBluetoothStatus(bluetooth) {
             updateDisplay_SongNhac(false);
             //console.log('Lỗi khi lấy dữ liệu', data.message);
           }
+}
+
+    //script liên quan tới API GET Media Player
+    let isHovering = false;
+    let isHovering_volume_slide = false;
+    let isHovering_led_brightness = false;
+    let fullTime = 0;
+    let intervalId;
+    //Cập nhật thông tin GET từ API
+    function fetchData_all_info() {
+      //Kiểm tra nếu checkbox được tích hoặc sync_active là true
+      const syncCheckbox = document.getElementById('sync_checkbox');
+      var rlc_log_display_style;
+      //Không thực hiện fetchData_Media_Player nếu checkbox không được tích
+      if (!syncCheckbox.checked) {
+        return;
+      }
+      fetch("<?php echo $URL_API_VBOT ?>?type=1&data=all_info")
+        .then(response => {
+          if (!response.ok) {
+            document.getElementById('div_message_error').style.display = 'block';
+            document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + response.status;
+          }
+          const contentType = response.headers.get('content-type');
+          if (!contentType || !contentType.includes('application/json')) {
+            return response.text().then(text => {
+              throw new Error('Dữ liệu phản hồi không phải JSON');
+            });
+          }
+          return response.json();
+        })
+        .then(data => {
+			update_index_data(data);
         })
         .catch(error => {
           document.getElementById('div_message_error').style.display = 'block';
@@ -1351,9 +1385,80 @@ function renderBluetoothStatus(bluetooth) {
           updateDisplay_SongNhac(false);
         });
     }
+    // Bắt đầu lấy dữ liệu mỗi giây sử dụng api thường http
+    //intervalId = setInterval(fetchData_all_info, <?php echo intval($Config['media_player']['media_sync_ui']['delay_time']); ?> * 1000);
 
-    // Bắt đầu lấy dữ liệu mỗi giây
-    intervalId = setInterval(fetchData_all_info, <?php echo intval($Config['media_player']['media_sync_ui']['delay_time']); ?> * 1000);
+	//Sử dụng cơ chế SSE nhận dữ liệu từ backend VBot
+	let sseAllInfo = null;
+	let sseAllInfoReconnectTimer = null;
+	function stopSSE_all_info() {
+		if (sseAllInfoReconnectTimer) {
+			clearTimeout(sseAllInfoReconnectTimer);
+			sseAllInfoReconnectTimer = null;
+		}
+		if (sseAllInfo) {
+			if (sseAllInfo.readyState !== EventSource.CLOSED) {
+				sseAllInfo.close();
+			}
+			sseAllInfo = null;
+		}
+	}
+
+	function startSSE_all_info() {
+		const syncCheckbox = document.getElementById("sync_checkbox");
+		if (!syncCheckbox.checked) {
+			stopSSE_all_info();
+			return;
+		}
+		if (sseAllInfoReconnectTimer) {
+			clearTimeout(sseAllInfoReconnectTimer);
+			sseAllInfoReconnectTimer = null;
+		}
+		if (sseAllInfo) {
+			if (sseAllInfo.readyState !== EventSource.CLOSED) {
+				sseAllInfo.close();
+			}
+			sseAllInfo = null;
+		}
+		sseAllInfo = new EventSource("<?php echo $URL_API_VBOT ?>?type=1&data=all_info&stream=sse&interval=1");
+		sseAllInfo.onopen = function () {
+			//console.log("SSE kết nối thành công");
+			document.getElementById("div_message_error").style.display = "none";
+		};
+		sseAllInfo.addEventListener("update", function (event) {
+			update_index_data(JSON.parse(event.data));
+		});
+
+		sseAllInfo.onerror = function () {
+			//console.log("SSE mất kết nối");
+			stopSSE_all_info();
+			document.getElementById("div_message_error").style.display = "block";
+			document.getElementById("message_error").innerHTML = "Không thể kết nối đến API (SSE), vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa.";
+			updateDisplay_SongNhac(false);
+			//Nếu đã tắt Sync thì không reconnect
+			if (!syncCheckbox.checked) {
+				return;
+			}
+			sseAllInfoReconnectTimer = setTimeout(function () {
+				const syncCheckbox = document.getElementById("sync_checkbox");
+				if (syncCheckbox.checked) {
+					startSSE_all_info();
+				}
+			}, 1000);
+		};
+	}
+
+	//Khởi động SSE lần đầu
+	startSSE_all_info();
+
+	//Theo dõi thay đổi checkbox Sync
+	document.getElementById("sync_checkbox").addEventListener("change", function () {
+		if (this.checked) {
+			startSSE_all_info();
+		} else {
+			stopSSE_all_info();
+		}
+	});
 
     // Ngừng cập nhật thanh trượt khi hover chuột vào
     document.getElementById('progress-bar').addEventListener('mouseover', () => {

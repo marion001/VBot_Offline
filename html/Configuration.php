@@ -12,7 +12,7 @@ ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
 //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-$Cache_UI_Ver = '1.2.1';
+$Cache_UI_Ver = '1.2.2';
 
 //Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;
@@ -180,6 +180,8 @@ $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['ac
 $Port_API = $Config['api']['port'];
 $Port_Server_Streaming_Audio_UDP = $Config['api']['streaming_server']['protocol']['udp_sock']['port'];
 $Port_Server_Streaming_Audio_Socket = $Config['api']['streaming_server']['protocol']['socket']['port'];
+
+$API_AUTH_KEY = $Config['api']['auth']['api_key'];
 
 //Tìm tất cả các tệp có tên bắt đầu bằng 'avata_user'
 $files = glob('assets/img/avata_user.*');

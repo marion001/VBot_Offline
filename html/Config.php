@@ -110,6 +110,8 @@ if (isset($_POST['all_config_save'])) {
   $Config['api']['show_log']['max_log'] = intval($_POST['max_logs_api']);
   $Config['api']['show_log']['active'] = isset($_POST['api_log_active']) ? true : false;
   $Config['api']['show_log']['log_lever'] = $_POST['api_log_active_log_lever'] ? true : false;
+  $Config['api']['auth']['active'] = $_POST['api_auth_active'] ? true : false;
+  $Config['api']['auth']['api_key'] = $_POST['api_auth_key'];
 
   #Cập nhật giá trị đường dẫn path web ui
   $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
@@ -1080,6 +1082,21 @@ include 'html_head.php';
                   );
                   echo input_field('', 'Danh Sách Dữ Liệu API', "http://$serverIp/API_List.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/API_List.php", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
+				<div class="alert alert-danger" role="alert">
+					<h5 class="card-title">Thiết lập bảo mật, xác thực khi dùng API, API Auth (Authentication: Header VBot-API-Key)</h5>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt xác thực khi thực hiện truy vấn, gửi dữ liệu từ API (Khuyến nghị nên tắt)')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="api_auth_active" id="api_auth_active" <?php echo $Config['api']['auth']['active'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+				<?php
+				echo input_field('api_auth_key', 'Key Authentication', $Config['api']['auth']['api_key'], '', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+				?>
+				<p class="text-primary"><b>Lưu Ý:</b> <br/> - Khi chức năng này được kích hoạt, bạn cần phải bật thêm tính năng: <b>[Cấu Hình Web Interface (Giao Diện) => Cho Phép Truy Cập Bên Ngoài Internet]</b> để có thể dùng được API tương tác với giao diện WebUI<br/>- Khi sử dụng API cần thêm Header là: VBot-API-Key với tham số dữ liệu value là Key Authentication được bạn cấu hình bên trên.</p>
+				</div>
                 </div>
               </div>
             </div>
@@ -1130,7 +1147,7 @@ include 'html_head.php';
                         echo input_field('udp_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_maximum_client_connected', 'Tối Đa Client Kết Nối', $Config['api']['streaming_server']['protocol']['udp_sock']['maximum_client_connected'] ?? 3, 'required', 'number', '1', '1', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('udp_time_remove_inactive_clients', 'Thời gian dọn dẹp Client (s)', $Config['api']['streaming_server']['protocol']['udp_sock']['time_remove_inactive_clients'] ?? 300, 'required', 'number', '1', '200', '900', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
-                        echo select_field('udp_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)', 'stt_ggcloud_v2' => 'STT Google Cloud V2'], $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'], []);
+                        echo select_field('udp_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free - Tiếng Việt)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)', 'stt_ggcloud_v2' => 'STT Google Cloud V2'], $Config['api']['streaming_server']['protocol']['udp_sock']['source_stt'], []);
                         ?>
                         <div class="row mb-3">
                           <label for="udp_working_mode" class="col-sm-3 col-form-label">Chế Độ Làm Việc <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
@@ -1197,8 +1214,6 @@ include 'html_head.php';
                     </div>
                   </div>
                   </div>
-
-
 
                 </div>
               </div>
@@ -1506,27 +1521,22 @@ include 'html_head.php';
                           <h5 class="card-title">Cấu hình STT:</h5>
 						  <div class="alert alert-primary" role="alert">
 
-						<?php
-						$gstt_languages = [
-						  "vi-VN" => "Tiếng Việt",
-						  "en-US" => "English (United States)",
-						  "en-GB" => "English (United Kingdom)",
-						  "zh-CN" => "中文 (Giản thể - Trung Quốc)",
-						  "zh-TW" => "中文 (Phồn thể - Đài Loan)",
-						  "ja-JP" => "日本語 (Nhật Bản)",
-						  "ko-KR" => "한국어 (Hàn Quốc)",
-						  "th-TH" => "ไทย (Thái Lan)",
-						  "id-ID" => "Bahasa Indonesia",
-						  "fr-FR" => "Français (Pháp)",
-						  "de-DE" => "Deutsch (Đức)",
-						  "es-ES" => "Español (Tây Ban Nha)",
-						  "es-MX" => "Español (Mexico)",
-						  "pt-BR" => "Português (Brazil)",
-						  "ru-RU" => "Русский (Nga)",
-						  "hi-IN" => "हिन्दी (Ấn Độ)"
-						];
-						$current_gcloud_language_code = $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code'] ?? 'vi-VN';
-						?>
+							<?php
+							$gstt_languages = [];
+							$json_file_gstt_languages = "includes/other_data/list_voices_stt_gcloud.json";
+							if (is_file($json_file_gstt_languages)) {
+								$json_gstt_languages = json_decode(file_get_contents($json_file_gstt_languages), true);
+
+								if (is_array($json_gstt_languages)) {
+									foreach ($json_gstt_languages as $language) {
+										if (!empty($language['code']) && !empty($language['name'])) {
+											$gstt_languages[$language['code']] = $language['name'];
+										}
+									}
+								}
+							}
+							$current_gcloud_language_code =$Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['language_code'] ?? 'vi-VN';
+							?>
 
                           <!-- ẩn hiện cấu hình select_stt_ggcloud_html -->
                           <div id="select_stt_ggcloud_html" class="col-12" style="display: none;">
@@ -1816,6 +1826,18 @@ include 'html_head.php';
                               <center><button class="btn btn-success rounded-pill" type="button" onclick="get_token_tts_default_zai_did()">Lấy Token zai_did</button> <i class="bi bi-question-circle-fill" onclick="show_message('zai_did Chỉ dùng cho trợ lý ảo Default Assistant, với chức năng: Chuyển đổi thêm kết quả thành văn bản (text), Hạn sử dụng 1 năm')"></i></center>
                             </div>
                           </div>
+
+							<?php
+							$gcloudVoices_TTS = json_decode(file_get_contents('includes/other_data/list_voices_tts_gcloud.json'), true);
+							$languages_gTTS = [];
+							foreach ($gcloudVoices_TTS as $voice_gtts) {
+								$languages_gTTS[$voice_gtts['language_code']] = $voice_gtts['language'];
+							}
+							ksort($languages_gTTS);
+							$currentLanguage_gTTS = $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] ?? 'vi-VN';
+							$currentVoice_gTTS = $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name'] ?? '';
+							?>
+
                           <!-- ẩn hiện cấu hình select_tts_default_html style="display: none;" -->
                           <div id="select_tts_ggcloud_html" class="col-12" style="display: none;">
                             <h4 class="card-title" title="Chuyển văn bản thành văn bản">
@@ -1824,9 +1846,14 @@ include 'html_head.php';
                               </center>
                             </h4>
                             <div class="form-floating mb-3">
-                              <select name="tts_ggcloud_language_code" id="tts_ggcloud_language_code" class="form-select border-success" aria-label="Default select example">
-                                <option value="vi-VN" <?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['language_code'] === 'vi-VN' ? 'selected' : ''; ?>>Tiếng Việt</option>
-                              </select>
+								<select name="tts_ggcloud_language_code" id="tts_ggcloud_language_code" class="form-select border-success">
+								<?php foreach($languages_gTTS as $code_GTTS => $name_gTTS): ?>
+								<option value="<?= htmlspecialchars($code_GTTS) ?>"
+								<?= $code_GTTS == $currentLanguage_gTTS ? 'selected' : '' ?>>
+								<?= htmlspecialchars($name_gTTS) ?>
+								</option>
+								<?php endforeach; ?>
+								</select>
                               <label for="tts_ggcloud_language_code">Ngôn ngữ:</label>
                             </div>
                             <div class="input-group mb-3">
@@ -2012,10 +2039,17 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <input type="text" class="form-control border-success" name="tts_ggcloud_key_token" id="tts_ggcloud_key_token" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['token_key']; ?>">
                               <label for="tts_ggcloud_key_token" class="form-label">Token Key:</label>
                             </div>
-                            <div class="form-floating mb-3">
-                              <input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_ggcloud_key_speaking_speed" id="tts_ggcloud_key_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['speaking_speed']; ?>">
-                              <label for="tts_ggcloud_key_speaking_speed" class="form-label">Tốc độ đọc:</label>
-                            </div>
+							<div class="form-floating mb-3">
+							  <select name="tts_ggcloud_key_language_code" id="tts_ggcloud_key_language_code" class="form-select border-success">
+								<?php foreach ($languages_gTTS as $code_GTTS => $name_gTTS): ?>
+								  <option value="<?php echo htmlspecialchars($code_GTTS); ?>"
+									<?php echo ($code_GTTS === ($Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code'] ?? 'vi-VN')) ? 'selected' : ''; ?>>
+									<?php echo htmlspecialchars($name_gTTS); ?>
+								  </option>
+								<?php endforeach; ?>
+							  </select>
+							  <label for="tts_ggcloud_key_language_code">Ngôn ngữ:</label>
+							</div>
                             <div class="input-group mb-3">
                               <div class="form-floating">
                                 <select name="tts_ggcloud_key_voice_name" id="tts_ggcloud_key_voice_name" class="form-select border-success" aria-label="Default select example">
@@ -2028,8 +2062,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud" id="get_voice_name_gcloud" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="form-floating mb-3">
-                              <input type="text" class="form-control border-danger" name="tts_ggcloud_key_language_code" id="tts_ggcloud_key_language_code" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['language_code']; ?>">
-                              <label for="tts_ggcloud_key_language_code" class="form-label">Ngôn Ngữ:</label>
+                              <input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_ggcloud_key_speaking_speed" id="tts_ggcloud_key_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['speaking_speed']; ?>">
+                              <label for="tts_ggcloud_key_speaking_speed" class="form-label">Tốc độ đọc:</label>
                             </div>
                           </div>
                           <!-- ẩn hiện cấu hình select_tts_ggcloud_key style="display: none;" -->
@@ -4272,111 +4306,59 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
       xhr.setRequestHeader("Content-Type", "application/json");
       xhr.send(data);
     }
-
-    //Tải danh sách giọng đọc của google tts cloud
-    function load_list_GoogleVoices_tts(select_tts_gcloud, loadingg = 'no') {
-      if (loadingg === 'ok') loading("show");
-      let selectElement_tts_gcloud;
-      let currentSelectedVoice_tts_gcloud;
-      if (select_tts_gcloud === 'tts_ggcloud') {
-        selectElement_tts_gcloud = document.getElementById('tts_ggcloud_voice_name');
-        currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['voice_name']; ?>';
-      } else if (select_tts_gcloud === 'tts_ggcloud_key') {
-        selectElement_tts_gcloud = document.getElementById('tts_ggcloud_key_voice_name');
-        currentSelectedVoice_tts_gcloud = '<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?>';
-      } else if (select_tts_gcloud === 'tts_audio_reply') {
-        selectElement_tts_gcloud = document.getElementById('tts_audio_reply_voice_name');
-        currentSelectedVoice_tts_gcloud = 'vi-VN-Neural2-A';
-      }
-      if (!selectElement_tts_gcloud) {
-        if (loadingg === 'ok') loading("hide");
-        showMessagePHP("Không tìm thấy thẻ select tts gcloud được chọn", 5);
-        return;
-      }
-      function loadJSON(url, useRaw = false) {
-        const xhr = new XMLHttpRequest();
-        xhr.open("GET", url, true);
-        if (useRaw) {
-          xhr.setRequestHeader("Accept", "application/vnd.github.v3.raw");
-        }
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-              try {
-                const data = JSON.parse(xhr.responseText);
-                const voiceList = data.voice_list_vi_vn;
-                selectElement_tts_gcloud.innerHTML = "";
-                voiceList.forEach(function(voice) {
-                  const option = document.createElement("option");
-                  option.value = voice;
-                  option.textContent = voice;
-                  if (voice === currentSelectedVoice_tts_gcloud) {
-                    option.selected = true;
-                    option.setAttribute("selected", "");
-                  }
-                  selectElement_tts_gcloud.appendChild(option);
-                });
-                if (loadingg === 'ok') {
-                  showMessagePHP("Đã tải danh sách giọng đọc TTS Google Cloud", 5);
-                  loading("hide");
-                }
-              } catch (e) {
-                if (useRaw) {
-                  loadJSON("includes/other_data/list_voices_tts_gcloud.json");
-                } else {
-                  if (loadingg === 'ok') loading("hide");
-                  showMessagePHP("Lỗi phân tích JSON tts GCloud: " + e, 5);
-                }
-              }
-            } else {
-              if (useRaw) {
-                loadJSON("includes/other_data/list_voices_tts_gcloud.json");
-              } else {
-                if (loadingg === 'ok') loading("hide");
-                showMessagePHP("Không thể tải file JSON tts GCloud. Mã lỗi HTTP: " + xhr.status, 5);
-              }
-            }
-          }
-        };
-        xhr.send();
-      }
-      //loadJSON("https://api.github.com/repos/marion001/VBot_Offline/contents/html/includes/other_data/list_voices_tts_gcloud.json", true);
-      loadJSON("includes/other_data/list_voices_tts_gcloud.json");
-    }
-
-	//Tạo Mac Giả
-	function random_mac_address(inputId) {
-		const input = document.getElementById(inputId);
-		if (!input) {
-			show_message("không tìm thấy thẻ input có id là: "+inputId);
-			return;
-		}
-		const hex = "0123456789abcdef";
-		let mac = [];
-		for (let i = 0; i < 6; i++) {
-			mac.push(
-				hex[Math.floor(Math.random() * 16)] +
-				hex[Math.floor(Math.random() * 16)]
-			);
-		}
-		let firstByte = parseInt(mac[0], 16);
-		firstByte = (firstByte | 0x02) & 0xFE;
-		mac[0] = firstByte.toString(16).padStart(2, "0");
-		mac_fake = mac.join(":");
-		input.value = mac_fake
-		showMessagePHP("Tạo địa chỉ MAC giả thành công: " +mac_fake, 5);
-		show_message("Tạo địa chỉ MAC giả thành công: <b>" +mac_fake+ "</b> Bạn cần bật kích hoạt: <b>Fake Mac Verification</b> và <b>Lưu Cài Đặt</b> trước, sau đó mới nhấn nút: <b>Hủy Liên Kết Và Đặt Lại Dữ Liệu</b> để tiến hành xác thực kích hoạt lại với máy chủ Xiaozhi");
-	}
-
-    document.addEventListener('DOMContentLoaded', function() {
-      updateButton_Audio_Welcome();
-      document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)
-      selectHotwordWakeup();
-    });
-	document.getElementById("hotword_select_wakeup").addEventListener("change", function () {
-    selectHotwordWakeup();
-	});
   </script>
+<script>
+const gcloudVoices = <?= json_encode($gcloudVoices_TTS, JSON_UNESCAPED_UNICODE); ?>;
+
+function load_list_GoogleVoices_tts(select_tts_gcloud) {
+    let selectVoice;
+    let selectLanguage;
+    let currentVoice;
+    if (select_tts_gcloud === "tts_ggcloud") {
+        selectVoice = document.getElementById("tts_ggcloud_voice_name");
+        selectLanguage = document.getElementById("tts_ggcloud_language_code");
+        currentVoice = "<?php echo $currentVoice_gTTS; ?>";
+    }
+	else if (select_tts_gcloud === 'tts_ggcloud_key') {
+		selectVoice = document.getElementById('tts_ggcloud_key_voice_name');
+		selectLanguage = document.getElementById('tts_ggcloud_key_language_code');
+		currentVoice = "<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['voice_name']; ?>";
+	}
+    const lang = selectLanguage.value;
+    selectVoice.innerHTML = "";
+    gcloudVoices.filter(v => v.language_code === lang).sort((a, b) => {
+            if (a.type !== b.type)
+                return a.type.localeCompare(b.type);
+            return a.name.localeCompare(b.name);
+        }).forEach(v => {
+            const option = document.createElement("option");
+            option.value = v.name;
+			option.textContent = v.name + ' (' + v.type + ' - ' + v.gender + ')';
+            if (v.name === currentVoice)
+                option.selected = true;
+            selectVoice.appendChild(option);
+        });
+}
+
+document.getElementById("tts_ggcloud_language_code").addEventListener("change", function(){
+    load_list_GoogleVoices_tts("tts_ggcloud");
+});
+document.getElementById("tts_ggcloud_key_language_code").addEventListener("change", function () {
+    load_list_GoogleVoices_tts("tts_ggcloud_key");
+});
+
+document.getElementById("hotword_select_wakeup").addEventListener("change", function () {
+	selectHotwordWakeup();
+});
+	
+document.addEventListener("DOMContentLoaded", function(){
+  updateButton_Audio_Welcome();
+  document.getElementById('sound_welcome_file_path').addEventListener('change', updateButton_Audio_Welcome)
+  selectHotwordWakeup();
+  load_list_GoogleVoices_tts("tts_ggcloud");
+  load_list_GoogleVoices_tts("tts_ggcloud_key");
+});
+</script>
 
 </body>
 
