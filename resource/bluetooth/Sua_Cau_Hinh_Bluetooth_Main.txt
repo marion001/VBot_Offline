@@ -1,0 +1,15 @@
+$:> sudo nano /etc/bluetooth/main.conf
+
+[General]
+ControllerMode = dual
+Name = VBot Assistant
+FastConnectable = true
+JustWorksRepairing = confirm
+RefreshDiscovery = true
+SecureConnections = on
+
+
+[Policy]
+ReconnectAttempts = 20
+ReconnectIntervals = 1,2,3,5,8
+AutoEnable = true

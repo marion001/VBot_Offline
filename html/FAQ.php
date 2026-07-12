@@ -2115,6 +2115,51 @@ $:> systemctl status bluealsa</code></pre>
 
         </div>
     </div>
+	
+</div>
+
+<!-- BƯỚC 6 -->
+<div class="accordion-item">
+    <h2 class="accordion-header">
+        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#step6">
+            Bước 6: cấu hình BlueZ main.conf (Khuyên dùng)
+        </button>
+    </h2>
+
+    <div id="step6" class="accordion-collapse collapse">
+        <div class="accordion-body">
+            <p><strong>Mở file cấu hình BlueZ:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> sudo nano /etc/bluetooth/main.conf</code></pre>
+            <p><strong>Chỉnh lại các thông số trong file thành như sau:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>[General]
+ControllerMode = dual
+
+FastConnectable = true
+
+JustWorksRepairing = confirm
+
+RefreshDiscovery = true
+
+SecureConnections = on
+
+
+[Policy]
+ReconnectAttempts = 20
+
+ReconnectIntervals = 1,2,3,5,8
+
+AutoEnable = true</code></pre>
+
+            <p><strong>Lưu và thoát Nano:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>Ctrl + O
+Enter
+Ctrl + X</code></pre>
+
+            <p><strong>Khởi động lại Raspberry Pi:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> sudo reboot</code></pre>
+
+        </div>
+    </div>
 </div>
 
 <!-- FIX TREO -->
