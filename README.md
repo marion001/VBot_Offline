@@ -1,241 +1,158 @@
+# VBot Assistant - Trợ Lý Loa Thông Minh Tiếng Việt Toàn Diện
 
-VBot Assistant, VBot là loa thông minh tiếng Việt, hỗ trợ điều khiển nhà thông minh, trả lời câu hỏi, nhắc nhở, phát nhạc và nhiều tiện ích khác. Với thiết kế tinh tế và khả năng hiểu ngôn ngữ tự nhiên, VBot mang đến sự tiện nghi và trải nghiệm hiện đại, gần gũi cho mọi gia đình Việt.
------
-- Các Bạn Có Nhu Cầu Mua Mạch VBot Assistant AIO, hoặc Nguyên 1 Chiếc Loa Liên Hệ Mình Nhé: [Facebook - Vũ Tuyển](https://www.facebook.com/TWFyaW9uMDAx)
-- Mạch được thiết kế dùng với Loa Xiaodu Donkey Kong
-- Group Hệ Hỗ Trợ: [Facebook - Group](https://www.facebook.com/groups/1148385343358824)
-- @Email: VBot.Assistant@gmail.com
-- Demo Hoàn Thiện: [Demo Video Youtube](https://youtu.be/D84jqz-Trss?si=fv9vIWn-RtkAjByl)
-- Sơ Đồ Mạch Chế Cháo DIY -> Kéo Xuống Cuối Cùng Nhé
-------------------------------------------------
-- HỖ TRỢ TỐT NHẤT TRÊN Raspberry Pi Zero 2W (IMG có sẵn được Build trên Raspberry Pi Zero 2W)
-- Mạch Mic ReSpeaker 2-Mics Pi HAT v1 (sử dụng ic WM8960), ReSpeaker Mic Array v2.0, Mic USB, V..v...
-- Hoặc Mạch Mic Vietbot AIO Ver 2.0
-- Hoặc Có Thể Sử Dụng Các Module Mic i2s Và phát âm thanh Audio I2s
-- Hỗ Trợ Các Loại Đèn LED Có Mã Như: WS2812B, APPA102 (Sử dụng duy nhất chân GPIO10 trên Raspberry Pi để điều khiển led)
-- --------------------------------
-- Kết Nối Client Server Sử Dụng MCU Như ESP32,ESP32 D1 MINI, ESP32S3, V..v...
-- Hỗ Trợ Đánh Thức Bằng Từ Khóa Sử Dụng Picovoice Và Snowboy
-- Đầy Đủ Giao Tiếp API, MQTT
-- Kết Nối Điều Khiển Home Assistant (HASS)
-- Tùy Chỉnh Câu Lệnh Điều Khiển Thiết Bị Home Assistant (Custom Home Assistant)
-- Trình Giải Trí, Nghe Nhạc, kể Chuyển, Đọc Báo, PodCast, Tin Tức Trong Ngày, Thời Sự
-- Phát Nhạc Từ Danh Sách Phát (PlayList)
-- Quản Lý Danh Sách Phát trên Webui
-- Lên Lịch Trình, Thông Báo, Lời Nhắc, v...v....
-- Sao Lưu, Backup dữ liệu lên Google Cloud Driver
-- Thiết Lập Mật Khẩu Đăng Nhập Webui
-- Hỗ Trợ Truy Cập WebUI VBot bên ngoài mạng Internet
-- Liên kết và tương tác, ra lệnh với các thiết bị chạy VBot trong cùng lớp mạng (Loa 1 ra lệnh Control, điều khiển, phát nhạc, đọc báo, tin tức, tới Loa 2, Client Loa 1 ra lệnh tới Loa 2, V..v....)
-- Tích hợp với trợ lý ảo Assist của Home Assistant (Làm Tác Nhân)
-      : https://github.com/marion001/VBot-Assist-Conversation
-- Liên Kết Loa VBot Vào Home Assistant
-      : https://github.com/marion001/VBot_Offline_Custom_Component
+VBot Assistant là giải pháp loa thông minh tiếng Việt mã nguồn mở cao cấp, được thiết kế tối ưu cho nền tảng Raspberry Pi (đặc biệt là Zero 2W). Dự án cung cấp khả năng tương tác giọng nói tự nhiên, điều khiển nhà thông minh (Smarthome) và hệ thống giải trí đa phương tiện mạnh mẽ.
 
-- Thiết Lập Diy VBot Client Kết Nối Tới Loa VBot
-      : https://github.com/marion001/VBot_Client_Offline
+---
 
-- Hỗ Trợ Xử Lý Đa Lệnh Trong 1 Câu Lệnh:
-  
-          Ví Dụ Câu Lệnh:
-        - Bật đèn ngủ và tắt đèn bếp
-        - Bật đèn khòng khách và đèn phòng ngủ
-        - Tắt đèn bếp sau đó phát danh sách nhạc
-  
+## 🌟 Tính Năng Nổi Bật
 
-- Thông Tin Đăng Nhập SSH:
+### 1. Điều Khiển Nhà Thông Minh (Smart Home)
+*   **Tích hợp Home Assistant (HASS):** Điều khiển thực thể (Lights, Switches, Covers, Scripts...) qua API/Websocket. Phản hồi trạng thái thiết bị bằng giọng nói.
+*   **VBot Custom Component:** Cho phép liên kết VBot vào Home Assistant như một Media Player chuyên nghiệp, hỗ trợ thông báo TTS và điều khiển từ xa.
+    *   [Link Repository Custom Component](https://github.com/marion001/VBot_Offline_Custom_Component)
+*   **Hỗ trợ HASS Assist:** Tích hợp sâu vào tính năng "Assist" của HA để trở thành một tác nhân hội thoại (Conversation Agent) mạnh mẽ.
+    *   [Link Repository Assist Integration](https://github.com/marion001/VBot-Assist-Conversation)
+*   **Xử lý Đa Lệnh (Multiple Commands):** Thực hiện nhiều hành động trong một câu nói.
+    *   *Ví dụ: "Bật đèn phòng khách, mở rèm và phát nhạc thư giãn".*
+*   **Hỗ trợ Broadlink & MQTT:** Điều khiển thiết bị IR/RF và giao tiếp với các module tự chế (ESP8266/ESP32) qua MQTT.
+*   **Custom Commands:** Định nghĩa các câu lệnh điều khiển HASS tùy biến qua file JSON (`resource/hass/Home_Assistant_Custom.json`).
 
-        $:> user: pi
-        $:> pass: vbot123
-  
-- Chạy VBot thủ công:
+### 2. Hệ Thống Giải Trí Đa Phương Tiện
+*   **Âm Nhạc:** Tích hợp Zing MP3, YouTube Music, Nhaccuatui và Music Local.
+*   **Kết nối Không dây:** 
+    *   **AirPlay (Shairport-Sync):** Truyền phát nhạc chất lượng cao từ thiết bị Apple (iPhone, iPad, Mac).
+    *   **Bluetooth Sink:** Biến VBot thành loa Bluetooth cho mọi thiết bị di động.
+*   **Tin Tức:** Cập nhật tin tức từ VnExpress, Dân Trí, Báo Mới... dưới dạng Podcast/Audio.
+*   **Radio Online:** Hỗ trợ các kênh VOV1, VOV2, VOV3, VOV5, VOV Giao thông...
+*   **Podcast & Kể Chuyện:** Kho nội dung phong phú cho mọi lứa tuổi.
 
-		- Yêu Cầu: Đã Flash IMG VBot Vào Thẻ Nhớ Dùng Cho Raspberry  pi
-		- Cần Dừng Chạy VBot Tự Động Trước Bằng Lệnh:
-		$:> systemctl --user stop VBot_Offline.service
-		- Sau Đó Chạy Thủ Công:
-        $:> cd VBot_Offline
-        $:> python3 Start.py
+### 3. Trợ Lý Ảo Đa AI (Virtual Assistants)
+*   Linh hoạt chuyển đổi giữa các bộ não: **XiaoZhi**, **Google Gemini**, **ChatGPT**, **Zalo Assistant**.
+*   **Nhận diện từ khóa (Wake-word):** Tích hợp công nghệ **Picovoice (Porcupine)** và **Snowboy**, hỗ trợ đa từ khóa đánh thức ("Ê Cu", "Hey Google", "Jarvis"...).
+*   **Chế độ hội thoại liên tục:** Tự động lắng nghe phản hồi mà không cần gọi lại từ khóa.
 
-- Hỗ trợ người dùng tự tùy biến, code theo ý muốn ở các File:
+### 4. Tiện Ích & Hệ Thống
+*   **Lập Lịch & Thông Báo (Scheduler):** Hẹn giờ, nhắc nhở, tự động bật/tắt Micro theo thời gian định sẵn.
+*   **Streaming Server (Satellite Speaker):** Kết nối ESP32 thu/phát âm thanh từ xa qua giao thức Socket/UDP.
+*   **Cloud Backup:** Sao lưu cấu hình lên Google Drive.
+*   **Tự Động Cập Nhật:** Nâng cấp chương trình và WebUI chỉ với 1 click.
 
-        - Code Trợ Lý Ảo: Dev_Assistant.py
-        - Code Custom Skill: Dev_Customization.py
-        - Code Hiệu Ứng Đèn Led: Dev_Led.py
-        - Code Chuyển Văn Bản Thành Giọng Nói: Dev_TTS.py
-        - Code Nguồn Âm Nhạc: Dev_Music.py
+---
 
+## 🌐 Giao Diện Quản Trị WebUI
 
-Link Download IMG FLASH (IMG Được Build Trên Raspberry Pi Zero 2W): https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ
+VBot cung cấp một WebUI mạnh mẽ giúp người dùng quản lý thiết bị một cách trực quan:
 
-Phần Mềm Tìm Kiếm Thiết Bị Chạy VBot Trong Mạng Lan: https://drive.google.com/drive/folders/1wLxamxFjP96LT-rN2iobJ8M3j5nGrxs_?usp=drive_link
+*   **Bảng Điều Khiển (Dashboard):** Theo dõi trạng thái hệ thống thời gian thực (CPU, Nhiệt độ, RAM...).
+*   **Quản Lý Cấu Hình:** Chỉnh sửa trực tiếp `Config.json` ngay trên trình duyệt.
+*   **Quản Lý Giải Trí:** Tạo và chỉnh sửa danh sách phát (Playlist), Radio và Podcast.
+*   **Trình Xem Log (Log Viewer):** Theo dõi quá trình nhận diện giọng nói và phản hồi hệ thống.
+*   **Điều Khiển Thiết Bị:** Kiểm soát âm lượng, đèn LED và Microphone.
+*   **Quản Lý Lịch Hẹn:** Thiết lập các lời nhắc hoặc lịch phát nhạc tự động.
 
-      Model: Raspberry Pi Zero 2 W Rev 1.0
+---
 
-      $:>uname -a
-      Linux VBot-Assistant 6.1.21-v7+ #1642 SMP Mon Apr  3 17:20:52 BST 2023 armv7l GNU/Linux
+## 🔌 Giao Tiếp API & MQTT (Dành cho Tích Hợp)
 
-      $:>python3 --version
-      Python 3.9.2
+VBot cung cấp khả năng kết nối mạnh mẽ với các hệ thống bên thứ ba:
 
-      $:>apache2 -v
-      Server version: Apache/2.4.56 (Raspbian)
-      Server built:   2023-04-02T03:06:01
+*   **RESTful API:** Hỗ trợ các Endpoint để lấy trạng thái hệ thống, điều khiển Media Player, điều chỉnh âm lượng, phát TTS, và gửi câu lệnh Chatbot.
+    *   Hỗ trợ **Server-Sent Events (SSE)** để cập nhật trạng thái thời gian thực.
+*   **MQTT Broker:** VBot có thể kết nối với MQTT Broker để nhận lệnh điều khiển hoặc xuất trạng thái thiết bị, giúp tích hợp dễ dàng vào các hệ thống Smarthome như Home Assistant, Node-RED...
 
-      $:>php -v
-      PHP 7.4.33 (cli) (built: Feb 22 2023 20:07:47) ( NTS )
-      Copyright (c) The PHP Group
-      Zend Engine v3.4.0, Copyright (c) Zend Technologies
-          with Zend OPcache v7.4.33, Copyright (c), by Zend Technologies
+---
 
-      $:>lsb_release -a
-      No LSB modules are available.
-      Distributor ID: Raspbian
-      Description:    Raspbian GNU/Linux 11 (bullseye)
-      Release:        11
-      Codename:       bullseye
+## 🏗️ Kiến Trúc Hệ Thống & Luồng Dữ Liệu
 
-      $:>cat /etc/os-release
-      PRETTY_NAME="Raspbian GNU/Linux 11 (bullseye)"
-      NAME="Raspbian GNU/Linux"
-      VERSION_ID="11"
-      VERSION="11 (bullseye)"
-      VERSION_CODENAME=bullseye
-      ID=raspbian
-      ID_LIKE=debian
-      HOME_URL="http://www.raspbian.org/"
-      SUPPORT_URL="http://www.raspbian.org/RaspbianForums"
-      BUG_REPORT_URL="http://www.raspbian.org/RaspbianBugs"
-
-      $:>vcgencmd version
-      Mar 17 2023 10:53:00
-      Copyright (c) 2012 Broadcom
-      version 82f3750a65fadae9a38077e3c2e217ad158c8d54 (clean) (release) (start_cd)
-
-<hr/>
-
-```txt
-##Cấu Trúc Sơ Đồ Luồng Xử Lý VBot Assistant:
-Sơ Đồ Chi Tiết: https://drive.google.com/drive/folders/1E2H53HDxZ_ZCtOhyUcr7Yi6PfeiXXhEZ
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                              VBot Assistant                                 │
-│                           Khởi động hệ thống                                │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    1. KHỞI TẠO CÁC MODULE                                   │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐  │
-│  │   Hardware   │  │   Network    │  │  Media Player│  │ Virtual Asstant │  │
-│  │ - LED        │  │ - Home Asst  │  │ - Music      │  │ - Zalo          │  │
-│  │ - Buttons    │  │ - MQTT       │  │ - Radio      │  │ - ChatGPT       │  │
-│  │ - Microphone │  │ - OpenWeather│  │ - News       │  │ - Gemini        │  │
-│  │ - Speaker    │  └──────────────┘  │ - Podcast    │  │ - XiaoZhi       │  │
-│  └──────────────┘                    └──────────────┘  └─────────────────┘  │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    2. CHỜ SẴN SANG NGHE                                     │
-│                       Hotword Detection                                     │
-│  ┌──────────────┐                                                           │
-│  │ Porcupine    │  Hotwords: "Ê cu", "E cu", "Hey Google", etc.             │
-│  │ Snowboy      │                                                           │
-│  └──────────────┘                                                           │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-                    ┌───────────────YES──────────────┐
-                    │ Nếu Được Đánh Thức Thành Công  │
-                    ▼                                ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    3. XỬ LÝ LỆNH (Khi phát hiện Hotword)                    │
-└─────────────────────────────────────────────────────────────────────────────┘
-                    │
-                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    3.1. THU ÂM CÂU LỆNH VÀ CHUYỂN VĂN BẢN                   │
-│  ┌──────────────┐                                                           │
-│  │   RECORD     │  ┌──────────────┐  ┌──────────────┐                       │
-│  │ Duration: 6s │  │ STT Default  │  │ STT Viettel  │                       │
-│  │ Silence: 3s  │  │ STT Google   │  │ STT Zalo     │                       │
-│  └──────────────┘  └──────────────┘  └──────────────┘                       │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    3.3. PHÂN LOẠI VÀ THỰC HIỆN LỆNH                         │
-└─────────────────────────────────────────────────────────────────────────────┘
-           │	Hệ Thống Xử Lý Phân Tích Câu Lệnh Từ Người Dùng
-           ├─────────────────┬─────────────────┬──────────────────┤
-           │                 │                 │                  │
-           ▼                 ▼                 ▼                  ▼
-┌───────────┐ ┌─────────────┐ ┌───────────────┐ ┌─────────────┐ ┌─────────────┐
-│  MEDIA    │ │ HOME ASSIST │ │   WEATHER     │ │   CUSTOM    │ │   DEFAULT   │
-│ - Music   │ │ - Lights    │ │ - Temperature │ │   SKILLS    │ │ Processing  │
-│ - Radio   │ │ - Devices   │ │ - Forecast    │ │             │ │             │
-│ - News    │ │ - Automation│ │               │ │             │ │             │
-│ - Podcast │ └─────────────┘ └───────────────┘ └─────────────┘ └─────────────┘
-└───────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│            3.2. PHÂN TÍCH VÀ XỬ LÝ LỆNH (Có Hỗ Trợ Bởi Trợ Lý Ảo AI)        │
-│                             PRIORITY ORDER:                                 │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐     │
-│  │ Default Asst │  │ Zalo Asst    │  │ ChatGPT      │  │ Gemini       │     │
-│  │ (Active)     │  │ (Active)     │  │ (Inactive)   │  │ (Inactive)   │     │
-│  └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘     │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    3.4. CHUYỂN VĂN BẢN THÀNH GIỌNG NÓI                      │
-│                             Text-to-Speech                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                       │
-│  │   TTS Edge   │  │  TTS Zalo    │  │ TTS Default  │                       │
-│  │ (Active)     │  │              │  │              │                       │
-│  └──────────────┘  └──────────────┘  └──────────────┘                       │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    3.5. PHÁT ÂM VÀ HIỂN THỊ KẾT QUẢ                         │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                       │
-│  │   SPEAKER    │  │    SCREEN    │  │    LED       │                       │
-│  │ Volume: 50   │  │ LCD I2C/SPI  │  │ WS281x       │                       │
-│  └──────────────┘  └──────────────┘  └──────────────┘                       │
-└─────────────────────────────────────────────────────────────────────────────┘
-                                    │
-                                    ▼
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                    4. TRẠNG THÁI SAU KHI XỬ LÝ                              │
-└─────────────────────────────────────────────────────────────────────────────┘
-									│
-					   ┌────────────┼────────────┐
-					   │            │            │
-					   ▼            ▼            ▼
-				┌─────────────┐ ┌─────────────┐ ┌─────────────┐
-				│  CONVERSA-  │ │   BACK TO   │ │  PLAYBACK   │
-				│ TION MODE   │ │ LISTENING   │ │  CONTROL    │
-				│ (Active)    │ │   (Hotword) │ │ (Buttons)   │
-				└─────────────┘ └─────────────┘ └─────────────┘
+### Sơ đồ luồng xử lý chi tiết
+```mermaid
+graph TD
+    A[Khởi động VBot] --> B{Chế độ Chờ}
+    B -->|Picovoice / Snowboy| C[Kích hoạt LED/Âm thanh chào]
+    C --> D[Thu âm Lệnh Voice - 6s]
+    D --> E[Chuyển giọng nói thành Văn bản - STT]
+    E --> F{Phân tích & Phân loại}
+    
+    F -->|Điều khiển| G[HASS / MQTT / Broadlink]
+    F -->|Giải trí| H[Media Player / AirPlay / Radio]
+    F -->|Hỏi đáp AI| I[Gemini / GPT / XiaoZhi]
+    F -->|Hệ thống| J[Volume / Weather / Time / Restart]
+    
+    G --> K[Tổng hợp phản hồi - TTS]
+    H --> K
+    I --> K
+    J --> K
+    
+    K --> L[Phát âm thanh & Hiệu ứng LED]
+    L --> M{Conversation Mode?}
+    M -->|Bật| D
+    M -->|Tắt| B
 ```
-<hr/>
 
-![Alt text](https://github.com/user-attachments/assets/05b0eafa-6b73-42b9-ae65-e3e114faec01) 
+---
 
-![Alt text](https://github.com/user-attachments/assets/cd10cef1-de0e-42fc-ac41-42d8548b1da4)
+## 👨‍💻 Dành Cho Nhà Phát Triển (Customization)
 
-![VBot3](https://github.com/user-attachments/assets/8d0c145f-20f8-4aaf-a0e4-1a40f5dc6097)
+VBot cực kỳ linh hoạt cho việc mở rộng:
 
-![Image](https://github.com/user-attachments/assets/efbe15fc-77e5-4ace-b458-43a70b531abe)
+### 1. Danh Sách Các File Tùy Biến (Customization Files)
+VBot cung cấp hệ thống file `Dev_*.py` để bạn có thể can thiệp vào mọi công đoạn của hệ thống mà không làm ảnh hưởng đến lõi (Core) của chương trình:
 
-![Image](https://github.com/user-attachments/assets/6545cc75-f0c3-421c-808d-74ef06c0ac28)
+*   **`Dev_Customization.py`:** File quan trọng nhất để viết các kỹ năng riêng (Custom Skills). Bạn có thể bắt từ khóa và thực hiện các hành động như điều khiển thiết bị, phát âm thanh tùy ý.
+*   **`Dev_Assistant.py`:** Tùy biến hoặc tích hợp thêm các bộ não AI mới cho trợ lý.
+*   **`Dev_Led.py`:** Thiết kế các hiệu ứng nháy đèn LED riêng cho các trạng thái: Chờ, Nghĩ, Nói, Lỗi...
+*   **`Dev_Music.py`:** Tích hợp thêm các nguồn nhạc trực tuyến hoặc cách thức lấy link nhạc mới.
+*   **`Dev_TTS.py`:** Thêm các engine chuyển đổi Văn bản thành Giọng nói (Text-to-Speech) khác.
+*   **`Dev_STT.py`:** Tùy biến bộ nhận diện Giọng nói thành Văn bản (Speech-to-Text).
+*   **`Dev_Weather.py`:** Tùy biến nguồn dữ liệu thời tiết (OpenWeather, WeatherAPI...).
+*   **`Dev_Processing.py`:** Can thiệp sâu vào quá trình phân tích và xử lý chuỗi văn bản sau khi nhận diện.
+*   **`Dev_Logs.py`:** Tùy chỉnh cách thức ghi log hoặc đẩy log lên các hệ thống giám sát khác.
+*   **`Dev_Picovoice.py`:** Cấu hình sâu cho bộ nhận diện từ khóa đánh thức Picovoice.
 
-Sơ đồ mạch Loa Thông Minh Tiếng Việt VBot Assistant DAC I2S Sử Dụng Mic INMP441 và MAX89357
+### 2. Tùy Biến NLP (Xử Lý Ngôn Ngữ) thông qua JSON
+Thay đổi cách VBot hiểu câu lệnh tại thư mục `resource/`:
+*   **`Action.json`:** Từ khóa hành động (bật, tắt, phát...).
+*   **`Object.json`:** Đối tượng điều khiển (đèn, rèm, nhạc...).
 
-Nếu sử dụng Mic INMP441 và MAX89357 thì cần sử dụng IMG có chữ 'i2s' flash vào thẻ nhớ
+---
 
-[VBot_i2s_bb.pdf](https://github.com/user-attachments/files/22601079/VBot_i2s_bb.pdf)
-<img width="2583" height="1830" alt="Image" src="https://github.com/user-attachments/assets/96162be8-0f07-401f-86af-786372b9aba3" />
+## 💻 Yêu Cầu Phần Cứng & Mạch DIY
+
+*   **Raspberry Pi:** Khuyên dùng **Pi Zero 2W**. Hỗ trợ Pi 3, Pi 4.
+*   **Mạch Mic:** ReSpeaker HAT, Vietbot AIO, Module I2S INMP441.
+*   **Âm thanh:** Loa 3.5mm, USB, DAC I2S MAX98357.
+*   **LED:** WS2812B/APA102 (GPIO10).
+*   **Điều khiển:** Nút nhấn (Wakeup, Volume, Mic) hoặc Rotary Encoder.
+
+---
+
+## 🚀 Cài Đặt & Sử Dụng
+
+### 1. Sử dụng Image Build sẵn (Đề nghị)
+1.  **Tải IMG:** [Google Drive - VBot Images](https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ)
+2.  **Flash:** Sử dụng BalenaEtcher hoặc Rufus nạp vào thẻ nhớ.
+3.  **Khởi động:** Cắm thẻ, cấp nguồn và chờ hệ thống khởi tạo.
+
+### 2. Cấu Hình Kết Nối WiFi
+VBot hỗ trợ thiết lập mạng WiFi cực kỳ đơn giản mà không cần kết nối màn hình/bàn phím:
+*   **Sử dụng App di động:** Tải ứng dụng **BTBerryWifi** (có sẵn trên cả iOS và Android).
+*   **Phương thức:** Ứng dụng hỗ trợ quét và cấu hình WiFi cho loa thông qua kết nối **Bluetooth** hoặc **Hotspot** (Điểm phát sóng tự động của Pi).
+*   **Ưu điểm:** Giúp người dùng dễ dàng mang loa đi sử dụng ở các môi trường mạng khác nhau.
+
+### 3. Quản lý qua SSH
+*   **User:** `pi` | **Pass:** `vbot123`
+*   **Service:** `systemctl --user [start|stop|restart] VBot_Offline.service`
+
+---
+
+## 🤝 Liên Hệ & Cộng Đồng
+
+*   **Tác giả:** Vũ Tuyển (VBot Assistant)
+*   **Facebook:** [Vũ Tuyển Dev](https://www.facebook.com/TWFyaW9uMDAx)
+*   **Cộng đồng:** [Group VBot Assistant](https://www.facebook.com/groups/1148385343358824)
+
+---
+*VBot Assistant - Mang trí tuệ nhân tạo thực sự vào ngôi nhà Việt.*
+
+![VBot Overview](https://github.com/user-attachments/assets/05b0eafa-6b73-42b9-ae65-e3e114faec01)
+![VBot Schematic](https://github.com/user-attachments/assets/96162be8-0f07-401f-86af-786372b9aba3)
