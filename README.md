@@ -118,7 +118,7 @@ VBot cung cấp hệ thống file `Dev_*.py` để bạn có thể can thiệp v
 ### 2. Tùy Biến NLP (Xử Lý Ngôn Ngữ) thông qua JSON
 Thay đổi cách VBot hiểu câu lệnh tại các file json:
 *   **`Action.json`:** Từ khóa hành động (bật, tắt, phát...).
-*   **`Adverbs.json`:**
+*   **`Adverbs.json`:** Trạng từ kết hợp với từ khóa hoặc đối tượng
 *   **`Object.json`:** Đối tượng điều khiển (đèn, rèm, nhạc...).
 
 ---
