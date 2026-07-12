@@ -253,5 +253,17 @@
       <span>Thông tin hệ thống</span>
     </a>
   </li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="FAQ.php">
+      <i class="bi bi-question-circle"></i>
+      <span>Hướng Dẫn</span>
+    </a>
+  </li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="README.php">
+      <i class="bi bi-filetype-md"></i>
+      <span>README.md</span>
+    </a>
+  </li>
   </ul>
 </aside>
