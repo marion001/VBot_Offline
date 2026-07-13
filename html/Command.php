@@ -1287,7 +1287,7 @@ if (isset($_POST['logs_bluealsa'])) {
 }
 
 if (isset($_POST['install_bluetooth_agent_py'])) {
-  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluetooth_agent.py /usr/local/bin/bluetooth_agent.py && sudo chmod 0777 /usr/local/bin/bluetooth_agent.py";
+  $CMD = "sudo cp " . $VBot_Offline . "resource/bluetooth/bluetooth_agent.py /usr/local/bin/bluetooth_agent.py && sudo chmod 0777 /usr/local/bin/bluetooth_agent.py";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1303,7 +1303,7 @@ if (isset($_POST['install_bluetooth_agent_py'])) {
 }
 
 if (isset($_POST['install_bthelper'])) {
-  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/bthelper /usr/bin/bthelper";
+  $CMD = "sudo cp " . $VBot_Offline . "resource/bluetooth/bthelper /usr/bin/bthelper";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1319,7 +1319,7 @@ if (isset($_POST['install_bthelper'])) {
 }
 
 if (isset($_POST['install_bluealsa'])) { 
-  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/bluealsa.service /etc/systemd/system/bluealsa.service && sudo systemctl daemon-reload && sudo systemctl enable bluealsa.service && sudo systemctl start bluealsa.service";
+  $CMD = "sudo cp " . $VBot_Offline . "resource/bluetooth/bluealsa.service /etc/systemd/system/bluealsa.service && sudo systemctl daemon-reload && sudo systemctl enable bluealsa.service && sudo systemctl start bluealsa.service";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -1335,7 +1335,23 @@ if (isset($_POST['install_bluealsa'])) {
 }
 
 if (isset($_POST['install_bluetooth_agent_service'])) { 
-  $CMD = "sudo cp /home/pi/VBot_Offline/resource/bluetooth/vbot-bluetooth-agent.service /etc/systemd/system/vbot-bluetooth-agent.service && sudo systemctl daemon-reload && sudo systemctl enable vbot-bluetooth-agent.service && sudo systemctl start vbot-bluetooth-agent.service";
+  $CMD = "sudo cp " . $VBot_Offline . "resource/bluetooth/vbot-bluetooth-agent.service /etc/systemd/system/vbot-bluetooth-agent.service && sudo systemctl daemon-reload && sudo systemctl enable vbot-bluetooth-agent.service && sudo systemctl start vbot-bluetooth-agent.service";
+  $connection = ssh2_connect($ssh_host, $ssh_port);
+  if (!$connection) {
+    die($SSH_CONNECT_ERROR);
+  }
+  if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    die($SSH2_AUTH_ERROR);
+  }
+  $stream = ssh2_exec($connection, $CMD);
+  stream_set_blocking($stream, true);
+  $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+  $output = "$GET_current_USER@$HostName:~ $ $CMD\n";
+  $output .=  stream_get_contents($stream_out);
+}
+
+if (isset($_POST['install_bluetooth_config_main'])) { 
+  $CMD = "sudo bash " . $VBot_Offline . "resource/bluetooth/install_config_bluetooth.sh";
   $connection = ssh2_connect($ssh_host, $ssh_port);
   if (!$connection) {
     die($SSH_CONNECT_ERROR);
@@ -2513,6 +2529,7 @@ include 'html_head.php';
 						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bthelper" type="submit" title="Cài đặt bthelper">install bthelper</button></li>
 						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bluealsa" type="submit" title="Cài đặt bluealsa.service">install bluealsa.service</button></li>
 						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bluetooth_agent_service" type="submit" title="Cài đặt vbot-bluetooth-agent.service">install vbot-bluetooth-agent.service</button></li>
+						  <button onclick="loading('show')" class="dropdown-item text-danger" name="install_bluetooth_config_main" type="submit" title="Cài đặt cấu hình config cho bluetooth">install config bluetooth main.conf</button></li>
                         </ul>
                       </div>
                     </div>

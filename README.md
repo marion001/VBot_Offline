@@ -125,7 +125,7 @@ Thay đổi cách VBot hiểu câu lệnh tại các file json:
 
 ## 💻 Yêu Cầu Phần Cứng & Mạch DIY
 
-*   **Raspberry Pi:** Khuyên dùng **Pi Zero 2W**.
+*   **Raspberry Pi:** Khuyên dùng **Raspberry Pi Zero 2W**.
 *   **Mạch Mic:** ReSpeaker HAT, VBot AIO, Vietbot AIO, Module I2S INMP441 hoặc các module Mic I2S khác có chức năng tương tự.
 *   **Âm thanh:** Loa 3.5mm, USB, DAC I2S MAX89357 hoặc các mạch DAC tương tự.
 *   **LED:** WS2812B/APA102 (GPIO10).
@@ -135,7 +135,7 @@ Thay đổi cách VBot hiểu câu lệnh tại các file json:
 
 ## 🚀 Cài Đặt & Sử Dụng
 
-### 1. Sử dụng Image Build sẵn (Đề nghị)
+### 1. Sử dụng Image Build sẵn (Đề nghị) [IMG được Build trên Raspberry Pi Zero 2w]
 1.  **Tải IMG:** [Google Drive - VBot Images](https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ)
     *   **Loại Image mặc định (Không có chữ `i2s`):** Dành cho các mạch sử dụng IC **WM8960** (như ReSpeaker 2-Mics Pi HAT) hoặc mạch **VBot AIO** tiêu chuẩn.
     *   **Loại Image `i2s` (Có chữ `i2s`):** Dành cho cấu hình sử dụng **Mic INMP441** (hoặc các Mic I2S tương tự) kết hợp với **MAX89357** hoặc các mạch DAC audio khác có chức năng chân tương tự hoặc mạch **VBot AIO i2s**.
