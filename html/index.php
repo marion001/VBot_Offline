@@ -1607,7 +1607,11 @@ function update_index_data(data){
 					document.getElementById("version_airplay").textContent = parts.length >= 2 ? parts.slice(0, 2).join("-") : data.version;
 				}
 			} else {
-				show_message(data.message);
+				const message = data.message || "";
+				if (message.includes("bluealsad") && message.includes("command not found")) {
+					return;
+				}
+				show_message(message);
 			}
 		})
 		.catch(function(error) {
