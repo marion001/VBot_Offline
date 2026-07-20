@@ -1,8 +1,8 @@
 {
     "version": "1.1.7",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi MediaPlayer và các lỗi hệ thống khác, Nâng cấp giao thức SSE tương tác với WebUI",
-    "releaseDate": "20/07/2026",
+    "description": "Đồng Bộ Home Assistant Custom VBot, hỗ trợ Media Player trên Home Assistant. Và một vài cải tiến khác",
+    "releaseDate": "20/07/2026-1",
     "changes": [
         {
             "type": "feature",

@@ -241,7 +241,6 @@ Các trách nhiệm chính của `Streaming.py`:
 
 Xem thêm:
 
-- [`README_Socket.md`](README_Socket.md)
 - [`README_Socket_Client.md`](README_Socket_Client.md)
 
 ## REST API, SSE và MQTT
@@ -643,3 +642,5 @@ Khuyến nghị:
 ---
 
 VBot Assistant hướng tới một nền tảng loa thông minh tiếng Việt có thể tự triển khai, tùy biến và tích hợp sâu với hệ sinh thái nhà thông minh.
+
+<img width="2688" height="1360" alt="Image" src="https://github.com/user-attachments/assets/fc2ac10b-00d0-4b20-9c63-2367c3a101d0" />
