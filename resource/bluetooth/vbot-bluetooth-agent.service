@@ -26,7 +26,7 @@ User=root
 Group=root
 
 # tránh treo systemd khi GLib loop lỗi
-KillMode=process
+KillMode=control-group
 TimeoutStopSec=10
 
 [Install]

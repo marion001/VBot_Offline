@@ -1,0 +1,209 @@
+lấy volume hiện tại:
+busctl get-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume
+
+
+pi@VBot-Assistant:~ $
+
+
+Tắt SoftVolume:
+$:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume b false
+
+Bật SoftVolume:
+$:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume b true
+
+Kiểm tra SoftVolume được bật hay chưa
+$:> busctl get-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 SoftVolume
+
+Mute:
+$:> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume ay 2 0 0
+
+thay đổi âm lượng:
+$> busctl set-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume ay 2 127 127
+
+Kiểm tra mức Volume hiện tại:
+$:> busctl get-property org.bluealsa /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source org.bluealsa.PCM1 Volume
+
+Play:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Play
+
+Pause:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Play
+
+Stop:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Stop
+
+Next:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Next
+
+Previous:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 Previous
+
+Volume Up:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 VolumeUp
+
+Volume Down:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1 VolumeDown
+
+Ngắt kết nối Bluetooth:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.Device1 Disconnect
+
+Kết nối lại:
+$:> busctl call org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.Device1 Connect
+
+
+
+Phát nhạc:	Lib.bluetooth_control("play")
+Tạm dừng:	Lib.bluetooth_control("pause")
+Dừng phát:	Lib.bluetooth_control("stop")
+Bài tiếp theo Next:	Lib.bluetooth_control("next")
+Bài trước đó Pre:	Lib.bluetooth_control("previous")
+Tăng âm lượng:		Lib.bluetooth_control("volume_up")
+Giảm âm lượng:		Lib.bluetooth_control("volume_down")
+
+Kết nối thiết bị:	Lib.bluetooth_control("connect")
+Ngắt kết nối thiết bị:	Lib.bluetooth_control("disconnect")
+Bật SoftVolume:		Lib.bluetooth_control("softvolume_on")
+Tắt SoftVolume:		Lib.bluetooth_control("softvolume_off")
+
+Mute:		Lib.bluetooth_control("mute")
+UnMute:		Lib.bluetooth_control("unmute")
+Âm lượng tối đa:	Lib.bluetooth_control("volume_max")
+Đặt âm lượng theo %(0-100):	Lib.bluetooth_control("volume_set", value=50)
+
+Lấy trạng thái bật tắt sử dụng SoftVolume:	Lib.bluetooth_get("softvolume")
+Lấy âm lượng hiện tại:	Lib.bluetooth_get("volume")
+
+
+
+{"action":"play"}
+{"action":"pause"}
+{"action":"stop"}
+{"action":"next"}
+{"action":"previous"}
+{"action":"volume_up"}
+{"action":"volume_down"}
+
+{"action":"connect"}
+{"action":"disconnect"}
+
+{"action":"softvolume"}
+{"action":"softvolume","value":"on"}
+{"action":"softvolume","value":"off"}
+
+{"action":"volume"}
+{"action":"volume","value":80}
+
+{"action":"mute"}
+{"action":"unmute"}
+
+{"action":"volume_max"}
+
+
+
+lấy path pcm đang chạy:
+$:> busctl tree org.bluealsa | grep a2dpsnk/source
+
+Ngắt kết nối:
+	busctl call org.bluez \
+	/org/bluez/hci0/dev_08_87_C7_DB_05_5C \
+	org.bluez.Device1 \
+	Disconnect
+
+	hoặc: $:> bluetoothctl disconnect 08:87:C7:DB:05:5C
+
+
+
+pi@VBot-Assistant:~ $ busctl introspect org.bluealsa \
+> /org/bluealsa/hci0/dev_08_87_C7_DB_05_5C/a2dpsnk/source \
+> org.bluealsa.PCM1
+NAME                TYPE      SIGNATURE RESULT/VALUE                            FLAGS
+.GetCodecs          method    -         a{sa{sv}}                               -
+.Open               method    -         hh                                      -
+.SelectCodec        method    sa{sv}    -                                       -
+.ChannelMap         property  as        2 "FL" "FR"                             emits-change
+.Channels           property  y         2                                       emits-change
+.ClientDelay        property  n         6674                                    emits-change writab>
+.Codec              property  s         "AAC"                                   emits-change
+.CodecConfiguration property  ay        6 128 1 4 131 91 96                     emits-change
+.Delay              property  q         382                                     emits-change
+.Device             property  o         "/org/bluez/hci0/dev_08_87_C7_DB_05_5C" emits-change
+.Format             property  q         33296                                   emits-change
+.Mode               property  s         "source"                                emits-change
+.Rate               property  u         44100                                   emits-change
+.Running            property  b         true                                    emits-change
+.Sequence           property  u         0                                       emits-change
+.SoftVolume         property  b         false                                   emits-change writab>
+.Transport          property  s         "A2DP-sink"                             emits-change
+.Volume             property  ay        2 127 127                               emits-change writab>
+
+
+
+
+pi@VBot-Assistant:~ $ busctl introspect org.bluez \
+> /org/bluez/hci0/dev_08_87_C7_DB_05_5C
+NAME                                TYPE      SIGNATURE RESULT/VALUE                             FL>
+org.bluez.Device1                   interface -         -                                        -
+.CancelPairing                      method    -         -                                        -
+.Connect                            method    -         -                                        -
+.ConnectProfile                     method    s         -                                        -
+.Disconnect                         method    -         -                                        -
+.DisconnectProfile                  method    s         -                                        -
+.Pair                               method    -         -                                        -
+.Adapter                            property  o         "/org/bluez/hci0"                        em>
+.Address                            property  s         "08:87:C7:DB:05:5C"                      em>
+.AddressType                        property  s         "public"                                 em>
+.AdvertisingData                    property  a{yv}     -                                        em>
+.AdvertisingFlags                   property  ay        -                                        em>
+.Alias                              property  s         "iPhone 11 V\305\251 Tuy\341\273\203n"   em>
+.Appearance                         property  q         -                                        em>
+.Blocked                            property  b         false                                    em>
+NAME                                TYPE      SIGNATURE RESULT/VALUE                             FL>
+org.bluez.Device1                   interface -         -                                        -
+.CancelPairing                      method    -         -                                        -
+.Connect                            method    -         -                                        -
+.ConnectProfile                     method    s         -                                        -
+.Disconnect                         method    -         -                                        -
+.DisconnectProfile                  method    s         -                                        -
+.Pair                               method    -         -                                        -
+.Adapter                            property  o         "/org/bluez/hci0"                        em>
+.Address                            property  s         "08:87:C7:DB:05:5C"                      em>
+.AddressType                        property  s         "public"                                 em>
+.AdvertisingData                    property  a{yv}     -                                        em>
+.AdvertisingFlags                   property  ay        -                                        em>
+.Alias                              property  s         "iPhone 11 V\305\251 Tuy\341\273\203n"   em>
+.Appearance                         property  q         -                                        em>
+.Blocked                            property  b         false                                    em>
+.Class                              property  u         7995916                                  em>
+.Connected                          property  b         true                                     em>
+.Icon                               property  s         "phone"                                  em>
+.LegacyPairing                      property  b         false                                    em>
+.ManufacturerData                   property  a{qv}     -                                        em>
+.Modalias                           property  s         -                                        em>
+.Name                               property  s         "iPhone 11 V\305\251 Tuy\341\273\203n"   em>
+.Paired                             property  b         true                                     em>
+.RSSI                               property  n         -                                        em>
+.ServiceData                        property  a{sv}     -                                        em>
+.ServicesResolved                   property  b         false                                    em>
+.Trusted                            property  b         true                                     em>
+.TxPower                            property  n         -                                        em>
+.UUIDs                              property  as        4 "0000110a-0000-1000-8000-00805f9b34fb… em>
+.WakeAllowed                        property  b         -                                        em>
+org.bluez.MediaControl1             interface -         -                                        -
+.FastForward                        method    -         -                                        de>
+.Next                               method    -         -                                        de>
+
+pi@VBot-Assistant:~ $ ^C
+pi@VBot-Assistant:~ $ busctl introspect org.bluez /org/bluez/hci0/dev_08_87_C7_DB_05_5C org.bluez.MediaControl1
+NAME                    TYPE      SIGNATURE RESULT/VALUE FLAGS
+.FastForward            method    -         -            deprecated
+.Next                   method    -         -            deprecated
+.Pause                  method    -         -            deprecated
+.Play                   method    -         -            deprecated
+.Previous               method    -         -            deprecated
+.Rewind                 method    -         -            deprecated
+.Stop                   method    -         -            deprecated
+.VolumeDown             method    -         -            deprecated
+.VolumeUp               method    -         -            deprecated
+.Connected              property  b         true         emits-change
+.Player                 property  o         -            emits-change
+pi@VBot-Assistant:~ $

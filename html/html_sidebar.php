@@ -254,6 +254,12 @@
     </a>
   </li>
   <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="Runtime_Diagnostics.php">
+      <i class="bi bi-activity"></i>
+      <span>Chẩn đoán Runtime</span>
+    </a>
+  </li>
+  <li class="nav-item" onclick="loading('show')">
     <a class="nav-link collapsed" href="FAQ.php">
       <i class="bi bi-question-circle"></i>
       <span>Hướng Dẫn</span>

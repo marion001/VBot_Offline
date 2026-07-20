@@ -2033,6 +2033,90 @@
       "response": []
     },
     {
+      "name": "Loa Mute (Đa Nguồn Âm Thanh)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"audio_output\",\r\n    \"action\": \"mute\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Loa UnMute (Đa Nguồn Âm Thanh)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"audio_output\",\r\n    \"action\": \"unmute\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Loa Volume Change (Đa Nguồn Âm Thanh)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"audio_output\",\r\n    \"action\": \"volume\",\r\n    \"value\": 66\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "Đánh Thức Bot (Waku Up)",
       "request": {
         "method": "POST",

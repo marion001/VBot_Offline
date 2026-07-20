@@ -139,15 +139,20 @@ if (!empty($fileContent)) {
     $Config = null;
 }
 
+$phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
+
 if (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
-    //Bật Logs PHP
+    //Bật hiển thị và ghi toàn bộ lỗi PHP vào log chung của VBot.
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
+    ini_set('log_errors', 1);
+    ini_set('error_log', $phpErrorLog);
     error_reporting(E_ALL);
 } else {
-    //Tắt Logs PHP
+    //Tắt hiển thị và ghi lỗi PHP theo cấu hình WebUI.
     ini_set('display_errors', 0);
     ini_set('display_startup_errors', 0);
+    ini_set('log_errors', 0);
     error_reporting(0);
 }
 
@@ -178,7 +183,7 @@ $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['ac
 
 //Cổng port của đường API
 $Port_API = $Config['api']['port'];
-$Port_Server_Streaming_Audio_UDP = $Config['api']['streaming_server']['protocol']['udp_sock']['port'];
+//$Port_Server_Streaming_Audio_UDP = null;
 $Port_Server_Streaming_Audio_Socket = $Config['api']['streaming_server']['protocol']['socket']['port'];
 
 $API_AUTH_KEY = $Config['api']['auth']['api_key'];

@@ -1214,15 +1214,29 @@ function update_index_data(data){
             document.getElementById('airplay_active').checked = data.media_player.airplay_active ? true : false;
             document.getElementById('bluetooth_active').checked = data.bluetooth.active ? true : false;
 			renderBluetoothStatus(data.bluetooth);
+			const media = data.media_player || {};
+			const audioOutput = data.audio_output || {};
+			const mediaSourceKind = media.source_kind || (
+				media.airplay_playing === true ? 'airplay' :
+				data.bluetooth?.playing === true ? 'bluetooth' :
+				(media.audio_playing === true || media.pause_media_flag === true) ? 'local_media' : 'idle'
+			);
+			const mediaPlaybackState = media.playback_state || (
+				media.pause_media_flag === true ? 'paused' :
+				(media.audio_playing === true || media.airplay_playing === true || data.bluetooth?.playing === true)
+					? 'playing' : 'idle'
+			);
+			const mediaIsPlaying = mediaPlaybackState === 'playing';
+			const mediaIsPaused = mediaPlaybackState === 'paused';
             //Media Player
 			document.getElementById('media-name').innerHTML =
 				'Tên bài hát: <font color="blue">' +
 				(
-					data.media_player.airplay_playing === true
+					mediaSourceKind === 'airplay'
 						? (
-							data.media_player.airplay_song_name &&
-							String(data.media_player.airplay_song_name).trim() !== 'N/A'
-								? data.media_player.airplay_song_name
+							media.airplay_song_name &&
+							String(media.airplay_song_name).trim() !== 'N/A'
+								? media.airplay_song_name
 								: 'N/A'
 						)
 						: (
@@ -1243,12 +1257,12 @@ function update_index_data(data){
 										}
 									}
 								}
-								return btName ||
+								return (mediaSourceKind === 'bluetooth' ? btName : null) ||
 									(
-										(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
-											&& data.media_player.media_name &&
-											String(data.media_player.media_name).trim() !== 'N/A'
-											? data.media_player.media_name
+										(mediaIsPlaying || mediaIsPaused)
+											&& media.media_name &&
+											String(media.media_name).trim() !== 'N/A'
+											? media.media_name
 											: 'N/A'
 									);
 							})()
@@ -1256,22 +1270,22 @@ function update_index_data(data){
 				) +
 				'</font>';
 
-			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (data.media_player.audio_playing === true || data.bluetooth.playing === true || data.media_player.airplay_playing === true ? 'Đang phát' : (data.media_player.pause_media_flag === true ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
+			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (mediaIsPlaying ? 'Đang phát' : (mediaIsPaused ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
 			//Cập nhật nguồn phát nhạc
 			document.getElementById('audio-source').innerHTML =
 				'Nguồn Phát: <font color=blue>' +
 				(
-					data.bluetooth?.playing === true
+					mediaSourceKind === 'bluetooth'
 						? ('<i class="bi bi-bluetooth"></i>' + (data.bluetooth.device_name ? ' - ' + data.bluetooth.device_name : ''))
 						: (
-							data.media_player.airplay_playing === true
+							mediaSourceKind === 'airplay'
 								? 'AirPlay'
 								: (
-									(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+									(mediaIsPlaying || mediaIsPaused)
 										? (
-											data.media_player.media_player_source &&
-											String(data.media_player.media_player_source).trim() !== 'N/A'
-												? data.media_player.media_player_source
+											media.media_player_source &&
+											String(media.media_player_source).trim() !== 'N/A'
+												? media.media_player_source
 												: 'Local Audio'
 										)
 										: 'N/A'
@@ -1283,13 +1297,13 @@ function update_index_data(data){
             //Cập nhật ảnh cover bài hát
 			document.getElementById('media-cover').src =
 			(
-				data.bluetooth?.playing === true && data.bluetooth?.is_connected === true
+				mediaSourceKind === 'bluetooth' && data.bluetooth?.is_connected === true
 					? 'assets/img/bluetooth_icon.png'
 					: (
-						data.media_player.airplay_playing === true
+						mediaSourceKind === 'airplay'
 							? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
 							: (
-								(data.media_player.audio_playing === true || data.media_player.pause_media_flag === true)
+								(mediaIsPlaying || mediaIsPaused)
 									? (
 										data.media_player.media_player_source === 'Local' &&
 										(!data.media_player.media_cover ||
@@ -1304,7 +1318,7 @@ function update_index_data(data){
 			);
             //Cập nhật giá trị full time
             fullTime = data.media_player.full_time;
-            if (data.media_player.audio_playing || data.media_player.airplay_playing || data.bluetooth.playing) {
+            if (mediaIsPlaying || mediaIsPaused) {
               updateDisplay_SongNhac(true);
             } else {
               updateDisplay_SongNhac(false);
@@ -1330,7 +1344,7 @@ function update_index_data(data){
             }
             //Cập nhật thanh trượt chỉ khi không đang hover
             if (!isHovering_volume_slide) {
-              set_Volume_HTML(data.volume);
+              set_Volume_HTML(audioOutput.volume ?? data.volume);
             }
             if (!isHovering) {
               //Cập nhật volume khi chuột không trong vùng của nó

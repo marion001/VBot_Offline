@@ -1,0 +1,108 @@
+$:> sudo apt-get update
+$:> sudo apt-get install -y autoconf automake libtool
+
+- cài libfdk-aac-dev FDK-AAC từ source trước rồi mới build BlueALSA.
+	$:> git clone https://github.com/mstorsjo/fdk-aac.git
+	$:> cd fdk-aac
+	$:> autoreconf -fiv
+	$:> ./configure --prefix=/usr
+	$:> make -j2
+	$:> sudo make install
+	$:> sudo ldconfig
+	
+	- Kiểm tra:
+		$:> pkg-config --modversion fdk-aac
+		- Hoặc Lệnh:
+			$:> ls /usr/lib*/pkgconfig/fdk-aac.pc
+
+- Cài BlueALSA:
+	$:> git clone https://github.com/arkq/bluez-alsa.git
+	$:> cd ~/bluez-alsa
+
+	$:> sudo apt update && sudo apt install -y \
+		git build-essential automake autoconf libtool pkg-config \
+		libasound2-dev libbluetooth-dev libglib2.0-dev \
+		libsbc-dev libreadline-dev libsystemd-dev
+	$:> autoreconf --install
+	$:> ./configure \
+		--enable-aac \
+		--enable-cli \
+		--enable-rfcomm \
+		--enable-systemd
+	$:> make -j2
+	$:> sudo make install
+	$:> sudo ldconfig
+	- Khi Build thành công BlueALSA chạy lệnh sau để kiểm tra:
+		$:> bluealsad -V
+		$:> bluealsad --help
+
+- Tạo file bluealsa.service để khởi động cùng hệ thống:
+	$:> sudo nano /etc/systemd/system/bluealsa.service
+	
+		[Unit]
+		Description=BlueALSA daemon
+		Wants=bluetooth.service
+		After=bluetooth.service dbus.service systemd-udevd.service
+
+		[Service]
+		Type=simple
+		ExecStart=/usr/bin/bluealsad -p a2dp-sink --keep-alive=5
+		Restart=on-failure
+		RestartSec=3
+		StartLimitIntervalSec=0
+
+		[Install]
+		WantedBy=multi-user.target
+
+- Tạo service file vbot-bluetooth-agent.service để khởi động cùng hệ thống:
+	$:> sudo nano /etc/systemd/system/vbot-bluetooth-agent.service
+
+		[Unit]
+		Description=VBot Bluetooth DBus Agent
+		Documentation=https://github.com/marion001/VBot_Offline
+
+		Wants=bluetooth.service dbus.service bluealsa.service
+		After=bluetooth.service dbus.service bluealsa.service systemd-udevd.service
+
+		Requires=bluetooth.service
+
+		[Service]
+		Type=simple
+
+		# chạy Python trực tiếp
+		ExecStart=/usr/bin/python3 /usr/local/bin/bluetooth_agent.py
+
+		# restart nếu crash
+		Restart=always
+		RestartSec=2
+
+		# DBus + GLib
+		Environment=PYTHONUNBUFFERED=1
+		Environment=DBUS_SYSTEM_BUS_ADDRESS=unix:path=/var/run/dbus/system_bus_socket
+
+		# chạy dưới root để access BlueZ full quyền
+		User=root
+		Group=root
+
+		# tránh treo systemd khi GLib loop lỗi
+		KillMode=process
+		TimeoutStopSec=10
+
+		[Install]
+		WantedBy=multi-user.target
+
+- Nạp lại systemd:
+	$:> sudo systemctl daemon-reload
+
+- Bật tự khởi động 2 service vừa tạo:
+	$:> sudo systemctl enable bluealsa.service
+	$:> sudo systemctl enable vbot-bluetooth-agent.service
+
+- Khởi động ngay 2 service vừa tạo:
+	$:> sudo systemctl start bluealsa.service
+	$:> sudo systemctl start vbot-bluetooth-agent.service
+
+- Kiểm tra:
+	$:> systemctl status bluealsa.service
+	$:> sudo systemctl status vbot-bluetooth-agent.service
+	

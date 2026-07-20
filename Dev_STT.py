@@ -56,8 +56,10 @@ async def dev_stt():
                 Lib.show_log(f'[DEV STT] Đã dừng thu âm sau: {maximum_recording_time} giây', color=Lib.Color.YELLOW)
                 break
 
-            #Để lấy dữ liệu âm thanh từ Mic bắt buộc phải sử dụng là: Lib.recorder.read()
-            audio_frame = Lib.recorder.read()
+            #Mọi dữ liệu mic phải đi qua cổng đọc chung để tránh native read đồng thời.
+            audio_frame = Lib.read_recorder_frame(owner="dev_stt")
+            if audio_frame is None:
+                break
 
             if any(audio_frame):
                 last_audio_time = time.time()
@@ -118,7 +120,11 @@ async def dev_stt():
             single_utterance=True   #Kích hoạt chế độ ngắt tự động khi phát hiện dừng nói (True = Bật, False = Tắt)
         )
         requests = audio_generator()
-        responses = await Lib.asyncio.to_thread(client.streaming_recognize, streaming_config, requests)
+        # Google trả về lazy iterator; ép duyệt iterator trong worker thread để
+        # việc chờ Mic/Network không khóa event loop.
+        responses = await Lib.asyncio.to_thread(
+            lambda: list(client.streaming_recognize(streaming_config, requests))
+        )
         for response in responses:
             for result in response.results:
 

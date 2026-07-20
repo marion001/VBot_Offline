@@ -204,7 +204,7 @@ class RPiId:
 
     
     def getNewCpuId(self):
-        out = subprocess.run('cat /proc/cpuinfo | grep "Serial\|Revision\|Hardware"', shell=True,capture_output=True,encoding='utf-8',text=True).stdout
+        out = subprocess.run(r'cat /proc/cpuinfo | grep "Serial\|Revision\|Hardware"', shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         matches = re.findall(r"^(Hardware|Revision|Serial)\s+:\s(.+)", out,re.M)  
         use_id = "".join([x[1] for x in matches])
         if len(use_id) ==0: return None
@@ -216,7 +216,7 @@ class RPiId:
         str = subprocess.run("cat /proc/cpuinfo | grep Serial", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         if len(str) > 0 :
             #this stirps the leading zeros if any
-            cpu_id = re.findall(':\s*(\S+)', str)
+            cpu_id = re.findall(r':\s*(\S+)', str)
         if len(cpu_id) == 1:
             return cpu_id[0] if len(cpu_id[0]) > 0 else None
         else: 
@@ -279,7 +279,7 @@ class RPiId:
         """
         str = subprocess.run("bluetoothctl list", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         #this finds all interfaces but ignores lo
-        mac = re.findall('^Controller\s+([0-9A-Fa-f:-]+)\s+', str)
+        mac = re.findall(r'^Controller\s+([0-9A-Fa-f:-]+)\s+', str)
         if len(mac) == 1:
             if len(mac[0]) > 0 : 
                 return mac[0]

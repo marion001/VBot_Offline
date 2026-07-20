@@ -42,21 +42,11 @@
             "active": false,
             "connection_protocol": "socket",
             "protocol": {
-                "udp_sock": {
-                    "port": 5003,
-                    "maximum_recording_time": 6,
-                    "maximum_client_connected": 3,
-                    "time_remove_inactive_clients": 900,
-                    "source_stt": "stt_default",
-                    "working_mode": "main_processing",
-                    "select_wakeup": "porcupine",
-                    "client_conversation_mode": true,
-                    "data_client_name": "Data_VBot_Client.json"
-                },
                 "socket": {
                     "port": 5003,
                     "maximum_recording_time": 5,
                     "maximum_client_connected": 3,
+                    "max_concurrent_stt": 2,
                     "source_stt": "stt_ggcloud",
                     "select_wakeup": "snowboy",
                     "client_conversation_mode": true,
@@ -816,12 +806,14 @@
                     "password": "",
                     "publish_topic": "",
                     "subscribe_topic": ""
-                }
+                },
+                "ota_config_source": "https://api.tenclass.net/xiaozhi/ota/"
             }
         },
         "fake_mac": {
             "active": false,
             "address": "ee:29:06:d4:b9:4a"
-        }
+        },
+        "pcm_output_gain": 0.3
     }
 }

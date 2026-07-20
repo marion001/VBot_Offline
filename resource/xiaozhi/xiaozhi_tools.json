@@ -35,7 +35,7 @@
         },
         {
             "name": "_VBot_Led_Brightness",
-            "active": true,
+            "active": false,
             "description": "Điều chỉnh độ sáng của đèn LED trên loa VBot — có thể tăng, giảm, hoặc đặt trực tiếp giá trị từ 0 đến 100.",
             "inputSchema": {
                 "type": "object",
@@ -165,7 +165,7 @@
             "description": "Trả về thông tin Mạng WiFi, địa chỉ IP hiện tại của thiết bị nếu có yêu cầu. MCP này không cần tham số đầu vào, đọc thông tin liền mạch không được ngắt câu hoặc ngắt từ",
             "inputSchema": {
                 "type": "object",
-                "properties": {},
+                "properties": [],
                 "required": []
             }
         }

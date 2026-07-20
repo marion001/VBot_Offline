@@ -337,26 +337,33 @@ include 'html_head.php';
         .then(data => {
           if (data.success) {
             document.getElementById('div_message_error').style.display = 'none';
+			const audioOutput = data.audio_output || {};
+			const mediaSourceKind = audioOutput.source_kind || data.source_kind || (data.airplay_playing === true ? 'airplay' : (data.audio_playing ? 'local_media' : 'idle'));
+			const mediaPlaybackState = audioOutput.playback_state || data.playback_state || (data.audio_playing || data.airplay_playing ? 'playing' : 'idle');
+			const mediaIsPlaying = mediaPlaybackState === 'playing';
+			const mediaIsPaused = mediaPlaybackState === 'paused';
             //Media Player
 			document.getElementById('media-name').innerHTML =
 			  'Tên bài hát: <font color="blue">' +
 			  ((!data.media_name || String(data.media_name).trim() === 'N/A')
-				? (data.airplay_playing === true
+				? (mediaSourceKind === 'airplay'
 					? (data.airplay_song_name && String(data.airplay_song_name).trim() !== 'N/A'
 						? data.airplay_song_name
 						: 'N/A')
 					: 'N/A')
 				: data.media_name) +
 			  '</font>';
-            document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + data.volume + '%</font>';
-			document.getElementById('audio-playing').innerHTML = 'Đang phát: <font color=blue>' + (data.audio_playing ? 'Có' : data.airplay_playing ? 'Có' : 'Không') + '</font>';
-			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player_source === 'N/A' ? (data.airplay_playing === true ? 'AirPlay' : 'N/A') : data.media_player_source) +'</font>';
+            document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + (audioOutput.volume ?? data.volume) + '%</font>';
+			document.getElementById('audio-playing').innerHTML = 'Trạng thái: <font color=blue>' + (mediaIsPlaying ? 'Đang phát' : (mediaIsPaused ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
+			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player_source === 'N/A' ? (mediaSourceKind === 'airplay' ? 'AirPlay' : 'N/A') : data.media_player_source) +'</font>';
 			document.getElementById('media-cover').src =
-				(data.audio_playing
+				(mediaSourceKind === 'bluetooth'
+					? 'assets/img/bluetooth_icon.png'
+					: (mediaIsPlaying || mediaIsPaused) && mediaSourceKind !== 'airplay'
 					? (data.media_player_source === 'Local' && !data.media_cover
 						? 'assets/img/icon_audio_local.png'
 						: (data.media_cover || 'assets/img/Error_Null_Media_Player.png'))
-					: data.airplay_playing
+					: mediaSourceKind === 'airplay'
 						? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
 						: 'assets/img/Error_Null_Media_Player.png'
 				);
@@ -370,7 +377,7 @@ include 'html_head.php';
               let timeInfo = document.getElementById('time-info');
               timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(data.current_duration) + '</font> / ' + formatTime_Player(fullTime);
             }
-            if (data.audio_playing || data.airplay_playing) {
+            if (mediaIsPlaying || mediaIsPaused) {
               updateDisplay_SongNhac(true);
             } else {
               updateDisplay_SongNhac(false);

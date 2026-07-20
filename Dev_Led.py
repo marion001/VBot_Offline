@@ -81,7 +81,7 @@ def LED_LOADING():
     while Lib.led_effect_active:
         if Lib.current_led_effect != "LOADING":
             break
-        strip.setBrightness(LED_BRIGHTNESS)
+        strip.setBrightness(Lib.led_brightness)
         #Chia số lượng led thành 2 nửa
         for j in range(num_pixels // 2):
             if Lib.current_led_effect != "LOADING":
@@ -152,7 +152,7 @@ def LED_MUTE(color_hex=Lib.config['smart_config']['led']['effect']['led_mute']):
     while Lib.led_effect_active:
         if Lib.current_led_effect != "MUTE":
             break
-        strip.setBrightness(LED_BRIGHTNESS)
+        strip.setBrightness(Lib.led_brightness)
         for i in range(strip.numPixels()):
             if Lib.current_led_effect != "MUTE":
                 break
@@ -174,7 +174,7 @@ def LED_ERROR():
     while Lib.led_effect_active:
         if Lib.current_led_effect != "ERROR":
             break
-        strip.setBrightness(LED_BRIGHTNESS)
+        strip.setBrightness(Lib.led_brightness)
         for i in range(strip.numPixels()):
             strip.setPixelColor(i, Color(255, 0, 0))
             strip.show()
@@ -224,7 +224,7 @@ def LED_PAUSE():
     while Lib.led_effect_active:
         if Lib.current_led_effect != "PAUSE":
             break
-        strip.setBrightness(LED_BRIGHTNESS)
+        strip.setBrightness(Lib.led_brightness)
         hue = Lib.random.randint(0, 360)
         for brightness in range(0, 256, 5):
             if Lib.current_led_effect != "PAUSE":
@@ -260,7 +260,7 @@ def LED_SPEAK():
     while Lib.led_effect_active:
         if Lib.current_led_effect != "SPEAK":
             break
-        strip.setBrightness(LED_BRIGHTNESS)
+        strip.setBrightness(Lib.led_brightness)
         #Sử Dụng reversed QUAY NGƯỢC LẠI hiệu ứng LOADING
         for j in reversed(range(num_pixels // 2)):
             if Lib.current_led_effect != "SPEAK":
@@ -342,6 +342,7 @@ def LED_STARTUP():
 
 #Led khi âm lượng được thay đổi volume_change sẽ là giá trị âm lượng được truyền vào hàm có giá trị từ 0 tới 100
 def LED_VOLUME(volume_change):
+    strip.setBrightness(Lib.led_brightness)
     def wheel(pos):
         if pos < 85:
             return Color(pos * 3, 255 - pos * 3, 0)

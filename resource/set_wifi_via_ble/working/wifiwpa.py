@@ -325,7 +325,7 @@ class WPAConf:
             try:
                 #this also works for Network Manager implementations.
                 data = subprocess.run("wpa_cli -i wlan0 signal_poll", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
-                signal = re.findall('RSSI=(.*?)\s', data, re.DOTALL)
+                signal = re.findall(r'RSSI=(.*?)\s', data, re.DOTALL)
                 Log.log(f'connected network signal strength: {int(signal[0])}')
                 signal_strength = WifiUtil.signal(int(signal[0]))
             except Exception as e:
@@ -386,7 +386,7 @@ class WPAConf:
         network_number = -1
         out = subprocess.run("wpa_cli -i wlan0 list_networks", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         Log.log(out)
-        ssids = re.findall('(\d+)\s+([^\s]+)', out, re.DOTALL)  #\s+([^\s]+)
+        ssids = re.findall(r'(\d+)\s+([^\s]+)', out, re.DOTALL)  #\s+([^\s]+)
         #ssids is returned as: [('0', 'BELL671'), ('1', 'nksan')] - network number, ssid
         #no need to read network numbers as they are incremented started at 0
         #IMPORTANT:
@@ -992,7 +992,7 @@ class WpaSupplicant:
             #out = subprocess.run(f'wpa_passphrase {ssid} {pw}',
             out = subprocess.run(["wpa_passphrase",f'{ssid}',f'{pw}'],
                             capture_output=True,encoding='utf-8',text=True).stdout
-            temp_psk = re.findall('(psk=[^\s]+)\s+\}', out, re.DOTALL)
+            temp_psk = re.findall(r'(psk=[^\s]+)\s+\}', out, re.DOTALL)
             if len(temp_psk)>0: 
                 psk = temp_psk[0]
         Log.log(f'psk from get_psk: {psk}')

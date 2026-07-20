@@ -441,7 +441,7 @@ class WPAConf:
             try:
                 #this also works for Network Manager implementations.
                 data = subprocess.run("wpa_cli -i wlan0 signal_poll", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
-                signal = re.findall('RSSI=(.*?)\s', data, re.DOTALL)
+                signal = re.findall(r'RSSI=(.*?)\s', data, re.DOTALL)
                 mLOG.log(f'connected network signal strength: {int(signal[0])}')
                 signal_strength = WifiUtil.signal(int(signal[0]))
             except Exception as e:
@@ -502,7 +502,7 @@ class WPAConf:
         network_number = -1
         out = subprocess.run("wpa_cli -i wlan0 list_networks", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         mLOG.log(out)
-        ssids = re.findall('(\d+)\s+([^\s]+)', out, re.DOTALL)  #\s+([^\s]+)
+        ssids = re.findall(r'(\d+)\s+([^\s]+)', out, re.DOTALL)  #\s+([^\s]+)
         #ssids is returned as: [('0', 'BELL671'), ('1', 'nksan')] - network number, ssid
         #no need to read network numbers as they are incremented started at 0
         #IMPORTANT:
@@ -1108,7 +1108,7 @@ class WpaSupplicant:
             #out = subprocess.run(f'wpa_passphrase {ssid} {pw}',
             out = subprocess.run(["wpa_passphrase",f'{ssid}',f'{pw}'],
                             capture_output=True,encoding='utf-8',text=True).stdout
-            temp_psk = re.findall('(psk=[^\s]+)\s+\}', out, re.DOTALL)
+            temp_psk = re.findall(r'(psk=[^\s]+)\s+\}', out, re.DOTALL)
             if len(temp_psk)>0: 
                 psk = temp_psk[0]
         mLOG.log(f'psk from get_psk: {psk}')
@@ -1588,7 +1588,7 @@ class RPiId:
 
     
     def getNewCpuId(self):
-        out = subprocess.run('cat /proc/cpuinfo | grep "Serial\|Revision\|Hardware"', shell=True,capture_output=True,encoding='utf-8',text=True).stdout
+        out = subprocess.run(r'cat /proc/cpuinfo | grep "Serial\|Revision\|Hardware"', shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         matches = re.findall(r"^(Hardware|Revision|Serial)\s+:\s(.+)", out,re.M)  
         use_id = "".join([x[1] for x in matches])
         if len(use_id) ==0: return None
@@ -1600,7 +1600,7 @@ class RPiId:
         str = subprocess.run("cat /proc/cpuinfo | grep Serial", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         if len(str) > 0 :
             #this stirps the leading zeros if any
-            cpu_id = re.findall(':\s*(\S+)', str)
+            cpu_id = re.findall(r':\s*(\S+)', str)
         if len(cpu_id) == 1:
             return cpu_id[0] if len(cpu_id[0]) > 0 else None
         else: 
@@ -1663,7 +1663,7 @@ class RPiId:
         """
         str = subprocess.run("bluetoothctl list", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         #this finds all interfaces but ignores lo
-        mac = re.findall('^Controller\s+([0-9A-Fa-f:-]+)\s+', str)
+        mac = re.findall(r'^Controller\s+([0-9A-Fa-f:-]+)\s+', str)
         if len(mac) == 1:
             if len(mac[0]) > 0 : 
                 return mac[0]

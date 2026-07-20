@@ -16,6 +16,8 @@ import Lib
 import Led
 import TTS_Processing
 import Def_Processing
+
+_DEV_PROCESSING_OWNER = "dev_processing"
 from Media_Player import media_player
 
 def tts_client_url(filename):
@@ -131,11 +133,24 @@ def dev_finish_processing():
             media_player.Play_Sound(Lib.Sound_Finish)   #Phát âm thanh nội bộ khi xử lý xong dữ liệu
         Led.LED("OFF")  #Tắt Đèn LED
     #Gắn Cờ False Báo Hệ Thống Đã Xử LÝ Xong Dữ Liệu (True = Đang Xử Lý, False Không Xử Lý)
-    Lib.main_vbot_processing = False
+    Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)
+
+
+async def dev_finish_processing_async():
+    """Async-safe finish path used by the built-in developer workflow."""
+    if Lib.xiaozhi_flag_media_request:
+        Lib.conversation_mode_flag = False
+        Lib.xiaozhi_flag_media_request = None
+    else:
+        Lib.conversation_mode_flag = bool(Lib.conversation_mode)
+        if not Lib.conversation_mode:
+            await media_player.play_sound_async(Lib.Sound_Finish)
+        Led.LED("OFF")
+    Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)
 
 #Xử lý cache TTS và phát luôn âm thanh nếu có (Mẫu Demo)
 #Giữ nguyên hàm này, không được sửa
-async def dev_handle_cache_tts(msg_text):
+async def dev_handle_cache_tts(msg_text, finish_processing=True):
     if not msg_text or not isinstance(msg_text, str):
         return False
     tts_key = Lib.tts_string(msg_text)  #Lib.tts_string(msg_text) tạo tên file âm thanh tts bằng kết quả text được xử lý các ký tự
@@ -148,7 +163,12 @@ async def dev_handle_cache_tts(msg_text):
         if not tts_data:
             #Chuyển văn bản thành âm thanh TTS
             tts_data = await TTS_Processing.Select_TTS_async(msg_text)
-        Lib.main_vbot_processing = False
+        if not tts_data:
+            if finish_processing:
+                Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)
+            return False
+        if finish_processing:
+            Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)
         #Phát TTS
         return await media_player.play_answer_async(tts_data)
 
@@ -169,7 +189,8 @@ async def dev_handle_cache_tts(msg_text):
             if mp3_file:
                 result_url = tts_client_url(mp3_file)
     Lib.tts_client_result = result_url  #Trả dữ liệu File âm thanh Về Client để Client phát TTS
-    Lib.main_vbot_processing = False    #Gắn Cờ False Báo Hệ Thống Đã Xử LÝ Xong Dữ Liệu (True = Đang Xử Lý, False Không Xử Lý)
+    if finish_processing:
+        Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)
     return result_url
 
 #Xử lý các lệnh yêu cầu điều khiển hệ thống
@@ -191,15 +212,10 @@ async def dev_execute_value_key_sys(command_input: str):
 
 #Cần Giữ Nguyên Tên Hàm: async def dev_processing(text_input):
 #Mọi Thay Đổi Code cần được xử lý bên trong hàm này nhé
-async def dev_processing(text_input):
+async def _dev_processing_impl(text_input):
     print(f"[DEV Processing] Dữ liệu văn bản từ STT truyền vào để xử lý: {text_input}")
     
     #Gắn Cờ Cho Chương Trình Đang Xử Lý Dữ Liệu (True = Đang Xử Lý, False Không Xử Lý)
-    Lib.main_vbot_processing = True
-    
-    #Chạy Led Loading (Hiệu Ứng Đang Xử Lý Dữ Liệu)
-    Led.LED("LOADING")
-    
     #Chuyển Văn Bản Thành Chữ thường Để Xử Lý Dữ Liệu
     text_input_lower = text_input.lower()
 
@@ -217,10 +233,10 @@ async def dev_processing(text_input):
             Lib.show_log(f"[Custom HomeAssistant] {msg_text}", color=Lib.Color.GREEN)
             
             #Gọi kiểm tra và phát tts
-            await dev_handle_cache_tts(msg_text)
+            await dev_handle_cache_tts(msg_text, finish_processing=False)
             
             #Kiểm tra xử lý cuối => quay về chờ được đánh thức (Chỉ sử dụng khi muốn quay về chờ được đánh thức, đặt trên dòng return)
-            dev_finish_processing()
+            await dev_finish_processing_async()
             
             #Sử dụng return Quay về chờ đánh thức, không chạy tiếp code bên dưới nữa vì đã xử lý xong ở Custom Home Asistant
             return True
@@ -245,8 +261,8 @@ async def dev_processing(text_input):
                 else:
                     msg_text = f"[DEV Customization] Đã gửi lệnh Remote '{cmd_info['command_name']}' thành công"
                 Lib.show_log(f"[DEV Customization] Broadlink Remote {msg_text}", color=Lib.Color.GREEN)
-                await dev_handle_cache_tts(msg_text)
-                dev_finish_processing()
+                await dev_handle_cache_tts(msg_text, finish_processing=False)
+                await dev_finish_processing_async()
                 return True
             except Exception as e:
                 Lib.show_log(f"[Broadlink Remote] Lỗi gửi lệnh: {e}", color=Lib.Color.RED)
@@ -267,7 +283,7 @@ async def dev_processing(text_input):
             if Lib.conversation_mode:   #Nếu Chế Độ Hội Thoại/Trò Chuyện Liên Tục được bật
                 Lib.conversation_mode_flag = True   #Đặt giá trị Lib.conversation_mode_flag = True để tự động đánh thức Wake UP
             Led.LED("OFF")
-            Lib.main_vbot_processing = False    #Gắn Cờ Cho Chương Trình Đang Xử Lý Dữ Liệu (True = Đang Xử Lý, False Không Xử Lý)
+            Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)    #Gắn Cờ Cho Chương Trình Đang Xử Lý Dữ Liệu (True = Đang Xử Lý, False Không Xử Lý)
 
             #Sử dụng return Quay về chờ đánh thức, không chạy tiếp code bên dưới nữa vì đã xử lý xong ở Custom Skill
             return True
@@ -295,7 +311,11 @@ async def dev_processing(text_input):
     """
     #Có thể xóa đoạn này nếu không sử dụng
     if Lib.config['voice_command_system']['active']:
-        result = Def_Processing.find_best_voice_command_sys(text_input_lower, Lib.voice_cmd_list_sys)
+        result = await Lib.asyncio.to_thread(
+            Def_Processing.find_best_voice_command_sys,
+            text_input_lower,
+            Lib.voice_cmd_list_sys,
+        )
         if result:
             if await dev_execute_value_key_sys(result["value_key"]):
                 return True
@@ -308,7 +328,7 @@ async def dev_processing(text_input):
     #Bạn Có Thể Xử Lý Dữ Liệu Theo ý Muốn Ở Đây (xử lý điều khiển nhà thông minh, xử lý phát nhạc, gọi các API, V..v....)
     """
     #Ví Dụ phát tts văn bản đó và hiển thị
-    await dev_handle_cache_tts(text_input_lower)
+    await dev_handle_cache_tts(text_input_lower, finish_processing=False)
 
     #Hiển thị dữ liệu Logs
     Lib.show_log(f"[DEV Processing] Dữ liệu đã được xử lý xong: {text_input_lower}", color=Lib.Color.GREEN)
@@ -337,6 +357,7 @@ async def dev_processing(text_input):
 
     #Nếu có dữ liệu văn bản trả về từ trợ lý ảo in ra logs
     if Assistant_Text:
+        Lib.assistant_text_result = Assistant_Text
         Lib.show_log(f"[DEV Processing] {Assistant_Text}", color=Lib.Color.GREEN)
 
     #Kiểm tra nếu có dữ liệu âm thanh trả về từ trợ lý ảo
@@ -366,5 +387,15 @@ async def dev_processing(text_input):
                 Lib.tts_client_result = tts_client_url(tts_client)
 
     #Kiểm tra xử lý cuối => quay về chờ được đánh thức
-    dev_finish_processing()
+    await dev_finish_processing_async()
     return True
+
+
+async def dev_processing(text_input):
+    """Run developer processing without leaking the global busy state."""
+    Lib.mark_processing_busy(owner=_DEV_PROCESSING_OWNER)
+    Led.LED("LOADING")
+    try:
+        return await _dev_processing_impl(text_input)
+    finally:
+        Lib.finish_processing(owner=_DEV_PROCESSING_OWNER)
