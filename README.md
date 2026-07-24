@@ -38,7 +38,7 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 - Trợ lý mặc định của VBot.
 - Google Gemini, ChatGPT, XiaoZhi và các nguồn trợ lý được bật trong `Config.json`.
 - Home Assistant Assist và câu lệnh Home Assistant tùy chỉnh.
-- Các điểm mở rộng `Dev_*.py` dành cho logic cá nhân.
+- Các điểm mở rộng `Dev_*.py` dành cho logic cá nhân, (Người dùng, lập trình có thể tự code theo ý muốn).
 - Phân tích từ khóa thông qua `Action.json`, `Adverbs.json` và `Object.json`.
 
 ### Media và kết nối âm thanh
@@ -100,23 +100,22 @@ Các thành phần chính:
 | File | Vai trò |
 |---|---|
 | `Start.py` | Điểm khởi chạy chương trình. |
-| `VBot.py` | Vòng đời chính, hotword, microphone và cleanup. |
-| `Lib.py` | Cấu hình, trạng thái dùng chung, helper hệ thống, DBus và hàng đợi. |
-| `Assistant.py` | Điều phối trợ lý, STT/TTS và câu trả lời. |
-| `Data_Processing.py` | Phân tích nội dung và định tuyến lệnh. |
-| `Def_Processing.py` | Các hàm xử lý chức năng hệ thống/trợ lý. |
-| `STT_Processing.py` | Chọn và gọi nguồn Speech-to-Text. |
-| `TTS_Processing.py` | Chọn và gọi nguồn Text-to-Speech. |
-| `Media_Player.py` | Media player nội bộ và vòng đời phát nhạc. |
-| `Api.py` | REST API, SSE, MQTT, AirPlay DBus, diagnostics và watchdog. |
-| `Streaming.py` | WebSocket server, session client và streaming STT. |
-| `Bluetooth.py` | Theo dõi BlueZ, metadata và trạng thái Bluetooth. |
-| `Button.py` | Nút nhấn và rotary encoder. |
-| `Led.py` | Hiệu ứng LED và khôi phục trạng thái nghỉ. |
-| `Scheduler.py` | Lịch thông báo và tác vụ định kỳ. |
+| `VBot.cpython-39-arm-linux-gnueabihf.so` | Vòng đời chính, hotword, microphone và cleanup. |
+| `Lib.cpython-39-arm-linux-gnueabihf.so` | Cấu hình, trạng thái dùng chung, helper hệ thống, DBus và hàng đợi. |
+| `Assistant.cpython-39-arm-linux-gnueabihf.so` | Điều phối trợ lý, STT/TTS và câu trả lời. |
+| `Data_Processing.cpython-39-arm-linux-gnueabihf.so` | Phân tích nội dung và định tuyến lệnh. |
+| `Def_Processing.cpython-39-arm-linux-gnueabihf.so` | Các hàm xử lý chức năng hệ thống/trợ lý. |
+| `STT_Processing.cpython-39-arm-linux-gnueabihf.so` | Chọn và gọi nguồn Speech-to-Text. |
+| `TTS_Processing.cpython-39-arm-linux-gnueabihf.so` | Chọn và gọi nguồn Text-to-Speech. |
+| `Media_Player.cpython-39-arm-linux-gnueabihf.so` | Media player nội bộ và vòng đời phát nhạc. |
+| `Api.cpython-39-arm-linux-gnueabihf.so` | REST API, SSE, MQTT, AirPlay DBus, diagnostics và watchdog. |
+| `Streaming.cpython-39-arm-linux-gnueabihf.so` | WebSocket server, session client và streaming STT. |
+| `Bluetooth.cpython-39-arm-linux-gnueabihf.so` | Theo dõi BlueZ, metadata và trạng thái Bluetooth. |
+| `Button.cpython-39-arm-linux-gnueabihf.so` | Nút nhấn và rotary encoder. |
+| `Led.cpython-39-arm-linux-gnueabihf.so` | Hiệu ứng LED và khôi phục trạng thái nghỉ. |
+| `Scheduler.cpython-39-arm-linux-gnueabihf.so` | Lịch thông báo và tác vụ định kỳ. |
 | `html/` | WebUI PHP, JavaScript, CSS và tài nguyên giao diện. |
 | `resource/` | Âm thanh, service, script cài đặt và dữ liệu tích hợp. |
-| `tests/` | Bộ kiểm thử logic và hồi quy. |
 
 ### Nguyên tắc xử lý bất đồng bộ
 
@@ -135,7 +134,7 @@ Chờ từ khóa đánh thức
 Phát âm báo + cập nhật LED
         │
         ▼
-Thu âm ───── nhấn giữ nút ────► hủy thu âm, phát dong.mp3, về trạng thái chờ
+Thu âm ───── nhấn giữ nút ────► hủy thu âm, về trạng thái chờ
         │
         ▼
 STT → phân tích câu lệnh
@@ -148,16 +147,16 @@ STT → phân tích câu lệnh
         ▼
 TTS / phản hồi / LED
         │
-        └── tiếp tục nghe nếu bật conversation mode
+        └── tiếp tục nghe nếu bật chế độ hội thoại (conversation_mode)
 ```
 
 ## Audio, AirPlay và Bluetooth
 
 VBot có nhiều nguồn cùng sử dụng loa. Trạng thái được xuất qua API để xác định nguồn hiện tại:
 
-- `Local`: media player nội bộ.
-- `AirPlay`: Shairport Sync đang phát.
-- `Bluetooth`: thiết bị Bluetooth đang phát.
+- `Local`: media player nội bộ từ các nguồn nhạc, giải trí tích hợp sẵn.
+- `AirPlay`: AirPlay2 (Tương thích với hệ sinh thái Apple) đang phát.
+- `Bluetooth`: thiết bị Bluetooth (Kết nối phát nhạc từ điện thoại ra loa VBot thông qua Bluetooth) đang phát.
 - `N/A`: không có nguồn media xác định.
 
 ### Media nội bộ
