@@ -109,7 +109,7 @@ if (isset($_POST['start_recovery_config_json'])) {
 
 #Lưu lại các giá trị Config.json
 if (isset($_POST['all_config_save'])) {
-  error_log('[PHP Config] Bắt đầu xử lý yêu cầu lưu Config.json', 0);
+  #error_log('[PHP Config] Bắt đầu xử lý yêu cầu lưu Config.json', 0);
   if ($Config['backup_upgrade']['config_json']['active'] === true) {
     $dateTime = new DateTime();
     $newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
@@ -684,7 +684,7 @@ if (isset($_POST['all_config_save'])) {
 
   if ($result_ConfigJson !== false) {
     $messages[] = "Cấu hình đã được lưu thành công!";
-    error_log('[PHP Config] Đã lưu Config.json thành công (' . $result_ConfigJson . ' bytes)', 0);
+    #error_log('[PHP Config] Đã lưu Config.json thành công (' . $result_ConfigJson . ' bytes)', 0);
   } else {
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
     $lastError = error_get_last();

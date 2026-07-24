@@ -37,7 +37,7 @@ colorzero                    1.1
 cparser                      0.2.0
 cryptography                 3.3.2
 cupshelpers                  1.0
-Cython                       0.29.33
+Cython                       3.2.9
 dbus-python                  1.2.16
 deep-translator              1.11.4
 distro                       1.5.0

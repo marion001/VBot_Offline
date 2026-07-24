@@ -6,6 +6,8 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+date_default_timezone_set('Asia/Ho_Chi_Minh');
+
 #tăng giới hạn bộ nhớ cho PHP
 ini_set('memory_limit', '1G');
 ini_set('upload_max_filesize', '300M');
