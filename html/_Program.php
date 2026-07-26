@@ -356,7 +356,7 @@ include 'html_head.php';
             return $Backup_File_Name;
         } else {
             $messages[] = '<br/></font color=red>- Lỗi khi nén thư mục. Mã lỗi: ' . $returnCode . '</font>';
-            $messages[] = $output;
+            $messages[] = implode('<br>', $output);
             return null;
         }
     }

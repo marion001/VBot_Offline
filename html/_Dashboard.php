@@ -577,8 +577,9 @@ include 'html_head.php';
                                         $fileResponse = $service->files->listFiles(array('q' => $fileQuery, 'fields' => 'files(id, name, createdTime)'));
                                         $fileCount = count($fileResponse->files);
                                         $messages[] = "<font color=green>- Số tệp hiện tại trên Google Drive <b>$backupFolderName: $fileCount</b></font>";
-                                        if ($fileCount >= $Config['backup_upgrade']['google_cloud_drive']['limit_backup_files']) {
-                                            $messages[] = "<br/><font color=red>- Số lượng tệp tin sao lưu trên Google Drive vượt quá: <b>$Limit_Backup_Files</b> file</font>";
+                                        $limitBackupFiles = (int) $Config['backup_upgrade']['google_cloud_drive']['limit_backup_files'];
+                                        if ($fileCount >= $limitBackupFiles) {
+                                            $messages[] = "<br/><font color=red>- Số lượng tệp tin sao lưu trên Google Drive vượt quá: <b>$limitBackupFiles</b> file</font>";
                                             $oldestFile = null;
                                             foreach ($fileResponse->files as $file) {
                                                 if ($oldestFile === null || strtotime($file->createdTime) < strtotime($oldestFile->createdTime)) {
