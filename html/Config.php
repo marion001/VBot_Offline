@@ -3306,7 +3306,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_xiaozhiai">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_xiaozhiai" aria-expanded="false" aria-controls="collapse_button_xiaozhiai">
-                  Cấu Hình Bot/Trợ Lý XiaoZhi AI: <?php echo $Config['xiaozhi']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
+                  Cấu Hình Bot/Trợ Lý XiaoZhi AI (Hoặc Dùng Các Server Khác Tương Tự): <?php echo $Config['xiaozhi']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                 <div id="collapse_button_xiaozhiai" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_xiaozhiai">
 				<div class="alert alert-success" role="alert">
                   <?php
@@ -3320,13 +3320,13 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 						</div></div></div>";
                   echo "<div class='row mb-3'>
 					  <label class='col-sm-3 col-form-label'>MCP VBot System Control 
-						<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi tương tác ngược với hệ thống và chức năng của VBot thông qua MCP Có Sẵn Của VBot')\"></i> :
+						<i class='bi bi-question-circle-fill' onclick=\"show_message('Bật hoặc tắt để kích hoạt sử dụng XiaoZhi tương tác ngược với hệ thống và chức năng của VBot thông qua MCP Có Sẵn Của VBot, <a href=XiaoZhi_MCP.php>Vào Trang Quản Lý MCP Và Hướng Dẫn</a>')\"></i> :
 					  </label>
 					  <div class='col-sm-9'>
 						<div class='form-switch'>
 						  <input class='form-check-input border-success' type='checkbox' name='xiaozhi_ai_mcp_system' id='xiaozhi_ai_mcp_system' " . (!empty($Config['xiaozhi']['mcp_system_control']) ? 'checked' : '') . ">
 						</div></div></div>";
-                  echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/");
+                  echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/<hr/> Hoặc OTA Server: https://vietbot.vn/ota/ Trang Chủ: https://vietbot.vn/ ");
                   echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
                   echo input_field('xiaozhi_version_active', 'Phiên bản Firmware', $Config['xiaozhi']['version_active'] ?? '2.2.3', '', 'text', '', '', '', 'Phiên bản Version khi xác thực đăng ký và hiển thị trên trang chủ của XiaoZhi, Nhập bất kỳ phiên bản, văn bản nào cũng được', 'border-success', 'Lấy Phiên Bản Mới', "xiaozhi_getLatestVersion('')", 'btn btn-success border-success', 'onclick', '');
                   echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, '', 'number', '0.1', '', '', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS', 'border-success', '', '', '', '', '');

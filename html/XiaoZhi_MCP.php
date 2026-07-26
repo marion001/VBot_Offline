@@ -293,7 +293,7 @@ echo '<table class="table table-bordered border-primary">';
 echo '<thead>
         <tr>
           <th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">STT</th>
-          <th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Tên Tools MCP</th>
+          <th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Tên MCP Plugin/Tools</th>
           <th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Trạng Thái Kích Hoạt</th>
           <th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Mô Tả</th>
         </tr>
@@ -326,10 +326,10 @@ if (empty($MCP_plugins)) {
     echo '<table class="table table-bordered border-success">';
     echo '<thead>
             <tr>
-              <th class="text-danger" style="text-align:center;">STT</th>
-              <th class="text-danger">Tên Plugin / Tool</th>
-              <th class="text-danger" style="text-align:center;">Kích Hoạt</th>
-              <th class="text-danger">Mô Tả</th>
+              <th class="text-danger" style="text-align: center; vertical-align: middle;">STT</th>
+              <th class="text-danger" style="text-align: center; vertical-align: middle;">Tên MCP Plugin/Tools</th>
+              <th class="text-danger" style="text-align: center; vertical-align: middle;">Trạng Thái Kích Hoạt</th>
+              <th class="text-danger" style="text-align: center; vertical-align: middle;">Mô Tả</th>
             </tr>
           </thead><tbody>';
     $plugin_index = 1;
