@@ -593,7 +593,7 @@ Các file mở rộng:
 ### MCP Plugins cho trợ lý XiaoZhi
 
 VBot hỗ trợ mở rộng công cụ MCP cho XiaoZhi mà không cần sửa trực tiếp
-`VBot_XiaoAI.py`. Mỗi thư mục trong `resource/xiaozhi/mcp_plugins` tương
+`VBot_XiaoAI.cpython-39-arm-linux-gnueabihf`. Mỗi thư mục trong `resource/xiaozhi/mcp_plugins` tương
 ứng với một MCP tool độc lập:
 
 ```text
@@ -615,7 +615,7 @@ resource/xiaozhi/mcp_plugins/
 Có thể bật/tắt từng plugin tại WebUI:
 
 ```text
-XiaoZhi_MCP.php → MCP Plugins do người dùng tự viết
+html/XiaoZhi_MCP.php → MCP Plugins do người dùng tự viết
 ```
 
 Sau khi thêm hoặc bật/tắt plugin, cần khởi động lại VBot để áp dụng. Nút
@@ -630,9 +630,6 @@ Dự án có sẵn ba plugin mẫu, mặc định đều tắt:
 | `self.vbot.wikipedia_search` | Tìm kiếm kiến thức trên Wikipedia tiếng Việt. |
 
 Tài liệu chi tiết: [`resource/xiaozhi/mcp_plugins.readme`](resource/xiaozhi/mcp_plugins.readme).
-
-> **Cảnh báo bảo mật:** `handler.py` chạy với cùng quyền của tiến trình
-> VBot và không nằm trong sandbox. Chỉ cài MCP plugin từ nguồn tin cậy.
 
 Nguyên tắc khi đóng góp hoặc mở rộng:
 
