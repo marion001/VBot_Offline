@@ -590,6 +590,50 @@ Các file mở rộng:
 | `Dev_Logs.py` | Định tuyến log riêng. |
 | `Dev_Picovoice.py` | Tùy chỉnh wake word/Picovoice. |
 
+### MCP Plugins cho trợ lý XiaoZhi
+
+VBot hỗ trợ mở rộng công cụ MCP cho XiaoZhi mà không cần sửa trực tiếp
+`VBot_XiaoAI.py`. Mỗi thư mục trong `resource/xiaozhi/mcp_plugins` tương
+ứng với một MCP tool độc lập:
+
+```text
+resource/xiaozhi/mcp_plugins/
+└── ten_plugin/
+    ├── plugin.json
+    └── handler.py
+```
+
+- `plugin.json` khai báo trạng thái, tên tool, mô tả, `inputSchema`,
+  entrypoint, hàm xử lý và timeout.
+- `handler.py` nhận `arguments` từ XiaoZhi, xử lý dữ liệu hoặc điều khiển
+  VBot rồi trả kết quả MCP.
+- Handler có thể là hàm đồng bộ hoặc `async`.
+- VBot kiểm tra arguments, giới hạn thời gian chạy và chuẩn hóa kết quả
+  trước khi gửi lại server XiaoZhi.
+- Plugin chỉ được nạp một lần khi VBot khởi động.
+
+Có thể bật/tắt từng plugin tại WebUI:
+
+```text
+XiaoZhi_MCP.php → MCP Plugins do người dùng tự viết
+```
+
+Sau khi thêm hoặc bật/tắt plugin, cần khởi động lại VBot để áp dụng. Nút
+**Hướng Dẫn MCP Plugin** trên WebUI hiển thị cấu trúc và ví dụ đầy đủ.
+
+Dự án có sẵn ba plugin mẫu, mặc định đều tắt:
+
+| Plugin | Công dụng |
+|---|---|
+| `self.vbot.echo` | Đọc lại nội dung để kiểm tra luồng MCP. |
+| `self.vbot.system_status` | Trả thông tin mạng, IP, âm lượng và uptime của VBot. |
+| `self.vbot.wikipedia_search` | Tìm kiếm kiến thức trên Wikipedia tiếng Việt. |
+
+Tài liệu chi tiết: [`resource/xiaozhi/mcp_plugins.readme`](resource/xiaozhi/mcp_plugins.readme).
+
+> **Cảnh báo bảo mật:** `handler.py` chạy với cùng quyền của tiến trình
+> VBot và không nằm trong sandbox. Chỉ cài MCP plugin từ nguồn tin cậy.
+
 Nguyên tắc khi đóng góp hoặc mở rộng:
 
 - Không thực hiện network I/O blocking trực tiếp trong event loop.
