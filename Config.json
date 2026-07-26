@@ -414,7 +414,6 @@
             "speak_to_text": {
                 "stt_select": "stt_default",
                 "duration_recording": 6,
-                "timeout_connect": 7,
                 "interim_results": false,
                 "gain": {
                     "active": false,
@@ -440,7 +439,11 @@
                         "time_out": 60
                     }
                 },
-                "stt_dev": []
+                "stt_dev": [],
+                "connection_timeout": 5,
+                "streaming_session_timeout": 30,
+                "result_timeout": 15,
+                "failure_cooldown": 2.5
             },
             "conversation_mode": true,
             "sound": {
@@ -501,7 +504,9 @@
                 ]
             },
             "hotword_engine": {
-                "key": "/fcfc34f34f+TGsdTNolucA=="
+                "use_the_key": "system_default",
+                "key": "/fcfc34f34f+TGsdTNolucA==",
+                "notes": "use_the_key: user sẽ sử dụng key của người dùng, system_default: sử dụng key mặc định hệ thống"
             },
             "hotword": {
                 "select_wakeup": "porcupine",

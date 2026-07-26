@@ -1,0 +1,21 @@
+{
+    "active": false,
+    "entrypoint": "handler.py",
+    "function": "handle",
+    "tool": {
+        "name": "self.vbot.echo",
+        "description": "Đọc lại nội dung người dùng cung cấp, dùng để kiểm tra MCP plugin",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "description": "Nội dung cần đọc lại"
+                }
+            },
+            "required": [
+                "text"
+            ]
+        }
+    }
+}

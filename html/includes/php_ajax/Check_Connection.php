@@ -650,7 +650,7 @@ if (isset($_GET['del_get_hass_all'])) {
 #Kiểm tra key Picovoice
 if (isset($_GET['check_key_picovoice'])) {
     $key =  str_replace(' ', '+', @$_GET['key']);
-    $lang = $VBot_Offline . 'resource/hotword/' . @$_GET['lang'];
+    $lang_code = @$_GET['lang'];
     $response = [
         'success' => false,
         'message' => '',
@@ -660,13 +660,24 @@ if (isset($_GET['check_key_picovoice'])) {
         echo json_encode($response);
         exit();
     }
-	if (!in_array($lang, ['vi', 'eng'], true)) {
-		$response['message'] = 'Chỉ hỗ trợ kiểm tra key với ngôn ngữ là (vi = Tiếng Việt) hoặc (eng = Tiếng Anh)';
+	if (!in_array($lang_code, ['vi', 'eng', 'customize'], true)) {
+		$response['message'] = 'Chỉ hỗ trợ kiểm tra key với ngôn ngữ vi, eng hoặc customize';
 		echo json_encode($response);
 		exit();
 	}
-    $modelFilePath = $VBot_Offline . 'resource/picovoice/library/' . $Config['smart_config']['smart_wakeup']['hotword']['library'][$_GET['lang']]['modelFilePath'];
-    $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Check_Key_Picovoice.py $key $lang $modelFilePath");
+    $lang_path = $VBot_Offline . 'resource/hotword/' . $lang_code;
+    if ($lang_code === 'customize') {
+        //Script Python sẽ đọc keyword_paths và model_file_path từ Dev_Picovoice.py.
+        $modelFilePath = '';
+    } else {
+        $modelFilePath = $VBot_Offline . 'resource/picovoice/library/' .
+            $Config['smart_config']['smart_wakeup']['hotword']['library'][$lang_code]['modelFilePath'];
+    }
+    $CMD = 'python3 ' .
+        escapeshellarg($directory_path . '/includes/php_ajax/Check_Key_Picovoice.py') . ' ' .
+        escapeshellarg($key) . ' ' .
+        escapeshellarg($lang_path) . ' ' .
+        escapeshellarg($modelFilePath);
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $response['message'] = 'Không thể kết nối tới máy chủ SSH';

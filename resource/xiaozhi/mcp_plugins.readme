@@ -1,0 +1,163 @@
+HƯỚNG DẪN MCP PLUGINS CHO XIAOZHI
+==================================
+
+1. Cấu trúc thư mục
+-------------------
+
+Mỗi thư mục trong resource/xiaozhi/mcp_plugins là một MCP tool:
+
+resource/xiaozhi/mcp_plugins/
+└── sample_echo/
+    ├── plugin.json
+    └── handler.py
+
+Tên thư mục chỉ nên chứa chữ, số, dấu gạch ngang hoặc gạch dưới:
+A-Z, a-z, 0-9, "-" và "_".
+
+VBot chỉ đọc plugin một lần khi VBot_XiaoAI.py khởi động. Sau khi thêm,
+xóa hoặc bật/tắt plugin trên giao diện XiaoZhi_MCP.php, phải khởi động
+lại VBot để áp dụng.
+
+2. Cấu trúc plugin.json
+-----------------------
+
+{
+    "active": false,
+    "entrypoint": "handler.py",
+    "function": "handle",
+    "timeout": 12,
+    "tool": {
+        "name": "self.vbot.echo",
+        "description": "Đọc lại nội dung người dùng cung cấp",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "text": {
+                    "type": "string",
+                    "description": "Nội dung cần đọc lại"
+                }
+            },
+            "required": ["text"]
+        }
+    }
+}
+
+Ý nghĩa:
+
+- active: trạng thái bật/tắt plugin. Có thể thay đổi trên giao diện PHP.
+- entrypoint: tên file Python xử lý, mặc định là handler.py.
+- function: tên hàm xử lý, mặc định là handle.
+- timeout: thời gian xử lý tối đa, từ 1 đến 60 giây, mặc định 12 giây.
+- tool: định nghĩa MCP chuẩn được gửi tới server Xiaozhi.
+- tool.name: phải duy nhất, không được trùng MCP nội bộ hoặc plugin khác.
+- inputSchema: JSON Schema mô tả arguments do Xiaozhi gửi vào.
+
+Không đặt active, entrypoint hoặc function bên trong tool. Các trường quản
+lý plugin không được gửi lên server MCP.
+
+3. Viết handler.py
+------------------
+
+Handler có thể là hàm thường:
+
+def handle(arguments, context):
+    text = arguments.get("text", "").strip()
+    if not text:
+        raise ValueError("Thiếu nội dung text")
+    return f"Bạn vừa nói: {text}"
+
+Hoặc hàm async:
+
+async def handle(arguments, context):
+    text = arguments.get("text", "").strip()
+    return {
+        "content": [
+            {
+                "type": "text",
+                "text": f"Bạn vừa nói: {text}"
+            }
+        ],
+        "structuredContent": {
+            "text": text
+        }
+    }
+
+arguments là dictionary được Xiaozhi tạo theo inputSchema.
+
+context cung cấp:
+
+- context["Lib"]: module Lib của VBot.
+- context["state"]: trạng thái kết nối Xiaozhi.
+- context["media_player"]: trình phát media của VBot.
+- context["log"]: hàm hiển thị log.
+- context["vbot_path"]: đường dẫn thư mục VBot.
+
+Ví dụ ghi log:
+
+context["log"](
+    "[MCP Plugin] Đang xử lý dữ liệu",
+    color=context["Lib"].Color.CYAN
+)
+
+4. Kiểu dữ liệu handler có thể trả về
+-------------------------------------
+
+Chuỗi:
+
+return "Đã xử lý thành công"
+
+Dictionary dữ liệu:
+
+return {
+    "status": "success",
+    "value": 123
+}
+
+Kết quả MCP hoàn chỉnh:
+
+return {
+    "content": [
+        {
+            "type": "text",
+            "text": "Đã xử lý thành công"
+        }
+    ],
+    "structuredContent": {
+        "status": "success"
+    }
+}
+
+VBot tự chuyển chuỗi và dictionary thường sang kết quả MCP hợp lệ.
+Nếu handler trả None, VBot trả thông báo tool đã xử lý thành công.
+VBot kiểm tra required, type, enum, min/max và giới hạn thời gian xử lý
+trước khi trả kết quả về server Xiaozhi.
+
+5. Luồng xử lý dữ liệu
+----------------------
+
+Người dùng nói
+-> Xiaozhi hiểu yêu cầu
+-> Xiaozhi chọn tool và tạo arguments
+-> VBot tìm handler tương ứng
+-> handler.py xử lý API, file, thiết bị hoặc dữ liệu
+-> VBot chuẩn hóa kết quả
+-> Xiaozhi nhận kết quả và trả lời người dùng.
+
+6. Bật/tắt plugin
+-----------------
+
+Mở giao diện XiaoZhi_MCP.php, tìm bảng "MCP Plugins do người dùng tự viết",
+bật hoặc tắt plugin rồi nhấn "Lưu thay đổi".
+
+Giao diện chỉ sửa trường active trong plugin.json, không sửa tool,
+inputSchema, entrypoint hoặc mã handler.py.
+
+Khởi động lại VBot sau khi lưu để danh sách plugin mới được nạp.
+
+7. Lưu ý an toàn
+----------------
+
+handler.py chạy với cùng quyền của tiến trình VBot và không nằm trong
+sandbox. Chỉ cài plugin từ nguồn tin cậy. Plugin có thể đọc file, gọi mạng,
+điều khiển thiết bị hoặc chạy lệnh hệ thống nếu người viết chủ động sử dụng
+các chức năng đó.

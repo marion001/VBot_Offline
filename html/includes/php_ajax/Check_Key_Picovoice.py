@@ -30,6 +30,7 @@ else:
 #Đường dẫn chứa các tệp .ppn
 model_path = f'{lang}'
 model_file_path = f'{model_file}'
+language_code = os.path.basename(model_path.rstrip('/'))
 
 result = {
     'success': False,
@@ -37,23 +38,54 @@ result = {
 }
 
 try:
-    # Lấy tệp .ppn đầu tiên từ thư mục
-    ppn_file = get_first_ppn_file(model_path)
-    if ppn_file is None:
+    sensitivity = 0.5
+    if language_code == "customize":
+        vbot_path = os.path.abspath(
+            os.path.join(os.path.dirname(__file__), "..", "..", "..")
+        )
+        if vbot_path not in sys.path:
+            sys.path.insert(0, vbot_path)
+        import Dev_Picovoice
+        keyword_paths = [
+            os.path.abspath(path if os.path.isabs(path) else os.path.join(vbot_path, path))
+            for path in Dev_Picovoice.keyword_paths
+            if isinstance(path, str) and path.endswith(".ppn")
+        ]
+        custom_model_path = Dev_Picovoice.model_file_path
+        model_file_path = os.path.abspath(
+            custom_model_path
+            if os.path.isabs(custom_model_path)
+            else os.path.join(vbot_path, custom_model_path)
+        )
+        if keyword_paths:
+            selected_index = random.randrange(len(keyword_paths))
+            keyword_path = keyword_paths[selected_index]
+            if selected_index < len(Dev_Picovoice.sensitivities):
+                sensitivity = float(Dev_Picovoice.sensitivities[selected_index])
+        else:
+            keyword_path = None
+        ppn_file = os.path.basename(keyword_path) if keyword_path else None
+    else:
+        ppn_file = get_first_ppn_file(model_path)
+        keyword_path = os.path.join(model_path, ppn_file) if ppn_file else None
+
+    if ppn_file is None or keyword_path is None:
         result['message'] = 'Không tìm thấy tệp .ppn trong thư mục.'
         print(json.dumps(result, ensure_ascii=False))
         sys.exit(1)
     porcupine = pvporcupine.create(
         access_key=key,
-        sensitivities=[0.5],
-        keyword_paths=[os.path.join(model_path, ppn_file)],
+        sensitivities=[sensitivity],
+        keyword_paths=[keyword_path],
         model_path=model_file_path
     )
-    last_part_str_lang = lang.rstrip('/').split('/')[-1]
+    last_part_str_lang = language_code
     if last_part_str_lang == 'vi':
         language_name = 'Tiếng Việt'
     elif last_part_str_lang == 'eng':
         language_name = 'Tiếng Anh'
+    elif last_part_str_lang == 'customize':
+        language_name = 'Customize (Dev_Picovoice.py)'
     else:
         language_name = 'Không Xác Định'
     result['success'] = True
@@ -62,6 +94,7 @@ try:
     result['language_name'] = language_name
     result['model_file_path'] = model_file_path
     result['message'] = f'Token Picovoice Hợp Lệ'
+    porcupine.delete()
     print(json.dumps(result, ensure_ascii=False))
 
 except pvporcupine.PorcupineInvalidArgumentError as e:

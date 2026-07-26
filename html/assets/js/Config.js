@@ -1435,7 +1435,8 @@ function test_key_Picovoice() {
     var token = document.getElementById('hotword_engine_key').value;
     var lang = document.getElementById('select_hotword_lang').value;
     var xhr = new XMLHttpRequest();
-    var url = 'includes/php_ajax/Check_Connection.php?check_key_picovoice&key=' + token + '&lang=' + lang;
+    var url = 'includes/php_ajax/Check_Connection.php?check_key_picovoice&key='
+        + encodeURIComponent(token) + '&lang=' + encodeURIComponent(lang);
     xhr.open('GET', url);
     xhr.responseType = 'json';
     xhr.onload = function () {

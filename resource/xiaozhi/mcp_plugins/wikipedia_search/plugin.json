@@ -1,0 +1,21 @@
+{
+    "active": true,
+    "entrypoint": "handler.py",
+    "function": "handle",
+    "tool": {
+        "name": "self.vbot.wikipedia_search",
+        "description": "Tìm kiếm thông tin, kiến thức, nhân vật, địa danh, sự kiện hoặc khái niệm trên Wikipedia tiếng Việt khi người dùng cần tra cứu dữ liệu",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "query": {
+                    "type": "string",
+                    "description": "Từ khóa hoặc câu hỏi cần tìm kiếm thông tin"
+                }
+            },
+            "required": [
+                "query"
+            ]
+        }
+    }
+}

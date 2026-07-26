@@ -1,8 +1,8 @@
 {
-    "version": "1.1.8",
+    "version": "1.1.9",
     "projectName": "Program VBot Offline",
-    "description": "Đồng Bộ Home Assistant Custom VBot, hỗ trợ Media Player trên Home Assistant. Và một vài cải tiến khác",
-    "releaseDate": "24/07/2026",
+    "description": "Sửa lỗi KEY Picovoice, Hỗ trợ MCP Plugins người dùng code tích hợp tools cho XiaoAI",
+    "releaseDate": "26/07/2026",
     "changes": [
         {
             "type": "feature",

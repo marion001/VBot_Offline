@@ -189,7 +189,12 @@ if (isset($_POST['all_config_save'])) {
 
   #CẬP NHẬT GIÁ TRỊ TRONG Speak To Text (STT)speak_to_text:
   $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] = intval($_POST['duration_recording']);
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect'] = intval($_POST['timeout_connect']);
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['connection_timeout'] = floatval($_POST['connection_timeout']);
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['streaming_session_timeout'] = floatval($_POST['streaming_session_timeout']);
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['result_timeout'] = floatval($_POST['result_timeout']);
+  $Config['smart_config']['smart_wakeup']['speak_to_text']['failure_cooldown'] = floatval($_POST['failure_cooldown']);
+  unset($Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect']);
+  unset($Config['smart_config']['smart_wakeup']['speak_to_text']['stt_default_session_timeout']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] = floatval($_POST['stt_gain']);
   $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] = isset($_POST['stt_gain_active']) ? true : false;
   $Config['smart_config']['smart_wakeup']['speak_to_text']['interim_results'] = isset($_POST['stt_interim_results']) ? true : false;
@@ -214,6 +219,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_wakeup']['hotword_engine']['key'] = $_POST['hotword_engine_key'];
   $Config['smart_config']['smart_wakeup']['hotword']['lang'] = $_POST['select_hotword_lang'];
   $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] = ($_POST['hotword_select_wakeup'] === "null") ? null : $_POST['hotword_select_wakeup'];
+  $Config['smart_config']['smart_wakeup']['hotword_engine']['use_the_key'] = $_POST['use_the_key_picovoice'] ?? 'system_default';
   $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] = isset($_POST['continue_running_if_hotword_initialization_fails']) ? true : false;
   $Config['smart_config']['smart_wakeup']['hotword']['gain']['value_float'] = floatval($_POST['hotword_gain']);
   $Config['smart_config']['smart_wakeup']['hotword']['gain']['active'] = isset($_POST['hotword_gain_active']) ? true : false;
@@ -1350,8 +1356,15 @@ include 'html_head.php';
 						?>
                       <!-- nếu hotword được chọn là Picovoice Procupine -->
                       <div id="select_show_picovoice_porcupine">
+
+						<?php
+						$picovoice_use_the_key = $Config['smart_config']['smart_wakeup']['hotword_engine']['use_the_key'];
+						if ($picovoice_use_the_key === null) {$picovoice_use_the_key = '';}
+						echo select_field('use_the_key_picovoice', 'Cơ Chế Sử Dụng Key Picovoice', ['system_default' => 'Dùng KEY có sẵn trên hệ thống', 'user' => 'Sử dụng KEY của người dùng (Cấu hình KEY bên dưới)'], $picovoice_use_the_key, []);
+						?>
+
                         <?php
-                        echo input_field('hotword_engine_key', 'Picovoice Token Key ', htmlspecialchars($Config['smart_config']['smart_wakeup']['hotword_engine']['key']), '', 'text', '', '', '', 'Đăng ký, lấy key: <a href="https://console.picovoice.ai" target="_blank">https://console.picovoice.ai</a>', 'border-success', 'Kiểm Tra', 'test_key_Picovoice()', 'btn btn-success border-success', 'onclick', '_blank');
+                        echo input_field('hotword_engine_key', 'Picovoice Token Key ', htmlspecialchars($Config['smart_config']['smart_wakeup']['hotword_engine']['key']), '', 'text', '', '', '', 'Key này chỉ sử dụng khi chọn chế độ <b>Cơ Chế Sử Dụng Key Picovoice:</b> là: <b>Sử dụng KEY của người dùng</b><br/> Đăng ký, lấy key: <a href="https://console.picovoice.ai" target="_blank">https://console.picovoice.ai</a>', 'border-success', 'Kiểm Tra', 'test_key_Picovoice()', 'btn btn-success border-success', 'onclick', '_blank');
 						echo input_field('ring_buffer_porcupine', 'Đệm âm thanh (Ring Buffer)', $Config['smart_config']['smart_wakeup']['hotword']['ring_buffer_porcupine'] ?? 5, 'required', 'number', '1', '5', '30', 'Tạo một hàng đợi vòng (ring buffer) để lưu các khung âm thanh (audio frame) đọc từ microphone, cung cấp dữ liệu cho bộ phát hiện wakeword. Hotword Porcupine nên để trong khoảng 5 –> 8 (Mặc định là 5)', 'border-success', '', '', '', '', '');
                         ?>
                         <div class="form-floating mb-3">
@@ -1436,7 +1449,10 @@ include 'html_head.php';
                <div class="alert alert-success" role="alert">
 				<?php
                   echo input_field('duration_recording', 'Thời gian lắng nghe tối đa (giây)', $Config['smart_config']['smart_wakeup']['speak_to_text']['duration_recording'] ?? 6, 'required', 'number', '1', '3', '10', 'Thời gian lắng nghe tối đa khi Bot được đánh thức', 'border-success', '', '', '', '', '');
-                  echo input_field('timeout_connect', 'Hết thời gian kết nối', $Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect'] ?? 7, 'required', 'number', '1', '3', '20', 'Thời kết nối tôi đa khi không có phản hồi từ Server, Máy Chủ như: (Mất kết nối mạng, Lỗi kết nối tới máy chủ, V..v...)', 'border-success', '', '', '', '', '');
+                  echo input_field('connection_timeout', 'Timeout kết nối STT', $Config['smart_config']['smart_wakeup']['speak_to_text']['connection_timeout'] ?? ($Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect'] ?? 5), 'required', 'number', '1', '2', '20', 'Thời gian tối đa để mở kết nối tới server STT. Giá trị này không giới hạn độ dài câu nói.', 'border-success', '', '', '', '', '');
+                  echo input_field('streaming_session_timeout', 'Timeout an toàn phiên Streaming STT', $Config['smart_config']['smart_wakeup']['speak_to_text']['streaming_session_timeout'] ?? 30, 'required', 'number', '1', '15', '300', 'Ngưỡng chống treo toàn phiên. Bình thường server VAD hoặc is_final sẽ kết thúc sớm khi người dùng nói xong.', 'border-success', '', '', '', '', '');
+                  echo input_field('result_timeout', 'Timeout xử lý file STT', $Config['smart_config']['smart_wakeup']['speak_to_text']['result_timeout'] ?? 15, 'required', 'number', '1', '5', '60', 'Thời gian chờ kết quả khi chuyển file âm thanh sang văn bản.', 'border-success', '', '', '', '', '');
+                  echo input_field('failure_cooldown', 'Tạm nghỉ backend sau lỗi', $Config['smart_config']['smart_wakeup']['speak_to_text']['failure_cooldown'] ?? 2.5, 'required', 'number', '0.5', '1', '30', 'Thời gian tạm bỏ qua backend STT sau timeout hoặc lỗi kết nối.', 'border-success', '', '', '', '', '');
 
                   ?>
 			<div class="row mb-3">
@@ -4350,7 +4366,26 @@ document.addEventListener("DOMContentLoaded", function(){
   load_list_GoogleVoices_tts("tts_ggcloud_key");
 });
 </script>
+<script>
+// Ẩn/hiện cả dòng chứa input hotword_engine_key
+document.addEventListener('DOMContentLoaded', function () {
+    const useKeySelect = document.getElementById('use_the_key_picovoice');
+    const hotwordKeyInput = document.getElementById('hotword_engine_key');
+    if (!useKeySelect || !hotwordKeyInput) {
+        return;
+    }
+    const hotwordKeyRow = hotwordKeyInput.closest('.row');
+    function updateHotwordKeyVisibility() {
+        const isUserKey = useKeySelect.value === 'user';
 
+        if (hotwordKeyRow) {
+            hotwordKeyRow.style.display = isUserKey ? '' : 'none';
+        }
+    }
+    updateHotwordKeyVisibility();
+    useKeySelect.addEventListener('change', updateHotwordKeyVisibility);
+});
+</script>
 </body>
 
 </html>

@@ -152,7 +152,7 @@
   <li class="nav-item" onclick="loading('show')">
     <a class="nav-link collapsed" href="XiaoZhi_MCP.php">
       <i class="bi bi-server"></i>
-      <span>XiaoZhi MCP</span>
+      <span>XiaoAI MCP Tools</span>
     </a>
   </li>
   </li>

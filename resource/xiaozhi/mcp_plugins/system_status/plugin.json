@@ -1,0 +1,25 @@
+{
+    "active": false,
+    "entrypoint": "handler.py",
+    "function": "handle",
+    "tool": {
+        "name": "self.vbot.system_status",
+        "description": "Dùng khi người dùng hỏi trạng thái của loa VBot, gồm thời gian, địa chỉ IP, mạng WiFi, âm lượng và thời gian hệ thống đã chạy",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "detail": {
+                    "type": "string",
+                    "enum": [
+                        "all",
+                        "network",
+                        "audio",
+                        "uptime"
+                    ],
+                    "description": "Nhóm thông tin cần lấy. Dùng all nếu người dùng không chỉ định rõ"
+                }
+            },
+            "required": []
+        }
+    }
+}
