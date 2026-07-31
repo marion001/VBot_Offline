@@ -2,7 +2,7 @@
     "version": "1.1.9",
     "projectName": "Program VBot Offline",
     "description": "Sửa lỗi KEY Picovoice, Hỗ trợ MCP Plugins người dùng code tích hợp tools cho XiaoAI, Sửa lỗi gọi trợ lý ảo Assistant",
-    "releaseDate": "26/07/2026-1",
+    "releaseDate": "31/07/2026",
     "changes": [
         {
             "type": "feature",
