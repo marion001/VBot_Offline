@@ -8,6 +8,12 @@
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
+// Luôn ghi mọi lỗi PHP vào log chung, kể cả lỗi xảy ra khi đang nạp Config.json.
+$phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
+ini_set('log_errors', 1);
+ini_set('error_log', $phpErrorLog);
+error_reporting(E_ALL);
+
 #tăng giới hạn bộ nhớ cho PHP
 ini_set('memory_limit', '1G');
 ini_set('upload_max_filesize', '300M');
@@ -29,13 +35,13 @@ $HostName = gethostname();
 $GET_current_USER = get_current_user();
 
 //Lấy địa chỉ IP của máy chủ
-$serverIp = $_SERVER['SERVER_ADDR'];
+$serverIp = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '127.0.0.1';
 
 //Lấy địa chỉ IP của người dùng khi truy cập
-$userIp = $_SERVER['REMOTE_ADDR'];
+$userIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1';
 
 //Đường dẫn ui html /home/pi/VBot_Offline/html
-$HTML_VBot_Offline = getcwd();
+$HTML_VBot_Offline = __DIR__;
 
 //đường dẫn path VBot python
 $VBot_Offline = "/home/pi/VBot_Offline/";
@@ -56,6 +62,11 @@ $Config = null;
 
 //biến lưu trữ thông báo php
 $messages = [];
+$Configuration_Load_Status = [
+    'recovered' => false,
+    'backup_file' => null,
+    'error' => null
+];
 
 //Danh sách các đuôi file không cho phép tải xuống
 $Restricted_Extensions = ['html', 'python', 'php', 'so'];
@@ -73,13 +84,14 @@ $Max_NewsPaper = 50;
 $Allowed_Extensions_Audio = ['mp3', 'wav', 'ogg', 'aac'];
 
 //Lấy giao thức (http hoặc https)
-$Protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$serverPort = isset($_SERVER['SERVER_PORT']) ? (int)$_SERVER['SERVER_PORT'] : 80;
+$Protocol = ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || $serverPort === 443) ? "https://" : "http://";
 
 //Lấy tên miền (ví dụ: 192.168.14.113)
-$Domain = $_SERVER['HTTP_HOST'];
+$Domain = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $serverIp;
 
 //Lấy đường dẫn tới file hiện tại (ví dụ: /html/includes/php_ajax/Media_Player_Search.php)
-$Path = $_SERVER['REQUEST_URI'];
+$Path = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '/';
 
 //Kết hợp thành URL đầy đủ
 $Current_URL = $Protocol . $Domain . $Path;
@@ -107,25 +119,23 @@ if ($needCopy) {
         //echo "Backup được chọn: $latestBackup\n";
         //echo "Sao chép tới: $Config_filePath\n";
         if (file_exists($Config_filePath)) {
-            exec("rm -f " . escapeshellarg($Config_filePath));
+            @unlink($Config_filePath);
         }
         $dirPath = dirname($Config_filePath);
-        exec("chmod 0777 " . escapeshellarg($dirPath));
-        $cmd = "cp " . escapeshellarg($latestBackup) . " " . escapeshellarg($Config_filePath);
-        exec($cmd, $output, $return_var);
-        if ($return_var === 0) {
-            //echo "Đã sao chép Config từ backup.\n";
-            echo '<script>
-				alert("- Lỗi Dữ Liệu Tệp Cấu Hình Config.json\n\n- Đã Khôi Phục Dữ Liệu Từ Tệp Sao Lưu Mới Nhất: ' . basename($latestBackup) . '");
-				</script>';
-            exec("chmod 0777 " . escapeshellarg($Config_filePath));
+        @chmod($dirPath, 0777);
+        if (@copy($latestBackup, $Config_filePath)) {
+            $Configuration_Load_Status['recovered'] = true;
+            $Configuration_Load_Status['backup_file'] = basename($latestBackup);
+            @chmod($Config_filePath, 0777);
             $fileContent = file_get_contents($Config_filePath);
         } else {
             //echo "Không thể sao chép file backup vào: $Config_filePath\n";
+            $Configuration_Load_Status['error'] = 'Không thể khôi phục Config.json từ bản sao lưu mới nhất.';
             $Config = null;
         }
     } else {
         //echo "Không tìm thấy file backup nào trong: $Backup_dir\n";
+        $Configuration_Load_Status['error'] = 'Không tìm thấy bản sao lưu để khôi phục Config.json.';
         $Config = null;
     }
 }
@@ -134,16 +144,22 @@ if ($needCopy) {
 if (!empty($fileContent)) {
     $Config = json_decode($fileContent, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        echo 'Có lỗi xảy ra khi giải mã Config.json: ' . json_last_error_msg();
+        $Configuration_Load_Status['error'] = 'Lỗi giải mã Config.json: ' . json_last_error_msg();
         $Config = null;
     }
 } else {
     $Config = null;
 }
 
-$phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
-
-if (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
+if (defined('VBOT_JSON_API') && VBOT_JSON_API === true) {
+    // API luôn ghi lỗi vào log nhưng không đưa Warning/Notice/HTML vào phản hồi JSON.
+    ini_set('display_errors', 0);
+    ini_set('display_startup_errors', 0);
+    ini_set('html_errors', 0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', $phpErrorLog);
+    error_reporting(E_ALL);
+} elseif (isset($Config['web_interface']['errors_display']) && $Config['web_interface']['errors_display'] === true) {
     //Bật hiển thị và ghi toàn bộ lỗi PHP vào log chung của VBot.
     ini_set('display_errors', 1);
     ini_set('display_startup_errors', 1);
@@ -151,11 +167,12 @@ if (isset($Config['web_interface']['errors_display']) && $Config['web_interface'
     ini_set('error_log', $phpErrorLog);
     error_reporting(E_ALL);
 } else {
-    //Tắt hiển thị và ghi lỗi PHP theo cấu hình WebUI.
+    // Chỉ tắt hiển thị trên giao diện; mọi lỗi vẫn luôn được ghi vào Vbot_error.log.
     ini_set('display_errors', 0);
     ini_set('display_startup_errors', 0);
-    ini_set('log_errors', 0);
-    error_reporting(0);
+    ini_set('log_errors', 1);
+    ini_set('error_log', $phpErrorLog);
+    error_reporting(E_ALL);
 }
 
 $stt_token_google_cloud = $VBot_Offline . $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file'];
@@ -179,6 +196,36 @@ $ssh_host = $serverIp;
 $ssh_port = $Config['ssh_server']['ssh_port'];
 $ssh_user = $Config['ssh_server']['ssh_username'];
 $ssh_password = $Config['ssh_server']['ssh_password'];
+
+if (!function_exists('vbotSetFullPermissions')) {
+    function vbotSetFullPermissions($path, $label = 'tệp/thư mục')
+    {
+        global $ssh_host, $ssh_port, $ssh_user, $ssh_password;
+        clearstatcache(true, $path);
+        $currentPermissions = @fileperms($path);
+        if ($currentPermissions !== false && (($currentPermissions & 0777) === 0777)) {
+            return true;
+        }
+        if (@chmod($path, 0777)) {
+            return true;
+        }
+        if (
+            function_exists('ssh2_connect') &&
+            function_exists('ssh2_sftp') &&
+            function_exists('ssh2_sftp_chmod')
+        ) {
+            $connection = @ssh2_connect($ssh_host, intval($ssh_port));
+            if ($connection && @ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+                $sftp = @ssh2_sftp($connection);
+                if ($sftp && @ssh2_sftp_chmod($sftp, $path, 0777)) {
+                    return true;
+                }
+            }
+        }
+        error_log('Không thể đặt quyền 0777 cho ' . $label . ': ' . $path);
+        return false;
+    }
+}
 
 //Kiểm tra xem google cloud backup có được bật hay không:
 $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['active'];

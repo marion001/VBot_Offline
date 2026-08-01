@@ -139,7 +139,7 @@ stop
 
 Server kết thúc audio queue hiện tại và đưa audio đã nhận sang STT.
 
-`status_audio` là tham số riêng cho kết nối socket. kết nối UDP không thêm trường giá trị này.
+`status_audio` là tham số trạng thái âm thanh trả về cho kết nối WebSocket.
 
 ## 5. Binary audio client gửi lên Server
 
@@ -438,4 +438,4 @@ socket.onmessage = async (event) => {
 | `ws_recv_timeout` | Tùy chọn, timeout nhận phản hồi từ STT websocket phụ. |
 | `thread_join_timeout` | Tùy chọn, timeout join thread STT. |
 
-`time_remove_inactive_clients` chỉ dùng cho UDP, không áp dụng cho chế độ socket.
+WebSocket tự dọn client khi kết nối đóng hoặc vượt quá timeout đã cấu hình.

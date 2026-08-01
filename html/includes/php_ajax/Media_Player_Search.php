@@ -6,11 +6,9 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+require_once __DIR__.'/Api_Helpers.php';
+vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']) {
 	session_start();
@@ -282,8 +280,8 @@ if (isset($_GET['ZingMP3_Search'])) {
 	}
 	$zingJsonPath = '../cache/ZingMP3.json';
 	if (!file_exists($zingJsonPath)) {
-		file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($zingJsonPath));
+		file_put_contents($zingJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($zingJsonPath, 0777);
 	}
 	$curl = curl_init();
 	curl_setopt_array($curl, array(
@@ -332,7 +330,7 @@ if (isset($_GET['ZingMP3_Search'])) {
 			'data' => $results
 			];
 		echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		file_put_contents($zingJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		file_put_contents($zingJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
 	} else {
 		echo json_encode(array(
 			'success' => false,
@@ -346,8 +344,8 @@ if (isset($_GET['ZingMP3_Search'])) {
 if (isset($_GET['Cache_ZingMP3'])) {
 	$zingmp3JsonPath = "../cache/ZingMP3.json";
 	if (!file_exists($zingmp3JsonPath)) {
-		file_put_contents($zingmp3JsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($zingmp3JsonPath));
+		file_put_contents($zingmp3JsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($zingmp3JsonPath, 0777);
 	}
 	$jsonData = file_get_contents($zingmp3JsonPath);
 	$data = json_decode($jsonData, true);
@@ -373,8 +371,8 @@ if (isset($_GET['NhacCuaTui_Search'])) {
 	}
 	$nhaccuatuiJsonPath = '../cache/NhacCuaTui.json';
 	if (!file_exists($nhaccuatuiJsonPath)) {
-		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($nhaccuatuiJsonPath));
+		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($nhaccuatuiJsonPath, 0777);
 	}
     $url = "https://graph.nhaccuatui.com/api/v3/search/all?keyword=".urlencode($Song_Name)."&correct=false&timestamp=".round(microtime(true) * 1000);
     $ch = curl_init();
@@ -436,7 +434,7 @@ if (isset($_GET['NhacCuaTui_Search'])) {
 				'data' => $results
 				];
 			echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			file_put_contents($nhaccuatuiJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+			file_put_contents($nhaccuatuiJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
         }
     }
     curl_close($ch);
@@ -447,8 +445,8 @@ if (isset($_GET['NhacCuaTui_Search'])) {
 if (isset($_GET['Cache_NhacCuaTui'])) {
 	$nhaccuatuiJsonPath = "../cache/NhacCuaTui.json";
 	if (!file_exists($nhaccuatuiJsonPath)) {
-		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($nhaccuatuiJsonPath));
+		file_put_contents($nhaccuatuiJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($nhaccuatuiJsonPath, 0777);
 	}
 	$jsonData = file_get_contents($nhaccuatuiJsonPath);
 	$data = json_decode($jsonData, true);
@@ -649,8 +647,8 @@ if (isset($_GET['podcast_Search'])) {
 	}
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
-		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($podcastJsonPath));
+		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($podcastJsonPath, 0777);
 	}
 	if (isTokenExpired_podcast($Config)) {
 		refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Port_API);
@@ -717,7 +715,7 @@ if (isset($_GET['podcast_Search'])) {
 		if ($result['success']) {
 			$result['message'] = 'Dữ liệu được truy xuất thành công';
 		}
-		file_put_contents($podcastJsonPath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+		file_put_contents($podcastJsonPath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
 	}
 	echo json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	exit();
@@ -727,8 +725,8 @@ if (isset($_GET['podcast_Search'])) {
 if (isset($_GET['Cache_PodCast'])) {
 	$podcastJsonPath = '../cache/PodCast.json';
 	if (!file_exists($podcastJsonPath)) {
-		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($podcastJsonPath));
+		file_put_contents($podcastJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($podcastJsonPath, 0777);
 	}
 	$jsonData = file_get_contents($podcastJsonPath);
 	$data = json_decode($jsonData, true);
@@ -755,8 +753,8 @@ if (isset($_GET['Youtube_Search'])) {
 	}
 	$youtubeJsonPath = '../cache/Youtube.json';
 	if (!file_exists($youtubeJsonPath)) {
-		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($youtubeJsonPath));
+		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($youtubeJsonPath, 0777);
 	}
 	$apiKey = $Config['media_player']['youtube']['google_apis_key'];
 	$searchUrlYoutube = "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=" . urlencode($Youtube_Name) . "&maxResults=" . $Youtube_Limit . "&key=" . $apiKey;
@@ -824,7 +822,7 @@ if (isset($_GET['Youtube_Search'])) {
 				'data' => $items
 			];
 			echo json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			file_put_contents($youtubeJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+			file_put_contents($youtubeJsonPath, json_encode($responsez, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
 		}
 	}
 	exit();
@@ -833,8 +831,8 @@ if (isset($_GET['Youtube_Search'])) {
 if (isset($_GET['Cache_Youtube'])) {
 	$youtubeJsonPath = '../cache/Youtube.json';
 	if (!file_exists($youtubeJsonPath)) {
-		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($youtubeJsonPath));
+		file_put_contents($youtubeJsonPath, json_encode([], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($youtubeJsonPath, 0777);
 	}
 	$jsonData = file_get_contents($youtubeJsonPath);
 	$data = json_decode($jsonData, true);
@@ -940,8 +938,8 @@ if (isset($_GET['Cache_NewsPaper'])) {
 			'message' => 'Danh sách báo, tin tức',
 			'data' => []
 		];
-		file_put_contents($newspaperJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($newspaperJsonPath));
+		file_put_contents($newspaperJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($newspaperJsonPath, 0777);
 	}
 	$jsonData = file_get_contents($newspaperJsonPath);
 	$data = json_decode($jsonData, true);
@@ -962,8 +960,8 @@ if (isset($_GET['Cache_PlayList'])) {
 			'message' => 'Danh sách phát tổng hợp',
 			'data' => []
 		];
-		file_put_contents($playlistJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($playlistJsonPath));
+		file_put_contents($playlistJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($playlistJsonPath, 0777);
 	}
 	$jsonData = file_get_contents($playlistJsonPath);
 	$data = json_decode($jsonData, true);
@@ -976,7 +974,8 @@ if (isset($_GET['Cache_PlayList'])) {
 }
 
 //Thêm bài hát vào playlist
-if (isset($_GET['playlist_ADD'])) {
+if (isset($_POST['playlist_ADD'])) {
+	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 	$filePath = '../cache/PlayList.json';
 	$response = [];
 	if (!file_exists($filePath)) {
@@ -985,8 +984,8 @@ if (isset($_GET['playlist_ADD'])) {
 			'message' => 'Danh sách phát tổng hợp',
 			'data' => []
 		];
-		file_put_contents($filePath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($filePath));
+		file_put_contents($filePath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+		@chmod($filePath, 0777);
 	}
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$requiredFields = ['title', 'cover', 'audio', 'duration', 'description', 'source', 'id', 'channelTitle', 'artist'];
@@ -1037,7 +1036,8 @@ if (isset($_GET['playlist_ADD'])) {
 		} else {
 			$data['data'][] = $newEntry;
 			$jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			if (file_put_contents($filePath, $jsonData)) {
+			if (file_put_contents($filePath, $jsonData, LOCK_EX)) {
+				@chmod($filePath, 0777);
 				$response['success'] = true;
 				$response['message'] = 'Dữ liệu đã được ghi vào file JSON thành công.';
 			} else {
@@ -1054,7 +1054,8 @@ if (isset($_GET['playlist_ADD'])) {
 }
 
 //Xóa playlist hoặc xóa 1 hay nhiều bài hát theo ids_list
-if (isset($_GET['playlist_DELETE'])) {
+if (isset($_POST['playlist_DELETE'])) {
+	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 	$filePath = '../cache/PlayList.json';
 	if (file_exists($filePath)) {
 		$jsonData = file_get_contents($filePath);
@@ -1096,7 +1097,8 @@ if (isset($_GET['playlist_DELETE'])) {
 			'message' => "Danh sách phát tổng hợp",
 			'data' => $updatedData
 		];
-		if (file_put_contents($filePath, json_encode($fileContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+		if (file_put_contents($filePath, json_encode($fileContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
+			@chmod($filePath, 0777);
 			$response = [
 				'success' => true,
 				'message' => 'Danh sách phát đã được cập nhật.',
@@ -1124,15 +1126,14 @@ if (isset($_GET['playlist_DELETE'])) {
 }
 
 //Xóa cache dữ liệu bài hát
-if (isset($_GET['cache_delete']) && in_array($_GET['cache_delete'], ['ZingMP3', 'Youtube', 'PodCast'])) {
+if (isset($_POST['cache_delete']) && in_array($_POST['cache_delete'], ['ZingMP3', 'Youtube', 'PodCast'], true)) {
+	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 	$response = array('success' => false, 'message' => '');
-	$cacheType = $_GET['cache_delete'];
+	$cacheType = $_POST['cache_delete'];
 	$jsonFilePath = '../cache/' . $cacheType . '.json';
 	if (file_exists($jsonFilePath)) {
-		$fileHandle = fopen($jsonFilePath, 'w');
-		if ($fileHandle) {
-			fwrite($fileHandle, '[]');
-			fclose($fileHandle);
+		if (file_put_contents($jsonFilePath, '[]', LOCK_EX) !== false) {
+			@chmod($jsonFilePath, 0777);
 			$response['success'] = true;
 			$response['message'] = "Đã xóa cache $cacheType";
 			echo json_encode($response);
@@ -1198,7 +1199,7 @@ if (isset($_GET['newspaper'])) {
 				];
 			}
 			if (!empty($result["data"])) {
-				if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+				if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
 					$response['success'] = true;
 					$response['message'] = "Đã lưu dữ liệu vào $filePath";
 					$response['data'] = $result["data"];
@@ -1245,7 +1246,7 @@ if (isset($_GET['newspaper'])) {
 					$titles_seen[] = $title;
 				}
 			}
-			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
 				$response['success'] = true;
 				$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
 				$response['data'] = $result["data"];
@@ -1312,7 +1313,7 @@ if (isset($_GET['newspaper'])) {
 					];
 				}
 			}
-			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
 				$response['success'] = true;
 				$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
 				$response['data'] = $result["data"];
@@ -1365,7 +1366,7 @@ if (isset($_GET['newspaper'])) {
 						];
 					}
 				}
-				if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+				if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
 					$response['success'] = true;
 					$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
 					$response['data'] = $result["data"];
@@ -1434,7 +1435,7 @@ if (isset($_GET['newspaper'])) {
 				];
 				$printedTitles[] = $title;
 			}
-			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+			if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
 				$response['success'] = true;
 				$response['message'] = "Dữ liệu đã được lưu vào tệp $filePath";
 				$response['data'] = $result["data"];
@@ -1485,7 +1486,7 @@ if (isset($_GET['newspaper'])) {
 				}
 			}
 		}
-		if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
+		if (file_put_contents($filePath, json_encode($result, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
 			$response = [
 				'success' => true,
 				'message' => "Dữ liệu đã được lưu vào tệp $filePath",
@@ -1538,6 +1539,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						'success' => false,
 						'message' => "Không thể tạo thư mục $savePath."
 					];
+				} else {
+					@chmod($savePath, 0777);
 				}
 			} elseif (!is_writable($savePath)) {
 				$response = [
@@ -1568,8 +1571,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 							'message' => "Không thể tải file. Mã trạng thái HTTP: $httpCode"
 						];
 					} else {
-						if (file_put_contents($fullPath, $fileContent) !== false) {
-							shell_exec('chmod 0777 ' . escapeshellarg($fullPath));
+						if (file_put_contents($fullPath, $fileContent, LOCK_EX) !== false) {
+							@chmod($fullPath, 0777);
 							$response = [
 								'success' => true,
 								'message' => "Đã tải: " . basename($songName) . " vào thư mục nhạc Local"

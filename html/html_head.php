@@ -1,3 +1,16 @@
+<?php
+$VBot_Csrf_Token = '';
+if (session_status() === PHP_SESSION_ACTIVE) {
+    if (
+        !isset($_SESSION['vbot_csrf_token'])
+        || !is_string($_SESSION['vbot_csrf_token'])
+        || strlen($_SESSION['vbot_csrf_token']) < 64
+    ) {
+        $_SESSION['vbot_csrf_token'] = bin2hex(random_bytes(32));
+    }
+    $VBot_Csrf_Token = $_SESSION['vbot_csrf_token'];
+}
+?>
 <!--
   #Code By: Vũ Tuyển
   #Designed by: BootstrapMade
@@ -10,6 +23,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <meta name="vbot-csrf-token" content="<?php echo htmlspecialchars($VBot_Csrf_Token, ENT_QUOTES, 'UTF-8'); ?>">
+  <script>
+    window.VBOT_CSRF_TOKEN = <?php echo json_encode($VBot_Csrf_Token); ?>;
+  </script>
   <!-- <title>VBot Assistant</title> -->
   <meta name="description" content="VBot Assistant - Loa Thông Minh VBot tiếng Việt, tích hợp trợ lý ảo giúp điều khiển nhà thông minh, phát nhạc, nhắc nhở và nhiều tiện ích khác. Trải nghiệm loa thông minh cho người Việt.">
   <meta name="keywords" content="VBot Assistant, Loa Thông Minh VBot, Loa Thông Minh Tiếng Việt, Loa Thông Minh Trợ Lý Ảo VBot, trợ lý ảo, loa thông minh Việt Nam, điều khiển giọng nói, nhà thông minh">
@@ -26,10 +43,14 @@
   <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="assets/vendor/quill/quill.snow.css" rel="stylesheet">
-  <link href="assets/vendor/quill/quill.bubble.css" rel="stylesheet">
   <link href="assets/vendor/remixicon/remixicon.css" rel="stylesheet">
-  <link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">
+  <?php
+  $webui_page_name = basename($_SERVER['PHP_SELF'] ?? '');
+  $webui_datatable_pages = ['index.php', 'Log_TTS.php', 'Log_pycache.php'];
+  if (in_array($webui_page_name, $webui_datatable_pages, true)) {
+      echo '<link href="assets/vendor/simple-datatables/style.css" rel="stylesheet">';
+  }
+  ?>
   <!-- Template Main CSS File -->
   <link href="assets/css/style.css" rel="stylesheet">
   <link href="assets/css/dark_mode.css" rel="stylesheet">

@@ -389,11 +389,12 @@ include 'html_head.php';
       formData.append('fileToUpload_avata', fileInput.files[0]);
       formData.append('upload_avata', 'true');
       var xhr = new XMLHttpRequest();
-      xhr.open('POST', 'includes/php_ajax/Upload_file_path.php?upload_avata', true);
+      xhr.open('POST', 'includes/php_ajax/Upload_file_path.php', true);
+      xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
       xhr.onload = function() {
-        if (xhr.status === 200) {
-          try {
-            var response = JSON.parse(xhr.responseText);
+        try {
+          var response = JSON.parse(xhr.responseText);
+          if (xhr.status === 200) {
             console.log(response);
             if (response.success) {
               loading('hide');
@@ -402,13 +403,13 @@ include 'html_head.php';
               loading('hide');
               show_message(response.message);
             }
-          } catch (e) {
+          } else {
             loading('hide');
-            show_message('Lỗi khi xử lý phản hồi từ máy chủ: ' + e);
+            show_message(response.message || response.error || ('Yêu cầu bị lỗi với mã trạng thái: ' + xhr.status));
           }
-        } else {
+        } catch (e) {
           loading('hide');
-          show_message('Yêu cầu bị lỗi với mã trạng thái: ' + xhr.status);
+          show_message('Lỗi khi xử lý phản hồi từ máy chủ: ' + e);
         }
       };
       xhr.onerror = function() {

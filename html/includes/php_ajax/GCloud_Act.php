@@ -6,12 +6,9 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+require_once __DIR__.'/Api_Helpers.php';
+vbotApiInitialize(['POST']);
 include '../../Configuration.php';
-
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json; charset=utf-8');
 
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
@@ -21,11 +18,10 @@ if ($Config['contact_info']['user_login']['active']) {
     ) {
         session_unset();
         session_destroy();
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        ], 401);
     }
 }
 
@@ -40,8 +36,7 @@ if (!$google_cloud_drive_active === true) {
     $responseData['success'] = false;
     $responseData['gcloud_notification'] = "Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active)";
     $responseData['message'] = "Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active)";
-    echo json_encode($responseData);
-    exit();
+    vbotApiJsonResponse($responseData, 503);
 }
 
 $authConfigPath = '../../includes/other_data/Google_Driver_PHP/client_secret.json';
@@ -56,8 +51,7 @@ if (!file_exists($LIB_Google_API_PHP_CLIENT)) {
     $activve_show = false;
     $responseData['success'] = false;
     $responseData['message'] = "Thư Viện Google Cloud Drive Chưa Được Cấu Hình, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình";
-    echo json_encode($responseData);
-    exit();
+    vbotApiJsonResponse($responseData, 503);
 } else {
     require_once $LIB_Google_API_PHP_CLIENT;
     $activve_show = true;
@@ -88,8 +82,7 @@ if ($activve_show === true) {
     } else {
         $responseData['message'] = "Tệp json xác thực không tồn tại: $tokenPath";
         $responseData['gcloud_notification'] = "Tệp json xác thực không tồn tại: $tokenPath";
-        echo json_encode($responseData);
-        exit();
+        vbotApiJsonResponse($responseData, 401);
     }
     //Kiểm tra và làm mới token nếu cần
     if ($client->isAccessTokenExpired()) {
@@ -98,37 +91,39 @@ if ($activve_show === true) {
             if (isset($newAccessToken['access_token'])) {
                 //echo "Làm mới token thành công";
                 $accessToken = array_merge($accessToken, $newAccessToken);
-                file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+                @chmod($tokenPath, 0777);
                 $responseData['gcloud_notification'] = "Làm mới mã Token thành công";
                 $client->setAccessToken($accessToken);
             } else {
                 $responseData['message'] = "Token xác thực đã hết hạn và không thể làm mới, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình";
                 $responseData['gcloud_notification'] = "Token xác thực đã hết hạn và không thể làm mới, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình";
-                echo json_encode($responseData);
-                exit();
+                vbotApiJsonResponse($responseData, 401);
             }
         } else {
             $responseData['message'] = "Token xác thực đã hết hạn và không thể làm mới, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình dữ liệu";
             $responseData['gcloud_notification'] = "Token xác thực đã hết hạn và không thể làm mới, cần truy cập: Sao Lưu Cloud->Google Drive để cấu hình dữ liệu";
-            echo json_encode($responseData);
-            exit();
+            vbotApiJsonResponse($responseData, 401);
         }
     }
 }
 
 #Scan thư mục trong GDriver
-if (isset($_GET['Scan'])) {
-    if (isset($_GET['Folder_Name']) && !empty($_GET['Folder_Name'])) {
-        $folderName = $_GET['Folder_Name'];
+if (isset($_POST['Scan'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    if (isset($_POST['Folder_Name']) && !empty($_POST['Folder_Name'])) {
+        $folderName = trim($_POST['Folder_Name']);
+        if (mb_strlen($folderName) > 150) {
+            vbotApiJsonResponse(['success' => false, 'message' => 'Tên thư mục Google Drive quá dài'], 400);
+        }
     } else {
         $responseData['success'] = false;
         $responseData['message'] = "Cần Nhập Tên Thư Mục Cần Scan";
-        echo json_encode($responseData);
-        exit();
+        vbotApiJsonResponse($responseData, 400);
     }
     $driveService = new Drive($client);
     $response = $driveService->files->listFiles([
-        'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s'", $folderName),
+        'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s'", str_replace(["\\", "'"], ["\\\\", "\\'"], $folderName)),
         'fields' => 'files(id, name)',
         'pageSize' => 1,
     ]);
@@ -161,21 +156,24 @@ if (isset($_GET['Scan'])) {
             }
         }
     }
-    echo json_encode($responseData);
-    exit();
+    vbotApiJsonResponse($responseData, $responseData['success'] ? 200 : 404);
 }
 
 //Hàm Xóa file theo id
-if (isset($_GET['Delete'])) {
-    if (isset($_GET['id_file']) && !empty($_GET['id_file'])) {
-        $id_file = $_GET['id_file'];
+if (isset($_POST['Delete'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    if (isset($_POST['id_file']) && !empty($_POST['id_file'])) {
+        $id_file = trim($_POST['id_file']);
+        if (!preg_match('/^[A-Za-z0-9_-]{10,200}$/', $id_file)) {
+            vbotApiJsonResponse(['success' => false, 'message' => 'ID file Google Drive không hợp lệ'], 400);
+        }
     } else {
         $responseData['success'] = false;
         $responseData['message'] = "Cần Nhập ID Của Tệp Cần Xóa";
-        echo json_encode($responseData);
-        exit();
+        vbotApiJsonResponse($responseData, 400);
     }
     $driveService = new Drive($client);
+    $fileName = $id_file;
     try {
         $file = $driveService->files->get($id_file, ['fields' => 'id, name']);
         if ($file) {
@@ -184,22 +182,23 @@ if (isset($_GET['Delete'])) {
             $responseData['success'] = true;
             //$responseData['message'] =  "Tệp $fileName  có ID: $id_file đã được xóa thành công.";
             $responseData['message'] =  "File $fileName đã được xóa thành công.";
-            echo json_encode($responseData);
+            vbotApiJsonResponse($responseData);
         }
     } catch (Exception $e) {
         if ($e->getCode() === 404) {
             $responseData['success'] = false;
             $responseData['message'] = "Tệp có ID: $id_file không tồn tại";
-            echo json_encode($responseData);
+            vbotApiJsonResponse($responseData, 404);
         } else {
             $responseData['success'] = false;
             $responseData['message'] = "Không thể xóa tệp $fileName: " . $e->getMessage();
-            echo json_encode($responseData);
+            error_log('Google Drive delete failed: '.$e->getMessage());
+            vbotApiJsonResponse($responseData, 502);
         }
     }
 } else {
     $responseData['success'] = false;
     $responseData['message'] = "ID tệp không được cung cấp";
-    echo json_encode($responseData);
+    vbotApiJsonResponse($responseData, 400);
 }
 ?>

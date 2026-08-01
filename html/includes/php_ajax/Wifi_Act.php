@@ -5,11 +5,9 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+require_once __DIR__.'/Api_Helpers.php';
+vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json; charset=utf-8');
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
     if (
@@ -18,12 +16,19 @@ if ($Config['contact_info']['user_login']['active']) {
     ) {
         session_unset();
         session_destroy();
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        ], 401);
     }
+}
+
+function vbotWifiValidName($value)
+{
+    return is_string($value)
+        && $value !== ''
+        && strlen($value) <= 100
+        && !preg_match('/[\x00-\x1F\x7F]/', $value);
 }
 
 //Kiểm tra thông tin mạng
@@ -40,7 +45,7 @@ function networkInfo($connectionName = null) {
             "gatewaySource" => "N/A"
         ];
     }
-    $raw = shell_exec('nmcli connection show "'.$connectionName.'"');
+    $raw = shell_exec('nmcli connection show '.escapeshellarg($connectionName));
     $method = "";
     $ip = "";
     $gateway = "";
@@ -82,126 +87,149 @@ function networkInfo($connectionName = null) {
 }
 
 //Xóa Wifi
-if (isset($_GET['Delete_Wifi'])) {
+if (isset($_POST['Delete_Wifi'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     if (isset($_POST['action']) && $_POST['action'] == 'delete_wifi' && isset($_POST['wifiName'])) {
-        $wifiName = $_POST['wifiName'];
+        $wifiName = trim($_POST['wifiName']);
+        if (!vbotWifiValidName($wifiName)) {
+            vbotApiJsonResponse(['success' => false, 'message' => 'Tên kết nối WiFi không hợp lệ.'], 400);
+        }
+        $safeWifiName = htmlspecialchars($wifiName, ENT_QUOTES, 'UTF-8');
         $wifiInfo = shell_exec('iwconfig wlan0');
         if (empty($wifiInfo)) {
-            echo json_encode([
+            vbotApiJsonResponse([
                 'success' => false,
                 'message' => 'Không thể thực hiện lệnh iwconfig hoặc không có dữ liệu.',
                 'data' => null
-            ]);
-            exit;
+            ], 502);
         }
         preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
         $wifiData_ESSID = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
         if ($wifiName !== $wifiData_ESSID) {
             $connection = ssh2_connect($ssh_host, $ssh_port);
             if (!$connection) {
-                echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.']);
-                exit;
+                vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.'], 502);
             }
             if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-                echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại.']);
-                exit;
+                vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại.'], 401);
             }
-            $stream = ssh2_exec($connection, "sudo nmcli connection delete '$wifiName'");
+            $stream = ssh2_exec($connection, 'sudo nmcli connection delete ' . escapeshellarg($wifiName));
             if (!$stream) {
-                echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh xóa WiFi.']);
-                exit;
+                vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh xóa WiFi.'], 502);
             }
             stream_set_blocking($stream, true);
             $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+            $stream_err = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
             $result = stream_get_contents($stream_out);
-            echo json_encode(['success' => true, 'message' => $result]);
+            $resultError = trim(stream_get_contents($stream_err));
+            if ($resultError !== '') {
+                error_log('Delete WiFi failed: '.$resultError);
+                vbotApiJsonResponse(['success' => false, 'message' => 'Không thể xóa kết nối WiFi.'], 502);
+            }
+            vbotApiJsonResponse(['success' => true, 'message' => htmlspecialchars(trim($result), ENT_QUOTES, 'UTF-8')]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'Wifi ' . $wifiName . ' đang được kết nối, Không cho phép xóa']);
+            vbotApiJsonResponse(['success' => false, 'message' => 'Wifi ' . $safeWifiName . ' đang được kết nối, Không cho phép xóa'], 409);
         }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Lỗi khi xóa WiFi: Tham số không hợp lệ.']);
+        vbotApiJsonResponse(['success' => false, 'message' => 'Lỗi khi xóa WiFi: Tham số không hợp lệ.'], 400);
     }
-    exit();
 }
 
 //Kết Nối Wifi
-if (isset($_GET['Connect_Wifi'])) {
+if (isset($_POST['Connect_Wifi'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
         if (isset($_POST['ssid']) && isset($_POST['password'])) {
-            $ssid = $_POST['ssid'];
+            $ssid = trim($_POST['ssid']);
             $password = $_POST['password'];
+            if (!vbotWifiValidName($ssid) || !is_string($password) || strlen($password) > 63 || preg_match('/[\x00-\x1F\x7F]/', $password)) {
+                vbotApiJsonResponse(['success' => false, 'message' => 'SSID hoặc mật khẩu WiFi không hợp lệ.'], 400);
+            }
             $connection = ssh2_connect($ssh_host, $ssh_port);
             if (!$connection) {
-                echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.']);
-                exit;
+                vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.'], 502);
             }
             if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-                echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại.']);
-                exit;
+                vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại.'], 401);
             }
             if ($action == 'connect_wifi') {
-                $command = "sudo nmcli connection up '$ssid'";
+                $command = 'sudo nmcli connection up ' . escapeshellarg($ssid);
             } elseif ($action == 'connect_and_save_wifi') {
                 if (!empty($password)) {
-                    $command = "sudo nmcli device wifi connect '$ssid' password '$password'";
+                    $command = 'sudo nmcli device wifi connect ' . escapeshellarg($ssid) . ' password ' . escapeshellarg($password);
                 } else {
-                    $command = "sudo nmcli device wifi connect '$ssid'";
+                    $command = 'sudo nmcli device wifi connect ' . escapeshellarg($ssid);
                 }
             } else {
-                echo json_encode(['success' => false, 'message' => 'Hành động không hợp lệ.']);
-                exit;
+                vbotApiJsonResponse(['success' => false, 'message' => 'Hành động không hợp lệ.'], 400);
             }
             $stream = ssh2_exec($connection, $command);
+            if (!$stream) {
+                vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh kết nối WiFi.'], 502);
+            }
             stream_set_blocking($stream, true);
             $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+            $stream_err = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
             $result = stream_get_contents($stream_out);
-            echo json_encode(['success' => true, 'message' => $result]);
+            $resultError = trim(stream_get_contents($stream_err));
+            if ($resultError !== '') {
+                error_log('Connect WiFi failed: '.$resultError);
+                vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới WiFi đã chọn.'], 502);
+            }
+            vbotApiJsonResponse(['success' => true, 'message' => htmlspecialchars(trim($result), ENT_QUOTES, 'UTF-8')]);
         } else {
-            echo json_encode(['success' => false, 'message' => 'SSID hoặc mật khẩu không được cung cấp.']);
+            vbotApiJsonResponse(['success' => false, 'message' => 'SSID hoặc mật khẩu không được cung cấp.'], 400);
         }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Yêu cầu không hợp lệ.']);
+        vbotApiJsonResponse(['success' => false, 'message' => 'Yêu cầu không hợp lệ.'], 400);
     }
-    exit();
 }
 
 //Đặt lại cấu hình Wifi
-if (isset($_GET['Reset_Wifi'])) {
+if (isset($_POST['Reset_Wifi'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không thể kết nối đến server SSH.',
             'data' => null
-        ]);
-        exit;
+        ], 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Xác thực SSH thất bại.',
             'data' => null
-        ]);
-        exit;
+        ], 401);
     }
-    $command = 'dos2unix ' . $VBot_Offline . 'resource/wifi_manager/reset_wifi.sh && sudo ' . $VBot_Offline . 'resource/wifi_manager/reset_wifi.sh';
+    $resetWifiScript = $VBot_Offline . 'resource/wifi_manager/reset_wifi.sh';
+    $command = 'dos2unix ' . escapeshellarg($resetWifiScript) . ' && sudo ' . escapeshellarg($resetWifiScript);
     $stream = ssh2_exec($connection, $command);
+    if (!$stream) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi chương trình đặt lại WiFi.', 'data' => null], 502);
+    }
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
+    $stream_err = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
     $result = stream_get_contents($stream_out);
-    echo json_encode([
+    $resultError = trim(stream_get_contents($stream_err));
+    if ($resultError !== '') {
+        error_log('Reset WiFi failed: '.$resultError);
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể đặt lại cấu hình WiFi.', 'data' => null], 502);
+    }
+    vbotApiJsonResponse([
         'success' => true,
         'message' => 'Đã gửi lệnh đặt lại toàn bộ cấu hình WiFi, Hãy kiểm tra, kết nối và cấu hình với điểm truy cập Wifi được phát ra là: VBot Assistant',
         'data' => null
     ]);
-    exit;
 }
 
 #Quét các mạng wifi xung quanh
@@ -210,32 +238,32 @@ if (isset($_GET['Scan_Wifi_List'])) {
     putenv("LC_ALL=C.UTF-8");
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không thể kết nối đến server SSH.',
             'data' => null
-        ]);
-        exit;
+        ], 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Xác thực SSH thất bại.',
             'data' => null
-        ]);
-        exit;
+        ], 401);
     }
     $stream = ssh2_exec($connection, "sudo nmcli -t -f SSID,BSSID,MODE,CHAN,RATE,SIGNAL,BARS,SECURITY dev wifi");
+    if (!$stream) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh quét WiFi.', 'data' => null], 502);
+    }
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $result = stream_get_contents($stream_out);
     if (!$result) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Lỗi khi lấy dữ liệu WiFi từ SSH.',
             'data' => null
-        ]);
-        exit;
+        ], 502);
     }
     $lines = explode("\n", $result);
     $wifi_data = [];
@@ -243,7 +271,9 @@ if (isset($_GET['Scan_Wifi_List'])) {
         if (!empty($line)) {
             $line = str_replace('\\', '', $line);
             $parts = explode(':', $line);
-            $parts = array_map('htmlspecialchars', $parts);
+            $parts = array_map(function ($part) {
+                return htmlspecialchars($part, ENT_QUOTES, 'UTF-8');
+            }, $parts);
             $bssidParts = array_slice($parts, 1, 6);
             $bssid = implode(':', $bssidParts);
             $chan = $parts[8];
@@ -265,12 +295,11 @@ if (isset($_GET['Scan_Wifi_List'])) {
             ];
         }
     }
-    echo json_encode([
+    vbotApiJsonResponse([
         'success' => true,
         'message' => 'Quét WiFi thành công.',
         'data' => $wifi_data
     ]);
-    exit;
 }
 
 #Lấy Mật Khẩu Wifi Đã Kết Nối
@@ -281,19 +310,16 @@ if (isset($_GET['Get_Password_Wifi'])) {
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $response['message'] = "Không thể kết nối đến server SSH.";
-        echo json_encode($response);
-        exit;
+        vbotApiJsonResponse($response, 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
         $response['message'] = "Xác thực SSH thất bại.";
-        echo json_encode($response);
-        exit;
+        vbotApiJsonResponse($response, 401);
     }
-    $desiredSSID = isset($_GET['ssid']) ? $_GET['ssid'] : '';
-    if (empty($desiredSSID)) {
+    $desiredSSID = isset($_GET['ssid']) ? trim($_GET['ssid']) : '';
+    if (!vbotWifiValidName($desiredSSID)) {
         $response['message'] = "Cần nhập tên Wifi để lấy mật khẩu.";
-        echo json_encode($response);
-        exit;
+        vbotApiJsonResponse($response, 400);
     }
     $configFilePath = '/etc/NetworkManager/system-connections/';
     $stream = ssh2_exec($connection, "ls \"$configFilePath\"");
@@ -303,7 +329,10 @@ if (isset($_GET['Get_Password_Wifi'])) {
         if (!empty($file)) {
             $file = trim($file, '"');
             $configFile = $configFilePath . $file;
-            $stream = ssh2_exec($connection, "sudo cat \"$configFile\"");
+            $stream = ssh2_exec($connection, 'sudo cat '.escapeshellarg($configFile));
+            if (!$stream) {
+                continue;
+            }
             stream_set_blocking($stream, true);
             $configContent = stream_get_contents($stream);
             preg_match('/ssid=(.*)/', $configContent, $ssidMatches);
@@ -312,7 +341,7 @@ if (isset($_GET['Get_Password_Wifi'])) {
             preg_match('/timestamp=(.*)/', $configContent, $timestampMatches);
             preg_match('/seen-bssids=(.*)/', $configContent, $bssidMatches);
             $formattedTimestamp = !empty($timestampMatches[1]) ? date("H:i:s d-m-Y", $timestampMatches[1]) : null;
-            if (!empty($ssidMatches[1]) && strpos($ssidMatches[1], $desiredSSID) !== false) {
+            if (!empty($ssidMatches[1]) && trim($ssidMatches[1]) === $desiredSSID) {
                 $wifiInfo = [
                     'file' => $file,
                     'ssid' => $ssidMatches[1],
@@ -331,8 +360,7 @@ if (isset($_GET['Get_Password_Wifi'])) {
     } else {
         $response['message'] = "Không tìm thấy WiFi phù hợp.";
     }
-    echo json_encode($response);
-    exit();
+    vbotApiJsonResponse($response, $response['success'] ? 200 : 404);
 }
 
 #Hiển thị các mạng wifi đã kết nối
@@ -354,20 +382,19 @@ if (isset($_GET['Show_Wifi_List'])) {
                 "interface" => $parts[2] ?? ""
             ];
         }, $savedWifiInfo);
-        echo json_encode([
+        vbotApiJsonResponse([
             "success" => true,
             "message" => "Lấy danh sách WiFi thành công.",
             "data"    => $formattedWifiInfo
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        ]);
     } else {
 
-        echo json_encode([
+        vbotApiJsonResponse([
             "success" => false,
             "message" => "Không thể lấy danh sách WiFi.",
             "data"    => []
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        ], 502);
     }
-    exit();
 }
 
 #kiểm tra thông tin mạng wifi đang kết nối
@@ -379,12 +406,11 @@ if (isset($_GET['Wifi_Network_Information'])) {
     #$wifiInfo = shell_exec('iwconfig wlan0');
 	#$wifiInfo = iconv('ISO-8859-1', 'UTF-8//IGNORE', $wifiInfo); //Nếu tên wifi có dấu tiếng việt
     if (empty($wifiInfo)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không thể thực hiện lệnh iwconfig hoặc không có dữ liệu.',
             'data' => null
-        ]);
-        exit;
+        ], 502);
     }
     $wifiData = [];
     preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
@@ -429,16 +455,16 @@ if (isset($_GET['Wifi_Network_Information'])) {
 	$wifiData['DNS_Mode'] =  $net['dnsSource'];
 	$wifiData['Gateway'] = $net['gateway'];
 	$wifiData['Gateway_Mode'] = $net['gatewaySource'];
-    echo json_encode([
+    vbotApiJsonResponse([
         'success' => true,
         'message' => 'Dữ liệu đã được lấy thành công.',
         'data' => $wifiData
-    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    exit();
+    ]);
 }
 
 #Đặt IP Tĩnh
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'set_static_ip') {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connected_network_name'] ?? '';
@@ -446,35 +472,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $gateway = $_POST['gateway'] ?? '';
     $dns1 = $_POST['dns1'] ?? '8.8.8.8';
     $dns2 = $_POST['dns2'] ?? '8.8.4.4';
-    if ($connectionName === '' || $ip === '' || $gateway === '') {
-        echo json_encode([
+    if (!vbotWifiValidName($connectionName) || $ip === '' || $gateway === '') {
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thiếu tham số: Connection Name, IP hoặc Gateway'
-        ]);
-        exit;
+        ], 400);
     }
     if (strpos($ip, '/') !== false) {$ip = explode('/', $ip)[0];}
+    if (
+        !filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+        || !filter_var($gateway, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+        || !filter_var($dns1, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+        || ($dns2 !== '' && !filter_var($dns2, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
+    ) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Địa chỉ IP, Gateway hoặc DNS không hợp lệ'], 400);
+    }
     $ip_cidr = $ip . "/24";
+    $safeConnectionName = htmlspecialchars($connectionName, ENT_QUOTES, 'UTF-8');
     $dnsString = $dns1;
     if ($dns2 !== '') {$dnsString .= "," . $dns2;}
-	$fullCmd = 'sudo nmcli connection modify "' . $connectionName . '" '
-			 . 'ipv4.addresses "' . $ip_cidr . '" '
-			 . 'ipv4.gateway "' . $gateway . '" '
-			 . 'ipv4.dns "' . $dnsString . '" '
+	$fullCmd = 'sudo nmcli connection modify ' . escapeshellarg($connectionName) . ' '
+			 . 'ipv4.addresses ' . escapeshellarg($ip_cidr) . ' '
+			 . 'ipv4.gateway ' . escapeshellarg($gateway) . ' '
+			 . 'ipv4.dns ' . escapeshellarg($dnsString) . ' '
 			 . 'ipv4.method manual';
 	$connection = ssh2_connect($ssh_host, $ssh_port);
 	if (!$connection) {
-		echo json_encode(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.']);
-		exit;
+		vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.'], 502);
 	}
 	if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-		echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại.']);
-		exit;
+		vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại.'], 401);
 	}
 	$stream = ssh2_exec($connection, $fullCmd);
 	if (!$stream) {
-		echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh nmcli.']);
-		exit;
+		vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh nmcli.'], 502);
 	}
 	stream_set_blocking($stream, true);
 	$stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
@@ -484,46 +515,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 	fclose($stdout);
 	fclose($stderr);
 	if (!empty($result_err)) {
-		echo json_encode([
+		error_log('Set static IP failed: '.trim($result_err));
+		vbotApiJsonResponse([
 			'success' => false,
-			'message' => 'Không thể áp dụng IP tĩnh.',
-			'error_output' => $result_err,
-			'cmd' => $fullCmd
-		]);
-		exit;
+			'message' => 'Không thể áp dụng IP tĩnh.'
+		], 502);
 	}
-	echo json_encode([
+	vbotApiJsonResponse([
 		'success' => true,
-		'message' => 'Thiết Lập IP Tĩnh Thành Công cho: <b>'.$connectionName.'</b>, Bạn Hãy REBOOT - Khởi Động lại Thiết Bị Để Được Áp Dụng',
-		'output' => $result_out,
-		'cmd' => $fullCmd
+		'message' => 'Thiết Lập IP Tĩnh Thành Công cho: <b>'.$safeConnectionName.'</b>, Bạn Hãy REBOOT - Khởi Động lại Thiết Bị Để Được Áp Dụng',
+		'output' => trim($result_out)
 	]);
-	exit;
 }
 
 //Đặt lại IP Động
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'use_dhcp_automatically') {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connected_network_name'] ?? '';
-    if ($connectionName === '') {
-        echo json_encode([
+    if (!vbotWifiValidName($connectionName)) {
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thiếu tên mạng WiFi (connectionName)'
-        ]);
-        exit;
+        ], 400);
     }
+    $safeConnectionName = htmlspecialchars($connectionName, ENT_QUOTES, 'UTF-8');
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
-        echo json_encode(['success' => false, 'message' => 'Không thể kết nối SSH']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối SSH'], 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại'], 401);
     }
     $fullCmd =
-        'sudo nmcli connection modify "' . $connectionName . '" ' .
+        'sudo nmcli connection modify ' . escapeshellarg($connectionName) . ' ' .
         'ipv4.method auto ' .
         'ipv4.addresses "" ' .
         'ipv4.gateway "" ' .
@@ -531,100 +557,95 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         'ipv4.ignore-auto-dns yes';
     $stream = ssh2_exec($connection, $fullCmd);
     if (!$stream) {
-        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh để chuyển sang DHCP ip động']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh để chuyển sang DHCP ip động'], 502);
     }
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $output = stream_get_contents($stream_out);
-    echo json_encode([
+    vbotApiJsonResponse([
         'success' => true,
-        'message' => "Đã chuyển sang DHCP (IP động) thành công cho: <b>$connectionName</b>, Bạn Hãy REBOOT - Khởi Động lại Thiết Bị Để Được Áp Dụng",
-        'cmd' => $fullCmd,
-        'output' => $output
+        'message' => "Đã chuyển sang DHCP (IP động) thành công cho: <b>$safeConnectionName</b>, Bạn Hãy REBOOT - Khởi Động lại Thiết Bị Để Được Áp Dụng",
+        'output' => trim($output)
     ]);
-    exit;
 }
 
 #Cấu Hình DNS
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'set_dns_only') {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connection_name'] ?? '';
     $dns1 = $_POST['dns1'] ?? '8.8.8.8';
     $dns2 = $_POST['dns2'] ?? '8.8.4.4';
-    if ($connectionName === '') {
-        echo json_encode(['success' => false, 'message' => 'Thiếu Connection Name']);
-        exit;
+    if (!vbotWifiValidName($connectionName)) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Thiếu Connection Name'], 400);
+    }
+    $safeConnectionName = htmlspecialchars($connectionName, ENT_QUOTES, 'UTF-8');
+    if (
+        !filter_var($dns1, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+        || !filter_var($dns2, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)
+    ) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Địa chỉ DNS không hợp lệ'], 400);
     }
     $dnsString = $dns1 . ' ' . $dns2;
     $fullCmd =
-        'sudo nmcli connection modify "' . $connectionName . '" ' .
-        'ipv4.dns "' . $dnsString . '" ' .
+        'sudo nmcli connection modify ' . escapeshellarg($connectionName) . ' ' .
+        'ipv4.dns ' . escapeshellarg($dnsString) . ' ' .
         'ipv4.ignore-auto-dns yes';
     $conn = ssh2_connect($ssh_host, $ssh_port);
     if (!$conn) {
-        echo json_encode(['success' => false, 'message' => 'Không thể kết nối SSH']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối SSH'], 502);
     }
     if (!ssh2_auth_password($conn, $ssh_user, $ssh_password)) {
-        echo json_encode(['success' => false, 'message' => 'Sai Tài Khoản hoặc Mật Khẩu Đăng Nhập SSH']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Sai Tài Khoản hoặc Mật Khẩu Đăng Nhập SSH'], 401);
     }
     $stream = ssh2_exec($conn, $fullCmd);
     if (!$stream) {
-        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh cấu hình DNS']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh cấu hình DNS'], 502);
     }
     stream_set_blocking($stream, true);
     $result = stream_get_contents($stream);
-    echo json_encode([
+    vbotApiJsonResponse([
         'success' => true,
-        'message' => "Đã thiết lập cấu hình DNS: $dnsString cho: <b>$connectionName</b><br/>Hãy REBOOT, Khởi Động Lại Hệ Thống Để Áp Dụng DNS Mới",
-        'cmd' => $fullCmd,
-        'output' => $result
+        'message' => "Đã thiết lập cấu hình DNS: $dnsString cho: <b>$safeConnectionName</b><br/>Hãy REBOOT, Khởi Động Lại Hệ Thống Để Áp Dụng DNS Mới",
+        'output' => trim($result)
     ]);
-    exit;
 }
 
 #Đặt Lại DNS SẼ DO DHCP CUNG CẤP DNS
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'reset_dns_dhcp') {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
     $connectionName = $_POST['connection_name'] ?? '';
-    if ($connectionName === '') {
-        echo json_encode([
+    if (!vbotWifiValidName($connectionName)) {
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thiếu tên kết nối WiFi'
-        ]);
-        exit;
+        ], 400);
     }
+    $safeConnectionName = htmlspecialchars($connectionName, ENT_QUOTES, 'UTF-8');
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
-        echo json_encode(['success' => false, 'message' => 'Không thể kết nối SSH']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối SSH'], 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        echo json_encode(['success' => false, 'message' => 'Xác thực SSH thất bại']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại'], 401);
     }
-    $fullCmd = 'sudo nmcli connection modify "' . $connectionName . '" '
+    $fullCmd = 'sudo nmcli connection modify ' . escapeshellarg($connectionName) . ' '
              . 'ipv4.dns "" '
              . 'ipv4.ignore-auto-dns no';
     $stream = ssh2_exec($connection, $fullCmd);
     if (!$stream) {
-        echo json_encode(['success' => false, 'message' => 'Không thể thực thi lệnh cấu hình DNS mặc định do DHCP Modem, Route cấp phát']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh cấu hình DNS mặc định do DHCP Modem, Route cấp phát'], 502);
     }
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $output = stream_get_contents($stream_out);
-    echo json_encode([
+    vbotApiJsonResponse([
         'success' => true,
-        'message' => "Đã chuyển về dùng DNS mặc định từ DHCP Modem, Route cấp phát cho: <b>$connectionName</b><br/>Hãy REBOOT, Khởi Động Lại Hệ Thống Để Áp Dụng DNS Mới",
-        'cmd' => $fullCmd,
-        'response' => $output
+        'message' => "Đã chuyển về dùng DNS mặc định từ DHCP Modem, Route cấp phát cho: <b>$safeConnectionName</b><br/>Hãy REBOOT, Khởi Động Lại Hệ Thống Để Áp Dụng DNS Mới",
+        'response' => trim($output)
     ]);
-    exit;
 }
 ?>

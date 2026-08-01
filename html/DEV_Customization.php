@@ -91,7 +91,7 @@ include 'html_head.php';
     if (isset($_POST['save_code'])) {
       // Lưu mã Python từ trình soạn thảo vào file mà không chạy code
       $python_code = $_POST['code'];
-      file_put_contents($file_path, $python_code);
+      file_put_contents($file_path, $python_code, LOCK_EX);
       echo '<script>showMessagePHP("Code đã được lưu", 3);</script>';
     }
     ?>
@@ -99,11 +99,11 @@ include 'html_head.php';
     if (isset($_POST['run_code'])) {
       // Lưu mã Python từ trình soạn thảo vào file khi chạy code
       $python_code = $_POST['code'];
-      file_put_contents($file_path, $python_code);
+      file_put_contents($file_path, $python_code, LOCK_EX);
       echo '<script>showMessagePHP("Chạy Code Thành Công", 2);</script>';
       echo "<div class='output'>";
       // Chạy file Python và lấy đầu ra
-      $output = shell_exec("python3 $file_path 2>&1");
+      $output = shell_exec("python3 ".escapeshellarg($file_path)." 2>&1");
       echo "<pre>" . htmlspecialchars($output) . "</pre>";
       echo "</div><hr/>";
     }

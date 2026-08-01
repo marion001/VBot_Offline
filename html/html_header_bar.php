@@ -6,7 +6,7 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
-include 'Configuration.php';
+include_once 'Configuration.php';
 ?>
 
 <head>
@@ -177,7 +177,7 @@ include 'Configuration.php';
       <!-- End Notification Nav -->
       <!-- Scan VBot trong cùng Lớp Mạng-->
       <li class="nav-item nav-icon" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng">
-        <i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="get_vbotScanDevices()"></i>
+        <i class="bi bi-radar text-success" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Scan_Devicde" onclick="runWebuiVbotClientAction('get_vbotScanDevices')"></i>
       </li>
       <div class="modal fade" id="modalDialogScrollable_VBot_Scan_Devicde" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable" id="vbotScan_size_setting">
@@ -185,19 +185,19 @@ include 'Configuration.php';
             <div id="welcome-message" class="welcome-message">
               Tìm Kiếm Các Thiết Bị Chạy VBot Trong Cùng Lớp Mạng
               <div class="icon-group_chatbot">
-                <i class="bi bi-trash text-danger pe-3" title="Xóa Dữ Liệu Tìm Kiếm" onclick="clearAllDevices_vbotScanDevices()"></i>
-                <i class="bi bi-arrow-repeat refresh-btn pe-3 text-success" title="Kiểm tra, tải lại trạng thái hoạt động của các thiết bị chạy VBot" onclick="check_Device_Status_VBot_Server()"></i>
+                <i class="bi bi-trash text-danger pe-3" title="Xóa Dữ Liệu Tìm Kiếm" onclick="runWebuiVbotClientAction('clearAllDevices_vbotScanDevices')"></i>
+                <i class="bi bi-arrow-repeat refresh-btn pe-3 text-success" title="Kiểm tra, tải lại trạng thái hoạt động của các thiết bị chạy VBot" onclick="runWebuiVbotClientAction('check_Device_Status_VBot_Server')"></i>
                 <i class="bi bi-arrows-fullscreen pe-3" id="vbotScan_fullscreen" onclick="vbotScan_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện"></i>
                 <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng"></i>
               </div>
             </div>
             <br/>
-            <button type="button" class="btn btn-warning" onclick="scan_VBot_Device()"><i class="bi bi-radar"></i> Quét Thiết Bị</button>
+            <button type="button" class="btn btn-warning" onclick="runWebuiVbotClientAction('scan_VBot_Device')"><i class="bi bi-radar"></i> Quét Thiết Bị</button>
             <br/>
             <div class="input-group mb-3">
               <span class="input-group-text border-success">Thêm Thủ Công:</span>
               <input type="text" id="add_ip_vbot_server" class="form-control border-success" placeholder="Nhập địa chỉ ip thiết bị loa VBot, VD: 192.168.1.107">
-              <button type="button" id="btn_add_ip_vbot_server" name="btn_add_ip_vbot_server" title="Thêm thiết bị VBot thủ công" class="btn btn-primary border-success" onclick="add_IP_VBot_Server()">Thêm</button>
+              <button type="button" id="btn_add_ip_vbot_server" name="btn_add_ip_vbot_server" title="Thêm thiết bị VBot thủ công" class="btn btn-primary border-success" onclick="runWebuiVbotClientAction('add_IP_VBot_Server')">Thêm</button>
             </div>
             <div id="vbot_Scan_devices"></div>
           </div>
@@ -206,7 +206,7 @@ include 'Configuration.php';
 
       <!-- Scan Show Logs API-->
       <li class="nav-item nav-icon" title="Hiển Thị Dữ Liệu Logs VBot Assistant Theo Thời Gian Thực">
-        <i class="bi bi-journal-text text-info" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_Show_Logs_API"></i>
+        <i class="bi bi-journal-text text-info" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_Show_Logs_API" onclick="loadWebuiLogModule()"></i>
       </li>
       <div class="modal fade" id="modalDialogScrollable_Show_Logs_API" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable" id="Show_LogsAPI_size_setting">
@@ -265,7 +265,7 @@ include 'Configuration.php';
                 <option value="<?php echo $URL_API_VBOT; ?>" data-full_name_chatbot_api="<?php echo $Config['contact_info']['full_name']; ?>" selected><?php echo $Config['contact_info']['full_name']; ?> - Mặc Định</option>
               </select>
               &nbsp;<div class="icon-group_chatbot">
-                <i class="bi bi-arrow-repeat pe-3 text-success" onclick="scan_VBot_Device()" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng Lan"></i>
+                <i class="bi bi-arrow-repeat pe-3 text-success" onclick="runWebuiVbotClientAction('scan_VBot_Device')" title="Tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng Lan"></i>
                 <i class="bi bi-arrows-fullscreen pe-3" id="chatbot_fullscreen" onclick="chatbot_toggleFullScreen()" title="Phóng to, thu nhỏ giao diện chatbox"></i>
                 <i class="bi bi-x-lg text-danger" data-bs-dismiss="modal" title="Đóng ChatBox"></i>
               </div>
@@ -419,7 +419,7 @@ include 'Configuration.php';
       }
       loading('show');
       var xhr = new XMLHttpRequest();
-      var url = "includes/php_ajax/Check_Connection.php?" + action_name;
+      var url = "includes/php_ajax/Check_Connection.php";
       xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
           loading('hide');
@@ -439,8 +439,10 @@ include 'Configuration.php';
           }
         }
       };
-      xhr.open("GET", url, true);
-      xhr.send();
+      xhr.open("POST", url, true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+      xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
+      xhr.send(encodeURIComponent(action_name) + "=1");
     }
   </script>
 </header>

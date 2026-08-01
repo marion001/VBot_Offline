@@ -204,12 +204,23 @@ include 'html_head.php';
     include 'html_js.php';
     ?>
     <script>
+        function wifiApiErrorMessage(xhr, fallbackMessage) {
+            try {
+                const response = JSON.parse(xhr.responseText);
+                return response.message || response.error || fallbackMessage;
+            } catch (error) {
+                return fallbackMessage;
+            }
+        }
+
         //Reset cấu hình wifi
         function reset_All_Wifi() {
             if (confirm("Bạn có chắc chắn muốn xóa tất cả các kết nối Wi-Fi không?\nHành động này sẽ làm mất kết nối mạng hiện tại!\n\nVà hệ thống sẽ tạo điểm truy cập Wifi mới với tên: 'VBot Assistant' để bạn kết nối và cấu hình")) {
                 loading("show");
 				const xhr = new XMLHttpRequest();
-                xhr.open("GET", "includes/php_ajax/Wifi_Act.php?Reset_Wifi=true", true);
+                xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+                xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4) {
                         if (xhr.status === 200) {
@@ -218,11 +229,11 @@ include 'html_head.php';
                             show_message(response.message);
                         } else {
 							loading("hide");
-                            show_message("Lỗi khi gửi yêu cầu đặt lại cấu hình wifi");
+                            show_message(wifiApiErrorMessage(xhr, "Lỗi khi gửi yêu cầu đặt lại cấu hình wifi"));
                         }
                     }
                 };
-                xhr.send();
+                xhr.send("Reset_Wifi=1");
             }
         }
         //Hiển thị dang sách wifi đã kết nối
@@ -320,7 +331,7 @@ include 'html_head.php';
                         fileListDiv.innerHTML = '<p>Không có dữ liệu WiFi nào được tìm thấy.</p>';
                     }
                 } else {
-                    show_message('Yêu cầu không thành công với trạng thái: ' + xhr.status);
+                    show_message(wifiApiErrorMessage(xhr, 'Yêu cầu không thành công, HTTP ' + xhr.status));
                 }
                 loading("hide");
             };
@@ -383,8 +394,9 @@ include 'html_head.php';
                 }
             }
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php?Connect_Wifi', true);
+            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
             xhr.onload = function() {
                 if (xhr.status === 200) {
                     var response = JSON.parse(xhr.responseText);
@@ -394,12 +406,12 @@ include 'html_head.php';
                         show_message('<font color=red>Kết nối thất bại: ' + response.message + '</font>');
                     }
                 } else {
-                    show_message('<font color=red>Có lỗi xảy ra: ' + xhr.statusText + '</font>');
+                    show_message('<font color=red>' + wifiApiErrorMessage(xhr, 'Có lỗi xảy ra: HTTP ' + xhr.status) + '</font>');
                 }
                 loading("hide");
                 getWifiNetworkInformation();
             };
-            var data = 'action=connect_and_save_wifi' +
+            var data = 'Connect_Wifi=1&action=connect_and_save_wifi' +
                 '&ssid=' + encodeURIComponent(hiddenSSID || ssid) +
                 '&password=' + encodeURIComponent(password);
             xhr.send(data);
@@ -418,8 +430,9 @@ include 'html_head.php';
             }
             loading("show");
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php?Delete_Wifi', true);
+            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
             xhr.onload = function() {
                 if (xhr.status === 200) {
                     try {
@@ -434,7 +447,7 @@ include 'html_head.php';
                         show_message('Lỗi phân tích phản hồi JSON: ' + e);
                     }
                 } else {
-                    show_message('Có lỗi xảy ra:' + xhr.statusText);
+                    show_message(wifiApiErrorMessage(xhr, 'Có lỗi xảy ra: HTTP ' + xhr.status));
                 }
                 loading("hide");
             };
@@ -442,7 +455,7 @@ include 'html_head.php';
                 loading("hide");
                 show_message('Lỗi yêu cầu mạng.');
             };
-            var data = 'action=delete_wifi&wifiName=' + encodeURIComponent(ssid);
+            var data = 'Delete_Wifi=1&action=delete_wifi&wifiName=' + encodeURIComponent(ssid);
             xhr.send(data);
         }
 
@@ -454,8 +467,9 @@ include 'html_head.php';
             }
             loading("show");
             var xhr = new XMLHttpRequest();
-            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php?Connect_Wifi', true);
+            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
             xhr.onload = function() {
                 if (xhr.status === 200) {
                     try {
@@ -469,7 +483,7 @@ include 'html_head.php';
                         show_message('<font color=red>Lỗi phân tích phản hồi JSON: ' + e + '</font>');
                     }
                 } else {
-                    show_message('<font color=red>Có lỗi xảy ra: ' + xhr.statusText + '</font>');
+                    show_message('<font color=red>' + wifiApiErrorMessage(xhr, 'Có lỗi xảy ra: HTTP ' + xhr.status) + '</font>');
                 }
                 loading("hide");
                 getWifiNetworkInformation();
@@ -478,7 +492,7 @@ include 'html_head.php';
                 loading("hide");
                 show_message('Lỗi yêu cầu mạng.');
             };
-            var data = 'action=connect_wifi&password=""&ssid=' + encodeURIComponent(ssid);
+            var data = 'Connect_Wifi=1&action=connect_wifi&password=""&ssid=' + encodeURIComponent(ssid);
             xhr.send(data);
         }
 
@@ -509,7 +523,7 @@ include 'html_head.php';
                         }
                     } else {
                         loading("hide");
-                        show_message("Lỗi khi gửi yêu cầu: " + xhr.status);
+                        show_message(wifiApiErrorMessage(xhr, "Lỗi khi gửi yêu cầu: HTTP " + xhr.status));
                     }
                 }
             };
@@ -550,7 +564,7 @@ include 'html_head.php';
                             show_message('Lỗi phân tích JSON:' + e);
                         }
                     } else {
-                        show_message('Lỗi khi gửi yêu cầu:' + xhr.statusText);
+                        show_message(wifiApiErrorMessage(xhr, 'Lỗi khi gửi yêu cầu, HTTP ' + xhr.status));
                     }
                 }
             };
@@ -636,6 +650,7 @@ function set_static_ip() {
     formData.append("dns2", dns2);
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4) {
 			loading("hide");
@@ -674,6 +689,7 @@ function set_dhcp_mode() {
     formData.append("connected_network_name", connected_network_name);
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onload = function () {
         if (xhr.status === 200) {
 			loading("hide");
@@ -690,7 +706,7 @@ function set_dhcp_mode() {
             }
         } else {
 			loading("hide");
-            show_message("Lỗi xảy ra, không thể gửi yêu cầu");
+            show_message(wifiApiErrorMessage(xhr, "Lỗi xảy ra, không thể gửi yêu cầu"));
         }
     };
     xhr.send(formData);
@@ -715,6 +731,7 @@ function set_dns_only() {
     formData.append("dns2", d2);
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             loading("hide");
@@ -745,6 +762,7 @@ function resetDNS_DHCP() {
     formData.append("connection_name", connectionName);
     let xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onload = function () {
         let resp = {};
         try { resp = JSON.parse(xhr.responseText); } catch (e) {

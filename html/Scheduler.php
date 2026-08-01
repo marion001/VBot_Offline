@@ -134,6 +134,32 @@ include 'html_head.php';
       //Mảng lưu thông báo lỗi
       $errorMessages = [];
       $successMessage = [];
+		function vbotSchedulerSetFullPermissions($path, $label) {
+			global $ssh_host, $ssh_port, $ssh_user, $ssh_password;
+			clearstatcache(true, $path);
+			$currentPermissions = @fileperms($path);
+			if ($currentPermissions !== false && (($currentPermissions & 0777) === 0777)) {
+				return true;
+			}
+			if (@chmod($path, 0777)) {
+				return true;
+			}
+			if (
+				function_exists('ssh2_connect') &&
+				function_exists('ssh2_sftp') &&
+				function_exists('ssh2_sftp_chmod')
+			) {
+				$connection = @ssh2_connect($ssh_host, intval($ssh_port));
+				if ($connection && @ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+					$sftp = @ssh2_sftp($connection);
+					if ($sftp && @ssh2_sftp_chmod($sftp, $path, 0777)) {
+						return true;
+					}
+				}
+			}
+			error_log('Scheduler: không thể đặt quyền 0777 cho ' . $label . ': ' . $path);
+			return false;
+		}
 		function generate_audio_select($directories, $field_name, $selected_value = '') {
 			if (!is_array($directories)) {
 				$directories = [$directories];
@@ -164,14 +190,14 @@ include 'html_head.php';
       $directory = dirname($json_file);
       if (!is_dir($directory)) {
         mkdir($directory, 0777, true);
-        chmod($directory, 0777);
+        vbotSchedulerSetFullPermissions($directory, 'thư mục dữ liệu Scheduler');
       }
       if (!file_exists($json_file)) {
         $default_data = [
           'notification_schedule' => []
         ];
         file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        chmod($json_file, 0777);
+        vbotSchedulerSetFullPermissions($json_file, 'tệp dữ liệu Scheduler');
       }
       $json_data = file_get_contents($json_file);
       $data = json_decode($json_data, true);
@@ -196,7 +222,7 @@ include 'html_head.php';
               'notification_schedule' => []
             ];
             if (file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false) {
-              chmod($json_file, 0777);
+              vbotSchedulerSetFullPermissions($json_file, 'tệp dữ liệu Scheduler');
               $successMessage[] = "Toàn bộ dữ liệu cấu hình đã được xóa thành công";
               echo '<script>window.location.href = "Scheduler.php";</script>';
               exit;
@@ -219,7 +245,7 @@ include 'html_head.php';
           			$errorMessages[] = 'Không thể tạo thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền thư mục.';
           		}
           	}
-          	if (!chmod($file_save_directory, 0777)) {
+			if (!vbotSchedulerSetFullPermissions($file_save_directory, 'thư mục âm thanh Scheduler')) {
           		$errorMessages[] = 'Không thể thiết lập quyền cho thư mục ' . $file_save_directory . '. Vui lòng kiểm tra quyền hệ thống.';
           	}
 			*/
@@ -257,7 +283,7 @@ include 'html_head.php';
             } else {
               // Di chuyển tệp vào thư mục đích
               if (move_uploaded_file($_FILES["fileToUpload_Scheduler_Upload_Audio"]["tmp_name"], $fileTargetPath)) {
-                chmod($fileTargetPath, 0777);
+                vbotSchedulerSetFullPermissions($fileTargetPath, 'tệp âm thanh Scheduler');
                 $successMessage[] = "- Tệp \"" . htmlspecialchars($fileName) . "\" đã được tải lên và lưu trữ thành công.";
               } else {
                 $errorMessages[] = "- Có lỗi xảy ra khi tải lên tệp của bạn. Vui lòng thử lại.";
@@ -361,12 +387,12 @@ include 'html_head.php';
           //Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
           if (!is_dir($destinationDir)) {
             mkdir($destinationDir, 0777, true);
-            chmod($destinationDir, 0777);
+            vbotSchedulerSetFullPermissions($destinationDir, 'thư mục backup Scheduler');
             $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
           }
           //Sao chép tệp mới
           if (copy($sourceFile, $destinationFile)) {
-            chmod($destinationFile, 0777);
+            vbotSchedulerSetFullPermissions($destinationFile, 'tệp backup Scheduler');
             //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
             //Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
             $jsonFiles = glob($destinationDir . "/*.json");
@@ -386,34 +412,45 @@ include 'html_head.php';
         }
 
         #Lưu dữ liệu Lập Lịch, Thông Báo
-        if (isset($_POST['notification_schedule'])) {
-          $updated_schedule = [];
-          foreach ($_POST['notification_schedule'] as $task) {
-            $task['active'] = isset($task['active']) ? (bool)$task['active'] : false;
-            $task['create_words'] = isset($task['create_words']) && !empty($task['create_words']) ? $task['create_words'] : 'vbot_interface';
+        // Khi xóa tác vụ cuối cùng, trình duyệt không gửi notification_schedule.
+        // Vì vậy luôn coi trường không tồn tại là một danh sách rỗng để việc xóa được lưu.
+        $submitted_schedule = $_POST['notification_schedule'] ?? [];
+        $updated_schedule = [];
+        if (is_array($submitted_schedule)) {
+          foreach ($submitted_schedule as $task) {
+            if (!is_array($task)) {
+              continue;
+            }
+
+            $task['data'] = isset($task['data']) && is_array($task['data']) ? $task['data'] : [];
+            $task['active'] = isset($task['active']);
+            $task['create_words'] = !empty($task['create_words']) ? $task['create_words'] : 'vbot_interface';
             $task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
-            $task['data']['audio_file'] = isset($task['data']['audio_file']) && !empty($task['data']['audio_file']) ? $task['data']['audio_file'] : "";
-            //Kiểm tra các điều kiện cơ bản của task
+            $task['data']['message'] = isset($task['data']['message']) ? trim($task['data']['message']) : '';
+            $task['data']['audio_file'] = isset($task['data']['audio_file']) ? trim($task['data']['audio_file']) : '';
+            $task['time'] = isset($task['time']) && is_array($task['time'])
+              ? array_values(array_filter(array_map('trim', $task['time']), function ($time) {
+                  return $time !== '';
+                }))
+              : [];
+            $task['date'] = isset($task['date']) && is_array($task['date'])
+              ? array_values(array_filter(array_map('trim', $task['date']), function ($date) {
+                  return $date !== '';
+                }))
+              : [];
+
+            //Chỉ lưu tác vụ có đủ dữ liệu bắt buộc.
             if (
               !empty($task['name']) &&
-              isset($task['time']) && is_array($task['time']) && count($task['time']) > 0 && // Kiểm tra time có mảng không
+              !empty($task['time']) &&
               !empty($task['date']) &&
-              (!empty($task['data']['message']) || !empty($task['data']['audio_file']))
+              ($task['data']['message'] !== '' || $task['data']['audio_file'] !== '')
             ) {
-              //Lọc các giá trị thời gian hợp lệ (không phải chuỗi trống)
-              $task['time'] = array_filter($task['time'], function ($time) {
-                return !empty($time);
-              });
-              //Nếu danh sách time sau khi lọc vẫn có ít nhất một giá trị
-              if (!empty($task['time'])) {
-                $updated_schedule[] = $task;
-              }
+              $updated_schedule[] = $task;
             }
           }
-          $data['notification_schedule'] = $updated_schedule;
-          file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-          #$successMessage[] = "Dữ liệu đã được lưu thành công.";
         }
+        $data['notification_schedule'] = $updated_schedule;
 
         #Lưu dữ liệu Thông Báo Cập Nhật Home Assistant
         $data['send_notify_upgrade_vbot_home_assistant']['active'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_active']) ? true : false;
@@ -513,9 +550,20 @@ include 'html_head.php';
         $data['play_all_music_local']['active'] = isset($_POST['play_all_local_active']) ? true : false;
         $data['play_all_music_local']['date'] = isset($_POST['dates_play_all_local']) ? $_POST['dates_play_all_local'] : [];
 
-        #lưu toàn bộ dữ liệu vào file Json
-        file_put_contents($json_file, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        $successMessage[] = "Dữ liệu đã được lưu thành công.";
+        #Lưu toàn bộ dữ liệu vào file JSON đúng một lần.
+        $encoded_schedule = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($encoded_schedule === false) {
+          $save_error = "Không thể mã hóa dữ liệu Scheduler: " . json_last_error_msg();
+          $errorMessages[] = $save_error;
+          error_log($save_error);
+        } elseif (file_put_contents($json_file, $encoded_schedule, LOCK_EX) === false) {
+          $save_error = "Không thể ghi dữ liệu Scheduler vào tệp: " . $json_file;
+          $errorMessages[] = $save_error;
+          error_log($save_error);
+        } else {
+          vbotSchedulerSetFullPermissions($json_file, 'tệp dữ liệu Scheduler');
+          $successMessage[] = "Dữ liệu đã được lưu thành công.";
+        }
       }
       ?>
       <section class="section">

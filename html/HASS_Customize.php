@@ -145,14 +145,22 @@ include 'html_head.php';
                     if (preg_match('/^(\s*)-(.*)$/', $line, $matches)) {
                         $indent = strlen($matches[1]) / 2;
                         $value = trim($matches[2]);
-                        $parent = &$result;
-                        foreach ($path as $segment) {
-                            $parent = &$parent[$segment];
+                        while (count($path) > $indent) {
+                            array_pop($path);
                         }
-                        if ($lastKey !== null && isset($parent[$lastKey]) && is_array($parent[$lastKey])) {
-                            $parent[$lastKey][] = $value;
+                        $parent = &$result;
+                        if (!empty($path)) {
+                            $listKey = array_pop($path);
+                            foreach ($path as $segment) {
+                                $parent = &$parent[$segment];
+                            }
+                            if (!isset($parent[$listKey]) || !is_array($parent[$listKey])) {
+                                $parent[$listKey] = [];
+                            }
+                            $parent[$listKey][] = $value;
+                            $path[] = $listKey;
                         } else {
-                            $parent[$lastKey] = [$value];
+                            $parent[] = $value;
                         }
                     } else {
                         preg_match('/^(\s*)([^:]+):(.*)$/', $line, $matches);
@@ -198,11 +206,11 @@ include 'html_head.php';
                     $destinationFile = $destinationDir . "/Home_Assistant_Custom_" . date('dmY_His') . ".json";
                     if (!is_dir($destinationDir)) {
                         mkdir($destinationDir, 0777, true);
-                        chmod($destinationDir, 0777);
+                    vbotSetFullPermissions($destinationDir, 'thư mục backup Custom HASS');
                         $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
                     }
                     if (copy($sourceFile, $destinationFile)) {
-                        chmod($destinationFile, 0777);
+                        vbotSetFullPermissions($destinationFile, 'tệp backup Custom HASS');
                         //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
                         $jsonFiles = glob($destinationDir . "/*.json");
                         usort($jsonFiles, function ($a, $b) {
@@ -219,30 +227,39 @@ include 'html_head.php';
                         $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
                     }
                 }
-                $deletedItems = json_decode($_POST['deleted_items'] ?? '[]', true);
                 $intents = $_POST['intents'] ?? [];
-                // Loại bỏ các intent đã bị xóa
-                foreach ($deletedItems as $deletedId) {
-                    $deletedIndex = str_replace('accordion_button_custom_hass_', '', $deletedId) - 1;
-                    if (isset($intents[$deletedIndex])) {
-                        unset($intents[$deletedIndex]);
-                    }
+                if (!is_array($intents)) {
+                    $intents = [];
                 }
-                // Sắp xếp lại chỉ số mảng để giữ tính liên tục sau khi xóa
                 $intents = array_values($intents);
                 // Chuyển đổi YAML thành mảng và xử lý các dữ liệu khác (YAML, questions, active, v.v.)
                 foreach ($intents as $index => $intent) {
-                    $intents[$index]['data_yaml'] = yamlToArray(trim($intent['data_yaml']));
+                    if (!is_array($intent)) {
+                        unset($intents[$index]);
+                        continue;
+                    }
+                    $intents[$index]['data_yaml'] = yamlToArray(trim($intent['data_yaml'] ?? ''));
                     $intents[$index]['questions'] = array_filter(array_map('trim', explode("\n", $intent['questions'] ?? '')));
-                    $intents[$index]['name'] = $intent['name'];
-                    $intents[$index]['reply'] = $intent['reply'] ?? '';
+                    $intents[$index]['questions'] = array_values($intents[$index]['questions']);
+                    $intents[$index]['name'] = trim($intent['name'] ?? '');
+                    $intents[$index]['reply'] = trim($intent['reply'] ?? '');
                     $intents[$index]['active'] = isset($intent['active']) && $intent['active'] === 'on';
                 }
-                $updatedData = ['intents' => $intents];
-                if (file_put_contents($jsonFilePath, json_encode($updatedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES))) {
-                    $successMessage[] = "Dữ liệu đã được lưu thành công!";
+                $updatedData = ['intents' => array_values($intents)];
+                $encodedData = json_encode($updatedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($encodedData === false) {
+                    $saveError = "Không thể mã hóa dữ liệu Custom Home Assistant: " . json_last_error_msg();
+                    $errorMessages[] = $saveError;
+                    error_log($saveError);
+                } elseif (file_put_contents($jsonFilePath, $encodedData, LOCK_EX) === false) {
+                    $saveError = "Không thể ghi dữ liệu Custom Home Assistant vào tệp: " . $jsonFilePath;
+                    $errorMessages[] = $saveError;
+                    error_log($saveError);
                 } else {
-                    $errorMessages[] = "Không thể lưu dữ liệu. Vui lòng kiểm tra quyền truy cập tệp tin.";
+                    if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS')) {
+                        error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
+                    }
+                    $successMessage[] = "Dữ liệu đã được lưu thành công!";
                 }
             }
 
@@ -256,11 +273,11 @@ include 'html_head.php';
                     // Kiểm tra xem thư mục đích có tồn tại hay không, nếu không thì tạo mới
                     if (!is_dir($destinationDir)) {
                         mkdir($destinationDir, 0777, true);
-                        chmod($destinationDir, 0777);
+                    vbotSetFullPermissions($destinationDir, 'thư mục backup Custom HASS');
                         $successMessage[] = "- Tạo thư mục sao lưu thành công: <b>$destinationDir</b>";
                     }
                     if (copy($sourceFile, $destinationFile)) {
-                        chmod($destinationFile, 0777);
+                        vbotSetFullPermissions($destinationFile, 'tệp backup Custom HASS');
                         //$successMessage[] = "Tệp đã được sao chép thành công đến $destinationFile";
                         // Lấy danh sách các tệp .json trong thư mục đích, sắp xếp theo thời gian tạo (cũ nhất trước)
                         $jsonFiles = glob($destinationDir . "/*.json");
@@ -278,21 +295,17 @@ include 'html_head.php';
                         $errorMessages[] = "- Xảy ra Lỗi, Không thể sao lưu tệp: <b>$sourceFile</b>";
                     }
                 }
-                // Đường dẫn thư mục
-                $directory = $VBot_Offline . 'resource/hass';
-                if (is_dir($directory)) {
-                    $files = glob($directory . '/*.json');
-                    foreach ($files as $file) {
-                        if (is_file($file)) {
-                            unlink($file);
-                        }
+                // Chỉ làm rỗng đúng tệp Custom Home Assistant, không xóa các JSON khác trong resource/hass.
+                $content = json_encode(["intents" => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($content !== false && file_put_contents($jsonFilePath, $content, LOCK_EX) !== false) {
+                            if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS khôi phục')) {
+                        error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
                     }
-                    $content = json_encode(["intents" => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-                    file_put_contents($jsonFilePath, $content);
-                    chmod($jsonFilePath, 0777);
                     $successMessage[] = "Toàn bộ dữ liệu cấu hình đã được xóa thành công";
                 } else {
-                    $errorMessages[] = "Thư mục không tồn tại: " . $directory;
+                    $deleteError = "Không thể xóa dữ liệu cấu hình Custom Home Assistant: " . $jsonFilePath;
+                    $errorMessages[] = $deleteError;
+                    error_log($deleteError);
                 }
             }
 
@@ -331,6 +344,9 @@ include 'html_head.php';
 					}
 					if ($uploadOk === 1) {
 						if (move_uploaded_file($_FILES["fileToUpload_custom_hass_restore"]["tmp_name"], $jsonFilePath)) {
+                                    if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS khôi phục')) {
+								error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant sau khi khôi phục: " . $jsonFilePath);
+							}
 							$successMessage[] =
 								"- Tệp " . htmlspecialchars($fileName) .
 								" đã được tải lên và khôi phục dữ liệu Custom Home Assistant thành công";
@@ -343,20 +359,25 @@ include 'html_head.php';
 				}
 				//KHÔI PHỤC TỪ FILE HỆ THỐNG
 				else if ($data_recovery_type === "khoi_phuc_file_he_thong") {
-					$start_recovery_custom_hass = $_POST['backup_custom_hass_json_files'];
-					if (!empty($start_recovery_custom_hass)) {
-						if (file_exists($start_recovery_custom_hass)) {
+					$selectedBackup = basename($_POST['backup_custom_hass_json_files'] ?? '');
+					$backupDirectory = $directory_path . '/' . trim($Config['backup_upgrade']['custom_home_assistant']['backup_path'], '/\\');
+					$start_recovery_custom_hass = $backupDirectory . '/' . $selectedBackup;
+					if ($selectedBackup !== '') {
+						if (is_file($start_recovery_custom_hass)) {
 							$jsonContent = file_get_contents($start_recovery_custom_hass);
 							$data = json_decode($jsonContent, true);
 							if (json_last_error() !== JSON_ERROR_NONE || !isset($data['intents']) || !is_array($data['intents'])) {
 								$errorMessages[] = "- Tệp sao lưu hệ thống không đúng dữ liệu Custom Home Assistant (thiếu intents)";
 							} else {
-								$command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($jsonFilePath);
-								exec($command, $output, $resultCode);
-								if ($resultCode === 0) {
+								if (copy($start_recovery_custom_hass, $jsonFilePath)) {
+									if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS khôi phục')) {
+										error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant sau khi khôi phục: " . $jsonFilePath);
+									}
 									$successMessage[] = "Đã khôi phục dữ liệu Custom Home Assistant từ tệp sao lưu trên hệ thống thành công";
 								} else {
-									$errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Custom Home Assistant. Mã lỗi: " . $resultCode;
+									$restoreError = "Không thể sao chép tệp sao lưu Custom Home Assistant: " . $start_recovery_custom_hass;
+									$errorMessages[] = $restoreError;
+									error_log($restoreError);
 								}
 							}
 						} else {
@@ -373,9 +394,13 @@ include 'html_head.php';
                 $data = json_decode($jsonData, true);
                 // Kiểm tra nếu dữ liệu JSON không hợp lệ hoặc thiếu key "intents"
                 if (!is_array($data) || !isset($data['intents'])) {
-                    chmod($jsonFilePath, 0777);
                     $data = ['intents' => []];
-                    file_put_contents($jsonFilePath, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                    $defaultJson = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                    if ($defaultJson === false || file_put_contents($jsonFilePath, $defaultJson, LOCK_EX) === false) {
+                        error_log("Không thể khởi tạo lại tệp Custom Home Assistant không hợp lệ: " . $jsonFilePath);
+                    } elseif (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS')) {
+                        error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
+                    }
                 }
                 $intents = $data['intents'];
                 if (empty($intents)) {
@@ -466,13 +491,12 @@ include 'html_head.php';
                                                     <div class="input-group mb-3">
                                                         <textarea required class="form-control border-success" rows="5" name="intents[<?= $index ?>][questions]" id="intents[<?= $index ?>][questions]">
 <?= htmlspecialchars(implode("\n", $intent['questions'] ?? [])) ?></textarea>
-                                                        </textarea>
                                                         <div class="invalid-feedback">Cần nhập câu lệnh thực thi cho tác vụ này</div>
                                                     </div>
                                                 </div>
                                             </div>
                                             <center>
-                                                <button type="button" class="btn btn-danger rounded-pill" onclick="removeIntentSection('accordion_button_custom_hass_<?= $index + 1 ?>', '<?= htmlspecialchars($intent['name']) ?>')"><i class="bi bi-trash"></i> Xóa Tác Vụ</button>
+                                                <button type="button" class="btn btn-danger rounded-pill" onclick='removeIntentSection("accordion_button_custom_hass_<?= $index + 1 ?>", <?= json_encode($intent['name'], JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_HEX_TAG) ?>)'><i class="bi bi-trash"></i> Xóa Tác Vụ</button>
                                             </center>
                                         </div>
                                     </div>
@@ -486,8 +510,12 @@ include 'html_head.php';
                 $defaultContent = json_encode([
                     "intents" => []
                 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if (file_put_contents($jsonFilePath, $defaultContent) !== false) {
-                    chmod($jsonFilePath, 0777);
+                if (file_put_contents($jsonFilePath, $defaultContent, LOCK_EX) !== false) {
+                    if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS')) {
+                        error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
+                    }
+                } else {
+                    error_log("Không thể tạo tệp Custom Home Assistant: " . $jsonFilePath);
                 }
             }
                     ?>
@@ -591,40 +619,38 @@ include 'html_head.php';
       <audio id="audioPlayer" style="display: none;" controls></audio>-->
     <!-- Template Main JS File -->
     <script>
-        //Mảng chứa danh sách các phần tử đã xóa
-        let deletedItems = [];
-        //Để lưu lại phần tử gốc khi xóa
-        let removedSections = {};
+        //Lưu trực tiếp node DOM để khôi phục đúng cả các giá trị người dùng vừa chỉnh sửa.
+        const removedSections = {};
 
         function removeIntentSection(id, name_text) {
             const section = document.getElementById(id);
             if (section) {
-                // Thêm ID phần tử vào mảng deletedItems
-                deletedItems.push(id);
-                // Lưu lại phần tử gốc để khôi phục sau
-                removedSections[id] = section.innerHTML;
-                // Thay thế nội dung của phần tử bị xóa bằng thông báo và thêm nút "Hủy bỏ"
-                section.innerHTML = '<div class="alert alert-danger">' +
-                    'Đã xóa tác vụ: <b>' + name_text + '</b>, Thay đổi sẽ được lưu khi bạn nhấn "Lưu thay đổi".' +
-                    '<button type="button" class="btn btn-warning btn-sm rounded-pill" onclick="restoreIntentSection(\'' + id + '\')">Hủy bỏ</button>' +
-                    '</div>';
-                //thêm một input ẩn vào form để gửi danh sách phần tử đã xóa sau đó
-                document.querySelector('form').addEventListener('submit', function() {
-                    const deletedInput = document.createElement('input');
-                    deletedInput.type = 'hidden';
-                    deletedInput.name = 'deleted_items';
-                    deletedInput.value = JSON.stringify(deletedItems);
-                    this.appendChild(deletedInput);
+                const placeholder = document.createElement('div');
+                placeholder.id = id + '_deleted';
+                placeholder.className = 'alert alert-danger';
+                placeholder.appendChild(document.createTextNode('Đã xóa tác vụ: '));
+                const taskName = document.createElement('b');
+                taskName.textContent = name_text;
+                placeholder.appendChild(taskName);
+                placeholder.appendChild(document.createTextNode(', thay đổi sẽ được lưu khi bạn nhấn "Lưu thay đổi". '));
+                const restoreButton = document.createElement('button');
+                restoreButton.type = 'button';
+                restoreButton.className = 'btn btn-warning btn-sm rounded-pill';
+                restoreButton.textContent = 'Hủy bỏ';
+                restoreButton.addEventListener('click', function() {
+                    restoreIntentSection(id);
                 });
+                placeholder.appendChild(restoreButton);
+                removedSections[id] = { section: section, placeholder: placeholder };
+                section.replaceWith(placeholder);
             }
         }
 
         // Hàm phục hồi phần tử
         function restoreIntentSection(id) {
-            const section = document.getElementById(id);
-            if (section && removedSections[id]) {
-                section.innerHTML = removedSections[id];
-                deletedItems = deletedItems.filter(itemId => itemId !== id);
+            const removed = removedSections[id];
+            if (removed && removed.placeholder.isConnected) {
+                removed.placeholder.replaceWith(removed.section);
                 delete removedSections[id];
             }
         }
@@ -743,9 +769,9 @@ include 'html_head.php';
 
         //Test điều khiển code yaml
         function yaml_test_code_hass(id_texara) {
-            yamlInput = yamlToArrayy(document.getElementById(id_texara).value);
-            input = JSON.stringify(yamlInput, null, 2);
             try {
+                const yamlInput = yamlToArrayy(document.getElementById(id_texara).value);
+                const input = JSON.stringify(yamlInput, null, 2);
                 const actionData = JSON.parse(input);
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
@@ -753,11 +779,16 @@ include 'html_head.php';
                 const data = 'yaml_test_control_homeassistant=' + encodeURIComponent(JSON.stringify(actionData));
                 xhr.onload = function() {
                     if (xhr.status >= 200 && xhr.status < 300) {
-                        var response = JSON.parse(xhr.responseText);
-                        if (response.success) {
-                            showMessagePHP(response.message, 3)
-                        } else {
-                            show_message(response.message, 3);
+                        try {
+                            const response = JSON.parse(xhr.responseText);
+                            if (response.success) {
+                                showMessagePHP(response.message, 3);
+                            } else {
+                                show_message(response.message || 'Home Assistant từ chối dữ liệu YAML', 3);
+                            }
+                        } catch (parseError) {
+                            console.error('Phản hồi kiểm tra YAML không phải JSON:', xhr.responseText);
+                            show_message('Máy chủ trả về dữ liệu không phải JSON khi kiểm tra YAML. Vui lòng xem Vbot_error.log.');
                         }
                     } else {
                         show_message('Lỗi yêu cầu: ' + xhr.status);
@@ -788,13 +819,20 @@ include 'html_head.php';
                         path.pop();
                     }
                     let parent = result;
-                    for (const segment of path) {
-                        parent = parent[segment];
-                    }
-                    if (lastKey !== null && Array.isArray(parent[lastKey])) {
-                        parent[lastKey].push(value);
+                    if (path.length > 0) {
+                        const listKey = path[path.length - 1];
+                        for (const segment of path.slice(0, -1)) {
+                            parent = parent[segment];
+                        }
+                        if (!Array.isArray(parent[listKey])) {
+                            parent[listKey] = [];
+                        }
+                        parent[listKey].push(value);
                     } else {
-                        parent[lastKey] = [value];
+                        if (!Array.isArray(result)) {
+                            throw new Error('Danh sách YAML cấp cao nhất không được hỗ trợ');
+                        }
+                        result.push(value);
                     }
                 } else if ((matches = line.match(/^(\s*)([^:]+):(.*)$/))) {
                     const indent = matches[1].length / 2;

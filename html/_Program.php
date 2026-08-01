@@ -27,6 +27,59 @@ $Version_VBot_Program_filePath = $VBot_Offline . 'Version.json';
 $backupFolderName = $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'];
 $directoriessss = [$Download_Path, $Extract_Path];
 
+function vbotProgramWriteJson($filePath, array $data, $label)
+{
+    $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($encoded === false) {
+        error_log('[PHP Program ERROR] Không thể mã hóa ' . $label . ': ' . json_last_error_msg());
+        return false;
+    }
+    if (file_put_contents($filePath, $encoded, LOCK_EX) === false) {
+        error_log('[PHP Program ERROR] Không thể ghi ' . $label . ': ' . $filePath);
+        return false;
+    }
+    if (!vbotSetFullPermissions($filePath, $label)) {
+        error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho ' . $label . ': ' . $filePath);
+    }
+    return true;
+}
+
+function vbotProgramNormalizePath($path)
+{
+    $path = str_replace('\\', '/', (string) $path);
+    if ($path === '') {
+        return '';
+    }
+    if ($path[0] !== '/' && !preg_match('/^[A-Za-z]:\//', $path)) {
+        $path = str_replace('\\', '/', getcwd()) . '/' . $path;
+    }
+    $parts = [];
+    foreach (explode('/', $path) as $part) {
+        if ($part === '' || $part === '.') continue;
+        if ($part === '..') {
+            array_pop($parts);
+        } else {
+            $parts[] = $part;
+        }
+    }
+    $prefix = preg_match('/^[A-Za-z]:/', $path) ? '' : '/';
+    return rtrim($prefix . implode('/', $parts), '/');
+}
+
+function vbotProgramIsTemporaryPath($path)
+{
+    global $Download_Path, $Extract_Path;
+    $target = vbotProgramNormalizePath($path);
+    foreach ([$Download_Path, $Extract_Path] as $allowedPath) {
+        $allowed = vbotProgramNormalizePath($allowedPath);
+        if ($allowed !== '' && ($target === $allowed || strpos($target, $allowed . '/') === 0)) {
+            return true;
+        }
+    }
+    error_log('[PHP Program ERROR] Từ chối xóa đường dẫn ngoài thư mục tạm: ' . $path);
+    return false;
+}
+
 #Đọc nội dung file Version.json
 if (file_exists($Version_VBot_Program_filePath)) {
     $Version_VBot_Program = json_decode(file_get_contents($Version_VBot_Program_filePath), true);
@@ -38,6 +91,13 @@ if (file_exists($Version_VBot_Program_filePath)) {
 } else {
     $messages[] = 'Tệp JSON không tồn tại tại đường dẫn: ' . $Version_VBot_Program_filePath;
     $Version_VBot_Program = null;
+}
+if (!is_array($Version_VBot_Program)) {
+    $Version_VBot_Program = [
+        'version' => 'Không xác định',
+        'releaseDate' => 'Không xác định',
+        'description' => ''
+    ];
 }
 
 ?>
@@ -69,7 +129,8 @@ include 'html_head.php';
         $configNewContent = file_get_contents($configNewPath);
         $configOldContent = file_get_contents($configOldPath);
         if ($configNewContent === false || $configOldContent === false) {
-            $messages[] = "<font color=red>- Lỗi khi đọc nội dung JSON từ một trong các tệp <b>$configNewData</b> hoặc <b>$configOldData</b> để chuyển dữ liệu</font>";
+            $messages[] = "<font color=red>- Lỗi khi đọc nội dung JSON từ một trong các tệp <b>$configNewPath</b> hoặc <b>$configOldPath</b> để chuyển dữ liệu</font>";
+            error_log('[PHP Program ERROR] Không thể đọc dữ liệu chuyển cấu hình: ' . $configNewPath . ' | ' . $configOldPath);
             return false;
         }
         $configNewData = json_decode($configNewContent, true);
@@ -122,9 +183,8 @@ include 'html_head.php';
         if (!empty($missingKeys)) {
             $messages[] = "<font color=red>- Các khóa không tồn tại trong dữ liệu mới: <b>" . implode(', ', $missingKeys) . "</b></font><br/>";
         }
-        $writeResult = file_put_contents($configNewPath, json_encode($configNewData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        if ($writeResult === false) {
-            $messages[] = "<font color=green>- Lỗi khi lưu dữ liệu vào tệp <b>'$configNewPath'</b></font><br/>";
+        if (!vbotProgramWriteJson($configNewPath, $configNewData, 'Config.json sau nâng cấp')) {
+            $messages[] = "<font color=red>- Lỗi khi lưu dữ liệu vào tệp <b>'$configNewPath'</b></font><br/>";
             return false;
         }
         $messages[] = "<font color=green>- Các giá trị đã được thay thế và lưu vào tệp: <b>'$configNewPath'</b></font><br/>";
@@ -134,6 +194,10 @@ include 'html_head.php';
     #Hàm xóa thư mục và các file, thư mục con bên trong
     function deleteDirectory($dir){
         global $messages;
+        if (!vbotProgramIsTemporaryPath($dir)) {
+            $messages[] = "<font color=red>Từ chối xóa đường dẫn ngoài thư mục tạm: $dir</font>";
+            return false;
+        }
         if (!file_exists($dir)) {
             $messages[] = "<font color=red>Thư mục hoặc tệp $dir không tồn tại để xóa dữ liệu</font>";
             return false;
@@ -160,9 +224,19 @@ include 'html_head.php';
             return false;
         }
         if (!is_dir($destination)) {
-            mkdir($destination, 0777, true);
+            if (!mkdir($destination, 0777, true) && !is_dir($destination)) {
+                $messages[] = "<font color=red>- Không thể tạo thư mục đích '$destination'</font>";
+                error_log('[PHP Program ERROR] Không thể tạo thư mục sao chép: ' . $destination);
+                return false;
+            }
+            @chmod($destination, 0777);
         }
         $dir = opendir($source);
+        if ($dir === false) {
+            $messages[] = "<font color=red>- Không thể mở thư mục nguồn '$source'</font>";
+            return false;
+        }
+        $copySucceeded = true;
         while (($file = readdir($dir)) !== false) {
             // Bỏ qua các thư mục hiện tại (.) và thư mục cha (..)
             if ($file != '.' && $file != '..') {
@@ -173,18 +247,25 @@ include 'html_head.php';
                     continue;
                 }
                 if (is_dir($srcPath)) {
-                    copyFiles($srcPath, $destPath, $keepList);
+                    if (!copyFiles($srcPath, $destPath, $keepList)) {
+                        $copySucceeded = false;
+                    }
                 } else {
                     if (copy($srcPath, $destPath)) {
+                        if (!vbotSetFullPermissions($destPath, 'tệp sao chép khi cập nhật VBot')) {
+                            error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho tệp: ' . $destPath);
+                        }
                         $messages[] = "<font color=green>- Đã sao chép tệp: </font><font color=blue><b>" . basename($srcPath) . "</b></font>";
                     } else {
                         $messages[] = "<font color=red>- Không thể sao chép tệp <b>'$srcPath'</b> đến <b>'$destPath'</b></font>";
+                        error_log('[PHP Program ERROR] Sao chép thất bại: ' . $srcPath . ' -> ' . $destPath);
+                        $copySucceeded = false;
                     }
                 }
             }
         }
         closedir($dir);
-        return true;
+        return $copySucceeded;
     }
 
     #Chỉ sao chép các tệp cần thiết từ thư mục nguồn sang thư mục đích
@@ -199,7 +280,7 @@ include 'html_head.php';
             $destinationFile = $destinationDir . $file;
             if (file_exists($sourceFile)) {
                 copy($sourceFile, $destinationFile);
-                chmod($destinationFile, 0777);
+                vbotSetFullPermissions($destinationFile, 'tệp tạm khi cập nhật VBot');
                 $messages[] = "<br/><font color=green>- Đã sao chép <b>$file</b> thành công vào bộ nhớ tạm để chuẩn bị di chuyển dữ liệu</font><br>";
             } else {
                 $messages[] = "<font color=red>- Không tìm thấy tệp <b>$file</b> trong thư mục nguồn: <b>$sourceDir</b></font><br>";
@@ -209,6 +290,7 @@ include 'html_head.php';
 
     //Hàm xóa thư mục và nội dung bên trong chỉ dùng cho lúc cập nhật, không để Logs
     function deleteDir($dirPath){
+        if (!vbotProgramIsTemporaryPath($dirPath)) return false;
         if (!is_dir($dirPath)) return;
         $files = scandir($dirPath);
         foreach ($files as $file) {
@@ -225,6 +307,7 @@ include 'html_head.php';
 
     #Xóa nội dungtrong thư mục, không xóa thư mục cha
     function delete_in_Dir($dirPath){
+        if (!vbotProgramIsTemporaryPath($dirPath)) return false;
         if (!is_dir($dirPath)) return;
         $files = scandir($dirPath);
         foreach ($files as $file) {
@@ -243,7 +326,7 @@ include 'html_head.php';
         global $messages;
         if (!is_dir($directory)) {
             if (mkdir($directory, 0777, true)) {
-                chmod($directory, 0777);
+                vbotSetFullPermissions($directory, 'thư mục tạm VBot');
                 $messages[] = "<font color=green>- Thư mục <b>'$directory'</b> đã được tạo thành công và quyền truy cập đã được đặt là 0777</font>";
             } else {
                 $messages[] = "<font color=red>- Không thể tạo thư mục <b>'$directory'</b></font>";
@@ -254,15 +337,39 @@ include 'html_head.php';
     #Giải nén tệp .tar.gz
     function extractTarGz($tarFilePath, $extractTo){
         global $messages;
-        if (!file_exists($tarFilePath)) {
+        if (!is_file($tarFilePath) || !preg_match('/\.tar\.gz$/i', $tarFilePath)) {
             $messages[] = "<font color=red>- Tệp Sao Lưu: <b>'$tarFilePath'</b> không tồn tại</font>";
             return false;
+        }
+        if (!vbotProgramIsTemporaryPath($extractTo)) {
+            $messages[] = "<font color=red>- Thư mục giải nén không hợp lệ</font>";
+            return false;
+        }
+        if (!is_dir($extractTo) && !mkdir($extractTo, 0777, true) && !is_dir($extractTo)) {
+            $messages[] = "<font color=red>- Không thể tạo thư mục giải nén</font>";
+            return false;
+        }
+        $listCommand = "tar -tzf " . escapeshellarg($tarFilePath) . " 2>&1";
+        exec($listCommand, $archiveEntries, $listResult);
+        if ($listResult !== 0 || empty($archiveEntries)) {
+            $messages[] = "<font color=red>- Tệp sao lưu bị lỗi hoặc không đọc được danh sách nội dung</font>";
+            error_log('[PHP Program ERROR] Không thể đọc archive: ' . $tarFilePath . ' | ' . implode(' ', $archiveEntries));
+            return false;
+        }
+        foreach ($archiveEntries as $entry) {
+            $entry = str_replace('\\', '/', trim($entry));
+            if ($entry === '' || $entry[0] === '/' || preg_match('/(^|\/)\.\.($|\/)/', $entry)) {
+                $messages[] = "<font color=red>- Tệp sao lưu chứa đường dẫn không an toàn, đã hủy giải nén</font>";
+                error_log('[PHP Program ERROR] Archive chứa đường dẫn không an toàn: ' . $entry);
+                return false;
+            }
         }
         $command = "tar -xzf " . escapeshellarg($tarFilePath) . " -C " . escapeshellarg($extractTo);
         exec($command, $output, $returnVar);
         if ($returnVar === 0) {
             return true;
         } else {
+            error_log('[PHP Program ERROR] Giải nén thất bại (' . $returnVar . '): ' . $tarFilePath . ' | ' . implode(' ', $output));
             return false;
         }
     }
@@ -275,26 +382,61 @@ include 'html_head.php';
         $zipFile = $destinationDir . "/" . $repoName . ".zip";
         $zipUrl = rtrim($repoUrl, '/') . "/archive/refs/heads/main.zip";
         if (!is_dir($destinationDir)) {
-            mkdir($destinationDir, 0777, true);
+            if (!mkdir($destinationDir, 0777, true) && !is_dir($destinationDir)) {
+                $messages[] = "<font color=red>- Không thể tạo thư mục tải bản cập nhật</font>";
+                return null;
+            }
         }
-        file_put_contents($zipFile, fopen($zipUrl, 'r'));
-        chmod($zipFile, 0777);
+        $remoteStream = @fopen($zipUrl, 'rb');
+        if ($remoteStream === false || file_put_contents($zipFile, $remoteStream, LOCK_EX) === false) {
+            if (is_resource($remoteStream)) fclose($remoteStream);
+            $messages[] = "<font color=red>- Không thể tải dữ liệu cập nhật từ GitHub</font>";
+            error_log('[PHP Program ERROR] Không thể tải repo: ' . $zipUrl);
+            return null;
+        }
+        fclose($remoteStream);
+        if (!vbotSetFullPermissions($zipFile, 'tệp ZIP cập nhật VBot')) {
+            error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho: ' . $zipFile);
+        }
+        if (!class_exists('ZipArchive')) {
+            $messages[] = "<font color=red>- PHP chưa cài extension ZipArchive</font>";
+            @unlink($zipFile);
+            return null;
+        }
         $zip = new ZipArchive;
         $messages[] = "<font color=green>- Tải xuống thành công, đang tiến hành giải nén dữ liệu...</font>";
         if ($zip->open($zipFile) === TRUE) {
+            for ($zipIndex = 0; $zipIndex < $zip->numFiles; $zipIndex++) {
+                $entryName = str_replace('\\', '/', $zip->getNameIndex($zipIndex));
+                if ($entryName === '' || $entryName[0] === '/' || preg_match('/(^|\/)\.\.($|\/)/', $entryName)) {
+                    $zip->close();
+                    @unlink($zipFile);
+                    $messages[] = "<font color=red>- Tệp cập nhật chứa đường dẫn không an toàn</font>";
+                    error_log('[PHP Program ERROR] ZIP chứa đường dẫn không an toàn: ' . $entryName);
+                    return null;
+                }
+            }
             $extractedFolder = $destinationDir . "/" . $repoName . "-main";
-            $zip->extractTo($destinationDir);
+            if (!$zip->extractTo($destinationDir)) {
+                $zip->close();
+                @unlink($zipFile);
+                $messages[] = "<font color=red>- Không thể giải nén dữ liệu cập nhật</font>";
+                return null;
+            }
             $zip->close();
-            unlink($zipFile);
+            if (!unlink($zipFile)) {
+                error_log('[PHP Program ERROR] Không thể xóa tệp ZIP tạm: ' . $zipFile);
+            }
             $htmlFolder = $extractedFolder . "/html";
             if (is_dir($htmlFolder)) {
                 deleteDir($htmlFolder);
             }
-            chmod($extractedFolder, 0777);
+            vbotSetFullPermissions($extractedFolder, 'thư mục giải nén cập nhật VBot');
             //$messages[] = "Giải nén dữ liệu thành công, tiến hành nâng cấp...";
             return $extractedFolder;
         } else {
             $messages[] = "Có Lỗi Xảy Ra, không thể giải nén được giữ liệu đã tải xuống, đã dừng tiến trình";
+            @unlink($zipFile);
             return null;
         }
     }
@@ -305,26 +447,31 @@ include 'html_head.php';
         if (!is_dir($Backup_Dir_Save_VBot)) {
             if (mkdir($Backup_Dir_Save_VBot, 0777, true)) {
                 $messages[] = "<font color=blue>- Thư mục đã được tạo: <b>$Backup_Dir_Save_VBot</b></font>";
-                chmod($Backup_Dir_Save_VBot, 0777);
+                vbotSetFullPermissions($Backup_Dir_Save_VBot, 'thư mục backup VBot');
             } else {
                 $messages[] = "<font color=red>- Lỗi, Không thể tạo thư mục: <b>$Backup_Dir_Save_VBot</b></font>";
                 return null;
             }
         }
-        $Version_VBot_Program_releaseDate = str_replace('/', '-', $Version_VBot_Program['releaseDate']);
-        $Version_VBot_Program_version = str_replace('/', '-', $Version_VBot_Program['version']);
+        $Version_VBot_Program_releaseDate = preg_replace('/[^0-9A-Za-z._-]/', '-', (string) ($Version_VBot_Program['releaseDate'] ?? 'unknown-date'));
+        $Version_VBot_Program_version = preg_replace('/[^0-9A-Za-z._-]/', '-', (string) ($Version_VBot_Program['version'] ?? 'unknown-version'));
         $Backup_File_Name = $Backup_Dir_Save_VBot . '/VBot_Program_' . date('dmY_His') . '_' . $Version_VBot_Program_releaseDate . '_' . $Version_VBot_Program_version . '.tar.gz';
         $tarCommand = "tar -czvf " . escapeshellarg($Backup_File_Name) . " -C " . escapeshellarg($VBot_Offline);
         foreach ($Exclude_Files_Folder as $item) {
             $tarCommand .= " --exclude=" . escapeshellarg($item);
         }
         foreach ($Exclude_File_Format as $ext) {
-            $tarCommand .= " --exclude=*" . escapeshellarg($ext);
+            $ext = ltrim(trim((string) $ext), '*.');
+            if ($ext !== '') {
+                $tarCommand .= " --exclude=" . escapeshellarg('*.' . $ext);
+            }
         }
         $tarCommand .= " . --warning=all 2>&1";
         exec($tarCommand, $output, $returnCode);
         if ($returnCode === 0) {
-            chmod($Backup_File_Name, 0777);
+            if (!vbotSetFullPermissions($Backup_File_Name, 'tệp backup VBot')) {
+                error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho backup: ' . $Backup_File_Name);
+            }
             $messages[] = "<font color=green>- Tạo bản sao lưu chương trình VBot thành công:</font> <font color=blue><a title='Tải Xuống file backup: " . basename($Backup_File_Name) . "' onclick=\"downloadFile('" . $HTML_VBot_Offline . "/" . $Backup_File_Name . "')\">" . basename($Backup_File_Name) . "</a></font> <a title='Tải Xuống file backup: " . basename($Backup_File_Name) . "' onclick=\"downloadFile('" . $HTML_VBot_Offline . "/" . $Backup_File_Name . "')\"><font color=green>Tải Xuống</font></a>";
             /*
           // Hiển thị các file và thư mục đã nén
@@ -343,14 +490,18 @@ include 'html_head.php';
 			*/
             $Backup_File_Names = glob($Backup_Dir_Save_VBot . '/*.tar.gz');
             $numBackupFiles = count($Backup_File_Names);
+            $Limit_Backup_Files = max(1, intval($Limit_Backup_Files));
             if ($numBackupFiles > $Limit_Backup_Files) {
                 usort($Backup_File_Names, function ($a, $b) {
                     return filemtime($a) - filemtime($b);
                 });
                 $filesToDelete = array_slice($Backup_File_Names, 0, $numBackupFiles - $Limit_Backup_Files);
                 foreach ($filesToDelete as $file) {
-                    unlink($file);
-                    $messages[] = "<br/>- Số lượng tệp tin sao lưu trên hệ thống vượt quá giới hạn là: <b>$Limit_Backup_Files</b>, đã xóa file cũ nhất: <font color=red><b>" . basename($file) . "</b></font>";
+                    if (unlink($file)) {
+                        $messages[] = "<br/>- Số lượng tệp tin sao lưu trên hệ thống vượt quá giới hạn là: <b>$Limit_Backup_Files</b>, đã xóa file cũ nhất: <font color=red><b>" . basename($file) . "</b></font>";
+                    } else {
+                        error_log('[PHP Program ERROR] Không thể xóa backup cũ: ' . $file);
+                    }
                 }
             }
             return $Backup_File_Name;
@@ -397,7 +548,7 @@ include 'html_head.php';
                 if ($client->getRefreshToken()) {
                     $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                     if (isset($token['access_token'])) {
-                        file_put_contents($tokenPath, json_encode($token, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                vbotProgramWriteJson($tokenPath, $token, 'token Google Drive');
                         $libPath_exist = true;
                         $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                     } else {
@@ -420,20 +571,31 @@ include 'html_head.php';
         $Backup_Upgrade_Program = $_POST['Backup_Upgrade_Program'];
         $Exclude_Files_Folder = isset($_POST['exclude_files_folder']) ? $_POST['exclude_files_folder'] : [];
         $Exclude_File_Format = isset($_POST['exclude_file_format']) ? $_POST['exclude_file_format'] : [];
-        $Backup_To_Cloud = $_POST['vbot_program_cloud_backup'];
+        $Exclude_Files_Folder = is_array($Exclude_Files_Folder) ? $Exclude_Files_Folder : [];
+        $Exclude_File_Format = is_array($Exclude_File_Format) ? $Exclude_File_Format : [];
+        $Backup_To_Cloud = $_POST['vbot_program_cloud_backup'] ?? '';
         foreach ($directoriessss as $directory) {
             createDirectory($directory);
         }
-        $connection = ssh2_connect($ssh_host, $ssh_port);
-        ssh2_auth_password($connection, $ssh_user, $ssh_password);
+        $connection = false;
+        if (function_exists('ssh2_connect')) {
+            $connection = @ssh2_connect($ssh_host, $ssh_port);
+            if ($connection && !@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+                $connection = false;
+                error_log('[PHP Program ERROR] Xác thực SSH thất bại khi xử lý backup/nâng cấp');
+            }
+        }
         //Kiểm tra xem nút nhấn nào được submit
         if ($Backup_Upgrade_Program === "upload_and_restore") {
             $messages[] =  "<font color=green>- Đang tiến hành tải lên bản khôi phục dữ liệu</font>";
             $uploadOk = 1;
-            if (isset($_FILES["fileToUpload"])) {
+            if (isset($_FILES["fileToUpload"]) && $_FILES["fileToUpload"]["error"] !== UPLOAD_ERR_NO_FILE) {
                 $targetFile = $Download_Path . '/' . basename($_FILES["fileToUpload"]["name"]);
                 $fileName = basename($_FILES["fileToUpload"]["name"]);
-                if (!preg_match('/\.tar\.gz$/', $fileName) || !preg_match('/^VBot_Program/', $fileName)) {
+                if ($_FILES["fileToUpload"]["error"] !== UPLOAD_ERR_OK) {
+                    $messages[] = "<font color=red>- Tệp tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload"]["error"]) . "</font>";
+                    $uploadOk = 0;
+                } elseif (!preg_match('/\.tar\.gz$/i', $fileName) || !preg_match('/^VBot_Program/i', $fileName)) {
                     $messages[] = "<font color=red>- Chỉ chấp nhận tệp .tar.gz, dành cho VBot_Program, và được Giao Diện tạo ra bản sao lưu đó</font>";
                     $uploadOk = 0;
                 }
@@ -443,8 +605,11 @@ include 'html_head.php';
                     $messages[] = "<font color=red>- Tệp sao lưu không được tải lên</font>";
                 } else {
                     if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $targetFile)) {
+                        if (!vbotSetFullPermissions($targetFile, 'tệp upload backup VBot')) {
+                            error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho tệp upload: ' . $targetFile);
+                        }
                         $messages[] = "<font color=green>- Tệp <b>" . htmlspecialchars($fileName) . "</b> đã được tải lên thành công</font>";
-                        if (extractTarGz($directory_path . '/' . $targetFile, $Extract_Path)) {
+                        if (extractTarGz(vbotProgramNormalizePath($targetFile), $Extract_Path)) {
                             $Extract_Path_OK = $directory_path . '/' . $Extract_Path . '/';
                             $messages[] = "<font color=green>- Giải nén thành công vào đường dẫn: <b>$Extract_Path/</b> </font><br/>";
                             if (copyFiles($Extract_Path_OK, $VBot_Offline)) {
@@ -487,7 +652,7 @@ include 'html_head.php';
                                     if ($client->getRefreshToken()) {
                                         $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                                         if (isset($token['access_token'])) {
-                                            file_put_contents($tokenPath, json_encode($token, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                                            vbotProgramWriteJson($tokenPath, $token, 'token Google Drive');
                                             $libPath_exist = true;
                                             $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                                         } else {
@@ -608,7 +773,7 @@ include 'html_head.php';
                                             if ($client->getRefreshToken()) {
                                                 $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                                                 if (isset($token['access_token'])) {
-                                                    file_put_contents($tokenPath, json_encode($token, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                                                    vbotProgramWriteJson($tokenPath, $token, 'token Google Drive');
                                                     $libPath_exist = true;
                                                     $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                                                 } else {
@@ -718,13 +883,21 @@ include 'html_head.php';
                         //Kiểm tra và khởi động lại VBot khi cập nhật thành công
                         $Auto_Reboot_updated_the_program_successfully = isset($_POST['auto_restart_vbot']) ? true : false;
                         if ($Auto_Reboot_updated_the_program_successfully === true) {
-                            ssh2_exec($connection, "systemctl --user restart VBot_Offline.service");
-                            $messages[] = "<font color=green><br/>- Đã chạy lệnh khởi động lại chương trình VBot: <b>systemctl --user restart VBot_Offline.service</b></font><br/>";
+                            if ($connection && @ssh2_exec($connection, "systemctl --user restart VBot_Offline.service")) {
+                                $messages[] = "<font color=green><br/>- Đã chạy lệnh khởi động lại chương trình VBot: <b>systemctl --user restart VBot_Offline.service</b></font><br/>";
+                            } else {
+                                $messages[] = "<font color=red><br/>- Không thể tự động khởi động lại VBot do kết nối SSH không khả dụng</font><br/>";
+                                error_log('[PHP Program ERROR] Không thể gửi lệnh restart VBot qua SSH');
+                            }
                         } else {
                             $messages[] = "<font color=red><br/>- Chương trình VBot không được lựa chọn để tự động khởi động lại khi cập nhật thành công, Bạn cần khởi động lại thủ công để áp dụng dữ liệu mới</font>";
                         }
-                        ssh2_exec($connection, "sudo chmod -R 0777 $VBot_Offline");
-                        ssh2_exec($connection, "sudo chmod -R 0777 $directory_path");
+                        if ($connection) {
+                            @ssh2_exec($connection, "sudo chmod -R 0777 -- " . escapeshellarg($VBot_Offline));
+                            @ssh2_exec($connection, "sudo chmod -R 0777 -- " . escapeshellarg($directory_path));
+                        } else {
+                            error_log('[PHP Program ERROR] Không thể đồng bộ quyền 0777 sau nâng cấp do SSH không khả dụng');
+                        }
                         $Sound_updated_the_program_successfully_OK = isset($_POST['sound_updated_the_program_successfully']) ? true : false;
                         if ($Sound_updated_the_program_successfully_OK === true) {
                             $sound_updated_the_program_successfully = $VBot_Offline . $Config['smart_config']['smart_wakeup']['sound']['default']['updated_the_program_successfully'];
@@ -749,7 +922,7 @@ include 'html_head.php';
             if ($client->getRefreshToken()) {
                 $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                 if (isset($token['access_token'])) {
-                    file_put_contents($tokenPath, json_encode($token, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                    vbotProgramWriteJson($tokenPath, $token, 'token Google Drive');
                     $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                 } else {
                     $messages[] = '<font color=green>- Xảy ra lỗi, Token Làm Mới Không Tồn Tại Để Xác Thực</font>';
@@ -763,17 +936,40 @@ include 'html_head.php';
         $service = new Drive($client);
         try {
             $file = $service->files->get($fileId, ['fields' => 'name']);
-            $fileName = $file->getName();
+            $fileName = basename($file->getName());
+            if (!preg_match('/^VBot_Program_.*\.tar\.gz$/i', $fileName)) {
+                $messages[] = "<font color='red'>- Tệp Google Drive không đúng định dạng backup VBot.</font>";
+                error_log('[PHP Program ERROR] Từ chối tên tệp Google Drive: ' . $file->getName());
+                return false;
+            }
             $destinationPath = rtrim($destinationDirectory, '/') . '/' . $fileName;
             $content = $service->files->get($fileId, ['alt' => 'media']);
-            $outFile = fopen($destinationPath, 'w');
-            while (!$content->getBody()->eof()) {
-                fwrite($outFile, $content->getBody()->read(1024));
+            $outFile = fopen($destinationPath, 'wb');
+            if ($outFile === false) {
+                $messages[] = "<font color='red'>- Không thể mở tệp đích để lưu backup.</font>";
+                error_log('[PHP Program ERROR] Không thể mở tệp tải từ Drive: ' . $destinationPath);
+                return false;
             }
+            if (!flock($outFile, LOCK_EX)) {
+                fclose($outFile);
+                $messages[] = "<font color='red'>- Không thể khóa tệp đích để tải backup.</font>";
+                return false;
+            }
+            while (!$content->getBody()->eof()) {
+                if (fwrite($outFile, $content->getBody()->read(8192)) === false) {
+                    flock($outFile, LOCK_UN);
+                    fclose($outFile);
+                    @unlink($destinationPath);
+                    $messages[] = "<font color='red'>- Lỗi khi ghi tệp backup tải từ Google Drive.</font>";
+                    return false;
+                }
+            }
+            fflush($outFile);
+            flock($outFile, LOCK_UN);
             fclose($outFile);
             if (file_exists($destinationPath)) {
                 $messages[] = "<font color='green'>- Tải xuống tệp <b>'$fileName'</b> thành công</font>";
-                chmod($destinationPath, 0777);
+                vbotSetFullPermissions($destinationPath, 'tệp tải từ Google Drive');
                 return $destinationPath;
             } else {
                 $messages[] = "<font color='red'>- Không thể lưu tệp '$fileName'.</font>";
@@ -831,8 +1027,15 @@ include 'html_head.php';
                     $messages[] = "<font color=red>- <b>Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active), quá trình khôi phục dữ liệu đã được hủy</font>";
                 }
             }
-            //Nếu dữ liệu là đường dẫn Local
-            elseif (strpos($data_restore_file, '/home/') === 0) {
+            //Chỉ cho phép khôi phục tệp local nằm trong đúng thư mục backup VBot.
+            elseif (
+                preg_match('/^VBot_Program_.*\.tar\.gz$/i', basename($data_restore_file)) &&
+                strpos(
+                    vbotProgramNormalizePath($data_restore_file),
+                    vbotProgramNormalizePath($Backup_Dir_Save_VBot) . '/'
+                ) === 0
+            ) {
+                $data_restore_file = vbotProgramNormalizePath($data_restore_file);
                 $messages[] = "<font color=green>- Tiến hành khôi phục dữ liệu từ tệp sao lưu trên hệ thống</font>";
                 if (extractTarGz($data_restore_file, $Extract_Path)) {
                     $Extract_Path_OK = $directory_path . '/' . $Extract_Path . '/';
@@ -850,7 +1053,8 @@ include 'html_head.php';
                     $messages[] = "<font color=red>- Lỗi khi giải nén tệp</font>";
                 }
             } else {
-                $messages[] = "<font color=red>- Dữ liệu không bắt đầu bằng 'http' hoặc '/home/'</font>";
+                $messages[] = "<font color=red>- Tệp khôi phục không thuộc thư mục backup VBot hoặc không đúng định dạng</font>";
+                error_log('[PHP Program ERROR] Từ chối đường dẫn khôi phục: ' . $data_restore_file);
             }
         } else {
             $messages[] = "<font color=red>- Dữ liệu Restore_Backup là rỗng.</font>";
@@ -869,6 +1073,11 @@ if (isset($_POST['Check_For_Upgrade'])) {
         if (file_exists($localFile)) {
             $localContent = file_get_contents($localFile);
             $localData    = json_decode($localContent, true);
+            if (!is_array($localData)) {
+                $localData = [];
+                $messages[] = "<font color=red>Version.json local không hợp lệ</font>";
+                error_log('[PHP Program ERROR] Version.json local không hợp lệ: ' . $localFile);
+            }
             $ch = curl_init();
             curl_setopt($ch, CURLOPT_URL, $apiUrl);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -880,11 +1089,13 @@ if (isset($_POST['Check_For_Upgrade'])) {
             if ($httpCode === 200 && $response !== false) {
                 $apiData = json_decode($response, true);
                 if (isset($apiData['content'])) {
-                    $remoteContent = base64_decode($apiData['content']);
+                    $remoteContent = base64_decode($apiData['content'], true);
                     $remoteData    = json_decode($remoteContent, true);
                     if (isset($localData['releaseDate']) && isset($remoteData['releaseDate'])) {
-						if ($localData['changes'][0]['description'] !== $remoteData['changes'][0]['description']) {
-							$check_lib_noti = '<font color=blue><b>' . $remoteData['changes'][0]['description'] . '</b></font>';
+                        $localChangeFeature = $localData['changes'][0]['description'] ?? '';
+                        $remoteChangeFeature = $remoteData['changes'][0]['description'] ?? '';
+						if ($localChangeFeature !== $remoteChangeFeature) {
+							$check_lib_noti = '<font color=blue><b>' . htmlspecialchars($remoteChangeFeature) . '</b></font>';
 						} else {
 							$check_lib_noti = null;
 						}

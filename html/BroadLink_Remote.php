@@ -473,10 +473,12 @@ function showLearnCommandExtraFields(handmade) {
 //Scan Thiết Bị Broadlink
 function scanBroadlinkDevices() {
 	loading('show');
-    var url = 'includes/php_ajax/BroadLink.php?scan_broadlink_remote_device';
+    var url = 'includes/php_ajax/BroadLink.php';
     showMessagePHP('Đang quét thiết bị Broadlink Remote trong mạng...', 3);
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
+    xhr.open('POST', url, true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status !== 200) {
@@ -499,7 +501,7 @@ function scanBroadlinkDevices() {
             }
         }
     };
-    xhr.send();
+    xhr.send('scan_broadlink_remote_device=1');
 }
 
 //KIỂM TRA THIẾT BỊ CÓ RF HAY KHÔNG
@@ -700,6 +702,7 @@ function deleteDeviceByMac(friendly_name, mac, ip, model) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status !== 200) {
@@ -733,6 +736,7 @@ function renameDevice(mac) {
     var xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status !== 200) {
@@ -798,6 +802,7 @@ function learn_Command(ip, mac, devtype, wave_type, friendly_name, model) {
     formData.append("devtype", devtype);
     fetch("includes/php_ajax/BroadLink.php", {
         method: "POST",
+        headers: {"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""},
         body: formData
     })
     .then(res => res.text())
@@ -910,6 +915,7 @@ function saveLearnedCommandToJson(wave_type) {
     formData.append("wave_type", wave_type);
     fetch("includes/php_ajax/BroadLink.php", {
         method: "POST",
+        headers: {"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""},
         body: formData
     })
     .then(res => res.json())
@@ -941,6 +947,7 @@ function saveLearnedCommandRow(row) {
     fd.append('active', row.querySelector('.cmd_active').checked ? '1' : '0');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
         try {
@@ -968,6 +975,7 @@ function deleteLearnedCommandRow(row) {
     fd.append('index', row.dataset.cmdIndex);
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
         try {
@@ -991,6 +999,7 @@ function deleteAllDevicesRemote() {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/BroadLink.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             var res = JSON.parse(xhr.responseText);
@@ -1012,6 +1021,7 @@ function deleteAllCmdDevicesRemote() {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/BroadLink.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             var res = JSON.parse(xhr.responseText);
@@ -1076,6 +1086,7 @@ function sendBroadlinkCommand(ip, mac, devtype, code) {
     const xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/BroadLink.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
         var res;

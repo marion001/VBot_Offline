@@ -746,8 +746,34 @@ function handleAudioReplyType() {
             '<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_zalo\')" title="Tạo File âm thanh"> Tạo Âm Thanh</button> ' +
             ' <button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound" onclick="use_this_wakeup_reply_sound(\'\')" title="Sử Dụng Âm Thanh Này"> Sử Dụng Âm Thanh Này</button> ' +
             '</center>';
-    }
-    else {
+    } else if (type === "wakeup_reply_tts_edge") {
+        contentDiv.innerHTML =
+            '<div class="form-floating mb-3">' +
+            '<input type="number" min="0.5" step="0.1" max="2.0" class="form-control border-success" id="create_tts_edge_WakeUP_Reply_speed" value="1.0">' +
+            '<label for="create_tts_edge_WakeUP_Reply_speed" class="form-label">Tốc độ đọc:</label>' +
+            '</div>' +
+            '<div class="form-floating mb-3">' +
+            '<select id="create_tts_edge_WakeUP_Reply_voice_name" class="form-select border-success">' +
+            '<option value="vi-VN-HoaiMyNeural" selected>Giọng nữ - Hoài My</option>' +
+            '<option value="vi-VN-NamMinhNeural">Giọng nam - Nam Minh</option>' +
+            '</select>' +
+            '<label for="create_tts_edge_WakeUP_Reply_voice_name">Giọng đọc Edge TTS:</label>' +
+            '</div>' +
+            '<div class="form-floating mb-3">' +
+            '<textarea class="form-control border-success" style="height: 100px;" id="tts_audio_reply_input_text"></textarea>' +
+            '<label for="tts_audio_reply_input_text" class="form-label">Nhập nội dung văn bản cần tạo file âm thanh</label>' +
+            '</div>' +
+            '<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;">' +
+            '<span class="input-group-text border-danger">File Âm Thanh:</span>' +
+            '<input type="text" id="tts_audio_reply_output_path" class="form-control border-danger" readonly>' +
+            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+            '<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p"><i class="bi bi-download"></i></button>' +
+            '</div>' +
+            '<center>' +
+            '<button type="button" class="btn btn-primary rounded-pill" onclick="createAudio_Wakeup_reply(\'tts_edge\')">Tạo Âm Thanh</button> ' +
+            '<button type="button" class="btn btn-success rounded-pill" id="add_use_this_wakeup_reply_sound">Sử Dụng Âm Thanh Này</button>' +
+            '</center>';
+    } else {
         contentDiv.innerHTML = "";
     }
 }
@@ -876,7 +902,10 @@ async function xiaozhi_active_device_info() {
 						};
 						fetch("includes/php_ajax/Scanner.php", {
 							method: "POST",
-							headers: { "Content-Type": "application/x-www-form-urlencoded" },
+							headers: {
+								"Content-Type": "application/x-www-form-urlencoded",
+								"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""
+							},
 							body: new URLSearchParams({xiaozhi: "1", action: "active_success_save_data", json_data: JSON.stringify(logData)}),
 						})
 						.then(res => res.json().catch(() => ({})))
@@ -922,6 +951,7 @@ function xiaozhi_action(action, confirmText, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Scanner.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             loading('hide');
@@ -1168,32 +1198,39 @@ function createAudio_Wakeup_reply(source_tts) {
         showMessagePHP("Vui lòng nhập nội dung để tạo âm thanh", 5);
         return;
     }
-    let url_tts = "";
+    const ttsParams = new URLSearchParams({
+        create_tts_audio: "1",
+        source_tts: source_tts,
+        text: text
+    });
     if (source_tts === 'tts_ggcloud') {
         const speed = document.getElementById("create_tts_ggcloud_WakeUP_Reply_speed").value;
         const voiceName = document.getElementById("tts_audio_reply_voice_name").value;
-        const encodedText = encodeURIComponent(text);
-        const encodedVoice = encodeURIComponent(voiceName);
-        url_tts = "includes/php_ajax/TTS_Audio_Create.php?create_tts_audio&source_tts=tts_ggcloud&language_code=vi-VN&speaking_rate=" + speed + "&voice_name=" + encodedVoice + "&text=" + encodedText;
+        ttsParams.set("language_code", "vi-VN");
+        ttsParams.set("speaking_rate", speed);
+        ttsParams.set("voice_name", voiceName);
     }
     else if (source_tts === 'tts_zalo') {
         const speakerId = document.getElementById("create_tts_zalo_WakeUP_Reply_voice_name").value;
         const speakerSpeed = document.getElementById("create_tts_zalo_WakeUP_Reply_speed").value;
-        const encodedText = encodeURIComponent(text);
-        url_tts = "includes/php_ajax/TTS_Audio_Create.php"
-            + "?create_tts_audio"
-            + "&source_tts=tts_zalo"
-            + "&speaker_id=" + speakerId
-            + "&speaker_speed=" + speakerSpeed
-            + "&encode_type=1&text=" + encodedText;
+        ttsParams.set("speaker_id", speakerId);
+        ttsParams.set("speaker_speed", speakerSpeed);
+        ttsParams.set("encode_type", "1");
+    } else if (source_tts === 'tts_edge') {
+        const voiceName = document.getElementById("create_tts_edge_WakeUP_Reply_voice_name").value;
+        const speakingRate = document.getElementById("create_tts_edge_WakeUP_Reply_speed").value;
+        ttsParams.set("voice_name", voiceName);
+        ttsParams.set("speaking_rate", speakingRate);
     }
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", url_tts, true);
+    xhr.open("POST", "includes/php_ajax/TTS_Audio_Create.php", true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-                try {
-                    const data = JSON.parse(xhr.responseText);
+            try {
+                const data = JSON.parse(xhr.responseText);
+                if (xhr.status === 200) {
                     if (data.success) {
                         showMessagePHP(data.message || "Tạo file âm thanh thành công", 5);
                         const filePathInput = document.getElementById("tts_audio_reply_output_path");
@@ -1211,19 +1248,19 @@ function createAudio_Wakeup_reply(source_tts) {
                         }
                     } else {
                         loading('hide');
-                        showMessagePHP("Lỗi khi tạo file âm thanh: " + (data.message || "Không rõ lỗi"), 5);
+                        showMessagePHP("Lỗi khi tạo file âm thanh: " + (data.message || data.error || "Không rõ lỗi"), 5);
                     }
-                } catch (e) {
+                } else {
                     loading('hide');
-                    showMessagePHP("Lỗi Phản Hồi Từ Server, Vui Lòng Thử Lại: " + e.message, 5);
+                    showMessagePHP("Không thể tạo âm thanh: " + (data.message || data.error || ("HTTP " + xhr.status)), 5);
                 }
-            } else {
+            } catch (e) {
                 loading('hide');
-                showMessagePHP("Không thể gửi yêu cầu tạo âm thanh. Mã lỗi: " + xhr.status, 5);
+                showMessagePHP("Lỗi Phản Hồi Từ Server, Vui Lòng Thử Lại: " + e.message, 5);
             }
         }
     };
-    xhr.send();
+    xhr.send(ttsParams.toString());
 }
 
 //Lựa chọn file âm thanh dùng cho wakeup reply
@@ -1234,9 +1271,11 @@ function use_this_wakeup_reply_sound(filePath) {
     }
     loading('show');
     const encodedFilePath = encodeURIComponent(filePath);
-    const url = 'includes/php_ajax/Hotword_pv_ppn.php?use_this_wakeup_reply_sound&file_path=' + encodedFilePath;
+    const url = 'includes/php_ajax/Hotword_pv_ppn.php';
     const xhr = new XMLHttpRequest();
-    xhr.open("GET", url, true);
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             if (xhr.status === 200) {
@@ -1256,11 +1295,11 @@ function use_this_wakeup_reply_sound(filePath) {
                 }
             } else {
                 loading('hide');
-                show_message("Lỗi kết nối đến server!");
+                show_message(hotwordApiErrorMessage(xhr, "Lỗi kết nối đến server!"));
             }
         }
     };
-    xhr.send();
+    xhr.send("use_this_wakeup_reply_sound=1&file_path=" + encodedFilePath);
 }
 
 //Cập nhật đường dẫn path web ui vào thẻ input html
@@ -1319,7 +1358,7 @@ function getBacklistData(dataPath, textareaId) {
 //Thay đổi giá trị value của BackList.json theo đường dẫn chỉ định 
 function changeBacklistValue(path_json, value_type) {
     var url = "includes/php_ajax/Show_file_path.php";
-    var params = "delete_data_backlist=1&path=" + path_json + "&value_type=" + value_type;
+    var params = "delete_data_backlist=1&path=" + encodeURIComponent(path_json) + "&value_type=" + encodeURIComponent(value_type);
     var xhr = new XMLHttpRequest();
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
@@ -1348,8 +1387,10 @@ function changeBacklistValue(path_json, value_type) {
     xhr.onerror = function () {
         show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
     };
-    xhr.open("GET", url + "?" + params, true);
-    xhr.send();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
+    xhr.send(params);
 }
 
 //Hàm gọi Test LED khi nhấn nút
@@ -1591,6 +1632,18 @@ function CheckConnectionHomeAssistant(inputId) {
 }
 
 //Tải lên file hotword Snowboy
+function hotwordApiErrorMessage(xhr, fallbackMessage) {
+    try {
+        const response = JSON.parse(xhr.responseText);
+        if (Array.isArray(response.messages)) {
+            return response.messages.join('<br/>');
+        }
+        return response.message || response.error || fallbackMessage;
+    } catch (error) {
+        return fallbackMessage;
+    }
+}
+
 function uploadFilesHotwordSnowboy() {
     const formData = new FormData();
     const files = document.getElementById('upload_files_hotword_snowboy').files;
@@ -1605,6 +1658,7 @@ function uploadFilesHotwordSnowboy() {
     formData.append('action_hotword_snowboy', 'upload_files_hotword_snowboy');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onload = function () {
         if (xhr.status === 200) {
             try {
@@ -1621,7 +1675,7 @@ function uploadFilesHotwordSnowboy() {
                 show_message('Không thể phân tích phản hồi json: ' + e.message);
             }
         } else {
-            show_message("<center>Tải file lên thất bại</center>");
+            show_message(hotwordApiErrorMessage(xhr, "Tải file lên thất bại"));
         }
     };
     xhr.send(formData);
@@ -1643,6 +1697,7 @@ function uploadFilesHotwordPPNandPV() {
     formData.append('action_ppn_pv', 'upload_files_ppn_pv');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onload = function () {
         if (xhr.status === 200) {
             try {
@@ -1659,7 +1714,7 @@ function uploadFilesHotwordPPNandPV() {
                 show_message('Không thể phân tích phản hồi json: ' + e.message);
             }
         } else {
-            show_message("<center>Tải file lên thất bại</center>");
+            show_message(hotwordApiErrorMessage(xhr, "Tải file lên thất bại"));
         }
     };
     xhr.send(formData);
@@ -1671,8 +1726,10 @@ function reload_hotword_config(langg = "No") {
         return;
     }
     var xhr = new XMLHttpRequest();
+    var requestBody = "";
     if (langg === "No") {
-        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config');
+        xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+        requestBody = "reload_hotword_config=1";
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
@@ -1691,11 +1748,12 @@ function reload_hotword_config(langg = "No") {
                     }
                 }
             } else {
-                show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+                show_message("<center>" + hotwordApiErrorMessage(xhr, "Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt") + "</center>");
             }
         };
     } else if (langg === 'snowboy') {
-        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_hotword_config_snowboy');
+        xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+        requestBody = "reload_hotword_config_snowboy=1";
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
@@ -1706,11 +1764,12 @@ function reload_hotword_config(langg = "No") {
                 }
                 loadConfigHotword("snowboy");
             } else {
-                show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Hotword tiếng anh và tiếng việt</center>");
+                show_message("<center>" + hotwordApiErrorMessage(xhr, "Có lỗi xảy ra khi ghi mới dữ liệu Hotword Snowboy") + "</center>");
             }
         };
     } else if (langg === 'wakeup_reply') {
-        xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?reload_wakeup_reply');
+        xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
+        requestBody = "reload_wakeup_reply=1";
         xhr.onload = function () {
             if (xhr.status === 200) {
                 var response = JSON.parse(xhr.responseText);
@@ -1721,11 +1780,13 @@ function reload_hotword_config(langg = "No") {
                 }
                 loadWakeupReply();
             } else {
-                show_message("<center>Có lỗi xảy ra khi ghi mới dữ liệu Câu Phản Hồi Wakeup Reply</center>");
+                show_message("<center>" + hotwordApiErrorMessage(xhr, "Có lỗi xảy ra khi ghi mới dữ liệu Câu Phản Hồi Wakeup Reply") + "</center>");
             }
         };
     }
-    xhr.send();
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
+    xhr.send(requestBody);
 }
 
 //Tải Lên File âm thanh wakeup_reply
@@ -1743,6 +1804,7 @@ function uploadFilesWakeUP_Reply() {
     formData.append('wakeup_reply_upload', 'upload_files_wakeup_reply');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onload = function () {
         if (xhr.status === 200) {
             try {
@@ -1760,7 +1822,7 @@ function uploadFilesWakeUP_Reply() {
                 show_message('Lỗi khi phân tích phản hồi từ máy chủ.');
             }
         } else {
-            show_message('Lỗi khi gửi yêu cầu tải lên.');
+            show_message(hotwordApiErrorMessage(xhr, 'Lỗi khi gửi yêu cầu tải lên.'));
         }
     };
     xhr.send(formData);

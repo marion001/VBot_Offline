@@ -122,8 +122,10 @@ include 'html_head.php';
       return;
     }
     var xhr = new XMLHttpRequest();
-    var url = "includes/php_ajax/Show_file_path.php?empty_the_file&file_path=" + encodeURIComponent(selectedValue);
-    xhr.open("GET", url);
+    var url = "includes/php_ajax/Show_file_path.php";
+    xhr.open("POST", url);
+    xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function() {
       if (xhr.readyState === 4 && xhr.status === 200) {
         try {
@@ -139,7 +141,7 @@ include 'html_head.php';
         }
       }
     };
-    xhr.send();
+    xhr.send("empty_the_file=1&file_path=" + encodeURIComponent(selectedValue));
   }
 
   //Tải file Logs được chọn

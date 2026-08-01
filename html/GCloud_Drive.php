@@ -67,11 +67,11 @@ if ($google_cloud_drive_active === true) {
     global $notifications;
     // Nội dung mặc định là '{}'
     if (!file_exists($filePath)) {
-      if (file_put_contents($filePath, $initialContent)) {
+      if (file_put_contents($filePath, $initialContent, LOCK_EX) !== false) {
         //$notifications[] = "Đã tạo file: $filePath với nội dung mặc định\n";
 
         // Thiết lập quyền chmod 777 cho file
-        if (chmod($filePath, 0777)) {
+        if (vbotSetFullPermissions($filePath, 'tệp cấu hình Google Drive')) {
           //$notifications[] = "Đã thiết lập quyền 777 cho file: $filePath\n";
         } else {
           $notifications[] =  "Không thể thiết lập quyền 777 cho file: $filePath\n";

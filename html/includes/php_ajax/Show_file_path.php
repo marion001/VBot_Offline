@@ -6,12 +6,10 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+require_once __DIR__.'/Api_Helpers.php';
+vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
-//Cấu hình tiêu đề CORS
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json; charset=utf-8');
+$allowedFileRoots = vbotApiAllowedRoots([$VBot_Offline, $directory_path]);
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -78,6 +76,9 @@ function get_all_file_directory($dir)
       continue;
     }
     $path = $dir . '/' . $item;
+    if (is_link($path)) {
+      continue;
+    }
     if (is_dir($path)) {
       $files = array_merge($files, get_all_file_directory($path));
     } else {
@@ -125,16 +126,21 @@ if (isset($_GET['scan_Audio_Startup'])) {
 
 //Chuyển Âm Thanh Thành Base64
 if (isset($_GET['audio_b64'])) {
-  $filePath = isset($_GET['path']) ? $_GET['path'] : '';
-  echo encodeFileToBase64($filePath);
+  $requestedPath = isset($_GET['path']) ? $_GET['path'] : '';
+  $filePath = vbotApiResolveExistingPath($requestedPath, $allowedFileRoots, 'file');
+  $audioExtension = $filePath !== false ? strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) : '';
+  echo $filePath !== false && in_array($audioExtension, $Allowed_Extensions_Audio, true)
+    ? encodeFileToBase64($filePath)
+    : json_encode(['success' => false, 'error' => 'Đường dẫn file không hợp lệ']);
   exit();
 }
 
 //Tìm Kiếm Âm Thanh Trong Thư Mục TTS_Audio
 if (isset($_GET['TTS_Audio'])) {
   $file = $_GET['TTS_Audio'];
-  $filePath = $VBot_Offline . $file;
-  if (file_exists($filePath)) {
+  $filePath = vbotApiResolveExistingPath($VBot_Offline.$file, $allowedFileRoots, 'file');
+  $audioExtension = $filePath !== false ? strtolower(pathinfo($filePath, PATHINFO_EXTENSION)) : '';
+  if ($filePath !== false && in_array($audioExtension, $Allowed_Extensions_Audio, true)) {
     $fileInfo = pathinfo($filePath);
     $fileExtension = strtolower($fileInfo['extension']);
     $mimeType = 'audio/' . $fileExtension;
@@ -148,16 +154,19 @@ if (isset($_GET['TTS_Audio'])) {
   exit();
 }
 
-if (isset($_GET['empty_the_file'])) {
-  $file_path = $_GET['file_path'];
+if (isset($_POST['empty_the_file'])) {
+  vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+  $requestedPath = isset($_POST['file_path']) ? $_POST['file_path'] : '';
+  $logRoots = vbotApiAllowedRoots([$VBot_Offline.'resource/log']);
+  $file_path = vbotApiResolveExistingPath($requestedPath, $logRoots, 'file');
   $response = [];
-  if (file_exists($file_path)) {
-    file_put_contents($file_path, '');
+  if ($file_path !== false && strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'log') {
+    file_put_contents($file_path, '', LOCK_EX);
     $response['success'] = true;
     $response['message'] = "Đã Xóa Dữ Liệu File: " . basename($file_path) . " Thành Công";
   } else {
     $response['success'] = false;
-    $response['message'] = "File: " . basename($file_path) . " Không Tồn Tại Để Xóa Dữ Liệu";
+    $response['message'] = "File không tồn tại hoặc đường dẫn nằm ngoài thư mục VBot";
   }
   echo json_encode($response);
 }
@@ -179,14 +188,15 @@ function updateValueByPath(&$data, $path, $newValue)
 }
 
 // Kiểm tra và xử lý xóa giá trị nếu tham số 'delete_data_backlist' và 'path' được truyền
-if (isset($_GET['delete_data_backlist']) && isset($_GET['path'])) {
+if (isset($_POST['delete_data_backlist']) && isset($_POST['path'])) {
+  vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
   $response = [
     'success' => false,
     'message' => '',
     'data' => null
   ];
-  $path_to_update = $_GET['path'];
-  $value_type = isset($_GET['value_type']) ? $_GET['value_type'] : null;
+  $path_to_update = $_POST['path'];
+  $value_type = isset($_POST['value_type']) ? $_POST['value_type'] : null;
   if ($value_type === 'null') {
     $newValue = null;
   } elseif ($value_type === '{}') {
@@ -194,7 +204,7 @@ if (isset($_GET['delete_data_backlist']) && isset($_GET['path'])) {
   } elseif ($value_type === '[]') {
     $newValue = [];
   } else {
-    $newValue = $_GET['value_type'] ?? null;
+    $newValue = isset($_POST['value_type']) ? $_POST['value_type'] : null;
   }
   if (file_exists($Backlist_File_Name)) {
     $fileContents = file_get_contents($Backlist_File_Name);
@@ -202,7 +212,7 @@ if (isset($_GET['delete_data_backlist']) && isset($_GET['path'])) {
       $data = json_decode($fileContents, true);
       if ($data !== null) {
         if (updateValueByPath($data, $path_to_update, $newValue)) {
-          if (file_put_contents($Backlist_File_Name, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false) {
+          if (file_put_contents($Backlist_File_Name, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX) !== false) {
             $response['success'] = true;
             $response['message'] = 'Giá trị đã được cập nhật thành công.';
             $response['data'] = $data;
@@ -249,8 +259,8 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
     'message' => '',
     'data' => null
   ];
-  $file_path = $_GET['file'];
-  if (file_exists($file_path) && is_readable($file_path)) {
+  $file_path = vbotApiResolveExistingPath($_GET['file'], $allowedFileRoots, 'file');
+  if ($file_path !== false && is_readable($file_path)) {
     $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
     if ($file_extension === 'json' || $file_extension === 'txt' || $file_extension === 'log' || $file_extension === 'logs') {
       $content = file_get_contents($file_path);
@@ -276,11 +286,15 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
 
 //Hiển thị toàn bộ file trong thư mục
 if (isset($_GET['show_all_file'])) {
-  $directory = $_GET['directory_path'];
-  if (!is_dir($directory)) {
+  $directory = vbotApiResolveExistingPath(
+    isset($_GET['directory_path']) ? $_GET['directory_path'] : '',
+    $allowedFileRoots,
+    'directory'
+  );
+  if ($directory === false) {
     echo json_encode([
       'success' => false,
-      'message' => "Thư mục $directory không tồn tại.",
+      'message' => "Thư mục không tồn tại hoặc nằm ngoài thư mục VBot.",
       'data' => []
     ]);
     exit;
@@ -304,7 +318,15 @@ if (isset($_GET['show_all_file'])) {
 
 //Xem cấu trúc tệp backup tar.gz
 if (isset($_GET['read_file_backup']) && isset($_GET['file']) && !empty($_GET['file'])) {
-  $filePath = escapeshellarg($_GET['file']);
+  $resolvedBackup = vbotApiResolveExistingPath($_GET['file'], $allowedFileRoots, 'file');
+  if ($resolvedBackup === false || !preg_match('/\.tar\.gz$/i', $resolvedBackup)) {
+    vbotApiJsonResponse([
+      'success' => false,
+      'message' => 'Đường dẫn file backup không hợp lệ.',
+      'data' => []
+    ], 400);
+  }
+  $filePath = escapeshellarg($resolvedBackup);
   $command = "tar -tzf $filePath";
   $output = shell_exec($command);
   if ($output) {
@@ -328,9 +350,16 @@ if (isset($_GET['read_file_backup']) && isset($_GET['file']) && !empty($_GET['fi
 
 # Xem nội dung file bên trong cấu trúc tệp .tar.gz
 if (isset($_GET['read_files_in_backup']) && isset($_GET['file_path']) && !empty($_GET['file_path']) && isset($_GET['file_name']) && !empty($_GET['file_name'])) {
-  $file_path = $_GET['file_path'];
+  $file_path = vbotApiResolveExistingPath($_GET['file_path'], $allowedFileRoots, 'file');
   $file_name = $_GET['file_name'];
-  if (file_exists($file_path)) {
+  $normalizedMemberName = str_replace('\\', '/', $file_name);
+  if (
+    $file_path !== false
+    && preg_match('/\.tar\.gz$/i', $file_path)
+    && strpos($file_name, "\0") === false
+    && strpos($normalizedMemberName, '../') === false
+    && substr($normalizedMemberName, 0, 1) !== '/'
+  ) {
     $command = "tar -O -xzf " . escapeshellarg($file_path) . " " . escapeshellarg($file_name);
     $file_content = shell_exec($command);
     if ($file_content !== null) {

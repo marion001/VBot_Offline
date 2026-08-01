@@ -1606,11 +1606,12 @@ function update_index_data(data){
 		fetch("includes/php_ajax/Scanner.php?check_version=" + encodeURIComponent(type), {
 			cache: "no-store"
 		})
-		.then(function(response) {
+		.then(async function(response) {
+			const data = await response.json();
 			if (!response.ok) {
-				throw new Error("Lỗi HTTP: " + response.status);
+				throw new Error(data.message || ("Lỗi HTTP: " + response.status));
 			}
-			return response.json();
+			return data;
 		})
 		.then(function(data) {
 			if (data.success) {
@@ -1622,8 +1623,8 @@ function update_index_data(data){
 				}
 			} else {
 				const message = data.message || "";
-				if (message.includes("bluealsad") && message.includes("command not found")) {
-					return;
+				if ((message.includes("bluealsad") || message.includes("shairport")) && message.includes("command not found")) {
+				  return;
 				}
 				show_message(message);
 			}
@@ -1652,7 +1653,7 @@ function update_index_data(data){
                 show_message('Lỗi:' + response.message);
               }
             } catch (e) {
-              show_message('Lỗi phân tích JSON 1:' + e);
+              show_message('Lỗi phân tích JSON:' + e);
             }
           } else {
             show_message('Lỗi khi gửi yêu cầu:' + xhr.statusText);

@@ -6,11 +6,9 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+require_once __DIR__.'/Api_Helpers.php';
+vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header('Content-Type: application/json; charset=utf-8');
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
     if (
@@ -19,22 +17,34 @@ if ($Config['contact_info']['user_login']['active']) {
     ) {
         session_unset();
         session_destroy();
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        ], 401);
     }
+}
+
+function vbotCheckIsPrivateLanIpv4($ipAddress)
+{
+    if (!filter_var($ipAddress, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+        return false;
+    }
+    $ip = ip2long($ipAddress);
+    return ($ip >= ip2long('10.0.0.0') && $ip <= ip2long('10.255.255.255'))
+        || ($ip >= ip2long('172.16.0.0') && $ip <= ip2long('172.31.255.255'))
+        || ($ip >= ip2long('192.168.0.0') && $ip <= ip2long('192.168.255.255'));
 }
 
 //Tets Code Yaml Hass
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_homeassistant'])) {
     $actionData = json_decode($_POST['yaml_test_control_homeassistant'], true);
     if (!$actionData || empty($actionData['action']) || empty($actionData['target']['entity_id'])) {
-        echo json_encode(['success' => false, 'message' => 'Thiếu "action" hoặc "entity_id" trong dữ liệu']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Thiếu "action" hoặc "entity_id" trong dữ liệu'], 400);
     }
     $action = $actionData['action'];
+    if (!is_string($action) || !preg_match('/^[a-z0-9_]+\.[a-z0-9_]+$/i', $action)) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Action Home Assistant không hợp lệ'], 400);
+    }
     $target = $actionData['target'];
     $entity_id = $target['entity_id'];
     list($domain, $service) = explode('.', $action);
@@ -84,18 +94,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
     if (!$response['success']) {
         $response = sendRequest($Config['home_assistant']['external_url'] . '/api/services/' . $domain . '/' . $service, $headers, $payload);
     }
-    echo json_encode($response);
-    exit;
+    vbotApiJsonResponse($response, $response['success'] ? 200 : 502);
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ping_status'])) {
     if (!isset($_POST['ip']) || empty($_POST['ip'])) {
-        echo json_encode([
+        vbotApiJsonResponse([
             "success" => false,
             "message" => "Không có IP nào được cung cấp",
             "data" => []
-        ]);
-        exit;
+        ], 400);
     }
     $ip_input = $_POST['ip'];
     if (is_array($ip_input)) {
@@ -111,37 +119,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ping_status'])) {
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $result['message'] = "Kết nối SSH không thành công";
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     if (!@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
         $result['message'] = "Xác thực SSH không thành công";
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     $stream = ssh2_exec($connection, $CMD);
     if (!$stream) {
         $result['message'] = "Không thể thực thi lệnh.";
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     stream_set_blocking($stream, true);
     $output = stream_get_contents($stream);
     fclose($stream);
     if (!$output) {
         $result['message'] = "Phản hồi trống từ Python";
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     $decoded = json_decode($output, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
         $result['message'] = "JSON không hợp lệ từ Python";
         $result['raw'] = $output;
-        echo json_encode($result);
-        exit;
+        error_log('Ping script returned invalid JSON: '.substr(trim($output), 0, 2000));
+        vbotApiJsonResponse($result, 502);
     }
-    echo json_encode($decoded);
-    exit;
+    vbotApiJsonResponse($decoded);
 }
 
 #Kiểm tra trạng thái các thiết bị chạy Vbot Server trong mạng lan
@@ -149,8 +152,10 @@ if (isset($_GET['check_status_vbot_server_in_lan'])) {
     $ip = isset($_GET['ip']) ? $_GET['ip'] : '';
     $port = isset($_GET['port']) ? $_GET['port'] : '';
     if (empty($ip) || empty($port)) {
-        echo json_encode(['success' => false, 'message' => 'Thiếu IP hoặc cổng PORT']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Thiếu IP hoặc cổng PORT'], 400);
+    }
+    if (!vbotCheckIsPrivateLanIpv4($ip) || !ctype_digit((string)$port) || (int)$port < 1 || (int)$port > 65535) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'IP hoặc cổng PORT không hợp lệ'], 400);
     }
     $url = "http://" . $ip . ":" . $port;
     $curl = curl_init();
@@ -164,9 +169,9 @@ if (isset($_GET['check_status_vbot_server_in_lan'])) {
     ));
     $response = curl_exec($curl);
     if (curl_errno($curl)) {
-        echo json_encode(['success' => false, 'message' => 'Lỗi cURL: ' . curl_error($curl)]);
+        error_log('VBot server status cURL failed for '.$ip.':'.$port.': '.curl_error($curl));
         curl_close($curl);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới thiết bị'], 502);
     }
     curl_close($curl);
     $success = false;
@@ -177,23 +182,23 @@ if (isset($_GET['check_status_vbot_server_in_lan'])) {
             $success = true;
             $message = "Thiết bị đang trực tuyến";
         } else {
-            echo json_encode(['success' => false, 'message' => 'Thiết bị ngoại tuyến, hoặc chương trình VBot chưa được khởi chạy']);
-            exit;
+            vbotApiJsonResponse(['success' => false, 'message' => 'Thiết bị ngoại tuyến, hoặc chương trình VBot chưa được khởi chạy'], 502);
         }
     } else {
-        echo json_encode(['success' => false, 'message' => 'Không nhận được phản hồi']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không nhận được phản hồi'], 502);
     }
-    echo json_encode(['success' => $success, 'message' => $message, 'ip_address' => $ip, 'port_api' => $port]);
-    exit;
+    vbotApiJsonResponse(['success' => $success, 'message' => $message, 'ip_address' => $ip, 'port_api' => $port]);
 }
 
 //Thêm thiết bị chạy Vbot Server thủ công bằng IP
-if (isset($_GET['add_ip_vbot_server'])) {
-    $ip = isset($_GET['ip']) ? trim($_GET['ip']) : '';
+if (isset($_POST['add_ip_vbot_server'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    $ip = isset($_POST['ip']) ? trim($_POST['ip']) : '';
     if (empty($ip)) {
-        echo json_encode(['success' => false, 'error' => 'Thiếu địa chỉ IP']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'error' => 'Thiếu địa chỉ IP'], 400);
+    }
+    if (!vbotCheckIsPrivateLanIpv4($ip)) {
+        vbotApiJsonResponse(['success' => false, 'error' => 'Chỉ cho phép địa chỉ IPv4 thuộc mạng LAN riêng'], 400);
     }
     $url = "http://$ip/VBot_API.php";
     $curl = curl_init();
@@ -208,13 +213,11 @@ if (isset($_GET['add_ip_vbot_server'])) {
     $response = curl_exec($curl);
     curl_close($curl);
     if (!$response) {
-        echo json_encode(['success' => false, 'error' => 'Không thể kết nối đến IP']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'error' => 'Không thể kết nối đến IP'], 502);
     }
     $json = json_decode($response, true);
     if (!isset($json['success']) || $json['success'] !== true) {
-        echo json_encode(['success' => false, 'error' => 'API trả về success = false']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'error' => 'API thiết bị trả về dữ liệu không hợp lệ'], 502);
     }
     $device = [
         'ip_address' => $json['ip_address'] ?? $ip,
@@ -226,11 +229,11 @@ if (isset($_GET['add_ip_vbot_server'])) {
     $dir_path = dirname($json_path);
     if (!is_dir($dir_path)) {
         mkdir($dir_path, 0777, true);
-		shell_exec('chmod 0777 ' . escapeshellarg($dir_path));
+        @chmod($dir_path, 0777);
     }
     if (!file_exists($json_path)) {
-        file_put_contents($json_path, "[]");
-		shell_exec('chmod 0777 ' . escapeshellarg($json_path));
+        file_put_contents($json_path, "[]", LOCK_EX);
+        @chmod($json_path, 0777);
     }
     $devices = [];
     if (file_exists($json_path)) {
@@ -252,27 +255,30 @@ if (isset($_GET['add_ip_vbot_server'])) {
     if (!$updated) {
         $devices[] = $device;
     }
-    file_put_contents($json_path, json_encode($devices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-    echo json_encode(['success' => true, 'device' => $device]);
-    exit;
+    file_put_contents($json_path, json_encode($devices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+    @chmod($json_path, 0777);
+    vbotApiJsonResponse(['success' => true, 'device' => $device]);
 }
 
 //Xóa thiết bị chạy Vbot Server thủ công bằng IP
-if (isset($_GET['delete_ip_vbot_server'])) {
-    $ip = isset($_GET['ip']) ? trim($_GET['ip']) : '';
+if (isset($_POST['delete_ip_vbot_server'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    $ip = isset($_POST['ip']) ? trim($_POST['ip']) : '';
     if (empty($ip)) {
-        echo json_encode(['success' => false, 'error' => 'Thiếu địa chỉ IP']);
-        exit;
+        vbotApiJsonResponse(['success' => false, 'error' => 'Thiếu địa chỉ IP'], 400);
+    }
+    if (!vbotCheckIsPrivateLanIpv4($ip)) {
+        vbotApiJsonResponse(['success' => false, 'error' => 'Địa chỉ IPv4 không hợp lệ'], 400);
     }
     $json_path = $directory_path . '/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json';
     $dir_path = dirname($json_path);
     if (!is_dir($dir_path)) {
         mkdir($dir_path, 0777, true);
-		shell_exec('chmod 0777 ' . escapeshellarg($dir_path));
+        @chmod($dir_path, 0777);
     }
     if (!file_exists($json_path)) {
-        file_put_contents($json_path, "[]");
-		shell_exec('chmod 0777 ' . escapeshellarg($json_path));
+        file_put_contents($json_path, "[]", LOCK_EX);
+        @chmod($json_path, 0777);
     }
     $devices = [];
     if (file_exists($json_path)) {
@@ -288,12 +294,12 @@ if (isset($_GET['delete_ip_vbot_server'])) {
     });
     $devices = array_values($devices);
     if (count($devices) < $original_count) {
-        file_put_contents($json_path, json_encode($devices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-        echo json_encode(['success' => true, 'message' => 'Xóa thiết bị thành công', 'ip_address' => $ip]);
+        file_put_contents($json_path, json_encode($devices, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        @chmod($json_path, 0777);
+        vbotApiJsonResponse(['success' => true, 'message' => 'Xóa thiết bị thành công', 'ip_address' => $ip]);
     } else {
-        echo json_encode(['success' => false, 'error' => 'Không tìm thấy dữ liệu IP tương ứng để xóa']);
+        vbotApiJsonResponse(['success' => false, 'error' => 'Không tìm thấy dữ liệu IP tương ứng để xóa'], 404);
     }
-    exit;
 }
 
 #kiểm tra kết nối tới SSH Server
@@ -308,43 +314,38 @@ if (isset($_GET['check_ssh'])) {
     ];
     if (empty($ssh_host) || empty($ssh_user) || empty($ssh_pass) || empty($ssh_port)) {
         $response['message'] = 'Vui lòng cung cấp đầy đủ ssh_host, ssh_port, ssh_user và ssh_pass.';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 400);
     }
     if (!function_exists('ssh2_connect')) {
         $response['message'] = 'Tiện ích mở rộng PHP SSH2 chưa được cài đặt: sudo apt-get install php-ssh2';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 500);
     }
     $connection = @ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $response['message'] = 'Không thể kết nối tới máy chủ SSH, Kiểm tra lại địa chỉ máy chủ hoặc port, hoặc SSH chưa được kích hoạt trên máy chủ';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_pass)) {
         $response['message'] = 'Xác thực SSH thất bại, Kiểm tra lại Tên Đăng Nhập hoặc Mật Khẩu';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 401);
     }
     $response['success'] = true;
     $response['message'] = 'Kết nối SSH thành công!';
-    echo json_encode($response);
     ssh2_disconnect($connection);
     gc_collect_cycles();
-    exit();
+    vbotApiJsonResponse($response);
 }
 
 #Lệnh Command SSH
-if (isset($_GET['VBot_CMD'])) {
-    $Command = $_GET['Command'] ?? '';
+if (isset($_POST['VBot_CMD'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    $Command = isset($_POST['Command']) ? $_POST['Command'] : '';
     if (empty($Command)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không có dữ liệu câu lệnh đầu vào',
             'data' => null
-        ]);
-        exit();
+        ], 400);
     }
     $Command_decode = base64_decode($Command);
     $connection = ssh2_connect($ssh_host, $ssh_port);
@@ -371,8 +372,7 @@ if (isset($_GET['VBot_CMD'])) {
     } else {
         $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
     }
-    echo json_encode($result);
-    exit();
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 502);
 }
 
 //Kiểm tra phiên bản AirPlay
@@ -388,13 +388,11 @@ if (isset($_GET['check_version_airplay'])) {
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $result['message'] = 'Không thể kết nối SSH.';
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     if (!@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
         $result['message'] = 'Xác thực SSH thất bại.';
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 401);
     }
     $stream = ssh2_exec($connection, "shairport-sync -V");
     stream_set_blocking($stream, true);
@@ -416,32 +414,29 @@ if (isset($_GET['check_version_airplay'])) {
     $response = @file_get_contents($url, false, $context);
     if ($response === false) {
         $result['message'] = 'Không lấy được dữ liệu từ GitHub.';
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     $github = json_decode($response, true);
     if (!isset($github['content'])) {
         $result['message'] = 'Version.json không hợp lệ.';
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     $json = base64_decode(str_replace("\n", "", $github['content']));
     $version = json_decode($json, true);
     if (!$version) {
         $result['message'] = 'Không đọc được Version.json.';
-        echo json_encode($result);
-        exit;
+        vbotApiJsonResponse($result, 502);
     }
     $result['latest_version'] = $version['build_date'];
     $result['description'] = $version['description'];
     $result['update'] = ($current_version !== $version['build_date']);
     $result['success'] = true;
-    echo json_encode($result);
-    exit;
+    vbotApiJsonResponse($result);
 }
 
 #Chạy Chương trình VBot
-if (isset($_GET['start_vbot_service'])) {
+if (isset($_POST['start_vbot_service'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $CMD = "systemctl --user start VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
     $result = [
@@ -461,12 +456,12 @@ if (isset($_GET['start_vbot_service'])) {
     } else {
         $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
     }
-    echo json_encode($result);
-    exit;
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 502);
 }
 
 #Dừng Chương trình VBot
-if (isset($_GET['stop_vbot_service'])) {
+if (isset($_POST['stop_vbot_service'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $CMD = "systemctl --user stop VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
     $result = [
@@ -486,12 +481,12 @@ if (isset($_GET['stop_vbot_service'])) {
     } else {
         $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
     }
-    echo json_encode($result);
-    exit;
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 502);
 }
 
 #Khởi động lại Chương trình VBot
-if (isset($_GET['restart_vbot_service'])) {
+if (isset($_POST['restart_vbot_service'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $CMD = "systemctl --user restart VBot_Offline.service";
     $connection = ssh2_connect($ssh_host, $ssh_port);
     $result = [
@@ -511,12 +506,12 @@ if (isset($_GET['restart_vbot_service'])) {
     } else {
         $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
     }
-    echo json_encode($result);
-    exit;
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 502);
 }
 
 #Khởi động lại toàn bộ hệ thống
-if (isset($_GET['reboot_os'])) {
+if (isset($_POST['reboot_os'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $CMD = "sudo reboot";
     $connection = ssh2_connect($ssh_host, $ssh_port);
     $result = [
@@ -537,96 +532,104 @@ if (isset($_GET['reboot_os'])) {
     } else {
         $result['message'] = 'Không thể kết nối tới máy chủ SSH.';
     }
-    echo json_encode($result);
-    exit;
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 502);
 }
 
 #kiểm tra Kết Nối Hass
 if (isset($_GET['check_hass'])) {
     $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
     $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
-    if (!empty($url)) {
+    if (filter_var($url, FILTER_VALIDATE_URL) && in_array(strtolower((string)parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)) {
         $ch = curl_init($url . '/api/config');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token, 'Content-Type: application/json']);
         $response = curl_exec($ch);
         if (curl_errno($ch)) {
             $curlError = curl_error($ch);
-            if (strpos($curlError, 'Failed to connect') !== false) {
-                $message = 'Không thể kết nối, Kiểm tra lại URL: ' . $curlError;
-            } else {
-                $message = 'Xảy ra lỗi khi tiến hành kiểm tra: ' . $curlError;
-            }
-            echo json_encode(['success' => false, 'message' => $message]);
+            error_log('Home Assistant connection check failed: '.$curlError);
+            curl_close($ch);
+            vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới Home Assistant'], 502);
         } else {
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
             if ($httpCode >= 200 && $httpCode < 300) {
-                echo json_encode(['success' => true, 'message' => 'Kết nối thành công', 'response' => json_decode($response)]);
-            } else if ($httpCode = 401 && $httpCode = 200) {
-                echo json_encode(['success' => false, 'message' => 'Kết nối thất bại, Mã token không đúng', 'response' => json_decode($response)]);
+                vbotApiJsonResponse(['success' => true, 'message' => 'Kết nối thành công', 'response' => json_decode($response)]);
+            } else if ($httpCode === 401) {
+                vbotApiJsonResponse(['success' => false, 'message' => 'Kết nối thất bại, Mã token không đúng', 'response' => json_decode($response)], 401);
             } else {
-                echo json_encode(['success' => false, 'response' => json_decode($response), 'message' => 'HTTP Error: ' . $httpCode]);
+                error_log('Home Assistant check returned HTTP '.$httpCode);
+                vbotApiJsonResponse(['success' => false, 'message' => 'Home Assistant trả về lỗi HTTP '.$httpCode], 502);
             }
         }
-        curl_close($ch);
     } else {
-        echo json_encode(['success' => false, 'message' => 'URL không hợp lệ']);
+        vbotApiJsonResponse(['success' => false, 'message' => 'URL không hợp lệ'], 400);
     }
-    exit();
 }
 
 #Lấy dữ liệu Hass
 if (isset($_GET['get_hass_all'])) {
     $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
     $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
-    if (!empty($url)) {
+    if (filter_var($url, FILTER_VALIDATE_URL) && in_array(strtolower((string)parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)) {
         $ch = curl_init($url . '/api/states');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_HTTPHEADER, ['Authorization: Bearer ' . $token, 'Content-Type: application/json']);
         $response = curl_exec($ch);
         if (curl_errno($ch)) {
             $curlError = curl_error($ch);
-            if (strpos($curlError, 'Failed to connect') !== false) {
-                $message = 'Không thể kết nối, Kiểm tra lại URL: ' . $curlError;
-            } else {
-                $message = 'Xảy ra lỗi khi tiến hành kiểm tra: ' . $curlError;
-            }
-            echo json_encode(['success' => false, 'message' => $message]);
+            error_log('Home Assistant state download failed: '.$curlError);
+            curl_close($ch);
+            vbotApiJsonResponse(['success' => false, 'message' => 'Không thể lấy dữ liệu Home Assistant'], 502);
         } else {
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($httpCode >= 200 && $httpCode < 300) {
-                echo json_encode(['success' => true, 'message' => 'Kết nối thành công', 'response' => json_decode($response)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
                 $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
                 if (!file_exists($filePath_HASS)) {
-                    file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-					shell_exec('chmod 0777 ' . escapeshellarg($filePath_HASS));
+                    file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+                    @chmod($filePath_HASS, 0777);
+                }
+                $existingData = json_decode(file_get_contents($filePath_HASS), true);
+                if (!is_array($existingData)) {
+                    $existingData = [];
                 }
                 $existingData['get_hass_all'] = json_decode($response);
                 $jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                file_put_contents($filePath_HASS, $jsonData);
-            } else if ($httpCode = 401 && $httpCode = 200) {
-                echo json_encode(['success' => false, 'message' => 'Kết nối thất bại, Mã token không đúng', 'response' => json_decode($response)]);
+                if ($jsonData === false || file_put_contents($filePath_HASS, $jsonData, LOCK_EX) === false) {
+                    curl_close($ch);
+                    vbotApiJsonResponse(['success' => false, 'message' => 'Không thể lưu dữ liệu Home Assistant'], 500);
+                }
+                @chmod($filePath_HASS, 0777);
+                curl_close($ch);
+                vbotApiJsonResponse(['success' => true, 'message' => 'Kết nối thành công', 'response' => json_decode($response)]);
+            } else if ($httpCode === 401) {
+                curl_close($ch);
+                vbotApiJsonResponse(['success' => false, 'message' => 'Kết nối thất bại, Mã token không đúng', 'response' => json_decode($response)], 401);
             } else {
-                echo json_encode(['success' => false, 'response' => json_decode($response), 'message' => 'HTTP Error: ' . $httpCode]);
+                curl_close($ch);
+                error_log('Home Assistant states returned HTTP '.$httpCode);
+                vbotApiJsonResponse(['success' => false, 'message' => 'Home Assistant trả về lỗi HTTP '.$httpCode], 502);
             }
         }
-        curl_close($ch);
     } else {
-        echo json_encode(['success' => false, 'message' => 'URL không hợp lệ']);
+        vbotApiJsonResponse(['success' => false, 'message' => 'URL không hợp lệ'], 400);
     }
-    exit();
 }
 
 #Xóa dữ liệu Hass đã lấy
-if (isset($_GET['del_get_hass_all'])) {
+if (isset($_POST['del_get_hass_all'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $response = [
         'success' => false,
         'message' => 'Đã có lỗi xảy ra.'
     ];
     $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
     if (!file_exists($filePath_HASS)) {
-        file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-		shell_exec('chmod 0777 ' . escapeshellarg($filePath_HASS));
+        file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        @chmod($filePath_HASS, 0777);
     }
     $existingData = json_decode(file_get_contents($filePath_HASS), true);
     if ($existingData === null) {
@@ -635,7 +638,8 @@ if (isset($_GET['del_get_hass_all'])) {
     $existingData['get_hass_all'] = [];
     $jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if ($jsonData !== false) {
-        if (file_put_contents($filePath_HASS, $jsonData)) {
+        if (file_put_contents($filePath_HASS, $jsonData, LOCK_EX)) {
+            @chmod($filePath_HASS, 0777);
             $response['success'] = true;
             $response['message'] = 'Dữ Liệu Đồng Bộ trước đó đã được xóa thành công.';
         } else {
@@ -644,7 +648,7 @@ if (isset($_GET['del_get_hass_all'])) {
     } else {
         $response['message'] = 'Lỗi: Không thể chuyển đổi dữ liệu thành JSON.';
     }
-    echo json_encode($response);
+    vbotApiJsonResponse($response, $response['success'] ? 200 : 500);
 }
 
 #Kiểm tra key Picovoice
@@ -657,13 +661,11 @@ if (isset($_GET['check_key_picovoice'])) {
     ];
     if (empty($_GET['lang']) || empty($_GET['key'])) {
         $response['message'] = 'Vui lòng cung cấp đầy đủ key, lang';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 400);
     }
 	if (!in_array($lang_code, ['vi', 'eng', 'customize'], true)) {
 		$response['message'] = 'Chỉ hỗ trợ kiểm tra key với ngôn ngữ vi, eng hoặc customize';
-		echo json_encode($response);
-		exit();
+		vbotApiJsonResponse($response, 400);
 	}
     $lang_path = $VBot_Offline . 'resource/hotword/' . $lang_code;
     if ($lang_code === 'customize') {
@@ -681,25 +683,26 @@ if (isset($_GET['check_key_picovoice'])) {
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         $response['message'] = 'Không thể kết nối tới máy chủ SSH';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
         $response['message'] = 'Xác thực SSH không thành công.';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 401);
     }
     $stream = ssh2_exec($connection, $CMD);
     if (!$stream) {
         $response['message'] = 'Không thể thực thi lệnh trên máy chủ SSH.';
-        echo json_encode($response);
-        exit();
+        vbotApiJsonResponse($response, 502);
     }
     stream_set_blocking($stream, true);
     $stream_out = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $output = stream_get_contents($stream_out);
-    echo $output;
-    exit();
+    $picovoiceResult = json_decode(trim($output), true);
+    if (!is_array($picovoiceResult)) {
+        error_log('Picovoice key checker returned invalid JSON: '.substr(trim($output), 0, 2000));
+        vbotApiJsonResponse(['success' => false, 'message' => 'Trình kiểm tra Picovoice trả về dữ liệu không hợp lệ'], 502);
+    }
+    vbotApiJsonResponse($picovoiceResult);
 }
 
 #Kiểm tra Kết Nối MQTT
@@ -707,9 +710,12 @@ if (isset($_GET['check_mqtt'])) {
     if (isset($_GET['host'], $_GET['port'], $_GET['user'], $_GET['pass'])) {
         require('./phpMQTT.php');
         $server = $_GET['host'];
-        $port = $_GET['port'];
+        $port = (int)$_GET['port'];
         $username = $_GET['user'];
         $password = $_GET['pass'];
+        if ($server === '' || $port < 1 || $port > 65535) {
+            vbotApiJsonResponse(['success' => false, 'message' => 'Máy chủ hoặc cổng MQTT không hợp lệ'], 400);
+        }
         $client_id = 'VBot_TEST_CONNECT_MQTT_client_' . uniqid();
         $mqtt = new Bluerhinos\phpMQTT($server, $port, $client_id);
         if ($mqtt->connect(true, NULL, $username, $password)) {
@@ -730,8 +736,7 @@ if (isset($_GET['check_mqtt'])) {
             'message' => 'Thiếu thông tin kết nối MQTT, cần nhập đủ thông tin: Máy Chủ MQTT, Cổng PORT, Tài Khoản, Mật Khẩu, Hoặc máy chủ MQTT có lỗi, không hoạt động'
         ];
     }
-    echo json_encode($response);
-    exit();
+    vbotApiJsonResponse($response, $response['success'] ? 200 : 502);
 }
 
 #Lấy Phiên Bản Picovoice
@@ -743,18 +748,18 @@ if (isset($_GET['Picovoice_Version'])) {
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 30);
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     $response = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     if ($response === false || $http_code !== 200) {
-        header('Content-Type: application/json');
-        echo json_encode([
+        error_log('Picovoice RSS request failed: '.curl_error($ch).' (HTTP '.$http_code.')');
+        curl_close($ch);
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không thể kết nối tới RSS feed.',
-            'error' => curl_error($ch)
-        ]);
+        ], 502);
     } else {
-        header('Access-Control-Allow-Origin: *');
         header('Content-Type: application/xml');
         echo $response;
     }
@@ -765,14 +770,21 @@ if (isset($_GET['Picovoice_Version'])) {
 #Chatbox Check_Connection.php?vbot_chatbox&ip=192.168.14.113&port=5002&text=tên%20bạn%20là%20gì
 if (isset($_GET['vbot_chatbox'])) {
     if (!isset($_GET['ip_port']) || !isset($_GET['text'])) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thiếu một hoặc nhiều tham số: ip:port, text'
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        ], 400);
     }
     $ip_port = $_GET['ip_port'];
     $text = $_GET['text'];
+    $chatHost = parse_url($ip_port, PHP_URL_HOST);
+    if (
+        !filter_var($ip_port, FILTER_VALIDATE_URL)
+        || strtolower((string)parse_url($ip_port, PHP_URL_SCHEME)) !== 'http'
+        || !vbotCheckIsPrivateLanIpv4($chatHost)
+    ) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Địa chỉ Chatbox không hợp lệ hoặc không thuộc mạng LAN riêng'], 400);
+    }
     $curl = curl_init();
     $postData = json_encode([
         'type' => 3,
@@ -799,42 +811,37 @@ if (isset($_GET['vbot_chatbox'])) {
         $curlError = curl_error($curl);
         $curlErrno = curl_errno($curl);
         curl_close($curl);
-        echo json_encode([
+        error_log('VBot chatbox cURL failed: '.$curlError.' ('.$curlErrno.')');
+        vbotApiJsonResponse([
             'success' => false,
-            'message' => 'Lỗi cURL: ' . $curlError,
+            'message' => 'Không thể kết nối tới Chatbox',
             'error_code' => $curlErrno
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        ], 502);
     }
     $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
     curl_close($curl);
     if ($httpCode !== 200) {
-        echo json_encode([
+        error_log('VBot chatbox returned HTTP '.$httpCode);
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Yêu cầu thất bại với mã HTTP: ' . $httpCode,
-            'response' => $response
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+        ], 502);
     }
     $jsonResponse = json_decode($response, true);
     if (json_last_error() !== JSON_ERROR_NONE) {
-        echo json_encode([
+        error_log('VBot chatbox returned invalid JSON: '.substr(trim($response), 0, 2000));
+        vbotApiJsonResponse([
             'success' => false,
-            'message' => 'Lỗi phân tích JSON trả về: ' . json_last_error_msg(),
-            'response' => $response
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+            'message' => 'Chatbox trả về dữ liệu JSON không hợp lệ'
+        ], 502);
     }
     if (!isset($jsonResponse['success']) || !isset($jsonResponse['message'])) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
-            'message' => 'Dữ liệu JSON trả về không đúng định dạng',
-            'response' => $jsonResponse
-        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        exit;
+            'message' => 'Dữ liệu JSON trả về không đúng định dạng'
+        ], 502);
     }
-    echo json_encode($jsonResponse, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    exit();
+    vbotApiJsonResponse($jsonResponse);
 }
 
 //Lấy token zai_did tts_default
@@ -848,11 +855,11 @@ if (isset($_GET['get_token_tts_default_zai_did'])) {
     if (curl_errno($ch)) {
         $error = curl_error($ch);
         curl_close($ch);
-        echo json_encode([
+        error_log('Zalo token request failed: '.$error);
+        vbotApiJsonResponse([
             'success' => false,
-            'message' => "Lỗi cURL, Vui lòng thử lại: $error"
-        ]);
-        exit();
+            'message' => 'Không thể kết nối tới dịch vụ lấy token Zalo'
+        ], 502);
     }
     $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
@@ -866,25 +873,25 @@ if (isset($_GET['get_token_tts_default_zai_did'])) {
             $dt->modify('-10 days');
             $expires_iso = $dt->format('Y-m-d\TH:i:sP');
             $zai_did_value = explode('=', $cookie_value)[1];
-            echo json_encode([
+            vbotApiJsonResponse([
                 'success' => true,
                 'message' => 'Lấy Token zai_did thành công, hãy Lưu Cài Đặt Cấu Hình Config để áp dụng',
                 'zai_did' => $zai_did_value,
                 'expires_zai_did' => $expires_iso
-            ], JSON_PRETTY_PRINT);
-        } catch (Exception $e) {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Lỗi xử lý thời gian: ' . $e->getMessage()
             ]);
+        } catch (Exception $e) {
+            error_log('Zalo token expiry parse failed: '.$e->getMessage());
+            vbotApiJsonResponse([
+                'success' => false,
+                'message' => 'Không thể xử lý thời hạn token Zalo'
+            ], 502);
         }
     } else {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không tìm thấy zai_did hoặc thời gian hết hạn. Vui lòng thử lại'
-        ]);
+        ], 502);
     }
-    exit();
 }
 
 //Lấy danh sách giọng đọc của google cloud
@@ -892,26 +899,28 @@ if (isset($_GET['get_ggcloud_voice_name'])) {
     $CMD = 'python3 ' .$Config['web_interface']['path'].'/includes/php_ajax/Get_Voice_Name_GCloud.py';
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Không thể kết nối SSH'
-        ]);
-        exit;
+        ], 502);
     }
     if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             'success' => false,
             'message' => 'Xác thực SSH thất bại'
-        ]);
-        exit;
+        ], 401);
     }
     $stream = ssh2_exec($connection, $CMD);
     stream_set_blocking($stream, true);
     $output = stream_get_contents(
         ssh2_fetch_stream($stream, SSH2_STREAM_STDIO)
     );
-    echo trim($output);
-    exit;
+    $voiceData = json_decode(trim($output), true);
+    if (!is_array($voiceData)) {
+        error_log('Google Cloud voice script returned invalid JSON: '.substr(trim($output), 0, 2000));
+        vbotApiJsonResponse(['success' => false, 'message' => 'Danh sách giọng Google Cloud không hợp lệ'], 502);
+    }
+    vbotApiJsonResponse($voiceData);
 }
 
 //Lấy danh sách model trợ lý google gemini
@@ -919,18 +928,16 @@ if (isset($_GET['get_model_gemini'])) {
     $apiKey     = $_GET['apikey'] ?? '';
     $versionAPI = $_GET['version_api'] ?? 'v1beta'; // mặc định
     if (empty($apiKey)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             "success" => false,
             "message" => "Thiếu tham số apikey"
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+        ], 400);
     }
     if (!in_array($versionAPI, ['v1', 'v1beta'], true)) {
-        echo json_encode([
+        vbotApiJsonResponse([
             "success" => false,
             "message" => "version_api không hợp lệ (chỉ v1 hoặc v1beta)"
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+        ], 400);
     }
     $url = "https://generativelanguage.googleapis.com/{$versionAPI}/models?key={$apiKey}";
     $ch = curl_init();
@@ -945,23 +952,26 @@ if (isset($_GET['get_model_gemini'])) {
     $error     = curl_error($ch);
     curl_close($ch);
     if ($response === false) {
-        echo json_encode([
+        error_log('Gemini model request failed: '.$error);
+        vbotApiJsonResponse([
             "success" => false,
-            "message" => $error
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+            "message" => 'Không thể kết nối tới API Gemini'
+        ], 502);
     }
     if ($http_code !== 200) {
-        echo $response;
-        exit;
+        error_log('Gemini model API returned HTTP '.$http_code.': '.substr(trim($response), 0, 2000));
+        $remoteError = json_decode($response, true);
+        $remoteMessage = isset($remoteError['error']['message'])
+            ? $remoteError['error']['message']
+            : 'API Gemini trả về lỗi HTTP '.$http_code;
+        vbotApiJsonResponse(['success' => false, 'message' => $remoteMessage], 502);
     }
     $json = json_decode($response, true);
     if (!isset($json['models']) || !is_array($json['models'])) {
-        echo json_encode([
+        vbotApiJsonResponse([
             "success" => false,
             "message" => "Dữ liệu Gemini không hợp lệ"
-        ], JSON_UNESCAPED_UNICODE);
-        exit;
+        ], 502);
     }
     $modelList = [];
 	foreach ($json['models'] as $model) {
@@ -997,19 +1007,17 @@ if (isset($_GET['get_model_gemini'])) {
 	}
 	$existingData['gemini_models'] = $modelList;
 	if (file_put_contents($outputFile, json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
-		echo json_encode([
+		vbotApiJsonResponse([
 			"success" => false,
 			"message" => "Không ghi được file JSON"
-		], JSON_UNESCAPED_UNICODE);
-		exit;
+		], 500);
 	}
-    echo json_encode([
+    vbotApiJsonResponse([
         "success" => true,
         "count" => count($modelList),
 		"message" => "Lấy dữ liệu Model Gemini thành công"
         #"output_file" => $outputFile
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
+    ]);
 }
 
 ?>

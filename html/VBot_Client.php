@@ -7,6 +7,8 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+require_once __DIR__.'/includes/Client_Data_Helpers.php';
+$vbotClientDataPath = vbotClientDataFilePath($Config, $directory_path);
 ?>
 
 <?php
@@ -173,16 +175,40 @@ if ($Config['contact_info']['user_login']['active']) {
     <a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a>
 
     <script>
+        function vbotParseApiResponse(xhr) {
+            try {
+                return JSON.parse(xhr.responseText);
+            } catch (error) {
+                return null;
+            }
+        }
+
         //Hàm lưu dữ liệu Client vào Server
         function saveToServer(data) {
-            return fetch('includes/php_ajax/VBot_Client_Upgrade_Firmware.php?action=save_data_vbot_client', {
+            return fetch('includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+                        'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''
                     },
-                    body: JSON.stringify(data)
+                    body: new URLSearchParams({
+                        action: 'save_data_vbot_client',
+                        json_data: JSON.stringify(data)
+                    })
                 })
-                .then(response => response.json())
+                .then(async response => {
+                    const responseText = await response.text();
+                    let result;
+                    try {
+                        result = JSON.parse(responseText);
+                    } catch (error) {
+                        throw new Error('Server trả về dữ liệu không phải JSON (HTTP ' + response.status + ')');
+                    }
+                    if (!response.ok) {
+                        throw new Error(result.message || ('HTTP ' + response.status));
+                    }
+                    return result;
+                })
                 .then(result => {
                     if (!result.success) {
                         show_message('Lỗi khi lưu dữ liệu: ' + result.message);
@@ -198,7 +224,7 @@ if ($Config['contact_info']['user_login']['active']) {
 
         //Hàm đọc dữ liệu từ server
         function loadFromServer() {
-            const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path; ?>/includes/other_data/VBot_Client_Data/Data_VBot_Client.json';
+            const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo rawurlencode($vbotClientDataPath); ?>';
             return fetch(url)
                 .then(response => {
                     if (!response.ok) {
@@ -242,11 +268,14 @@ if ($Config['contact_info']['user_login']['active']) {
                                     document.getElementById('vbot_Client_Scan_devices').innerHTML = 'Không tìm thấy thiết bị VBot Client nào';
                                 }
                             } else {
-                                show_message('Lỗi: <font color="red">' + response.messager + '</font>');
+                                show_message('Lỗi: <font color="red">' + (response.message || response.error || 'Không rõ lỗi') + '</font>');
                             }
                         } catch (error) {
                             document.getElementById('vbot_Client_Scan_devices').innerHTML = 'Lỗi xử lý dữ liệu.';
                         }
+                    } else {
+                        const response = vbotParseApiResponse(xhr);
+                        show_message((response && (response.message || response.error)) || ('Lỗi HTTP: ' + xhr.status));
                     }
                 }
             };
@@ -378,6 +407,7 @@ if ($Config['contact_info']['user_login']['active']) {
                 formData.append('showJsonData_Client', ip_address);
                 fetch(phpUrl, {
                         method: 'POST',
+                        headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''},
                         body: formData
                     })
                     .then(response => {
@@ -526,8 +556,10 @@ if ($Config['contact_info']['user_login']['active']) {
                 if (result.toLowerCase().includes("bypass_fr_ok")) {
                     showMessagePHP("Bỏ qua xác thực OTA thành công, đang tiến hành cập nhật Firmware....", 5);
                     var xhr = new XMLHttpRequest();
-                    var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php?start_upgrade_firmware&ip=' + encodeURIComponent(ip_address) + '&url_firmware=' + encodeURIComponent(url_firmware);
-                    xhr.open('GET', url, true);
+                    var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
+                    xhr.open('POST', url, true);
+                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+                    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
                     //Timeout cho XMLHttpRequest (còn lại từ 180 giây)
                     var remainingTime = totalTimeout - elapsedTime;
                     var xhrTimeout = setTimeout(function() {
@@ -558,11 +590,10 @@ if ($Config['contact_info']['user_login']['active']) {
 										bypass_upgrade_littlefs(ip_address, function(resultLittlefs) {
 											if (resultLittlefs.toLowerCase().includes("bypass_fs_ok")) {
 												var xhrLittlefs = new XMLHttpRequest();
-												var urlLittlefs =
-													'includes/php_ajax/VBot_Client_Upgrade_Firmware.php?start_upgrade_littlefs'
-													+ '&ip=' + encodeURIComponent(ip_address)
-													+ '&url_littlefs=' + encodeURIComponent(url_littlefs);
-												xhrLittlefs.open('GET', urlLittlefs, true);
+												var urlLittlefs = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
+												xhrLittlefs.open('POST', urlLittlefs, true);
+												xhrLittlefs.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+												xhrLittlefs.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
 												xhrLittlefs.onload = function() {
 													loading('hide');
 													if (xhrLittlefs.status >= 200 && xhrLittlefs.status < 300) {
@@ -574,14 +605,15 @@ if ($Config['contact_info']['user_login']['active']) {
 															show_message("Nâng cấp Firmware thành công, nhưng nâng cấp LittleFS thất bại: " + dataLittlefs.message);
 														}
 													} else {
-														show_message("Nâng cấp Firmware thành công, nhưng nâng cấp giao diện trong LittleFS lỗi HTTP: " + xhrLittlefs.status);
+														var littlefsError = vbotParseApiResponse(xhrLittlefs);
+														show_message((littlefsError && littlefsError.message) || ("Nâng cấp Firmware thành công, nhưng nâng cấp giao diện trong LittleFS lỗi HTTP: " + xhrLittlefs.status));
 													}
 												};
 												xhrLittlefs.onerror = function() {
 													loading('hide');
 													show_message("Nâng cấp Firmware thành công nhưng lỗi mạng khi nâng cấp giao diện trong LittleFS");
 												};
-												xhrLittlefs.send();
+												xhrLittlefs.send('start_upgrade_littlefs=1&ip=' + encodeURIComponent(ip_address) + '&url_littlefs=' + encodeURIComponent(url_littlefs));
 											} else {
 												loading('hide');
 												show_message("Nâng cấp Firmware thành công nhưng bypass LittleFS thất bại: " + resultLittlefs);
@@ -610,7 +642,7 @@ if ($Config['contact_info']['user_login']['active']) {
                         loading('hide');
                         show_message("Lỗi mạng trong quá trình cập nhật Firmware");
                     };
-                    xhr.send();
+                    xhr.send('start_upgrade_firmware=1&ip=' + encodeURIComponent(ip_address) + '&url_firmware=' + encodeURIComponent(url_firmware));
                 } else {
                     loading('hide');
                     show_message('-Lỗi xảy ra trong quá trình bỏ qua xác thực OTA<br/>- Thiết Bị Không Trực Tuyến: ' + result);
@@ -621,8 +653,10 @@ if ($Config['contact_info']['user_login']['active']) {
         //Hàm bypass firmware (giữ nguyên)
         function bypass_upgrade_firmware(ip_address, callback) {
             var xhr = new XMLHttpRequest();
-            var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php?bypass_upgrade_firmware&ip=' + encodeURIComponent(ip_address);
-            xhr.open('GET', url, true);
+            var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     var data = JSON.parse(xhr.responseText);
@@ -633,7 +667,8 @@ if ($Config['contact_info']['user_login']['active']) {
                         callback('Error');
                     }
                 } else {
-                    show_message("Yêu cầu bỏ qua xác thực OTA không thành công với trạng thái: " + xhr.status + " " + xhr.statusText);
+                    var errorData = vbotParseApiResponse(xhr);
+                    show_message((errorData && errorData.message) || ("Yêu cầu bỏ qua xác thực OTA không thành công với trạng thái: " + xhr.status));
                     callback('Error');
                 }
             };
@@ -641,14 +676,16 @@ if ($Config['contact_info']['user_login']['active']) {
                 show_message("Lỗi mạng khi bỏ qua xác thực OTA");
                 callback('Error');
             };
-            xhr.send();
+            xhr.send('bypass_upgrade_firmware=1&ip=' + encodeURIComponent(ip_address));
         }
 
         //Hàm bypass LittleFS (giữ nguyên)
         function bypass_upgrade_littlefs(ip_address, callback) {
             var xhr = new XMLHttpRequest();
-            var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php?bypass_upgrade_littlefs&ip=' + encodeURIComponent(ip_address);
-            xhr.open('GET', url, true);
+            var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
                     var data = JSON.parse(xhr.responseText);
@@ -659,7 +696,8 @@ if ($Config['contact_info']['user_login']['active']) {
                         callback('Error');
                     }
                 } else {
-                    show_message("Yêu cầu bỏ qua xác thực OTA không thành công với trạng thái: " + xhr.status + " " + xhr.statusText);
+                    var errorData = vbotParseApiResponse(xhr);
+                    show_message((errorData && errorData.message) || ("Yêu cầu bỏ qua xác thực OTA không thành công với trạng thái: " + xhr.status));
                     callback('Error');
                 }
             };
@@ -667,7 +705,7 @@ if ($Config['contact_info']['user_login']['active']) {
                 show_message("Lỗi mạng khi bỏ qua xác thực OTA");
                 callback('Error');
             };
-            xhr.send();
+            xhr.send('bypass_upgrade_littlefs=1&ip=' + encodeURIComponent(ip_address));
         }
 
         //Nâng cấp FW Thủ Công, chọn file .bin
@@ -690,6 +728,7 @@ if ($Config['contact_info']['user_login']['active']) {
             showMessagePHP("Đang gửi Firmware .bin tới Client để nâng cấp Thủ Công...", 5);
             var xhr = new XMLHttpRequest();
             xhr.open("POST", 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php', true);
+            xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
             //Thiết lập tổng timeout 3 phút (180 giây)
             var timeoutDuration = 180000;
             var timeoutId = setTimeout(function() {
@@ -767,6 +806,7 @@ if ($Config['contact_info']['user_login']['active']) {
                 const timeoutId = setTimeout(() => controller.abort(), 3000);
                 const response = await fetch(phpUrl, {
                     method: 'POST',
+                    headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''},
                     body: formData,
                     signal: controller.signal
                 });
@@ -837,6 +877,7 @@ if ($Config['contact_info']['user_login']['active']) {
             formData.append('showJsonData_Client', ip_address);
             fetch(phpUrl, {
                     method: 'POST',
+                    headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''},
                     body: formData
                 })
                 .then(response => {

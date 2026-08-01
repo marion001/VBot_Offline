@@ -30,6 +30,85 @@ register_shutdown_function(static function () use ($phpErrorLog): void {
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+
+function vbotConfigSetFullPermissions($filePath, $label)
+{
+  global $ssh_host, $ssh_port, $ssh_user, $ssh_password;
+
+  clearstatcache(true, $filePath);
+  $currentPermissions = @fileperms($filePath);
+  if ($currentPermissions !== false && (($currentPermissions & 0777) === 0777)) {
+    return true;
+  }
+
+  if (@chmod($filePath, 0777)) {
+    return true;
+  }
+
+  if (!function_exists('ssh2_connect') || !function_exists('ssh2_sftp') || !function_exists('ssh2_sftp_chmod')) {
+    error_log('[PHP Config ERROR] Không thể đặt quyền 0777 cho ' . $label . ': PHP SSH2/SFTP không khả dụng', 0);
+    return false;
+  }
+
+  $connection = @ssh2_connect($ssh_host, intval($ssh_port));
+  if (!$connection || !@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+    error_log('[PHP Config ERROR] Không thể kết nối hoặc xác thực SSH để đặt quyền 0777 cho ' . $label, 0);
+    return false;
+  }
+
+  $sftp = @ssh2_sftp($connection);
+  if (!$sftp || !@ssh2_sftp_chmod($sftp, $filePath, 0777)) {
+    error_log('[PHP Config ERROR] SSH/SFTP không thể đặt quyền 0777 cho ' . $label . ': ' . $filePath, 0);
+    return false;
+  }
+
+  return true;
+}
+
+function vbotConfigWriteFile($filePath, $content, $label)
+{
+  if (!is_string($content)) {
+    error_log('[PHP Config ERROR] Nội dung ghi không hợp lệ cho ' . $label, 0);
+    return false;
+  }
+  if (file_put_contents($filePath, $content, LOCK_EX) === false) {
+    $lastError = error_get_last();
+    error_log('[PHP Config ERROR] Không thể ghi ' . $label . ': ' . ($lastError['message'] ?? $filePath), 0);
+    return false;
+  }
+  vbotConfigSetFullPermissions($filePath, $label);
+  return true;
+}
+
+function vbotConfigWriteJson($filePath, array $data, $label)
+{
+  $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  if ($encoded === false) {
+    error_log('[PHP Config ERROR] Không thể mã hóa ' . $label . ': ' . json_last_error_msg(), 0);
+    return false;
+  }
+  return vbotConfigWriteFile($filePath, $encoded, $label);
+}
+
+function vbotConfigIsValidJsonFile($filePath)
+{
+  if (!is_file($filePath) || !is_readable($filePath)) {
+    return false;
+  }
+  $content = file_get_contents($filePath);
+  if ($content === false || trim($content) === '') {
+    return false;
+  }
+  $decoded = json_decode($content, true);
+  return json_last_error() === JSON_ERROR_NONE && is_array($decoded);
+}
+if (!empty($Configuration_Load_Status['recovered'])) {
+  $messages[] = 'Config.json đã được tự động khôi phục từ: '
+    . (isset($Configuration_Load_Status['backup_file']) ? $Configuration_Load_Status['backup_file'] : '');
+}
+if (!empty($Configuration_Load_Status['error'])) {
+  $messages[] = $Configuration_Load_Status['error'];
+}
 // Trang lưu cấu hình luôn ghi lỗi vào file, kể cả khi WebUI tắt hiển thị lỗi.
 // display_errors vẫn giữ theo Configuration.php nên không lộ lỗi trên giao diện.
 ini_set('log_errors', '1');
@@ -48,11 +127,13 @@ if ($Config['contact_info']['user_login']['active']) {
   }
 }
 
+$directoryPath_Backup_Config = $Config['backup_upgrade']['config_json']['backup_path'];
 if ($Config['backup_upgrade']['config_json']['active'] === true) {
-  $directoryPath_Backup_Config = $Config['backup_upgrade']['config_json']['backup_path'];
   if (!is_dir($directoryPath_Backup_Config)) {
-    if (mkdir($directoryPath_Backup_Config, 0777, true)) {
-      chmod($directoryPath_Backup_Config, 0777);
+    if (!mkdir($directoryPath_Backup_Config, 0777, true) && !is_dir($directoryPath_Backup_Config)) {
+      error_log('[PHP Config ERROR] Không thể tạo thư mục backup Config: ' . $directoryPath_Backup_Config, 0);
+    } elseif (!vbotConfigSetFullPermissions($directoryPath_Backup_Config, 'thư mục backup Config')) {
+      //Lỗi chi tiết đã được ghi vào Vbot_error.log.
     }
   }
 }
@@ -63,39 +144,44 @@ $read_stt_token_google_cloud = null;
 if (isset($_POST['start_recovery_config_json'])) {
   $data_recovery_type = $_POST['start_recovery_config_json'];
   if ($data_recovery_type === "khoi_phuc_tu_tep_he_thong") {
-    $start_recovery_config_json = $_POST['backup_config_json_files'];
-    if (!empty($start_recovery_config_json)) {
-      if (file_exists($start_recovery_config_json)) {
-        $command = 'cp ' . escapeshellarg($start_recovery_config_json) .
-          ' ' . escapeshellarg($VBot_Offline .
-            'Config.json');
-        exec($command, $output, $resultCode);
-        if ($resultCode === 0) {
+    $selectedBackup = basename($_POST['backup_config_json_files'] ?? '');
+    $start_recovery_config_json = rtrim($directoryPath_Backup_Config, '/\\') . '/' . $selectedBackup;
+    if ($selectedBackup !== '') {
+      if (vbotConfigIsValidJsonFile($start_recovery_config_json)) {
+        if (copy($start_recovery_config_json, $Config_filePath)) {
+          vbotConfigSetFullPermissions($Config_filePath, 'Config.json sau khi khôi phục');
           $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu trên hệ thống thành công";
         } else {
-          $messages[] = "Lỗi xảy ra khi khôi phục dữ liệu tệp Config.json Mã lỗi: " . $resultCode;
+          $messages[] = "Lỗi xảy ra khi sao chép tệp khôi phục Config.json";
+          error_log('[PHP Config ERROR] Không thể khôi phục từ: ' . $start_recovery_config_json, 0);
         }
       } else {
-        $messages[] = "Lỗi: Tệp " . basename($start_recovery_config_json) .
-          " không tồn tại trên hệ thống";
+        $messages[] = "Lỗi: Tệp " . htmlspecialchars($selectedBackup) . " không tồn tại hoặc không phải JSON hợp lệ";
       }
     } else {
       $messages[] = "Không có tệp sao lưu Config nào được chọn để khôi phục!";
     }
   } else if ($data_recovery_type === "khoi_phuc_tu_tep_tai_len") {
     $uploadOk = 1;
-    if (isset($_FILES["fileToUpload_configjson_restore"])) {
+    if (isset($_FILES["fileToUpload_configjson_restore"]) && $_FILES["fileToUpload_configjson_restore"]["error"] !== UPLOAD_ERR_NO_FILE) {
       $targetFile = $VBot_Offline .
         'Config.json';
       $fileName = basename($_FILES["fileToUpload_configjson_restore"]["name"]);
-      if (!preg_match('/\.json$/', $fileName) || !preg_match('/^Config/', $fileName)) {
+      if ($_FILES["fileToUpload_configjson_restore"]["error"] !== UPLOAD_ERR_OK) {
+        $messages[] = "- Tệp tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload_configjson_restore"]["error"]);
+        $uploadOk = 0;
+      } elseif (!preg_match('/\.json$/i', $fileName) || !preg_match('/^Config/i', $fileName)) {
         $messages[] = "- Chỉ chấp nhận tệp .json, dành cho Config.json";
+        $uploadOk = 0;
+      } elseif (!vbotConfigIsValidJsonFile($_FILES["fileToUpload_configjson_restore"]["tmp_name"])) {
+        $messages[] = "- Nội dung tệp Config.json không hợp lệ";
         $uploadOk = 0;
       }
       if ($uploadOk == 0) {
         $messages[] = "- Tệp sao lưu không được tải lên";
       } else {
         if (move_uploaded_file($_FILES["fileToUpload_configjson_restore"]["tmp_name"], $targetFile)) {
+          vbotConfigSetFullPermissions($targetFile, 'Config.json tải lên khôi phục');
           $messages[] = "- Tệp " . htmlspecialchars($fileName) . " đã được tải lên và khôi phục thành công";
         } else {
           $messages[] = "- Có lỗi xảy ra khi tải lên tệp sao lưu của bạn";
@@ -114,18 +200,22 @@ if (isset($_POST['all_config_save'])) {
     $dateTime = new DateTime();
     $newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
     $destinationFile_Backup_Config = $directoryPath_Backup_Config . '/' . $newFileName;
-    if (copy($Config_filePath, $destinationFile_Backup_Config)) {
-      chmod($destinationFile_Backup_Config, 0777);
+    if (is_dir($directoryPath_Backup_Config) && copy($Config_filePath, $destinationFile_Backup_Config)) {
+      vbotConfigSetFullPermissions($destinationFile_Backup_Config, 'bản backup Config');
       $files_ConfigJso_BUP = glob($directoryPath_Backup_Config . '/*.json');
-      if (count($files_ConfigJso_BUP) > $Config['backup_upgrade']['config_json']['limit_backup_files']) {
+      $backupLimit = max(1, intval($Config['backup_upgrade']['config_json']['limit_backup_files']));
+      if (count($files_ConfigJso_BUP) > $backupLimit) {
         usort($files_ConfigJso_BUP, function ($a, $b) {
           return filemtime($a) - filemtime($b);
         });
-        $oldestFile_configBaup = array_shift($files_ConfigJso_BUP);
-        if (unlink($oldestFile_configBaup)) {
-          // echo "Đã xóa file cũ nhất: $oldestFile_configBaup\n";
+        foreach (array_slice($files_ConfigJso_BUP, 0, count($files_ConfigJso_BUP) - $backupLimit) as $oldestFile_configBaup) {
+          if (!unlink($oldestFile_configBaup)) {
+            error_log('[PHP Config ERROR] Không thể xóa bản backup cũ: ' . $oldestFile_configBaup, 0);
+          }
         }
       }
+    } else {
+      error_log('[PHP Config ERROR] Không thể tạo bản backup Config trước khi lưu: ' . $destinationFile_Backup_Config, 0);
     }
   }
 
@@ -138,7 +228,10 @@ if (isset($_POST['all_config_save'])) {
   $Config['api']['port'] = intval($_POST['api_port']);
   $Config['api']['show_log']['max_log'] = intval($_POST['max_logs_api']);
   $Config['api']['show_log']['active'] = isset($_POST['api_log_active']) ? true : false;
-  $Config['api']['show_log']['log_lever'] = isset($_POST['api_log_active_log_lever']);
+  $apiLogLevel = strtoupper(trim($_POST['api_log_active_log_lever'] ?? 'INFO'));
+  $Config['api']['show_log']['log_lever'] = in_array($apiLogLevel, ['DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'], true)
+    ? $apiLogLevel
+    : 'INFO';
   $Config['api']['auth']['active'] = isset($_POST['api_auth_active']);
   $Config['api']['auth']['api_key'] = $_POST['api_auth_key'];
 
@@ -641,32 +734,35 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['news_paper_data'] = $updated_news_paper_data;
 
   #Cập Nhật File JSon STT Google Cloud
-  if ($_POST['stt_select'] === "stt_ggcloud") {
+  $selectedStt = $_POST['stt_select'] ?? '';
+  if ($selectedStt === "stt_ggcloud") {
 
     #Cập nhật json stt Google Cloud V1
-    $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_json_file_token'];
+    $json_data_goolge_cloud_stt = trim($_POST['stt_ggcloud_json_file_token'] ?? '');
+    if ($json_data_goolge_cloud_stt === '') {
+      $json_data_goolge_cloud_stt = '{}';
+    }
     json_decode($json_data_goolge_cloud_stt);
     if (json_last_error() === JSON_ERROR_NONE) {
-      if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
-        $json_data_goolge_cloud_stt = '{}';
+      if (!vbotConfigWriteFile($stt_token_google_cloud, $json_data_goolge_cloud_stt, 'token STT Google Cloud V1')) {
+        $messages[] = 'Lỗi: Không thể lưu token STT Google Cloud V1.';
       }
-      $json_data_goolge_cloud_stt = trim($json_data_goolge_cloud_stt);
-      file_put_contents($stt_token_google_cloud, $json_data_goolge_cloud_stt);
       //$messages[] = 'Dữ liệu stt_token_google_cloud đã được lưu vào file thành công.';
     } else {
       $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
     }
-  } else if ($_POST['stt_select'] === "stt_ggcloud_v2") {
+  } else if ($selectedStt === "stt_ggcloud_v2") {
 
     #Cập nhật json stt Google Cloud V2
-    $json_data_goolge_cloud_stt = $_POST['stt_ggcloud_v2_json_file_token'];
+    $json_data_goolge_cloud_stt = trim($_POST['stt_ggcloud_v2_json_file_token'] ?? '');
+    if ($json_data_goolge_cloud_stt === '') {
+      $json_data_goolge_cloud_stt = '{}';
+    }
     json_decode($json_data_goolge_cloud_stt);
     if (json_last_error() === JSON_ERROR_NONE) {
-      if (empty($json_data_goolge_cloud_stt) || $json_data_goolge_cloud_stt === null) {
-        $json_data_goolge_cloud_stt = '{}';
+      if (!vbotConfigWriteFile($stt_token_google_cloud, $json_data_goolge_cloud_stt, 'token STT Google Cloud V2')) {
+        $messages[] = 'Lỗi: Không thể lưu token STT Google Cloud V2.';
       }
-      $json_data_goolge_cloud_stt = trim($json_data_goolge_cloud_stt);
-      file_put_contents($stt_token_google_cloud, $json_data_goolge_cloud_stt);
       //$messages[] = 'Dữ liệu stt_token_google_cloud đã được lưu vào file thành công.';
     } else {
       $messages[] = 'Lỗi: Dữ liệu stt_token_google_cloud không phải là JSON hợp lệ.';
@@ -674,43 +770,51 @@ if (isset($_POST['all_config_save'])) {
   }
 
   #Cập nhật tts Google Cloud
-  $json_data_goolge_cloud_tts = $_POST['tts_ggcloud_json_file_token'];
+  $json_data_goolge_cloud_tts = trim($_POST['tts_ggcloud_json_file_token'] ?? '');
+  if ($json_data_goolge_cloud_tts === '') {
+    $json_data_goolge_cloud_tts = '{}';
+  }
   json_decode($json_data_goolge_cloud_tts);
   if (json_last_error() === JSON_ERROR_NONE) {
-    if (empty($json_data_goolge_cloud_tts) || $json_data_goolge_cloud_tts === null) {
-      $json_data_goolge_cloud_tts = '{}';
+    if (!vbotConfigWriteFile($tts_token_google_cloud, $json_data_goolge_cloud_tts, 'token TTS Google Cloud')) {
+      $messages[] = 'Lỗi: Không thể lưu token TTS Google Cloud.';
     }
-    $json_data_goolge_cloud_tts = trim($json_data_goolge_cloud_tts);
-    file_put_contents($tts_token_google_cloud, $json_data_goolge_cloud_tts);
     //$messages[] = 'Dữ liệu tts_token_google_cloud đã được lưu vào file thành công.';
   } else {
     $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
   }
-  $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-
-  if ($result_ConfigJson !== false) {
+  $configSaved = vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
+  if ($configSaved) {
     $messages[] = "Cấu hình đã được lưu thành công!";
-    #error_log('[PHP Config] Đã lưu Config.json thành công (' . $result_ConfigJson . ' bytes)', 0);
   } else {
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
-    $lastError = error_get_last();
-    error_log('[PHP Config ERROR] Không thể ghi Config.json: ' . ($lastError['message'] ?? 'Không rõ nguyên nhân'), 0);
   }
 
   #Đồng thời Restart VBot nếu được nhấn
-  if ($_POST['all_config_save'] === 'and_restart_VBot') {
+  if ($configSaved && $_POST['all_config_save'] === 'and_restart_VBot') {
     $CMD = "systemctl --user restart VBot_Offline.service";
-    $connection = ssh2_connect($ssh_host, $ssh_port);
+    if (!function_exists('ssh2_connect')) {
+      $messages[] = 'Không thể khởi động lại VBot vì PHP chưa cài extension SSH2.';
+      error_log('[PHP Config ERROR] Không thể restart VBot: PHP SSH2 extension không khả dụng', 0);
+      $connection = false;
+    } else {
+      $connection = @ssh2_connect($ssh_host, $ssh_port);
+    }
     if ($connection) {
       if (@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        $stream = ssh2_exec($connection, $CMD);
-        stream_set_blocking($stream, true);
-        $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
-        $messages[] = 'Đang Khởi Động Lại Chương Trình VBot';
+        $stream = @ssh2_exec($connection, $CMD);
+        if (is_resource($stream)) {
+          stream_set_blocking($stream, true);
+          $output = stream_get_contents(ssh2_fetch_stream($stream, SSH2_STREAM_STDIO));
+          $messages[] = 'Đang Khởi Động Lại Chương Trình VBot';
+        } else {
+          $messages[] = 'Không thể gửi lệnh khởi động lại VBot.';
+          error_log('[PHP Config ERROR] ssh2_exec không thể chạy lệnh restart VBot', 0);
+        }
       } else {
         $messages[] = 'Xác thực SSH không thành công.';
       }
-    } else {
+    } elseif (function_exists('ssh2_connect')) {
       $messages[] = 'Không thể kết nối tới máy chủ SSH';
     }
   }
@@ -738,14 +842,17 @@ if (isset($_POST['save_hotword_snowboy'])) {
     }
   }
   $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = $updatedConfig;
-  file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-  $messages[] = 'Cập nhật các giá trị trong Hotword Snowboy thành công';
+  if (vbotConfigWriteJson($Config_filePath, $Config, 'Config.json - Hotword Snowboy')) {
+    $messages[] = 'Cập nhật các giá trị trong Hotword Snowboy thành công';
+  } else {
+    $messages[] = 'Không thể lưu cấu hình Hotword Snowboy';
+  }
 }
 
 #Lưu các giá trị cấu hình chi tiết trong hotword Picovoice/Procupine
 if (isset($_POST['save_hotword_theo_lang'])) {
-  $lang = $_POST['lang_hotword_get'];
-  $Lib_modelFilePath = $_POST['select_file_lib_pv'];
+  $lang = $_POST['lang_hotword_get'] ?? '';
+  $Lib_modelFilePath = trim($_POST['select_file_lib_pv'] ?? '');
   $updatedConfig = [];
   if (empty($Lib_modelFilePath)) {
     $messages[] = "Lỗi, Cần chọn file thư viện Hotword .pv";
@@ -772,8 +879,11 @@ if (isset($_POST['save_hotword_theo_lang'])) {
       }
       $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = $updatedConfig;
       $Config['smart_config']['smart_wakeup']['hotword']['library'][$lang]['modelFilePath'] = $Lib_modelFilePath;
-      file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-      $messages[] = 'Cập nhật các giá trị trong Hotword Picovoice/Procupine thành công';
+      if (vbotConfigWriteJson($Config_filePath, $Config, 'Config.json - Hotword Picovoice')) {
+        $messages[] = 'Cập nhật các giá trị trong Hotword Picovoice/Procupine thành công';
+      } else {
+        $messages[] = 'Không thể lưu cấu hình Hotword Picovoice/Procupine';
+      }
     }
   }
 }
@@ -794,8 +904,11 @@ if (isset($_POST['save_config_wakeup_reply'])) {
   }
   $Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] = $newSoundFileList;
   $Config['smart_config']['smart_wakeup']['wakeup_reply']['active'] = isset($_POST['wakeup_reply_active']) ? true : false;
-  file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
-  $messages[] = 'Cập nhật các giá trị trong Câu Phản Hồi (wakeup_reply) thành công';
+  if (vbotConfigWriteJson($Config_filePath, $Config, 'Config.json - Wakeup Reply')) {
+    $messages[] = 'Cập nhật các giá trị trong Câu Phản Hồi (wakeup_reply) thành công';
+  } else {
+    $messages[] = 'Không thể lưu cấu hình Câu Phản Hồi (wakeup_reply)';
+  }
 }
 
 #Đọc File stt và tts google cloud
@@ -3891,6 +4004,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                         <option selected>Chọn Nguồn TTS....</option>
                         <option value="wakeup_reply_tts_gcloud">TTS Google Cloud (JSON File)</option>
                         <option value="wakeup_reply_tts_zalo">TTS Zalo (Sử Dụng KEY)</option>
+                        <option value="wakeup_reply_tts_edge">TTS Microsoft Edge</option>
                       </select>
                     </div>
                     <div id="tts_audio_reply_options"></div>
