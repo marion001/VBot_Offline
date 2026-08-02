@@ -32,47 +32,45 @@
         });
     }
 
-    function addUpdateNotification(item, remoteVersion) {
-        var notificationList = document.getElementById('notification');
-        if (!notificationList) {
-            return;
-        }
-        var listItem = document.createElement('li');
-        listItem.className = 'notification-item';
-
-        var iconLink = document.createElement('a');
-        iconLink.href = item.target;
-        iconLink.innerHTML = '<i class="bi bi-box-arrow-in-up text-success"></i>';
-
-        var content = document.createElement('div');
-        var heading = document.createElement('h4');
-        heading.className = 'text-success';
-        heading.textContent = item.title;
-        var message = document.createElement('p');
-        message.className = 'text-primary';
-        message.textContent = 'Có phiên bản mới: ' + remoteVersion.releaseDate;
-        var checkLink = document.createElement('a');
-        checkLink.href = item.target;
-        checkLink.className = 'text-danger';
-        checkLink.textContent = 'Kiểm tra';
-
-        content.appendChild(heading);
-        content.appendChild(message);
-        content.appendChild(checkLink);
-        listItem.appendChild(iconLink);
-        listItem.appendChild(content);
-        notificationList.appendChild(listItem);
-
-        var count = document.getElementById('number_notification');
-        var countText = document.getElementById('number_notification_1');
-        if (count) {
-            count.textContent = String((parseInt(count.textContent, 10) || 0) + 1);
-        }
-        if (countText) {
-            var current = parseInt(countText.textContent.replace(/[^0-9]/g, ''), 10) || 0;
-            countText.innerHTML = 'Bạn có <b>' + (current + 1) + '</b> thông báo mới';
-        }
-    }
+	function addUpdateNotification(item, remoteVersion) {
+		var notificationList = document.getElementById('notification');
+		if (!notificationList) {
+			return;
+		}
+		var listItem = document.createElement('li');
+		listItem.className = 'notification-item';
+		var link = document.createElement('a');
+		link.href = item.target;
+		link.className = 'd-flex text-decoration-none';
+		var icon = document.createElement('div');
+		icon.innerHTML = '<i class="bi bi-box-arrow-in-up text-success"></i>';
+		var content = document.createElement('div');
+		var heading = document.createElement('h4');
+		heading.className = 'text-success';
+		heading.textContent = item.title;
+		var message = document.createElement('p');
+		message.className = 'text-primary';
+		message.textContent = 'Có phiên bản mới: ' + remoteVersion.releaseDate;
+		var checkText = document.createElement('span');
+		checkText.className = 'text-danger';
+		checkText.textContent = 'Kiểm tra';
+		content.appendChild(heading);
+		content.appendChild(message);
+		content.appendChild(checkText);
+		link.appendChild(icon);
+		link.appendChild(content);
+		listItem.appendChild(link);
+		notificationList.appendChild(listItem);
+		var count = document.getElementById('number_notification');
+		var countText = document.getElementById('number_notification_1');
+		if (count) {
+			count.textContent = String((parseInt(count.textContent, 10) || 0) + 1);
+		}
+		if (countText) {
+			var current = parseInt(countText.textContent.replace(/[^0-9]/g, ''), 10) || 0;
+			countText.innerHTML = 'Bạn có <b>' + (current + 1) + '</b> thông báo mới';
+		}
+	}
 
     function checkOne(item) {
         return Promise.all([

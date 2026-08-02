@@ -51,12 +51,12 @@ function checkPermissions($dir)
         <li>
             <hr class="dropdown-divider">
         </li>
-        <li class="notification-item">
+        <li class="notification-item" onclick="command_php(\'chmod_vbot\', true)" style="cursor: pointer;">
             <i class="bi bi-exclamation-circle text-warning"></i>
             <div>
                 <h4 class="text-danger">Cấp Quyền Chmod</h4>
                 <p class="text-primary">Có: <b>' . $i_count . '</b> file, thư mục chưa được cấp quyền thao tác</p>
-                <p class="text-success" onclick="command_php(\'chmod_vbot\', true)" style="cursor: pointer;">Nhấn Để Cấp Quyền</p>
+                <p class="text-success">Nhấn Để Cấp Quyền</p>
             </div>
         </li>';
     }

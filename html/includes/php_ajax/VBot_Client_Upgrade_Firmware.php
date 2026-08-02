@@ -1,5 +1,4 @@
 <?php
-ob_start();
 #Code By: Vũ Tuyển
 #Designed by: BootstrapMade
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
@@ -7,6 +6,7 @@ ob_start();
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+ob_start();
 require_once __DIR__.'/Api_Helpers.php';
 require_once dirname(__DIR__).'/Client_Data_Helpers.php';
 vbotApiInitialize(['POST']);

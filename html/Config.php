@@ -1,4 +1,11 @@
 <?php
+#Code By: Vũ Tuyển
+#Designed by: BootstrapMade
+#GitHub VBot: https://github.com/marion001/VBot_Offline.git
+#Facebook Group: https://www.facebook.com/groups/1148385343358824
+#Facebook: https://www.facebook.com/TWFyaW9uMDAx
+#Email: VBot.Assistant@gmail.com
+
 $phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
 ini_set('log_errors', '1');
 ini_set('error_log', $phpErrorLog);
@@ -21,13 +28,6 @@ register_shutdown_function(static function () use ($phpErrorLog): void {
   );
   error_log($message, 0);
 });
-
-#Code By: Vũ Tuyển
-#Designed by: BootstrapMade
-#GitHub VBot: https://github.com/marion001/VBot_Offline.git
-#Facebook Group: https://www.facebook.com/groups/1148385343358824
-#Facebook: https://www.facebook.com/TWFyaW9uMDAx
-#Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
 
