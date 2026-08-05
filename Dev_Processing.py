@@ -390,9 +390,8 @@ async def _dev_processing_impl(text_input):
     await dev_finish_processing_async()
     return True
 
-
+#Thực thi quy trình xử lý của nhà phát triển DEV
 async def dev_processing(text_input):
-    """Run developer processing without leaking the global busy state."""
     Lib.mark_processing_busy(owner=_DEV_PROCESSING_OWNER)
     Led.LED("LOADING")
     try:

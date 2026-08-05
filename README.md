@@ -1,9 +1,11 @@
-# VBot Assistant
+# VBot Assistant 🇻🇳
 
-VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Raspberry Pi, được tối ưu cho Raspberry Pi Zero 2W. Dự án kết hợp nhận diện từ khóa đánh thức, Speech-to-Text (STT), xử lý lệnh, trợ lý AI, Text-to-Speech (TTS), phát media, Home Assistant, MQTT, AirPlay, Bluetooth, WebSocket client và giao diện quản trị WebUI.
+VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Raspberry Pi, được tối ưu cho Raspberry Pi Zero 2W. Dự án thuần Việt dùng để điều khiển nhà thông minh trong mạng nội bộ gia đình (Local), kết hợp nhận diện từ khóa đánh thức (Picovoice, Snowboy), Speech-to-Text (STT), xử lý lệnh, trợ lý AI, Text-to-Speech (TTS), phát media, Home Assistant, MQTT, AirPlay, Bluetooth, WebSocket client và giao diện quản trị WebUI.
 
 ## Mục lục
-
+- Tài Liệu OS IMG Liên Quan Tới VBot: [Google Drive - VBot Images](https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ)
+- [Cài VBot Client Cho ESP, PhicommR1](https://github.com/marion001/VBot_Client_Offline)
+- [Liên Kết Dữ Liệu VBot Vào Home Assistant (HASS), Assist Qua Custom Component](https://github.com/marion001/VBot_Offline_Custom_Component)
 - [Tính năng chính](#tính-năng-chính)
 - [Phần cứng và nền tảng](#phần-cứng-và-nền-tảng)
 - [Kiến trúc chương trình](#kiến-trúc-chương-trình)
@@ -59,7 +61,6 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 - Custom command cho thiết bị, script và automation.
 - Tích hợp tham khảo:
   - [VBot Offline Custom Component](https://github.com/marion001/VBot_Offline_Custom_Component)
-  - [VBot Assist Conversation](https://github.com/marion001/VBot-Assist-Conversation)
 
 ### Hệ thống và tiện ích
 
@@ -245,7 +246,7 @@ Cổng API được cấu hình tại:
 ```json
 {
   "api": {
-    "port": 5000
+    "port": 5002
   }
 }
 ```
@@ -300,14 +301,14 @@ GET /runtime/diagnostics
 Ví dụ:
 
 ```bash
-curl http://127.0.0.1:5000/runtime/diagnostics
+curl http://127.0.0.1:5002/runtime/diagnostics
 ```
 
 Nếu bật API authentication:
 
 ```bash
 curl -H 'VBot-API-Key: YOUR_API_KEY' \
-  http://127.0.0.1:5000/runtime/diagnostics
+  http://127.0.0.1:5002/runtime/diagnostics
 ```
 
 Thông tin trả về gồm:
@@ -508,7 +509,7 @@ python -m unittest tests.test_airplay_metadata
 ### API diagnostics không truy cập được
 
 ```bash
-curl -v http://127.0.0.1:5000/runtime/diagnostics
+curl -v http://127.0.0.1:5002/runtime/diagnostics
 ```
 
 Nếu bật auth, thêm `VBot-API-Key`. Kiểm tra cổng thực tế trong `Config.json` và trạng thái service.
@@ -588,7 +589,7 @@ Các file mở rộng:
 | `Dev_Processing.py` | Logic xử lý văn bản riêng. |
 | `Dev_Weather.py` | Nguồn thời tiết riêng. |
 | `Dev_Logs.py` | Định tuyến log riêng. |
-| `Dev_Picovoice.py` | Tùy chỉnh wake word/Picovoice. |
+| `Dev_Picovoice.py` | Tùy chỉnh wake word/Picovoice. (Có thể sử dụng Picovoice không cần KEY)|
 
 ### MCP Plugins cho trợ lý XiaoZhi
 
@@ -670,4 +671,9 @@ Khuyến nghị:
 
 VBot Assistant hướng tới một nền tảng loa thông minh tiếng Việt có thể tự triển khai, tùy biến và tích hợp sâu với hệ sinh thái nhà thông minh.
 
+## WebUI VBot
 <img width="2688" height="1360" alt="Image" src="https://github.com/user-attachments/assets/fc2ac10b-00d0-4b20-9c63-2367c3a101d0" />
+
+## Home Assistant Custom Component (HASS)
+
+<img width="2688" height="1360" alt="Image" src="https://github.com/user-attachments/assets/b917e0a2-e6ff-452c-9823-14d04e664791" />

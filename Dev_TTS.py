@@ -1,9 +1,10 @@
-"""
-Custom async TTS implementation.
-
-Network I/O is native async. File operations remain synchronous helpers and
-are executed through asyncio.to_thread.
-"""
+'''
+Code By: Vũ Tuyển
+GitHub VBot: https://github.com/marion001/VBot_Offline.git
+Facebook Group: https://www.facebook.com/groups/1148385343358824
+Facebook: https://www.facebook.com/TWFyaW9uMDAx
+Mail: VBot.Assistant@gmail.com
+'''
 
 import Lib
 import aiohttp

@@ -12,7 +12,7 @@ Hệ thống OS sử dụng phiên bản 3.0 trong dải được hỗ trợ t�
     - Phiên bản Pvporcupine/Porcupine tương thích từ 3.0 -> 3.0.x
 Bạn hãy sử dụng từ khóa hotword và tệp model thư viện tương ứng với phiên bản trong dải bên trên
 
-Key Picovoice sẽ được sử dụng trong file Config.json
+Key Picovoice sẽ được sử dụng trong file Config.json (Hoặc chế độ sử dụng Key của hệ thống)
     - smart_config -> smart_wakeup -> hotword_engine -> key
 
 keyword_paths sử dụng bao nhiêu từ khóa thì sensitivities cần cấu hình theo tương ứng

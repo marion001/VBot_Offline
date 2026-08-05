@@ -101,11 +101,6 @@ async def dev_skill(input_text):
     color=Lib.Color.GREEN sẽ có các tham số màu: PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDERLINE, END, WHITE
     """
     Lib.show_log(f"[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
-    
-    
-
-  
-
 
     #Ví dụ sử dụng trợ lý ảo
     """
@@ -124,10 +119,6 @@ async def dev_skill(input_text):
             
     """
 
-    
-    
-    
-    
     #ví dụ chuyển dữ liệu text, văn bản thành file âm thanh audio
     """
     
@@ -138,9 +129,8 @@ async def dev_skill(input_text):
         Lib.show_log(f"Lỗi chuyển đổi dữ liệu văn bản thành âm thanh", color=Lib.Color.RED)
     
     """
-    
-    
-    
+
+
     """
     Ví dụ Phát âm thanh từ file audio
     Sử dụng pass nếu không muốn thực thi trong điều kiện if,

@@ -1,6 +1,9 @@
 '''
-Code By: Vu Tuyen
+Code By: Vũ Tuyển
 GitHub VBot: https://github.com/marion001/VBot_Offline.git
+Facebook Group: https://www.facebook.com/groups/1148385343358824
+Facebook: https://www.facebook.com/TWFyaW9uMDAx
+Mail: VBot.Assistant@gmail.com
 '''
 
 import aiohttp
@@ -31,7 +34,7 @@ async def custom_music_async(input_text: str):
         songs = data.get("data", {}).get("songs", [])
         if not songs:
             Lib.show_log(
-                "DEV Custom Music: Khong tim thay bai hat",
+                "DEV Custom Music: Không tìm thấy bài hát",
                 color=Lib.Color.RED,
             )
             return None, None, None, None
