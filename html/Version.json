@@ -1,8 +1,8 @@
 {
-    "version": "1.1.9",
+    "version": "1.2.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa lỗi KEY Picovoice, Hỗ trợ MCP Plugins người dùng code tích hợp tools cho XiaoAI",
-    "releaseDate": "26/07/2026",
+    "description": "Giảm dung lượng, dữ liệu rác thừa của toàn bộ file chương trình VBot sau khi biên dịch chương trình thành công",
+    "releaseDate": "05/08/2026",
     "changes": [
         {
             "type": "feature",
