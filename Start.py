@@ -6,8 +6,13 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+import os
 import sys
 import traceback
+from datetime import datetime
+from pathlib import Path
+
+VBOT_PATH = Path(__file__).resolve().parent
 
 def main() -> int:
     try:
@@ -20,12 +25,21 @@ def main() -> int:
         traceback_text = traceback.format_exc()
         msg_error = f"[Start] Lỗi khi khởi động VBot: {e}\n{traceback_text}"
         try:
+            log_file = VBOT_PATH / "resource" / "log" / "Vbot_error.log"
+            os.makedirs(os.path.dirname(log_file), exist_ok=True)
+            with open(log_file, "a", encoding="utf-8") as f:
+                f.write(
+                    f"\n[{datetime.now().strftime('%H:%M:%S %d-%m-%Y')}]\n"
+                    f"{msg_error}\n"
+                )
+        except Exception as log_error:
+            print(f"[Start] Không thể ghi file log: {log_error}", file=sys.stderr)
+        try:
             import Lib
-            Lib.Logs_VBot(msg_error)
             Lib.show_log(f"[Start] Lỗi khi khởi động VBot: {e}", color=Lib.Color.RED)
-            print(traceback_text, file=sys.stderr, end="")
         except Exception:
-            print(msg_error, file=sys.stderr, end="")
+            print(f"[Start] Lỗi khi khởi động VBot: {e}", file=sys.stderr)
+        print(traceback_text, file=sys.stderr, end="")
         return 1
 
 if __name__ == "__main__":
