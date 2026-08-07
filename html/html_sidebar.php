@@ -103,7 +103,7 @@
     <ul id="icons-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
       <li>
         <a href="Log_Services.php">
-          <i class="bi bi-circle"></i><span>Log VBot</span>
+          <i class="bi bi-circle"></i><span>Log Chương Trình VBot</span>
         </a>
       </li>
       <li>

@@ -23,7 +23,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
         vbotApiJsonResponse([
             'success' => false,
             'status' => 'error',
-            'message' => 'Phiên đăng nhập đã hết hạn.'
+            'message' => 'Phiên đăng nhập đã hết hạn, bạn cần tải lại trang để quay về trang đăng nhập.'
         ], 401);
     }
 }
