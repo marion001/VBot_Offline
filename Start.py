@@ -7,6 +7,7 @@ Mail: VBot.Assistant@gmail.com
 '''
 
 import sys
+import traceback
 
 def main() -> int:
     try:
@@ -16,13 +17,15 @@ def main() -> int:
     except KeyboardInterrupt:
         return 0
     except Exception as e:
+        traceback_text = traceback.format_exc()
+        msg_error = f"[Start] Lỗi khi khởi động VBot: {e}\n{traceback_text}"
         try:
             import Lib
-            Msg_ERROR = f"[Start] Lỗi khi khởi động VBot: {e}"
-            Lib.Logs_VBot(Msg_ERROR)
-            Lib.show_log(Msg_ERROR, color=Lib.Color.RED)
+            Lib.Logs_VBot(msg_error)
+            Lib.show_log(f"[Start] Lỗi khi khởi động VBot: {e}", color=Lib.Color.RED)
+            print(traceback_text, file=sys.stderr, end="")
         except Exception:
-            print(f"[Start] Lỗi khi khởi động VBot: {e}", file=sys.stderr)
+            print(msg_error, file=sys.stderr, end="")
         return 1
 
 if __name__ == "__main__":
