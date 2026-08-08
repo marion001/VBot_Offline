@@ -34,7 +34,7 @@ function vbotProgramWriteJson($filePath, array $data, $label)
         error_log('[PHP Program ERROR] Không thể mã hóa ' . $label . ': ' . json_last_error_msg());
         return false;
     }
-    if (file_put_contents($filePath, $encoded, LOCK_EX) === false) {
+    if (!vbotAtomicWriteFile($filePath, $encoded, $label)) {
         error_log('[PHP Program ERROR] Không thể ghi ' . $label . ': ' . $filePath);
         return false;
     }
@@ -42,6 +42,35 @@ function vbotProgramWriteJson($filePath, array $data, $label)
         error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho ' . $label . ': ' . $filePath);
     }
     return true;
+}
+
+// Chạy lệnh SSH đồng bộ và lấy đúng mã thoát. Phải chờ VBot dừng hẳn
+// trước khi thay Config.json để tiến trình cũ không ghi dữ liệu từ RAM.
+function vbotProgramRunSshCommand($connection, $command, &$output = null)
+{
+    $output = '';
+    if (!$connection || !function_exists('ssh2_exec')) {
+        return false;
+    }
+    $marker = '__VBOT_SSH_EXIT_' . bin2hex(random_bytes(8)) . '__';
+    $wrappedCommand = '( ' . $command . ' ); vbot_exit_code=$?; printf "\\n' . $marker . '%s\\n" "$vbot_exit_code"';
+    $stream = @ssh2_exec($connection, $wrappedCommand);
+    if ($stream === false) {
+        return false;
+    }
+    $errorStream = @ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+    stream_set_blocking($stream, true);
+    if (is_resource($errorStream)) stream_set_blocking($errorStream, true);
+    $stdout = stream_get_contents($stream);
+    $stderr = is_resource($errorStream) ? stream_get_contents($errorStream) : '';
+    if (is_resource($errorStream)) fclose($errorStream);
+    fclose($stream);
+    $output = trim($stdout . ($stderr !== '' ? "\n" . $stderr : ''));
+    if (!preg_match('/' . preg_quote($marker, '/') . '(\\d+)/', $stdout, $matches)) {
+        return false;
+    }
+    $output = trim(str_replace($matches[0], '', $output));
+    return intval($matches[1]) === 0;
 }
 
 function vbotProgramNormalizePath($path)
@@ -279,13 +308,18 @@ include 'html_head.php';
             $sourceFile = $sourceDir . $file;
             $destinationFile = $destinationDir . $file;
             if (file_exists($sourceFile)) {
-                copy($sourceFile, $destinationFile);
+                if (!copy($sourceFile, $destinationFile)) {
+                    $messages[] = "<font color=red>- Không thể sao lưu <b>$file</b> vào bộ nhớ tạm</font><br>";
+                    error_log('[PHP Program ERROR] Không thể sao lưu tệp trước nâng cấp: ' . $sourceFile . ' -> ' . $destinationFile);
+                    return false;
+                }
                 vbotSetFullPermissions($destinationFile, 'tệp tạm khi cập nhật VBot');
                 $messages[] = "<br/><font color=green>- Đã sao chép <b>$file</b> thành công vào bộ nhớ tạm để chuẩn bị di chuyển dữ liệu</font><br>";
             } else {
                 $messages[] = "<font color=red>- Không tìm thấy tệp <b>$file</b> trong thư mục nguồn: <b>$sourceDir</b></font><br>";
             }
         }
+        return true;
     }
 
     //Hàm xóa thư mục và nội dung bên trong chỉ dùng cho lúc cập nhật, không để Logs
@@ -395,17 +429,26 @@ include 'html_head.php';
             return null;
         }
         fclose($remoteStream);
+        clearstatcache(true, $zipFile);
+        if (!is_file($zipFile) || filesize($zipFile) < 1024) {
+            $messages[] = "<font color=red>- Gói ZIP tải về bị rỗng hoặc quá nhỏ</font>";
+            error_log('[UPGRADE PROGRAM ERROR] [kiểm tra tải xuống] ZIP không hợp lệ: ' . $zipFile);
+            @unlink($zipFile);
+            return null;
+        }
+        error_log('[UPGRADE PROGRAM INFO] SHA-256 gói tải về: ' . hash_file('sha256', $zipFile));
         if (!vbotSetFullPermissions($zipFile, 'tệp ZIP cập nhật VBot')) {
             error_log('[PHP Program ERROR] Không thể đặt quyền 0777 cho: ' . $zipFile);
         }
         if (!class_exists('ZipArchive')) {
             $messages[] = "<font color=red>- PHP chưa cài extension ZipArchive</font>";
+            error_log('[UPGRADE PROGRAM ERROR] [kiểm tra môi trường] PHP thiếu ZipArchive');
             @unlink($zipFile);
             return null;
         }
         $zip = new ZipArchive;
         $messages[] = "<font color=green>- Tải xuống thành công, đang tiến hành giải nén dữ liệu...</font>";
-        if ($zip->open($zipFile) === TRUE) {
+        if ($zip->open($zipFile, ZipArchive::CHECKCONS) === TRUE) {
             for ($zipIndex = 0; $zipIndex < $zip->numFiles; $zipIndex++) {
                 $entryName = str_replace('\\', '/', $zip->getNameIndex($zipIndex));
                 if ($entryName === '' || $entryName[0] === '/' || preg_match('/(^|\/)\.\.($|\/)/', $entryName)) {
@@ -421,6 +464,7 @@ include 'html_head.php';
                 $zip->close();
                 @unlink($zipFile);
                 $messages[] = "<font color=red>- Không thể giải nén dữ liệu cập nhật</font>";
+                error_log('[UPGRADE PROGRAM ERROR] [giải nén] ZipArchive::extractTo thất bại');
                 return null;
             }
             $zip->close();
@@ -436,6 +480,7 @@ include 'html_head.php';
             return $extractedFolder;
         } else {
             $messages[] = "Có Lỗi Xảy Ra, không thể giải nén được giữ liệu đã tải xuống, đã dừng tiến trình";
+            error_log('[UPGRADE PROGRAM ERROR] [kiểm tra ZIP] Gói ZIP hỏng hoặc không nhất quán');
             @unlink($zipFile);
             return null;
         }
@@ -747,6 +792,9 @@ include 'html_head.php';
             //Xử lý nếu dữ liệu là nút nhấn cập nhật
             elseif ($Backup_Upgrade_Program === "yes_vbot_upgrade") {
                 delete_in_Dir($Download_Path);
+                $rollbackProgramOnStartFailure = (bool) (
+                    $Config['backup_upgrade']['advanced_settings']['rollback_program_on_start_failure'] ?? true
+                );
                 $vbot_program_cloud_backup_khi_cap_nhat = isset($_POST['vbot_program_cloud_backup_khi_cap_nhat']) ? $_POST['vbot_program_cloud_backup_khi_cap_nhat'] : null;
                 $Keep_The_File_Folder_POST = isset($_POST['keep_the_file_folder']) ? $_POST['keep_the_file_folder'] : [];
                 $messages[] = "<font color=green><b>- Đang tiến hành cập nhật phiên bản chương trình VBot mới</b></font><br/>";
@@ -755,6 +803,42 @@ include 'html_head.php';
 
                 if (!is_null($download_Git_Repo_As_Named_Zip)) {
                     $messages[] = "<font color=green>- Tải dữ liệu và giải nén thành công vào đường dẫn: <b>" . $download_Git_Repo_As_Named_Zip . "/</b></font><br/>";
+                    if (!vbotUpgradeValidatePackage(
+                        $download_Git_Repo_As_Named_Zip,
+                        ['Config.json', 'Version.json', 'Lib.py', 'Lib_System.py', 'VBot.py'],
+                        $messages,
+                        'PROGRAM'
+                    )) {
+                        deleteDirectory($Download_Path);
+                        $download_Git_Repo_As_Named_Zip = null;
+                    }
+                    if (!is_null($download_Git_Repo_As_Named_Zip) &&
+                        (!vbotUpgradeValidateJson($download_Git_Repo_As_Named_Zip . '/Config.json', $messages, 'PROGRAM', 'Config.json') ||
+                         !vbotUpgradeValidateJson($download_Git_Repo_As_Named_Zip . '/Version.json', $messages, 'PROGRAM', 'Version.json'))) {
+                        deleteDirectory($Download_Path);
+                        $download_Git_Repo_As_Named_Zip = null;
+                    }
+                    if (!is_null($download_Git_Repo_As_Named_Zip)) {
+                        $pythonLintOutput = '';
+                        $pythonCachePath = $Download_Path . '/python_lint_cache';
+                        $pythonLintCommand = 'PYTHONPYCACHEPREFIX=' . escapeshellarg($pythonCachePath)
+                            . ' python3 -m compileall -q ' . escapeshellarg($download_Git_Repo_As_Named_Zip);
+                        if (!vbotProgramRunSshCommand($connection, $pythonLintCommand, $pythonLintOutput)) {
+                            vbotUpgradeReportError(
+                                $messages,
+                                'PROGRAM',
+                                'kiểm tra cú pháp Python',
+                                $pythonLintOutput !== '' ? $pythonLintOutput : 'Không thể chạy python3 -m compileall'
+                            );
+                            deleteDirectory($Download_Path);
+                            $download_Git_Repo_As_Named_Zip = null;
+                        } else {
+                            $messages[] = "<font color=green>- Cú pháp Python trong gói cập nhật hợp lệ.</font><br/>";
+                        }
+                    }
+                    if (is_null($download_Git_Repo_As_Named_Zip)) {
+                        $messages[] = "<font color=red><b>- Gói chương trình không đạt kiểm tra tiền cập nhật.</b></font>";
+                    } else {
                     if ($make_a_backup_before_updating === true) {
                         $messages[] = "- Đang tiến hành sao lưu dữ liệu trước khi cập nhật...";
                         $FileName_Backup_VBot = backup_data($Exclude_Files_Folder, $Exclude_File_Format);
@@ -868,47 +952,157 @@ include 'html_head.php';
                     } else {
                         $messages[] = "- Sao lưu dữ liệu trước khi cập nhật bị tắt, sẽ không có bản sao lưu nào được tạo ra";
                     }
-                    #Tên tập tin để chuyển dữ liệu, nội dung trong tệp tin đó sang tập tin mới ["Config.json", "Action.json"];
-                    $filename_transfers_data_to_new_file = ["Config.json"];
-                    copyFilesToDestination($VBot_Offline, $Download_Path . '/', $filename_transfers_data_to_new_file);
-                    $messages[] = "<font color=green><b>- Đang tiến hành cập nhật dữ liệu mới...</b></font>";
-                    #Tiến hành Sao chép ghi đè dữ liệu mới và bỏ qua file được chọn
-                    if (copyFiles($download_Git_Repo_As_Named_Zip . '/', $VBot_Offline, $Keep_The_File_Folder_POST)) {
-                        $messages[] = "<font color=green><b>- Đã hoàn tất cập nhật dữ liệu mới</b></font><br/>";
-                        $config_new_path = $VBot_Offline . 'Config.json';
-                        $config_old_path = $Download_Path . '/Config.json';
-                        replace_values_json_file($config_new_path, $config_old_path);
-                        deleteDirectory($Extract_Path);
-                        deleteDirectory($Download_Path);
-                        //Kiểm tra và khởi động lại VBot khi cập nhật thành công
-                        $Auto_Reboot_updated_the_program_successfully = isset($_POST['auto_restart_vbot']) ? true : false;
-                        if ($Auto_Reboot_updated_the_program_successfully === true) {
-                            if ($connection && @ssh2_exec($connection, "systemctl --user restart VBot_Offline.service")) {
-                                $messages[] = "<font color=green><br/>- Đã chạy lệnh khởi động lại chương trình VBot: <b>systemctl --user restart VBot_Offline.service</b></font><br/>";
-                            } else {
-                                $messages[] = "<font color=red><br/>- Không thể tự động khởi động lại VBot do kết nối SSH không khả dụng</font><br/>";
-                                error_log('[PHP Program ERROR] Không thể gửi lệnh restart VBot qua SSH');
-                            }
+                    // Giữ VBot hoạt động trong lúc cập nhật, nhưng đặt cờ để tiến trình
+                    // đang chạy không ghi Config.json từ RAM lên file vừa merge.
+                    $upgradeMarkerPath = $VBot_Offline . '.program_upgrade_in_progress';
+                    clearstatcache(true, $upgradeMarkerPath);
+                    if (is_file($upgradeMarkerPath)) {
+                        $markerAge = time() - (int) @filemtime($upgradeMarkerPath);
+                        if ($markerAge < 1800) {
+                            vbotUpgradeReportError($messages, 'PROGRAM', 'khóa cập nhật', 'Một tiến trình cập nhật khác đang hoạt động');
+                            $upgradeMarkerCreated = false;
                         } else {
-                            $messages[] = "<font color=red><br/>- Chương trình VBot không được lựa chọn để tự động khởi động lại khi cập nhật thành công, Bạn cần khởi động lại thủ công để áp dụng dữ liệu mới</font>";
+                            @unlink($upgradeMarkerPath);
+                            error_log('[UPGRADE PROGRAM WARNING] Đã xóa cờ cập nhật bị sót quá 30 phút');
+                            $upgradeMarkerCreated = null;
                         }
-                        if ($connection) {
-                            @ssh2_exec($connection, "sudo chmod -R 0777 -- " . escapeshellarg($VBot_Offline));
-                            @ssh2_exec($connection, "sudo chmod -R 0777 -- " . escapeshellarg($directory_path));
-                        } else {
-                            error_log('[PHP Program ERROR] Không thể đồng bộ quyền 0777 sau nâng cấp do SSH không khả dụng');
-                        }
-                        $Sound_updated_the_program_successfully_OK = isset($_POST['sound_updated_the_program_successfully']) ? true : false;
-                        if ($Sound_updated_the_program_successfully_OK === true) {
-                            $sound_updated_the_program_successfully = $VBot_Offline . $Config['smart_config']['smart_wakeup']['sound']['default']['updated_the_program_successfully'];
-                            echo "<script>playAudio_upgrade('$sound_updated_the_program_successfully');</script>";
-                        }
-                        $messages[] = "<br/><font color=green><b>- Cập nhật dữ liệu hoàn tất</b></font>";
                     } else {
-                        $messages[] = "<font color=red>- Lỗi xảy ra trong quá trình cập nhật dữ liệu mới</font>";
+                        $upgradeMarkerCreated = null;
+                    }
+                    if ($upgradeMarkerCreated !== false) {
+                        $upgradeMarkerCreated = file_put_contents(
+                            $upgradeMarkerPath,
+                            date('c') . "\n",
+                            LOCK_EX
+                        ) !== false;
+                    }
+                    if (!$upgradeMarkerCreated) {
+                        $messages[] = "<font color=red><b>- Không thể tạo cờ bảo vệ Config.json; đã hủy cập nhật.</b></font>";
+                        error_log('[PHP Program ERROR] Không thể tạo cờ nâng cấp: ' . $upgradeMarkerPath);
+                    } else {
+                        vbotSetFullPermissions($upgradeMarkerPath, 'cờ bảo vệ Config khi nâng cấp');
+                        $messages[] = "<font color=green>- VBot vẫn đang hoạt động; đã bật khóa chống ghi đè Config.json.</font><br/>";
+
+                        $config_old_path = $Download_Path . '/Config.json';
+                        $config_template_path = rtrim($download_Git_Repo_As_Named_Zip, '/') . '/Config.json';
+                        $config_upgrade_temp = $VBot_Offline . 'Config.json.upgrade.tmp';
+                        $config_backup_path = $VBot_Offline . 'Config.json.bak';
+
+                        $oldConfigSaved = copyFilesToDestination(
+                            $VBot_Offline,
+                            $Download_Path . '/',
+                            ["Config.json"]
+                        );
+                        $newTemplateValid = false;
+                        if (is_file($config_template_path)) {
+                            $templateData = json_decode(file_get_contents($config_template_path), true);
+                            $newTemplateValid = is_array($templateData) && json_last_error() === JSON_ERROR_NONE;
+                        }
+
+                        if (!$oldConfigSaved || !$newTemplateValid || !copy($config_template_path, $config_upgrade_temp)) {
+                            @unlink($config_upgrade_temp);
+                            @unlink($upgradeMarkerPath);
+                            $messages[] = "<font color=red><b>- Config cũ hoặc mẫu Config mới không hợp lệ; đã hủy cập nhật.</b></font>";
+                            error_log('[PHP Program ERROR] Không thể chuẩn bị hai tệp Config để merge khi nâng cấp');
+                        } elseif (!replace_values_json_file($config_upgrade_temp, $config_old_path)) {
+                            @unlink($config_upgrade_temp);
+                            @unlink($upgradeMarkerPath);
+                            $messages[] = "<font color=red><b>- Merge Config backup vào Config mới thất bại; đã hủy cập nhật.</b></font>";
+                        } else {
+                            // Không bao giờ chép Config.json/.bak từ GitHub trực tiếp vào hệ thống.
+                            $Keep_The_File_Folder_POST[] = 'Config.json';
+                            $Keep_The_File_Folder_POST[] = 'Config.json.bak';
+                            $Keep_The_File_Folder_POST = array_values(array_unique($Keep_The_File_Folder_POST));
+                            $messages[] = "<font color=green><b>- Đang tiến hành cập nhật dữ liệu mới...</b></font>";
+
+                            $programRollbackPath = $Download_Path . '/rollback_program';
+                            if (vbotUpgradeTransactionalCopy(
+                                $download_Git_Repo_As_Named_Zip . '/',
+                                $VBot_Offline,
+                                $Keep_The_File_Folder_POST,
+                                $programRollbackPath,
+                                $messages,
+                                'PROGRAM'
+                            )) {
+                                // Lưu Config cũ thành .bak rồi cài bản merge dưới khóa dùng chung PHP/Python.
+                                $mergedConfigContent = @file_get_contents($config_upgrade_temp);
+                                if (!is_string($mergedConfigContent) || trim($mergedConfigContent) === '' ||
+                                    !copy($config_old_path, $config_backup_path) ||
+                                    !vbotSetFullPermissions($config_backup_path, 'Config.json.bak trước nâng cấp') ||
+                                    !vbotAtomicWriteFile(
+                                        $VBot_Offline . 'Config.json',
+                                        $mergedConfigContent,
+                                        'Config.json đã merge'
+                                    )) {
+                                    @unlink($config_upgrade_temp);
+                                    vbotUpgradeRollbackTransaction($programRollbackPath, $VBot_Offline, $messages, 'PROGRAM');
+                                    @unlink($upgradeMarkerPath);
+                                    $messages[] = "<font color=red><b>- Không thể cài đặt Config.json đã merge; VBot vẫn chạy phiên bản hiện tại.</b></font>";
+                                    error_log('[PHP Program ERROR] Không thể thay Config.json đã merge');
+                                } else {
+                                    @unlink($config_upgrade_temp);
+                                    vbotSetFullPermissions($VBot_Offline . 'Config.json', 'Config.json sau nâng cấp');
+                                    $messages[] = "<font color=green><b>- Đã merge Config backup vào mẫu Config mới và cài đặt thành công.</b></font><br/>";
+
+                                    // Chỉ đến đây mới restart. Cờ vẫn tồn tại trong lúc tiến
+                                    // trình cũ thoát nên save_config_now() không thể ghi đè.
+                                    $restartOutput = '';
+                                    $programUpdateHealthy = false;
+                                    $restartCommand = 'systemctl --user restart VBot_Offline.service'
+                                        . ' && sleep 3 && systemctl --user is-active --quiet VBot_Offline.service';
+                                    if (vbotProgramRunSshCommand($connection, $restartCommand, $restartOutput)) {
+                                        @unlink($upgradeMarkerPath);
+                                        deleteDirectory($Extract_Path);
+                                        deleteDirectory($Download_Path);
+                                        $programUpdateHealthy = true;
+                                        $messages[] = "<font color=green><br/>- Cập nhật hoàn tất và đã restart VBot bằng Config.json mới.</font><br/>";
+                                    } else {
+                                        if ($rollbackProgramOnStartFailure) {
+                                            vbotUpgradeRollbackTransaction($programRollbackPath, $VBot_Offline, $messages, 'PROGRAM');
+                                            $rollbackConfigContent = @file_get_contents($config_old_path);
+                                            if (is_string($rollbackConfigContent) && vbotAtomicWriteFile($VBot_Offline . 'Config.json', $rollbackConfigContent, 'Config.json rollback')) {
+                                                vbotSetFullPermissions($VBot_Offline . 'Config.json', 'Config.json rollback');
+                                            } else {
+                                                vbotUpgradeReportError($messages, 'PROGRAM', 'rollback Config', 'Không thể phục hồi Config.json cũ');
+                                            }
+                                            $rollbackRestartOutput = '';
+                                            vbotProgramRunSshCommand(
+                                                $connection,
+                                                'systemctl --user restart VBot_Offline.service && sleep 3 && systemctl --user is-active --quiet VBot_Offline.service',
+                                                $rollbackRestartOutput
+                                            );
+                                        } else {
+                                            $messages[] = "<font color=orange>- Tự động rollback đang tắt; giữ nguyên phiên bản vừa cập nhật để kiểm tra thủ công.</font><br/>";
+                                            error_log('[UPGRADE PROGRAM WARNING] VBot lỗi sau cập nhật nhưng rollback tự động đang tắt trong Config.json');
+                                        }
+                                        @unlink($upgradeMarkerPath);
+                                        vbotUpgradeReportError($messages, 'PROGRAM', 'xác minh service', 'VBot không duy trì trạng thái active sau restart: ' . $restartOutput);
+                                        error_log('[PHP Program ERROR] Không thể restart VBot sau nâng cấp: ' . $restartOutput);
+                                    }
+
+                                    $Sound_updated_the_program_successfully_OK = isset($_POST['sound_updated_the_program_successfully']);
+                                    if ($programUpdateHealthy && $Sound_updated_the_program_successfully_OK) {
+                                        $sound_updated_the_program_successfully = $VBot_Offline . $Config['smart_config']['smart_wakeup']['sound']['default']['updated_the_program_successfully'];
+                                        echo "<script>playAudio_upgrade('$sound_updated_the_program_successfully');</script>";
+                                    }
+                                    if ($programUpdateHealthy) {
+                                        $messages[] = "<br/><font color=green><b>- Cập nhật dữ liệu hoàn tất</b></font>";
+                                    } elseif ($rollbackProgramOnStartFailure) {
+                                        $messages[] = "<br/><font color=orange><b>- Bản cập nhật lỗi đã được rollback.</b></font>";
+                                    } else {
+                                        $messages[] = "<br/><font color=orange><b>- Bản cập nhật lỗi được giữ lại vì chức năng rollback đang tắt.</b></font>";
+                                    }
+                                }
+                            } else {
+                                @unlink($config_upgrade_temp);
+                                @unlink($upgradeMarkerPath);
+                                $messages[] = "<font color=red>- Lỗi sao chép chương trình mới; Config.json cũ vẫn được giữ nguyên.</font>";
+                            }
+                        }
+                    }
                     }
                 } else {
-                    $messages[] = "<font color=red><b>- Có Lỗi trong quá trình tải xuống và giải nén dữ liệu, đã dừng quá trình cập nhật dữ liệu mới</b>";
+                    vbotUpgradeReportError($messages, 'PROGRAM', 'tải/giải nén', 'Không thể tải hoặc giải nén gói cập nhật chương trình');
                 }
             }
         }

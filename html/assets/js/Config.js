@@ -1408,6 +1408,108 @@ function get_test_led() {
     test_led(value);
 }
 
+function bluetoothStatusLabel(value) {
+    if (value === true) return 'Bật';
+    if (value === false) return 'Tắt';
+    return 'Không xác định';
+}
+
+function selectBluetoothAdapter(adapter) {
+    if (!/^hci\d+$/.test(adapter)) {
+        show_message('Bluetooth adapter không hợp lệ');
+        return;
+    }
+    var input = document.getElementById('bluetooth_adapter');
+    if (!input) {
+        show_message('Không tìm thấy input Bluetooth Device');
+        return;
+    }
+    input.value = adapter;
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+    document.querySelectorAll('#bluetooth_adapter_scanner tbody tr').forEach(function (row) {
+        row.classList.toggle('table-success', row.dataset.adapter === adapter);
+    });
+    showMessagePHP('Đã chọn Bluetooth adapter: ' + adapter, 4);
+}
+
+function scan_bluetooth_adapters() {
+    loading('show');
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'includes/php_ajax/Scanner.php?scan_bluetooth_adapters=1', true);
+    xhr.responseType = 'json';
+    xhr.onload = function () {
+        loading('hide');
+        var data = xhr.response;
+        if (xhr.status < 200 || xhr.status >= 300 || !data) {
+            show_message('Không thể quét Bluetooth adapter: ' + (data && data.message ? data.message : xhr.statusText));
+            return;
+        }
+        var container = document.getElementById('bluetooth_adapter_scanner');
+        if (!container) return;
+        container.replaceChildren();
+        if (!data.success || !Array.isArray(data.devices) || data.devices.length === 0) {
+            var emptyAlert = document.createElement('div');
+            emptyAlert.className = 'alert alert-warning';
+            emptyAlert.textContent = data.message || 'Không tìm thấy Bluetooth adapter nào';
+            container.appendChild(emptyAlert);
+            return;
+        }
+
+        var table = document.createElement('table');
+        table.className = 'table table-bordered border-primary align-middle';
+        var thead = document.createElement('thead');
+        var header = document.createElement('tr');
+        ['Device', 'Tên Controller', 'Địa Chỉ MAC', 'Nguồn', 'Pairable', 'Discoverable', 'Hành Động'].forEach(function (title) {
+            var th = document.createElement('th');
+            th.className = 'text-center';
+            th.textContent = title;
+            header.appendChild(th);
+        });
+        thead.appendChild(header);
+        table.appendChild(thead);
+        var tbody = document.createElement('tbody');
+        var selected = (document.getElementById('bluetooth_adapter') || {}).value || '';
+        data.devices.forEach(function (device) {
+            var adapter = String(device.adapter || '');
+            if (!/^hci\d+$/.test(adapter)) return;
+            var row = document.createElement('tr');
+            row.dataset.adapter = adapter;
+            if (adapter === selected) row.className = 'table-success';
+            [
+                adapter,
+                String(device.name || ''),
+                String(device.address || ''),
+                bluetoothStatusLabel(device.powered),
+                bluetoothStatusLabel(device.pairable),
+                bluetoothStatusLabel(device.discoverable)
+            ].forEach(function (value) {
+                var td = document.createElement('td');
+                td.textContent = value;
+                td.className = 'text-center';
+                row.appendChild(td);
+            });
+            var action = document.createElement('td');
+            action.className = 'text-center';
+            var button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-primary rounded-pill';
+            button.textContent = 'Chọn';
+            button.addEventListener('click', function () { selectBluetoothAdapter(adapter); });
+            action.appendChild(button);
+            row.appendChild(action);
+            tbody.appendChild(row);
+        });
+        table.appendChild(tbody);
+        container.appendChild(table);
+        showMessagePHP(data.message, 4);
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message('Yêu cầu quét Bluetooth adapter thất bại');
+    };
+    xhr.send();
+}
+
 //scan mic hoặc audio out
 function scan_audio_devices(device_name) {
     loading("show");
@@ -1606,9 +1708,10 @@ function checkSSHConnection(sshHost) {
 function CheckConnectionHomeAssistant(inputId) {
     loading("show");
     var url_hasss = document.getElementById(inputId).value;
-    var token_hasss = document.getElementById('hass_long_token').value;
     var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?check_hass&url_hass=' + encodeURIComponent(url_hasss) + '&token_hass=' + encodeURIComponent(token_hasss), true);
+    xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             loading("hide");
@@ -1628,7 +1731,7 @@ function CheckConnectionHomeAssistant(inputId) {
             }
         }
     };
-    xhr.send();
+    xhr.send('check_hass=1&url_hass=' + encodeURIComponent(url_hasss));
 }
 
 //Tải lên file hotword Snowboy

@@ -8,6 +8,57 @@
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
 
+//Khóa liên tiến trình dùng chung với Lib_System.py và ghi file bằng rename nguyên tử.
+if (!function_exists('vbotAtomicWriteFile')) {
+function vbotAtomicWriteFile($filePath, $content, $label = 'file')
+{
+    if (!is_string($filePath) || $filePath === '' || !is_string($content)) {
+        error_log('[PHP FILE ERROR] Dữ liệu ghi không hợp lệ: '.$label);
+        return false;
+    }
+    $directory = dirname($filePath);
+    if (!is_dir($directory)) {
+        error_log('[PHP FILE ERROR] Thư mục không tồn tại: '.$directory);
+        return false;
+    }
+    $lockHandle = @fopen($filePath.'.lock', 'c+');
+    if ($lockHandle === false || !@flock($lockHandle, LOCK_EX)) {
+        if (is_resource($lockHandle)) fclose($lockHandle);
+        error_log('[PHP FILE ERROR] Không thể khóa file: '.$filePath);
+        return false;
+    }
+    $tempPath = @tempnam($directory, '.vbot-json-');
+    $success = false;
+    try {
+        if ($tempPath === false) throw new RuntimeException('Không thể tạo file tạm');
+        $handle = @fopen($tempPath, 'wb');
+        if ($handle === false) throw new RuntimeException('Không thể mở file tạm');
+        $length = strlen($content);
+        $written = 0;
+        while ($written < $length) {
+            $count = fwrite($handle, substr($content, $written));
+            if ($count === false || $count === 0) {
+                fclose($handle);
+                throw new RuntimeException('Không thể ghi đủ nội dung');
+            }
+            $written += $count;
+        }
+        fflush($handle);
+        if (function_exists('fsync')) @fsync($handle);
+        fclose($handle);
+        if (!@rename($tempPath, $filePath)) throw new RuntimeException('Không thể thay thế file đích');
+        $success = true;
+    } catch (Throwable $error) {
+        error_log('[PHP FILE ERROR] '.$label.': '.$error->getMessage());
+    } finally {
+        if (!$success && is_string($tempPath) && is_file($tempPath)) @unlink($tempPath);
+        flock($lockHandle, LOCK_UN);
+        fclose($lockHandle);
+    }
+    return $success;
+}
+}
+
 // Luôn ghi mọi lỗi PHP vào log chung, kể cả lỗi xảy ra khi đang nạp Config.json.
 $phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
 ini_set('log_errors', 1);
@@ -20,7 +71,7 @@ ini_set('upload_max_filesize', '300M');
 ini_set('post_max_size', '300M');
 
 //Thay đổi để trình duyệt tải lại dữ liệu cache js, css đã lưu trước đó
-$Cache_UI_Ver = '1.2.3';
+$Cache_UI_Ver = '1.2.4';
 
 //Lấy đường dẫn đầy đủ tới tệp PHP hiện tại
 //$current_file_path = __FILE__;
@@ -69,7 +120,7 @@ $Configuration_Load_Status = [
 ];
 
 //Danh sách các đuôi file không cho phép tải xuống
-$Restricted_Extensions = ['html', 'python', 'php', 'so'];
+$Restricted_Extensions = ['html', 'python', 'php', 'so', 'json'];
 
 //Danh sách các định dạng hình ảnh hợp lệ
 $allowed_image_types = ["jpg", "png", "jpeg", "gif"];
@@ -151,6 +202,52 @@ if (!empty($fileContent)) {
     $Config = null;
 }
 
+//CSRF độc lập với đăng nhập: WebUI không yêu cầu mật khẩu vẫn phải có session/token hợp lệ.
+$requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : '';
+$requestScript = basename(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '');
+$loginActive = !empty($Config['contact_info']['user_login']['active']);
+$csrfProtectedPost = $requestMethod === 'POST' && $requestScript !== 'Login.php';
+$needsAnonymousCsrfSession = !$loginActive && $requestMethod !== '' && $requestScript !== 'Login.php';
+
+if ($csrfProtectedPost || $needsAnonymousCsrfSession) {
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        session_set_cookie_params([
+            'httponly' => true,
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'samesite' => 'Lax',
+        ]);
+        session_start();
+    }
+    if (
+        !isset($_SESSION['vbot_csrf_token'])
+        || !is_string($_SESSION['vbot_csrf_token'])
+        || strlen($_SESSION['vbot_csrf_token']) < 64
+    ) {
+        $_SESSION['vbot_csrf_token'] = bin2hex(random_bytes(32));
+    }
+}
+
+if ($csrfProtectedPost) {
+    $sessionToken = isset($_SESSION['vbot_csrf_token']) ? $_SESSION['vbot_csrf_token'] : '';
+    $requestToken = isset($_SERVER['HTTP_X_CSRF_TOKEN'])
+        ? $_SERVER['HTTP_X_CSRF_TOKEN']
+        : (isset($_POST['csrf_token']) ? $_POST['csrf_token'] : '');
+    if (!is_string($sessionToken) || $sessionToken === '' || !is_string($requestToken) || !hash_equals($sessionToken, $requestToken)) {
+        error_log('[PHP SECURITY] Đã chặn POST thiếu hoặc sai CSRF token: '.$requestScript);
+        http_response_code(403);
+        if (defined('VBOT_JSON_API') && VBOT_JSON_API === true) {
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'status' => 'error', 'message' => 'CSRF token không hợp lệ hoặc đã hết hạn.']);
+        } else {
+            echo 'Yêu cầu bị từ chối: CSRF token không hợp lệ hoặc đã hết hạn.';
+        }
+        exit;
+    }
+    //Khi login bật, các trang cũ sẽ tự mở lại session để kiểm tra đăng nhập.
+    //Khi login tắt, giữ session mở để html_head.php xuất token cho giao diện.
+    if ($loginActive) session_write_close();
+}
+
 if (defined('VBOT_JSON_API') && VBOT_JSON_API === true) {
     // API luôn ghi lỗi vào log nhưng không đưa Warning/Notice/HTML vào phản hồi JSON.
     ini_set('display_errors', 0);
@@ -224,6 +321,215 @@ if (!function_exists('vbotSetFullPermissions')) {
         }
         error_log('Không thể đặt quyền 0777 cho ' . $label . ': ' . $path);
         return false;
+    }
+}
+
+// Ghi lỗi nâng cấp theo một định dạng chung. error_log đã được trỏ tới
+// resource/log/Vbot_error.log ở đầu tệp này.
+if (!function_exists('vbotUpgradeReportError')) {
+    function vbotUpgradeReportError(&$messages, $component, $step, $detail)
+    {
+        $component = strtoupper((string) $component);
+        $step = trim((string) $step);
+        $detail = trim((string) $detail);
+        $logMessage = '[UPGRADE ' . $component . ' ERROR] [' . $step . '] ' . $detail;
+        error_log($logMessage);
+        $messages[] = "<font color=red><b>- Lỗi tại bước " . htmlspecialchars($step, ENT_QUOTES, 'UTF-8') . ":</b> "
+            . htmlspecialchars($detail, ENT_QUOTES, 'UTF-8') . "</font><br/>";
+        return false;
+    }
+}
+
+if (!function_exists('vbotUpgradeValidatePackage')) {
+    function vbotUpgradeValidatePackage($root, array $requiredPaths, &$messages, $component)
+    {
+        $root = rtrim($root, '/\\');
+        if (!is_dir($root)) {
+            return vbotUpgradeReportError($messages, $component, 'kiểm tra gói', 'Thư mục gói cập nhật không tồn tại: ' . $root);
+        }
+        foreach ($requiredPaths as $relativePath) {
+            $path = $root . '/' . ltrim($relativePath, '/\\');
+            if (!is_file($path) || !is_readable($path) || filesize($path) <= 0) {
+                return vbotUpgradeReportError($messages, $component, 'kiểm tra gói', 'Thiếu hoặc không đọc được tệp bắt buộc: ' . $relativePath);
+            }
+        }
+        return true;
+    }
+}
+
+if (!function_exists('vbotUpgradeValidateJson')) {
+    function vbotUpgradeValidateJson($path, &$messages, $component, $label)
+    {
+        $content = @file_get_contents($path);
+        if ($content === false) {
+            return vbotUpgradeReportError($messages, $component, 'kiểm tra JSON', 'Không thể đọc ' . $label);
+        }
+        json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            return vbotUpgradeReportError($messages, $component, 'kiểm tra JSON', $label . ' không hợp lệ: ' . json_last_error_msg());
+        }
+        return true;
+    }
+}
+
+if (!function_exists('vbotUpgradeLintPhpTree')) {
+    function vbotUpgradeLintPhpTree($root, &$messages, $component)
+    {
+        if (!is_dir($root)) {
+            return vbotUpgradeReportError($messages, $component, 'kiểm tra PHP', 'Thư mục PHP không tồn tại: ' . $root);
+        }
+        $checked = 0;
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($root, FilesystemIterator::SKIP_DOTS)
+        );
+        foreach ($iterator as $item) {
+            if (!$item->isFile() || strtolower($item->getExtension()) !== 'php') continue;
+            $output = [];
+            $exitCode = 0;
+            exec(escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($item->getPathname()) . ' 2>&1', $output, $exitCode);
+            if ($exitCode !== 0) {
+                return vbotUpgradeReportError(
+                    $messages,
+                    $component,
+                    'kiểm tra cú pháp PHP',
+                    $item->getFilename() . ': ' . implode(' ', $output)
+                );
+            }
+            $checked++;
+        }
+        if ($checked === 0) {
+            return vbotUpgradeReportError($messages, $component, 'kiểm tra PHP', 'Không tìm thấy tệp PHP trong gói giao diện');
+        }
+        $messages[] = "<font color=green>- Đã kiểm tra cú pháp <b>$checked</b> tệp PHP.</font><br/>";
+        return true;
+    }
+}
+
+if (!function_exists('vbotUpgradeTransactionalCopy')) {
+    function vbotUpgradeTransactionalCopy($source, $destination, array $keepList, $rollbackRoot, &$messages, $component)
+    {
+        $source = rtrim($source, '/\\');
+        $destination = rtrim($destination, '/\\');
+        $rollbackRoot = rtrim($rollbackRoot, '/\\');
+        if (!is_dir($source)) {
+            return vbotUpgradeReportError($messages, $component, 'sao chép', 'Thư mục nguồn không tồn tại: ' . $source);
+        }
+        if ((!is_dir($destination) && !mkdir($destination, 0777, true)) ||
+            (!is_dir($rollbackRoot) && !mkdir($rollbackRoot, 0777, true))) {
+            return vbotUpgradeReportError($messages, $component, 'chuẩn bị rollback', 'Không thể tạo thư mục đích hoặc rollback');
+        }
+
+        $files = [];
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::LEAVES_ONLY
+        );
+        foreach ($iterator as $item) {
+            if (!$item->isFile() || in_array($item->getFilename(), $keepList, true)) continue;
+            $relative = str_replace('\\', '/', substr($item->getPathname(), strlen($source) + 1));
+            if ($relative === '' || strpos($relative, '../') !== false) {
+                return vbotUpgradeReportError($messages, $component, 'kiểm tra đường dẫn', 'Đường dẫn không an toàn: ' . $relative);
+            }
+            $files[] = [$item->getPathname(), $relative];
+        }
+        if (empty($files)) {
+            return vbotUpgradeReportError($messages, $component, 'kiểm tra gói', 'Không tìm thấy tệp nào để cập nhật');
+        }
+
+        $processed = [];
+        $manifest = [];
+        foreach ($files as [$srcPath, $relative]) {
+            $destPath = $destination . '/' . $relative;
+            $backupPath = $rollbackRoot . '/' . $relative;
+            $existed = is_file($destPath);
+            if ($existed) {
+                if (!is_dir(dirname($backupPath)) && !mkdir(dirname($backupPath), 0777, true)) {
+                    $failure = 'Không thể tạo thư mục rollback cho: ' . $relative;
+                    break;
+                }
+                if (!copy($destPath, $backupPath)) {
+                    $failure = 'Không thể sao lưu tệp hiện tại để rollback: ' . $relative;
+                    break;
+                }
+            }
+            if (!is_dir(dirname($destPath)) && !mkdir(dirname($destPath), 0777, true)) {
+                $failure = 'Không thể tạo thư mục đích cho: ' . $relative;
+                break;
+            }
+            // Đăng ký rollback trước khi copy vì copy() có thể tạo/ghi dở tệp đích.
+            $processed[] = [$destPath, $backupPath, $existed];
+            $manifest[] = ['relative' => $relative, 'existed' => $existed];
+            if (!copy($srcPath, $destPath)) {
+                $failure = 'Không thể sao chép tệp: ' . $relative;
+                break;
+            }
+            clearstatcache(true, $destPath);
+            $sourceHash = @hash_file('sha256', $srcPath);
+            $destinationHash = @hash_file('sha256', $destPath);
+            if ($sourceHash === false || !hash_equals($sourceHash, (string) $destinationHash)) {
+                $failure = 'SHA-256 không khớp sau khi sao chép: ' . $relative;
+                break;
+            }
+            @chmod($destPath, 0777);
+        }
+
+        if (isset($failure)) {
+            foreach (array_reverse($processed) as [$destPath, $backupPath, $existed]) {
+                if ($existed && is_file($backupPath)) {
+                    @copy($backupPath, $destPath);
+                } elseif (!$existed && is_file($destPath)) {
+                    @unlink($destPath);
+                }
+            }
+            return vbotUpgradeReportError($messages, $component, 'sao chép/rollback', $failure . '. Đã rollback các tệp đã thay đổi.');
+        }
+        if (file_put_contents(
+            $rollbackRoot . '/manifest.json',
+            json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES),
+            LOCK_EX
+        ) === false) {
+            foreach (array_reverse($processed) as [$destPath, $backupPath, $existed]) {
+                if ($existed && is_file($backupPath)) @copy($backupPath, $destPath);
+                elseif (!$existed && is_file($destPath)) @unlink($destPath);
+            }
+            return vbotUpgradeReportError($messages, $component, 'tạo manifest', 'Không thể lưu manifest rollback; đã phục hồi dữ liệu cũ');
+        }
+        $messages[] = "<font color=green>- Đã sao chép và xác minh SHA-256 <b>" . count($processed) . "</b> tệp.</font><br/>";
+        return true;
+    }
+}
+
+if (!function_exists('vbotUpgradeRollbackTransaction')) {
+    function vbotUpgradeRollbackTransaction($rollbackRoot, $destination, &$messages, $component)
+    {
+        $rollbackRoot = rtrim($rollbackRoot, '/\\');
+        $destination = rtrim($destination, '/\\');
+        $manifestPath = $rollbackRoot . '/manifest.json';
+        $manifest = json_decode((string) @file_get_contents($manifestPath), true);
+        if (!is_array($manifest)) {
+            return vbotUpgradeReportError($messages, $component, 'rollback', 'Không đọc được manifest rollback');
+        }
+        $rollbackOk = true;
+        foreach (array_reverse($manifest) as $entry) {
+            $relative = $entry['relative'] ?? '';
+            if ($relative === '' || strpos($relative, '../') !== false) {
+                $rollbackOk = false;
+                continue;
+            }
+            $destPath = $destination . '/' . $relative;
+            $backupPath = $rollbackRoot . '/' . $relative;
+            if (!empty($entry['existed'])) {
+                if (!is_file($backupPath) || !@copy($backupPath, $destPath)) $rollbackOk = false;
+            } elseif (is_file($destPath) && !@unlink($destPath)) {
+                $rollbackOk = false;
+            }
+        }
+        if (!$rollbackOk) {
+            return vbotUpgradeReportError($messages, $component, 'rollback', 'Rollback không hoàn tất; cần khôi phục từ bản sao lưu hệ thống');
+        }
+        error_log('[UPGRADE ' . strtoupper($component) . ' WARNING] Đã rollback toàn bộ tệp cập nhật');
+        $messages[] = "<font color=orange><b>- Đã rollback toàn bộ tệp về phiên bản trước.</b></font><br/>";
+        return true;
     }
 }
 

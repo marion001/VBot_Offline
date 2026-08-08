@@ -7,6 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+require_once __DIR__.'/includes/php_ajax/Home_Assistant_Helpers.php';
 ?>
 <?php
 if ($Config['contact_info']['user_login']['active']) {
@@ -94,11 +95,23 @@ include 'html_head.php';
             $successMessage = [];
 
             #Chuyển đổi Json Sang YAML không dùng thư viện
+            function vbotYamlEncodeScalar($value)
+            {
+                if ($value === null) return 'null';
+                if (is_bool($value)) return $value ? 'true' : 'false';
+                if (is_int($value) || is_float($value)) return (string)$value;
+                $text = (string)$value;
+                if (preg_match('/^[a-zA-Z0-9._-]+$/', $text)) return $text;
+                return json_encode($text, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+            }
+
             function arrayToYaml($array, $indent = 0)
             {
+                $array = (array)$array;
                 $yaml = '';
                 $indentation = str_repeat(' ', $indent);
                 foreach ($array as $key => $value) {
+                    if (is_object($value)) $value = (array)$value;
                     // Xử lý mảng
                     if (is_array($value)) {
                         if (empty($value)) {
@@ -108,7 +121,7 @@ include 'html_head.php';
                             // Nếu là mảng đơn giản, sử dụng dấu "-"
                             $yaml .= $indentation . $key . ":\n";
                             foreach ($value as $subValue) {
-                                $yaml .= $indentation . "  - " . $subValue . "\n";
+                                $yaml .= $indentation . "  - " . vbotYamlEncodeScalar($subValue) . "\n";
                             }
                         } else {
                             // Mảng khác (mảng phức tạp)
@@ -121,79 +134,12 @@ include 'html_head.php';
                         } elseif ($value === "" && $key === "entity_id") {
                             // Nếu là `entity_id` và có giá trị là rỗng, ghi "{}"
                             $yaml .= $indentation . $key . ": {}\n";
-                        } elseif (is_numeric($value) || preg_match('/^[a-zA-Z0-9._-]+$/', $value)) {
-                            // Các giá trị đơn giản không cần dấu nháy
-                            $yaml .= $indentation . $key . ": " . $value . "\n";
                         } else {
-                            // Các giá trị có dấu nháy đôi
-                            $yaml .= $indentation . $key . ": \"" . $value . "\"\n";
+                            $yaml .= $indentation . $key . ": " . vbotYamlEncodeScalar($value) . "\n";
                         }
                     }
                 }
                 return $yaml;
-            }
-
-            #Chuyển đổi Yaml Sang Json không dùng thư viện
-            function yamlToArray($yaml)
-            {
-                $lines = explode("\n", trim($yaml));
-                $result = [];
-                $path = [];
-                $lastKey = null;
-                foreach ($lines as $line) {
-                    if (trim($line) === "") continue;
-                    if (preg_match('/^(\s*)-(.*)$/', $line, $matches)) {
-                        $indent = strlen($matches[1]) / 2;
-                        $value = trim($matches[2]);
-                        while (count($path) > $indent) {
-                            array_pop($path);
-                        }
-                        $parent = &$result;
-                        if (!empty($path)) {
-                            $listKey = array_pop($path);
-                            foreach ($path as $segment) {
-                                $parent = &$parent[$segment];
-                            }
-                            if (!isset($parent[$listKey]) || !is_array($parent[$listKey])) {
-                                $parent[$listKey] = [];
-                            }
-                            $parent[$listKey][] = $value;
-                            $path[] = $listKey;
-                        } else {
-                            $parent[] = $value;
-                        }
-                    } else {
-                        preg_match('/^(\s*)([^:]+):(.*)$/', $line, $matches);
-                        if (!$matches) continue;
-                        $indent = strlen($matches[1]) / 2;
-                        $key = trim($matches[2]);
-                        $value = trim($matches[3]);
-                        $value = trim($value, "\"");
-                        while (count($path) > $indent) {
-                            array_pop($path);
-                        }
-                        $parent = &$result;
-                        foreach ($path as $segment) {
-                            $parent = &$parent[$segment];
-                        }
-                        if ($key == 'entity_id') {
-                            if (strpos($value, "-") === 0) {
-                                $parent[$key] = explode("\n", $value);
-                            } else {
-                                $parent[$key] = $value;
-                            }
-                        } else {
-                            if ($value === "") {
-                                $parent[$key] = [];
-                                $path[] = $key;
-                            } else {
-                                $parent[$key] = is_numeric($value) ? (float)$value : $value;
-                            }
-                        }
-                        $lastKey = $key;
-                    }
-                }
-                return $result;
             }
 
             // Xử lý dữ liệu khi form được gửi
@@ -232,26 +178,56 @@ include 'html_head.php';
                     $intents = [];
                 }
                 $intents = array_values($intents);
+                $intentValidationFailed = false;
+                $questionOwners = [];
                 // Chuyển đổi YAML thành mảng và xử lý các dữ liệu khác (YAML, questions, active, v.v.)
                 foreach ($intents as $index => $intent) {
                     if (!is_array($intent)) {
                         unset($intents[$index]);
                         continue;
                     }
-                    $intents[$index]['data_yaml'] = yamlToArray(trim($intent['data_yaml'] ?? ''));
+                    $yamlError = null;
+                    $parsedYaml = vbotHassParseActionYaml(trim($intent['data_yaml'] ?? ''), $yamlError);
+                    $validatedYaml = is_array($parsedYaml) ? vbotHassValidateAction($parsedYaml, $yamlError) : null;
                     $intents[$index]['questions'] = array_filter(array_map('trim', explode("\n", $intent['questions'] ?? '')));
                     $intents[$index]['questions'] = array_values($intents[$index]['questions']);
                     $intents[$index]['name'] = trim($intent['name'] ?? '');
                     $intents[$index]['reply'] = trim($intent['reply'] ?? '');
                     $intents[$index]['active'] = isset($intent['active']) && $intent['active'] === 'on';
+                    if ($intents[$index]['name'] === '') {
+                        $errorMessages[] = '- Tác vụ số '.($index + 1).' chưa có tên.';
+                        $intentValidationFailed = true;
+                    }
+                    if (!$intents[$index]['questions']) {
+                        $errorMessages[] = '- Tác vụ '.htmlspecialchars($intents[$index]['name']).' chưa có câu lệnh.';
+                        $intentValidationFailed = true;
+                    }
+                    foreach ($intents[$index]['questions'] as $question) {
+                        $normalizedQuestion = preg_replace('/\s+/u', ' ', trim($question));
+                        $normalizedQuestion = function_exists('mb_strtolower') ? mb_strtolower($normalizedQuestion, 'UTF-8') : strtolower($normalizedQuestion);
+                        if (isset($questionOwners[$normalizedQuestion])) {
+                            $errorMessages[] = '- Câu lệnh bị trùng "'.htmlspecialchars($question).'" giữa tác vụ '.htmlspecialchars($questionOwners[$normalizedQuestion]).' và '.htmlspecialchars($intents[$index]['name']).'.';
+                            $intentValidationFailed = true;
+                        } else {
+                            $questionOwners[$normalizedQuestion] = $intents[$index]['name'];
+                        }
+                    }
+                    if ($validatedYaml === null) {
+                        $errorMessages[] = '- YAML của tác vụ '.htmlspecialchars($intents[$index]['name']).' không hợp lệ: '.htmlspecialchars((string)$yamlError);
+                        $intentValidationFailed = true;
+                    } else {
+                        $intents[$index]['data_yaml'] = $validatedYaml;
+                    }
                 }
                 $updatedData = ['intents' => array_values($intents)];
                 $encodedData = json_encode($updatedData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if ($encodedData === false) {
+                if ($intentValidationFailed) {
+                    error_log('[Custom Home Assistant] Đã từ chối lưu vì dữ liệu intent/YAML không hợp lệ');
+                } elseif ($encodedData === false) {
                     $saveError = "Không thể mã hóa dữ liệu Custom Home Assistant: " . json_last_error_msg();
                     $errorMessages[] = $saveError;
                     error_log($saveError);
-                } elseif (file_put_contents($jsonFilePath, $encodedData, LOCK_EX) === false) {
+                } elseif (!vbotAtomicWriteFile($jsonFilePath, $encodedData, 'Custom Home Assistant')) {
                     $saveError = "Không thể ghi dữ liệu Custom Home Assistant vào tệp: " . $jsonFilePath;
                     $errorMessages[] = $saveError;
                     error_log($saveError);
@@ -297,7 +273,7 @@ include 'html_head.php';
                 }
                 // Chỉ làm rỗng đúng tệp Custom Home Assistant, không xóa các JSON khác trong resource/hass.
                 $content = json_encode(["intents" => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if ($content !== false && file_put_contents($jsonFilePath, $content, LOCK_EX) !== false) {
+                if ($content !== false && vbotAtomicWriteFile($jsonFilePath, $content, 'xóa Custom Home Assistant')) {
                             if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS khôi phục')) {
                         error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
                     }
@@ -336,14 +312,18 @@ include 'html_head.php';
 							$errorMessages[] = "- Nội dung tệp JSON không hợp lệ";
 							$uploadOk = 0;
 						} else {
-							if (!isset($data['intents']) || !is_array($data['intents'])) {
-								$errorMessages[] = "- Tệp JSON không đúng dữ liệu Custom Home Assistant (thiếu key intents)";
+							$documentError = null;
+							$validatedDocument = vbotHassValidateIntentDocument($data, $documentError);
+							if ($validatedDocument === null) {
+								$errorMessages[] = "- Tệp JSON không đúng dữ liệu Custom Home Assistant: ".htmlspecialchars((string)$documentError);
 								$uploadOk = 0;
+							} else {
+								$jsonContent = json_encode($validatedDocument, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 							}
 						}
 					}
 					if ($uploadOk === 1) {
-						if (move_uploaded_file($_FILES["fileToUpload_custom_hass_restore"]["tmp_name"], $jsonFilePath)) {
+                                    if (vbotAtomicWriteFile($jsonFilePath, $jsonContent, 'khôi phục Custom Home Assistant tải lên')) {
                                     if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS khôi phục')) {
 								error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant sau khi khôi phục: " . $jsonFilePath);
 							}
@@ -366,10 +346,13 @@ include 'html_head.php';
 						if (is_file($start_recovery_custom_hass)) {
 							$jsonContent = file_get_contents($start_recovery_custom_hass);
 							$data = json_decode($jsonContent, true);
-							if (json_last_error() !== JSON_ERROR_NONE || !isset($data['intents']) || !is_array($data['intents'])) {
-								$errorMessages[] = "- Tệp sao lưu hệ thống không đúng dữ liệu Custom Home Assistant (thiếu intents)";
+							$documentError = null;
+							$validatedDocument = json_last_error() === JSON_ERROR_NONE ? vbotHassValidateIntentDocument($data, $documentError) : null;
+							if ($validatedDocument === null) {
+								$errorMessages[] = "- Tệp sao lưu hệ thống không đúng dữ liệu Custom Home Assistant: ".htmlspecialchars((string)$documentError);
 							} else {
-								if (copy($start_recovery_custom_hass, $jsonFilePath)) {
+								$jsonContent = json_encode($validatedDocument, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                                if (vbotAtomicWriteFile($jsonFilePath, $jsonContent, 'khôi phục Custom Home Assistant từ backup')) {
 									if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS khôi phục')) {
 										error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant sau khi khôi phục: " . $jsonFilePath);
 									}
@@ -392,15 +375,15 @@ include 'html_head.php';
             if (file_exists($jsonFilePath)) {
                 $jsonData = file_get_contents($jsonFilePath);
                 $data = json_decode($jsonData, true);
-                // Kiểm tra nếu dữ liệu JSON không hợp lệ hoặc thiếu key "intents"
-                if (!is_array($data) || !isset($data['intents'])) {
+                $documentError = null;
+                $validatedDocument = vbotHassValidateIntentDocument($data, $documentError);
+                // Không tự ghi đè file lỗi; giữ file để backup/recovery và chỉ hiển thị danh sách rỗng.
+                if ($validatedDocument === null) {
+                    error_log("Custom Home Assistant không hợp lệ: " . (string)$documentError);
                     $data = ['intents' => []];
-                    $defaultJson = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                    if ($defaultJson === false || file_put_contents($jsonFilePath, $defaultJson, LOCK_EX) === false) {
-                        error_log("Không thể khởi tạo lại tệp Custom Home Assistant không hợp lệ: " . $jsonFilePath);
-                    } elseif (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS')) {
-                        error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
-                    }
+                    $errorMessages[] = '- File Custom Home Assistant không hợp lệ: '.htmlspecialchars((string)$documentError).'. File gốc được giữ nguyên để khôi phục.';
+                } else {
+                    $data = $validatedDocument;
                 }
                 $intents = $data['intents'];
                 if (empty($intents)) {
@@ -510,7 +493,7 @@ include 'html_head.php';
                 $defaultContent = json_encode([
                     "intents" => []
                 ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if (file_put_contents($jsonFilePath, $defaultContent, LOCK_EX) !== false) {
+                if (vbotAtomicWriteFile($jsonFilePath, $defaultContent, 'tạo Custom Home Assistant')) {
                     if (!vbotSetFullPermissions($jsonFilePath, 'tệp Custom HASS')) {
                         error_log("Không thể đặt quyền 0777 cho tệp Custom Home Assistant: " . $jsonFilePath);
                     }
@@ -770,13 +753,12 @@ include 'html_head.php';
         //Test điều khiển code yaml
         function yaml_test_code_hass(id_texara) {
             try {
-                const yamlInput = yamlToArrayy(document.getElementById(id_texara).value);
-                const input = JSON.stringify(yamlInput, null, 2);
-                const actionData = JSON.parse(input);
+                const yamlInput = document.getElementById(id_texara).value;
                 const xhr = new XMLHttpRequest();
                 xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-                const data = 'yaml_test_control_homeassistant=' + encodeURIComponent(JSON.stringify(actionData));
+                xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+                const data = 'yaml_test_control_homeassistant=' + encodeURIComponent(yamlInput);
                 xhr.onload = function() {
                     if (xhr.status >= 200 && xhr.status < 300) {
                         try {
@@ -803,67 +785,6 @@ include 'html_head.php';
             }
         }
 
-        //Chuyển Yaml Sang Json
-        function yamlToArrayy(yaml) {
-            const lines = yaml.trim().split("\n");
-            const result = {};
-            const path = [];
-            let lastKey = null;
-            for (let line of lines) {
-                if (line.trim() === "") continue;
-                let matches;
-                if ((matches = line.match(/^(\s*)-(.*)$/))) {
-                    const indent = matches[1].length / 2;
-                    const value = matches[2].trim();
-                    while (path.length > indent) {
-                        path.pop();
-                    }
-                    let parent = result;
-                    if (path.length > 0) {
-                        const listKey = path[path.length - 1];
-                        for (const segment of path.slice(0, -1)) {
-                            parent = parent[segment];
-                        }
-                        if (!Array.isArray(parent[listKey])) {
-                            parent[listKey] = [];
-                        }
-                        parent[listKey].push(value);
-                    } else {
-                        if (!Array.isArray(result)) {
-                            throw new Error('Danh sách YAML cấp cao nhất không được hỗ trợ');
-                        }
-                        result.push(value);
-                    }
-                } else if ((matches = line.match(/^(\s*)([^:]+):(.*)$/))) {
-                    const indent = matches[1].length / 2;
-                    const key = matches[2].trim();
-                    let value = matches[3].trim().replace(/^"|"$/g, "");
-                    while (path.length > indent) {
-                        path.pop();
-                    }
-                    let parent = result;
-                    for (const segment of path) {
-                        parent = parent[segment];
-                    }
-                    if (key === "entity_id") {
-                        if (value.startsWith("-")) {
-                            parent[key] = value.split("\n");
-                        } else {
-                            parent[key] = value;
-                        }
-                    } else {
-                        if (value === "") {
-                            parent[key] = {};
-                            path.push(key);
-                        } else {
-                            parent[key] = isNaN(value) ? value : parseFloat(value);
-                        }
-                    }
-                    lastKey = key;
-                }
-            }
-            return result;
-        }
     </script>
     <script>
         // Hiển thị modal xem nội dung file json Home_Assistant.json

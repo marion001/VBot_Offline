@@ -8,6 +8,9 @@
 require_once __DIR__.'/Api_Helpers.php';
 vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
+putenv("LANG=C.UTF-8");
+putenv("LC_ALL=C.UTF-8");
+setlocale(LC_CTYPE, 'C.UTF-8', 'en_US.UTF-8', 'UTF-8');
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
     if (
@@ -29,6 +32,20 @@ function vbotWifiValidName($value)
         && $value !== ''
         && strlen($value) <= 100
         && !preg_match('/[\x00-\x1F\x7F]/', $value);
+}
+
+function vbotWifiValidUuid($value)
+{
+    return is_string($value)
+        && preg_match('/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/', $value);
+}
+
+function vbotNmcliSplitTerseLine($line)
+{
+    $parts = preg_split('/(?<!\\\\):/', rtrim($line, "\r\n"));
+    return array_map(function ($part) {
+        return str_replace(['\\:', '\\\\'], [':', '\\'], $part);
+    }, $parts ?: []);
 }
 
 //Kiểm tra thông tin mạng
@@ -93,21 +110,14 @@ if (isset($_POST['Delete_Wifi'])) {
     putenv("LC_ALL=C.UTF-8");
     if (isset($_POST['action']) && $_POST['action'] == 'delete_wifi' && isset($_POST['wifiName'])) {
         $wifiName = trim($_POST['wifiName']);
-        if (!vbotWifiValidName($wifiName)) {
-            vbotApiJsonResponse(['success' => false, 'message' => 'Tên kết nối WiFi không hợp lệ.'], 400);
+        $wifiUuid = trim($_POST['uuid'] ?? '');
+        if (!vbotWifiValidName($wifiName) || !vbotWifiValidUuid($wifiUuid)) {
+            vbotApiJsonResponse(['success' => false, 'message' => 'Tên hoặc UUID kết nối WiFi không hợp lệ.'], 400);
         }
         $safeWifiName = htmlspecialchars($wifiName, ENT_QUOTES, 'UTF-8');
-        $wifiInfo = shell_exec('iwconfig wlan0');
-        if (empty($wifiInfo)) {
-            vbotApiJsonResponse([
-                'success' => false,
-                'message' => 'Không thể thực hiện lệnh iwconfig hoặc không có dữ liệu.',
-                'data' => null
-            ], 502);
-        }
-        preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
-        $wifiData_ESSID = isset($essidMatches[1]) ? $essidMatches[1] : 'N/A';
-        if ($wifiName !== $wifiData_ESSID) {
+        $activeUuids = (string) shell_exec('LANG=C.UTF-8 LC_ALL=C.UTF-8 nmcli -t -f UUID connection show --active');
+        $isActive = in_array(strtolower($wifiUuid), array_map('strtolower', array_filter(array_map('trim', explode("\n", $activeUuids)))), true);
+        if (!$isActive) {
             $connection = ssh2_connect($ssh_host, $ssh_port);
             if (!$connection) {
                 vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH.'], 502);
@@ -115,7 +125,7 @@ if (isset($_POST['Delete_Wifi'])) {
             if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
                 vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại.'], 401);
             }
-            $stream = ssh2_exec($connection, 'sudo nmcli connection delete ' . escapeshellarg($wifiName));
+            $stream = ssh2_exec($connection, 'sudo nmcli connection delete uuid ' . escapeshellarg($wifiUuid));
             if (!$stream) {
                 vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh xóa WiFi.'], 502);
             }
@@ -145,7 +155,8 @@ if (isset($_POST['Connect_Wifi'])) {
     if (isset($_POST['action'])) {
         $action = $_POST['action'];
         if (isset($_POST['ssid']) && isset($_POST['password'])) {
-            $ssid = trim($_POST['ssid']);
+                $ssid = trim($_POST['ssid']);
+                $wifiUuid = trim($_POST['uuid'] ?? '');
             $password = $_POST['password'];
             if (!vbotWifiValidName($ssid) || !is_string($password) || strlen($password) > 63 || preg_match('/[\x00-\x1F\x7F]/', $password)) {
                 vbotApiJsonResponse(['success' => false, 'message' => 'SSID hoặc mật khẩu WiFi không hợp lệ.'], 400);
@@ -158,7 +169,10 @@ if (isset($_POST['Connect_Wifi'])) {
                 vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH thất bại.'], 401);
             }
             if ($action == 'connect_wifi') {
-                $command = 'sudo nmcli connection up ' . escapeshellarg($ssid);
+                if (!vbotWifiValidUuid($wifiUuid)) {
+                    vbotApiJsonResponse(['success' => false, 'message' => 'UUID kết nối WiFi không hợp lệ.'], 400);
+                }
+                $command = 'sudo nmcli connection up uuid ' . escapeshellarg($wifiUuid);
             } elseif ($action == 'connect_and_save_wifi') {
                 if (!empty($password)) {
                     $command = 'sudo nmcli device wifi connect ' . escapeshellarg($ssid) . ' password ' . escapeshellarg($password);
@@ -251,7 +265,7 @@ if (isset($_GET['Scan_Wifi_List'])) {
             'data' => null
         ], 401);
     }
-    $stream = ssh2_exec($connection, "sudo nmcli -t -f SSID,BSSID,MODE,CHAN,RATE,SIGNAL,BARS,SECURITY dev wifi");
+    $stream = ssh2_exec($connection, "sudo nmcli --escape yes -t -f SSID,BSSID,MODE,CHAN,RATE,SIGNAL,BARS,SECURITY dev wifi");
     if (!$stream) {
         vbotApiJsonResponse(['success' => false, 'message' => 'Không thể thực thi lệnh quét WiFi.', 'data' => null], 502);
     }
@@ -269,21 +283,17 @@ if (isset($_GET['Scan_Wifi_List'])) {
     $wifi_data = [];
     foreach ($lines as $line) {
         if (!empty($line)) {
-            $line = str_replace('\\', '', $line);
-            $parts = explode(':', $line);
-            $parts = array_map(function ($part) {
-                return htmlspecialchars($part, ENT_QUOTES, 'UTF-8');
-            }, $parts);
-            $bssidParts = array_slice($parts, 1, 6);
-            $bssid = implode(':', $bssidParts);
-            $chan = $parts[8];
-            $rate = $parts[9];
-            $signal = $parts[10];
-            $bars = $parts[11];
-            $securityy = empty($parts[12]) ? "" : $parts[12];
+            $parts = vbotNmcliSplitTerseLine($line);
+            if (count($parts) < 8) continue;
+            $bssid = $parts[1];
+            $chan = $parts[3];
+            $rate = $parts[4];
+            $signal = $parts[5];
+            $bars = $parts[6];
+            $securityy = empty($parts[7]) ? "" : $parts[7];
             $Check_ssid_hidee = empty($parts[0]) ? "wifi_hidden" : $parts[0];
             $Check_ssid_hide = empty($parts[0]) ? "Mạng ẩn" : $parts[0];
-            $security = empty($parts[12]) ? "Không mật khẩu" : $parts[12];
+            $security = empty($parts[7]) ? "Không mật khẩu" : $parts[7];
             $wifi_data[] = [
                 'SSID' => $Check_ssid_hide,
                 'BSSID' => $bssid,
@@ -317,8 +327,9 @@ if (isset($_GET['Get_Password_Wifi'])) {
         vbotApiJsonResponse($response, 401);
     }
     $desiredSSID = isset($_GET['ssid']) ? trim($_GET['ssid']) : '';
-    if (!vbotWifiValidName($desiredSSID)) {
-        $response['message'] = "Cần nhập tên Wifi để lấy mật khẩu.";
+    $desiredUuid = isset($_GET['uuid']) ? trim($_GET['uuid']) : '';
+    if (!vbotWifiValidName($desiredSSID) || !vbotWifiValidUuid($desiredUuid)) {
+        $response['message'] = "Tên hoặc UUID WiFi không hợp lệ.";
         vbotApiJsonResponse($response, 400);
     }
     $configFilePath = '/etc/NetworkManager/system-connections/';
@@ -335,20 +346,20 @@ if (isset($_GET['Get_Password_Wifi'])) {
             }
             stream_set_blocking($stream, true);
             $configContent = stream_get_contents($stream);
-            preg_match('/ssid=(.*)/', $configContent, $ssidMatches);
-            preg_match('/psk=(.*)/', $configContent, $passwordMatches);
-            preg_match('/uuid=(.*)/', $configContent, $uuidMatches);
-            preg_match('/timestamp=(.*)/', $configContent, $timestampMatches);
-            preg_match('/seen-bssids=(.*)/', $configContent, $bssidMatches);
+            preg_match('/^ssid=(.*)$/m', $configContent, $ssidMatches);
+            preg_match('/^psk=(.*)$/m', $configContent, $passwordMatches);
+            preg_match('/^uuid=(.*)$/m', $configContent, $uuidMatches);
+            preg_match('/^timestamp=(.*)$/m', $configContent, $timestampMatches);
+            preg_match('/^seen-bssids=(.*)$/m', $configContent, $bssidMatches);
             $formattedTimestamp = !empty($timestampMatches[1]) ? date("H:i:s d-m-Y", $timestampMatches[1]) : null;
-            if (!empty($ssidMatches[1]) && trim($ssidMatches[1]) === $desiredSSID) {
+            if (!empty($uuidMatches[1]) && strcasecmp(trim($uuidMatches[1]), $desiredUuid) === 0) {
                 $wifiInfo = [
                     'file' => $file,
-                    'ssid' => $ssidMatches[1],
-                    'uuid' => !empty($uuidMatches[1]) ? $uuidMatches[1] : null,
+                    'ssid' => trim($ssidMatches[1]),
+                    'uuid' => !empty($uuidMatches[1]) ? trim($uuidMatches[1]) : null,
                     'timestamp' => $formattedTimestamp,
-                    'seen_bssids' => !empty($bssidMatches[1]) ? rtrim($bssidMatches[1], ';') : null,
-                    'password' => !empty($passwordMatches[1]) ? $passwordMatches[1] : 'Không có mật khẩu'
+                    'seen_bssids' => !empty($bssidMatches[1]) ? rtrim(trim($bssidMatches[1]), ';') : null,
+                    'password' => !empty($passwordMatches[1]) ? trim($passwordMatches[1]) : 'Không có mật khẩu'
                 ];
                 $response['data'][] = $wifiInfo;
             }
@@ -367,21 +378,24 @@ if (isset($_GET['Get_Password_Wifi'])) {
 if (isset($_GET['Show_Wifi_List'])) {
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
-    $result = shell_exec("LANG=C.UTF-8 LC_ALL=C.UTF-8 nmcli -t -f NAME,UUID,DEVICE con show");
+    $result = shell_exec("LANG=C.UTF-8 LC_ALL=C.UTF-8 nmcli --escape yes -t -f NAME,UUID,TYPE,DEVICE con show");
     if ($result !== null) {
         //Nếu chuỗi không phải UTF-8 thì chuyển sang UTF-8
         if (!mb_check_encoding($result, "UTF-8")) {
             $result = mb_convert_encoding($result, "UTF-8");
         }
         $savedWifiInfo = array_filter(explode("\n", trim($result)));
-        $formattedWifiInfo = array_map(function ($item) {
-            $parts = explode(':', $item);
+        $formattedWifiInfo = array_values(array_filter(array_map(function ($item) {
+            $parts = vbotNmcliSplitTerseLine($item);
+            $uuid = $parts[1] ?? '';
+            $type = $parts[2] ?? '';
+            if (!vbotWifiValidUuid($uuid) || !in_array($type, ['802-11-wireless', 'wifi'], true)) return null;
             return [
                 "ssid"      => $parts[0] ?? "",
-                "uuid"      => $parts[1] ?? "",
-                "interface" => $parts[2] ?? ""
+                "uuid"      => $uuid,
+                "interface" => $parts[3] ?? ""
             ];
-        }, $savedWifiInfo);
+        }, $savedWifiInfo)));
         vbotApiJsonResponse([
             "success" => true,
             "message" => "Lấy danh sách WiFi thành công.",

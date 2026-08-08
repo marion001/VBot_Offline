@@ -25,6 +25,34 @@ if ($Config['contact_info']['user_login']['active']) {
     }
 }
 
+if (isset($_GET['scan_bluetooth_adapters'])) {
+    $scriptPath = $directory_path . '/includes/php_ajax/Scan_Bluetooth_Adapters.py';
+    $CMD = 'python3 ' . escapeshellarg($scriptPath);
+    $connection = @ssh2_connect($ssh_host, $ssh_port);
+    if (!$connection) {
+        error_log('[Bluetooth Scanner ERROR] Không thể kết nối SSH');
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới máy chủ SSH', 'devices' => []], 502);
+    }
+    if (!@ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+        error_log('[Bluetooth Scanner ERROR] Xác thực SSH thất bại');
+        vbotApiJsonResponse(['success' => false, 'message' => 'Xác thực SSH không thành công', 'devices' => []], 502);
+    }
+    $stream = @ssh2_exec($connection, $CMD);
+    if (!$stream) {
+        error_log('[Bluetooth Scanner ERROR] Không thể chạy: ' . $scriptPath);
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể chạy trình quét Bluetooth', 'devices' => []], 502);
+    }
+    stream_set_blocking($stream, true);
+    $output = stream_get_contents($stream);
+    fclose($stream);
+    $decodedOutput = json_decode($output, true);
+    if (!is_array($decodedOutput) || !isset($decodedOutput['devices']) || !is_array($decodedOutput['devices'])) {
+        error_log('[Bluetooth Scanner ERROR] Dữ liệu JSON không hợp lệ: ' . substr(trim($output), 0, 2000));
+        vbotApiJsonResponse(['success' => false, 'message' => 'Trình quét Bluetooth trả về dữ liệu không hợp lệ', 'devices' => []], 502);
+    }
+    vbotApiJsonResponse($decodedOutput);
+}
+
 if (isset($_GET['scan_mic'])) {
     $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Scan_Mic.py");
     $connection = ssh2_connect($ssh_host, $ssh_port);

@@ -7,6 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+require_once __DIR__.'/includes/php_ajax/Api_Helpers.php';
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -26,12 +27,14 @@ if ($Config['contact_info']['user_login']['active']) {
 }
 
 if (isset($_POST['file_path']) && isset($_POST['code'])) {
-  $file_path = $_POST['file_path'];
+  $allowedJsonRoots = vbotApiAllowedRoots([$VBot_Offline, $directory_path]);
+  $file_path = vbotApiResolveExistingPath($_POST['file_path'], $allowedJsonRoots, 'file');
   $json_code = $_POST['code'];
   // Nếu file_path trống thì bỏ qua xử lý
-  if (empty($file_path)) {
-    echo json_encode(['success' => false, 'message' => 'Không có đường dẫn file, bỏ qua lưu.']);
-    return;
+  if ($file_path === false || strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) !== 'json') {
+    http_response_code(400);
+    echo json_encode(['success' => false, 'message' => 'Chỉ được sửa file JSON hiện có bên trong thư mục VBot.']);
+    exit;
   }
   // Kiểm tra JSON có hợp lệ không
   json_decode($json_code);
@@ -39,7 +42,7 @@ if (isset($_POST['file_path']) && isset($_POST['code'])) {
     echo json_encode(["success" => false, "message" => "JSON không hợp lệ."]);
     exit;
   }
-  if (file_put_contents($file_path, $json_code) !== false) {
+  if (vbotAtomicWriteFile($file_path, $json_code, 'JSON Editor '.basename($file_path))) {
     echo json_encode(["success" => true, "message" => "Đã lưu file thành công: " . basename($file_path)]);
   } else {
     echo json_encode(["success" => false, "message" => "Không thể ghi vào file:" . basename($file_path)]);
@@ -226,6 +229,7 @@ include 'html_head.php';
       var xhr = new XMLHttpRequest();
       xhr.open("POST", window.location.href, true);
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+      xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
       var body = "file_path=" + encodeURIComponent(currentFile) + "&save_code=true&code=" + encodeURIComponent(JSON.stringify(parsed, null, 4));
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {

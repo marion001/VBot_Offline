@@ -7,6 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 require_once __DIR__.'/Api_Helpers.php';
+require_once __DIR__.'/Home_Assistant_Helpers.php';
 vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
 if ($Config['contact_info']['user_login']['active']) {
@@ -35,27 +36,29 @@ function vbotCheckIsPrivateLanIpv4($ipAddress)
         || ($ip >= ip2long('192.168.0.0') && $ip <= ip2long('192.168.255.255'));
 }
 
+function vbotHassConfiguredUrl($requestedUrl, array $config)
+{
+    $requestedUrl = rtrim(trim((string)$requestedUrl), '/');
+    foreach (['internal_url', 'external_url'] as $key) {
+        $configuredUrl = rtrim(trim((string)($config[$key] ?? '')), '/');
+        if ($configuredUrl !== '' && hash_equals($configuredUrl, $requestedUrl)) {
+            return $configuredUrl;
+        }
+    }
+    return false;
+}
+
 //Tets Code Yaml Hass
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_homeassistant'])) {
-    $actionData = json_decode($_POST['yaml_test_control_homeassistant'], true);
-    if (!$actionData || empty($actionData['action']) || empty($actionData['target']['entity_id'])) {
-        vbotApiJsonResponse(['success' => false, 'message' => 'Thiếu "action" hoặc "entity_id" trong dữ liệu'], 400);
-    }
+    $yamlError = null;
+    $parsedYaml = vbotHassParseActionYaml($_POST['yaml_test_control_homeassistant'], $yamlError);
+    $actionData = is_array($parsedYaml) ? vbotHassValidateAction($parsedYaml, $yamlError) : null;
+    if ($actionData === null) vbotApiJsonResponse(['success' => false, 'message' => $yamlError], 400);
     $action = $actionData['action'];
-    if (!is_string($action) || !preg_match('/^[a-z0-9_]+\.[a-z0-9_]+$/i', $action)) {
-        vbotApiJsonResponse(['success' => false, 'message' => 'Action Home Assistant không hợp lệ'], 400);
-    }
     $target = $actionData['target'];
-    $entity_id = $target['entity_id'];
     list($domain, $service) = explode('.', $action);
-    $data = is_array($actionData['data'] ?? null) ? $actionData['data'] : [];
-    if (is_string($entity_id)) {
-        $payload = array_merge(['entity_id' => [$entity_id]], $data);
-    } elseif (is_array($entity_id)) {
-        $payload = array_merge(['entity_id' => $entity_id], $data);
-    } else {
-        $payload = array_merge(['entity_id' => []], $data);
-    }
+    $data = (array)$actionData['data'];
+    $payload = array_merge($data, (array)$target);
     $headers = [
         "Authorization: Bearer " . $Config['home_assistant']['long_token'],
         "Content-Type: application/json"
@@ -67,6 +70,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 20);
         $response = curl_exec($ch);
         if ($response === false) {
             $error = curl_error($ch);
@@ -90,9 +95,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_hom
                 return ['success' => false, 'message' => 'Lỗi: ' . $statusCode];
         }
     }
-    $response = sendRequest($Config['home_assistant']['internal_url'] . '/api/services/' . $domain . '/' . $service, $headers, $payload);
+    $internalHassUrl = rtrim((string)$Config['home_assistant']['internal_url'], '/');
+    $externalHassUrl = rtrim((string)$Config['home_assistant']['external_url'], '/');
+    $response = sendRequest($internalHassUrl . '/api/services/' . $domain . '/' . $service, $headers, $payload);
     if (!$response['success']) {
-        $response = sendRequest($Config['home_assistant']['external_url'] . '/api/services/' . $domain . '/' . $service, $headers, $payload);
+        $response = sendRequest($externalHassUrl . '/api/services/' . $domain . '/' . $service, $headers, $payload);
     }
     vbotApiJsonResponse($response, $response['success'] ? 200 : 502);
 }
@@ -535,11 +542,11 @@ if (isset($_POST['reboot_os'])) {
     vbotApiJsonResponse($result, $result['success'] ? 200 : 502);
 }
 
-#kiểm tra Kết Nối Hass
-if (isset($_GET['check_hass'])) {
-    $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
-    $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
-    if (filter_var($url, FILTER_VALIDATE_URL) && in_array(strtolower((string)parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+#Kiểm tra kết nối HASS bằng URL/token đã lưu; không đưa token vào query string.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['check_hass'])) {
+    $url = vbotHassConfiguredUrl($_POST['url_hass'] ?? '', $Config['home_assistant']);
+    $token = (string)($Config['home_assistant']['long_token'] ?? '');
+    if ($url !== false && $token !== '') {
         $ch = curl_init($url . '/api/config');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
@@ -564,15 +571,15 @@ if (isset($_GET['check_hass'])) {
             }
         }
     } else {
-        vbotApiJsonResponse(['success' => false, 'message' => 'URL không hợp lệ'], 400);
+        vbotApiJsonResponse(['success' => false, 'message' => 'URL/token không hợp lệ hoặc chưa được lưu trong Config'], 400);
     }
 }
 
-#Lấy dữ liệu Hass
-if (isset($_GET['get_hass_all'])) {
-    $url = isset($_GET['url_hass']) ? $_GET['url_hass'] : '';
-    $token = isset($_GET['token_hass']) ? $_GET['token_hass'] : '';
-    if (filter_var($url, FILTER_VALIDATE_URL) && in_array(strtolower((string)parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true)) {
+#Lấy dữ liệu HASS bằng POST + CSRF và chỉ kết nối URL đã lưu trong Config.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['get_hass_all'])) {
+    $url = vbotHassConfiguredUrl($_POST['url_hass'] ?? '', $Config['home_assistant']);
+    $token = (string)($Config['home_assistant']['long_token'] ?? '');
+    if ($url !== false && $token !== '') {
         $ch = curl_init($url . '/api/states');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
@@ -588,17 +595,15 @@ if (isset($_GET['get_hass_all'])) {
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($httpCode >= 200 && $httpCode < 300) {
                 $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
-                if (!file_exists($filePath_HASS)) {
-                    file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
-                    @chmod($filePath_HASS, 0777);
-                }
-                $existingData = json_decode(file_get_contents($filePath_HASS), true);
+                $existingData = file_exists($filePath_HASS)
+                    ? json_decode((string)file_get_contents($filePath_HASS), true)
+                    : ['get_hass_all' => []];
                 if (!is_array($existingData)) {
                     $existingData = [];
                 }
                 $existingData['get_hass_all'] = json_decode($response);
                 $jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if ($jsonData === false || file_put_contents($filePath_HASS, $jsonData, LOCK_EX) === false) {
+                if ($jsonData === false || !vbotAtomicWriteFile($filePath_HASS, $jsonData, 'danh sách thiết bị Home Assistant')) {
                     curl_close($ch);
                     vbotApiJsonResponse(['success' => false, 'message' => 'Không thể lưu dữ liệu Home Assistant'], 500);
                 }
@@ -615,7 +620,7 @@ if (isset($_GET['get_hass_all'])) {
             }
         }
     } else {
-        vbotApiJsonResponse(['success' => false, 'message' => 'URL không hợp lệ'], 400);
+        vbotApiJsonResponse(['success' => false, 'message' => 'URL/token không hợp lệ hoặc chưa được lưu trong Config'], 400);
     }
 }
 
@@ -627,18 +632,16 @@ if (isset($_POST['del_get_hass_all'])) {
         'message' => 'Đã có lỗi xảy ra.'
     ];
     $filePath_HASS = $VBot_Offline . 'resource/hass/Home_Assistant.json';
-    if (!file_exists($filePath_HASS)) {
-        file_put_contents($filePath_HASS, json_encode(['get_hass_all' => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
-        @chmod($filePath_HASS, 0777);
-    }
-    $existingData = json_decode(file_get_contents($filePath_HASS), true);
+    $existingData = file_exists($filePath_HASS)
+        ? json_decode((string)file_get_contents($filePath_HASS), true)
+        : ['get_hass_all' => []];
     if ($existingData === null) {
         $existingData = [];
     }
     $existingData['get_hass_all'] = [];
     $jsonData = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if ($jsonData !== false) {
-        if (file_put_contents($filePath_HASS, $jsonData, LOCK_EX)) {
+        if (vbotAtomicWriteFile($filePath_HASS, $jsonData, 'xóa danh sách thiết bị Home Assistant')) {
             @chmod($filePath_HASS, 0777);
             $response['success'] = true;
             $response['message'] = 'Dữ Liệu Đồng Bộ trước đó đã được xóa thành công.';

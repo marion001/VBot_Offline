@@ -65,6 +65,9 @@
     "zeroconf_mdns": {
         "active": true
     },
+    "bluetooth": {
+        "adapter": "hci0"
+    },
     "voice_command_system": {
         "active": false,
         "minimum_result_threshold": 0.74
@@ -755,6 +758,7 @@
         "advanced_settings": {
             "automatically_check_for_updates": true,
             "restart_vbot": false,
+            "rollback_program_on_start_failure": false,
             "sound_notification": true,
             "refresh_page_ui": true
         },

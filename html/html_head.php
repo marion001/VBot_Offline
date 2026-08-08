@@ -26,6 +26,19 @@ if (session_status() === PHP_SESSION_ACTIVE) {
   <meta name="vbot-csrf-token" content="<?php echo htmlspecialchars($VBot_Csrf_Token, ENT_QUOTES, 'UTF-8'); ?>">
   <script>
     window.VBOT_CSRF_TOKEN = <?php echo json_encode($VBot_Csrf_Token); ?>;
+    document.addEventListener('DOMContentLoaded', function () {
+      document.querySelectorAll('form').forEach(function (form) {
+        if ((form.method || 'get').toLowerCase() !== 'post') return;
+        var input = form.querySelector('input[name="csrf_token"]');
+        if (!input) {
+          input = document.createElement('input');
+          input.type = 'hidden';
+          input.name = 'csrf_token';
+          form.appendChild(input);
+        }
+        input.value = window.VBOT_CSRF_TOKEN || '';
+      });
+    });
   </script>
   <!-- <title>VBot Assistant</title> -->
   <meta name="description" content="VBot Assistant - Loa Thông Minh VBot tiếng Việt, tích hợp trợ lý ảo giúp điều khiển nhà thông minh, phát nhạc, nhắc nhở và nhiều tiện ích khác. Trải nghiệm loa thông minh cho người Việt.">

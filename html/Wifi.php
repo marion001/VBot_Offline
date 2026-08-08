@@ -7,6 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+setlocale(LC_CTYPE, 'C.UTF-8', 'en_US.UTF-8', 'UTF-8');
 
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
@@ -32,7 +33,7 @@ function networkInfo($connectionName = null) {
             "gatewaySource" => "N/A"
         ];
     }
-    $raw = shell_exec('nmcli connection show "'.$connectionName.'"');
+    $raw = shell_exec('LANG=C.UTF-8 LC_ALL=C.UTF-8 nmcli connection show '.escapeshellarg($connectionName));
     $method = "";
     $ip = "";
     $gateway = "";
@@ -213,6 +214,12 @@ include 'html_head.php';
             }
         }
 
+        function wifiEscapeHtml(value) {
+            return String(value == null ? '' : value).replace(/[&<>"']/g, function(character) {
+                return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[character];
+            });
+        }
+
         //Reset cấu hình wifi
         function reset_All_Wifi() {
             if (confirm("Bạn có chắc chắn muốn xóa tất cả các kết nối Wi-Fi không?\nHành động này sẽ làm mất kết nối mạng hiện tại!\n\nVà hệ thống sẽ tạo điểm truy cập Wifi mới với tên: 'VBot Assistant' để bạn kết nối và cấu hình")) {
@@ -249,21 +256,53 @@ include 'html_head.php';
                     fileListDiv.innerHTML = '';
                     // Kiểm tra xem response có thành công và có dữ liệu không
                     if (response.success && Array.isArray(response.data)) {
-                        var table = '<table class="table table-bordered border-primary">';
-                        table += '<thead><tr><th colspan="6" style="text-align: center; vertical-align: middle;">Danh Sách Wifi Đã Kết Nối</th></tr><tr><th style="text-align: center; vertical-align: middle;">Tên Wifi</th><th style="text-align: center; vertical-align: middle;">UUID</th><th style="text-align: center; vertical-align: middle;">Interface</th><th colspan="3" style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
-                        table += '<tbody>';
-                        response.data.forEach(function(wifi) {
-                            table += '<tr>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + wifi.ssid + '</td>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + wifi.uuid + '</td>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + wifi.interface + '</td>';
-                            table += '<td style="text-align: center; vertical-align: middle;"><button onclick="connectWifiOld(\'' + wifi.ssid + '\')" class="btn btn-success rounded-pill"><i class="bi bi-arrows-angle-contract"></i> Kết Nối</button></td>';
-                            table += '<td style="text-align: center; vertical-align: middle;"><button onclick="getWifiPassword(\'' + wifi.ssid + '\')" class="btn btn-primary rounded-pill"><i class="bi bi-info-circle"></i> Mật Khẩu</button></td>';
-                            table += '<td style="text-align: center; vertical-align: middle;"><button onclick="deleteWifi(\'' + wifi.ssid + '\')" class="btn btn-danger rounded-pill"><i class="bi bi-trash3-fill"></i> Xóa</button></td>';
-                            table += '</tr>';
+                        var table = document.createElement('table');
+                        table.className = 'table table-bordered border-primary';
+                        var thead = document.createElement('thead');
+                        var titleRow = document.createElement('tr');
+                        var titleCell = document.createElement('th');
+                        titleCell.colSpan = 6;
+                        titleCell.className = 'text-center align-middle';
+                        titleCell.textContent = 'Danh Sách Wifi Đã Kết Nối';
+                        titleRow.appendChild(titleCell);
+                        thead.appendChild(titleRow);
+                        var headerRow = document.createElement('tr');
+                        ['Tên Wifi', 'UUID', 'Interface', 'Kết Nối', 'Mật Khẩu', 'Xóa'].forEach(function(label) {
+                            var th = document.createElement('th');
+                            th.className = 'text-center align-middle';
+                            th.textContent = label;
+                            headerRow.appendChild(th);
                         });
-                        table += '</tbody></table>';
-                        fileListDiv.innerHTML = table;
+                        thead.appendChild(headerRow);
+                        table.appendChild(thead);
+                        var tbody = document.createElement('tbody');
+                        response.data.forEach(function(wifi, wifiIndex) {
+                            var row = document.createElement('tr');
+                            [wifi.ssid, wifi.uuid, wifi.interface].forEach(function(value) {
+                                var td = document.createElement('td');
+                                td.className = 'text-center align-middle';
+                                td.textContent = value || '';
+                                row.appendChild(td);
+                            });
+                            [
+                                ['Kết Nối', 'btn-success', function() { connectWifiOld(wifi.ssid, wifi.uuid); }],
+                                ['Mật Khẩu', 'btn-primary', function() { getWifiPassword(wifi.ssid, wifi.uuid); }],
+                                ['Xóa', 'btn-danger', function() { deleteWifi(wifi.ssid, wifi.uuid); }]
+                            ].forEach(function(action) {
+                                var td = document.createElement('td');
+                                td.className = 'text-center align-middle';
+                                var button = document.createElement('button');
+                                button.type = 'button';
+                                button.className = 'btn ' + action[1] + ' rounded-pill';
+                                button.textContent = action[0];
+                                button.addEventListener('click', action[2]);
+                                td.appendChild(button);
+                                row.appendChild(td);
+                            });
+                            tbody.appendChild(row);
+                        });
+                        table.appendChild(tbody);
+                        fileListDiv.appendChild(table);
                         loading("hide");
                     } else {
                         fileListDiv.innerHTML = 'Dữ liệu trả về không hợp lệ.';
@@ -309,24 +348,30 @@ include 'html_head.php';
                         response.data.forEach(function(wifi) {
                             // Kiểm tra nếu tên WiFi là "Mạng ẩn"
                             var ssidDisplay = wifi.SSID === "Mạng ẩn" ?
-                                "<span style='color:red;'>" + wifi.SSID + "</span>" :
-                                wifi.SSID;
+                                "<span style='color:red;'>" + wifiEscapeHtml(wifi.SSID) + "</span>" :
+                                wifiEscapeHtml(wifi.SSID);
                             tableHTML +=
                                 "<tr>" +
                                 "<td><center>" + ssidDisplay + "</center></td>" +
-                                "<td><center>" + wifi.BSSID + "</center></td>" +
-                                "<td><center>" + wifi.Channel + "</center></td>" +
-                                "<td><center>" + wifi.Rate + "</center></td>" +
-                                "<td><center>" + wifi.Signal + "</center></td>" +
-                                "<td><center><font color=green>" + wifi.Bars + "</font></center></td>" +
-                                "<td><center>" + wifi.Security + "</center></td>" +
-                                '<td><center><button onclick="connectWifiNew(\'' + wifi.SSID + '\', \'' + wifi.Security + '\')" class="btn btn-success rounded-pill"><i class="bi bi-arrows-angle-contract"></i> Kết Nối</button></center></td>' +
+                                "<td><center>" + wifiEscapeHtml(wifi.BSSID) + "</center></td>" +
+                                "<td><center>" + wifiEscapeHtml(wifi.Channel) + "</center></td>" +
+                                "<td><center>" + wifiEscapeHtml(wifi.Rate) + "</center></td>" +
+                                "<td><center>" + wifiEscapeHtml(wifi.Signal) + "</center></td>" +
+                                "<td><center><font color=green>" + wifiEscapeHtml(wifi.Bars) + "</font></center></td>" +
+                                "<td><center>" + wifiEscapeHtml(wifi.Security) + "</center></td>" +
+                                '<td><center><button type="button" data-wifi-index="' + wifiIndex + '" class="btn btn-success rounded-pill wifi-connect-new"><i class="bi bi-arrows-angle-contract"></i> Kết Nối</button></center></td>' +
                                 "</tr>";
                         });
                         tableHTML +=
                             "</tbody>" +
                             "</table>";
                         fileListDiv.innerHTML = tableHTML;
+                        fileListDiv.querySelectorAll('.wifi-connect-new').forEach(function(button) {
+                            button.addEventListener('click', function() {
+                                var wifi = response.data[Number(button.dataset.wifiIndex)];
+                                if (wifi) connectWifiNew(wifi.SSID, wifi.Security);
+                            });
+                        });
                     } else {
                         fileListDiv.innerHTML = '<p>Không có dữ liệu WiFi nào được tìm thấy.</p>';
                     }
@@ -418,7 +463,7 @@ include 'html_head.php';
         }
 
         //Xóa Wifi
-        function deleteWifi(ssid) {
+        function deleteWifi(ssid, uuid) {
             if (!ssid || ssid.trim() === '') {
                 show_message('Tên WiFi không hợp lệ.');
                 return;
@@ -455,12 +500,13 @@ include 'html_head.php';
                 loading("hide");
                 show_message('Lỗi yêu cầu mạng.');
             };
-            var data = 'Delete_Wifi=1&action=delete_wifi&wifiName=' + encodeURIComponent(ssid);
+            var data = 'Delete_Wifi=1&action=delete_wifi&wifiName=' + encodeURIComponent(ssid) +
+                '&uuid=' + encodeURIComponent(uuid || '');
             xhr.send(data);
         }
 
         //Kết nối tới wifi đã lưu trước đó
-        function connectWifiOld(ssid) {
+        function connectWifiOld(ssid, uuid) {
             if (!ssid || ssid.trim() === '') {
                 show_message('Tên WiFi không hợp lệ.');
                 return;
@@ -492,14 +538,16 @@ include 'html_head.php';
                 loading("hide");
                 show_message('Lỗi yêu cầu mạng.');
             };
-            var data = 'Connect_Wifi=1&action=connect_wifi&password=""&ssid=' + encodeURIComponent(ssid);
+            var data = 'Connect_Wifi=1&action=connect_wifi&password=&ssid=' + encodeURIComponent(ssid) +
+                '&uuid=' + encodeURIComponent(uuid || '');
             xhr.send(data);
         }
 
         //Lấy Mật Khẩu Wifi
-        function getWifiPassword(ssid) {
+        function getWifiPassword(ssid, uuid) {
             loading("show");
-            const url = "includes/php_ajax/Wifi_Act.php?Get_Password_Wifi&ssid=" + encodeURIComponent(ssid);
+            const url = "includes/php_ajax/Wifi_Act.php?Get_Password_Wifi=1&ssid=" + encodeURIComponent(ssid) +
+                "&uuid=" + encodeURIComponent(uuid || '');
             const xhr = new XMLHttpRequest();
             xhr.open("GET", url, true);
             xhr.onreadystatechange = function() {
@@ -510,7 +558,7 @@ include 'html_head.php';
                             if (data.success) {
                                 console.log("Dữ liệu nhận được:", data.data);
                                 data.data.forEach(function(wifiInfo) {
-                                    show_message("<b>Tên Wifi:</b> " + wifiInfo.ssid + "<br/><b>Mật Khẩu:</b> <font color=red>" + wifiInfo.password + "</font><br/><b>Địa Chỉ Mac:</b> " + wifiInfo['seen_bssids'] + "<br/><b>UUID:</b> " + wifiInfo.uuid + "<br/><b>Timestamp:</b> " + wifiInfo.timestamp);
+                                    show_message("<b>Tên Wifi:</b> " + wifiEscapeHtml(wifiInfo.ssid) + "<br/><b>Mật Khẩu:</b> <font color=red>" + wifiEscapeHtml(wifiInfo.password) + "</font><br/><b>Địa Chỉ Mac:</b> " + wifiEscapeHtml(wifiInfo['seen_bssids']) + "<br/><b>UUID:</b> " + wifiEscapeHtml(wifiInfo.uuid) + "<br/><b>Timestamp:</b> " + wifiEscapeHtml(wifiInfo.timestamp));
                                     loading("hide");
                                 });
                             } else {

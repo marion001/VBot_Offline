@@ -18,35 +18,13 @@ import os
 import shlex
 import signal
 import threading
-import json
-import re
 from datetime import datetime
 from collections import OrderedDict
 
 #Tên DBus của BlueZ và đường dẫn Agent
 BUS_NAME = "org.bluez"
 AGENT_PATH = "/com/vbot/agent"
-DEFAULT_CONFIG_PATH = "/home/pi/VBot_Offline/Config.json"
-DEFAULT_BLUETOOTH_ADAPTER = "hci0"
-
-def load_bluetooth_adapter(config_path=None):
-    """Đọc adapter từ Config.json; mọi dữ liệu thiếu/sai đều trả về hci0."""
-    path = config_path or os.environ.get("VBOT_CONFIG_PATH", DEFAULT_CONFIG_PATH)
-    try:
-        with open(path, "r", encoding="utf-8-sig") as config_file:
-            config_data = json.load(config_file)
-        adapter = config_data.get("bluetooth", {}).get("adapter", DEFAULT_BLUETOOTH_ADAPTER)
-        if isinstance(adapter, str):
-            adapter = adapter.strip().lower()
-            if re.fullmatch(r"hci\d+", adapter):
-                return adapter
-    except (OSError, ValueError, TypeError, AttributeError):
-        pass
-    return DEFAULT_BLUETOOTH_ADAPTER
-
-BLUETOOTH_ADAPTER = os.environ.get("VBOT_BLUETOOTH_ADAPTER", "").strip().lower()
-if not re.fullmatch(r"hci\d+", BLUETOOTH_ADAPTER):
-    BLUETOOTH_ADAPTER = load_bluetooth_adapter()
+BLUETOOTH_ADAPTER = os.environ.get("VBOT_BLUETOOTH_ADAPTER", "hci0")
 ENABLE_PASSKEY_AUTH = True  # True bật xác thực mã (KeyboardDisplay), False tắt (NoInputNoOutput)
 DEFAULT_PIN_CODE = "0000"
 DEFAULT_PASSKEY = 0
@@ -132,8 +110,7 @@ def cancel_scheduled_source(source_id):
         pass
 
 def device_path_to_mac(path):
-    adapter_prefix = f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_"
-    if not path or not str(path).startswith(adapter_prefix): return None
+    if not path or "dev_" not in path: return None
     return path.split("dev_", 1)[1].replace("_", ":").upper()
 
 _system_bus = None
@@ -141,31 +118,6 @@ def get_system_bus():
     global _system_bus
     if _system_bus is None: _system_bus = dbus.SystemBus()
     return _system_bus
-
-def adapter_path():
-    return f"/org/bluez/{BLUETOOTH_ADAPTER}"
-
-def get_adapter_properties():
-    obj = get_system_bus().get_object(BUS_NAME, adapter_path())
-    return dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-
-def select_available_adapter(bus):
-    """Xác minh adapter cấu hình tồn tại; nếu không thì chuyển an toàn về hci0."""
-    global BLUETOOTH_ADAPTER
-    configured = BLUETOOTH_ADAPTER
-    for candidate in (configured, DEFAULT_BLUETOOTH_ADAPTER):
-        try:
-            obj = bus.get_object(BUS_NAME, f"/org/bluez/{candidate}")
-            props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-            props.GetAll("org.bluez.Adapter1")
-            BLUETOOTH_ADAPTER = candidate
-            if candidate != configured:
-                log(f"Adapter '{configured}' không tồn tại, tự động dùng {candidate}")
-            return candidate
-        except Exception:
-            continue
-    BLUETOOTH_ADAPTER = DEFAULT_BLUETOOTH_ADAPTER
-    raise RuntimeError("Không tìm thấy Bluetooth adapter hci0 hoặc adapter đã cấu hình")
 
 def is_actually_connected(mac):
     try:
@@ -186,8 +138,6 @@ def get_device_name(mac):
         iface = dbus.Interface(om, "org.freedesktop.DBus.ObjectManager")
         objects = iface.GetManagedObjects()
         for path, interfaces in objects.items():
-            if not str(path).startswith(f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_"):
-                continue
             if "org.bluez.Device1" in interfaces:
                 dev_mac = device_path_to_mac(path)
                 if dev_mac == mac:
@@ -238,6 +188,8 @@ def set_softvolume_true(mac):
     #Trả về False để GLib không lặp lại hàm này
     return False
 
+def get_info(mac): return run(f"bluetoothctl info {mac}")
+
 def is_paired(mac):
     try:
         bus = get_system_bus()
@@ -246,18 +198,12 @@ def is_paired(mac):
         return bool(props.Get("org.bluez.Device1", "Paired"))
     except Exception:
         pass
-    return False
+    return "Paired: yes" in get_info(mac)
 
 def trust(mac):
     if mac:
         log(f"Đánh dấu trust tin cậy thiết bị: {device_info_str(mac)}")
-        try:
-            path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-            obj = get_system_bus().get_object(BUS_NAME, path)
-            props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-            props.Set("org.bluez.Device1", "Trusted", dbus.Boolean(True))
-        except Exception as error:
-            log(f"Không thể trust {mac} trên {BLUETOOTH_ADAPTER}: {error}")
+        run(f"bluetoothctl trust {mac}")
 
 def is_running(proc): return proc is not None and proc.poll() is None
 
@@ -316,7 +262,7 @@ def _delayed_start_audio(mac, generation):
         return False
     try:
         process = subprocess.Popen(
-            ["bluealsa-aplay", f"--hci={BLUETOOTH_ADAPTER}", mac],
+            ["bluealsa-aplay", mac],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
         )
@@ -368,16 +314,13 @@ def playback_health_check():
     return True
 
 def set_visibility(visible):
-    try:
-        props = get_adapter_properties()
-        props.Set("org.bluez.Adapter1", "Pairable", dbus.Boolean(bool(visible)))
-        props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(bool(visible)))
-    except Exception as error:
-        log(f"Không thể đổi trạng thái hiển thị của {BLUETOOTH_ADAPTER}: {error}")
-        return
     if visible:
+        run("bluetoothctl pairable on")
+        run("bluetoothctl discoverable on")
         log("Trạng thái Bluetooth: Đã hiển thị tên thiết bị (Cho phép các thiết bị khác tìm thấy Bluetooth)")
     else:
+        run("bluetoothctl discoverable off")
+        run("bluetoothctl pairable off")
         log("Trạng thái Bluetooth: Đã ẩn tên thiết bị (Để duy trì 1 kết nối với thiết bị hiện tại)")
 
 def clear_device_state(mac):
@@ -390,13 +333,7 @@ def clear_device_state(mac):
 def remove_device(mac):
     if not mac: return
     log(f"Tiến hành dọn dẹp thiết bị kết nối lỗi: {device_info_str(mac)}")
-    try:
-        adapter_obj = get_system_bus().get_object(BUS_NAME, adapter_path())
-        adapter_iface = dbus.Interface(adapter_obj, "org.bluez.Adapter1")
-        device_path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-        adapter_iface.RemoveDevice(dbus.ObjectPath(device_path))
-    except Exception as error:
-        log(f"Không thể xóa {mac} khỏi {BLUETOOTH_ADAPTER}: {error}")
+    run(f"bluetoothctl remove {mac}")
 
 def remember_pairing_device(device):
     mac = device_path_to_mac(device)
@@ -443,7 +380,8 @@ def watchdog(interface, changed, invalidated, path):
                     dev_obj = get_system_bus().get_object(BUS_NAME, path)
                     dbus.Interface(dev_obj, "org.bluez.Device1").Disconnect()
                 except Exception as error:
-                    log(f"DBus disconnect thất bại trên {BLUETOOTH_ADAPTER}: {error}")
+                    log(f"DBus disconnect thất bại ({error}), dùng bluetoothctl")
+                    run(f"bluetoothctl disconnect {mac}")
                 return
 
             if visibility_timer:
@@ -518,9 +456,6 @@ class Agent(dbus.service.Object):
             raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
 
     def _prepare_pairing(self, device):
-        if device_path_to_mac(device) is None:
-            log(f"Từ chối yêu cầu pairing ngoài adapter {BLUETOOTH_ADAPTER}: {device}")
-            raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
         self._reject_if_busy(device)
         return remember_pairing_device(device)
 
@@ -605,8 +540,6 @@ if __name__ == "__main__":
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = get_system_bus()
     try:
-        select_available_adapter(bus)
-        log(f"Sử dụng Bluetooth adapter: {BLUETOOTH_ADAPTER}")
         if ENABLE_PASSKEY_AUTH:
             Register_Agent = "KeyboardDisplay"
         else:
@@ -620,7 +553,7 @@ if __name__ == "__main__":
         signal.signal(signal.SIGTERM, request_shutdown)
         signal.signal(signal.SIGINT, request_shutdown)
 
-        get_adapter_properties().Set("org.bluez.Adapter1", "Powered", dbus.Boolean(True))
+        run("bluetoothctl power on")
         om = dbus.Interface(bus.get_object(BUS_NAME, "/"), "org.freedesktop.DBus.ObjectManager")
         for path, interfaces in om.GetManagedObjects().items():
             if "org.bluez.Device1" in interfaces and interfaces["org.bluez.Device1"].get("Connected"):

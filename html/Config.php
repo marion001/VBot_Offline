@@ -71,7 +71,7 @@ function vbotConfigWriteFile($filePath, $content, $label)
     error_log('[PHP Config ERROR] Nội dung ghi không hợp lệ cho ' . $label, 0);
     return false;
   }
-  if (file_put_contents($filePath, $content, LOCK_EX) === false) {
+  if (!vbotAtomicWriteFile($filePath, $content, $label)) {
     $lastError = error_get_last();
     error_log('[PHP Config ERROR] Không thể ghi ' . $label . ': ' . ($lastError['message'] ?? $filePath), 0);
     return false;
@@ -148,7 +148,8 @@ if (isset($_POST['start_recovery_config_json'])) {
     $start_recovery_config_json = rtrim($directoryPath_Backup_Config, '/\\') . '/' . $selectedBackup;
     if ($selectedBackup !== '') {
       if (vbotConfigIsValidJsonFile($start_recovery_config_json)) {
-        if (copy($start_recovery_config_json, $Config_filePath)) {
+        $recoveryContent = @file_get_contents($start_recovery_config_json);
+        if (is_string($recoveryContent) && vbotAtomicWriteFile($Config_filePath, $recoveryContent, 'Config.json khôi phục')) {
           vbotConfigSetFullPermissions($Config_filePath, 'Config.json sau khi khôi phục');
           $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu trên hệ thống thành công";
         } else {
@@ -222,6 +223,15 @@ if (isset($_POST['all_config_save'])) {
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG mic
   $Config['smart_config']['mic']['id'] = intval($_POST['mic_id']);
   $Config['smart_config']['mic']['scan_on_boot'] = isset($_POST['mic_scan_on_boot']) ? true : false;
+
+  #Bluetooth adapter dùng cho bluetooth_agent.py
+  $bluetoothAdapter = strtolower(trim($_POST['bluetooth_adapter'] ?? 'hci0'));
+  if (!preg_match('/^hci\d+$/', $bluetoothAdapter)) {
+    $messages[] = 'Bluetooth adapter không hợp lệ, đã sử dụng mặc định hci0.';
+    error_log('[PHP Config WARNING] Bluetooth adapter không hợp lệ: ' . $bluetoothAdapter . '; dùng hci0', 0);
+    $bluetoothAdapter = 'hci0';
+  }
+  $Config['bluetooth']['adapter'] = $bluetoothAdapter;
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG API
   $Config['api']['active'] = isset($_POST['api_active']) ? true : false;
@@ -563,6 +573,7 @@ if (isset($_POST['all_config_save'])) {
 
   #Cập nhật sao lưu trương trình VBot
   $Config['backup_upgrade']['advanced_settings']['restart_vbot'] = isset($_POST['restart_vbot_upgrade']) ? true : false;
+  $Config['backup_upgrade']['advanced_settings']['rollback_program_on_start_failure'] = isset($_POST['rollback_program_on_start_failure']) ? true : false;
   $Config['backup_upgrade']['advanced_settings']['automatically_check_for_updates'] = isset($_POST['automatically_check_for_updates']) ? true : false;
   $Config['backup_upgrade']['advanced_settings']['sound_notification'] = isset($_POST['sound_notification_backup_upgrade']) ? true : false;
   $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] = isset($_POST['refresh_page_ui_backup_upgrade']) ? true : false;
@@ -1336,6 +1347,27 @@ include 'html_head.php';
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
+
+                    <div class="card">
+                      <div class="card-body">
+                        <h5 class="card-title">Bluetooth Adapter</h5>
+                        <div class="alert alert-primary" role="alert">
+                          <?php
+                          echo input_field(
+                            'bluetooth_adapter',
+                            'Bluetooth Device',
+                            htmlspecialchars($Config['bluetooth']['adapter'] ?? 'hci0'),
+                            'required',
+                            'text',
+                            '', '', '',
+                            'Nhập adapter BlueZ cần sử dụng, ví dụ hci0 hoặc hci1. Nếu Config.json lỗi, thiếu khóa, giá trị sai hoặc adapter không tồn tại, Bluetooth Agent sẽ tự dùng hci0.',
+                            'border-success', 'Tìm Kiếm', "scan_bluetooth_adapters()", 'btn btn-success border-success', 'onclick', ''
+                          );
+                          ?>
+                          <div id="bluetooth_adapter_scanner" class="mt-3"></div>
+                        </div>
+                      </div>
+                    </div>
 
 					<div class="card">
                     <div class="card-body">
@@ -3619,6 +3651,14 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="restart_vbot_upgrade" id="restart_vbot_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['restart_vbot'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Tự Động Rollback Khi VBot Lỗi <i class="bi bi-question-circle-fill" onclick="show_message('Khi bật: nếu VBot không duy trì trạng thái active sau khi cập nhật, WebUI sẽ khôi phục mã nguồn và Config.json cũ rồi restart lại phiên bản trước. Khi tắt: WebUI chỉ hiển thị và ghi log lỗi, không tự rollback.')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="rollback_program_on_start_failure" id="rollback_program_on_start_failure" <?php echo ($Config['backup_upgrade']['advanced_settings']['rollback_program_on_start_failure'] ?? true) ? 'checked' : ''; ?>>
                       </div>
                     </div>
                   </div>

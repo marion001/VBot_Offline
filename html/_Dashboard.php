@@ -175,15 +175,24 @@ include 'html_head.php';
             return null;
         }
         fclose($remoteStream);
+        clearstatcache(true, $zipFile);
+        if (!is_file($zipFile) || filesize($zipFile) < 1024) {
+            $messages[] = "<font color=red>- Gói ZIP tải về bị rỗng hoặc quá nhỏ</font>";
+            error_log('[UPGRADE INTERFACE ERROR] [kiểm tra tải xuống] ZIP không hợp lệ: ' . $zipFile);
+            @unlink($zipFile);
+            return null;
+        }
+        error_log('[UPGRADE INTERFACE INFO] SHA-256 gói tải về: ' . hash_file('sha256', $zipFile));
         @chmod($zipFile, 0777);
         if (!class_exists('ZipArchive')) {
             $messages[] = "<font color=red>- PHP chưa cài extension ZipArchive</font>";
+            error_log('[UPGRADE INTERFACE ERROR] [kiểm tra môi trường] PHP thiếu ZipArchive');
             @unlink($zipFile);
             return null;
         }
         $zip = new ZipArchive;
         $messages[] = "<font color=green>- Tải xuống thành công, đang tiến hành giải nén dữ liệu...</font>";
-        if ($zip->open($zipFile) === TRUE) {
+        if ($zip->open($zipFile, ZipArchive::CHECKCONS) === TRUE) {
             for ($zipIndex = 0; $zipIndex < $zip->numFiles; $zipIndex++) {
                 $entryName = str_replace('\\', '/', $zip->getNameIndex($zipIndex));
                 if ($entryName === '' || $entryName[0] === '/' || preg_match('/(^|\/)\.\.($|\/)/', $entryName)) {
@@ -198,6 +207,7 @@ include 'html_head.php';
             if (!$zip->extractTo($destinationDir)) {
                 $zip->close();
                 @unlink($zipFile);
+                error_log('[UPGRADE INTERFACE ERROR] [giải nén] ZipArchive::extractTo thất bại');
                 return null;
             }
             $zip->close();
@@ -207,6 +217,7 @@ include 'html_head.php';
             return $extractedFolder;
         } else {
             $messages[] = "Có Lỗi Xảy Ra, không thể giải nén được giữ liệu đã tải xuống, đã dừng tiến trình";
+            error_log('[UPGRADE INTERFACE ERROR] [kiểm tra ZIP] Gói ZIP hỏng hoặc không nhất quán');
             @unlink($zipFile);
             return null;
         }
@@ -627,6 +638,34 @@ include 'html_head.php';
                 $download_Git_Repo_As_Named_Zip = downloadGitRepoAsNamedZip($Github_Repo_Vbot, $Download_Path);
                 if (!is_null($download_Git_Repo_As_Named_Zip)) {
                     $messages[] = "<font color=green>- Tải dữ liệu và giải nén thành công vào đường dẫn: <b>" . $download_Git_Repo_As_Named_Zip . "/</b></font><br/>";
+                    $interfacePackageValid = vbotUpgradeValidatePackage(
+                        $download_Git_Repo_As_Named_Zip,
+                        ['html/Version.json', 'html/Configuration.php', 'html/_Dashboard.php', 'html/_Program.php'],
+                        $messages,
+                        'INTERFACE'
+                    );
+                    if ($interfacePackageValid) {
+                        $interfacePackageValid = vbotUpgradeValidateJson(
+                            $download_Git_Repo_As_Named_Zip . '/html/Version.json',
+                            $messages,
+                            'INTERFACE',
+                            'html/Version.json'
+                        );
+                    }
+                    if ($interfacePackageValid) {
+                        $interfacePackageValid = vbotUpgradeLintPhpTree(
+                            $download_Git_Repo_As_Named_Zip . '/html',
+                            $messages,
+                            'INTERFACE'
+                        );
+                    }
+                    if (!$interfacePackageValid) {
+                        deleteDirectory($Download_Path);
+                        $download_Git_Repo_As_Named_Zip = null;
+                    }
+                    if (is_null($download_Git_Repo_As_Named_Zip)) {
+                        $messages[] = "<font color=red><b>- Gói giao diện không đạt kiểm tra tiền cập nhật.</b></font>";
+                    } else {
                     #lựa chọn có tạo bản sao lưu trước khi cập nhật không
                     if ($make_a_backup_before_updating === true) {
                         $messages[] =  "- Đang tạo bản sao lưu giao diện trước khi cập nhật";
@@ -745,8 +784,25 @@ include 'html_head.php';
                     }
                     $messages[] = "<font color=green><b>- Đang tiến hành cập nhật dữ liệu mới...</b></font>";
                     #Tiến hành Sao chép ghi đè dữ liệu mới và bỏ qua file được chọn
-                    if (copyFiles($download_Git_Repo_As_Named_Zip . '/html/', $directory_path . '/', $Keep_The_File_Folder_POST)) {
+                    $interfaceRollbackPath = $Download_Path . '/rollback_interface';
+                    if (vbotUpgradeTransactionalCopy(
+                        $download_Git_Repo_As_Named_Zip . '/html/',
+                        $directory_path . '/',
+                        $Keep_The_File_Folder_POST,
+                        $interfaceRollbackPath,
+                        $messages,
+                        'INTERFACE'
+                    )) {
                         $messages[] = "<font color=green><b>- Đã hoàn tất cập nhật dữ liệu mới</b></font><br/>";
+                        if (!vbotUpgradeValidatePackage(
+                            $directory_path,
+                            ['Version.json', 'Configuration.php', '_Dashboard.php', '_Program.php'],
+                            $messages,
+                            'INTERFACE'
+                        ) || !vbotUpgradeValidateJson($directory_path . '/Version.json', $messages, 'INTERFACE', 'Version.json sau cập nhật')) {
+                            vbotUpgradeReportError($messages, 'INTERFACE', 'hậu kiểm', 'Giao diện sau cập nhật không đạt kiểm tra bắt buộc');
+                            vbotUpgradeRollbackTransaction($interfaceRollbackPath, $directory_path, $messages, 'INTERFACE');
+                        } else {
                         deleteDirectory($Extract_Path);
                         deleteDirectory($Download_Path);
                         if ($connection) {
@@ -761,11 +817,13 @@ include 'html_head.php';
                             echo "<script>playAudio_upgrade('$sound_updated_the_interface_successfully');</script>";
                             $messages[] = "<br/><font color=green><b>- Cập nhật hoàn tất, hãy tải lại trang để áp dụng dữ liệu mới</b></font>";
                         }
+                        }
                     } else {
-                        $messages[] = "<font color=red>- Lỗi xảy ra trong quá trình cập nhật dữ liệu mới</font>";
+                        vbotUpgradeReportError($messages, 'INTERFACE', 'cập nhật', 'Sao chép hoặc xác minh giao diện thất bại');
+                    }
                     }
                 } else {
-                    $messages[] =  "<font color=red>-Lỗi xảy ra trong quá trình tải xuống bản cập nhật dữ liệu, Đã dừng quá trình cập nhật</font>";
+                    vbotUpgradeReportError($messages, 'INTERFACE', 'tải/giải nén', 'Không thể tải hoặc giải nén gói cập nhật giao diện');
                 }
             }
         }
