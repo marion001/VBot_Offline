@@ -75,7 +75,35 @@ def backup_version_metadata(path):
     clean = lambda value, fallback: re.sub(r"[^0-9A-Za-z._-]", "-", str(value or fallback))
     return clean(data.get("releaseDate"), "unknown-date"), clean(data.get("version"), "unknown-version")
 
-def package_rollback(rollback, prefix, release_date, version):
+def backup_limit(config, section):
+    try:
+        limit = int(config["backup_upgrade"][section]["backup"]["limit_backup_files"])
+        return limit if limit >= 1 else 5
+    except (KeyError, TypeError, ValueError):
+        return 5
+
+def prune_backups(directory, prefix, limit, keep=None):
+    limit = max(1, limit)
+    backups = sorted(
+        (item for item in directory.glob(f"{prefix}_*.tar.gz") if item.is_file() and not item.is_symlink()),
+        key=lambda item: (item.stat().st_mtime_ns, item.name),
+    )
+    removed = 0
+    excess = max(0, len(backups) - limit)
+    for item in backups:
+        if removed >= excess:
+            break
+        if keep is not None and item == keep:
+            continue
+        try:
+            item.unlink()
+            removed += 1
+            log(f"Đã xóa backup chương trình cũ: {item.name}")
+        except OSError as error:
+            log(f"Không thể xóa backup cũ {item}: {error}", error=True)
+    log(f"Đã kiểm tra giới hạn backup: giữ tối đa {limit} tệp, đã xóa {removed} tệp cũ")
+
+def package_rollback(rollback, prefix, release_date, version, limit=5):
     if not rollback.is_dir():
         raise RuntimeError(f"Không tìm thấy thư mục rollback để nén: {rollback}")
     name = f"{prefix}_{dt.datetime.now():%d%m%Y_%H%M%S}_{release_date}_{version}.tar.gz"
@@ -96,6 +124,7 @@ def package_rollback(rollback, prefix, release_date, version):
         if os.path.exists(temp_name):
             os.unlink(temp_name)
     log(f"Đã nén rollback thành: {archive}")
+    prune_backups(archive.parent, prefix, limit, keep=archive)
     return archive
 
 def merge_config(template, old):
@@ -467,6 +496,8 @@ def update(args):
             return
         old_config = read_json(ROOT / "Config.json")
         old_release_date, old_version = backup_version_metadata(ROOT / "Version.json")
+        manual_backup_limit = backup_limit(old_config, "vbot_program")
+        log(f"Giới hạn backup chương trình thủ công: {manual_backup_limit} tệp")
         log("Đã đọc Config.json hiện tại")
         merged_config = merge_config(read_json(source / "Config.json"), old_config)
         log("Đã merge giá trị Config cũ vào mẫu Config mới")
@@ -519,7 +550,9 @@ def update(args):
             else:
                 log("Đã bỏ qua restart service theo tùy chọn --no-restart")
             try:
-                rollback_archive = package_rollback(rollback, "VBot_Program", old_release_date, old_version)
+                rollback_archive = package_rollback(
+                    rollback, "VBot_Program", old_release_date, old_version, manual_backup_limit
+                )
             except Exception as package_error:
                 rollback_archive = rollback
                 log(f"Không thể nén rollback, thư mục backup được giữ nguyên: {package_error}", error=True)
@@ -545,7 +578,9 @@ def update(args):
                     rollback_errors.append(f"restart bản cũ: {restart_old.stdout.strip()}")
                     log(f"Không thể restart phiên bản cũ: {restart_old.stdout.strip()}", error=True)
             try:
-                package_rollback(rollback, "VBot_Program", old_release_date, old_version)
+                package_rollback(
+                    rollback, "VBot_Program", old_release_date, old_version, manual_backup_limit
+                )
             except Exception as package_error:
                 rollback_errors.append(f"nén rollback: {package_error}")
                 log(f"Không thể nén rollback; thư mục backup được giữ nguyên: {package_error}", error=True)

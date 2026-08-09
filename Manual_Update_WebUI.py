@@ -61,7 +61,36 @@ def backup_version_metadata(path):
     clean = lambda value, fallback: re.sub(r"[^0-9A-Za-z._-]", "-", str(value or fallback))
     return clean(data.get("releaseDate"), "unknown-date"), clean(data.get("version"), "unknown-version")
 
-def package_rollback(rollback, prefix, release_date, version):
+def backup_limit(config_path, section):
+    try:
+        config = read_json_object(config_path)
+        limit = int(config["backup_upgrade"][section]["backup"]["limit_backup_files"])
+        return limit if limit >= 1 else 5
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return 5
+
+def prune_backups(directory, prefix, limit, keep=None):
+    limit = max(1, limit)
+    backups = sorted(
+        (item for item in directory.glob(f"{prefix}_*.tar.gz") if item.is_file() and not item.is_symlink()),
+        key=lambda item: (item.stat().st_mtime_ns, item.name),
+    )
+    removed = 0
+    excess = max(0, len(backups) - limit)
+    for item in backups:
+        if removed >= excess:
+            break
+        if keep is not None and item == keep:
+            continue
+        try:
+            item.unlink()
+            removed += 1
+            log(f"Đã xóa backup WebUI cũ: {item.name}")
+        except OSError as error:
+            log(f"Không thể xóa backup cũ {item}: {error}", error=True)
+    log(f"Đã kiểm tra giới hạn backup: giữ tối đa {limit} tệp, đã xóa {removed} tệp cũ")
+
+def package_rollback(rollback, prefix, release_date, version, limit=5):
     if not rollback.is_dir():
         raise RuntimeError(f"Không tìm thấy thư mục rollback để nén: {rollback}")
     name = f"{prefix}_{dt.datetime.now():%d%m%Y_%H%M%S}_{release_date}_{version}.tar.gz"
@@ -82,6 +111,7 @@ def package_rollback(rollback, prefix, release_date, version):
         if os.path.exists(temp_name):
             os.unlink(temp_name)
     log(f"Đã nén rollback thành: {archive}")
+    prune_backups(archive.parent, prefix, limit, keep=archive)
     return archive
 
 def atomic_copy_file(source, destination):
@@ -414,6 +444,8 @@ def update(args):
             log("Đã hoàn tất chế độ --check-only, không có dữ liệu nào được cập nhật")
             return
         old_release_date, old_version = backup_version_metadata(HTML_ROOT / "Version.json")
+        manual_backup_limit = backup_limit(ROOT / "Config.json", "web_interface")
+        log(f"Giới hạn backup WebUI thủ công: {manual_backup_limit} tệp")
         rollback.mkdir(parents=True, exist_ok=False)
         log(f"Đã tạo vùng rollback: {rollback}")
         try:
@@ -422,7 +454,9 @@ def update(args):
             log("Đang áp dụng quyền 0777 cho WebUI, bỏ qua html/Backup_Upgrade và *.lock...")
             apply_project_permissions(HTML_ROOT)
             try:
-                rollback_archive = package_rollback(rollback, "VBot_Interface", old_release_date, old_version)
+                rollback_archive = package_rollback(
+                    rollback, "VBot_Interface", old_release_date, old_version, manual_backup_limit
+                )
             except Exception as package_error:
                 rollback_archive = rollback
                 log(f"Không thể nén rollback, thư mục backup được giữ nguyên: {package_error}", error=True)
@@ -438,7 +472,9 @@ def update(args):
                     f"{reason} | Rollback WebUI chưa hoàn chỉnh: {rollback_error}"
                 ) from update_error
             try:
-                package_rollback(rollback, "VBot_Interface", old_release_date, old_version)
+                package_rollback(
+                    rollback, "VBot_Interface", old_release_date, old_version, manual_backup_limit
+                )
             except Exception as package_error:
                 log(f"Không thể nén rollback, thư mục backup được giữ nguyên: {package_error}", error=True)
             raise
