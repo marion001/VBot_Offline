@@ -20,6 +20,7 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 - [Kiểm thử](#kiểm-thử)
 - [Xử lý sự cố](#xử-lý-sự-cố)
 - [Phát triển và mở rộng](#phát-triển-và-mở-rộng)
+- [Cập nhật thủ công qua SSH](#cập-nhật-thủ-công-qua-ssh)
 - [Sao lưu và an toàn dữ liệu](#sao-lưu-và-an-toàn-dữ-liệu)
 - [Liên hệ](#liên-hệ)
 
@@ -642,6 +643,147 @@ Nguyên tắc khi đóng góp hoặc mở rộng:
 - Không để watchdog khởi động lại dịch vụ trong lúc shutdown.
 - LED tạm thời phải khôi phục trạng thái nghỉ sau khi hoàn tất.
 - Thêm test hồi quy cho lỗi đã sửa.
+
+## Cập nhật thủ công qua SSH
+
+Hai công cụ `Manual_Update_Program.py` và `Manual_Update_WebUI.py` dùng để cập nhật hoặc
+rollback VBot khi WebUI không hoạt động. Đăng nhập SSH bằng tài khoản chạy VBot (thường là
+`pi`), không thêm `sudo` trước lệnh Python:
+
+```bash
+ssh pi@DIA_CHI_IP_VBOT
+cd /home/pi/VBot_Offline
+python3 Manual_Update_Program.py --help
+python3 Manual_Update_WebUI.py --help
+```
+
+### Cập nhật chương trình
+
+Chạy không có `--apply` sẽ cập nhật ngay, merge giá trị `Config.json` cũ vào mẫu Config mới,
+tạo rollback, kiểm tra service và restart `VBot_Offline.service`:
+
+```bash
+python3 Manual_Update_Program.py
+```
+
+Chỉ tải và kiểm tra gói, không ghi dữ liệu:
+
+```bash
+python3 Manual_Update_Program.py --check-only
+```
+
+Cập nhật nhưng chưa restart service:
+
+```bash
+python3 Manual_Update_Program.py --no-restart
+```
+
+### Cập nhật WebUI
+
+```bash
+# Cập nhật ngay
+python3 Manual_Update_WebUI.py
+
+# Chỉ tải, kiểm tra ZIP và lint PHP
+python3 Manual_Update_WebUI.py --check-only
+```
+
+Cập nhật WebUI không restart service VBot. Sau khi hoàn tất, dùng `Ctrl+F5` để tải lại giao diện.
+
+### Repository, nhánh hoặc ZIP local
+
+```bash
+python3 Manual_Update_Program.py --repo https://github.com/USER/REPOSITORY --branch main
+python3 Manual_Update_WebUI.py --repo https://github.com/USER/REPOSITORY --branch main
+
+python3 Manual_Update_Program.py --zip /home/pi/VBot_Offline-main.zip
+python3 Manual_Update_WebUI.py --zip /home/pi/VBot_Offline-main.zip
+```
+
+### Bảo vệ JSON và dữ liệu người dùng
+
+Các JSON đang tồn tại được giữ lại mặc định, gồm `BackList.json`, token STT/TTS,
+`Home_Assistant.json`, `Home_Assistant_Custom.json` và những JSON dữ liệu khác. JSON lõi như
+`Version.json`, `Action.json`, `Adverbs.json`, `Object.json` và một số JSON hệ thống vẫn được
+cập nhật. Chỉ ghi đè một JSON dữ liệu khi thực sự cần:
+
+```bash
+python3 Manual_Update_Program.py --replace-json Home_Assistant.json
+python3 Manual_Update_WebUI.py --replace-json PlayList.json
+```
+
+WebUI giữ `html/includes/other_data` mặc định. Có thể giữ thêm thư mục tùy chỉnh:
+
+```bash
+python3 Manual_Update_WebUI.py --keep includes/other_data --keep includes/cache
+```
+
+### Backup rollback
+
+Rollback thủ công được đóng gói theo định dạng:
+
+```text
+VBot_Program_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz
+VBot_Interface_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz
+```
+
+Ví dụ: `VBot_Program_07082026_221844_05-08-2026_1.2.0.tar.gz`.
+
+Backup Python có `created.json`, `Config.json` (đối với chương trình) và thư mục `files/` chứa
+các file cũ. Backup đầy đủ do WebUI tạo có dữ liệu trực tiếp tại gốc archive. Hai công cụ tự
+nhận diện và xử lý đúng cả hai cấu trúc.
+
+Khôi phục bản chương trình mới nhất:
+
+```bash
+python3 Manual_Update_Program.py --rollback
+```
+
+Công cụ tìm `VBot_Program_*.tar.gz` mới nhất trong:
+
+```text
+/home/pi/VBot_Offline/Backup_Upgrade/Manual_Program
+/home/pi/VBot_Offline/html/Backup_Upgrade/Backup_Program
+```
+
+Hoặc chỉ định một file:
+
+```bash
+python3 Manual_Update_Program.py --rollback /home/pi/VBot_Offline/Backup_Upgrade/Manual_Program/VBot_Program_09082026_131844_05-08-2026_1.2.0.tar.gz
+```
+
+Khôi phục WebUI mới nhất hoặc chỉ định file:
+
+```bash
+python3 Manual_Update_WebUI.py --rollback
+python3 Manual_Update_WebUI.py --rollback /home/pi/VBot_Offline/Backup_Upgrade/Manual_WebUI/VBot_Interface_09082026_131844_05-08-2026_1.2.0.tar.gz
+```
+
+Backup WebUI được tìm trong:
+
+```text
+/home/pi/VBot_Offline/Backup_Upgrade/Manual_WebUI
+/home/pi/VBot_Offline/html/Backup_Upgrade/Backup_Interface
+```
+
+File được chỉ định phải nằm trực tiếp trong một thư mục hợp lệ, đúng tiền tố và đuôi `.tar.gz`.
+Archive được kiểm tra chống path traversal, symlink, hardlink và file thiết bị trước khi giải nén.
+Rollback chương trình không thay đổi `html`; rollback WebUI chỉ khôi phục cây `html`.
+
+### Quyền file, dừng giữa chừng và log
+
+- Trình cập nhật chương trình chmod `0777` phần chương trình nhưng bỏ qua `TTS_Audio`, `Media`,
+  toàn bộ `html`, `*.lock` và symlink.
+- Trình cập nhật WebUI chỉ chmod `html`, bỏ qua `html/Backup_Upgrade`, `*.lock` và symlink.
+- Khi nhấn `Ctrl+C` sau lúc bắt đầu ghi, công cụ rollback dữ liệu đã thay đổi, khôi phục Config,
+  xóa marker và thoát với mã `130`. Không nhấn `Ctrl+C` lần hai trong khi đang rollback.
+- Tất cả tiến trình được in ra console; chỉ lỗi phát sinh được ghi vào
+  `resource/log/Vbot_error.log`.
+
+```bash
+tail -f /home/pi/VBot_Offline/resource/log/Vbot_error.log
+systemctl --user status VBot_Offline.service --no-pager
+```
 
 ## Sao lưu và an toàn dữ liệu
 

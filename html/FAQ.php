@@ -80,6 +80,175 @@ include 'html_head.php';
 <hr/>Hướng Dẫn Tháo Lắp Mạch VBot AIO: <a href="https://docs.google.com/document/d/1X_xGqGQt0HfPNDXM6c_joUwHxwr-mGiS/edit" target="_blank">https://docs.google.com/document/d/1X_xGqGQt0HfPNDXM6c_joUwHxwr-mGiS</a>
 <hr/>Hướng Dẫn Cấu Hình Ban Đầu: <a href="https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M/edit" target="_blank">https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M</a>
               </div>
+
+              <div class="card accordion mb-3" id="accordion_manual_update_ssh">
+                <div class="card-body">
+                  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                      data-bs-target="#collapse_manual_update_ssh" aria-expanded="false"
+                      aria-controls="collapse_manual_update_ssh">
+                    Cập Nhật Thủ Công Chương Trình Và Giao Diện Qua SSH Khi WebUI Bị Lỗi
+                  </h5>
+                  <div id="collapse_manual_update_ssh" class="accordion-collapse collapse"
+                       data-bs-parent="#accordion_manual_update_ssh">
+                    <div class="card-body">
+                      <div class="alert alert-danger">
+                        <b>Yêu cầu bắt buộc:</b> cần đăng nhập SSH vào Raspberry Pi bằng tài khoản đang chạy VBot
+                        (thông thường là <code>pi</code>) để thực thi các lệnh. Hai file
+                        <code>Manual_Update_Program.py</code> và <code>Manual_Update_WebUI.py</code> phải tồn tại trong
+                        <code>/home/pi/VBot_Offline</code>.
+                      </div>
+                      <div class="alert alert-warning">
+                        Nên chạy bằng tài khoản <b>pi</b>, không thêm <code>sudo</code> trước lệnh Python. Service
+                        <code>VBot_Offline.service</code> là user service và được điều khiển bằng
+                        <code>systemctl --user</code>.
+                      </div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-3">1. Đăng nhập vào thiết bị bằng SSH</h5>
+                      <p>Tìm địa chỉ IP của VBot trong WebUI, modem/router hoặc màn hình thiết bị. Trên Windows mở
+                        PowerShell/Terminal; trên Linux hoặc macOS mở Terminal, sau đó chạy:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> ssh pi@DIA_CHI_IP_VBOT</code></pre>
+                      <p>Ví dụ:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> ssh pi@192.168.1.50</code></pre>
+                      <ul>
+                        <li>Lần đầu kết nối, nhập <code>yes</code> để xác nhận khóa máy chủ.</li>
+                        <li>Nhập mật khẩu SSH của tài khoản <code>pi</code>. Khi gõ mật khẩu sẽ không hiện ký tự.</li>
+                        <li>Nếu báo <code>Connection refused</code>, cần bật dịch vụ SSH trên Raspberry Pi trước.</li>
+                      </ul>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">2. Đi tới thư mục VBot và kiểm tra công cụ</h5>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> cd /home/pi/VBot_Offline
+$:> pwd
+$:> ls -l Manual_Update_Program.py Manual_Update_WebUI.py
+$:> python3 Manual_Update_Program.py --help
+$:> python3 Manual_Update_WebUI.py --help</code></pre>
+
+                      <h5 class="border-bottom border-success pb-2 mt-4">3. Cập nhật thủ công chương trình VBot</h5>
+                      <p><b>Chỉ tải và kiểm tra gói, chưa ghi dữ liệu:</b></p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py --check-only</code></pre>
+                      <p>Lệnh trên chỉ kiểm tra ZIP, file bắt buộc, JSON và cú pháp Python rồi tự dọn dữ liệu tạm.</p>
+                      <p><b>Thực hiện cập nhật chương trình:</b></p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py</code></pre>
+                      <div class="alert alert-info">
+                        Công cụ sẽ tải và kiểm tra gói, merge giá trị Config cũ vào mẫu Config mới, tạo rollback,
+                        sao chép chương trình, ghi Config nguyên tử, sau đó tự chạy
+                        <code>systemctl --user restart VBot_Offline.service</code>. Sau 3 giây công cụ kiểm tra service
+                        phải ở trạng thái <code>active</code> mới báo thành công. Nếu service lỗi, mã nguồn và
+                        Config.json cũ được tự động rollback rồi phiên bản cũ được restart lại.
+                      </div>
+                      <div class="alert alert-success">
+                        <b>Bảo vệ dữ liệu JSON:</b> mọi file <code>*.json</code> đã tồn tại trên thiết bị đều được giữ lại mặc định,
+                        bao gồm <code>BackList.json</code>, <code>stt_token_google_cloud.json</code>,
+                        <code>tts_token_google_cloud.json</code>, <code>Home_Assistant.json</code>,
+                        <code>Home_Assistant_Custom.json</code> và các JSON dữ liệu người dùng khác. JSON chỉ có trong gói mới
+                        vẫn được cài đặt. Các JSON lõi <code>Version.json</code>, <code>Action.json</code>,
+                        <code>Adverbs.json</code>, <code>Object.json</code> và một số JSON hệ thống trong
+                        <code>resource</code> vẫn được nâng cấp vì chúng thuộc mã nguồn.
+                      </div>
+                      <div class="alert alert-warning">
+                        Sau khi sao chép thành công, trình cập nhật chương trình đặt quyền <code>0777</code> cho phần chương trình
+                        trong <code>/home/pi/VBot_Offline</code>, nhưng loại trừ hoàn toàn <code>TTS_Audio</code>,
+                        <code>Media</code> và toàn bộ cây <code>html</code>. Trình cập nhật WebUI chịu trách nhiệm chmod riêng
+                        cây <code>html</code> và loại trừ <code>html/Backup_Upgrade</code>. Cả hai không đi theo liên kết mềm.
+                        Các file khóa tạm thời <code>*.lock</code> cũng được bỏ qua vì có thể đang được VBot hoặc WebUI sử dụng.
+                        Nếu một mục khác không thể chmod, lỗi được ghi vào <code>Vbot_error.log</code> nhưng không làm rollback
+                        toàn bộ bản cập nhật chỉ vì metadata quyền của mục đó.
+                      </div>
+                      <p>Chỉ khi thực sự muốn thay một JSON dữ liệu hiện có bằng bản trong gói cập nhật, chỉ rõ đường dẫn bằng
+                        <code>--replace-json</code> (có thể dùng nhiều lần):</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py \
+    --replace-json Home_Assistant.json</code></pre>
+                      <p><b>Cập nhật nhưng tạm thời không restart:</b></p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py --no-restart</code></pre>
+                      <p>Sau đó có thể restart và kiểm tra thủ công:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> systemctl --user restart VBot_Offline.service
+$:> systemctl --user is-active VBot_Offline.service
+$:> systemctl --user status VBot_Offline.service --no-pager</code></pre>
+
+                      <h5 class="border-bottom border-success pb-2 mt-4">4. Cập nhật thủ công giao diện WebUI</h5>
+                      <p><b>Chỉ tải, kiểm tra gói và lint toàn bộ PHP:</b></p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_WebUI.py --check-only</code></pre>
+                      <p><b>Thực hiện cập nhật WebUI:</b></p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_WebUI.py</code></pre>
+                      <p>Mặc định công cụ giữ lại <code>html/includes/other_data</code>. Có thể giữ thêm cache hoặc thư
+                        mục tùy chỉnh bằng cách dùng <code>--keep</code> nhiều lần:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_WebUI.py \
+    --keep includes/other_data \
+    --keep includes/cache</code></pre>
+                      <p>Các JSON dữ liệu đã tồn tại trong <code>html</code> cũng được giữ mặc định; <code>html/Version.json</code>
+                        và JSON thư viện trong <code>assets/vendor</code> vẫn được cập nhật. Có thể cho phép thay một file cụ thể:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_WebUI.py \
+    --replace-json PlayList.json</code></pre>
+                      <div class="alert alert-info">
+                        Cập nhật WebUI không restart service VBot. Sau khi hoàn tất, tải lại hoàn toàn trang bằng
+                        <code>Ctrl + F5</code> hoặc xóa cache trình duyệt nếu giao diện vẫn hiển thị bản cũ.
+                      </div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">5. Cập nhật từ repository hoặc nhánh khác</h5>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py --repo https://github.com/USER/REPOSITORY --branch main
+$:> python3 Manual_Update_WebUI.py --repo https://github.com/USER/REPOSITORY --branch main</code></pre>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">6. Cập nhật bằng file ZIP local</h5>
+                      <p>Dùng cách này khi Raspberry Pi không tải trực tiếp được từ GitHub. Chép ZIP vào thiết bị bằng
+                        SCP, USB hoặc công cụ truyền file, sau đó chạy:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py --zip /home/pi/VBot_Offline-main.zip
+$:> python3 Manual_Update_WebUI.py --zip /home/pi/VBot_Offline-main.zip</code></pre>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">7. Theo dõi tiến trình và kiểm tra lỗi</h5>
+                      <p>Tất cả các bước, phần trăm tải, dung lượng và tốc độ được in trực tiếp trên console SSH. Chỉ
+                        lỗi phát sinh mới được ghi vào log chung:</p>
+                      <div class="alert alert-info">
+                        Có thể nhấn <code>Ctrl+C</code> để dừng. Nếu chưa ghi mã nguồn, công cụ dọn gói tải và thư mục tạm.
+                        Nếu đã bắt đầu sao chép, công cụ rollback file đã thay đổi, khôi phục Config, xóa marker cập nhật
+                        rồi thoát với mã <code>130</code>. Hãy chờ thông báo dọn dẹp/rollback hoàn tất và dấu nhắc SSH xuất hiện
+                        trước khi chạy lại hoặc reboot; không nhấn <code>Ctrl+C</code> lần thứ hai trong lúc đang rollback.
+                      </div>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> tail -n 100 /home/pi/VBot_Offline/resource/log/Vbot_error.log
+$:> tail -f /home/pi/VBot_Offline/resource/log/Vbot_error.log</code></pre>
+                      <p>Xem log service VBot sau cập nhật:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> journalctl --user -u VBot_Offline.service -n 100 --no-pager
+$:> journalctl --user -u VBot_Offline.service -f</code></pre>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">8. Vị trí dữ liệu rollback</h5>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> ls -lah /home/pi/VBot_Offline/Backup_Upgrade/Manual_Program/
+$:> ls -lah /home/pi/VBot_Offline/Backup_Upgrade/Manual_WebUI/</code></pre>
+                      <p>Mỗi lần cập nhật tạo một tệp rollback nén tương thích cách đặt tên của WebUI:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>VBot_Program_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz
+VBot_Interface_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz</code></pre>
+                      <p>Ví dụ: <code>VBot_Program_07082026_221844_05-08-2026_1.2.0.tar.gz</code>. Thông tin
+                        <code>releaseDate</code> và <code>version</code> thuộc phiên bản cũ được sao lưu. Thư mục rollback chỉ bị
+                        xóa sau khi file nén đã tạo và kiểm tra thành công; nếu nén lỗi, thư mục được giữ nguyên.</p>
+
+                      <h5 class="border-bottom border-danger pb-2 mt-4">9. Khôi phục bản backup mới nhất</h5>
+                      <p>Khôi phục chương trình mới nhất và tự restart <code>VBot_Offline.service</code>:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py --rollback</code></pre>
+                      <p>Hoặc chỉ định chính xác một file backup chương trình:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_Program.py --rollback /home/pi/VBot_Offline/Backup_Upgrade/Manual_Program/VBot_Program_09082026_131844_05-08-2026_1.2.0.tar.gz</code></pre>
+                      <p>Công cụ tìm file <code>VBot_Program_*.tar.gz</code> có thời gian sửa đổi mới nhất trong cả hai thư mục:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>/home/pi/VBot_Offline/Backup_Upgrade/Manual_Program
+/home/pi/VBot_Offline/html/Backup_Upgrade/Backup_Program</code></pre>
+                      <p>Khôi phục giao diện WebUI mới nhất:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_WebUI.py --rollback</code></pre>
+                      <p>Hoặc chỉ định chính xác một file backup giao diện:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> python3 Manual_Update_WebUI.py --rollback /home/pi/VBot_Offline/Backup_Upgrade/Manual_WebUI/VBot_Interface_09082026_131844_05-08-2026_1.2.0.tar.gz</code></pre>
+                      <p>Công cụ tìm file <code>VBot_Interface_*.tar.gz</code> mới nhất trong:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>/home/pi/VBot_Offline/Backup_Upgrade/Manual_WebUI
+/home/pi/VBot_Offline/html/Backup_Upgrade/Backup_Interface</code></pre>
+                      <div class="alert alert-warning">
+                        Chế độ <code>--rollback</code> không tải GitHub. File tar.gz được kiểm tra chống đường dẫn vượt thư mục,
+                        symlink, hardlink và file thiết bị trước khi giải nén. Không ngắt nguồn hoặc nhấn <code>Ctrl+C</code>
+                        trong lúc đang khôi phục.
+                      </div>
+
+                      <div class="alert alert-secondary mt-4">
+                        <b>Lưu ý:</b> không đóng cửa sổ SSH, ngắt nguồn hoặc reboot thiết bị khi công cụ đang tải,
+                        giải nén, merge Config, sao chép hoặc rollback. Chỉ thao tác lại khi lệnh đã kết thúc và trả
+                        về dấu nhắc <code>pi@VBot-Assistant:~ $</code>.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="card accordion" id="accordion_button_mic_tetser">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_mic_tetser" aria-expanded="false" aria-controls="collapse_button_mic_tetser">
