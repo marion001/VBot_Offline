@@ -1674,6 +1674,8 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
 <span class="prompt">$:&gt;</span> <b>shairport-sync -V</b>
     </div>
 
+
+
     <div class="alert alert-warning mt-4">
       <i class="bi bi-exclamation-triangle-fill me-2"></i>
       <strong>Lưu ý:</strong>
@@ -1686,6 +1688,17 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
 
   </div>
 </div>
+
+      <div class="card shadow border-info">
+        <div class="card-header bg-info text-white">
+          <i class="bi bi-lightbulb-fill me-2"></i> Phần Mềm Trên Máy Tính Để Truyền Âm Thanh Airplay Qua Mạng Lan, Local
+        </div>
+        <div class="card-body">
+          <ul class="mb-0">
+            <li>Tải TuneBlade Truyền Âm Thanh Tới Các Loa VBot: <a href="http://www.tuneblade.com" target="_blank">http://www.tuneblade.com</a></li>
+          </ul>
+        </div>
+      </div>
 
       <!-- Card lưu ý cuối -->
       <div class="card shadow border-info">

@@ -1343,7 +1343,7 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic, <font color=red>(Lọc Nhiễu Mic: VAD, Noise Suppression, Auto Gain - AGC: <?php echo $Config['smart_config']['webrtcvad']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
+                  Cấu Hình Âm Thanh Volume/Mic, Bluetooth, <font color=red>(Lọc Nhiễu Mic: VAD, Noise Suppression, Auto Gain - AGC: <?php echo $Config['smart_config']['webrtcvad']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
