@@ -1364,6 +1364,10 @@ include 'html_head.php';
                             'border-success', 'Tìm Kiếm', "scan_bluetooth_adapters()", 'btn btn-success border-success', 'onclick', ''
                           );
                           ?>
+                          <div class="alert alert-warning mt-2 mb-2" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill"></i>
+                            Nếu thay đổi <b>Bluetooth Device</b>, cần <b>Lưu Cấu hình Config</b> và <b>Reboot khởi động lại toàn bộ hệ thống</b> để áp dụng.
+                          </div>
                           <div id="bluetooth_adapter_scanner" class="mt-3"></div>
                         </div>
                       </div>

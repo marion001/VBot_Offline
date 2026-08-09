@@ -8,6 +8,37 @@
 
 include 'Configuration.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE) {
+  session_set_cookie_params([
+    'httponly' => true,
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+    'samesite' => 'Lax',
+  ]);
+  session_start();
+}
+if (empty($_SESSION['vbot_csrf_token']) || !is_string($_SESSION['vbot_csrf_token'])) {
+  $_SESSION['vbot_csrf_token'] = bin2hex(random_bytes(32));
+}
+
+function verifyLoginCsrfToken()
+{
+  $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf_token'] ?? '');
+  return is_string($token)
+    && isset($_SESSION['vbot_csrf_token'])
+    && is_string($_SESSION['vbot_csrf_token'])
+    && hash_equals($_SESSION['vbot_csrf_token'], $token);
+}
+
+function rejectInvalidLoginCsrf()
+{
+  if (verifyLoginCsrfToken()) return;
+  if (function_exists('Logs')) Logs('Đã chặn yêu cầu Login.php thiếu hoặc sai CSRF token');
+  http_response_code(403);
+  header('Content-Type: application/json; charset=utf-8');
+  echo json_encode(['success' => false, 'message' => 'Yêu cầu không hợp lệ hoặc phiên CSRF đã hết hạn.']);
+  exit;
+}
+
 $filePath_Data = 'includes/other_data/WebUI_Login_Security/Login_Data.json';
 $dirPath_Data  = dirname($filePath_Data);
 $logDir  = $VBot_Offline . 'resource/log';
@@ -46,6 +77,7 @@ $Login_Data = json_decode(file_get_contents($filePath_Data), true);
 $error1 = '';
 $error = '';
 if (isset($_POST['reset_limit_login'])) {
+  rejectInvalidLoginCsrf();
   $inputEmail = trim($_POST['email'] ?? '');
   if (strcasecmp($inputEmail, $Config['contact_info']['email']) === 0) {
     if (file_exists($filePath_Data)) {
@@ -74,6 +106,7 @@ if ($Login_Data['number_of_failed_logins'] == $Config['contact_info']['user_logi
     $error .= "<br/><center><h1><font color='red'>VBot Assistant Đăng Nhập Thất Bại</font><br/><br/>Vượt quá số lần đăng nhập cho phép! Hãy thử lại sau <font color='red'>" . ($unlockTime - $now) . "</font> giây<br/><br/><a href='Login.php'>Tải Lại Trang</a></h1>";
     echo $error;
     echo '<hr/><h2><font color=red>Reset Giới Hạn Thời Gian Chờ</font></h2><br/><form method="POST">
+			<input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['vbot_csrf_token'], ENT_QUOTES, 'UTF-8') . '">
 			Nhập Email: <input type="text" name="email" placeholder="Nhập Email Của Bạn">
 			<button type="submit" name="reset_limit_login">Reset Giới Hạn Đăng Nhập</button>
 			</form><br/>';
@@ -88,8 +121,9 @@ if ($Login_Data['number_of_failed_logins'] == $Config['contact_info']['user_logi
 }
 
 #Quên Mật Khẩu
-if (isset($_GET['forgot_password'])) {
-  $my_email = $_GET['mail'];
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['forgot_password'])) {
+  rejectInvalidLoginCsrf();
+  $my_email = $_POST['mail'] ?? '';
   if (!empty($my_email)) {
     if ($my_email === $Config['contact_info']['email']) {
       // Hiển thị mật khẩu hoặc gửi liên kết đặt lại mật khẩu
@@ -114,11 +148,17 @@ if (isset($_GET['forgot_password'])) {
   exit();
 }
 //Đổi mật khẩu
-if (isset($_GET['change_password'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
+  rejectInvalidLoginCsrf();
   header('Content-Type: application/json');
-  $currentPassword = $_GET['currentPassword'];
-  $newPassword = $_GET['newpassword'];
-  $renewPassword = $_GET['renewpassword'];
+  if (empty($_SESSION['user_login']['logged_in'])) {
+    http_response_code(401);
+    echo json_encode(['success' => false, 'message' => 'Phiên đăng nhập đã hết hạn!']);
+    exit();
+  }
+  $currentPassword = $_POST['currentPassword'] ?? '';
+  $newPassword = $_POST['newpassword'] ?? '';
+  $renewPassword = $_POST['renewpassword'] ?? '';
   // Kiểm tra xem tất cả các tham số có giá trị không
   if (!empty($currentPassword) && !empty($newPassword) && !empty($renewPassword)) {
     // Kiểm tra xem mật khẩu cũ có khớp với mật khẩu hiện tại không
@@ -129,7 +169,11 @@ if (isset($_GET['change_password'])) {
         if ($newPassword === $renewPassword) {
           //Tiến hành cập nhật mật khẩu mới
           $Config['contact_info']['user_login']['user_password'] = $renewPassword;
-          file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+          $encodedConfig = json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+          if ($encodedConfig === false || !vbotAtomicWriteFile($Config_filePath, $encodedConfig, 'Config.json')) {
+            echo json_encode(['success' => false, 'message' => 'Không thể ghi mật khẩu mới vào Config.json!']);
+            exit();
+          }
           $response = [
             "success" => true,
             "message" => "Mật khẩu đã được thay đổi thành công!"
@@ -162,23 +206,6 @@ if (isset($_GET['change_password'])) {
   exit();
 }
 
-session_start();
-
-// Hàm tạo token CSRF
-function generateCsrfToken()
-{
-  if (empty($_SESSION['csrf_token'])) {
-    $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-  }
-  return $_SESSION['csrf_token'];
-}
-
-// Hàm kiểm tra token CSRF
-function verifyCsrfToken($token)
-{
-  return isset($_SESSION['csrf_token']) && hash_equals($_SESSION['csrf_token'], $token);
-}
-
 //Đăng xuất
 if (isset($_GET['logout'])) {
   unset($_SESSION['user_login']);
@@ -198,14 +225,14 @@ if ($Config['contact_info']['user_login']['active']) {
   exit;
 }
 
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-  if (!isset($_POST['csrf_token']) || !verifyCsrfToken($_POST['csrf_token'])) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['token_password'])) {
+  if (!verifyLoginCsrfToken()) {
     $Msg_ERROR = "Yêu cầu đăng nhập không hợp lệ!";
     $error .= $Msg_ERROR;
     Logs($Msg_ERROR);
   } else {
     $stored_hash = hash('sha256', $Config['contact_info']['user_login']['user_password']);
-    $password_user = $_POST['token_password'];
+    $password_user = (string) $_POST['token_password'];
     if (hash_equals($stored_hash, $password_user)) {
       $Login_Data['number_of_failed_logins'] = 0;
       file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
@@ -230,7 +257,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
   }
 }
-generateCsrfToken();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -306,7 +332,7 @@ include 'html_head.php';
                           <label for="salt_password" class="form-label">Mật khẩu:</label>
                           <input type="password" name="salt_password" class="form-control border-success" placeholder="Nhập mật khẩu đăng nhập" id="salt_password" required>
                           <input type="hidden" name="token_password" class="form-control border-success" id="token_password">
-                          <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                          <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($_SESSION['vbot_csrf_token'], ENT_QUOTES, 'UTF-8'); ?>">
                           <div class="invalid-feedback">Vui lòng nhập mật khẩu của bạn!</div>
                         </div>
                         <div class="d-grid gap-2 mt-3">

@@ -442,7 +442,9 @@ include 'html_head.php';
         return false;
       }
       var xhr = new XMLHttpRequest();
-      xhr.open("GET", "Login.php?change_password&currentPassword=" + encodeURIComponent(currentPassword) + "&newpassword=" + encodeURIComponent(newPassword) + "&renewpassword=" + encodeURIComponent(renewPassword), true);
+      xhr.open("POST", "Login.php", true);
+      xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+      xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
           var response = JSON.parse(xhr.responseText);
@@ -455,7 +457,12 @@ include 'html_head.php';
           }
         }
       };
-      xhr.send();
+      xhr.send(
+        "change_password=1" +
+        "&currentPassword=" + encodeURIComponent(currentPassword) +
+        "&newpassword=" + encodeURIComponent(newPassword) +
+        "&renewpassword=" + encodeURIComponent(renewPassword)
+      );
     }
 
 const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' +

@@ -296,7 +296,9 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             return false;
         }
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "Login.php?forgot_password&mail=" + encodeURIComponent(email), true);
+        xhr.open("POST", "Login.php", true);
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
+        xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
         xhr.onreadystatechange = function() {
             loading("hide");
             if (xhr.readyState === 4 && xhr.status === 200) {
@@ -308,7 +310,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 }
             }
         };
-        xhr.send();
+        xhr.send("forgot_password=1&mail=" + encodeURIComponent(email));
     }
 
 <?php } ?>

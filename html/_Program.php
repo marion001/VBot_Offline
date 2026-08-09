@@ -805,7 +805,19 @@ include 'html_head.php';
                     $messages[] = "<font color=green>- Tải dữ liệu và giải nén thành công vào đường dẫn: <b>" . $download_Git_Repo_As_Named_Zip . "/</b></font><br/>";
                     if (!vbotUpgradeValidatePackage(
                         $download_Git_Repo_As_Named_Zip,
-                        ['Config.json', 'Version.json', 'Lib.py', 'Lib_System.py', 'VBot.py'],
+                        ['Config.json', 'Version.json', 'Start.py'],
+                        $messages,
+                        'PROGRAM'
+                    )) {
+                        deleteDirectory($Download_Path);
+                        $download_Git_Repo_As_Named_Zip = null;
+                    }
+                    if (!is_null($download_Git_Repo_As_Named_Zip) && !vbotUpgradeValidateAlternativeFiles(
+                        $download_Git_Repo_As_Named_Zip,
+                        [
+                            'Lib' => ['Lib.py', 'Lib.cpython-*.so'],
+                            'VBot' => ['VBot.py', 'VBot.cpython-*.so'],
+                        ],
                         $messages,
                         'PROGRAM'
                     )) {

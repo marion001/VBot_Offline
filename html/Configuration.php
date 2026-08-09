@@ -357,6 +357,33 @@ if (!function_exists('vbotUpgradeValidatePackage')) {
     }
 }
 
+if (!function_exists('vbotUpgradeValidateAlternativeFiles')) {
+    function vbotUpgradeValidateAlternativeFiles($root, array $requiredGroups, &$messages, $component)
+    {
+        $root = rtrim($root, '/\\');
+        foreach ($requiredGroups as $label => $patterns) {
+            $found = false;
+            foreach ((array) $patterns as $pattern) {
+                foreach ((array) glob($root . '/' . ltrim($pattern, '/\\'), GLOB_NOSORT) as $path) {
+                    if (is_file($path) && is_readable($path) && filesize($path) > 0) {
+                        $found = true;
+                        break 2;
+                    }
+                }
+            }
+            if (!$found) {
+                return vbotUpgradeReportError(
+                    $messages,
+                    $component,
+                    'kiểm tra gói',
+                    'Thiếu mô-đun bắt buộc ' . $label . ' (chấp nhận: ' . implode(', ', (array) $patterns) . ')'
+                );
+            }
+        }
+        return true;
+    }
+}
+
 if (!function_exists('vbotUpgradeValidateJson')) {
     function vbotUpgradeValidateJson($path, &$messages, $component, $label)
     {
@@ -373,10 +400,51 @@ if (!function_exists('vbotUpgradeValidateJson')) {
 }
 
 if (!function_exists('vbotUpgradeLintPhpTree')) {
+    function vbotUpgradeFindPhpCli()
+    {
+        $candidates = [];
+        if (defined('PHP_BINARY') && is_string(PHP_BINARY) && PHP_BINARY !== '') {
+            $candidates[] = PHP_BINARY;
+        }
+        if (defined('PHP_BINDIR') && is_string(PHP_BINDIR) && PHP_BINDIR !== '') {
+            $candidates[] = rtrim(PHP_BINDIR, '/\\') . '/php';
+        }
+        $candidates[] = '/usr/bin/php';
+        $candidates[] = '/usr/local/bin/php';
+
+        if (DIRECTORY_SEPARATOR === '/') {
+            $commandOutput = [];
+            $commandCode = 1;
+            @exec('command -v php 2>/dev/null', $commandOutput, $commandCode);
+            if ($commandCode === 0 && !empty($commandOutput[0])) {
+                $candidates[] = trim($commandOutput[0]);
+            }
+        }
+
+        foreach (array_unique($candidates) as $candidate) {
+            $resolved = @realpath($candidate);
+            if ($resolved === false || !is_file($resolved) || !is_executable($resolved)) continue;
+            $binaryName = basename($resolved);
+            if (preg_match('/^php(?:[0-9]+(?:\.[0-9]+)*)?(?:\.exe)?$/i', $binaryName)) {
+                return $resolved;
+            }
+        }
+        return null;
+    }
+
     function vbotUpgradeLintPhpTree($root, &$messages, $component)
     {
         if (!is_dir($root)) {
             return vbotUpgradeReportError($messages, $component, 'kiểm tra PHP', 'Thư mục PHP không tồn tại: ' . $root);
+        }
+        $phpCli = vbotUpgradeFindPhpCli();
+        if ($phpCli === null) {
+            return vbotUpgradeReportError(
+                $messages,
+                $component,
+                'kiểm tra môi trường PHP',
+                'Không tìm thấy PHP CLI có quyền thực thi (thường là /usr/bin/php)'
+            );
         }
         $checked = 0;
         $iterator = new RecursiveIteratorIterator(
@@ -386,7 +454,7 @@ if (!function_exists('vbotUpgradeLintPhpTree')) {
             if (!$item->isFile() || strtolower($item->getExtension()) !== 'php') continue;
             $output = [];
             $exitCode = 0;
-            exec(escapeshellarg(PHP_BINARY) . ' -l ' . escapeshellarg($item->getPathname()) . ' 2>&1', $output, $exitCode);
+            exec(escapeshellarg($phpCli) . ' -l ' . escapeshellarg($item->getPathname()) . ' 2>&1', $output, $exitCode);
             if ($exitCode !== 0) {
                 return vbotUpgradeReportError(
                     $messages,
