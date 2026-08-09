@@ -182,6 +182,7 @@ python-vlc                   3.0.16120
 pytubefix                    9.5.1
 pytz                         2022.1
 pyusb                        1.2.1
+PyYAML                       6.0.3
 rainbowhat                   0.1.0
 RapidFuzz                    3.13.0
 reportlab                    3.5.59
