@@ -411,8 +411,12 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
     }
     $sedName = str_replace(['\\', '&', '|'], ['\\\\', '\\&', '\\|'], $airplayName);
     $sedExpression = 's|^[[:space:]]*\(//[[:space:]]*\)\?name[[:space:]]*=.*|        name = "'.$sedName.'";|g';
+    // escapeshellarg() có thể loại bỏ Unicode khi locale PHP/Apache không phải UTF-8.
+    // Chỉ truyền Base64 ASCII qua SSH, sau đó đưa script UTF-8 trực tiếp vào stdin của sed.
+    $sedScriptBase64 = base64_encode($sedExpression."\n");
     $commands[] = [
-        'command' => 'sudo sed -i '.escapeshellarg($sedExpression).' /etc/shairport-sync.conf'
+        'command' => 'printf %s '.escapeshellarg($sedScriptBase64)
+            .' | base64 --decode | sudo sed -i -f - -- /etc/shairport-sync.conf'
             .' && sudo systemctl restart shairport-sync.service',
         'label' => 'AirPlay: '.$airplayName,
     ];
