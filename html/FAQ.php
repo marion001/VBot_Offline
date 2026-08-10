@@ -2310,6 +2310,9 @@ $:> systemctl status bluealsa</code></pre>
 
     <div id="step6" class="accordion-collapse collapse">
         <div class="accordion-body">
+            <p><strong>Lệnh tự động:</strong></p>
+            <pre class="bg-dark text-light p-3 rounded"><code>$:> sudo cp /home/pi/VBot_Offline/resource/bluetooth/main.conf /etc/bluetooth/main.conf</code></pre>
+            <p><strong>Hoặc cấu hình thủ công:</strong></p>
             <p><strong>Mở file cấu hình BlueZ:</strong></p>
             <pre class="bg-dark text-light p-3 rounded"><code>$:> sudo nano /etc/bluetooth/main.conf</code></pre>
             <p><strong>Chỉnh lại các thông số trong file thành như sau:</strong></p>

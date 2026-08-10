@@ -425,6 +425,8 @@ include 'html_head.php';
                          <i class="bi bi-bluetooth"></i> Bluetooth Audio</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
 
+						  <button class="dropdown-item text-danger fw-bold" name="fix_bluetooth_default" type="button" title="Khôi phục cấu hình và khởi chạy các dịch vụ Bluetooth về mặc định" onclick="command_php('fix_bluetooth_default')">Fix Bluetooth Về Cấu Hình Mặc Định</button>
+						  <li><hr class="dropdown-divider"></li>
 						  <button class="dropdown-item text-danger" name="start_vbot_bluetooth_agent" type="button" title="Khởi động lại vbot-bluetooth-agent.service" onclick="command_php('start_vbot_bluetooth_agent')">vbot-bluetooth-agent Start</button>
 						  <button class="dropdown-item text-danger" name="stop_vbot_bluetooth_agent" type="button" title="Khởi động lại vbot-bluetooth-agent.service" onclick="command_php('stop_vbot_bluetooth_agent')">vbot-bluetooth-agent Stop</button>
 						  <button class="dropdown-item text-danger" name="restart_vbot_bluetooth_agent" type="button" title="Khởi động lại vbot-bluetooth-agent.service" onclick="command_php('restart_vbot_bluetooth_agent')">vbot-bluetooth-agent Restart</button>

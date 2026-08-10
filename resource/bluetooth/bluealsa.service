@@ -2,13 +2,13 @@
 Description=BlueALSA daemon
 Wants=bluetooth.service
 After=bluetooth.service dbus.service systemd-udevd.service
+StartLimitIntervalSec=0
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/bluealsad -p a2dp-sink --keep-alive=5
 Restart=on-failure
 RestartSec=3
-StartLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target

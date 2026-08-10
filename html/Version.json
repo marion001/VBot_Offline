@@ -2,7 +2,7 @@
     "version": "1.2.1",
     "projectName": "WebUI VBot Offline",
     "description": "Sửa lỗi hệ thống VBot, Giảm dung lượng, dữ liệu rác thừa của toàn bộ file chương trình VBot sau khi biên dịch chương trình thành công",
-    "releaseDate": "09/08/2026",
+    "releaseDate": "10/08/2026",
     "changes": [
         {
             "type": "feature",

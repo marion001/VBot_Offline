@@ -4,6 +4,7 @@ import glob
 import json
 import os
 import re
+import shlex
 import subprocess
 import sys
 
@@ -12,20 +13,12 @@ try:
 except (AttributeError, OSError):
     pass
 
-
 def run(command):
     try:
-        result = subprocess.run(
-            command,
-            capture_output=True,
-            text=True,
-            timeout=5,
-            check=False,
-        )
+        result = subprocess.run(command, capture_output=True, text=True, timeout=5, check=False)
         return result.stdout.strip()
     except Exception:
         return ""
-
 
 def read_text(path):
     try:
@@ -33,7 +26,6 @@ def read_text(path):
             return handle.read().strip()
     except OSError:
         return ""
-
 
 def get_property(adapter, property_name):
     output = run([
@@ -44,6 +36,26 @@ def get_property(adapter, property_name):
         return output.split(None, 1)[1].lower() == "true"
     return None
 
+#Giải mã chuỗi byte UTF-8 dạng bát phân mà busctl dùng
+def decode_busctl_string(value):
+    def decode_octets(match):
+        octets = re.findall(r"\\([0-7]{3})", match.group(0))
+        try:
+            return bytes(int(octet, 8) for octet in octets).decode("utf-8")
+        except (ValueError, UnicodeDecodeError):
+            return match.group(0)
+    return re.sub(r"(?:\\[0-7]{3})+", decode_octets, value)
+
+def get_string_property(adapter, property_name):
+    output = run([
+        "busctl", "get-property", "org.bluez", f"/org/bluez/{adapter}",
+        "org.bluez.Adapter1", property_name,
+    ])
+    try:
+        values = shlex.split(output)
+        return decode_busctl_string(values[1].strip()) if len(values) > 1 and values[0] == "s" else ""
+    except ValueError:
+        return ""
 
 def main():
     controller_names = {}
@@ -64,10 +76,13 @@ def main():
         if not re.fullmatch(r"hci\d+", adapter):
             continue
         address = read_text(os.path.join(path, "address")).upper()
+        if not re.fullmatch(r"[0-9A-F]{2}(?::[0-9A-F]{2}){5}", address):
+            address = get_string_property(adapter, "Address").upper()
+        controller_name = controller_names.get(address) or get_string_property(adapter, "Alias") or "Bluetooth Controller"
         devices.append({
             "adapter": adapter,
             "address": address,
-            "name": controller_names.get(address, "Bluetooth Controller"),
+            "name": controller_name,
             "powered": get_property(adapter, "Powered"),
             "pairable": get_property(adapter, "Pairable"),
             "discoverable": get_property(adapter, "Discoverable"),

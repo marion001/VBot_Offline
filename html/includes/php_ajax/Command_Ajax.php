@@ -60,7 +60,7 @@ $allowedActions = [
     'cloudflared_tunnel_disable', 'cloudflared_tunnel_status', 'cloudflared_tunnel_list',
     'save_asound_to_alsamixer', 'alsamixer_asound_to_alsamixer', 'update_btwifiset_py',
     'fix_airplay_services', 'install_bluetooth_agent_py', 'install_bthelper', 'install_bluealsa',
-    'install_bluetooth_agent_service', 'install_bluetooth_config_main',
+    'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_bluetooth_default',
     'check_version_picovoice_porcupine', 'list_time_zones', 'check_time_zones', 'fix_time_zones',
     'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
     'enabled_vbot_api_external', 'disable_vbot_api_external',
@@ -80,7 +80,7 @@ $confirmationActions = [
     'reboot_os', 'fix_asound_airplay', 'Stop_Service_Unnecessary_Processes',
     'alsamixer_asound_to_alsamixer', 'update_btwifiset_py', 'fix_airplay_services',
     'install_bluetooth_agent_py', 'install_bthelper', 'install_bluealsa',
-    'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_time_zones',
+    'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_bluetooth_default', 'fix_time_zones',
     'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
     'enabled_vbot_api_external', 'disable_vbot_api_external', 'install_picovoice', 'install_porcupine',
 ];
@@ -142,7 +142,7 @@ $outputActions = [
     'auto_status', 'logs_auto_wifi', 'status_auto_wifi',
     'logs_btwifiset', 'status_btwifiset', 'pass_crypto_btwifiset',
     'status_vbot_bluetooth_agent', 'logs_vbot_bluetooth_agent',
-    'status_bluealsa', 'logs_bluealsa', 'logs_airplay', 'status_airplay', 'version_airplay',
+    'status_bluealsa', 'logs_bluealsa', 'fix_bluetooth_default', 'logs_airplay', 'status_airplay', 'version_airplay',
     'cloudflared_tunnel_status', 'cloudflared_tunnel_list',
     'check_version_picovoice_porcupine', 'list_time_zones', 'check_time_zones',
 ];
@@ -209,6 +209,7 @@ $successMessages = [
     'install_bluealsa' => 'Đã cài service BlueALSA.',
     'install_bluetooth_agent_service' => 'Đã cài service Bluetooth Agent.',
     'install_bluetooth_config_main' => 'Đã chạy trình cài đặt cấu hình Bluetooth.',
+    'fix_bluetooth_default' => 'Đã khôi phục cấu hình Bluetooth mặc định và khởi chạy BlueALSA, Bluetooth Agent, BlueALSA Player.',
     'check_version_picovoice_porcupine' => 'Phiên bản Picovoice và Porcupine',
     'list_time_zones' => 'Danh sách múi giờ', 'check_time_zones' => 'Thông tin múi giờ hiện tại',
     'fix_time_zones' => 'Đã khôi phục cấu hình đồng bộ thời gian.',
@@ -420,6 +421,34 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
             .' && sudo systemctl restart shairport-sync.service',
         'label' => 'AirPlay: '.$airplayName,
     ];
+} elseif ($action === 'fix_bluetooth_default') {
+    $bluetoothRoot = rtrim($VBot_Offline, '/').'/resource/bluetooth';
+    $bluetoothFiles = [
+        'bluetooth_agent.py', 'bthelper', 'bluealsa.service',
+        'vbot-bluetooth-agent.service', 'main.conf',
+    ];
+    foreach ($bluetoothFiles as $bluetoothFile) {
+        $source = $bluetoothRoot.'/'.$bluetoothFile;
+        $commands[] = [
+            'command' => 'sudo test -f '.escapeshellarg($source),
+            'label' => 'Kiểm tra file '.$source,
+        ];
+    }
+    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/bluetooth_agent.py').' /usr/local/bin/bluetooth_agent.py', 'label' => 'Cài bluetooth_agent.py'];
+    $commands[] = ['command' => 'sudo chmod 0777 /usr/local/bin/bluetooth_agent.py', 'label' => 'Cấp quyền bluetooth_agent.py'];
+    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/bthelper').' /usr/bin/bthelper', 'label' => 'Cài bthelper'];
+    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/bluealsa.service').' /etc/systemd/system/bluealsa.service', 'label' => 'Cài bluealsa.service'];
+    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/vbot-bluetooth-agent.service').' /etc/systemd/system/vbot-bluetooth-agent.service', 'label' => 'Cài vbot-bluetooth-agent.service'];
+    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/main.conf').' /etc/bluetooth/main.conf', 'label' => 'Cài Bluetooth main.conf'];
+    $commands[] = ['command' => 'sudo systemctl daemon-reload', 'label' => 'Nạp lại systemd'];
+    $commands[] = ['command' => 'sudo systemctl enable bluealsa.service', 'label' => 'Bật tự khởi động BlueALSA'];
+    $commands[] = ['command' => 'sudo systemctl enable vbot-bluetooth-agent.service', 'label' => 'Bật tự khởi động Bluetooth Agent'];
+    $commands[] = ['command' => 'sudo systemctl restart bluealsa.service', 'label' => 'Khởi động lại BlueALSA'];
+    $commands[] = ['command' => 'sudo systemctl restart vbot-bluetooth-agent.service', 'label' => 'Khởi động lại Bluetooth Agent'];
+    $commands[] = ['command' => 'sudo systemctl enable --now bluealsa-aplay.service', 'label' => 'Bật BlueALSA Player'];
+    $commands[] = ['command' => 'sudo systemctl status bluealsa.service --no-pager --full', 'label' => 'Trạng thái BlueALSA'];
+    $commands[] = ['command' => 'sudo systemctl status vbot-bluetooth-agent.service --no-pager --full', 'label' => 'Trạng thái Bluetooth Agent'];
+    $commands[] = ['command' => 'sudo systemctl status bluealsa-aplay.service --no-pager --full', 'label' => 'Trạng thái BlueALSA Player'];
 } else {
     $jobSuffix = str_replace('.', '-', uniqid('', true));
     $serviceCommands = [
@@ -553,18 +582,14 @@ foreach ($commands as $commandItem) {
     $cleanOutput = trim(preg_replace('/\n?__VBOT_EXIT__\d+\s*$/', '', (string) $commandOutput));
     $commandLog .= "\n".($cleanOutput !== '' ? $cleanOutput : '[Khong co du lieu tra ve]');
     if ($exitCode !== 0) {
-        vbotApiJsonResponse([
-            'success' => false,
-            'status' => 'error',
-            'message' => 'Thao tac that bai: '.($cleanOutput !== '' ? $cleanOutput : 'lenh tra ve ma '.$exitCode),
-            'command_log' => $commandLog,
-            'data' => $commandLog,
-        ], 500);
         error_log('Command AJAX '.$action.' failed for '.$commandLabel.' (exit '.$exitCode.'): '.$cleanOutput);
         vbotApiJsonResponse([
             'success' => false,
             'status' => 'error',
-            'message' => 'Thao tác thất bại: '.($cleanOutput !== '' ? $cleanOutput : 'lệnh trả về mã '.$exitCode)
+            'message' => 'Thao tác thất bại tại bước "'.$commandLabel.'": '
+                .($cleanOutput !== '' ? $cleanOutput : 'lệnh trả về mã '.$exitCode),
+            'command_log' => $commandLog,
+            'data' => $commandLog,
         ], 500);
     }
     if (in_array($action, $outputActions, true)) {

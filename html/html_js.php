@@ -1697,7 +1697,7 @@ function command_php(command_line, reload_page = null) {
         'cloudflared_tunnel_disable', 'cloudflared_tunnel_status', 'cloudflared_tunnel_list',
         'save_asound_to_alsamixer', 'alsamixer_asound_to_alsamixer', 'update_btwifiset_py',
         'fix_airplay_services', 'install_bluetooth_agent_py', 'install_bthelper', 'install_bluealsa',
-        'install_bluetooth_agent_service', 'install_bluetooth_config_main',
+        'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_bluetooth_default',
         'check_version_picovoice_porcupine', 'list_time_zones', 'check_time_zones', 'fix_time_zones',
         'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
         'enabled_vbot_api_external', 'disable_vbot_api_external',
@@ -1721,7 +1721,7 @@ function command_php(command_line, reload_page = null) {
     const fileChangeActions = [
         'alsamixer_asound_to_alsamixer', 'update_btwifiset_py', 'fix_airplay_services',
         'install_bluetooth_agent_py', 'install_bthelper', 'install_bluealsa',
-        'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_time_zones',
+        'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_bluetooth_default', 'fix_time_zones',
         'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
         'enabled_vbot_api_external', 'disable_vbot_api_external', 'install_picovoice', 'install_porcupine'
     ];

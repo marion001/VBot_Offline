@@ -1360,15 +1360,21 @@ include 'html_head.php';
                             'required',
                             'text',
                             '', '', '',
-                            'Nhập adapter BlueZ cần sử dụng, ví dụ hci0 hoặc hci1. Nếu Config.json lỗi, thiếu khóa, giá trị sai hoặc adapter không tồn tại, Bluetooth Agent sẽ tự dùng hci0.',
-                            'border-success', 'Tìm Kiếm', "scan_bluetooth_adapters()", 'btn btn-success border-success', 'onclick', ''
+                            'Nhập adapter BlueZ cần sử dụng, ví dụ hci0 hoặc hci1. Nếu Config.json lỗi, thiếu khóa, giá trị sai hoặc adapter không tồn tại, Bluetooth Agent sẽ tự dùng hci0, hệ thống cũng hỗ trợ nhiều thiết bị USB Bluetooth ngoài để cho chất lượng âm thanh cao hơn',
+                            'border-success', 'Tìm Kiếm Thiết Bị', "scan_bluetooth_adapters()", 'btn btn-success border-success', 'onclick', ''
                           );
                           ?>
                           <div class="alert alert-warning mt-2 mb-2" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            Nếu thay đổi <b>Bluetooth Device</b>, cần <b>Lưu Cấu hình Config</b> và <b>Reboot khởi động lại toàn bộ hệ thống</b> để áp dụng.
+                            <i class="bi bi-exclamation-triangle-fill"></i> <b>Lưu Ý:</b><br/>
+                            - Sau khi thay đổi <b>Bluetooth Device</b>, hãy nhấn nút <b>Lưu Và Restart Bluetooth</b> bên dưới để áp dụng ngay<br/><br/>
+							- Hệ thống cũng hỗ trợ, kết nối với các USB Bluetooth khác, thông qua kết nối USB để tăng chất lượng âm thanh và kết nối ổn định hơn so với Bluetooth on board trên pi
                           </div>
                           <div id="bluetooth_adapter_scanner" class="mt-3"></div>
+                          <div class="d-flex justify-content-center mb-2">
+                            <button type="button" class="btn btn-success rounded-pill" title="Lưu adapter đang chọn và khởi động lại Bluetooth Agent" onclick="saveAndRestartBluetoothAdapter()">
+                              <i class="bi bi-arrow-clockwise"></i> Lưu Và Restart Bluetooth
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>

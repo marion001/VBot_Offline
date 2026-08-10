@@ -29,8 +29,8 @@ AGENT_PATH = "/com/vbot/agent"
 DEFAULT_CONFIG_PATH = "/home/pi/VBot_Offline/Config.json"
 DEFAULT_BLUETOOTH_ADAPTER = "hci0"
 
+#Đọc adapter từ Config.json, mọi dữ liệu thiếu/sai đều trả về hci0
 def load_bluetooth_adapter(config_path=None):
-    """Đọc adapter từ Config.json; mọi dữ liệu thiếu/sai đều trả về hci0."""
     path = config_path or os.environ.get("VBOT_CONFIG_PATH", DEFAULT_CONFIG_PATH)
     try:
         with open(path, "r", encoding="utf-8-sig") as config_file:
@@ -149,8 +149,8 @@ def get_adapter_properties():
     obj = get_system_bus().get_object(BUS_NAME, adapter_path())
     return dbus.Interface(obj, "org.freedesktop.DBus.Properties")
 
+#Xác minh adapter cấu hình tồn tại, nếu không thì chuyển an toàn về hci0
 def select_available_adapter(bus):
-    """Xác minh adapter cấu hình tồn tại; nếu không thì chuyển an toàn về hci0."""
     global BLUETOOTH_ADAPTER
     configured = BLUETOOTH_ADAPTER
     for candidate in (configured, DEFAULT_BLUETOOTH_ADAPTER):
@@ -166,6 +166,23 @@ def select_available_adapter(bus):
             continue
     BLUETOOTH_ADAPTER = DEFAULT_BLUETOOTH_ADAPTER
     raise RuntimeError("Không tìm thấy Bluetooth adapter hci0 hoặc adapter đã cấu hình")
+
+#Chỉ để adapter đã cấu hình hoạt động, tránh phát hiện/ghép đôi nhầm controller
+def disable_unselected_adapters(bus):
+    manager = dbus.Interface(bus.get_object(BUS_NAME, "/"), "org.freedesktop.DBus.ObjectManager")
+    for path, interfaces in manager.GetManagedObjects().items():
+        if "org.bluez.Adapter1" not in interfaces or str(path) == adapter_path():
+            continue
+        adapter_name = str(path).rsplit("/", 1)[-1]
+        try:
+            props = dbus.Interface(bus.get_object(BUS_NAME, path), "org.freedesktop.DBus.Properties")
+            #Ẩn adapter trước rồi mới tắt nguồn để không nhận thêm yêu cầu pairing trong lúc chuyển trạng thái.
+            props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(False))
+            props.Set("org.bluez.Adapter1", "Pairable", dbus.Boolean(False))
+            props.Set("org.bluez.Adapter1", "Powered", dbus.Boolean(False))
+            log(f"Đã tắt Bluetooth adapter không được chọn: {adapter_name}")
+        except Exception as error:
+            log(f"Không thể tắt Bluetooth adapter {adapter_name}: {error}")
 
 def is_actually_connected(mac):
     try:
@@ -261,7 +278,7 @@ def trust(mac):
 
 def is_running(proc): return proc is not None and proc.poll() is None
 
-#chỉ được phép dừng process do agent này tạo.
+#Chỉ được phép dừng process do agent này tạo.
 def stop_bluealsa_playback():
     global active_playback_process, active_playback_device, playback_generation
     with playback_lock:
@@ -607,6 +624,7 @@ if __name__ == "__main__":
     try:
         select_available_adapter(bus)
         log(f"Sử dụng Bluetooth adapter: {BLUETOOTH_ADAPTER}")
+        disable_unselected_adapters(bus)
         if ENABLE_PASSKEY_AUTH:
             Register_Agent = "KeyboardDisplay"
         else:

@@ -1432,6 +1432,42 @@ function selectBluetoothAdapter(adapter) {
     showMessagePHP('Đã chọn Bluetooth adapter: ' + adapter, 4);
 }
 
+function saveAndRestartBluetoothAdapter() {
+    var input = document.getElementById('bluetooth_adapter');
+    var adapter = input ? String(input.value || '').trim().toLowerCase() : '';
+    if (!/^hci\d+$/.test(adapter)) {
+        show_message('Bluetooth adapter không hợp lệ. Hãy quét và chọn lại adapter.');
+        return;
+    }
+
+    loading('show');
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', 'includes/php_ajax/Save_Bluetooth_Adapter.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+    xhr.onload = function () {
+        loading('hide');
+        var data;
+        try {
+            data = JSON.parse(xhr.responseText);
+        } catch (error) {
+            show_message('Máy chủ trả về dữ liệu không hợp lệ khi lưu Bluetooth adapter.');
+            return;
+        }
+        if (xhr.status < 200 || xhr.status >= 300 || !data.success) {
+            show_message(data.message || 'Không thể lưu Bluetooth adapter.');
+            return;
+        }
+        showMessagePHP(data.message || ('Đã lưu Bluetooth adapter ' + adapter + '.'), 4);
+        command_php('restart_vbot_bluetooth_agent');
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message('Không thể kết nối máy chủ để lưu Bluetooth adapter.');
+    };
+    xhr.send('adapter=' + encodeURIComponent(adapter));
+}
+
 function scan_bluetooth_adapters() {
     loading('show');
     var xhr = new XMLHttpRequest();
