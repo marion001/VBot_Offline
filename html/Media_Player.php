@@ -343,19 +343,21 @@ include 'html_head.php';
 			const mediaIsPlaying = mediaPlaybackState === 'playing';
 			const mediaIsPaused = mediaPlaybackState === 'paused';
             //Media Player
-			document.getElementById('media-name').innerHTML =
-			  'Tên bài hát: <font color="blue">' +
-			  ((!data.media_name || String(data.media_name).trim() === 'N/A')
+			const mediaName = ((!data.media_name || String(data.media_name).trim() === 'N/A')
 				? (mediaSourceKind === 'airplay'
 					? (data.airplay_song_name && String(data.airplay_song_name).trim() !== 'N/A'
 						? data.airplay_song_name
 						: 'N/A')
 					: 'N/A')
-				: data.media_name) +
-			  '</font>';
+				: data.media_name);
+			document.getElementById('media-name').replaceChildren('Tên bài hát: ', Object.assign(document.createElement('span'), {textContent: String(mediaName)}));
+			document.getElementById('media-name').lastElementChild.style.color = 'blue';
             document.getElementById('volume').innerHTML = 'Âm lượng: <font color=blue>' + (audioOutput.volume ?? data.volume) + '%</font>';
 			document.getElementById('audio-playing').innerHTML = 'Trạng thái: <font color=blue>' + (mediaIsPlaying ? 'Đang phát' : (mediaIsPaused ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
-			document.getElementById('audio-source').innerHTML = 'Nguồn Media: <font color=blue>' + (data.media_player_source === 'N/A' ? (mediaSourceKind === 'airplay' ? 'AirPlay' : 'N/A') : data.media_player_source) +'</font>';
+			const sourceElement = document.createElement('span');
+			sourceElement.style.color = 'blue';
+			sourceElement.textContent = String(data.media_player_source === 'N/A' ? (mediaSourceKind === 'airplay' ? 'AirPlay' : 'N/A') : (data.media_player_source || 'N/A'));
+			document.getElementById('audio-source').replaceChildren('Nguồn Media: ', sourceElement);
 			document.getElementById('media-cover').src =
 				(mediaSourceKind === 'bluetooth'
 					? 'assets/img/bluetooth_icon.png'
@@ -378,7 +380,7 @@ include 'html_head.php';
               timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(data.current_duration) + '</font> / ' + formatTime_Player(fullTime);
             }
             if (mediaIsPlaying || mediaIsPaused) {
-              updateDisplay_SongNhac(true);
+              updateDisplay_SongNhac(true, mediaIsPaused);
             } else {
               updateDisplay_SongNhac(false);
             }
@@ -386,13 +388,13 @@ include 'html_head.php';
             updateDisplay_SongNhac(false);
             document.getElementById('div_message_error').style.display = 'block';
             //console.log('Lỗi khi lấy dữ liệu', data.message);
-            document.getElementById('message_error').innerHTML = data.message;
+            document.getElementById('message_error').textContent = data.message || 'Lỗi không xác định';
           }
         })
         .catch(error => {
           updateDisplay_SongNhac(false);
           document.getElementById('div_message_error').style.display = 'block';
-          document.getElementById('message_error').innerHTML = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + error;
+          document.getElementById('message_error').textContent = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + error;
         });
     }
     //Bắt đầu lấy dữ liệu mỗi giây
@@ -445,6 +447,7 @@ include 'html_head.php';
   <script>
     //Hiệu Ứng Sóng Nhạc Khi Phát Media Player
     let currentStatus_SongNHAC = false;
+    let isPaused_SongNHAC = false;
     let previousStatus_SongNHAC = null;
     const canvas_SN = document.getElementById("waveCanvas_songNhac");
     const ctx = canvas_SN.getContext("2d");
@@ -494,17 +497,26 @@ include 'html_head.php';
           else ctx.lineTo(x, y);
         }
         ctx.stroke();
-        time_SongNhac += 0.05;
+        if (!isPaused_SongNHAC) {
+          time_SongNhac += 0.05;
+        }
       } else {
         document.getElementById("waveContainer_song_nhac").style.display = "none";
       }
       requestAnimationFrame(drawWaves);
     }
 
-    function updateDisplay_SongNhac(status_SN) {
-      if (status_SN === previousStatus_SongNHAC) return;
-      previousStatus_SongNHAC = status_SN;
+    function updateDisplay_SongNhac(status_SN, paused_SN = false) {
+      const nextStatus = `${status_SN}:${paused_SN}`;
+      if (nextStatus === previousStatus_SongNHAC) return;
+      previousStatus_SongNHAC = nextStatus;
       currentStatus_SongNHAC = status_SN;
+      isPaused_SongNHAC = status_SN && paused_SN;
+      // Khi tải trang trong lúc media đã pause, dựng một khung sóng rõ ràng
+      // thay vì giữ pha 0 (hai đường sóng gần như phẳng).
+      if (isPaused_SongNHAC && time_SongNhac === 0) {
+        time_SongNhac = 1.25;
+      }
     }
     //Khởi động vòng vẽ sóng
     window.addEventListener("DOMContentLoaded", () => {

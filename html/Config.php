@@ -693,6 +693,11 @@ if (isset($_POST['all_config_save'])) {
   $Config['xiaozhi']['fake_mac']['address'] = $_POST['xiaozhi_mac_fake'];
   $Config['xiaozhi']['version_active'] = $_POST['xiaozhi_version_active'];
   $Config['xiaozhi']['start_the_protocol'] = $_POST['xiaozhi_start_the_protocol'];
+  $Config['xiaozhi']['auto_reconnect'] = isset($_POST['xiaozhi_auto_reconnect']) ? true : false;
+  $xiaozhiInputMode = strtolower(trim($_POST['xiaozhi_assistant_input_mode'] ?? 'audio'));
+  $Config['xiaozhi']['assistant_input_mode'] = in_array($xiaozhiInputMode, ['audio', 'text', 'auto'], true) ? $xiaozhiInputMode : 'audio';
+  $Config['xiaozhi']['assistant_text_max_length'] = max(1, min(10000, intval($_POST['xiaozhi_assistant_text_max_length'] ?? 12)));
+  $Config['xiaozhi']['assistant_pcm_frame_delay_ms'] = max(0.0, min(60.0, floatval($_POST['xiaozhi_assistant_pcm_frame_delay_ms'] ?? 5)));
   $Config['xiaozhi']['tts_time_out'] = intval($_POST['xiaozhi_tts_time_out']);
   $Config['xiaozhi']['reconnection_timeout'] = intval($_POST['xiaozhi_reconnection_timeout']);
   $Config['xiaozhi']['tts_stream_silence_time'] = intval($_POST['xiaozhi_tts_stream_silence_time']);
@@ -3483,11 +3488,21 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 						</div></div></div>";
                   echo input_field('xiaozhi_ota_version_url', 'Link/URL OTA Server', $Config['xiaozhi']['system_options']['network']['ota_version_url'] ?? '', '', 'text', '', '', '', "Nhập địa chỉ Link/URL OTA của Server cần kết nối, Ví dụ: https://api.tenclass.net/xiaozhi/ota/<br/>Trang Chủ Liên Kết Thiết Bị: - https://xiaozhi.me/<hr/> Hoặc OTA Server: https://vietbot.vn/ota/ Trang Chủ: https://vietbot.vn/ ");
                   echo select_field('xiaozhi_start_the_protocol', 'Giao Thức Kết Nối', ['websocket' => 'WebSocket', 'udp' => 'UDP + MQTT (Chưa được hỗ trợ)'], $Config['xiaozhi']['start_the_protocol'] ?? 'websocket', ['udp']);
+                  echo "<div class='row mb-3'>
+					  <label class='col-sm-3 col-form-label'>Tự Động Kết Nối Lại
+						<i class='bi bi-question-circle-fill' onclick=\"show_message('Cho phép WebSocket XiaoZhi tự kết nối lại sau khi mất kết nối, Nên tắt để tránh spam hoặc tránh bị máy chủ chặn, làm nghẽn Máy chủ. Hệ toohoogns tự động kết nối lại khi được sử dụng')\"></i> :
+					  </label>
+					  <div class='col-sm-9'><div class='form-switch'>
+						<input class='form-check-input border-success' type='checkbox' name='xiaozhi_auto_reconnect' id='xiaozhi_auto_reconnect' " . (!empty($Config['xiaozhi']['auto_reconnect']) ? 'checked' : '') . ">
+					  </div></div></div>";
+                  echo select_field('xiaozhi_assistant_input_mode', 'Dạng Dữ Liệu Gửi Lên Máy Chủ', ['audio' => 'Audio PCM đã xử lý Gain/Noise', 'text' => 'Văn Bản, Text', 'auto' => 'Tự Động Theo Độ Dài Văn Bản'], $Config['xiaozhi']['assistant_input_mode'] ?? 'audio');
+                  echo input_field('xiaozhi_assistant_text_max_length', 'Giới Hạn Ký Tự Khi Gửi Text', $Config['xiaozhi']['assistant_text_max_length'] ?? 12, '', 'number', '1', '1', '10000', 'Chế độ auto sẽ chuyển sang gửi dữ liệu Audio PCM khi văn bản dài hơn giới hạn này', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_assistant_pcm_frame_delay_ms', 'Độ Trễ Gửi Mỗi Frame PCM (ms)', $Config['xiaozhi']['assistant_pcm_frame_delay_ms'] ?? 5, '', 'number', '0.1', '0', '60', 'Protocol v1: mỗi frame Opus được gửi riêng; 5ms nhanh và ổn định, 0ms là nhanh nhất', 'border-success', '', '', '', '', '');
                   echo input_field('xiaozhi_version_active', 'Phiên bản Firmware', $Config['xiaozhi']['version_active'] ?? '2.2.3', '', 'text', '', '', '', 'Phiên bản Version khi xác thực đăng ký và hiển thị trên trang chủ của XiaoZhi, Nhập bất kỳ phiên bản, văn bản nào cũng được', 'border-success', 'Lấy Phiên Bản Mới', "xiaozhi_getLatestVersion('')", 'btn btn-success border-success', 'onclick', '');
                   echo input_field('xiaozhi_time_out_output_stream', 'Time Out Audio', $Config['xiaozhi']['time_out_output_stream'] ?? 0.5, '', 'number', '0.1', '', '', 'Nếu Không còn dữ liệu âm thanh Stream trong 1 khoảng thời gian sẽ tự kết thúc TTS', 'border-success', '', '', '', '', '');
-                  echo input_field('xiaozhi_pcm_output_gain', 'Hệ số âm lượng PCM XiaoZhi', $Config['xiaozhi']['pcm_output_gain'] ?? 1.0, '', 'number', '0.01', '0.05', '4', '1.0 giữ nguyên, 1.5/2.0 khuếch đại, 0.5 giảm còn một nửa', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_pcm_output_gain', 'Hệ số âm lượng PCM', $Config['xiaozhi']['pcm_output_gain'] ?? 1.0, '', 'number', '0.01', '0.05', '4', '1.0 giữ nguyên, 1.5/2.0 khuếch đại, 0.5 giảm còn một nửa', 'border-success', '', '', '', '', '');
                   echo input_field('xiaozhi_tts_time_out', 'Thời Gian Chờ Phản Hồi Tối Đa (Giây)', $Config['xiaozhi']['tts_time_out'] ?? 5, '', 'number', '1', '', '', 'Hết thời gian chờ mà không nhận được dữ liệu phản hồi lại từ Server sẽ đóng phiên kết nối hiện tại', 'border-success', '', '', '', '', '');
-                  echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, '', 'number', '1', '', '', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ', 'border-success', '', '', '', '', '');
+                  echo input_field('xiaozhi_reconnection_timeout', 'Thời Gian Chờ Kết Nối Lại Tối Đa (Giây)', $Config['xiaozhi']['reconnection_timeout'] ?? 10, '', 'number', '1', '', '', 'Thời Gian Chờ Kết Nối Lại Tối Đa (giây) khi bị mất kết nối với máy chủ (Sử dụng khi tính năng Tự Động Kết Nối Lại được bật)', 'border-success', '', '', '', '', '');
                   echo input_field('xiaozhi_tts_stream_silence_time', 'Ngưỡng im lặng cho phép tối đa TTS (Giây)', $Config['xiaozhi']['tts_stream_silence_time'] ?? 5, '', 'number', '1', '', '', 'là ngưỡng im lặng tối đa mà hệ thống cho phép trong luồng âm thanh TTS — nếu vượt quá thì coi như TTS kết thúc hoặc bị lỗi im lặng', 'border-success', '', '', '', '', '');
                   $status = $Config['xiaozhi']['activation_status'] ?? false;
                   echo "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Trạng Thái Liên Kết 

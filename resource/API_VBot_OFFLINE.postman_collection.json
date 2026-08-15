@@ -4021,6 +4021,62 @@
       "response": []
     },
     {
+      "name": "Scheduler Lịch Sử Đã Chạy Tác Vụ, Tiến Trình",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\": \"scheduler\",\r\n    \"value\": \"history\",\r\n    \"parameter\": 50\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Scheduler Lịch Chạy Tác Vụ Tiếp Theo (Lần Tới)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\": \"scheduler\",\r\n    \"value\": \"next_runs\",\r\n    \"parameter\": 10\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "RESTART VBot Service",
       "request": {
         "method": "GET",
@@ -4300,6 +4356,29 @@
           "port": "5002",
           "path": [
             "logs"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Lấy Thông Tin Dữ Liệu Âm Thanh Thô PCM Từ Phiên WakeUP",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.175:5002/stt/pcm",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002",
+          "path": [
+            "stt",
+            "pcm"
           ]
         }
       },

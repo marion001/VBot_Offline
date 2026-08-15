@@ -1,0 +1,108 @@
+[
+  {
+    "task": "test thông báo",
+    "status": "success",
+    "message": "",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T19:37:37",
+    "finished_at": "2026-08-11T19:37:39"
+  },
+  {
+    "task": "test thông báo",
+    "status": "success",
+    "message": "",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T19:38:48",
+    "finished_at": "2026-08-11T19:38:49"
+  },
+  {
+    "task": "change_volume",
+    "status": "success",
+    "message": "Thay đổi âm lượng thành: 44%",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T20:35:05",
+    "finished_at": "2026-08-11T20:35:05",
+    "execution_mode": "manual"
+  },
+  {
+    "task": "change_volume",
+    "status": "success",
+    "message": "Thay đổi âm lượng thành: 90%",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T20:35:08",
+    "finished_at": "2026-08-11T20:35:08",
+    "execution_mode": "manual"
+  },
+  {
+    "task": "change_volume",
+    "status": "success",
+    "message": "Thay đổi âm lượng thành: 44%",
+    "scheduled_at": "2026-08-11T20:39",
+    "started_at": "2026-08-11T20:39:33",
+    "finished_at": "2026-08-11T20:39:34",
+    "execution_mode": "auto"
+  },
+  {
+    "task": "change_volume",
+    "status": "success",
+    "message": "Thay đổi âm lượng thành: 90%",
+    "scheduled_at": "2026-08-11T20:40",
+    "started_at": "2026-08-11T20:40:33",
+    "finished_at": "2026-08-11T20:40:34",
+    "execution_mode": "auto"
+  },
+  {
+    "task": "change_volume",
+    "status": "success",
+    "message": "Thay đổi âm lượng thành: 44%",
+    "scheduled_at": "2026-08-11T20:44",
+    "started_at": "2026-08-11T20:44:33",
+    "finished_at": "2026-08-11T20:44:34",
+    "execution_mode": "auto"
+  },
+  {
+    "task": "change_volume",
+    "status": "success",
+    "message": "Thay đổi âm lượng thành: 90%",
+    "scheduled_at": "2026-08-11T20:46",
+    "started_at": "2026-08-11T20:46:34",
+    "finished_at": "2026-08-11T20:46:34",
+    "execution_mode": "auto"
+  },
+  {
+    "task": "test thông báo",
+    "status": "success",
+    "message": "",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T22:17:07",
+    "finished_at": "2026-08-11T22:17:09",
+    "execution_mode": "manual"
+  },
+  {
+    "task": "test thông báo",
+    "status": "success",
+    "message": "",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T22:17:10",
+    "finished_at": "2026-08-11T22:17:12",
+    "execution_mode": "manual"
+  },
+  {
+    "task": "test thông báo",
+    "status": "success",
+    "message": "",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T22:17:12",
+    "finished_at": "2026-08-11T22:17:14",
+    "execution_mode": "manual"
+  },
+  {
+    "task": "test thông báo",
+    "status": "success",
+    "message": "",
+    "scheduled_at": null,
+    "started_at": "2026-08-11T22:17:15",
+    "finished_at": "2026-08-11T22:17:16",
+    "execution_mode": "manual"
+  }
+]

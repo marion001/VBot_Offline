@@ -412,6 +412,12 @@ if (!empty($successMessage)) {
 var broadlinkDevices = [];
 var currentLearnDeviceMac = null;
 
+// Gửi token cả trong header và body để tương thích với các web server/proxy
+// không chuyển tiếp header X-CSRF-Token tới PHP.
+function appendCsrfToken(params) {
+    return params + '&csrf_token=' + encodeURIComponent(window.VBOT_CSRF_TOKEN || '');
+}
+
 //Mở Modal Học Lệnh
 function openLearnCommandModal() {bootstrap.Modal.getOrCreateInstance(document.getElementById("exampleModal_learn_commands")).show();
 }
@@ -501,7 +507,7 @@ function scanBroadlinkDevices() {
             }
         }
     };
-    xhr.send('scan_broadlink_remote_device=1');
+    xhr.send(appendCsrfToken('scan_broadlink_remote_device=1'));
 }
 
 //KIỂM TRA THIẾT BỊ CÓ RF HAY KHÔNG
@@ -725,7 +731,7 @@ function deleteDeviceByMac(friendly_name, mac, ip, model) {
             }
         }
     };
-    xhr.send('delete_device_broadlink_remote=1'+'&mac=' + encodeURIComponent(mac));
+    xhr.send(appendCsrfToken('delete_device_broadlink_remote=1'+'&mac=' + encodeURIComponent(mac)));
 }
 
 //Đổi Tên Thiết Bị
@@ -760,7 +766,7 @@ function renameDevice(mac) {
         }
     };
     var params = 'rename_device_broadlink_remote=1' + '&mac=' + encodeURIComponent(mac) + '&friendly=' + encodeURIComponent(newFriendly);
-    xhr.send(params);
+    xhr.send(appendCsrfToken(params));
 }
 
 //Học Lệnh
@@ -800,6 +806,7 @@ function learn_Command(ip, mac, devtype, wave_type, friendly_name, model) {
     formData.append("mac", mac);
     formData.append("wave_type", wave_type);
     formData.append("devtype", devtype);
+    formData.append("csrf_token", window.VBOT_CSRF_TOKEN || "");
     fetch("includes/php_ajax/BroadLink.php", {
         method: "POST",
         headers: {"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""},
@@ -913,6 +920,7 @@ function saveLearnedCommandToJson(wave_type) {
     formData.append("command_data", data);
     formData.append("command_reply", reply);
     formData.append("wave_type", wave_type);
+    formData.append("csrf_token", window.VBOT_CSRF_TOKEN || "");
     fetch("includes/php_ajax/BroadLink.php", {
         method: "POST",
         headers: {"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""},
@@ -945,6 +953,7 @@ function saveLearnedCommandRow(row) {
     fd.append('reply', row.querySelector('.cmd_reply').value.trim());
     fd.append('data', row.querySelector('.cmd_data').value.trim());
     fd.append('active', row.querySelector('.cmd_active').checked ? '1' : '0');
+    fd.append('csrf_token', window.VBOT_CSRF_TOKEN || '');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -973,6 +982,7 @@ function deleteLearnedCommandRow(row) {
     fd.append('delete_learned_command', '1');
     fd.append('mac', row.dataset.cmdMac);
     fd.append('index', row.dataset.cmdIndex);
+    fd.append('csrf_token', window.VBOT_CSRF_TOKEN || '');
     const xhr = new XMLHttpRequest();
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -1012,7 +1022,7 @@ function deleteAllDevicesRemote() {
 			}
         }
     };
-    xhr.send("deleteAllDevicesRemote=1");
+    xhr.send(appendCsrfToken("deleteAllDevicesRemote=1"));
 }
 
 //XÓa toàn bộ dữ liệu lệnh đã học
@@ -1033,7 +1043,7 @@ function deleteAllCmdDevicesRemote() {
 			}
         }
     };
-    xhr.send("deleteAllCmdDevicesRemote=1");
+    xhr.send(appendCsrfToken("deleteAllCmdDevicesRemote=1"));
 }
 
 //lấy dữ liệu thực thi send lệnh
@@ -1111,7 +1121,7 @@ function sendBroadlinkCommand(ip, mac, devtype, code) {
         "&mac=" + encodeURIComponent(mac) +
         "&devtype=" + encodeURIComponent(devtype) +
         "&code=" + encodeURIComponent(code);
-    xhr.send(params);
+    xhr.send(appendCsrfToken(params));
 }
 
 //onclick xem nội dung file json
@@ -1212,6 +1222,7 @@ function sendPing(ipList, noti = '') {
     var xhr = new XMLHttpRequest();
     xhr.open("POST", "includes/php_ajax/Check_Connection.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
@@ -1240,7 +1251,7 @@ function sendPing(ipList, noti = '') {
         }
     };
     var params = "ping_status=1&ip=" + encodeURIComponent(ipList);
-    xhr.send(params);
+    xhr.send(appendCsrfToken(params));
 }
 
 //Ping Lại

@@ -120,6 +120,148 @@
         initLogViewer(checkbox.id, outputId);
     }
 
+    var errorLogRequest = null;
+    function loadVbotErrorLog() {
+        var output = document.getElementById('vbotErrorLogOutput');
+        var status = document.getElementById('vbotErrorLogStatus');
+        var reloadButton = document.getElementById('reloadVbotErrorLogButton');
+        if (!output || !status || !config.errorLogUrl) {
+            return;
+        }
+        if (errorLogRequest) {
+            errorLogRequest.abort();
+        }
+        var xhr = new XMLHttpRequest();
+        errorLogRequest = xhr;
+        xhr.timeout = 15000;
+        status.textContent = 'Đang tải Vbot_error.log...';
+        if (reloadButton) {
+            reloadButton.disabled = true;
+        }
+        function finish() {
+            if (errorLogRequest === xhr) {
+                errorLogRequest = null;
+            }
+            if (reloadButton) {
+                reloadButton.disabled = false;
+            }
+        }
+        xhr.onload = function () {
+            try {
+                var response = JSON.parse(xhr.responseText);
+                if (xhr.status < 200 || xhr.status >= 300 || !response.success) {
+                    throw new Error(response.message || 'HTTP ' + xhr.status);
+                }
+                var content = typeof response.data === 'string' ? response.data : '';
+                output.textContent = content || 'File Vbot_error.log hiện không có dữ liệu.';
+                status.textContent = 'Cập nhật lúc ' + new Date().toLocaleTimeString('vi-VN');
+                output.scrollTop = output.scrollHeight;
+            } catch (error) {
+                output.textContent = 'Không thể đọc Vbot_error.log: ' + error.message;
+                status.textContent = 'Tải logs thất bại';
+            }
+            finish();
+        };
+        xhr.onerror = function () {
+            output.textContent = 'Không thể kết nối tới WebUI để đọc Vbot_error.log.';
+            status.textContent = 'Lỗi kết nối';
+            finish();
+        };
+        xhr.ontimeout = function () {
+            output.textContent = 'Quá thời gian chờ đọc Vbot_error.log.';
+            status.textContent = 'Quá thời gian';
+            finish();
+        };
+        xhr.open('GET', config.errorLogUrl, true);
+        xhr.send();
+    }
+
+    function copyVbotErrorLog() {
+        var output = document.getElementById('vbotErrorLogOutput');
+        var content = output ? output.textContent : '';
+        if (!content) {
+            show_message('Không có dữ liệu logs để sao chép');
+            return;
+        }
+        function copied() {
+            showMessagePHP('Đã sao chép nội dung Vbot_error.log', 3);
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(content).then(copied).catch(function(error) {
+                show_message('Không thể sao chép logs: ' + error.message);
+            });
+            return;
+        }
+        var textarea = document.createElement('textarea');
+        textarea.value = content;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            copied();
+        } catch (error) {
+            show_message('Không thể sao chép logs: ' + error.message);
+        }
+        document.body.removeChild(textarea);
+    }
+
+    function clearVbotErrorLog() {
+        if (!config.fileActionUrl || !config.errorLogPath) {
+            show_message('Thiếu cấu hình đường dẫn Vbot_error.log');
+            return;
+        }
+        if (!window.confirm('Bạn có chắc chắn muốn xóa toàn bộ nội dung Vbot_error.log?')) {
+            return;
+        }
+        var button = document.getElementById('clearVbotErrorLogButton');
+        if (button) {
+            button.disabled = true;
+        }
+        var xhr = new XMLHttpRequest();
+        xhr.timeout = 15000;
+        xhr.open('POST', config.fileActionUrl, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+        xhr.setRequestHeader('X-CSRF-Token', config.csrfToken || '');
+        xhr.onload = function () {
+            if (button) {
+                button.disabled = false;
+            }
+            try {
+                var response = JSON.parse(xhr.responseText);
+                if (xhr.status < 200 || xhr.status >= 300 || !response.success) {
+                    throw new Error(response.message || 'HTTP ' + xhr.status);
+                }
+                showMessagePHP('Đã xóa nội dung Vbot_error.log', 3);
+                loadVbotErrorLog();
+            } catch (error) {
+                show_message('Không thể xóa Vbot_error.log: ' + error.message);
+            }
+        };
+        xhr.onerror = xhr.ontimeout = function () {
+            if (button) {
+                button.disabled = false;
+            }
+            show_message('Không thể kết nối để xóa Vbot_error.log');
+        };
+        xhr.send('empty_the_file=1&file_path=' + encodeURIComponent(config.errorLogPath));
+    }
+
+    function downloadVbotErrorLog() {
+        if (!config.fileDownloadUrl || !config.errorLogPath) {
+            show_message('Thiếu cấu hình tải xuống Vbot_error.log');
+            return;
+        }
+        var link = document.createElement('a');
+        link.href = config.fileDownloadUrl + '?file=' + encodeURIComponent(config.errorLogPath);
+        link.download = 'Vbot_error.log';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     Object.keys(checkboxMap).forEach(function (id) {
         var checkbox = document.getElementById(id);
         if (!checkbox || checkbox.dataset.webuiLogsBound === '1') {
@@ -147,4 +289,8 @@
 
     window.initLogViewer = initLogViewer;
     window.formatLogMessage = formatLogMessage;
+    window.loadVbotErrorLog = loadVbotErrorLog;
+    window.copyVbotErrorLog = copyVbotErrorLog;
+    window.clearVbotErrorLog = clearVbotErrorLog;
+    window.downloadVbotErrorLog = downloadVbotErrorLog;
 })();

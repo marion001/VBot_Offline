@@ -205,6 +205,41 @@ include_once 'Configuration.php';
       </div>
 
       <!-- Scan Show Logs API-->
+      <li class="nav-item nav-icon" title="Đọc file lỗi Vbot_error.log">
+        <i class="bi bi-file-earmark-text text-danger" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_VBot_Error_Log" onclick="openWebuiErrorLog()"></i>
+      </li>
+      <div class="modal fade" id="modalDialogScrollable_VBot_Error_Log" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+          <div class="modal-content bg-secondary">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-exclamation-triangle text-warning"></i> Vbot_error.log</h5>
+              <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+			<br/>
+            <div class="modal-body">
+              <div class="d-flex justify-content-between align-items-center mb-2">
+                <small id="vbotErrorLogStatus" class="text-light">Chưa tải dữ liệu</small>
+                <div class="btn-group btn-group-sm" role="group" aria-label="Điều khiển Vbot_error.log">
+                  <button type="button" id="copyVbotErrorLogButton" class="btn btn-info" onclick="copyVbotErrorLog()">
+                    <i class="bi bi-clipboard"></i> Copy logs
+                  </button>
+                  <button type="button" id="downloadVbotErrorLogButton" class="btn btn-success" onclick="downloadVbotErrorLog()">
+                    <i class="bi bi-download"></i> Tải xuống
+                  </button>
+                  <button type="button" id="reloadVbotErrorLogButton" class="btn btn-warning" onclick="openWebuiErrorLog(true)">
+                    <i class="bi bi-arrow-clockwise"></i> Tải lại logs
+                  </button>
+                  <button type="button" id="clearVbotErrorLogButton" class="btn btn-danger" onclick="clearVbotErrorLog()">
+                    <i class="bi bi-trash"></i> Xóa logs
+                  </button>
+                </div>
+              </div>
+              <pre id="vbotErrorLogOutput" class="form-control border-danger text-light bg-dark" style="height: 500px; overflow: auto; white-space: pre-wrap; word-break: break-word;" aria-live="polite"></pre>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <li class="nav-item nav-icon" title="Hiển Thị Dữ Liệu Logs VBot Assistant Theo Thời Gian Thực">
         <i class="bi bi-journal-text text-info" type="button" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_Show_Logs_API" onclick="loadWebuiLogModule()"></i>
       </li>

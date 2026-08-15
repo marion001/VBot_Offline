@@ -7,7 +7,26 @@
             "data": {
                 "message": "chào bạn tuyển nhé",
                 "audio_file": "",
-                "repeat": 1
+                "repeat": 1,
+                "max_duration_seconds": 0
+            },
+            "recurrence": {
+                "type": "legacy",
+                "start_date": "",
+                "end_date": "",
+                "date": "",
+                "day": 1,
+                "interval": 1,
+                "months": [],
+                "days": []
+            },
+            "conditions": {
+                "mode": "always",
+                "mic_state": "any",
+                "only_when_idle": false,
+                "skip_if_media_playing": false,
+                "skip_if_bluetooth_playing": false,
+                "skip_if_airplay_playing": false
             },
             "date": [
                 "Monday",
@@ -28,7 +47,26 @@
             "data": {
                 "message": "https://www.youtube.com/watch?v=4zTek7Ud0u4&list=RD4zTek7Ud0u4&start_radio=1",
                 "audio_file": "",
-                "repeat": 1
+                "repeat": 1,
+                "max_duration_seconds": 0
+            },
+            "recurrence": {
+                "type": "legacy",
+                "start_date": "",
+                "end_date": "",
+                "date": "",
+                "day": 1,
+                "interval": 1,
+                "months": [],
+                "days": []
+            },
+            "conditions": {
+                "mode": "always",
+                "mic_state": "any",
+                "only_when_idle": false,
+                "skip_if_media_playing": false,
+                "skip_if_bluetooth_playing": false,
+                "skip_if_airplay_playing": false
             },
             "date": [
                 "Monday",
@@ -62,7 +100,26 @@
         ],
         "time": [
             "03:05"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "reboot_os": {
         "active": false,
@@ -71,7 +128,26 @@
         ],
         "time": [
             "03:07"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "stop_media_player": {
         "time": [
@@ -86,18 +162,29 @@
             "Friday",
             "Saturday",
             "Sunday"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "change_volume": {
-        "date": [
-            "Monday",
-            "Tuesday",
-            "Wednesday",
-            "Thursday",
-            "Friday",
-            "Saturday",
-            "Sunday"
-        ],
+        "date": [],
         "active": false,
         "time": [
             "20:25",
@@ -106,7 +193,30 @@
         "volume_time": [
             "44",
             "99"
-        ]
+        ],
+        "recurrence": {
+            "type": "days_of_month",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": [
+                1,
+                28,
+                31
+            ]
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "change_led_brightness": {
         "date": [
@@ -124,7 +234,26 @@
         ],
         "brightness_time": [
             "20"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "play_play_playlist": {
         "time": [
@@ -140,7 +269,26 @@
             "Friday",
             "Saturday",
             "Sunday"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "play_all_music_local": {
         "time": [
@@ -155,7 +303,26 @@
             "Friday",
             "Saturday",
             "Sunday"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     },
     "mic_on_off": {
         "date": [
@@ -177,6 +344,25 @@
             "off",
             "on",
             "off"
-        ]
+        ],
+        "recurrence": {
+            "type": "legacy",
+            "start_date": "",
+            "end_date": "",
+            "date": "",
+            "day": 1,
+            "interval": 1,
+            "months": [],
+            "days": []
+        },
+        "conditions": {
+            "mode": "always",
+            "mic_state": "any",
+            "only_when_idle": false,
+            "skip_if_media_playing": false,
+            "skip_if_bluetooth_playing": false,
+            "skip_if_airplay_playing": false
+        },
+        "max_duration_seconds": 0
     }
 }

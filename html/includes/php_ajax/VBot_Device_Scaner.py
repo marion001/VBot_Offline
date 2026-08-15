@@ -1,135 +1,144 @@
-#Code By: Vũ Tuyển
-#GitHub VBot: https://github.com/marion001/VBot_Offline.git
-#Facebook Group: https://www.facebook.com/groups/1148385343358824
-#Facebook: https://www.facebook.com/TWFyaW9uMDAx
-#Email: VBot.Assistant@gmail.com
-
-import subprocess
-import re
-import json
-import requests
 import ipaddress
-from concurrent.futures import ThreadPoolExecutor
+import json
+import re
+import subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
-# Kiểm tra và import các thư viện cần thiết
-try:
-    import nmap
-except ImportError:
+import requests
+
+
+NMAP_TIMEOUT_SECONDS = 30
+HTTP_TIMEOUT_SECONDS = 1.5
+MAX_SCAN_ADDRESSES = 4096
+MAX_WORKERS = 32
+
+
+def emit(success, message, data=None):
     print(json.dumps({
-        "success": False,
-        "messager": "Thư viện 'python-nmap' không được cài đặt. Vui lòng cài đặt bằng 2 lệnh sau: 'pip install python-nmap' và 'sudo apt-get install nmap -y'",
-        "data": {}
-    }, indent=4))
-    exit(1)
+        "success": bool(success),
+        "message": str(message),
+        "data": data if isinstance(data, list) else [],
+    }, ensure_ascii=False))
 
-# Kiểm tra nmap binary
-def check_nmap_installed():
-    try:
-        subprocess.run(['nmap', '--version'], capture_output=True, text=True, check=True)
-        return True
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        return False
 
-# Lấy địa chỉ IP của máy tính hiện tại
-def read_info_startup(iface_name="wlan0"):
+def get_primary_network():
+    """Return the network used by the default IPv4 route."""
+    route_result = subprocess.run(
+        ["ip", "-j", "-4", "route", "get", "1.1.1.1"],
+        capture_output=True, text=True, check=True, timeout=5,
+    )
+    routes = json.loads(route_result.stdout or "[]")
+    if not routes:
+        raise RuntimeError("Không tìm thấy route IPv4 mặc định")
+    interface = routes[0].get("dev")
+    source_ip = routes[0].get("prefsrc") or routes[0].get("src")
+    if not interface:
+        raise RuntimeError("Không xác định được interface mạng mặc định")
+
+    address_result = subprocess.run(
+        ["ip", "-j", "-4", "addr", "show", "dev", interface],
+        capture_output=True, text=True, check=True, timeout=5,
+    )
+    interfaces = json.loads(address_result.stdout or "[]")
+    addresses = [
+        item for info in interfaces for item in info.get("addr_info", [])
+        if item.get("family") == "inet" and item.get("scope") == "global"
+    ]
+    selected = next((item for item in addresses if item.get("local") == source_ip), None)
+    selected = selected or (addresses[0] if addresses else None)
+    if not selected:
+        raise RuntimeError(f"Interface {interface} không có địa chỉ IPv4 LAN")
+
+    source_ip = selected["local"]
+    prefix_length = int(selected.get("prefixlen", 24))
+    network = ipaddress.IPv4Network(f"{source_ip}/{prefix_length}", strict=False)
+    # Không để một cấu hình /8 hoặc /16 vô tình tạo lượt quét quá lớn từ WebUI.
+    if network.num_addresses > MAX_SCAN_ADDRESSES:
+        network = ipaddress.IPv4Network(f"{source_ip}/24", strict=False)
+    return interface, source_ip, network
+
+
+def scan_active_ips(network):
+    result = subprocess.run(
+        [
+            "nmap", "-sn", "-n", "--max-retries", "1",
+            "--host-timeout", "2s", "-oG", "-", str(network),
+        ],
+        capture_output=True, text=True, check=False,
+        timeout=NMAP_TIMEOUT_SECONDS,
+    )
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "nmap thất bại").strip()
+        raise RuntimeError(detail[:500])
+    active_ips = []
+    for line in result.stdout.splitlines():
+        match = re.match(r"Host:\s+(\d+\.\d+\.\d+\.\d+).*Status:\s+Up", line)
+        if match:
+            active_ips.append(match.group(1))
+    return active_ips
+
+
+def check_device(ip):
     try:
-        ip_result = subprocess.run(['ip', 'addr', 'show', iface_name], capture_output=True, text=True)
-        ip_output = ip_result.stdout
-        ip_match = re.search(r'inet (\d+\.\d+\.\d+\.\d+)', ip_output)
-        ip_address = ip_match.group(1) if ip_match else None
-        return ip_address
-    except Exception:
+        response = requests.get(
+            f"http://{ip}/VBot_API.php",
+            timeout=HTTP_TIMEOUT_SECONDS,
+            allow_redirects=False,
+            headers={"Accept": "application/json"},
+        )
+        if response.status_code != 200:
+            return None
+        payload = response.json()
+        if not isinstance(payload, dict) or payload.get("success") is not True:
+            return None
+        port_api = int(payload.get("port_api"))
+        if not 1 <= port_api <= 65535:
+            return None
+        host_name = str(payload.get("host_name") or "").strip()[:255]
+        user_name = str(payload.get("user_name") or "").strip()[:255]
+        if not host_name or not user_name:
+            return None
+        # IP nguồn quét là dữ liệu đáng tin cậy hơn trường do thiết bị trả về.
+        return {
+            "ip_address": ip,
+            "port_api": port_api,
+            "host_name": host_name,
+            "user_name": user_name,
+        }
+    except (requests.RequestException, ValueError, TypeError, KeyError):
         return None
 
-# Hàm kiểm tra dữ liệu từ API và lưu thông tin khi thành công
-def check_device(ip):
-    url = f"http://{ip}/VBot_API.php"
-    try:
-        response = requests.get(url, timeout=1)
-        if response.status_code == 200:
-            data = response.json()
-            if data.get('success') is True:
-                return {
-                    "ip_address": data['ip_address'],
-                    "port_api": data['port_api'],
-                    "host_name": data['host_name'],
-                    "user_name": data['user_name']
-                }
-        else:
-            return {
-                "ip_address": ip,
-                "port_api": None,
-                "host_name": None,
-                "user_name": None
-            }
-    except requests.exceptions.RequestException:
-        pass
-    return None
 
-# Quét mạng LAN và kiểm tra thiết bị bằng nmap
 def scan_and_check_devices():
-    if not check_nmap_installed():
-        print(json.dumps({
-            "success": False,
-            "messager": "Chương trình 'nmap' không được cài đặt trên hệ thống. Vui lòng cài đặt bằng lệnh: 'sudo apt-get install nmap'",
-            "data": {}
-        }, indent=4))
-        return
-
-    ip_address = read_info_startup()
-    if ip_address is None:
-        print(json.dumps({
-            "success": False,
-            "messager": "Không thể lấy địa chỉ IP hiện tại",
-            "data": {}
-        }, indent=4))
-        return
-    
-    # Khởi tạo nmap PortScanner
     try:
-        nm = nmap.PortScanner()
-    except Exception as e:
-        print(json.dumps({
-            "success": False,
-            "messager": f"Lỗi khi khởi tạo nmap: {str(e)}",
-            "data": {}
-        }, indent=4))
-        return
+        interface, source_ip, network = get_primary_network()
+        active_ips = scan_active_ips(network)
+        found_devices = []
+        with ThreadPoolExecutor(max_workers=min(MAX_WORKERS, max(1, len(active_ips)))) as executor:
+            futures = {executor.submit(check_device, ip): ip for ip in active_ips}
+            for future in as_completed(futures):
+                try:
+                    device = future.result()
+                except Exception:
+                    device = None
+                if device:
+                    found_devices.append(device)
+        found_devices.sort(key=lambda item: ipaddress.IPv4Address(item["ip_address"]))
+        message = (
+            f"Tìm thấy {len(found_devices)} thiết bị VBot qua {interface} ({network})"
+            if found_devices else
+            f"Không tìm thấy thiết bị VBot qua {interface} ({source_ip}, mạng {network})"
+        )
+        # Quét hoàn tất vẫn là success; data rỗng không phải lỗi thực thi.
+        emit(True, message, found_devices)
+    except FileNotFoundError as error:
+        missing = getattr(error, "filename", None) or "ip/nmap"
+        emit(False, f"Thiếu chương trình hệ thống: {missing}")
+    except subprocess.TimeoutExpired:
+        emit(False, f"Quá thời gian quét mạng ({NMAP_TIMEOUT_SECONDS} giây)")
+    except Exception as error:
+        emit(False, f"Không thể quét thiết bị VBot: {error}")
 
-    ip_network = ipaddress.IPv4Network(f"{ip_address}/24", strict=False)
-    found_devices = []
 
-    # Quét chỉ các host (bỏ .0 và .255) để khớp với code cũ
-    try:
-        nm.scan(hosts=str(ip_network), arguments='-sn')  # Quét subnet, không bao gồm .0 và .255
-    except Exception as e:
-        print(json.dumps({
-            "success": False,
-            "messager": f"Lỗi khi quét mạng bằng nmap: {str(e)}",
-            "data": {}
-        }, indent=4))
-        return
-
-    active_ips = [host for host in nm.all_hosts() if nm[host].state() == 'up']
-
-    if active_ips:
-        with ThreadPoolExecutor(max_workers=20) as executor:
-            results = list(executor.map(check_device, active_ips))
-            found_devices = [result for result in results if result is not None]
-
-    if found_devices:
-        print(json.dumps({
-            "success": True,
-            "messager": "Tìm Kiếm Thiết Bị VBot Thành Công",
-            "data": found_devices
-        }, indent=4))
-    else:
-        print(json.dumps({
-            "success": False,
-            "messager": f"Không tìm thấy thiết bị đang chạy VBot nào trong cùng lớp mạng với: {ip_address}",
-            "data": {}
-        }, indent=4))
-
-# Chạy chương trình
 if __name__ == "__main__":
     scan_and_check_devices()

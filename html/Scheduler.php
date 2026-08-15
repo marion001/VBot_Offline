@@ -20,6 +20,32 @@ if ($Config['contact_info']['user_login']['active']) {
     exit;
   }
 }
+
+//Fallback chỉ đọc lịch sử trực tiếp khi tiến trình/API VBot không hoạt động.
+if (isset($_GET['scheduler_history_fallback'])) {
+  header('Content-Type: application/json; charset=utf-8');
+  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+  $limit = filter_var($_GET['limit'] ?? 50, FILTER_VALIDATE_INT, [
+    'options' => ['default' => 50, 'min_range' => 1, 'max_range' => 300]
+  ]);
+  $schedule_data_file = $VBot_Offline . ltrim($Config['schedule']['data_json_file'], '/\\');
+  $history_file = dirname($schedule_data_file) . DIRECTORY_SEPARATOR . 'Scheduler_History.json';
+  $history = [];
+  $message = 'Chưa có dữ liệu lịch sử Scheduler';
+  if (is_file($history_file) && is_readable($history_file)) {
+    $history_json = file_get_contents($history_file);
+    $decoded_history = $history_json !== false ? json_decode($history_json, true) : null;
+    if (!is_array($decoded_history)) {
+      http_response_code(500);
+      echo json_encode(['success' => false, 'data' => [], 'source' => 'file', 'message' => 'Scheduler_History.json không chứa JSON hợp lệ'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+      exit;
+    }
+    $history = array_slice($decoded_history, -$limit);
+    $message = 'Đã đọc lịch sử trực tiếp từ Scheduler_History.json';
+  }
+  echo json_encode(['success' => true, 'data' => $history, 'source' => 'file', 'message' => $message], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+  exit;
+}
 $Schedule_Audio_dir = $VBot_Offline . $Config['schedule']['audio_path'];
 if (!file_exists($Schedule_Audio_dir)) {
   if (mkdir($Schedule_Audio_dir, 0777, true)) {
@@ -187,6 +213,52 @@ include 'html_head.php';
 			}
 			echo '</select>';
 		}
+
+        function render_system_scheduler_options($task_key, $task_data, $label, $time_container_id, $date_field_name = null) {
+          $recurrence = $task_data['recurrence'] ?? ['type' => 'legacy'];
+          $conditions = $task_data['conditions'] ?? ['mode' => 'always'];
+          $type = $recurrence['type'] ?? 'legacy';
+          $prefix = 'system_schedule_options[' . $task_key . ']';
+          $types = ['legacy'=>'Theo thứ trong tuần','daily'=>'Hằng ngày','daily_months'=>'Hằng ngày (Lựa chọn tháng)','weekdays'=>'Ngày làm việc (Thứ Hai–Thứ Sáu)','weekends'=>'Cuối tuần (Thứ Bảy–Chủ Nhật)','once'=>'Chỉ chạy một lần','monthly'=>'Một ngày mỗi tháng','days_of_month'=>'N ngày trong tháng'];
+          echo '<div class="row mb-3">';
+          echo '<label class="col-sm-3 col-form-label">Chế độ chạy:</label>';
+          echo '<div class="col-sm-9">';
+          echo '<select class="form-select border-success scheduler-recurrence-type" data-scheduler-index="system-'.htmlspecialchars($task_key).'" data-time-container-id="'.htmlspecialchars($time_container_id).'" name="'.$prefix.'[recurrence][type]">';
+          foreach ($types as $value => $text) echo '<option value="'.$value.'" '.($type === $value ? 'selected' : '').'>'.$text.'</option>';
+          if ($type === 'interval_days') echo '<option value="interval_days" selected>Chu kỳ N ngày (lịch cũ)</option>';
+          echo '</select>';
+          echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="weekdays weekends monthly interval_days"><span class="input-group-text border-success">Bắt đầu</span><input type="date" class="form-control border-success" name="'.$prefix.'[recurrence][start_date]" value="'.htmlspecialchars($recurrence['start_date'] ?? '').'"><span class="input-group-text border-success">Kết thúc</span><input type="date" class="form-control border-success" name="'.$prefix.'[recurrence][end_date]" value="'.htmlspecialchars($recurrence['end_date'] ?? '').'"></div>';
+          echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="once"><span class="input-group-text border-success">Ngày thực hiện</span><input type="date" class="form-control border-success" name="'.$prefix.'[recurrence][date]" value="'.htmlspecialchars($recurrence['date'] ?? '').'"></div>';
+          echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="monthly"><span class="input-group-text border-success">Ngày trong tháng</span><input type="number" min="1" max="31" class="form-control border-success" name="'.$prefix.'[recurrence][day]" value="'.intval($recurrence['day'] ?? 1).'"></div>';
+          echo '<div class="mt-2 scheduler-recurrence-fields" data-recurrence-for="daily_months"><div class="border rounded p-2">Chọn tháng áp dụng:<br/>';
+          $months = $recurrence['months'] ?? range(1, 12); foreach (range(1, 12) as $month) echo '<label class="me-3"><input type="checkbox" class="form-check-input border-success" name="'.$prefix.'[recurrence][months][]" value="'.$month.'" '.(in_array($month, $months) ? 'checked' : '').'> Tháng '.$month.'</label>';
+          echo '</div></div><div class="mt-2 scheduler-recurrence-fields" data-recurrence-for="days_of_month"><div class="border rounded p-2">Chọn các ngày trong tháng:<br/>';
+          $days = $recurrence['days'] ?? [1]; foreach (range(1, 31) as $day) echo '<label class="me-3"><input type="checkbox" class="form-check-input border-success" name="'.$prefix.'[recurrence][days][]" value="'.$day.'" '.(in_array($day, $days) ? 'checked' : '').'> '.$day.'</label>';
+          echo '</div><small class="text-muted">Tháng không có ngày đã chọn (ví dụ ngày 31 trong tháng 2) sẽ tự bỏ qua.</small></div>';
+          echo '</div></div>';
+          echo '<div class="row mb-3">';
+          echo '<label class="col-sm-3 col-form-label">Điều kiện chạy:</label>';
+          echo '<div class="col-sm-9">';
+          $condition_mode = $conditions['mode'] ?? 'always';
+          echo '<select class="form-select border-primary scheduler-condition-mode" data-scheduler-index="system-'.htmlspecialchars($task_key).'" name="'.$prefix.'[conditions][mode]"><option value="always" '.($condition_mode === 'always' ? 'selected' : '').'>Luôn thực thi</option><option value="conditional" '.($condition_mode === 'conditional' ? 'selected' : '').'>Chỉ thực thi khi thỏa mãn điều kiện</option></select>';
+          echo '<div class="scheduler-condition-fields mt-2" data-scheduler-index="system-'.htmlspecialchars($task_key).'">';
+          echo '<select class="form-select mb-2 border-success" name="'.$prefix.'[conditions][mic_state]"><option value="any">Không phụ thuộc mic</option><option value="on" '.(($conditions['mic_state'] ?? '') === 'on' ? 'selected' : '').'>Chỉ khi mic được bật</option><option value="off" '.(($conditions['mic_state'] ?? '') === 'off' ? 'selected' : '').'>Chỉ khi mic được tắt</option></select>';
+          foreach (['only_when_idle'=>'Chỉ khi VBot rảnh','skip_if_media_playing'=>'Bỏ qua khi đang phát Media Player','skip_if_bluetooth_playing'=>'Bỏ qua khi đang phát Bluetooth','skip_if_airplay_playing'=>'Bỏ qua khi đang phát AirPlay'] as $key => $text) echo '<label class="me-3"><input type="checkbox" class="form-check-input border-success" name="'.$prefix.'[conditions]['.$key.']" '.(!empty($conditions[$key]) ? 'checked' : '').'> '.$text.'</label>';
+          echo '</div></div></div>';
+          echo '<div class="row mb-3 scheduler-legacy-dates" data-scheduler-index="system-'.htmlspecialchars($task_key).'">';
+          echo '<label class="col-sm-3 col-form-label">Các thứ trong tuần</label>';
+          echo '<div class="col-sm-9"><div class="form-switch">';
+          $selected_dates = is_array($task_data['date'] ?? null) ? $task_data['date'] : [];
+          $date_input_name = $date_field_name ? htmlspecialchars($date_field_name) : 'dates_' . htmlspecialchars($task_key);
+          foreach ($GLOBALS['week_days'] ?? [] as $date => $week_label) {
+            echo '<input class="form-check-input border-success" type="checkbox" name="' . $date_input_name . '[]" value="' . htmlspecialchars($date) . '" ' . (in_array($date, $selected_dates) ? 'checked' : '') . '> ';
+            echo '<label>' . htmlspecialchars($week_label) . '</label><br />';
+          }
+          echo '</div></div></div>';
+          echo '<div class="row mb-3">';
+          echo '<label class="col-sm-3 col-form-label">Thời gian tối đa (giây/s) <i class="bi bi-question-circle-fill" onclick="show_message(\'Là khoảng thời gian lâu nhất mà một tác vụ thông báo được phép phát. Tác vụ được chạy tối đa 60 giây. Khi hết 60 giây mà TTS, file âm thanh hoặc URL media vẫn chưa kết thúc, Scheduler sẽ tự dừng tác vụ và ghi lịch sử trạng thái. Mặc định đặt là 0 => không giới hạn thời gian, chờ tác vụ phát xong.\')"></i>:</label>';
+          echo '<div class="col-sm-9"><div class="input-group"><span class="input-group-text">Thời gian</span><input type="number" min="0" max="86400" class="form-control" name="'.$prefix.'[max_duration_seconds]" value="'.intval($task_data['max_duration_seconds'] ?? 0).'"><span class="input-group-text">giây/s</span></div><small class="text-muted">Đơn vị giây, đặt 0 để không giới hạn, chờ tác vụ phát xong.</small></div></div>';
+        }
       $directory = dirname($json_file);
       if (!is_dir($directory)) {
         mkdir($directory, 0777, true);
@@ -428,11 +500,50 @@ include 'html_head.php';
             $task['data']['repeat'] = isset($task['data']['repeat']) && intval($task['data']['repeat']) > 0 ? intval($task['data']['repeat']) : 1;
             $task['data']['message'] = isset($task['data']['message']) ? trim($task['data']['message']) : '';
             $task['data']['audio_file'] = isset($task['data']['audio_file']) ? trim($task['data']['audio_file']) : '';
+            $task['data']['max_duration_seconds'] = isset($task['data']['max_duration_seconds'])
+              ? max(0, min(86400, intval($task['data']['max_duration_seconds']))) : 0;
+            $allowed_recurrence = ['legacy', 'daily', 'daily_months', 'weekdays', 'weekends', 'once', 'monthly', 'days_of_month', 'interval_days'];
+            $task['recurrence'] = isset($task['recurrence']) && is_array($task['recurrence']) ? $task['recurrence'] : [];
+            $recurrence_type = $task['recurrence']['type'] ?? 'legacy';
+            $task['recurrence']['type'] = in_array($recurrence_type, $allowed_recurrence, true) ? $recurrence_type : 'legacy';
+            $task['recurrence']['start_date'] = trim($task['recurrence']['start_date'] ?? '');
+            $task['recurrence']['end_date'] = trim($task['recurrence']['end_date'] ?? '');
+            $task['recurrence']['date'] = trim($task['recurrence']['date'] ?? '');
+            $task['recurrence']['day'] = max(1, min(31, intval($task['recurrence']['day'] ?? 1)));
+            $task['recurrence']['interval'] = max(1, min(365, intval($task['recurrence']['interval'] ?? 1)));
+            $task['recurrence']['months'] = isset($task['recurrence']['months']) && is_array($task['recurrence']['months'])
+              ? array_values(array_unique(array_filter(array_map('intval', $task['recurrence']['months']), function ($month) { return $month >= 1 && $month <= 12; })))
+              : [];
+            $task['recurrence']['days'] = isset($task['recurrence']['days']) && is_array($task['recurrence']['days'])
+              ? array_values(array_unique(array_filter(array_map('intval', $task['recurrence']['days']), function ($day) { return $day >= 1 && $day <= 31; })))
+              : [];
+            if ($task['recurrence']['type'] === 'daily_months' && empty($task['recurrence']['months'])) {
+              $task['recurrence']['months'] = range(1, 12);
+            }
+            if ($task['recurrence']['type'] === 'days_of_month' && empty($task['recurrence']['days'])) {
+              $task['recurrence']['days'] = [1];
+            }
+            $conditions = isset($task['conditions']) && is_array($task['conditions']) ? $task['conditions'] : [];
+            $legacy_has_conditions = (($conditions['mic_state'] ?? 'any') !== 'any') ||
+              !empty($conditions['only_when_idle']) || !empty($conditions['skip_if_media_playing']) ||
+              !empty($conditions['skip_if_bluetooth_playing']) || !empty($conditions['skip_if_airplay_playing']);
+            $condition_mode = $conditions['mode'] ?? ($legacy_has_conditions ? 'conditional' : 'always');
+            $task['conditions'] = [
+              'mode' => ($condition_mode === 'conditional') ? 'conditional' : 'always',
+              'mic_state' => in_array(($conditions['mic_state'] ?? 'any'), ['any', 'on', 'off'], true) ? $conditions['mic_state'] : 'any',
+              'only_when_idle' => isset($conditions['only_when_idle']),
+              'skip_if_media_playing' => isset($conditions['skip_if_media_playing']),
+              'skip_if_bluetooth_playing' => isset($conditions['skip_if_bluetooth_playing']),
+              'skip_if_airplay_playing' => isset($conditions['skip_if_airplay_playing'])
+            ];
             $task['time'] = isset($task['time']) && is_array($task['time'])
               ? array_values(array_filter(array_map('trim', $task['time']), function ($time) {
                   return $time !== '';
                 }))
               : [];
+            if ($task['recurrence']['type'] === 'once' && count($task['time']) > 1) {
+              $task['time'] = array_slice($task['time'], 0, 1);
+            }
             $task['date'] = isset($task['date']) && is_array($task['date'])
               ? array_values(array_filter(array_map('trim', $task['date']), function ($date) {
                   return $date !== '';
@@ -443,7 +554,7 @@ include 'html_head.php';
             if (
               !empty($task['name']) &&
               !empty($task['time']) &&
-              !empty($task['date']) &&
+              (!empty($task['date']) || $task['recurrence']['type'] !== 'legacy') &&
               ($task['data']['message'] !== '' || $task['data']['audio_file'] !== '')
             ) {
               $updated_schedule[] = $task;
@@ -550,6 +661,46 @@ include 'html_head.php';
         $data['play_all_music_local']['active'] = isset($_POST['play_all_local_active']) ? true : false;
         $data['play_all_music_local']['date'] = isset($_POST['dates_play_all_local']) ? $_POST['dates_play_all_local'] : [];
 
+        //Cấu hình Scheduler nâng cao dùng chung cho các tác vụ hệ thống.
+        $system_options = $_POST['system_schedule_options'] ?? [];
+        $system_task_keys = ['change_volume', 'change_led_brightness', 'mic_on_off', 'play_play_playlist', 'play_all_music_local', 'stop_media_player', 'restart_vbot', 'reboot_os'];
+        foreach ($system_task_keys as $system_key) {
+          $option = isset($system_options[$system_key]) && is_array($system_options[$system_key]) ? $system_options[$system_key] : [];
+          $recurrence = isset($option['recurrence']) && is_array($option['recurrence']) ? $option['recurrence'] : [];
+          $allowed_types = ['legacy', 'daily', 'daily_months', 'weekdays', 'weekends', 'once', 'monthly', 'days_of_month', 'interval_days'];
+          $recurrence_type = in_array(($recurrence['type'] ?? 'legacy'), $allowed_types, true) ? $recurrence['type'] : 'legacy';
+          $months = isset($recurrence['months']) && is_array($recurrence['months']) ? array_values(array_filter(array_unique(array_map('intval', $recurrence['months'])), fn($value) => $value >= 1 && $value <= 12)) : [];
+          $month_days = isset($recurrence['days']) && is_array($recurrence['days']) ? array_values(array_filter(array_unique(array_map('intval', $recurrence['days'])), fn($value) => $value >= 1 && $value <= 31)) : [];
+          if ($recurrence_type === 'daily_months' && empty($months)) $months = range(1, 12);
+          if ($recurrence_type === 'days_of_month' && empty($month_days)) $month_days = [1];
+          $data[$system_key]['recurrence'] = [
+            'type' => $recurrence_type,
+            'start_date' => trim($recurrence['start_date'] ?? ''),
+            'end_date' => trim($recurrence['end_date'] ?? ''),
+            'date' => trim($recurrence['date'] ?? ''),
+            'day' => max(1, min(31, intval($recurrence['day'] ?? 1))),
+            'interval' => max(1, min(365, intval($recurrence['interval'] ?? 1))),
+            'months' => $months,
+            'days' => $month_days
+          ];
+          $condition = isset($option['conditions']) && is_array($option['conditions']) ? $option['conditions'] : [];
+          $data[$system_key]['conditions'] = [
+            'mode' => (($condition['mode'] ?? 'always') === 'conditional') ? 'conditional' : 'always',
+            'mic_state' => in_array(($condition['mic_state'] ?? 'any'), ['any', 'on', 'off'], true) ? $condition['mic_state'] : 'any',
+            'only_when_idle' => isset($condition['only_when_idle']),
+            'skip_if_media_playing' => isset($condition['skip_if_media_playing']),
+            'skip_if_bluetooth_playing' => isset($condition['skip_if_bluetooth_playing']),
+            'skip_if_airplay_playing' => isset($condition['skip_if_airplay_playing'])
+          ];
+          $data[$system_key]['max_duration_seconds'] = max(0, min(86400, intval($option['max_duration_seconds'] ?? 0)));
+          if ($recurrence_type === 'once' && count($data[$system_key]['time'] ?? []) > 1) {
+            $data[$system_key]['time'] = array_slice(array_values($data[$system_key]['time']), 0, 1);
+            foreach (['volume_time', 'brightness_time', 'action'] as $paired_key) {
+              if (isset($data[$system_key][$paired_key])) $data[$system_key][$paired_key] = array_slice(array_values($data[$system_key][$paired_key]), 0, 1);
+            }
+          }
+        }
+
         #Lưu toàn bộ dữ liệu vào file JSON đúng một lần.
         $encoded_schedule = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($encoded_schedule === false) {
@@ -590,6 +741,17 @@ include 'html_head.php';
             echo '</div>';
           }
           ?>
+          <div class="card mb-3 border-info">
+            <div class="card-body">
+              <h5 class="card-title">Theo dõi tiến trình, tác vụ:</h5>
+              <button type="button" class="btn btn-danger btn-sm" onclick="stopCurrentSchedulerTask()"><i class="bi bi-stop-circle"></i> Dừng tác vụ đang phát</button>
+              <button type="button" class="btn btn-info btn-sm" onclick="loadSchedulerOverview()"><i class="bi bi-arrow-clockwise"></i> Cập nhật</button>
+              <button type="button" class="btn btn-outline-danger btn-sm" onclick="clearSchedulerHistory()"><i class="bi bi-trash"></i> Xóa lịch sử</button>
+			  <hr/>
+              <div class="row mt-3"><div class="col-md-6"><h6><b>Lần chạy tác vụ tiếp theo</b></h6><div id="scheduler-next-runs" class="small text-primary">Đang tải...</div></div>
+              <div class="col-md-6"><h6><b>Lịch sử đã thực thi tác vụ</b></h6><div id="scheduler-history" class="small text-success" style="max-height:260px;overflow:auto">Đang tải...</div></div></div>
+            </div>
+          </div>
           <div id="task-container">
             <?php if (!empty($data['notification_schedule'])) : ?>
               <?php foreach ($data['notification_schedule'] as $index => $notification) : ?>
@@ -604,7 +766,7 @@ include 'html_head.php';
                           <label for="active-<?= $index ?>" class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này')"></i>:</label>
                           <div class="col-sm-9">
                             <div class="form-switch">
-                              <input type="checkbox" class="form-check-input" id="active-<?= $index ?>" name="notification_schedule[<?= $index ?>][active]" <?= $notification['active'] ? 'checked' : '' ?>>
+                              <input type="checkbox" class="form-check-input border-success" id="active-<?= $index ?>" name="notification_schedule[<?= $index ?>][active]" <?= $notification['active'] ? 'checked' : '' ?>>
                             </div>
                           </div>
                         </div>
@@ -659,9 +821,72 @@ include 'html_head.php';
                           </div>
                         </div>
                         <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Thời gian tối đa (giây/s)<i class="bi bi-question-circle-fill" onclick="show_message('Là khoảng thời gian lâu nhất mà một tác vụ thông báo được phép phát. Tác vụ được chạy tối đa 60 giây. Khi hết 60 giây mà TTS, file âm thanh hoặc URL media vẫn chưa kết thúc, Scheduler sẽ tự dừng tác vụ và ghi lịch sử trạng thái: 0: không giới hạn, chờ tác vụ phát xong.')"></i>:</label>
+                          <div class="col-sm-9">
+                            <input type="number" min="0" max="86400" class="form-control border-success" name="notification_schedule[<?= $index ?>][data][max_duration_seconds]" value="<?= intval($notification['data']['max_duration_seconds'] ?? 0) ?>">
+                            <small class="text-muted">Đơn vị giây, đặt 0 để không giới hạn, chờ tác vụ phát xong.</small>
+                          </div>
+                        </div>
+                        <?php
+                          $recurrence = $notification['recurrence'] ?? ['type' => 'legacy'];
+                          $conditions = $notification['conditions'] ?? [];
+                          $has_saved_conditions = (($conditions['mic_state'] ?? 'any') !== 'any') || !empty($conditions['only_when_idle']) || !empty($conditions['skip_if_media_playing']) || !empty($conditions['skip_if_bluetooth_playing']) || !empty($conditions['skip_if_airplay_playing']);
+                          $condition_mode_ui = $conditions['mode'] ?? ($has_saved_conditions ? 'conditional' : 'always');
+                        ?>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Chế độ chạy:</label>
+                          <div class="col-sm-9">
+                            <select class="form-select border-success scheduler-recurrence-type" data-scheduler-index="<?= $index ?>" name="notification_schedule[<?= $index ?>][recurrence][type]">
+                              <?php foreach (['legacy'=>'Theo thứ trong tuần','daily'=>'Hằng ngày','daily_months'=>'Hằng ngày (Lựa chọn tháng)','weekdays'=>'Ngày làm việc (Thứ Hai–Thứ Sáu)','weekends'=>'Cuối tuần (Thứ Bảy–Chủ Nhật)','once'=>'Chỉ một lần','monthly'=>'Một ngày mỗi tháng','days_of_month'=>'N ngày trong tháng'] as $value => $label): ?>
+                                <option value="<?= $value ?>" <?= (($recurrence['type'] ?? 'legacy') === $value) ? 'selected' : '' ?>><?= $label ?></option>
+                              <?php endforeach; ?>
+                              <?php if (($recurrence['type'] ?? '') === 'interval_days'): ?><option value="interval_days" selected>Chu kỳ N ngày (lịch cũ)</option><?php endif; ?>
+                            </select>
+                            <div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="weekdays weekends monthly interval_days">
+                              <span class="input-group-text border-success">Bắt đầu</span><input type="date" class="form-control border-success" name="notification_schedule[<?= $index ?>][recurrence][start_date]" value="<?= htmlspecialchars($recurrence['start_date'] ?? '') ?>">
+                              <span class="input-group-text border-success">Kết thúc</span><input type="date" class="form-control border-success" name="notification_schedule[<?= $index ?>][recurrence][end_date]" value="<?= htmlspecialchars($recurrence['end_date'] ?? '') ?>">
+                            </div>
+                            <div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="once"><span class="input-group-text border-success">Ngày thực hiện</span><input type="date" class="form-control border-success" name="notification_schedule[<?= $index ?>][recurrence][date]" value="<?= htmlspecialchars($recurrence['date'] ?? '') ?>"></div>
+                            <div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="monthly"><span class="input-group-text border-success">Ngày trong tháng</span><input type="number" min="1" max="31" class="form-control border-success" name="notification_schedule[<?= $index ?>][recurrence][day]" value="<?= intval($recurrence['day'] ?? 1) ?>"></div>
+                            <div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="interval_days"><span class="input-group-text">Chu kỳ N ngày</span><input type="number" min="1" max="365" class="form-control" name="notification_schedule[<?= $index ?>][recurrence][interval]" value="<?= intval($recurrence['interval'] ?? 1) ?>"></div>
+                            <div class="mt-2 scheduler-recurrence-fields" data-recurrence-for="daily_months">
+                              <div class="border rounded p-2"><div class="mb-1">Chọn tháng áp dụng:</div>
+                              <?php $selected_months = $recurrence['months'] ?? range(1, 12); foreach (range(1, 12) as $month): ?>
+                                <div class="form-check form-check-inline"><input class="form-check-input border-success" type="checkbox" id="recurrence-month-<?= $index ?>-<?= $month ?>" name="notification_schedule[<?= $index ?>][recurrence][months][]" value="<?= $month ?>" <?= in_array($month, $selected_months) ? 'checked' : '' ?>><label class="form-check-label" for="recurrence-month-<?= $index ?>-<?= $month ?>">Tháng <?= $month ?></label></div>
+                              <?php endforeach; ?></div>
+                            </div>
+                            <div class="mt-2 scheduler-recurrence-fields" data-recurrence-for="days_of_month">
+                              <div class="border rounded p-2"><div class="mb-1">Chọn các ngày trong tháng:</div>
+                              <?php $selected_month_days = $recurrence['days'] ?? [1]; foreach (range(1, 31) as $month_day): ?>
+                                <div class="form-check form-check-inline"><input class="form-check-input border-success" type="checkbox" id="recurrence-day-<?= $index ?>-<?= $month_day ?>" name="notification_schedule[<?= $index ?>][recurrence][days][]" value="<?= $month_day ?>" <?= in_array($month_day, $selected_month_days) ? 'checked' : '' ?>><label class="form-check-label" for="recurrence-day-<?= $index ?>-<?= $month_day ?>"><?= $month_day ?></label></div>
+                              <?php endforeach; ?></div>
+                              <small class="text-muted">Tháng không có ngày đã chọn (ví dụ ngày 31 trong tháng 2) sẽ tự bỏ qua.</small>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Điều kiện chạy:</label>
+                          <div class="col-sm-9">
+                            <select class="form-select border-primary mb-2 scheduler-condition-mode" data-scheduler-index="<?= $index ?>" name="notification_schedule[<?= $index ?>][conditions][mode]">
+                              <option value="always" <?= $condition_mode_ui === 'always' ? 'selected' : '' ?>>Luôn thực thi</option>
+                              <option value="conditional" <?= $condition_mode_ui === 'conditional' ? 'selected' : '' ?>>Chỉ thực thi khi thỏa điều kiện</option>
+                            </select>
+                            <div class="scheduler-condition-fields" data-scheduler-index="<?= $index ?>">
+                            <select class="form-select border-success mb-2" name="notification_schedule[<?= $index ?>][conditions][mic_state]">
+                              <option value="any" <?= (($conditions['mic_state'] ?? 'any') === 'any') ? 'selected' : '' ?>>Không phụ thuộc microphone</option>
+                              <option value="on" <?= (($conditions['mic_state'] ?? '') === 'on') ? 'selected' : '' ?>>Chỉ khi microphone bật</option>
+                              <option value="off" <?= (($conditions['mic_state'] ?? '') === 'off') ? 'selected' : '' ?>>Chỉ khi microphone tắt</option>
+                            </select>
+                            <?php foreach (['only_when_idle'=>'Chỉ khi VBot đang rảnh','skip_if_media_playing'=>'Bỏ qua khi đang phát media','skip_if_bluetooth_playing'=>'Bỏ qua khi Bluetooth đang phát','skip_if_airplay_playing'=>'Bỏ qua khi AirPlay đang phát'] as $key => $label): ?>
+                              <div class="form-check"><input class="form-check-input border-success" type="checkbox" name="notification_schedule[<?= $index ?>][conditions][<?= $key ?>]" <?= !empty($conditions[$key]) ? 'checked' : '' ?>><label class="form-check-label"><?= $label ?></label></div>
+                            <?php endforeach; ?>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row mb-3 scheduler-legacy-dates" data-scheduler-index="<?= $index ?>">
                           <label for="date-<?= $index ?>" class="col-sm-3 col-form-label">
-                            Chọn các ngày trong tuần hoặc thiết lập ngày cụ thể (có thể thiết lập được cả 2 loại dữ liệu cùng lúc)
-                            <i class="bi bi-question-circle-fill" onclick="show_message('Chọn ít nhất một trong các ngày trong tuần hoặc nhập ngày cụ thể vào ô dưới, định dạng ngày sẽ phải phân cách bởi dấu / ví dụ: <b>01/12/20244</b>')"></i>
+                            Các thứ trong tuần
+                            <i class="bi bi-question-circle-fill" onclick="show_message('Chỉ áp dụng khi Chế độ lịch là Theo thứ trong tuần. Có thể chọn nhiều thứ và thêm các ngày ngoại lệ cụ thể, ví dụ: 01/12/2026.')"></i>
                             <font color='red' size='6' title='Bắt Buộc Nhập'>*</font> :
                           </label>
                           <div class="col-sm-9">
@@ -679,7 +904,7 @@ include 'html_head.php';
                               //Hiển thị checkbox cho các ngày trong tuần
                               foreach ($week_days as $key => $label) {
                                 $checked = in_array($key, $week_days_selected) ? 'checked' : '';
-                                echo '<input type="checkbox" class="form-check-input" id="date-' . $index . '-' . $key . '" name="notification_schedule[' . $index . '][date][]" value="' . $key . '" ' . $checked . '> ';
+                                echo '<input type="checkbox" class="form-check-input border-success" id="date-' . $index . '-' . $key . '" name="notification_schedule[' . $index . '][date][]" value="' . $key . '" ' . $checked . '> ';
                                 echo '<label for="date-' . $index . '-' . $key . '">' . $label . '</label><br/>';
                               }
                               //Hiển thị ô input cho các ngày tháng cụ thể (dd/mm/yyyy) và nút xóa
@@ -704,7 +929,7 @@ include 'html_head.php';
                             <div id="time-container-<?= $index ?>">
                               <?php foreach ($notification['time'] as $time_key => $time_value) : ?>
                                 <div class="time-input-container input-group mb-3">
-                                  <input type="text" class="form-control border-success time-input" name="notification_schedule[<?= $index ?>][time][]" value="<?= htmlspecialchars($time_value) ?>" id="time-input-<?= $index ?>-<?= $time_key ?>" placeholder="HH:MM (Giờ:phút)" onclick="showHourSuggestions(this)" autocomplete="off">
+                                  <input type="time" step="60" class="form-control border-success time-input" name="notification_schedule[<?= $index ?>][time][]" value="<?= htmlspecialchars($time_value) ?>" id="time-input-<?= $index ?>-<?= $time_key ?>" required>
                                   <div class="suggestions-list" id="suggestions-list-<?= $index ?>-<?= $time_key ?>" style="display: none;">
                                     <!-- Các gợi ý sẽ được thêm vào đây -->
                                   </div>
@@ -715,7 +940,7 @@ include 'html_head.php';
                                 </div>
                               <?php endforeach; ?>
                             </div>
-                            <button type="button" class="btn btn-success rounded-pill" onclick="addTimeInput(<?= $index ?>)">Thêm thời gian</button>
+                            <button type="button" class="btn btn-success rounded-pill scheduler-add-time" data-scheduler-index="<?= $index ?>" onclick="addTimeInput(<?= $index ?>)">Thêm thời gian</button>
                           </div>
                         </div>
                         <center>
@@ -738,6 +963,7 @@ include 'html_head.php';
           </div>
           <hr style="border: 2px solid #0000FF;">
           <div class="alert alert-success text-center" role="alert"><b>Các Tác Vụ Sẵn Có Trên Hệ Thống</b></div>
+
           <div class="card accordion" id="accordion_button_send_notify_upgrade_vbot_hass">
             <div class="card-body">
               <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_send_notify_upgrade_vbot_hass" aria-expanded="false" aria-controls="collapse_button_send_notify_upgrade_vbot_hass">
@@ -760,7 +986,7 @@ include 'html_head.php';
                     <div class="form-switch">
                       <input
                         type="checkbox"
-                        class="form-check-input"
+                        class="form-check-input border-success"
                         id="send_notify_upgrade_vbot_home_assistant_active"
                         name="send_notify_upgrade_vbot_home_assistant_active"
                         <?php echo (isset($data['send_notify_upgrade_vbot_home_assistant']['active'])
@@ -771,7 +997,7 @@ include 'html_head.php';
                 </div>
                 <div class="row mb-3">
                   <label for="send_notify_upgrade_vbot_home_assistant_time" class="col-sm-3 col-form-label">
-                    Thời Gian
+                    Thời Gian Kích Hoạt:
                     <i class="bi bi-question-circle-fill" onclick="show_message('Định dạng thời gian là 24 giờ, (giờ:phút) Ví Dụ: (03:59)')"></i>:
                   </label>
                   <div class="col-sm-9">
@@ -812,31 +1038,27 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="change_volume_active" id="change_volume_active" value="<?php echo $change_volume['active']; ?>" <?= $change_volume['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="change_volume_active" id="change_volume_active" value="<?php echo $change_volume['active']; ?>" <?= $change_volume['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
-                <!-- Checkbox ngày -->
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Màn Hình')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_change_volume[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $change_volume['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
+			<?php
+			render_system_scheduler_options(
+				'change_volume',
+				$data['change_volume'] ?? [],
+				'Thay đổi âm lượng',
+				'time-changes-volumes',
+				'dates_change_volume'
+			);
+			?>
                 <!-- Thời gian -->
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_display_screen" id="time-changes_volumes">
                       <?php foreach ($change_volume['time'] as $index => $time): ?>
                         <div class="time-input-container input-group mb-3" id="time-change_volume-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_change_volume[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_change_volume[]" value="<?= htmlspecialchars($time) ?>">
                           <input class="form-control border-primary" type="number" name="volumes_volume_time[]" value="<?= isset($change_volume['volume_time'][$index]) ? htmlspecialchars($change_volume['volume_time'][$index]) : '' ?>" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">
 						<button class="btn btn-primary" type="button" onclick="run_test_task('change_volume', '<?= isset($change_volume['volume_time'][$index]) ? htmlspecialchars($change_volume['volume_time'][$index]) : '' ?>')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-<?= $index ?>"><i class="bi bi-trash"></i></button>
@@ -878,31 +1100,29 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="change_led_brightness_active" id="change_led_brightness_active" value="<?php echo $change_led_brightness['active']; ?>" <?= $change_led_brightness['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="change_led_brightness_active" id="change_led_brightness_active" value="<?php echo $change_led_brightness['active']; ?>" <?= $change_led_brightness['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
-                <!-- Checkbox ngày -->
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Màn Hình')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_changes_brightness[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $change_led_brightness['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
+
+<?php
+render_system_scheduler_options(
+    'change_led_brightness',
+    $data['change_led_brightness'] ?? [],
+    'Thay đổi độ sáng LED',
+    'time-changes-brightness',
+    'dates_changes_brightness'
+);
+?>
+
                 <!-- Thời gian -->
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_display_screen" id="time-changes_brightness">
                       <?php foreach ($change_led_brightness['time'] as $index => $time): ?>
                         <div class="time-input-container input-group mb-3" id="time-change_led_brightness-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_change_brightness[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_change_brightness[]" value="<?= htmlspecialchars($time) ?>">
                           <input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" value="<?= isset($change_led_brightness['brightness_time'][$index]) ? htmlspecialchars($change_led_brightness['brightness_time'][$index]) : '' ?>" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">
 							<button class="btn btn-primary" type="button" onclick="run_test_task('change_led_brightness', '<?= isset($change_led_brightness['brightness_time'][$index]) ? htmlspecialchars($change_led_brightness['brightness_time'][$index]) : '' ?>')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-<?= $index ?>"><i class="bi bi-trash"></i></button>
@@ -944,24 +1164,20 @@ include 'html_head.php';
 			  <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i>:</label>
 			  <div class="col-sm-9">
 			  <div class="form-switch">
-				<input type="checkbox" class="form-check-input" name="change_mic_on_off_active" value="1" <?= $change_mic_on_off['active'] ? 'checked' : '' ?>>
+				<input type="checkbox" class="form-check-input border-success" name="change_mic_on_off_active" value="1" <?= $change_mic_on_off['active'] ? 'checked' : '' ?>>
 			  </div>
 			  </div>
 			</div>
-			<!-- NGÀY TRONG TUẦN -->
-			<div class="row mb-3">
-			<label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Áp Dụng Bật, Tắt Sử Dụng Mic')"></i> :</label>
-			  <div class="col-sm-9">
-			  <div class="form-switch">
-				<?php foreach ($week_days as $date => $label): ?>
-				  <div class="form-check">
-					<input class="form-check-input" type="checkbox" name="mic_on_off_date[]" value="<?= $date ?>" <?= in_array($date, $change_mic_on_off['date']) ? 'checked' : '' ?>>
-					<label class="form-check-label"><?= $label ?></label>
-				  </div>
-				<?php endforeach; ?>
-			  </div>
-			  </div>
-			</div>
+
+<?php
+render_system_scheduler_options(
+    'mic_on_off',
+    $data['mic_on_off'] ?? [],
+    'Bật/Tắt microphone',
+    'time-mic_on_off',
+    'mic_on_off_date'
+);
+?>
 
 			<div class="row mb-3">
 			  <label class="col-sm-3 col-form-label">Thời gian: Bật/Tắt</label>
@@ -969,7 +1185,7 @@ include 'html_head.php';
 				<div id="time-mic_on_off">
 				  <?php foreach ($change_mic_on_off['time'] as $i => $time): ?>
 					<div class="input-group mb-2 time-row" id="mic-row-<?= $i ?>">
-					  <input type="text" class="form-control border-success" name="mic_on_off_time[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm">
+					  <input type="time" step="60" class="form-control border-success" name="mic_on_off_time[]" value="<?= htmlspecialchars($time) ?>">
 					  <select class="form-select border-success" name="mic_on_off_action[]">
 						<option value="on"  <?= ($change_mic_on_off['action'][$i] ?? '') === 'on'  ? 'selected' : '' ?>>Bật Mic</option>
 						<option value="off" <?= ($change_mic_on_off['action'][$i] ?? '') === 'off' ? 'selected' : '' ?>>Tắt Mic</option>
@@ -1013,29 +1229,28 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="play_playlist_active" id="play_playlist_active" value="<?php echo $play_play_playlist['active']; ?>" <?= $play_play_playlist['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="play_playlist_active" id="play_playlist_active" value="<?php echo $play_play_playlist['active']; ?>" <?= $play_play_playlist['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
+
+<?php
+render_system_scheduler_options(
+    'play_play_playlist',
+    $data['play_play_playlist'] ?? [],
+    'Phát playlist',
+    'time-on-play_play_playlist',
+    'dates_play_playlist_player'
+);
+?>
+
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Có Thể Chọn Các Ngày Trong Tuần Để Lên Lịch Dừng Phát Media Player')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_play_playlist_player[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $play_play_playlist['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_play_playlist" id="time-on-play_play_playlist">
                       <?php foreach ($play_play_playlist['time'] as $index => $time): ?>
                         <div class="time-input-play_play_playlist input-group mb-3" id="time-play_play_playlist-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_player_playlist[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_player_playlist[]" value="<?= htmlspecialchars($time) ?>">
 						  <button class="btn btn-primary" type="button" onclick="run_test_task('play_play_playlist', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_play_playlist-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -1076,29 +1291,26 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="play_all_local_active" id="play_all_local_active" value="<?php echo $play_all_music_local['active']; ?>" <?= $play_all_music_local['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="play_all_local_active" id="play_all_local_active" value="<?php echo $play_all_music_local['active']; ?>" <?= $play_all_music_local['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
+<?php
+render_system_scheduler_options(
+    'play_all_music_local',
+    $data['play_all_music_local'] ?? [],
+    'Phát nhạc local',
+    'time-on-play_all_music_local',
+    'dates_play_all_local'
+);
+?>
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Có Thể Chọn Các Ngày Trong Tuần Để Lên Lịch Dừng Phát Media Player')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_play_all_local[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $play_all_music_local['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_player_local" id="time-on-play_all_music_local">
                       <?php foreach ($play_all_music_local['time'] as $index => $time): ?>
                         <div class="time-input-play_all_music_local input-group mb-3" id="time-play_all_music_local-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_player_local[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_player_local[]" value="<?= htmlspecialchars($time) ?>">
 						  <button class="btn btn-primary" type="button" onclick="run_test_task('play_all_music_local', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_all_music_local-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -1143,29 +1355,26 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="stop_media_player_active" id="stop_media_player_active" value="<?php echo $stop_media_player['active']; ?>" <?= $stop_media_player['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="stop_media_player_active" id="stop_media_player_active" value="<?php echo $stop_media_player['active']; ?>" <?= $stop_media_player['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
+<?php
+render_system_scheduler_options(
+    'stop_media_player',
+    $data['stop_media_player'] ?? [],
+    'Dừng Media Player',
+    'time-on-stop_media_player',
+    'dates_stop_media_player'
+);
+?>
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Có Thể Chọn Các Ngày Trong Tuần Để Lên Lịch Dừng Phát Media Player')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_stop_media_player[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $stop_media_player['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_stop_media_player" id="time-on-stop_media_player">
                       <?php foreach ($stop_media_player['time'] as $index => $time): ?>
                         <div class="time-input-stop_media_player input-group mb-3" id="time-stop_media_player-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_stop_media_player[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_stop_media_player[]" value="<?= htmlspecialchars($time) ?>">
 						  <button class="btn btn-primary" type="button" onclick="run_test_task('stop_media_player', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-stop_media_player-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -1204,29 +1413,26 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="restart_vbot_service_active" id="restart_vbot_service_active" value="<?php echo $restart_vbot['active']; ?>" <?= $restart_vbot['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="restart_vbot_service_active" id="restart_vbot_service_active" value="<?php echo $restart_vbot['active']; ?>" <?= $restart_vbot['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
+<?php
+render_system_scheduler_options(
+    'restart_vbot',
+    $data['restart_vbot'] ?? [],
+    'Restart VBot',
+    'time-on-restart_vbot',
+    'dates_restart_vbot'
+);
+?>
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Sử Dụng Khởi Động Lại Chương Trình VBot')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_restart_vbot[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $restart_vbot['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_restart_vbot" id="time-on-restart_vbot">
                       <?php foreach ($restart_vbot['time'] as $index => $time): ?>
                         <div class="time-input-restart_vbot input-group mb-3" id="time-restart_vbot-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_restart_vbot[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_restart_vbot[]" value="<?= htmlspecialchars($time) ?>">
 						  <button class="btn btn-primary" type="button" onclick="run_test_task('restart_vbot', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-restart_vbot-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -1265,29 +1471,26 @@ include 'html_head.php';
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
                   <div class="col-sm-9">
                     <div class="form-switch">
-                      <input class="form-check-input" type="checkbox" name="reboot_os_active" id="reboot_os_active" value="<?php echo $reboot_os['active']; ?>" <?= $reboot_os['active'] ? 'checked' : '' ?>>
+                      <input class="form-check-input border-success" type="checkbox" name="reboot_os_active" id="reboot_os_active" value="<?php echo $reboot_os['active']; ?>" <?= $reboot_os['active'] ? 'checked' : '' ?>>
                     </div>
                   </div>
                 </div>
+<?php
+render_system_scheduler_options(
+    'reboot_os',
+    $data['reboot_os'] ?? [],
+    'Reboot hệ điều hành',
+    'time-on-reboot_os',
+    'dates_reboot_os'
+);
+?>
                 <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Các Ngày Trong Tuần <i class="bi bi-question-circle-fill" onclick="show_message('Chọn Các Ngày Trong Tuần Để Sử Dụng Khởi Động Lại OS SYSTEM')"></i> :</label>
-                  <div class="col-sm-9">
-                    <div class="form-switch">
-                      <?php foreach ($week_days as $date => $label): ?>
-                        <input class="form-check-input" type="checkbox" name="dates_reboot_os[]" value="<?= htmlspecialchars($date) ?>" <?= in_array($date, $reboot_os['date']) ? 'checked' : '' ?>>
-                        <label><?= htmlspecialchars($label) ?></label>
-                        <br />
-                      <?php endforeach; ?>
-                    </div>
-                  </div>
-                </div>
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian:</label>
+                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
                   <div class="col-sm-9">
                     <div class="time-inputs_reboot_os" id="time-on-reboot_os">
                       <?php foreach ($reboot_os['time'] as $index => $time): ?>
                         <div class="time-input-reboot_os input-group mb-3" id="time-reboot_os-<?= $index ?>">
-                          <input class="form-control border-success" type="text" name="time_reboot_os[]" value="<?= htmlspecialchars($time) ?>" placeholder="HH:mm (Giờ:Phút)">
+                          <input class="form-control border-success" type="time" step="60" name="time_reboot_os[]" value="<?= htmlspecialchars($time) ?>">
 						  <button class="btn btn-primary" type="button" onclick="run_test_task('reboot_os', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
                           <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-reboot_os-<?= $index ?>"><i class="bi bi-trash"></i></button>
                         </div>
@@ -1306,7 +1509,7 @@ include 'html_head.php';
 </div>
           <center>
             <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
-            <button type="button" class="btn btn-success rounded-pill" onclick="addNewTask()">Thêm mới tác vụ</button>
+            <button type="button" class="btn btn-success rounded-pill" onclick="addNewTask()"><i class="bi bi-plus-circle-dotted"></i> Thêm mới tác vụ</button>
             <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_Scheduler" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Lời Nhắc, Thông Báo không')">
               <i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
           </center>
@@ -1665,6 +1868,15 @@ function loadAudioFiles(selectId) {
         "</div>" +
         "</div>" +
         "</div>" +
+        "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Thời gian tối đa (giây/s) <i class='bi bi-question-circle-fill' onclick=\"show_message('Là khoảng thời gian lâu nhất mà một tác vụ thông báo được phép phát. Tác vụ được chạy tối đa 60 giây. Khi hết 60 giây mà TTS, file âm thanh hoặc URL media vẫn chưa kết thúc, Scheduler sẽ tự dừng tác vụ và ghi lịch sử trạng thái: 0: không giới hạn, chờ tác vụ phát xong.')\"></i>:</label><div class='col-sm-9'><input type='number' min='0' max='86400' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][data][max_duration_seconds]' value='0'><small class='text-muted'>Đơn vị giây, đặt 0 để không giới hạn, chờ tác vụ phát xong.</small></div></div>" +
+        "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Chế độ chạy:</label><div class='col-sm-9'>" +
+        "<select class='form-select border-success scheduler-recurrence-type' data-scheduler-index='" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][recurrence][type]'><option value='legacy'>Theo thứ trong tuần</option><option value='daily'>Hằng ngày</option><option value='daily_months'>Hằng ngày (Lựa chọn tháng)</option><option value='weekdays'>Ngày làm việc (Thứ Hai–Thứ Sáu)</option><option value='weekends'>Cuối tuần (Thứ Bảy–Chủ Nhật)</option><option value='once'>Chỉ một lần</option><option value='monthly'>Một ngày mỗi tháng</option><option value='days_of_month'>N ngày trong tháng</option></select>" +
+        "<div class='input-group mt-2 scheduler-recurrence-fields' data-recurrence-for='weekdays weekends monthly'><span class='input-group-text border-success'>Bắt đầu</span><input type='date' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][recurrence][start_date]'><span class='input-group-text border-success'>Kết thúc</span><input type='date' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][recurrence][end_date]'></div>" +
+        "<div class='input-group mt-2 scheduler-recurrence-fields' data-recurrence-for='once'><span class='input-group-text border-success'>Ngày thực hiện</span><input type='date' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][recurrence][date]'></div>" +
+        "<div class='input-group mt-2 scheduler-recurrence-fields' data-recurrence-for='monthly'><span class='input-group-text border-success'>Ngày trong tháng</span><input type='number' min='1' max='31' value='1' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][recurrence][day]'></div>" +
+        "<div class='mt-2 scheduler-recurrence-fields' data-recurrence-for='daily_months'><div class='border rounded p-2'>Chọn tháng áp dụng:<br>" + Array.from({length: 12}, (_, i) => "<label class='me-3'><input type='checkbox' class='form-check-input border-success' checked name='notification_schedule[" + newTaskIndex + "][recurrence][months][]' value='" + (i + 1) + "'> Tháng " + (i + 1) + "</label>").join('') + "</div></div>" +
+        "<div class='mt-2 scheduler-recurrence-fields' data-recurrence-for='days_of_month'><div class='border rounded p-2'>Chọn các ngày trong tháng:<br>" + Array.from({length: 31}, (_, i) => "<label class='me-3'><input type='checkbox' class='form-check-input border-success' " + (i === 0 ? "checked " : "") + "name='notification_schedule[" + newTaskIndex + "][recurrence][days][]' value='" + (i + 1) + "'> " + (i + 1) + "</label>").join('') + "</div><small class='text-muted'>Tháng không có ngày đã chọn (ví dụ ngày 31 trong tháng 2) sẽ tự bỏ qua.</small></div></div></div>" +
+        "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Điều kiện chạy:</label><div class='col-sm-9'><select class='form-select border-primary mb-2 scheduler-condition-mode' data-scheduler-index='" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][conditions][mode]'><option value='always' selected>Luôn thực thi</option><option value='conditional'>Chỉ thực thi khi thỏa điều kiện</option></select><div class='scheduler-condition-fields' data-scheduler-index='" + newTaskIndex + "'><select class='form-select mb-2 border-success' name='notification_schedule[" + newTaskIndex + "][conditions][mic_state]'><option value='any'>Không phụ thuộc mic</option><option value='on'>Chỉ khi mic bật</option><option value='off'>Chỉ khi mic tắt</option></select><label><input type='checkbox' class='form-check-input border-success' name='notification_schedule[" + newTaskIndex + "][conditions][only_when_idle]'> Chỉ khi VBot rảnh</label><br><label><input type='checkbox' class='form-check-input border-success' name='notification_schedule[" + newTaskIndex + "][conditions][skip_if_media_playing]'> Bỏ qua khi phát media</label><br><label><input type='checkbox' class='form-check-input border-success' name='notification_schedule[" + newTaskIndex + "][conditions][skip_if_bluetooth_playing]'> Bỏ qua khi Bluetooth phát</label><br><label><input type='checkbox' class='form-check-input border-success' name='notification_schedule[" + newTaskIndex + "][conditions][skip_if_airplay_playing]'> Bỏ qua khi AirPlay phát</label></div></div></div>" +
         "<div class='row mb-3'>" +
         "<label for='name-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Tên tác vụ <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
@@ -1700,8 +1912,8 @@ function loadAudioFiles(selectId) {
         "<div class='invalid-feedback'>Cần điền số lần lặp lại thông báo</div>" +
         "</div>" +
         "</div>" +
-        "<div class='row mb-3'>" +
-        "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Chọn các ngày trong tuần <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
+        "<div class='row mb-3 scheduler-legacy-dates' data-scheduler-index='" + newTaskIndex + "'>" +
+        "<label for='date-" + newTaskIndex + "' class='col-sm-3 col-form-label'>Các thứ trong tuần <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>:</label>" +
         "<div class='col-sm-9'>" +
         "<div class='form-switch'>";
       taskHtml += "<?php foreach (['Monday' => 'Thứ Hai', 'Tuesday' => 'Thứ Ba', 'Wednesday' => 'Thứ Tư', 'Thursday' => 'Thứ Năm', 'Friday' => 'Thứ Sáu', 'Saturday' => 'Thứ Bảy', 'Sunday' => 'Chủ Nhật'] as $key => $label) : ?>" +
@@ -1718,12 +1930,12 @@ function loadAudioFiles(selectId) {
         "<div class='col-sm-9'>" +
         "<div id='time-container-" + newTaskIndex + "'>" +
         "<div class='input-group mb-3'>" +
-        "<input required min='00:00' max='23:59' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][time][]' placeholder='HH:MM'>" +
+        "<input required type='time' step='60' class='form-control border-success time-input' name='notification_schedule[" + newTaskIndex + "][time][]'>" +
         "<button type='button' class='btn btn-danger border-success' onclick='removeTimeInput(" + newTaskIndex + ", this)' style='display: none;'><i class='bi bi-trash'></i></button>" +
         "<div class='invalid-feedback'>Cần nhập thời gian thực hiện của tác vụ</div>" +
         "</div>" +
         "</div>" +
-        "<button type='button' class='btn btn-primary rounded-pill' onclick='addTimeInput(" + newTaskIndex + ")'>Thêm thời gian</button><br><br>" +
+        "<button type='button' class='btn btn-primary rounded-pill scheduler-add-time' data-scheduler-index='" + newTaskIndex + "' onclick='addTimeInput(" + newTaskIndex + ")'>Thêm thời gian</button><br><br>" +
         "<center><button type='button' class='btn btn-danger rounded-pill' onclick='deleteTask(" + newTaskIndex + ")'><i class='bi bi-trash'></i> Xóa tác vụ này</button></center>" +
         "</div>" +
         "</div>" +
@@ -1731,6 +1943,7 @@ function loadAudioFiles(selectId) {
         "</div></div>" +
         "</div>";
       taskContainer.innerHTML += taskHtml;
+      initializeSchedulerRecurrence(taskContainer);
 
       //Sau khi chèn vào DOM -> gọi API để fill dữ liệu
       loadAudioFiles("audio_file-" + newTaskIndex);
@@ -1777,7 +1990,7 @@ function loadAudioFiles(selectId) {
       const timeContainer = document.getElementById('time-container-' + taskIndex);
       const timeInputHtml =
         "<div class='input-group mb-3'>" +
-        "<input type='text' class='form-control border-success' name='notification_schedule[" + taskIndex + "][time][]' placeholder='HH:MM'>" +
+        "<input required type='time' step='60' class='form-control border-success time-input' name='notification_schedule[" + taskIndex + "][time][]'>" +
         "<button type='button' class='btn btn-danger border-success' onclick='removeTimeInput(" + taskIndex + ", this)' title='Xóa Thời Gian'><i class='bi bi-trash'></i></button>" +
         "</div>";
       timeContainer.innerHTML += timeInputHtml;
@@ -1860,7 +2073,7 @@ function loadAudioFiles(selectId) {
       const inputContainer = document.createElement('div');
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-restart_vbot', 'input-group', 'mb-3');
-      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_restart_vbot[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-restart_vbot-' + time_Restart_VBot + '"><i class="bi bi-trash"></i></button>';
+      inputContainer.innerHTML = '<input class="form-control border-success" type="time" step="60" name="time_restart_vbot[]"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-restart_vbot-' + time_Restart_VBot + '"><i class="bi bi-trash"></i></button>';
       timeOnContainer.insertBefore(inputContainer, this);
       document.getElementById('delete-restart_vbot-' + time_Restart_VBot).addEventListener('click', function() {
         document.getElementById(inputContainerId).remove();
@@ -1883,7 +2096,7 @@ function loadAudioFiles(selectId) {
       const inputContainer = document.createElement('div');
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-stop_media_player', 'input-group', 'mb-3');
-      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_stop_media_player[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-stop_media_player-' + time_Stop_Media_Player + '"><i class="bi bi-trash"></i></button>';
+      inputContainer.innerHTML = '<input class="form-control border-success" type="time" step="60" name="time_stop_media_player[]"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-stop_media_player-' + time_Stop_Media_Player + '"><i class="bi bi-trash"></i></button>';
       timeOnContainer.insertBefore(inputContainer, this);
       document.getElementById('delete-stop_media_player-' + time_Stop_Media_Player).addEventListener('click', function() {
         document.getElementById(inputContainerId).remove();
@@ -1906,7 +2119,7 @@ function loadAudioFiles(selectId) {
       const inputContainer = document.createElement('div');
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-reboot_os', 'input-group', 'mb-3');
-      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_reboot_os[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-reboot_os-' + time_REboot_OS + '"><i class="bi bi-trash"></i></button>';
+      inputContainer.innerHTML = '<input class="form-control border-success" type="time" step="60" name="time_reboot_os[]"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-reboot_os-' + time_REboot_OS + '"><i class="bi bi-trash"></i></button>';
       timeOnContainer.insertBefore(inputContainer, this);
       document.getElementById('delete-reboot_os-' + time_REboot_OS).addEventListener('click', function() {
         document.getElementById(inputContainerId).remove();
@@ -1929,7 +2142,7 @@ function loadAudioFiles(selectId) {
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
       inputContainer.innerHTML =
-        '<input class="form-control border-success" type="text" name="time_change_volume[]" placeholder="HH:mm (Giờ:Phút)">' +
+        '<input class="form-control border-success" type="time" step="60" name="time_change_volume[]">' +
         '<input class="form-control border-primary" type="number" name="volumes_volume_time[]" placeholder="Âm lượng (0-100)" min="0" max="100" style="max-width: 200px;">' +
         '<button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_volume-' + timeVolumeCounter + '">' +
         '<i class="bi bi-trash"></i>' +
@@ -1950,7 +2163,7 @@ function loadAudioFiles(selectId) {
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-container', 'input-group', 'mb-3');
       inputContainer.innerHTML =
-        '<input class="form-control border-success" type="text" name="time_change_brightness[]" placeholder="HH:mm (Giờ:Phút)">' +
+        '<input class="form-control border-success" type="time" step="60" name="time_change_brightness[]">' +
         '<input class="form-control border-primary" type="number" name="brightness_brightnes_time[]" placeholder="Độ sáng từ (0-100)" min="0" max="100" style="max-width: 200px;">' +
         '<button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-change_led_brightness-' + timeBrightnessCounter + '">' +
         '<i class="bi bi-trash"></i>' +
@@ -1969,7 +2182,7 @@ function loadAudioFiles(selectId) {
       const inputContainer = document.createElement('div');
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-play_play_playlist', 'input-group', 'mb-3');
-      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_player_playlist[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_play_playlist-' + time_Play_Playlist + '"><i class="bi bi-trash"></i></button>';
+      inputContainer.innerHTML = '<input class="form-control border-success" type="time" step="60" name="time_player_playlist[]"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_play_playlist-' + time_Play_Playlist + '"><i class="bi bi-trash"></i></button>';
       timeOnContainer.insertBefore(inputContainer, this);
       document.getElementById('delete-play_play_playlist-' + time_Play_Playlist).addEventListener('click', function() {
         document.getElementById(inputContainerId).remove();
@@ -1992,7 +2205,7 @@ function loadAudioFiles(selectId) {
       const inputContainer = document.createElement('div');
       inputContainer.id = inputContainerId;
       inputContainer.classList.add('time-input-play_all_music_local', 'input-group', 'mb-3');
-      inputContainer.innerHTML = '<input class="form-control border-success" type="text" name="time_player_local[]" placeholder="HH:mm (Giờ:Phút)"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_all_music_local-' + time_All_Local + '"><i class="bi bi-trash"></i></button>';
+      inputContainer.innerHTML = '<input class="form-control border-success" type="time" step="60" name="time_player_local[]"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_all_music_local-' + time_All_Local + '"><i class="bi bi-trash"></i></button>';
       timeOnContainer.insertBefore(inputContainer, this);
       document.getElementById('delete-play_all_music_local-' + time_All_Local).addEventListener('click', function() {
         document.getElementById(inputContainerId).remove();
@@ -2016,7 +2229,7 @@ document.getElementById('add-mic-time').addEventListener('click', function () {
     div.className = 'input-group mb-2 time-row';
     div.id = rowId;
 	div.innerHTML =
-		'<input type="text" class="form-control border-success" name="mic_on_off_time[]" placeholder="HH:mm">' +
+		'<input type="time" step="60" class="form-control border-success" name="mic_on_off_time[]">' +
 		'<select class="form-select border-success" name="mic_on_off_action[]">' +
 			'<option value="on">Bật</option>' +
 			'<option value="off">Tắt</option>' +
@@ -2065,6 +2278,151 @@ function run_test_task(value, parameter = null) {
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.send(JSON.stringify(data));
 }
+
+async function schedulerApi(value, parameter = null) {
+    const payload = {type: 3, data: 'scheduler', value: value};
+    if (parameter !== null) payload.parameter = parameter;
+    const response = await fetch("<?php echo $Protocol.$serverIp.':'.$Port_API; ?>", {
+        method: 'POST', credentials: 'include', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    });
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || ('HTTP ' + response.status));
+    return result;
+}
+
+async function schedulerHistoryFromFile(limit = 50) {
+    const response = await fetch(
+        'Scheduler.php?scheduler_history_fallback=1&limit=' + encodeURIComponent(limit),
+        {method: 'GET', credentials: 'include', cache: 'no-store'}
+    );
+    const result = await response.json();
+    if (!response.ok || !result.success) throw new Error(result.message || ('HTTP ' + response.status));
+    return result;
+}
+
+function updateSchedulerRecurrenceFields(select) {
+    const scope = select.closest('.alert') || select.closest('.card') || document;
+    const selectedType = select.value;
+    scope.querySelectorAll('.scheduler-recurrence-fields').forEach(group => {
+        const visible = (group.dataset.recurrenceFor || '').split(/\s+/).includes(selectedType);
+        group.hidden = !visible;
+        group.querySelectorAll('input, select').forEach(input => input.disabled = !visible);
+    });
+    const index = select.dataset.schedulerIndex;
+    const legacyGroup = scope.querySelector('.scheduler-legacy-dates[data-scheduler-index="' + index + '"]');
+    if (legacyGroup) {
+        const visible = selectedType === 'legacy';
+        legacyGroup.hidden = !visible;
+        legacyGroup.querySelectorAll('input, select, button').forEach(input => input.disabled = !visible);
+    }
+    let addTimeButton = scope.querySelector('.scheduler-add-time[data-scheduler-index="' + index + '"]');
+    const externalTimeContainerId = select.dataset.timeContainerId;
+    const externalTimeContainer = externalTimeContainerId ? document.getElementById(externalTimeContainerId) : null;
+    if (!addTimeButton && externalTimeContainer && externalTimeContainer.parentElement) {
+        addTimeButton = Array.from(externalTimeContainer.parentElement.querySelectorAll('button')).find(button =>
+            !externalTimeContainer.contains(button) && String(button.getAttribute('onclick') || '').includes('add')
+        );
+    }
+    if (addTimeButton) {
+        addTimeButton.disabled = selectedType === 'once';
+        addTimeButton.title = selectedType === 'once' ? 'Chế độ Chỉ một lần chỉ sử dụng một thời gian' : 'Thêm thời gian';
+    }
+    const timeContainer = externalTimeContainer || scope.querySelector('#time-container-' + index);
+    if (timeContainer) {
+        const timeInputs = Array.from(timeContainer.querySelectorAll('input[type="time"], input.time-input'));
+        timeInputs.forEach((input, inputIndex) => {
+            const disabledByOnce = selectedType === 'once' && inputIndex > 0;
+            input.disabled = disabledByOnce;
+            const row = input.closest('.input-group');
+            if (row) {
+                row.classList.toggle('opacity-50', disabledByOnce);
+                row.querySelectorAll('button').forEach(button => button.disabled = disabledByOnce);
+            }
+        });
+    }
+}
+
+function updateSchedulerConditionFields(select) {
+    const scope = select.closest('.alert') || select.closest('.card') || document;
+    const index = select.dataset.schedulerIndex;
+    const fields = scope.querySelector('.scheduler-condition-fields[data-scheduler-index="' + index + '"]');
+    if (!fields) return;
+    const enabled = select.value === 'conditional';
+    fields.classList.toggle('opacity-50', !enabled);
+    fields.querySelectorAll('input, select').forEach(input => input.disabled = !enabled);
+}
+
+function initializeSchedulerRecurrence(root = document) {
+    root.querySelectorAll('.scheduler-recurrence-type').forEach(updateSchedulerRecurrenceFields);
+    root.querySelectorAll('.scheduler-condition-mode').forEach(updateSchedulerConditionFields);
+}
+
+document.addEventListener('change', event => {
+    if (event.target.classList.contains('scheduler-recurrence-type')) updateSchedulerRecurrenceFields(event.target);
+    if (event.target.classList.contains('scheduler-condition-mode')) updateSchedulerConditionFields(event.target);
+});
+
+document.addEventListener('submit', () => {
+    //Giữ lại các lựa chọn điều kiện đang bị khóa khi chế độ là Luôn thực thi.
+    document.querySelectorAll('.scheduler-condition-fields input, .scheduler-condition-fields select').forEach(input => input.disabled = false);
+});
+
+async function stopCurrentSchedulerTask() {
+    try { const result = await schedulerApi('stop_current'); showMessagePHP(result.message); }
+    catch (error) { show_message(error.message); }
+}
+
+function renderSchedulerRows(elementId, rows, formatter) {
+    const container = document.getElementById(elementId);
+    container.replaceChildren();
+    if (!Array.isArray(rows) || rows.length === 0) { container.textContent = 'Chưa có dữ liệu'; return; }
+    rows.forEach(row => { const line = document.createElement('div'); line.className = 'border-bottom py-1'; line.textContent = formatter(row); container.appendChild(line); });
+}
+
+function formatSchedulerDateTime(value) {
+    const match = String(value || '').match(/^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})/);
+    return match ? (match[4] + ':' + match[5] + ' - ' + match[3] + '/' + match[2] + '/' + match[1]) : String(value || '');
+}
+
+async function loadSchedulerOverview() {
+    const nextRunsContainer = document.getElementById('scheduler-next-runs');
+    const historyContainer = document.getElementById('scheduler-history');
+    try {
+        const nextRuns = await schedulerApi('next_runs', 10);
+        renderSchedulerRows('scheduler-next-runs', nextRuns.data, row => formatSchedulerDateTime(row.next_run) + ' — ' + row.name);
+    } catch (error) {
+        nextRunsContainer.textContent = 'Không thể lấy dữ liệu vì VBot/API đang không hoạt động: ' + error.message;
+    }
+    try {
+        const history = await schedulerApi('history', 50);
+        renderSchedulerRows('scheduler-history', [...history.data].reverse(), row => {
+            const executionLabel = row.execution_mode === 'manual' ? '[Được chạy kiểm tra thủ công]' : '[Được chạy tự động]';
+            return formatSchedulerDateTime(row.finished_at) + ' — ' + row.task + ' ' + executionLabel + ' [' + row.status + ']' + (row.message ? ': ' + row.message : '');
+        });
+    } catch (apiError) {
+        try {
+            const history = await schedulerHistoryFromFile(50);
+            renderSchedulerRows('scheduler-history', [...history.data].reverse(), row => {
+                const executionLabel = row.execution_mode === 'manual' ? '[Được chạy kiểm tra thủ công]' : '[Được chạy tự động]';
+                return formatSchedulerDateTime(row.finished_at) + ' — ' + row.task + ' ' + executionLabel + ' [' + row.status + ']' + (row.message ? ': ' + row.message : '');
+            });
+            historyContainer.insertAdjacentHTML('afterbegin', '<div class="text-danger border-bottom py-1">VBot/API không hoạt động — đang đọc trực tiếp Scheduler_History.json</div>');
+        } catch (fileError) {
+            historyContainer.textContent = 'Không thể đọc lịch sử từ API hoặc file: ' + fileError.message;
+        }
+    }
+}
+
+async function clearSchedulerHistory() {
+    try { await schedulerApi('clear_history'); await loadSchedulerOverview(); }
+    catch (error) { show_message(error.message); }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    initializeSchedulerRecurrence();
+    loadSchedulerOverview();
+});
 
 //Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống
 function validateFormVBot() {

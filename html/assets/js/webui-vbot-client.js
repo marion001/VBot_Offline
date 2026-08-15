@@ -1,5 +1,17 @@
 'use strict';
 
+    function escapeVBotDeviceHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function(character) {
+            return {
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[character];
+        });
+    }
+
+    function encodeVBotDeviceArgument(value) {
+        return encodeURIComponent(String(value == null ? '' : value)).replace(/'/g, '%27');
+    }
+
     //Quét các thiết bị sử dụng VBot trong cùng lớp mạng
     function scan_VBot_Device() {
         loading('show');
@@ -42,15 +54,21 @@
                                     '<tbody>';
                                 data.forEach((device, index) => {
                                     const rowId = 'device_row_' + index;
+                                    const deviceName = escapeVBotDeviceHtml(device.user_name);
+                                    const ipAddress = escapeVBotDeviceHtml(device.ip_address);
+                                    const portApi = escapeVBotDeviceHtml(device.port_api);
+                                    const hostName = escapeVBotDeviceHtml(device.host_name);
+                                    const encodedIp = encodeVBotDeviceArgument(device.ip_address);
+                                    const encodedName = encodeVBotDeviceArgument(device.user_name);
                                     tableHTML +=
                                         '<tr id="' + rowId + '">' +
-                                        '<td id="' + rowId + '_name" style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + (device.user_name || '') + '</p></b></td>' +
-                                        '<td id="' + rowId + '_ip" style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + (device.ip_address || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.ip_address || '') + '</a></b></td>' +
-                                        '<td id="' + rowId + '_port" style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + (device.ip_address || '') + ':' + (device.port_api || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.port_api || '') + '</a></b></td>' +
-                                        '<td id="' + rowId + '_host" style="text-align: center; vertical-align: middle;"><b>' + (device.host_name || '') + '</b></td>' +
+                                        '<td id="' + rowId + '_name" style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + deviceName + '</p></b></td>' +
+                                        '<td id="' + rowId + '_ip" style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + ipAddress + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + ipAddress + '</a></b></td>' +
+                                        '<td id="' + rowId + '_port" style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + ipAddress + ':' + portApi + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + portApi + '</a></b></td>' +
+                                        '<td id="' + rowId + '_host" style="text-align: center; vertical-align: middle;"><b>' + hostName + '</b></td>' +
                                         '<td id="' + rowId + '_action" style="text-align: center; vertical-align: middle;">' +
-                                        '<button class="btn btn-danger" title="Xóa ' + (device.ip_address || '') + '" onclick="delete_IP_VBot_Server(\'' + (device.ip_address || '') + '\')"><i class="bi bi-trash"></i></button>' +
-                                        ' <button class="btn btn-primary" title="WebUI ' + (device.ip_address || '') + '" onclick="showIframeModal(\'' + (device.ip_address || '') + '\', \'' + (device.user_name || '') + '\')"><i class="bi bi-gear-wide-connected"></i></button>' +
+                                        '<button class="btn btn-danger" title="Xóa ' + ipAddress + '" onclick="delete_IP_VBot_Server(decodeURIComponent(\'' + encodedIp + '\'))"><i class="bi bi-trash"></i></button>' +
+                                        ' <button class="btn btn-primary" title="WebUI ' + ipAddress + '" onclick="showIframeModal(decodeURIComponent(\'' + encodedIp + '\'), decodeURIComponent(\'' + encodedName + '\'))"><i class="bi bi-gear-wide-connected"></i></button>' +
                                         '</td>' +
                                         '</tr>';
                                 });
@@ -58,7 +76,7 @@
                                     '</tbody>' +
                                     '</table>';
                                 document.getElementById("vbot_Scan_devices").innerHTML = tableHTML;
-                                check_Device_Status_VBot_Server();
+                                check_Device_Status_VBot_Server('on');
                                 fetchAndPopulateDevices_chatbot();
                             } else {
                                 document.getElementById("vbot_Scan_devices").innerHTML = "Không tìm thấy thiết bị nào.";
@@ -67,12 +85,12 @@
                             show_message("Đã xảy ra lỗi: " + (response.message || response.error || "Không rõ lỗi"));
                         }
                     } catch (error) {
-                        document.getElementById("vbot_Scan_devices").innerHTML = "Đã xảy ra lỗi khi xử lý dữ liệu: " + xhr.responseText;
+                        document.getElementById("vbot_Scan_devices").textContent = "Đã xảy ra lỗi khi xử lý dữ liệu: " + xhr.responseText;
                     }
                 } else {
                     try {
                         const response = JSON.parse(xhr.responseText);
-                        document.getElementById("vbot_Scan_devices").innerHTML =
+                        document.getElementById("vbot_Scan_devices").textContent =
                             response.message || response.error || ("Không thể kết nối tới máy chủ: " + xhr.status);
                     } catch (error) {
                         document.getElementById("vbot_Scan_devices").innerHTML = "Không thể kết nối tới máy chủ: " + xhr.status;
@@ -119,10 +137,12 @@
                 if (td) {
                     td.innerHTML = '<b>' + statusDot + ' <p class="text-success">' + deviceName + '</p></b>';
                 }
-                if (isOnline) {
-                    showMessagePHP('<font color="green">Thiết bị: ' + ip + ' đang <b>trực tuyến</b></font>', 7);
-                } else {
-                    showMessagePHP('<font color="red">Thiết bị: ' + ip + ' đang <b>ngoại tuyến</b></font>', 7);
+                if (chatbox_click === 'on') {
+                    if (isOnline) {
+                        showMessagePHP('<font color="green">Thiết bị: ' + ip + ' đang <b>trực tuyến</b></font>', 7);
+                    } else {
+                        showMessagePHP('<font color="red">Thiết bị: ' + ip + ' đang <b>ngoại tuyến</b></font>', 7);
+                    }
                 }
             };
             xhr.onerror = function() {
@@ -132,7 +152,9 @@
                 if (td) {
                     td.innerHTML = '<b>' + statusDot + ' <p class="text-success">' + deviceName + '</p></b>';
                 }
-                showMessagePHP('<font color="red">Thiết bị: ' + ip + ' đang <b>ngoại tuyến</b></font>', 7);
+                if (chatbox_click === 'on') {
+                    showMessagePHP('<font color="red">Thiết bị: ' + ip + ' đang <b>ngoại tuyến</b></font>', 7);
+                }
             };
             xhr.send();
         });
@@ -188,7 +210,7 @@
                     }
                 } catch (error) {
                     loading('hide');
-                    document.getElementById("vbot_Scan_devices").innerHTML = "<center><h5 class='text-danger'>Lỗi khi phân tích dữ liệu: " + error.message + "</h5></center>";
+                    document.getElementById("vbot_Scan_devices").textContent = "Lỗi khi phân tích dữ liệu: " + error.message;
                 }
             } else {
                 loading('hide');

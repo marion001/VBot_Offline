@@ -157,7 +157,7 @@ if (isset($_POST['VBot_Device_Scaner'])) {
     if (!file_exists($json_file_path)) {
         try {
             file_put_contents($json_file_path, json_encode([]), LOCK_EX);
-            @chmod($json_file_path, 0777);
+            @chmod($json_file_path, 0660);
         } catch (Exception $e) {
             error_log('VBot scanner JSON creation failed: '.$e->getMessage());
             vbotApiJsonResponse([
@@ -194,6 +194,8 @@ if (isset($_POST['VBot_Device_Scaner'])) {
     stream_set_blocking($stream, true);
     $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
     $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+    stream_set_timeout($stdout, 40);
+    stream_set_timeout($stderr, 40);
     $output = stream_get_contents($stdout);
     $error_output = stream_get_contents($stderr);
     fclose($stream);
@@ -218,35 +220,22 @@ if (isset($_POST['VBot_Device_Scaner'])) {
                     && isset($device['host_name'])
                     && isset($device['user_name']);
             });
-            if (!empty($complete_data)) {
-                try {
-                    $existing_data = json_decode(file_get_contents($json_file_path), true);
-                    if (!is_array($existing_data)) {
-                        $existing_data = [];
-                    }
-                    $ip_addresses = array_column($existing_data, 'ip_address');
-                    foreach ($complete_data as $new_device) {
-                        $index = array_search($new_device['ip_address'], $ip_addresses);
-                        if ($index !== false) {
-                            $existing_data[$index] = $new_device;
-                        } else {
-                            $existing_data[] = $new_device;
-                        }
-                    }
-                    if (!file_put_contents($json_file_path, json_encode(array_values($existing_data), JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
-                        throw new Exception('Không thể ghi dữ liệu vào file JSON.');
-                    }
-                    @chmod($json_file_path, 0777);
-                } catch (Exception $e) {
-                    error_log('VBot scanner data save failed: '.$e->getMessage());
-                    vbotApiJsonResponse([
-                        'success' => false,
-                        'message' => 'Không thể lưu dữ liệu thiết bị đã quét.',
-                        'data' => []
-                    ], 500);
+            try {
+                $complete_data = array_values($complete_data);
+                $encodedData = json_encode($complete_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($encodedData === false || !vbotAtomicWriteFile($json_file_path, $encodedData, 'VBot device scan cache')) {
+                    throw new Exception('Không thể ghi dữ liệu vào file JSON.');
                 }
+                @chmod($json_file_path, 0660);
+            } catch (Exception $e) {
+                error_log('VBot scanner data save failed: '.$e->getMessage());
+                vbotApiJsonResponse([
+                    'success' => false,
+                    'message' => 'Không thể lưu dữ liệu thiết bị đã quét.',
+                    'data' => []
+                ], 500);
             }
-            $json_output['data'] = json_decode(file_get_contents($json_file_path), true) ?? [];
+            $json_output['data'] = $complete_data;
         }
         vbotApiJsonResponse($json_output);
     } else {

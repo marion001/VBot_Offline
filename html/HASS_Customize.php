@@ -431,7 +431,7 @@ include 'html_head.php';
                                                 <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt hành động này')"></i> :</label>
                                                 <div class="col-sm-9">
                                                     <div class="form-switch">
-                                                        <input class="form-check-input" type="checkbox" name="intents[<?= $index ?>][active]" id="intents[<?= $index ?>][active]" <?= !empty($intent['active']) ? 'checked' : '' ?>>
+                                                        <input class="form-check-input border-success" type="checkbox" name="intents[<?= $index ?>][active]" id="intents[<?= $index ?>][active]" <?= !empty($intent['active']) ? 'checked' : '' ?>>
                                                     </div>
                                                 </div>
                                             </div>
@@ -653,7 +653,7 @@ include 'html_head.php';
                 '<label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message(\'Bật hoặc Tắt để kích hoạt hành động này\')"></i>:</label>' +
                 '<div class="col-sm-9">' +
                 '<div class="form-switch">' +
-                '<input class="form-check-input" type="checkbox" checked name="intents[' + (sectionCounter - 1) + '][active]" id="intents[' + (sectionCounter - 1) + '][active]">' +
+                '<input class="form-check-input border-success" type="checkbox" checked name="intents[' + (sectionCounter - 1) + '][active]" id="intents[' + (sectionCounter - 1) + '][active]">' +
                 '</div>' +
                 '</div>' +
                 '</div>' +

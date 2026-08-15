@@ -302,31 +302,44 @@ function highlightCode(code) {
     return code;
 }
 
-// Chạy Test Code
+let currentApiTestRequest = null;
+
+// Chạy request đã chọn mà không thực thi mã JavaScript tùy ý.
 document.getElementById("run_api_code").onclick = function() {
-    var code = document.getElementById("code_send_api_test").textContent || document.getElementById("code_send_api_test").innerText;
-    try {
-        (function() {
-            try {
-                eval(code);
-            } catch (e) {
-                document.getElementById('reponse_tets_code_api').textContent = 'Lỗi xảy ra: ' + e;
-            }
-        })();
-    } catch (e) {
-        document.getElementById('reponse_tets_code_api').textContent = 'Lỗi Thực Thi Mã: ' + e;
+    if (!currentApiTestRequest) {
+        document.getElementById('reponse_tets_code_api').textContent = 'Chưa chọn API để kiểm tra.';
+        return;
     }
+    loading('show');
+    fetch(currentApiTestRequest.url, {
+        method: currentApiTestRequest.method,
+        headers: {'Content-Type': 'application/json'},
+        body: ['GET', 'HEAD'].includes(currentApiTestRequest.method) ? undefined : JSON.stringify(currentApiTestRequest.body)
+    })
+    .then(async response => {
+        const responseText = await response.text();
+        let responseData;
+        try { responseData = JSON.parse(responseText); } catch (_) { responseData = responseText; }
+        document.getElementById('reponse_tets_code_api').textContent =
+            'HTTP ' + response.status + '\n' + (typeof responseData === 'string' ? responseData : JSON.stringify(responseData, null, 4));
+    })
+    .catch(error => {
+        document.getElementById('reponse_tets_code_api').textContent = 'Lỗi gửi yêu cầu API: ' + error.message;
+    })
+    .finally(() => loading('hide'));
 };
 
 // onclick xem nội dung file json
 function test_Code_API(json_body, method, url, name) {
-    if (!method || !url || !name || !json_body) {
+    if (!method || !url || !name) {
 		show_message("Thiếu dữ liệu đầu vào để  kiểm tra API");
         return;
     }
     let formattedJson;
     try {
-        if (typeof json_body === 'string') {
+        if (json_body === '' || json_body == null) {
+            formattedJson = "{}";
+        } else if (typeof json_body === 'string') {
             formattedJson = JSON.stringify(JSON.parse(json_body), null, 4);
         } else {
             formattedJson = JSON.stringify(json_body, null, 4);
@@ -335,6 +348,11 @@ function test_Code_API(json_body, method, url, name) {
 		show_message("Phản hồi JSON không hợp lệ: " +e);
         formattedJson = "{}";
     }
+    currentApiTestRequest = {
+        body: typeof json_body === 'string' ? JSON.parse(formattedJson) : json_body,
+        method: String(method).toUpperCase(),
+        url: String(url)
+    };
 const apiCode = 
   "var API_VBot = '" + url + "';\n\n" +
   "var data = " +
@@ -381,6 +399,8 @@ function showDetails(index) {
     const urlzz = item.request.url.raw; 
 	const url = urlzz.replace(/(^https?:\/\/)[^\/]+/, '$1<?php echo $Domain . ":" . $Config["api"]["port"]; ?>');
     const body = item.request.body?.raw || '';
+    currentApiTestRequest = null;
+    document.getElementById('reponse_tets_code_api').textContent = '- Chưa có dữ liệu phản hồi';
     let curl = "curl -X " + method + " '" + url + "'" + (body ? " -H 'Content-Type: application/json' --data '" + body.replace(/'/g, "\\'") + "'" : "");
     // Cập nhật nội dung hiển thị chi tiết API
     document.getElementById('detailsContainer').innerHTML =
@@ -391,7 +411,7 @@ function showDetails(index) {
             "<pre class='bg-light p-2 rounded' id='url" + index + "'><a href='" + url + "' target='_bank'>" + url + "</a></pre>" +
             "<span class='copy-icon' title='Sao chép dữ liệu' onclick=\"copyToClipboard('url" + index + "')\">📋</span>" +
         "</div>" +
-       "<p><strong>Dữ Liệu Gửi (Body):</strong> <button class='btn btn-danger rounded-pill btn-sm' onclick='test_Code_API(" + body + ", \"" + method + "\", \"" + url + "\", \""+item.name+"\")'>Test API</button></p>" +
+       "<p><strong>Dữ Liệu Gửi (Body):</strong> <button type='button' id='testApiButton' class='btn btn-danger rounded-pill btn-sm'>Test API</button></p>" +
         "<div class='pre-container'>" +
             "<pre class='bg-light p-2 rounded' id='body" + index + "'>" + body + "</pre>" +
             "<span class='copy-icon' title='Sao chép dữ liệu' onclick=\"copyToClipboard('body" + index + "')\">📋</span>" +
@@ -410,6 +430,10 @@ function showDetails(index) {
             "<pre class='bg-light p-2 rounded' id='code" + index + "'>" + curl + "</pre>" +
             "<span class='copy-icon' title='Sao chép dữ liệu' onclick=\"copyToClipboard('code" + index + "')\">📋</span>" +
         "</div>";
+
+    document.getElementById('testApiButton').addEventListener('click', function() {
+        test_Code_API(body, method, url, item.name);
+    });
 }
   
 function updateCodeDisplay(index) {

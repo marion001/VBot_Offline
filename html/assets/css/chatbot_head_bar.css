@@ -105,3 +105,59 @@
         .icon-group_chatbot i {
             cursor: pointer;
         }
+
+        /* Trên điện thoại, giữ các icon header trên một hàng và cho phép vuốt
+           ngang thay vì co nhỏ hoặc tràn ra ngoài màn hình. */
+        @media (max-width: 768px) {
+            #vbot_header_bar {
+                min-width: 0;
+                max-width: calc(100vw - 92px);
+            }
+
+            #vbot_header_bar > ul {
+                width: 100%;
+                flex-wrap: nowrap !important;
+                justify-content: flex-start;
+                overflow-x: auto;
+                overflow-y: hidden;
+                padding: 0 2px 5px;
+                scroll-behavior: smooth;
+                scroll-snap-type: x proximity;
+                scrollbar-width: thin;
+                scrollbar-color: #0d6efd transparent;
+                -webkit-overflow-scrolling: touch;
+                overscroll-behavior-inline: contain;
+            }
+
+            #vbot_header_bar > ul::-webkit-scrollbar {
+                height: 4px;
+            }
+
+            #vbot_header_bar > ul::-webkit-scrollbar-thumb {
+                background-color: #0d6efd;
+                border-radius: 10px;
+            }
+
+            #vbot_header_bar > ul > * {
+                flex: 0 0 auto;
+                scroll-snap-align: start;
+            }
+
+            /* Dropdown cần thoát khỏi khung cuộn để menu Thông báo, Power và
+               Avatar không bị overflow cắt mất trên màn hình nhỏ. */
+            #vbot_header_bar > ul.vbot-header-dropdown-open {
+                overflow: visible !important;
+            }
+
+            #vbot_header_bar .dropdown-menu.show {
+                z-index: 1100;
+            }
+
+            #vbot_header_bar .nav-icon {
+                margin-right: 14px;
+            }
+
+            #vbot_header_bar #container_time {
+                white-space: nowrap;
+            }
+        }

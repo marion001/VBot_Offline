@@ -794,6 +794,7 @@
         "device_activation_code": "",
         "tts_time_out": 13,
         "reconnection_timeout": 3,
+        "auto_reconnect": false,
         "tts_stream_silence_time": 5,
         "version_active": "2.2.3",
         "call_tools_file": "resource/xiaozhi/xiaozhi_tools.json",
@@ -823,6 +824,9 @@
             "active": false,
             "address": "ee:29:06:d4:b9:4a"
         },
-        "pcm_output_gain": 0.3
+        "pcm_output_gain": 0.3,
+        "assistant_text_max_length": 12,
+        "assistant_input_mode": "audio",
+        "assistant_pcm_frame_delay_ms": 5
     }
 }

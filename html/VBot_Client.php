@@ -282,6 +282,16 @@ if ($Config['contact_info']['user_login']['active']) {
             xhr.send();
         }
 
+		function escapeVBotClientHtml(value) {
+			return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({
+				'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+			})[character]);
+		}
+
+		function vbotClientJsArgument(value) {
+			return escapeVBotClientHtml(JSON.stringify(String(value == null ? '' : value)));
+		}
+
 		//Hiển thị thông in các thiết bị VBot client
         function displayDeviceData(data) {
             if (!Array.isArray(data)) {
@@ -315,27 +325,32 @@ if ($Config['contact_info']['user_login']['active']) {
                 '</thead>' +
                 '<tbody>';
             data.forEach(function(device, index) {
-                const versionUrl = device.VBOT_CHECK_API_VERSION || device.update.version_url;
+                const deviceIpRaw = device.ip_address || device.ip || '';
+                const serverIpRaw = device.server?.vbot_server_ip || device.server?.host || '';
+                const firmwareUrlRaw = device.firmware_url || device.update?.bin_url || '';
+                const versionUrl = device.VBOT_CHECK_API_VERSION || device.update?.version_url;
+                const deviceIp = escapeVBotClientHtml(deviceIpRaw);
+                const serverIp = escapeVBotClientHtml(serverIpRaw);
                 tableHTML +=
                     '<tr>' +
-                    '<td style="text-align: center; vertical-align: middle;"><span class="status-dot" id="status-' + index + '"></span>' + (device.client_name || '') + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;"><span class="status-dot" id="status-' + index + '"></span>' + escapeVBotClientHtml(device.client_name) + '</td>' +
 
 					'<td style="text-align: center; vertical-align: middle;">' +
 					'<a href="' +
-					'http://' + (device.ip_address || device.ip || '') +
+					'http://' + deviceIp +
 					(((device.chip?.manufacturer || '').toLowerCase() === 'phicomm') ? ':8081' : '') +
 					'" target="_blank">' +
-					(device.ip_address || device.ip || '') +
+					deviceIp +
 					//(((device.chip?.manufacturer || '').toLowerCase() === 'phicomm') ? ':8081' : '') +
 					' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
 
-					'<td style="text-align: center; vertical-align: middle;"><a href="http://' + (device.server.vbot_server_ip || device.server.host) + '" target="_blank">' + (device.server.vbot_server_ip || device.server.socket) + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
-                    '<td style="text-align: center; vertical-align: middle;" id="device-version-' + index + '">' + (device.version || '') + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;">' + (device.chip_model || device.chip.model) + ' ' + (device.chip_suffix || '') + '</td>' +
+					'<td style="text-align: center; vertical-align: middle;"><a href="http://' + serverIp + '" target="_blank" rel="noopener noreferrer">' + escapeVBotClientHtml(device.server?.vbot_server_ip || device.server?.socket) + ' <i class="bi bi-box-arrow-up-right"></i></a></td>' +
+                    '<td style="text-align: center; vertical-align: middle;" id="device-version-' + index + '">' + escapeVBotClientHtml(device.version) + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + escapeVBotClientHtml(device.chip_model || device.chip?.model) + ' ' + escapeVBotClientHtml(device.chip_suffix) + '</td>' +
                     '<td style="text-align: center; vertical-align: middle;">' +
-                    '<button class="btn btn-info ping-btn" data-ip="' + (device.ip_address || device.ip || '') + '" data-index="' + index + '" title="Kiểm tra trạng thái"><i class="bi bi-wifi"></i></button> ' +
-                    '<button type="button" class="btn btn-warning" onclick="showJsonData(\'' + (device.ip_address || device.ip || '') + '\')" title="Xem dữ liệu cấu hình json"><i class="bi bi-filetype-json"></i></button> ' +
-                    '<button class="btn btn-danger delete-btn" data-ip="' + (device.ip_address || device.ip || '') + '" title="Xóa Client: ' + (device.ip_address || device.ip || '') + '"><i class="bi bi-trash"></i></button> ' +
+                    '<button class="btn btn-info ping-btn" data-ip="' + deviceIp + '" data-index="' + index + '" title="Kiểm tra trạng thái"><i class="bi bi-wifi"></i></button> ' +
+                    '<button type="button" class="btn btn-warning" onclick="showJsonData(' + vbotClientJsArgument(deviceIpRaw) + ')" title="Xem dữ liệu cấu hình json"><i class="bi bi-filetype-json"></i></button> ' +
+                    '<button class="btn btn-danger delete-btn" data-ip="' + deviceIp + '" title="Xóa Client: ' + deviceIp + '"><i class="bi bi-trash"></i></button> ' +
                     '</td>' +
                     '</tr>';
                 //Check version
@@ -352,15 +367,27 @@ if ($Config['contact_info']['user_login']['active']) {
 							latestVersion = versionData.build_date;
 						}
 						const currentVersion = device.version || '';
-						let versionHTML = currentVersion;
+						const versionCell = document.querySelector('#device-version-' + index);
+						versionCell.replaceChildren(document.createTextNode(currentVersion));
 						if (latestVersion && !compareVersions(currentVersion, latestVersion)) {
-							versionHTML +=
-								' <span class="update-link" title="Có phiên bản mới: ' + latestVersion + '">Có phiên bản mới: ' + latestVersion + '</span>' +
-								' <br/><button type="button" class="btn btn-primary update-link_upgrade" onclick="start_upgrade_firmware(\'' + (device.ip_address || device.ip || '') + '\', \'' + (device.firmware_url || device.update.bin_url || '') + '\')"> Nâng Cấp <i class="bi bi-arrow-up-circle"></i></button>';
+							const updateLabel = document.createElement('span');
+							updateLabel.className = 'update-link';
+							updateLabel.title = 'Có phiên bản mới: ' + latestVersion;
+							updateLabel.textContent = ' Có phiên bản mới: ' + latestVersion;
+							const upgradeButton = document.createElement('button');
+							upgradeButton.type = 'button';
+							upgradeButton.className = 'btn btn-primary update-link_upgrade';
+							upgradeButton.textContent = 'Nâng Cấp ';
+							upgradeButton.addEventListener('click', () => start_upgrade_firmware(deviceIpRaw, firmwareUrlRaw));
+							upgradeButton.insertAdjacentHTML('beforeend', '<i class="bi bi-arrow-up-circle"></i>');
+							versionCell.append(updateLabel, document.createElement('br'), upgradeButton);
 						} else {
-							versionHTML += ' <span class="latest-version" title="Phiên bản mới nhất"> Đã cập nhật</span>';
+							const latestLabel = document.createElement('span');
+							latestLabel.className = 'latest-version';
+							latestLabel.title = 'Phiên bản mới nhất';
+							latestLabel.textContent = ' Đã cập nhật';
+							versionCell.appendChild(latestLabel);
 						}
-						document.querySelector('#device-version-' + index).innerHTML = versionHTML;
 					})
 
                     .catch(error => {
@@ -373,7 +400,7 @@ if ($Config['contact_info']['user_login']['active']) {
                             showMessagePHP('Lỗi kiểm tra phiên bản mới từ GitHub: ' + error.message, 5);
                             //console.log('Fetch error:', error);
                         }
-                        document.querySelector('#device-version-' + index).innerHTML = device.version || '';
+                        document.querySelector('#device-version-' + index).textContent = device.version || '';
                     });
                 // Ping device initially
                 pingDevice(device.ip_address || device.ip || '', index);
@@ -892,7 +919,10 @@ if ($Config['contact_info']['user_login']['active']) {
                         throw new Error(data.error || 'Không thể lấy dữ liệu từ client');
                     }
                     const formattedJson = JSON.stringify(data, null, 2);
-                    document.getElementById('jsonContent').innerHTML = '<code class="language-json">' + formattedJson + '</code>';
+                    const jsonCode = document.createElement('code');
+                    jsonCode.className = 'language-json';
+                    jsonCode.textContent = formattedJson;
+                    document.getElementById('jsonContent').replaceChildren(jsonCode);
                     Prism.highlightAllUnder(document.getElementById('jsonContent'));
                     const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));
                     jsonModal.show();
@@ -922,7 +952,7 @@ if ($Config['contact_info']['user_login']['active']) {
                 })
                 .catch(error => {
                     loading('hide');
-                    document.getElementById('vbot_Client_Scan_devices').innerHTML = '<center>Lỗi khi tải dữ liệu từ server: ' + error.message + '</center>';
+                    document.getElementById('vbot_Client_Scan_devices').textContent = 'Lỗi khi tải dữ liệu từ server: ' + error.message;
                 });
         });
     </script>

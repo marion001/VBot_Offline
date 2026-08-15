@@ -1,8 +1,8 @@
 {
-    "version": "1.2.1",
+    "version": "1.2.2",
     "projectName": "Program VBot Offline",
-    "description": "Sửa lỗi hệ thống VBot, Giảm dung lượng, dữ liệu rác thừa của toàn bộ file chương trình VBot sau khi biên dịch chương trình thành công",
-    "releaseDate": "10/08/2026",
+    "description": "Sửa Lỗi Trợ Lý Xiaozhi, Nâng cấp xử lý Lịch Trình Thông Báo Scheduler + Giao Diện Cấu Hình, Nâng Cấp Xiaozhi MCP. Và các thay đổi tối ưu khác",
+    "releaseDate": "15/08/2026",
     "changes": [
         {
             "type": "feature",

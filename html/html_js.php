@@ -1655,7 +1655,6 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             selectElement.appendChild(option);
                         }
                     });
-                    check_Device_Status_VBot_Server('on');
                 } catch (e) {
                     showMessagePHP('Lỗi: Không thể phân tích JSON - ' + e.message, 5);
                 }
@@ -2133,7 +2132,15 @@ function command_php(command_line, reload_page = null) {
     };
 
     window.webuiLogConfig = {
-        apiUrl: <?php echo json_encode($URL_API_VBOT, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>
+        apiUrl: <?php echo json_encode($URL_API_VBOT, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
+        errorLogUrl: <?php echo json_encode(
+            'includes/php_ajax/Show_file_path.php?read_file_path=1&file=' . rawurlencode($VBot_Offline . 'resource/log/Vbot_error.log'),
+            JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE
+        ); ?>,
+        errorLogPath: <?php echo json_encode($VBot_Offline . 'resource/log/Vbot_error.log', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>,
+        fileActionUrl: 'includes/php_ajax/Show_file_path.php',
+        fileDownloadUrl: 'includes/php_ajax/Download_file_path.php',
+        csrfToken: window.VBOT_CSRF_TOKEN || ''
     };
     window.loadWebuiLogModule = function() {
         if (window.webuiLogModulePromise) {
@@ -2152,6 +2159,34 @@ function command_php(command_line, reload_page = null) {
         });
         return window.webuiLogModulePromise;
     };
+    window.openWebuiErrorLog = function(forceReload) {
+        return window.loadWebuiLogModule().then(function() {
+            if (typeof window.loadVbotErrorLog === 'function') {
+                return window.loadVbotErrorLog(forceReload === true);
+            }
+            // Có thể trình duyệt đang giữ module logs của phiên bản cũ. Nạp lại
+            // một lần với cache-buster thay vì buộc người dùng xóa cache.
+            window.webuiLogModulePromise = null;
+            return new Promise(function(resolve, reject) {
+                var script = document.createElement('script');
+                script.src = 'assets/js/webui-logs.js?v=<?php echo rawurlencode((string)$Cache_UI_Ver); ?>&reload=' + Date.now();
+                script.onload = function() {
+                    if (typeof window.loadVbotErrorLog !== 'function') {
+                        reject(new Error('Module đọc Vbot_error.log chưa sẵn sàng'));
+                        return;
+                    }
+                    window.loadVbotErrorLog(forceReload === true);
+                    resolve();
+                };
+                script.onerror = function() {
+                    reject(new Error('Không thể tải lại module logs'));
+                };
+                document.head.appendChild(script);
+            });
+        }).catch(function(error) {
+            show_message('Không thể đọc Vbot_error.log: ' + error.message);
+        });
+    };
     document.addEventListener('change', function(event) {
         if (
             event.target
@@ -2161,6 +2196,22 @@ function command_php(command_line, reload_page = null) {
             window.loadWebuiLogModule();
         }
     }, true);
+
+    //Tránh khung cuộn ngang mobile cắt mất dropdown Thông báo/Power/Avatar.
+    document.addEventListener('show.bs.dropdown', function(event) {
+        var headerBar = event.target && event.target.closest('#vbot_header_bar');
+        var iconRow = headerBar && headerBar.querySelector(':scope > ul');
+        if (iconRow) {
+            iconRow.classList.add('vbot-header-dropdown-open');
+        }
+    });
+    document.addEventListener('hidden.bs.dropdown', function(event) {
+        var headerBar = event.target && event.target.closest('#vbot_header_bar');
+        var iconRow = headerBar && headerBar.querySelector(':scope > ul');
+        if (iconRow && !headerBar.querySelector('.dropdown-menu.show')) {
+            iconRow.classList.remove('vbot-header-dropdown-open');
+        }
+    });
 
 	//Tìm kiếm dữ liệu trong trang
 	document.addEventListener('DOMContentLoaded', function() {

@@ -337,6 +337,7 @@ if (!file_exists($mcp_json_file)) {
 
 //Chỉ tải nội dung file khi người dùng mở trình soạn thảo.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['load_mcp_plugin_file'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $plugin_directory_name = $_POST['mcp_plugin_directory'] ?? '';
     $plugin_file_name = $_POST['mcp_plugin_file'] ?? '';
     $plugin_file_path = resolve_mcp_plugin_file(
@@ -360,16 +361,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['load_mcp_plugin_file'
             $response['message'] = 'Không thể đọc nội dung file MCP plugin';
         }
     }
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(
-        $response,
-        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
-    );
-    exit;
+    vbotApiJsonResponse($response, $response['success'] ? 200 : 404);
 }
 
 //Lưu nội dung file Python/JSON của MCP plugin từ trình soạn thảo modal.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_mcp_plugin_file'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $plugin_directory_name = $_POST['mcp_plugin_directory'] ?? '';
     $plugin_file_name = $_POST['mcp_plugin_file'] ?? '';
     $plugin_file_content = $_POST['mcp_plugin_file_content'] ?? '';
@@ -405,17 +402,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_mcp_plugin_file'
         }
 
     if (isset($_POST['mcp_plugin_ajax'])) {
-        header('Content-Type: application/json; charset=utf-8');
-        echo json_encode(
-            [
-                'success' => $plugin_file_save_success,
-                'message' => $plugin_file_save_message
-            ],
-            JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+        vbotApiJsonResponse(
+            ['success' => $plugin_file_save_success, 'message' => $plugin_file_save_message],
+            $plugin_file_save_success ? 200 : 400
         );
-        exit;
     }
     $messages[] = $plugin_file_save_message;
+}
+
+//Chỉnh sửa mô tả MCP hệ thống trực tiếp trong xiaozhi_tools.json.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_builtin_mcp_description'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    $tool_name = trim((string) ($_POST['builtin_mcp_tool_name'] ?? ''));
+    $description = trim((string) ($_POST['builtin_mcp_description'] ?? ''));
+    $description_length = function_exists('mb_strlen') ? mb_strlen($description, 'UTF-8') : strlen($description);
+    if ($tool_name === '' || $description === '' || $description_length > 4000) {
+        vbotApiJsonResponse([
+            'success' => false,
+            'message' => 'Tên MCP hoặc mô tả không hợp lệ; mô tả phải từ 1 đến 4000 ký tự.'
+        ], 400);
+    }
+    $tools_data = json_decode((string) @file_get_contents($mcp_json_file), true);
+    if (!is_array($tools_data) || !isset($tools_data['tools']) || !is_array($tools_data['tools'])) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'xiaozhi_tools.json không hợp lệ.'], 500);
+    }
+    $updated = false;
+    foreach ($tools_data['tools'] as &$tool) {
+        if (is_array($tool) && isset($tool['name']) && hash_equals((string) $tool['name'], $tool_name)) {
+            $tool['description'] = $description;
+            normalize_mcp_empty_properties($tool);
+            $updated = true;
+            break;
+        }
+    }
+    unset($tool);
+    if (!$updated) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không tìm thấy MCP hệ thống: '.$tool_name], 404);
+    }
+    $json_output = json_encode(
+        $tools_data,
+        JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+    $backup_file = $mcp_json_file.'.bak';
+    if ($json_output === false || !@copy($mcp_json_file, $backup_file)) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể tạo bản sao xiaozhi_tools.json.bak nên chưa lưu mô tả.'], 500);
+    }
+    if (!atomic_write_mcp_json($mcp_json_file, $json_output)) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Không thể ghi mô tả vào xiaozhi_tools.json.'], 500);
+    }
+    vbotApiJsonResponse([
+        'success' => true,
+        'tool_name' => $tool_name,
+        'description' => $description,
+        'message' => 'Đã cập nhật mô tả MCP: '.$tool_name.' (đã tạo bản sao .bak)'
+    ]);
 }
 
 
@@ -641,8 +681,8 @@ echo '<thead>
       <tbody>';
 $stt_mcp = 1;
 foreach ($MCP_data_json['tools'] as $tool) {
-    $name = htmlspecialchars($tool['name']);
-    $description = htmlspecialchars($tool['description'] ?? '');
+    $name = htmlspecialchars($tool['name'], ENT_QUOTES, 'UTF-8');
+    $description = htmlspecialchars($tool['description'] ?? '', ENT_QUOTES, 'UTF-8');
     $active = isset($enabled_mcp_tools[$tool['name']]) ? 'checked' : '';
     echo "<tr>
             <th scope='row' style='text-align: center; vertical-align: middle;'>{$stt_mcp}</th>
@@ -652,7 +692,13 @@ foreach ($MCP_data_json['tools'] as $tool) {
                 <input class='form-check-input border-success' type='checkbox' name='{$name}' id='{$name}' {$active}>
               </div>
             </td>
-            <td style='vertical-align: middle;' class='text-primary'>{$description}</td>
+            <td style='vertical-align: middle;' class='text-primary'>
+              <span class='builtin-mcp-description-text'>{$description}</span>
+              <button type='button' class='btn btn-sm btn-outline-success ms-2 builtin-mcp-description-edit'
+                      title='Chỉnh sửa mô tả MCP' data-tool='{$name}' data-description='{$description}'>
+                <i class='bi bi-pencil-square'></i>
+              </button>
+            </td>
           </tr>";
     $stt_mcp++;
 }
@@ -808,6 +854,28 @@ if (empty($MCP_plugins)) {
             </div>
         </div>
     </div>
+    <div class="modal fade" id="myModal_Builtin_MCP_Description" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <form id="builtin_mcp_description_form">
+                    <div class="modal-header">
+                        <h5 class="modal-title text-primary"><i class="bi bi-pencil-square"></i> Chỉnh sửa mô tả: <span id="builtin_mcp_description_title"></span></h5>
+                        <button type="button" class="close btn btn-danger" onclick="$('#myModal_Builtin_MCP_Description').modal('hide');"><i class="bi bi-x-circle-fill"></i> Đóng</button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="builtin_mcp_tool_name" id="builtin_mcp_tool_name">
+                        <textarea class="form-control border-primary" rows="10" maxlength="4000" required
+                                  name="builtin_mcp_description" id="builtin_mcp_description"></textarea>
+                        <div class="form-text">Mô tả này được gửi tới server XiaoZhi để hướng dẫn khi nào và cách gọi MCP. Tối đa 4000 ký tự.</div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" id="builtin_mcp_description_save" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu mô tả</button>
+                        <button type="button" class="btn btn-secondary rounded-pill" onclick="$('#myModal_Builtin_MCP_Description').modal('hide');">Đóng</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     <div class="modal fade" id="myModal_Create_MCP_Plugin" tabindex="-1" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -958,6 +1026,64 @@ if (empty($MCP_plugins)) {
         );
         var mcpPluginSavedContent = '';
         var mcpPluginContentLoaded = false;
+        //Luôn gọi thẳng PHP WebUI; không phụ thuộc URL hiện tại hoặc API VBot Python.
+        var mcpPluginPhpEndpoint = 'XiaoZhi_MCP.php';
+        var currentBuiltinMcpDescriptionButton = null;
+
+        document.querySelectorAll('.builtin-mcp-description-edit').forEach(function(button) {
+            button.addEventListener('click', function() {
+                currentBuiltinMcpDescriptionButton = this;
+                document.getElementById('builtin_mcp_tool_name').value = this.dataset.tool || '';
+                document.getElementById('builtin_mcp_description_title').textContent = this.dataset.tool || '';
+                document.getElementById('builtin_mcp_description').value = this.dataset.description || '';
+                $('#myModal_Builtin_MCP_Description').modal('show');
+                setTimeout(function() {
+                    document.getElementById('builtin_mcp_description').focus();
+                }, 250);
+            });
+        });
+
+        document.getElementById('builtin_mcp_description_form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            if (!this.reportValidity()) return;
+            var saveButton = document.getElementById('builtin_mcp_description_save');
+            var originalButtonHtml = saveButton.innerHTML;
+            var formData = new FormData(this);
+            formData.append('save_builtin_mcp_description', '1');
+            saveButton.disabled = true;
+            saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
+            fetch(mcpPluginPhpEndpoint, {
+                method: 'POST',
+                body: formData,
+                credentials: 'same-origin',
+                headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''}
+            })
+            .then(function(response) {
+                return response.text().then(function(responseText) {
+                    var result;
+                    try { result = JSON.parse(responseText); }
+                    catch (error) { throw new Error('PHP trả về dữ liệu không phải JSON (HTTP ' + response.status + ')'); }
+                    if (!response.ok || !result.success) throw new Error(result.message || ('HTTP ' + response.status));
+                    return result;
+                });
+            })
+            .then(function(result) {
+                if (currentBuiltinMcpDescriptionButton) {
+                    currentBuiltinMcpDescriptionButton.dataset.description = result.description;
+                    var descriptionElement = currentBuiltinMcpDescriptionButton.parentElement.querySelector('.builtin-mcp-description-text');
+                    if (descriptionElement) descriptionElement.textContent = result.description;
+                }
+                $('#myModal_Builtin_MCP_Description').modal('hide');
+                showMessagePHP(result.message, 3);
+            })
+            .catch(function(error) {
+                showMessagePHP('Lỗi lưu mô tả MCP: ' + error.message, 5);
+            })
+            .finally(function() {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalButtonHtml;
+            });
+        });
 
         var createMcpDirectoryInput = document.getElementById('mcp_create_directory');
         var createMcpToolNameInput = document.getElementById('mcp_create_tool_name');
@@ -1132,10 +1258,11 @@ if (empty($MCP_plugins)) {
                 selectedButton.disabled = true;
                 mcpPluginContentLoaded = false;
                 mcpPluginEditor.setValue('Đang tải nội dung file...');
-                fetch(window.location.href, {
+                fetch(mcpPluginPhpEndpoint, {
                     method: 'POST',
                     body: loadData,
-                    credentials: 'same-origin'
+                    credentials: 'same-origin',
+                    headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''}
                 })
                 .then(function(response) {
                     if (!response.ok) {
@@ -1194,10 +1321,11 @@ if (empty($MCP_plugins)) {
             saveButton.disabled = true;
             saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
 
-            fetch(window.location.href, {
+            fetch(mcpPluginPhpEndpoint, {
                 method: 'POST',
                 body: formData,
-                credentials: 'same-origin'
+                credentials: 'same-origin',
+                headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''}
             })
             .then(function(response) {
                 if (!response.ok) {

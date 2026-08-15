@@ -1124,6 +1124,19 @@ function setBleButtons(enabled) {
 
 //Cập nhật hiển thị danh sách thiết bị bluetooth đang kết nối
 let bluetoothSelectOpen = false;
+function getBluetoothAdapterName(device) {
+    if (device && device.adapter) {
+        return String(device.adapter);
+    }
+    const path = String((device && device.path) || '');
+    const match = path.match(/\/(hci\d+)(?:\/|$)/i);
+    return match ? match[1].toLowerCase() : 'N/A';
+}
+
+function formatBluetoothDeviceLabel(device) {
+    return String((device && device.name) || 'Unknown Device') + ' (' + getBluetoothAdapterName(device) + ')';
+}
+
 function renderBluetoothStatus(bluetooth) {
 	renderBluetoothActive(bluetooth);
     const statusEl = document.getElementById('bluetooth_status');
@@ -1142,7 +1155,7 @@ function renderBluetoothStatus(bluetooth) {
         return;
     }
     if (devices.length === 1) {
-        statusEl.innerHTML ='<span class="text-success">' + devices[0].name + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;" title="Nhấn để ngắt kết nối Bluetooth với thiết bị đang kết nối hiện tại">Ngắt kết nối</button>';
+        statusEl.innerHTML ='<span class="text-success">' + formatBluetoothDeviceLabel(devices[0]) + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;" title="Nhấn để ngắt kết nối Bluetooth với thiết bị đang kết nối hiện tại">Ngắt kết nối</button>';
 		setBleButtons(true);
         return;
     }
@@ -1155,7 +1168,7 @@ function renderBluetoothStatus(bluetooth) {
 				'onchange="bluetooth_control(\'receive_signal\', this.value)">';
 
     devices.forEach(function(device) {
-        html += '<option value="' + device.path + '"' + (device.path === bluetooth.device_path ? ' selected' : '') + '>' + device.name + '</option>';
+        html += '<option value="' + device.path + '"' + (device.path === bluetooth.device_path ? ' selected' : '') + '>' + formatBluetoothDeviceLabel(device) + '</option>';
     });
     html += '</select>';
     statusEl.innerHTML = html;
@@ -1316,10 +1329,17 @@ function update_index_data(data){
 							)
 					)
 			);
-            //Cập nhật giá trị full time
-            fullTime = data.media_player.full_time;
+            // Bluetooth cung cấp tổng thời lượng qua metadata AVRCP Track.Duration;
+            // media nội bộ tiếp tục dùng thời lượng do VLC trả về.
+            const bluetoothDuration = Number(data.bluetooth?.song_duration) || 0;
+            const displayedCurrentDuration = mediaSourceKind === 'bluetooth'
+              ? 0
+              : (Number(data.media_player.current_duration) || 0);
+            fullTime = mediaSourceKind === 'bluetooth'
+              ? bluetoothDuration
+              : (Number(data.media_player.full_time) || 0);
             if (mediaIsPlaying || mediaIsPaused) {
-              updateDisplay_SongNhac(true);
+              updateDisplay_SongNhac(true, mediaIsPaused);
             } else {
               updateDisplay_SongNhac(false);
             }
@@ -1350,9 +1370,9 @@ function update_index_data(data){
               //Cập nhật volume khi chuột không trong vùng của nó
               let progressBar = document.getElementById('progress-bar');
               progressBar.max = fullTime;
-              progressBar.value = data.media_player.current_duration;
+              progressBar.value = displayedCurrentDuration;
               let timeInfo = document.getElementById('time-info');
-              timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(data.media_player.current_duration) + '</font> / ' + formatTime_Player(fullTime);
+              timeInfo.innerHTML = '<font color=blue>' + formatTime_Player(displayedCurrentDuration) + '</font> / ' + formatTime_Player(fullTime);
             }
           } else {
             document.getElementById('div_message_error').style.display = 'block';
@@ -1921,6 +1941,7 @@ function update_index_data(data){
   <script>
     //Hiệu Ứng Sóng Nhạc Khi Phát Media Player
     let currentStatus_SongNHAC = false;
+    let isPaused_SongNHAC = false;
     let previousStatus_SongNHAC = null;
     const canvas_SN = document.getElementById("waveCanvas_songNhac");
     const ctx = canvas_SN.getContext("2d");
@@ -1970,17 +1991,26 @@ function update_index_data(data){
           else ctx.lineTo(x, y);
         }
         ctx.stroke();
-        time_SongNhac += 0.05;
+        if (!isPaused_SongNHAC) {
+          time_SongNhac += 0.05;
+        }
       } else {
         document.getElementById("waveContainer_song_nhac").style.display = "none";
       }
       requestAnimationFrame(drawWaves);
     }
 
-    function updateDisplay_SongNhac(status_SN) {
-      if (status_SN === previousStatus_SongNHAC) return;
-      previousStatus_SongNHAC = status_SN;
+    function updateDisplay_SongNhac(status_SN, paused_SN = false) {
+      const nextStatus = `${status_SN}:${paused_SN}`;
+      if (nextStatus === previousStatus_SongNHAC) return;
+      previousStatus_SongNHAC = nextStatus;
       currentStatus_SongNHAC = status_SN;
+      isPaused_SongNHAC = status_SN && paused_SN;
+      // Khi tải trang trong lúc media đã pause, dựng một khung sóng rõ ràng
+      // thay vì giữ pha 0 (hai đường sóng gần như phẳng).
+      if (isPaused_SongNHAC && time_SongNhac === 0) {
+        time_SongNhac = 1.25;
+      }
     }
 
     //Khởi động vòng vẽ sóng và list thiết bị dùng cho tts

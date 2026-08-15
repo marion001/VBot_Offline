@@ -96,18 +96,18 @@ include 'html_head.php';
           if (response.success) {
             showMessagePHP("Đã tải dữ liệu log", 3);
             if (response.data.trim() !== "") {
-              document.getElementById('logsOutput').innerHTML = response.data;
+              document.getElementById('logsOutput').value = response.data;
             } else {
-              document.getElementById('logsOutput').innerHTML = 'Không có dữ liệu trong file log: ' + fileName;
+              document.getElementById('logsOutput').value = 'Không có dữ liệu trong file log: ' + fileName;
             }
           }
         } else {
-          document.getElementById('logsOutput').innerHTML = 'Không thể tải dữ liệu từ server.';
+          document.getElementById('logsOutput').value = 'Không thể tải dữ liệu từ server.';
         }
       };
       xhr.send();
     } else {
-      document.getElementById('logsOutput').innerHTML = 'Vui lòng chọn file Logs để xem';
+      document.getElementById('logsOutput').value = 'Vui lòng chọn file Logs để xem';
       show_message('Vui lòng chọn file Logs để xem');
     }
   }

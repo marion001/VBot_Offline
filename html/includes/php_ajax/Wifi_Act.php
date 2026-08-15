@@ -415,9 +415,30 @@ if (isset($_GET['Show_Wifi_List'])) {
 if (isset($_GET['Wifi_Network_Information'])) {
     putenv("LANG=C.UTF-8");
     putenv("LC_ALL=C.UTF-8");
-	#$wifiInfo = shell_exec('LANG=C.UTF-8 iwconfig wlan0');
-	$wifiInfo = shell_exec('LANG=C.UTF-8 iwconfig wlan0 2>&1');
-    #$wifiInfo = shell_exec('iwconfig wlan0');
+	// Ưu tiên interface Wi-Fi đang kết nối do NetworkManager báo về.
+	$wifiInterface = '';
+	$deviceStatus = (string) shell_exec('LANG=C.UTF-8 LC_ALL=C.UTF-8 nmcli --escape yes -t -f DEVICE,TYPE,STATE device status 2>/dev/null');
+	foreach (array_filter(explode("\n", trim($deviceStatus))) as $deviceLine) {
+		$deviceParts = vbotNmcliSplitTerseLine($deviceLine);
+		if (($deviceParts[1] ?? '') === 'wifi' && ($deviceParts[2] ?? '') === 'connected') {
+			$wifiInterface = $deviceParts[0] ?? '';
+			break;
+		}
+	}
+	if ($wifiInterface === '') {
+		$iwOutput = (string) shell_exec('iw dev 2>/dev/null');
+		if (preg_match('/^\s*Interface\s+([^\s]+)\s*$/m', $iwOutput, $interfaceMatch)) {
+			$wifiInterface = $interfaceMatch[1];
+		}
+	}
+	if ($wifiInterface === '' || !preg_match('/^[a-zA-Z0-9_.:-]+$/', $wifiInterface)) {
+		vbotApiJsonResponse([
+			'success' => false,
+			'message' => 'Không tìm thấy interface Wi-Fi đang hoạt động.',
+			'data' => null
+		], 404);
+	}
+	$wifiInfo = shell_exec('LANG=C.UTF-8 LC_ALL=C.UTF-8 iwconfig ' . escapeshellarg($wifiInterface) . ' 2>&1');
 	#$wifiInfo = iconv('ISO-8859-1', 'UTF-8//IGNORE', $wifiInfo); //Nếu tên wifi có dấu tiếng việt
     if (empty($wifiInfo)) {
         vbotApiJsonResponse([
@@ -427,6 +448,7 @@ if (isset($_GET['Wifi_Network_Information'])) {
         ], 502);
     }
     $wifiData = [];
+	$wifiData['interface'] = $wifiInterface;
     preg_match('/ESSID:"([^"]+)"/', $wifiInfo, $essidMatches);
     preg_match('/Frequency:([\d\.]+)\sGHz/', $wifiInfo, $frequencyMatches);
     preg_match('/Access Point: ([0-9A-Fa-f:]{17})/', $wifiInfo, $accessPointMatches);

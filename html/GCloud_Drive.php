@@ -293,10 +293,14 @@ include 'html_head.php';
             ssh2_auth_password($connection, $ssh_user, $ssh_password);
             $composer_json = $HTML_VBot_Offline . '/includes/other_data/Google_Driver_PHP/composer.json';
             $composer_lock = $HTML_VBot_Offline . '/includes/other_data/Google_Driver_PHP/composer.lock';
-            ssh2_exec($connection, "cp  $composer_json $client_directory");
-            ssh2_exec($connection, "cp $composer_lock $client_directory");
-            ssh2_exec($connection, "chmod -R 0777 $base_directory");
-            ssh2_exec($connection, "cd $client_directory/ && composer update");
+            $composerJsonArg = escapeshellarg($composer_json);
+            $composerLockArg = escapeshellarg($composer_lock);
+            $clientDirectoryArg = escapeshellarg($client_directory);
+            $baseDirectoryArg = escapeshellarg($base_directory);
+            ssh2_exec($connection, "cp -- $composerJsonArg $clientDirectoryArg");
+            ssh2_exec($connection, "cp -- $composerLockArg $clientDirectoryArg");
+            ssh2_exec($connection, "chmod -R 0777 -- $baseDirectoryArg");
+            ssh2_exec($connection, "composer --working-dir=$clientDirectoryArg update");
           }
 
           // Kiểm tra sự tồn tại của thư mục
@@ -306,12 +310,14 @@ include 'html_head.php';
 
             // Tạo thư mục nếu không tồn tại
             if (!file_exists($base_directory)) {
-              ssh2_exec($connection, "mkdir -p $base_directory");
-              ssh2_exec($connection, "chmod 0777 $base_directory");
+              $baseDirectoryArg = escapeshellarg($base_directory);
+              ssh2_exec($connection, "mkdir -p -- $baseDirectoryArg");
+              ssh2_exec($connection, "chmod 0777 -- $baseDirectoryArg");
             }
             // Tạo thư mục google-api-php-client
-            ssh2_exec($connection, "mkdir -p $client_directory");
-            ssh2_exec($connection, "chmod 0777 $client_directory");
+            $clientDirectoryArg = escapeshellarg($client_directory);
+            ssh2_exec($connection, "mkdir -p -- $clientDirectoryArg");
+            ssh2_exec($connection, "chmod 0777 -- $clientDirectoryArg");
           }
 
           // Kiểm tra lại nếu tệp thư viện không tồn tại
