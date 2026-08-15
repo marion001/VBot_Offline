@@ -47,17 +47,29 @@ Lib.show_log("- [DEV STT] Đã Khởi Tạo: Google Cloud Speak To Text V1", col
 
 #Ví Dụ Sử Dụng STT Google Cloud V1
 async def dev_stt():
+    #Chụp owner tại đầu phiên để không vô tình đọc mic nếu quyền bị chuyển
+    #sang một pipeline khác trong lúc Google STT đang streaming.
+    capture_owner = Lib.get_mic_capture_owner()
+    if capture_owner not in ("local_stt", "dev_stt"):
+        Lib.show_log(
+            f"[DEV STT] Không thể thu âm với owner: {capture_owner}",
+            color=Lib.Color.RED,
+        )
+        return None
+
+    stop_stream_event = Lib.threading.Event()
+
     def audio_generator():
         last_audio_time = time.time()
         start_time = time.time()
         agc_buffer = bytearray()
-        while True:
+        while not stop_stream_event.is_set():
             if time.time() - start_time >= maximum_recording_time:
                 Lib.show_log(f'[DEV STT] Đã dừng thu âm sau: {maximum_recording_time} giây', color=Lib.Color.YELLOW)
                 break
 
             #Mọi dữ liệu mic phải đi qua cổng đọc chung để tránh native read đồng thời.
-            audio_frame = Lib.read_recorder_frame(owner="dev_stt")
+            audio_frame = Lib.read_recorder_frame(owner=capture_owner)
             if audio_frame is None:
                 break
 
@@ -88,18 +100,22 @@ async def dev_stt():
 
                         #Đưa frame 10ms vào bộ xử lý AGC
                         result = Lib.Noise_Auto_Gain.Process10ms(bytes(chunk))
-                        
+                         
                         #Gửi frame audio đã xử lý vào Google Streaming STT
+                        Lib.append_stt_input_pcm(result.audio)
                         yield speech.StreamingRecognizeRequest(audio_content=result.audio)
 
                 #Nếu không bật tự động cân bằng âm thanh AGC thì dùng Speex Noise (Lọc Nhiễu Nền)
                 elif Lib.Noise_STT:
                     #Gửi frame audio đã xử lý vào Google Streaming STT
-                    yield speech.StreamingRecognizeRequest(audio_content=Lib.Noise_STT.process(pcm_bytes))
+                    processed_audio = Lib.Noise_STT.process(pcm_bytes)
+                    Lib.append_stt_input_pcm(processed_audio)
+                    yield speech.StreamingRecognizeRequest(audio_content=processed_audio)
 
                 #Nếu không bật lọc nhiễu âm thanh đầu vào Mic => gửi trực tiếp dữ liệu âm thanh tới stt gcloud
                 else:
                     #Gửi frame audio vào Google Streaming STT
+                    Lib.append_stt_input_pcm(pcm_bytes)
                     yield speech.StreamingRecognizeRequest(audio_content=pcm_bytes)
             else:
                 #Dừng nếu im lặng quá lâu
@@ -119,12 +135,33 @@ async def dev_stt():
             interim_results=dev_stt_interim_results,   #Hiển Thị Kết quả trung gian (True là bật, False là tắt) (bật True chỉ dùng để Debug)
             single_utterance=True   #Kích hoạt chế độ ngắt tự động khi phát hiện dừng nói (True = Bật, False = Tắt)
         )
-        requests = audio_generator()
-        # Google trả về lazy iterator; ép duyệt iterator trong worker thread để
-        # việc chờ Mic/Network không khóa event loop.
-        responses = await Lib.asyncio.to_thread(
-            lambda: list(client.streaming_recognize(streaming_config, requests))
-        )
+        def recognize_stream():
+            responses = []
+            try:
+                # Duyệt response ngay trong worker để có thể ngừng gửi mic khi
+                # Google báo đã nhận diện xong một câu nói.
+                for response in client.streaming_recognize(
+                    streaming_config, audio_generator()
+                ):
+                    responses.append(response)
+                    if (
+                        response.speech_event_type
+                        == speech.StreamingRecognizeResponse.SpeechEventType.END_OF_SINGLE_UTTERANCE
+                    ):
+                        stop_stream_event.set()
+                        Lib.show_log(
+                            "[DEV STT] Google đã phát hiện kết thúc câu nói",
+                            color=Lib.Color.YELLOW,
+                        )
+            finally:
+                # Bảo đảm generator dừng trong cả trường hợp thành công, lỗi
+                # gRPC hoặc task STT bị hủy.
+                stop_stream_event.set()
+            return responses
+
+        # Google trả về lazy iterator; duyệt iterator trong worker thread để
+        # việc chờ Mic/Network không khóa event loop chính.
+        responses = await Lib.asyncio.to_thread(recognize_stream)
         for response in responses:
             for result in response.results:
 
@@ -158,4 +195,6 @@ async def dev_stt():
             Lib.config['smart_config']['smart_wakeup']['sound']['default']['stt_to_text_error']
         )
         return None
+    finally:
+        stop_stream_event.set()
     return None
