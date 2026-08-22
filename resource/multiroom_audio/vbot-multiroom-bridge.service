@@ -1,0 +1,25 @@
+[Unit]
+Description=VBot Multiroom Bridge Service
+After=network-online.target sound.target vbot-multiroom-controller.service
+Wants=network-online.target sound.target vbot-multiroom-controller.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+
+WorkingDirectory=/home/pi/VBot_Offline/resource/multiroom_audio
+
+Environment=PYTHONUNBUFFERED=1
+Environment=VBOT_MULTIROOM_CONFIG=/home/pi/VBot_Offline/Config.json
+
+ExecStart=/usr/bin/python3 /home/pi/VBot_Offline/resource/multiroom_audio/vbot_multiroom_bridge.py serve
+
+Restart=always
+RestartSec=2
+
+TimeoutStopSec=5
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

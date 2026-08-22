@@ -205,12 +205,19 @@ if (isset($_POST['all_config_save'])) {
       vbotConfigSetFullPermissions($destinationFile_Backup_Config, 'bản backup Config');
       $files_ConfigJso_BUP = glob($directoryPath_Backup_Config . '/*.json');
       $backupLimit = max(1, intval($Config['backup_upgrade']['config_json']['limit_backup_files']));
-      if (count($files_ConfigJso_BUP) > $backupLimit) {
-        usort($files_ConfigJso_BUP, function ($a, $b) {
-          return filemtime($a) - filemtime($b);
-        });
-        foreach (array_slice($files_ConfigJso_BUP, 0, count($files_ConfigJso_BUP) - $backupLimit) as $oldestFile_configBaup) {
-          if (!unlink($oldestFile_configBaup)) {
+      
+      // Sắp xếp file theo thời gian chỉnh sửa (cũ nhất đầu tiên)
+      usort($files_ConfigJso_BUP, function ($a, $b) {
+        return filemtime($a) - filemtime($b);
+      });
+      
+      // Xóa các file thừa để giữ chính xác số lượng limit
+      $filesToDelete = count($files_ConfigJso_BUP) - $backupLimit;
+      if ($filesToDelete > 0) {
+        foreach (array_slice($files_ConfigJso_BUP, 0, $filesToDelete) as $oldestFile_configBaup) {
+          if (unlink($oldestFile_configBaup)) {
+            // Thành công
+          } else {
             error_log('[PHP Config ERROR] Không thể xóa bản backup cũ: ' . $oldestFile_configBaup, 0);
           }
         }
@@ -458,6 +465,30 @@ if (isset($_POST['all_config_save'])) {
 
   #Cập Nhật Bật hoặc tắt Sử dụng Media Player
   $Config['media_player']['active'] = isset($_POST['media_player_active']) ? true : false;
+  $Config['media_player']['multiroom_audio']['active'] = isset($_POST['multiroom_audio_active']) ? true : false;
+  $Config['media_player']['multiroom_audio']['default_volume'] = max(0, min(100, intval($_POST['multiroom_audio_default_volume'] ?? 90)));
+  $Config['media_player']['multiroom_audio']['default_muted'] = isset($_POST['multiroom_audio_default_muted']);
+
+  $multiroom_url_schemes = preg_split('/[\s,]+/', strtolower(trim($_POST['multiroom_audio_allowed_url_schemes'] ?? 'http,https')));
+  $multiroom_url_schemes = array_values(array_unique(array_filter($multiroom_url_schemes, function ($scheme) {
+    return preg_match('/^[a-z][a-z0-9+.-]*$/', $scheme) === 1;
+  })));
+  $Config['media_player']['multiroom_audio']['allowed_url_schemes'] = !empty($multiroom_url_schemes) ? $multiroom_url_schemes : ['http', 'https'];
+  $Config['media_player']['multiroom_audio']['url_timeout_seconds'] = max(0, floatval($_POST['multiroom_audio_url_timeout_seconds'] ?? 15));
+  $Config['media_player']['multiroom_audio']['url_reconnect'] = isset($_POST['multiroom_audio_url_reconnect']);
+
+  $multiroom_string_defaults = [
+    'vlc_loopback_output_device' => 'plughw:Loopback,0,0',
+    'vlc_loopback_capture_device' => 'plughw:Loopback,1,0',
+    'local_playback_device' => 'default',
+    'alsa_capture_command' => 'arecord',
+    'alsa_playback_command' => 'aplay',
+  ];
+  foreach ($multiroom_string_defaults as $multiroom_key => $multiroom_default) {
+    $multiroom_value = trim($_POST['multiroom_audio_' . $multiroom_key] ?? '');
+    $Config['media_player']['multiroom_audio'][$multiroom_key] = $multiroom_value !== '' ? $multiroom_value : $multiroom_default;
+  }
+  $Config['media_player']['multiroom_audio']['bridge_switch_delay_ms'] = max(0, intval($_POST['multiroom_audio_bridge_switch_delay_ms'] ?? 80));
   $Config['media_player']['wake_up_in_media_player'] = isset($_POST['wake_up_in_media_player']) ? true : false;
   
   #Phát lặp lại danh sách nhạc
@@ -2224,8 +2255,8 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                 <label for="tts_ggcloud_key_voice_name">Giọng đọc:</label>
                               </div>
                               <button type="button" name="load_list_gcloudkey_tts" id="load_list_gcloudkey_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud_key', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
-                              <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_key_voice_name')"><i class="bi bi-play-circle"></i></button>
-                              <button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud" id="get_voice_name_gcloud" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
+                              <button type="button" name="tts_sample_gcloud_key_play" id="tts_sample_gcloud_key_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_key_voice_name')"><i class="bi bi-play-circle"></i></button>
+                              <button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud_key" id="get_voice_name_gcloud_key" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="form-floating mb-3">
                               <input type="number" min="0.25" step="0.25" max="4.0" class="form-control border-success" name="tts_ggcloud_key_speaking_speed" id="tts_ggcloud_key_speaking_speed" value="<?php echo $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud_key']['speaking_speed']; ?>">
@@ -2734,7 +2765,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_media_player">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
-                  Cấu Hình Phát Nhạc, Câu Trả Lời - Media Player: <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
+                  Media Player, Playlist, Multiroom Audio, Ưu Tiên Nguồn Phát : <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
                  <div class="alert alert-success" role="alert"> <div class="card">
@@ -2759,6 +2790,59 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     </div>
                     </div>
                   </div>
+
+					<div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Multiroom Audio (Liên Kết Nhiều Loa, Phát Âm Thanh Đa Vùng) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để kích hoạt sử dụng liên kết các loa VBot trong cùng mạng lan khi muốn phát Media âm thanh đa vùng thông qua mạng Wifi')"></i> :</h5>
+                     <div class="alert alert-primary" role="alert"> <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">Kích hoạt: </label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="multiroom_audio_active" id="multiroom_audio_active" <?php echo $Config['media_player']['multiroom_audio']['active'] ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+                      <?php
+                      $multiroom_audio_config = $Config['media_player']['multiroom_audio'] ?? [];
+                      $multiroom_allowed_schemes = $multiroom_audio_config['allowed_url_schemes'] ?? ['http', 'https'];
+                      if (!is_array($multiroom_allowed_schemes)) {
+                        $multiroom_allowed_schemes = [$multiroom_allowed_schemes];
+                      }
+
+                      echo input_field('multiroom_audio_default_volume', 'Âm Lượng PCM Mặc Định', $multiroom_audio_config['default_volume'] ?? 90, 'required', 'number', '1', '0', '100', 'Âm lượng riêng của luồng PCM Multiroom, không thay đổi âm lượng tổng Lib.Volume của loa.', 'border-success');
+                      ?>
+                      <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label" for="multiroom_audio_default_muted">Tắt Tiếng Mặc Định:</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="multiroom_audio_default_muted" id="multiroom_audio_default_muted" <?php echo !empty($multiroom_audio_config['default_muted']) ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+                      <?php
+                      echo input_field('multiroom_audio_allowed_url_schemes', 'Giao Thức URL Cho Phép', implode(', ', $multiroom_allowed_schemes), 'required', 'text', '', '', '', 'Nhập các giao thức cách nhau bằng dấu phẩy, ví dụ: http, https.', 'border-success');
+                      echo input_field('multiroom_audio_url_timeout_seconds', 'Thời Gian Chờ URL (giây)', $multiroom_audio_config['url_timeout_seconds'] ?? 15, 'required', 'number', '0.1', '0', '', 'Thời gian chờ khi kết nối nguồn âm thanh URL; đặt 0 nếu không muốn giới hạn.', 'border-success');
+                      ?>
+                      <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label" for="multiroom_audio_url_reconnect">Tự Kết Nối Lại URL:</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="multiroom_audio_url_reconnect" id="multiroom_audio_url_reconnect" <?php echo !array_key_exists('url_reconnect', $multiroom_audio_config) || !empty($multiroom_audio_config['url_reconnect']) ? 'checked' : ''; ?>>
+                          </div>
+                        </div>
+                      </div>
+                      <?php
+                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'plughw:Loopback,0,0', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC ghi âm thanh vào snd-aloop.', 'border-success');
+                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,0', 'required', 'text', '', '', '', 'Thiết bị ALSA mà Multiroom dùng để thu âm thanh từ snd-aloop.', 'border-success');
+                      echo input_field('multiroom_audio_local_playback_device', 'Thiết Bị Phát Âm Thanh Local', $multiroom_audio_config['local_playback_device'] ?? 'default', 'required', 'text', '', '', '', 'Thiết bị ALSA phát âm thanh trên chính loa này.', 'border-success');
+                      echo input_field('multiroom_audio_bridge_switch_delay_ms', 'Độ Trễ Chuyển Bridge (ms)', $multiroom_audio_config['bridge_switch_delay_ms'] ?? 80, 'required', 'number', '1', '0', '', 'Thời gian nghỉ khi Audio Bridge chuyển quyền capture giữa Local và Multiroom.', 'border-success');
+                      echo input_field('multiroom_audio_alsa_capture_command', 'Lệnh Thu ALSA', $multiroom_audio_config['alsa_capture_command'] ?? 'arecord', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để thu âm thanh.', 'border-success');
+                      echo input_field('multiroom_audio_alsa_playback_command', 'Lệnh Phát ALSA', $multiroom_audio_config['alsa_playback_command'] ?? 'aplay', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để phát âm thanh.', 'border-success');
+                      ?>
+                    </div>
+                    </div>
+                  </div>
+
                   <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">PlayList (Danh Sách Phát) <i class="bi bi-question-circle-fill"></i> :</h5>
@@ -2766,7 +2850,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                       <?php
                       echo select_field('newspaper_play_mode', 'Chế Độ Phát Báo, Tin Tức', ['' => '-- Chọn Chế Độ --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['newspaper_play_mode'], []);
                       echo select_field('music_play_mode', 'Chế Độ Phát Nhạc', ['' => '-- Chọn Chế Độ --', 'random' => 'random (Ngẫu nhiên)', 'sequential' => 'sequential (Tuần tự)'], $Config['media_player']['play_list']['music_play_mode'], []);
-					  echo select_field_bool('play_list_loop', 'Chế Độ Khi Phát PlayList', ['' => '-- Chọn Chế Độ --', true => 'Lặp Lại PlayList', false => 'Chỉ 1 Lần'], $Config['media_player']['play_list']['loop'], []);
+					  echo select_field_bool('play_list_loop', 'Chế Độ Lặp Mặc Định Cho PlayList Cũ', ['' => '-- Chọn Chế Độ --', true => 'Lặp Lại PlayList', false => 'Chỉ 1 Lần'], $Config['media_player']['play_list']['loop'], []);
+					  echo '<div class="alert alert-info py-2 mt-2 mb-0 small" role="alert"><i class="bi bi-info-circle"></i> Thiết lập này áp dụng cho PlayList.json, News_Paper.json hoặc dữ liệu PlayList không có cấu hình lặp riêng. Các PlayList được quản lý trong Media Player sẽ ưu tiên sử dụng chế độ lặp đã lưu riêng cho từng PlayList.</div>';
                       ?>
                     </div>
                   </div>
@@ -2840,7 +2925,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_media_player_source">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
-                  Nguồn Phát Media Player: Nhạc, Radio, Kể Truyện, PodCast, Đọc Báo Tin tức:
+                  Nguồn Phát: Nhạc, Radio, Kể Truyện, PodCast, Đọc Báo Tin tức:
                 </h5>
                 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
                  <div class="alert alert-success" role="alert">  <div class="card">

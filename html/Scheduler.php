@@ -214,22 +214,22 @@ include 'html_head.php';
 			echo '</select>';
 		}
 
-        function render_system_scheduler_options($task_key, $task_data, $label, $time_container_id, $date_field_name = null) {
+        function render_system_scheduler_options($task_key, $task_data, $label, $time_container_id, $date_field_name = null, $input_prefix = null) {
           $recurrence = $task_data['recurrence'] ?? ['type' => 'legacy'];
           $conditions = $task_data['conditions'] ?? ['mode' => 'always'];
           $type = $recurrence['type'] ?? 'legacy';
-          $prefix = 'system_schedule_options[' . $task_key . ']';
-          $types = ['legacy'=>'Theo thứ trong tuần','daily'=>'Hằng ngày','daily_months'=>'Hằng ngày (Lựa chọn tháng)','weekdays'=>'Ngày làm việc (Thứ Hai–Thứ Sáu)','weekends'=>'Cuối tuần (Thứ Bảy–Chủ Nhật)','once'=>'Chỉ chạy một lần','monthly'=>'Một ngày mỗi tháng','days_of_month'=>'N ngày trong tháng'];
+          $prefix = $input_prefix ?: ('system_schedule_options[' . $task_key . ']');
+          $types = ['legacy'=>'Theo thứ trong tuần','daily'=>'Hằng ngày','daily_months'=>'Hằng ngày (Lựa chọn tháng)','weekdays'=>'Ngày làm việc (Thứ Hai–Thứ Sáu)','weekends'=>'Cuối tuần (Thứ Bảy–Chủ Nhật)','once'=>'Chỉ chạy một lần','monthly'=>'Một ngày mỗi tháng','days_of_month'=>'N ngày trong tháng','interval_days'=>'Chu kỳ N ngày'];
           echo '<div class="row mb-3">';
           echo '<label class="col-sm-3 col-form-label">Chế độ chạy:</label>';
           echo '<div class="col-sm-9">';
           echo '<select class="form-select border-success scheduler-recurrence-type" data-scheduler-index="system-'.htmlspecialchars($task_key).'" data-time-container-id="'.htmlspecialchars($time_container_id).'" name="'.$prefix.'[recurrence][type]">';
           foreach ($types as $value => $text) echo '<option value="'.$value.'" '.($type === $value ? 'selected' : '').'>'.$text.'</option>';
-          if ($type === 'interval_days') echo '<option value="interval_days" selected>Chu kỳ N ngày (lịch cũ)</option>';
           echo '</select>';
           echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="weekdays weekends monthly interval_days"><span class="input-group-text border-success">Bắt đầu</span><input type="date" class="form-control border-success" name="'.$prefix.'[recurrence][start_date]" value="'.htmlspecialchars($recurrence['start_date'] ?? '').'"><span class="input-group-text border-success">Kết thúc</span><input type="date" class="form-control border-success" name="'.$prefix.'[recurrence][end_date]" value="'.htmlspecialchars($recurrence['end_date'] ?? '').'"></div>';
           echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="once"><span class="input-group-text border-success">Ngày thực hiện</span><input type="date" class="form-control border-success" name="'.$prefix.'[recurrence][date]" value="'.htmlspecialchars($recurrence['date'] ?? '').'"></div>';
           echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="monthly"><span class="input-group-text border-success">Ngày trong tháng</span><input type="number" min="1" max="31" class="form-control border-success" name="'.$prefix.'[recurrence][day]" value="'.intval($recurrence['day'] ?? 1).'"></div>';
+          echo '<div class="input-group mt-2 scheduler-recurrence-fields" data-recurrence-for="interval_days"><span class="input-group-text border-success">Lặp mỗi</span><input type="number" min="1" max="365" class="form-control border-success" name="'.$prefix.'[recurrence][interval]" value="'.intval($recurrence['interval'] ?? 1).'"><span class="input-group-text border-success">ngày</span></div>';
           echo '<div class="mt-2 scheduler-recurrence-fields" data-recurrence-for="daily_months"><div class="border rounded p-2">Chọn tháng áp dụng:<br/>';
           $months = $recurrence['months'] ?? range(1, 12); foreach (range(1, 12) as $month) echo '<label class="me-3"><input type="checkbox" class="form-check-input border-success" name="'.$prefix.'[recurrence][months][]" value="'.$month.'" '.(in_array($month, $months) ? 'checked' : '').'> Tháng '.$month.'</label>';
           echo '</div></div><div class="mt-2 scheduler-recurrence-fields" data-recurrence-for="days_of_month"><div class="border rounded p-2">Chọn các ngày trong tháng:<br/>';
@@ -268,7 +268,7 @@ include 'html_head.php';
         $default_data = [
           'notification_schedule' => []
         ];
-        file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        vbotAtomicWriteFile($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'khởi tạo dữ liệu Scheduler');
         vbotSchedulerSetFullPermissions($json_file, 'tệp dữ liệu Scheduler');
       }
       $json_data = file_get_contents($json_file);
@@ -289,23 +289,18 @@ include 'html_head.php';
       ];
       if (isset($_POST['delete_all_Scheduler'])) {
         if (file_exists($json_file)) {
-          if (unlink($json_file)) {
-            $default_data = [
-              'notification_schedule' => []
-            ];
-            if (file_put_contents($json_file, json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false) {
+          $default_data = ['notification_schedule' => []];
+          $default_json = json_encode($default_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+          if ($default_json !== false && vbotAtomicWriteFile($json_file, $default_json, 'xóa dữ liệu Scheduler')) {
               vbotSchedulerSetFullPermissions($json_file, 'tệp dữ liệu Scheduler');
               $successMessage[] = "Toàn bộ dữ liệu cấu hình đã được xóa thành công";
               echo '<script>window.location.href = "Scheduler.php";</script>';
               exit;
-            } else {
-              $errorMessage[] = "Không thể tạo lại tệp dữ liệu mặc định.";
-            }
           } else {
-            $errorMessage[] = "Không thể xóa tệp dữ liệu cũ.";
+            $errorMessages[] = "Không thể tạo lại tệp dữ liệu Scheduler mặc định.";
           }
         } else {
-          $errorMessage[] = "Tệp dữ liệu không tồn tại.";
+          $errorMessages[] = "Tệp dữ liệu không tồn tại.";
         }
       }
       if (isset($_POST['Scheduler_Upload_Audio_Submit'])) {
@@ -406,7 +401,7 @@ include 'html_head.php';
 				}
 			}
 			if ($uploadOk === 1) {
-				if (move_uploaded_file($_FILES["fileToUpload_Scheduler_restore"]["tmp_name"], $json_file)) {
+				if (vbotAtomicWriteFile($json_file, $jsonContent, 'khôi phục Scheduler từ tệp tải lên')) {
 					$successMessage[] =
 						"- Tệp " . htmlspecialchars($fileName) .
 						" đã được tải lên và khôi phục dữ liệu Scheduler thành công";
@@ -428,14 +423,12 @@ include 'html_head.php';
 					if (json_last_error() !== JSON_ERROR_NONE || !isset($data['restart_vbot']) || !isset($data['stop_media_player']) || !isset($data['change_led_brightness'])) {
 						$errorMessages[] = "- Tệp Scheduler hệ thống không đúng cấu trúc dữ liệu";
 					} else {
-						$command = 'cp ' . escapeshellarg($start_recovery_custom_hass) . ' ' . escapeshellarg($json_file);
-						exec($command, $output, $resultCode);
-						if ($resultCode === 0) {
+						if (vbotAtomicWriteFile($json_file, $jsonContent, 'khôi phục Scheduler từ bản sao hệ thống')) {
 							$successMessage[] = "Đã khôi phục dữ liệu Scheduler từ tệp sao lưu trên hệ thống thành công";
 							echo '<script>alert("Đã khôi phục dữ liệu Scheduler từ tệp sao lưu trên hệ thống thành công");</script>';
 							echo '<script>window.location.href = "Scheduler.php";</script>';
 						} else {
-							$errorMessages[] = "Lỗi xảy ra khi khôi phục dữ liệu Scheduler. Mã lỗi: " . $resultCode;
+							$errorMessages[] = "Lỗi xảy ra khi ghi dữ liệu Scheduler đã khôi phục.";
 						}
 					}
 				} else {
@@ -649,11 +642,57 @@ include 'html_head.php';
         $data['reboot_os']['active'] = isset($_POST['reboot_os_active']) ? true : false;
         $data['reboot_os']['date'] = isset($_POST['dates_reboot_os']) ? $_POST['dates_reboot_os'] : [];
 
-        #Lưu dữ liệu Phát danh sách nhạc
-        $time_player_playlist = isset($_POST['time_player_playlist']) ? $_POST['time_player_playlist'] : [];
-        $data['play_play_playlist']['time'] = array_filter($time_player_playlist);
+        #Lưu dữ liệu Phát danh sách nhạc: mỗi phần tử là một lịch độc lập.
+        $posted_playlist_schedules = isset($_POST['playlist_schedules']) && is_array($_POST['playlist_schedules']) ? $_POST['playlist_schedules'] : [];
+        $playlist_schedules = [];
+        foreach ($posted_playlist_schedules as $schedule_index => $schedule_option) {
+          if (!is_array($schedule_option)) continue;
+          $posted_slots = isset($schedule_option['slots']) && is_array($schedule_option['slots']) ? $schedule_option['slots'] : [];
+          // Tương thích dữ liệu form của bản ngay trước: nhiều giờ nhưng dùng chung một playlist_id.
+          if (!$posted_slots) {
+            $fallback_times = isset($schedule_option['time']) && is_array($schedule_option['time']) ? $schedule_option['time'] : [$schedule_option['time'] ?? ''];
+            foreach ($fallback_times as $fallback_time) $posted_slots[] = ['time'=>$fallback_time, 'playlist_id'=>$schedule_option['playlist_id'] ?? ''];
+          }
+          $slots = [];
+          foreach ($posted_slots as $slot) {
+            if (!is_array($slot)) continue;
+            $slot_time = trim((string)($slot['time'] ?? ''));
+            if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $slot_time)) continue;
+            $slot_playlist_id = trim((string)($slot['playlist_id'] ?? ''));
+            if ($slot_playlist_id !== '' && !preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $slot_playlist_id)) $slot_playlist_id = '';
+            $slots[] = ['time'=>$slot_time, 'playlist_id'=>$slot_playlist_id];
+          }
+          if (!$slots) continue;
+          $recurrence = isset($schedule_option['recurrence']) && is_array($schedule_option['recurrence']) ? $schedule_option['recurrence'] : [];
+          $allowed_types = ['legacy', 'daily', 'daily_months', 'weekdays', 'weekends', 'once', 'monthly', 'days_of_month', 'interval_days'];
+          $recurrence_type = in_array(($recurrence['type'] ?? 'legacy'), $allowed_types, true) ? $recurrence['type'] : 'legacy';
+          $months = isset($recurrence['months']) && is_array($recurrence['months']) ? array_values(array_filter(array_unique(array_map('intval', $recurrence['months'])), fn($value) => $value >= 1 && $value <= 12)) : [];
+          $month_days = isset($recurrence['days']) && is_array($recurrence['days']) ? array_values(array_filter(array_unique(array_map('intval', $recurrence['days'])), fn($value) => $value >= 1 && $value <= 31)) : [];
+          if ($recurrence_type === 'daily_months' && empty($months)) $months = range(1, 12);
+          if ($recurrence_type === 'days_of_month' && empty($month_days)) $month_days = [1];
+          $condition = isset($schedule_option['conditions']) && is_array($schedule_option['conditions']) ? $schedule_option['conditions'] : [];
+          $playlist_schedules[] = [
+            'id' => preg_match('/^[a-zA-Z0-9_-]{1,80}$/', (string)($schedule_option['id'] ?? '')) ? (string)$schedule_option['id'] : ('playlist_' . time() . '_' . intval($schedule_index)),
+            'active' => isset($schedule_option['active']), 'slots' => $slots,
+            'time' => array_column($slots, 'time'), 'playlist_id' => array_column($slots, 'playlist_id'),
+            'date' => isset($schedule_option['date']) && is_array($schedule_option['date']) ? array_values(array_intersect($schedule_option['date'], array_keys($week_days))) : [],
+            'recurrence' => ['type'=>$recurrence_type, 'start_date'=>trim($recurrence['start_date'] ?? ''), 'end_date'=>trim($recurrence['end_date'] ?? ''), 'date'=>trim($recurrence['date'] ?? ''), 'day'=>max(1,min(31,intval($recurrence['day'] ?? 1))), 'interval'=>max(1,min(365,intval($recurrence['interval'] ?? 1))), 'months'=>$months, 'days'=>$month_days],
+            'conditions' => ['mode'=>(($condition['mode'] ?? 'always') === 'conditional' ? 'conditional' : 'always'), 'mic_state'=>in_array(($condition['mic_state'] ?? 'any'), ['any','on','off'], true) ? $condition['mic_state'] : 'any', 'only_when_idle'=>isset($condition['only_when_idle']), 'skip_if_media_playing'=>isset($condition['skip_if_media_playing']), 'skip_if_bluetooth_playing'=>isset($condition['skip_if_bluetooth_playing']), 'skip_if_airplay_playing'=>isset($condition['skip_if_airplay_playing'])],
+            'max_duration_seconds' => max(0, min(86400, intval($schedule_option['max_duration_seconds'] ?? 0)))
+          ];
+        }
+        $data['play_play_playlist']['schedules'] = $playlist_schedules;
+        $legacy_playlist_times = [];
+        $legacy_playlist_ids = [];
+        foreach ($playlist_schedules as $playlist_schedule) {
+          foreach ($playlist_schedule['slots'] as $playlist_slot) {
+            $legacy_playlist_times[] = $playlist_slot['time'];
+            $legacy_playlist_ids[] = $playlist_slot['playlist_id'];
+          }
+        }
+        $data['play_play_playlist']['time'] = $legacy_playlist_times;
+        $data['play_play_playlist']['playlist_id'] = $legacy_playlist_ids;
         $data['play_play_playlist']['active'] = isset($_POST['play_playlist_active']) ? true : false;
-        $data['play_play_playlist']['date'] = isset($_POST['dates_play_playlist_player']) ? $_POST['dates_play_playlist_player'] : [];
 
         #Lưu dữ liệu Phát toàn bộ nhạc trong thư mục Local
         $time_player_local = isset($_POST['time_player_local']) ? $_POST['time_player_local'] : [];
@@ -663,7 +702,7 @@ include 'html_head.php';
 
         //Cấu hình Scheduler nâng cao dùng chung cho các tác vụ hệ thống.
         $system_options = $_POST['system_schedule_options'] ?? [];
-        $system_task_keys = ['change_volume', 'change_led_brightness', 'mic_on_off', 'play_play_playlist', 'play_all_music_local', 'stop_media_player', 'restart_vbot', 'reboot_os'];
+        $system_task_keys = ['change_volume', 'change_led_brightness', 'mic_on_off', 'play_all_music_local', 'stop_media_player', 'restart_vbot', 'reboot_os'];
         foreach ($system_task_keys as $system_key) {
           $option = isset($system_options[$system_key]) && is_array($system_options[$system_key]) ? $system_options[$system_key] : [];
           $recurrence = isset($option['recurrence']) && is_array($option['recurrence']) ? $option['recurrence'] : [];
@@ -702,12 +741,60 @@ include 'html_head.php';
         }
 
         #Lưu toàn bộ dữ liệu vào file JSON đúng một lần.
+        // Lưu các lịch hệ thống độc lập; cấu trúc cũ bên trên vẫn được giữ để tương thích ngược.
+        $posted_system_schedules = isset($_POST['system_task_schedules']) && is_array($_POST['system_task_schedules']) ? $_POST['system_task_schedules'] : [];
+        $independent_system_task_keys = array_merge($system_task_keys, ['send_notify_upgrade_vbot_home_assistant']);
+        $grouped_system_schedules = array_fill_keys($independent_system_task_keys, []);
+        foreach ($posted_system_schedules as $schedule_index => $schedule_option) {
+          if (!is_array($schedule_option)) continue;
+          $task_key = (string)($schedule_option['task'] ?? '');
+          if (!array_key_exists($task_key, $grouped_system_schedules)) continue;
+          $slot_time = trim((string)($schedule_option['time'] ?? ''));
+          if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $slot_time)) continue;
+          $parameter = $schedule_option['parameter'] ?? null;
+          if ($task_key === 'change_volume' || $task_key === 'change_led_brightness') {
+            $parameter = max(0, min(100, intval($parameter)));
+          } elseif ($task_key === 'mic_on_off') {
+            $parameter = in_array($parameter, ['on', 'off'], true) ? $parameter : 'off';
+          } else {
+            $parameter = null;
+          }
+          $recurrence = isset($schedule_option['recurrence']) && is_array($schedule_option['recurrence']) ? $schedule_option['recurrence'] : [];
+          $allowed_types = ['legacy', 'daily', 'daily_months', 'weekdays', 'weekends', 'once', 'monthly', 'days_of_month', 'interval_days'];
+          $recurrence_type = in_array(($recurrence['type'] ?? 'legacy'), $allowed_types, true) ? $recurrence['type'] : 'legacy';
+          $months = isset($recurrence['months']) && is_array($recurrence['months']) ? array_values(array_filter(array_unique(array_map('intval', $recurrence['months'])), fn($value) => $value >= 1 && $value <= 12)) : [];
+          $month_days = isset($recurrence['days']) && is_array($recurrence['days']) ? array_values(array_filter(array_unique(array_map('intval', $recurrence['days'])), fn($value) => $value >= 1 && $value <= 31)) : [];
+          if ($recurrence_type === 'daily_months' && !$months) $months = range(1, 12);
+          if ($recurrence_type === 'days_of_month' && !$month_days) $month_days = [1];
+          $condition = isset($schedule_option['conditions']) && is_array($schedule_option['conditions']) ? $schedule_option['conditions'] : [];
+          $grouped_system_schedules[$task_key][] = [
+            'id' => preg_match('/^[a-zA-Z0-9_-]{1,80}$/', (string)($schedule_option['id'] ?? '')) ? (string)$schedule_option['id'] : ('system_' . time() . '_' . intval($schedule_index)),
+            'active' => isset($schedule_option['active']),
+            'slots' => [['time' => $slot_time, 'parameter' => $parameter]],
+            'time' => [$slot_time], 'parameter' => $parameter,
+            'date' => isset($schedule_option['date']) && is_array($schedule_option['date']) ? array_values(array_intersect($schedule_option['date'], array_keys($week_days))) : [],
+            'recurrence' => ['type'=>$recurrence_type, 'start_date'=>trim($recurrence['start_date'] ?? ''), 'end_date'=>trim($recurrence['end_date'] ?? ''), 'date'=>trim($recurrence['date'] ?? ''), 'day'=>max(1,min(31,intval($recurrence['day'] ?? 1))), 'interval'=>max(1,min(365,intval($recurrence['interval'] ?? 1))), 'months'=>$months, 'days'=>$month_days],
+            'conditions' => ['mode'=>(($condition['mode'] ?? 'always') === 'conditional' ? 'conditional' : 'always'), 'mic_state'=>in_array(($condition['mic_state'] ?? 'any'), ['any','on','off'], true) ? $condition['mic_state'] : 'any', 'only_when_idle'=>isset($condition['only_when_idle']), 'skip_if_media_playing'=>isset($condition['skip_if_media_playing']), 'skip_if_bluetooth_playing'=>isset($condition['skip_if_bluetooth_playing']), 'skip_if_airplay_playing'=>isset($condition['skip_if_airplay_playing'])],
+            'max_duration_seconds' => max(0, min(86400, intval($schedule_option['max_duration_seconds'] ?? 0)))
+          ];
+        }
+        foreach ($grouped_system_schedules as $system_key => $schedules) {
+          $data[$system_key]['schedules'] = $schedules;
+          if ($schedules) $data[$system_key]['active'] = true;
+        }
+        $removed_system_tasks = isset($_POST['removed_system_schedule_tasks']) && is_array($_POST['removed_system_schedule_tasks']) ? $_POST['removed_system_schedule_tasks'] : [];
+        foreach (array_unique($removed_system_tasks) as $removed_system_task) {
+          if (array_key_exists($removed_system_task, $grouped_system_schedules) && !$grouped_system_schedules[$removed_system_task]) {
+            $data[$removed_system_task]['active'] = false;
+          }
+        }
+
         $encoded_schedule = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($encoded_schedule === false) {
           $save_error = "Không thể mã hóa dữ liệu Scheduler: " . json_last_error_msg();
           $errorMessages[] = $save_error;
           error_log($save_error);
-        } elseif (file_put_contents($json_file, $encoded_schedule, LOCK_EX) === false) {
+        } elseif (!vbotAtomicWriteFile($json_file, $encoded_schedule, 'dữ liệu Scheduler')) {
           $save_error = "Không thể ghi dữ liệu Scheduler vào tệp: " . $json_file;
           $errorMessages[] = $save_error;
           error_log($save_error);
@@ -732,7 +819,7 @@ include 'html_head.php';
           }
           // Hiển thị thông báo thành công nếu có
           if (!empty($successMessage)) {
-            echo '<div class="alert alert-success alert-dismissible fade show" id="message_error" role="alert">';
+            echo '<div class="alert alert-success alert-dismissible fade show" id="message_success" role="alert">';
             echo '<ul style="color: green;">';
             foreach ($successMessage as $successMessagegg) {
               echo '<li>' . $successMessagegg . '</li>';
@@ -963,6 +1050,57 @@ include 'html_head.php';
           </div>
           <hr style="border: 2px solid #0000FF;">
           <div class="alert alert-success text-center" role="alert"><b>Các Tác Vụ Sẵn Có Trên Hệ Thống</b></div>
+
+          <?php
+          $independentSystemSchedules = [];
+          foreach (['change_volume','change_led_brightness','mic_on_off','play_all_music_local','stop_media_player','restart_vbot','reboot_os','send_notify_upgrade_vbot_home_assistant'] as $systemTaskKey) {
+            foreach (($data[$systemTaskKey]['schedules'] ?? []) as $systemSchedule) {
+              if (!is_array($systemSchedule)) continue;
+              $systemSchedule['task'] = $systemTaskKey;
+              $independentSystemSchedules[] = $systemSchedule;
+            }
+          }
+          $systemTaskLabels = [
+            'change_volume'=>'Thay đổi âm lượng', 'change_led_brightness'=>'Thay đổi độ sáng LED',
+            'mic_on_off'=>'Bật/Tắt microphone', 'play_all_music_local'=>'Phát toàn bộ nhạc Local',
+            'stop_media_player'=>'Dừng Media Player', 'restart_vbot'=>'Khởi động lại VBot',
+            'reboot_os'=>'Khởi động lại hệ điều hành',
+            'send_notify_upgrade_vbot_home_assistant'=>'Kiểm tra và thông báo cập nhật VBot'
+          ];
+          ?>
+          <div class="card border-primary mb-3">
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-calendar2-plus"></i> Quản Lý Các Lịch Tác Vụ Độc Lập</h5>
+              <p class="text-muted">Mỗi lịch bên dưới có loại tác vụ, thời gian, chế độ chạy và điều kiện riêng. Dữ liệu lịch cũ vẫn được hỗ trợ.</p>
+              <div id="system-task-schedule-changes"></div>
+              <div id="system-task-schedules-container">
+                <?php foreach ($independentSystemSchedules as $systemScheduleIndex => $systemSchedule):
+                  $systemSlots = is_array($systemSchedule['slots'] ?? null) ? $systemSchedule['slots'] : [];
+                  $systemSlot = $systemSlots[0] ?? ['time'=>(($systemSchedule['time'][0] ?? '')), 'parameter'=>($systemSchedule['parameter'] ?? '')];
+                  $systemTask = $systemSchedule['task'] ?? 'change_volume'; ?>
+                  <div class="card border-success mb-3 system-task-schedule-card">
+                    <div class="card-body">
+                      <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][id]" value="<?= htmlspecialchars($systemSchedule['id'] ?? ('system_'.$systemScheduleIndex)) ?>">
+                      <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch tác vụ #<?= $systemScheduleIndex + 1 ?></b><button class="btn btn-danger btn-sm system-task-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
+                      <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[<?= $systemScheduleIndex ?>][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= $key ?>" <?= $systemTask===$key?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[<?= $systemScheduleIndex ?>][time]" value="<?= htmlspecialchars($systemSlot['time'] ?? '') ?>"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[<?= $systemScheduleIndex ?>][parameter]" value="<?= htmlspecialchars((string)($systemSlot['parameter'] ?? '')) ?>"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[<?= $systemScheduleIndex ?>][active]" <?= !isset($systemSchedule['active']) || $systemSchedule['active']?'checked':'' ?>><label class="form-check-label">Bật</label></div></div></div>
+                      <?php render_system_scheduler_options('independent_'.$systemScheduleIndex, $systemSchedule, 'Tác vụ hệ thống', '', 'system_task_schedules['.$systemScheduleIndex.'][date]', 'system_task_schedules['.$systemScheduleIndex.']'); ?>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+              <div id="system-task-schedules-empty" class="alert alert-secondary <?= $independentSystemSchedules ? 'd-none' : '' ?>">Chưa có lịch tác vụ độc lập. Nhấn nút bên dưới để tạo lịch mới.</div>
+              <button class="btn btn-success rounded-pill" type="button" id="add-system-task-schedule"><i class="bi bi-plus-circle"></i> Tạo lịch tác vụ mới</button>
+            </div>
+          </div>
+
+          <template id="system-task-schedule-template">
+            <div class="card border-success mb-3 system-task-schedule-card"><div class="card-body">
+              <input type="hidden" name="system_task_schedules[__INDEX__][id]" value="system___STAMP_____INDEX__">
+              <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch tác vụ mới</b><button class="btn btn-danger btn-sm system-task-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
+              <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[__INDEX__][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= $key ?>"><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[__INDEX__][time]"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[__INDEX__][parameter]" value="50"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[__INDEX__][active]" checked><label class="form-check-label">Bật</label></div></div></div>
+              <?php render_system_scheduler_options('independent___INDEX__', ['date'=>array_keys($week_days)], 'Tác vụ hệ thống', '', 'system_task_schedules[__INDEX__][date]', 'system_task_schedules[__INDEX__]'); ?>
+            </div></div>
+          </template>
 
           <div class="card accordion" id="accordion_button_send_notify_upgrade_vbot_hass">
             <div class="card-body">
@@ -1215,15 +1353,49 @@ render_system_scheduler_options(
               <div id="collapse_button_play_playlist" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_play_playlist">
                <div class="alert alert-success" role="alert">
 			   <?php
+                $schedulerPlaylists = [];
+                $schedulerPlaylistManifestPath = __DIR__.'/includes/cache/PlayLists.json';
+                if (is_file($schedulerPlaylistManifestPath)) {
+                  $schedulerPlaylistManifest = json_decode((string)file_get_contents($schedulerPlaylistManifestPath), true);
+                  if (is_array($schedulerPlaylistManifest) && isset($schedulerPlaylistManifest['playlists']) && is_array($schedulerPlaylistManifest['playlists'])) {
+                    $schedulerPlaylists = $schedulerPlaylistManifest['playlists'];
+                  }
+                }
+                $schedulerPlaylistIds = array_values(array_filter(array_map(fn($item) => (string)($item['id'] ?? ''), $schedulerPlaylists)));
                 //Kiểm tra dữ liệu play_play_playlist và gán giá trị mặc định nếu không có
                 if (!isset($data['play_play_playlist']) || empty($data['play_play_playlist'])) {
                   $data['play_play_playlist'] = [
                     'active' => false,
                     'date' => ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
-                    'time' => ["17:30"]
+                    'time' => ["17:30"],
+                    'playlist_id' => [""]
                   ];
                 }
                 $play_play_playlist = $data['play_play_playlist'];
+                $playlistScheduleEntries = [];
+                if (!empty($play_play_playlist['schedules']) && is_array($play_play_playlist['schedules'])) {
+                  $playlistScheduleEntries = $play_play_playlist['schedules'];
+                } else {
+                  // Tự chuyển cấu trúc cũ (nhiều giờ dùng chung chế độ chạy) sang từng lịch độc lập.
+                  $legacyTimes = is_array($play_play_playlist['time'] ?? null) ? $play_play_playlist['time'] : [];
+                  $legacyIds = is_array($play_play_playlist['playlist_id'] ?? null) ? $play_play_playlist['playlist_id'] : [];
+                  foreach ($legacyTimes as $legacyIndex => $legacyTime) {
+                    $playlistScheduleEntries[] = [
+                      'id' => 'legacy_' . $legacyIndex,
+                      'active' => true,
+                      'time' => [$legacyTime],
+                      'playlist_id' => $legacyIds[$legacyIndex] ?? '',
+                      'date' => $play_play_playlist['date'] ?? array_keys($week_days),
+                      'recurrence' => $play_play_playlist['recurrence'] ?? ['type' => 'legacy'],
+                      'conditions' => $play_play_playlist['conditions'] ?? ['mode' => 'always'],
+                      'max_duration_seconds' => $play_play_playlist['max_duration_seconds'] ?? 0
+                    ];
+                  }
+                }
+                if (!$playlistScheduleEntries) {
+                  $playlistScheduleEntries[] = ['id'=>'playlist_0', 'active'=>true, 'time'=>['17:30'], 'playlist_id'=>'', 'date'=>array_keys($week_days), 'recurrence'=>['type'=>'legacy'], 'conditions'=>['mode'=>'always'], 'max_duration_seconds'=>0];
+                }
+                $playlistScheduleEntries = array_values($playlistScheduleEntries);
                 ?>
                 <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng')"></i> :</label>
@@ -1234,31 +1406,33 @@ render_system_scheduler_options(
                   </div>
                 </div>
 
-<?php
-render_system_scheduler_options(
-    'play_play_playlist',
-    $data['play_play_playlist'] ?? [],
-    'Phát playlist',
-    'time-on-play_play_playlist',
-    'dates_play_playlist_player'
-);
-?>
-
-                <div class="row mb-3">
-                  <label class="col-sm-3 col-form-label">Thời Gian Kích Hoạt:</label>
-                  <div class="col-sm-9">
-                    <div class="time-inputs_play_playlist" id="time-on-play_play_playlist">
-                      <?php foreach ($play_play_playlist['time'] as $index => $time): ?>
-                        <div class="time-input-play_play_playlist input-group mb-3" id="time-play_play_playlist-<?= $index ?>">
-                          <input class="form-control border-success" type="time" step="60" name="time_player_playlist[]" value="<?= htmlspecialchars($time) ?>">
-						  <button class="btn btn-primary" type="button" onclick="run_test_task('play_play_playlist', '')"><i class="bi bi-play" title="Chạy Test Tác Vụ Này"></i></button>
-                          <button class="btn btn-danger border-success" title="Xóa thời gian Bật này" type="button" id="delete-play_play_playlist-<?= $index ?>"><i class="bi bi-trash"></i></button>
-                        </div>
-                      <?php endforeach; ?>
-                      <button class="btn btn-success rounded-pill" type="button" id="add-time-play_play_playlist">Thêm thời gian</button>
+                <p class="text-muted">Mỗi khung bên dưới là một lịch độc lập: PlayList, thời gian, chế độ chạy và điều kiện có thể khác nhau.</p>
+                <div id="playlist-schedules-container">
+                  <?php foreach ($playlistScheduleEntries as $index => $playlistSchedule): ?>
+                    <?php
+                      $scheduleSlots = isset($playlistSchedule['slots']) && is_array($playlistSchedule['slots']) ? $playlistSchedule['slots'] : [];
+                      if (!$scheduleSlots) {
+                        $scheduleTimes = is_array($playlistSchedule['time'] ?? null) ? $playlistSchedule['time'] : [$playlistSchedule['time'] ?? ''];
+                        $schedulePlaylistIds = is_array($playlistSchedule['playlist_id'] ?? null) ? $playlistSchedule['playlist_id'] : [];
+                        foreach ($scheduleTimes as $slotIndex => $scheduleTime) {
+                          $scheduleSlots[] = ['time'=>$scheduleTime, 'playlist_id'=>$schedulePlaylistIds[$slotIndex] ?? (is_string($playlistSchedule['playlist_id'] ?? null) ? $playlistSchedule['playlist_id'] : '')];
+                        }
+                      }
+                      $scheduleSlots = array_values(array_filter($scheduleSlots, 'is_array'));
+                      if (!$scheduleSlots) $scheduleSlots[] = ['time'=>'', 'playlist_id'=>''];
+                    ?>
+                    <div class="card border-primary mb-3 playlist-schedule-card" data-playlist-schedule-index="<?= intval($index) ?>">
+                      <div class="card-body">
+                        <input type="hidden" name="playlist_schedules[<?= $index ?>][id]" value="<?= htmlspecialchars($playlistSchedule['id'] ?? ('playlist_'.$index)) ?>">
+                        <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch PlayList #<?= $index + 1 ?></b><button class="btn btn-danger btn-sm playlist-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
+                        <div class="row mb-3"><label class="col-sm-3 col-form-label">Bật lịch này:</label><div class="col-sm-9 form-switch"><input class="form-check-input border-success" type="checkbox" name="playlist_schedules[<?= $index ?>][active]" <?= !isset($playlistSchedule['active']) || $playlistSchedule['active'] ? 'checked' : '' ?>></div></div>
+                        <div class="row mb-3"><label class="col-sm-3 col-form-label">Khung giờ và PlayList:</label><div class="col-sm-9"><div class="playlist-schedule-times" id="playlist-schedule-<?= $index ?>"><?php foreach ($scheduleSlots as $slotIndex => $scheduleSlot): $slotPlaylistId = (string)($scheduleSlot['playlist_id'] ?? ''); ?><div class="input-group mb-2 playlist-time-row"><input class="form-control border-success" type="time" step="60" required name="playlist_schedules[<?= $index ?>][slots][<?= $slotIndex ?>][time]" value="<?= htmlspecialchars($scheduleSlot['time'] ?? '') ?>"><select class="form-select border-primary scheduler-playlist-select <?= ($slotPlaylistId !== '' && !in_array($slotPlaylistId, $schedulerPlaylistIds, true)) ? 'is-invalid' : '' ?>" name="playlist_schedules[<?= $index ?>][slots][<?= $slotIndex ?>][playlist_id]"><option value="">PlayList mặc định</option><?php if ($slotPlaylistId !== '' && !in_array($slotPlaylistId, $schedulerPlaylistIds, true)): ?><option value="<?= htmlspecialchars($slotPlaylistId, ENT_QUOTES, 'UTF-8') ?>" selected>PlayList đã bị xóa hoặc không còn tồn tại</option><?php endif; ?><?php foreach ($schedulerPlaylists as $playlist): ?><option value="<?= htmlspecialchars($playlist['id'] ?? '', ENT_QUOTES, 'UTF-8') ?>" <?= ($slotPlaylistId === ($playlist['id'] ?? '')) ? 'selected' : '' ?>><?= htmlspecialchars($playlist['name'] ?? 'N/A', ENT_QUOTES, 'UTF-8') ?></option><?php endforeach; ?></select><button class="btn btn-primary scheduler-playlist-test" type="button" title="Chạy thử PlayList của dòng này"><i class="bi bi-play"></i></button><button class="btn btn-outline-danger playlist-time-delete" type="button" title="Xóa khung giờ"><i class="bi bi-trash"></i></button></div><?php endforeach; ?></div><small class="text-muted">Mỗi khung giờ có thể chọn một PlayList khác nhau.</small><br><button class="btn btn-outline-success btn-sm scheduler-add-time playlist-time-add" data-scheduler-index="system-playlist_<?= $index ?>" type="button"><i class="bi bi-plus-circle"></i> Thêm khung giờ và PlayList</button></div></div>
+                        <?php render_system_scheduler_options('playlist_'.$index, $playlistSchedule, 'Phát playlist', 'playlist-schedule-'.$index, 'playlist_schedules['.$index.'][date]', 'playlist_schedules['.$index.']'); ?>
+                      </div>
                     </div>
-                  </div>
+                  <?php endforeach; ?>
                 </div>
+                <button class="btn btn-success rounded-pill" type="button" id="add-time-play_play_playlist"><i class="bi bi-plus-circle"></i> Thêm lịch PlayList</button>
 				<hr/>
 				
               </div>
@@ -1517,10 +1691,10 @@ render_system_scheduler_options(
             <font color="green">Dữ Liệu Cấu Hình:</font>
           </h5>
           <div class="row mb-3">
-            <label for="schedule_config_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
+            <label for="schedule_data_json_path" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
             <div class="col-sm-9">
 			<div class="input-group">
-              <input disabled class="form-control border-danger" type="text" name="schedule_config_path" id="schedule_config_path" value="<?php echo $VBot_Offline . $Config['schedule']['data_json_file']; ?>">
+              <input disabled class="form-control border-danger" type="text" name="schedule_data_json_path" id="schedule_data_json_path" value="<?php echo $VBot_Offline . $Config['schedule']['data_json_file']; ?>">
 <button type="button" class="btn btn-success border-danger" title="Xem dữ liệu Đã cấu hình Custom Home Assistant" id="openModalBtn_laplich_thongbao"><i class="bi bi-eye"></i></button>
 <button type="button" class="btn btn-info border-danger" title="Tải Xuống file: <?php echo $json_file; ?>" onclick="downloadFile('<?php echo $json_file; ?>')"><i class="bi bi-download"></i></button>
             </div>
@@ -1778,6 +1952,59 @@ function loadAudioFiles(selectId) {
     });
   </script>
   <script>
+    // Trinh duyet tu quyet dinh giao dien cua input type="time" theo locale,
+    // vi vay mot so thiet bi se hien SA/CH. Chuyen toan bo o gio sang text
+    // co kiem tra HH:mm de giao dien Scheduler luon dung dinh dang 24 gio.
+    const schedulerTime24Pattern = /^([01]\d|2[0-3]):([0-5]\d)$/;
+
+    function normalizeSchedulerTime24(value) {
+      const raw = String(value || '').trim();
+      if (!raw) return '';
+      let match = raw.match(/^(\d{1,2}):?(\d{2})$/);
+      if (!match) return raw;
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      if (hour > 23 || minute > 59) return raw;
+      return String(hour).padStart(2, '0') + ':' + String(minute).padStart(2, '0');
+    }
+
+    function validateSchedulerTime24(input, normalize = false) {
+      if (normalize) input.value = normalizeSchedulerTime24(input.value);
+      const valid = !input.value || schedulerTime24Pattern.test(input.value);
+      input.setCustomValidity(valid ? '' : 'Vui lòng nhập giờ theo định dạng 24 giờ HH:mm, từ 00:00 đến 23:59.');
+      input.classList.toggle('is-invalid', !valid);
+      return valid;
+    }
+
+    function initializeSchedulerTime24(root = document) {
+      const inputs = [];
+      if (root.nodeType === Node.ELEMENT_NODE && root.matches('input[type="time"], input.scheduler-time-24h')) inputs.push(root);
+      if (root.querySelectorAll) inputs.push(...root.querySelectorAll('input[type="time"], input.scheduler-time-24h'));
+      inputs.forEach(input => {
+        if (input.dataset.time24Initialized === '1') return;
+        input.dataset.time24Initialized = '1';
+        input.type = 'text';
+        input.classList.add('scheduler-time-24h');
+        input.inputMode = 'numeric';
+        input.maxLength = 5;
+        input.placeholder = 'HH:mm';
+        input.autocomplete = 'off';
+        input.title = 'Giờ 24h, định dạng HH:mm (00:00–23:59)';
+        input.value = normalizeSchedulerTime24(input.value);
+        input.addEventListener('input', () => {
+          input.value = input.value.replace(/[^0-9:]/g, '').slice(0, 5);
+          validateSchedulerTime24(input, false);
+        });
+        input.addEventListener('blur', () => validateSchedulerTime24(input, true));
+        validateSchedulerTime24(input, false);
+      });
+    }
+
+    initializeSchedulerTime24();
+    new MutationObserver(mutations => mutations.forEach(mutation =>
+      mutation.addedNodes.forEach(node => initializeSchedulerTime24(node))
+    )).observe(document.body, {childList: true, subtree: true});
+
     let newTaskIndex = <?= count($data['notification_schedule']) ?>;
     let deletedTasks = [];
     function createDateElement(index, specific_date, container) {
@@ -2175,25 +2402,68 @@ function loadAudioFiles(selectId) {
       timeBrightnessCounter++;
     });
  <!-- Scripts Phát danh sách nhạc -->
-    let time_Play_Playlist = <?= count($play_play_playlist['time']) ?>;
+    let time_Play_Playlist = <?= count($playlistScheduleEntries) ?>;
+    const playlistScheduleContainer = document.getElementById('playlist-schedules-container');
+    const playlistScheduleTemplate = playlistScheduleContainer.querySelector('.playlist-schedule-card').cloneNode(true);
+    function bindPlaylistScheduleCard(card) {
+      card.querySelector('.playlist-schedule-delete').addEventListener('click', function() { card.remove(); });
+      const timesContainer = card.querySelector('.playlist-schedule-times');
+      function bindPlaylistSlot(row) {
+        const playlistSelect = row.querySelector('.scheduler-playlist-select');
+        playlistSelect.addEventListener('change', function() { playlistSelect.classList.remove('is-invalid'); });
+        row.querySelector('.scheduler-playlist-test').addEventListener('click', function() {
+          run_test_task('play_play_playlist', playlistSelect.value);
+        });
+        row.querySelector('.playlist-time-delete').addEventListener('click', function() {
+          const rows = timesContainer.querySelectorAll('.playlist-time-row');
+          if (rows.length <= 1) {
+            show_message('Mỗi lịch PlayList cần có ít nhất một khung giờ.');
+            return;
+          }
+          row.remove();
+        });
+      }
+      timesContainer.querySelectorAll('.playlist-time-row').forEach(bindPlaylistSlot);
+      card.querySelector('.playlist-time-add').addEventListener('click', function() {
+        const row = timesContainer.querySelector('.playlist-time-row').cloneNode(true);
+        row.querySelector('input[type="time"], input.scheduler-time-24h').value = '';
+        row.querySelector('.scheduler-playlist-select').value = '';
+        row.querySelector('.scheduler-playlist-select').classList.remove('is-invalid');
+        const slotKey = 'slot_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        row.querySelectorAll('[name]').forEach(element => {
+          element.name = element.name.replace(/\[slots\]\[[^\]]+\]/, '[slots][' + slotKey + ']');
+        });
+        timesContainer.appendChild(row);
+        bindPlaylistSlot(row);
+      });
+      initializeSchedulerRecurrence(card);
+    }
+    playlistScheduleContainer.querySelectorAll('.playlist-schedule-card').forEach(bindPlaylistScheduleCard);
     document.getElementById('add-time-play_play_playlist').addEventListener('click', function() {
-      const timeOnContainer = document.getElementById('time-on-play_play_playlist');
-      const inputContainerId = 'time_player_playlist-' + time_Play_Playlist;
-      const inputContainer = document.createElement('div');
-      inputContainer.id = inputContainerId;
-      inputContainer.classList.add('time-input-play_play_playlist', 'input-group', 'mb-3');
-      inputContainer.innerHTML = '<input class="form-control border-success" type="time" step="60" name="time_player_playlist[]"><button class="btn btn-danger border-success" title="Xóa thời gian này" type="button" id="delete-play_play_playlist-' + time_Play_Playlist + '"><i class="bi bi-trash"></i></button>';
-      timeOnContainer.insertBefore(inputContainer, this);
-      document.getElementById('delete-play_play_playlist-' + time_Play_Playlist).addEventListener('click', function() {
-        document.getElementById(inputContainerId).remove();
+      const card = playlistScheduleTemplate.cloneNode(true);
+      card.dataset.playlistScheduleIndex = time_Play_Playlist;
+      card.querySelector('b').textContent = 'Lịch PlayList #' + (time_Play_Playlist + 1);
+      card.querySelectorAll('[name]').forEach(element => {
+        element.name = element.name.replace(/playlist_schedules\[\d+\]/g, 'playlist_schedules[' + time_Play_Playlist + ']');
       });
+      card.querySelectorAll('[data-scheduler-index]').forEach(element => element.dataset.schedulerIndex = 'system-playlist_' + time_Play_Playlist);
+      card.querySelector('.playlist-schedule-times').id = 'playlist-schedule-' + time_Play_Playlist;
+      card.querySelector('.scheduler-recurrence-type').dataset.timeContainerId = 'playlist-schedule-' + time_Play_Playlist;
+      card.querySelectorAll('input[type="hidden"]').forEach(element => element.value = 'playlist_' + Date.now() + '_' + time_Play_Playlist);
+      const clonedTimeRows = card.querySelectorAll('.playlist-time-row');
+      clonedTimeRows.forEach((row, rowIndex) => { if (rowIndex > 0) row.remove(); });
+      card.querySelector('.playlist-time-row input[type="time"], .playlist-time-row input.scheduler-time-24h').value = '';
+      card.querySelector('.playlist-time-row .scheduler-playlist-select').value = '';
+      card.querySelector('.playlist-time-row .scheduler-playlist-select').classList.remove('is-invalid');
+      card.querySelector('.scheduler-recurrence-type').value = 'legacy';
+      card.querySelector('.scheduler-condition-mode').value = 'always';
+      card.querySelectorAll('input[type="date"]').forEach(element => element.value = '');
+      card.querySelector('input[name$="[active]"]').checked = true;
+      card.querySelector('input[name$="[max_duration_seconds]"]').value = 0;
+      card.querySelectorAll('.scheduler-legacy-dates input[type="checkbox"]').forEach(element => element.checked = true);
+      playlistScheduleContainer.appendChild(card);
+      bindPlaylistScheduleCard(card);
       time_Play_Playlist++;
-    });
-    document.querySelectorAll('.time-inputs_play_playlist > div > button').forEach(button => {
-      button.addEventListener('click', function() {
-        const container = button.parentElement;
-        container.remove();
-      });
     });
 <!--END Scripts Phát danh sách nhạc -->
 
@@ -2302,7 +2572,7 @@ async function schedulerHistoryFromFile(limit = 50) {
 }
 
 function updateSchedulerRecurrenceFields(select) {
-    const scope = select.closest('.alert') || select.closest('.card') || document;
+    const scope = select.closest('.playlist-schedule-card') || select.closest('.alert') || select.closest('.card') || document;
     const selectedType = select.value;
     scope.querySelectorAll('.scheduler-recurrence-fields').forEach(group => {
         const visible = (group.dataset.recurrenceFor || '').split(/\s+/).includes(selectedType);
@@ -2324,15 +2594,16 @@ function updateSchedulerRecurrenceFields(select) {
             !externalTimeContainer.contains(button) && String(button.getAttribute('onclick') || '').includes('add')
         );
     }
+    const singleTimeOnly = selectedType === 'once' && !scope.classList.contains('playlist-schedule-card');
     if (addTimeButton) {
-        addTimeButton.disabled = selectedType === 'once';
-        addTimeButton.title = selectedType === 'once' ? 'Chế độ Chỉ một lần chỉ sử dụng một thời gian' : 'Thêm thời gian';
+        addTimeButton.disabled = singleTimeOnly;
+        addTimeButton.title = singleTimeOnly ? 'Chế độ Chỉ một lần chỉ sử dụng một thời gian' : 'Thêm thời gian';
     }
     const timeContainer = externalTimeContainer || scope.querySelector('#time-container-' + index);
     if (timeContainer) {
-        const timeInputs = Array.from(timeContainer.querySelectorAll('input[type="time"], input.time-input'));
+        const timeInputs = Array.from(timeContainer.querySelectorAll('input[type="time"], input.time-input, input.scheduler-time-24h'));
         timeInputs.forEach((input, inputIndex) => {
-            const disabledByOnce = selectedType === 'once' && inputIndex > 0;
+            const disabledByOnce = singleTimeOnly && inputIndex > 0;
             input.disabled = disabledByOnce;
             const row = input.closest('.input-group');
             if (row) {
@@ -2344,7 +2615,7 @@ function updateSchedulerRecurrenceFields(select) {
 }
 
 function updateSchedulerConditionFields(select) {
-    const scope = select.closest('.alert') || select.closest('.card') || document;
+    const scope = select.closest('.playlist-schedule-card') || select.closest('.alert') || select.closest('.card') || document;
     const index = select.dataset.schedulerIndex;
     const fields = scope.querySelector('.scheduler-condition-fields[data-scheduler-index="' + index + '"]');
     if (!fields) return;
@@ -2352,6 +2623,94 @@ function updateSchedulerConditionFields(select) {
     fields.classList.toggle('opacity-50', !enabled);
     fields.querySelectorAll('input, select').forEach(input => input.disabled = !enabled);
 }
+
+const systemTaskSchedulesContainer = document.getElementById('system-task-schedules-container');
+const systemTaskScheduleTemplate = document.getElementById('system-task-schedule-template');
+let systemTaskScheduleIndex = <?= count($independentSystemSchedules) ?>;
+
+function updateSystemTaskParameter(card) {
+    const task = card.querySelector('.system-task-kind').value;
+    const wrap = card.querySelector('.system-task-parameter-wrap');
+    const oldField = wrap.querySelector('.system-task-parameter');
+    const name = oldField ? oldField.name : '';
+    const oldValue = oldField ? oldField.value : '';
+    if (task === 'mic_on_off') {
+        wrap.innerHTML = '<select class="form-select border-warning system-task-parameter" name="' + name + '"><option value="on">Bật Mic</option><option value="off">Tắt Mic</option></select>';
+        wrap.querySelector('select').value = (oldValue === 'on' || oldValue === 'off') ? oldValue : 'off';
+    } else if (task === 'change_volume' || task === 'change_led_brightness') {
+        const label = task === 'change_volume' ? 'Âm lượng (0-100)' : 'Độ sáng (0-100)';
+        wrap.innerHTML = '<input type="number" min="0" max="100" class="form-control border-warning system-task-parameter" name="' + name + '" placeholder="' + label + '" value="' + (oldValue || '50') + '">';
+    } else {
+        wrap.innerHTML = '<input type="hidden" class="system-task-parameter" name="' + name + '" value=""><div class="form-control bg-light text-muted">Không cần tham số</div>';
+    }
+}
+
+function markSystemTaskScheduleChanged(task) {
+    if (!task) return;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = 'removed_system_schedule_tasks[]';
+    input.value = task;
+    document.getElementById('system-task-schedule-changes').appendChild(input);
+}
+
+function bindSystemTaskScheduleCard(card) {
+    const taskSelect = card.querySelector('.system-task-kind');
+    card.dataset.originalTask = taskSelect.value;
+    card.querySelector('.system-task-schedule-delete').addEventListener('click', function () {
+        markSystemTaskScheduleChanged(card.dataset.originalTask || taskSelect.value);
+        card.remove();
+        document.getElementById('system-task-schedules-empty').classList.toggle('d-none', systemTaskSchedulesContainer.children.length > 0);
+    });
+    taskSelect.addEventListener('change', function () {
+        markSystemTaskScheduleChanged(card.dataset.originalTask);
+        card.dataset.originalTask = taskSelect.value;
+        updateSystemTaskParameter(card);
+    });
+    updateSystemTaskParameter(card);
+    initializeSchedulerRecurrence(card);
+}
+
+systemTaskSchedulesContainer.querySelectorAll('.system-task-schedule-card').forEach(bindSystemTaskScheduleCard);
+function createSystemTaskSchedule(selectedTask = 'change_volume') {
+    const stamp = Date.now();
+    const html = systemTaskScheduleTemplate.innerHTML
+        .replaceAll('__INDEX__', String(systemTaskScheduleIndex))
+        .replaceAll('__STAMP__', String(stamp));
+    const holder = document.createElement('div');
+    holder.innerHTML = html.trim();
+    const card = holder.firstElementChild;
+    systemTaskSchedulesContainer.appendChild(card);
+    card.querySelector('.system-task-kind').value = selectedTask;
+    bindSystemTaskScheduleCard(card);
+    document.getElementById('system-task-schedules-empty').classList.add('d-none');
+    card.scrollIntoView({behavior: 'smooth', block: 'center'});
+    systemTaskScheduleIndex++;
+}
+document.getElementById('add-system-task-schedule').addEventListener('click', function () { createSystemTaskSchedule(); });
+
+// Đặt nút tạo lịch ngay trong từng mục tác vụ để không phải quay lại đầu trang.
+const systemTaskAccordionMap = {
+    accordion_button_volume_change: 'change_volume',
+    accordion_button_brightness_change: 'change_led_brightness',
+    accordion_button_mic_on_off: 'mic_on_off',
+    accordion_button_play_all_local: 'play_all_music_local',
+    accordion_button_stop_media_player: 'stop_media_player',
+    accordion_button_restart_vbot_service: 'restart_vbot',
+    accordion_button_reboot_os: 'reboot_os',
+    accordion_button_send_notify_upgrade_vbot_hass: 'send_notify_upgrade_vbot_home_assistant'
+};
+Object.entries(systemTaskAccordionMap).forEach(([accordionId, task]) => {
+    const accordion = document.getElementById(accordionId);
+    const target = accordion ? accordion.querySelector('.alert.alert-success') : null;
+    if (!target) return;
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-outline-primary btn-sm mb-3';
+    button.innerHTML = '<i class="bi bi-calendar2-plus"></i> Tạo lịch độc lập mới cho tác vụ này';
+    button.addEventListener('click', function () { createSystemTaskSchedule(task); });
+    target.prepend(button);
+});
 
 function initializeSchedulerRecurrence(root = document) {
     root.querySelectorAll('.scheduler-recurrence-type').forEach(updateSchedulerRecurrenceFields);
@@ -2426,10 +2785,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
 //Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống
 function validateFormVBot() {
+    initializeSchedulerTime24();
+    let firstInvalidTime = null;
+    document.querySelectorAll('input.scheduler-time-24h').forEach(input => {
+        if (!input.disabled && !validateSchedulerTime24(input, true) && !firstInvalidTime) firstInvalidTime = input;
+    });
+    if (firstInvalidTime) {
+        show_message('Thời gian không hợp lệ. Vui lòng nhập theo định dạng 24 giờ HH:mm, từ 00:00 đến 23:59.');
+        firstInvalidTime.scrollIntoView({behavior: 'smooth', block: 'center'});
+        setTimeout(() => firstInvalidTime.focus(), 350);
+        return false;
+    }
     const requiredInputs = document.querySelectorAll('input[required], select[required], textarea[required]');
     let firstEmptyInput = null;
     let emptyFields = [];
     requiredInputs.forEach(input => {
+        if (input.disabled) return;
         input.classList.remove('empty-field');
         if (!input.value.trim()) {
             input.classList.add('empty-field');

@@ -28,6 +28,319 @@ if ($Config['contact_info']['user_login']['active']) {
 
 $Cover_URL_Local = dirname(dirname(dirname($Current_URL)));
 
+function playlistStorePaths()
+{
+	$cache = realpath(__DIR__.'/../cache');
+	if ($cache === false) {
+		throw new RuntimeException('Thư mục cache PlayList không tồn tại');
+	}
+	$directory = $cache.DIRECTORY_SEPARATOR.'playlists';
+	if (!is_dir($directory) && !mkdir($directory, 0777, true) && !is_dir($directory)) {
+		throw new RuntimeException('Không thể tạo thư mục lưu nhiều PlayList');
+	}
+	return [
+		'cache' => $cache,
+		'directory' => $directory,
+		'manifest' => $cache.DIRECTORY_SEPARATOR.'PlayLists.json',
+		'legacy' => $cache.DIRECTORY_SEPARATOR.'PlayList.json',
+	];
+}
+
+function playlistAtomicWrite($path, $data)
+{
+	$json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	if ($json === false) return false;
+	$temp = $path.'.tmp.'.bin2hex(random_bytes(4));
+	if (file_put_contents($temp, $json, LOCK_EX) === false) return false;
+	@chmod($temp, 0777);
+	if (!@rename($temp, $path)) {
+		@unlink($temp);
+		return false;
+	}
+	@chmod($path, 0777);
+	return true;
+}
+
+function playlistEmptyData($name)
+{
+	return [
+		'success' => true,
+		'message' => 'Danh sách phát '.$name,
+		'playlist_name' => $name,
+		'play_mode' => 'random',
+		'loop' => false,
+		'data' => [],
+	];
+}
+
+function playlistNameLength($name)
+{
+	return function_exists('mb_strlen') ? mb_strlen($name, 'UTF-8') : strlen($name);
+}
+
+function playlistNameKey($name)
+{
+	return function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : strtolower($name);
+}
+
+function playlistInitializeStore()
+{
+	$paths = playlistStorePaths();
+	$defaultPath = $paths['directory'].DIRECTORY_SEPARATOR.'default.json';
+	if (!file_exists($paths['manifest'])) {
+		$legacy = null;
+		if (file_exists($paths['legacy'])) {
+			$legacy = json_decode((string)file_get_contents($paths['legacy']), true);
+		}
+		if (!is_array($legacy) || !isset($legacy['data']) || !is_array($legacy['data'])) {
+			$legacy = playlistEmptyData('Mặc định');
+		}
+		playlistAtomicWrite($defaultPath, $legacy);
+		$now = time();
+		playlistAtomicWrite($paths['manifest'], [
+			'success' => true,
+			'active_id' => 'default',
+			'playlists' => [[
+				'id' => 'default', 'name' => 'Mặc định', 'file' => 'default.json',
+				'created_at' => $now, 'updated_at' => $now,
+			]],
+		]);
+		playlistAtomicWrite($paths['legacy'], $legacy);
+	}
+	$manifest = json_decode((string)file_get_contents($paths['manifest']), true);
+	if (!is_array($manifest) || empty($manifest['playlists']) || !is_array($manifest['playlists'])) {
+		throw new RuntimeException('Dữ liệu quản lý PlayList không hợp lệ');
+	}
+	$ids = array_column($manifest['playlists'], 'id');
+	if (!in_array($manifest['active_id'] ?? '', $ids, true)) {
+		$manifest['active_id'] = $manifest['playlists'][0]['id'];
+		playlistAtomicWrite($paths['manifest'], $manifest);
+	}
+	return [$paths, $manifest];
+}
+
+function playlistFindMeta($manifest, $playlistId)
+{
+	foreach ($manifest['playlists'] as $item) {
+		if (($item['id'] ?? '') === $playlistId) return $item;
+	}
+	return null;
+}
+
+function playlistResolve($playlistId = null)
+{
+	[$paths, $manifest] = playlistInitializeStore();
+	$id = trim((string)($playlistId ?: $manifest['active_id']));
+	$meta = playlistFindMeta($manifest, $id);
+	if (!$meta || !preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $id)) {
+		throw new InvalidArgumentException('PlayList không tồn tại');
+	}
+	$path = $paths['directory'].DIRECTORY_SEPARATOR.$meta['file'];
+	return [$paths, $manifest, $meta, $path];
+}
+
+function playlistReadData($path, $name)
+{
+	$data = file_exists($path) ? json_decode((string)file_get_contents($path), true) : null;
+	if (!is_array($data) || !isset($data['data']) || !is_array($data['data'])) {
+		$data = playlistEmptyData($name);
+		playlistAtomicWrite($path, $data);
+	}
+	$data['playlist_name'] = $name;
+	$playMode = $data['play_mode'] ?? 'random';
+	$data['play_mode'] = in_array($playMode, ['sequential', 'random', 'repeat_one'], true) ? $playMode : 'random';
+	$data['loop'] = filter_var($data['loop'] ?? false, FILTER_VALIDATE_BOOLEAN);
+	return $data;
+}
+
+function playlistSyncLegacyIfActive($paths, $manifest, $playlistId, $data)
+{
+	if (($manifest['active_id'] ?? '') === $playlistId) {
+		return playlistAtomicWrite($paths['legacy'], $data);
+	}
+	return true;
+}
+
+if (isset($_GET['Playlist_Manager'])) {
+	try {
+		[$paths, $manifest] = playlistInitializeStore();
+		foreach ($manifest['playlists'] as &$item) {
+			$path = $paths['directory'].DIRECTORY_SEPARATOR.$item['file'];
+			$data = playlistReadData($path, $item['name']);
+			$item['item_count'] = count($data['data']);
+			$item['active'] = $item['id'] === $manifest['active_id'];
+			$item['play_mode'] = $data['play_mode'];
+			$item['loop'] = $data['loop'];
+		}
+		unset($item);
+		echo json_encode($manifest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
+	}
+	exit();
+}
+
+if (isset($_GET['Playlist_Backup'])) {
+	try {
+		[$paths, $manifest] = playlistInitializeStore();
+		$backup = ['format' => 'vbot-playlists-backup-v1', 'created_at' => time(), 'active_id' => $manifest['active_id'], 'playlists' => []];
+		foreach ($manifest['playlists'] as $item) {
+			$backup['playlists'][] = ['meta' => $item, 'content' => playlistReadData($paths['directory'].DIRECTORY_SEPARATOR.$item['file'], $item['name'])];
+		}
+		header('Content-Disposition: attachment; filename="VBot_PlayLists_Backup_'.date('Ymd_His').'.json"');
+		echo json_encode($backup, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
+	}
+	exit();
+}
+
+if (isset($_POST['playlist_items_action'])) {
+	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+	try {
+		[$paths, $manifest, $meta, $sourcePath] = playlistResolve($_POST['playlist_id'] ?? null);
+		$action = strtolower(trim((string)$_POST['playlist_items_action']));
+		$sourceData = playlistReadData($sourcePath, $meta['name']);
+		$ids = json_decode((string)($_POST['item_ids'] ?? '[]'), true);
+		$ids = is_array($ids) ? array_values(array_unique(array_filter(array_map('strval', $ids)))) : [];
+
+		if ($action === 'settings') {
+			$mode = strtolower(trim((string)($_POST['play_mode'] ?? 'random')));
+			if (!in_array($mode, ['sequential', 'random', 'repeat_one'], true)) throw new InvalidArgumentException('Chế độ phát không hợp lệ');
+			$sourceData['play_mode'] = $mode;
+			$sourceData['loop'] = filter_var($_POST['loop'] ?? false, FILTER_VALIDATE_BOOLEAN);
+			if (!playlistAtomicWrite($sourcePath, $sourceData) || !playlistSyncLegacyIfActive($paths, $manifest, $meta['id'], $sourceData)) throw new RuntimeException('Không thể lưu chế độ phát');
+			echo json_encode(['success' => true, 'message' => 'Đã lưu chế độ phát cho '.$meta['name']], JSON_UNESCAPED_UNICODE);
+			exit();
+		}
+
+		if ($action === 'reorder') {
+			if (count($ids) !== count($sourceData['data'])) throw new InvalidArgumentException('Danh sách thứ tự bài hát không đầy đủ');
+			$byId = [];
+			foreach ($sourceData['data'] as $entry) $byId[(string)($entry['ids_list'] ?? '')] = $entry;
+			$ordered = [];
+			foreach ($ids as $itemId) {
+				if (!isset($byId[$itemId])) throw new InvalidArgumentException('Bài hát cần sắp xếp không tồn tại');
+				$ordered[] = $byId[$itemId];
+			}
+			$sourceData['data'] = $ordered;
+			if (!playlistAtomicWrite($sourcePath, $sourceData) || !playlistSyncLegacyIfActive($paths, $manifest, $meta['id'], $sourceData)) throw new RuntimeException('Không thể lưu thứ tự bài hát');
+			echo json_encode(['success' => true, 'message' => 'Đã lưu thứ tự bài hát'], JSON_UNESCAPED_UNICODE);
+			exit();
+		}
+
+		if (!in_array($action, ['copy', 'move'], true) || !$ids) throw new InvalidArgumentException('Thao tác bài hát không hợp lệ');
+		[$targetPaths, $targetManifest, $targetMeta, $targetPath] = playlistResolve($_POST['target_playlist_id'] ?? null);
+		if ($targetMeta['id'] === $meta['id']) throw new InvalidArgumentException('Hãy chọn một PlayList đích khác');
+		$selected = [];
+		$remaining = [];
+		foreach ($sourceData['data'] as $entry) {
+			if (in_array((string)($entry['ids_list'] ?? ''), $ids, true)) $selected[] = $entry;
+			else $remaining[] = $entry;
+		}
+		if (!$selected) throw new InvalidArgumentException('Không tìm thấy bài hát đã chọn');
+		$targetData = playlistReadData($targetPath, $targetMeta['name']);
+		$originalTargetData = $targetData;
+		$targetKeys = [];
+		foreach ($targetData['data'] as $entry) $targetKeys[(string)($entry['source'] ?? '').'|'.(string)($entry['id'] ?? '').'|'.(string)($entry['audio'] ?? '')] = true;
+		$added = 0;
+		foreach ($selected as $entry) {
+			$key = (string)($entry['source'] ?? '').'|'.(string)($entry['id'] ?? '').'|'.(string)($entry['audio'] ?? '');
+			if (isset($targetKeys[$key])) continue;
+			$entry['ids_list'] = strtoupper(bin2hex(random_bytes(3)));
+			$targetData['data'][] = $entry;
+			$targetKeys[$key] = true;
+			$added++;
+		}
+		if ($added === 0) throw new InvalidArgumentException('Các bài đã chọn đều tồn tại trong PlayList đích');
+		if (!playlistAtomicWrite($targetPath, $targetData) || !playlistSyncLegacyIfActive($targetPaths, $targetManifest, $targetMeta['id'], $targetData)) throw new RuntimeException('Không thể cập nhật PlayList đích');
+		if ($action === 'move') {
+			$sourceData['data'] = $remaining;
+			if (!playlistAtomicWrite($sourcePath, $sourceData) || !playlistSyncLegacyIfActive($paths, $manifest, $meta['id'], $sourceData)) {
+				playlistAtomicWrite($targetPath, $originalTargetData);
+				playlistSyncLegacyIfActive($targetPaths, $targetManifest, $targetMeta['id'], $originalTargetData);
+				throw new RuntimeException('Không thể hoàn tất di chuyển; thay đổi ở PlayList đích đã được hoàn tác');
+			}
+		}
+		echo json_encode(['success' => true, 'message' => ($action === 'move' ? 'Đã di chuyển ' : 'Đã sao chép ').$added.' bài sang '.$targetMeta['name']], JSON_UNESCAPED_UNICODE);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
+	}
+	exit();
+}
+
+if (isset($_POST['playlist_manager_action'])) {
+	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+	try {
+		[$paths, $manifest] = playlistInitializeStore();
+		$action = strtolower(trim((string)$_POST['playlist_manager_action']));
+		$id = trim((string)($_POST['playlist_id'] ?? ''));
+		$name = trim((string)($_POST['playlist_name'] ?? ''));
+		$deleteFileAfterSave = null;
+		$successMessage = 'Đã cập nhật PlayList';
+		if ($action === 'create' || $action === 'clone') {
+			if ($name === '' || playlistNameLength($name) > 80) throw new InvalidArgumentException('Tên PlayList phải từ 1 đến 80 ký tự');
+			if (count($manifest['playlists']) >= 100) throw new InvalidArgumentException('Chỉ cho phép tối đa 100 PlayList');
+			foreach ($manifest['playlists'] as $item) {
+				if (playlistNameKey($item['name']) === playlistNameKey($name)) throw new InvalidArgumentException('Tên PlayList đã tồn tại');
+			}
+			$id = 'pl_'.bin2hex(random_bytes(6));
+			$now = time();
+			$manifest['playlists'][] = ['id' => $id, 'name' => $name, 'file' => $id.'.json', 'created_at' => $now, 'updated_at' => $now];
+			if ($action === 'clone') {
+				$sourceMeta = playlistFindMeta($manifest, trim((string)($_POST['source_playlist_id'] ?? '')));
+				if (!$sourceMeta || $sourceMeta['id'] === $id) throw new InvalidArgumentException('PlayList nguồn không tồn tại');
+				$newData = playlistReadData($paths['directory'].DIRECTORY_SEPARATOR.$sourceMeta['file'], $sourceMeta['name']);
+				$newData['playlist_name'] = $name;
+				foreach ($newData['data'] as &$entry) $entry['ids_list'] = strtoupper(bin2hex(random_bytes(3)));
+				unset($entry);
+			} else {
+				$newData = playlistEmptyData($name);
+			}
+			if (!playlistAtomicWrite($paths['directory'].DIRECTORY_SEPARATOR.$id.'.json', $newData)) throw new RuntimeException('Không thể tạo file PlayList');
+			$successMessage = ($action === 'clone' ? 'Đã nhân bản PlayList: ' : 'Đã tạo PlayList: ').$name;
+		} elseif ($action === 'rename') {
+			if ($name === '' || playlistNameLength($name) > 80) throw new InvalidArgumentException('Tên PlayList phải từ 1 đến 80 ký tự');
+			$found = false;
+			foreach ($manifest['playlists'] as &$item) {
+				if ($item['id'] === $id) { $item['name'] = $name; $item['updated_at'] = time(); $found = true; }
+				elseif (playlistNameKey($item['name']) === playlistNameKey($name)) throw new InvalidArgumentException('Tên PlayList đã tồn tại');
+			}
+			unset($item);
+			if (!$found) throw new InvalidArgumentException('PlayList không tồn tại');
+			$successMessage = 'Đã đổi tên PlayList thành: '.$name;
+		} elseif ($action === 'select') {
+			$meta = playlistFindMeta($manifest, $id);
+			if (!$meta) throw new InvalidArgumentException('PlayList không tồn tại');
+			$manifest['active_id'] = $id;
+			$data = playlistReadData($paths['directory'].DIRECTORY_SEPARATOR.$meta['file'], $meta['name']);
+			if (!playlistAtomicWrite($paths['legacy'], $data)) throw new RuntimeException('Không thể kích hoạt PlayList');
+			$successMessage = 'Đã đặt PlayList mặc định: '.$meta['name'];
+		} elseif ($action === 'delete') {
+			if (count($manifest['playlists']) <= 1) throw new InvalidArgumentException('Phải giữ lại ít nhất một PlayList');
+			$meta = playlistFindMeta($manifest, $id);
+			if (!$meta) throw new InvalidArgumentException('PlayList không tồn tại');
+			$manifest['playlists'] = array_values(array_filter($manifest['playlists'], function ($item) use ($id) { return $item['id'] !== $id; }));
+			$deleteFileAfterSave = $paths['directory'].DIRECTORY_SEPARATOR.$meta['file'];
+			if ($manifest['active_id'] === $id) {
+				$manifest['active_id'] = $manifest['playlists'][0]['id'];
+				$newMeta = $manifest['playlists'][0];
+				$data = playlistReadData($paths['directory'].DIRECTORY_SEPARATOR.$newMeta['file'], $newMeta['name']);
+				if (!playlistAtomicWrite($paths['legacy'], $data)) throw new RuntimeException('Không thể chuyển sang PlayList thay thế');
+			}
+			$successMessage = 'Đã xóa PlayList: '.$meta['name'];
+		} else {
+			throw new InvalidArgumentException('Thao tác quản lý PlayList không hợp lệ');
+		}
+		if (!playlistAtomicWrite($paths['manifest'], $manifest)) throw new RuntimeException('Không thể lưu danh sách PlayList');
+		if ($deleteFileAfterSave !== null) @unlink($deleteFileAfterSave);
+		echo json_encode(['success' => true, 'message' => $successMessage, 'playlist_id' => $id, 'active_id' => $manifest['active_id']], JSON_UNESCAPED_UNICODE);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
+	}
+	exit();
+}
+
 //Chuyển đổi thời gian
 function formatDuration($duration)
 {
@@ -953,22 +1266,14 @@ if (isset($_GET['Cache_NewsPaper'])) {
 
 //Hiển thị dữ liệu playlist
 if (isset($_GET['Cache_PlayList'])) {
-	$playlistJsonPath = '../cache/PlayList.json';
-	if (!file_exists($playlistJsonPath)) {
-		$initialData = [
-			'success' => true,
-			'message' => 'Danh sách phát tổng hợp',
-			'data' => []
-		];
-		file_put_contents($playlistJsonPath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
-		@chmod($playlistJsonPath, 0777);
-	}
-	$jsonData = file_get_contents($playlistJsonPath);
-	$data = json_decode($jsonData, true);
-	if (json_last_error() === JSON_ERROR_NONE) {
+	try {
+		[$paths, $manifest, $meta, $playlistJsonPath] = playlistResolve($_GET['playlist_id'] ?? null);
+		$data = playlistReadData($playlistJsonPath, $meta['name']);
+		$data['playlist'] = $meta;
+		$data['active_id'] = $manifest['active_id'];
 		echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-	} else {
-		echo json_encode(['success' => false, 'message' => 'Lỗi phân tích JSON.'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
 	}
 	exit();
 }
@@ -976,17 +1281,14 @@ if (isset($_GET['Cache_PlayList'])) {
 //Thêm bài hát vào playlist
 if (isset($_POST['playlist_ADD'])) {
 	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
-	$filePath = '../cache/PlayList.json';
-	$response = [];
-	if (!file_exists($filePath)) {
-		$initialData = [
-			'success' => true,
-			'message' => 'Danh sách phát tổng hợp',
-			'data' => []
-		];
-		file_put_contents($filePath, json_encode($initialData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
-		@chmod($filePath, 0777);
+	try {
+		[$playlistPaths, $playlistManifest, $playlistMeta, $filePath] = playlistResolve($_POST['playlist_id'] ?? null);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
+		exit();
 	}
+	$selectedPlaylistId = $playlistMeta['id'];
+	$response = [];
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$requiredFields = ['title', 'cover', 'audio', 'duration', 'description', 'source', 'id', 'channelTitle', 'artist'];
 		$missingFields = [];
@@ -1021,8 +1323,7 @@ if (isset($_POST['playlist_ADD'])) {
 			'channelTitle' => convertToNull($_POST['channelTitle']),
 			'artist' => convertToNull($_POST['artist'])
 		];
-		$jsonData = file_get_contents($filePath);
-		$data = json_decode($jsonData, true);
+		$data = playlistReadData($filePath, $playlistMeta['name']);
 		$isDuplicate = false;
 		foreach ($data['data'] as $entry) {
 			if ($entry['title'] === $newEntry['title'] && $entry['source'] === $newEntry['source'] && $entry['artist'] === $newEntry['artist'] && $entry['cover'] === $newEntry['cover']) {
@@ -1035,9 +1336,7 @@ if (isset($_POST['playlist_ADD'])) {
 			$response['message'] = ' Bài hát ' . $_POST['title'] . ' đã tồn tại trong danh sách phát ở nguồn ' . $_POST['source'];
 		} else {
 			$data['data'][] = $newEntry;
-			$jsonData = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			if (file_put_contents($filePath, $jsonData, LOCK_EX)) {
-				@chmod($filePath, 0777);
+			if (playlistAtomicWrite($filePath, $data) && playlistSyncLegacyIfActive($playlistPaths, $playlistManifest, $selectedPlaylistId, $data)) {
 				$response['success'] = true;
 				$response['message'] = 'Dữ liệu đã được ghi vào file JSON thành công.';
 			} else {
@@ -1056,7 +1355,13 @@ if (isset($_POST['playlist_ADD'])) {
 //Xóa playlist hoặc xóa 1 hay nhiều bài hát theo ids_list
 if (isset($_POST['playlist_DELETE'])) {
 	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
-	$filePath = '../cache/PlayList.json';
+	try {
+		[$playlistPaths, $playlistManifest, $playlistMeta, $filePath] = playlistResolve($_POST['playlist_id'] ?? null);
+	} catch (Throwable $error) {
+		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);
+		exit();
+	}
+	$selectedPlaylistId = $playlistMeta['id'];
 	if (file_exists($filePath)) {
 		$jsonData = file_get_contents($filePath);
 		$data = json_decode($jsonData, true);
@@ -1097,8 +1402,7 @@ if (isset($_POST['playlist_DELETE'])) {
 			'message' => "Danh sách phát tổng hợp",
 			'data' => $updatedData
 		];
-		if (file_put_contents($filePath, json_encode($fileContent, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX)) {
-			@chmod($filePath, 0777);
+		if (playlistAtomicWrite($filePath, $fileContent) && playlistSyncLegacyIfActive($playlistPaths, $playlistManifest, $selectedPlaylistId, $fileContent)) {
 			$response = [
 				'success' => true,
 				'message' => 'Danh sách phát đã được cập nhật.',

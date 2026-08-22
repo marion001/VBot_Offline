@@ -115,11 +115,17 @@
         },
         {
             "name": "_VBot_PlaylistPlayer",
-            "description": "Phát danh sách nhạc, playlist, album hoặc tuyển tập bài hát.",
+            "description": "Phát danh sách nhạc theo tên PlayList người dùng yêu cầu; nếu không nêu tên thì phát PlayList mặc định.",
             "inputSchema": {
                 "type": "object",
                 "additionalProperties": false,
-                "properties": {},
+                "properties": {
+                    "playlist": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Tên PlayList cần phát. Bỏ qua trường này để phát PlayList mặc định."
+                    }
+                },
                 "required": []
             }
         },

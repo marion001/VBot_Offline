@@ -1,0 +1,30 @@
+{
+    "success": true,
+    "message": "Danh sách phát tổng hợp",
+    "data": [
+        {
+            "ids_list": "1D413E",
+            "title": "Thuyền Quyên",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/2/e/c/5/2ec51983dbff681cc3cb7af20b4c7ad2.jpg",
+            "audio": "ZZDD86BZ",
+            "duration": "03:13",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "ZZDD86BZ",
+            "channelTitle": null,
+            "artist": "Diệu Kiên"
+        },
+        {
+            "ids_list": "49AF60",
+            "title": "Hoa Cỏ Lau (Ballad)",
+            "cover": "https://photo-zmp3.zmdcdn.me/cover/7/8/0/6/7806c3ae887611fe0c4a66ff6464338a.jpg",
+            "audio": "Z6DOZCO8",
+            "duration": "03:34",
+            "description": null,
+            "source": "ZingMP3",
+            "id": "Z6DOZCO8",
+            "channelTitle": null,
+            "artist": "Ngân Ngân"
+        }
+    ]
+}

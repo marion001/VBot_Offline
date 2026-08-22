@@ -17,7 +17,7 @@ $git_repository = $pathParts[1];
 <?php
 $webui_page_name = basename($_SERVER['PHP_SELF'] ?? '');
 $webui_datatable_pages = ['index.php', 'Log_TTS.php', 'Log_pycache.php'];
-$webui_media_pages = ['index.php', 'Media_Player.php'];
+$webui_media_pages = ['index.php'];
 $webui_backup_pages = ['Config.php', '_Program.php', '_Dashboard.php'];
 $webui_password_pages = ['Login.php', 'Users_Profile.php'];
 if (in_array($webui_page_name, $webui_datatable_pages, true)) {
@@ -355,7 +355,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     }
 
 <?php } ?>
-<?php if (in_array($webui_page_name, ['Config.php', 'Media_Player.php'], true)) { ?>
+<?php if (in_array($webui_page_name, ['index.php', 'Config.php'], true)) { ?>
     //Tải lên file âm thanh theo giấ trị được chỉ định key_path
     function upload_File(key_path) {
         loading("show");
@@ -580,6 +580,48 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         };
         xhr.send();
     }
+
+	//Phát nhạc Youtube từ ID bài hát
+	function play_Youtube_Link(youtube_id, youtube_name = null, youtube_cover = null) {
+		if (youtube_id === null || youtube_id === '' || youtube_id === 'N/A') {
+			show_message('Lỗi, không lấy được ID hoặc Link Video Youtube không hợp lệ');
+			return;
+		}
+		var youtube_link = youtube_id;
+		if (youtube_link.indexOf('http://') !== 0 && youtube_link.indexOf('https://') !== 0) {
+			youtube_link = 'https://www.youtube.com/watch?v=' + youtube_link;
+		}
+		loading('show');
+		var data = JSON.stringify({
+			'type': 1,
+			'data': 'media_control',
+			'action': 'play',
+			'media_link': youtube_link
+		});
+		var xhr = new XMLHttpRequest();
+		xhr.open('POST', '<?php echo $URL_API_VBOT; ?>', true);
+		xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+		xhr.onreadystatechange = function() {
+			if (xhr.readyState !== 4) {
+				return;
+			}
+			loading('hide');
+			if (xhr.status === 200) {
+				try {
+					var response = JSON.parse(xhr.responseText);
+					if (response.success === true) {
+						return;
+					}
+					show_message(response.message || 'Yêu cầu phát Youtube không thành công');
+				} catch (e) {
+					show_message('Lỗi phân tích cú pháp JSON: ' + e);
+				}
+			} else {
+				show_message('Lỗi tìm nạp dữ liệu: ' + xhr.status + ', Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa');
+			}
+		};
+		xhr.send(data);
+	}
 
     //Get link play Youtube
     function get_Youtube_Link(youtube_id, youtube_name = null, youtube_cover = null) {
@@ -877,7 +919,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         if (!fileListDiv) {
                             fileListDiv = document.getElementById('tableContainer');
                             document.getElementById('tableContainer').style.display = '';
-                            document.getElementById('tableContainer').style.height = '400px';
+                            document.getElementById('tableContainer').style.height = '600px';
                             document.getElementById('tableContainer').style.overflowY = 'auto';
                         }
                         fileListDiv.innerHTML = '';
@@ -982,7 +1024,8 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + (youtube.channelTitle || 'N/A') + '</font></p>';
                             fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (youtube.duration || 'N/A') + '</font></p>';
                             fileInfo += '<p style="margin: 0;">Mô tả: <font color="green">' + (description || 'N/A') + '</font></p>';
-                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                            //fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="play_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
                             fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', \'' + (youtube.duration || 'N/A') + '\', \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
                             fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
@@ -1005,63 +1048,131 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         xhr.send();
     }
 
-    //Thêm bài hát vào danh sách phát playlist
-    function addToPlaylist(title, cover, audio, duration, description, source, id, channelTitle, artist) {
+    let playlistAddPendingSong = null;
+    let playlistAddCreatingNew = false;
+
+    function playlistAddMessage(text, error=false) {
+        const element = document.getElementById('playlist-add-target-message');
+        if (!element) return;
+        element.textContent = text;
+        element.className = 'alert mt-3 mb-0 ' + (error ? 'alert-danger' : 'alert-success');
+    }
+
+    function playlistToggleCreateNew(createNew) {
+        playlistAddCreatingNew = createNew === true;
+        const fields = document.getElementById('playlist-add-new-fields');
+        const toggle = document.getElementById('playlist-add-new-toggle');
+        const select = document.getElementById('playlist-add-target-select');
+        if (fields) fields.classList.toggle('d-none', !playlistAddCreatingNew);
+        if (toggle) toggle.classList.toggle('d-none', playlistAddCreatingNew);
+        if (select) select.disabled = playlistAddCreatingNew;
+        if (playlistAddCreatingNew) {
+            const input = document.getElementById('playlist-add-new-name');
+            if (input) { input.value = ''; setTimeout(() => input.focus(), 50); }
+        }
+    }
+
+    async function addToPlaylist(title, cover, audio, duration, description, source, id, channelTitle, artist) {
+        playlistAddPendingSong = {title, cover, audio, duration, description, source, id, channelTitle, artist};
         loading("show");
-        var xhr = new XMLHttpRequest();
-        var url = "includes/php_ajax/Media_Player_Search.php";
-        xhr.open("POST", url, true);
-        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-        xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
-        xhr.onreadystatechange = function() {
-            if (xhr.readyState === XMLHttpRequest.DONE) {
-                if (xhr.status === 200) {
-                    loading("hide");
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        showMessagePHP("Đã thêm " + title + " vào PlayList thành công!");
-                    } else {
-                        show_message("Lỗi: " + response.message);
-                    }
-                } else {
-                    loading("hide");
-                    show_message("Lỗi kết nối với server.");
-                }
+        try {
+            const response = await fetch('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'});
+            const manager = await response.json();
+            if (!response.ok || manager.success === false) throw new Error(manager.message || 'Không tải được danh sách PlayList');
+            const select = document.getElementById('playlist-add-target-select');
+            select.replaceChildren();
+            (manager.playlists || []).forEach(item => {
+                const option = new Option(item.name + ' (' + Number(item.item_count || 0) + ' bài)', item.id);
+                option.selected = item.id === manager.active_id;
+                select.add(option);
+            });
+            document.getElementById('playlist-add-song-title').textContent = 'Bài hát: ' + title;
+            document.getElementById('playlist-add-target-message').className = 'alert d-none mt-3 mb-0';
+            playlistToggleCreateNew(false);
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('playlistAddTargetModal')).show();
+        } catch (error) {
+            show_message('Lỗi: ' + error.message);
+        } finally {
+            loading("hide");
+        }
+    }
+
+    async function confirmAddToPlaylist() {
+        if (!playlistAddPendingSong) return;
+        const confirmButton = document.getElementById('playlist-add-confirm');
+        confirmButton.disabled = true;
+        loading("show");
+        try {
+            let targetId = document.getElementById('playlist-add-target-select').value;
+            let targetName = document.getElementById('playlist-add-target-select').selectedOptions[0]?.textContent || 'PlayList';
+            if (playlistAddCreatingNew) {
+                const newName = document.getElementById('playlist-add-new-name').value.trim();
+                if (!newName) throw new Error('Hãy nhập tên playlist mới');
+                const createBody = new URLSearchParams({playlist_manager_action:'create', playlist_name:newName});
+                const createResponse = await fetch('includes/php_ajax/Media_Player_Search.php', {
+                    method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''}, body:createBody
+                });
+                const created = await createResponse.json();
+                if (!createResponse.ok || !created.success) throw new Error(created.message || 'Không thể tạo playlist mới');
+                targetId = created.playlist_id;
+                targetName = newName;
+                if (typeof selectedPlaylistId !== 'undefined') selectedPlaylistId = targetId;
             }
-        };
-        var params = "playlist_ADD=1&title=" + encodeURIComponent(title) +
-            "&cover=" + encodeURIComponent(cover) +
-            "&audio=" + encodeURIComponent(audio) +
-            "&duration=" + encodeURIComponent(duration) +
-            "&description=" + encodeURIComponent(description) +
-            "&source=" + encodeURIComponent(source) +
-            "&id=" + encodeURIComponent(id) +
-            "&channelTitle=" + encodeURIComponent(channelTitle) +
-            "&artist=" + encodeURIComponent(artist);
-        xhr.send(params);
+
+            if (!targetId) throw new Error('Hãy chọn playlist nhận bài hát');
+            const songBody = new URLSearchParams({playlist_ADD:'1', playlist_id:targetId});
+            Object.entries(playlistAddPendingSong).forEach(([key, value]) => songBody.set(key, value == null ? 'null' : String(value)));
+            const addResponse = await fetch('includes/php_ajax/Media_Player_Search.php', {
+                method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''}, body:songBody
+            });
+            const added = await addResponse.json();
+            if (!addResponse.ok || !added.success) throw new Error(added.message || 'Không thể thêm bài hát');
+
+            bootstrap.Modal.getInstance(document.getElementById('playlistAddTargetModal'))?.hide();
+            showMessagePHP('Đã thêm ' + playlistAddPendingSong.title + ' vào ' + targetName, 5);
+            playlistAddPendingSong = null;
+            if (typeof loadPlayList === 'function' && document.getElementById('playlist-manager-select')) loadPlayList();
+        } catch (error) {
+            playlistAddMessage(error.message, true);
+        } finally {
+            confirmButton.disabled = false;
+            loading("hide");
+        }
     }
 
     //Xóa toàn bộ playlist hoặc 1 số bài
-    function deleteFromPlaylist(action, idsList) {
-        if (action === "delete_all") {
-            if (!confirm("Bạn có chắc chắn muốn xóa tất cả bài hát trong PlayList?")) {
-                return;
-            }
+    function deleteFromPlaylist(action, idsList, confirmed = false) {
+        if (action === "delete_all" && !confirmed) {
+            if (typeof playlistOpenDialog === 'function') playlistOpenDialog('delete_all');
+            return;
         }
+        loading("show");
         const xhr = new XMLHttpRequest();
         xhr.open("POST", "includes/php_ajax/Media_Player_Search.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
-        const data = 'playlist_DELETE=1&action=' + encodeURIComponent(action) + '&ids_list=' + encodeURIComponent(idsList || "");
+        const data = 'playlist_DELETE=1&action=' + encodeURIComponent(action) + '&ids_list=' + encodeURIComponent(idsList || "") +
+            '&playlist_id=' + encodeURIComponent(typeof selectedPlaylistId !== 'undefined' ? (selectedPlaylistId || '') : '');
         xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                const response = JSON.parse(xhr.responseText);
-                if (typeof loadPlayList === "function") {
-                    loadPlayList();
-                } else {
-                    cachePlayList();
+            if (xhr.readyState === 4) {
+                loading("hide");
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    if (!response.success) throw new Error(response.message || 'Không thể cập nhật PlayList');
+                    showMessagePHP(response.message, 4);
+                    if (typeof loadPlayList === "function") {
+                        loadPlayList();
+                    } else {
+                        cachePlayList();
+                    }
+                } catch(error) {
+                    show_message(error.message || 'Phản hồi PlayList không hợp lệ');
                 }
             }
+        };
+        xhr.onerror = function() {
+            loading("hide");
+            show_message('Không thể kết nối API PlayList');
         };
         xhr.send(data);
     }
@@ -1211,7 +1322,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         if (!fileListDiv) {
                             fileListDiv = document.getElementById('tableContainer');
                             document.getElementById('tableContainer').style.display = '';
-                            document.getElementById('tableContainer').style.height = '400px';
+                            document.getElementById('tableContainer').style.height = '600px';
                             document.getElementById('tableContainer').style.overflowY = 'auto';
                         }
                         fileListDiv.innerHTML = '';
@@ -1301,6 +1412,9 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 			payload.source_playlist = "zingmp3";
 		}else if (action_control === 'nhaccuatui') {
 			payload.source_playlist = "nhaccuatui";
+		} else if (action_control === 'managed') {
+			payload.source_playlist = "managed";
+			payload.playlist_id = (typeof selectedPlaylistId !== 'undefined' ? selectedPlaylistId : null);
 		} else {
 			payload.source_playlist = true;
 		}
@@ -2006,13 +2120,20 @@ function command_php(command_line, reload_page = null) {
 		var fileInput = document.getElementById("fileInput_PlayList");
 		var file = fileInput.files[0];
 		if (!file) {
-			alert("Cần chọn file .json PlayList để tải lên!");
+			show_message("Cần chọn file .json PlayList để tải lên!");
+			return;
+		}
+		if ((document.getElementById('playlist-import-mode')?.value === 'new') && !document.getElementById('playlist-import-new-name')?.value?.trim()) {
+			show_message('Hãy nhập tên PlayList mới');
 			return;
 		}
 		loading("show");
 		var formData = new FormData();
 		formData.append("json_file_playlist", "1");
 		formData.append("select_json_file_playlist", file);
+		formData.append("playlist_id", typeof selectedPlaylistId !== 'undefined' ? (selectedPlaylistId || '') : '');
+		formData.append("import_mode", document.getElementById('playlist-import-mode')?.value || 'overwrite');
+		formData.append("new_playlist_name", document.getElementById('playlist-import-new-name')?.value?.trim() || '');
 		var xhr = new XMLHttpRequest();
 		xhr.open("POST", "includes/php_ajax/Upload_file_path.php", true);
 		xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -2022,11 +2143,10 @@ function command_php(command_line, reload_page = null) {
 					var res = JSON.parse(xhr.responseText);
 					if (res.success) {
 						loading("hide");
+						if (res.playlist_id && typeof selectedPlaylistId !== 'undefined') selectedPlaylistId = res.playlist_id;
 						showMessagePHP(res.message, 5);
 						if (tab === "index.php"){
 							loadPlayList();
-						}else if (tab === "Media_Player.php"){
-							cachePlayList();
 						}
 					}
 					else {

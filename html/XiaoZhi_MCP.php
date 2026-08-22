@@ -91,6 +91,28 @@ function download_file($url, $saveDir) {
 $mcp_json_file = $VBot_Offline.'resource/xiaozhi/xiaozhi_tools.json';
 $mcp_plugins_dir = $VBot_Offline.'resource/xiaozhi/mcp_plugins';
 $mcp_plugins_readme_file = $VBot_Offline.'resource/xiaozhi/mcp_plugins.readme';
+$mcp_playlist_manifest_file = $VBot_Offline.'html/includes/cache/PlayLists.json';
+$mcp_managed_playlists = [];
+$mcp_active_playlist_id = '';
+if (is_file($mcp_playlist_manifest_file)) {
+    $mcp_playlist_manifest = json_decode((string) file_get_contents($mcp_playlist_manifest_file), true);
+    if (is_array($mcp_playlist_manifest)) {
+        $mcp_active_playlist_id = (string) ($mcp_playlist_manifest['active_id'] ?? '');
+        foreach (($mcp_playlist_manifest['playlists'] ?? []) as $playlist) {
+            if (!is_array($playlist)) continue;
+            $playlist_id = trim((string) ($playlist['id'] ?? ''));
+            $playlist_name = trim((string) ($playlist['name'] ?? ''));
+            $playlist_file = trim((string) ($playlist['file'] ?? ''));
+            if ($playlist_id === '' || $playlist_name === '' || basename($playlist_file) !== $playlist_file) continue;
+            if (!is_file($VBot_Offline.'html/includes/cache/playlists/'.$playlist_file)) continue;
+            $mcp_managed_playlists[] = [
+                'id' => $playlist_id,
+                'name' => $playlist_name,
+                'active' => $playlist_id === $mcp_active_playlist_id,
+            ];
+        }
+    }
+}
 $mcp_plugins_readme = is_file($mcp_plugins_readme_file)
     ? file_get_contents($mcp_plugins_readme_file)
     : "Không tìm thấy file hướng dẫn: ".$mcp_plugins_readme_file;
@@ -684,6 +706,26 @@ foreach ($MCP_data_json['tools'] as $tool) {
     $name = htmlspecialchars($tool['name'], ENT_QUOTES, 'UTF-8');
     $description = htmlspecialchars($tool['description'] ?? '', ENT_QUOTES, 'UTF-8');
     $active = isset($enabled_mcp_tools[$tool['name']]) ? 'checked' : '';
+    $playlist_choices_html = '';
+    if (($tool['name'] ?? '') === '_VBot_PlaylistPlayer') {
+        if ($mcp_managed_playlists) {
+            $playlist_badges = [];
+            foreach ($mcp_managed_playlists as $playlist) {
+                $playlist_label = htmlspecialchars($playlist['name'], ENT_QUOTES, 'UTF-8');
+                $badge_class = $playlist['active'] ? 'bg-success' : 'bg-secondary';
+                $default_text = $playlist['active'] ? ' <i class="bi bi-star-fill"></i> Mặc định' : '';
+                $playlist_badges[] = '<span class="badge '.$badge_class.' me-1 mb-1">'
+                    .$playlist_label.$default_text.'</span>';
+            }
+            $playlist_choices_html = '<div class="mt-2 p-2 border rounded bg-light">'
+                .'<small class="text-dark"><b><i class="bi bi-music-note-list"></i> PlayList XiaoZhi có thể chọn:</b></small><br>'
+                .implode('', $playlist_badges)
+                .'<div class="small text-muted mt-1">Người dùng có thể yêu cầu phát đúng tên PlayList; nếu không nêu tên sẽ dùng PlayList mặc định.</div>'
+                .'</div>';
+        } else {
+            $playlist_choices_html = '<div class="alert alert-warning py-1 px-2 mt-2 mb-0 small">Chưa có PlayList hợp lệ để XiaoZhi lựa chọn.</div>';
+        }
+    }
     echo "<tr>
             <th scope='row' style='text-align: center; vertical-align: middle;'>{$stt_mcp}</th>
             <td style='vertical-align: middle;' class='text-success'><b>{$name}</b></td>
@@ -698,6 +740,7 @@ foreach ($MCP_data_json['tools'] as $tool) {
                       title='Chỉnh sửa mô tả MCP' data-tool='{$name}' data-description='{$description}'>
                 <i class='bi bi-pencil-square'></i>
               </button>
+              {$playlist_choices_html}
             </td>
           </tr>";
     $stt_mcp++;

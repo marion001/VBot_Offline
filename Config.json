@@ -287,6 +287,23 @@
                 "wav",
                 "flac"
             ]
+        },
+        "multiroom_audio": {
+            "active": true,
+            "default_volume": 90,
+            "default_muted": false,
+            "allowed_url_schemes": [
+                "http",
+                "https"
+            ],
+            "url_timeout_seconds": 15,
+            "url_reconnect": true,
+            "vlc_loopback_output_device": "plughw:Loopback,0,0",
+            "vlc_loopback_capture_device": "plughw:Loopback,1,0",
+            "local_playback_device": "default",
+            "bridge_switch_delay_ms": 80,
+            "alsa_capture_command": "arecord",
+            "alsa_playback_command": "aplay"
         }
     },
     "developer_customization": {

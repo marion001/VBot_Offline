@@ -179,7 +179,7 @@ python-Levenshtein           0.12.2
 python-nmap                  0.7.1
 python-prctl                 1.7
 python-vlc                   3.0.16120
-pytubefix                    9.5.1
+pytubefix                    10.11.0
 pytz                         2022.1
 pyusb                        1.2.1
 PyYAML                       6.0.3

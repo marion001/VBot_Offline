@@ -2450,6 +2450,83 @@ org.bluez.Device1 Connect</code></pre></div></div></div>
 </div>
 
 
+<div class="card accordion" id="accordion_fix_youtube_link">
+    <div class="card-body">
+
+        <h5 class="card-title accordion-button collapsed"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#collapse_fix_youtube_link"
+            aria-expanded="false"
+            aria-controls="collapse_fix_youtube_link">
+            <i class="bi bi-youtube me-2 text-danger"></i>
+            Hướng dẫn Fix tìm kiếm và lấy Link YouTube
+        </h5>
+
+        <div id="collapse_fix_youtube_link"
+             class="accordion-collapse collapse">
+
+            <div class="pt-3">
+
+                <p>
+                    Nếu chức năng tìm kiếm hoặc lấy link phát âm thanh YouTube bị lỗi
+                    <b>BotDetection</b>, <b>PO Token</b> hoặc không lấy được URL Audio,
+                    hãy chạy file cài đặt và sửa lỗi tự động bên dưới.
+                </p>
+
+                <p class="mb-1"><b>File cài đặt nằm tại:</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>/home/pi/VBot_Offline/resource/test_device/Install_Pytubefix_10_11_0_Node.sh</code></pre>
+
+                <p class="mb-1"><b>Bước 1: Lệnh di chuyển tới thư mục chứa file thực thi</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>cd /home/pi/VBot_Offline/resource/test_device/</code></pre>
+
+
+                <p class="mb-1"><b>Bước 2: Lệnh cấp quyền thực thi</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>chmod +x Install_Pytubefix_10_11_0_Node.sh</code></pre>
+
+                <p class="mb-1"><b>Bước 3: Lệnh Chạy file Fix</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>./Install_Pytubefix_10_11_0_Node.sh</code></pre>
+
+                <p class="mb-1"><b>File sẽ tự động thực hiện:</b></p>
+
+                <ul>
+                    <li>Cài đúng phiên bản <b>pytubefix 10.11.0</b>.</li>
+                    <li>Giữ nguyên phiên bản <b>aiohttp</b> đang có trên hệ thống.</li>
+                    <li>Cài Node.js phù hợp với kiến trúc Raspberry Pi.</li>
+                    <li>Tạo và kiểm tra <b>nodejs_wheel</b>.</li>
+                    <li>Thiết lập <code>ROOT_DIR = "/usr/local"</code>.</li>
+                    <li>Kiểm tra Node tại <code>/usr/local/bin/node</code>.</li>
+                    <li>Kiểm tra lại toàn bộ dependency sau khi cài.</li>
+                </ul>
+
+                <p class="mb-1"><b>Bước 3: Kiểm tra kết quả</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>python3 -c "import pytubefix; print(pytubefix.__version__)"
+node --version</code></pre>
+
+                <p class="mb-1"><b>Kết quả mong đợi:</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>10.11.0
+v22.22.3</code></pre>
+
+                <div class="alert alert-info mb-0">
+                    <i class="bi bi-info-circle"></i>
+                    Sau khi Fix hoàn tất, hãy thử lại chức năng tìm kiếm và lấy link phát âm thanh YouTube trên VBot.
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+
+
           </div>
     </section>
   </main>

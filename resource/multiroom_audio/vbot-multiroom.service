@@ -1,0 +1,26 @@
+[Unit]
+Description=VBot Multiroom Audio Daemon
+After=network-online.target sound.target
+Wants=network-online.target sound.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+
+WorkingDirectory=/home/pi/VBot_Offline/resource/multiroom_audio
+
+Environment=PYTHONUNBUFFERED=1
+Environment=PYTHONPATH=/home/pi/VBot_Offline
+Environment=VBOT_MULTIROOM_CONFIG=/home/pi/VBot_Offline/Config.json
+
+ExecStart=/usr/bin/python3 /home/pi/VBot_Offline/resource/multiroom_audio/vbot_multiroom.py daemon
+
+Restart=always
+RestartSec=2
+
+TimeoutStopSec=5
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

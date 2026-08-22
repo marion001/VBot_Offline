@@ -9,6 +9,7 @@ Mail: VBot.Assistant@gmail.com
 import os
 import importlib
 import json
+import signal
 import subprocess
 import sys
 import traceback
@@ -116,6 +117,20 @@ def main() -> int:
         if _mqtt_is_enabled() and not check_paho_mqtt_version():
             _write_startup_log("Không thể bảo đảm phiên bản paho-mqtt yêu cầu, VBot vẫn tiếp tục khởi động.", error=True)
         import VBot
+        shutdown_started = False
+
+        def handle_shutdown_signal(signum, _frame):
+            nonlocal shutdown_started
+            if shutdown_started:
+                return
+            shutdown_started = True
+            signal_name = signal.Signals(signum).name
+            _write_startup_log(f"Nhận {signal_name}, đang dọn dẹp trước khi dừng VBot...")
+            VBot.cleanup()
+            raise SystemExit(0)
+
+        signal.signal(signal.SIGTERM, handle_shutdown_signal)
+        signal.signal(signal.SIGINT, handle_shutdown_signal)
         VBot.main()
         return 0
     except KeyboardInterrupt:

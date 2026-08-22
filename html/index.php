@@ -69,6 +69,87 @@ include 'html_head.php';
       bottom: 10px;
       z-index: 1;
     }
+
+    #tableContainer:not(:empty) {
+      width: 100%;
+      max-width: 100%;
+      margin-top: 12px;
+      padding: 16px;
+      border: 1px solid rgba(13, 110, 253, 0.28);
+      border-radius: 12px;
+      background: rgba(248, 249, 250, 0.82);
+      box-shadow: 0 2px 10px rgba(33, 37, 41, 0.06);
+    }
+
+    .playlist-control-panel {
+      padding: 12px;
+      margin-bottom: 10px;
+      border: 1px solid #dee2e6;
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .playlist-control-panel-primary {
+      border-color: rgba(13, 110, 253, 0.35);
+      background: rgba(13, 110, 253, 0.035);
+    }
+
+    .playlist-control-panel-info {
+      border-color: rgba(13, 202, 240, 0.42);
+      background: rgba(13, 202, 240, 0.04);
+    }
+
+    .playlist-control-panel-success {
+      border-color: rgba(25, 135, 84, 0.35);
+      background: rgba(25, 135, 84, 0.035);
+    }
+
+    .playlist-control-label {
+      display: block;
+      margin-bottom: 8px;
+      color: #495057;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.025em;
+    }
+
+    .playlist-action-cell > .btn,
+    .playlist-action-cell > a {
+      display: inline-block;
+      margin: 4px;
+      vertical-align: middle;
+    }
+
+    .playlist-action-cell > a > .btn {
+      margin: 0;
+    }
+
+    /* Giữ khoảng cách rõ ràng khi các nút Playlist tự xuống dòng. */
+    #tableContainer .playlist-control-panel .btn-group.flex-wrap {
+      gap: 8px;
+    }
+
+    #tableContainer .playlist-control-panel .btn-group.flex-wrap > .btn {
+      margin: 0;
+      border-radius: 0.375rem !important;
+    }
+
+    @media (max-width: 991.98px) {
+      #tableContainer .playlist-control-panel .btn {
+        margin: 4px;
+        border-radius: 0.375rem !important;
+      }
+
+      #tableContainer .playlist-control-panel .btn-group.flex-wrap {
+        padding: 2px 0;
+      }
+
+      #tableContainer .playlist-control-panel .input-group {
+        align-items: center;
+        row-gap: 6px;
+      }
+    }
   </style>
   <!-- CSS thanh trượt độ sáng đèn led -->
   <style>
@@ -224,7 +305,13 @@ include 'html_head.php';
               <div class="card">
                 <div class="card-body">
                   <div class="card-title d-flex justify-content-between align-items-center">
-                    <label>Trình Phát Đa Phương Tiện - Media Player:</label>
+                    <?php if (!empty($Config['media_player']['multiroom_audio']['active'])): ?>
+                    <div class="ms-2 d-flex flex-column align-items-start gap-1">
+                      <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#multiroomModal" onclick="multiroomOpen()"><i class="bi bi-speaker"></i>Điều Khiển Multiroom Audio</button>
+                      <p id="media-multiroom-connection" class="mb-0 small"><span class="badge bg-danger text-white"><i class="bi bi-speaker"></i>Multiroom Audio: Không kết nối</span></p>
+                    </div>
+                    <?php endif; ?>
+                    <label>Trình Phát Đa Phương Tiện - Media Player</label>
 					<span class="d-none" id="ble_active">
 						<i class="bi bi-bluetooth text-primary"></i> 
 						<span id="bluetooth_status" class="text-success"></span>
@@ -264,9 +351,9 @@ include 'html_head.php';
                   </center>
                   <br/>
                   <center>
-				  <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát trước đó" class="btn btn-success rounded-pill" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
-                    <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
-                    <button type="button" id="play_Button" name="play_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success rounded-pill" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
+				  <button type="button" id="playlist_prev_Button" name="playlist_prev_Button" title="Chuyển bài hát trước đó" class="btn btn-success rounded-pill" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
+                    <button type="button" id="playlist_play_Button" name="playlist_play_Button" title="Phát nhạc trong Play List" class="btn btn-primary rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
+                    <button type="button" id="playlist_next_Button" name="playlist_next_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success rounded-pill" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
                   </center>
                 </div>
                 <hr />
@@ -526,13 +613,31 @@ include 'html_head.php';
 
                 </div>
 			  </div>
+			  
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-speaker"></i> Multiroom Audio > <i class="bi bi-patch-question-fill" onclick="show_message('Phát âm thanh đa vùng trên các loa chạy VBot trong cùng lớp mạng nội bộ, Lan Local')"></i>:</span> </h5>
+              <div class="activity">
+                <div class="activity-item d-flex">
+                  <div class="form-switch">
+					<input class="form-check-input border-danger"disabled type="checkbox" name="multiroom_audio_active" id="multiroom_audio_active" <?php echo $Config['media_player']['multiroom_audio']['active'] ? 'checked' : ''; ?>>
+                  </div>
+                  <i class="bi bi-dash-lg"></i>
+                  <div class="activity-content">
+                    <b>
+                      <font color="red"> Kích Hoạt </font>
+                    </b>
+                  </div>
+                </div>
+                </div>
+			  </div>
+			  
           </div>
           <!-- kết thúc chức năng chung -->
           <!-- Chức Năng Khác -->
           <div class="card">
             <div class="card-body pb-0">
               <h5 class="card-title">Chế Độ Khác:</h5>
-              <div id="budgetChart" class="echart">
+              <div id="systemModeOptions" class="echart">
                 <ul>
                   <li>
                     <font color="blue">Home Assistant:</font>
@@ -669,7 +774,7 @@ include 'html_head.php';
           <div class="card">
             <div class="card-body pb-0">
               <h5 class="card-title">Logs Hệ Thống <span id="show_log_name_log_display_style"> | N/A </span></h5>
-              <div id="budgetChart" class="echart">
+              <div id="systemLogsOptions" class="echart">
                 <ul>
                   <li>
                     <font color="blue">Bật, Tắt Logs hệ thống</font>
@@ -734,6 +839,158 @@ include 'html_head.php';
         <!-- End Right side columns -->
       </div>
     </section>
+  <div class="modal fade" id="multiroomModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
+
+<div class="modal-header d-flex align-items-center">
+  <h5 class="modal-title mb-0">
+    <i class="bi bi-speaker"></i> Multiroom Audio (Âm thanh Đa Vùng)
+  </h5>
+
+  <div id="mr-room-connection" class="d-flex align-items-center ms-2">
+    <i class="bi bi-broadcast me-1"></i>
+    <span>Multiroom không kết nối</span>
+  </div>
+
+  <button type="button" class="btn-close ms-auto" data-bs-dismiss="modal"></button>
+</div>
+
+      <div class="modal-body">
+        
+        <div id="multiroom-ui-message" class="alert d-none"></div>
+        <div class="row g-3">
+          <!-- Phần Quản Lý Nhóm Loa -->
+          <div class="col-lg-5">
+            <!-- Card Quét Loa -->
+            <div class="card border-secondary mb-3"><div class="card-body"><h6 class="card-title"><i class="bi bi-search"></i> Quét Thiết Bị Trong Mạng Lan</h6>
+              <button class="btn btn-secondary btn-sm w-100 mb-2" onclick="multiroomRefresh(true, true)"><i class="bi bi-search"></i> Quét Lại Thiết Bị</button>
+              <div id="mr-devices" class="small border rounded p-2" style="max-height:200px;overflow-y:auto;background:#f8f9fa;"></div>
+            </div></div>
+
+            <!-- Card Quản Lý Nhóm -->
+            <div class="card border-primary"><div class="card-body"><h6 class="card-title"><i class="bi bi-collection"></i> Quản Lý Nhóm Loa</h6>
+              <div id="mr-group-vbot-required" class="alert alert-warning py-2">Chỉ có thể quản lý nhóm loa khi chương trình VBot đang hoạt động.</div>
+              <div class="alert alert-info py-2 small"><i class="bi bi-info-circle"></i> Khuyến nghị mỗi nhóm nên có dưới 8 thiết bị để duy trì kết nối và đồng bộ âm thanh ổn định.</div>
+              <!-- Chọn Group -->
+              <label class="form-label mb-2"><small>Chọn Nhóm Loa Hiện Có:</small></label>
+              <select id="mr-group-select" class="form-select mb-3 border-success" onchange="multiroomSelectGroup()"></select>
+
+              <div class="border-top pt-3 mt-3">
+                <div class="d-flex gap-2 flex-wrap">
+                  <button id="mr-group-create" class="btn btn-outline-success btn-sm flex-grow-1" onclick="multiroomGroupMode('create')" disabled><i class="bi bi-plus-circle"></i> Tạo Nhóm</button>
+                  <button id="mr-group-edit" class="btn btn-outline-primary btn-sm flex-grow-1" onclick="multiroomGroupMode('edit')" disabled><i class="bi bi-pencil"></i> Sửa</button>
+                  <button id="mr-group-delete" class="btn btn-outline-danger btn-sm flex-grow-1" onclick="multiroomGroupMode('delete')" disabled><i class="bi bi-trash"></i> Xóa</button>
+                </div>
+
+                <div id="mr-group-editor" class="border rounded p-3 mt-3 d-none bg-light">
+                  <h6 id="mr-group-editor-title" class="mb-3 text-center"></h6>
+                  <input type="hidden" id="mr-group-id">
+                  <label class="form-label"><small>Tên nhóm:</small></label>
+                  <input id="mr-group-name" class="form-control mb-3 border-success" placeholder="Nhập tên nhóm loa cần tạo" title="Tên nhóm loa">
+                  <label class="form-label"><small id="mr-group-members-label">Chọn loa tham gia nhóm:</small></label>
+                  <div id="mr-group-members" class="border rounded p-2 mb-3 bg-white" style="max-height:220px;overflow-y:auto;"></div>
+                  <div id="mr-group-delete-warning" class="alert alert-danger py-2 d-none">Nhóm sẽ bị xóa khỏi cấu hình. Các loa và dịch vụ Multiroom không bị gỡ.</div>
+                  <div class="d-flex gap-2">
+                    <button id="mr-group-confirm" class="btn btn-primary btn-sm flex-grow-1" onclick="multiroomGroupConfirm()" disabled><i class="bi bi-check-circle"></i> Xác Nhận</button>
+                    <button class="btn btn-secondary btn-sm" onclick="multiroomGroupMode('cancel')"><i class="bi bi-x-circle"></i> Hủy</button>
+                  </div>
+                </div>
+              </div>
+            </div></div>
+          </div>
+
+          <!-- Phần Điều Khiển Phiên Phát -->
+          <div class="col-lg-7">
+            <!-- Card Bắt Đầu Phát -->
+            <div class="card border-success mb-3"><div class="card-body"><h6 class="card-title"><i class="bi bi-play-circle"></i> Lựa Chọn Nhóm Để Phát Âm Thanh</h6>
+              <div class="input-group mb-2">
+                <select id="mr-session-group-select" class="form-select border-success" title="Chọn nhóm loa để phát âm thanh đa vùng"></select>
+                <button class="btn btn-success border-success" onclick="multiroomSession('start')" title="Phát nhóm đã chọn"><i class="bi bi-play-fill"></i> Kết Nối</button>
+              </div>
+              <button class="btn btn-danger w-100 btn-sm" onclick="multiroomSession('local')" title="Dừng phát group, chuyển về loa local"><i class="bi bi-stop-circle"></i> Dừng kết nối & Phát Về Loa Chủ</button>
+            </div></div>
+
+            <!-- Card Quản Lý Loa Trong Phiên Phát -->
+            <div id="mr-active-session-card" class="card border-warning mb-3"><div class="card-body"><h6 class="card-title"><i class="bi bi-sliders"></i> Quản Lý Loa Đang Phát Trong Nhóm</h6>
+              <div id="mr-no-active-session" class="alert alert-secondary mb-0">Không có dữ liệu hiển thị do chưa kết nối với các nhóm loa để phát âm thanh đa vùng.</div>
+              <div id="mr-active-session-controls" class="d-none">
+                <div id="mr-session" class="small alert alert-info mb-2"></div>
+                <div class="border rounded p-2 mb-3 bg-light">
+                  <div class="d-flex justify-content-between"><small><b>Âm lượng tổng các loa VBot đang kết nối</b></small><small id="mr-master-volume-value" class="text-primary">0%</small></div>
+                  <input type="range" id="mr-master-volume" class="form-range" min="0" max="100" value="0"
+                    title="Thay đổi Lib.Volume đồng thời trên toàn bộ loa trong phiên"
+                    onpointerdown="multiroomMasterVolumeDragging=true"
+                    onpointercancel="multiroomMasterVolumeDragging=false"
+                    oninput="multiroomMasterVolumePreview(this.value)"
+                    onchange="multiroomMasterVolumeCommit(this.value)">
+                  <small class="text-success">Đây là Volume tổng của các loa VBot, khi được thay đổi ở đây toàn bộ âm lượng tổng của các loa VBot có trong nhóm này đều có giá trị giống nhau</small>
+                </div>
+                <div id="mr-speakers" class="row g-2 mb-3" style="max-height:300px;overflow-y:auto;"></div>
+                <button class="btn btn-primary w-100 btn-sm" onclick="multiroomApplySpeakerChanges()" title="Áp dụng những thay đổi được chọn"><i class="bi bi-check-circle"></i> Áp Dụng Thay Đổi</button>
+              </div>
+            </div></div>
+
+          </div>
+        </div>
+      </div><div class="modal-footer"><button class="btn btn-danger" data-bs-dismiss="modal">Đóng</button></div>
+    </div></div>
+  </div>
+
+  <div class="modal fade" id="playlistAddTargetModal" tabindex="-1" aria-labelledby="playlistAddTargetModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="playlistAddTargetModalLabel"><i class="bi bi-music-note-list"></i> Thêm Bài Hát Vào Playlist</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-primary py-2" id="playlist-add-song-title">Đang chọn bài hát...</div>
+          <label for="playlist-add-target-select" class="form-label fw-bold">Chọn playlist nhận bài hát:</label>
+          <select id="playlist-add-target-select" class="form-select border-success mb-3"></select>
+          <button type="button" id="playlist-add-new-toggle" class="btn btn-outline-success btn-sm" onclick="playlistToggleCreateNew(true)">
+            <i class="bi bi-plus-circle"></i> Thêm Vào Playlist Mới
+          </button>
+          <div id="playlist-add-new-fields" class="mt-3 d-none">
+            <label for="playlist-add-new-name" class="form-label fw-bold">Tên playlist mới:</label>
+            <div class="input-group">
+              <input type="text" maxlength="80" id="playlist-add-new-name" class="form-control border-success" placeholder="Ví dụ: Nhạc thư giãn">
+              <button type="button" class="btn btn-outline-secondary" onclick="playlistToggleCreateNew(false)">Dùng Playlist Có Sẵn</button>
+            </div>
+          </div>
+          <div id="playlist-add-target-message" class="alert d-none mt-3 mb-0"></div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" id="playlist-add-confirm" class="btn btn-success" onclick="confirmAddToPlaylist()">
+            <i class="bi bi-plus-circle-fill"></i> Xác Nhận Thêm
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="playlistManagerDialog" tabindex="-1" aria-labelledby="playlistManagerDialogLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="playlistManagerDialogLabel"><i class="bi bi-music-note-list"></i> Quản Lý PlayList</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body">
+          <div id="playlist-manager-dialog-description" class="alert alert-info py-2"></div>
+          <div id="playlist-manager-name-group">
+            <label for="playlist-manager-name-input" class="form-label fw-bold" id="playlist-manager-name-label">Tên PlayList:</label>
+            <input type="text" maxlength="80" class="form-control border-primary" id="playlist-manager-name-input" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();playlistManagerDialogSubmit();}">
+            <div class="invalid-feedback" id="playlist-manager-name-error">Tên PlayList phải từ 1 đến 80 ký tự.</div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <button type="button" class="btn btn-primary" id="playlist-manager-dialog-confirm" onclick="playlistManagerDialogSubmit()"><i class="bi bi-check-circle"></i> Xác Nhận</button>
+        </div>
+      </div>
+    </div>
+  </div>
   </main>
   <!-- End #main -->
   <!-- ======= Footer ======= -->
@@ -746,6 +1003,643 @@ include 'html_head.php';
   include 'html_js.php';
   ?>
   <script>
+    const multiroomApiUrl = <?php echo json_encode(rtrim($URL_API_VBOT, '/') . '/multiroom'); ?>;
+    let multiroomSnapshot = {};
+    let multiroomPendingSpeakerChanges = {}; // Track checkbox changes
+    let multiroomEventSource = null;
+    let multiroomSSEReconnectTimer = null;
+    let multiroomSSEWasDisconnected = false;
+    let multiroomDiscoveryTimer = null;
+    const multiroomDeviceLastSeen = {};
+    const multiroomDeviceOfflineAfterMs = 45000;
+    const multiroomVolumeHovered = new Set();
+    const multiroomVolumeDragging = new Set();
+    const multiroomVolumeDrafts = {};
+    let multiroomLoadingDepth = 0;
+    let multiroomGroupEditorMode = null;
+    let multiroomAPIConnected = false;
+    let multiroomMasterVolumeDragging = false;
+    let multiroomDisabledNoticeShown = false;
+    const multiroomConnectionError = 'Không thể kết nối đến API (SSE), vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa.';
+    const multiroomGroupRequiresVBot = 'Chỉ có thể quản lý nhóm loa khi chương trình VBot đang hoạt động.';
+    const multiroomDisabledMessage = 'Multiroom Audio không được kích hoạt khi chương trình VBot khởi động, để kích hoạt hãy vào: Cấu hình Config -> Media Player -> Multiroom Audio để kích hoạt và khởi động lại chương trình VBot để áp dụng.';
+
+    function setMultiroomAPIConnected(connected) {
+      multiroomAPIConnected = connected === true;
+      ['mr-group-create', 'mr-group-edit', 'mr-group-delete', 'mr-group-confirm'].forEach(id => {
+        const button = document.getElementById(id);
+        if(button) button.disabled = !multiroomAPIConnected;
+      });
+      const warning = document.getElementById('mr-group-vbot-required');
+      if(warning) warning.classList.toggle('d-none', multiroomAPIConnected);
+      if(!multiroomAPIConnected) updateMultiroomConnectionIndicators(false);
+    }
+
+    function updateMultiroomConnectionIndicators(connected) {
+      const isConnected = connected === true;
+      const text = isConnected ? 'Đang kết nối' : 'Không kết nối';
+      const modalStatus = document.getElementById('mr-room-connection');
+      if(modalStatus) {
+		modalStatus.innerHTML = '<i class="bi bi-broadcast me-1"></i> ' + text;
+		modalStatus.className = 'd-flex align-items-center ms-2 ' + (isConnected ? 'text-success' : 'text-secondary');
+      }
+      const mediaStatus = document.getElementById('media-multiroom-connection');
+      if(mediaStatus) {
+        mediaStatus.innerHTML = '<span class="text-white badge ' +
+          (isConnected ? 'bg-success' : 'bg-secondary') + '"><i class="bi bi-speaker"></i>Multiroom Audio: ' + text + '</span>';
+      }
+    }
+
+    function multiroomLoadingStart() {
+      multiroomLoadingDepth += 1;
+      if(multiroomLoadingDepth === 1) loading("show");
+    }
+
+    function multiroomLoadingEnd() {
+      multiroomLoadingDepth = Math.max(0, multiroomLoadingDepth - 1);
+      if(multiroomLoadingDepth === 0) loading("hide");
+    }
+
+    function applyMultiroomSnapshot(nextSnapshot, discoveryCompleted=false) {
+      nextSnapshot = nextSnapshot || {};
+      const knownDevices = Array.isArray(multiroomSnapshot.devices) ? multiroomSnapshot.devices : [];
+      const incomingDevices = Array.isArray(nextSnapshot.devices) ? nextSnapshot.devices : [];
+      const now = Date.now();
+      const mergedDevices = new Map(knownDevices.map(device => [String(device.id||'').toLowerCase(), {...device}]));
+      incomingDevices.forEach(device => {
+        const id = String(device.id||'').toLowerCase();
+        if(!id) return;
+        mergedDevices.set(id, {...(mergedDevices.get(id)||{}), ...device});
+        if(discoveryCompleted) multiroomDeviceLastSeen[id] = now;
+      });
+      const runtimeSpeakers = (nextSnapshot.controller?.speakers || []);
+      runtimeSpeakers.forEach(speaker => {
+        const id = String(speaker.id||'').toLowerCase();
+        if(!id) return;
+        if(speaker.online === true) multiroomDeviceLastSeen[id] = now;
+        if(!mergedDevices.has(id)) mergedDevices.set(id, {...speaker});
+      });
+      nextSnapshot.devices = Array.from(mergedDevices.entries()).map(([id, device]) => {
+        const runtime = runtimeSpeakers.find(speaker => String(speaker.id||'').toLowerCase() === id);
+        const lastSeen = Number(multiroomDeviceLastSeen[id] || 0);
+        const online = runtime?.online === false
+          ? false
+          : (runtime?.online === true || (lastSeen > 0 && now - lastSeen <= multiroomDeviceOfflineAfterMs));
+        return {...device, online:online, last_seen_ms:lastSeen || null};
+      });
+      multiroomSnapshot = nextSnapshot;
+      setMultiroomAPIConnected(true);
+      renderMultiroom();
+      if(nextSnapshot.enabled === false && !multiroomDisabledNoticeShown) {
+        multiroomDisabledNoticeShown = true;
+        const message = document.getElementById('multiroom-ui-message');
+        if(message) {
+          message.textContent = multiroomDisabledMessage;
+          message.className = 'alert alert-warning';
+        }
+      }
+    }
+
+    function stopMultiroomSSE() {
+      if(multiroomSSEReconnectTimer) {
+        clearTimeout(multiroomSSEReconnectTimer);
+        multiroomSSEReconnectTimer = null;
+      }
+      if(multiroomEventSource) {
+        multiroomEventSource.close();
+        multiroomEventSource = null;
+      }
+    }
+
+    function startMultiroomSSE() {
+      stopMultiroomSSE();
+      multiroomEventSource = new EventSource(multiroomApiUrl + '/events?interval=1');
+      multiroomEventSource.addEventListener('update', event => {
+        try {
+          const data = JSON.parse(event.data);
+          if(data.success && data.multiroom) applyMultiroomSnapshot(data.multiroom, false);
+        } catch(error) {
+          mrMessage('Dữ liệu SSE Multiroom không hợp lệ: ' + error.message, true);
+        }
+      });
+      multiroomEventSource.addEventListener('error_status', event => {
+        try { mrMessage(JSON.parse(event.data).message || 'Lỗi cập nhật Multiroom', true); }
+        catch(_error) { mrMessage('Lỗi cập nhật Multiroom', true); }
+      });
+      multiroomEventSource.onopen = function () {
+        setMultiroomAPIConnected(true);
+        const message = document.getElementById('multiroom-ui-message');
+        if(message && message.textContent === multiroomConnectionError) message.className = 'alert d-none';
+        if(multiroomSSEWasDisconnected) {
+          multiroomSSEWasDisconnected = false;
+          // API vua song lai: quet mDNS va lay lai toan bo snapshot, khong chi
+          // runtime SSE (runtime SSE co chu dich khong quet LAN lien tuc).
+          multiroomRefresh(true);
+        }
+      };
+      multiroomEventSource.onerror = function () {
+        setMultiroomAPIConnected(false);
+        mrMessage(multiroomConnectionError, true);
+        multiroomSSEWasDisconnected = true;
+        if(multiroomEventSource) {
+          multiroomEventSource.close();
+          multiroomEventSource = null;
+        }
+        if(!multiroomSSEReconnectTimer) {
+          multiroomSSEReconnectTimer = setTimeout(function () {
+            multiroomSSEReconnectTimer = null;
+            if(document.getElementById('multiroomModal')?.classList.contains('show')) startMultiroomSSE();
+          }, 1000);
+        }
+      };
+    }
+
+    function stopMultiroomDiscoveryMonitor() {
+      if(multiroomDiscoveryTimer) {
+        clearInterval(multiroomDiscoveryTimer);
+        multiroomDiscoveryTimer = null;
+      }
+    }
+
+    function startMultiroomDiscoveryMonitor() {
+      stopMultiroomDiscoveryMonitor();
+      multiroomDiscoveryTimer = setInterval(function () {
+        if(document.getElementById('multiroomModal')?.classList.contains('show')) {
+          multiroomRefresh(true, false, true);
+        }
+      }, 20000);
+    }
+    
+    function mrMessage(text, error=false) { 
+      const el=document.getElementById('multiroom-ui-message'); 
+      if(!el)return; 
+      el.textContent=text; 
+      el.className='alert '+(error?'alert-danger':'alert-success'); 
+    }
+
+    function multiroomSuccess(text, timeout=5) {
+      mrMessage(text, false);
+      if(typeof showMessagePHP === 'function') showMessagePHP(text, timeout);
+    }
+    
+    async function multiroomRequest(payload) {
+      const response=await fetch(multiroomApiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+        .catch(() => { setMultiroomAPIConnected(false); throw new Error(multiroomConnectionError); });
+      const data=await multiroomReadJson(response);
+      if(!response.ok||!data.success) throw new Error(data.message||data.result?.error||'Thao tác Multiroom không thành công'); 
+      setMultiroomAPIConnected(true);
+      return data.result;
+    }
+
+    async function multiroomReadJson(response) {
+      const contentType = String(response.headers.get('content-type') || '').toLowerCase();
+      if(!contentType.includes('application/json')) {
+        setMultiroomAPIConnected(false);
+        throw new Error(multiroomConnectionError);
+      }
+      try {
+        return await response.json();
+      } catch(_error) {
+        setMultiroomAPIConnected(false);
+        throw new Error(multiroomConnectionError);
+      }
+    }
+    
+    function multiroomSelectGroup() { 
+      const g=(multiroomSnapshot.groups||[]).find(x=>x.id===document.getElementById('mr-group-select').value); 
+      if(!g)return;
+      if(multiroomGroupEditorMode==='edit' || multiroomGroupEditorMode==='delete') {
+        multiroomGroupMode(multiroomGroupEditorMode);
+      }
+    }
+
+    function multiroomGroupMode(mode) {
+      const editor = document.getElementById('mr-group-editor');
+      if(mode === 'cancel') {
+        multiroomGroupEditorMode = null;
+        editor.classList.add('d-none');
+        return;
+      }
+      if(!multiroomAPIConnected) {
+        mrMessage(multiroomGroupRequiresVBot, true);
+        return;
+      }
+      const selected = (multiroomSnapshot.groups||[]).find(
+        group => group.id === document.getElementById('mr-group-select').value
+      );
+      if(mode !== 'create' && !selected) {
+        mrMessage('Vui lòng chọn một nhóm để thao tác', true);
+        return;
+      }
+      multiroomGroupEditorMode = mode;
+      editor.classList.remove('d-none');
+      const nameInput = document.getElementById('mr-group-name');
+      const confirm = document.getElementById('mr-group-confirm');
+      const warning = document.getElementById('mr-group-delete-warning');
+      const deleting = mode === 'delete';
+      document.getElementById('mr-group-editor-title').textContent =
+        mode === 'create' ? 'Tạo Nhóm Loa Mới' : mode === 'edit' ? 'Sửa Nhóm Loa' : 'Xóa Nhóm Loa';
+      document.getElementById('mr-group-id').value = selected?.id || '';
+      nameInput.value = selected?.name || '';
+      nameInput.placeholder = mode === 'create' ? 'Nhập tên nhóm cần tạo' : 'Tên nhóm loa';
+      nameInput.disabled = deleting;
+      confirm.className = 'btn btn-sm flex-grow-1 ' + (deleting ? 'btn-danger' : mode === 'create' ? 'btn-success' : 'btn-primary');
+      confirm.innerHTML = deleting
+        ? '<i class="bi bi-trash"></i> Xác Nhận Xóa'
+        : '<i class="bi bi-check-circle"></i> ' + (mode === 'create' ? 'Tạo Nhóm' : 'Lưu Thay Đổi');
+      warning.classList.toggle('d-none', !deleting);
+      document.getElementById('mr-group-members-label').textContent = deleting
+        ? 'Các loa hiện có trong nhóm:' : 'Chọn loa tham gia nhóm:';
+      renderGroupMembersCheckbox(selected?.members || [], deleting);
+      if(mode === 'create') nameInput.focus();
+    }
+
+    function multiroomGroupIdFromName(name) {
+      return String(name||'').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/đ/g, 'd').replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '');
+    }
+
+    function multiroomGroupConfirm() {
+      if(!multiroomAPIConnected) {
+        mrMessage(multiroomGroupRequiresVBot, true);
+        return;
+      }
+      if(multiroomGroupEditorMode === 'delete') return multiroomGroupDelete();
+      if(multiroomGroupEditorMode === 'create' || multiroomGroupEditorMode === 'edit') {
+        return multiroomGroupSave(multiroomGroupEditorMode);
+      }
+    }
+    
+    function renderGroupMembersCheckbox(selectedMembers=[], disabled=false) {
+      const container = document.getElementById('mr-group-members');
+      const availableDevices = [...(multiroomSnapshot.devices||[])];
+      const knownIds = new Set(availableDevices.map(device => device.id));
+      selectedMembers.forEach(id => {
+        if(!knownIds.has(id)) availableDevices.push({id:id, name:id, online:false});
+      });
+      container.innerHTML = availableDevices.map(d => {
+        const isSelected = selectedMembers.includes(d.id);
+        const status = d.online===false ? '<span class="text-danger">offline</span>' : '<span class="text-success">online</span>';
+		return '<div class="form-check">' +
+		  '<input class="form-check-input mr-device-checkbox border-success" type="checkbox" id="device_' + d.id + '" data-device-id="' + d.id + '" ' +
+			(isSelected ? 'checked' : '') + ' ' +
+			(disabled ? 'disabled' : '') +
+		  '>' +
+		  '<label class="form-check-label" for="device_' + d.id + '">' +
+			'<i class="bi bi-speaker"></i> ' + (d.name || d.id || 'N/A') + ' - ' + d.id + ' ' + status +
+		  '</label>' +
+		'</div>';
+      }).join('') || '<div class="text-muted">Không tìm thấy loa.</div>';
+    }
+    
+    function getSelectedGroupMembers() {
+      const checkboxes = document.querySelectorAll('#mr-group-members .mr-device-checkbox:checked');
+      return Array.from(checkboxes).map(cb => cb.dataset.deviceId);
+    }
+    
+    async function multiroomGroupSave(mode) { 
+      multiroomLoadingStart();
+      try { 
+        const name=document.getElementById('mr-group-name').value.trim();
+        if(!name) throw new Error('Tên nhóm không được để trống');
+        const groupId = mode==='create'
+          ? multiroomGroupIdFromName(name)
+          : document.getElementById('mr-group-id').value;
+        if(!groupId) throw new Error('Không thể tạo mã nhóm từ tên đã nhập');
+        const members=getSelectedGroupMembers();
+        const p={
+          action:mode==='create'?'group_create':'group_update',
+          group_id:groupId,
+          name:name,
+          members:members,
+          replace:true
+        }; 
+        await multiroomRequest(p);
+        multiroomGroupMode('cancel');
+        multiroomSuccess(mode==='create'?'Đã tạo nhóm loa':'Đã cập nhật tên và thành viên nhóm loa'); 
+      } catch(e){
+        mrMessage(e.message,true);
+      } finally { multiroomLoadingEnd(); }
+    }
+    
+    async function multiroomGroupDelete() { 
+      multiroomLoadingStart();
+      try { 
+        await multiroomRequest({action:'group_delete',group_id:document.getElementById('mr-group-id').value}); 
+        multiroomGroupMode('cancel');
+        multiroomSuccess('Đã xóa nhóm loa'); 
+      } catch(e){
+        mrMessage(e.message,true);
+      } finally { multiroomLoadingEnd(); }
+    }
+    
+    async function multiroomSession(action) { 
+      multiroomLoadingStart();
+      try { 
+        const p={action:action}; 
+        if(action==='start') p.group_id=document.getElementById('mr-session-group-select').value; 
+        await multiroomRequest(p); 
+        multiroomSuccess(action==='start'?'Đã bắt đầu phát âm thanh đa vùng':'Đã dừng Multiroom và chuyển về loa local'); 
+      } catch(e){
+        mrMessage(e.message,true);
+      } finally { multiroomLoadingEnd(); }
+    }
+    
+    function toggleSessionSpeaker(speakerId, isChecked) {
+      multiroomPendingSpeakerChanges[speakerId] = isChecked;
+    }
+    
+    async function multiroomApplySpeakerChanges() {
+      multiroomLoadingStart();
+      try {
+        const controller = multiroomSnapshot.controller || {};
+        const currentSpeakers = (controller.speakers || []).map(s => s.id);
+        const toAdd = [];
+        const toRemove = [];
+        
+        // Determine which speakers to add/remove
+        Object.entries(multiroomPendingSpeakerChanges).forEach(([id, shouldBePresent]) => {
+          if(shouldBePresent && !currentSpeakers.includes(id)) {
+            toAdd.push(id);
+          } else if(!shouldBePresent && currentSpeakers.includes(id)) {
+            toRemove.push(id);
+          }
+        });
+        
+        if(toAdd.length === 0 && toRemove.length === 0) {
+          multiroomSuccess('Không có thay đổi nào cần áp dụng');
+        } else {
+          const desiredSpeakerIds = currentSpeakers
+            .filter(id => !toRemove.includes(id))
+            .concat(toAdd.filter(id => !currentSpeakers.includes(id)));
+          await multiroomRequest({action:'sync_speakers', speaker_ids:desiredSpeakerIds});
+          multiroomSuccess('Đã áp dụng thay đổi loa');
+        }
+        multiroomPendingSpeakerChanges = {};
+      } catch(e){
+        mrMessage(e.message,true);
+      } finally { multiroomLoadingEnd(); }
+    }
+    
+    async function multiroomSpeakerSetVolume(id, volume) { 
+      try { 
+        await multiroomRequest({action:'set_volume', speaker_ids:[id], volume:Number(volume)}); 
+      } catch(e){
+        mrMessage(e.message,true);
+      } 
+    }
+
+    function multiroomMasterVolumePreview(value) {
+      multiroomMasterVolumeDragging = true;
+      const text = document.getElementById('mr-master-volume-value');
+      if(text) text.textContent = Number(value) + '%';
+    }
+
+    async function multiroomMasterVolumeCommit(value) {
+      multiroomLoadingStart();
+      try {
+        const result = await multiroomRequest({action:'set_master_volume', volume:Number(value)});
+        const applied = Number(result?.group_master_volume ?? value);
+        multiroomSuccess('Đã đặt âm lượng tổng của toàn bộ loa thành ' + applied + '%');
+      } catch(e) {
+        mrMessage(e.message, true);
+      } finally {
+        multiroomMasterVolumeDragging = false;
+        multiroomLoadingEnd();
+      }
+    }
+
+    function multiroomVolumeHover(id, active) {
+      if(active) multiroomVolumeHovered.add(id);
+      else multiroomVolumeHovered.delete(id);
+      if(!active && !multiroomVolumeDragging.has(id)) renderMultiroom();
+    }
+
+    function multiroomVolumeBegin(id, value) {
+      multiroomVolumeDragging.add(id);
+      multiroomVolumeDrafts[id] = Number(value);
+    }
+
+    function multiroomVolumePreview(id, value) {
+      const normalized = Math.max(0, Math.min(100, Number(value) || 0));
+      multiroomVolumeDrafts[id] = normalized;
+      const text = document.getElementById('mr-volume-value-' + id);
+      if(text) text.textContent = normalized + '%';
+    }
+
+    async function multiroomVolumeCommit(id, value) {
+      const normalized = Math.max(0, Math.min(100, Number(value) || 0));
+      multiroomVolumeDrafts[id] = normalized;
+      try {
+        await multiroomSpeakerSetVolume(id, normalized);
+      } finally {
+        multiroomVolumeDragging.delete(id);
+        delete multiroomVolumeDrafts[id];
+        if(!multiroomVolumeHovered.has(id)) renderMultiroom();
+      }
+    }
+
+    function multiroomVolumeCancel(id) {
+      multiroomVolumeDragging.delete(id);
+      delete multiroomVolumeDrafts[id];
+      if(!multiroomVolumeHovered.has(id)) renderMultiroom();
+    }
+    
+    async function multiroomSpeakerSetMute(id, isMuted) { 
+      multiroomLoadingStart();
+      try { 
+        await multiroomRequest({action:'set_mute', speaker_ids:[id], muted:isMuted});
+        multiroomSuccess(isMuted?'Đã tắt tiếng loa':'Đã bật tiếng loa'); 
+      } catch(e){
+        mrMessage(e.message,true);
+      } finally { multiroomLoadingEnd(); }
+    }
+    
+    function renderMultiroom() {
+      // Render group select
+      const select=document.getElementById('mr-group-select'); 
+      if(!select)return; 
+      const old=select.value; 
+      select.replaceChildren(); 
+      (multiroomSnapshot.groups||[]).forEach(g=>select.add(new Option(g.name+' ('+g.member_count+' loa)',g.id))); 
+      if(old && (multiroomSnapshot.groups||[]).some(g=>g.id===old)) select.value=old; 
+      if(!multiroomGroupEditorMode) multiroomSelectGroup();
+      
+      // Render session group select
+      const sessionSelect=document.getElementById('mr-session-group-select');
+      if(sessionSelect) {
+        const oldSession=sessionSelect.value;
+        sessionSelect.replaceChildren();
+        (multiroomSnapshot.groups||[]).forEach(g=>sessionSelect.add(new Option(g.name+' ('+g.member_count+' loa)',g.id)));
+        if(oldSession)sessionSelect.value=oldSession;
+      }
+      
+      // Render devices list
+      const devices=document.getElementById('mr-devices'); 
+      const runtimeSpeakerMap = Object.fromEntries(((multiroomSnapshot.controller||{}).speakers||[]).map(s => [s.id, s]));
+      devices.innerHTML=(multiroomSnapshot.devices||[]).map(d=>{
+        const online = runtimeSpeakerMap[d.id]?.online ?? d.online;
+        return '<div class="py-1"><i class="bi bi-speaker"></i> '+(d.name||d.id||'N/A')+' - '+(d.id||'')+(online===false?' <span class="text-danger" title="Offline">●</span>':' <span class="text-success" title="Online">●</span>')+'</div>';
+      }).join('')||'Không tìm thấy loa.';
+      
+      // Render session info
+      const c=multiroomSnapshot.controller||{}, b=multiroomSnapshot.bridge||{}, r=multiroomSnapshot.receiver||{}; 
+      const activeSessionStates = ['starting', 'playing', 'paused', 'receiving'];
+      const multiroomSessionActive = activeSessionStates.includes(String(c.state||'').toLowerCase())
+        || b.mode === 'multiroom'
+        || r.running === true;
+      updateMultiroomConnectionIndicators(multiroomSessionActive);
+      document.getElementById('mr-no-active-session')?.classList.toggle('d-none', multiroomSessionActive);
+      document.getElementById('mr-active-session-controls')?.classList.toggle('d-none', !multiroomSessionActive);
+      if(!multiroomSessionActive) {
+        multiroomPendingSpeakerChanges = {};
+        multiroomVolumeHovered.clear();
+        multiroomVolumeDragging.clear();
+      }
+      document.getElementById('mr-session').textContent='Phiên phát: '+(c.state||'idle')+' | Nhóm: '+(c.group_id||'N/A')+' | '+((c.speakers||[]).length)+' loa'; 
+      if(!multiroomMasterVolumeDragging) {
+        const masterVolume = Number(c.group_master_volume ?? r.master_volume ?? 0);
+        const masterSlider = document.getElementById('mr-master-volume');
+        const masterText = document.getElementById('mr-master-volume-value');
+        if(masterSlider) masterSlider.value = masterVolume;
+        if(masterText) masterText.textContent = masterVolume + '%';
+      }
+
+      // Coordinator la VBot dang giu nguon PCM va phat packet cho ca group.
+      // Uu tien controller smart; tren loa client dung route cua receiver.
+      const normalizeMrHost = value => String(value||'').trim().toLowerCase().replace(/\.$/, '');
+      const coordinatorHost = c.coordinator_host || r.coordinator_host || r.route_coordinator_host || '';
+      const normalizedCoordinatorHost = normalizeMrHost(coordinatorHost);
+      const localDeviceId = String(r.id||'').trim().toLowerCase();
+      const localDeviceHost = normalizeMrHost(r.host||'');
+      
+      // Render speakers with checkboxes - hiển thị tất cả devices, không chỉ current speakers
+      const speakersContainer = document.getElementById('mr-speakers');
+      if(!multiroomSessionActive) {
+        speakersContainer.replaceChildren();
+        return;
+      }
+      // SSE van cap nhat snapshot phia sau, nhung khong thay DOM slider khi
+      // con tro dang hover/drag de thumb khong bi giat ve gia tri server cu.
+      if(multiroomVolumeHovered.size || multiroomVolumeDragging.size) return;
+      const currentSpeakerIds = (c.speakers||[]).map(s => s.id);
+      const speakersMap = Object.fromEntries((c.speakers||[]).map(s => [s.id, s]));
+      
+      const allDevices = multiroomSnapshot.devices||[];
+      speakersContainer.innerHTML = allDevices.map(d => {
+        const currentSpeaker = speakersMap[d.id];
+        const isInCurrentSession = currentSpeakerIds.includes(d.id);
+        
+        // Xác định trạng thái checkbox: nếu có pending change, dùng nó; không thì dùng trạng thái hiện tại
+        let isChecked;
+        if(multiroomPendingSpeakerChanges.hasOwnProperty(d.id)) {
+          isChecked = multiroomPendingSpeakerChanges[d.id]; // Dùng pending state
+        } else {
+          isChecked = isInCurrentSession; // Dùng current state
+        }
+        
+        const volume = currentSpeaker?.volume ?? 100;
+        const isMuted = currentSpeaker?.muted ?? false;
+        const effectiveOnline = currentSpeaker?.online ?? d.online;
+        const statusClass = effectiveOnline === false ? 'text-danger' : 'text-success';
+        const statusText = effectiveOnline === false ? 'offline' : 'online';
+        const bgColor = isChecked ? '#e8f5e9' : (isInCurrentSession ? '#fff3e0' : '#f5f5f5');
+        const isCoordinator = normalizedCoordinatorHost && normalizeMrHost(d.host) === normalizedCoordinatorHost;
+        const isCurrentDevice = (localDeviceId && String(d.id||'').trim().toLowerCase() === localDeviceId)
+          || (localDeviceHost && normalizeMrHost(d.host) === localDeviceHost);
+        
+		return '<div class="col-md-6"><div class="border rounded p-3" style="background:' + bgColor + ';">' +
+		  '<div class="form-check mb-2">' +
+			'<input class="form-check-input border-success" type="checkbox" id="speaker_' + d.id + '" ' + (isChecked ? 'checked' : '') +
+			  " onchange=\"toggleSessionSpeaker('" + d.id + "', this.checked)\">" +
+			'<label class="form-check-label fw-bold d-block">' +
+			  '<span class="d-block"><i class="bi bi-speaker"></i> ' + (d.name || d.id || 'Loa') +
+				' <span class="' + statusClass + '" title="' + statusText + '">●</span>' +
+			  '</span>' +
+			  '<span class="d-flex align-items-center gap-1 mt-1 flex-wrap">' +
+				(isCoordinator
+				  ? '<span class="badge bg-primary"><i class="bi bi-broadcast"></i> Nguồn Phát</span>'
+				  : (isInCurrentSession
+					  ? '<span class="badge bg-secondary"><i class="bi bi-speaker"></i> Nguồn Nhận</span>'
+					  : '')) +
+				(isCurrentDevice
+				  ? '<span class="badge bg-success"><i class="bi bi-check-circle-fill"></i> Loa hiện tại</span>'
+				  : '') +
+			  '</span>' +
+			'</label>' +
+		  '</div>' +
+
+		  '<div class="mb-2">' +
+			'<small class="text-muted">Volume PCM: <b id="mr-volume-value-' + d.id + '" class="text-primary">' +
+			  volume + '%</b> ' +
+			  (isMuted ? '<span class="badge bg-danger">Mute</span>' : '') +
+			'</small><br>' +
+
+			'<input title="Kéo để thay đổi âm lượng PCM của từng loa trong nhóm" type="range" min="0" max="100" value="' + volume + '" class="form-range form-range-sm" ' +
+			  "onpointerenter=\"multiroomVolumeHover('" + d.id + "', true)\" " +
+			  "onpointerleave=\"multiroomVolumeHover('" + d.id + "', false)\" " +
+			  "onfocus=\"multiroomVolumeHover('" + d.id + "', true)\" " +
+			  "onblur=\"multiroomVolumeHover('" + d.id + "', false)\" " +
+			  "onpointerdown=\"multiroomVolumeBegin('" + d.id + "', this.value)\" " +
+			  "onpointercancel=\"multiroomVolumeCancel('" + d.id + "')\" " +
+			  "oninput=\"multiroomVolumePreview('" + d.id + "', this.value)\" " +
+			  "onchange=\"multiroomVolumeCommit('" + d.id + "', this.value)\" " +
+			  (isInCurrentSession ? '' : 'disabled') +
+			'>' +
+		  '</div>' +
+
+		  '<button class="btn ' + (isMuted ? 'btn-success' : 'btn-warning') + ' btn-sm me-1" ' +
+			"onclick=\"multiroomSpeakerSetMute('" + d.id + "', " + (!isMuted) + ")\" " +
+			(isInCurrentSession ? '' : 'disabled') +
+		  '>' +
+			'<i class="bi ' + (isMuted ? 'bi-volume-mute' : 'bi-volume-down') + '"></i> ' +
+			(isMuted ? 'Bật' : 'Tắt') + ' Âm' +
+		  '</button>' +
+
+		  (isChecked && !isInCurrentSession
+			? '<small class="text-success d-block mt-2"><i class="bi bi-plus-circle-fill"></i> Thêm vào phiên đang phát</small>'
+			: '') +
+
+		  (!isChecked && isInCurrentSession
+			? '<small class="text-danger d-block mt-2"><i class="bi bi-x-circle-fill"></i> Ngắt khỏi phiên đang phát</small>'
+			: '') +
+
+		'</div></div>';
+      }).join('')||'<div class="text-muted col-12">Không có loa nào.</div>';
+    }
+    
+    async function multiroomRefresh(discover=false, notifySuccess=false, background=false) { 
+      if(!background) multiroomLoadingStart();
+      try { 
+        // Refresh nhanh khong quet mDNS; giu lai danh sach da discovery.
+        const response=await fetch(multiroomApiUrl+(discover?'?discover=true':''),{cache:'no-store'})
+          .catch(() => { setMultiroomAPIConnected(false); throw new Error(multiroomConnectionError); }); 
+        const data=await multiroomReadJson(response);
+        if(!response.ok||!data.success)throw new Error(data.message||'Không lấy được trạng thái'); 
+        applyMultiroomSnapshot(data.multiroom||{}, discover);
+        if(notifySuccess) multiroomSuccess(discover?'Đã quét và cập nhật danh sách loa':'Đã cập nhật trạng thái Multiroom');
+      } catch(e){
+        setMultiroomAPIConnected(false);
+        mrMessage(e.message,true);
+      } finally { if(!background) multiroomLoadingEnd(); }
+    }
+    
+    function multiroomOpen(){ 
+      document.getElementById('multiroom-ui-message').className='alert d-none'; 
+      multiroomDisabledNoticeShown = false;
+      multiroomPendingSpeakerChanges = {}; // Reset changes when opening modal
+      multiroomSSEWasDisconnected = false;
+      setMultiroomAPIConnected(false);
+      multiroomRefresh(true);
+      startMultiroomSSE();
+      startMultiroomDiscoveryMonitor();
+    }
+
+    document.getElementById('multiroomModal')?.addEventListener('hidden.bs.modal', function () {
+      stopMultiroomSSE();
+      stopMultiroomDiscoveryMonitor();
+    });
+    
     //hàm để hiển thị thông tin vị trí và thời tiết
 	async function getLocationAndWeather() {
 	  try {
@@ -1241,6 +2135,14 @@ function update_index_data(data){
 			);
 			const mediaIsPlaying = mediaPlaybackState === 'playing';
 			const mediaIsPaused = mediaPlaybackState === 'paused';
+			const multiroomActive = media.multiroom_active === true || mediaSourceKind === 'multiroom';
+			updateMultiroomConnectionIndicators(multiroomActive);
+			const multiroomCoordinator = media.multiroom_coordinator === true;
+			const showMediaProgress = true;
+			canSeekCurrentMedia = (!multiroomActive || multiroomCoordinator) && (mediaIsPlaying || mediaIsPaused);
+			const progressContainer = document.getElementById('progress-container');
+			progressContainer.style.display = showMediaProgress ? '' : 'none';
+			document.getElementById('progress-bar').disabled = !canSeekCurrentMedia;
             //Media Player
 			document.getElementById('media-name').innerHTML =
 				'Tên bài hát: <font color="blue">' +
@@ -1283,7 +2185,7 @@ function update_index_data(data){
 				) +
 				'</font>';
 
-			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (mediaIsPlaying ? 'Đang phát' : (mediaIsPaused ? 'Đang tạm dừng' : 'Không phát')) + '</font>';
+			document.getElementById('audio-playing').innerHTML = 'Trạng Thái: <font color=blue>' + (mediaIsPlaying ? (multiroomActive ? 'Đang phát Multiroom' : 'Đang phát') : (mediaIsPaused ? (multiroomActive ? 'Multiroom đang tạm dừng' : 'Đang tạm dừng') : 'Không phát')) + '</font>';
 			//Cập nhật nguồn phát nhạc
 			document.getElementById('audio-source').innerHTML =
 				'Nguồn Phát: <font color=blue>' +
@@ -1300,12 +2202,23 @@ function update_index_data(data){
 											String(media.media_player_source).trim() !== 'N/A'
 												? media.media_player_source
 												: 'Local Audio'
-										)
+										  )
 										: 'N/A'
 								)
 						)
 				) +
 				'</font>';
+			if (media.playlist_active && media.playlist_name) {
+				document.getElementById('audio-source').innerHTML =
+					'Nguồn Phát: <font color="blue">PlayList - ' + playlistEscapeHtml(media.playlist_name) + '</font>';
+			}
+			playlistMarkPlaying(media.playlist_active ? media.playlist_id : null, media.playlist_active ? media.media_name : null);
+			if (multiroomActive) {
+				const coordinatorName = String(media.multiroom_coordinator_name || '').trim();
+				document.getElementById('audio-source').innerHTML =
+					'Nguồn Phát: <font color="blue">Multiroom' +
+					(coordinatorName ? ' - ' + coordinatorName : '') + '</font>';
+			}
 
             //Cập nhật ảnh cover bài hát
 			document.getElementById('media-cover').src =
@@ -1386,6 +2299,7 @@ function update_index_data(data){
     let isHovering_volume_slide = false;
     let isHovering_led_brightness = false;
     let fullTime = 0;
+    let canSeekCurrentMedia = false;
     let intervalId;
     //Cập nhật thông tin GET từ API
     function fetchData_all_info() {
@@ -1506,6 +2420,7 @@ function update_index_data(data){
 
     // Lắng nghe sự kiện kéo thanh trượt để hiển thị giá trị khi nhả chuột
     document.getElementById('progress-bar').addEventListener('change', (event) => {
+      if (!canSeekCurrentMedia) return;
       const progressBar = event.target;
       const currentDuration = progressBar.value;
       //Chạy function để tua thời gian media player
@@ -1740,21 +2655,396 @@ function update_index_data(data){
     });
   </script>
   <script>
-    //Hiển thị playlist dưới dạng table và tìm kiếm tab index.php
-    function loadPlayList() {
+    let selectedPlaylistId = null;
+    let playlistManagerCache = {playlists:[], active_id:null};
+    let playlistRenderedItems = [];
+    let playlistOrderDirty = false;
+    let playlistPage = 1;
+    let playlistPageSize = 10;
+    let playlistOrderSaveTimer = null;
+    let playlistRuntimeId = null;
+    let playlistRuntimeTitle = null;
+
+    function playlistEscapeHtml(value) {
+      const element = document.createElement('div');
+      element.textContent = String(value ?? '');
+      return element.innerHTML;
+    }
+
+    function playlistSafeHttpUrl(value) {
+      try {
+        const url = new URL(String(value || ''), window.location.href);
+        return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+      } catch(error) {
+        return '';
+      }
+    }
+
+    function playlistDurationSeconds(value) {
+      const text = String(value || '').trim();
+      if(/^\d+$/.test(text)) return Number(text);
+      const parts = text.split(':').map(Number);
+      if(parts.length >= 2 && parts.every(Number.isFinite)) return parts.reduce((total, part) => total * 60 + part, 0);
+      const iso = text.match(/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i);
+      return iso ? Number(iso[1]||0)*3600 + Number(iso[2]||0)*60 + Number(iso[3]||0) : 0;
+    }
+
+    function playlistFormatDuration(seconds) {
+      seconds = Math.max(0, Math.floor(Number(seconds)||0));
+      return [Math.floor(seconds/3600), Math.floor((seconds%3600)/60), seconds%60].map(value => String(value).padStart(2,'0')).join(':');
+    }
+
+    function playlistRenderStats(items) {
+      const sources = {};
+      let duration = 0;
+      items.forEach(item => {
+        const source = String(item.source || 'Không rõ');
+        sources[source] = (sources[source] || 0) + 1;
+        duration += playlistDurationSeconds(item.duration);
+      });
+      const element = document.getElementById('playlist-stats');
+      if(element) element.textContent = items.length + ' bài • ' + playlistFormatDuration(duration) + ' • ' + Object.entries(sources).map(([source,count]) => source + ': ' + count).join(' | ');
+    }
+
+    function playlistRefreshOrderButtons() {
+      const rows = Array.from(document.querySelectorAll('#playlistTableBody tr[data-playlist-item-id]'));
+      rows.forEach((row, index) => {
+        const up = row.querySelector('.playlist-order-up');
+        const down = row.querySelector('.playlist-order-down');
+        if(up) up.disabled = index === 0;
+        if(down) down.disabled = index === rows.length - 1;
+      });
+    }
+
+    function playlistPlayEntry(button) {
+      const item = playlistRenderedItems[Number(button.dataset.entryIndex)];
+      if(!item) return show_message('Không tìm thấy dữ liệu bài hát');
+      const source = String(item.source || '');
+      if(source === 'Youtube') return play_Youtube_Link(item.id, item.title, item.cover);
+      if(source === 'ZingMP3') return get_ZingMP3_Link(item.id, item.title, item.cover, item.artist);
+      if(source === 'Local') return send_Media_Play_API(item.audio, item.title, item.cover, 'Local');
+      return send_Media_Play_API(item.audio, item.title, item.cover, source || 'PlayList');
+    }
+
+    function playlistMarkPlaying(playlistId, title) {
+      playlistRuntimeId = playlistId || null;
+      playlistRuntimeTitle = title || null;
+      document.querySelectorAll('#playlistTableBody tr[data-entry-index]').forEach(row => {
+        const item = playlistRenderedItems[Number(row.dataset.entryIndex)];
+        const active = Boolean(playlistId && playlistId === selectedPlaylistId && title && String(item?.title || item?.name || '') === String(title));
+        row.classList.toggle('table-success', active);
+        let badge = row.querySelector('.playlist-playing-badge');
+        if(active && !badge) {
+          badge = document.createElement('span');
+          badge.className = 'playlist-playing-badge badge bg-success ms-2';
+          badge.textContent = 'Đang phát';
+          row.querySelector('td:nth-child(2) div > div:last-child')?.prepend(badge);
+        } else if(!active && badge) badge.remove();
+      });
+    }
+
+    function playlistDeleteEntry(button) {
+      const item = playlistRenderedItems[Number(button.dataset.entryIndex)];
+      if(item?.ids_list) deleteFromPlaylist('delete_some', String(item.ids_list));
+    }
+
+    async function loadPlayList() {
       loading('show');
+      try {
+        const response = await fetch('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'});
+        const manager = await response.json();
+        if(!response.ok || manager.success === false) throw new Error(manager.message || 'Không tải được danh sách PlayList');
+        const exists = (manager.playlists||[]).some(item => item.id === selectedPlaylistId);
+        selectedPlaylistId = exists ? selectedPlaylistId : manager.active_id;
+        renderPlayList(manager);
+      } catch(error) {
+        loading('hide');
+        show_message('Lỗi quản lý PlayList: ' + error.message);
+      }
+    }
+
+    let playlistManagerDialogAction = null;
+
+    function playlistCurrentMeta() {
+      return (playlistManagerCache.playlists||[]).find(item => item.id === selectedPlaylistId) || {};
+    }
+
+    function playlistOpenDialog(action) {
+      const meta = playlistCurrentMeta();
+      const modalElement = document.getElementById('playlistManagerDialog');
+      const input = document.getElementById('playlist-manager-name-input');
+      const inputGroup = document.getElementById('playlist-manager-name-group');
+      const description = document.getElementById('playlist-manager-dialog-description');
+      const title = document.getElementById('playlistManagerDialogLabel');
+      const confirmButton = document.getElementById('playlist-manager-dialog-confirm');
+      playlistManagerDialogAction = action;
+      input.classList.remove('is-invalid');
+      input.value = '';
+      const destructiveAction = action === 'delete' || action === 'delete_all' || action === 'delete_selected';
+      inputGroup.classList.toggle('d-none', destructiveAction);
+      confirmButton.className = 'btn ' + (destructiveAction ? 'btn-danger' : 'btn-primary');
+
+      if(action === 'create') {
+        title.innerHTML = '<i class="bi bi-plus-circle"></i> Tạo PlayList Mới';
+        description.textContent = 'Nhập tên cho PlayList cần tạo. Việc tạo mới không thay đổi PlayList mặc định.';
+        input.placeholder = 'Ví dụ: Nhạc thư giãn';
+      } else if(action === 'clone') {
+        title.innerHTML = '<i class="bi bi-copy"></i> Nhân Bản PlayList';
+        description.textContent = 'Tạo một bản sao độc lập từ PlayList “' + (meta.name || 'N/A') + '”.';
+        input.value = (meta.name || 'PlayList') + ' - Bản sao';
+      } else if(action === 'rename') {
+        title.innerHTML = '<i class="bi bi-pencil"></i> Đổi Tên PlayList';
+        description.textContent = 'Nhập tên mới cho PlayList: ' + (meta.name || 'N/A');
+        input.value = meta.name || '';
+      } else if(action === 'delete_all') {
+        title.innerHTML = '<i class="bi bi-trash"></i> Xóa Toàn Bộ Bài Hát';
+        description.textContent = 'Bạn có chắc chắn muốn xóa toàn bộ bài hát trong PlayList “' + (meta.name || 'N/A') + '”? PlayList vẫn được giữ lại.';
+      } else if(action === 'delete_selected') {
+        const selectedCount = playlistSelectedItemIds().length;
+        title.innerHTML = '<i class="bi bi-trash"></i> Xóa Các Bài Đã Chọn';
+        description.textContent = 'Bạn có chắc chắn muốn xóa ' + selectedCount + ' bài đã chọn khỏi PlayList “' + (meta.name || 'N/A') + '”?';
+      } else {
+        title.innerHTML = '<i class="bi bi-trash"></i> Xóa PlayList';
+        description.textContent = 'Bạn có chắc chắn muốn xóa PlayList “' + (meta.name || 'N/A') + '” và toàn bộ bài hát bên trong?';
+      }
+
+      const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+      modal.show();
+      if(action === 'create' || action === 'rename' || action === 'clone') {
+        modalElement.addEventListener('shown.bs.modal', () => { input.focus(); input.select(); }, {once:true});
+      }
+    }
+
+    function playlistManagerAction(action) {
+      if(action === 'select') return playlistManagerRequest(action, '');
+      playlistOpenDialog(action);
+    }
+
+    async function playlistManagerDialogSubmit() {
+      const action = playlistManagerDialogAction;
+      const input = document.getElementById('playlist-manager-name-input');
+      const name = input.value.trim();
+      if((action === 'create' || action === 'rename' || action === 'clone') && (!name || name.length > 80)) {
+        input.classList.add('is-invalid');
+        input.focus();
+        return;
+      }
+      if(action === 'delete_all') {
+        bootstrap.Modal.getInstance(document.getElementById('playlistManagerDialog'))?.hide();
+        deleteFromPlaylist('delete_all', '', true);
+        return;
+      }
+      if(action === 'delete_selected') {
+        const selectedIds = playlistSelectedItemIds();
+        if(!selectedIds.length) {
+          bootstrap.Modal.getInstance(document.getElementById('playlistManagerDialog'))?.hide();
+          show_message('Không còn bài hát nào được chọn');
+          return;
+        }
+        bootstrap.Modal.getInstance(document.getElementById('playlistManagerDialog'))?.hide();
+        deleteFromPlaylist('delete_some', selectedIds.join(','), true);
+        return;
+      }
+      await playlistManagerRequest(action, name);
+    }
+
+    async function playlistManagerRequest(action, name='') {
+      loading('show');
+      try {
+        const body = new URLSearchParams({playlist_manager_action:action, playlist_id:selectedPlaylistId||'', source_playlist_id:selectedPlaylistId||'', playlist_name:name.trim()});
+        const response = await fetch('includes/php_ajax/Media_Player_Search.php', {
+          method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''}, body:body
+        });
+        const data = await response.json();
+        if(!response.ok || !data.success) throw new Error(data.message || 'Thao tác PlayList thất bại');
+        if(action === 'create' || action === 'clone' || action === 'select') selectedPlaylistId = data.playlist_id || data.active_id;
+        if(action === 'delete') selectedPlaylistId = data.active_id;
+        bootstrap.Modal.getInstance(document.getElementById('playlistManagerDialog'))?.hide();
+        showMessagePHP(data.message, 5);
+        await loadPlayList();
+      } catch(error) {
+        loading('hide');
+        show_message(error.message);
+      }
+    }
+
+    function selectManagedPlaylist(id) {
+      selectedPlaylistId = id;
+      loadPlayList();
+    }
+
+    function downloadSelectedPlaylist() {
+      if(!selectedPlaylistId) return;
+      downloadPlaylistExport('includes/php_ajax/Media_Player_Search.php?Cache_PlayList=1&playlist_id=' + encodeURIComponent(selectedPlaylistId));
+    }
+
+    function downloadPlaylistExport(url) {
+      const link = document.createElement('a');
+      link.href = url + (url.includes('?') ? '&' : '?') + '_download=' + Date.now();
+      link.download = '';
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    }
+
+    function downloadAllPlaylists() {
+      downloadPlaylistExport('includes/php_ajax/Media_Player_Search.php?Playlist_Backup=1');
+    }
+
+    function playlistSelectedItemIds() {
+      return Array.from(document.querySelectorAll('.playlist-item-check:checked')).map(item => item.value);
+    }
+
+    function playlistDeleteSelected() {
+      const ids = playlistSelectedItemIds();
+      if(!ids.length) return show_message('Hãy chọn ít nhất một bài hát cần xóa');
+      playlistOpenDialog('delete_selected');
+    }
+
+    function playlistToggleAll(checked) {
+      document.querySelectorAll('.playlist-item-check').forEach(item => {
+        if(item.closest('tr')?.style.display !== 'none') item.checked = checked;
+      });
+      playlistUpdateSelectionState();
+    }
+
+    function playlistUpdateSelectionState() {
+      const selected = playlistSelectedItemIds().length;
+      const total = document.querySelectorAll('.playlist-item-check').length;
+      const label = document.getElementById('playlist-selected-count');
+      if(label) label.textContent = 'Đã chọn: ' + selected + ' / ' + total + ' bài';
+      ['playlist-copy-selected','playlist-move-selected','playlist-delete-selected'].forEach(id => {
+        const button = document.getElementById(id);
+        if(button) button.disabled = selected === 0 || ((id !== 'playlist-delete-selected') && !(playlistManagerCache.playlists||[]).some(item => item.id !== selectedPlaylistId));
+      });
+    }
+
+    function playlistApplyFilterPage(resetPage=false) {
+      if(resetPage) playlistPage = 1;
+      const query = String(document.getElementById('playlist-filter')?.value || '').trim().toLocaleLowerCase('vi');
+      playlistPageSize = Number(document.getElementById('playlist-page-size')?.value || 10);
+      const rows = Array.from(document.querySelectorAll('#playlistTableBody tr[data-playlist-item-id]'));
+      const matched = rows.filter(row => !query || String(row.dataset.playlistSearch || '').includes(query));
+      const pages = Math.max(1, Math.ceil(matched.length / playlistPageSize));
+      playlistPage = Math.min(Math.max(1, playlistPage), pages);
+      rows.forEach(row => { row.style.display = 'none'; });
+      matched.slice((playlistPage - 1) * playlistPageSize, playlistPage * playlistPageSize).forEach(row => { row.style.display = ''; });
+      const pageInfo = document.getElementById('playlist-page-info');
+      if(pageInfo) pageInfo.textContent = 'Trang ' + playlistPage + '/' + pages + ' • ' + matched.length + ' bài';
+      const prev = document.getElementById('playlist-page-prev');
+      const next = document.getElementById('playlist-page-next');
+      if(prev) prev.disabled = playlistPage <= 1;
+      if(next) next.disabled = playlistPage >= pages;
+      playlistUpdateSelectionState();
+    }
+
+    function playlistChangePage(delta) {
+      playlistPage += delta;
+      playlistApplyFilterPage(false);
+    }
+
+    async function playlistItemsAction(action) {
+      const ids = playlistSelectedItemIds();
+      if(!ids.length) return show_message('Hãy chọn ít nhất một bài hát');
+      const targets = (playlistManagerCache.playlists||[]).filter(item => item.id !== selectedPlaylistId);
+      if(!targets.length) return show_message('Chưa có PlayList đích khác');
+      const targetId = document.getElementById('playlist-bulk-target')?.value;
+      const target = targets.find(item => item.id === targetId);
+      if(!target) return;
+      await playlistPostItems({playlist_items_action:action, playlist_id:selectedPlaylistId, target_playlist_id:target.id, item_ids:JSON.stringify(ids)});
+    }
+
+    async function playlistSaveSettings() {
+      const mode = document.getElementById('playlist-play-mode')?.value || 'random';
+      const loop = document.getElementById('playlist-loop-mode')?.checked ? 'true' : 'false';
+      await playlistPostItems({playlist_items_action:'settings', playlist_id:selectedPlaylistId, play_mode:mode, loop:loop});
+    }
+
+    async function playlistPostItems(values, reload=true) {
+      loading('show');
+      try {
+        const response = await fetch('includes/php_ajax/Media_Player_Search.php', {
+          method:'POST',
+          headers:{
+            'Content-Type':'application/x-www-form-urlencoded',
+            'X-CSRF-Token':window.VBOT_CSRF_TOKEN||''
+          },
+          body:new URLSearchParams(values)
+        });
+        const data = await response.json();
+        if(!response.ok || !data.success) throw new Error(data.message || 'Thao tác PlayList thất bại');
+        showMessagePHP(data.message, 4);
+        if(reload) await loadPlayList();
+      } catch(error) {
+        loading('hide');
+        show_message(error.message);
+      }
+    }
+
+    function playlistMoveRow(button, direction) {
+      const row = button.closest('tr[data-playlist-item-id]');
+      if(!row) return;
+      const sibling = direction < 0 ? row.previousElementSibling : row.nextElementSibling;
+      if(!sibling || !sibling.matches('tr[data-playlist-item-id]')) return;
+      if(direction < 0) row.parentNode.insertBefore(row, sibling);
+      else row.parentNode.insertBefore(sibling, row);
+      document.querySelectorAll('#playlistTableBody tr[data-playlist-item-id]').forEach((item, index) => {
+        const number = item.querySelector('.playlist-order-number');
+        if(number) number.textContent = String(index + 1);
+      });
+      playlistRefreshOrderButtons();
+      row.classList.add('table-warning');
+      playlistOrderDirty = true;
+      const saveButton = document.getElementById('playlist-save-order');
+      if(saveButton) {
+        saveButton.classList.remove('btn-outline-primary');
+        saveButton.classList.add('btn-warning');
+        saveButton.innerHTML = '<i class="bi bi-list-ol"></i> Lưu Thứ Tự (*)';
+      }
+      setTimeout(() => row.classList.remove('table-warning'), 350);
+      clearTimeout(playlistOrderSaveTimer);
+      playlistOrderSaveTimer = setTimeout(() => playlistSaveOrder(), 900);
+    }
+
+    async function playlistSaveOrder() {
+      const ids = Array.from(document.querySelectorAll('#playlistTableBody tr[data-playlist-item-id]')).map(row => row.dataset.playlistItemId);
+      await playlistPostItems({playlist_items_action:'reorder', playlist_id:selectedPlaylistId, item_ids:JSON.stringify(ids)});
+      playlistOrderDirty = false;
+    }
+
+    function renderPlayList(manager) {
+      playlistManagerCache = manager;
+      const selectedMeta = (manager.playlists||[]).find(item => item.id === selectedPlaylistId) || {};
+      const bulkTargetOptions = (manager.playlists||[]).filter(item => item.id !== selectedPlaylistId).map(item => '<option value="' + playlistEscapeHtml(item.id) + '">' + playlistEscapeHtml(item.name) + '</option>').join('');
+      const playlistOptions = (manager.playlists||[]).map(item =>
+        '<option value="' + playlistEscapeHtml(item.id) + '" ' + (item.id===selectedPlaylistId?'selected':'') + '>' +
+        playlistEscapeHtml(item.name) + ' (' + Number(item.item_count||0) + ' bài)' + (item.active?' • mặc định':'') + '</option>'
+      ).join('');
       var tableContainer = document.getElementById('tableContainer');
       var tableHTML =
-        '<h5 class="card-title">PlayList, Danh Sách Nhạc: ' +
-		' <button type="button" id="play_Button" name="play_Button" title="Phát nhạc trong Play List" class="btn btn-primary btn-sm" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>' +
-		' <button type="button" class="btn btn-warning btn-sm" title="Tải Xuống Danh Sách Nhạc" onclick="downloadFile(\'<?php echo $HTML_VBot_Offline.'/includes/cache/PlayList.json'; ?>\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-download"></i></button> ' +
-		' <button class="btn btn-danger btn-sm" title="Xóa toàn bộ danh sách phát" onclick="deleteFromPlaylist(\'delete_all\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-trash"></i></button> ' +
-		'</h5>' +
-		'<div class="input-group"><span class="input-group-text border-success">Tải Lên PlayList.json</span><input type="file" class="form-control border-success" id="fileInput_PlayList" accept=".json"><button class="btn btn-primary border-success" type="button" onclick="uploadFile_PlayList(\'index.php\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-upload"></i> Tải Lên</button></div>' +
-		'<table class="table table-borderless datatable" id="playlistTable">' +
+		'<h5 class="card-title">PlayList, Danh Sách Nhạc</h5><div id="playlist-stats" class="alert alert-secondary py-2 small">Đang tính thống kê...</div>' +
+		'<div class="playlist-control-panel playlist-control-panel-primary"><span class="playlist-control-label"><i class="bi bi-collection-play"></i> Chọn Và Sử Dụng PlayList <span class="badge bg-primary ms-1">' + Number((manager.playlists||[]).length) + ' PlayList</span></span><div class="input-group"><span class="input-group-text border-primary"><i class="bi bi-collection-play"></i></span>' +
+		'<select id="playlist-manager-select" class="form-select border-primary" onchange="selectManagedPlaylist(this.value)">' + playlistOptions + '</select>' +
+		'<button type="button" title="Phát PlayList đang chọn" class="btn btn-success" onclick="playlist_media_control(\'managed\')" ' + (Number(selectedMeta.item_count||0)===0?'disabled':'') + '><i class="bi bi-play-fill"></i> Phát</button>' +
+		'<button type="button" class="btn btn-warning" title="Tải xuống PlayList đang chọn" onclick="downloadSelectedPlaylist()"><i class="bi bi-download"></i> Tải Xuống</button></div></div>' +
+		'<div class="playlist-control-panel"><span class="playlist-control-label"><i class="bi bi-tools"></i> Quản Lý PlayList</span><div class="btn-group flex-wrap" role="group" aria-label="Quản lý PlayList">' +
+		'<button class="btn btn-success" type="button" onclick="playlistManagerAction(\'create\')"><i class="bi bi-plus-circle"></i> Tạo</button>' +
+		'<button class="btn btn-outline-success" type="button" onclick="playlistManagerAction(\'clone\')"><i class="bi bi-copy"></i> Nhân Bản</button>' +
+		'<button class="btn btn-warning" type="button" onclick="playlistManagerAction(\'select\')" ' + (selectedPlaylistId===manager.active_id?'disabled':'') + '><i class="bi bi-star-fill"></i> Đặt Mặc Định</button>' +
+		'<button class="btn btn-primary" type="button" onclick="playlistManagerAction(\'rename\')"><i class="bi bi-pencil"></i> Đổi Tên</button>' +
+		'<button class="btn btn-outline-danger" type="button" onclick="playlistOpenDialog(\'delete_all\')" ' + (Number(selectedMeta.item_count||0)===0?'disabled':'') + '><i class="bi bi-eraser"></i> Xóa Toàn Bộ Bài</button>' +
+		'<button class="btn btn-danger" type="button" onclick="playlistManagerAction(\'delete\')" ' + ((manager.playlists||[]).length<=1?'disabled':'') + '><i class="bi bi-trash"></i> Xóa PlayList</button><button class="btn btn-dark" type="button" onclick="downloadAllPlaylists()"><i class="bi bi-archive"></i> Sao Lưu Tất Cả</button></div></div>' +
+		'<div class="playlist-control-panel playlist-control-panel-info"><span class="playlist-control-label"><i class="bi bi-shuffle"></i> Chế Độ Và Thứ Tự Phát</span><div class="row g-2 align-items-center"><div class="col-md-4"><label class="form-label mb-0">Thứ tự phát</label><select id="playlist-play-mode" class="form-select border-info"><option value="sequential" ' + (selectedMeta.play_mode==='sequential'?'selected':'') + '>Tuần tự</option><option value="random" ' + (selectedMeta.play_mode==='random'?'selected':'') + '>Ngẫu nhiên</option><option value="repeat_one" ' + (selectedMeta.play_mode==='repeat_one'?'selected':'') + '>Lặp một bài</option></select></div>' +
+		'<div class="col-md-3 pt-md-4"><div class="form-check form-switch"><input id="playlist-loop-mode" class="form-check-input" type="checkbox" ' + (selectedMeta.loop?'checked':'') + '><label class="form-check-label" for="playlist-loop-mode">Lặp danh sách</label></div></div>' +
+		'<div class="col-md-5 pt-md-4"><button class="btn btn-info btn-sm" onclick="playlistSaveSettings()"><i class="bi bi-save"></i> Lưu Chế Độ Phát</button> <button id="playlist-save-order" class="btn btn-outline-primary btn-sm" onclick="playlistSaveOrder()"><i class="bi bi-list-ol"></i> Lưu Thứ Tự</button></div></div></div>' +
+		'<div class="playlist-control-panel playlist-control-panel-success"><span class="playlist-control-label"><i class="bi bi-check2-square"></i> Thao Tác Các Bài Đã Chọn <span id="playlist-selected-count" class="badge bg-secondary ms-1">Đã chọn: 0 / ' + Number(selectedMeta.item_count||0) + ' bài</span></span><div class="input-group input-group-sm"><span class="input-group-text">PlayList đích</span><select id="playlist-bulk-target" class="form-select" ' + (bulkTargetOptions?'':'disabled') + '>' + (bulkTargetOptions || '<option>Chưa có PlayList khác</option>') + '</select><button id="playlist-copy-selected" class="btn btn-outline-success" onclick="playlistItemsAction(\'copy\')" disabled><i class="bi bi-copy"></i> Sao Chép Bài Đã Chọn</button><button id="playlist-move-selected" class="btn btn-outline-warning" onclick="playlistItemsAction(\'move\')" disabled><i class="bi bi-arrow-left-right"></i> Di Chuyển Bài Đã Chọn</button><button id="playlist-delete-selected" class="btn btn-danger" onclick="playlistDeleteSelected()" disabled><i class="bi bi-trash"></i> Xóa Bài Đã Chọn</button></div><div class="text-muted small mt-2"><i class="bi bi-arrow-up-down"></i> Dùng nút mũi tên trên từng bài để đổi vị trí; hệ thống sẽ tự lưu sau khi thay đổi.</div></div>' +
+		'<div class="playlist-control-panel playlist-control-panel-success"><span class="playlist-control-label"><i class="bi bi-file-earmark-arrow-up"></i> Nhập Dữ Liệu PlayList</span><div class="row g-2"><div class="col-12 col-md"><select id="playlist-import-mode" class="form-select border-success" onchange="document.getElementById(\'playlist-import-new-name-column\').classList.toggle(\'d-none\',this.value!==\'new\')"><option value="overwrite">Ghi đè PlayList hiện tại</option><option value="merge">Gộp và bỏ bài trùng</option><option value="new">Tạo thành PlayList mới</option></select></div><div id="playlist-import-new-name-column" class="col-12 col-md d-none"><input id="playlist-import-new-name" maxlength="80" class="form-control border-success" placeholder="Tên PlayList mới"></div><div class="col-12 col-md"><div class="input-group"><input type="file" class="form-control border-success" id="fileInput_PlayList" accept=".json"><button class="btn btn-primary border-success" type="button" onclick="uploadFile_PlayList(\'index.php\')"><i class="bi bi-upload"></i> Tải Lên</button></div></div></div></div>' +
+		'<div class="row g-2 align-items-center my-3"><div class="col-md-6"><div class="input-group input-group-sm"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="playlist-filter" class="form-control" placeholder="Tìm tên bài, nghệ sĩ hoặc nguồn..." oninput="playlistApplyFilterPage(true)"></div></div><div class="col-md-2"><select id="playlist-page-size" class="form-select form-select-sm" onchange="playlistApplyFilterPage(true)"><option value="5">5 bài/trang</option><option value="10" selected>10 bài/trang</option><option value="20">20 bài/trang</option><option value="50">50 bài/trang</option></select></div><div class="col-md-4 text-md-end"><button id="playlist-page-prev" class="btn btn-outline-secondary btn-sm" onclick="playlistChangePage(-1)"><i class="bi bi-chevron-left"></i></button> <span id="playlist-page-info" class="small mx-2">Trang 1/1</span><button id="playlist-page-next" class="btn btn-outline-secondary btn-sm" onclick="playlistChangePage(1)"><i class="bi bi-chevron-right"></i></button></div></div>' +
+		'<table class="table table-borderless" id="playlistTable">' +
         '<thead>' +
         '<tr>' +
-        '<th scope="col" style="text-align: center; vertical-align: middle;">STT</th>' +
+        '<th scope="col" style="text-align: center; vertical-align: middle;"><input class="form-check-input" type="checkbox" title="Chọn tất cả" onchange="playlistToggleAll(this.checked)"> STT</th>' +
         '<th scope="col" style="text-align: center; vertical-align: middle;">Bài Hát</th>' +
         '<th scope="col" style="text-align: center; vertical-align: middle;">Hành Động</th>' +
         '</tr>' +
@@ -1767,62 +3057,51 @@ function update_index_data(data){
       var table = document.getElementById('playlistTable');
       var tableBody = document.getElementById('playlistTableBody');
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList', true);
+      xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList=1&playlist_id=' + encodeURIComponent(selectedPlaylistId||''), true);
       xhr.onload = function() {
         if (xhr.status === 200) {
           var data = JSON.parse(xhr.responseText);
           var fileInfo = '';
           // Kiểm tra dữ liệu
           if (data.data && Array.isArray(data.data)) {
+            playlistRenderedItems = data.data.slice();
+            playlistOrderDirty = false;
             data.data.forEach(function(playlist, index) {
               var description = playlist.description ? (playlist.description.length > 70 ? playlist.description.substring(0, 70) + '...' : playlist.description) : 'N/A';
+              const safeCover = playlistSafeHttpUrl(playlist.cover) || 'assets/img/Error_Null_Media_Player.png';
+              const externalUrl = playlist.source === 'Youtube'
+                ? ('https://www.youtube.com/watch?v=' + encodeURIComponent(String(playlist.id || '')))
+                : playlistSafeHttpUrl(playlist.audio);
               // Tạo thông tin cho mỗi playlist dựa trên nguồn
               fileInfo +=
-                '<tr>' +
-                '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>' +
+                '<tr data-playlist-item-id="' + playlistEscapeHtml(playlist.ids_list) + '" data-entry-index="' + index + '" data-playlist-search="' + playlistEscapeHtml([playlist.title, playlist.artist, playlist.channelTitle, playlist.source].filter(Boolean).join(' ').toLocaleLowerCase('vi')) + '">' +
+                '<td style="text-align: center; vertical-align: middle;"><input class="form-check-input playlist-item-check" type="checkbox" onchange="playlistUpdateSelectionState()" value="' + playlistEscapeHtml(playlist.ids_list) + '"> <span class="playlist-order-number">' + (index + 1) + '</span><div class="btn-group btn-group-sm ms-1" role="group" aria-label="Đổi vị trí bài hát"><button type="button" class="btn btn-outline-primary playlist-order-up" title="Chuyển lên" onclick="playlistMoveRow(this,-1)" ' + (index===0?'disabled':'') + '><i class="bi bi-arrow-up"></i></button><button type="button" class="btn btn-outline-primary playlist-order-down" title="Chuyển xuống" onclick="playlistMoveRow(this,1)" ' + (index===data.data.length-1?'disabled':'') + '><i class="bi bi-arrow-down"></i></button></div></td>' +
                 '<td>' +
                 '<div style="display: flex; align-items: center; margin-bottom: 10px;">' +
                 '<div style="flex-shrink: 0; margin-right: 15px;">' +
-                '<img src="' + playlist.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">' +
+                '<img src="' + playlistEscapeHtml(safeCover) + '" alt="Ảnh bìa" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;">' +
                 '</div>' +
                 '<div>' +
-                '<p style="margin: 0; font-weight: bold;">Tên bài hát: <font color="green">' + playlist.title + '</font></p>' +
+                '<p style="margin: 0; font-weight: bold;">Tên bài hát: <font color="green">' + playlistEscapeHtml(playlist.title || 'N/A') + '</font></p>' +
                 (playlist.source === 'Youtube' ?
-                  '<p style="margin: 0;">Kênh: <font color="green">' + playlist.channelTitle + '</font></p>' +
-                  '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlist.duration + '</font></p>' +
-                  '<p style="margin: 0;">Mô tả: <font color="green">' + description + '</font></p>' : '') +
+                  '<p style="margin: 0;">Kênh: <font color="green">' + playlistEscapeHtml(playlist.channelTitle || 'N/A') + '</font></p>' +
+                  '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlistEscapeHtml(playlist.duration || 'N/A') + '</font></p>' +
+                  '<p style="margin: 0;">Mô tả: <font color="green">' + playlistEscapeHtml(description) + '</font></p>' : '') +
                 (playlist.source === 'ZingMP3' ?
-                  '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color="green">' + playlist.artist + '</font></p>' +
-                  '<p style="margin: 0;">Thời Lượng: <font color="green">' + (playlist.duration || 'N/A') + '</font></p>' : '') +
+                  '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color="green">' + playlistEscapeHtml(playlist.artist || 'N/A') + '</font></p>' +
+                  '<p style="margin: 0;">Thời Lượng: <font color="green">' + playlistEscapeHtml(playlist.duration || 'N/A') + '</font></p>' : '') +
                 (playlist.source === 'PodCast' ?
-                  '<p style="margin: 0;">Thể Loại: <font color="green">' + description + '</font></p>' : '') +
+                  '<p style="margin: 0;">Thể Loại: <font color="green">' + playlistEscapeHtml(description) + '</font></p>' : '') +
                 (playlist.source === 'Local' ?
-                  '<p style="margin: 0;">Kích Thước: <font color="green">' + playlist.duration + '</font></p>' : '') +
-                '<p style="margin: 0;">Nguồn Nhạc: <font color="green">' + playlist.source + '</font></p>' +
+                  '<p style="margin: 0;">Kích Thước: <font color="green">' + playlistEscapeHtml(playlist.duration || 'N/A') + '</font></p>' : '') +
+                '<p style="margin: 0;">Nguồn Nhạc: <font color="green">' + playlistEscapeHtml(playlist.source || 'N/A') + '</font></p>' +
                 '</div>' +
                 '</div>' +
                 '</td>' +
-                '<td style="text-align: center; vertical-align: middle;">' +
-                (playlist.source === 'Youtube' ?
-                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="get_Youtube_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\')"><i class="bi bi-play-circle"></i></button>' +
-                  '<a href="https://www.youtube.com/watch?v=' + playlist.id + '" target="_blank">' +
-                  '<button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
-                  '</a>' : '') +
-                (playlist.source === 'ZingMP3' ?
-                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="get_ZingMP3_Link(\'' + playlist.id + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'' + playlist.artist + '\')"><i class="bi bi-play-circle"></i></button>' : '') +
-                (playlist.source === 'PodCast' ?
-                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
-                  '<a href="' + playlist.audio + '" target="_blank"> ' +
-                  '<button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
-                  '</a>' : '') +
-                (playlist.source === 'NhacCuaTui' ?
-                  '<button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'PodCast\')"><i class="bi bi-play-circle"></i></button>' +
-                  '<a href="' + playlist.audio + '" target="_blank"> ' +
-                  '<button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + playlist.title + '"><i class="bi bi-box-arrow-up-right"></i></button>' +
-                  '</a>' : '') +
-                (playlist.source === 'Local' ?
-                  ' <button class="btn btn-success btn-sm" title="Phát: ' + playlist.title + '" onclick="send_Media_Play_API(\'' + playlist.audio + '\', \'' + playlist.title + '\', \'' + playlist.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button>' : '') +
-                ' <button class="btn btn-danger btn-sm" title="Xóa khỏi danh sách phát: ' + playlist.title + '" onclick="deleteFromPlaylist(\'delete_some\', \'' + playlist.ids_list + '\')"><i class="bi bi-trash"></i></button>' +
+                '<td class="playlist-action-cell" style="text-align: center; vertical-align: middle;">' +
+                '<button class="btn btn-success btn-sm" data-entry-index="' + index + '" title="Phát bài hát" onclick="playlistPlayEntry(this)"><i class="bi bi-play-circle"></i></button>' +
+                (externalUrl ? '<a href="' + playlistEscapeHtml(externalUrl) + '" target="_blank" rel="noopener noreferrer"><button type="button" class="btn btn-info btn-sm" title="Mở trong tab mới"><i class="bi bi-box-arrow-up-right"></i></button></a>' : '') +
+                '<button class="btn btn-danger btn-sm" data-entry-index="' + index + '" title="Xóa khỏi danh sách phát" onclick="playlistDeleteEntry(this)"><i class="bi bi-trash"></i></button>' +
                 '</td>' +
                 '</tr>';
             });
@@ -1831,23 +3110,9 @@ function update_index_data(data){
             fileInfo = '<tr><td colspan="3">Không có dữ liệu</td></tr>';
           }
           tableBody.innerHTML = fileInfo;
-          try {
-            new simpleDatatables.DataTable(table, {
-              perPageSelect: [5, 10, 15, ['All', -1]],
-              perPage: 5,
-              columns: [{
-                  select: 0,
-                  sortSequence: ['asc', 'desc']
-                },
-                {
-                  select: 1,
-                  sortSequence: ['asc', 'desc']
-				}
-              ]
-            });
-          } catch (e) {
-            show_message('Lỗi khi khởi tạo DataTable: ' + e.message);
-          }
+          playlistRenderStats(playlistRenderedItems);
+          playlistMarkPlaying(playlistRuntimeId, playlistRuntimeTitle);
+          playlistApplyFilterPage(true);
           loading('hide');
         } else {
           loading('hide');

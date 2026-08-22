@@ -256,10 +256,7 @@
         "max_duration_seconds": 0
     },
     "play_play_playlist": {
-        "time": [
-            "19:46",
-            "18:43"
-        ],
+        "time": [],
         "active": false,
         "date": [
             "Monday",
@@ -288,7 +285,9 @@
             "skip_if_bluetooth_playing": false,
             "skip_if_airplay_playing": false
         },
-        "max_duration_seconds": 0
+        "max_duration_seconds": 0,
+        "schedules": [],
+        "playlist_id": []
     },
     "play_all_music_local": {
         "time": [

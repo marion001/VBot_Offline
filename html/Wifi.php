@@ -345,7 +345,7 @@ include 'html_head.php';
                             "</tr>" +
                             "</thead>" +
                             "<tbody>";
-                        response.data.forEach(function(wifi) {
+                        response.data.forEach(function(wifi, wifiIndex) {
                             // Kiểm tra nếu tên WiFi là "Mạng ẩn"
                             var ssidDisplay = wifi.SSID === "Mạng ẩn" ?
                                 "<span style='color:red;'>" + wifiEscapeHtml(wifi.SSID) + "</span>" :

@@ -287,7 +287,8 @@ function processYoutubeData(data_media_Youtube) {
         fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + (youtube.channelTitle || 'N/A') + '</font></p>';
         fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (youtube.duration || 'N/A') + '</font></p>';
         fileInfo += '<p style="margin: 0;">Mô tả: <font color=green>' + (description || 'N/A') + '</font></p>';
-        fileInfo += ' <button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+        //fileInfo += ' <button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+        fileInfo += ' <button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="play_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
         fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', null, \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
         fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
         fileInfo += '</div></div>';
@@ -678,8 +679,8 @@ function adjustContainerStyle_tableContainer() {
     var container = document.getElementById('tableContainer');
     if (container) {
         var contentHeight = container.scrollHeight;
-        if (contentHeight > 400) {
-            container.style.height = '400px';
+        if (contentHeight > 600) {
+            container.style.height = '600px';
             container.style.overflowY = 'auto';
         } else {
             container.style.height = 'auto';

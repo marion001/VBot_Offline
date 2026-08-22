@@ -13,7 +13,7 @@
         "header": [],
         "body": {
           "mode": "raw",
-          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://www.youtube.com/watch?v=33X_LhEUaZc\",\r\n    \"media_name\": \"\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"\",\r\n    \"notes\": \"hỗ trợ các link youtube, zingmp3, nhaccuatui, link nhạc mp3 - stream trực tiếp, tên bài hát - text\"\r\n\r\n}",
+          "raw": "{\r\n    \"type\": 1,\r\n    \"data\":\"media_control\",\r\n    \"action\":\"play\",\r\n    \"media_link\": \"https://www.youtube.com/watch?v=qzCdMyyCFC0\",\r\n    \"media_name\": \"\",\r\n    \"media_cover\": \"\",\r\n    \"media_player_source\": \"\",\r\n    \"notes\": \"hỗ trợ các link youtube, zingmp3, nhaccuatui, link nhạc mp3 - stream trực tiếp, tên bài hát - text\"\r\n\r\n}",
           "options": {
             "raw": {
               "language": "json"
@@ -710,6 +710,34 @@
             "168",
             "14",
             "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Link Play Youtube Từ Link/URL/ID",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 5,\r\n    \"data\":\"get_link_youtube\",\r\n    \"value\": \"https://www.youtube.com/watch?v=qzCdMyyCFC0\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
           ],
           "port": "5002"
         }
@@ -4379,6 +4407,56 @@
           "path": [
             "stt",
             "pcm"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Multiroom Lấy Thông Tin",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.175:5002/multiroom",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002",
+          "path": [
+            "multiroom"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Multiroom Kích Hoạt Phát Hiện Thiết Bị Này",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://192.168.14.175:5002/multiroom?discover=true",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
+          ],
+          "port": "5002",
+          "path": [
+            "multiroom"
+          ],
+          "query": [
+            {
+              "key": "discover",
+              "value": "true"
+            }
           ]
         }
       },

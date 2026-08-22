@@ -271,9 +271,21 @@ if (isset($_POST['json_file_playlist'])) {
         $allowedFileRoots,
         'directory'
     );
-    $target_file = $targetDirectory !== false
-        ? $targetDirectory.DIRECTORY_SEPARATOR."PlayList.json"
-        : false;
+    $playlistId = trim((string)($_POST['playlist_id'] ?? ''));
+    $importMode = strtolower(trim((string)($_POST['import_mode'] ?? 'overwrite')));
+    $newPlaylistName = trim((string)($_POST['new_playlist_name'] ?? ''));
+    $manifestPath = $targetDirectory !== false ? $targetDirectory.DIRECTORY_SEPARATOR.'PlayLists.json' : false;
+    $manifest = ($manifestPath && is_file($manifestPath))
+        ? json_decode((string)file_get_contents($manifestPath), true) : null;
+    $playlistMeta = null;
+    if (is_array($manifest) && preg_match('/^[a-zA-Z0-9_-]{1,64}$/', $playlistId)) {
+        foreach (($manifest['playlists'] ?? []) as $item) {
+            if (($item['id'] ?? '') === $playlistId) { $playlistMeta = $item; break; }
+        }
+    }
+    $playlistDirectory = $targetDirectory !== false ? $targetDirectory.DIRECTORY_SEPARATOR.'playlists' : false;
+    $target_file = ($playlistMeta && is_dir($playlistDirectory))
+        ? $playlistDirectory.DIRECTORY_SEPARATOR.$playlistMeta['file'] : false;
     if (!isset($_FILES["select_json_file_playlist"])) {
         $response["message"] = "Không có file!";
     }
@@ -299,14 +311,58 @@ if (isset($_POST['json_file_playlist'])) {
         ) {
             $response["message"] = "File JSON không hợp lệ!";
         }
+	elseif ($importMode === 'new') {
+		if ($newPlaylistName === '' || strlen($newPlaylistName) > 240 || count($manifest['playlists'] ?? []) >= 100) {
+			vbotApiJsonResponse(['success' => false, 'message' => 'Tên PlayList mới không hợp lệ hoặc đã đạt giới hạn'], 400);
+		}
+		foreach (($manifest['playlists'] ?? []) as $item) {
+			if (strtolower((string)$item['name']) === strtolower($newPlaylistName)) vbotApiJsonResponse(['success' => false, 'message' => 'Tên PlayList đã tồn tại'], 409);
+		}
+		$newId = 'pl_'.bin2hex(random_bytes(6));
+		$newMeta = ['id' => $newId, 'name' => $newPlaylistName, 'file' => $newId.'.json', 'created_at' => time(), 'updated_at' => time()];
+		$playlistData['playlist_name'] = $newPlaylistName;
+		foreach ($playlistData['data'] as &$entry) $entry['ids_list'] = strtoupper(bin2hex(random_bytes(3)));
+		unset($entry);
+		$normalizedContent = json_encode($playlistData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		$newPath = $playlistDirectory.DIRECTORY_SEPARATOR.$newMeta['file'];
+		if ($normalizedContent !== false && @file_put_contents($newPath, $normalizedContent, LOCK_EX) !== false) {
+			$manifest['playlists'][] = $newMeta;
+			@file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+			$response = ['success' => true, 'playlist_id' => $newId, 'message' => 'Đã tạo và nhập dữ liệu vào PlayList: '.$newPlaylistName];
+		} else $response['message'] = 'Không thể tạo PlayList mới';
+	}
+	elseif ($importMode === 'merge') {
+		$currentData = json_decode((string)@file_get_contents($target_file), true);
+		if (!is_array($currentData) || !isset($currentData['data']) || !is_array($currentData['data'])) $currentData = ['data' => []];
+		$keys = [];
+		foreach ($currentData['data'] as $entry) $keys[(string)($entry['source'] ?? '').'|'.(string)($entry['id'] ?? '').'|'.(string)($entry['audio'] ?? '')] = true;
+		$added = 0;
+		foreach ($playlistData['data'] as $entry) {
+			$key = (string)($entry['source'] ?? '').'|'.(string)($entry['id'] ?? '').'|'.(string)($entry['audio'] ?? '');
+			if (isset($keys[$key])) continue;
+			$entry['ids_list'] = strtoupper(bin2hex(random_bytes(3)));
+			$currentData['data'][] = $entry;
+			$keys[$key] = true;
+			$added++;
+		}
+		$normalizedContent = json_encode($currentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+		if ($normalizedContent !== false && @file_put_contents($target_file, $normalizedContent, LOCK_EX) !== false) {
+			if (($manifest['active_id'] ?? '') === $playlistId) @file_put_contents($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', $normalizedContent, LOCK_EX);
+			$response = ['success' => true, 'playlist_id' => $playlistId, 'message' => 'Đã gộp '.$added.' bài mới vào PlayList: '.$playlistMeta['name']];
+		} else $response['message'] = 'Không thể gộp dữ liệu PlayList';
+	}
 	elseif (
         ($normalizedContent = json_encode($playlistData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false
         && @file_put_contents($target_file, $normalizedContent, LOCK_EX) !== false
     ) {
 		$original_name = vbotUploadSafeName($_FILES["select_json_file_playlist"]["name"]);
         @chmod($target_file, 0777);
+		if (($manifest['active_id'] ?? '') === $playlistId) {
+			@file_put_contents($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', $normalizedContent, LOCK_EX);
+			@chmod($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', 0777);
+		}
 		$response["success"] = true;
-		$response["message"] = "Tải lên thành công: " . $original_name . " -> PlayList.json";
+		$response["message"] = "Tải lên thành công: " . $original_name . " -> " . $playlistMeta['name'];
 	}
         else {
             $response["message"] = "Không thể lưu file!";
