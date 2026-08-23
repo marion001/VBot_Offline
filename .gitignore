@@ -1,0 +1,32 @@
+# =========================
+# VBot - Git Ignore
+# =========================
+
+# Cache WebUI
+/html/includes/cache/
+
+# File xác thực / token local
+/html/includes/other_data/Google_Driver_PHP/client_secret.json
+/html/includes/other_data/Google_Driver_PHP/verify_token.json
+
+git Command.txt
+
+# Dữ liệu local của VBot
+/html/includes/other_data/VBot_Client_Data/
+/html/includes/other_data/VBot_Server_Data/
+
+# Python cache ở mọi thư mục
+__pycache__/
+backup_so
+*.pyc
+*.pyo
+*.pyd
+
+# File PHP chỉ dùng local
+/html/PHP_PAGE_OK.php
+
+# Bỏ qua tất cả file .lock
+*.lock
+
+# Nhưng vẫn cho phép composer.lock
+!/html/includes/other_data/Google_Driver_PHP/composer.lock
