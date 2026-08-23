@@ -651,6 +651,33 @@ include 'html_head.php';
             border-radius: 8px;
             font-family: 'Courier New', Courier, monospace;
         }
+
+        .mcp-toolbar {
+            position: sticky;
+            top: 64px;
+            z-index: 900;
+            padding: .75rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(13, 110, 253, .22);
+            border-radius: .75rem;
+            background: rgba(244, 248, 255, .96);
+            box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+            backdrop-filter: blur(6px);
+        }
+
+        .mcp-search-hidden {
+            display: none !important;
+        }
+
+        #mcp-search-empty {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .mcp-toolbar {
+                top: 60px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -680,18 +707,43 @@ include 'html_head.php';
       </nav>
     </div>
     <section class="section">
+    <div class="mcp-toolbar" id="mcp-toolbar" aria-label="Tìm kiếm và điều hướng MCP">
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-lg">
+          <div class="input-group">
+            <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+            <input type="search" id="mcp-tool-search" class="form-control border-primary"
+              placeholder="Tìm tên MCP, plugin, mô tả hoặc trạng thái..." autocomplete="off">
+            <button type="button" id="mcp-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+        <div class="col-12 col-lg-auto">
+          <select id="mcp-quick-navigation" class="form-select border-primary" aria-label="Đi tới khu vực MCP">
+            <option value="">Đi tới khu vực...</option>
+            <option value="mcp-builtin-section">MCP nội bộ VBot</option>
+            <option value="mcp-custom-section">MCP Plugin người dùng</option>
+            <option value="mcp-actions-section">Lưu và quản lý cấu hình</option>
+          </select>
+        </div>
+      </div>
+      <div id="mcp-search-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
+        <i class="bi bi-info-circle"></i> Không tìm thấy MCP phù hợp.
+      </div>
+    </div>
     <div class="row">
 
 <!-- <div class="col-lg-6"> -->
-<form method="post" action="">
-          <div class="card">
+<form method="post" action="" id="mcp-config-form">
+          <div class="card" id="mcp-config-section">
             <div class="card-body">
-              <h5 class="card-title">MCP Nội Bộ Hệ Thống System VBot Control <i class="bi bi-question-circle-fill" onclick="show_message('Máy chủ, Server khi được kết nối sẽ có thể tương tác được với hệ thống VBot')"></i></h5>
+              <h5 class="card-title" id="mcp-builtin-section">MCP Nội Bộ Hệ Thống System VBot Control <i class="bi bi-question-circle-fill" onclick="show_message('Máy chủ, Server khi được kết nối sẽ có thể tương tác được với hệ thống VBot')"></i></h5>
 <?php
 if (!$MCP_data_json || !isset($MCP_data_json['tools'])) {
     die("<center><p style='color:red;'>Dữ liệu JSON không hợp lệ hoặc thiếu trường 'tools': $mcp_json_file</p></center>");
 }
-echo '<table class="table table-bordered border-primary">';
+echo '<div class="table-responsive"><table class="table table-bordered border-primary" id="mcp-builtin-table">';
 echo '<thead>
         <tr>
           <th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">STT</th>
@@ -746,17 +798,17 @@ foreach ($MCP_data_json['tools'] as $tool) {
     $stt_mcp++;
 }
 
-echo '</tbody></table>';
+echo '</tbody></table></div>';
 
 echo '<div class="d-flex flex-wrap justify-content-between align-items-center gap-2">';
-echo '<h5 class="card-title mb-0">MCP Plugins do người dùng tự viết</h5>';
+echo '<h5 class="card-title mb-0" id="mcp-custom-section">MCP Plugins do người dùng tự viết</h5>';
 echo '<button type="button" class="btn btn-success rounded-pill" id="open_create_mcp_plugin_modal">'
     .'<i class="bi bi-plus-circle"></i> Tạo MCP mới</button>';
 echo '</div><hr>';
 if (empty($MCP_plugins)) {
     echo '<div class="alert alert-secondary">Chưa có MCP plugin trong thư mục resource/xiaozhi/mcp_plugins.</div>';
 } else {
-    echo '<table class="table table-bordered border-success">';
+    echo '<div class="table-responsive"><table class="table table-bordered border-success" id="mcp-custom-table">';
     echo '<thead>
             <tr>
               <th class="text-danger" style="text-align: center; vertical-align: middle;">STT</th>
@@ -815,10 +867,10 @@ if (empty($MCP_plugins)) {
               </tr>";
         $plugin_index++;
     }
-    echo '</tbody></table>';
+    echo '</tbody></table></div>';
 }
 ?>
-<div class="row mb-3">
+<div class="row mb-3" id="mcp-actions-section">
             <label for="file_xiaozhi_tools" class="col-sm-3 col-form-label"><b>Đường Dẫn/Path File Cấu Hình:</b></label>
             <div class="col-sm-9">
               <input disabled="" class="form-control border-danger" type="text" name="file_xiaozhi_tools" id="file_xiaozhi_tools" value="<?php echo $mcp_json_file; ?>">
@@ -1414,6 +1466,79 @@ if (empty($MCP_plugins)) {
             event.preventDefault();
             event.returnValue = '';
         });
+    </script>
+    <script>
+        function normalizeMcpSearchText(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLocaleLowerCase('vi')
+                .trim();
+        }
+
+        function initializeMcpPageNavigation() {
+            const searchInput = document.getElementById('mcp-tool-search');
+            const clearButton = document.getElementById('mcp-search-clear');
+            const navigation = document.getElementById('mcp-quick-navigation');
+            const emptyState = document.getElementById('mcp-search-empty');
+            if (!searchInput || !clearButton || !navigation || !emptyState) {
+                return;
+            }
+
+            const getRows = function() {
+                return Array.from(document.querySelectorAll('#mcp-builtin-table tbody tr, #mcp-custom-table tbody tr'));
+            };
+
+            const getRowSearchText = function(row) {
+                const fieldState = Array.from(row.querySelectorAll('input, select, textarea')).map(function(field) {
+                    if (field.type === 'checkbox') {
+                        return field.checked ? 'kích hoạt bật active enabled' : 'tắt inactive disabled';
+                    }
+                    return field.value || '';
+                }).join(' ');
+                return normalizeMcpSearchText(row.textContent + ' ' + fieldState);
+            };
+
+            const applySearch = function() {
+                const query = normalizeMcpSearchText(searchInput.value);
+                let visibleCount = 0;
+                getRows().forEach(function(row) {
+                    const visible = query === '' || getRowSearchText(row).includes(query);
+                    row.classList.toggle('mcp-search-hidden', !visible);
+                    if (visible) {
+                        visibleCount += 1;
+                    }
+                });
+                emptyState.style.display = query !== '' && visibleCount === 0 ? 'block' : 'none';
+            };
+
+            searchInput.addEventListener('input', applySearch);
+            clearButton.addEventListener('click', function() {
+                searchInput.value = '';
+                applySearch();
+                searchInput.focus();
+            });
+            navigation.addEventListener('change', function() {
+                const target = document.getElementById(navigation.value);
+                if (target) {
+                    target.scrollIntoView({behavior: 'smooth', block: 'center'});
+                    window.setTimeout(function() {
+                        target.setAttribute('tabindex', '-1');
+                        target.focus({preventScroll: true});
+                    }, 250);
+                }
+                navigation.value = '';
+            });
+
+            document.getElementById('mcp-config-form')?.addEventListener('change', function(event) {
+                if (event.target.matches('input, select, textarea')) {
+                    applySearch();
+                }
+            });
+            applySearch();
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeMcpPageNavigation);
     </script>
   <?php
   include 'html_js.php';

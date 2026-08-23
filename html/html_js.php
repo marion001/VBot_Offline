@@ -1501,12 +1501,25 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 <script>
     //Chatbox
     const select_Element_api_chatbox = document.getElementById('source_chatbot_api');
+    let chatbotDeviceListRequest = null;
+
+    function escapeChatboxHtml(value) {
+        const node = document.createElement('div');
+        node.textContent = value == null ? '' : String(value);
+        return node.innerHTML;
+    }
+
     function sendRequest(message) {
-        const selectedValue_api_chatbox = select_Element_api_chatbox.value;
+        if (!select_Element_api_chatbox) {
+            showMessagePHP('Không tìm thấy danh sách nguồn ChatBot', 3);
+            return;
+        }
+        let selectedValue_api_chatbox = select_Element_api_chatbox.value;
         const selectedOption_api_chatbox = select_Element_api_chatbox.options[select_Element_api_chatbox.selectedIndex];
-        const fullName_VBot_api_chatbox = selectedOption_api_chatbox.getAttribute('data-full_name_chatbot_api');
-        console.log(fullName_VBot_api_chatbox);
-        if (!select_Element_api_chatbox || !selectedValue_api_chatbox || selectedValue_api_chatbox.trim() === '') {
+        const fullName_VBot_api_chatbox = selectedOption_api_chatbox
+            ? (selectedOption_api_chatbox.getAttribute('data-full_name_chatbot_api') || 'VBot')
+            : 'VBot';
+        if (!selectedValue_api_chatbox || selectedValue_api_chatbox.trim() === '') {
             selectedValue_api_chatbox = "<?php echo $URL_API_VBOT; ?>";
         }
         var data = JSON.stringify({
@@ -1527,9 +1540,16 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 clearTimeout(timeout);
                 typingIndicator.remove();
                 if (this.status === 200) {
-                    var response = JSON.parse(this.responseText);
+                    var response;
+                    try {
+                        response = JSON.parse(this.responseText);
+                    } catch (error) {
+                        showMessagePHP('ChatBot trả về dữ liệu không hợp lệ', 3);
+                        return;
+                    }
                     stopAllAudio();
                     var botMessageHTML = '';
+                    const safeBotName = escapeChatboxHtml(fullName_VBot_api_chatbox);
                     if (response.success) {
                         var audioUrl = response.message;
                         var audioPattern = /^TTS_Audio.*\.(mp3|ogg|wav)$/i;
@@ -1538,7 +1558,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(audioUrl);
                             botMessageHTML =
                                 '<div class="message bot-message">' +
-                                '<div class="message-time">' + getCurrentTime() + ' [' + fullName_VBot_api_chatbox + ']</div>' +
+                                '<div class="message-time">' + getCurrentTime() + ' [' + safeBotName + ']</div>' +
                                 '    <div class="audio-container">' +
                                 '         <audio controls>' +
                                 '            <source src="' + fullAudioUrl + '" type="audio/' + audioExtension + '">' +
@@ -1549,8 +1569,8 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         } else {
                             botMessageHTML =
                                 '<div class="message bot-message">' +
-                                '<div class="message-time">' + getCurrentTime() + ' [' + fullName_VBot_api_chatbox + ']</div>' +
-                                '    <div>' + response.message + '</div>' +
+                                '<div class="message-time">' + getCurrentTime() + ' [' + safeBotName + ']</div>' +
+                                '    <div>' + escapeChatboxHtml(response.message) + '</div>' +
                                 '</div>';
                         }
                         document.getElementById('chatbox').innerHTML += botMessageHTML;
@@ -1564,7 +1584,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         var msg_error = "Có lỗi xảy ra. Vui lòng thử lại";
                         var errorMessageHTML =
                             '<div class="message bot-message">' +
-                            '<div class="message-time">' + getCurrentTime() + ' [' + fullName_VBot_api_chatbox + ']</div>' +
+                            '<div class="message-time">' + getCurrentTime() + ' [' + safeBotName + ']</div>' +
                             '<div>' + msg_error + '</div>' +
                             '</div>';
                         document.getElementById('chatbox').innerHTML += errorMessageHTML;
@@ -1582,7 +1602,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                     var msg_error = "Có vẻ VBot đang không phản hồi, vui lòng thử lại.";
                     var failureMessageHTML =
                         '<div class="message bot-message">' +
-                        '<div class="message-time">' + getCurrentTime() + ' [' + fullName_VBot_api_chatbox + ']</div>' +
+                        '<div class="message-time">' + getCurrentTime() + ' [' + escapeChatboxHtml(fullName_VBot_api_chatbox) + ']</div>' +
                         '    <div>' + msg_error + '</div>' +
                         '</div>';
                     document.getElementById('chatbox').innerHTML += failureMessageHTML;
@@ -1607,9 +1627,15 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         }
         //Nếu chatbot ánh xạ tới thiết bị khác
         else {
-            const url = 'includes/php_ajax/Check_Connection.php?vbot_chatbox&ip_port=' + encodeURIComponent(selectedValue_api_chatbox) + '&text=' + encodeURIComponent(message);
-            xhr.open("GET", url);
-            xhr.send();
+            const requestBody = new URLSearchParams();
+            requestBody.set('vbot_chatbox', '1');
+            requestBody.set('ip_port', selectedValue_api_chatbox);
+            requestBody.set('text', message);
+            requestBody.set('csrf_token', window.VBOT_CSRF_TOKEN || '');
+            xhr.open("POST", 'includes/php_ajax/Check_Connection.php');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+            xhr.send(requestBody.toString());
             timeout = setTimeout(function() {
                 typingIndicator.innerHTML = 'Vui lòng chờ thêm...';
                 timeout = setTimeout(function() {
@@ -1636,8 +1662,8 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             if (message) {
                 const userMessageHTML =
                     '<div class="message user-message">' +
-                    '<div class="message-time">' + getCurrentTime() + ' [' + fullName_VBot_api_chatbox + ']</div>' +
-                    '    <div>' + message + '</div>' +
+                    '<div class="message-time">' + getCurrentTime() + ' [' + escapeChatboxHtml(fullName_VBot_api_chatbox) + ']</div>' +
+                    '    <div>' + escapeChatboxHtml(message) + '</div>' +
                     '</div>';
                 const chatbox = document.getElementById('chatbox');
                 if (chatbox) {
@@ -1744,40 +1770,68 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             return;
         }
         const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path . "/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json"; ?>';
+        if (chatbotDeviceListRequest && chatbotDeviceListRequest.readyState !== 4) {
+            chatbotDeviceListRequest.abort();
+        }
+        const previousValue = selectElement.value;
         const xhr = new XMLHttpRequest();
+        chatbotDeviceListRequest = xhr;
+        selectElement.disabled = true;
         xhr.open('GET', url, true);
         xhr.onload = function() {
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const data = JSON.parse(xhr.responseText);
                     if (!data.success) {
+                        showMessagePHP(data.message || 'Không thể tải danh sách thiết bị VBot', 3);
+                        selectElement.disabled = false;
                         return;
                     }
                     if (!data.data || !Array.isArray(data.data)) {
+                        showMessagePHP('Danh sách thiết bị VBot không đúng định dạng', 3);
+                        selectElement.disabled = false;
                         return;
                     }
                     const serverIp = '<?php echo $serverIp; ?>';
                     while (selectElement.options.length > 1) {
                         selectElement.remove(1);
                     }
+                    const knownDevices = new Set();
                     data.data.forEach(device => {
-                        if (device.ip_address !== serverIp) {
+                        const ipAddress = String(device && device.ip_address || '').trim();
+                        const port = Number(device && device.port_api);
+                        const userName = String(device && device.user_name || '').trim();
+                        const validIpv4 = /^(?:\d{1,3}\.){3}\d{1,3}$/.test(ipAddress)
+                            && ipAddress.split('.').every(part => Number(part) >= 0 && Number(part) <= 255);
+                        const deviceKey = ipAddress + ':' + port;
+                        if (ipAddress !== serverIp && validIpv4 && Number.isInteger(port) && port >= 1 && port <= 65535 && !knownDevices.has(deviceKey)) {
+                            knownDevices.add(deviceKey);
                             const option = document.createElement('option');
-                            option.value = 'http://' + device.ip_address + ':' + device.port_api + '/';
-                            option.text = device.user_name;
-                            option.setAttribute('data-full_name_chatbot_api', device.user_name);
+                            option.value = 'http://' + ipAddress + ':' + port + '/';
+                            option.text = userName || deviceKey;
+                            option.setAttribute('data-full_name_chatbot_api', userName || deviceKey);
                             selectElement.appendChild(option);
                         }
                     });
+                    if (Array.from(selectElement.options).some(option => option.value === previousValue)) {
+                        selectElement.value = previousValue;
+                    }
                 } catch (e) {
                     showMessagePHP('Lỗi: Không thể phân tích JSON - ' + e.message, 5);
                 }
             } else {
                 showMessagePHP('Lỗi lấy dữ liệu các Loa VBot trong cùng lớp mạng: HTTP status ' + xhr.status, 5);
             }
+            selectElement.disabled = false;
         };
         xhr.onerror = function() {
+            selectElement.disabled = false;
             showMessagePHP('Lỗi khi gửi yêu cầu lấy dữ liệu các loa chạy VBot trong cùng lớp mạng', 5);
+        };
+        xhr.onabort = function() {
+            if (chatbotDeviceListRequest === xhr) {
+                selectElement.disabled = false;
+            }
         };
         xhr.send();
     }
@@ -2333,84 +2387,109 @@ function command_php(command_line, reload_page = null) {
         }
     });
 
-	//Tìm kiếm dữ liệu trong trang
+	//Tìm kiếm dữ liệu trong nội dung chính của trang.
 	document.addEventListener('DOMContentLoaded', function() {
-	  var searchResults = [];
-	  function findParentH5(el) {
-		var parent = el.parentElement;
-		while(parent) {
-		  var h5 = parent.querySelector('h5');
-		  if(h5) return h5;
+	  const input = document.getElementById('searchInput');
+	  const dropdown = document.getElementById('searchResults');
+	  const searchBar = input && input.closest('.search-bar');
+	  if (!input || !dropdown || !searchBar) return;
+	  let searchResults = [];
+
+	  const normalizeSearchText = function(value) {
+		return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+		  .toLowerCase().replace(/\s+/g, ' ').trim();
+	  };
+	  const closeSearchResults = function() {
+		dropdown.classList.remove('show');
+		input.setAttribute('aria-expanded', 'false');
+	  };
+	  const findSectionHeading = function(element) {
+		const card = element.closest('.card');
+		if (card) {
+		  return card.querySelector(':scope > .card-body > .card-title') || card.querySelector('.card-title');
+		}
+		const section = element.closest('section, main');
+		return section ? section.querySelector('h1, h2, h3, h4, h5, h6') : null;
+	  };
+	  const findElementsWithText = function(keyword) {
+		const root = document.querySelector('main#main') || document.querySelector('main') || document.body;
+		const normalizedKeyword = normalizeSearchText(keyword);
+		const seen = new Set();
+		searchResults = [];
+		const selector = 'h1, h2, h3, h4, h5, h6, label, button, a, td, th, .card-title, .list-group-item';
+		root.querySelectorAll(selector).forEach(function(element) {
+		  if (element.closest('#config-toolbar') || element.closest('.modal') || element.closest('script, style')) return;
+		  const visibleText = String(element.textContent || '').replace(/\s+/g, ' ').trim();
+		  if (!visibleText || !normalizeSearchText(visibleText).includes(normalizedKeyword)) return;
+		  const heading = findSectionHeading(element);
+		  const headingText = heading ? String(heading.textContent || '').replace(/\s+/g, ' ').trim() : '';
+		  const uniqueKey = normalizeSearchText(headingText + '|' + visibleText);
+		  if (seen.has(uniqueKey)) return;
+		  seen.add(uniqueKey);
+		  searchResults.push({el: element, headingText: headingText, text: visibleText.substring(0, 140)});
+		});
+		searchResults = searchResults.slice(0, 50);
+	  };
+	  const activateResult = function(item) {
+		let parent = item.el.parentElement;
+		while (parent) {
+		  if (parent.classList.contains('collapse') && !parent.classList.contains('show')
+			  && window.bootstrap && bootstrap.Collapse) {
+			bootstrap.Collapse.getOrCreateInstance(parent, {toggle: false}).show();
+		  }
 		  parent = parent.parentElement;
 		}
-		return null;
-	  }
-	  function findElementsWithText(keyword) {
-		searchResults = [];
-		var seenTexts = new Set();
-		keyword = keyword.toLowerCase();
-		var elements = document.querySelectorAll('label, button, font, a.list-group-item.list-group-item-action, td.lib_pip');
-		elements.forEach(el => {
-		  var textNodes = Array.from(el.childNodes).filter(n => n.nodeType === Node.TEXT_NODE);
-		  var visibleText = textNodes.map(n => n.textContent)
-									 .map(t => t.split('\n').filter(l => !l.trim().startsWith('//')).join(' '))
-									 .join(' ')
-									 .trim();
-		  if (visibleText.toLowerCase().includes(keyword) && visibleText !== '') {
-			if (!seenTexts.has(visibleText)) {
-			  var parentH5 = findParentH5(el);
-			  searchResults.push({el: el, parentH5: parentH5});
-			  seenTexts.add(visibleText);
-			}
-		  }
-		});
-	  }
-	  function updateDropdown() {
-		var dropdown = document.getElementById('searchResults');
-		dropdown.innerHTML = '';
-		if (searchResults.length === 0) {
-		  dropdown.classList.remove('show');
+		setTimeout(function() {
+		  item.el.scrollIntoView({behavior: 'smooth', block: 'center'});
+		  item.el.classList.add('highlight');
+		  setTimeout(function() { item.el.classList.remove('highlight'); }, 1500);
+		}, 300);
+		closeSearchResults();
+	  };
+	  const updateDropdown = function(keyword) {
+		dropdown.replaceChildren();
+		if (!keyword) {
+		  closeSearchResults();
 		  return;
 		}
-	searchResults.forEach((item, index) => {
-	  var li = document.createElement('li');
-	  li.classList.add('dropdown-item');
-	  var parentH5Text = item.parentH5 ? item.parentH5.textContent.trim() : '';
-	  var elText = item.el.textContent.trim().substring(0,100);
-	  li.textContent = parentH5Text + ' -> ' + elText;
-	  li.addEventListener('click', function() {
-		var el = item.el;
-		var parent = el.parentElement;
-		while(parent) {
-		  if(parent.classList.contains('collapse') && !parent.classList.contains('show')) {
-			var instance = bootstrap.Collapse.getOrCreateInstance(parent);
-			instance.show();
-		  }
-		  parent = parent.parentElement;
-		}
-		setTimeout(function(target){
-			target.scrollIntoView({behavior:'smooth', block:'center'});
-			target.style.backgroundColor = '#c8e6c9';
-			setTimeout(() => {
-				target.style.backgroundColor = '';
-			}, 1500);
-		}, 300, el);
-		dropdown.classList.remove('show'); 
-	  });
-	  dropdown.appendChild(li);
-	});
-		dropdown.classList.add('show');
-	  }
-	  var input = document.getElementById('searchInput');
-	  input.addEventListener('input', function() {
-		var keyword = this.value.trim();
-		if(keyword) {
-		  findElementsWithText(keyword);
-		  updateDropdown();
+		if (searchResults.length === 0) {
+		  const empty = document.createElement('li');
+		  empty.className = 'dropdown-item text-muted disabled';
+		  empty.textContent = 'Không tìm thấy nội dung phù hợp';
+		  dropdown.appendChild(empty);
 		} else {
-		  searchResults = [];
-		  updateDropdown();
+		  searchResults.forEach(function(item) {
+			const li = document.createElement('li');
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = 'dropdown-item';
+			button.setAttribute('role', 'option');
+			button.textContent = (item.headingText && item.headingText !== item.text ? item.headingText + ' → ' : '') + item.text;
+			button.addEventListener('click', function() { activateResult(item); });
+			li.appendChild(button);
+			dropdown.appendChild(li);
+		  });
 		}
+		dropdown.classList.add('show');
+		input.setAttribute('aria-expanded', 'true');
+	  };
+
+	  input.addEventListener('input', function() {
+		const keyword = input.value.trim();
+		if (keyword) findElementsWithText(keyword); else searchResults = [];
+		updateDropdown(keyword);
+	  });
+	  input.addEventListener('keydown', function(event) {
+		if (event.key === 'Escape') {
+		  closeSearchResults();
+		  input.blur();
+		} else if (event.key === 'Enter' && searchResults.length > 0) {
+		  event.preventDefault();
+		  activateResult(searchResults[0]);
+		}
+	  });
+	  document.addEventListener('click', function(event) {
+		if (!searchBar.contains(event.target)) closeSearchResults();
 	  });
 	});
 </script>

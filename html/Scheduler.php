@@ -135,6 +135,33 @@ include 'html_head.php';
       max-height: calc(100vh - 40px);
       overflow-y: auto;
     }
+
+    .scheduler-toolbar {
+      position: sticky;
+      top: 64px;
+      z-index: 900;
+      padding: .75rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(13, 110, 253, .22);
+      border-radius: .75rem;
+      background: rgba(244, 248, 255, .96);
+      box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+      backdrop-filter: blur(6px);
+    }
+
+    .scheduler-search-hidden {
+      display: none !important;
+    }
+
+    #scheduler-search-empty {
+      display: none;
+    }
+
+    @media (max-width: 991.98px) {
+      .scheduler-toolbar {
+        top: 60px;
+      }
+    }
   </style>
 </head>
 
@@ -805,6 +832,28 @@ include 'html_head.php';
       }
       ?>
       <section class="section">
+        <div class="scheduler-toolbar" id="scheduler-toolbar" aria-label="Tìm kiếm và điều hướng tác vụ">
+          <div class="row g-2 align-items-center">
+            <div class="col-12 col-lg">
+              <div class="input-group">
+                <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+                <input type="search" id="scheduler-task-search" class="form-control border-primary"
+                  placeholder="Tìm tác vụ, ví dụ: báo thức, âm lượng, Bluetooth..." autocomplete="off">
+                <button type="button" id="scheduler-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+            </div>
+            <div class="col-12 col-lg-auto">
+              <select id="scheduler-quick-navigation" class="form-select border-primary" aria-label="Đi tới tác vụ">
+                <option value="">Đi tới tác vụ...</option>
+              </select>
+            </div>
+          </div>
+          <div id="scheduler-search-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
+            <i class="bi bi-info-circle"></i> Không tìm thấy tác vụ phù hợp.
+          </div>
+        </div>
         <div class="row">
           <?php
           // Hiển thị thông báo lỗi nếu có
@@ -2859,6 +2908,128 @@ function validateFormVBot() {
     }
     return true;
 }
+  </script>
+
+  <script>
+    function normalizeSchedulerSearchText(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('vi')
+        .trim();
+    }
+
+    function initializeSchedulerTaskNavigation() {
+      const searchInput = document.getElementById('scheduler-task-search');
+      const clearButton = document.getElementById('scheduler-search-clear');
+      const navigation = document.getElementById('scheduler-quick-navigation');
+      const emptyState = document.getElementById('scheduler-search-empty');
+      if (!searchInput || !clearButton || !navigation || !emptyState) {
+        return;
+      }
+
+      const getAccordions = function() {
+        return Array.from(document.querySelectorAll('.card.accordion[id]'));
+      };
+
+      const getAccordionLabel = function(accordion, index) {
+        const button = accordion.querySelector('.accordion-button');
+        const label = button ? button.textContent.replace(/\s+/g, ' ').trim() : '';
+        return label || 'Tác vụ ' + (index + 1);
+      };
+
+      const rebuildNavigation = function() {
+        const currentValue = navigation.value;
+        navigation.replaceChildren(new Option('Đi tới tác vụ...', ''));
+        getAccordions().forEach(function(accordion, index) {
+          navigation.appendChild(new Option(getAccordionLabel(accordion, index), accordion.id));
+        });
+        if (currentValue && document.getElementById(currentValue)) {
+          navigation.value = currentValue;
+        }
+      };
+
+      const applySearch = function() {
+        const query = normalizeSchedulerSearchText(searchInput.value);
+        let visibleCount = 0;
+        getAccordions().forEach(function(accordion) {
+          const searchableText = normalizeSchedulerSearchText(accordion.textContent);
+          const visible = query === '' || searchableText.includes(query);
+          accordion.classList.toggle('scheduler-search-hidden', !visible);
+          if (visible) {
+            visibleCount += 1;
+          }
+        });
+        emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+      };
+
+      const showAccordion = function(accordion) {
+        const collapseElement = accordion.querySelector('.accordion-collapse');
+        if (!collapseElement) {
+          return;
+        }
+        const BootstrapCollapse = window.bootstrap && window.bootstrap.Collapse;
+        if (BootstrapCollapse) {
+          let collapseInstance = null;
+          if (typeof BootstrapCollapse.getOrCreateInstance === 'function') {
+            collapseInstance = BootstrapCollapse.getOrCreateInstance(collapseElement, {toggle: false});
+          } else if (typeof BootstrapCollapse.getInstance === 'function') {
+            collapseInstance = BootstrapCollapse.getInstance(collapseElement);
+          }
+          if (!collapseInstance) {
+            collapseInstance = new BootstrapCollapse(collapseElement, {toggle: false});
+          }
+          collapseInstance.show();
+          return;
+        }
+        collapseElement.classList.add('show');
+        const toggle = accordion.querySelector('.accordion-button');
+        if (toggle) {
+          toggle.classList.remove('collapsed');
+          toggle.setAttribute('aria-expanded', 'true');
+        }
+      };
+
+      searchInput.addEventListener('input', applySearch);
+      clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        applySearch();
+        searchInput.focus();
+      });
+      navigation.addEventListener('change', function() {
+        const target = document.getElementById(navigation.value);
+        if (target) {
+          searchInput.value = '';
+          applySearch();
+          target.scrollIntoView({behavior: 'smooth', block: 'center'});
+          window.setTimeout(function() {
+            showAccordion(target);
+            const toggle = target.querySelector('.accordion-button');
+            if (toggle) {
+              toggle.focus({preventScroll: true});
+            }
+          }, 250);
+        }
+        navigation.value = '';
+      });
+
+      rebuildNavigation();
+      applySearch();
+
+      const taskContainer = document.getElementById('task-container');
+      if (taskContainer) {
+        let rebuildTimer = null;
+        new MutationObserver(function() {
+          window.clearTimeout(rebuildTimer);
+          rebuildTimer = window.setTimeout(function() {
+            rebuildNavigation();
+            applySearch();
+          }, 100);
+        }).observe(taskContainer, {childList: true});
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeSchedulerTaskNavigation);
   </script>
 
 

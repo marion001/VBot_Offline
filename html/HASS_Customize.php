@@ -68,6 +68,33 @@ include 'html_head.php';
             max-height: calc(100vh - 40px);
             overflow-y: auto;
         }
+
+        .hass-custom-toolbar {
+            position: sticky;
+            top: 64px;
+            z-index: 900;
+            padding: .75rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(13, 110, 253, .22);
+            border-radius: .75rem;
+            background: rgba(244, 248, 255, .96);
+            box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+            backdrop-filter: blur(6px);
+        }
+
+        .hass-custom-search-hidden {
+            display: none !important;
+        }
+
+        #hass-custom-search-empty {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .hass-custom-toolbar {
+                top: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -87,7 +114,31 @@ include 'html_head.php';
                 </ol>
             </nav>
         </div>
-        <form class="row g-3 needs-validation" novalidate method="POST" enctype="multipart/form-data" action="" onsubmit="return validateFormVBot()">
+        <div class="hass-custom-toolbar" id="hass-custom-toolbar" aria-label="Tìm kiếm và điều hướng tác vụ Home Assistant">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg">
+                    <div class="input-group">
+                        <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+                        <input type="search" id="hass-custom-task-search" class="form-control border-primary"
+                            placeholder="Tìm tên tác vụ, câu lệnh, phản hồi hoặc nội dung YAML..." autocomplete="off">
+                        <button type="button" id="hass-custom-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-auto">
+                    <select id="hass-custom-quick-navigation" class="form-select border-primary" aria-label="Đi tới khu vực Home Assistant">
+                        <option value="">Đi tới tác vụ hoặc khu vực...</option>
+                        <option value="hass-custom-config-section">Dữ liệu cấu hình</option>
+                        <option value="hass-custom-recovery-section">Khôi phục dữ liệu</option>
+                    </select>
+                </div>
+            </div>
+            <div id="hass-custom-search-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
+                <i class="bi bi-info-circle"></i> Không tìm thấy tác vụ phù hợp.
+            </div>
+        </div>
+        <form id="hass-custom-form" class="row g-3 needs-validation" novalidate method="POST" enctype="multipart/form-data" action="" onsubmit="return validateFormVBot()">
             <?php
             $jsonFilePath = $VBot_Offline . $Config['home_assistant']['custom_commands']['custom_command_file'];
             // Mảng lưu thông báo
@@ -419,7 +470,7 @@ include 'html_head.php';
                                 <font color="green">Thiết Lập Lệnh Tùy Chỉnh Home Assistant:</font> <a href="https://github.com/user-attachments/assets/eb92a617-12f6-40c9-9d00-35cdbe5cd0bb" target="_bank">(Cấu Trúc Code YAML: Ảnh Hướng Dẫn, Demo)</a>
                             </h5>
                             <?php foreach ($intents as $index => $intent): ?>
-                                <div class="card accordion" id="accordion_button_custom_hass_<?= $index + 1 ?>">
+                                <div class="card accordion hass-custom-task" id="accordion_button_custom_hass_<?= $index + 1 ?>">
                                     <div class="card-body">
                                         <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_custom_hass_<?= $index + 1 ?>" aria-expanded="false" aria-controls="collapse_button_custom_hass_<?= $index + 1 ?>">
                                             <font color="Fuchsia"><?= htmlspecialchars($intent['name']) ?>, &nbsp;</font> Trạng Thái: &nbsp;<?= !empty($intent['active']) ? ' <font color=green>Bật</font>' : ' <font color=red>Tắt</font>' ?>
@@ -512,7 +563,7 @@ include 'html_head.php';
                         <button type="button" class="btn btn-success rounded-pill" onclick="addNewSection()">Thêm Mới Tác Vụ</button>
                         <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_custom_home_assistant" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Custom Home Assistant không')"><i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
                     </center>
-                    <h5 class="card-title">
+                    <h5 class="card-title" id="hass-custom-config-section">
                         <font color="green">Dữ Liệu Cấu Hình:</font>
                     </h5>
                     <div class="row mb-3">
@@ -526,7 +577,7 @@ include 'html_head.php';
 						</div>
                     </div>
                     <hr />
-                    <h5 class="card-title">
+                    <h5 class="card-title" id="hass-custom-recovery-section">
                         <font color="green">Khôi Phục Dữ Liệu:</font>
                     </h5>
                     <div class="row mb-3">
@@ -645,7 +696,7 @@ include 'html_head.php';
             //Tạo ID duy nhất cho mỗi phần tử
             const sectionID = 'section_custom_hass_' + sectionCounter;
             const newSection =
-                '<div class="card" id="' + sectionID + '">' +
+                '<div class="card hass-custom-task" id="' + sectionID + '">' +
                 '<div class="card-body">' +
                 '<h5 class="card-title text-danger">Thêm Mới Tác Vụ:</h5>' +
 
@@ -866,6 +917,140 @@ function validateFormVBot() {
     }
     return true;
 }
+  </script>
+  <script>
+    function normalizeHassCustomSearchText(value) {
+        return String(value || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLocaleLowerCase('vi')
+            .trim();
+    }
+
+    function initializeHassCustomNavigation() {
+        const searchInput = document.getElementById('hass-custom-task-search');
+        const clearButton = document.getElementById('hass-custom-search-clear');
+        const navigation = document.getElementById('hass-custom-quick-navigation');
+        const emptyState = document.getElementById('hass-custom-search-empty');
+        const form = document.getElementById('hass-custom-form');
+        if (!searchInput || !clearButton || !navigation || !emptyState || !form) {
+            return;
+        }
+
+        const getTasks = function() {
+            return Array.from(form.querySelectorAll('.hass-custom-task[id]'));
+        };
+
+        const getTaskLabel = function(task, index) {
+            const nameInput = task.querySelector('input[name$="[name]"]');
+            const accordionButton = task.querySelector('.accordion-button');
+            const heading = task.querySelector('.card-title');
+            return String(
+                (nameInput && nameInput.value) ||
+                (accordionButton && accordionButton.textContent) ||
+                (heading && heading.textContent) ||
+                'Tác vụ ' + (index + 1)
+            ).replace(/\s+/g, ' ').trim();
+        };
+
+        const getTaskSearchText = function(task) {
+            const fieldValues = Array.from(task.querySelectorAll('input, select, textarea')).map(function(field) {
+                if (field.type === 'checkbox') {
+                    return field.checked ? 'kích hoạt bật active enabled' : 'tắt inactive disabled';
+                }
+                return field.value || '';
+            }).join(' ');
+            return normalizeHassCustomSearchText(task.textContent + ' ' + fieldValues);
+        };
+
+        const rebuildNavigation = function() {
+            navigation.replaceChildren(new Option('Đi tới tác vụ hoặc khu vực...', ''));
+            getTasks().forEach(function(task, index) {
+                navigation.appendChild(new Option(getTaskLabel(task, index), task.id));
+            });
+            navigation.appendChild(new Option('Dữ liệu cấu hình', 'hass-custom-config-section'));
+            navigation.appendChild(new Option('Khôi phục dữ liệu', 'hass-custom-recovery-section'));
+        };
+
+        const applySearch = function() {
+            const query = normalizeHassCustomSearchText(searchInput.value);
+            let visibleCount = 0;
+            getTasks().forEach(function(task) {
+                const visible = query === '' || getTaskSearchText(task).includes(query);
+                task.classList.toggle('hass-custom-search-hidden', !visible);
+                if (visible) {
+                    visibleCount += 1;
+                }
+            });
+            emptyState.style.display = query !== '' && visibleCount === 0 ? 'block' : 'none';
+        };
+
+        const showTask = function(task) {
+            const collapseElement = task.querySelector('.accordion-collapse');
+            if (!collapseElement) {
+                return;
+            }
+            const BootstrapCollapse = window.bootstrap && window.bootstrap.Collapse;
+            if (BootstrapCollapse) {
+                let instance = typeof BootstrapCollapse.getOrCreateInstance === 'function'
+                    ? BootstrapCollapse.getOrCreateInstance(collapseElement, {toggle: false})
+                    : (typeof BootstrapCollapse.getInstance === 'function' ? BootstrapCollapse.getInstance(collapseElement) : null);
+                if (!instance) {
+                    instance = new BootstrapCollapse(collapseElement, {toggle: false});
+                }
+                instance.show();
+                return;
+            }
+            collapseElement.classList.add('show');
+            const toggle = task.querySelector('.accordion-button');
+            if (toggle) {
+                toggle.classList.remove('collapsed');
+                toggle.setAttribute('aria-expanded', 'true');
+            }
+        };
+
+        searchInput.addEventListener('input', applySearch);
+        clearButton.addEventListener('click', function() {
+            searchInput.value = '';
+            applySearch();
+            searchInput.focus();
+        });
+        navigation.addEventListener('change', function() {
+            const target = document.getElementById(navigation.value);
+            if (target) {
+                searchInput.value = '';
+                applySearch();
+                target.scrollIntoView({behavior: 'smooth', block: 'center'});
+                window.setTimeout(function() {
+                    if (target.classList.contains('hass-custom-task')) {
+                        showTask(target);
+                    }
+                    target.setAttribute('tabindex', '-1');
+                    target.focus({preventScroll: true});
+                }, 250);
+            }
+            navigation.value = '';
+        });
+        form.addEventListener('input', function(event) {
+            if (event.target.matches('input, select, textarea')) {
+                applySearch();
+            }
+        });
+
+        let refreshTimer = null;
+        new MutationObserver(function() {
+            window.clearTimeout(refreshTimer);
+            refreshTimer = window.setTimeout(function() {
+                rebuildNavigation();
+                applySearch();
+            }, 100);
+        }).observe(form, {childList: true, subtree: true});
+
+        rebuildNavigation();
+        applySearch();
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeHassCustomNavigation);
   </script>
     <script src="assets/vendor/prism/prism.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
     <script src="assets/vendor/prism/prism-json.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>

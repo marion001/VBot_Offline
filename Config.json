@@ -66,7 +66,8 @@
         "active": true
     },
     "bluetooth": {
-        "adapter": "hci0"
+        "adapter": "hci0",
+        "sync_agent_runtime_on_boot": false
     },
     "voice_command_system": {
         "active": false,
@@ -704,6 +705,9 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "BackList.json",
+                    "multiroom_groups.json",
+                    "Scheduler_History.json",
+                    "Scheduler_Runtime.json",
                     "service_error.log",
                     "service_log.log",
                     "Vbot_error.log",
@@ -757,18 +761,21 @@
                 "backup_before_updating": true,
                 "keep_file_directory": [
                     "News_Paper.json",
+                    "PlayLists.json",
                     "Data_Schedule.json",
                     "PlayList.json",
                     "Login_Data.json",
                     "PodCast.json",
                     "Youtube.json",
                     "ZingMP3.json",
+                    "NhacCuaTui.json",
                     "client_secret.json",
                     "verify_token.json",
                     "VBot_Devices_Network.json",
                     "Data_VBot_Client.json",
                     "PlayList_Local.json",
                     "__pycache__"
+                    "playlists"
                 ]
             }
         },

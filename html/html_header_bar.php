@@ -115,6 +115,7 @@ include_once 'Configuration.php';
 		max-width: 600px;
 		width: 100%;
 		padding: 0;
+		z-index: 1061;
 	}
 
 	#searchResults .dropdown-item {
@@ -149,12 +150,12 @@ include_once 'Configuration.php';
   </div>
   <!-- End Logo -->
 <!-- Tìm kiếm -->
-  <div class="search-bar">
+  <div class="search-bar" role="search">
 <div class="input-group flex-nowrap" title="Tìm kiếm nội dung trong trang">
-  <input class="form-control border-success" type="text" id="searchInput" placeholder="Nhập nội dung tìm kiếm">
+  <input class="form-control border-success" type="search" id="searchInput" placeholder="Nhập nội dung tìm kiếm" autocomplete="off" aria-label="Tìm kiếm nội dung trong trang" aria-controls="searchResults" aria-expanded="false">
   <span class="input-group-text border-success" id="addon-wrapping"><i class="bi bi-search text-success"></i></span>
   </div>
- <ul class="dropdown-menu w-100 border-success" id="searchResults"></ul>
+ <ul class="dropdown-menu w-100 border-success" id="searchResults" role="listbox" aria-label="Kết quả tìm kiếm"></ul>
 </div>
 <!--END  Tìm kiếm -->
   <nav id="vbot_header_bar" class="header-nav ms-auto">
@@ -288,7 +289,9 @@ include_once 'Configuration.php';
 
       <!-- Chatbot Biểu tượng mở chatbox -->
       <li class="nav-item nav-icon">
-        <i class="bi bi-chat-dots text-primary" type="button" onclick="fetchAndPopulateDevices_chatbot()" class="btn btn-primary" title="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot"></i>
+        <button type="button" class="nav-link border-0 bg-transparent p-0" onclick="fetchAndPopulateDevices_chatbot()" title="Mở ChatBot" aria-label="Mở ChatBot" data-bs-toggle="modal" data-bs-target="#modalDialogScrollable_chatbot">
+          <i class="bi bi-chat-dots text-primary" aria-hidden="true"></i>
+        </button>
       </li>
       <div class="modal fade" id="modalDialogScrollable_chatbot" tabindex="-1" data-bs-backdrop="false" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-scrollable" id="chatbot_size_setting">

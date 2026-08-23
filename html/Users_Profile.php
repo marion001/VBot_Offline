@@ -68,7 +68,6 @@ foreach ($data as $province) {
   $Config['contact_info']['location']['latitude'] = floatval($_POST['latitude_name']);
   $Config['contact_info']['location']['longitude'] = floatval($_POST['longitude_name']);
   $Config['contact_info']['email'] = $_POST['email_name'];
-  $Config['contact_info']['user_login']['user_password'] = $_POST['webui_password'];
 
   // Lưu cấu hình $Config vào file JSON
   file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
@@ -88,6 +87,32 @@ if (isset($_POST['save_change_user_login'])) {
 include 'html_head.php';
 ?>
 
+<style>
+  .profile-toolbar {
+    padding: .75rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(13, 110, 253, .22);
+    border-radius: .75rem;
+    background: rgba(244, 248, 255, .78);
+  }
+
+  .profile .nav-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+  }
+
+  .profile .nav-tabs .nav-link {
+    white-space: nowrap;
+  }
+
+  .profile-security-summary {
+    width: 100%;
+    margin-top: 1rem;
+  }
+</style>
+
 <body>
   <?php
   include 'html_header_bar.php';
@@ -104,6 +129,24 @@ include 'html_head.php';
         </ol>
       </nav>
     </div>
+    <div class="profile-toolbar" aria-label="Điều hướng hồ sơ người dùng">
+      <div class="row g-2 align-items-center">
+        <div class="col-12 col-lg">
+          <div class="small text-primary">
+            <i class="bi bi-shield-lock-fill"></i> Nơi chứa thông tin dữ liệu cấu hình cá nhân của người dùng
+          </div>
+        </div>
+        <div class="col-12 col-lg-auto">
+          <select id="profile-quick-navigation" class="form-select border-primary" aria-label="Đi tới mục hồ sơ">
+            <option value="profile-overview">Tổng quan</option>
+            <option value="profile-edit">Chỉnh sửa hồ sơ</option>
+            <option value="profile-settings">Cài đặt đăng nhập</option>
+            <option value="profile-change-password">Đổi mật khẩu WebUI</option>
+            <option value="profile-forgot-password">Quên mật khẩu WebUI</option>
+          </select>
+        </div>
+      </div>
+    </div>
     <section class="section profile">
       <div class="row">
         <div class="col-xl-4">
@@ -111,6 +154,10 @@ include 'html_head.php';
             <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
               <img src="<?php echo $Avata_File; ?>" alt="Profile" class="rounded-circle">
               <h2><?php echo $Config['contact_info']['full_name']; ?></h2>
+              <div class="profile-security-summary alert alert-<?php echo $Config['contact_info']['user_login']['active'] ? 'success' : 'warning'; ?> py-2 mb-0">
+                <div><b>Đăng nhập WebUI:</b> <?php echo $Config['contact_info']['user_login']['active'] ? 'Đang bật' : 'Đang tắt'; ?></div>
+                <div class="small">Khóa sau <b><?php echo intval($Config['contact_info']['user_login']['login_attempts']); ?></b> lần đăng nhập sai, chờ khóa tối đa <b><?php echo intval($Config['contact_info']['user_login']['login_lock_time']); ?></b> giây.</div>
+              </div>
             </div>
           </div>
         </div>
@@ -118,7 +165,7 @@ include 'html_head.php';
           <div class="card">
             <div class="card-body pt-3">
               <!-- Bordered Tabs -->
-              <ul class="nav nav-tabs nav-tabs-bordered">
+              <ul class="nav nav-tabs nav-tabs-bordered" id="profile-tabs" role="tablist">
                 <li class="nav-item">
                   <button type="button" class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Tổng quan</button>
                 </li>
@@ -224,16 +271,12 @@ include 'html_head.php';
                     <div class="row mb-3">
                       <label for="email_name" class="col-md-4 col-lg-3 col-form-label">Email <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                       <div class="col-md-8 col-lg-9">
-                        <input required name="email_name" type="text" class="form-control border-success" id="email_name" placeholder="<?php echo $Config['contact_info']['email']; ?>" value="<?php echo $Config['contact_info']['email']; ?>">
+                        <input required name="email_name" type="email" autocomplete="email" class="form-control border-success" id="email_name" placeholder="<?php echo $Config['contact_info']['email']; ?>" value="<?php echo $Config['contact_info']['email']; ?>">
                         <div class="invalid-feedback">Vui Lòng Nhập Email (Dùng để tìm lại mật khẩu và 1 số chức năng khác) !</div>
                       </div>
                     </div>
-                    <div class="row mb-3">
-                      <label for="webui_password" class="col-md-4 col-lg-3 col-form-label">Mật khẩu Web UI <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
-                      <div class="col-md-8 col-lg-9">
-                        <input required name="webui_password" type="text" class="form-control border-success" id="webui_password" placeholder="<?php echo $Config['contact_info']['user_login']['user_password']; ?>" value="<?php echo $Config['contact_info']['user_login']['user_password']; ?>">
-                        <div class="invalid-feedback">Vui Lòng Nhập Mật Khảu Đăng Nhập Web UI (Dùng để đăng nhập khi bạn bật đăng nhập trên web ui) !</div>
-                      </div>
+                    <div class="alert alert-info" role="alert">
+                      <i class="bi bi-shield-lock"></i> Mật khẩu không được hiển thị tại đây. Để thay đổi, hãy mở mục <b>Đổi mật khẩu WebUI</b>.
                     </div>
                     <div class="text-center">
                       <button type="submit" name="save_change_info_name" class="btn btn-primary rounded-pill">Lưu Hồ Sơ</button>
@@ -282,21 +325,30 @@ include 'html_head.php';
                   <div class="row mb-3">
                     <label for="currentPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Cũ <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                     <div class="col-md-8 col-lg-9">
-                      <input required name="currentPassword" type="password" class="form-control border-success" id="currentPassword">
+                      <div class="input-group">
+                        <input required name="currentPassword" type="password" autocomplete="current-password" class="form-control border-success" id="currentPassword">
+                        <button type="button" class="btn btn-outline-secondary password-toggle" data-password-target="currentPassword" title="Hiện hoặc ẩn mật khẩu"><i class="bi bi-eye"></i></button>
+                      </div>
                       <div class="valid-feedback">Cần nhập mật khẩu cũ!</div>
                     </div>
                   </div>
                   <div class="row mb-3">
                     <label for="newPassword" class="col-md-4 col-lg-3 col-form-label">Mật Khẩu Mới <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                     <div class="col-md-8 col-lg-9">
-                      <input required name="newPassword" type="password" class="form-control border-success" id="newPassword">
+                      <div class="input-group">
+                        <input required name="newPassword" type="password" autocomplete="new-password" class="form-control border-success" id="newPassword">
+                        <button type="button" class="btn btn-outline-secondary password-toggle" data-password-target="newPassword" title="Hiện hoặc ẩn mật khẩu"><i class="bi bi-eye"></i></button>
+                      </div>
                       <div class="valid-feedback">Cần nhập mật khẩu mới!</div>
                     </div>
                   </div>
                   <div class="row mb-3">
                     <label for="renewPassword" class="col-md-4 col-lg-3 col-form-label">Nhập Lại Mật Khẩu Mới <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                     <div class="col-md-8 col-lg-9">
-                      <input required name="renewPassword" type="password" class="form-control border-success" id="renewPassword">
+                      <div class="input-group">
+                        <input required name="renewPassword" type="password" autocomplete="new-password" class="form-control border-success" id="renewPassword">
+                        <button type="button" class="btn btn-outline-secondary password-toggle" data-password-target="renewPassword" title="Hiện hoặc ẩn mật khẩu"><i class="bi bi-eye"></i></button>
+                      </div>
                       <div class="valid-feedback">Cần nhập lại mật khẩu mới!</div>
                     </div>
                   </div>
@@ -309,7 +361,7 @@ include 'html_head.php';
                   <div class="row mb-3">
                     <label for="forgotPassword_email" class="col-md-4 col-lg-3 col-form-label">Nhập Email <font color="red" size="6" title="Bắt Buộc Nhập">*</font>:</label>
                     <div class="col-md-8 col-lg-9">
-                      <input required name="forgotPassword_email" type="text" class="form-control border-success" id="forgotPassword_email" value="<?php echo $Config['contact_info']['email']; ?>">
+                      <input required name="forgotPassword_email" type="email" autocomplete="email" class="form-control border-success" id="forgotPassword_email" value="<?php echo $Config['contact_info']['email']; ?>">
                       <div class="valid-feedback">Cần nhập địa chỉ email để lấy lại mật khẩu</div>
                     </div>
                   </div>
@@ -336,20 +388,9 @@ include 'html_head.php';
     //Kiểm tra nhật mật khẩu webui nếu chứa khoảng trống
     function validateForm_pass() {
       loading('show');
-      const webui_password = document.getElementById('webui_password');
       const email_name = document.getElementById('email_name');
       const longitude_name = document.getElementById('longitude_name');
       const latitude_name = document.getElementById('latitude_name');
-      if (/\s/.test(webui_password.value)) {
-        show_message('Mật khẩu đăng nhập WebUI không được phép chứa khoảng trống hoặc dấu cách!');
-        loading('hide');
-        return false;
-      }
-      if (webui_password.value.trim() === '') {
-        show_message('Cần nhập mật khẩu đăng nhập WebUI');
-        loading('hide');
-        return false;
-      }
 
       if (/\s/.test(email_name.value)) {
         show_message('Địa chỉ Email không được phép chứa khoảng trống hoặc dấu cách!');
@@ -426,6 +467,17 @@ include 'html_head.php';
       var newPassword = document.getElementById("newPassword").value;
       var renewPassword = document.getElementById("renewPassword").value;
 
+      if (!currentPassword || !newPassword || !renewPassword) {
+        show_message('Cần nhập đầy đủ mật khẩu cũ, mật khẩu mới và xác nhận mật khẩu mới.');
+        loading('hide');
+        return false;
+      }
+      if (newPassword !== renewPassword) {
+        show_message('Mật khẩu mới và phần nhập lại không trùng khớp.');
+        loading('hide');
+        return false;
+      }
+
       if (/\s/.test(currentPassword)) {
         show_message('Mật khẩu cũ không được phép chứa khoảng trống hoặc dấu cách!');
         loading('hide');
@@ -450,6 +502,9 @@ include 'html_head.php';
           var response = JSON.parse(xhr.responseText);
           if (response.success) {
             loading('hide');
+            document.getElementById("currentPassword").value = '';
+            document.getElementById("newPassword").value = '';
+            document.getElementById("renewPassword").value = '';
             show_message(response.message);
           } else {
             loading('hide');
@@ -464,6 +519,67 @@ include 'html_head.php';
         "&renewpassword=" + encodeURIComponent(renewPassword)
       );
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const quickNavigation = document.getElementById('profile-quick-navigation');
+      const tabButtons = Array.from(document.querySelectorAll('#profile-tabs [data-bs-toggle="tab"]'));
+
+      const activateProfileTab = function(targetId) {
+        const button = tabButtons.find(function(tabButton) {
+          return tabButton.getAttribute('data-bs-target') === '#' + targetId;
+        });
+        if (!button) {
+          return;
+        }
+        if (window.bootstrap && window.bootstrap.Tab) {
+          const BootstrapTab = window.bootstrap.Tab;
+          let tabInstance = typeof BootstrapTab.getOrCreateInstance === 'function'
+            ? BootstrapTab.getOrCreateInstance(button)
+            : (typeof BootstrapTab.getInstance === 'function' ? BootstrapTab.getInstance(button) : null);
+          if (!tabInstance) {
+            tabInstance = new BootstrapTab(button);
+          }
+          tabInstance.show();
+        } else {
+          button.click();
+        }
+        if (quickNavigation) {
+          quickNavigation.value = targetId;
+        }
+      };
+
+      if (quickNavigation) {
+        quickNavigation.addEventListener('change', function() {
+          activateProfileTab(quickNavigation.value);
+          document.querySelector('.profile .card')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+        });
+      }
+
+      tabButtons.forEach(function(tabButton) {
+        tabButton.addEventListener('shown.bs.tab', function() {
+          const targetId = tabButton.getAttribute('data-bs-target').slice(1);
+          if (quickNavigation) {
+            quickNavigation.value = targetId;
+          }
+        });
+      });
+
+      document.querySelectorAll('.password-toggle').forEach(function(toggleButton) {
+        toggleButton.addEventListener('click', function() {
+          const input = document.getElementById(toggleButton.dataset.passwordTarget);
+          if (!input) {
+            return;
+          }
+          const showPassword = input.type === 'password';
+          input.type = showPassword ? 'text' : 'password';
+          const icon = toggleButton.querySelector('i');
+          if (icon) {
+            icon.className = showPassword ? 'bi bi-eye-slash' : 'bi bi-eye';
+          }
+          toggleButton.title = showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu';
+        });
+      });
+    });
 
 const apiURL = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' +
                '<?php echo $VBot_Offline; ?>' + 'resource/VietNam_Localtion.json';

@@ -40,6 +40,110 @@ if (session_status() === PHP_SESSION_ACTIVE) {
       });
     });
   </script>
+  <script>
+    (function () {
+      'use strict';
+
+      const loginUrl = new URL('Login.php', document.baseURI).href;
+      let redirectingToLogin = false;
+
+      function isLoginPageUrl(url) {
+        try {
+          return new URL(url, document.baseURI).pathname.toLowerCase().endsWith('/login.php');
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function isSameOriginRequest(url) {
+        try {
+          return new URL(url, document.baseURI).origin === window.location.origin;
+        } catch (error) {
+          return false;
+        }
+      }
+
+      function responseIndicatesExpiredSession(status, responseUrl, body) {
+        if (isLoginPageUrl(responseUrl)) return true;
+        if (status === 401) return true;
+        if (!body) return false;
+        const text = typeof body === 'string' ? body : JSON.stringify(body);
+        return /(?:phiên|phien).{0,30}(?:đăng nhập|dang nhap).{0,30}(?:hết hạn|het han)/i.test(text)
+          || /(?:chỉ cho phép|chi cho phep).{0,50}(?:đăng nhập|dang nhap)/i.test(text)
+          || /login\.php/i.test(text) && /(?:location|redirect|đăng nhập|dang nhap)/i.test(text);
+      }
+
+      function redirectToLogin() {
+        if (redirectingToLogin || isLoginPageUrl(window.location.href)) return;
+        redirectingToLogin = true;
+        window.location.replace(loginUrl);
+      }
+
+      window.VBotWebUISession = {
+        loginUrl: loginUrl,
+        check: function (status, responseUrl, body, requestUrl) {
+          if (!isSameOriginRequest(requestUrl || responseUrl || window.location.href)) return false;
+          if (!responseIndicatesExpiredSession(status, responseUrl, body)) return false;
+          redirectToLogin();
+          return true;
+        },
+        redirectToLogin: redirectToLogin
+      };
+
+      if (typeof window.fetch === 'function') {
+        const nativeFetch = window.fetch.bind(window);
+        window.fetch = async function (input, init) {
+          const requestUrl = typeof input === 'string' || input instanceof URL
+            ? String(input)
+            : input && input.url ? input.url : window.location.href;
+          const response = await nativeFetch(input, init);
+          if (!isSameOriginRequest(requestUrl)) return response;
+
+          let body = '';
+          const responseUrl = response.url || requestUrl;
+          if (response.status === 401 || response.status === 403 || isLoginPageUrl(responseUrl)) {
+            try { body = await response.clone().text(); } catch (error) {}
+          } else {
+            const contentType = response.headers.get('content-type') || '';
+            if (/json|text|html/i.test(contentType)) {
+              try { body = await response.clone().text(); } catch (error) {}
+            }
+          }
+          window.VBotWebUISession.check(response.status, responseUrl, body, requestUrl);
+          return response;
+        };
+      }
+
+      if (typeof window.XMLHttpRequest === 'function') {
+        const nativeOpen = XMLHttpRequest.prototype.open;
+        const nativeSend = XMLHttpRequest.prototype.send;
+        XMLHttpRequest.prototype.open = function (method, url) {
+          this.__vbotRequestUrl = url;
+          return nativeOpen.apply(this, arguments);
+        };
+        XMLHttpRequest.prototype.send = function () {
+          if (!this.__vbotSessionListener) {
+            this.__vbotSessionListener = true;
+            this.addEventListener('loadend', function () {
+              const requestUrl = this.__vbotRequestUrl || this.responseURL;
+              if (!isSameOriginRequest(requestUrl)) return;
+              let body = '';
+              try {
+                body = this.responseType === 'json' ? this.response : this.responseText;
+              } catch (error) {}
+              window.VBotWebUISession.check(
+                this.status,
+                this.responseURL || requestUrl,
+                body,
+                requestUrl
+              );
+            });
+          }
+          return nativeSend.apply(this, arguments);
+        };
+      }
+    })();
+  </script>
   <!-- <title>VBot Assistant</title> -->
   <meta name="description" content="VBot Assistant - Loa Thông Minh VBot tiếng Việt, tích hợp trợ lý ảo giúp điều khiển nhà thông minh, phát nhạc, nhắc nhở và nhiều tiện ích khác. Trải nghiệm loa thông minh cho người Việt.">
   <meta name="keywords" content="VBot Assistant, Loa Thông Minh VBot, Loa Thông Minh Tiếng Việt, Loa Thông Minh Trợ Lý Ảo VBot, trợ lý ảo, loa thông minh Việt Nam, điều khiển giọng nói, nhà thông minh">

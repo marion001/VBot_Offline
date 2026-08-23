@@ -325,9 +325,12 @@ if (isset($_POST['json_file_playlist'])) {
 		unset($entry);
 		$normalizedContent = json_encode($playlistData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		$newPath = $playlistDirectory.DIRECTORY_SEPARATOR.$newMeta['file'];
-		if ($normalizedContent !== false && @file_put_contents($newPath, $normalizedContent, LOCK_EX) !== false) {
+		if ($normalizedContent !== false && vbotAtomicWriteFile($newPath, $normalizedContent, 'PlayList mới')) {
 			$manifest['playlists'][] = $newMeta;
-			@file_put_contents($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+			$manifestContent = json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+			if ($manifestContent === false || !vbotAtomicWriteFile($manifestPath, $manifestContent, 'danh sách PlayList')) {
+				vbotApiJsonResponse(['success' => false, 'message' => 'Không thể cập nhật danh sách PlayList'], 500);
+			}
 			$response = ['success' => true, 'playlist_id' => $newId, 'message' => 'Đã tạo và nhập dữ liệu vào PlayList: '.$newPlaylistName];
 		} else $response['message'] = 'Không thể tạo PlayList mới';
 	}
@@ -346,19 +349,19 @@ if (isset($_POST['json_file_playlist'])) {
 			$added++;
 		}
 		$normalizedContent = json_encode($currentData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		if ($normalizedContent !== false && @file_put_contents($target_file, $normalizedContent, LOCK_EX) !== false) {
-			if (($manifest['active_id'] ?? '') === $playlistId) @file_put_contents($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', $normalizedContent, LOCK_EX);
+		if ($normalizedContent !== false && vbotAtomicWriteFile($target_file, $normalizedContent, 'gộp dữ liệu PlayList')) {
+			if (($manifest['active_id'] ?? '') === $playlistId) vbotAtomicWriteFile($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', $normalizedContent, 'PlayList đang hoạt động');
 			$response = ['success' => true, 'playlist_id' => $playlistId, 'message' => 'Đã gộp '.$added.' bài mới vào PlayList: '.$playlistMeta['name']];
 		} else $response['message'] = 'Không thể gộp dữ liệu PlayList';
 	}
 	elseif (
         ($normalizedContent = json_encode($playlistData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !== false
-        && @file_put_contents($target_file, $normalizedContent, LOCK_EX) !== false
+        && vbotAtomicWriteFile($target_file, $normalizedContent, 'nhập dữ liệu PlayList')
     ) {
 		$original_name = vbotUploadSafeName($_FILES["select_json_file_playlist"]["name"]);
         @chmod($target_file, 0777);
 		if (($manifest['active_id'] ?? '') === $playlistId) {
-			@file_put_contents($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', $normalizedContent, LOCK_EX);
+			vbotAtomicWriteFile($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', $normalizedContent, 'PlayList đang hoạt động');
 			@chmod($targetDirectory.DIRECTORY_SEPARATOR.'PlayList.json', 0777);
 		}
 		$response["success"] = true;

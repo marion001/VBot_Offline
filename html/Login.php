@@ -46,11 +46,11 @@ $logFile = $logDir . "/Vbot_error.log";
 if (!file_exists($logDir)) {
   mkdir($logDir, 0777, true);
 }
-exec("chmod -R 777 " . escapeshellarg($logDir));
+@chmod($logDir, 0777);
 if (!file_exists($logFile)) {
   file_put_contents($logFile, "");
 }
-exec("chmod 777 " . escapeshellarg($logFile));
+@chmod($logFile, 0777);
 function Logs($message)
 {
   global $logFile;
@@ -59,21 +59,90 @@ function Logs($message)
   file_put_contents($logFile, $line, FILE_APPEND);
 }
 
+function vbotLoginClientKey()
+{
+  $remoteAddress = isset($_SERVER['REMOTE_ADDR']) ? trim((string)$_SERVER['REMOTE_ADDR']) : 'unknown';
+  return hash('sha256', $remoteAddress !== '' ? $remoteAddress : 'unknown');
+}
+
+function vbotNormalizeLoginData($data, $clientKey)
+{
+  if (!is_array($data)) $data = [];
+  if (!isset($data['attempts_by_client']) || !is_array($data['attempts_by_client'])) {
+    $legacyFails = max(0, (int)($data['number_of_failed_logins'] ?? 0));
+    $legacyTime = isset($data['last_failed_login_time']) ? (int)$data['last_failed_login_time'] : null;
+    $data = ['attempts_by_client' => []];
+    if ($legacyFails > 0) {
+      $data['attempts_by_client'][$clientKey] = [
+        'number_of_failed_logins' => $legacyFails,
+        'last_failed_login_time' => $legacyTime,
+      ];
+    }
+  }
+  return $data;
+}
+
+function vbotUpdateLoginData($filePath, $clientKey, callable $callback)
+{
+  $handle = @fopen($filePath, 'c+');
+  if ($handle === false || !@flock($handle, LOCK_EX)) {
+    if (is_resource($handle)) fclose($handle);
+    throw new RuntimeException('Không thể khóa dữ liệu bảo mật đăng nhập');
+  }
+  try {
+    rewind($handle);
+    $raw = stream_get_contents($handle);
+    $data = vbotNormalizeLoginData($raw !== '' ? json_decode($raw, true) : [], $clientKey);
+    $result = $callback($data);
+    $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    if ($encoded === false) throw new RuntimeException('Không thể mã hóa dữ liệu bảo mật đăng nhập');
+    rewind($handle);
+    if (!ftruncate($handle, 0) || fwrite($handle, $encoded) === false) {
+      throw new RuntimeException('Không thể ghi dữ liệu bảo mật đăng nhập');
+    }
+    fflush($handle);
+    if (function_exists('fsync')) @fsync($handle);
+    return ['data' => $data, 'result' => $result];
+  } finally {
+    flock($handle, LOCK_UN);
+    fclose($handle);
+  }
+}
+
+function vbotLoginAttemptState(array $data, $clientKey, $maxAttempts, $lockSeconds, $now = null)
+{
+  $now = $now ?? time();
+  $entry = $data['attempts_by_client'][$clientKey] ?? [];
+  $fails = max(0, (int)($entry['number_of_failed_logins'] ?? 0));
+  $lastFailed = (int)($entry['last_failed_login_time'] ?? 0);
+  $unlockTime = ($fails >= $maxAttempts && $lastFailed > 0) ? $lastFailed + $lockSeconds : 0;
+  return [
+    'fails' => $fails,
+    'locked' => $unlockTime > $now,
+    'remaining_seconds' => max(0, $unlockTime - $now),
+  ];
+}
+
 if (!is_dir($dirPath_Data)) {
   mkdir($dirPath_Data, 0777, true);
-  exec('chmod 0777 ' . escapeshellarg($dirPath_Data));
 }
+@chmod($dirPath_Data, 0777);
 
 if (!file_exists($filePath_Data)) {
   $defaultData = [
-    "number_of_failed_logins" => intval(0),
-    "last_failed_login_time" => null
+    "attempts_by_client" => []
   ];
   file_put_contents($filePath_Data, json_encode($defaultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-  exec('chmod 0777 ' . escapeshellarg($filePath_Data));
 }
+@chmod($filePath_Data, 0777);
 
-$Login_Data = json_decode(file_get_contents($filePath_Data), true);
+$loginClientKey = vbotLoginClientKey();
+$maxLoginAttempts = max(1, (int)($Config['contact_info']['user_login']['login_attempts'] ?? 5));
+$loginLockSeconds = max(1, (int)($Config['contact_info']['user_login']['login_lock_time'] ?? 900));
+$loginReadResult = vbotUpdateLoginData($filePath_Data, $loginClientKey, function (&$data) {
+  return null;
+});
+$Login_Data = $loginReadResult['data'];
 $error1 = '';
 $error = '';
 if (isset($_POST['reset_limit_login'])) {
@@ -81,9 +150,11 @@ if (isset($_POST['reset_limit_login'])) {
   $inputEmail = trim($_POST['email'] ?? '');
   if (strcasecmp($inputEmail, $Config['contact_info']['email']) === 0) {
     if (file_exists($filePath_Data)) {
-      $Login_Data['number_of_failed_logins'] = 0;
-      $Login_Data['last_failed_login_time']  = null;
-      file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+      $resetResult = vbotUpdateLoginData($filePath_Data, $loginClientKey, function (&$data) {
+        $data['attempts_by_client'] = [];
+        return true;
+      });
+      $Login_Data = $resetResult['data'];
       $Msg_ERROR = "✅ Đã reset giới hạn đăng nhập WebUI";
       $error .= $Msg_ERROR . '<br/><br/>';
       Logs($Msg_ERROR);
@@ -95,15 +166,9 @@ if (isset($_POST['reset_limit_login'])) {
   }
 }
 
-if ($Login_Data['number_of_failed_logins'] == $Config['contact_info']['user_login']['login_attempts']) {
-  $Login_Data['last_failed_login_time'] = time();
-  file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-} else if ($Login_Data['number_of_failed_logins'] >= $Config['contact_info']['user_login']['login_attempts']) {
-  $lastTime = intval($Login_Data['last_failed_login_time']);
-  $unlockTime = $lastTime + $Config['contact_info']['user_login']['login_lock_time'];
-  $now = time();
-  if ($now < $unlockTime) {
-    $error .= "<br/><center><h1><font color='red'>VBot Assistant Đăng Nhập Thất Bại</font><br/><br/>Vượt quá số lần đăng nhập cho phép! Hãy thử lại sau <font color='red'>" . ($unlockTime - $now) . "</font> giây<br/><br/><a href='Login.php'>Tải Lại Trang</a></h1>";
+$loginState = vbotLoginAttemptState($Login_Data, $loginClientKey, $maxLoginAttempts, $loginLockSeconds);
+if ($loginState['locked']) {
+    $error .= "<br/><center><h1><font color='red'>VBot Assistant Đăng Nhập Thất Bại</font><br/><br/>Vượt quá số lần đăng nhập cho phép! Hãy thử lại sau <font color='red'>" . $loginState['remaining_seconds'] . "</font> giây<br/><br/><a href='Login.php'>Tải Lại Trang</a></h1>";
     echo $error;
     echo '<hr/><h2><font color=red>Reset Giới Hạn Thời Gian Chờ</font></h2><br/><form method="POST">
 			<input type="hidden" name="csrf_token" value="' . htmlspecialchars($_SESSION['vbot_csrf_token'], ENT_QUOTES, 'UTF-8') . '">
@@ -113,11 +178,6 @@ if ($Login_Data['number_of_failed_logins'] == $Config['contact_info']['user_logi
     echo $error1;
     echo '</center>';
     exit();
-  } else {
-    $Login_Data['number_of_failed_logins'] = 0;
-    $Login_Data['last_failed_login_time'] = null;
-    file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-  }
 }
 
 #Quên Mật Khẩu
@@ -215,10 +275,12 @@ if (isset($_GET['logout'])) {
 
 if ($Config['contact_info']['user_login']['active']) {
   // Kiểm tra xem người dùng đã đăng nhập chưa
-  if (isset($_SESSION['user_login'])) {
+  if (!empty($_SESSION['user_login']['logged_in'])) {
     // Nếu đã đăng nhập, chuyển hướng đến trang index
     header('Location: index.php');
     exit;
+  } elseif (isset($_SESSION['user_login'])) {
+    unset($_SESSION['user_login']);
   }
 } else {
   header('Location: index.php');
@@ -233,9 +295,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['token_password'])) {
   } else {
     $stored_hash = hash('sha256', $Config['contact_info']['user_login']['user_password']);
     $password_user = (string) $_POST['token_password'];
-    if (hash_equals($stored_hash, $password_user)) {
-      $Login_Data['number_of_failed_logins'] = 0;
-      file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+    $passwordMatches = hash_equals($stored_hash, $password_user);
+    $attemptUpdate = vbotUpdateLoginData(
+      $filePath_Data,
+      $loginClientKey,
+      function (&$data) use ($loginClientKey, $maxLoginAttempts, $loginLockSeconds, $passwordMatches) {
+        $now = time();
+        $state = vbotLoginAttemptState($data, $loginClientKey, $maxLoginAttempts, $loginLockSeconds, $now);
+        if ($state['locked']) {
+          return ['status' => 'locked', 'remaining_seconds' => $state['remaining_seconds']];
+        }
+        if ($state['fails'] >= $maxLoginAttempts) {
+          unset($data['attempts_by_client'][$loginClientKey]);
+          $state['fails'] = 0;
+        }
+        if ($passwordMatches) {
+          unset($data['attempts_by_client'][$loginClientKey]);
+          return ['status' => 'success'];
+        }
+        $currentFails = $state['fails'] + 1;
+        $data['attempts_by_client'][$loginClientKey] = [
+          'number_of_failed_logins' => $currentFails,
+          'last_failed_login_time' => $currentFails >= $maxLoginAttempts ? $now : null,
+        ];
+        return [
+          'status' => $currentFails >= $maxLoginAttempts ? 'locked' : 'failed',
+          'fails' => $currentFails,
+          'remaining_seconds' => $currentFails >= $maxLoginAttempts ? $loginLockSeconds : 0,
+        ];
+      }
+    );
+    $Login_Data = $attemptUpdate['data'];
+    $attemptResult = $attemptUpdate['result'];
+    if (($attemptResult['status'] ?? '') === 'success') {
+      session_regenerate_id(true);
       // Đăng nhập thành công
       $_SESSION['user_login'] = [
         'logged_in' => true,
@@ -243,13 +336,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['token_password'])) {
       ];
       header('Location: index.php');
       exit;
+    } elseif (($attemptResult['status'] ?? '') === 'locked') {
+      $waitSeconds = max(1, (int)($attemptResult['remaining_seconds'] ?? $loginLockSeconds));
+      $error .= "❌ Đã vượt quá {$maxLoginAttempts} lần đăng nhập. Vui lòng thử lại sau <b>{$waitSeconds}</b> giây.";
     } else {
       $error .= "❌ Sai mật khẩu!";
-      $Login_Data['number_of_failed_logins'] = intval($Login_Data['number_of_failed_logins']) + 1;
-      file_put_contents($filePath_Data, json_encode($Login_Data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-      $currentFails = intval($Login_Data['number_of_failed_logins']);
-      $maxAttempts  = intval($Config['contact_info']['user_login']['login_attempts']);
-      $remaining    = $maxAttempts - $currentFails;
+      $currentFails = (int)($attemptResult['fails'] ?? 0);
+      $remaining = $maxLoginAttempts - $currentFails;
       if ($remaining > 0 && $remaining <= 3) {
         $error .= "<br/>Bạn còn <b>{$remaining}</b> lần đăng nhập";
       }

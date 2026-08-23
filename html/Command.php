@@ -236,6 +236,52 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['commandd'])) {
 include 'html_head.php';
 ?>
 
+<style>
+  .command-toolbar {
+    position: sticky;
+    top: 64px;
+    z-index: 900;
+    padding: .75rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(13, 110, 253, .22);
+    border-radius: .75rem;
+    background: rgba(244, 248, 255, .96);
+    box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+    backdrop-filter: blur(6px);
+  }
+
+  .command-action-groups {
+    min-height: 2.5rem;
+  }
+
+  .command-action-group-search-hidden,
+  .command-tool-section-search-hidden {
+    display: none !important;
+  }
+
+  .command-tool-section {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(25, 135, 84, .2);
+    border-radius: .75rem;
+    background: var(--bs-body-bg, #fff);
+  }
+
+  .command-tool-section-danger {
+    border-color: rgba(220, 53, 69, .3);
+  }
+
+  .command-empty-state {
+    display: none;
+  }
+
+  @media (max-width: 991.98px) {
+    .command-toolbar {
+      top: 60px;
+    }
+  }
+</style>
+
 <body>
   <!-- ======= Header ======= -->
   <?php
@@ -260,6 +306,25 @@ include 'html_head.php';
     </div>
     <!-- End Page Title -->
     <section class="section">
+      <div class="command-toolbar" id="command-toolbar" aria-label="Tìm kiếm và điều hướng lệnh">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-lg">
+            <div class="input-group">
+              <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+              <input type="search" id="command-action-search" class="form-control border-primary"
+                placeholder="Tìm lệnh, ví dụ: Bluetooth, AirPlay, WiFi, múi giờ..." autocomplete="off">
+              <button type="button" id="command-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12 col-lg-auto">
+            <select id="command-quick-navigation" class="form-select border-primary" aria-label="Đi tới nhóm lệnh">
+              <option value="">Đi tới nhóm lệnh...</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col-lg-12">
           <div class="card">
@@ -267,7 +332,7 @@ include 'html_head.php';
               <form method="POST" action="">
                 <br />
                 <div class="row g-3 d-flex justify-content-center">
-                  <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
+                  <div id="command-action-groups" class="col-auto d-flex flex-wrap justify-content-center gap-2 command-action-groups">
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-danger dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
@@ -454,10 +519,14 @@ include 'html_head.php';
                       </div>
                     </div>
               </form>
+              <div id="command-empty-state" class="alert alert-info command-empty-state mt-3 mb-0" role="status">
+                <i class="bi bi-info-circle"></i> Không tìm thấy nhóm lệnh phù hợp.
+              </div>
             </div>
           </div>
           <hr />
-          <form method="POST" action="">
+          <form method="POST" action="" id="command-library-tools" class="command-tool-section" data-command-title="Thư viện Picovoice Porcupine">
+            <h5 class="mb-3"><i class="bi bi-box-seam"></i> Quản Lý Thư Viện Nhận Diện WakeWord</h5>
             <div class="row g-3 d-flex justify-content-center">
               <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
                 <div class="input-group">
@@ -502,7 +571,8 @@ include 'html_head.php';
 </div>
 </div>
 </form>
-          <form method="POST" action="">
+          <form method="POST" action="" id="command-timezone-tools" class="command-tool-section" data-command-title="Thời gian múi giờ">
+            <h5 class="mb-3"><i class="bi bi-clock-history"></i> Thời Gian và Múi Giờ</h5>
             <div class="row g-3 d-flex justify-content-center">
 
               <div class="col-auto d-flex flex-wrap justify-content-center gap-2">
@@ -543,11 +613,14 @@ include 'html_head.php';
 
 
           <hr />
-          <form method="POST" action="">
+          <form method="POST" action="" id="command-terminal-tools" class="command-tool-section command-tool-section-danger" data-command-title="Dòng lệnh Terminal Linux">
+            <div class="alert alert-warning py-2" role="alert">
+              <i class="bi bi-exclamation-triangle-fill"></i> Dòng lệnh được thực thi trực tiếp trên hệ thống bằng quyền user thông qua SSH. Chỉ chạy lệnh khi bạn hiểu rõ tác động.
+            </div>
             <div class="input-group mb-3">
               <span class="input-group-text border-success" id="basic-addon1"><i class="bi bi-terminal-fill" onclick="show_message('Nhập các lệnh Linux cần thực thi, hệ thống sẽ sử dụng thông tin ssh của bạn để thực hiện lệnh như 1 user bình thường')"></i></span>
               <input type="text" class="form-control border-success" name="commandnd" placeholder="Nhập dòng lệnh cần thực hiện">
-              <button class="btn btn-success border-success" onclick="loading('show')" name="commandd" type="submit">Command</button>
+              <button class="btn btn-success border-success" onclick="loading('show')" name="commandd" type="submit"><i class="bi bi-command"></i> Command</button>
             </div>
             <div class="form-group">
               <textarea class="form-control border-success text-info bg-dark" id="textarea_log_command" rows="14"><?php echo $output; ?></textarea>
@@ -660,6 +733,118 @@ function rename_airplayyy() {
         box.style.display = "none";
     }
 }
+
+    function normalize_command_search_text(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('vi')
+        .trim();
+    }
+
+    function initialize_command_layout() {
+      const searchInput = document.getElementById('command-action-search');
+      const clearButton = document.getElementById('command-search-clear');
+      const navigation = document.getElementById('command-quick-navigation');
+      const groupsContainer = document.getElementById('command-action-groups');
+      const emptyState = document.getElementById('command-empty-state');
+      if (!searchInput || !clearButton || !navigation || !groupsContainer || !emptyState) {
+        return;
+      }
+
+      const groups = Array.from(groupsContainer.querySelectorAll(':scope > .btn-group'));
+      const toolSections = Array.from(document.querySelectorAll('.command-tool-section'));
+
+      groups.forEach(function(group, index) {
+        const toggle = group.querySelector('.dropdown-toggle');
+        const label = toggle ? toggle.textContent.replace(/\s+/g, ' ').trim() : 'Nhóm lệnh ' + (index + 1);
+        group.classList.add('command-action-group');
+        group.dataset.commandSearch = normalize_command_search_text(group.textContent + ' ' + label);
+        group.id = group.id || 'command-group-' + (index + 1);
+
+        const option = document.createElement('option');
+        option.value = group.id;
+        option.textContent = label;
+        navigation.appendChild(option);
+      });
+
+      toolSections.forEach(function(section) {
+        const label = section.dataset.commandTitle || section.querySelector('h5')?.textContent.trim() || section.id;
+        section.dataset.commandSearch = normalize_command_search_text(section.textContent + ' ' + label);
+        const option = document.createElement('option');
+        option.value = section.id;
+        option.textContent = label;
+        navigation.appendChild(option);
+      });
+
+      const applySearch = function() {
+        const query = normalize_command_search_text(searchInput.value);
+        let visibleCount = 0;
+
+        groups.forEach(function(group) {
+          const visible = query === '' || group.dataset.commandSearch.includes(query);
+          group.classList.toggle('command-action-group-search-hidden', !visible);
+          if (visible) {
+            visibleCount += 1;
+          }
+        });
+
+        toolSections.forEach(function(section) {
+          const visible = query === '' || section.dataset.commandSearch.includes(query);
+          section.classList.toggle('command-tool-section-search-hidden', !visible);
+          if (visible) {
+            visibleCount += 1;
+          }
+        });
+
+        emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+      };
+
+      searchInput.addEventListener('input', applySearch);
+      clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        applySearch();
+        searchInput.focus();
+      });
+      navigation.addEventListener('change', function() {
+        const target = document.getElementById(navigation.value);
+        if (target) {
+          target.scrollIntoView({behavior: 'smooth', block: 'center'});
+          const toggle = target.querySelector('.dropdown-toggle');
+          if (toggle) {
+            window.setTimeout(function() {
+              toggle.focus({preventScroll: true});
+              const BootstrapDropdown = window.bootstrap && window.bootstrap.Dropdown;
+              if (BootstrapDropdown) {
+                let dropdownInstance = null;
+                if (typeof BootstrapDropdown.getOrCreateInstance === 'function') {
+                  dropdownInstance = BootstrapDropdown.getOrCreateInstance(toggle);
+                } else if (typeof BootstrapDropdown.getInstance === 'function') {
+                  dropdownInstance = BootstrapDropdown.getInstance(toggle);
+                }
+                if (!dropdownInstance) {
+                  dropdownInstance = new BootstrapDropdown(toggle);
+                }
+                dropdownInstance.show();
+                return;
+              }
+
+              // Dự phòng cho trang dùng Bootstrap không xuất đối tượng JS toàn cục.
+              const dropdown = toggle.closest('.dropdown');
+              const menu = dropdown ? dropdown.querySelector('.dropdown-menu') : null;
+              if (menu) {
+                toggle.setAttribute('aria-expanded', 'true');
+                toggle.classList.add('show');
+                menu.classList.add('show');
+              }
+            }, 250);
+          }
+        }
+        navigation.value = '';
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initialize_command_layout);
 
 
     //lấy dữ liệu phiên bản picovoice khi trang được tải toàn bộ

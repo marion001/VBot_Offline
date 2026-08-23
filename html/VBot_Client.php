@@ -106,6 +106,40 @@ if ($Config['contact_info']['user_login']['active']) {
         max-height: 200px;
         overflow-y: auto;
     }
+
+    .vbot-client-toolbar {
+        position: sticky;
+        top: 64px;
+        z-index: 900;
+        padding: .75rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(13, 110, 253, .22);
+        border-radius: .75rem;
+        background: rgba(244, 248, 255, .96);
+        box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+        backdrop-filter: blur(6px);
+    }
+
+    .vbot-client-search-hidden {
+        display: none !important;
+    }
+
+    #vbot-client-empty-filter {
+        display: none;
+    }
+
+    @media (max-width: 991.98px) {
+        .vbot-client-toolbar {
+            top: 60px;
+        }
+
+        .modal-xl,
+        .modal-lg {
+            max-width: calc(100vw - 1rem);
+            margin-left: auto;
+            margin-right: auto;
+        }
+    }
 </style>
 
 <body>
@@ -123,6 +157,33 @@ if ($Config['contact_info']['user_login']['active']) {
             </nav>
         </div>
 
+        <div class="vbot-client-toolbar" id="vbot-client-toolbar" aria-label="Tìm kiếm và lọc VBot Client">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg">
+                    <div class="input-group">
+                        <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+                        <input type="search" id="vbot-client-search" class="form-control border-primary"
+                            placeholder="Tìm tên Client, IP, server, firmware hoặc chip..." autocomplete="off">
+                        <button type="button" id="vbot-client-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-auto">
+                    <select id="vbot-client-status-filter" class="form-select border-primary" aria-label="Lọc trạng thái Client">
+                        <option value="">Tất cả trạng thái</option>
+                        <option value="online">Trực tuyến</option>
+                        <option value="offline">Ngoại tuyến</option>
+                        <option value="unknown">Đang kiểm tra</option>
+                    </select>
+                </div>
+            </div>
+            <div id="vbot-client-status-summary" class="small text-primary mt-2">Chưa có dữ liệu Client.</div>
+            <div id="vbot-client-empty-filter" class="alert alert-info py-2 mt-2 mb-0" role="status">
+                <i class="bi bi-info-circle"></i> Không tìm thấy Client phù hợp.
+            </div>
+        </div>
+
         <div class="input-group mb-3">
             <span class="input-group-text border-danger" id="basic-addon2">Hướng Dẫn:</span>
             <input type="text" disabled class="form-control border-danger" name="guide_client" id="guide_client" value="https://github.com/marion001/VBot_Client_Offline">
@@ -132,7 +193,7 @@ if ($Config['contact_info']['user_login']['active']) {
         <section class="section">
             <center>
                 <button type="button" class="btn btn-primary" onclick="scan_VBot_Client_Device()"><i class="bi bi-radar"></i> Quét Thiết Bị Client</button>
-                <button class="btn btn-success" onclick="reloadClients()" title="Tải lại toàn bộ dữ liệu Client hiện có"> Tải lại Dữ Liệu Client</button>
+                <button type="button" class="btn btn-success" onclick="reloadClients()" title="Tải lại toàn bộ dữ liệu Client hiện có"> Tải lại Dữ Liệu Client</button>
                 <button type="button" class="btn btn-danger" onclick="clearServerData()"><i class="bi bi-x-circle"></i> Xóa Dữ Liệu Quét Trước Đó</button>
             </center>
             <br />
@@ -292,6 +353,47 @@ if ($Config['contact_info']['user_login']['active']) {
 			return escapeVBotClientHtml(JSON.stringify(String(value == null ? '' : value)));
 		}
 
+        function normalizeVBotClientSearchText(value) {
+            return String(value || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLocaleLowerCase('vi')
+                .trim();
+        }
+
+        function applyVBotClientFilters() {
+            const searchInput = document.getElementById('vbot-client-search');
+            const statusFilter = document.getElementById('vbot-client-status-filter');
+            const emptyState = document.getElementById('vbot-client-empty-filter');
+            const summary = document.getElementById('vbot-client-status-summary');
+            if (!searchInput || !statusFilter || !emptyState || !summary) {
+                return;
+            }
+            const rows = Array.from(document.querySelectorAll('#vbot-client-table tbody tr'));
+            const query = normalizeVBotClientSearchText(searchInput.value);
+            const selectedStatus = statusFilter.value;
+            let visibleCount = 0;
+            const statusCounts = {online: 0, offline: 0, unknown: 0};
+
+            rows.forEach(function(row) {
+                const status = row.dataset.clientStatus || 'unknown';
+                statusCounts[status] = (statusCounts[status] || 0) + 1;
+                const matchesSearch = query === '' || (row.dataset.clientSearch || '').includes(query);
+                const matchesStatus = selectedStatus === '' || status === selectedStatus;
+                const visible = matchesSearch && matchesStatus;
+                row.classList.toggle('vbot-client-search-hidden', !visible);
+                if (visible) {
+                    visibleCount += 1;
+                }
+            });
+
+            summary.textContent = rows.length === 0
+                ? 'Chưa có dữ liệu Client.'
+                : 'Tổng: ' + rows.length + ' | Trực tuyến: ' + statusCounts.online
+                    + ' | Ngoại tuyến: ' + statusCounts.offline + ' | Đang kiểm tra: ' + statusCounts.unknown;
+            emptyState.style.display = rows.length > 0 && visibleCount === 0 ? 'block' : 'none';
+        }
+
 		//Hiển thị thông in các thiết bị VBot client
         function displayDeviceData(data) {
             if (!Array.isArray(data)) {
@@ -312,7 +414,7 @@ if ($Config['contact_info']['user_login']['active']) {
             // Sắp xếp mảng data theo IP
             data.sort(compareIPs);
             let tableHTML =
-                '<table class="table table-bordered border-primary">' +
+                '<table class="table table-bordered border-primary" id="vbot-client-table">' +
                 '<thead>' +
                 '<tr>' +
                 '<th style="text-align: center; vertical-align: middle;">Tên Client</th>' +
@@ -331,8 +433,13 @@ if ($Config['contact_info']['user_login']['active']) {
                 const versionUrl = device.VBOT_CHECK_API_VERSION || device.update?.version_url;
                 const deviceIp = escapeVBotClientHtml(deviceIpRaw);
                 const serverIp = escapeVBotClientHtml(serverIpRaw);
+                const clientSearchText = normalizeVBotClientSearchText([
+                    device.client_name, deviceIpRaw, serverIpRaw, device.version,
+                    device.chip_model || device.chip?.model, device.chip_suffix,
+                    device.chip?.manufacturer
+                ].join(' '));
                 tableHTML +=
-                    '<tr>' +
+                    '<tr data-client-status="unknown" data-client-search="' + escapeVBotClientHtml(clientSearchText) + '">' +
                     '<td style="text-align: center; vertical-align: middle;"><span class="status-dot" id="status-' + index + '"></span>' + escapeVBotClientHtml(device.client_name) + '</td>' +
 
 					'<td style="text-align: center; vertical-align: middle;">' +
@@ -407,6 +514,7 @@ if ($Config['contact_info']['user_login']['active']) {
             });
             tableHTML += '</tbody></table>';
             document.getElementById('vbot_Client_Scan_devices').innerHTML = tableHTML;
+            applyVBotClientFilters();
 
             // Gắn sự kiện cho các nút "Xóa"
             document.querySelectorAll('.delete-btn').forEach(function(button) {
@@ -848,7 +956,12 @@ if ($Config['contact_info']['user_login']['active']) {
                         statusDot.classList.remove('offline');
                         statusDot.classList.add('online');
                         statusDot.title = 'Trực Tuyến';
+                        const row = statusDot.closest('tr');
+                        if (row) {
+                            row.dataset.clientStatus = 'online';
+                        }
                     }
+                    applyVBotClientFilters();
                     if (showNotification) {
                         showMessagePHP('<p class="text-success"><b>Thiết bị ' + ip + ' đang Trực Tuyến</b></p>', 3);
                     }
@@ -862,7 +975,12 @@ if ($Config['contact_info']['user_login']['active']) {
                     statusDot.classList.remove('online');
                     statusDot.classList.add('offline');
                     statusDot.title = 'Ngoại Tuyến';
+                    const row = statusDot.closest('tr');
+                    if (row) {
+                        row.dataset.clientStatus = 'offline';
+                    }
                 }
+                applyVBotClientFilters();
                 if (showNotification) {
                     showMessagePHP('<p class="text-danger"><b>Thiết bị ' + ip + ' đang Ngoại Tuyến</b></p>', 3);
                 }
@@ -878,7 +996,7 @@ if ($Config['contact_info']['user_login']['active']) {
             loading('show');
             loadFromServer()
                 .then(devices => {
-                    const updatedDevices = devices.filter(device => device.ip_address || device.ip || '' !== ip);
+                    const updatedDevices = devices.filter(device => (device.ip_address || device.ip || '') !== ip);
                     return saveToServer(updatedDevices)
                         .then(result => {
                             if (result.success) {
@@ -939,6 +1057,33 @@ if ($Config['contact_info']['user_login']['active']) {
 
         //Hiển thị dữ liệu khi trang được tải
         document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('vbot-client-search');
+            const clearButton = document.getElementById('vbot-client-search-clear');
+            const statusFilter = document.getElementById('vbot-client-status-filter');
+            if (searchInput) {
+                searchInput.addEventListener('input', applyVBotClientFilters);
+            }
+            if (statusFilter) {
+                statusFilter.addEventListener('change', applyVBotClientFilters);
+            }
+            if (clearButton && searchInput && statusFilter) {
+                clearButton.addEventListener('click', function() {
+                    searchInput.value = '';
+                    statusFilter.value = '';
+                    applyVBotClientFilters();
+                    searchInput.focus();
+                });
+            }
+            const manualIpInput = document.getElementById('add_client_manual_ip');
+            if (manualIpInput) {
+                manualIpInput.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        bat_dau_them_client_thu_cong();
+                    }
+                });
+            }
+
             loading('show');
             loadFromServer()
                 .then(devices => {

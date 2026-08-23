@@ -117,8 +117,10 @@ numpy                        1.19.5
 oauthlib                     3.1.0
 openai                       1.13.3
 opuslib                      3.0.1
+orjson                       3.11.5
+packaging                    26.3
 pafy                         0.5.5
-paho-mqtt                    1.5.1
+paho-mqtt                    1.6.1
 pantilthat                   0.0.7
 parglare                     0.16.0
 parso                        0.8.1
@@ -137,6 +139,7 @@ pigpio                       1.78
 PiIR                         0.2.5
 Pillow                       8.1.2
 pip                          20.3.4
+pipdeptree                   2.28.0
 pixel-ring                   0.1.0
 prompt-toolkit               3.0.39
 propcache                    0.4.1
@@ -178,9 +181,10 @@ python-Levenshtein           0.12.2
 python-nmap                  0.7.1
 python-prctl                 1.7
 python-vlc                   3.0.16120
-pytubefix                    9.5.1
+pytubefix                    10.11.0
 pytz                         2022.1
 pyusb                        1.2.1
+PyYAML                       6.0.3
 rainbowhat                   0.1.0
 RapidFuzz                    3.13.0
 reportlab                    3.5.59
@@ -242,6 +246,7 @@ Werkzeug                     1.0.1
 wheel                        0.34.2
 wikipedia                    1.4.0
 wrapt                        1.12.1
+wyoming                      1.10.0
 yarl                         1.22.0
 youtube-dl                   2021.12.17
 yt-dlp                       2025.10.14

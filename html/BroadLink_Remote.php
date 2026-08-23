@@ -171,6 +171,41 @@ include 'html_head.php';
             max-height: calc(100vh - 40px);
             overflow-y: auto;
         }
+
+        .broadlink-toolbar {
+            position: sticky;
+            top: 64px;
+            z-index: 900;
+            padding: .75rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(13, 110, 253, .22);
+            border-radius: .75rem;
+            background: rgba(244, 248, 255, .96);
+            box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+            backdrop-filter: blur(6px);
+        }
+
+        .broadlink-section {
+            padding: .75rem;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(13, 110, 253, .18);
+            border-radius: .75rem;
+            background: var(--bs-body-bg, #fff);
+        }
+
+        .broadlink-search-hidden {
+            display: none !important;
+        }
+
+        #broadlink-search-empty {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .broadlink-toolbar {
+                top: 60px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -196,6 +231,32 @@ include 'html_head.php';
       </nav>
     </div><!-- End Page Title -->
     <section class="section">
+      <div class="broadlink-toolbar" id="broadlink-toolbar" aria-label="Tìm kiếm và điều hướng BroadLink">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-lg">
+            <div class="input-group">
+              <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+              <input type="search" id="broadlink-data-search" class="form-control border-primary"
+                placeholder="Tìm tên thiết bị, IP, MAC hoặc tên câu lệnh..." autocomplete="off">
+              <button type="button" id="broadlink-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12 col-lg-auto">
+            <select id="broadlink-quick-navigation" class="form-select border-primary" aria-label="Đi tới khu vực BroadLink">
+              <option value="">Đi tới khu vực...</option>
+              <option value="broadlink-devices-section">Danh sách thiết bị</option>
+              <option value="broadlink-commands-section">Danh sách lệnh đã học</option>
+              <option value="broadlink-config-section">Dữ liệu cấu hình</option>
+              <option value="broadlink-recovery-section">Khôi phục dữ liệu</option>
+            </select>
+          </div>
+        </div>
+        <div id="broadlink-search-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
+          <i class="bi bi-info-circle"></i> Không tìm thấy thiết bị hoặc câu lệnh phù hợp.
+        </div>
+      </div>
       <div class="row">
 <?php
 // Hiển thị thông báo lỗi nếu có
@@ -219,7 +280,9 @@ if (!empty($successMessage)) {
 	echo '</div>';
 }
 ?>
-<table id="deviceTable" class="table table-bordered border-primary">
+<div id="broadlink-devices-section" class="broadlink-section">
+<div class="table-responsive">
+<table id="deviceTable" class="table table-bordered border-primary mb-0">
     <thead>
         <tr>
             <th style="text-align: center; vertical-align: middle;" colspan="7">
@@ -242,9 +305,11 @@ if (!empty($successMessage)) {
     </thead>
     <tbody></tbody>
 </table>
-<hr/ class="text-primary">
+</div>
+</div>
+<hr class="text-primary" />
 <!-- Bảng Lệnh Đã Học -->
-  <div class="card-body p-0">
+  <div id="broadlink-commands-section" class="card-body broadlink-section p-2">
     <div class="table-responsive">
       <table class="table table-bordered border-primary datatable_broadlink" id="cmdTable">
         <thead>
@@ -277,7 +342,7 @@ if (!empty($successMessage)) {
     </div>
   </div>
 
-<h5 class="card-title">
+<h5 class="card-title" id="broadlink-config-section">
 <font color="green">Dữ Liệu Cấu Hình:</font>
 </h5>
                     <div class="row mb-3">
@@ -290,7 +355,7 @@ if (!empty($successMessage)) {
                         </div>
                         </div>
                     </div>
-<form class="row g-3 needs-validation" novalidate method="POST" enctype="multipart/form-data" action="">
+<form id="broadlink-recovery-section" class="row g-3 needs-validation broadlink-section" novalidate method="POST" enctype="multipart/form-data" action="">
 <h5 class="card-title">
 	<font color="green">Khôi Phục Dữ Liệu:</font>
 </h5>
@@ -1262,6 +1327,81 @@ function pingAgain() {
     }
 }
 
+function normalizeBroadlinkSearchText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('vi')
+        .trim();
+}
+
+function initializeBroadlinkPageNavigation() {
+    const searchInput = document.getElementById('broadlink-data-search');
+    const clearButton = document.getElementById('broadlink-search-clear');
+    const navigation = document.getElementById('broadlink-quick-navigation');
+    const emptyState = document.getElementById('broadlink-search-empty');
+    const deviceBody = document.querySelector('#deviceTable tbody');
+    const commandBody = document.querySelector('#cmdTable tbody');
+    if (!searchInput || !clearButton || !navigation || !emptyState || !deviceBody || !commandBody) {
+        return;
+    }
+
+    const getRows = function() {
+        return Array.from(deviceBody.querySelectorAll('tr')).concat(Array.from(commandBody.querySelectorAll('tr')));
+    };
+
+    const getRowSearchText = function(row) {
+        const fieldValues = Array.from(row.querySelectorAll('input, select, textarea')).map(function(field) {
+            const selectedText = field.tagName === 'SELECT' && field.selectedOptions.length
+                ? field.selectedOptions[0].textContent
+                : '';
+            return String(field.value || '') + ' ' + selectedText;
+        }).join(' ');
+        return normalizeBroadlinkSearchText(row.textContent + ' ' + fieldValues);
+    };
+
+    const applySearch = function() {
+        const query = normalizeBroadlinkSearchText(searchInput.value);
+        let visibleCount = 0;
+        getRows().forEach(function(row) {
+            const isPlaceholder = row.querySelector('td[colspan]') !== null;
+            const visible = query === '' || (!isPlaceholder && getRowSearchText(row).includes(query));
+            row.classList.toggle('broadlink-search-hidden', !visible);
+            if (visible && !isPlaceholder) {
+                visibleCount += 1;
+            }
+        });
+        emptyState.style.display = query !== '' && visibleCount === 0 ? 'block' : 'none';
+    };
+
+    searchInput.addEventListener('input', applySearch);
+    clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        applySearch();
+        searchInput.focus();
+    });
+    navigation.addEventListener('change', function() {
+        const target = document.getElementById(navigation.value);
+        if (target) {
+            target.scrollIntoView({behavior: 'smooth', block: 'center'});
+            window.setTimeout(function() {
+                target.setAttribute('tabindex', '-1');
+                target.focus({preventScroll: true});
+            }, 250);
+        }
+        navigation.value = '';
+    });
+
+    let filterTimer = null;
+    const tableObserver = new MutationObserver(function() {
+        window.clearTimeout(filterTimer);
+        filterTimer = window.setTimeout(applySearch, 50);
+    });
+    tableObserver.observe(deviceBody, {childList: true, subtree: true});
+    tableObserver.observe(commandBody, {childList: true, subtree: true});
+    applySearch();
+}
+
 // Hiển thị modal xem nội dung file json Home_Assistant.json
 ['openModalBtn_Home_Assistant'].forEach(function(id) {
 	document.getElementById(id).addEventListener('click', function() {
@@ -1273,6 +1413,7 @@ function pingAgain() {
 });
 
 document.addEventListener('DOMContentLoaded', function () {
+    initializeBroadlinkPageNavigation();
     loadBroadlinkDevices();
 	loadLearnedCommandsEditable();
 });

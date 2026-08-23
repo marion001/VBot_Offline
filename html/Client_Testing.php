@@ -89,7 +89,10 @@ include 'html_head.php';
           </div>
 
           <label for="serverUrl" class="text-success">WebSocket URL:</label>
-          <input id="serverUrl" class="form-control border-success" value="ws://192.168.14.175:5003" autocomplete="off">
+          <input id="serverUrl" class="form-control border-success" value="<?php
+            $socketPort = (int)($Config['api']['streaming_server']['protocol']['socket']['port'] ?? 5003);
+            echo htmlspecialchars('ws://' . $serverIp . ':' . $socketPort, ENT_QUOTES, 'UTF-8');
+          ?>" autocomplete="off" inputmode="url" spellcheck="false">
 			<br/>
           <label for="sessionId" class="text-success">Session ID:</label>
           <input id="sessionId" class="form-control border-success" autocomplete="off">
@@ -231,6 +234,8 @@ include 'html_head.php';
     let sourceNode = null;
     let processorNode = null;
     let isRecording = false;
+    let isStartingRecording = false;
+    let recordingRequestId = 0;
     let frameCount = 0;
     let pendingBinaryAudioMeta = null;
     let pcmReceiving = false;
@@ -241,6 +246,7 @@ include 'html_head.php';
     let playbackContext = null;
     let nextPcmPlaybackTime = 0;
     const urlAudioPlayers = new Set();
+    const MAX_LOG_LINES = 1000;
 
     function makeSessionId() {
       return "VBot_Demo_Client_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 8);
@@ -252,6 +258,9 @@ include 'html_head.php';
       line.className = "log-" + type;
       line.textContent = `[${time}] ${message}`;
       els.log.appendChild(line);
+      while (els.log.childElementCount > MAX_LOG_LINES) {
+        els.log.firstElementChild.remove();
+      }
       els.log.scrollTop = els.log.scrollHeight;
     }
 
@@ -380,21 +389,67 @@ include 'html_head.php';
       log("Stopped URL audio players: " + stopped, stopped ? "ok" : "info");
     }
 
+    function stopPcmAudio(closeContext = false) {
+      for (const source of Array.from(pcmSources)) {
+        try { source.stop(); } catch {}
+        try { source.disconnect(); } catch {}
+        pcmSources.delete(source);
+      }
+      nextPcmPlaybackTime = 0;
+      pendingBinaryAudioMeta = null;
+      pcmReceiving = false;
+      if (pcmReceivingResetTimer) {
+        clearTimeout(pcmReceivingResetTimer);
+        pcmReceivingResetTimer = null;
+      }
+      if (closeContext && playbackContext) {
+        const context = playbackContext;
+        playbackContext = null;
+        if (context.state !== "closed") context.close().catch(() => {});
+      }
+    }
+
+    function isValidWebSocketUrl(value) {
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === "ws:" || parsed.protocol === "wss:";
+      } catch {
+        return false;
+      }
+    }
+
     function connectSocket() {
-      if (socket && socket.readyState === WebSocket.OPEN) return;
+      if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
 
       const url = els.serverUrl.value.trim();
-      socket = new WebSocket(url);
-      socket.binaryType = "arraybuffer";
+      if (!isValidWebSocketUrl(url)) {
+        log("WebSocket URL không hợp lệ. Chỉ chấp nhận ws:// hoặc wss://", "error");
+        setSocketState("URL không hợp lệ");
+        return;
+      }
+      let currentSocket;
+      try {
+        currentSocket = new WebSocket(url);
+      } catch (error) {
+        log("Không thể tạo WebSocket: " + error.message, "error");
+        setConnectedState(false);
+        return;
+      }
+      socket = currentSocket;
+      currentSocket.binaryType = "arraybuffer";
+      els.connectBtn.disabled = true;
+      els.disconnectBtn.disabled = false;
       setSocketState("Đang kết nối");
 
-      socket.onopen = () => {
+      currentSocket.onopen = () => {
+        if (socket !== currentSocket) return;
         setConnectedState(true);
         log("Đã kết nối " + url, "ok");
         sendClientConfig();
       };
 
-      socket.onmessage = (event) => {
+      currentSocket.onmessage = (event) => {
+        if (socket !== currentSocket) return;
         if (typeof event.data === "string") {
           try {
             const data = JSON.parse(event.data);
@@ -462,16 +517,20 @@ include 'html_head.php';
         }
       };
 
-      socket.onerror = () => {
+      currentSocket.onerror = () => {
+        if (socket !== currentSocket) return;
         log("Lỗi WebSocket", "error");
       };
 
-      socket.onclose = () => {
+      currentSocket.onclose = () => {
+        if (socket !== currentSocket) return;
         log("Socket đã đóng", "warn");
         setConnectedState(false);
         pendingBinaryAudioMeta = null;
         nextPcmPlaybackTime = 0;
         stopRecording(false);
+        stopUrlAudio();
+        stopPcmAudio(true);
         if (continueWakeUpTimer) {
           clearInterval(continueWakeUpTimer);
           continueWakeUpTimer = null;
@@ -513,8 +572,12 @@ include 'html_head.php';
 
     function disconnectSocket() {
       stopRecording(true);
+      stopUrlAudio();
+      stopPcmAudio(true);
       if (socket) {
         socket.close();
+      } else {
+        setConnectedState(false);
       }
     }
 
@@ -524,14 +587,25 @@ include 'html_head.php';
     }
 
     async function startRecording() {
-      if (isRecording) return;
+      if (isRecording || isStartingRecording) return;
+      isStartingRecording = true;
+      const requestId = ++recordingRequestId;
       if (!socket || socket.readyState !== WebSocket.OPEN) {
         const ready = await ensureSocketConnected();
-        if (!ready) return;
+        if (!ready) {
+          isStartingRecording = false;
+          return;
+        }
       }
 
       const sampleRate = Number(els.sampleRate.value) || 16000;
-      const chunkSize = Number(els.chunkSize.value) || 512;
+      const requestedChunkSize = Number(els.chunkSize.value) || 512;
+      const validChunkSizes = [256, 512, 1024, 2048, 4096, 8192, 16384];
+      const chunkSize = validChunkSizes.includes(requestedChunkSize) ? requestedChunkSize : 512;
+      if (chunkSize !== requestedChunkSize) {
+        els.chunkSize.value = String(chunkSize);
+        log("Frame samples không hợp lệ, đã dùng giá trị 512", "warn");
+      }
 
       try {
 
@@ -547,7 +621,7 @@ include 'html_head.php';
           return;
         }
 
-        mediaStream = await navigator.mediaDevices.getUserMedia({
+        const acquiredStream = await navigator.mediaDevices.getUserMedia({
           audio: {
             channelCount: 1,
             echoCancellation: true,
@@ -555,6 +629,12 @@ include 'html_head.php';
             autoGainControl: true
           }
         });
+
+        if (requestId !== recordingRequestId || !socket || socket.readyState !== WebSocket.OPEN) {
+          acquiredStream.getTracks().forEach(track => track.stop());
+          return;
+        }
+        mediaStream = acquiredStream;
 
         audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
         sourceNode = audioContext.createMediaStreamSource(mediaStream);
@@ -583,6 +663,9 @@ include 'html_head.php';
       } catch (error) {
         log("Không mở được microphone: " + error.message, "error");
         stopRecording(false);
+      } finally {
+        if (requestId === recordingRequestId) isStartingRecording = false;
+        setConnectedState(Boolean(socket && socket.readyState === WebSocket.OPEN));
       }
     }
 
@@ -608,7 +691,7 @@ include 'html_head.php';
     }
 
     async function startRecordingWakeUPSession() {
-      els.wakeBtn.disabled = true;
+      els.wakeUpBtn.disabled = true;
       try {
         const socketReady = await ensureSocketConnected();
         if (!socketReady) return;
@@ -624,11 +707,13 @@ include 'html_head.php';
 
         sendText("Skip_WakeUP");
       } finally {
-        els.wakeBtn.disabled = !(socket && socket.readyState === WebSocket.OPEN);
+        els.wakeUpBtn.disabled = false;
       }
     }
 
     function stopRecording(sendStopCommand = true) {
+      recordingRequestId += 1;
+      isStartingRecording = false;
       if (!isRecording && !audioContext && !mediaStream) return;
 
       isRecording = false;
@@ -678,6 +763,24 @@ include 'html_head.php';
         els.helpText.classList.toggle("d-none");
         els.currentUrl.textContent = window.location.href;
       });
+
+    window.addEventListener("pagehide", () => {
+      stopRecording(false);
+      for (const audio of Array.from(urlAudioPlayers)) {
+        try { audio.pause(); } catch {}
+        urlAudioPlayers.delete(audio);
+      }
+      stopPcmAudio(true);
+      if (continueWakeUpTimer) {
+        clearInterval(continueWakeUpTimer);
+        continueWakeUpTimer = null;
+      }
+      if (socket) {
+        const closingSocket = socket;
+        socket = null;
+        try { closingSocket.close(1000, "Page closed"); } catch {}
+      }
+    });
   </script>
 
 </body>

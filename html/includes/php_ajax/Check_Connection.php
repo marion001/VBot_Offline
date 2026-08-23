@@ -770,16 +770,20 @@ if (isset($_GET['Picovoice_Version'])) {
     exit();
 }
 
-#Chatbox Check_Connection.php?vbot_chatbox&ip=192.168.14.113&port=5002&text=tên%20bạn%20là%20gì
-if (isset($_GET['vbot_chatbox'])) {
-    if (!isset($_GET['ip_port']) || !isset($_GET['text'])) {
+#Chatbox: dùng POST để nội dung trò chuyện không xuất hiện trong URL và access log.
+if (isset($_POST['vbot_chatbox'])) {
+    vbotApiVerifyCsrf();
+    if (!isset($_POST['ip_port']) || !isset($_POST['text'])) {
         vbotApiJsonResponse([
             'success' => false,
             'message' => 'Thiếu một hoặc nhiều tham số: ip:port, text'
         ], 400);
     }
-    $ip_port = $_GET['ip_port'];
-    $text = $_GET['text'];
+    $ip_port = trim((string)$_POST['ip_port']);
+    $text = trim((string)$_POST['text']);
+    if ($text === '' || strlen($text) > 10000) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Nội dung Chatbox trống hoặc vượt quá giới hạn cho phép'], 400);
+    }
     $chatHost = parse_url($ip_port, PHP_URL_HOST);
     if (
         !filter_var($ip_port, FILTER_VALIDATE_URL)
@@ -799,9 +803,9 @@ if (isset($_GET['vbot_chatbox'])) {
         CURLOPT_URL => $ip_port,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_MAXREDIRS => 0,
         CURLOPT_TIMEOUT => 30,
-        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_FOLLOWLOCATION => false,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => $postData,

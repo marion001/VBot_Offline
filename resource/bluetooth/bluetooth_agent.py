@@ -70,6 +70,8 @@ visibility_timer = None
 
 active_playback_device = None  # MAC của thiết bị đang phát âm thanh
 active_playback_process = None  # process ID của bluealsa-aplay đang chạy
+suspended_playback_device = None  # MAC cần khôi phục sau khi AirPlay kết thúc
+BT_AUDIO_SUSPEND_FILE = "/tmp/vbot_bt_audio_suspended"
 playback_generation = 0  # vô hiệu hóa callback delayed-start cũ
 playback_lock = threading.RLock()
 device_names_cache = {}  # cache tên thiết bị để tránh gọi bluetoothctl info nhiều lần
@@ -301,6 +303,9 @@ def stop_bluealsa_playback():
 def start_bluealsa_playback(mac):
     global active_playback_process, active_playback_device, playback_generation
     if not mac: return
+    if os.path.exists(BT_AUDIO_SUSPEND_FILE):
+        log("BlueALSA đang tạm nhường đầu ra cho AirPlay")
+        return
     if (active_playback_device == mac and is_running(active_playback_process)): return
     
     #Chỉ cho phép âm thanh nếu đã ghép đôi
@@ -333,9 +338,12 @@ def _delayed_start_audio(mac, generation):
         return False
     try:
         process = subprocess.Popen(
-            ["bluealsa-aplay", f"--hci={BLUETOOTH_ADAPTER}", mac],
+            # bluealsa-aplay nhận địa chỉ thiết bị; --hci là tùy chọn của
+            # bluealsad và không tồn tại trên nhiều bản bluealsa-aplay.
+            ["bluealsa-aplay", mac],
             stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
+            # Đưa lỗi ALSA/BlueALSA vào journald để chẩn đoán được nguyên nhân.
+            stderr=None,
         )
         with playback_lock:
             stale = generation != playback_generation or active_playback_device != mac
@@ -375,12 +383,33 @@ def ensure_primary_audio():
 
 #Chỉ khởi động lại tiến trình phát lại đã chọn nếu bị thoát đột ngột
 def playback_health_check():
+    global suspended_playback_device
     if shutdown_requested:
         return False
-    device = active_playback_device
+    if os.path.exists(BT_AUDIO_SUSPEND_FILE):
+        if active_playback_device:
+            suspended_playback_device = active_playback_device
+        if is_running(active_playback_process):
+            stop_bluealsa_playback()
+        return True
+    device = active_playback_device or suspended_playback_device
+    if device and (not is_actually_connected(device) or not is_paired(device)):
+        suspended_playback_device = None
+        device = None
+    if device and active_playback_device is None:
+        suspended_playback_device = None
+        log(f"Khôi phục BlueALSA sau khi AirPlay kết thúc: {device_info_str(device)}")
+        start_bluealsa_playback(device)
+        return True
+    # Marker có thể xuất hiện đúng lúc Bluetooth vừa kết nối, trước khi agent
+    # kịp chọn active device. Khi AirPlay dừng phải tự chọn lại thiết bị.
+    if not device and connected_devices:
+        ensure_primary_audio()
+        return True
     if (device and is_actually_connected(device) and is_paired(device)
             and not is_running(active_playback_process)):
-        log(f"bluealsa-aplay đã dừng ngoài ý muốn, khởi động lại cho: {device_info_str(device)}")
+        exit_code = active_playback_process.poll() if active_playback_process else None
+        log(f"bluealsa-aplay đã dừng ngoài ý muốn (exit={exit_code}), khởi động lại cho: {device_info_str(device)}")
         start_bluealsa_playback(device)
     return True
 

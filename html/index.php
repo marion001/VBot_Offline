@@ -340,21 +340,20 @@ include 'html_head.php';
                       <font color=red>00:00:00 / 00:00:00</font>
                     </div>
                   </div>
-                  <center>
-					<button type="button" id="play_Button" name="play_Button" title="Phát nhạc" class="btn btn-success" onclick="control_media('resume')"><i class="bi bi-play-circle"></i></button>
-                    <button type="button" id="pause_Button" name="pause_Button" title="Tạm dừng phát nhạc" class="btn btn-warning" onclick="control_media('pause')"><i class="bi bi-pause-circle"></i></button>
-                    <button type="button" id="stop_Button" name="stop_Button" title="Dừng phát nhạc" class="btn btn-danger" onclick="control_media('stop')"><i class="bi bi-stop-circle"></i></button>
-					
-					<button type="button" id="ble_prev_Button" name="ble_prev_Button" title="Bluetooth: Chuyển bài trước đó" class="btn btn-primary" onclick="bluetooth_control('previous')"><i class="bi bi-bluetooth"></i> <i class="bi bi-skip-backward"></i></button>
-					<button type="button" id="ble_next_Button" name="ble_next_Button" title="Bluetooth: Chuyển bài kế tiếp" class="btn btn-primary" onclick="bluetooth_control('next')"><i class="bi bi-skip-forward"></i> <i class="bi bi-bluetooth"></i></button>
-
-                  </center>
-                  <br/>
-                  <center>
-				  <button type="button" id="playlist_prev_Button" name="playlist_prev_Button" title="Chuyển bài hát trước đó" class="btn btn-success rounded-pill" onclick="playlist_media_control('prev')"><i class="bi bi-music-note-list"></i> <i class="bi bi-skip-backward-fill"></i></button>
-                    <button type="button" id="playlist_play_Button" name="playlist_play_Button" title="Phát nhạc trong Play List" class="btn btn-primary rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>
-                    <button type="button" id="playlist_next_Button" name="playlist_next_Button" title="Chuyển bài hát kế tiếp" class="btn btn-success rounded-pill" onclick="playlist_media_control('next')"><i class="bi bi-skip-forward-fill"></i> <i class="bi bi-music-note-list"></i></button>
-                  </center>
+                  <div class="d-flex flex-column align-items-center gap-2">
+                    <div class="d-flex flex-row align-items-center justify-content-center gap-2" aria-label="Các nút điều khiển media">
+                      <div class="btn-group" role="group" aria-label="Điều khiển phát nhạc">
+                        <button type="button" id="play_Button" title="Phát nhạc" class="btn btn-success" onclick="control_media('resume')"><i class="bi bi-play-circle"></i></button>
+                        <button type="button" id="pause_Button" title="Tạm dừng phát nhạc" class="btn btn-warning" onclick="control_media('pause')"><i class="bi bi-pause-circle"></i></button>
+                        <button type="button" id="stop_Button" title="Dừng phát nhạc" class="btn btn-danger" onclick="control_media('stop')"><i class="bi bi-stop-circle"></i></button>
+                      </div>
+                      <div class="btn-group" role="group" aria-label="Chuyển bài hát">
+                        <button type="button" id="media_prev_Button" title="Chuyển bài trước theo nguồn đang phát" class="btn btn-outline-primary" onclick="control_media('previous')"><i class="bi bi-skip-backward-fill"></i></button>
+                        <button type="button" id="media_next_Button" title="Chuyển bài kế tiếp theo nguồn đang phát" class="btn btn-outline-primary" onclick="control_media('next')"><i class="bi bi-skip-forward-fill"></i></button>
+                      </div>
+                    </div>
+                    <button type="button" id="playlist_play_Button" title="Phát Playlist mặc định" class="btn btn-primary btn-sm rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> Phát Playlist mặc định</button>
+                  </div>
                 </div>
                 <hr />
                 <div class="card-body">
@@ -1339,7 +1338,7 @@ include 'html_head.php';
         const p={action:action}; 
         if(action==='start') p.group_id=document.getElementById('mr-session-group-select').value; 
         await multiroomRequest(p); 
-        multiroomSuccess(action==='start'?'Đã bắt đầu phát âm thanh đa vùng':'Đã dừng Multiroom và chuyển về loa local'); 
+        multiroomSuccess(action==='start'?'Đã kết nối âm thanh đa vùng':'Đã dừng Multiroom và chuyển về loa local'); 
       } catch(e){
         mrMessage(e.message,true);
       } finally { multiroomLoadingEnd(); }
@@ -1529,10 +1528,16 @@ include 'html_head.php';
       speakersContainer.innerHTML = allDevices.map(d => {
         const currentSpeaker = speakersMap[d.id];
         const isInCurrentSession = currentSpeakerIds.includes(d.id);
+        const isCoordinator = normalizedCoordinatorHost && normalizeMrHost(d.host) === normalizedCoordinatorHost;
         
         // Xác định trạng thái checkbox: nếu có pending change, dùng nó; không thì dùng trạng thái hiện tại
         let isChecked;
-        if(multiroomPendingSpeakerChanges.hasOwnProperty(d.id)) {
+        if(isCoordinator) {
+          // Loa chủ chính là nguồn PCM nên luôn thuộc phiên phát. Không cho
+          // WebUI gửi yêu cầu ngắt chính coordinator khỏi phiên của nó.
+          isChecked = true;
+          delete multiroomPendingSpeakerChanges[d.id];
+        } else if(multiroomPendingSpeakerChanges.hasOwnProperty(d.id)) {
           isChecked = multiroomPendingSpeakerChanges[d.id]; // Dùng pending state
         } else {
           isChecked = isInCurrentSession; // Dùng current state
@@ -1544,15 +1549,16 @@ include 'html_head.php';
         const statusClass = effectiveOnline === false ? 'text-danger' : 'text-success';
         const statusText = effectiveOnline === false ? 'offline' : 'online';
         const bgColor = isChecked ? '#e8f5e9' : (isInCurrentSession ? '#fff3e0' : '#f5f5f5');
-        const isCoordinator = normalizedCoordinatorHost && normalizeMrHost(d.host) === normalizedCoordinatorHost;
         const isCurrentDevice = (localDeviceId && String(d.id||'').trim().toLowerCase() === localDeviceId)
           || (localDeviceHost && normalizeMrHost(d.host) === localDeviceHost);
         
 		return '<div class="col-md-6"><div class="border rounded p-3" style="background:' + bgColor + ';">' +
 		  '<div class="form-check mb-2">' +
 			'<input class="form-check-input border-success" type="checkbox" id="speaker_' + d.id + '" ' + (isChecked ? 'checked' : '') +
+			  (isCoordinator ? ' disabled title="Loa chủ luôn phát âm thanh trong phiên"' : '') +
 			  " onchange=\"toggleSessionSpeaker('" + d.id + "', this.checked)\">" +
-			'<label class="form-check-label fw-bold d-block">' +
+			'<label class="form-check-label fw-bold d-block"' +
+			  (isCoordinator ? ' style="opacity:1;color:inherit;"' : '') + '>' +
 			  '<span class="d-block"><i class="bi bi-speaker"></i> ' + (d.name || d.id || 'Loa') +
 				' <span class="' + statusClass + '" title="' + statusText + '">●</span>' +
 			  '</span>' +
@@ -2006,9 +2012,10 @@ function renderBluetoothActive(bluetooth) {
     }
 }
 
-//Bật tắt 2 button next và prev tương ứng khi kết nối bluetooth
+//Nút tắt/mở tiếng Bluetooth chỉ hoạt động khi có thiết bị kết nối.
+//Previous/Next là nút dùng chung nên được backend quyết định theo nguồn đang phát.
 function setBleButtons(enabled) {
-    ["ble_prev_Button", "ble_next_Button", "bluetooth_mute_unmute"].forEach(id => {
+    ["bluetooth_mute_unmute"].forEach(id => {
         const btn = document.getElementById(id);
         if (btn) {
             btn.disabled = !enabled;
@@ -3039,7 +3046,7 @@ function update_index_data(data){
 		'<div class="col-md-3 pt-md-4"><div class="form-check form-switch"><input id="playlist-loop-mode" class="form-check-input" type="checkbox" ' + (selectedMeta.loop?'checked':'') + '><label class="form-check-label" for="playlist-loop-mode">Lặp danh sách</label></div></div>' +
 		'<div class="col-md-5 pt-md-4"><button class="btn btn-info btn-sm" onclick="playlistSaveSettings()"><i class="bi bi-save"></i> Lưu Chế Độ Phát</button> <button id="playlist-save-order" class="btn btn-outline-primary btn-sm" onclick="playlistSaveOrder()"><i class="bi bi-list-ol"></i> Lưu Thứ Tự</button></div></div></div>' +
 		'<div class="playlist-control-panel playlist-control-panel-success"><span class="playlist-control-label"><i class="bi bi-check2-square"></i> Thao Tác Các Bài Đã Chọn <span id="playlist-selected-count" class="badge bg-secondary ms-1">Đã chọn: 0 / ' + Number(selectedMeta.item_count||0) + ' bài</span></span><div class="input-group input-group-sm"><span class="input-group-text">PlayList đích</span><select id="playlist-bulk-target" class="form-select" ' + (bulkTargetOptions?'':'disabled') + '>' + (bulkTargetOptions || '<option>Chưa có PlayList khác</option>') + '</select><button id="playlist-copy-selected" class="btn btn-outline-success" onclick="playlistItemsAction(\'copy\')" disabled><i class="bi bi-copy"></i> Sao Chép Bài Đã Chọn</button><button id="playlist-move-selected" class="btn btn-outline-warning" onclick="playlistItemsAction(\'move\')" disabled><i class="bi bi-arrow-left-right"></i> Di Chuyển Bài Đã Chọn</button><button id="playlist-delete-selected" class="btn btn-danger" onclick="playlistDeleteSelected()" disabled><i class="bi bi-trash"></i> Xóa Bài Đã Chọn</button></div><div class="text-muted small mt-2"><i class="bi bi-arrow-up-down"></i> Dùng nút mũi tên trên từng bài để đổi vị trí; hệ thống sẽ tự lưu sau khi thay đổi.</div></div>' +
-		'<div class="playlist-control-panel playlist-control-panel-success"><span class="playlist-control-label"><i class="bi bi-file-earmark-arrow-up"></i> Nhập Dữ Liệu PlayList</span><div class="row g-2"><div class="col-12 col-md"><select id="playlist-import-mode" class="form-select border-success" onchange="document.getElementById(\'playlist-import-new-name-column\').classList.toggle(\'d-none\',this.value!==\'new\')"><option value="overwrite">Ghi đè PlayList hiện tại</option><option value="merge">Gộp và bỏ bài trùng</option><option value="new">Tạo thành PlayList mới</option></select></div><div id="playlist-import-new-name-column" class="col-12 col-md d-none"><input id="playlist-import-new-name" maxlength="80" class="form-control border-success" placeholder="Tên PlayList mới"></div><div class="col-12 col-md"><div class="input-group"><input type="file" class="form-control border-success" id="fileInput_PlayList" accept=".json"><button class="btn btn-primary border-success" type="button" onclick="uploadFile_PlayList(\'index.php\')"><i class="bi bi-upload"></i> Tải Lên</button></div></div></div></div>' +
+		'<div class="playlist-control-panel playlist-control-panel-success"><span class="playlist-control-label"><i class="bi bi-file-earmark-arrow-up"></i> Tải Lên và Nhập Vào Dữ LIệu PlayList</span><div class="row g-2"><div class="col-12 col-md"><select id="playlist-import-mode" class="form-select border-success" onchange="document.getElementById(\'playlist-import-new-name-column\').classList.toggle(\'d-none\',this.value!==\'new\')"><option value="overwrite">Ghi đè PlayList hiện tại</option><option value="merge">Gộp và bỏ bài trùng</option><option value="new">Tạo thành PlayList mới</option></select></div><div id="playlist-import-new-name-column" class="col-12 col-md d-none"><input id="playlist-import-new-name" maxlength="80" class="form-control border-success" placeholder="Tên PlayList mới"></div><div class="col-12"><div class="input-group"><input type="file" class="form-control border-success" id="fileInput_PlayList" accept=".json"><button class="btn btn-primary border-success" type="button" onclick="uploadFile_PlayList(\'index.php\')"><i class="bi bi-upload"></i> Tải lên và nhập</button></div></div></div></div>' +
 		'<div class="row g-2 align-items-center my-3"><div class="col-md-6"><div class="input-group input-group-sm"><span class="input-group-text"><i class="bi bi-search"></i></span><input id="playlist-filter" class="form-control" placeholder="Tìm tên bài, nghệ sĩ hoặc nguồn..." oninput="playlistApplyFilterPage(true)"></div></div><div class="col-md-2"><select id="playlist-page-size" class="form-select form-select-sm" onchange="playlistApplyFilterPage(true)"><option value="5">5 bài/trang</option><option value="10" selected>10 bài/trang</option><option value="20">20 bài/trang</option><option value="50">50 bài/trang</option></select></div><div class="col-md-4 text-md-end"><button id="playlist-page-prev" class="btn btn-outline-secondary btn-sm" onclick="playlistChangePage(-1)"><i class="bi bi-chevron-left"></i></button> <span id="playlist-page-info" class="small mx-2">Trang 1/1</span><button id="playlist-page-next" class="btn btn-outline-secondary btn-sm" onclick="playlistChangePage(1)"><i class="bi bi-chevron-right"></i></button></div></div>' +
 		'<table class="table table-borderless" id="playlistTable">' +
         '<thead>' +

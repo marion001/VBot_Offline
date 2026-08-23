@@ -87,7 +87,18 @@ function playlistInitializeStore()
 {
 	$paths = playlistStorePaths();
 	$defaultPath = $paths['directory'].DIRECTORY_SEPARATOR.'default.json';
-	if (!file_exists($paths['manifest'])) {
+	$manifest = file_exists($paths['manifest'])
+		? json_decode((string)file_get_contents($paths['manifest']), true)
+		: null;
+	$manifestValid = is_array($manifest) && !empty($manifest['playlists']) && is_array($manifest['playlists']);
+	if (!$manifestValid && file_exists($paths['manifest'].'.bak')) {
+		$backup = json_decode((string)file_get_contents($paths['manifest'].'.bak'), true);
+		if (is_array($backup) && !empty($backup['playlists']) && is_array($backup['playlists'])) {
+			$manifest = $backup;
+			$manifestValid = playlistAtomicWrite($paths['manifest'], $manifest);
+		}
+	}
+	if (!$manifestValid) {
 		$legacy = null;
 		if (file_exists($paths['legacy'])) {
 			$legacy = json_decode((string)file_get_contents($paths['legacy']), true);
@@ -97,17 +108,17 @@ function playlistInitializeStore()
 		}
 		playlistAtomicWrite($defaultPath, $legacy);
 		$now = time();
-		playlistAtomicWrite($paths['manifest'], [
+		$manifest = [
 			'success' => true,
 			'active_id' => 'default',
 			'playlists' => [[
 				'id' => 'default', 'name' => 'Mặc định', 'file' => 'default.json',
 				'created_at' => $now, 'updated_at' => $now,
 			]],
-		]);
+		];
+		playlistAtomicWrite($paths['manifest'], $manifest);
 		playlistAtomicWrite($paths['legacy'], $legacy);
 	}
-	$manifest = json_decode((string)file_get_contents($paths['manifest']), true);
 	if (!is_array($manifest) || empty($manifest['playlists']) || !is_array($manifest['playlists'])) {
 		throw new RuntimeException('Dữ liệu quản lý PlayList không hợp lệ');
 	}
@@ -1271,6 +1282,9 @@ if (isset($_GET['Cache_PlayList'])) {
 		$data = playlistReadData($playlistJsonPath, $meta['name']);
 		$data['playlist'] = $meta;
 		$data['active_id'] = $manifest['active_id'];
+		if (isset($_GET['_download'])) {
+			header('Content-Disposition: attachment; filename="VBot_PlayList_'.$meta['id'].'.json"');
+		}
 		echo json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 	} catch (Throwable $error) {
 		echo json_encode(['success' => false, 'message' => $error->getMessage()], JSON_UNESCAPED_UNICODE);

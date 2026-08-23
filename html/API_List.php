@@ -167,6 +167,41 @@ if (!isset($_SESSION['user_login']) ||
     .details-container h5 {
         margin-bottom: 1rem;
     }
+
+    .api-list-toolbar {
+        position: sticky;
+        top: 64px;
+        z-index: 900;
+        padding: .75rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(13, 110, 253, .22);
+        border-radius: .75rem;
+        background: rgba(244, 248, 255, .96);
+        box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+        backdrop-filter: blur(6px);
+    }
+
+    .api-list-search-hidden {
+        display: none !important;
+    }
+
+    #api-list-empty {
+        display: none;
+    }
+
+    @media (max-width: 767.98px) {
+        .api-list-toolbar {
+            top: 60px;
+        }
+
+        .list-container {
+            max-height: 45vh;
+            margin-bottom: 1rem;
+            border-right: 0;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: .75rem;
+        }
+    }
 </style>
 </head>
 <?php
@@ -189,6 +224,33 @@ include 'html_sidebar.php';
       </nav>
     </div>
 	    <section class="section">
+        <div class="api-list-toolbar" id="api-list-toolbar" aria-label="Tìm kiếm và lọc API">
+            <div class="row g-2 align-items-center">
+                <div class="col-12 col-lg">
+                    <div class="input-group">
+                        <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+                        <input type="search" id="api-list-search" class="form-control border-primary"
+                            placeholder="Tìm theo tên API, method hoặc URL..." autocomplete="off">
+                        <button type="button" id="api-list-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm">
+                            <i class="bi bi-x-lg"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="col-6 col-lg-auto">
+                    <select id="api-method-filter" class="form-select border-primary" aria-label="Lọc theo phương thức API">
+                        <option value="">Tất cả Method</option>
+                    </select>
+                </div>
+                <div class="col-6 col-lg-auto">
+                    <select id="api-quick-navigation" class="form-select border-primary" aria-label="Mở nhanh API">
+                        <option value="">Mở nhanh API...</option>
+                    </select>
+                </div>
+            </div>
+            <div id="api-list-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
+                <i class="bi bi-info-circle"></i> Không tìm thấy API phù hợp.
+            </div>
+        </div>
         <div class="row">
 
 <?php
@@ -205,7 +267,7 @@ echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fa
         $items = $data['item'];
 		?>
         <!-- Hiển thị thông tin từ mục info -->
-        <div class="card mb-4">
+        <div class="card mb-4" id="api-info-section">
             <div class="card-header">
                 <h4 class="mb-0 text-primary">Thông tin API</h4>
             </div>
@@ -218,14 +280,18 @@ echo '<div class="col-lg-12"><div class="alert alert-danger alert-dismissible fa
             </div>
         </div>
         <!-- Hiển thị danh sách các yêu cầu API -->
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-4" id="api-browser-section">
     <div class="row">
         <!-- Sidebar (Left Column) -->
         <div class="col-md-4 list-container">
 		<p class="text-primary"><strong>Danh Sách API:</strong></p>
             <div class="list-group" id="apiList">
                 <?php foreach ($items as $index => $item): ?>
-                    <a class="list-group-item list-group-item-action" onclick="showDetails(<?php echo $index; ?>)">
+                    <a class="list-group-item list-group-item-action" role="button" tabindex="0"
+                       data-api-index="<?php echo $index; ?>"
+                       data-api-name="<?php echo htmlspecialchars($item['name'], ENT_QUOTES, 'UTF-8'); ?>"
+                       data-api-method="<?php echo htmlspecialchars(strtoupper($item['request']['method']), ENT_QUOTES, 'UTF-8'); ?>"
+                       onclick="showDetails(<?php echo $index; ?>)">
                         <?php echo htmlspecialchars($item['name'])." <span class='badge bg-primary'> ".htmlspecialchars($item['request']['method'])."</span>"; ?>
                     </a>
                 <?php endforeach; ?>
@@ -385,13 +451,97 @@ const apiCode =
 </script>
 
 <script>
-    const items = <?php echo json_encode($items, JSON_HEX_TAG); ?>;
+    const items = <?php echo json_encode(isset($items) && is_array($items) ? $items : [], JSON_HEX_TAG); ?>;
+
+function normalizeApiListSearchText(value) {
+    return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLocaleLowerCase('vi')
+        .trim();
+}
+
+function initializeApiListNavigation() {
+    const searchInput = document.getElementById('api-list-search');
+    const clearButton = document.getElementById('api-list-search-clear');
+    const methodFilter = document.getElementById('api-method-filter');
+    const quickNavigation = document.getElementById('api-quick-navigation');
+    const emptyState = document.getElementById('api-list-empty');
+    const apiList = document.getElementById('apiList');
+    if (!searchInput || !clearButton || !methodFilter || !quickNavigation || !emptyState || !apiList) {
+        return;
+    }
+
+    const links = Array.from(apiList.querySelectorAll('.list-group-item[data-api-index]'));
+    const methods = new Set();
+    links.forEach(function(link) {
+        const index = Number(link.dataset.apiIndex);
+        const item = items[index] || {};
+        const method = String(link.dataset.apiMethod || '').toUpperCase();
+        const rawUrl = item.request && item.request.url ? (item.request.url.raw || '') : '';
+        link.dataset.apiSearch = normalizeApiListSearchText(link.dataset.apiName + ' ' + method + ' ' + rawUrl);
+        if (method) {
+            methods.add(method);
+        }
+        quickNavigation.appendChild(new Option(method + ' — ' + link.dataset.apiName, String(index)));
+        link.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault();
+                showDetails(index);
+            }
+        });
+    });
+
+    Array.from(methods).sort().forEach(function(method) {
+        methodFilter.appendChild(new Option(method, method));
+    });
+
+    const applyFilter = function() {
+        const query = normalizeApiListSearchText(searchInput.value);
+        const selectedMethod = methodFilter.value;
+        let visibleCount = 0;
+        links.forEach(function(link) {
+            const matchesSearch = query === '' || link.dataset.apiSearch.includes(query);
+            const matchesMethod = selectedMethod === '' || link.dataset.apiMethod === selectedMethod;
+            const visible = matchesSearch && matchesMethod;
+            link.classList.toggle('api-list-search-hidden', !visible);
+            if (visible) {
+                visibleCount += 1;
+            }
+        });
+        emptyState.style.display = visibleCount === 0 ? 'block' : 'none';
+    };
+
+    searchInput.addEventListener('input', applyFilter);
+    methodFilter.addEventListener('change', applyFilter);
+    clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        methodFilter.value = '';
+        applyFilter();
+        searchInput.focus();
+    });
+    quickNavigation.addEventListener('change', function() {
+        if (quickNavigation.value !== '') {
+            searchInput.value = '';
+            methodFilter.value = '';
+            applyFilter();
+            showDetails(Number(quickNavigation.value));
+            document.getElementById('detailsContainer')?.scrollIntoView({behavior: 'smooth', block: 'start'});
+        }
+        quickNavigation.value = '';
+    });
+    applyFilter();
+}
+
 // Hàm hiển thị chi tiết API
 function showDetails(index) {
-    const listItems = document.querySelectorAll('.list-group-item');
+    const listItems = document.querySelectorAll('#apiList .list-group-item[data-api-index]');
 
     listItems.forEach(item => item.classList.remove('active'));
 
+    if (!items[index] || !listItems[index]) {
+        return;
+    }
     listItems[index].classList.add('active');
 
     const item = items[index];
@@ -601,6 +751,8 @@ function updateCodeDisplay(index) {
             document.body.removeChild(textarea);
         }
     }
+
+    document.addEventListener('DOMContentLoaded', initializeApiListNavigation);
 </script>
 
 

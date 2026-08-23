@@ -570,6 +570,12 @@ function saveMessage(type, text, name_vbot) {
     localStorage.setItem('messages', JSON.stringify(messages));
 }
 
+function escapeStoredChatboxHtml(value) {
+    const node = document.createElement('div');
+    node.textContent = value == null ? '' : String(value);
+    return node.innerHTML;
+}
+
 //Hàm xóa tin nhắn khỏi localStorage và giao diện
 function deleteMessage(index) {
     const messages = JSON.parse(localStorage.getItem('messages')) || [];
@@ -587,7 +593,7 @@ function loadMessages() {
     messages.forEach(function (message, index) {
         var messageHTML = '<div class="message ' + (message.type === 'user' ? 'user-message' : 'bot-message') + '">' +
             '<span class="delete_message_chatbox" data-index="' + index + '" title="Xóa tin nhắn">x</span>' +
-            '<div class="message-time">' + message.time + '</div>';
+            '<div class="message-time">' + escapeStoredChatboxHtml(message.time) + '</div>';
         if (message.text && /^TTS_Audio.*\.(mp3|ogg|wav)$/i.test(message.text)) {
             var audioExtension = message.text.split('.').pop();
             var fullAudioUrl = 'includes/php_ajax/Show_file_path.php?TTS_Audio=' + encodeURIComponent(message.text);
@@ -599,7 +605,7 @@ function loadMessages() {
                 '    </audio>' +
                 '</div>';
         } else {
-            messageHTML += '<div>' + message.text + '</div>';
+            messageHTML += '<div>' + escapeStoredChatboxHtml(message.text) + '</div>';
         }
         messageHTML += '</div>';
         chatbox.innerHTML += messageHTML;

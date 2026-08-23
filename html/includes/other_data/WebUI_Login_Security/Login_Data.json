@@ -1,4 +1,3 @@
 {
-    "number_of_failed_logins": 0,
-    "last_failed_login_time": null
+    "attempts_by_client": []
 }

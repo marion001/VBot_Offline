@@ -142,10 +142,10 @@ async def dev_skill(input_text):
         pass
         
     #ví dụ phát nhạc:
-    Lib.audio_media_url = "http://vutuyen.dev/1.mp3" #link bài hát, hoặc link stream, radio, v..v...
-    Lib.audio_media_title = "thuyền quyên" #tên của hài hát
-    Lib.audio_media_cover = "http://vutuyen.dev/1.png" #ảnh của bài nhạc
-    Lib.media_player_source = "youtube" #Điền gì cũng được
+    Lib.vbot_state.set_media_metadata(
+        url="http://vutuyen.dev/1.mp3", title="thuyền quyên",
+        cover="http://vutuyen.dev/1.png", source="youtube",
+    )
     #Tiến hành phát nhạc
     media_player.Play_Media(Lib.audio_media_url)
     

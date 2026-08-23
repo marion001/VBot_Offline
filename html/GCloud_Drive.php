@@ -46,6 +46,16 @@ if ($google_cloud_drive_active === true) {
     return round($bytes, $precision) . ' ' . $units[$pow];
   }
 
+  function maskGoogleDriveToken($value)
+  {
+    $value = (string)$value;
+    if ($value === '') {
+      return 'Không có dữ liệu';
+    }
+    $visibleLength = min(6, strlen($value));
+    return str_repeat('•', max(8, strlen($value) - $visibleLength)) . substr($value, -$visibleLength);
+  }
+
   // Hàm kiểm tra và tạo thư mục nếu chưa tồn tại
   function createDirectoryIfNotExists($filePath)
   {
@@ -152,6 +162,36 @@ include 'html_head.php';
       window.location.href = "GCloud_Drive.php";
     }
   </script>
+  <style>
+    .gdrive-toolbar {
+      position: sticky;
+      top: 64px;
+      z-index: 900;
+      padding: .75rem;
+      margin-bottom: 1rem;
+      border: 1px solid rgba(13, 110, 253, .22);
+      border-radius: .75rem;
+      background: rgba(244, 248, 255, .96);
+      box-shadow: 0 .25rem .75rem rgba(18, 38, 63, .08);
+      backdrop-filter: blur(6px);
+    }
+
+    .gdrive-section {
+      border: 1px solid rgba(13, 110, 253, .18);
+      border-radius: .75rem;
+    }
+
+    #client_secret_json {
+      min-height: 12rem;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    @media (max-width: 991.98px) {
+      .gdrive-toolbar {
+        top: 60px;
+      }
+    }
+  </style>
 </head>
 
 <body>
@@ -279,6 +319,24 @@ include 'html_head.php';
     </div>
     <!-- End Page Title -->
     <section class="section">
+      <div class="gdrive-toolbar" id="gdrive-toolbar" aria-label="Điều hướng cấu hình Google Drive">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-lg">
+            <div class="small text-primary">
+              <i class="bi bi-shield-lock-fill"></i>
+              Token xác thực được che trên giao diện. Việc lưu và tự động làm mới token vẫn hoạt động bình thường.
+            </div>
+          </div>
+          <div class="col-12 col-lg-auto">
+            <select id="gdrive-quick-navigation" class="form-select border-primary" aria-label="Đi tới khu vực Google Drive">
+              <option value="">Đi tới khu vực...</option>
+              <option value="gdrive-oauth-section">Cấu hình OAuth Client</option>
+              <option value="gdrive-token-section">Xác thực và thông tin Drive</option>
+              <option value="gdrive-danger-section">Xóa dữ liệu Google Drive</option>
+            </select>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <?php
         if ($google_cloud_drive_active === true) {
@@ -375,9 +433,9 @@ include 'html_head.php';
           <?php
           echo '<div style="text-align: right;">Google API Client Version: <font color=red><b>' . $client::LIBVER . '</b></font></div><br/><br/>';
           ?>
-          <div class="card accordion" id="accordion_button_client_secret_json">
+          <div class="card accordion gdrive-section" id="accordion_button_client_secret_json">
             <div class="card-body">
-              <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_client_secret_json" aria-expanded="false" aria-controls="collapse_button_client_secret_json">
+              <h5 class="card-title accordion-button collapsed" id="gdrive-oauth-section" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_client_secret_json" aria-expanded="false" aria-controls="collapse_button_client_secret_json">
                 Thông Tin Xác Thực: Google Cloud OAuth 2.0 Client IDs, Type->Desktop
               </h5>
               <div id="collapse_button_client_secret_json" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_client_secret_json">
@@ -400,7 +458,7 @@ include 'html_head.php';
           <?php
           if ($activve_show === true) {
           ?>
-            <div class="card">
+            <div class="card gdrive-section" id="gdrive-token-section">
               <div class="card-body">
                 <h5 class="card-title">Google Driver Verify Token</h5>
                 <?php
@@ -571,7 +629,7 @@ include 'html_head.php';
                 <label for="access_token_verify" class="col-sm-3 col-form-label" title="Verify Token">Mã Token: </label>
                 <div class="col-sm-9">
                 <div class="input-group mb-3">
-                <input disabled type="text" class="form-control border-danger" name="access_token_verify" id="access_token_verify" placeholder="' . $accessToken['access_token'] . '" value="' . $accessToken['access_token'] . '">
+                <input disabled type="text" class="form-control border-danger" name="access_token_verify" id="access_token_verify" value="' . htmlspecialchars(maskGoogleDriveToken($accessToken['access_token'] ?? ''), ENT_QUOTES, 'UTF-8') . '">
                 </div>
                 </div>
                 </div>';
@@ -579,7 +637,7 @@ include 'html_head.php';
                 <label for="refresh_token_verify" class="col-sm-3 col-form-label" title="Refresh Token">Mã làm mới Token: </label>
                 <div class="col-sm-9">
                 <div class="input-group mb-3">
-                <input disabled type="text" class="form-control border-danger" name="refresh_token_verify" id="refresh_token_verify" placeholder="' . $accessToken['refresh_token'] . '" value="' . $accessToken['refresh_token'] . '">
+                <input disabled type="text" class="form-control border-danger" name="refresh_token_verify" id="refresh_token_verify" value="' . htmlspecialchars(maskGoogleDriveToken($accessToken['refresh_token'] ?? ''), ENT_QUOTES, 'UTF-8') . '">
                 </div>
                 </div>
                 </div>';
@@ -624,7 +682,7 @@ include 'html_head.php';
 <div class="alert alert-primary" role="alert">
 Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cấu Hình Tải Lên Bản Sao Lưu Dữ Liệu - Cloud Backup</b> -> <b>Google Cloud Drive</b> -> <b>Kích Hoạt</b>
 </div>
-                <form method="post" onsubmit="return confirmDelete();">
+                <form method="post" id="gdrive-danger-section" class="border border-danger rounded p-3" onsubmit="return confirmDelete();">
                   <center><button class="btn btn-danger border-danger rounded-pill" type="submit" name="del_all_data_gcloud_drive">Xóa toàn bộ Dữ Liệu</button></center>
                 </form>
               </div>
@@ -647,6 +705,41 @@ include 'html_head.php';
       return confirm("Bạn có chắc chắn muốn xóa toàn bộ dữ liệu không, thao tác này sẽ xóa cả dữ liệu tệp cấu hình xác thực JSON  Google Cloud OAuth 2.0 Client IDs");
 
     }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const navigation = document.getElementById('gdrive-quick-navigation');
+      if (!navigation) {
+        return;
+      }
+      navigation.addEventListener('change', function() {
+        const target = document.getElementById(navigation.value);
+        if (target) {
+          target.scrollIntoView({behavior: 'smooth', block: 'center'});
+          window.setTimeout(function() {
+            if (target.id === 'gdrive-oauth-section') {
+              const collapseElement = document.getElementById('collapse_button_client_secret_json');
+              const BootstrapCollapse = window.bootstrap && window.bootstrap.Collapse;
+              if (collapseElement && BootstrapCollapse) {
+                let instance = typeof BootstrapCollapse.getOrCreateInstance === 'function'
+                  ? BootstrapCollapse.getOrCreateInstance(collapseElement, {toggle: false})
+                  : (typeof BootstrapCollapse.getInstance === 'function' ? BootstrapCollapse.getInstance(collapseElement) : null);
+                if (!instance) {
+                  instance = new BootstrapCollapse(collapseElement, {toggle: false});
+                }
+                instance.show();
+              } else if (collapseElement) {
+                collapseElement.classList.add('show');
+                target.classList.remove('collapsed');
+                target.setAttribute('aria-expanded', 'true');
+              }
+            }
+            target.setAttribute('tabindex', '-1');
+            target.focus({preventScroll: true});
+          }, 250);
+        }
+        navigation.value = '';
+      });
+    });
   </script>
   <!-- Template Main JS File -->
   <?php

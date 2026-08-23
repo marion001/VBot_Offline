@@ -1,8 +1,8 @@
 {
-    "version": "1.2.2",
+    "version": "1.2.3",
     "projectName": "Program VBot Offline",
-    "description": "Sửa Lỗi Trợ Lý Xiaozhi, Nâng cấp xử lý Lịch Trình Thông Báo Scheduler + Giao Diện Cấu Hình, Nâng Cấp Xiaozhi MCP. Và các thay đổi tối ưu khác",
-    "releaseDate": "15/08/2026",
+    "description": "Fix Bug hệ thống, Nâng Cấp Multiroom Phát âm thanh đa vùng, Nâng Cấp Multi Playlist, Cấu trúc giao diện WebUI và nhiều thay đổi khác",
+    "releaseDate": "23/08/2026",
     "changes": [
         {
             "type": "feature",

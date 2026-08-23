@@ -33,6 +33,53 @@ include 'html_head.php';
         }
         .cmd { color: #28a745; font-weight: 500; }
         .path { color: #dc3545; }
+        .faq-search-toolbar {
+            position: sticky;
+            top: 65px;
+            z-index: 20;
+            padding: 12px;
+            margin-bottom: 16px;
+            border: 1px solid rgba(13, 110, 253, 0.25);
+            border-radius: 10px;
+            background: rgba(248, 249, 250, 0.96);
+            backdrop-filter: blur(5px);
+        }
+        .faq-search-results {
+            position: absolute;
+            top: calc(100% + 4px);
+            right: 0;
+            left: 0;
+            z-index: 1050;
+            max-height: 320px;
+            overflow-y: auto;
+        }
+        [data-bs-theme="dark"] .faq-search-toolbar {
+            background: rgba(33, 37, 41, 0.96);
+        }
+        .faq-search-results .list-group-item {
+            cursor: pointer;
+        }
+        .faq-search-result-title {
+            font-weight: 600;
+        }
+        .faq-search-result-preview {
+            display: block;
+            margin-top: 2px;
+            overflow: hidden;
+            color: var(--bs-secondary-color);
+            font-size: .82rem;
+            line-height: 1.35;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .faq-search-hidden {
+            display: none !important;
+        }
+        .faq-search-focus {
+            outline: 2px solid rgba(13, 110, 253, .55);
+            outline-offset: 3px;
+            border-radius: .5rem;
+        }
     </style>
 <body>
   <!-- ======= Header ======= -->
@@ -58,6 +105,25 @@ include 'html_head.php';
     </div>
     <!-- End Page Title -->
     <section class="section">
+      <div class="faq-search-toolbar" aria-label="Tìm kiếm nhanh nội dung FAQ">
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-md">
+            <div class="position-relative">
+              <div class="input-group">
+                <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
+                <input type="search" id="faq-quick-search" class="form-control border-primary" placeholder="Tìm hướng dẫn, lỗi, lệnh hoặc nội dung FAQ..." autocomplete="off">
+                <button type="button" id="faq-search-clear" class="btn btn-outline-secondary" title="Xóa nội dung tìm kiếm" aria-label="Xóa nội dung tìm kiếm">
+                  <i class="bi bi-x-lg"></i>
+                </button>
+              </div>
+              <div id="faq-search-results" class="list-group faq-search-results d-none" role="listbox" aria-label="Kết quả tìm kiếm FAQ"></div>
+            </div>
+          </div>
+          <div class="col-12 col-md-auto">
+            <span id="faq-search-status" class="small text-muted" aria-live="polite">Nhập nội dung để tìm kiếm nhanh</span>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div id="accordion">
           <div class="card">
@@ -2542,6 +2608,338 @@ v22.22.3</code></pre>
   <?php
   include 'html_js.php';
   ?>
+  <script>
+    function normalizeFaqSearchText(value) {
+      return String(value || '')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/đ/g, 'd')
+        .replace(/Đ/g, 'D')
+        .toLocaleLowerCase('vi')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+
+    function initializeFaqQuickSearch() {
+      const searchInput = document.getElementById('faq-quick-search');
+      const clearButton = document.getElementById('faq-search-clear');
+      const resultsBox = document.getElementById('faq-search-results');
+      const statusBox = document.getElementById('faq-search-status');
+      const accordionRoot = document.getElementById('accordion');
+
+      if (!searchInput || !clearButton || !resultsBox || !statusBox || !accordionRoot) {
+        return;
+      }
+
+      const MAX_RESULTS = 15;
+
+      const cleanText = function(value) {
+        return String(value || '').replace(/\s+/g, ' ').trim();
+      };
+
+      const findLocalCollapse = function(button, container) {
+        const selector = button.getAttribute('data-bs-target');
+        if (!selector || selector.charAt(0) !== '#') {
+          return null;
+        }
+
+        const targetId = selector.slice(1);
+        if (!targetId) {
+          return null;
+        }
+
+        // Tìm trong chính mục FAQ trước để không bị nhầm khi file cũ có ID trùng nhau.
+        const localTargets = Array.from(container.querySelectorAll('.accordion-collapse[id]'));
+        const localTarget = localTargets.find(function(element) {
+          return element.id === targetId;
+        });
+        return localTarget || document.getElementById(targetId);
+      };
+
+      const buildSearchText = function(container, title) {
+        const clone = container.cloneNode(true);
+
+        // Nội dung accordion con sẽ được lập chỉ mục riêng, tránh một từ khóa trả về quá nhiều mục cha.
+        clone.querySelectorAll('.card.accordion, .accordion-item').forEach(function(child) {
+          child.remove();
+        });
+
+        return normalizeFaqSearchText(title + ' ' + clone.textContent);
+      };
+
+      const buildPreview = function(container, title) {
+        const clone = container.cloneNode(true);
+        clone.querySelectorAll('.card.accordion, .accordion-item, script, style').forEach(function(child) {
+          child.remove();
+        });
+
+        let text = cleanText(clone.textContent);
+        if (title && text.toLocaleLowerCase('vi').startsWith(title.toLocaleLowerCase('vi'))) {
+          text = cleanText(text.slice(title.length));
+        }
+        return text.length > 150 ? text.slice(0, 147) + '...' : text;
+      };
+
+      const entries = Array.from(accordionRoot.querySelectorAll('.accordion-button[data-bs-target]'))
+        .map(function(button, index) {
+          const container = button.closest('.accordion-item, .card.accordion');
+          if (!container) {
+            return null;
+          }
+
+          const title = cleanText(button.textContent) || 'Mục FAQ ' + (index + 1);
+          const titleSearch = normalizeFaqSearchText(title);
+          return {
+            button: button,
+            container: container,
+            collapse: findLocalCollapse(button, container),
+            title: title,
+            titleSearch: titleSearch,
+            searchText: buildSearchText(container, title),
+            preview: buildPreview(container, title)
+          };
+        })
+        .filter(Boolean);
+
+      const entryByContainer = new Map();
+      entries.forEach(function(entry) {
+        entryByContainer.set(entry.container, entry);
+      });
+
+      const resetEntryVisibility = function() {
+        entries.forEach(function(entry) {
+          entry.container.classList.remove('faq-search-hidden');
+        });
+      };
+
+      const applyEntryVisibility = function(ranked, normalizedQuery) {
+        if (!normalizedQuery) {
+          resetEntryVisibility();
+          return;
+        }
+
+        const visibleContainers = new Set();
+
+        ranked.forEach(function(result) {
+          const entry = result.entry;
+          visibleContainers.add(entry.container);
+
+          // Nếu mục khớp nằm trong accordion khác thì giữ toàn bộ các mục cha hiển thị.
+          let parent = entry.container.parentElement;
+          while (parent && parent !== accordionRoot) {
+            if (entryByContainer.has(parent)) {
+              visibleContainers.add(parent);
+            }
+            parent = parent.parentElement;
+          }
+        });
+
+        entries.forEach(function(entry) {
+          entry.container.classList.toggle(
+            'faq-search-hidden',
+            !visibleContainers.has(entry.container)
+          );
+        });
+      };
+
+      const hideResults = function() {
+        resultsBox.classList.add('d-none');
+      };
+
+      const showCollapse = function(element) {
+        if (!element) {
+          return;
+        }
+
+        const BootstrapCollapse = window.bootstrap && window.bootstrap.Collapse;
+        if (BootstrapCollapse) {
+          let instance = typeof BootstrapCollapse.getOrCreateInstance === 'function'
+            ? BootstrapCollapse.getOrCreateInstance(element, {toggle: false})
+            : (typeof BootstrapCollapse.getInstance === 'function' ? BootstrapCollapse.getInstance(element) : null);
+
+          if (!instance) {
+            instance = new BootstrapCollapse(element, {toggle: false});
+          }
+          instance.show();
+          return;
+        }
+
+        element.classList.add('show');
+      };
+
+      const openEntry = function(entry) {
+        const parentCollapses = [];
+        let parent = entry.container.parentElement;
+
+        while (parent && parent !== accordionRoot) {
+          if (parent.classList && parent.classList.contains('accordion-collapse')) {
+            parentCollapses.unshift(parent);
+          }
+          parent = parent.parentElement;
+        }
+
+        parentCollapses.forEach(showCollapse);
+        showCollapse(entry.collapse);
+
+        hideResults();
+        statusBox.textContent = 'Đã mở: ' + entry.title;
+
+        window.setTimeout(function() {
+          entry.button.scrollIntoView({behavior: 'smooth', block: 'center'});
+          entry.container.classList.add('faq-search-focus');
+          window.setTimeout(function() {
+            entry.container.classList.remove('faq-search-focus');
+          }, 1800);
+        }, 180);
+      };
+
+      const rankEntries = function(query) {
+        const normalizedQuery = normalizeFaqSearchText(query);
+        const terms = normalizedQuery.split(' ').filter(Boolean);
+
+        if (!normalizedQuery || terms.length === 0) {
+          return [];
+        }
+
+        return entries
+          .map(function(entry) {
+            if (!terms.every(function(term) { return entry.searchText.includes(term); })) {
+              return null;
+            }
+
+            let score = 0;
+            if (entry.titleSearch === normalizedQuery) score += 500;
+            if (entry.titleSearch.startsWith(normalizedQuery)) score += 250;
+            if (entry.titleSearch.includes(normalizedQuery)) score += 150;
+            terms.forEach(function(term) {
+              if (entry.titleSearch.includes(term)) score += 30;
+            });
+
+            return {entry: entry, score: score};
+          })
+          .filter(Boolean)
+          .sort(function(a, b) {
+            return b.score - a.score || a.entry.title.localeCompare(b.entry.title, 'vi');
+          });
+      };
+
+      const renderResults = function() {
+        const query = searchInput.value;
+        const normalizedQuery = normalizeFaqSearchText(query);
+        resultsBox.replaceChildren();
+        clearButton.disabled = normalizedQuery === '';
+
+        if (normalizedQuery === '') {
+          resetEntryVisibility();
+          hideResults();
+          statusBox.textContent = 'Nhập nội dung để tìm kiếm nhanh';
+          return;
+        }
+
+        const ranked = rankEntries(query);
+        applyEntryVisibility(ranked, normalizedQuery);
+        const visible = ranked.slice(0, MAX_RESULTS);
+
+        if (ranked.length === 0) {
+          const emptyItem = document.createElement('div');
+          emptyItem.className = 'list-group-item text-muted';
+          emptyItem.innerHTML = '<i class="bi bi-info-circle me-1"></i> Không tìm thấy nội dung FAQ phù hợp.';
+          resultsBox.appendChild(emptyItem);
+          resultsBox.classList.remove('d-none');
+          statusBox.textContent = 'Không tìm thấy kết quả';
+          return;
+        }
+
+        visible.forEach(function(result, resultIndex) {
+          const entry = result.entry;
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'list-group-item list-group-item-action text-start';
+          item.setAttribute('role', 'option');
+          item.dataset.resultIndex = String(resultIndex);
+
+          const title = document.createElement('span');
+          title.className = 'faq-search-result-title';
+          title.textContent = entry.title;
+          item.appendChild(title);
+
+          if (entry.preview) {
+            const preview = document.createElement('span');
+            preview.className = 'faq-search-result-preview';
+            preview.textContent = entry.preview;
+            item.appendChild(preview);
+          }
+
+          item.addEventListener('click', function() {
+            openEntry(entry);
+          });
+          resultsBox.appendChild(item);
+        });
+
+        resultsBox.classList.remove('d-none');
+        statusBox.textContent = ranked.length > MAX_RESULTS
+          ? 'Tìm thấy ' + ranked.length + ' mục, đang hiển thị ' + MAX_RESULTS + ' kết quả đầu'
+          : 'Tìm thấy ' + ranked.length + ' mục phù hợp';
+      };
+
+      searchInput.addEventListener('input', renderResults);
+      searchInput.addEventListener('focus', function() {
+        if (normalizeFaqSearchText(searchInput.value) !== '') {
+          renderResults();
+        }
+      });
+
+      searchInput.addEventListener('keydown', function(event) {
+        const resultButtons = Array.from(resultsBox.querySelectorAll('button.list-group-item-action'));
+
+        if (event.key === 'ArrowDown' && resultButtons.length > 0) {
+          event.preventDefault();
+          resultButtons[0].focus();
+        } else if (event.key === 'Enter' && resultButtons.length > 0) {
+          event.preventDefault();
+          resultButtons[0].click();
+        } else if (event.key === 'Escape') {
+          hideResults();
+        }
+      });
+
+      resultsBox.addEventListener('keydown', function(event) {
+        const resultButtons = Array.from(resultsBox.querySelectorAll('button.list-group-item-action'));
+        const currentIndex = resultButtons.indexOf(document.activeElement);
+
+        if (event.key === 'ArrowDown' && currentIndex >= 0) {
+          event.preventDefault();
+          resultButtons[Math.min(currentIndex + 1, resultButtons.length - 1)].focus();
+        } else if (event.key === 'ArrowUp' && currentIndex >= 0) {
+          event.preventDefault();
+          if (currentIndex === 0) {
+            searchInput.focus();
+          } else {
+            resultButtons[currentIndex - 1].focus();
+          }
+        } else if (event.key === 'Escape') {
+          hideResults();
+          searchInput.focus();
+        }
+      });
+
+      clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        renderResults();
+        searchInput.focus();
+      });
+
+      document.addEventListener('click', function(event) {
+        if (!event.target.closest('.faq-search-toolbar')) {
+          hideResults();
+        }
+      });
+
+      clearButton.disabled = true;
+    }
+
+    document.addEventListener('DOMContentLoaded', initializeFaqQuickSearch);
+  </script>
 </body>
 
 </html>

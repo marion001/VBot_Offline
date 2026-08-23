@@ -239,6 +239,7 @@ if (isset($_POST['all_config_save'])) {
     $bluetoothAdapter = 'hci0';
   }
   $Config['bluetooth']['adapter'] = $bluetoothAdapter;
+  $Config['bluetooth']['sync_agent_runtime_on_boot'] = isset($_POST['bluetooth_sync_agent_runtime_on_boot']);
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG API
   $Config['api']['active'] = isset($_POST['api_active']) ? true : false;
@@ -1129,6 +1130,25 @@ include 'html_head.php';
 	.accordion-collapse {
 		transition: all 0.3s ease-out;
 	}
+
+    .config-toolbar {
+      position: sticky;
+      top: 64px;
+      z-index: 900;
+      background: linear-gradient(135deg, rgba(239, 247, 255, 0.97), rgba(224, 239, 255, 0.97));
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(13, 110, 253, 0.2);
+      border-radius: 0.75rem;
+      box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.08);
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+    }
+    .config-section-search-hidden { display: none !important; }
+    #config-search-empty { display: none; }
+    @media (max-width: 767.98px) {
+      .config-toolbar { top: 58px; }
+      .config-toolbar .btn, .config-toolbar .form-select { white-space: nowrap; }
+    }
   </style>
 </head>
 
@@ -1172,7 +1192,22 @@ include 'html_head.php';
     <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="" onsubmit="return validateFormVBot()">
       <section class="section">
         <div class="row">
-          <div class="col-lg-12">
+		  <div class="col-12 config-toolbar border border-primary" id="config-toolbar" aria-label="Tìm kiếm và điều hướng cấu hình">
+			<div class="row g-2 align-items-center">
+			  <div class="col-12 col-lg-4"><div class="input-group">
+				<span class="input-group-text border-primary"><i class="bi bi-search"></i></span>
+				<input type="search" id="config-section-search" class="form-control border-primary" placeholder="Tìm cấu hình, ví dụ: Bluetooth, STT, Multiroom..." autocomplete="off">
+				<button type="button" id="config-search-clear" class="btn btn-outline-secondary" title="Xóa từ khóa"><i class="bi bi-x-lg"></i></button>
+			  </div></div>
+			  <div class="col-12 col-md-5 col-lg-3"><select id="config-quick-navigation" class="form-select border-primary" aria-label="Chuyển nhanh tới nhóm cấu hình"><option value="">Chuyển nhanh tới nhóm cấu hình...</option></select></div>
+			  <div class="col-12 col-md-7 col-lg-5 d-flex flex-wrap gap-2 justify-content-lg-end">
+				<button type="submit" name="all_config_save" value="" class="btn btn-primary rounded-pill flex-grow-1" title="Lưu toàn bộ cấu hình"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
+				<button type="submit" name="all_config_save" value="and_restart_VBot" class="btn btn-danger rounded-pill flex-grow-1" title="Lưu cấu hình và khởi động lại VBot"><i class="bi bi-save"></i> Lưu Cài Đặt Và Restart VBot</button>
+			  </div>
+			</div>
+		  </div>
+		  <div id="config-search-empty" class="col-12 alert alert-warning"><i class="bi bi-search"></i> Không tìm thấy nhóm cấu hình phù hợp.</div>
+          <div class="col-lg-12" id="config-sections">
 		<div class="alert alert-danger" role="alert">
             <div class="row mb-3 align-items-center">
               <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi<br/>- Người dùng tự code, xử lý dữ liệu, các bạn sẽ cần phải tự code xử lý ở file: <b>Dev_Processing.py</b>')"></i>:</label>
@@ -1400,6 +1435,23 @@ include 'html_head.php';
                             'border-success', 'Tìm Kiếm Thiết Bị', "scan_bluetooth_adapters()", 'btn btn-success border-success', 'onclick', ''
                           );
                           ?>
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label" for="bluetooth_sync_agent_runtime_on_boot">
+                              Đồng Bộ Bluetooth Agent Khi Khởi Động
+                              <i class="bi bi-question-circle-fill" onclick="show_message('Khi bật, mỗi lần VBot khởi động sẽ sao chép ghi đè file resource/bluetooth/bluetooth_agent.py vào /usr/local/bin/bluetooth_agent.py, xóa marker tạm và restart vbot-bluetooth-agent.service. Khi tắt, VBot sẽ bỏ qua toàn bộ bước đồng bộ này.')"></i>:
+                            </label>
+                            <div class="col-sm-9">
+                              <div class="form-check form-switch">
+                                <input class="form-check-input border-success" type="checkbox"
+                                  name="bluetooth_sync_agent_runtime_on_boot"
+                                  id="bluetooth_sync_agent_runtime_on_boot"
+                                  <?php echo ($Config['bluetooth']['sync_agent_runtime_on_boot'] ?? false) ? 'checked' : ''; ?>>
+                                <label class="form-check-label" for="bluetooth_sync_agent_runtime_on_boot">
+                                  Cho phép ghi đè agent và restart service khi VBot khởi động
+                                </label>
+                              </div>
+                            </div>
+                          </div>
                           <div class="alert alert-warning mt-2 mb-2" role="alert">
                             <i class="bi bi-exclamation-triangle-fill"></i> <b>Lưu Ý:</b><br/>
                             - Sau khi thay đổi <b>Bluetooth Device</b>, hãy nhấn nút <b>Lưu Và Restart Bluetooth</b> bên dưới để áp dụng ngay<br/><br/>
@@ -4344,10 +4396,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 			
             <div class="row mb-3">
               <center>
-                <button type="submit" name="all_config_save" value="" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
                 <button type="button" class="btn btn-warning rounded-pill" onclick="readJSON_file_path('<?php echo $Config_filePath; ?>')"><i class="bi bi-eye"></i> Xem Tệp Config</button>
                 <button type="button" class="btn btn-success rounded-pill" title="Tải Xuống file: Config.json" onclick="downloadFile('<?php echo $Config_filePath; ?>')"><i class="bi bi-download"></i> Tải Xuống</button>
-                <button type="submit" name="all_config_save" value="and_restart_VBot" class="btn btn-danger rounded-pill"><i class="bi bi-save"></i> Lưu Cài Đặt Và Restart VBot</button>
               </center>
               <!-- Modal hiển thị tệp Config.json -->
               <div class="modal fade" id="myModal_Config" tabindex="-1" role="dialog" aria-labelledby="modalLabel_Config" aria-hidden="true">
@@ -4648,6 +4698,68 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     updateHotwordKeyVisibility();
     useKeySelect.addEventListener('change', updateHotwordKeyVisibility);
+});
+</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const form = document.getElementById('hotwordForm');
+  const container = document.getElementById('config-sections');
+  const search = document.getElementById('config-section-search');
+  const clearButton = document.getElementById('config-search-clear');
+  const navigation = document.getElementById('config-quick-navigation');
+  const emptyState = document.getElementById('config-search-empty');
+  if (!form || !container || !search || !clearButton || !navigation || !emptyState) return;
+
+  const normalizeText = function (value) {
+    return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase().replace(/\s+/g, ' ').trim();
+  };
+  const sections = Array.from(container.children).filter(function (element) {
+    return element.classList && element.classList.contains('card');
+  });
+
+  sections.forEach(function (section, index) {
+    if (!section.id) section.id = 'config-section-' + (index + 1);
+    const heading = section.querySelector(':scope > .card-body > .card-title') || section.querySelector('.card-title');
+    const label = (heading ? heading.textContent : 'Nhóm cấu hình ' + (index + 1)).replace(/\s+/g, ' ').trim();
+    section.dataset.configSearch = normalizeText(section.textContent);
+    const option = document.createElement('option');
+    option.value = section.id;
+    option.textContent = label;
+    navigation.appendChild(option);
+  });
+
+  const applySearch = function () {
+    const query = normalizeText(search.value);
+    let visible = 0;
+    sections.forEach(function (section) {
+      const matched = !query || section.dataset.configSearch.includes(query);
+      section.classList.toggle('config-section-search-hidden', !matched);
+      if (matched) visible += 1;
+    });
+    emptyState.style.display = visible === 0 ? 'block' : 'none';
+  };
+
+  search.addEventListener('input', applySearch);
+  clearButton.addEventListener('click', function () {
+    search.value = '';
+    applySearch();
+    search.focus();
+  });
+  navigation.addEventListener('change', function () {
+    const target = document.getElementById(navigation.value);
+    if (!target) return;
+    search.value = '';
+    applySearch();
+    const collapse = target.querySelector(':scope > .card-body > .accordion-collapse');
+    if (collapse && window.bootstrap && bootstrap.Collapse) {
+      bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
+    }
+    target.scrollIntoView({behavior: 'smooth', block: 'start'});
+    navigation.value = '';
+  });
+
+  applySearch();
 });
 </script>
 </body>
