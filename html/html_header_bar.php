@@ -456,7 +456,7 @@ include_once 'Configuration.php';
         return;
       }
       loading('show');
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       var url = "includes/php_ajax/Check_Connection.php";
       xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {

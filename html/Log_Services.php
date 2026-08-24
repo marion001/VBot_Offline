@@ -88,7 +88,7 @@ include 'html_head.php';
     var selectedFile = document.getElementById('logFileSelect').value;
     if (selectedFile) {
       var fileName = selectedFile.split('/').pop();
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open('GET', 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(selectedFile), true);
       xhr.onload = function() {
         if (xhr.status === 200) {
@@ -121,7 +121,7 @@ include 'html_head.php';
       show_message('Vui Lòng Chọn File Logs để xóa dữ liệu');
       return;
     }
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     var url = "includes/php_ajax/Show_file_path.php";
     xhr.open("POST", url);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");

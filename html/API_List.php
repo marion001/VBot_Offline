@@ -359,8 +359,18 @@ include 'html_footer.php';
 <script>
 
 // Hàm để thêm màu sắc cho chuỗi JSON
+function apiListEscapeHtml(value) {
+    return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
 function highlightCode(code) {
-    code = code.replace(/"(.*?)"/g, "<span class='string'>\"$1\"</span>");
+    code = apiListEscapeHtml(code);
+    code = code.replace(/(&quot;.*?&quot;)/g, "<span class='string'>$1</span>");
     code = code.replace(/\b(var|let|const|function|return)\b/g, "<span class='keyword'>$1</span>");
     code = code.replace(/\b(\d+)\b/g, "<span class='number'>$1</span>");
     code = code.replace(/{|}/g, "<span class='brace'>$&</span>");
@@ -377,7 +387,7 @@ document.getElementById("run_api_code").onclick = function() {
         return;
     }
     loading('show');
-    fetch(currentApiTestRequest.url, {
+    vbotFetchWithTimeout(currentApiTestRequest.url, {
         method: currentApiTestRequest.method,
         headers: {'Content-Type': 'application/json'},
         body: ['GET', 'HEAD'].includes(currentApiTestRequest.method) ? undefined : JSON.stringify(currentApiTestRequest.body)
@@ -442,8 +452,7 @@ const apiCode =
   "xhr.send(data);\n"+
   "\n";
 
-    const apiFormattedCode = "<center contenteditable='false'><strong>Chỉnh Sửa Nội Dung Bên Dưới Để Test API:</strong></center><hr/><pre id='code_send_api_test'>" + apiCode + "</pre>";
-    const content = highlightCode(apiFormattedCode);
+    const content = "<center contenteditable='false'><strong>Chỉnh Sửa Nội Dung Bên Dưới Để Test API:</strong></center><hr/><pre id='code_send_api_test'>" + highlightCode(apiCode) + "</pre>";
     document.getElementById('api_test_json_sample').innerHTML = content;
     document.getElementById('name_file_showzz').textContent = "Tên API: "+name;
     $('#myModal_TETS_API').modal('show');
@@ -680,7 +689,8 @@ function updateCodeDisplay(index) {
 		"    CURLOPT_RETURNTRANSFER => true,\n" +
 		"    CURLOPT_ENCODING => '',\n" +
 		"    CURLOPT_MAXREDIRS => 10,\n" +
-		"    CURLOPT_TIMEOUT => 0,\n" +
+		"    CURLOPT_CONNECTTIMEOUT => 5,\n" +
+		"    CURLOPT_TIMEOUT => 30,\n" +
 		"    CURLOPT_FOLLOWLOCATION => true,\n" +
 		"    CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,\n" +
 		"    CURLOPT_CUSTOMREQUEST => \"" + method + "\",\n" + 

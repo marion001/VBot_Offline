@@ -640,6 +640,9 @@ include 'html_head.php';
                 if ($_FILES["fileToUpload"]["error"] !== UPLOAD_ERR_OK) {
                     $messages[] = "<font color=red>- Tệp tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload"]["error"]) . "</font>";
                     $uploadOk = 0;
+                } elseif (!is_uploaded_file($_FILES["fileToUpload"]["tmp_name"]) || (int)($_FILES["fileToUpload"]["size"] ?? 0) <= 0) {
+                    $messages[] = "<font color=red>- Tệp sao lưu tải lên không hợp lệ hoặc trống</font>";
+                    $uploadOk = 0;
                 } elseif (!preg_match('/\.tar\.gz$/i', $fileName) || !preg_match('/^VBot_Program/i', $fileName)) {
                     $messages[] = "<font color=red>- Chỉ chấp nhận tệp .tar.gz, dành cho VBot_Program, và được Giao Diện tạo ra bản sao lưu đó</font>";
                     $uploadOk = 0;
@@ -1289,6 +1292,8 @@ if (isset($_POST['Check_For_Upgrade'])) {
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_USERAGENT, 'VBot-Updater');
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['Accept: application/vnd.github.v3+json']);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 20);
             $response = curl_exec($ch);
             $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             curl_close($ch);

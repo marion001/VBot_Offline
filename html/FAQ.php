@@ -53,7 +53,7 @@ include 'html_head.php';
             max-height: 320px;
             overflow-y: auto;
         }
-        [data-bs-theme="dark"] .faq-search-toolbar {
+        [data-theme="dark"] .faq-search-toolbar {
             background: rgba(33, 37, 41, 0.96);
         }
         .faq-search-results .list-group-item {

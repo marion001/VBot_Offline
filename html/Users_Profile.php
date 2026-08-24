@@ -429,7 +429,7 @@ include 'html_head.php';
       var formData = new FormData();
       formData.append('fileToUpload_avata', fileInput.files[0]);
       formData.append('upload_avata', 'true');
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open('POST', 'includes/php_ajax/Upload_file_path.php', true);
       xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
       xhr.onload = function() {
@@ -493,7 +493,7 @@ include 'html_head.php';
         loading('hide');
         return false;
       }
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open("POST", "Login.php", true);
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
       xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");

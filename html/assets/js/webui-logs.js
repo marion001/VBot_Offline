@@ -58,7 +58,7 @@
         stopLogViewer();
 
         function fetchLogs() {
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.timeout = 10000;
             xhr.onerror = function () {
                 output.innerHTML = '<span style="color:red">Không thể kết nối đến API, vui lòng kiểm tra lại</span>';
@@ -131,7 +131,7 @@
         if (errorLogRequest) {
             errorLogRequest.abort();
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         errorLogRequest = xhr;
         xhr.timeout = 15000;
         status.textContent = 'Đang tải Vbot_error.log...';
@@ -219,7 +219,7 @@
         if (button) {
             button.disabled = true;
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.timeout = 15000;
         xhr.open('POST', config.fileActionUrl, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');

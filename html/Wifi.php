@@ -224,7 +224,7 @@ include 'html_head.php';
         function reset_All_Wifi() {
             if (confirm("Bạn có chắc chắn muốn xóa tất cả các kết nối Wi-Fi không?\nHành động này sẽ làm mất kết nối mạng hiện tại!\n\nVà hệ thống sẽ tạo điểm truy cập Wifi mới với tên: 'VBot Assistant' để bạn kết nối và cấu hình")) {
                 loading("show");
-				const xhr = new XMLHttpRequest();
+				const xhr = vbotCreateXhr();
                 xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
                 xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -246,7 +246,7 @@ include 'html_head.php';
         //Hiển thị dang sách wifi đã kết nối
         function Show_Wifi_List() {
             loading("show");
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.withCredentials = true;
             xhr.addEventListener("readystatechange", function() {
                 if (this.readyState === 4) {
@@ -318,7 +318,7 @@ include 'html_head.php';
         //Quét wifi
         function fetchAndDisplayWifiList() {
             loading("show");
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open('GET', 'includes/php_ajax/Wifi_Act.php?Scan_Wifi_List', true);
             xhr.onload = function() {
                 if (xhr.status >= 200 && xhr.status < 300) {
@@ -438,7 +438,7 @@ include 'html_head.php';
                     } while (password.trim().length < 8);
                 }
             }
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -474,7 +474,7 @@ include 'html_head.php';
                 return;
             }
             loading("show");
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -512,7 +512,7 @@ include 'html_head.php';
                 return;
             }
             loading("show");
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -548,7 +548,7 @@ include 'html_head.php';
             loading("show");
             const url = "includes/php_ajax/Wifi_Act.php?Get_Password_Wifi=1&ssid=" + encodeURIComponent(ssid) +
                 "&uuid=" + encodeURIComponent(uuid || '');
-            const xhr = new XMLHttpRequest();
+            const xhr = vbotCreateXhr();
             xhr.open("GET", url, true);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
@@ -580,7 +580,7 @@ include 'html_head.php';
 
         //Lấy thông tin mạng đang kết nối
         function getWifiNetworkInformation() {
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open('GET', 'includes/php_ajax/Wifi_Act.php?Wifi_Network_Information', true);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -590,13 +590,16 @@ include 'html_head.php';
                             var response = JSON.parse(xhr.responseText);
                             if (response.success) {
                                 //console.log('Dữ liệu Wi-Fi:' +xhr.responseText);
+								var safeWifiValue = function(value) {
+									return vbotEscapeHtml(value == null ? '' : value);
+								};
 								var tableHTML = '<table class="table table-bordered border-primary"><thead>';
-								tableHTML += '<tr><th colspan="4" style="text-align: center; vertical-align: middle;">Mạng Wifi Đang Kết Nối: <font color=red>' + response.data.ESSID + '</font></th></tr>';
+								tableHTML += '<tr><th colspan="4" style="text-align: center; vertical-align: middle;">Mạng Wifi Đang Kết Nối: <font color=red>' + safeWifiValue(response.data.ESSID) + '</font></th></tr>';
     tableHTML += '<tr><th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Thông Tin DHCP</th>';
       tableHTML += '<th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">IP Hiện Tại</th>';
       tableHTML += '<th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">DNS</th>';
       tableHTML += '<th scope="col" class="text-danger" style="text-align: center; vertical-align: middle;">Gateway</th></tr></thead>';
-  tableHTML += '<tbody><tr style="text-align: center; vertical-align: middle;"><td class="text-success">'+response.data.DHCP_Mode+'</td><td class="text-success">'+response.data.IP+'</td><td><p class="text-success">'+response.data.DNS+'</p><hr/><p class="text-primary">'+response.data.DNS_Mode+'</p></td><td><p class="text-success">'+response.data.Gateway+'</p><hr/> <p class="text-primary">'+response.data.Gateway_Mode+'</p></td></tr></tbody></table>';
+  tableHTML += '<tbody><tr style="text-align: center; vertical-align: middle;"><td class="text-success">'+safeWifiValue(response.data.DHCP_Mode)+'</td><td class="text-success">'+safeWifiValue(response.data.IP)+'</td><td><p class="text-success">'+safeWifiValue(response.data.DNS)+'</p><hr/><p class="text-primary">'+safeWifiValue(response.data.DNS_Mode)+'</p></td><td><p class="text-success">'+safeWifiValue(response.data.Gateway)+'</p><hr/> <p class="text-primary">'+safeWifiValue(response.data.Gateway_Mode)+'</p></td></tr></tbody></table>';
                             fileListDiv.innerHTML = tableHTML;
 							document.getElementById('connected_network_name').value = response.data.ESSID;
 							document.getElementById('connected_network_name1').value = response.data.ESSID;
@@ -696,7 +699,7 @@ function set_static_ip() {
     formData.append("gateway", gateway);
     formData.append("dns1", dns1);
     formData.append("dns2", dns2);
-    let xhr = new XMLHttpRequest();
+    let xhr = vbotCreateXhr();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
@@ -706,7 +709,7 @@ function set_static_ip() {
 				var res = JSON.parse(xhr.responseText);
 				if (res.success === true) {
 					close_ip_modal();
-					show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+					show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
 				} else {
 					show_message("Lỗi: " + (res.message || "Không xác định"));
 				}
@@ -735,7 +738,7 @@ function set_dhcp_mode() {
     var formData = new FormData();
     formData.append("action", "use_dhcp_automatically");
     formData.append("connected_network_name", connected_network_name);
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onload = function () {
@@ -745,7 +748,7 @@ function set_dhcp_mode() {
                 var res = JSON.parse(xhr.responseText);
                 if (res.success) {
 					close_ip_modal();
-                    show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+                    show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
                 } else {
                     show_message("Lỗi: " + res.message);
                 }
@@ -777,7 +780,7 @@ function set_dns_only() {
     formData.append("connection_name", connectionName);
     formData.append("dns1", d1);
     formData.append("dns2", d2);
-    let xhr = new XMLHttpRequest();
+    let xhr = vbotCreateXhr();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onreadystatechange = function () {
@@ -788,7 +791,7 @@ function set_dns_only() {
                 if (res.success) {
                     let modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal_dns_only'));
                     if (modal) modal.hide();
-					show_message(res.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+					show_message(res.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
                 } else {
 					show_message("Lỗi: "+res.message);
                 }
@@ -808,7 +811,7 @@ function resetDNS_DHCP() {
 	const connectionName = document.getElementById("connected_network_name").value.trim();
     formData.append("action", "reset_dns_dhcp");
     formData.append("connection_name", connectionName);
-    let xhr = new XMLHttpRequest();
+    let xhr = vbotCreateXhr();
     xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
     xhr.onload = function () {
@@ -821,7 +824,7 @@ function resetDNS_DHCP() {
 			let modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal_dns_only'));
 			if (modal) modal.hide();
 			loading("hide");
-            show_message(resp.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" onclick="power_action_service(\'reboot_os\',\'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống\')">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>');
+            show_message(resp.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
         } else {
 			loading("hide");
 			show_message("Lỗi: " + resp.message + "\nCMD: " + resp.cmd);

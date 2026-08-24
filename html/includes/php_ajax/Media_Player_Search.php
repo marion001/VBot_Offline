@@ -414,6 +414,8 @@ function refreshToken_podcast($Config, $VBot_Offline, $Protocol, $serverIp, $Por
 		CURLOPT_URL => $url,
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_POST => true,
+		CURLOPT_CONNECTTIMEOUT => 3,
+		CURLOPT_TIMEOUT => 8,
 		CURLOPT_HTTPHEADER => array(
 			'Content-Type: application/json',
 			'Content-Length: ' . strlen($postData)
@@ -534,7 +536,8 @@ function getLinkZingMP3($song_id, $Cookie_Zing)
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING => '',
 		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 0,
+		CURLOPT_CONNECTTIMEOUT => 5,
+		CURLOPT_TIMEOUT => 20,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 		CURLOPT_CUSTOMREQUEST => 'GET',
@@ -702,7 +705,10 @@ if (isset($_GET['NhacCuaTui_Search'])) {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     $response = curl_exec($ch);
     if ($response === false) {
         echo json_encode([
@@ -799,7 +805,8 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 		curl_setopt($ch, CURLOPT_URL, $URL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 10);
 		curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36');
 		$html = curl_exec($ch);
@@ -884,7 +891,8 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_ENCODING => '',
 			CURLOPT_MAXREDIRS => 10,
-			CURLOPT_TIMEOUT => 0,
+			CURLOPT_CONNECTTIMEOUT => 5,
+			CURLOPT_TIMEOUT => 20,
 			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 			CURLOPT_CUSTOMREQUEST => 'GET',
@@ -983,7 +991,8 @@ if (isset($_GET['podcast_Search'])) {
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_ENCODING => '',
 		CURLOPT_MAXREDIRS => 10,
-		CURLOPT_TIMEOUT => 0,
+		CURLOPT_CONNECTTIMEOUT => 5,
+		CURLOPT_TIMEOUT => 30,
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 		CURLOPT_CUSTOMREQUEST => 'POST',
@@ -1065,7 +1074,7 @@ if (isset($_GET['Cache_PodCast'])) {
 //Tìm kiếm Youtube
 if (isset($_GET['Youtube_Search'])) {
 	$Youtube_Name = $_GET['Name'] ?? '';
-	$Youtube_Limit = $_GET['Limit'] ?? '20';
+	$Youtube_Limit = max(1, min(50, (int)($_GET['Limit'] ?? 20)));
 	if (empty($Youtube_Name)) {
 		$responseb = [
 			'success' => false,
@@ -1087,6 +1096,10 @@ if (isset($_GET['Youtube_Search'])) {
 		CURLOPT_URL => $searchUrlYoutube,
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => true,
+		CURLOPT_CONNECTTIMEOUT => 5,
+		CURLOPT_TIMEOUT => 20,
+		CURLOPT_SSL_VERIFYPEER => true,
+		CURLOPT_SSL_VERIFYHOST => 2,
 	]);
 	$responseYoutube = curl_exec($curlYoutube);
 	curl_close($curlYoutube);
@@ -1114,6 +1127,10 @@ if (isset($_GET['Youtube_Search'])) {
 					CURLOPT_URL => $videosUrl,
 					CURLOPT_RETURNTRANSFER => true,
 					CURLOPT_FOLLOWLOCATION => true,
+					CURLOPT_CONNECTTIMEOUT => 5,
+					CURLOPT_TIMEOUT => 20,
+					CURLOPT_SSL_VERIFYPEER => true,
+					CURLOPT_SSL_VERIFYHOST => 2,
 				]);
 				$responseVideos = curl_exec($curlVideos);
 				curl_close($curlVideos);
@@ -1171,7 +1188,7 @@ if (isset($_GET['Cache_Youtube'])) {
 #get Link Youtube
 if (isset($_GET['GetLink_Youtube'])) {
 	$Youtube_ID = isset($_GET['Youtube_ID']) ? $_GET['Youtube_ID'] : '';
-	if (empty($Youtube_ID)) {
+	if (!is_string($Youtube_ID) || !preg_match('/^[A-Za-z0-9_-]{6,32}$/', $Youtube_ID)) {
 		$response = array(
 			'success' => false,
 			'message' => 'Cần nhập ID của video Youtube',
@@ -1186,6 +1203,10 @@ if (isset($_GET['GetLink_Youtube'])) {
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, $url_api_ytb);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+	curl_setopt($ch, CURLOPT_TIMEOUT, 20);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 	$response = curl_exec($ch);
 	if (curl_errno($ch)) {
 		echo 'Lỗi cURL: ' . curl_error($ch);
@@ -1198,7 +1219,7 @@ if (isset($_GET['GetLink_Youtube'])) {
 		$title = $data_api_ytb['items'][0]['snippet']['title'];
 		$thumbnails = $data_api_ytb['items'][0]['snippet']['thumbnails']['high']['url'];
 	}
-	$CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/Get_Link_Youtube.py $Youtube_ID");
+	$CMD = 'python3 ' . escapeshellarg($directory_path . '/includes/php_ajax/Get_Link_Youtube.py') . ' ' . escapeshellarg($Youtube_ID);
 	$connection = ssh2_connect($ssh_host, $ssh_port);
 	if (!$connection) {
 		$response = array(
@@ -1487,7 +1508,8 @@ if (isset($_GET['newspaper'])) {
 		curl_setopt($ch, CURLOPT_URL, $News_Paper);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_TIMEOUT, 20);
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 		$html = curl_exec($ch);
 		$error = curl_error($ch);
 		curl_close($ch);
@@ -1872,7 +1894,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					CURLOPT_FOLLOWLOCATION => true,
 					CURLOPT_TIMEOUT => 90,
 					CURLOPT_FAILONERROR => true,
-					CURLOPT_SSL_VERIFYPEER => false,
+					CURLOPT_CONNECTTIMEOUT => 8,
+					CURLOPT_SSL_VERIFYPEER => true,
+					CURLOPT_SSL_VERIFYHOST => 2,
 					CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
 				]);
 				$fileContent = curl_exec($ch);

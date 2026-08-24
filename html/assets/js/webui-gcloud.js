@@ -12,7 +12,7 @@
 
     window.gcloud_scan = function (folderName, sourceBackup, resultDivId) {
         loading('show');
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr(90000);
         xhr.open('POST', 'includes/php_ajax/GCloud_Act.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -84,7 +84,7 @@
             return;
         }
         loading('show');
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr(90000);
         xhr.open('POST', 'includes/php_ajax/GCloud_Act.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');

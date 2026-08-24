@@ -398,11 +398,12 @@ if (isset($_GET['check_version'])) {
 #Xác Thực, Liên Kết Với XiaoZhi
 if (isset($_GET['XiaoZhi_Active'])) {
     $action = isset($_GET['action']) ? $_GET['action'] : '';
+    $xiaozhiScript = escapeshellarg($directory_path . '/includes/php_ajax/XiaoZhi_Active.py');
     if ($action === 'get_device_info') {
-        $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/XiaoZhi_Active.py");
+        $CMD = 'python3 ' . $xiaozhiScript;
     } elseif ($action === 'signature_hmac') {
         $challenge = isset($_GET['challenge']) ? escapeshellarg($_GET['challenge']) : "''";
-        $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/XiaoZhi_Active.py") . " --sign $challenge";
+        $CMD = 'python3 ' . $xiaozhiScript . " --sign $challenge";
     } else {
         vbotApiJsonResponse(['success' => false, 'message' => 'Tham số truyền vào không đúng, không hợp lệ'], 400);
     }

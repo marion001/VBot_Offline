@@ -68,13 +68,26 @@ if ($file === false || !is_readable($file)) {
 }
 
 $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));
-$restrictedExtensions = array_map('strtolower', $Restricted_Extensions);
+$restrictedExtensions = array_values(array_diff(
+    array_map('strtolower', $Restricted_Extensions),
+    ['json']
+));
 if (in_array($fileExtension, $restrictedExtensions, true)) {
     vbotApiJsonResponse([
         'success' => false,
         'status' => 'error',
         'message' => 'Bạn không có quyền tải xuống file này.'
     ], 403);
+}
+
+if (isset($_GET['check'])) {
+    vbotApiJsonResponse([
+        'success' => true,
+        'status' => 'success',
+        'message' => 'Tệp sẵn sàng để tải xuống.',
+        'file_name' => vbotUtf8Basename($file),
+        'file_size' => filesize($file)
+    ]);
 }
 
 header('Content-Description: File Transfer');

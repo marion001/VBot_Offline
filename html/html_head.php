@@ -299,13 +299,19 @@ if (session_status() === PHP_SESSION_ACTIVE) {
       // Tạo thẻ li mới
       var li = document.createElement("li");
       li.classList.add("notification-item");
-      // Nội dung của thẻ li
-      li.innerHTML = '<a href="#"><font color="red"><i class="bi bi-exclamation-circle"></i></font></a>' +
-        '<div>' +
-        '<h4><font color="red">Phát Hiện Lỗi</font></h4>' +
-        '<p class="text-primary">' + message + '</p>' +
-        //'<a href="#"><p class="text-danger">Kiểm Tra</p></a>' +
-        '</div>';
+      var icon = document.createElement('i');
+      icon.className = 'bi bi-exclamation-circle text-danger';
+      var content = document.createElement('div');
+      var title = document.createElement('h4');
+      title.className = 'text-danger';
+      title.textContent = 'Phát Hiện Lỗi';
+      var detail = document.createElement('p');
+      detail.className = 'text-primary';
+      detail.textContent = message == null ? '' : String(message);
+      content.appendChild(title);
+      content.appendChild(detail);
+      li.appendChild(icon);
+      li.appendChild(content);
       // Thêm thẻ li vào trong ul
       document.querySelector('#notification').appendChild(li);
       // Cập nhật số lượng thông báo trong header
@@ -319,6 +325,43 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     // Cờ để phân biệt nút nhấn gửi tin nhắn tự động hay người dùng nhấn
     let isAutoClick_btn_send_msg = false;
 
+    function vbotSanitizeMessageHtml(message, allowedActions) {
+      var template = document.createElement('template');
+      template.innerHTML = message == null ? '' : String(message);
+      var safeActions = new Set(Array.isArray(allowedActions) ? allowedActions : []);
+      var allowedTags = new Set(['B', 'STRONG', 'I', 'EM', 'BR', 'HR', 'P', 'SPAN', 'FONT', 'SMALL', 'CODE', 'UL', 'OL', 'LI', 'A', 'CENTER', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LABEL', 'TH', 'BUTTON']);
+      Array.from(template.content.querySelectorAll('*')).forEach(function(node) {
+        if (!allowedTags.has(node.tagName)) {
+          node.replaceWith(document.createTextNode(node.textContent || ''));
+          return;
+        }
+        if (node.tagName === 'BUTTON' && !safeActions.has(node.getAttribute('data-vbot-action'))) {
+          node.replaceWith(document.createTextNode(node.textContent || ''));
+          return;
+        }
+        Array.from(node.attributes).forEach(function(attribute) {
+          var name = attribute.name.toLowerCase();
+          var keepClass = name === 'class';
+          var keepColor = name === 'color' && node.tagName === 'FONT';
+          var keepHref = name === 'href' && node.tagName === 'A';
+          var keepButtonType = name === 'type' && node.tagName === 'BUTTON' && attribute.value === 'button';
+          var keepSafeAction = name === 'data-vbot-action' && node.tagName === 'BUTTON' && attribute.value === 'reboot-os';
+          if (!keepClass && !keepColor && !keepHref && !keepButtonType && !keepSafeAction) node.removeAttribute(attribute.name);
+        });
+        if (node.tagName === 'A') {
+          try {
+            var url = new URL(node.getAttribute('href') || '', document.baseURI);
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') node.removeAttribute('href');
+          } catch (error) {
+            node.removeAttribute('href');
+          }
+          node.setAttribute('target', '_blank');
+          node.setAttribute('rel', 'noopener noreferrer');
+        }
+      });
+      return template.innerHTML;
+    }
+
     function showMessagePHP(message, timeout = 15) {
       var toastContainer = document.getElementById('toast');
       // Hiển thị lại toastContainer nếu bị ẩn trước đó
@@ -326,11 +369,40 @@ if (session_status() === PHP_SESSION_ACTIVE) {
       toastContainer.style.display = 'flex';
       var toastMessage = document.createElement('div');
       toastMessage.className = 'toast-message';
-      toastMessage.innerHTML = '<span>' + message + '</span> <button onclick="removeToast(this)" class="text-danger">×</button>';
+      var messageContent = document.createElement('span');
+      messageContent.innerHTML = vbotSanitizeMessageHtml(message);
+      var closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'text-danger';
+      closeButton.textContent = '×';
+      closeButton.addEventListener('click', function() { removeToast(toastMessage); });
+      toastMessage.appendChild(messageContent);
+      toastMessage.appendChild(document.createTextNode(' '));
+      toastMessage.appendChild(closeButton);
       toastContainer.appendChild(toastMessage);
       setTimeout(function() {
         removeToast(toastMessage);
       }, timeout * 1000);
+    }
+
+    function showMessageText(message, timeout = 15) {
+      var toastContainer = document.getElementById('toast');
+      toastContainer.style.visibility = 'visible';
+      toastContainer.style.display = 'flex';
+      var toastMessage = document.createElement('div');
+      toastMessage.className = 'toast-message';
+      var text = document.createElement('span');
+      text.textContent = String(message == null ? '' : message);
+      var closeButton = document.createElement('button');
+      closeButton.type = 'button';
+      closeButton.className = 'text-danger';
+      closeButton.textContent = '×';
+      closeButton.addEventListener('click', function() { removeToast(toastMessage); });
+      toastMessage.appendChild(text);
+      toastMessage.appendChild(document.createTextNode(' '));
+      toastMessage.appendChild(closeButton);
+      toastContainer.appendChild(toastMessage);
+      setTimeout(function() { removeToast(toastMessage); }, timeout * 1000);
     }
 
     function removeToast(toastElement) {
@@ -352,8 +424,23 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     }
 
     //Hiển thị và đóng thông báo Message
-    function show_message(message) {
-      document.querySelector('#notificationModal .modal-body').innerHTML = message;
+    function show_message(message, options) {
+      var modalBody = document.querySelector('#notificationModal .modal-body');
+      if (!modalBody) return;
+      var allowReboot = Boolean(options && options.allowReboot === true);
+      modalBody.innerHTML = vbotSanitizeMessageHtml(message, allowReboot ? ['reboot-os'] : []);
+      modalBody.querySelectorAll('[data-vbot-action="reboot-os"]').forEach(function(button) {
+        button.addEventListener('click', function() {
+          if (typeof power_action_service === 'function') {
+            power_action_service('reboot_os', 'Bạn có chắc chắn muốn khởi động lại toàn bộ hệ thống');
+          }
+        });
+      });
+      $('#notificationModal').modal('show');
+    }
+
+    function show_message_text(message) {
+      document.querySelector('#notificationModal .modal-body').textContent = String(message == null ? '' : message);
       $('#notificationModal').modal('show');
     }
 
@@ -391,7 +478,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
         }
         return;
       }
-      const xhr = new XMLHttpRequest();
+      const xhr = vbotCreateXhr();
       // Gửi yêu cầu GET tới server để lấy tệp âm thanh dưới dạng base64
       xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
       xhr.responseType = 'text';

@@ -246,7 +246,7 @@ if ($Config['contact_info']['user_login']['active']) {
 
         //Hàm lưu dữ liệu Client vào Server
         function saveToServer(data) {
-            return fetch('includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
+            return vbotFetchWithTimeout('includes/php_ajax/VBot_Client_Upgrade_Firmware.php', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -286,7 +286,7 @@ if ($Config['contact_info']['user_login']['active']) {
         //Hàm đọc dữ liệu từ server
         function loadFromServer() {
             const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo rawurlencode($vbotClientDataPath); ?>';
-            return fetch(url)
+            return vbotFetchWithTimeout(url)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('Không thể tải dữ liệu');
@@ -312,7 +312,7 @@ if ($Config['contact_info']['user_login']['active']) {
             showMessagePHP('Đang tìm kiếm các thiết bị chạy VBot Client trong mạng', 5);
             loading('show');
             const url = 'includes/php_ajax/Scanner.php?VBot_Client_Device_Scaner';
-            const xhr = new XMLHttpRequest();
+            const xhr = vbotCreateXhr();
             xhr.open('GET', url, true);
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
@@ -461,7 +461,7 @@ if ($Config['contact_info']['user_login']['active']) {
                     '</td>' +
                     '</tr>';
                 //Check version
-                fetch(versionUrl)
+                vbotFetchWithTimeout(versionUrl)
                     .then(response => response.json())
 					.then(versionData => {
 						let latestVersion = '';
@@ -534,47 +534,42 @@ if ($Config['contact_info']['user_login']['active']) {
         }
 
         //Tải lại dữ liệu cho Client riêng lẻ
-        function loading_data_client(ip_address, time_out = 10000) {
-            loading('show');
-            setTimeout(function() {
-                const phpUrl = '/includes/php_ajax/Scanner.php';
+        async function loading_data_client(ip_address, delay_ms = 0, manage_loading = true) {
+            if (manage_loading) loading('show');
+            if (delay_ms > 0) await sleep(delay_ms);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(function() { controller.abort(); }, 12000);
+            try {
+                const phpUrl = 'includes/php_ajax/Scanner.php';
                 const formData = new FormData();
                 formData.append('showJsonData_Client', ip_address);
-                fetch(phpUrl, {
+                const responseObject = await fetch(phpUrl, {
                         method: 'POST',
                         headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''},
-                        body: formData
-                    })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Không thể kết nối tới server PHP');
-                        }
-                        return response.json();
-                    })
-                    .then(response => {
-                        if (response.success) {
-                            loading('hide');
-                            loadFromServer().then(devices => {
-                                const updatedDevice = response;
-                                const deviceIndex = devices.findIndex(d => (d.ip_address || d.ip) === ip_address);
-                                if (deviceIndex !== -1) {
-                                    devices[deviceIndex] = updatedDevice;
-                                } else {
-                                    devices.push(updatedDevice);
-                                }
-                                saveToServer(devices);
-                                displayDeviceData(devices);
-                                showMessagePHP('Đã tải lại dữ liệu cho ' + ip_address, 5);
-                            });
-                        } else {
-                            throw new Error(response.error || 'Tải lại dữ liệu thất bại');
-                        }
-                    })
-                    .catch(error => {
-                        loading('hide');
-                        showMessagePHP('Lỗi: ' + error.message, 5);
+                        body: formData,
+                        signal: controller.signal
                     });
-            }, time_out);
+                if (!responseObject.ok) throw new Error('Không thể kết nối tới server PHP');
+                const response = await responseObject.json();
+                if (!response.success) throw new Error(response.error || 'Tải lại dữ liệu thất bại');
+                const devices = await loadFromServer();
+                const deviceIndex = devices.findIndex(d => (d.ip_address || d.ip) === ip_address);
+                if (deviceIndex !== -1) devices[deviceIndex] = response;
+                else devices.push(response);
+                await saveToServer(devices);
+                displayDeviceData(devices);
+                showMessageText('Đã tải lại dữ liệu cho ' + ip_address, 5);
+                return response;
+            } catch (error) {
+                const message = error && error.name === 'AbortError'
+                    ? 'Client ' + ip_address + ' không phản hồi trong 12 giây'
+                    : 'Lỗi: ' + error.message;
+                showMessageText(message, 5);
+                return null;
+            } finally {
+                clearTimeout(timeoutId);
+                if (manage_loading) loading('hide');
+            }
         }
 
 		//Xóa dữ liệu đã tìm kiếm trước đó
@@ -598,7 +593,7 @@ if ($Config['contact_info']['user_login']['active']) {
 
 		//kiểm tra URL littlefs.bin có tồn tại
 		function check_file_exists(url, callback) {
-			var xhr = new XMLHttpRequest();
+			var xhr = vbotCreateXhr();
 			xhr.open('HEAD', url, true);
 			xhr.onload = function() {
 				callback(xhr.status >= 200 && xhr.status < 300);
@@ -690,7 +685,7 @@ if ($Config['contact_info']['user_login']['active']) {
                 }
                 if (result.toLowerCase().includes("bypass_fr_ok")) {
                     showMessagePHP("Bỏ qua xác thực OTA thành công, đang tiến hành cập nhật Firmware....", 5);
-                    var xhr = new XMLHttpRequest();
+                    var xhr = vbotCreateXhr();
                     var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
                     xhr.open('POST', url, true);
                     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -724,7 +719,7 @@ if ($Config['contact_info']['user_login']['active']) {
 										//Nâng cấp littlefs Nếu có
 										bypass_upgrade_littlefs(ip_address, function(resultLittlefs) {
 											if (resultLittlefs.toLowerCase().includes("bypass_fs_ok")) {
-												var xhrLittlefs = new XMLHttpRequest();
+												var xhrLittlefs = vbotCreateXhr();
 												var urlLittlefs = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
 												xhrLittlefs.open('POST', urlLittlefs, true);
 												xhrLittlefs.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -787,7 +782,7 @@ if ($Config['contact_info']['user_login']['active']) {
 
         //Hàm bypass firmware (giữ nguyên)
         function bypass_upgrade_firmware(ip_address, callback) {
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
             xhr.open('POST', url, true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -816,7 +811,7 @@ if ($Config['contact_info']['user_login']['active']) {
 
         //Hàm bypass LittleFS (giữ nguyên)
         function bypass_upgrade_littlefs(ip_address, callback) {
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             var url = 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php';
             xhr.open('POST', url, true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
@@ -861,7 +856,7 @@ if ($Config['contact_info']['user_login']['active']) {
             }
             loading('show');
             showMessagePHP("Đang gửi Firmware .bin tới Client để nâng cấp Thủ Công...", 5);
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open("POST", 'includes/php_ajax/VBot_Client_Upgrade_Firmware.php', true);
             xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
             //Thiết lập tổng timeout 3 phút (180 giây)
@@ -912,29 +907,34 @@ if ($Config['contact_info']['user_login']['active']) {
         }
 
         // Tải lại các client có trong bộ nhớ server
-        function reloadClients() {
-            loadFromServer().then(clients => {
+        async function reloadClients() {
+            try {
+                const clients = await loadFromServer();
                 if (!clients || clients.length === 0) {
                     show_message("Không có Client nào trong dữ liệu.");
                     return;
                 }
                 loading('show');
-                clients.forEach((client, index) => {
-                    let ip_address = client.ip_address || client.ip;
-                    setTimeout(() => {
-                        loading_data_client(ip_address, 1000);
-                    }, index * 2000);
-                });
+                const jobs = clients.map((client, index) => loading_data_client(
+                    client.ip_address || client.ip,
+                    index * 250,
+                    false
+                ));
+                const results = await Promise.allSettled(jobs);
+                const successCount = results.filter(result => result.status === 'fulfilled' && result.value).length;
                 loading('hide');
-                showMessagePHP("Đã tải mới lại tất cả Client");
-            });
+                showMessageText('Đã tải lại ' + successCount + '/' + clients.length + ' Client');
+            } catch (error) {
+                loading('hide');
+                showMessageText('Không thể tải lại danh sách Client: ' + error.message, 5);
+            }
         }
 
         //Check Online, Offline
         async function pingDevice(ip, index, showNotification = false) {
             loading('show');
             try {
-                const phpUrl = '/includes/php_ajax/Scanner.php';
+                const phpUrl = 'includes/php_ajax/Scanner.php';
                 const formData = new FormData();
                 formData.append('showJsonData_Client', ip);
                 const controller = new AbortController();
@@ -1017,13 +1017,16 @@ if ($Config['contact_info']['user_login']['active']) {
         //Hàm hiển thị dữ liệu JSON trong modal
         function showJsonData(ip_address) {
             loading('show');
-            const phpUrl = '/includes/php_ajax/Scanner.php';
+            const phpUrl = 'includes/php_ajax/Scanner.php';
             const formData = new FormData();
             formData.append('showJsonData_Client', ip_address);
+            const controller = new AbortController();
+            const timeoutId = setTimeout(function() { controller.abort(); }, 12000);
             fetch(phpUrl, {
                     method: 'POST',
                     headers: {'X-CSRF-Token': window.VBOT_CSRF_TOKEN || ''},
-                    body: formData
+                    body: formData,
+                    signal: controller.signal
                 })
                 .then(response => {
                     if (!response.ok) {
@@ -1032,6 +1035,7 @@ if ($Config['contact_info']['user_login']['active']) {
                     return response.json();
                 })
                 .then(data => {
+                    clearTimeout(timeoutId);
                     loading('hide');
                     if (!data.success) {
                         throw new Error(data.error || 'Không thể lấy dữ liệu từ client');
@@ -1046,8 +1050,12 @@ if ($Config['contact_info']['user_login']['active']) {
                     jsonModal.show();
                 })
                 .catch(error => {
+                    clearTimeout(timeoutId);
                     loading('hide');
-                    showMessagePHP('Lỗi khi lấy dữ liệu JSON: ' + error.message, 5);
+                    const message = error && error.name === 'AbortError'
+                        ? 'Client không phản hồi trong 12 giây'
+                        : 'Lỗi khi lấy dữ liệu JSON: ' + error.message;
+                    showMessageText(message, 5);
                     document.getElementById('jsonContent').innerHTML = '<code class="language-json">Không thể tải dữ liệu JSON.</code>';
                     Prism.highlightAllUnder(document.getElementById('jsonContent'));
                     const jsonModal = new bootstrap.Modal(document.getElementById('jsonDisplayModal'));

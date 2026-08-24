@@ -95,7 +95,11 @@ $userIp = isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '127.0.0.1'
 $HTML_VBot_Offline = __DIR__;
 
 //đường dẫn path VBot python
-$VBot_Offline = "/home/pi/VBot_Offline/";
+$VBot_Root_Resolved = realpath(dirname(__DIR__));
+$VBot_Offline = rtrim(
+    $VBot_Root_Resolved !== false ? $VBot_Root_Resolved : dirname(__DIR__),
+    '/\\'
+) . DIRECTORY_SEPARATOR;
 
 $Backup_dir = $HTML_VBot_Offline . '/Backup_Upgrade/Backup_Config/';
 

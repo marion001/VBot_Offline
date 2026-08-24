@@ -10,6 +10,10 @@ import json
 import requests
 from bs4 import BeautifulSoup
 import sys
+from pathlib import Path
+
+VBOT_ROOT = Path(__file__).resolve().parents[3]
+DEFAULT_OUTPUT_FILE = VBOT_ROOT / "html" / "includes" / "other_data" / "list_voices_tts_gcloud.json"
 
 def detect_voice_type(voice_name):
     lower = voice_name.lower()
@@ -33,8 +37,10 @@ def detect_voice_type(voice_name):
         return "Polyglot"
     return "Unknown"
 
-def fetch_gcloud_voices_from_web(output_file="/home/pi/VBot_Offline/html/includes/other_data/list_voices_tts_gcloud.json"):
+def fetch_gcloud_voices_from_web(output_file=None):
     try:
+        output_file = Path(output_file) if output_file else DEFAULT_OUTPUT_FILE
+        output_file.parent.mkdir(parents=True, exist_ok=True)
         resp = requests.get("https://docs.cloud.google.com/text-to-speech/docs/list-voices-and-types", timeout=20, headers={"User-Agent": "Mozilla/5.0"})
         resp.raise_for_status()
         soup = BeautifulSoup(resp.text, "html.parser")
@@ -73,6 +79,7 @@ def fetch_gcloud_voices_from_web(output_file="/home/pi/VBot_Offline/html/include
 
         with open(output_file, "w", encoding="utf-8") as f:
             json.dump(voices, f, ensure_ascii=False, indent=4)
+        output_file.chmod(0o777)
 
         return {"success": True, "message": "Đã cập nhật danh sách giọng đọc Google Cloud.", "count": len(voices)}
 

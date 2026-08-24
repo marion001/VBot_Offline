@@ -69,7 +69,10 @@ function download_file($url, $saveDir) {
     $ch = curl_init($url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     $data = curl_exec($ch);
     $error = curl_error($ch);
     curl_close($ch);
@@ -1147,7 +1150,7 @@ if (empty($MCP_plugins)) {
             formData.append('save_builtin_mcp_description', '1');
             saveButton.disabled = true;
             saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
-            fetch(mcpPluginPhpEndpoint, {
+            vbotFetchWithTimeout(mcpPluginPhpEndpoint, {
                 method: 'POST',
                 body: formData,
                 credentials: 'same-origin',
@@ -1217,7 +1220,7 @@ if (empty($MCP_plugins)) {
             submitButton.disabled = true;
             submitButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang tạo...';
 
-            fetch(window.location.href, {
+            vbotFetchWithTimeout(window.location.href, {
                 method: 'POST',
                 body: formData,
                 credentials: 'same-origin',
@@ -1271,7 +1274,7 @@ if (empty($MCP_plugins)) {
                 deleteButton.disabled = true;
                 deleteButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang xóa...';
 
-                fetch(window.location.href, {
+                vbotFetchWithTimeout(window.location.href, {
                     method: 'POST',
                     body: deleteData,
                     credentials: 'same-origin',
@@ -1353,7 +1356,7 @@ if (empty($MCP_plugins)) {
                 selectedButton.disabled = true;
                 mcpPluginContentLoaded = false;
                 mcpPluginEditor.setValue('Đang tải nội dung file...');
-                fetch(mcpPluginPhpEndpoint, {
+                vbotFetchWithTimeout(mcpPluginPhpEndpoint, {
                     method: 'POST',
                     body: loadData,
                     credentials: 'same-origin',
@@ -1416,7 +1419,7 @@ if (empty($MCP_plugins)) {
             saveButton.disabled = true;
             saveButton.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Đang lưu...';
 
-            fetch(mcpPluginPhpEndpoint, {
+            vbotFetchWithTimeout(mcpPluginPhpEndpoint, {
                 method: 'POST',
                 body: formData,
                 credentials: 'same-origin',

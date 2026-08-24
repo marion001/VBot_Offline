@@ -2,7 +2,7 @@
     "version": "1.2.3",
     "projectName": "WebUI VBot Offline",
     "description": "Fix Bug hệ thống, Nâng Cấp Multiroom Phát âm thanh đa vùng, Nâng Cấp Multi Playlist, Cấu trúc giao diện WebUI và nhiều thay đổi khác",
-    "releaseDate": "23/08/2026",
+    "releaseDate": "24/08/2026",
     "changes": [
         {
             "type": "feature",

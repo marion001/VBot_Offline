@@ -858,6 +858,10 @@ if (isset($_GET['get_token_tts_default_zai_did'])) {
     curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/5.0');
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
     $response = curl_exec($ch);
     if (curl_errno($ch)) {
         $error = curl_error($ch);
@@ -903,7 +907,8 @@ if (isset($_GET['get_token_tts_default_zai_did'])) {
 
 //Lấy danh sách giọng đọc của google cloud
 if (isset($_GET['get_ggcloud_voice_name'])) {
-    $CMD = 'python3 ' .$Config['web_interface']['path'].'/includes/php_ajax/Get_Voice_Name_GCloud.py';
+    $voiceScript = rtrim((string)$Config['web_interface']['path'], '/\\') . '/includes/php_ajax/Get_Voice_Name_GCloud.py';
+    $CMD = 'python3 ' . escapeshellarg($voiceScript);
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
         vbotApiJsonResponse([
@@ -930,10 +935,12 @@ if (isset($_GET['get_ggcloud_voice_name'])) {
     vbotApiJsonResponse($voiceData);
 }
 
-//Lấy danh sách model trợ lý google gemini
-if (isset($_GET['get_model_gemini'])) {
-    $apiKey     = $_GET['apikey'] ?? '';
-    $versionAPI = $_GET['version_api'] ?? 'v1beta'; // mặc định
+//Lấy danh sách model trợ lý Google Gemini. API key chỉ nhận qua POST để
+//không xuất hiện trong URL, lịch sử trình duyệt hoặc access log của WebUI.
+if (isset($_POST['get_model_gemini'])) {
+    vbotApiVerifyCsrf(true);
+    $apiKey     = trim((string)($_POST['apikey'] ?? ''));
+    $versionAPI = (string)($_POST['version_api'] ?? 'v1beta');
     if (empty($apiKey)) {
         vbotApiJsonResponse([
             "success" => false,
@@ -952,7 +959,10 @@ if (isset($_GET['get_model_gemini'])) {
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_CONNECTTIMEOUT => 5,
         CURLOPT_TIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
     ]);
     $response  = curl_exec($ch);
     $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -1004,7 +1014,7 @@ if (isset($_GET['get_model_gemini'])) {
 	}
     $modelList = array_values(array_unique($modelList));
     sort($modelList);
-	$outputFile = "/home/pi/VBot_Offline/html/includes/other_data/gemini_model_list.json";
+	$outputFile = $directory_path . '/includes/other_data/gemini_model_list.json';
 	$existingData = [];
 	if (file_exists($outputFile)) {
 		$existingData = json_decode(file_get_contents($outputFile), true);
@@ -1013,12 +1023,14 @@ if (isset($_GET['get_model_gemini'])) {
 		}
 	}
 	$existingData['gemini_models'] = $modelList;
-	if (file_put_contents($outputFile, json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE)) === false) {
+	$encodedModelList = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+	if ($encodedModelList === false || !vbotAtomicWriteFile($outputFile, $encodedModelList, 'danh sách Gemini Model')) {
 		vbotApiJsonResponse([
 			"success" => false,
 			"message" => "Không ghi được file JSON"
 		], 500);
 	}
+	@chmod($outputFile, 0777);
     vbotApiJsonResponse([
         "success" => true,
         "count" => count($modelList),

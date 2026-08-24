@@ -643,7 +643,7 @@ include 'html_head.php';
   ?>
   <script>
     function get_picovoice_version() {
-      const xhr = new XMLHttpRequest();
+      const xhr = vbotCreateXhr();
       xhr.open('GET', 'includes/php_ajax/Check_Connection.php?Picovoice_Version');
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {

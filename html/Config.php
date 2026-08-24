@@ -171,6 +171,13 @@ if (isset($_POST['start_recovery_config_json'])) {
       if ($_FILES["fileToUpload_configjson_restore"]["error"] !== UPLOAD_ERR_OK) {
         $messages[] = "- Tệp tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload_configjson_restore"]["error"]);
         $uploadOk = 0;
+      } elseif (
+        !is_uploaded_file($_FILES["fileToUpload_configjson_restore"]["tmp_name"])
+        || (int)($_FILES["fileToUpload_configjson_restore"]["size"] ?? 0) <= 0
+        || (int)($_FILES["fileToUpload_configjson_restore"]["size"] ?? 0) > 10485760
+      ) {
+        $messages[] = "- Tệp Config tải lên không hợp lệ hoặc vượt quá 10 MB";
+        $uploadOk = 0;
       } elseif (!preg_match('/\.json$/i', $fileName) || !preg_match('/^Config/i', $fileName)) {
         $messages[] = "- Chỉ chấp nhận tệp .json, dành cho Config.json";
         $uploadOk = 0;
@@ -4448,6 +4455,12 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
   <?php
   include 'html_js.php';
   ?>
+  <script>
+    window.VBOT_WEBUI_ROOT_PATH = <?php echo json_encode(
+      $directory_path,
+      JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    ); ?>;
+  </script>
   <script src="assets/js/Config.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
   <script>
     //Xóa file backup Config
@@ -4601,7 +4614,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         "action": led_action,
         "value": led_value
       });
-      const xhr = new XMLHttpRequest();
+      const xhr = vbotCreateXhr();
       xhr.withCredentials = true;
       xhr.addEventListener("readystatechange", function() {
         if (this.readyState === 4) {

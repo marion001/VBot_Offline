@@ -213,6 +213,24 @@ include 'html_head.php';
 			error_log('Scheduler: không thể đặt quyền 0777 cho ' . $label . ': ' . $path);
 			return false;
 		}
+		function vbotSchedulerUploadedAudioIsValid($temporaryFile, $extension) {
+			if (!is_uploaded_file($temporaryFile)) return false;
+			$allowedMimes = [
+				'mp3' => ['audio/mpeg', 'audio/mp3', 'application/octet-stream'],
+				'wav' => ['audio/wav', 'audio/x-wav', 'audio/vnd.wave', 'application/octet-stream'],
+				'flac' => ['audio/flac', 'audio/x-flac', 'application/octet-stream'],
+				'ogg' => ['audio/ogg', 'application/ogg', 'application/octet-stream'],
+				'aac' => ['audio/aac', 'audio/x-aac', 'application/octet-stream'],
+			];
+			$extension = strtolower($extension);
+			if (!isset($allowedMimes[$extension])) return false;
+			$finfo = function_exists('finfo_open') ? finfo_open(FILEINFO_MIME_TYPE) : false;
+			if ($finfo === false) return true;
+			$mime = finfo_file($finfo, $temporaryFile);
+			finfo_close($finfo);
+			return is_string($mime) && in_array(strtolower($mime), $allowedMimes[$extension], true);
+		}
+
 		function generate_audio_select($directories, $field_name, $selected_value = '') {
 			if (!is_array($directories)) {
 				$directories = [$directories];
@@ -366,10 +384,26 @@ include 'html_head.php';
           // Kiểm tra xem tệp có được gửi không
           if (isset($_FILES["fileToUpload_Scheduler_Upload_Audio"])) {
             $fileName = basename($_FILES["fileToUpload_Scheduler_Upload_Audio"]["name"]);
+            $fileName = preg_replace('/[^\p{L}\p{N} ._()-]/u', '_', $fileName);
+            $fileExtension = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
+            $fileSize = (int)($_FILES["fileToUpload_Scheduler_Upload_Audio"]["size"] ?? 0);
             $fileTargetPath = $file_save_directory . "/" . $fileName; // Đường dẫn đầy đủ
             // Kiểm tra định dạng tệp (chỉ chấp nhận tệp âm thanh như mp3, wav, etc.)
-            if (!preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $fileName)) {
+            if ($_FILES["fileToUpload_Scheduler_Upload_Audio"]["error"] !== UPLOAD_ERR_OK) {
+              $errorMessages[] = "- Tệp âm thanh tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload_Scheduler_Upload_Audio"]["error"]);
+              $uploadOk = 0;
+            } elseif ($fileSize <= 0 || $fileSize > 104857600) {
+              $errorMessages[] = "- Tệp âm thanh không hợp lệ hoặc vượt quá 100 MB";
+              $uploadOk = 0;
+            } elseif (!preg_match('/\.(mp3|wav|flac|ogg|aac)$/i', $fileName)) {
               $errorMessages[] = "- Chỉ chấp nhận các định dạng tệp âm thanh (mp3, wav, flac, ogg, aac)";
+              $uploadOk = 0;
+            }
+            if ($uploadOk === 1 && !vbotSchedulerUploadedAudioIsValid(
+              $_FILES["fileToUpload_Scheduler_Upload_Audio"]["tmp_name"],
+              $fileExtension
+            )) {
+              $errorMessages[] = "- Nội dung tệp không khớp với định dạng âm thanh đã chọn";
               $uploadOk = 0;
             }
             if ($uploadOk == 0) {
@@ -404,7 +438,14 @@ include 'html_head.php';
 			}
 			if ($uploadOk === 1) {
 				$fileName = basename($_FILES["fileToUpload_Scheduler_restore"]["name"]);
-				if (!preg_match('/\.json$/i', $fileName)) {
+				$fileSize = (int)($_FILES["fileToUpload_Scheduler_restore"]["size"] ?? 0);
+				if ($_FILES["fileToUpload_Scheduler_restore"]["error"] !== UPLOAD_ERR_OK) {
+					$errorMessages[] = "- Tệp Scheduler tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload_Scheduler_restore"]["error"]);
+					$uploadOk = 0;
+				} elseif (!is_uploaded_file($_FILES["fileToUpload_Scheduler_restore"]["tmp_name"]) || $fileSize <= 0 || $fileSize > 10485760) {
+					$errorMessages[] = "- Tệp Scheduler không hợp lệ hoặc vượt quá 10 MB";
+					$uploadOk = 0;
+				} elseif (!preg_match('/\.json$/i', $fileName)) {
 					$errorMessages[] = "- Chỉ chấp nhận tệp .json cho Scheduler";
 					$uploadOk = 0;
 				}
@@ -1862,7 +1903,7 @@ render_system_scheduler_options(
 
     function get_audio_schedule() {
       loading("show");
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       var url = "includes/php_ajax/Media_Player_Search.php?audio_schedule";
       xhr.open("GET", url, true);
       xhr.responseType = "json";
@@ -1884,12 +1925,49 @@ render_system_scheduler_options(
             var tbody = document.createElement('tbody');
             response.forEach(function(audio) {
               var row = document.createElement('tr');
-              row.innerHTML = '<td style="text-align: center; vertical-align: middle;">' + audio.name + '</td><td style="text-align: center; vertical-align: middle;">' + audio.size + ' MB</td>' +
-                '<td style="text-align: center; vertical-align: middle;">' +
-                ' <button type="button" class="btn btn-primary" onclick="playAudio(\'' + audio.full_path + '\')"><i class="bi bi-play-circle"></i></button>' +
-                ' <button type="button" class="btn btn-success" onclick="downloadFile(\'' + audio.full_path + '\')"><i class="bi bi-download"></i></button>' +
-                ' <button type="button" class="btn btn-danger" onclick="deleteFile(\'' + audio.full_path + '\', \'du_lieu_audio_schedule\')"><i class="bi bi-trash"></i></button>' +
-                '</td>';
+              var audioName = String(audio && audio.name !== undefined ? audio.name : '');
+              var audioSize = String(audio && audio.size !== undefined ? audio.size : '0');
+              var audioPath = String(audio && audio.full_path !== undefined ? audio.full_path : '');
+
+              var nameCell = document.createElement('td');
+              var sizeCell = document.createElement('td');
+              var actionCell = document.createElement('td');
+              [nameCell, sizeCell, actionCell].forEach(function(cell) {
+                cell.style.textAlign = 'center';
+                cell.style.verticalAlign = 'middle';
+              });
+              nameCell.textContent = audioName;
+              sizeCell.textContent = audioSize + ' MB';
+
+              function createAudioActionButton(className, title, iconClass, handler) {
+                var button = document.createElement('button');
+                button.type = 'button';
+                button.className = className;
+                button.title = title;
+                button.style.margin = '0 2px';
+                var icon = document.createElement('i');
+                icon.className = iconClass;
+                button.appendChild(icon);
+                button.addEventListener('click', handler);
+                return button;
+              }
+
+              actionCell.appendChild(createAudioActionButton(
+                'btn btn-primary', 'Phát tệp âm thanh', 'bi bi-play-circle',
+                function() { playAudio(audioPath); }
+              ));
+              actionCell.appendChild(createAudioActionButton(
+                'btn btn-success', 'Tải xuống tệp âm thanh', 'bi bi-download',
+                function() { downloadFile(audioPath); }
+              ));
+              actionCell.appendChild(createAudioActionButton(
+                'btn btn-danger', 'Xóa tệp âm thanh', 'bi bi-trash',
+                function() { deleteFile(audioPath, 'du_lieu_audio_schedule'); }
+              ));
+
+              row.appendChild(nameCell);
+              row.appendChild(sizeCell);
+              row.appendChild(actionCell);
               tbody.appendChild(row);
             });
             table.appendChild(tbody);
@@ -1967,7 +2045,7 @@ function loadAudioFiles(selectId) {
   if (!selectElem) return;
   selectElem.innerHTML = "<option value=''>Chọn tệp âm thanh</option>";
   directories.forEach(dir => {
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     const url = "includes/php_ajax/Show_file_path.php?show_all_file&directory_path=" + encodeURIComponent(dir);
     xhr.open("GET", url, true);
     xhr.onreadystatechange = function() {
@@ -2575,7 +2653,7 @@ function run_test_task(value, parameter = null) {
     if (parameter !== null && parameter !== undefined) {
         data.parameter = parameter;
     }
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.withCredentials = true;
     xhr.onreadystatechange = function () {
 		if (xhr.readyState === 4) {
@@ -2601,7 +2679,7 @@ function run_test_task(value, parameter = null) {
 async function schedulerApi(value, parameter = null) {
     const payload = {type: 3, data: 'scheduler', value: value};
     if (parameter !== null) payload.parameter = parameter;
-    const response = await fetch("<?php echo $Protocol.$serverIp.':'.$Port_API; ?>", {
+    const response = await vbotFetchWithTimeout("<?php echo $Protocol.$serverIp.':'.$Port_API; ?>", {
         method: 'POST', credentials: 'include', headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(payload)
     });
@@ -2611,7 +2689,7 @@ async function schedulerApi(value, parameter = null) {
 }
 
 async function schedulerHistoryFromFile(limit = 50) {
-    const response = await fetch(
+    const response = await vbotFetchWithTimeout(
         'Scheduler.php?scheduler_history_fallback=1&limit=' + encodeURIComponent(limit),
         {method: 'GET', credentials: 'include', cache: 'no-store'}
     );

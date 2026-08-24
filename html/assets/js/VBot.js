@@ -1,5 +1,32 @@
 //thay đổi chế độ sáng tối
 const themeToggle = document.getElementById('themeToggle');
+
+function vbotMediaEscape(value) {
+    if (typeof window.vbotEscapeHtml === 'function') return window.vbotEscapeHtml(value);
+    var node = document.createElement('div');
+    node.textContent = value == null ? '' : String(value);
+    return node.innerHTML;
+}
+
+function vbotMediaUrl(value, allowRelative = false) {
+    try {
+        var raw = String(value || '').trim();
+        if (allowRelative && raw && !/^[a-z][a-z0-9+.-]*:/i.test(raw)) return raw;
+        var parsed = new URL(raw, document.baseURI);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:' ? parsed.href : '';
+    } catch (error) {
+        return '';
+    }
+}
+
+function vbotMediaHandler(functionName, args) {
+    if (typeof window.vbotInlineHandler === 'function') return window.vbotInlineHandler(functionName, args);
+    var safeName = /^[A-Za-z_$][\w$]*$/.test(functionName) ? functionName : '';
+    var values = (Array.isArray(args) ? args : []).map(function(value) {
+        return value === null ? 'null' : JSON.stringify(value == null ? '' : String(value));
+    });
+    return vbotMediaEscape(safeName + '(' + values.join(',') + ')');
+}
 function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     localStorage.setItem('vbot_theme', theme);
@@ -209,16 +236,18 @@ function processZingMP3Data(data_media_ZingMP3) {
 				'Dữ Liệu Tìm Kiếm ZingMP3: <button type="button" id="play_Button" name="play_Button" title="Phát toàn bộ dữ liệu tìm kiếm được từ ZingMP3" class="btn btn-primary btn-sm" onclick="playlist_media_control(\'zingmp3\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>';
         }
         data_media_ZingMP3.data.forEach(function (zing) {
+            var safeName = vbotMediaEscape(zing.name || '');
+            var safeThumb = vbotMediaEscape(vbotMediaUrl(zing.thumb));
             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-            fileInfo += '<img src="' + zing.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + zing.name + '</font></p>';
-            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + zing.artist + '</font></p>';
-            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (zing.duration || 'N/A') + '</font></p>';
-            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + zing.name + '" onclick="get_ZingMP3_Link(\'' + zing.id + '\', \'' + zing.name + '\', \'' + zing.thumb + '\', \'' + zing.artist + '\')"><i class="bi bi-play-circle"></i></button>';
-            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + zing.name + '" onclick="addToPlaylist(\'' + zing.name + '\', \'' + zing.thumb + '\', \'' + zing.id + '\', \'' + (zing.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + zing.id + '\', null, \'' + zing.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
-            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + zing.name + '" onclick="dowload_ZingMP3_ID(\'' + zing.id + '\', \'' + zing.name + '\')"><i class="bi bi-download"></i></button>';
-            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + zing.name + '" onclick="download_zingMp3_to_local(\'' + zing.id + '\', \'' + zing.name + '\')"><i class="bi bi-save2"></i></button>';
+            fileInfo += '<img src="' + safeThumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + safeName + '</font></p>';
+            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + vbotMediaEscape(zing.artist || '') + '</font></p>';
+            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotMediaEscape(zing.duration || 'N/A') + '</font></p>';
+            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeName + '" onclick="' + vbotMediaHandler('get_ZingMP3_Link', [zing.id, zing.name, zing.thumb, zing.artist]) + '"><i class="bi bi-play-circle"></i></button>';
+            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeName + '" onclick="' + vbotMediaHandler('addToPlaylist', [zing.name, zing.thumb, zing.id, zing.duration || 'N/A', null, 'ZingMP3', zing.id, null, zing.artist]) + '"><i class="bi bi-music-note-list"></i></button>';
+            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + safeName + '" onclick="' + vbotMediaHandler('dowload_ZingMP3_ID', [zing.id, zing.name]) + '"><i class="bi bi-download"></i></button>';
+            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + safeName + '" onclick="' + vbotMediaHandler('download_zingMp3_to_local', [zing.id, zing.name]) + '"><i class="bi bi-save2"></i></button>';
             fileInfo += '</div></div>';
             fileListDiv.innerHTML += fileInfo;
         });
@@ -243,16 +272,20 @@ function processNhacCuaTuiData(data_media_NhacCuaTui) {
 				'Dữ Liệu Tìm Kiếm NhacCuaTui: <button type="button" id="play_Button" name="play_Button" title="Phát toàn bộ dữ liệu tìm kiếm được từ NhacCuaTui" class="btn btn-primary btn-sm" onclick="playlist_media_control(\'nhaccuatui\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>';
         }
         data_media_NhacCuaTui.data.forEach(function (nct) {
+            var safeName = vbotMediaEscape(nct.name || '');
+            var safeThumb = vbotMediaEscape(vbotMediaUrl(nct.thumb));
+            var rawNctUrl = String(nct.url || '');
+            var downloadUrl = vbotMediaUrl(rawNctUrl.substring(0, rawNctUrl.indexOf('.mp3') + 4));
             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-            fileInfo += '<img src="' + nct.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + nct.name + '</font></p>';
-            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + nct.artist + '</font></p>';
-            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (nct.duration || 'N/A') + '</font></p>';
-            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + nct.name + '" onclick="startMediaPlayer(\'' + nct.url + '\', \'' + nct.name + '\', \'' + nct.thumb + '\', \'NhacCuaTui\')"><i class="bi bi-play-circle"></i></button>';
-            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + nct.name + '" onclick="addToPlaylist(\'' + nct.name + '\', \'' + nct.thumb + '\', \'' + nct.url + '\', \'' + (nct.duration || 'N/A') + '\', null, \'NhacCuaTui\', \'' + nct.url + '\', null, \'' + nct.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
-            fileInfo += ` <button class="btn btn-warning btn-sm" title="Tải Xuống: ${nct.name}" onclick="downloadFile('${nct.url.substring(0, nct.url.indexOf('.mp3') + 4)}')"><i class="bi bi-download"></i></button>`;
-            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + nct.name + '" onclick="download_Link_url_to_local(\'' + nct.url + '\', \'' + nct.name + '\')"><i class="bi bi-save2"></i></button>';
+            fileInfo += '<img src="' + safeThumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + safeName + '</font></p>';
+            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + vbotMediaEscape(nct.artist || '') + '</font></p>';
+            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotMediaEscape(nct.duration || 'N/A') + '</font></p>';
+            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeName + '" onclick="' + vbotMediaHandler('startMediaPlayer', [nct.url, nct.name, nct.thumb, 'NhacCuaTui']) + '"><i class="bi bi-play-circle"></i></button>';
+            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeName + '" onclick="' + vbotMediaHandler('addToPlaylist', [nct.name, nct.thumb, nct.url, nct.duration || 'N/A', null, 'NhacCuaTui', nct.url, null, nct.artist]) + '"><i class="bi bi-music-note-list"></i></button>';
+            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + safeName + '" onclick="' + vbotMediaHandler('downloadFile', [downloadUrl]) + '"><i class="bi bi-download"></i></button>';
+            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + safeName + '" onclick="' + vbotMediaHandler('download_Link_url_to_local', [nct.url, nct.name]) + '"><i class="bi bi-save2"></i></button>';
             fileInfo += '</div></div>';
             fileListDiv.innerHTML += fileInfo;
         });
@@ -279,18 +312,23 @@ function processYoutubeData(data_media_Youtube) {
 			'Dữ Liệu Tìm Kiếm Youtube: <button type="button" id="play_Button" name="play_Button" title="Phát toàn bộ dữ liệu tìm kiếm được từ Youtube" class="btn btn-primary btn-sm" onclick="playlist_media_control(\'youtube\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>';
     }
     data_media_Youtube.data.forEach(function (youtube) {
-        var description = youtube.description.length > 70 ? youtube.description.substring(0, 70) + '...' : youtube.description;
+        var rawDescription = String(youtube.description || '');
+        var description = rawDescription.length > 70 ? rawDescription.substring(0, 70) + '...' : rawDescription;
+        var safeTitle = vbotMediaEscape(youtube.title || '');
+        var safeCover = vbotMediaEscape(vbotMediaUrl(youtube.cover));
+        var safeId = String(youtube.id || '').replace(/[^A-Za-z0-9_-]/g, '');
+        var youtubeUrl = 'https://www.youtube.com/watch?v=' + safeId;
         var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
         fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-        fileInfo += '<img src="' + youtube.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + youtube.title + '</font></p>';
-        fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + (youtube.channelTitle || 'N/A') + '</font></p>';
-        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (youtube.duration || 'N/A') + '</font></p>';
-        fileInfo += '<p style="margin: 0;">Mô tả: <font color=green>' + (description || 'N/A') + '</font></p>';
+        fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + safeTitle + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + vbotMediaEscape(youtube.channelTitle || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotMediaEscape(youtube.duration || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Mô tả: <font color=green>' + vbotMediaEscape(description || 'N/A') + '</font></p>';
         //fileInfo += ' <button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-        fileInfo += ' <button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="play_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-        fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', null, \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
-        fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+        fileInfo += ' <button class="btn btn-success btn-sm" title="Phát: ' + safeTitle + '" onclick="' + vbotMediaHandler('play_Youtube_Link', [safeId, youtube.title, youtube.cover]) + '"><i class="bi bi-play-circle"></i></button>';
+        fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeTitle + '" onclick="' + vbotMediaHandler('addToPlaylist', [youtube.title, youtube.cover, youtubeUrl, null, description || 'N/A', 'Youtube', safeId, youtube.channelTitle || 'N/A', null]) + '"><i class="bi bi-music-note-list"></i></button>';
+        fileInfo += ' <a href="' + youtubeUrl + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + safeTitle + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
         fileInfo += '</div></div>';
         fileListDiv.innerHTML += fileInfo;
     });
@@ -315,17 +353,20 @@ function processPodCastData(data_media_PodCast) {
             '<button type="button" class="btn btn-primary border-success" onclick="cachePodCast()" title="Tải lại dữ liệu Cache"><i class="bi bi-arrow-repeat"></i></button></div>';
     }
     data_media_PodCast.data.forEach(function (podcast) {
+        var safeTitle = vbotMediaEscape(podcast.title || '');
+        var safeCover = vbotMediaEscape(vbotMediaUrl(podcast.cover));
+        var safeAudio = vbotMediaUrl(podcast.audio);
         var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
         fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-        fileInfo += '<img src="' + podcast.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + podcast.title + '</font></p>';
-        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (podcast.duration || 'N/A') + '</font></p>';
-        fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
-        fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + podcast.title + '" onclick="startMediaPlayer(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-        fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
-        fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + podcast.title + '" onclick="download_AUDIO_URL(\'' + podcast.audio + '\', \'' + podcast.title + '\')"><i class="bi bi-download"></i></button>';
-        fileInfo += ' <button class="btn btn-danger btn-sm" title="Tải Vào Thư Mục Local: ' + podcast.title + '" onclick="download_Link_url_to_local(\'' + podcast.audio + '\', \'' + podcast.title + '\')"><i class="bi bi-save2"></i></button>';
-        fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+        fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+        fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: <font color=green>' + safeTitle + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotMediaEscape(podcast.duration || 'N/A') + '</font></p>';
+        fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + vbotMediaEscape(podcast.description || 'N/A') + '</font></p>';
+        fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeTitle + '" onclick="' + vbotMediaHandler('startMediaPlayer', [safeAudio, podcast.title, podcast.cover]) + '"><i class="bi bi-play-circle"></i></button>';
+        fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeTitle + '" onclick="' + vbotMediaHandler('addToPlaylist', [podcast.title, podcast.cover, safeAudio, podcast.duration || 'N/A', podcast.description || 'N/A', 'PodCast', safeAudio, null, null]) + '"><i class="bi bi-music-note-list"></i></button>';
+        fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + safeTitle + '" onclick="' + vbotMediaHandler('download_AUDIO_URL', [safeAudio, podcast.title]) + '"><i class="bi bi-download"></i></button>';
+        fileInfo += ' <button class="btn btn-danger btn-sm" title="Tải Vào Thư Mục Local: ' + safeTitle + '" onclick="' + vbotMediaHandler('download_Link_url_to_local', [safeAudio, podcast.title]) + '"><i class="bi bi-save2"></i></button>';
+        fileInfo += ' <a href="' + vbotMediaEscape(safeAudio) + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-info" title="Mở trong tab mới: ' + safeTitle + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
         fileInfo += '</div></div>';
         fileListDiv.innerHTML += fileInfo;
     });
@@ -361,15 +402,17 @@ function processLocalData(data_media_local) {
             fileListDiv.innerHTML = '<br/><center><button class="btn btn-success" title="Phát toàn bộ bài hát trong thư mục nội bộ Local" onclick="playlist_media_control(\'local\')"><i class="bi bi-play-circle"></i> Phát Toàn Bộ Nhạc Local</button></center>';
         }
         data_media_local.forEach(function (file) {
+            var safeName = vbotMediaEscape(file.name || '');
+            var safeCover = vbotMediaEscape(vbotMediaUrl(file.cover, true));
             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-            fileInfo += '<img src="' + file.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: ' + file.name + '</p>';
-            fileInfo += '<p style="margin: 0;">Kích thước: ' + file.size + ' MB</p>';
-            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + file.name + '" onclick="startMediaPlayer(\'' + file.full_path + '\', \'' + file.name + '\', \'' + file.cover + '\', \'Local\')"><i class="bi bi-play-circle"></i></button> ';
-            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + file.name + '" onclick="addToPlaylist(\'' + file.name + '\', \'' + file.cover + '\', \'' + file.full_path + '\', \'' + file.size + ' MB\', null, \'Local\', \'' + file.full_path + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
-            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống File: ' + file.name + '" onclick="downloadFile(\'' + file.full_path + '\')"><i class="bi bi-download"></i></button>';
-            fileInfo += ' <button class="btn btn-danger btn-sm" title="Xóa File: ' + file.name + '" onclick="deleteFile(\'' + file.full_path + '\', \'media_player_search\')"><i class="bi bi-trash"></i></button>';
+            fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên bài hát: ' + safeName + '</p>';
+            fileInfo += '<p style="margin: 0;">Kích thước: ' + vbotMediaEscape(file.size || '') + ' MB</p>';
+            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeName + '" onclick="' + vbotMediaHandler('startMediaPlayer', [file.full_path, file.name, file.cover, 'Local']) + '"><i class="bi bi-play-circle"></i></button> ';
+            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeName + '" onclick="' + vbotMediaHandler('addToPlaylist', [file.name, file.cover, file.full_path, String(file.size || '') + ' MB', null, 'Local', file.full_path, null, null]) + '"><i class="bi bi-music-note-list"></i></button>';
+            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống File: ' + safeName + '" onclick="' + vbotMediaHandler('downloadFile', [file.full_path]) + '"><i class="bi bi-download"></i></button>';
+            fileInfo += ' <button class="btn btn-danger btn-sm" title="Xóa File: ' + safeName + '" onclick="' + vbotMediaHandler('deleteFile', [file.full_path, 'media_player_search']) + '"><i class="bi bi-trash"></i></button>';
             fileInfo += '</div></div>';
             fileListDiv.innerHTML += fileInfo;
             adjustContainerStyle_tableContainer();
@@ -490,14 +533,38 @@ function iframeModal_toggleFullScreen() {
 //Hiển thị thẻ modal iframe
 function showIframeModal(ipAddress, source_text_device) {
     loading('show');
+    const rawAddress = String(ipAddress || '').trim();
+    let targetUrl;
+    try {
+        if (!/^[A-Za-z0-9.-]+(?::\d{1,5})?$/.test(rawAddress)) throw new Error('Địa chỉ không hợp lệ');
+        targetUrl = new URL('http://' + rawAddress);
+        const port = targetUrl.port ? Number(targetUrl.port) : 80;
+        if (port < 1 || port > 65535) throw new Error('Cổng không hợp lệ');
+        const targetHost = targetUrl.hostname.toLowerCase();
+        const ipv4Parts = /^\d+(?:\.\d+){3}$/.test(targetHost) ? targetHost.split('.').map(Number) : null;
+        if (ipv4Parts && ipv4Parts.some(part => part < 0 || part > 255)) throw new Error('Địa chỉ IPv4 không hợp lệ');
+        const isPrivateIpv4 = ipv4Parts && (
+            ipv4Parts[0] === 10 ||
+            (ipv4Parts[0] === 192 && ipv4Parts[1] === 168) ||
+            (ipv4Parts[0] === 172 && ipv4Parts[1] >= 16 && ipv4Parts[1] <= 31)
+        );
+        const isPrivateTarget = targetHost === 'localhost' || targetHost.endsWith('.local') || isPrivateIpv4;
+        if (!isPrivateTarget) throw new Error('Thiết bị không thuộc mạng nội bộ');
+    } catch (error) {
+        show_message(error.message || 'Địa chỉ WebUI thiết bị không hợp lệ');
+        loading('hide');
+        return;
+    }
     const hostname = location.hostname;
     const isLocalNetwork = (
         hostname === 'localhost' ||
         hostname.startsWith('192.168.') ||
         hostname.startsWith('10.') || /^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(hostname)
     );
-    if (ipAddress === hostname) {
-        showMessagePHP('Bạn đang ở thiết bị này rồi: [' + source_text_device + ' - ' + ipAddress + ']');
+    const targetPort = targetUrl.port || '80';
+    const currentPort = location.port || (location.protocol === 'https:' ? '443' : '80');
+    if (targetUrl.hostname === hostname && targetPort === currentPort) {
+        showMessageText('Bạn đang ở thiết bị này rồi: [' + String(source_text_device || '') + ' - ' + rawAddress + ']');
         loading('hide');
         return;
     }
@@ -511,8 +578,18 @@ function showIframeModal(ipAddress, source_text_device) {
     const modalDialog = document.getElementById('iframeModal_size_setting');
     const modalContent = modalDialog.querySelector('.modal-content');
     const modalBody = modalDialog.querySelector('.modal-body');
-    iframeModal_source.innerHTML = '<b>Thiết Bị:  [' + source_text_device + '- <a href="http://' + ipAddress + '" target="_blank">' + ipAddress + '</a>]</b>';
-    iframe.src = 'http://' + ipAddress;
+    iframeModal_source.replaceChildren();
+    const sourceLabel = document.createElement('b');
+    sourceLabel.appendChild(document.createTextNode('Thiết Bị: [' + String(source_text_device || '') + ' - '));
+    const sourceLink = document.createElement('a');
+    sourceLink.href = targetUrl.href;
+    sourceLink.target = '_blank';
+    sourceLink.rel = 'noopener noreferrer';
+    sourceLink.textContent = rawAddress;
+    sourceLabel.appendChild(sourceLink);
+    sourceLabel.appendChild(document.createTextNode(']'));
+    iframeModal_source.appendChild(sourceLabel);
+    iframe.src = targetUrl.href;
     updateIframeSize();
     const modal = new bootstrap.Modal(document.getElementById('iframeModal'));
     modal.show();
@@ -732,7 +809,7 @@ function download_AUDIO_URL(url, name_title) {
         return;
     }
     loading("show");
-    fetch(url)
+    vbotFetchWithTimeout(url, {}, 180000)
         .then(response => {
             loading("hide");
             if (!response.ok) {

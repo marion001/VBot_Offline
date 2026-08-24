@@ -71,7 +71,17 @@ if (isset($_POST['start_recovery_broadlink'])) {
 		}
 		if ($uploadOk === 1) {
 			$fileName = basename($_FILES["fileToUpload_broadlink"]["name"]);
-			if (!preg_match('/\.json$/i', $fileName)) {
+			if ($_FILES["fileToUpload_broadlink"]["error"] !== UPLOAD_ERR_OK) {
+				$errorMessages[] = "- Tệp tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload_broadlink"]["error"]);
+				$uploadOk = 0;
+			} elseif (
+				!is_uploaded_file($_FILES["fileToUpload_broadlink"]["tmp_name"])
+				|| (int)($_FILES["fileToUpload_broadlink"]["size"] ?? 0) <= 0
+				|| (int)($_FILES["fileToUpload_broadlink"]["size"] ?? 0) > 10485760
+			) {
+				$errorMessages[] = "- Tệp BroadLink không hợp lệ hoặc vượt quá 10 MB";
+				$uploadOk = 0;
+			} elseif (!preg_match('/\.json$/i', $fileName)) {
 				$errorMessages[] = "- Chỉ chấp nhận tệp .json, dành cho broadlink.json";
 				$uploadOk = 0;
 			}
@@ -499,10 +509,10 @@ function showSaveLearnCommandButton(ip, mac, devtype, wave_type) {
         return;
     }
     if (document.getElementById("btn_save_learned_command")) return;
-    footer.insertAdjacentHTML("afterbegin", 
-	'<div class="d-flex gap-2 align-items-center"><button type="button" id="btn_test_learned_command" class="btn btn-primary" onclick="test_cmd_learn(\''+ip+'\', \''+mac+'\', \''+devtype+'\', \''+wave_type+'\')"><i class="bi bi-send-check"></i> Test Lệnh</button>' +
-	'<button type="button" id="btn_re_learned_command" class="btn btn-warning" onclick="learn_Command(\''+ip+'\', \''+mac+'\', \''+devtype+'\', \''+wave_type+'\', \'\', \'\')"><i class="bi bi-arrow-counterclockwise"></i> Học Lại</button>'+
-	'<button type="button" id="btn_save_learned_command" class="btn btn-success" onclick="saveLearnedCommandToJson(\''+wave_type+'\')"><i class="bi bi-floppy"></i> Lưu lệnh</button></div>');
+    footer.insertAdjacentHTML("afterbegin",
+	'<div class="d-flex gap-2 align-items-center"><button type="button" id="btn_test_learned_command" class="btn btn-primary" onclick="' + vbotInlineHandler('test_cmd_learn', [ip, mac, devtype, wave_type]) + '"><i class="bi bi-send-check"></i> Test Lệnh</button>' +
+	'<button type="button" id="btn_re_learned_command" class="btn btn-warning" onclick="' + vbotInlineHandler('learn_Command', [ip, mac, devtype, wave_type, '', '']) + '"><i class="bi bi-arrow-counterclockwise"></i> Học Lại</button>'+
+	'<button type="button" id="btn_save_learned_command" class="btn btn-success" onclick="' + vbotInlineHandler('saveLearnedCommandToJson', [wave_type]) + '"><i class="bi bi-floppy"></i> Lưu lệnh</button></div>');
 }
 
 //Thẻ Select Và Input khi học xong lệnh
@@ -546,7 +556,7 @@ function scanBroadlinkDevices() {
 	loading('show');
     var url = 'includes/php_ajax/BroadLink.php';
     showMessagePHP('Đang quét thiết bị Broadlink Remote trong mạng...', 3);
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -595,7 +605,7 @@ var globalIpList = [];
 function loadBroadlinkDevices() {
     loading('show');
     var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $broadlink_json_file; ?>';
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open('GET', url, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
@@ -634,41 +644,46 @@ function loadBroadlinkDevices() {
 					globalIpList.push(dev.ip);
 				}
                 var tr = document.createElement('tr');
+                var safeName = vbotEscapeHtml(dev.friendly_name || '');
+                var safeModel = vbotEscapeHtml(dev.model || '');
+                var safeIp = vbotEscapeHtml(dev.ip || '');
+                var safeMac = vbotEscapeHtml(dev.mac || '');
+                var safeDevtype = vbotEscapeHtml(dev.devtype || '');
                 //CỘT HỌC LỆNH
                 var learnButtons =
                     '<button type="button" class="btn btn-primary me-1" ' +
-                    'title="Học Lệnh IR từ: ' + dev.friendly_name + '" ' +
-					'data-disable="' + dev.ip + '" ' +
-                    'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'ir\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
+                    'title="Học Lệnh IR từ: ' + safeName + '" ' +
+					'data-disable="' + safeIp + '" ' +
+                    'onclick="' + vbotInlineHandler('learn_Command', [dev.ip, dev.mac, dev.devtype, 'ir', dev.friendly_name, dev.model]) + '">' +
                     '<i class="bi bi-broadcast"></i> IR</button>';
                 if (broadlinkHasRF(dev.devtype)) {
                     learnButtons +=
                         '<button type="button" class="btn btn-warning me-1" ' +
-                        'title="Học Lệnh RF từ: ' + dev.friendly_name + '" ' +
-						'data-disable="' + dev.ip + '" ' +
-                        'onclick="learn_Command(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'rf\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
+                        'title="Học Lệnh RF từ: ' + safeName + '" ' +
+						'data-disable="' + safeIp + '" ' +
+                        'onclick="' + vbotInlineHandler('learn_Command', [dev.ip, dev.mac, dev.devtype, 'rf', dev.friendly_name, dev.model]) + '">' +
                         '<i class="bi bi-broadcast-pin"></i> RF</button>';
                 }
 				learnButtons +=
 					'<button type="button" class="btn btn-info me-1" ' +
-					'title="Thêm Lệnh Thủ Công Từ: ' + dev.friendly_name + '" ' +
-					'data-disable="' + dev.ip + '" ' +
-					'onclick="learn_Command_handmade(\'' + dev.ip + '\', \'' + dev.mac + '\', \'' + dev.devtype + '\', \'handmade\', \'' + dev.friendly_name + '\', \'' + dev.model + '\')">' +
+					'title="Thêm Lệnh Thủ Công Từ: ' + safeName + '" ' +
+					'data-disable="' + safeIp + '" ' +
+					'onclick="' + vbotInlineHandler('learn_Command_handmade', [dev.ip, dev.mac, dev.devtype, 'handmade', dev.friendly_name, dev.model]) + '">' +
 					'<i class="bi bi-plus-circle-dotted"></i> Thêm Thủ Công</button>';
                 //CỘT HÀNH ĐỘNG
                 var actionButtons =
-                    '<button type="button" class="btn btn-success me-1" title="Đổi Tên Thiết Bị" onclick="renameDevice(\'' + dev.mac + '\')"><i class="bi bi-pencil-square"></i></button>' + 
-					'<button class="btn btn-info" title="Kiểm tra trạng thái" onclick="sendPing(\'' + dev.ip + '\', \'show_noti\')"><i class="bi bi-wifi"></i></button> ' + 
+                    '<button type="button" class="btn btn-success me-1" title="Đổi Tên Thiết Bị" onclick="' + vbotInlineHandler('renameDevice', [dev.mac]) + '"><i class="bi bi-pencil-square"></i></button>' +
+					'<button class="btn btn-info" title="Kiểm tra trạng thái" onclick="' + vbotInlineHandler('sendPing', [dev.ip, 'show_noti']) + '"><i class="bi bi-wifi"></i></button> ' +
                     '<button type="button" class="btn btn-danger" ' +
-                    'title="Xóa thiết bị: ' + dev.friendly_name + '" ' +
-                    'onclick="deleteDeviceByMac(\'' + dev.friendly_name + '\', \'' + dev.mac + '\', \'' + dev.ip + '\', \'' + dev.model + '\')">' +
+                    'title="Xóa thiết bị: ' + safeName + '" ' +
+                    'onclick="' + vbotInlineHandler('deleteDeviceByMac', [dev.friendly_name, dev.mac, dev.ip, dev.model]) + '">' +
                     '<i class="bi bi-trash"></i></button>';
                 tr.innerHTML =
                     '<td class="text-center">' + (i + 1) + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;" data-ip="'+dev.ip+'">' + dev.friendly_name + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;">' + dev.model + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;">' + dev.ip + '</td>' +
-                    '<td style="text-align: center; vertical-align: middle;">' + dev.mac + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;" data-ip="'+safeIp+'">' + safeName + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + safeModel + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + safeIp + '</td>' +
+                    '<td style="text-align: center; vertical-align: middle;">' + safeMac + '</td>' +
                     '<td class="text-center">' + learnButtons + '</td>' +
                     '<td class="text-center">' + actionButtons + '</td>';
                 tbody.appendChild(tr);
@@ -685,7 +700,7 @@ function loadBroadlinkDevices() {
 function loadLearnedCommandsEditable() {
     loading('show');
     var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $broadlink_json_file; ?>';
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open('GET', url, true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState !== 4) return;
@@ -738,12 +753,12 @@ function loadLearnedCommandsEditable() {
                     var disabledAttr = (isRFCommand && !devHasRF) ? 'disabled' : '';
                     //var rfNote = (isRFCommand && !devHasRF) ? ' ❌ (Không hỗ trợ RF)' : '';
                     var rfNote = (isRFCommand && !devHasRF) ? '' : '';
-                    options += '<option value="' + dev.mac + '" ' + 'data-devtype="' + dev.devtype + '" ' + (isSelected ? 'selected' : '') + ' ' + disabledAttr + '>' +dev.friendly_name + ' (' + dev.ip + ' - ' + dev.mac + ')' +rfNote +'</option>';
+                    options += '<option value="' + vbotEscapeHtml(dev.mac || '') + '" data-devtype="' + vbotEscapeHtml(dev.devtype || '') + '" ' + (isSelected ? 'selected' : '') + ' ' + disabledAttr + '>' + vbotEscapeHtml(dev.friendly_name || '') + ' (' + vbotEscapeHtml(dev.ip || '') + ' - ' + vbotEscapeHtml(dev.mac || '') + ')' + rfNote + '</option>';
                 });
                 tr.innerHTML =
                     '<td class="text-center">' + (rowNum++) + '</td>' +
-                    '<td><textarea class="form-control border-success cmd_name">' + (cmd.name || '') + '</textarea></td>' +
-                    '<td><textarea class="form-control border-success cmd_reply" placeholder="Để trống nếu không sử dụng câu phản hồi tùy chỉnh">' + (cmd.reply || '') + '</textarea></td>' +
+                    '<td><textarea class="form-control border-success cmd_name">' + vbotEscapeHtml(cmd.name || '') + '</textarea></td>' +
+                    '<td><textarea class="form-control border-success cmd_reply" placeholder="Để trống nếu không sử dụng câu phản hồi tùy chỉnh">' + vbotEscapeHtml(cmd.reply || '') + '</textarea></td>' +
                     '<td><select class="form-select border-success cmd_device_select">' + options + '</select></td>' +
                     '<td class="text-center">' +
                         '<div class="form-switch">' +
@@ -751,9 +766,9 @@ function loadLearnedCommandsEditable() {
                         '</div>' +
                     '</td>' +
                     '<td style="text-align: center;">' +
-                        '<b class="' + waveClass + '">' + waveText + '</b>' +
+                    '<b class="' + waveClass + '">' + vbotEscapeHtml(waveText) + '</b>' +
                     '</td>' +
-                    '<td><textarea class="form-control border-success cmd_data" rows="2">' + (cmd.data || '') + '</textarea></td>' +
+                    '<td><textarea class="form-control border-success cmd_data" rows="2">' + vbotEscapeHtml(cmd.data || '') + '</textarea></td>' +
                     '<td style="text-align: center; vertical-align: middle;">' +
                         '<button class="btn btn-success" onclick="saveLearnedCommandRow(this.closest(\'tr\'))"><i class="bi bi-save2"></i> Lưu</button> ' +
                         '<button class="btn btn-primary" onclick="sendLearnedCommandRow(this.closest(\'tr\'))" title="Gửi Lệnh"><i class="bi bi-send-check"></i></button> ' +
@@ -770,7 +785,7 @@ function loadLearnedCommandsEditable() {
 function deleteDeviceByMac(friendly_name, mac, ip, model) {
     if (!confirm('Bạn có chắc muốn xóa thiết bị: "'+friendly_name+'"\n - Tên Thiết Bị: '+model+'\n - Địa Chỉ MAC: '+mac+'\n - Địa Chỉ IP: '+ip)) return;
 	loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -804,7 +819,7 @@ function renameDevice(mac) {
     var newFriendly = prompt('Đổi Tên Thân Thiện\n - Nhập tên mới cho thiết bị:');
     if (!newFriendly) return;
 	loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -872,7 +887,7 @@ function learn_Command(ip, mac, devtype, wave_type, friendly_name, model) {
     formData.append("wave_type", wave_type);
     formData.append("devtype", devtype);
     formData.append("csrf_token", window.VBOT_CSRF_TOKEN || "");
-    fetch("includes/php_ajax/BroadLink.php", {
+    vbotFetchWithTimeout("includes/php_ajax/BroadLink.php", {
         method: "POST",
         headers: {"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""},
         body: formData
@@ -950,14 +965,11 @@ function fillLearnCommandDeviceSelect() {
     select.innerHTML = '<option value="">-- Chọn thiết bị --</option>';
     if (!broadlinkDevices || broadlinkDevices.length === 0) return;
     broadlinkDevices.forEach(dev => {
-        const selected =
-            currentLearnDeviceMac &&
-            dev.mac === currentLearnDeviceMac ? 'selected' : '';
-			select.insertAdjacentHTML("beforeend",
-				'<option value="' + dev.mac + '" ' + selected + '>' +
-					dev.friendly_name + ' (' + dev.ip + ' - ' + dev.mac + ')' +
-				'</option>'
-			);
+        const option = document.createElement('option');
+        option.value = String(dev.mac || '');
+        option.selected = Boolean(currentLearnDeviceMac && dev.mac === currentLearnDeviceMac);
+        option.textContent = String(dev.friendly_name || '') + ' (' + String(dev.ip || '') + ' - ' + String(dev.mac || '') + ')';
+        select.appendChild(option);
     });
 }
 
@@ -986,7 +998,7 @@ function saveLearnedCommandToJson(wave_type) {
     formData.append("command_reply", reply);
     formData.append("wave_type", wave_type);
     formData.append("csrf_token", window.VBOT_CSRF_TOKEN || "");
-    fetch("includes/php_ajax/BroadLink.php", {
+    vbotFetchWithTimeout("includes/php_ajax/BroadLink.php", {
         method: "POST",
         headers: {"X-CSRF-Token": window.VBOT_CSRF_TOKEN || ""},
         body: formData
@@ -1019,7 +1031,7 @@ function saveLearnedCommandRow(row) {
     fd.append('data', row.querySelector('.cmd_data').value.trim());
     fd.append('active', row.querySelector('.cmd_active').checked ? '1' : '0');
     fd.append('csrf_token', window.VBOT_CSRF_TOKEN || '');
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr(60000);
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
@@ -1048,7 +1060,7 @@ function deleteLearnedCommandRow(row) {
     fd.append('mac', row.dataset.cmdMac);
     fd.append('index', row.dataset.cmdIndex);
     fd.append('csrf_token', window.VBOT_CSRF_TOKEN || '');
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr(60000);
     xhr.open('POST', 'includes/php_ajax/BroadLink.php', true);
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
@@ -1071,7 +1083,7 @@ function deleteLearnedCommandRow(row) {
 //Xóa toàn bộ thiết bị device remote
 function deleteAllDevicesRemote() {
     if (!confirm("Bạn có chắc muốn xóa toàn bộ thiết bị Broadlink Remote không")) return;
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open("POST", "includes/php_ajax/BroadLink.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1093,7 +1105,7 @@ function deleteAllDevicesRemote() {
 //XÓa toàn bộ dữ liệu lệnh đã học
 function deleteAllCmdDevicesRemote() {
     if (!confirm("Bạn có chắc muốn xóa toàn bộ dữ liệu lệnh đã học không")) return;
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open("POST", "includes/php_ajax/BroadLink.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1158,7 +1170,7 @@ function sendBroadlinkCommand(ip, mac, devtype, code) {
     }
 	loading('show');
     devtype = String(devtype).trim();
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr(60000);
     xhr.open("POST", "includes/php_ajax/BroadLink.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1245,8 +1257,8 @@ function applyPingResult(pingData) {
     });
     for (var ip in pingData) {
         if (!pingData[ip].success) {
-            document.querySelectorAll('[data-disable="' + ip + '"]').forEach(function(btn) {
-                btn.setAttribute("disabled", "disabled");
+            document.querySelectorAll('[data-disable]').forEach(function(btn) {
+                if (btn.dataset.disable === String(ip)) btn.setAttribute("disabled", "disabled");
             });
         }
     }
@@ -1254,7 +1266,9 @@ function applyPingResult(pingData) {
 
 //Cập nhật trạng thái online, offline
 function updateDeviceStatus(ip, isOnline) {
-    var cell = document.querySelector('[data-ip="' + ip + '"]');
+    var cell = Array.from(document.querySelectorAll('[data-ip]')).find(function(item) {
+        return item.dataset.ip === String(ip);
+    });
     if (!cell) return;
     var oldIcon = cell.querySelector(".ping-icon");
     if (oldIcon) {
@@ -1284,7 +1298,7 @@ function sendPing(ipList, noti = '') {
 	if (noti === 'show_noti') {
 		loading('show');
 	}
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr(60000);
     xhr.open("POST", "includes/php_ajax/Check_Connection.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");

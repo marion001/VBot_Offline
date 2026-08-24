@@ -24,6 +24,9 @@ import platform
 import uuid
 import os
 
+VBOT_ROOT = Path(__file__).resolve().parents[3]
+VBOT_CONFIG_PATH = VBOT_ROOT / "Config.json"
+
 try:
     import machineid
 except ImportError:
@@ -63,7 +66,8 @@ def get_mac_address() -> str:
         return "00:00:00:00:00:00"
 
 #Fake Mac
-def get_mac_from_config(config_path="/home/pi/VBot_Offline/Config.json") -> str:
+def get_mac_from_config(config_path=None) -> str:
+    config_path = Path(config_path) if config_path else VBOT_CONFIG_PATH
     if not os.path.exists(config_path):
         return get_mac_address()
     try:
@@ -95,7 +99,8 @@ def get_release_date(file_path="/home/pi/VBot_Offline/Version.json"):
         return "N/A"
 """
 
-def get_release_date(file_path="/home/pi/VBot_Offline/Config.json"):
+def get_release_date(file_path=None):
+    file_path = Path(file_path) if file_path else VBOT_CONFIG_PATH
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             data = json.load(f)

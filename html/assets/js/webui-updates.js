@@ -4,7 +4,7 @@
     var config = window.webuiUpdateConfig || {};
 
     function requestJson(url) {
-        return fetch(url, {
+        return vbotFetchWithTimeout(url, {
             method: 'GET',
             credentials: 'same-origin',
             headers: {'Accept': 'application/json'}

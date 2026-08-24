@@ -39,6 +39,55 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 }
 ?>
 <script>
+    function vbotEscapeHtml(value) {
+        return String(value == null ? '' : value).replace(/[&<>"']/g, function(character) {
+            return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'}[character];
+        });
+    }
+
+    function vbotEncodeInlineValue(value) {
+        return encodeURIComponent(String(value == null ? '' : value)).replace(/'/g, '%27');
+    }
+
+    function vbotInlineHandler(functionName, args) {
+        var safeName = /^[A-Za-z_$][\w$]*$/.test(functionName) ? functionName : '';
+        var serializedArgs = (Array.isArray(args) ? args : []).map(function(value) {
+            return value === null ? 'null' : JSON.stringify(value == null ? '' : String(value));
+        });
+        return vbotEscapeHtml(safeName + '(' + serializedArgs.join(',') + ')');
+    }
+
+    function vbotCreateXhr(timeoutMs) {
+        var xhr = new window.XMLHttpRequest();
+        xhr.timeout = Number(timeoutMs) > 0 ? Number(timeoutMs) : 90000;
+        xhr.addEventListener('timeout', function() {
+            if (typeof loading === 'function') loading('hide');
+            if (typeof show_message_text === 'function') {
+                show_message_text('Yêu cầu đã quá thời gian chờ, vui lòng thử lại.');
+            }
+        });
+        return xhr;
+    }
+
+    function vbotFetchWithTimeout(resource, options, timeoutMs) {
+        var controller = new AbortController();
+        var requestOptions = Object.assign({}, options || {}, {signal: controller.signal});
+        var timeout = Number(timeoutMs) > 0 ? Number(timeoutMs) : 30000;
+        var timeoutId = window.setTimeout(function() { controller.abort(); }, timeout);
+        return window.fetch(resource, requestOptions).finally(function() {
+            window.clearTimeout(timeoutId);
+        });
+    }
+
+    function vbotSafeHttpUrl(value) {
+        try {
+            var parsed = new URL(String(value || ''), document.baseURI);
+            return (parsed.protocol === 'http:' || parsed.protocol === 'https:') ? parsed.href : '';
+        } catch (error) {
+            return '';
+        }
+    }
+
     //Xóa File theo path
 	function deleteFile(filePath, langg = "No") {
 		var fileName = filePath.substring(filePath.lastIndexOf('/') + 1);
@@ -46,7 +95,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 			return;
 		}
 		loading("show");
-		var xhr = new XMLHttpRequest();
+		var xhr = vbotCreateXhr();
 		xhr.open('POST', 'includes/php_ajax/Del_file_path.php', true);
 		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 		xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -96,23 +145,61 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 	}
 
     //Hàm tải xuống file theo đường dẫn
-    function downloadFile(filePath) {
-        var link = document.createElement('a');
-        link.href = 'includes/php_ajax/Download_file_path.php?file=' + encodeURIComponent(filePath);
-        link.target = '_blank';
-        link.download = filePath.substring(filePath.lastIndexOf('/') + 1);
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    async function downloadFile(filePath) {
+        const requestedPath = typeof filePath === 'string' ? filePath.trim() : '';
+        if (!requestedPath) {
+            showMessagePHP('Không có đường dẫn tệp để tải xuống', 3);
+            return;
+        }
+
+        if (/^https?:\/\//i.test(requestedPath)) {
+            const externalLink = document.createElement('a');
+            externalLink.href = requestedPath;
+            externalLink.target = '_blank';
+            externalLink.rel = 'noopener noreferrer';
+            document.body.appendChild(externalLink);
+            externalLink.click();
+            externalLink.remove();
+            return;
+        }
+
+        const endpoint = 'includes/php_ajax/Download_file_path.php?file=' + encodeURIComponent(requestedPath);
+        try {
+            const checkResponse = await vbotFetchWithTimeout(endpoint + '&check=1', {
+                method: 'GET',
+                credentials: 'same-origin',
+                cache: 'no-store'
+            });
+            let checkData = null;
+            try {
+                checkData = await checkResponse.json();
+            } catch (error) {}
+            if (!checkResponse.ok || !checkData || !checkData.success) {
+                const message = checkData && checkData.message
+                    ? checkData.message
+                    : 'Không tìm thấy tệp hoặc tệp không được phép tải xuống';
+                showMessagePHP(message, 4);
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.href = endpoint;
+            link.download = checkData.file_name || requestedPath.replace(/\\/g, '/').split('/').pop() || 'download';
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            showMessagePHP('Không thể kiểm tra tệp tải xuống: ' + error.message, 4);
+        }
     }
 
 <?php if (in_array($webui_page_name, $webui_backup_pages, true)) { ?>
     //Hiển thị tất cả các file có trong thư mục show ra tên file, đường dẫn, thời gian tạo, kích thước tệp
     function show_all_file_in_directory(directory_path, source_backup, resultDiv_Id) {
         loading("show");
-        var xhr = new XMLHttpRequest();
-        var url = 'includes/php_ajax/Show_file_path.php?show_all_file&directory_path=' + directory_path;
+        var xhr = vbotCreateXhr();
+        var url = 'includes/php_ajax/Show_file_path.php?show_all_file&directory_path=' + encodeURIComponent(directory_path);
         xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
             if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -125,27 +212,33 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         return;
                     }
                     if (response.success) {
-                        showMessagePHP(response.message);
+                        showMessageText(response.message);
                         var table = '<table class="table table-bordered border-primary">';
-                        table += '<tr><th colspan="5" class="text-primary" style="text-align: center; vertical-align: middle;">' + source_backup + '</th></tr>';
+                        table += '<tr><th colspan="5" class="text-primary" style="text-align: center; vertical-align: middle;">' + vbotEscapeHtml(source_backup) + '</th></tr>';
                         table += '<tr><th style="text-align: center; vertical-align: middle;">STT</th><th style="text-align: center; vertical-align: middle;">Tên tệp</th><th style="text-align: center; vertical-align: middle;">Thời gian tạo</th><th style="text-align: center; vertical-align: middle;">Kích thước</th><th style="text-align: center; vertical-align: middle;">Hành động</th></tr>';
                         response.data.forEach(function(file, index) {
+                            var fileName = String(file.name || '');
+                            var filePath = String(file.path || '');
+                            var safeName = vbotEscapeHtml(fileName);
+                            var safePath = vbotEscapeHtml(filePath);
+                            var encodedName = vbotEncodeInlineValue(fileName);
+                            var encodedPath = vbotEncodeInlineValue(filePath);
                             table += '<tr>';
                             table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + file.name + '</td>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + file.created_at + '</td>';
-                            table += '<td style="text-align: center; vertical-align: middle;">' + file.size + '</td>';
+                            table += '<td style="text-align: center; vertical-align: middle;">' + safeName + '</td>';
+                            table += '<td style="text-align: center; vertical-align: middle;">' + vbotEscapeHtml(file.created_at) + '</td>';
+                            table += '<td style="text-align: center; vertical-align: middle;">' + vbotEscapeHtml(file.size) + '</td>';
                             table += '<td style="text-align: center; vertical-align: middle;">';
-                            table += '<form method="POST" action=""><button type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu từ bản sao lưu trên hệ thống: ' + file.name + '\')" name="Restore_Backup" value="' + file.path + '" class="btn btn-primary" title="Khôi phục dữ liệu: ' + file.name + '"><i class="bi bi-arrow-counterclockwise" title="Khôi phục dữ liệu: ' + file.name + '"></i></button> </form> ';
-                            table += ' <button type="button" class="btn btn-success" title="Xem cấu trúc bên trong tệp: ' + file.name + '" onclick="read_file_backup(\'' + file.path + '\')"><i class="bi bi-eye"></i></button> ';
-                            table += ' <button type="button" class="btn btn-warning" title="Tải xuống file: ' + file.name + '" onclick="downloadFile(\'' + file.path + '\')"><i class="bi bi-download"></i></button> ';
-                            table += ' <button type="button" class="btn btn-danger" onclick="deleteFile(\'' + file.path + '\', \'Vbot_Backup_Program\')"><i class="bi bi-trash"></i></button></td>';
+                            table += '<form method="POST" action=""><input type="hidden" name="csrf_token" value="' + vbotEscapeHtml(window.VBOT_CSRF_TOKEN || '') + '"><button type="submit" onclick="return confirmRestore(\'Bạn có chắc chắn muốn khôi phục dữ liệu từ bản sao lưu trên hệ thống: \'+decodeURIComponent(\'' + encodedName + '\'))" name="Restore_Backup" value="' + safePath + '" class="btn btn-primary" title="Khôi phục dữ liệu: ' + safeName + '"><i class="bi bi-arrow-counterclockwise"></i></button> </form> ';
+                            table += ' <button type="button" class="btn btn-success" title="Xem cấu trúc bên trong tệp: ' + safeName + '" onclick="read_file_backup(decodeURIComponent(\'' + encodedPath + '\'))"><i class="bi bi-eye"></i></button> ';
+                            table += ' <button type="button" class="btn btn-warning" title="Tải xuống file: ' + safeName + '" onclick="downloadFile(decodeURIComponent(\'' + encodedPath + '\'))"><i class="bi bi-download"></i></button> ';
+                            table += ' <button type="button" class="btn btn-danger" onclick="deleteFile(decodeURIComponent(\'' + encodedPath + '\'), \'Vbot_Backup_Program\')"><i class="bi bi-trash"></i></button></td>';
                             table += '</tr>';
                         });
                         table += '</table>';
                         resultDiv_show_all_File.innerHTML = table;
                     } else {
-                        show_message(response.message);
+                        show_message_text(response.message);
                     }
                 } else {
                     loading("hide");
@@ -160,7 +253,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     //Đọc dữ liệu file theo path
     function read_loadFile(path) {
         var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(path);
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', url);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -197,7 +290,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     function read_file_backup(path_backup_file) {
         loading('show');
         var url = 'includes/php_ajax/Show_file_path.php?read_file_backup&file=' + encodeURIComponent(path_backup_file);
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', url);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -207,14 +300,17 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                     if (response.success) {
                         loading('hide');
                         var table = '<table class="table table-bordered border-primary">';
-                        table += '<tr><th colspan="3"  class="text-success"><center>Cấu Trúc Tệp: ' + fileName + '</center></th></tr>';
+                        table += '<tr><th colspan="3"  class="text-success"><center>Cấu Trúc Tệp: ' + vbotEscapeHtml(fileName) + '</center></th></tr>';
                         table += '<tr><th><center>STT</center></th><th><center>Tên tệp</center></th><th><center>Hành động</center></th></tr>';
                         response.data.forEach(function(file, index) {
+                            var memberName = String(file || '');
+                            var encodedBackupPath = vbotEncodeInlineValue(path_backup_file);
+                            var encodedMemberName = vbotEncodeInlineValue(memberName);
                             table += '<tr>';
                             table += '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>';
-                            table += '<td style="vertical-align: middle;"><font color=blue>' + file + '</font></td>';
+                            table += '<td style="vertical-align: middle;"><font color=blue>' + vbotEscapeHtml(memberName) + '</font></td>';
                             table += '<td style="text-align: center; vertical-align: middle;">';
-                            table += '<button type="button" class="btn btn-success" onclick="read_files_in_backup(\'' + path_backup_file + '\', \'' + file + '\')" title="Xem nội dung tệp tin: \'' + file + '\'"><i class="bi bi-eye"></i> Xem</button>';
+                            table += '<button type="button" class="btn btn-success" onclick="read_files_in_backup(decodeURIComponent(\'' + encodedBackupPath + '\'), decodeURIComponent(\'' + encodedMemberName + '\'))" title="Xem nội dung tệp tin: ' + vbotEscapeHtml(memberName) + '"><i class="bi bi-eye"></i> Xem</button>';
                             table += '</td>';
                             table += '</tr>';
                         });
@@ -226,7 +322,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         }
                     } else {
                         loading('hide');
-                        show_message(response.message);
+                        show_message_text(response.message);
                     }
                 } catch (e) {
                     loading('hide');
@@ -247,7 +343,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     function read_files_in_backup(file_path, file_name) {
         loading('show');
         var url = 'includes/php_ajax/Show_file_path.php?read_files_in_backup&file_path=' + encodeURIComponent(file_path) + '&file_name=' + encodeURIComponent(file_name);
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', url);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -295,7 +391,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             loading("hide");
             return false;
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open("POST", "Login.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -321,7 +417,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             return;
         }
         loading('show');
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open("POST", 'includes/php_ajax/Check_Connection.php');
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -366,7 +462,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             for (var i = 0; i < files.length; i++) {
                 formData.append('fileUpload[]', files[i]);
             }
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             formData.append(key_path, "1");
             xhr.open('POST', 'includes/php_ajax/Upload_file_path.php');
             xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -415,7 +511,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             "data": "volume",
             "action": action
         });
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.addEventListener("readystatechange", function() {
             if (this.readyState === 4) {
                 loading("hide");
@@ -449,7 +545,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             "data": "media_control",
             "action": action
         });
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.addEventListener("readystatechange", function() {
             if (this.readyState === 4) {
                 loading("hide");
@@ -477,7 +573,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     //Hàm lấy Audio Link
     function getAudioLink_newspaper(url_media) {
         return new Promise(function(resolve, reject) {
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.open("GET", "includes/php_ajax/Media_Player_Search.php?Get_Link_NewsPaper&url=" + encodeURIComponent(url_media));
             xhr.onload = function() {
                 if (xhr.status === 200) {
@@ -532,7 +628,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             "media_name": name_media,
             "media_player_source": media_source
         });
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.addEventListener("readystatechange", function() {
             if (this.readyState === XMLHttpRequest.DONE) {
                 loading("hide");
@@ -556,7 +652,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     //Get link Zingmp3
     function get_ZingMP3_Link(zing_id, zing_name, zing_cover, zing_artist) {
         loading("show");
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_GetLink&Zing_ID=' + zing_id;
         xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
@@ -598,7 +694,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 			'action': 'play',
 			'media_link': youtube_link
 		});
-		var xhr = new XMLHttpRequest();
+		var xhr = vbotCreateXhr();
 		xhr.open('POST', '<?php echo $URL_API_VBOT; ?>', true);
 		xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
 		xhr.onreadystatechange = function() {
@@ -630,7 +726,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             return;
         }
         loading("show");
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url = 'includes/php_ajax/Media_Player_Search.php?GetLink_Youtube&Youtube_ID=' + youtube_id;
         xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
@@ -671,7 +767,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 "action": action,
                 "value": dataKey
             });
-            var xhr = new XMLHttpRequest();
+            var xhr = vbotCreateXhr();
             xhr.addEventListener("readystatechange", function() {
                 if (this.readyState === 4) {
                     try {
@@ -710,7 +806,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         if (inputElement) {
             inputElement.style.display = "";
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_ZingMP3', true);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -739,16 +835,20 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 						' <button class="btn btn-warning btn-sm" title="Tải Xuống Dữ Liệu ZingMP3" onclick="downloadFile(\'<?php echo $VBot_Offline.'html/includes/cache/ZingMP3.json' ; ?>\')"><i class="bi bi-download"></i> <i class="bi bi-filetype-json"></i></button> ' +
 						'<button class="btn btn-danger btn-sm" title="Xóa dữ liệu cache ZingMP3" onclick="cache_delete(\'ZingMP3\')"><i class="bi bi-trash"></i></button> <br/>';
                         data.data.forEach(function(cache_ZING) {
+                            var safeName = vbotEscapeHtml(cache_ZING.name || '');
+                            var safeArtist = vbotEscapeHtml(cache_ZING.artist || '');
+                            var safeDuration = vbotEscapeHtml(cache_ZING.duration || 'N/A');
+                            var safeThumb = vbotEscapeHtml(vbotSafeHttpUrl(cache_ZING.thumb));
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-                            fileInfo += '<img src="' + cache_ZING.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + cache_ZING.name + '</font></p>';
-                            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + cache_ZING.artist + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (cache_ZING.duration || 'N/A') + '</font></p>';
-                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + cache_ZING.name + '" onclick="get_ZingMP3_Link(\'' + cache_ZING.id + '\', \'' + cache_ZING.name + '\', \'' + cache_ZING.thumb + '\', \'' + cache_ZING.artist + '\')"><i class="bi bi-play-circle"></i></button>';
-                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + cache_ZING.name + '" onclick="addToPlaylist(\'' + cache_ZING.name + '\', \'' + cache_ZING.thumb + '\', \'' + cache_ZING.id + '\', \'' + (cache_ZING.duration || 'N/A') + '\', null, \'ZingMP3\', \'' + cache_ZING.id + '\', null, \'' + cache_ZING.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
-                            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + cache_ZING.name + '" onclick="dowload_ZingMP3_ID(\'' + cache_ZING.id + '\', \'' + cache_ZING.name + '\')"><i class="bi bi-download"></i></button>';
-                            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + cache_ZING.name + '" onclick="download_zingMp3_to_local(\'' + cache_ZING.id + '\', \'' + cache_ZING.name + '\')"><i class="bi bi-save2"></i></button>';
+                            fileInfo += '<img src="' + safeThumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + safeName + '</font></p>';
+                            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + safeArtist + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + safeDuration + '</font></p>';
+                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeName + '" onclick="' + vbotInlineHandler('get_ZingMP3_Link', [cache_ZING.id, cache_ZING.name, cache_ZING.thumb, cache_ZING.artist]) + '"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeName + '" onclick="' + vbotInlineHandler('addToPlaylist', [cache_ZING.name, cache_ZING.thumb, cache_ZING.id, cache_ZING.duration || 'N/A', null, 'ZingMP3', cache_ZING.id, null, cache_ZING.artist]) + '"><i class="bi bi-music-note-list"></i></button>';
+                            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + safeName + '" onclick="' + vbotInlineHandler('dowload_ZingMP3_ID', [cache_ZING.id, cache_ZING.name]) + '"><i class="bi bi-download"></i></button>';
+                            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + safeName + '" onclick="' + vbotInlineHandler('download_zingMp3_to_local', [cache_ZING.id, cache_ZING.name]) + '"><i class="bi bi-save2"></i></button>';
                             fileInfo += '</div></div>';
                             zingDataDiv.innerHTML += fileInfo;
                             adjustContainerStyle_tableContainer();
@@ -775,7 +875,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         if (inputElement) {
             inputElement.style.display = "";
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_NhacCuaTui', true);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -804,16 +904,21 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 						' <button class="btn btn-warning btn-sm" title="Tải Xuống Dữ Liệu NhacCuaTui" onclick="downloadFile(\'<?php echo $VBot_Offline.'html/includes/cache/NhacCuaTui.json' ; ?>\')"><i class="bi bi-download"></i> <i class="bi bi-filetype-json"></i></button> ' +
 						'<button class="btn btn-danger btn-sm" title="Xóa dữ liệu cache NhacCuaTui" onclick="cache_delete(\'NhacCuaTui\')"><i class="bi bi-trash"></i></button> <br/>';
                         data.data.forEach(function(cache_nct) {
+                            var safeName = vbotEscapeHtml(cache_nct.name || '');
+                            var safeArtist = vbotEscapeHtml(cache_nct.artist || '');
+                            var safeDuration = vbotEscapeHtml(cache_nct.duration || 'N/A');
+                            var safeThumb = vbotEscapeHtml(vbotSafeHttpUrl(cache_nct.thumb));
+                            var safeDownloadUrl = vbotSafeHttpUrl(String(cache_nct.url || '').substring(0, String(cache_nct.url || '').indexOf('.mp3') + 4));
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-                            fileInfo += '<img src="' + cache_nct.thumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + cache_nct.name + '</font></p>';
-                            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + cache_nct.artist + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (cache_nct.duration || 'N/A') + '</font></p>';
-                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + cache_nct.name + '" onclick="startMediaPlayer(\'' + cache_nct.url + '\', \'' + cache_nct.name + '\', \'' + cache_nct.thumb + '\', \'NhacCuaTui\')"><i class="bi bi-play-circle"></i></button>';
-                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + cache_nct.name + '" onclick="addToPlaylist(\'' + cache_nct.name + '\', \'' + cache_nct.thumb + '\', \'' + cache_nct.url + '\', \'' + (cache_nct.duration || 'N/A') + '\', null, \'NhacCuaTui\', \'' + cache_nct.url + '\', null, \'' + cache_nct.artist + '\')"><i class="bi bi-music-note-list"></i></button>';
-                            fileInfo += ` <button class="btn btn-warning btn-sm" title="Tải Xuống: ${cache_nct.name}" onclick="downloadFile('${cache_nct.url.substring(0, cache_nct.url.indexOf('.mp3') + 4)}')"><i class="bi bi-download"></i></button>`;
-                            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + cache_nct.name + '" onclick="download_Link_url_to_local(\'' + cache_nct.url + '\', \'' + cache_nct.name + '\')"><i class="bi bi-save2"></i></button>';
+                            fileInfo += '<img src="' + safeThumb + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + safeName + '</font></p>';
+                            fileInfo += '<p style="margin: 0; font-weight: bold;">Nghệ sĩ: <font color=green>' + safeArtist + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + safeDuration + '</font></p>';
+                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeName + '" onclick="' + vbotInlineHandler('startMediaPlayer', [cache_nct.url, cache_nct.name, cache_nct.thumb, 'NhacCuaTui']) + '"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeName + '" onclick="' + vbotInlineHandler('addToPlaylist', [cache_nct.name, cache_nct.thumb, cache_nct.url, cache_nct.duration || 'N/A', null, 'NhacCuaTui', cache_nct.url, null, cache_nct.artist]) + '"><i class="bi bi-music-note-list"></i></button>';
+                            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + safeName + '" onclick="' + vbotInlineHandler('downloadFile', [safeDownloadUrl]) + '"><i class="bi bi-download"></i></button>';
+                            fileInfo += ' <button class="btn btn-info btn-sm" title="Tải Vào Thư Mục Local: ' + safeName + '" onclick="' + vbotInlineHandler('download_Link_url_to_local', [cache_nct.url, cache_nct.name]) + '"><i class="bi bi-save2"></i></button>';
                             fileInfo += '</div></div>';
                             nhaccuatuiDataDiv.innerHTML += fileInfo;
                             adjustContainerStyle_tableContainer();
@@ -840,7 +945,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         if (inputElement) {
             inputElement.style.display = "";
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PodCast', true);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -868,17 +973,20 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 						' <button class="btn btn-warning btn-sm" title="Tải Xuống Dữ Liệu PodCast" onclick="downloadFile(\'<?php echo $VBot_Offline.'html/includes/cache/PodCast.json' ; ?>\')"><i class="bi bi-download"></i> <i class="bi bi-filetype-json"></i></button> ' +
 						' <button class="btn btn-danger btn-sm" title="Xóa dữ liệu cache PodCast" onclick="cache_delete(\'PodCast\')"><i class="bi bi-trash"></i></button><br/>';
                         data.data.forEach(function(podcast) {
+                            var safeTitle = vbotEscapeHtml(podcast.title || '');
+                            var safeCover = vbotEscapeHtml(vbotSafeHttpUrl(podcast.cover));
+                            var safeAudio = vbotSafeHttpUrl(podcast.audio);
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-                            fileInfo += '<img src="' + podcast.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + podcast.title + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (podcast.duration || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + (podcast.description || 'N/A') + '</font></p>';
-                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + podcast.title + '" onclick="startMediaPlayer(\'' + podcast.audio + '\', \'' + podcast.title + '\', \'' + podcast.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + podcast.title + '" onclick="addToPlaylist(\'' + podcast.title + '\', \'' + podcast.cover + '\', \'' + podcast.audio + '\', \'' + (podcast.duration || 'N/A') + '\', \'' + (podcast.description || 'N/A') + '\', \'PodCast\', \'' + podcast.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
-                            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + podcast.title + '" onclick="download_AUDIO_URL(\'' + podcast.audio + '\', \'' + podcast.title + '\')"><i class="bi bi-download"></i></button>';
-                            fileInfo += ' <button class="btn btn-danger btn-sm" title="Tải Vào Thư Mục Local: ' + podcast.title + '" onclick="download_Link_url_to_local(\'' + podcast.audio + '\', \'' + podcast.title + '\')"><i class="bi bi-save2"></i></button>';
-                            fileInfo += ' <a href="' + podcast.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + podcast.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                            fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + safeTitle + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotEscapeHtml(podcast.duration || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thể Loại: <font color=green>' + vbotEscapeHtml(podcast.description || 'N/A') + '</font></p>';
+                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeTitle + '" onclick="' + vbotInlineHandler('startMediaPlayer', [safeAudio, podcast.title, podcast.cover]) + '"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeTitle + '" onclick="' + vbotInlineHandler('addToPlaylist', [podcast.title, podcast.cover, safeAudio, podcast.duration || 'N/A', podcast.description || 'N/A', 'PodCast', safeAudio, null, null]) + '"><i class="bi bi-music-note-list"></i></button>';
+                            fileInfo += ' <button class="btn btn-warning btn-sm" title="Tải Xuống: ' + safeTitle + '" onclick="' + vbotInlineHandler('download_AUDIO_URL', [safeAudio, podcast.title]) + '"><i class="bi bi-download"></i></button>';
+                            fileInfo += ' <button class="btn btn-danger btn-sm" title="Tải Vào Thư Mục Local: ' + safeTitle + '" onclick="' + vbotInlineHandler('download_Link_url_to_local', [safeAudio, podcast.title]) + '"><i class="bi bi-save2"></i></button>';
+                            fileInfo += ' <a href="' + vbotEscapeHtml(safeAudio) + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-info" title="Mở trong tab mới: ' + safeTitle + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
                             fileListDiv.innerHTML += fileInfo;
                             adjustContainerStyle_tableContainer();
@@ -906,7 +1014,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             inputElement.style.display = "none";
         }
         loading('show');
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url = "includes/php_ajax/Media_Player_Search.php?Cache_NewsPaper";
         xhr.open("GET", url, true);
         xhr.onload = function() {
@@ -923,19 +1031,22 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             document.getElementById('tableContainer').style.overflowY = 'auto';
                         }
                         fileListDiv.innerHTML = '';
-                        fileListDiv.innerHTML += '<b>Dữ Liệu Cache: '+ (response.data[0].source || 'N/A') +' </b> ' +
+                        fileListDiv.innerHTML += '<b>Dữ Liệu Cache: '+ vbotEscapeHtml(response.data[0].source || 'N/A') +' </b> ' +
 						' <button class="btn btn-success btn-sm" title="Phát toàn bộ" onclick="play_playlist_json_path(\'<?php echo $directory_path; ?>/includes/cache/<?php echo $Config['media_player']['news_paper']['newspaper_file_name']; ?>\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button> '+
 						' <button class="btn btn-warning btn-sm" title="Tải Xuống Dữ Liệu Báo, Tin Tức" onclick="downloadFile(\'<?php echo $VBot_Offline.'html/includes/cache/News_Paper.json' ; ?>\')"><i class="bi bi-download"></i> <i class="bi bi-filetype-json"></i></button> ';
                         response.data.forEach(function(news_paper) {
+                            var safeTitle = vbotEscapeHtml(news_paper.title || '');
+                            var safeCover = vbotEscapeHtml(vbotSafeHttpUrl(news_paper.cover));
+                            var safeAudio = vbotSafeHttpUrl(news_paper.audio);
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-                            fileInfo += '<img src="' + news_paper.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tiêu Đề: <font color=green>' + news_paper.title + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + (news_paper.publish_time || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (news_paper.duration || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + (news_paper.source || 'N/A') + '</font></p>';
-                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + news_paper.title + '" onclick="send_Media_Play_API(\'' + news_paper.audio + '\', \'' + news_paper.title + '\', \'' + news_paper.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-                            fileInfo += ' <a href="' + news_paper.audio + '" target="_blank"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + news_paper.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                            fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tiêu Đề: <font color=green>' + safeTitle + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + vbotEscapeHtml(news_paper.publish_time || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotEscapeHtml(news_paper.duration || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + vbotEscapeHtml(news_paper.source || 'N/A') + '</font></p>';
+                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeTitle + '" onclick="' + vbotInlineHandler('send_Media_Play_API', [safeAudio, news_paper.title, news_paper.cover]) + '"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += ' <a href="' + vbotEscapeHtml(safeAudio) + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + safeTitle + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
                             fileListDiv.innerHTML += fileInfo;
                         });
@@ -987,7 +1098,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         if (inputElement) {
             inputElement.style.display = "";
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_Youtube', true);
         xhr.onload = function() {
             if (xhr.status === 200) {
@@ -1016,18 +1127,23 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 						' <button class="btn btn-warning btn-sm" title="Tải Xuống Dữ Liệu Youtube" onclick="downloadFile(\'<?php echo $VBot_Offline.'html/includes/cache/Youtube.json' ; ?>\')"><i class="bi bi-download"></i> <i class="bi bi-filetype-json"></i></button> ' +
 						' <button class="btn btn-danger btn-sm" title="Xóa dữ liệu cache Youtube" onclick="cache_delete(\'Youtube\')"><i class="bi bi-trash"></i></button> <br/>';
                         data.data.forEach(function(youtube) {
-                            var description = youtube.description.length > 70 ? youtube.description.substring(0, 70) + '...' : youtube.description;
+                            var rawDescription = String(youtube.description || '');
+                            var description = rawDescription.length > 70 ? rawDescription.substring(0, 70) + '...' : rawDescription;
+                            var safeTitle = vbotEscapeHtml(youtube.title || '');
+                            var safeCover = vbotEscapeHtml(vbotSafeHttpUrl(youtube.cover));
+                            var safeId = String(youtube.id || '').replace(/[^A-Za-z0-9_-]/g, '');
+                            var youtubeUrl = 'https://www.youtube.com/watch?v=' + safeId;
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-                            fileInfo += '<img src="' + youtube.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + youtube.title + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + (youtube.channelTitle || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (youtube.duration || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Mô tả: <font color="green">' + (description || 'N/A') + '</font></p>';
+                            fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên Bài Hát: <font color=green>' + safeTitle + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Kênh: <font color=green>' + vbotEscapeHtml(youtube.channelTitle || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotEscapeHtml(youtube.duration || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Mô tả: <font color="green">' + vbotEscapeHtml(description || 'N/A') + '</font></p>';
                             //fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="get_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + youtube.title + '" onclick="play_Youtube_Link(\'' + youtube.id + '\', \'' + youtube.title + '\', \'' + youtube.cover + '\')"><i class="bi bi-play-circle"></i></button>';
-                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + youtube.title + '" onclick="addToPlaylist(\'' + youtube.title + '\', \'' + youtube.cover + '\', \'https://www.youtube.com/watch?v=' + youtube.id + '\', \'' + (youtube.duration || 'N/A') + '\', \'' + (description || 'N/A') + '\', \'Youtube\', \'' + youtube.id + '\', \'' + (youtube.channelTitle || 'N/A') + '\', null)"><i class="bi bi-music-note-list"></i></button>';
-                            fileInfo += ' <a href="https://www.youtube.com/watch?v=' + youtube.id + '" target="_bank"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + youtube.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                            fileInfo += '<button class="btn btn-success btn-sm" title="Phát: ' + safeTitle + '" onclick="' + vbotInlineHandler('play_Youtube_Link', [safeId, youtube.title, youtube.cover]) + '"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += ' <button class="btn btn-primary btn-sm" title="Thêm vào danh sách phát: ' + safeTitle + '" onclick="' + vbotInlineHandler('addToPlaylist', [youtube.title, youtube.cover, youtubeUrl, youtube.duration || 'N/A', description || 'N/A', 'Youtube', safeId, youtube.channelTitle || 'N/A', null]) + '"><i class="bi bi-music-note-list"></i></button>';
+                            fileInfo += ' <a href="' + youtubeUrl + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-info btn-sm" title="Mở trong tab mới: ' + safeTitle + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
                             fileListDiv.innerHTML += fileInfo;
                             adjustContainerStyle_tableContainer();
@@ -1076,7 +1192,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         playlistAddPendingSong = {title, cover, audio, duration, description, source, id, channelTitle, artist};
         loading("show");
         try {
-            const response = await fetch('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'});
+            const response = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'});
             const manager = await response.json();
             if (!response.ok || manager.success === false) throw new Error(manager.message || 'Không tải được danh sách PlayList');
             const select = document.getElementById('playlist-add-target-select');
@@ -1109,7 +1225,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 const newName = document.getElementById('playlist-add-new-name').value.trim();
                 if (!newName) throw new Error('Hãy nhập tên playlist mới');
                 const createBody = new URLSearchParams({playlist_manager_action:'create', playlist_name:newName});
-                const createResponse = await fetch('includes/php_ajax/Media_Player_Search.php', {
+                const createResponse = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php', {
                     method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''}, body:createBody
                 });
                 const created = await createResponse.json();
@@ -1122,7 +1238,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             if (!targetId) throw new Error('Hãy chọn playlist nhận bài hát');
             const songBody = new URLSearchParams({playlist_ADD:'1', playlist_id:targetId});
             Object.entries(playlistAddPendingSong).forEach(([key, value]) => songBody.set(key, value == null ? 'null' : String(value)));
-            const addResponse = await fetch('includes/php_ajax/Media_Player_Search.php', {
+            const addResponse = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php', {
                 method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''}, body:songBody
             });
             const added = await addResponse.json();
@@ -1147,7 +1263,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             return;
         }
         loading("show");
-        const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr();
         xhr.open("POST", "includes/php_ajax/Media_Player_Search.php", true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1210,7 +1326,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             show_message('Cần nhập tên bài hát để tìm kiếm.');
             return;
         }
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url;
         switch (select_name) {
             case 'Local':
@@ -1294,8 +1410,9 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                 fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
                 fileInfo += '<img src="' + cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên đài: <font color=green>' + radio.name + '</font></p>';
-                fileInfo += '<button class="btn btn-success" title="Phát đài radio: ' + radio.name + '" onclick="startMediaPlayer(\'' + radio.full_path + '\', \'' + radio.name + '\', \'' + cover + '\', \'Radio\')"><i class="bi bi-play-circle"></i></button>';
+                var safeRadioName = vbotEscapeHtml(radio.name || '');
+                fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tên đài: <font color=green>' + safeRadioName + '</font></p>';
+                fileInfo += '<button class="btn btn-success" title="Phát đài radio: ' + safeRadioName + '" onclick="' + vbotInlineHandler('startMediaPlayer', [radio.full_path, radio.name, cover, 'Radio']) + '"><i class="bi bi-play-circle"></i></button>';
                 fileInfo += '</div></div>';
                 fileListDiv.innerHTML += fileInfo;
                 adjustContainerStyle_tableContainer();
@@ -1308,7 +1425,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     //Lấy và hiển thị dữ liệu báo, tin tức
     function fetchData_NewsPaper(newspaper_link) {
         loading('show');
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url = "includes/php_ajax/Media_Player_Search.php?newspaper&link=" + newspaper_link;
         xhr.open("GET", url, true);
         xhr.onload = function() {
@@ -1326,18 +1443,21 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             document.getElementById('tableContainer').style.overflowY = 'auto';
                         }
                         fileListDiv.innerHTML = '';
-                        fileListDiv.innerHTML += '<b>Dữ Liệu Tìm Kiếm Báo: ' + (response.data[0].source || 'N/A') + ' </b> <button class="btn btn-success" title="Phát toàn bộ" onclick="play_playlist_json_path(\'<?php echo $directory_path; ?>/includes/cache/<?php echo $Config['media_player']['news_paper']['newspaper_file_name']; ?>\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>';
+                        fileListDiv.innerHTML += '<b>Dữ Liệu Tìm Kiếm Báo: ' + vbotEscapeHtml(response.data[0].source || 'N/A') + ' </b> <button class="btn btn-success" title="Phát toàn bộ" onclick="play_playlist_json_path(\'<?php echo $directory_path; ?>/includes/cache/<?php echo $Config['media_player']['news_paper']['newspaper_file_name']; ?>\')"><i class="bi bi-music-note-list"></i> <i class="bi bi-play-fill"></i></button>';
                         response.data.forEach(function(news_paper) {
+                            var safeTitle = vbotEscapeHtml(news_paper.title || '');
+                            var safeCover = vbotEscapeHtml(vbotSafeHttpUrl(news_paper.cover));
+                            var safeAudio = vbotSafeHttpUrl(news_paper.audio);
                             var fileInfo = '<div style="display: flex; align-items: center; margin-bottom: 10px;">';
                             fileInfo += '<div style="flex-shrink: 0; margin-right: 15px;">';
-                            fileInfo += '<img src="' + news_paper.cover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
-                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tiêu Đề: <font color=green>' + news_paper.title + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + (news_paper.publish_time || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + (news_paper.duration || 'N/A') + '</font></p>';
-                            fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + (news_paper.source || 'N/A') + '</font></p>';
-                            fileInfo += '<button class="btn btn-success" title="Phát: ' + news_paper.title + '" onclick="send_Media_Play_API(\'' + news_paper.audio + '\', \'' + news_paper.title + '\', \'' + news_paper.cover + '\')"><i class="bi bi-play-circle"></i></button>';
+                            fileInfo += '<img src="' + safeCover + '" style="width: 150px; height: 150px; object-fit: cover; border-radius: 10px;"></div>';
+                            fileInfo += '<div><p style="margin: 0; font-weight: bold;">Tiêu Đề: <font color=green>' + safeTitle + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Gian Tạo: <font color=green>' + vbotEscapeHtml(news_paper.publish_time || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Thời Lượng: <font color=green>' + vbotEscapeHtml(news_paper.duration || 'N/A') + '</font></p>';
+                            fileInfo += '<p style="margin: 0;">Nguồn: <font color=green>' + vbotEscapeHtml(news_paper.source || 'N/A') + '</font></p>';
+                            fileInfo += '<button class="btn btn-success" title="Phát: ' + safeTitle + '" onclick="' + vbotInlineHandler('send_Media_Play_API', [safeAudio, news_paper.title, news_paper.cover]) + '"><i class="bi bi-play-circle"></i></button>';
                             //fileInfo += ' <button class="btn btn-primary" title="Thêm vào danh sách phát: ' + news_paper.title + '" onclick="addToPlaylist(\'' + news_paper.title + '\', \'' + news_paper.cover + '\', \'' + news_paper.audio + '\', \'' + (news_paper.duration || 'N/A') + '\', \'' + (news_paper.description || 'N/A') + '\', \''+news_paper.source+'\', \'' + news_paper.audio + '\', null, null)"><i class="bi bi-music-note-list"></i></button>';
-                            fileInfo += ' <a href="' + news_paper.audio + '" target="_blank"><button class="btn btn-info" title="Mở trong tab mới: ' + news_paper.title + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
+                            fileInfo += ' <a href="' + vbotEscapeHtml(safeAudio) + '" target="_blank" rel="noopener noreferrer"><button class="btn btn-info" title="Mở trong tab mới: ' + safeTitle + '"><i class="bi bi-box-arrow-up-right"></i></button></a>';
                             fileInfo += '</div></div>';
                             fileListDiv.innerHTML += fileInfo;
                         });
@@ -1361,7 +1481,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 
     //Xóa dữ liệu cache bài hát theo nguồn nhạc
     function cache_delete(source_cache) {
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -1418,7 +1538,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 		} else {
 			payload.source_playlist = true;
 		}
-		const xhr = new XMLHttpRequest();
+		const xhr = vbotCreateXhr();
 		xhr.onreadystatechange = function () {
 			if (xhr.readyState === 4) {
 				loading("hide");
@@ -1472,7 +1592,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             }
             return;
         }
-        const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr();
         xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
         xhr.responseType = 'text';
         xhr.onload = function() {
@@ -1528,7 +1648,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             "action": "chatbot",
             "value": message
         });
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var chatbox = document.getElementById('chatbox');
         var typingIndicator = document.createElement('div');
         var timeout;
@@ -1774,7 +1894,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             chatbotDeviceListRequest.abort();
         }
         const previousValue = selectElement.value;
-        const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr();
         chatbotDeviceListRequest = xhr;
         selectElement.disabled = true;
         xhr.open('GET', url, true);
@@ -1905,7 +2025,7 @@ function command_php(command_line, reload_page = null) {
         logTextarea.value = logText;
         logTextarea.scrollTop = logTextarea.scrollHeight;
     };
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Command_Ajax.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -1974,7 +2094,7 @@ function command_php(command_line, reload_page = null) {
     //Gửi yêu cầu phát nhạc playlist bằng thông tin tệp json
     function play_playlist_json_path(url_json_file) {
         loading('show');
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         xhr.open("POST", "<?php echo $URL_API_VBOT; ?>", true);
         xhr.setRequestHeader("Content-Type", "application/json");
         var data = JSON.stringify({
@@ -2009,7 +2129,7 @@ function command_php(command_line, reload_page = null) {
     //Tải xuống bài hát Zingmp3
     function dowload_ZingMP3_ID(zing_id, zing_name) {
         loading("show");
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_GetLink&Zing_ID=' + zing_id;
         xhr.open('GET', url, true);
         xhr.onreadystatechange = function() {
@@ -2017,7 +2137,7 @@ function command_php(command_line, reload_page = null) {
                 try {
                     var data = JSON.parse(xhr.responseText);
                     if (data.success == true) {
-                        fetch(data.url)
+                        vbotFetchWithTimeout(data.url, {}, 180000)
                             .then(response => {
                                 loading("hide");
                                 if (!response.ok) {
@@ -2063,7 +2183,7 @@ function command_php(command_line, reload_page = null) {
             show_message('Lỗi: ID Zing hoặc tên bài hát không được để trống.');
         }
         loading("show");
-        var xhr = new XMLHttpRequest();
+        var xhr = vbotCreateXhr();
         var url_get_link = 'includes/php_ajax/Media_Player_Search.php?ZingMP3_GetLink&Zing_ID=' + encodeURIComponent(IDzing);
         xhr.open('GET', url_get_link, true);
         xhr.onreadystatechange = function() {
@@ -2071,7 +2191,7 @@ function command_php(command_line, reload_page = null) {
                 try {
                     var data = JSON.parse(xhr.responseText);
                     if (data.success == true) {
-                        var xhr2 = new XMLHttpRequest();
+                        var xhr2 = vbotCreateXhr();
                         xhr2.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
                         xhr2.setRequestHeader('Content-Type', 'application/json');
                         xhr2.onreadystatechange = function() {
@@ -2129,7 +2249,7 @@ function command_php(command_line, reload_page = null) {
         }
         songName = songName.replace(/\.mp3$/i, '');
         loading("show");
-        var xhr2 = new XMLHttpRequest();
+        var xhr2 = vbotCreateXhr();
         xhr2.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
         xhr2.setRequestHeader('Content-Type', 'application/json');
         xhr2.onreadystatechange = function() {
@@ -2188,7 +2308,7 @@ function command_php(command_line, reload_page = null) {
 		formData.append("playlist_id", typeof selectedPlaylistId !== 'undefined' ? (selectedPlaylistId || '') : '');
 		formData.append("import_mode", document.getElementById('playlist-import-mode')?.value || 'overwrite');
 		formData.append("new_playlist_name", document.getElementById('playlist-import-new-name')?.value?.trim() || '');
-		var xhr = new XMLHttpRequest();
+		var xhr = vbotCreateXhr();
 		xhr.open("POST", "includes/php_ajax/Upload_file_path.php", true);
 		xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
 		xhr.onreadystatechange = function () {

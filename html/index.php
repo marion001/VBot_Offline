@@ -1182,7 +1182,7 @@ include 'html_head.php';
     }
     
     async function multiroomRequest(payload) {
-      const response=await fetch(multiroomApiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      const response=await vbotFetchWithTimeout(multiroomApiUrl,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)},30000)
         .catch(() => { setMultiroomAPIConnected(false); throw new Error(multiroomConnectionError); });
       const data=await multiroomReadJson(response);
       if(!response.ok||!data.success) throw new Error(data.message||data.result?.error||'Thao tác Multiroom không thành công'); 
@@ -1476,10 +1476,24 @@ include 'html_head.php';
       // Render devices list
       const devices=document.getElementById('mr-devices'); 
       const runtimeSpeakerMap = Object.fromEntries(((multiroomSnapshot.controller||{}).speakers||[]).map(s => [s.id, s]));
-      devices.innerHTML=(multiroomSnapshot.devices||[]).map(d=>{
+      devices.replaceChildren();
+      const multiroomDevices = multiroomSnapshot.devices || [];
+      multiroomDevices.forEach(d=>{
         const online = runtimeSpeakerMap[d.id]?.online ?? d.online;
-        return '<div class="py-1"><i class="bi bi-speaker"></i> '+(d.name||d.id||'N/A')+' - '+(d.id||'')+(online===false?' <span class="text-danger" title="Offline">●</span>':' <span class="text-success" title="Online">●</span>')+'</div>';
-      }).join('')||'Không tìm thấy loa.';
+        const item = document.createElement('div');
+        item.className = 'py-1';
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-speaker';
+        const status = document.createElement('span');
+        status.className = online === false ? 'text-danger' : 'text-success';
+        status.title = online === false ? 'Offline' : 'Online';
+        status.textContent = '●';
+        item.appendChild(icon);
+        item.appendChild(document.createTextNode(' ' + String(d.name || d.id || 'N/A') + ' - ' + String(d.id || '') + ' '));
+        item.appendChild(status);
+        devices.appendChild(item);
+      });
+      if (multiroomDevices.length === 0) devices.textContent = 'Không tìm thấy loa.';
       
       // Render session info
       const c=multiroomSnapshot.controller||{}, b=multiroomSnapshot.bridge||{}, r=multiroomSnapshot.receiver||{}; 
@@ -1526,6 +1540,10 @@ include 'html_head.php';
       
       const allDevices = multiroomSnapshot.devices||[];
       speakersContainer.innerHTML = allDevices.map(d => {
+        const rawSpeakerId = String(d.id || '');
+        const safeSpeakerId = vbotEscapeHtml(rawSpeakerId);
+        const encodedSpeakerId = vbotEncodeInlineValue(rawSpeakerId);
+        const safeSpeakerName = vbotEscapeHtml(d.name || d.id || 'Loa');
         const currentSpeaker = speakersMap[d.id];
         const isInCurrentSession = currentSpeakerIds.includes(d.id);
         const isCoordinator = normalizedCoordinatorHost && normalizeMrHost(d.host) === normalizedCoordinatorHost;
@@ -1554,12 +1572,12 @@ include 'html_head.php';
         
 		return '<div class="col-md-6"><div class="border rounded p-3" style="background:' + bgColor + ';">' +
 		  '<div class="form-check mb-2">' +
-			'<input class="form-check-input border-success" type="checkbox" id="speaker_' + d.id + '" ' + (isChecked ? 'checked' : '') +
+			'<input class="form-check-input border-success" type="checkbox" id="speaker_' + safeSpeakerId + '" ' + (isChecked ? 'checked' : '') +
 			  (isCoordinator ? ' disabled title="Loa chủ luôn phát âm thanh trong phiên"' : '') +
-			  " onchange=\"toggleSessionSpeaker('" + d.id + "', this.checked)\">" +
+			  " onchange=\"toggleSessionSpeaker(decodeURIComponent('" + encodedSpeakerId + "'), this.checked)\">" +
 			'<label class="form-check-label fw-bold d-block"' +
 			  (isCoordinator ? ' style="opacity:1;color:inherit;"' : '') + '>' +
-			  '<span class="d-block"><i class="bi bi-speaker"></i> ' + (d.name || d.id || 'Loa') +
+			  '<span class="d-block"><i class="bi bi-speaker"></i> ' + safeSpeakerName +
 				' <span class="' + statusClass + '" title="' + statusText + '">●</span>' +
 			  '</span>' +
 			  '<span class="d-flex align-items-center gap-1 mt-1 flex-wrap">' +
@@ -1576,26 +1594,26 @@ include 'html_head.php';
 		  '</div>' +
 
 		  '<div class="mb-2">' +
-			'<small class="text-muted">Volume PCM: <b id="mr-volume-value-' + d.id + '" class="text-primary">' +
+			'<small class="text-muted">Volume PCM: <b id="mr-volume-value-' + safeSpeakerId + '" class="text-primary">' +
 			  volume + '%</b> ' +
 			  (isMuted ? '<span class="badge bg-danger">Mute</span>' : '') +
 			'</small><br>' +
 
 			'<input title="Kéo để thay đổi âm lượng PCM của từng loa trong nhóm" type="range" min="0" max="100" value="' + volume + '" class="form-range form-range-sm" ' +
-			  "onpointerenter=\"multiroomVolumeHover('" + d.id + "', true)\" " +
-			  "onpointerleave=\"multiroomVolumeHover('" + d.id + "', false)\" " +
-			  "onfocus=\"multiroomVolumeHover('" + d.id + "', true)\" " +
-			  "onblur=\"multiroomVolumeHover('" + d.id + "', false)\" " +
-			  "onpointerdown=\"multiroomVolumeBegin('" + d.id + "', this.value)\" " +
-			  "onpointercancel=\"multiroomVolumeCancel('" + d.id + "')\" " +
-			  "oninput=\"multiroomVolumePreview('" + d.id + "', this.value)\" " +
-			  "onchange=\"multiroomVolumeCommit('" + d.id + "', this.value)\" " +
+			  "onpointerenter=\"multiroomVolumeHover(decodeURIComponent('" + encodedSpeakerId + "'), true)\" " +
+			  "onpointerleave=\"multiroomVolumeHover(decodeURIComponent('" + encodedSpeakerId + "'), false)\" " +
+			  "onfocus=\"multiroomVolumeHover(decodeURIComponent('" + encodedSpeakerId + "'), true)\" " +
+			  "onblur=\"multiroomVolumeHover(decodeURIComponent('" + encodedSpeakerId + "'), false)\" " +
+			  "onpointerdown=\"multiroomVolumeBegin(decodeURIComponent('" + encodedSpeakerId + "'), this.value)\" " +
+			  "onpointercancel=\"multiroomVolumeCancel(decodeURIComponent('" + encodedSpeakerId + "'))\" " +
+			  "oninput=\"multiroomVolumePreview(decodeURIComponent('" + encodedSpeakerId + "'), this.value)\" " +
+			  "onchange=\"multiroomVolumeCommit(decodeURIComponent('" + encodedSpeakerId + "'), this.value)\" " +
 			  (isInCurrentSession ? '' : 'disabled') +
 			'>' +
 		  '</div>' +
 
 		  '<button class="btn ' + (isMuted ? 'btn-success' : 'btn-warning') + ' btn-sm me-1" ' +
-			"onclick=\"multiroomSpeakerSetMute('" + d.id + "', " + (!isMuted) + ")\" " +
+			"onclick=\"multiroomSpeakerSetMute(decodeURIComponent('" + encodedSpeakerId + "'), " + (!isMuted) + ")\" " +
 			(isInCurrentSession ? '' : 'disabled') +
 		  '>' +
 			'<i class="bi ' + (isMuted ? 'bi-volume-mute' : 'bi-volume-down') + '"></i> ' +
@@ -1618,7 +1636,7 @@ include 'html_head.php';
       if(!background) multiroomLoadingStart();
       try { 
         // Refresh nhanh khong quet mDNS; giu lai danh sach da discovery.
-        const response=await fetch(multiroomApiUrl+(discover?'?discover=true':''),{cache:'no-store'})
+        const response=await vbotFetchWithTimeout(multiroomApiUrl+(discover?'?discover=true':''),{cache:'no-store'},30000)
           .catch(() => { setMultiroomAPIConnected(false); throw new Error(multiroomConnectionError); }); 
         const data=await multiroomReadJson(response);
         if(!response.ok||!data.success)throw new Error(data.message||'Không lấy được trạng thái'); 
@@ -1661,7 +1679,7 @@ include 'html_head.php';
 		var lon = "<?php echo $Config['contact_info']['location']['longitude']; ?>";
 
 		var weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + lat + '&lon=' + lon + '&appid=8473858601dabd3d2cbb24fb50840686&units=metric&lang=vi';
-		const weatherRes = await fetch(weatherUrl);
+		const weatherRes = await vbotFetchWithTimeout(weatherUrl, {}, 30000);
 		if (!weatherRes.ok) throw new Error('Lỗi lấy thông tin thời tiết');
 		var w = await weatherRes.json();
 		var elTemp = document.getElementById('show_weather');
@@ -1675,7 +1693,11 @@ include 'html_head.php';
 		elDesc.textContent = ' ' + w.weather[0].description;
 		elWind.textContent = w.wind.speed + ' m/s';
 		elIcon.src = 'https://openweathermap.org/img/w/' + w.weather[0].icon + '.png';
-		elCity.innerHTML = w.name + ', <span>' + w.sys.country + '</span>';
+		elCity.replaceChildren();
+		elCity.appendChild(document.createTextNode(String(w.name || '') + ', '));
+		var countrySpan = document.createElement('span');
+		countrySpan.textContent = String((w.sys && w.sys.country) || '');
+		elCity.appendChild(countrySpan);
 	  } catch (err) {
 		console.error(err);
 		show_message('Không thể lấy thông tin thời tiết');
@@ -1727,7 +1749,7 @@ include 'html_head.php';
 		action: "set_time",
 		set_duration: set_duration
 	  };
-	  fetch(url, {
+	  vbotFetchWithTimeout(url, {
 		method: "POST",
 		headers: {"Content-Type": "application/json"},
 		body: JSON.stringify(payload)
@@ -1762,7 +1784,7 @@ include 'html_head.php';
 		} else {
 			payload = {type: type, data: dataKey, action: actionValue};
 		}
-	  fetch(url, {
+	  vbotFetchWithTimeout(url, {
 		method: "POST",
 		headers: {"Content-Type": "application/json"},
 		body: JSON.stringify(payload)
@@ -1798,7 +1820,7 @@ include 'html_head.php';
 	  };
 	  clearTimeout(set_Volume_Data._t);
 	  set_Volume_Data._t = setTimeout(() => {
-		fetch(url, {
+		vbotFetchWithTimeout(url, {
 		  method: "POST",
 		  headers: {"Content-Type": "application/json"},
 		  body: JSON.stringify(payload)
@@ -1823,7 +1845,7 @@ include 'html_head.php';
 	//Kiểm tra phiên bản AirPlay
 	function check_version_airplay() {
 		loading("show");
-		fetch("includes/php_ajax/Check_Connection.php?check_version_airplay", {cache: "no-store"})
+		vbotFetchWithTimeout("includes/php_ajax/Check_Connection.php?check_version_airplay", {cache: "no-store"}, 30000)
 		.then(function(response) {
 			return response.json();
 		})
@@ -1861,7 +1883,7 @@ include 'html_head.php';
 		action: "brightness",
 		value: value
 	  };
-	  fetch(url, {
+	  vbotFetchWithTimeout(url, {
 		method: "POST",
 		headers: {"Content-Type": "application/json"},
 		body: JSON.stringify(payload)
@@ -1917,7 +1939,7 @@ include 'html_head.php';
 		  value: text
 		};
 	  }
-	  fetch(url, {
+	  vbotFetchWithTimeout(url, {
 		method: "POST",
 		headers: {"Content-Type": "application/json"},
 		body: JSON.stringify(payload)
@@ -1969,7 +1991,7 @@ function bluetooth_control(action, value) {
     if (value !== undefined && value !== null) {
         payload.value = value;
     }
-    return fetch('<?php echo $URL_API_VBOT; ?>', {
+    return vbotFetchWithTimeout('<?php echo $URL_API_VBOT; ?>', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -2051,28 +2073,48 @@ function renderBluetoothStatus(bluetooth) {
     }
     const devices = Object.values(bluetooth.bluetooth_devices || {});
     if (!bluetooth.is_connected || devices.length === 0) {
-        statusEl.innerHTML = '<span class="text-danger">Chưa kết nối</span>';
+		statusEl.replaceChildren();
+		const disconnected = document.createElement('span');
+		disconnected.className = 'text-danger';
+		disconnected.textContent = 'Chưa kết nối';
+		statusEl.appendChild(disconnected);
 		setBleButtons(false);
         return;
     }
     if (devices.length === 1) {
-        statusEl.innerHTML ='<span class="text-success">' + formatBluetoothDeviceLabel(devices[0]) + '</span> <button type="button" onclick="bluetooth_control(\'disconnect\')" class="btn btn-danger btn-sm py-0 px-2" style="font-size: 0.75rem;" title="Nhấn để ngắt kết nối Bluetooth với thiết bị đang kết nối hiện tại">Ngắt kết nối</button>';
+		statusEl.replaceChildren();
+		const deviceLabel = document.createElement('span');
+		deviceLabel.className = 'text-success';
+		deviceLabel.textContent = formatBluetoothDeviceLabel(devices[0]);
+		const disconnectButton = document.createElement('button');
+		disconnectButton.type = 'button';
+		disconnectButton.className = 'btn btn-danger btn-sm py-0 px-2 ms-1';
+		disconnectButton.style.fontSize = '0.75rem';
+		disconnectButton.title = 'Nhấn để ngắt kết nối Bluetooth với thiết bị đang kết nối hiện tại';
+		disconnectButton.textContent = 'Ngắt kết nối';
+		disconnectButton.addEventListener('click', function() { bluetooth_control('disconnect'); });
+		statusEl.appendChild(deviceLabel);
+		statusEl.appendChild(disconnectButton);
 		setBleButtons(true);
         return;
     }
-    let html = '<select ' +
-				'id="bluetooth_device_select" ' +
-				'class="form-select form-select-sm border-success" ' +
-				'style="width:auto; min-width:220px;" ' +
-				'onfocus="bluetoothSelectOpen=true" ' +
-				'onblur="bluetoothSelectOpen=false" ' +
-				'onchange="bluetooth_control(\'receive_signal\', this.value)">';
-
+	statusEl.replaceChildren();
+	const deviceSelect = document.createElement('select');
+	deviceSelect.id = 'bluetooth_device_select';
+	deviceSelect.className = 'form-select form-select-sm border-success';
+	deviceSelect.style.width = 'auto';
+	deviceSelect.style.minWidth = '220px';
+	deviceSelect.addEventListener('focus', function() { bluetoothSelectOpen = true; });
+	deviceSelect.addEventListener('blur', function() { bluetoothSelectOpen = false; });
+	deviceSelect.addEventListener('change', function() { bluetooth_control('receive_signal', this.value); });
     devices.forEach(function(device) {
-        html += '<option value="' + device.path + '"' + (device.path === bluetooth.device_path ? ' selected' : '') + '>' + formatBluetoothDeviceLabel(device) + '</option>';
+		const option = document.createElement('option');
+		option.value = String(device.path || '');
+		option.textContent = formatBluetoothDeviceLabel(device);
+		option.selected = device.path === bluetooth.device_path;
+		deviceSelect.appendChild(option);
     });
-    html += '</select>';
-    statusEl.innerHTML = html;
+	statusEl.appendChild(deviceSelect);
 	setBleButtons(true);
 }
   </script>
@@ -2317,7 +2359,7 @@ function update_index_data(data){
       if (!syncCheckbox.checked) {
         return;
       }
-      fetch("<?php echo $URL_API_VBOT ?>?type=1&data=all_info")
+      vbotFetchWithTimeout("<?php echo $URL_API_VBOT ?>?type=1&data=all_info")
         .then(response => {
           if (!response.ok) {
             document.getElementById('div_message_error').style.display = 'block';
@@ -2545,7 +2587,7 @@ function update_index_data(data){
   <script>
 	//Kiểm tra phiên bản Bluetooth hoặc AirPlay
 	function check_version(type) {
-		fetch("includes/php_ajax/Scanner.php?check_version=" + encodeURIComponent(type), {
+		vbotFetchWithTimeout("includes/php_ajax/Scanner.php?check_version=" + encodeURIComponent(type), {
 			cache: "no-store"
 		})
 		.then(async function(response) {
@@ -2578,7 +2620,7 @@ function update_index_data(data){
 
     //Lấy thông tin mạng đang kết nối
     function getWifiNetworkInformation() {
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open('GET', 'includes/php_ajax/Wifi_Act.php?Wifi_Network_Information', true);
       xhr.onreadystatechange = function() {
         if (xhr.readyState === XMLHttpRequest.DONE) {
@@ -2758,7 +2800,7 @@ function update_index_data(data){
     async function loadPlayList() {
       loading('show');
       try {
-        const response = await fetch('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'});
+        const response = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'}, 30000);
         const manager = await response.json();
         if(!response.ok || manager.success === false) throw new Error(manager.message || 'Không tải được danh sách PlayList');
         const exists = (manager.playlists||[]).some(item => item.id === selectedPlaylistId);
@@ -2859,7 +2901,7 @@ function update_index_data(data){
       loading('show');
       try {
         const body = new URLSearchParams({playlist_manager_action:action, playlist_id:selectedPlaylistId||'', source_playlist_id:selectedPlaylistId||'', playlist_name:name.trim()});
-        const response = await fetch('includes/php_ajax/Media_Player_Search.php', {
+        const response = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php', {
           method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''}, body:body
         });
         const data = await response.json();
@@ -2971,7 +3013,7 @@ function update_index_data(data){
     async function playlistPostItems(values, reload=true) {
       loading('show');
       try {
-        const response = await fetch('includes/php_ajax/Media_Player_Search.php', {
+        const response = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php', {
           method:'POST',
           headers:{
             'Content-Type':'application/x-www-form-urlencoded',
@@ -3063,7 +3105,7 @@ function update_index_data(data){
       tableContainer.innerHTML = tableHTML;
       var table = document.getElementById('playlistTable');
       var tableBody = document.getElementById('playlistTableBody');
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open('GET', 'includes/php_ajax/Media_Player_Search.php?Cache_PlayList=1&playlist_id=' + encodeURIComponent(selectedPlaylistId||''), true);
       xhr.onload = function() {
         if (xhr.status === 200) {
@@ -3165,7 +3207,7 @@ function update_index_data(data){
         return;
       }
       const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path . "/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json"; ?>';;
-      const xhr = new XMLHttpRequest();
+      const xhr = vbotCreateXhr();
       xhr.open('GET', url, true);
       xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {

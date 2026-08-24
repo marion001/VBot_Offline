@@ -190,6 +190,8 @@ function displayResults_Hotword_Snowboy(data) {
     if (Array.isArray(data.config) && data.config.length > 0) {
         let tableContent = '';
         data.config.forEach(function (item, index) {
+            const safeFileName = vbotEscapeHtml(item.file_name || '');
+            const filePath = String(data.path_hotword || '') + String(item.file_name || '');
             tableContent +=
                 '<tr>' +
                 '<td style="text-align: center; vertical-align: middle;">' + (index + 1) + '</td>' +
@@ -199,17 +201,17 @@ function displayResults_Hotword_Snowboy(data) {
                 '</div>' +
                 '</td>' +
                 '<td>' +
-                '<input readonly class="form-control" type="text" name="snowboy_file_name_' + index + '" value="' + item.file_name + '">' +
+                '<input readonly class="form-control" type="text" name="snowboy_file_name_' + index + '" value="' + safeFileName + '">' +
                 '</td>' +
                 '<td>' +
                 '<input class="form-control" type="number" name="snowboy_sensitive_' + index + '" value="' + item.sensitive + '" step="0.1" min="0.1" max="1.0">' +
                 '</td>' +
                 '<td style="text-align: center; vertical-align: middle;">' +
                 '<center>' +
-                '<button type="button" class="btn btn-danger" title="Xóa file: ' + item.file_name + '" onclick="deleteFile(\'' + data.path_hotword + item.file_name + '\', \'' + data.lang + '\')">' +
+                '<button type="button" class="btn btn-danger" title="Xóa file: ' + safeFileName + '" onclick="' + vbotInlineHandler('deleteFile', [filePath, data.lang]) + '">' +
                 '<i class="bi bi-trash"></i>' +
                 '</button> ' +
-                '<button type="button" class="btn btn-success" title="Tải xuống file: ' + item.file_name + '" onclick="downloadFile(\'' + data.path_hotword + item.file_name + '\')">' +
+                '<button type="button" class="btn btn-success" title="Tải xuống file: ' + safeFileName + '" onclick="' + vbotInlineHandler('downloadFile', [filePath]) + '">' +
                 '<i class="bi bi-download"></i>' +
                 '</button>' +
                 '</center>' +
@@ -250,13 +252,13 @@ function displayResults_Hotword_dataa(data) {
     resultsDiv1.innerHTML = '';
     let reponse_lang = data.lang === "vi" ? "Tiếng Việt" : "Tiếng Anh";
     const langDiv = document.getElementById('language_hotwordd');
-    langDiv.innerHTML = '<strong>- Ngôn ngữ: </strong> <font color="red" id="data_lang_shows" value=' + data.lang + '>' + reponse_lang + '</font><br/>- File Thư Viện Đang Dùng: <font color="red">' + data.config_lib_pv_to_lang + '</font>';
+    langDiv.innerHTML = '<strong>- Ngôn ngữ: </strong> <font color="red" id="data_lang_shows" value="' + vbotEscapeHtml(data.lang || '') + '">' + vbotEscapeHtml(reponse_lang) + '</font><br/>- File Thư Viện Đang Dùng: <font color="red">' + vbotEscapeHtml(data.config_lib_pv_to_lang || '') + '</font>';
     const fileList = data.files_lib_pv;
     var selectHtml = '<tr><td colspan="4"><div class="form-floating mb-3"><select required class="form-select" id="select_file_lib_pv" name="select_file_lib_pv">';
     selectHtml += '<option value="">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</option>';
     fileList.forEach(function (file) {
         var isSelected_lib = (file === data.config_lib_pv_to_lang) ? ' selected' : '';
-        selectHtml += '<option value="' + file + '"' + isSelected_lib + '>' + file + '</option>';
+        selectHtml += '<option value="' + vbotEscapeHtml(file) + '"' + isSelected_lib + '>' + vbotEscapeHtml(file) + '</option>';
     });
     selectHtml += '</select><div class="invalid-feedback">Hãy chọn file thư viện .pv ' + reponse_lang + ' để cấu hình</div> <label for="select_file_lib_pv">Chọn file thư viện Hotword: ' + reponse_lang + '</label></div></td>';
     selectHtml += '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" id="deleteFilePV" title="Xóa file: "><i class="bi bi-trash"></i></button>  <button type="button" class="btn btn-success" id="downloadFilePV" title="Tải xuống file: "><i class="bi bi-download"></i></button> </center></td></tr>';
@@ -265,14 +267,16 @@ function displayResults_Hotword_dataa(data) {
         let tableContent = '';
         data.config.forEach((item, index) => {
             i_up++;
+            const safeFileName = vbotEscapeHtml(item.file_name || '');
+            const filePath = String(data.path_ppn || '') + String(item.file_name || '');
             tableContent +=
                 '<tr>' +
                 '<td style="text-align: center; vertical-align: middle;">' + i_up + '</td>' +
                 '<td style="text-align: center; vertical-align: middle;"><div  class="form-switch"><input class="form-check-input" type="checkbox" name="active_' + index + '" ' + (item.active ? 'checked' : '') + '></div></td>' +
-                '<td><input readonly class="form-control" type="text" name="file_name_' + index + '" value="' + item.file_name + '"></td>' +
+                '<td><input readonly class="form-control" type="text" name="file_name_' + index + '" value="' + safeFileName + '"></td>' +
                 '<td><input class="form-control" type="number" name="sensitive_' + index + '" value="' + item.sensitive + '" step="0.1" min="0.1" max="1.0"></td>' +
-                '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" title="Xóa file: ' + item.file_name + '" onclick="deleteFile(\'' + data.path_ppn + item.file_name + '\', \'' + data.lang + '\')"><i class="bi bi-trash"></i></button> ' +
-                '  <button type="button" class="btn btn-success" title="Tải xuống file: ' + item.file_name + '"  onclick="downloadFile(\'' + data.path_ppn + item.file_name + '\')"><i class="bi bi-download"></i></button></center></td>' +
+                '<td style="text-align: center; vertical-align: middle;"><center><button type="button" class="btn btn-danger" title="Xóa file: ' + safeFileName + '" onclick="' + vbotInlineHandler('deleteFile', [filePath, data.lang]) + '"><i class="bi bi-trash"></i></button> ' +
+                '  <button type="button" class="btn btn-success" title="Tải xuống file: ' + safeFileName + '" onclick="' + vbotInlineHandler('downloadFile', [filePath]) + '"><i class="bi bi-download"></i></button></center></td>' +
                 '</tr>';
         });
         tableContent +=
@@ -409,7 +413,7 @@ function test_key_difyAI() {
         "response_mode": "blocking",
         "user": "VBot_Assistant_TestKey",
     };
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('POST', url, true);
     Object.keys(headers).forEach(key => {
         xhr.setRequestHeader(key, headers[key]);
@@ -458,7 +462,7 @@ function test_key_ChatGPT(text) {
     var apiKey = document.getElementById('chat_gpt_key').value;
     var url_API = document.getElementById('chat_gpt_url_api').value;
     //const url_API = "https://api.openai.com/v1/chat/completions";
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open("POST", url_API, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.setRequestHeader("Authorization", 'Bearer ' + apiKey);
@@ -507,7 +511,7 @@ function test_key_Gemini(text) {
             }]
         }]
     };
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('POST', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
     xhr.onreadystatechange = function () {
@@ -621,7 +625,7 @@ function check_info_login_olli() {
     }
     var url = isEmail ? atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9sb2dpbg==') : atob('aHR0cHM6Ly91c2Vycy5pdmlldC5jb20vdjEvYXV0aC9vdHAvbG9naW4=');
     var data = isEmail ? { email: username, password: password } : { phone_number: username, password: password };
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/json");
     xhr.setRequestHeader("Accept", "*/*");
@@ -798,7 +802,7 @@ async function xiaozhi_active_device_info() {
     const localUrl = "includes/php_ajax/Scanner.php?XiaoZhi_Active&action=get_device_info";
     try {
         showMessagePHP("Đang lấy thông tin thiết bị phần cứng...", 3);
-        const response = await fetch(localUrl, { method: "GET" });
+        const response = await vbotFetchWithTimeout(localUrl, { method: "GET" }, 30000);
         if (!response.ok) throw new Error("HTTP Error " + response.status);
         const deviceInfo = await response.json();
         //console.log("deviceInfo:", JSON.stringify(deviceInfo, null, 2));
@@ -828,7 +832,7 @@ async function xiaozhi_active_device_info() {
             },
         };
         showMessagePHP("Tiến hành gửi thông tin dữ liệu lên máy chủ...", 3);
-        const otaResponse = await fetch(otaUrl, {
+        const otaResponse = await vbotFetchWithTimeout(otaUrl, {
             method: "POST",
             headers: headers,
             body: JSON.stringify(payload),
@@ -842,7 +846,7 @@ async function xiaozhi_active_device_info() {
             const active_number_code = result.activation.code;
             const hmacUrl = "includes/php_ajax/Scanner.php?XiaoZhi_Active&action=signature_hmac&challenge=" + encodeURIComponent(challenge);
             showMessagePHP("Gửi yêu cầu lấy HMAC...", 3);
-            const hmacResponse = await fetch(hmacUrl);
+            const hmacResponse = await vbotFetchWithTimeout(hmacUrl, {}, 30000);
             const hmacData = await hmacResponse.json();
             showMessagePHP("Đã ký Signature HMAC với thiết bị này thành công", 3);
             //Gửi activate và chờ nhập mã kích hoạt
@@ -860,7 +864,7 @@ async function xiaozhi_active_device_info() {
             showMessagePHP("Đang tiến hành gửi thông tin kích hoạt thiết bị này tới Máy Chủ, Vui Lòng Đợi Mã Kích Hoạt", 15);
             show_message("<b>Đang tiến hành gửi thông tin kích hoạt thiết bị này tới Máy Chủ, Vui Lòng Đợi Mã Kích Hoạt...</b>");
             while (waiting) {
-                const activateResp = await fetch(activateUrl, {
+                const activateResp = await vbotFetchWithTimeout(activateUrl, {
                     method: "POST",
                     headers: headers,
                     body: JSON.stringify(activatePayload)
@@ -900,7 +904,7 @@ async function xiaozhi_active_device_info() {
 							serial_number: deviceInfo.serial_number,
 							hmac_signature: hmacData.signature
 						};
-						fetch("includes/php_ajax/Scanner.php", {
+						vbotFetchWithTimeout("includes/php_ajax/Scanner.php", {
 							method: "POST",
 							headers: {
 								"Content-Type": "application/x-www-form-urlencoded",
@@ -948,7 +952,7 @@ async function xiaozhi_active_device_info() {
 function xiaozhi_action(action, confirmText, callback) {
     if (!confirm(confirmText)) return;
     loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open("POST", "includes/php_ajax/Scanner.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1016,7 +1020,7 @@ function xiaozhi_activation_status_true() {
 //Xiaozhi Lấy Phiên Bản Client Mới Nhất
 function xiaozhi_getLatestVersion() {
 	loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open("GET", "https://api.github.com/repos/78/xiaozhi-esp32/releases/latest", true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -1040,7 +1044,7 @@ function xiaozhi_getLatestVersion() {
 
 //Lấy token zai_did tts_default
 function get_token_tts_default_zai_did() {
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('GET', 'includes/php_ajax/Check_Connection.php?get_token_tts_default_zai_did', true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -1066,7 +1070,7 @@ function get_token_tts_default_zai_did() {
 //Lấy danh sách giọng đọc của Google từ web
 function voice_name_gcloud_get() {
 	loading('show');
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('GET', 'includes/php_ajax/Check_Connection.php?get_ggcloud_voice_name', true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -1113,8 +1117,11 @@ function get_model_gemini() {
         return;
     }
 	loading('show');
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', 'includes/php_ajax/Check_Connection.php?get_model_gemini&apikey='+geminiKey+'&version_api='+geminiVersion, true);
+    const xhr = vbotCreateXhr();
+    xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+    xhr.timeout = 20000;
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
@@ -1131,14 +1138,31 @@ function get_model_gemini() {
 				loading('hide');
                 show_message(e);
             }
+        } else if (xhr.readyState === 4) {
+            loading('hide');
+            show_message('Không thể lấy danh sách Gemini Model, HTTP ' + xhr.status);
         }
     };
-    xhr.send();
+    xhr.onerror = function() {
+        loading('hide');
+        show_message('Không thể kết nối để lấy danh sách Gemini Model');
+    };
+    xhr.ontimeout = function() {
+        loading('hide');
+        show_message('Yêu cầu lấy danh sách Gemini Model đã quá thời gian 20 giây');
+    };
+    xhr.send('get_model_gemini=1&apikey=' + encodeURIComponent(geminiKey) + '&version_api=' + encodeURIComponent(geminiVersion));
 }
 
 //Load Gemini Model cập nhật vào thẻ select
 function loadGeminiModelsXHR() {
-    const url = "includes/php_ajax/Show_file_path.php?read_file_path&file=/home/pi/VBot_Offline/html/includes/other_data/gemini_model_list.json";
+    const webuiRootPath = String(window.VBOT_WEBUI_ROOT_PATH || '').replace(/[\\/]+$/, '');
+    if (!webuiRootPath) {
+        show_message("Không xác định được thư mục WebUI để đọc danh sách Gemini");
+        return;
+    }
+    const modelListPath = webuiRootPath + '/includes/other_data/gemini_model_list.json';
+    const url = "includes/php_ajax/Show_file_path.php?read_file_path&file=" + encodeURIComponent(modelListPath);
     const selectEl = document.getElementById("gemini_models_name");
     if (!selectEl) {
         show_message("Không tìm thấy thẻ select có ID: gemini_models_name");
@@ -1146,7 +1170,7 @@ function loadGeminiModelsXHR() {
     }
     loading('show');
     const currentValue = selectEl.value;
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open("GET", url, true);
     xhr.setRequestHeader("Cache-Control", "no-cache");
     xhr.onreadystatechange = function () {
@@ -1222,7 +1246,7 @@ function createAudio_Wakeup_reply(source_tts) {
         ttsParams.set("voice_name", voiceName);
         ttsParams.set("speaking_rate", speakingRate);
     }
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open("POST", "includes/php_ajax/TTS_Audio_Create.php", true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1272,7 +1296,7 @@ function use_this_wakeup_reply_sound(filePath) {
     loading('show');
     const encodedFilePath = encodeURIComponent(filePath);
     const url = 'includes/php_ajax/Hotword_pv_ppn.php';
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open("POST", url, true);
     xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
     xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -1316,7 +1340,7 @@ function update_webui_link(path_web_ui_html) {
 //Hiển thị dữ liệu BackList.json
 function getBacklistData(dataPath, textareaId) {
     var url = "includes/php_ajax/Show_file_path.php?data_backlist";
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             if (this.status === 200) {
@@ -1359,7 +1383,7 @@ function getBacklistData(dataPath, textareaId) {
 function changeBacklistValue(path_json, value_type) {
     var url = "includes/php_ajax/Show_file_path.php";
     var params = "delete_data_backlist=1&path=" + encodeURIComponent(path_json) + "&value_type=" + encodeURIComponent(value_type);
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.addEventListener("readystatechange", function () {
         if (this.readyState === 4) {
             if (this.status === 200) {
@@ -1441,7 +1465,7 @@ function saveAndRestartBluetoothAdapter() {
     }
 
     loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Save_Bluetooth_Adapter.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -1470,7 +1494,7 @@ function saveAndRestartBluetoothAdapter() {
 
 function scan_bluetooth_adapters() {
     loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('GET', 'includes/php_ajax/Scanner.php?scan_bluetooth_adapters=1', true);
     xhr.responseType = 'json';
     xhr.onload = function () {
@@ -1549,7 +1573,7 @@ function scan_bluetooth_adapters() {
 //scan mic hoặc audio out
 function scan_audio_devices(device_name) {
     loading("show");
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     var url = 'includes/php_ajax/Scanner.php?' + device_name;
     xhr.open('GET', url, true);
     xhr.responseType = 'json';
@@ -1561,10 +1585,12 @@ function scan_audio_devices(device_name) {
                 if (device_name === "scan_mic") {
                     var container = document.getElementById('mic_scanner');
                     var tableHTML = '<table class="table table-bordered border-primary">';
-                    tableHTML += '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color=green>' + data.message + '</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Mic</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
+                    tableHTML += '<thead><tr><th colspan="3" style="text-align: center; vertical-align: middle;"><font color=green>' + vbotEscapeHtml(data.message || '') + '</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Mic</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
                     tableHTML += '<tbody>';
                     data.devices.forEach(function (device) {
-                        tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.ID + '</td><td style="vertical-align: middle;">' + (device.Tên || '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_MIC(' + device.ID + ')">Chọn</button></td></td></tr>';
+                        var micId = Number.parseInt(device.ID, 10);
+                        if (!Number.isFinite(micId)) return;
+                        tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + micId + '</td><td style="vertical-align: middle;">' + vbotEscapeHtml(device.Tên || '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_MIC(' + micId + ')">Chọn</button></td></tr>';
                     });
                     tableHTML += '</tbody></table>';
                     if (container) {
@@ -1578,10 +1604,14 @@ function scan_audio_devices(device_name) {
                 else if (device_name === "scan_alsamixer") {
                     var container = document.getElementById('alsamixer_scan');
                     var tableHTML = '<table class="table table-bordered border-primary">';
-                    tableHTML += '<thead><tr><th colspan="6" style="text-align: center; vertical-align: middle;"><font color=green>' + data.message + '</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Speaker</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Khả Năng</th><th style="text-align: center; vertical-align: middle;">Kênh Phát</th><th style="text-align: center; vertical-align: middle;">Thông Số</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
+                    tableHTML += '<thead><tr><th colspan="6" style="text-align: center; vertical-align: middle;"><font color=green>' + vbotEscapeHtml(data.message || '') + '</font></th></tr><tr><th style="text-align: center; vertical-align: middle;">ID Speaker</th><th style="text-align: center; vertical-align: middle;">Tên Thiết Bị</th><th style="text-align: center; vertical-align: middle;">Khả Năng</th><th style="text-align: center; vertical-align: middle;">Kênh Phát</th><th style="text-align: center; vertical-align: middle;">Thông Số</th><th style="text-align: center; vertical-align: middle;">Hành Động</th></tr></thead>';
                     tableHTML += '<tbody>';
                     data.devices.forEach(function (device) {
-                        tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + device.id + '</td><td style="vertical-align: middle;">' + (device.name || '') + '</td><td style="vertical-align: middle;">' + (device.capabilities || '') + '</td><td style="vertical-align: middle;">' + (device.playback_channels || '') + '</td><td style="vertical-align: middle;">' + (device.values.length > 0 ? device.values.map(value => (value.channel || '') + ' ' + (value.details || '')).join('<br>') : '') + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_Alsamixer(\'' + device.name + '\')">Chọn</button></td></td></tr>';
+                        var encodedDeviceName = vbotEncodeInlineValue(device.name || '');
+                        var mixerValues = Array.isArray(device.values)
+                            ? device.values.map(value => vbotEscapeHtml((value.channel || '') + ' ' + (value.details || ''))).join('<br>')
+                            : '';
+                        tableHTML += '<tr><td style="text-align: center; vertical-align: middle;">' + vbotEscapeHtml(device.id || '') + '</td><td style="vertical-align: middle;">' + vbotEscapeHtml(device.name || '') + '</td><td style="vertical-align: middle;">' + vbotEscapeHtml(device.capabilities || '') + '</td><td style="vertical-align: middle;">' + vbotEscapeHtml(device.playback_channels || '') + '</td><td style="vertical-align: middle;">' + mixerValues + '</td><td style="text-align: center; vertical-align: middle;"><button type="button" class="btn btn-primary rounded-pill" onclick="selectDevice_Alsamixer(decodeURIComponent(\'' + encodedDeviceName + '\'))">Chọn</button></td></tr>';
                     });
                     tableHTML += '</tbody></table>';
                     if (container) {
@@ -1613,7 +1643,7 @@ function test_key_Picovoice() {
     loading("show");
     var token = document.getElementById('hotword_engine_key').value;
     var lang = document.getElementById('select_hotword_lang').value;
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     var url = 'includes/php_ajax/Check_Connection.php?check_key_picovoice&key='
         + encodeURIComponent(token) + '&lang=' + encodeURIComponent(lang);
     xhr.open('GET', url);
@@ -1641,7 +1671,7 @@ function test_key_Picovoice() {
 
 //Hiển thị các bài hát trong thư mục Local
 function list_audio_show_path(id_path_music) {
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Show_file_path.php?' + encodeURIComponent(id_path_music), true);
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
@@ -1661,13 +1691,14 @@ function list_audio_show_path(id_path_music) {
                     '</tr>';
                 data.forEach(function (file, index) {
                     var fileName = getFileNameFromPath(file);
+                    var safeFileName = vbotEscapeHtml(fileName || '');
                     var rowContent =
                         '<tr>' +
                         '<td style="text-align: center; vertical-align: middle;"><center>' + (index + 1) + '</center></td>' +
-                        '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + fileName + '"></td>' +
+                        '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + safeFileName + '"></td>' +
                         '<td style="text-align: center; vertical-align: middle;"><center>' +
-                        '<button type="button" class="btn btn-danger" title="Xóa file: ' + fileName + '" onclick="deleteFile(\'' + file + '\', \'scan_Music_Local\')"><i class="bi bi-trash"></i></button>' +
-                        ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + fileName + '" onclick="downloadFile(\'' + file + '\')"><i class="bi bi-download"></i></button>' +
+                        '<button type="button" class="btn btn-danger" title="Xóa file: ' + safeFileName + '" onclick="' + vbotInlineHandler('deleteFile', [file, 'scan_Music_Local']) + '"><i class="bi bi-trash"></i></button>' +
+                        ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + safeFileName + '" onclick="' + vbotInlineHandler('downloadFile', [file]) + '"><i class="bi bi-download"></i></button>' +
                         '</center></td>' +
                         '</tr>';
                     tableBody.insertAdjacentHTML('beforeend', rowContent);
@@ -1687,13 +1718,14 @@ function list_audio_show_path(id_path_music) {
                     '</tr>';
                 data.forEach(function (file, index) {
                     var fileName = getFileNameFromPath(file);
+                    var safeFileName = vbotEscapeHtml(fileName || '');
                     var rowContent =
                         '<tr>' +
                         '<td style="text-align: center; vertical-align: middle;"><center>' + (index + 1) + '</center></td>' +
-                        '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + fileName + '"></td>' +
+                        '<td><input readonly class="form-control border-primary" type="text" name="file_name_music_local' + index + '" value="' + safeFileName + '"></td>' +
                         '<td style="text-align: center; vertical-align: middle;"><center>' +
-                        '<button type="button" class="btn btn-danger" title="Xóa file: ' + fileName + '" onclick="deleteFile(\'' + file + '\', \'scan_Audio_Startup\')"><i class="bi bi-trash"></i></button>' +
-                        ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + fileName + '" onclick="downloadFile(\'' + file + '\')"><i class="bi bi-download"></i></button>' +
+                        '<button type="button" class="btn btn-danger" title="Xóa file: ' + safeFileName + '" onclick="' + vbotInlineHandler('deleteFile', [file, 'scan_Audio_Startup']) + '"><i class="bi bi-trash"></i></button>' +
+                        ' <button type="button" class="btn btn-success" title="Tải Xuống file: ' + safeFileName + '" onclick="' + vbotInlineHandler('downloadFile', [file]) + '"><i class="bi bi-download"></i></button>' +
                         '</center></td>' +
                         '</tr>';
                     tableBody.insertAdjacentHTML('beforeend', rowContent);
@@ -1710,7 +1742,7 @@ function checkSSHConnection(sshHost) {
     var sshPort = document.getElementById('ssh_port').value;
     var sshUser = document.getElementById('ssh_username').value;
     var sshPass = document.getElementById('ssh_password').value;
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     var url = 'includes/php_ajax/Check_Connection.php?check_ssh' +
         '&host=' + encodeURIComponent(sshHost) +
         '&port=' + encodeURIComponent(sshPort) +
@@ -1744,7 +1776,7 @@ function checkSSHConnection(sshHost) {
 function CheckConnectionHomeAssistant(inputId) {
     loading("show");
     var url_hasss = document.getElementById(inputId).value;
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
     xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -1795,7 +1827,7 @@ function uploadFilesHotwordSnowboy() {
         formData.append('upload_files_hotword_snowboy[]', files[i]);
     }
     formData.append('action_hotword_snowboy', 'upload_files_hotword_snowboy');
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onload = function () {
@@ -1834,7 +1866,7 @@ function uploadFilesHotwordPPNandPV() {
     }
     formData.append('lang_hotword_get', lang);
     formData.append('action_ppn_pv', 'upload_files_ppn_pv');
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onload = function () {
@@ -1864,7 +1896,7 @@ function reload_hotword_config(langg = "No") {
     if (!confirm("Bạn có chắc chắn muốn cập nhật mới dữ liệu")) {
         return;
     }
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     var requestBody = "";
     if (langg === "No") {
         xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php');
@@ -1941,7 +1973,7 @@ function uploadFilesWakeUP_Reply() {
         formData.append('upload_files_wakeup_reply[]', files[i]);
     }
     formData.append('wakeup_reply_upload', 'upload_files_wakeup_reply');
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('POST', 'includes/php_ajax/Hotword_pv_ppn.php', true);
     xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onload = function () {
@@ -1969,7 +2001,7 @@ function uploadFilesWakeUP_Reply() {
 
 //Hiển thị list danh sách câu phản hồi
 function loadWakeupReply(pathVBot_PY) {
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?get_wakeup_reply', true);
     xhr.onload = function () {
         if (xhr.status === 200) {
@@ -1998,6 +2030,8 @@ function loadWakeupReply(pathVBot_PY) {
                         '</thead>' +
                         '<tbody>';
                     data.forEach((item, index) => {
+                        const safeFileName = vbotEscapeHtml(item.file_name || '');
+                        const wakeupFilePath = String(pathVBot_PY || '') + String(item.file_name || '');
                         html +=
                             '<tr>' +
                             '<td style="text-align: center;">' + (index + 1) + '</td>' +
@@ -2005,12 +2039,12 @@ function loadWakeupReply(pathVBot_PY) {
                             '<input class="form-check-input border-success" type="checkbox" name="save_wakeup_reply_active_' + index + '" ' + (item.active ? 'checked' : '') + '>' +
                             '</div></td>' +
                             '<td>' +
-                            '<input readonly class="form-control border-danger" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + item.file_name + '">' +
+                            '<input readonly class="form-control border-danger" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + safeFileName + '">' +
                             '</td>' +
                             '<td style="text-align: center;">' +
-                            '<button type="button" title="Nghe thử: ' + item.file_name + '" class="btn btn-primary" onclick="playAudio(\'' + pathVBot_PY + item.file_name + '\')"><i class="bi bi-play-circle"></i></button> ' +
-                            ' <button type="button" class="btn btn-success" onclick="downloadFile(\'' + pathVBot_PY + item.file_name + '\')" title="Tải Xuống File: ' + item.file_name + '"><i class="bi bi-download"></i></button> ' +
-                            ' <button type="button" class="btn btn-danger" title="Xóa file: ' + item.file_name + '" onclick="deleteFile(\'' + pathVBot_PY + item.file_name + '\', \'wakeup_reply\')"><i class="bi bi-trash"></i></button>' +
+                            '<button type="button" title="Nghe thử: ' + safeFileName + '" class="btn btn-primary" onclick="' + vbotInlineHandler('playAudio', [wakeupFilePath]) + '"><i class="bi bi-play-circle"></i></button> ' +
+                            ' <button type="button" class="btn btn-success" onclick="' + vbotInlineHandler('downloadFile', [wakeupFilePath]) + '" title="Tải Xuống File: ' + safeFileName + '"><i class="bi bi-download"></i></button> ' +
+                            ' <button type="button" class="btn btn-danger" title="Xóa file: ' + safeFileName + '" onclick="' + vbotInlineHandler('deleteFile', [wakeupFilePath, 'wakeup_reply']) + '"><i class="bi bi-trash"></i></button>' +
                             '</td>' +
                             '</tr>';
                     });
@@ -2036,7 +2070,7 @@ function loadWakeupReply(pathVBot_PY) {
 
 //Hiển thị list hotword khi được scan
 function loadConfigHotword(lang) {
-    const xhr = new XMLHttpRequest();
+    const xhr = vbotCreateXhr();
     xhr.open('GET', 'includes/php_ajax/Hotword_pv_ppn.php?hotword&lang=' + lang, true);
     xhr.onload = function () {
         if (xhr.status === 200) {
@@ -2054,7 +2088,7 @@ function loadConfigHotword(lang) {
 //Đọc nội dung các file yaml MQTT
 function read_YAML_file_path(fileName) {
     loading('show');
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('GET', 'includes/php_ajax/Show_file_path.php?yaml=' + fileName, true);
     xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -2086,7 +2120,7 @@ function checkMQTTConnection() {
     var user = document.getElementById('mqtt_username').value;
     var pass = document.getElementById('mqtt_password').value;
     var url = 'includes/php_ajax/Check_Connection.php?check_mqtt&host=' + host + '&port=' + port + '&user=' + user + '&pass=' + pass;
-    var xhr = new XMLHttpRequest();
+    var xhr = vbotCreateXhr();
     xhr.open('GET', url, true);
     xhr.onload = function () {
         if (xhr.status >= 200 && xhr.status < 300) {
@@ -2117,7 +2151,7 @@ function showRadioSelect(index, path_file) {
     select.focus();
     return;
   }
-  fetch('includes/php_ajax/Show_file_path.php?read_file_path&file='+path_file+'/includes/other_data/lits_newspaper_radio.json')
+  vbotFetchWithTimeout('includes/php_ajax/Show_file_path.php?read_file_path&file='+path_file+'/includes/other_data/lits_newspaper_radio.json')
     .then(response => response.json())
     .then(json => {
       if (!json.success || !json.data || !Array.isArray(json.data.radio)) {
@@ -2164,7 +2198,7 @@ function showNewsPaperSelect(index, path_file) {
     select.focus();
     return;
   }
-  fetch('includes/php_ajax/Show_file_path.php?read_file_path&file='+path_file+'/includes/other_data/lits_newspaper_radio.json')
+  vbotFetchWithTimeout('includes/php_ajax/Show_file_path.php?read_file_path&file='+path_file+'/includes/other_data/lits_newspaper_radio.json')
     .then(response => response.json())
     .then(json => {
       if (!json.success || !json.data || !Array.isArray(json.data.newspaper)) {

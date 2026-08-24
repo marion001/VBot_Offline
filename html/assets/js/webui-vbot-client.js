@@ -17,7 +17,7 @@
         loading('show');
         showMessagePHP('Đang tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng Lan', 12);
         const url = "includes/php_ajax/Scanner.php";
-        const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr(30000);
         xhr.open("POST", url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -116,7 +116,7 @@
             }
             const ip = ipCell.textContent;
             const port = portCell.textContent;
-            const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr(30000);
             const url = 'includes/php_ajax/Check_Connection.php?check_status_vbot_server_in_lan=true&ip=' + encodeURIComponent(ip) + '&port=' + encodeURIComponent(port);
             xhr.open('GET', url, true);
             xhr.onload = function() {
@@ -135,7 +135,7 @@
                     '<span style="color: green; font-size: 30px;" title="Thiết bị đang trực tuyến">●</span>' :
                     '<span style="color: red; font-size: 30px;" title="Thiết bị đang ngoại tuyến">●</span>';
                 if (td) {
-                    td.innerHTML = '<b>' + statusDot + ' <p class="text-success">' + deviceName + '</p></b>';
+                    td.innerHTML = '<b>' + statusDot + ' <p class="text-success">' + escapeVBotDeviceHtml(deviceName) + '</p></b>';
                 }
                 if (chatbox_click === 'on') {
                     if (isOnline) {
@@ -150,7 +150,7 @@
                 const deviceName = td.querySelector('p') ? td.querySelector('p').textContent : '';
                 const statusDot = '<span style="color: red; font-size: 30px;" title="Thiết bị đang ngoại tuyến">●</span>';
                 if (td) {
-                    td.innerHTML = '<b>' + statusDot + ' <p class="text-success">' + deviceName + '</p></b>';
+                    td.innerHTML = '<b>' + statusDot + ' <p class="text-success">' + escapeVBotDeviceHtml(deviceName) + '</p></b>';
                 }
                 if (chatbox_click === 'on') {
                     showMessagePHP('<font color="red">Thiết bị: ' + ip + ' đang <b>ngoại tuyến</b></font>', 7);
@@ -163,8 +163,8 @@
     //Lấy dữ liệu Các thiết bị chạy VBot trong mạng lan đã được Scan
     function get_vbotScanDevices() {
         loading('show');
-        const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + window.webuiVbotClientConfig.devicesFilePath + '';
-        const xhr = new XMLHttpRequest();
+        const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(window.webuiVbotClientConfig.devicesFilePath || '');
+        const xhr = vbotCreateXhr(30000);
         xhr.open('GET', url, true);
         xhr.onload = function() {
             if (xhr.status >= 200 && xhr.status < 300) {
@@ -186,15 +186,25 @@
                             '<tbody>';
                         jsonData.data.forEach((device, index) => {
                             const rowId = 'device_row_' + index;
+                            const deviceName = String(device.user_name || '');
+                            const deviceIp = String(device.ip_address || '');
+                            const devicePort = String(device.port_api || '');
+                            const hostName = String(device.host_name || '');
+                            const safeName = escapeVBotDeviceHtml(deviceName);
+                            const safeIp = escapeVBotDeviceHtml(deviceIp);
+                            const safePort = escapeVBotDeviceHtml(devicePort);
+                            const safeHost = escapeVBotDeviceHtml(hostName);
+                            const encodedIp = encodeVBotDeviceArgument(deviceIp);
+                            const encodedName = encodeVBotDeviceArgument(deviceName);
                             tableHTML +=
                                 '<tr id="' + rowId + '">' +
-                                '<td id="' + rowId + '_name" style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + (device.user_name || '') + '</p></b></td>' +
-                                '<td id="' + rowId + '_ip" style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + (device.ip_address || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.ip_address || '') + '</a></b></td>' +
-                                '<td id="' + rowId + '_port" style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + (device.ip_address || '') + ':' + (device.port_api || '') + '" target="_blank" title="Mở Trong Tab Mới">' + (device.port_api || '') + '</a></b></td>' +
-                                '<td id="' + rowId + '_host" style="text-align: center; vertical-align: middle;"><b>' + (device.host_name || '') + '</b></td>' +
+                                '<td id="' + rowId + '_name" style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + safeName + '</p></b></td>' +
+                                '<td id="' + rowId + '_ip" style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + safeIp + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + safeIp + '</a></b></td>' +
+                                '<td id="' + rowId + '_port" style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + safeIp + ':' + safePort + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + safePort + '</a></b></td>' +
+                                '<td id="' + rowId + '_host" style="text-align: center; vertical-align: middle;"><b>' + safeHost + '</b></td>' +
                                 '<td id="' + rowId + '_action" style="text-align: center; vertical-align: middle;">' +
-                                '<button class="btn btn-danger" title="Xóa ' + (device.ip_address || '') + '" onclick="delete_IP_VBot_Server(\'' + (device.ip_address || '') + '\')"><i class="bi bi-trash"></i></button>' +
-                                ' <button class="btn btn-primary" title="WebUI ' + (device.ip_address || '') + '" onclick="showIframeModal(\'' + (device.ip_address || '') + '\', \'' + (device.user_name || '') + '\')"><i class="bi bi-gear-wide-connected"></i></button>' +
+                                '<button class="btn btn-danger" title="Xóa ' + safeIp + '" onclick="delete_IP_VBot_Server(decodeURIComponent(\'' + encodedIp + '\'))"><i class="bi bi-trash"></i></button>' +
+                                ' <button class="btn btn-primary" title="WebUI ' + safeIp + '" onclick="showIframeModal(decodeURIComponent(\'' + encodedIp + '\'), decodeURIComponent(\'' + encodedName + '\'))"><i class="bi bi-gear-wide-connected"></i></button>' +
                                 '</td>' +
                                 '</tr>';
                         });
@@ -227,7 +237,7 @@
     //Xóa dữ liệu đã lưu Các thiết bị chạy VBot Server Trong Lan
     function clearAllDevices_vbotScanDevices() {
         const url = 'includes/php_ajax/Scanner.php';
-        const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr(30000);
         xhr.open('POST', url, true);
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
@@ -235,7 +245,7 @@
             if (xhr.status >= 200 && xhr.status < 300) {
                 try {
                     const response = JSON.parse(xhr.responseText);
-                    showMessagePHP(response.message, 3);
+                    showMessageText(response.message, 3);
                     if (response.success) {
                         get_vbotScanDevices();
                     }
@@ -270,7 +280,7 @@
         }
         const cleanIP = ip.replace(/^http:\/\//, '');
         const url = 'includes/php_ajax/Check_Connection.php';
-        const xhr = new XMLHttpRequest();
+        const xhr = vbotCreateXhr(30000);
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
@@ -310,8 +320,8 @@
             loading('hide');
             return;
         }
-        const url = '/includes/php_ajax/Check_Connection.php';
-        const xhr = new XMLHttpRequest();
+        const url = 'includes/php_ajax/Check_Connection.php';
+        const xhr = vbotCreateXhr(30000);
         xhr.open('POST', url, true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
         xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');

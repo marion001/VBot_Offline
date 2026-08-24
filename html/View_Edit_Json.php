@@ -182,7 +182,7 @@ include 'html_head.php';
         return;
       }
       editor.setSize("100%", "70vh");
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open("GET", "includes/php_ajax/Show_file_path.php?read_file_path&file=" + encodeURIComponent(filePath), true);
       xhr.onreadystatechange = function() {
         if (xhr.readyState === 4) {
@@ -226,7 +226,7 @@ include 'html_head.php';
         show_message('Có lỗi trong cấu trúc, cú pháp JSON được chỉnh sửa:<br/><font color=red>' + e.message + '</font>');
         return;
       }
-      var xhr = new XMLHttpRequest();
+      var xhr = vbotCreateXhr();
       xhr.open("POST", window.location.href, true);
       xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
       xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");

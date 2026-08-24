@@ -351,7 +351,14 @@ include 'html_head.php';
 					}
 					if ($uploadOk === 1) {
 						$fileName = basename($_FILES["fileToUpload_custom_hass_restore"]["name"]);
-						if (!preg_match('/\.json$/i', $fileName)) {
+						$fileSize = (int)($_FILES["fileToUpload_custom_hass_restore"]["size"] ?? 0);
+						if ($_FILES["fileToUpload_custom_hass_restore"]["error"] !== UPLOAD_ERR_OK) {
+							$errorMessages[] = "- Tệp Home Assistant tải lên gặp lỗi, mã lỗi: " . intval($_FILES["fileToUpload_custom_hass_restore"]["error"]);
+							$uploadOk = 0;
+						} elseif (!is_uploaded_file($_FILES["fileToUpload_custom_hass_restore"]["tmp_name"]) || $fileSize <= 0 || $fileSize > 10485760) {
+							$errorMessages[] = "- Tệp Home Assistant không hợp lệ hoặc vượt quá 10 MB";
+							$uploadOk = 0;
+						} elseif (!preg_match('/\.json$/i', $fileName)) {
 							$errorMessages[] = "- Chỉ chấp nhận tệp .json, dành cho Home_Assistant_Custom.json";
 							$uploadOk = 0;
 						}
@@ -805,7 +812,7 @@ include 'html_head.php';
         function yaml_test_code_hass(id_texara) {
             try {
                 const yamlInput = document.getElementById(id_texara).value;
-                const xhr = new XMLHttpRequest();
+                const xhr = vbotCreateXhr();
                 xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
                 xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
                 xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
