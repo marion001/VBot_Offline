@@ -438,13 +438,15 @@ include 'html_head.php';
                         <button class="btn btn-primary dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false">
                          <i class="bi bi-cloud-fill"></i> Cloudflare Tunnel</button>
                         <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <li><a class="dropdown-item text-primary fw-semibold" href="Cloudflare_Tunnel.php" onclick="loading('show')"><i class="bi bi-sliders"></i> Quản Lý Hồ Sơ Tunnel</a></li>
+                          <li><hr class="dropdown-divider"></li>
                           <li><button class="dropdown-item text-danger" name="cloudflared_tunnel_start" type="button" title="Chạy " onclick="command_php('cloudflared_tunnel_start')">Chạy</button></li>
                           <li><button class="dropdown-item text-danger" name="cloudflared_tunnel_stop" type="button" title="Dừng Chạy Tạm thời" onclick="command_php('cloudflared_tunnel_stop')">Dừng</button></li>
                           <li><button class="dropdown-item text-danger" name="cloudflared_tunnel_disable" type="button" title="Dừng Chạy Cloudflare Tunnel Khi pi Khởi Động" onclick="command_php('cloudflared_tunnel_disable')">Vô Hiệu</button></li>
                           <li><button class="dropdown-item text-danger" name="cloudflared_tunnel_enable" type="button" title="Cho Phép Chạy Cloudflare Tunnel Khi pi Khởi Động" onclick="command_php('cloudflared_tunnel_enable')">Kích hoạt</button></li>
                           <li><button class="dropdown-item text-danger" name="cloudflared_tunnel_status" type="button" title="Kiểm Tra Trạng Thái Cloudflare Tunnel" onclick="command_php('cloudflared_tunnel_status')">Kiểm Tra Trạng Thái</button></li>
                           <li><button class="dropdown-item text-danger" name="cloudflared_tunnel_list" type="button" title="Xem Danh Sách Tunnel List" onclick="command_php('cloudflared_tunnel_list')">Xem Danh Sách Tunnel List</button></li>
-                          <li><a href="FAQ.php"><button onclick="loading('show')" class="dropdown-item text-danger" type="button" title="Xem Hướng Dẫn">Hướng Dẫn</button></a></li>
+                          <li><a href="FAQ.php#accordion_button_Cloudflare_Tunnel" onclick="loading('show')" class="dropdown-item text-primary" title="Xem Hướng Dẫn"><i class="bi bi-book"></i> Hướng Dẫn</a></li>
                         </ul>
                       </div>
                     </div>

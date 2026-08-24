@@ -515,12 +515,15 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
         'logs_airplay' => 'journalctl -u shairport-sync.service -n 500 --no-pager',
         'status_airplay' => '(sudo systemctl status shairport-sync.service --no-pager --full; status=$?; if [ "$status" -eq 4 ]; then exit 4; fi; exit 0)',
         'version_airplay' => 'shairport-sync -V',
-        'cloudflared_tunnel_start' => 'sudo systemctl start cloudflared.service',
-        'cloudflared_tunnel_stop' => 'sudo systemctl stop cloudflared.service',
+        'cloudflared_tunnel_start' => 'timeout 25s sudo systemctl start cloudflared.service',
+        'cloudflared_tunnel_stop' => 'timeout 20s sudo systemctl stop cloudflared.service',
         'cloudflared_tunnel_enable' => 'sudo systemctl enable cloudflared.service',
         'cloudflared_tunnel_disable' => 'sudo systemctl disable cloudflared.service',
         'cloudflared_tunnel_status' => '(systemctl status cloudflared.service --no-pager --full; status=$?; if [ "$status" -eq 4 ]; then exit 4; fi; exit 0)',
-        'cloudflared_tunnel_list' => 'cloudflared tunnel list',
+        'cloudflared_tunnel_list' => 'CF_BIN=$(command -v cloudflared 2>/dev/null || true); '
+            .'for CF_PATH in /usr/local/bin/cloudflared /usr/bin/cloudflared /bin/cloudflared; do '
+            .'if [ -z "$CF_BIN" ] && [ -x "$CF_PATH" ]; then CF_BIN="$CF_PATH"; fi; done; '
+            .'[ -n "$CF_BIN" ] && [ -x "$CF_BIN" ] && timeout 30s "$CF_BIN" tunnel list',
         'save_asound_to_alsamixer' => 'sudo alsactl store && sudo cp -- /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state',
         'alsamixer_asound_to_alsamixer' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state')
             .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state').' /etc/wm8960-soundcard/wm8960_asound.state',

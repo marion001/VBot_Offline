@@ -1273,7 +1273,11 @@ include 'html_head.php';
                   echo input_field('webui_path', 'Path (Đường Dẫn) ', $directory_path, 'required', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Cập Nhật', 'update_webui_link(\'' . $directory_path . '\')', 'btn btn-success border-success', 'onclick', '');
                   ?>
                   <div class="row mb-3">
-                    <b class="text-danger">Nếu sử dụng Cloudflared Tunnel Để Gắn Tên Miền/Domain Truy Cập Bên Ngoài Internet: <a href="FAQ.php" target="_blank">hãy nhấn vào đây để xem hướng dẫn</a></b>
+                    <b class="text-danger">Nếu sử dụng Cloudflared Tunnel để gắn tên miền/domain truy cập bên ngoài Internet:</b>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                      <a href="Cloudflare_Tunnel.php" class="btn btn-primary btn-sm" onclick="loading('show')"><i class="bi bi-cloud-check"></i> Quản Lý Cloudflare Tunnel</a>
+                      <a href="FAQ.php#accordion_button_Cloudflare_Tunnel" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Xem Hướng Dẫn Cài Đặt</a>
+                    </div>
                   </div>
                 </div>
               </div>

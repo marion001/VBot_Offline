@@ -935,6 +935,11 @@ include 'html_head.php';
     </div></div>
   </div>
 
+  <div id="mr-inline-loading" class="d-none align-items-center ms-3 small text-primary" role="status" aria-live="polite">
+    <span class="spinner-border spinner-border-sm me-1" aria-hidden="true"></span>
+    <span id="mr-inline-loading-text">Đang tải dữ liệu Multiroom...</span>
+  </div>
+
   <div class="modal fade" id="playlistAddTargetModal" tabindex="-1" aria-labelledby="playlistAddTargetModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content">
@@ -1029,6 +1034,10 @@ include 'html_head.php';
         const button = document.getElementById(id);
         if(button) button.disabled = !multiroomAPIConnected;
       });
+      ['mr-group-select', 'mr-session-group-select'].forEach(id => {
+        const select = document.getElementById(id);
+        if(select) select.disabled = !multiroomAPIConnected;
+      });
       const warning = document.getElementById('mr-group-vbot-required');
       if(warning) warning.classList.toggle('d-none', multiroomAPIConnected);
       if(!multiroomAPIConnected) updateMultiroomConnectionIndicators(false);
@@ -1049,14 +1058,32 @@ include 'html_head.php';
       }
     }
 
-    function multiroomLoadingStart() {
+    function multiroomLoadingStart(message='Đang xử lý dữ liệu Multiroom...') {
       multiroomLoadingDepth += 1;
-      if(multiroomLoadingDepth === 1) loading("show");
+      const indicator=document.getElementById('mr-inline-loading');
+      const text=document.getElementById('mr-inline-loading-text');
+      const modal=document.getElementById('multiroomModal');
+      if(text) text.textContent=message;
+      if(indicator){indicator.classList.remove('d-none');indicator.classList.add('d-flex');}
+      if(modal) modal.setAttribute('aria-busy','true');
     }
 
     function multiroomLoadingEnd() {
       multiroomLoadingDepth = Math.max(0, multiroomLoadingDepth - 1);
-      if(multiroomLoadingDepth === 0) loading("hide");
+      if(multiroomLoadingDepth === 0) {
+        const indicator=document.getElementById('mr-inline-loading');
+        const modal=document.getElementById('multiroomModal');
+        if(indicator){indicator.classList.add('d-none');indicator.classList.remove('d-flex');}
+        if(modal) modal.removeAttribute('aria-busy');
+      }
+    }
+
+    function multiroomPrepareInitialLoadingState() {
+      const devices=document.getElementById('mr-devices');
+      if(devices){devices.replaceChildren();const spinner=document.createElement('span');spinner.className='spinner-border spinner-border-sm text-primary me-1';spinner.setAttribute('aria-hidden','true');devices.append(spinner,document.createTextNode('Đang quét thiết bị trong mạng LAN...'));}
+      ['mr-group-select','mr-session-group-select'].forEach(function(id){const select=document.getElementById(id);if(!select)return;select.replaceChildren(new Option('Đang tải dữ liệu nhóm loa...',''));select.disabled=true;});
+      const session=document.getElementById('mr-no-active-session');
+      if(session){session.replaceChildren();const spinner=document.createElement('span');spinner.className='spinner-border spinner-border-sm text-primary me-1';spinner.setAttribute('aria-hidden','true');session.append(spinner,document.createTextNode('Đang tải trạng thái phiên Multiroom...'));}
     }
 
     function applyMultiroomSnapshot(nextSnapshot, discoveryCompleted=false) {
@@ -1297,7 +1324,7 @@ include 'html_head.php';
     }
     
     async function multiroomGroupSave(mode) { 
-      multiroomLoadingStart();
+      multiroomLoadingStart(mode==='create'?'Đang tạo nhóm loa...':'Đang cập nhật nhóm loa...');
       try { 
         const name=document.getElementById('mr-group-name').value.trim();
         if(!name) throw new Error('Tên nhóm không được để trống');
@@ -1322,7 +1349,7 @@ include 'html_head.php';
     }
     
     async function multiroomGroupDelete() { 
-      multiroomLoadingStart();
+      multiroomLoadingStart('Đang xóa nhóm loa...');
       try { 
         await multiroomRequest({action:'group_delete',group_id:document.getElementById('mr-group-id').value}); 
         multiroomGroupMode('cancel');
@@ -1333,7 +1360,7 @@ include 'html_head.php';
     }
     
     async function multiroomSession(action) { 
-      multiroomLoadingStart();
+      multiroomLoadingStart(action==='start'?'Đang kết nối âm thanh đa vùng...':'Đang chuyển âm thanh về loa chủ...');
       try { 
         const p={action:action}; 
         if(action==='start') p.group_id=document.getElementById('mr-session-group-select').value; 
@@ -1349,7 +1376,7 @@ include 'html_head.php';
     }
     
     async function multiroomApplySpeakerChanges() {
-      multiroomLoadingStart();
+      multiroomLoadingStart('Đang áp dụng thay đổi danh sách loa...');
       try {
         const controller = multiroomSnapshot.controller || {};
         const currentSpeakers = (controller.speakers || []).map(s => s.id);
@@ -1395,7 +1422,7 @@ include 'html_head.php';
     }
 
     async function multiroomMasterVolumeCommit(value) {
-      multiroomLoadingStart();
+      multiroomLoadingStart('Đang áp dụng âm lượng tổng...');
       try {
         const result = await multiroomRequest({action:'set_master_volume', volume:Number(value)});
         const applied = Number(result?.group_master_volume ?? value);
@@ -1445,7 +1472,7 @@ include 'html_head.php';
     }
     
     async function multiroomSpeakerSetMute(id, isMuted) { 
-      multiroomLoadingStart();
+      multiroomLoadingStart(isMuted?'Đang tắt tiếng loa...':'Đang bật tiếng loa...');
       try { 
         await multiroomRequest({action:'set_mute', speaker_ids:[id], muted:isMuted});
         multiroomSuccess(isMuted?'Đã tắt tiếng loa':'Đã bật tiếng loa'); 
@@ -1633,7 +1660,7 @@ include 'html_head.php';
     }
     
     async function multiroomRefresh(discover=false, notifySuccess=false, background=false) { 
-      if(!background) multiroomLoadingStart();
+      if(!background) multiroomLoadingStart(discover?'Đang quét thiết bị Multiroom...':'Đang cập nhật trạng thái Multiroom...');
       try { 
         // Refresh nhanh khong quet mDNS; giu lai danh sach da discovery.
         const response=await vbotFetchWithTimeout(multiroomApiUrl+(discover?'?discover=true':''),{cache:'no-store'},30000)
@@ -1654,6 +1681,7 @@ include 'html_head.php';
       multiroomPendingSpeakerChanges = {}; // Reset changes when opening modal
       multiroomSSEWasDisconnected = false;
       setMultiroomAPIConnected(false);
+      multiroomPrepareInitialLoadingState();
       multiroomRefresh(true);
       startMultiroomSSE();
       startMultiroomDiscoveryMonitor();

@@ -723,6 +723,10 @@ VBot_Interface_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz</code></pre>
         </div>
 		
         <div class="card-body">
+			<div class="alert alert-primary d-flex flex-wrap align-items-center gap-2">
+				<div class="flex-grow-1"><strong>Đã cài Cloudflared?</strong> Bạn có thể tạo hồ sơ Quick Tunnel hoặc Domain riêng, kiểm tra và điều khiển service trực tiếp trên WebUI.</div>
+				<a href="Cloudflare_Tunnel.php" class="btn btn-primary" onclick="loading('show')"><i class="bi bi-cloud-check"></i> Mở Trang Quản Lý Cloudflare Tunnel</a>
+			</div>
 			<h5 class="border-bottom border-primary pb-2 mt-4">0. Yêu Cầu: Cần Truy Cập Login SSH Để Thực Thi Các Lệnh</h5>
             <h5 class="border-bottom border-primary pb-2 mt-4">1. Tải và cài đặt Cloudflared Cho RASPBERRY PI ZERO 2W 32 bit (ARM)</h5>
             <div class="bg-dark rounded p-3 code-block text-light">
@@ -2938,7 +2942,25 @@ v22.22.3</code></pre>
       clearButton.disabled = true;
     }
 
-    document.addEventListener('DOMContentLoaded', initializeFaqQuickSearch);
+    function openFaqSectionFromHash() {
+      const hash = window.location.hash;
+      if (!hash || hash.length < 2) return;
+      const target = document.getElementById(hash.slice(1));
+      if (!target) return;
+      const collapse = target.querySelector('.accordion-collapse');
+      if (collapse && window.bootstrap && bootstrap.Collapse) {
+        bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
+      }
+      window.setTimeout(function() {
+        target.scrollIntoView({behavior: 'smooth', block: 'start'});
+      }, 200);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeFaqQuickSearch();
+      openFaqSectionFromHash();
+    });
+    window.addEventListener('hashchange', openFaqSectionFromHash);
   </script>
 </body>
 
