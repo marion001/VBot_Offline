@@ -95,6 +95,26 @@
         "json_file": "resource/broadlink/broadlink.json",
         "backup_path": "Backup_Upgrade/Backup_Broadlink"
     },
+    "internal_ir": {
+        "tx_active": false,
+        "rx_active": false,
+        "backend": "ir_ctl",
+        "tx_gpio": 17,
+        "rx_gpio": 4,
+        "tx_device": "/dev/lirc0",
+        "rx_device": "/dev/lirc1",
+        "carrier": 38000,
+        "learn_timeout": 20,
+        "repeat": 1,
+        "minimum_threshold": 0.85,
+        "json_file": "resource/internal_ir/commands.json",
+        "receive_match_threshold": 0.92,
+        "receive_debounce_ms": 450,
+        "rx_control_active": true,
+        "tx_rx_guard_ms": 500,
+        "receive_match_margin": 0.06,
+        "receive_minimum_pulses": 20
+    },
     "mqtt_broker": {
         "mqtt_active": false,
         "mqtt_host": "192.168.14.17",

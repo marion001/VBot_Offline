@@ -643,6 +643,54 @@ if (isset($_POST['all_config_save'])) {
   #broadlink
   $Config['broadlink']['remote']['active'] = isset($_POST['broadlink_remote_active']) ? true : false;
   $Config['broadlink']['remote']['minimum_threshold'] = floatval($_POST['broadlink_remote_minimum_threshold']);
+  #IR nội bộ Raspberry Pi
+  if (!isset($Config['internal_ir'])) $Config['internal_ir'] = [];
+  $Config['internal_ir']['tx_active'] = isset($_POST['internal_ir_tx_active']);
+  $Config['internal_ir']['rx_active'] = isset($_POST['internal_ir_rx_active']);
+  $Config['internal_ir']['rx_control_active'] = $Config['internal_ir']['rx_active'] && isset($_POST['internal_ir_rx_control_active']);
+  $internalIrMatchThreshold = filter_var($_POST['internal_ir_receive_match_threshold'] ?? null, FILTER_VALIDATE_FLOAT);
+  $internalIrMatchMargin = filter_var($_POST['internal_ir_receive_match_margin'] ?? null, FILTER_VALIDATE_FLOAT);
+  $internalIrMinimumPulses = filter_var($_POST['internal_ir_receive_minimum_pulses'] ?? null, FILTER_VALIDATE_INT);
+  $internalIrDebounceMs = filter_var($_POST['internal_ir_receive_debounce_ms'] ?? null, FILTER_VALIDATE_INT);
+  $internalIrTxRxGuardMs = filter_var($_POST['internal_ir_tx_rx_guard_ms'] ?? null, FILTER_VALIDATE_INT);
+  if ($internalIrMatchThreshold === false || $internalIrMatchThreshold < 0.4 || $internalIrMatchThreshold > 0.99) {
+      $errorMessages[] = '- Ngưỡng khớp mã IR phải từ 0.40 đến 0.99';
+      $internalIrMatchThreshold = floatval($Config['internal_ir']['receive_match_threshold'] ?? 0.92);
+  }
+  if ($internalIrMatchMargin === false || $internalIrMatchMargin < 0 || $internalIrMatchMargin > 0.30) {
+      $errorMessages[] = '- Khoảng cách phân biệt mã IR phải từ 0.00 đến 0.30';
+      $internalIrMatchMargin = floatval($Config['internal_ir']['receive_match_margin'] ?? 0.06);
+  }
+  if ($internalIrMinimumPulses === false || $internalIrMinimumPulses < 7 || $internalIrMinimumPulses > 500) {
+      $errorMessages[] = '- Số xung IR tối thiểu phải từ 7 đến 500';
+      $internalIrMinimumPulses = intval($Config['internal_ir']['receive_minimum_pulses'] ?? 20);
+  }
+  if ($internalIrDebounceMs === false || $internalIrDebounceMs < 100 || $internalIrDebounceMs > 3000) {
+      $errorMessages[] = '- Thời gian chống lặp IR phải từ 100 đến 3000 mili giây';
+      $internalIrDebounceMs = intval($Config['internal_ir']['receive_debounce_ms'] ?? 450);
+  }
+  if ($internalIrTxRxGuardMs === false || $internalIrTxRxGuardMs < 0 || $internalIrTxRxGuardMs > 3000) {
+      $errorMessages[] = '- Thời gian tạm khóa mắt thu sau khi phát IR phải từ 0 đến 3000 mili giây';
+      $internalIrTxRxGuardMs = intval($Config['internal_ir']['tx_rx_guard_ms'] ?? 500);
+  }
+  $Config['internal_ir']['receive_match_threshold'] = round($internalIrMatchThreshold, 2);
+  $Config['internal_ir']['receive_match_margin'] = round($internalIrMatchMargin, 2);
+  $Config['internal_ir']['receive_minimum_pulses'] = $internalIrMinimumPulses;
+  $Config['internal_ir']['receive_debounce_ms'] = $internalIrDebounceMs;
+  $Config['internal_ir']['tx_rx_guard_ms'] = $internalIrTxRxGuardMs;
+  unset($Config['internal_ir']['active']);
+  $Config['internal_ir']['backend'] = 'ir_ctl';
+  $internalIrTxGpio = filter_var($_POST['internal_ir_tx_gpio'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 27]]);
+  $internalIrRxGpio = filter_var($_POST['internal_ir_rx_gpio'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 27]]);
+  if ($internalIrTxGpio === false || $internalIrRxGpio === false || $internalIrTxGpio === $internalIrRxGpio || $internalIrTxGpio === 10 || $internalIrRxGpio === 10) {
+      $errorMessages[] = '- GPIO phát/thu IR phải thuộc BCM 0-27, không trùng nhau và không được dùng GPIO10 vì GPIO10 đang điều khiển LED';
+      $internalIrTxGpio = intval($Config['internal_ir']['tx_gpio'] ?? 17);
+      $internalIrRxGpio = intval($Config['internal_ir']['rx_gpio'] ?? 4);
+  }
+  $Config['internal_ir']['tx_gpio'] = $internalIrTxGpio;
+  $Config['internal_ir']['rx_gpio'] = $internalIrRxGpio;
+  $Config['internal_ir']['tx_device'] = '/dev/lirc0';
+  $Config['internal_ir']['rx_device'] = '/dev/lirc1';
 
   #Cập nhật giao diện vbot
   $Config['backup_upgrade']['web_interface']['upgrade']['backup_before_updating'] = isset($_POST['make_a_backup_before_updating_interface']) ? true : false;
@@ -1250,7 +1298,7 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_webui_path">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
-                  Cấu Hình Web Interface (Giao Diện):
+                  Cấu Hình Web Interface/Cloudflare Tunnel (Giao Diện):
                 </h5>
                 <div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
                 <div class="alert alert-success" role="alert">   <div class="row mb-3">
@@ -1262,7 +1310,7 @@ include 'html_head.php';
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Cloudflared Tunnel Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="webui_external" id="webui_external" <?php echo $Config['web_interface']['external']['active'] ? 'checked' : ''; ?>>
@@ -1338,7 +1386,7 @@ include 'html_head.php';
 				<?php
 				echo input_field('api_auth_key', 'Key Authentication', $Config['api']['auth']['api_key'], '', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
 				?>
-				<p class="text-primary"><b>Lưu Ý:</b> <br/> - Khi chức năng này được kích hoạt, bạn cần phải bật thêm tính năng: <b>[Cấu Hình Web Interface (Giao Diện) => Cho Phép Truy Cập Bên Ngoài Internet]</b> để có thể dùng được API tương tác với giao diện WebUI<br/>- Khi sử dụng API cần thêm Header là: VBot-API-Key với tham số dữ liệu value là Key Authentication được bạn cấu hình bên trên.</p>
+				<p class="text-primary"><b>Lưu Ý:</b> <br/> - Khi chức năng này được kích hoạt, bạn cần phải bật thêm tính năng: <b>[Cấu Hình Web Interface/Cloudflare Tunnel (Giao Diện) => Cho Phép Truy Cập Bên Ngoài Internet]</b> để có thể dùng được API tương tác với giao diện WebUI<br/>- Khi sử dụng API cần thêm Header là: VBot-API-Key với tham số dữ liệu value là Key Authentication được bạn cấu hình bên trên.</p>
 				</div>
                 </div>
               </div>
@@ -1404,7 +1452,7 @@ include 'html_head.php';
                         echo input_field('port_server_socket_streaming_audio', 'Port Server', $Config['api']['streaming_server']['protocol']['socket']['port'] ?? 5003, 'required', 'number', '1', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('socket_maximum_recording_time', 'Thời Gian Thu Âm Tối Đa (s)', $Config['api']['streaming_server']['protocol']['socket']['maximum_recording_time'] ?? 5, 'required', 'number', '1', '3', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
                         echo input_field('socket_maximum_client_connected', 'Tối Đa Client Kết Nối', $Config['api']['streaming_server']['protocol']['socket']['maximum_client_connected'] ?? 3, 'required', 'number', '1', '1', '10', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', '', '', '', '', '');
-                        echo select_field('socket_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)', 'stt_ggcloud_v2' => 'STT Google Cloud V2'], $Config['api']['streaming_server']['protocol']['socket']['source_stt'], []);
+                        echo select_field('socket_source_stt', 'Nguồn xử lý âm thanh STT Cho Client', ['stt_default' => 'STT Mặc Định VBot (Free)', 'stt_ggcloud' => 'STT Google Cloud V1 (Nên Dùng)', 'stt_ggcloud_v2' => 'STT Google Cloud V2', 'stt_dev' => 'DEV STT Customize (Dev_STT.py)'], $Config['api']['streaming_server']['protocol']['socket']['source_stt'], []);
                         echo select_field('socket_select_wakeup', 'Nguồn Đánh Thức Hotword Client <font color="red" size="6" title="Bắt Buộc Nhập">*</font>',
                           ['porcupine' => 'Picovoice/Porcupine WakeUp Client (Nên Dùng)', 'snowboy' => 'Snowboy WakeUP Client'], $Config['api']['streaming_server']['protocol']['socket']['select_wakeup'], []);
                         echo input_field('socket_server_data_client_name', 'Tệp Dữ Liệu Client', $Config['api']['streaming_server']['protocol']['socket']['data_client_name'], 'required', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
@@ -1616,6 +1664,9 @@ include 'html_head.php';
 						if ($picovoice_use_the_key === null) {$picovoice_use_the_key = '';}
 						echo select_field('use_the_key_picovoice', 'Cơ Chế Sử Dụng Key Picovoice', ['system_default' => 'Dùng KEY có sẵn trên hệ thống', 'user' => 'Sử dụng KEY của người dùng (Cấu hình KEY bên dưới)'], $picovoice_use_the_key, []);
 						?>
+						<div class="alert alert-warning mt-2" role="alert">
+						  <b>Ghi chú:</b> Nếu không đánh thức được Hotword khi chọn chế độ Picovoice/Porcupine, bạn cần vào mục <b>Cấu Hình Âm Thanh Volume/Mic, Bluetooth</b> → <b>Cài Đặt Mic</b> → <b>Tìm Kiếm ID Mic</b> để quét lại ID Mic và chọn ID Mic tương ứng đã bị thay đổi.
+						</div>
 
                         <?php
                         echo input_field('hotword_engine_key', 'Picovoice Token Key ', htmlspecialchars($Config['smart_config']['smart_wakeup']['hotword_engine']['key']), '', 'text', '', '', '', 'Key này chỉ sử dụng khi chọn chế độ <b>Cơ Chế Sử Dụng Key Picovoice:</b> là: <b>Sử dụng KEY của người dùng</b><br/> Đăng ký, lấy key: <a href="https://console.picovoice.ai" target="_blank">https://console.picovoice.ai</a>', 'border-success', 'Kiểm Tra', 'test_key_Picovoice()', 'btn btn-success border-success', 'onclick', '_blank');
@@ -3758,6 +3809,89 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 		  </div>
 		  </div>
 		  </div>
+
+          <div class="card accordion" id="accordion_internal_ir">
+            <div class="card-body">
+              <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_internal_ir">
+                IR/Remote Nội Bộ GPIO Raspberry Pi:
+                <?php
+                  $internalIrTxActive = !empty($Config['internal_ir']['tx_active']);
+                  $internalIrRxActive = !empty($Config['internal_ir']['rx_active']);
+                  if ($internalIrTxActive && $internalIrRxActive) echo '<font color=green>&nbsp;Phát + Thu đang bật</font>';
+                  elseif ($internalIrTxActive) echo '<font color=green>&nbsp;Phát đang bật</font>';
+                  elseif ($internalIrRxActive) echo '<font color=green>&nbsp;Thu đang bật</font>';
+                  else echo '<font color=red>&nbsp;Đang tắt</font>';
+                ?>
+              </h5>
+              <div id="collapse_internal_ir" class="accordion-collapse collapse">
+                <div class="alert alert-success" role="alert">
+                  <div class="row mb-3"><label class="col-sm-3 col-form-label">Kích hoạt IR phát (TX):</label>
+                    <div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="internal_ir_tx_active" id="internal_ir_tx_active" <?php echo !empty($Config['internal_ir']['tx_active']) ? 'checked' : ''; ?>></div></div>
+                  </div>
+                  <div class="row mb-3"><label class="col-sm-3 col-form-label">Kích hoạt IR thu (RX):</label>
+                    <div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="internal_ir_rx_active" id="internal_ir_rx_active" onchange="toggleInternalIrRxControl()" <?php echo !empty($Config['internal_ir']['rx_active']) ? 'checked' : ''; ?>></div></div>
+                  </div>
+                  <div id="internal_ir_rx_control_options">
+                    <div class="row mb-3"><label class="col-sm-3 col-form-label">Dùng IR thu điều khiển loa:</label>
+                      <div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="internal_ir_rx_control_active" id="internal_ir_rx_control_active" <?php echo !empty($Config['internal_ir']['rx_control_active']) ? 'checked' : ''; ?> <?php echo empty($Config['internal_ir']['rx_active']) ? 'disabled' : ''; ?>></div>
+                        <small class="text-muted">Khi bật, VBot chạy luồng thu IR nền để thực hiện chức năng đã chọn cho từng mã lệnh.</small>
+                      </div>
+                    </div>
+                    <div class="row g-3 mb-3">
+                      <div class="col-md-6"><div class="form-floating">
+                        <input class="form-control border-success" type="number" min="0.40" max="0.99" step="0.01" required name="internal_ir_receive_match_threshold" id="internal_ir_receive_match_threshold" value="<?php echo htmlspecialchars($Config['internal_ir']['receive_match_threshold'] ?? 0.92); ?>">
+                        <label for="internal_ir_receive_match_threshold">Ngưỡng khớp mã IR (0.40–0.99)</label>
+                      </div></div>
+                      <div class="col-md-6"><div class="form-floating">
+                        <input class="form-control border-success" type="number" min="0" max="0.30" step="0.01" required name="internal_ir_receive_match_margin" id="internal_ir_receive_match_margin" value="<?php echo htmlspecialchars($Config['internal_ir']['receive_match_margin'] ?? 0.06); ?>">
+                        <label for="internal_ir_receive_match_margin">Khoảng cách phân biệt mã</label>
+                      </div><small class="text-muted">Từ chối nếu mã tốt nhất không cao hơn mã đứng thứ hai đủ mức này. Khuyến nghị 0.04–0.08.</small></div>
+                      <div class="col-md-6"><div class="form-floating">
+                        <input class="form-control border-success" type="number" min="7" max="500" step="1" required name="internal_ir_receive_minimum_pulses" id="internal_ir_receive_minimum_pulses" value="<?php echo intval($Config['internal_ir']['receive_minimum_pulses'] ?? 20); ?>">
+                        <label for="internal_ir_receive_minimum_pulses">Số xung tối thiểu</label>
+                      </div><small class="text-muted">Loại bỏ tín hiệu ngắn hoặc frame IR bị thu thiếu. Khuyến nghị từ 15.</small></div>
+                      <div class="col-md-6"><div class="form-floating">
+                        <input class="form-control border-success" type="number" min="100" max="3000" step="50" required name="internal_ir_receive_debounce_ms" id="internal_ir_receive_debounce_ms" value="<?php echo intval($Config['internal_ir']['receive_debounce_ms'] ?? 450); ?>">
+                        <label for="internal_ir_receive_debounce_ms">Chống lặp remote (ms)</label>
+                      </div></div>
+                      <div class="col-md-6"><div class="form-floating">
+                        <input class="form-control border-success" type="number" min="0" max="3000" step="50" required name="internal_ir_tx_rx_guard_ms" id="internal_ir_tx_rx_guard_ms" value="<?php echo intval($Config['internal_ir']['tx_rx_guard_ms'] ?? 500); ?>">
+                        <label for="internal_ir_tx_rx_guard_ms">Tạm khóa RX sau khi phát (ms)</label>
+                      </div><small class="text-muted">Ngăn mắt thu tự nhận lại tín hiệu do chính VBot vừa phát. Khuyến nghị 300–700 ms.</small></div>
+                    </div>
+                  </div>
+                  <div class="row g-3 mb-3">
+                    <div class="col-md-6"><div class="form-floating">
+                      <input class="form-control border-success" type="number" min="0" max="27" required name="internal_ir_tx_gpio" id="internal_ir_tx_gpio" value="<?php echo intval($Config['internal_ir']['tx_gpio'] ?? 17); ?>">
+                      <label for="internal_ir_tx_gpio">GPIO phát IR (BCM)</label>
+                    </div></div>
+                    <div class="col-md-6"><div class="form-floating">
+                      <input class="form-control border-success" type="number" min="0" max="27" required name="internal_ir_rx_gpio" id="internal_ir_rx_gpio" value="<?php echo intval($Config['internal_ir']['rx_gpio'] ?? 4); ?>">
+                      <label for="internal_ir_rx_gpio">GPIO thu IR (BCM)</label>
+                    </div></div>
+                  </div>
+                  <p class="small text-danger">Không dùng GPIO10 vì đang điều khiển LED, không dùng GPIO16 vì đây là chân bật amplifier. Sau khi đổi GPIO, chạy lại script cài IR và reboot hoặc khởi động lại loa</p>
+                  <div class="alert alert-warning py-2">
+                    <i class="bi bi-exclamation-triangle"></i> Để chức năng hoạt động, cần có <b>module phát IR</b> nối với GPIO TX và <b>module thu IR</b> nối với GPIO RX trên Raspberry Pi. Chỉ bật chức năng tương ứng với module đã kết nối.
+                  </div>
+                  <div class="alert alert-info py-2">
+                    <i class="bi bi-info-circle"></i> Sau khi chọn GPIO, xem
+                    <a href="FAQ.php#internal-ir-setup" target="_blank" class="alert-link">hướng dẫn thiết lập IR và chạy file cấu hình bằng ssh: install_internal_ir.sh</a>.
+                  </div>
+                  <a class="btn btn-success" href="Internal_IR.php" target="_blank"><i class="bi bi-arrow-return-right"></i> Học và quản lý lệnh IR</a>
+                  <script>
+                    function toggleInternalIrRxControl() {
+                      const rx = document.getElementById('internal_ir_rx_active');
+                      const control = document.getElementById('internal_ir_rx_control_active');
+                      if (!rx || !control) return;
+                      control.disabled = !rx.checked;
+                      if (!rx.checked) control.checked = false;
+                    }
+                  </script>
+                </div>
+              </div>
+            </div>
+          </div>
 
             <div class="card accordion" id="accordion_button_schedule_lich">
               <div class="card-body">

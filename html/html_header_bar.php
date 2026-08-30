@@ -153,7 +153,7 @@ include_once 'Configuration.php';
   <div class="search-bar" role="search">
 <div class="input-group flex-nowrap" title="Tìm kiếm nội dung trong trang">
   <input class="form-control border-success" type="search" id="searchInput" placeholder="Nhập nội dung tìm kiếm" autocomplete="off" aria-label="Tìm kiếm nội dung trong trang" aria-controls="searchResults" aria-expanded="false">
-  <span class="input-group-text border-success" id="addon-wrapping"><i class="bi bi-search text-success"></i></span>
+  <button class="btn btn-outline-success border-success" type="button" id="searchInputClear" title="Xóa nội dung tìm kiếm" aria-label="Xóa nội dung tìm kiếm"><i class="bi bi-x-lg"></i></button>
   </div>
  <ul class="dropdown-menu w-100 border-success" id="searchResults" role="listbox" aria-label="Kết quả tìm kiếm"></ul>
 </div>

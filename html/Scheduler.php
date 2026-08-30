@@ -811,19 +811,37 @@ include 'html_head.php';
         #Lưu toàn bộ dữ liệu vào file JSON đúng một lần.
         // Lưu các lịch hệ thống độc lập; cấu trúc cũ bên trên vẫn được giữ để tương thích ngược.
         $posted_system_schedules = isset($_POST['system_task_schedules']) && is_array($_POST['system_task_schedules']) ? $_POST['system_task_schedules'] : [];
-        $independent_system_task_keys = array_merge($system_task_keys, ['send_notify_upgrade_vbot_home_assistant']);
+        $independent_system_task_keys = array_merge($system_task_keys, ['vbot_action', 'send_notify_upgrade_vbot_home_assistant']);
         $grouped_system_schedules = array_fill_keys($independent_system_task_keys, []);
+        $migrated_system_task_keys = [];
         foreach ($posted_system_schedules as $schedule_index => $schedule_option) {
           if (!is_array($schedule_option)) continue;
           $task_key = (string)($schedule_option['task'] ?? '');
+          $selected_vbot_action = null;
+          if (strpos($task_key, 'vbot_action:') === 0) {
+            $selected_vbot_action = substr($task_key, strlen('vbot_action:'));
+            $task_key = 'vbot_action';
+          }
+          $source_task_key = (string)($schedule_option['source_task'] ?? '');
+          if ($task_key === 'vbot_action' && in_array($source_task_key, ['play_all_music_local','stop_media_player','restart_vbot','reboot_os'], true)) {
+            $migrated_system_task_keys[$source_task_key] = true;
+          }
           if (!array_key_exists($task_key, $grouped_system_schedules)) continue;
           $slot_time = trim((string)($schedule_option['time'] ?? ''));
           if (!preg_match('/^([01]\d|2[0-3]):[0-5]\d$/', $slot_time)) continue;
-          $parameter = $schedule_option['parameter'] ?? null;
+          $parameter = $selected_vbot_action ?? ($schedule_option['parameter'] ?? null);
           if ($task_key === 'change_volume' || $task_key === 'change_led_brightness') {
             $parameter = max(0, min(100, intval($parameter)));
           } elseif ($task_key === 'mic_on_off') {
             $parameter = in_array($parameter, ['on', 'off'], true) ? $parameter : 'off';
+          } elseif ($task_key === 'vbot_action') {
+            $parameter = trim((string)$parameter);
+            $static_vbot_actions = ['none','wakeup','volume_up','volume_down','volume_max','volume_min','mic_toggle','conversation_toggle','wakeup_reply_toggle','stop_tts','cancel_wakeup','media_play_pause','media_stop','media_next','media_previous','mute','unmute','play_all_local','restart_vbot','reboot_os'];
+            if (!in_array($parameter, $static_vbot_actions, true)
+                && !preg_match('/^playlist:[A-Za-z0-9_-]{1,100}$/', $parameter)
+                && !preg_match('/^radio:[a-f0-9]{12}$/', $parameter)) {
+              $parameter = 'none';
+            }
           } else {
             $parameter = null;
           }
@@ -849,6 +867,10 @@ include 'html_head.php';
         foreach ($grouped_system_schedules as $system_key => $schedules) {
           $data[$system_key]['schedules'] = $schedules;
           if ($schedules) $data[$system_key]['active'] = true;
+        }
+        foreach (array_keys($migrated_system_task_keys) as $legacy_task_key) {
+          $data[$legacy_task_key]['schedules'] = [];
+          $data[$legacy_task_key]['active'] = false;
         }
         $removed_system_tasks = isset($_POST['removed_system_schedule_tasks']) && is_array($_POST['removed_system_schedule_tasks']) ? $_POST['removed_system_schedule_tasks'] : [];
         foreach (array_unique($removed_system_tasks) as $removed_system_task) {
@@ -889,6 +911,17 @@ include 'html_head.php';
               <select id="scheduler-quick-navigation" class="form-select border-primary" aria-label="Đi tới tác vụ">
                 <option value="">Đi tới tác vụ...</option>
               </select>
+            </div>
+            <div class="col-12 d-flex flex-wrap gap-2 justify-content-center">
+              <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill flex-grow-1 flex-lg-grow-0">
+                <i class="bi bi-save"></i> Lưu Dữ liệu
+              </button>
+              <button type="button" class="btn btn-success rounded-pill flex-grow-1 flex-lg-grow-0" onclick="addNewTask()">
+                <i class="bi bi-plus-circle-dotted"></i> Thêm mới tác vụ thông báo
+              </button>
+              <button class="btn btn-success rounded-pill flex-grow-1 flex-lg-grow-0" type="button" id="add-system-task-schedule">
+                <i class="bi bi-plus-circle"></i> Thêm mới tác vụ hệ thống
+              </button>
             </div>
           </div>
           <div id="scheduler-search-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
@@ -1143,7 +1176,7 @@ include 'html_head.php';
 
           <?php
           $independentSystemSchedules = [];
-          foreach (['change_volume','change_led_brightness','mic_on_off','play_all_music_local','stop_media_player','restart_vbot','reboot_os','send_notify_upgrade_vbot_home_assistant'] as $systemTaskKey) {
+          foreach (['vbot_action','change_volume','change_led_brightness','mic_on_off','play_all_music_local','stop_media_player','restart_vbot','reboot_os','send_notify_upgrade_vbot_home_assistant'] as $systemTaskKey) {
             foreach (($data[$systemTaskKey]['schedules'] ?? []) as $systemSchedule) {
               if (!is_array($systemSchedule)) continue;
               $systemSchedule['task'] = $systemTaskKey;
@@ -1152,11 +1185,43 @@ include 'html_head.php';
           }
           $systemTaskLabels = [
             'change_volume'=>'Thay đổi âm lượng', 'change_led_brightness'=>'Thay đổi độ sáng LED',
-            'mic_on_off'=>'Bật/Tắt microphone', 'play_all_music_local'=>'Phát toàn bộ nhạc Local',
-            'stop_media_player'=>'Dừng Media Player', 'restart_vbot'=>'Khởi động lại VBot',
-            'reboot_os'=>'Khởi động lại hệ điều hành',
+            'mic_on_off'=>'Bật/Tắt microphone',
             'send_notify_upgrade_vbot_home_assistant'=>'Kiểm tra và thông báo cập nhật VBot'
           ];
+          $vbotActionOptions = [
+            'none'=>'Không thực hiện', 'wakeup'=>'Đánh thức VBot',
+            'volume_up'=>'Tăng âm lượng', 'volume_down'=>'Giảm âm lượng',
+            'volume_max'=>'Âm lượng lớn nhất', 'volume_min'=>'Âm lượng nhỏ nhất',
+            'mic_toggle'=>'Bật/Tắt microphone', 'conversation_toggle'=>'Bật/Tắt chế độ hội thoại',
+            'wakeup_reply_toggle'=>'Bật/Tắt chế độ câu phản hồi', 'stop_tts'=>'Dừng câu trả lời TTS',
+            'cancel_wakeup'=>'Hủy wakeup/thu âm hiện tại', 'media_play_pause'=>'Phát/Tạm dừng media',
+            'media_stop'=>'Dừng media', 'media_next'=>'Bài tiếp theo', 'media_previous'=>'Bài trước đó',
+            'mute'=>'Tắt tiếng loa (Mute)', 'unmute'=>'Mở tiếng loa (Unmute)',
+            'play_all_local'=>'Phát toàn bộ nhạc Local', 'restart_vbot'=>'Khởi động lại service VBot',
+            'reboot_os'=>'Khởi động lại Raspberry Pi'
+          ];
+          $schedulerPlaylistManifestPathForActions = __DIR__.'/includes/cache/PlayLists.json';
+          if (is_file($schedulerPlaylistManifestPathForActions)) {
+            $manifestForActions = json_decode((string)file_get_contents($schedulerPlaylistManifestPathForActions), true);
+            foreach (($manifestForActions['playlists'] ?? []) as $playlist) {
+              $id = trim((string)($playlist['id'] ?? ''));
+              if ($id !== '') $vbotActionOptions['playlist:'.$id] = 'Phát Playlist: '.((string)($playlist['name'] ?? $id));
+            }
+          }
+          foreach (($Config['media_player']['radio_data'] ?? []) as $radio) {
+            $radioName = trim((string)($radio['name'] ?? ''));
+            $radioLink = trim((string)($radio['link'] ?? ''));
+            if ($radioName !== '' && $radioLink !== '') {
+              $vbotActionOptions['radio:'.substr(sha1($radioName."\n".$radioLink), 0, 12)] = 'Phát Radio: '.$radioName;
+            }
+          }
+          // Hiển thị trực tiếp từng thao tác trong danh sách loại tác vụ. Giá trị
+          // vẫn được chuẩn hóa về task=vbot_action + parameter khi lưu JSON.
+          $directVbotTaskLabels = [];
+          foreach ($vbotActionOptions as $actionValue => $actionLabel) {
+            $directVbotTaskLabels['vbot_action:'.$actionValue] = $actionLabel;
+          }
+          $systemTaskLabels = $directVbotTaskLabels + $systemTaskLabels;
           ?>
           <div class="card border-primary mb-3">
             <div class="card-body">
@@ -1167,19 +1232,23 @@ include 'html_head.php';
                 <?php foreach ($independentSystemSchedules as $systemScheduleIndex => $systemSchedule):
                   $systemSlots = is_array($systemSchedule['slots'] ?? null) ? $systemSchedule['slots'] : [];
                   $systemSlot = $systemSlots[0] ?? ['time'=>(($systemSchedule['time'][0] ?? '')), 'parameter'=>($systemSchedule['parameter'] ?? '')];
-                  $systemTask = $systemSchedule['task'] ?? 'change_volume'; ?>
+                  $systemTask = $systemSchedule['task'] ?? 'change_volume';
+                  $legacyVbotActionMap = ['play_all_music_local'=>'play_all_local','stop_media_player'=>'media_stop','restart_vbot'=>'restart_vbot','reboot_os'=>'reboot_os'];
+                  $systemTaskSelectValue = $systemTask === 'vbot_action'
+                    ? 'vbot_action:'.((string)($systemSlot['parameter'] ?? $systemSchedule['parameter'] ?? 'none'))
+                    : (isset($legacyVbotActionMap[$systemTask]) ? 'vbot_action:'.$legacyVbotActionMap[$systemTask] : $systemTask); ?>
                   <div class="card border-success mb-3 system-task-schedule-card">
                     <div class="card-body">
                       <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][id]" value="<?= htmlspecialchars($systemSchedule['id'] ?? ('system_'.$systemScheduleIndex)) ?>">
+                      <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][source_task]" value="<?= htmlspecialchars($systemTask) ?>">
                       <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch tác vụ #<?= $systemScheduleIndex + 1 ?></b><button class="btn btn-danger btn-sm system-task-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
-                      <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[<?= $systemScheduleIndex ?>][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= $key ?>" <?= $systemTask===$key?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[<?= $systemScheduleIndex ?>][time]" value="<?= htmlspecialchars($systemSlot['time'] ?? '') ?>"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[<?= $systemScheduleIndex ?>][parameter]" value="<?= htmlspecialchars((string)($systemSlot['parameter'] ?? '')) ?>"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[<?= $systemScheduleIndex ?>][active]" <?= !isset($systemSchedule['active']) || $systemSchedule['active']?'checked':'' ?>><label class="form-check-label">Bật</label></div></div></div>
+                      <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[<?= $systemScheduleIndex ?>][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= htmlspecialchars($key) ?>" <?= $systemTaskSelectValue===$key?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[<?= $systemScheduleIndex ?>][time]" value="<?= htmlspecialchars($systemSlot['time'] ?? '') ?>"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[<?= $systemScheduleIndex ?>][parameter]" value="<?= htmlspecialchars((string)($systemSlot['parameter'] ?? '')) ?>"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[<?= $systemScheduleIndex ?>][active]" <?= !isset($systemSchedule['active']) || $systemSchedule['active']?'checked':'' ?>><label class="form-check-label">Bật</label></div></div></div>
                       <?php render_system_scheduler_options('independent_'.$systemScheduleIndex, $systemSchedule, 'Tác vụ hệ thống', '', 'system_task_schedules['.$systemScheduleIndex.'][date]', 'system_task_schedules['.$systemScheduleIndex.']'); ?>
                     </div>
                   </div>
                 <?php endforeach; ?>
               </div>
               <div id="system-task-schedules-empty" class="alert alert-secondary <?= $independentSystemSchedules ? 'd-none' : '' ?>">Chưa có lịch tác vụ độc lập. Nhấn nút bên dưới để tạo lịch mới.</div>
-              <button class="btn btn-success rounded-pill" type="button" id="add-system-task-schedule"><i class="bi bi-plus-circle"></i> Tạo lịch tác vụ mới</button>
             </div>
           </div>
 
@@ -1772,8 +1841,6 @@ render_system_scheduler_options(
 Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cài Đặt Lập Lịch, Lời Nhắc, Thông báo, V..v... (Schedule)</b> -> <b>Kích Hoạt</b>
 </div>
           <center>
-            <button type="submit" name="save_all_Scheduler" class="btn btn-primary rounded-pill"><i class="bi bi-save"></i> Lưu Dữ liệu</button>
-            <button type="button" class="btn btn-success rounded-pill" onclick="addNewTask()"><i class="bi bi-plus-circle-dotted"></i> Thêm mới tác vụ</button>
             <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_Scheduler" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Lời Nhắc, Thông Báo không')">
               <i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
           </center>
@@ -2761,7 +2828,11 @@ function updateSystemTaskParameter(card) {
     const oldField = wrap.querySelector('.system-task-parameter');
     const name = oldField ? oldField.name : '';
     const oldValue = oldField ? oldField.value : '';
-    if (task === 'mic_on_off') {
+    if (task.startsWith('vbot_action:')) {
+        const action = task.substring('vbot_action:'.length) || 'none';
+        wrap.innerHTML = '<input type="hidden" class="system-task-parameter" name="' + name + '" value=""><div class="form-control bg-light text-muted">Không cần tham số</div>';
+        wrap.querySelector('.system-task-parameter').value = action;
+    } else if (task === 'mic_on_off') {
         wrap.innerHTML = '<select class="form-select border-warning system-task-parameter" name="' + name + '"><option value="on">Bật Mic</option><option value="off">Tắt Mic</option></select>';
         wrap.querySelector('select').value = (oldValue === 'on' || oldValue === 'off') ? oldValue : 'off';
     } else if (task === 'change_volume' || task === 'change_led_brightness') {
@@ -2777,20 +2848,24 @@ function markSystemTaskScheduleChanged(task) {
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = 'removed_system_schedule_tasks[]';
-    input.value = task;
+    input.value = task.startsWith('vbot_action:') ? 'vbot_action' : task;
     document.getElementById('system-task-schedule-changes').appendChild(input);
 }
 
 function bindSystemTaskScheduleCard(card) {
     const taskSelect = card.querySelector('.system-task-kind');
+    const sourceTaskField = card.querySelector('input[name$="[source_task]"]');
+    const sourceTask = sourceTaskField ? sourceTaskField.value : '';
     card.dataset.originalTask = taskSelect.value;
     card.querySelector('.system-task-schedule-delete').addEventListener('click', function () {
         markSystemTaskScheduleChanged(card.dataset.originalTask || taskSelect.value);
+        if (sourceTask && sourceTask !== card.dataset.originalTask) markSystemTaskScheduleChanged(sourceTask);
         card.remove();
         document.getElementById('system-task-schedules-empty').classList.toggle('d-none', systemTaskSchedulesContainer.children.length > 0);
     });
     taskSelect.addEventListener('change', function () {
         markSystemTaskScheduleChanged(card.dataset.originalTask);
+        if (sourceTask && sourceTask !== card.dataset.originalTask) markSystemTaskScheduleChanged(sourceTask);
         card.dataset.originalTask = taskSelect.value;
         updateSystemTaskParameter(card);
     });

@@ -133,6 +133,15 @@ include 'html_head.php';
                         <option value="hass-custom-recovery-section">Khôi phục dữ liệu</option>
                     </select>
                 </div>
+                <div class="col-12 d-flex flex-wrap gap-2 justify-content-center">
+                    <button class="btn btn-primary rounded-pill flex-grow-1 flex-lg-grow-0" type="submit"
+                        name="save_custom_home_assistant" form="hass-custom-form">
+                        <i class="bi bi-save"></i> Lưu thay đổi
+                    </button>
+                    <button type="button" class="btn btn-success rounded-pill flex-grow-1 flex-lg-grow-0" onclick="addNewSection()">
+                        <i class="bi bi-plus-circle-dotted"></i> Thêm Mới Tác Vụ
+                    </button>
+                </div>
             </div>
             <div id="hass-custom-search-empty" class="alert alert-info py-2 mt-2 mb-0" role="status">
                 <i class="bi bi-info-circle"></i> Không tìm thấy tác vụ phù hợp.
@@ -566,8 +575,6 @@ include 'html_head.php';
 Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> -> <b>Cấu Hình Kết Nối Tới Home Assistant (HASS)</b> -> <b>Lệnh tùy chỉnh</b>
 </div>
                     <center>
-                        <button class="btn btn-primary  rounded-pill" type="submit" name="save_custom_home_assistant"><i class="bi bi-save"></i> Lưu thay đổi</button>
-                        <button type="button" class="btn btn-success rounded-pill" onclick="addNewSection()">Thêm Mới Tác Vụ</button>
                         <button class="btn btn-danger rounded-pill" type="submit" name="delete_all_custom_home_assistant" onclick="return confirmRestore('Bạn có chắc chắn muốn xóa tất cả dữ liệu cấu hình Custom Home Assistant không')"><i class="bi bi-trash"></i> Xóa Dữ Liệu Cấu hình</button>
                     </center>
                     <h5 class="card-title" id="hass-custom-config-section">

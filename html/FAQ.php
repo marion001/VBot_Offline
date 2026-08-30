@@ -147,6 +147,36 @@ include 'html_head.php';
 <hr/>Hướng Dẫn Cấu Hình Ban Đầu: <a href="https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M/edit" target="_blank">https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M</a>
               </div>
 
+              <div class="card accordion mb-3" id="internal-ir-setup">
+                <div class="card-body">
+                  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_internal_ir_setup" aria-expanded="false" aria-controls="collapse_internal_ir_setup">
+                    Hướng dẫn thiết lập IR nội bộ Raspberry Pi
+                  </h5>
+                  <div id="collapse_internal_ir_setup" class="accordion-collapse collapse">
+                    <div class="alert alert-info">
+                      Trước tiên hãy chọn GPIO phát/thu và bật chức năng tương ứng tại <b>Cấu hình → IR Nội Bộ Raspberry Pi</b>, sau đó lưu cấu hình.
+                    </div>
+                    <div class="alert alert-warning">
+                      <i class="bi bi-exclamation-triangle"></i> Cần kết nối <b>module phát IR</b> với GPIO TX và <b>module thu IR</b> với GPIO RX trên Raspberry Pi để sử dụng chức năng tương ứng.
+                    </div>
+                    <p><b>Chạy lần lượt các lệnh sau:</b></p>
+                    <pre class="bg-light border rounded p-2"><code>cd /home/pi/VBot_Offline/resource/internal_ir
+chmod 0777 install_internal_ir.sh
+./install_internal_ir.sh</code></pre>
+                    <p>Script sẽ tự xin quyền sudo, cài <code>v4l-utils</code>, đọc GPIO từ <code>Config.json</code> và cấu hình overlay LIRC trong <code>/boot/config.txt</code> hoặc <code>/boot/firmware/config.txt</code>.</p>
+                    <p><b>Sau khi chạy file <code>install_internal_ir.sh</code> hoàn tất, bắt buộc reboot hệ thống để nạp cấu hình IR:</b></p>
+                    <pre class="bg-light border rounded p-2"><code>sudo reboot</code></pre>
+                    <p><b>Kiểm tra thiết bị sau khi khởi động:</b></p>
+                    <pre class="bg-light border rounded p-2"><code>ls -l /dev/lirc*
+ir-ctl --features -d /dev/lirc0
+ir-ctl --features -d /dev/lirc1</code></pre>
+                    <div class="alert alert-warning mb-0">
+                      Không dùng GPIO10 vì VBot dùng cho LED; không dùng GPIO16 khi sử dụng Google Voice HAT vì đây là chân điều khiển amplifier.
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class="card accordion mb-3" id="accordion_manual_update_ssh">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse"
@@ -730,8 +760,8 @@ VBot_Interface_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz</code></pre>
 			<h5 class="border-bottom border-primary pb-2 mt-4">0. Yêu Cầu: Cần Truy Cập Login SSH Để Thực Thi Các Lệnh</h5>
             <h5 class="border-bottom border-primary pb-2 mt-4">1. Tải và cài đặt Cloudflared Cho RASPBERRY PI ZERO 2W 32 bit (ARM)</h5>
             <div class="bg-dark rounded p-3 code-block text-light">
-                <span class="cmd">$</span> wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-armhf.deb<br><br>
-                <span class="cmd">$</span> sudo dpkg -i cloudflared-linux-armhf.deb
+                <span class="cmd">$</span> wget -O /tmp/cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-armhf.deb<br><br>
+                <span class="cmd">$</span> sudo dpkg -i /tmp/cloudflared.deb
             </div>
             <small class="text-muted">Output mẫu:</small>
             <div class="bg-black rounded p-3 output-block text-light small">

@@ -5,7 +5,7 @@
             "reply": "biết rồi",
             "data_yaml": {
                 "action": "switch.turn_off",
-                "data": "{}",
+                "data": {},
                 "target": {
                     "entity_id": "switch.den_ngu"
                 }
@@ -21,7 +21,7 @@
             "reply": "được rồi để bật đèn ngủ",
             "data_yaml": {
                 "action": "switch.turn_on",
-                "data": "{}",
+                "data": {},
                 "target": {
                     "entity_id": "switch.den_ngu"
                 }
@@ -37,7 +37,7 @@
             "reply": "",
             "data_yaml": {
                 "action": "switch.turn_off",
-                "data": "{}",
+                "data": {},
                 "target": {
                     "entity_id": [
                         "switch.den_ngu",
@@ -74,7 +74,7 @@
             "reply": "",
             "data_yaml": {
                 "action": "script.turn_on",
-                "data": "{}",
+                "data": {},
                 "target": {
                     "entity_id": "script.irsend_quat_phong_ngu_toc_do_quat"
                 }

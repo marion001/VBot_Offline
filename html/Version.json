@@ -1,8 +1,8 @@
 {
-    "version": "1.2.3",
+    "version": "1.2.4",
     "projectName": "WebUI VBot Offline",
-    "description": "Fix Bug hệ thống, Nâng Cấp Multiroom Phát âm thanh đa vùng, Nâng Cấp Multi Playlist, Cấu trúc giao diện WebUI và nhiều thay đổi khác",
-    "releaseDate": "24/08/2026",
+    "description": "Hỗ trợ liên kết với các Module thu phát ir remote thông qua cấu hình chân GPIO và giao diện quản lý (Hỗ trợ tương tác ngược bằng remote với loa), Tích hợp Cloudflare Tunnel hỗ trợ giao diện quản lý đẩy WebUI VBot ra ngoài mạng internet, và một vài cải tiến khác",
+    "releaseDate": "30/08/2026",
     "changes": [
         {
             "type": "feature",

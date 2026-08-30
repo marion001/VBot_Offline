@@ -2511,17 +2511,38 @@ function command_php(command_line, reload_page = null) {
 	document.addEventListener('DOMContentLoaded', function() {
 	  const input = document.getElementById('searchInput');
 	  const dropdown = document.getElementById('searchResults');
+	  const clearButton = document.getElementById('searchInputClear');
 	  const searchBar = input && input.closest('.search-bar');
 	  if (!input || !dropdown || !searchBar) return;
 	  let searchResults = [];
+	  let activeResultIndex = -1;
+	  let searchTimer = null;
+	  const SEARCH_DEBOUNCE_MS = 140;
 
 	  const normalizeSearchText = function(value) {
 		return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+		  .replace(/đ/g, 'd').replace(/Đ/g, 'D')
 		  .toLowerCase().replace(/\s+/g, ' ').trim();
 	  };
 	  const closeSearchResults = function() {
 		dropdown.classList.remove('show');
 		input.setAttribute('aria-expanded', 'false');
+		input.removeAttribute('aria-activedescendant');
+		activeResultIndex = -1;
+	  };
+	  const elementSearchText = function(element) {
+		let text = String(element.textContent || '');
+		if (element.matches('input, textarea')) {
+		  text += ' ' + String(element.value || '') + ' ' + String(element.placeholder || '');
+		} else if (element.matches('select')) {
+		  text += ' ' + Array.from(element.selectedOptions || []).map(function(option) { return option.textContent || ''; }).join(' ');
+		}
+		return text.replace(/\s+/g, ' ').trim();
+	  };
+	  const isExcludedSearchElement = function(element) {
+		return Boolean(element.closest(
+		  '#config-toolbar, #scheduler-toolbar, #hass-custom-toolbar, .modal, template, script, style, [hidden], .d-none'
+		));
 	  };
 	  const findSectionHeading = function(element) {
 		const card = element.closest('.card');
@@ -2536,10 +2557,10 @@ function command_php(command_line, reload_page = null) {
 		const normalizedKeyword = normalizeSearchText(keyword);
 		const seen = new Set();
 		searchResults = [];
-		const selector = 'h1, h2, h3, h4, h5, h6, label, button, a, td, th, .card-title, .list-group-item';
+		const selector = 'h1, h2, h3, h4, h5, h6, label, button, a, td, th, p, li, input, textarea, select, .card-title, .list-group-item, .alert';
 		root.querySelectorAll(selector).forEach(function(element) {
-		  if (element.closest('#config-toolbar') || element.closest('.modal') || element.closest('script, style')) return;
-		  const visibleText = String(element.textContent || '').replace(/\s+/g, ' ').trim();
+		  if (isExcludedSearchElement(element)) return;
+		  const visibleText = elementSearchText(element);
 		  if (!visibleText || !normalizeSearchText(visibleText).includes(normalizedKeyword)) return;
 		  const heading = findSectionHeading(element);
 		  const headingText = heading ? String(heading.textContent || '').replace(/\s+/g, ' ').trim() : '';
@@ -2568,6 +2589,7 @@ function command_php(command_line, reload_page = null) {
 	  };
 	  const updateDropdown = function(keyword) {
 		dropdown.replaceChildren();
+		activeResultIndex = -1;
 		if (!keyword) {
 		  closeSearchResults();
 		  return;
@@ -2578,12 +2600,14 @@ function command_php(command_line, reload_page = null) {
 		  empty.textContent = 'Không tìm thấy nội dung phù hợp';
 		  dropdown.appendChild(empty);
 		} else {
-		  searchResults.forEach(function(item) {
+		  searchResults.forEach(function(item, index) {
 			const li = document.createElement('li');
 			const button = document.createElement('button');
 			button.type = 'button';
 			button.className = 'dropdown-item';
+			button.id = 'page-search-result-' + index;
 			button.setAttribute('role', 'option');
+			button.setAttribute('aria-selected', 'false');
 			button.textContent = (item.headingText && item.headingText !== item.text ? item.headingText + ' → ' : '') + item.text;
 			button.addEventListener('click', function() { activateResult(item); });
 			li.appendChild(button);
@@ -2593,23 +2617,66 @@ function command_php(command_line, reload_page = null) {
 		dropdown.classList.add('show');
 		input.setAttribute('aria-expanded', 'true');
 	  };
-
-	  input.addEventListener('input', function() {
+	  const selectSearchResult = function(index) {
+		const options = dropdown.querySelectorAll('[role="option"]');
+		if (!options.length) return;
+		activeResultIndex = (index + options.length) % options.length;
+		options.forEach(function(option, optionIndex) {
+		  const selected = optionIndex === activeResultIndex;
+		  option.classList.toggle('active', selected);
+		  option.setAttribute('aria-selected', selected ? 'true' : 'false');
+		});
+		const activeOption = options[activeResultIndex];
+		input.setAttribute('aria-activedescendant', activeOption.id);
+		activeOption.scrollIntoView({block: 'nearest'});
+	  };
+	  const runSearch = function() {
 		const keyword = input.value.trim();
 		if (keyword) findElementsWithText(keyword); else searchResults = [];
 		updateDropdown(keyword);
+	  };
+	  const scheduleSearch = function() {
+		window.clearTimeout(searchTimer);
+		searchTimer = window.setTimeout(runSearch, SEARCH_DEBOUNCE_MS);
+	  };
+
+	  input.addEventListener('input', scheduleSearch);
+	  input.addEventListener('focus', function() {
+		if (input.value.trim() && !dropdown.classList.contains('show')) runSearch();
 	  });
 	  input.addEventListener('keydown', function(event) {
 		if (event.key === 'Escape') {
 		  closeSearchResults();
 		  input.blur();
+		} else if (event.key === 'ArrowDown' && searchResults.length > 0) {
+		  event.preventDefault();
+		  selectSearchResult(activeResultIndex + 1);
+		} else if (event.key === 'ArrowUp' && searchResults.length > 0) {
+		  event.preventDefault();
+		  selectSearchResult(activeResultIndex - 1);
 		} else if (event.key === 'Enter' && searchResults.length > 0) {
 		  event.preventDefault();
-		  activateResult(searchResults[0]);
+		  activateResult(searchResults[activeResultIndex >= 0 ? activeResultIndex : 0]);
 		}
 	  });
+	  if (clearButton) {
+		clearButton.addEventListener('click', function() {
+		  window.clearTimeout(searchTimer);
+		  input.value = '';
+		  searchResults = [];
+		  closeSearchResults();
+		  input.focus();
+		});
+	  }
 	  document.addEventListener('click', function(event) {
 		if (!searchBar.contains(event.target)) closeSearchResults();
 	  });
+	  const searchRoot = document.querySelector('main#main') || document.querySelector('main');
+	  if (searchRoot && window.MutationObserver) {
+		const observer = new MutationObserver(function() {
+		  if (input.value.trim() && dropdown.classList.contains('show')) scheduleSearch();
+		});
+		observer.observe(searchRoot, {childList: true, subtree: true, characterData: true});
+	  }
 	});
 </script>

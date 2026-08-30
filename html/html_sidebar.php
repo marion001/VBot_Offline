@@ -160,6 +160,11 @@
           <i class="bi bi-circle"></i><span>BroadLink Remote</span>
         </a>
       </li>
+      <li>
+        <a href="Internal_IR.php">
+          <i class="bi bi-circle"></i><span>IR, Remote GPIO Nội Bộ</span>
+        </a>
+      </li>
       <li title="Quản lý Quick Tunnel và domain riêng qua Cloudflare" onclick="loading('show')">
         <a href="Cloudflare_Tunnel.php">
           <i class="bi bi-circle"></i><span>Cloudflare Tunnel</span>
