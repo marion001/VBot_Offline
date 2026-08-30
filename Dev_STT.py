@@ -45,7 +45,8 @@ client = speech.SpeechClient()
 
 Lib.show_log("- [DEV STT] Đã Khởi Tạo: Google Cloud Speak To Text V1", color=Lib.Color.GREEN)
 
-#Ví Dụ Sử Dụng STT Google Cloud V1
+# DEV STT CHO HỆ THỐNG LOA VBOT.
+# Hàm này tự đọc microphone cục bộ của loa. Không dùng cho Streaming Client.
 async def dev_stt():
     #Chụp owner tại đầu phiên để không vô tình đọc mic nếu quyền bị chuyển
     #sang một pipeline khác trong lúc Google STT đang streaming.
@@ -198,3 +199,39 @@ async def dev_stt():
     finally:
         stop_stream_event.set()
     return None
+
+
+# DEV STT CHO STREAMING CLIENT.
+# Hàm này không đọc microphone của loa. Streaming.py truyền trực tiếp toàn bộ
+# PCM 16-bit mono do Client gửi vào tham số pcm_audio.
+# Có thể thay nội dung hàm bằng bất kỳ dịch vụ STT tùy chỉnh nào, nhưng cần giữ
+# nguyên tên hàm, các tham số và trả về transcript dạng str hoặc None.
+async def dev_stt_streaming(pcm_audio, sample_rate=16000, client_id=None):
+    if not isinstance(pcm_audio, (bytes, bytearray)) or not pcm_audio:
+        return None
+    try:
+        Lib.show_log(
+            f"[DEV STT Streaming] Đang xử lý {len(pcm_audio)} bytes PCM từ Client {client_id}",
+            color=Lib.Color.PURPLE,
+        )
+        audio = speech.RecognitionAudio(content=bytes(pcm_audio))
+        config = speech.RecognitionConfig(
+            encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+            sample_rate_hertz=int(sample_rate),
+            language_code=Language_Code,
+            enable_automatic_punctuation=True,
+        )
+        response = await Lib.asyncio.to_thread(client.recognize, config=config, audio=audio)
+        transcript = " ".join(
+            result.alternatives[0].transcript
+            for result in response.results
+            if result.alternatives
+        ).strip()
+        if transcript:
+            Lib.show_log(f"[DEV STT Streaming][{client_id}] {transcript}", color=Lib.Color.GREEN)
+        return transcript or None
+    except Exception as error:
+        message = f"[DEV STT Streaming][{client_id}] Lỗi: {error}"
+        Lib.Logs_VBot(message)
+        Lib.show_log(message, color=Lib.Color.RED)
+        return None
