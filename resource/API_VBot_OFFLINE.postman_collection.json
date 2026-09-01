@@ -2985,6 +2985,62 @@
       "response": []
     },
     {
+      "name": "Cập Nhật Chương Trình VBot",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"update\",\r\n    \"action\": \"program\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cập Nhật Giao Diện VBot",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 3,\r\n    \"data\":\"update\",\r\n    \"action\": \"interface\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.113:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "113"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
       "name": "RESTART VBOT (Khi Bot Đang Chạy)",
       "request": {
         "method": "POST",
