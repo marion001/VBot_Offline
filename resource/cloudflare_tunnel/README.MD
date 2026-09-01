@@ -214,6 +214,11 @@ Nếu thư mục hoặc file chưa tồn tại, WebUI sẽ tự tạo thư mục
 
 `profiles.json` có thể chứa API Token hoặc Global API Key ở dạng dữ liệu cục bộ. Vì vậy:
 
+- Nếu `profiles.json` bị mất hoặc bị thay bằng kho rỗng, khi mở trang quản lý WebUI,
+  hệ thống sẽ đọc `cloudflared.service` và `/home/pi/Cloud_Flare/config.yml` để tự
+  tái tạo hồ sơ Quick/Named Tunnel đang cấu hình. API Token hoặc Global API Key
+  không tồn tại trong runtime nên phải nhập lại nếu cần thao tác xóa DNS từ WebUI.
+
 - Không tải file này lên Git hoặc chia sẻ công khai.
 - Không đưa nội dung file vào ảnh chụp/log hỗ trợ.
 - `.gitignore` trong thư mục đã loại trừ `profiles.json` và các file tạm `profiles.json.tmp.*`.

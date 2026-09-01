@@ -12,6 +12,7 @@ Mail: VBot.Assistant@gmail.com
 #Cập nhật $:> python3 Manual_Update_WebUI.py
 
 import argparse
+import contextlib
 import datetime as dt
 import json
 import os
@@ -27,9 +28,16 @@ import time
 import urllib.request
 import zipfile
 
+try:
+    import fcntl
+except ImportError:
+    fcntl = None
+
 ROOT = Path(__file__).resolve().parent
 HTML_ROOT = ROOT / "html"
 ERROR_LOG = ROOT / "resource/log/Vbot_error.log"
+UPGRADE_LOCK = ROOT / ".vbot_upgrade.lock"
+UPDATE_RESULT = ROOT / ".vbot_update_result.json"
 
 for _stream in (sys.stdout, sys.stderr):
     try:
@@ -135,19 +143,41 @@ def atomic_copy_file(source, destination):
         if os.path.exists(temp_name):
             os.unlink(temp_name)
 
+
+def atomic_json_write(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".update-result-", dir=str(path.parent))
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as handle:
+            json.dump(value, handle, ensure_ascii=False, indent=2)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temp_name, path)
+    finally:
+        if os.path.exists(temp_name):
+            os.unlink(temp_name)
+
 def apply_project_permissions(root):
     root = Path(root)
     excluded_roots = {root / "Backup_Upgrade"}
     changed = 0
+    already_correct = 0
     skipped_locks = 0
     permission_errors = []
 
     def chmod_path(path):
-        nonlocal changed
+        nonlocal changed, already_correct
         try:
             os.chmod(path, 0o777)
             changed += 1
         except OSError as error:
+            try:
+                if stat.S_IMODE(os.stat(path, follow_symlinks=False).st_mode) == 0o777:
+                    already_correct += 1
+                    return
+            except OSError:
+                pass
             permission_errors.append(f"{path}: {error}")
 
     chmod_path(root)
@@ -170,6 +200,7 @@ def apply_project_permissions(root):
             chmod_path(path)
     log(
         f"Đã chmod 0777 cho {changed} file/thư mục trong {root}, "
+        f"{already_correct} lỗi chmod được bỏ qua vì quyền đã là 0777; "
         f"đã loại trừ Backup_Upgrade, liên kết mềm và {skipped_locks} file *.lock"
     )
     if permission_errors:
@@ -423,7 +454,7 @@ def rollback_transaction(rollback):
                 atomic_copy_file(backup, destination)
     log("Đã khôi phục WebUI cũ")
 
-def update(args):
+def _update(args):
     if args.rollback is not None:
         rollback_latest(args)
         return
@@ -479,6 +510,30 @@ def update(args):
                 log(f"Không thể nén rollback, thư mục backup được giữ nguyên: {package_error}", error=True)
             raise
 
+
+@contextlib.contextmanager
+def upgrade_guard():
+    """Không cho Program và WebUI ghi file cùng một lúc."""
+    lock = UPGRADE_LOCK.open("a+")
+    try:
+        if fcntl is not None:
+            try:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as error:
+                raise RuntimeError("Một tiến trình cập nhật khác đang hoạt động") from error
+        yield
+    finally:
+        if fcntl is not None:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+        lock.close()
+
+
+def update(args):
+    if not args.apply and args.rollback is None:
+        return _update(args)
+    with upgrade_guard():
+        return _update(args)
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--repo", default="https://github.com/marion001/VBot_Offline")
@@ -503,14 +558,19 @@ def main():
         help="Khôi phục FILE backup, nếu không truyền FILE sẽ dùng bản .tar.gz mới nhất",
     )
     args = parser.parse_args()
+    started_at = int(time.time())
     try:
         update(args)
+        result = {"target": "interface", "status": "success", "message": "Cập nhật giao diện VBot thành công", "started_at": started_at, "finished_at": int(time.time())}
+        atomic_json_write(UPDATE_RESULT, result)
         return 0
     except KeyboardInterrupt:
         log("Đã nhận Ctrl+C, dữ liệu tạm của quá trình cập nhật đã được dọn dẹp", error=True)
         return 130
     except Exception as error:
         log(f"Lỗi cập nhật WebUI: {error}", error=True)
+        result = {"target": "interface", "status": "error", "message": f"Cập nhật giao diện VBot thất bại: {error}", "started_at": started_at, "finished_at": int(time.time())}
+        atomic_json_write(UPDATE_RESULT, result)
         return 1
 
 if __name__ == "__main__":

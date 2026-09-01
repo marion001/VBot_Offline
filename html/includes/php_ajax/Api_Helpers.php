@@ -177,6 +177,49 @@ function vbotApiResolveExistingPath($path, array $allowedRoots, $expectedType = 
     return $resolved;
 }
 
+function vbotApiIsSensitiveFilePath($path)
+{
+    $normalized = strtolower(str_replace('\\', '/', (string) $path));
+    $baseName = basename($normalized);
+    if (in_array($baseName, [
+        'config.json', 'config.json.bak', 'config_new.json', 'config_old.json',
+        'client_secret.json', 'verify_token.json', 'profiles.json',
+        'stt_token_google_cloud.json', 'tts_token_google_cloud.json',
+    ], true)) {
+        return true;
+    }
+    return strpos($normalized, '/backup_config/') !== false
+        || strpos($normalized, '/google_driver_php/') !== false
+        || strpos($normalized, '/.cloudflared/') !== false
+        || preg_match('/(?:^|\/)(?:stt|tts)[_-]token[^\/]*\.json$/i', $normalized) === 1;
+}
+
+function vbotApiAnonymousReadablePath($resolvedPath, array $anonymousRoots, $vbotRoot)
+{
+    $versionFiles = [
+        realpath($vbotRoot.'Version.json'),
+        realpath($vbotRoot.'html/Version.json'),
+    ];
+    if (in_array($resolvedPath, array_filter($versionFiles), true)) {
+        return true;
+    }
+    return vbotApiPathIsInside($resolvedPath, $anonymousRoots);
+}
+
+function vbotApiCanExposeFile($resolvedPath, $loginActive, array $anonymousRoots, $vbotRoot, $securityEnabled = true)
+{
+    if ($resolvedPath === false) {
+        return false;
+    }
+    if (!$securityEnabled) {
+        return true;
+    }
+    if (vbotApiIsSensitiveFilePath($resolvedPath)) {
+        return false;
+    }
+    return $loginActive || vbotApiAnonymousReadablePath($resolvedPath, $anonymousRoots, $vbotRoot);
+}
+
 function vbotApiVerifyCsrf($required = true)
 {
     if (!$required) {

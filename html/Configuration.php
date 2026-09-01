@@ -344,6 +344,51 @@ if (!function_exists('vbotUpgradeReportError')) {
     }
 }
 
+// Khóa dùng chung cho cập nhật chương trình và WebUI. flock được hệ điều hành
+// tự giải phóng nếu PHP bị dừng đột ngột; marker chỉ bảo vệ Config.json và
+// cung cấp thời gian bắt đầu để hiển thị trạng thái.
+if (!function_exists('vbotAcquireUpgradeLock')) {
+    function vbotAcquireUpgradeLock($rootPath, &$messages, $component, &$lockHandle, &$markerPath)
+    {
+        $rootPath = rtrim((string) $rootPath, '/\\') . DIRECTORY_SEPARATOR;
+        $lockPath = $rootPath . '.vbot_upgrade.lock';
+        $markerPath = $rootPath . '.program_upgrade_in_progress';
+        $lockHandle = @fopen($lockPath, 'c+');
+        if ($lockHandle === false || !@flock($lockHandle, LOCK_EX | LOCK_NB)) {
+            if (is_resource($lockHandle)) fclose($lockHandle);
+            $lockHandle = null;
+            clearstatcache(true, $markerPath);
+            $markerAge = is_file($markerPath) ? max(0, time() - (int) @filemtime($markerPath)) : 0;
+            $remaining = max(1, 1800 - min(1799, $markerAge));
+            vbotUpgradeReportError($messages, $component, 'khóa cập nhật', 'Một tiến trình cập nhật khác đang hoạt động');
+            $messages[] = "<font color=orange><b>- Thời gian dự kiến còn lại: "
+                . sprintf('%02d phút %02d giây', intdiv($remaining, 60), $remaining % 60)
+                . ". Khóa hệ thống sẽ chỉ được mở khi tiến trình hiện tại kết thúc.</b></font>";
+            return false;
+        }
+
+        // Lấy được flock nghĩa là không còn updater thật; marker hiện có chỉ là cờ bị sót.
+        @unlink($markerPath);
+        if (@file_put_contents($markerPath, date('c') . "\n", LOCK_EX) === false) {
+            @flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+            $lockHandle = null;
+            return vbotUpgradeReportError($messages, $component, 'tạo cờ cập nhật', 'Không thể tạo cờ bảo vệ Config.json');
+        }
+        vbotSetFullPermissions($lockPath, 'khóa cập nhật dùng chung');
+        vbotSetFullPermissions($markerPath, 'cờ bảo vệ Config khi nâng cấp');
+        register_shutdown_function(function () use (&$lockHandle, $markerPath) {
+            @unlink($markerPath);
+            if (is_resource($lockHandle)) {
+                @flock($lockHandle, LOCK_UN);
+                @fclose($lockHandle);
+            }
+            $lockHandle = null;
+        });
+        return true;
+    }
+}
+
 if (!function_exists('vbotUpgradeValidatePackage')) {
     function vbotUpgradeValidatePackage($root, array $requiredPaths, &$messages, $component)
     {

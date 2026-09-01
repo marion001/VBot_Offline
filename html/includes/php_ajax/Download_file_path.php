@@ -10,6 +10,19 @@ require_once __DIR__.'/Api_Helpers.php';
 vbotApiInitialize(['GET'], false);
 include '../../Configuration.php';
 $allowedFileRoots = vbotApiAllowedRoots([$VBot_Offline, $directory_path]);
+$loginActive = !empty($Config['contact_info']['user_login']['active']);
+$fileAccessSecurity = !array_key_exists('file_access_security', $Config['web_interface'])
+    || !empty($Config['web_interface']['file_access_security']);
+$anonymousDownloadRoots = vbotApiAllowedRoots([
+    $VBot_Offline.'resource/log',
+    $VBot_Offline.'resource/schedule',
+    $VBot_Offline.'resource/broadlink',
+    $VBot_Offline.'resource/internal_ir',
+    $VBot_Offline.'Media',
+    $VBot_Offline.'TTS_Audio',
+    $directory_path.'/includes/cache',
+    $directory_path.'/includes/other_data',
+]);
 
 // Preserve UTF-8 file names regardless of the operating system locale.
 function vbotUtf8Basename($path)
@@ -65,6 +78,14 @@ if ($file === false || !is_readable($file)) {
         'status' => 'error',
         'message' => 'File không tồn tại hoặc nằm ngoài thư mục VBot.'
     ], 404);
+}
+
+if (!vbotApiCanExposeFile($file, $loginActive, $anonymousDownloadRoots, $VBot_Offline, $fileAccessSecurity)) {
+    vbotApiJsonResponse([
+        'success' => false,
+        'status' => 'error',
+        'message' => 'File chứa dữ liệu bảo mật hoặc không thuộc vùng được phép tải xuống.'
+    ], 403);
 }
 
 $fileExtension = strtolower(pathinfo($file, PATHINFO_EXTENSION));

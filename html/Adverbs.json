@@ -1,0 +1,135 @@
+{
+    "conversation": [
+        "hội thoại",
+        "trò chuyện",
+        "liên tục"
+    ],
+    "mic": [
+        "mic",
+        "microphone",
+        "mích"
+    ],
+    "wakeup_reply": [
+        "phản hồi",
+        "lời đáp"
+    ],
+    "automation": [
+       "tự động hóa"
+    ],
+    "air_conditioner": [
+        "điều hòa",
+        "máy lạnh"
+    ],
+	"fan": [
+		"quạt"
+	],
+	"light": [
+		"ánh sáng",
+		"độ sáng"
+	],
+	"temperature": [
+		"nhiệt độ",
+		"độ xê",
+		"độ",
+		"°c",
+		"°C"
+	],
+    "zingmp3_unwanted_words_when_searching": [
+        "phát",
+        "bài",
+        "mở",
+        "bật",
+        "hát",
+		"ở",
+		"trên"
+    ],
+    "increase": [
+        "tăng"
+    ],
+    "decrease": [
+        "giảm"
+    ],
+    "maximum":[
+        "tối đa",
+		"cao nhất",
+        "full"
+    ],
+    "minimum":[
+        "tối thiểu",
+		"thấp nhất"
+    ],
+    "bigger": [
+        "to hơn",
+        "lớn hơn",
+        "lớn nhất",
+        "to nhất"
+    ],
+    "smaller": [
+        "bé đi",
+        "nhỏ đi",
+        "nhỏ nhất"
+    ],
+    "lower": [
+        "thấp"
+    ],
+    "high": [
+        "cao"
+    ],
+    "song": [
+        "bài"
+    ],
+    "sing": [
+        "hát"
+    ],
+	"music": [
+		"nhạc"
+	],
+	"playlist": [
+		"danh sách",
+		"danh sách nhạc",
+		"playlist"
+	],
+	"local": [
+		"nội bộ",
+		"local"
+	],
+	"on_speaker": [
+		"trên loa",
+		"tới loa",
+		"đến loa",
+		"ở loa"
+	],
+	"youtube": [
+		"youtube",
+		"du tút"
+	],
+	"zing_mp3": [
+		"zing mp3",
+		"zingmp3",
+		"zing"
+	],
+	"nhaccuatui": [
+		"nhaccuatui",
+		"nhạc của tui",
+		"nhaccuatui.com"
+	],
+	"multi_command": [
+		"đa lệnh"
+	],
+	"split_keywords": [
+		"và",
+		"rồi",
+		"sau đó"
+	],
+	"action_command_together": [
+		"on",
+		"off",
+		"open",
+		"closed",
+		"enable",
+		"disable",
+		"script",
+		"check",
+		"setup"
+	]
+}

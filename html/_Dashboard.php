@@ -454,6 +454,18 @@ include 'html_head.php';
         $Exclude_Files_Folder = is_array($Exclude_Files_Folder) ? $Exclude_Files_Folder : [];
         $Exclude_File_Format = is_array($Exclude_File_Format) ? $Exclude_File_Format : [];
         $Backup_To_Cloud = $_POST['web_interface_cloud_backup'] ?? '';
+        $upgradeLockHandle = null;
+        $programUpgradeMarker = null;
+        $interfaceUpgradeAllowed = true;
+        if ($Backup_Upgrade_Interface === "yes_interface_upgrade") {
+            $interfaceUpgradeAllowed = vbotAcquireUpgradeLock(
+                $VBot_Offline,
+                $messages,
+                'INTERFACE',
+                $upgradeLockHandle,
+                $programUpgradeMarker
+            );
+        }
         foreach ($directoriessss as $directory) {
             createDirectory($directory);
         }
@@ -632,6 +644,8 @@ include 'html_head.php';
                 } else {
                     $messages[] =  "<font color=red>-Lỗi xảy ra trong quá trình tạo bản sao lưu dữ liệu</font>";
                 }
+            } elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade" && !$interfaceUpgradeAllowed) {
+                $messages[] = "<font color=red><b>- Đã hủy cập nhật WebUI để tránh chạy đồng thời.</b></font>";
             } elseif ($Backup_Upgrade_Interface === "yes_interface_upgrade") {
                 delete_in_Dir($Download_Path);
                 $web_interface_cloud_backup_khi_cap_nhat = isset($_POST['web_interface_cloud_backup_khi_cap_nhat']) ? $_POST['web_interface_cloud_backup_khi_cap_nhat'] : null;

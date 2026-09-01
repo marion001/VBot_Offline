@@ -12,6 +12,7 @@ Mail: VBot.Assistant@gmail.com
 #Cập nhật $:> python3 Manual_Update_Program.py
 
 import argparse
+import contextlib
 import datetime as dt
 import json
 import os
@@ -35,6 +36,8 @@ except ImportError:
 ROOT = Path(__file__).resolve().parent
 ERROR_LOG = ROOT / "resource/log/Vbot_error.log"
 MARKER = ROOT / ".program_upgrade_in_progress"
+UPGRADE_LOCK = ROOT / ".vbot_upgrade.lock"
+UPDATE_RESULT = ROOT / ".vbot_update_result.json"
 CORE_UPDATE_JSON = {
     "Version.json",
     "Action.json",
@@ -228,15 +231,22 @@ def apply_project_permissions(root):
     root = Path(root)
     excluded_roots = {root / "TTS_Audio", root / "Media", root / "html"}
     changed = 0
+    already_correct = 0
     skipped_locks = 0
     permission_errors = []
 
     def chmod_path(path):
-        nonlocal changed
+        nonlocal changed, already_correct
         try:
             os.chmod(path, 0o777)
             changed += 1
         except OSError as error:
+            try:
+                if stat.S_IMODE(os.stat(path, follow_symlinks=False).st_mode) == 0o777:
+                    already_correct += 1
+                    return
+            except OSError:
+                pass
             permission_errors.append(f"{path}: {error}")
 
     chmod_path(root)
@@ -259,6 +269,7 @@ def apply_project_permissions(root):
             chmod_path(path)
     log(
         f"Đã chmod 0777 cho {changed} file/thư mục trong {root}; "
+        f"{already_correct} lỗi chmod được bỏ qua vì quyền đã là 0777; "
         f"đã loại trừ TTS_Audio, Media, toàn bộ html, liên kết mềm và {skipped_locks} file *.lock"
     )
     if permission_errors:
@@ -480,7 +491,31 @@ def rollback_transaction(rollback):
 def service(command):
     return subprocess.run(["systemctl", "--user", *command], stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
 
-def update(args):
+@contextlib.contextmanager
+def upgrade_guard():
+    """Giữ khóa nâng cấp thật; tự phục hồi marker nếu lần chạy trước bị dừng."""
+    lock = UPGRADE_LOCK.open("a+")
+    try:
+        if fcntl is not None:
+            try:
+                fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as error:
+                raise RuntimeError("Một tiến trình cập nhật khác đang hoạt động") from error
+        # Đã lấy được flock nên marker hiện có chắc chắn là cờ bị sót.
+        if MARKER.exists():
+            MARKER.unlink()
+            log(f"Đã xóa marker cập nhật bị sót: {MARKER}")
+        MARKER.write_text(dt.datetime.now().isoformat() + "\n", encoding="utf-8")
+        log("Đã bật khóa nâng cấp dùng chung và marker bảo vệ Config.json")
+        yield
+    finally:
+        MARKER.unlink(missing_ok=True)
+        if fcntl is not None:
+            fcntl.flock(lock.fileno(), fcntl.LOCK_UN)
+        lock.close()
+
+
+def _update(args):
     if args.rollback is not None:
         rollback_latest(args)
         return
@@ -521,13 +556,9 @@ def update(args):
             if str(value).strip("/\\")
         }
         log(f"Đã nạp {len(keep_entries)} mục cần giữ từ Config.json, các JSON người dùng hiện có sẽ không bị ghi đè")
-        if MARKER.exists():
-            raise RuntimeError(f"Đang có tiến trình cập nhật khác hoặc marker bị sót: {MARKER}")
         rollback.mkdir(parents=True, exist_ok=False)
         atomic_copy_file(ROOT / "Config.json", rollback / "Config.json")
         log(f"Đã tạo vùng rollback: {rollback}")
-        MARKER.write_text(dt.datetime.now().isoformat() + "\n", encoding="utf-8")
-        log("Đã bật marker bảo vệ Config.json trong lúc cập nhật")
         try:
             log("Đang sao chép các tệp chương trình mới...")
             copy_transaction(source, rollback, keep_entries, replace_json)
@@ -588,8 +619,13 @@ def update(args):
             if detail:
                 raise RuntimeError(f"{reason} | Rollback chưa hoàn chỉnh: {detail}") from update_error
             raise
-        finally:
-            MARKER.unlink(missing_ok=True)
+
+
+def update(args):
+    if not args.apply and args.rollback is None:
+        return _update(args)
+    with upgrade_guard():
+        return _update(args)
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
@@ -613,14 +649,19 @@ def main():
         help="Khôi phục FILE backup; nếu không truyền FILE sẽ dùng bản .tar.gz mới nhất",
     )
     args = parser.parse_args()
+    started_at = int(time.time())
     try:
         update(args)
+        result = {"target": "program", "status": "success", "message": "Cập nhật chương trình VBot thành công", "started_at": started_at, "finished_at": int(time.time())}
+        atomic_json_write(UPDATE_RESULT, result)
         return 0
     except KeyboardInterrupt:
         log("Đã nhận Ctrl+C; dữ liệu tạm và marker cập nhật đã được dọn dẹp", error=True)
         return 130
     except Exception as error:
         log(f"Lỗi cập nhật chương trình: {error}", error=True)
+        result = {"target": "program", "status": "error", "message": f"Cập nhật chương trình VBot thất bại: {error}", "started_at": started_at, "finished_at": int(time.time())}
+        atomic_json_write(UPDATE_RESULT, result)
         return 1
 
 if __name__ == "__main__":

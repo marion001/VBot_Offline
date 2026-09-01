@@ -880,6 +880,102 @@ VBot_Interface_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz</code></pre>
             </div>
             </div>
             </div>
+            <div class="card accordion" id="accordion_button_Tailscale_Funnel">
+              <div class="card-body">
+                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Tailscale_Funnel" aria-expanded="false" aria-controls="collapse_button_Tailscale_Funnel">
+                  Truy Cập WebUI Qua Tailscale Funnel / Serve
+                </h5>
+                <div id="collapse_button_Tailscale_Funnel" class="accordion-collapse collapse" data-bs-parent="#accordion_button_Tailscale_Funnel">
+                  <div class="card shadow">
+                    <div class="card-body">
+                      <div class="alert alert-primary d-flex flex-wrap align-items-center gap-2 mt-3">
+                        <div class="flex-grow-1"><strong>Đã cài Tailscale?</strong> Mở trang quản lý để kiểm tra, bật, dừng Funnel hoặc xóa cấu hình Funnel/Serve.</div>
+                        <a href="Tailscale_Funnel.php" class="btn btn-primary" onclick="loading('show')"><i class="bi bi-diagram-3"></i> Mở Trang Quản Lý Tailscale Funnel</a>
+                      </div>
+
+                      <div class="alert alert-warning d-flex gap-2 align-items-start">
+                        <i class="bi bi-terminal-fill mt-1"></i>
+                        <div><strong>Yêu cầu truy cập SSH:</strong> Trước khi thực hiện các bước cài đặt bên dưới, cần đăng nhập SSH vào Raspberry Pi/VBot bằng tài khoản có quyền chạy <code>sudo</code>. Các lệnh cài đặt, <code>tailscale up</code> và xác thực lần đầu phải được chạy trong cửa sổ SSH.</div>
+                      </div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">1. Cài đặt Tailscale</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light"><span class="cmd">$</span> curl -fsSL https://tailscale.com/install.sh | sh</div>
+                      <div class="alert alert-secondary small mt-2 mb-0">Lệnh cài đặt sẽ tự nhận diện Raspberry Pi OS/Raspbian và thêm kho gói phù hợp. Chỉ chạy script từ tên miền chính thức <code>tailscale.com</code>.</div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">2. Đăng nhập thiết bị vào Tailscale</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light"><span class="cmd">$</span> sudo tailscale up</div>
+                      <div class="alert alert-info small mt-2">Mở URL <code>https://login.tailscale.com/a/...</code> được in ra, đăng nhập và cấp quyền cho thiết bị. Không chia sẻ URL đăng nhập này cho người khác.</div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">3. Kiểm tra kết nối và phiên bản</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light">
+                        <span class="cmd">$</span> tailscale version<br>
+                        <span class="cmd">$</span> tailscale status<br>
+                        <span class="cmd">$</span> systemctl is-active tailscaled
+                      </div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">4. Bật Funnel cho WebUI VBot</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light"><span class="cmd">$</span> sudo tailscale funnel --bg --https=443 http://127.0.0.1:80</div>
+                      <div class="alert alert-warning small mt-2">Lần đầu bật Funnel, Tailscale có thể in URL <code>https://login.tailscale.com/f/funnel?node=...</code>. Hãy mở URL đó bằng tài khoản quản trị tailnet để cho phép Funnel. Sau khi được duyệt, chạy lại lệnh nếu cần.</div>
+                      <div class="alert alert-info small">Funnel chỉ cho phép cổng HTTPS công khai <code>443</code>, <code>8443</code> hoặc <code>10000</code>. Đích WebUI mặc định là <code>http://127.0.0.1:80</code>.</div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">5. Kiểm tra Funnel và Serve</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light">
+                        <span class="cmd">$</span> sudo tailscale funnel status<br>
+                        <span class="cmd">$</span> sudo tailscale funnel status --json<br>
+                        <span class="cmd">$</span> sudo tailscale serve status
+                      </div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">6. Chỉ dừng Funnel, giữ nguyên Serve</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light"><span class="cmd">$</span> sudo tailscale funnel --https=443 off</div>
+                      <p class="small text-muted mt-2">Cổng phải trùng với cổng HTTPS đã dùng khi bật Funnel. Thao tác này không logout và không xóa cấu hình Serve.</p>
+
+                      <h5 class="border-bottom border-danger pb-2 mt-4">7. Xóa toàn bộ cấu hình Funnel và Serve</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light">
+                        <span class="cmd">$</span> sudo tailscale funnel reset<br>
+                        <span class="cmd">$</span> sudo tailscale serve reset
+                      </div>
+                      <div class="alert alert-danger small mt-2">Hai lệnh này xóa cấu hình chia sẻ Funnel/Serve nhưng không chạy <code>tailscale down</code>, không logout và không gỡ Tailscale.</div>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">8. Truy cập và lưu ý bảo mật</h5>
+                      <div class="alert alert-success d-flex gap-2 align-items-start"><i class="bi bi-link-45deg fs-5"></i><div><strong>URL Funnel là địa chỉ duy nhất của thiết bị:</strong> Sau khi Funnel được kích hoạt, URL dạng <code>https://ten-thiet-bi.ten-tailnet.ts.net/</code> được gắn với DNS của thiết bị và không thay đổi khi dừng/bật lại Funnel, restart Tailscale hoặc khởi động lại Raspberry Pi. URL chỉ thay đổi khi thiết bị bị xóa rồi đăng ký lại, đổi tên thiết bị/DNS hoặc thay đổi tên tailnet.</div></div>
+                      <ul>
+                        <li>URL công khai có dạng <code>https://ten-thiet-bi.ten-tailnet.ts.net/</code>.</li>
+                        <li>Trong VBot, bật mục <strong>Cho Phép Truy Cập Bên Ngoài Internet</strong> và nên bật đăng nhập WebUI.</li>
+                        <li>Không công khai dịch vụ khác ngoài loopback nếu chưa hiểu rõ rủi ro.</li>
+                        <li>Dùng nút <strong>Kiểm tra hệ thống</strong> trên trang quản lý để xem trạng thái thực tế trước và sau mỗi thao tác.</li>
+                      </ul>
+
+                      <h5 class="border-bottom border-primary pb-2 mt-4">9. Dừng hẳn hoặc bật lại dịch vụ Tailscale</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light">
+                        <span class="cmd">$</span> sudo systemctl stop tailscaled<br>
+                        <span class="cmd">$</span> sudo systemctl disable tailscaled<br>
+                        <span class="cmd">$</span> sudo systemctl enable --now tailscaled
+                      </div>
+                      <p class="small text-muted mt-2">Dừng service vẫn giữ phần mềm và dữ liệu để sử dụng lại. Sau khi bật lại, nếu thiết bị chưa kết nối thì chạy <code>sudo tailscale up</code>.</p>
+
+                      <h5 class="border-bottom border-warning pb-2 mt-4">10. Đăng xuất thiết bị khỏi Tailscale</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light">
+                        <span class="cmd">$</span> sudo tailscale logout<br>
+                        <span class="cmd">$</span> sudo tailscale up
+                      </div>
+                      <div class="alert alert-warning small mt-2">Sau khi logout, Raspberry Pi rời tài khoản/tailnet hiện tại. Muốn dùng lại phải chạy <code>tailscale up</code> và đăng nhập lại.</div>
+
+                      <h5 class="border-bottom border-danger pb-2 mt-4">11. Gỡ Tailscale hoàn toàn</h5>
+                      <div class="bg-dark rounded p-3 code-block text-light">
+                        <span class="cmd">$</span> sudo tailscale funnel reset<br>
+                        <span class="cmd">$</span> sudo tailscale serve reset<br>
+                        <span class="cmd">$</span> sudo tailscale logout<br>
+                        <span class="cmd">$</span> sudo apt remove --purge tailscale tailscale-archive-keyring<br>
+                        <span class="cmd">$</span> sudo rm -f /etc/apt/sources.list.d/tailscale.list<br>
+                        <span class="cmd">$</span> sudo rm -f /usr/share/keyrings/tailscale-archive-keyring.gpg<br>
+                        <span class="cmd">$</span> sudo apt update
+                      </div>
+                      <div class="alert alert-danger small mt-2"><strong>Tùy chọn dọn dữ liệu trạng thái:</strong> chỉ chạy <code>sudo rm -rf /var/lib/tailscale</code> khi chắc chắn không cần giữ nhận dạng và trạng thái cũ. Trang quản lý yêu cầu xác nhận riêng trước khi thực hiện.</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
               <div class="card accordion" id="accordion_button_3">
                 <div class="card-body">
                   <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_3" aria-expanded="false">
@@ -2578,16 +2674,24 @@ org.bluez.Device1 Connect</code></pre></div></div></div>
 
                 <pre class="bg-light border rounded p-2"><code>/home/pi/VBot_Offline/resource/test_device/Install_Pytubefix_10_11_0_Node.sh</code></pre>
 
-                <p class="mb-1"><b>Bước 1: Lệnh di chuyển tới thư mục chứa file thực thi</b></p>
+                <div class="alert alert-warning" role="alert">
+                    <b>Yêu cầu:</b> Phải dừng chương trình VBot nếu đang chạy trước khi tiến hành cài đặt.
+                </div>
+
+                <p class="mb-1"><b>Bước 1: Dừng chương trình VBot đang chạy (nếu có)</b></p>
+
+                <pre class="bg-light border rounded p-2"><code>systemctl --user stop VBot_Offline.service</code></pre>
+
+                <p class="mb-1"><b>Bước 2: Lệnh di chuyển tới thư mục chứa file thực thi</b></p>
 
                 <pre class="bg-light border rounded p-2"><code>cd /home/pi/VBot_Offline/resource/test_device/</code></pre>
 
 
-                <p class="mb-1"><b>Bước 2: Lệnh cấp quyền thực thi</b></p>
+                <p class="mb-1"><b>Bước 3: Lệnh cấp quyền thực thi</b></p>
 
-                <pre class="bg-light border rounded p-2"><code>chmod +x Install_Pytubefix_10_11_0_Node.sh</code></pre>
+                <pre class="bg-light border rounded p-2"><code>sudo chmod +x Install_Pytubefix_10_11_0_Node.sh</code></pre>
 
-                <p class="mb-1"><b>Bước 3: Lệnh Chạy file Fix</b></p>
+                <p class="mb-1"><b>Bước 4: Lệnh Chạy file Fix</b></p>
 
                 <pre class="bg-light border rounded p-2"><code>./Install_Pytubefix_10_11_0_Node.sh</code></pre>
 

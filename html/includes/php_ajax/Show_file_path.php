@@ -10,6 +10,19 @@ require_once __DIR__.'/Api_Helpers.php';
 vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
 $allowedFileRoots = vbotApiAllowedRoots([$VBot_Offline, $directory_path]);
+$loginActive = !empty($Config['contact_info']['user_login']['active']);
+$fileAccessSecurity = !array_key_exists('file_access_security', $Config['web_interface'])
+  || !empty($Config['web_interface']['file_access_security']);
+$anonymousReadableRoots = vbotApiAllowedRoots([
+  $VBot_Offline.'resource/log',
+  $VBot_Offline.'resource/schedule',
+  $VBot_Offline.'resource/broadlink',
+  $VBot_Offline.'resource/internal_ir',
+  $VBot_Offline.'Media',
+  $VBot_Offline.'TTS_Audio',
+  $directory_path.'/includes/other_data',
+  $directory_path.'/Backup_Upgrade',
+]);
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -65,7 +78,7 @@ function formatSize($size)
 }
 
 //Hàm đệ quy để tìm tất cả các file trong thư mục
-function get_all_file_directory($dir)
+function get_all_file_directory($dir, $loginActive, array $anonymousRoots, $vbotRoot, $securityEnabled)
 {
   $files = [];
   $items = scandir($dir);
@@ -80,8 +93,12 @@ function get_all_file_directory($dir)
       continue;
     }
     if (is_dir($path)) {
-      $files = array_merge($files, get_all_file_directory($path));
+      $files = array_merge($files, get_all_file_directory($path, $loginActive, $anonymousRoots, $vbotRoot, $securityEnabled));
     } else {
+      $resolvedFile = realpath($path);
+      if (!vbotApiCanExposeFile($resolvedFile, $loginActive, $anonymousRoots, $vbotRoot, $securityEnabled)) {
+        continue;
+      }
       $files[] = [
         'name' => $item,
         'path' => $path,
@@ -260,7 +277,10 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
     'data' => null
   ];
   $file_path = vbotApiResolveExistingPath($_GET['file'], $allowedFileRoots, 'file');
-  if ($file_path !== false && is_readable($file_path)) {
+  if (
+    vbotApiCanExposeFile($file_path, $loginActive, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity)
+    && is_readable($file_path)
+  ) {
     $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
     if ($file_extension === 'json' || $file_extension === 'txt' || $file_extension === 'log' || $file_extension === 'logs') {
       $content = file_get_contents($file_path);
@@ -299,7 +319,15 @@ if (isset($_GET['show_all_file'])) {
     ]);
     exit;
   }
-  $fileList = get_all_file_directory($directory);
+  if ($fileAccessSecurity && !$loginActive && !vbotApiAnonymousReadablePath($directory, $anonymousReadableRoots, $VBot_Offline)) {
+    echo json_encode([
+      'success' => false,
+      'message' => 'Thư mục không thuộc vùng dữ liệu công khai.',
+      'data' => []
+    ]);
+    exit;
+  }
+  $fileList = get_all_file_directory($directory, $loginActive, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity);
   if (empty($fileList)) {
     echo json_encode([
       'success' => false,
@@ -319,7 +347,10 @@ if (isset($_GET['show_all_file'])) {
 //Xem cấu trúc tệp backup tar.gz
 if (isset($_GET['read_file_backup']) && isset($_GET['file']) && !empty($_GET['file'])) {
   $resolvedBackup = vbotApiResolveExistingPath($_GET['file'], $allowedFileRoots, 'file');
-  if ($resolvedBackup === false || !preg_match('/\.tar\.gz$/i', $resolvedBackup)) {
+  if (
+    !vbotApiCanExposeFile($resolvedBackup, $loginActive, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity)
+    || !preg_match('/\.tar\.gz$/i', $resolvedBackup)
+  ) {
     vbotApiJsonResponse([
       'success' => false,
       'message' => 'Đường dẫn file backup không hợp lệ.',
@@ -354,11 +385,14 @@ if (isset($_GET['read_files_in_backup']) && isset($_GET['file_path']) && !empty(
   $file_name = $_GET['file_name'];
   $normalizedMemberName = str_replace('\\', '/', $file_name);
   if (
-    $file_path !== false
+    (!$fileAccessSecurity || $loginActive)
+    && $file_path !== false
+    && vbotApiCanExposeFile($file_path, true, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity)
     && preg_match('/\.tar\.gz$/i', $file_path)
     && strpos($file_name, "\0") === false
     && strpos($normalizedMemberName, '../') === false
     && substr($normalizedMemberName, 0, 1) !== '/'
+    && (!$fileAccessSecurity || !vbotApiIsSensitiveFilePath('/'.$normalizedMemberName))
   ) {
     $command = "tar -O -xzf " . escapeshellarg($file_path) . " " . escapeshellarg($file_name);
     $file_content = shell_exec($command);

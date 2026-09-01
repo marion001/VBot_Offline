@@ -147,6 +147,123 @@ function cfRuntimeProfileId($profiles, $runtimeOutput) {
     return '';
 }
 
+function cfRuntimeSection($runtimeOutput, $name) {
+    $pattern = '/(?:^|\R)--- '.preg_quote($name, '/').' ---\R(.*?)(?=\R--- [A-Z]+ ---|$)/s';
+    return preg_match($pattern, (string)$runtimeOutput, $match) ? trim($match[1]) : '';
+}
+
+// Phục hồi phần cấu hình có thể chứng minh từ service/config đang chạy.
+// API Token/Global API Key không có trong runtime nên tuyệt đối không suy đoán.
+function cfRecoverRuntimeProfile($runtimeOutput) {
+    $runtimeOutput = (string)$runtimeOutput;
+    $exec = cfRuntimeSection($runtimeOutput, 'EXEC');
+    $config = cfRuntimeSection($runtimeOutput, 'CONFIG');
+    $enabled = preg_match('/(?:^|\R)enabled(?:\R|$)/', cfRuntimeSection($runtimeOutput, 'SERVICE')) === 1;
+    $mode = '';
+    $localUrl = '';
+    $hostname = '';
+    $tunnel = '';
+    $credentialsFile = '';
+    $recoveredName = '';
+
+    if ($config !== ''
+            && preg_match('/(?:^|\R)tunnel:\s*[\'\"]?([^\'\"\s]+)[\'\"]?/i', $config, $tunnelMatch)
+            && preg_match('/(?:^|\R)credentials-file:\s*[\'\"]?([^\'\"\r\n]+)[\'\"]?/i', $config, $credentialsMatch)
+            && preg_match('/(?:^|\R)\s*-\s*hostname:\s*[\'\"]?([^\'\"\s]+)[\'\"]?/i', $config, $hostnameMatch)) {
+        $mode = 'domain';
+        $tunnel = trim($tunnelMatch[1]);
+        $credentialsFile = trim($credentialsMatch[1]);
+        $hostname = strtolower(trim($hostnameMatch[1]));
+        if (preg_match('/(?:^|\R)\s*service:\s*[\'\"]?(https?:\/\/[^\'\"\s]+)[\'\"]?/i', $config, $serviceMatch)) {
+            $localUrl = trim($serviceMatch[1]);
+        }
+        if (!preg_match('/^[A-Za-z0-9][A-Za-z0-9_.-]{0,127}$/', $tunnel)
+                || !preg_match('/^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/', $hostname)
+                || !preg_match('#^/[-A-Za-z0-9_./]+\.json$#', $credentialsFile)
+                || strpos($credentialsFile, '..') !== false) return null;
+        $tunnelsJson = cfRuntimeSection($runtimeOutput, 'TUNNELS');
+        $tunnels = $tunnelsJson !== '' ? json_decode($tunnelsJson, true) : null;
+        if (is_array($tunnels)) {
+            foreach ($tunnels as $runtimeTunnel) {
+                if (!is_array($runtimeTunnel)) continue;
+                $runtimeId = trim(isset($runtimeTunnel['id']) ? (string)$runtimeTunnel['id'] : '');
+                $runtimeName = trim(isset($runtimeTunnel['name']) ? (string)$runtimeTunnel['name'] : '');
+                if ($runtimeName !== '' && (strcasecmp($runtimeId, $tunnel) === 0 || strcasecmp($runtimeName, $tunnel) === 0)) {
+                    $recoveredName = $runtimeName;
+                    break;
+                }
+            }
+        }
+    } elseif ($exec !== '' && preg_match('/--url(?:=|\s+)[\'\"]?(https?:\/\/[^\'\"\s;}]+)/i', $exec, $urlMatch)) {
+        $mode = 'quick';
+        $localUrl = trim($urlMatch[1]);
+    }
+    if ($mode === '' || !filter_var($localUrl, FILTER_VALIDATE_URL)) return null;
+
+    $identity = $mode === 'domain' ? $tunnel.'|'.$hostname : $localUrl;
+    $profileName = $mode === 'domain' ? ($recoveredName !== '' ? $recoveredName : 'Khôi phục: '.$hostname) : 'Khôi phục: Quick Tunnel';
+    $profileName = function_exists('mb_substr') ? mb_substr($profileName, 0, 80, 'UTF-8') : substr($profileName, 0, 80);
+    return [
+        'id' => substr(hash('sha256', 'recovered|'.$mode.'|'.$identity), 0, 16),
+        'name' => $profileName,
+        'mode' => $mode,
+        'local_url' => $localUrl,
+        'hostname' => $hostname,
+        'tunnel' => $tunnel,
+        'credentials_file' => $credentialsFile,
+        'api_token' => '',
+        'api_email' => '',
+        'global_api_key' => '',
+        'auth_type' => 'none',
+        'auto_start' => $enabled,
+        'updated_at' => date('c'),
+        'recovered_from_runtime' => true
+    ];
+}
+
+// Ghép hồ sơ lấy từ cấu hình đang chạy vào profiles.json. UUID của Named Tunnel
+// là định danh chính; các hồ sơ khác của người dùng không bị xóa hoặc ghi đè.
+function cfMergeRuntimeProfile(&$data, $runtimeOutput) {
+    $runtimeProfile = cfRecoverRuntimeProfile($runtimeOutput);
+    if (!is_array($runtimeProfile)) return ['changed' => false, 'added' => false, 'profile' => null];
+
+    $matchIndex = -1;
+    foreach ($data['profiles'] as $index => $profile) {
+        if (($runtimeProfile['mode'] ?? '') === 'domain') {
+            if (($profile['mode'] ?? '') === 'domain'
+                    && strcasecmp(trim((string)($profile['tunnel'] ?? '')), (string)$runtimeProfile['tunnel']) === 0) {
+                $matchIndex = $index;
+                break;
+            }
+        } elseif (($profile['mode'] ?? '') === 'quick'
+                && rtrim((string)($profile['local_url'] ?? ''), '/') === rtrim((string)$runtimeProfile['local_url'], '/')) {
+            $matchIndex = $index;
+            break;
+        }
+    }
+
+    if ($matchIndex < 0) {
+        $data['profiles'][] = $runtimeProfile;
+        return ['changed' => true, 'added' => true, 'profile' => $runtimeProfile];
+    }
+
+    $current = $data['profiles'][$matchIndex];
+    $fields = ['name', 'mode', 'local_url', 'hostname', 'tunnel', 'credentials_file', 'auto_start'];
+    $changed = false;
+    foreach ($fields as $field) {
+        if (($current[$field] ?? null) !== ($runtimeProfile[$field] ?? null)) {
+            $current[$field] = $runtimeProfile[$field];
+            $changed = true;
+        }
+    }
+    if ($changed) {
+        $current['updated_at'] = date('c');
+        $current['recovered_from_runtime'] = true;
+        $data['profiles'][$matchIndex] = $current;
+    }
+    return ['changed' => $changed, 'added' => false, 'profile' => $current];
+}
+
 function cfConnect($host, $port, $user, $password) {
     if (!function_exists('ssh2_connect')) cfResponse(['success' => false, 'message' => 'PHP chưa có extension SSH2.'], 500);
     $connection = @ssh2_connect($host, $port);
@@ -360,12 +477,29 @@ if ($action === 'delete_remote') {
 
 if ($action === 'status') {
     $findBinary = 'CF_BIN=$(command -v cloudflared 2>/dev/null || true); for CF_PATH in /usr/local/bin/cloudflared /usr/bin/cloudflared /bin/cloudflared; do if [ -z "$CF_BIN" ] && [ -x "$CF_PATH" ]; then CF_BIN="$CF_PATH"; fi; done';
-    $result = cfExec($connection, $findBinary.'; if [ -n "$CF_BIN" ] && [ -x "$CF_BIN" ]; then printf "%s\\n" "$CF_BIN"; "$CF_BIN" --version; else printf "CLOUDFLARED_NOT_INSTALLED"; fi; printf "\\n--- SERVICE ---\\n"; (systemctl is-enabled cloudflared.service 2>/dev/null || true); (systemctl is-active cloudflared.service 2>/dev/null || true); printf "\\n--- EXEC ---\\n"; (systemctl show cloudflared.service --property=ExecStart --value 2>/dev/null || true); printf "\\n--- CONFIG ---\\n"; (sudo cat /home/pi/Cloud_Flare/config.yml 2>/dev/null || true); printf "\\n--- URL ---\\n"; (journalctl -u cloudflared.service -n 80 --no-pager 2>/dev/null | grep -Eo "https://[-a-z0-9]+\\.trycloudflare\\.com" | tail -1 || true)');
+    $result = cfExec($connection, $findBinary.'; if [ -n "$CF_BIN" ] && [ -x "$CF_BIN" ]; then printf "%s\\n" "$CF_BIN"; "$CF_BIN" --version; else printf "CLOUDFLARED_NOT_INSTALLED"; fi; printf "\\n--- SERVICE ---\\n"; (systemctl is-enabled cloudflared.service 2>/dev/null || true); (systemctl is-active cloudflared.service 2>/dev/null || true); printf "\\n--- EXEC ---\\n"; (systemctl show cloudflared.service --property=ExecStart --value 2>/dev/null || true); printf "\\n--- CONFIG ---\\n"; (sudo cat /home/pi/Cloud_Flare/config.yml 2>/dev/null || true); printf "\\n--- TUNNELS ---\\n"; (if [ -n "$CF_BIN" ] && [ -x "$CF_BIN" ]; then "$CF_BIN" tunnel list --output json 2>/dev/null || true; fi); printf "\\n--- URL ---\\n"; (journalctl -u cloudflared.service -n 80 --no-pager 2>/dev/null | grep -Eo "https://[-a-z0-9]+\\.trycloudflare\\.com" | tail -1 || true)');
     $cloudflaredInstalled = strpos($result['output'], 'CLOUDFLARED_NOT_INSTALLED') === false;
     $serviceIsActive = preg_match('/(?:^|\\R)active(?:\\R|$)/', $result['output']) === 1;
     $publicUrl = '';
     if (preg_match('#https://[-a-z0-9]+\\.trycloudflare\\.com#i', $result['output'], $urlMatch)) {
         $publicUrl = $urlMatch[0];
+    }
+    $profileRecovered = false;
+    $recoveryNotice = '';
+    $runtimeMerge = cfMergeRuntimeProfile($data, $result['output']);
+    if ($runtimeMerge['changed']) {
+        $recoveredProfile = $runtimeMerge['profile'];
+        if (is_array($recoveredProfile)) {
+            if ($serviceIsActive) $data['active_profile'] = (string)$recoveredProfile['id'];
+            if (!cfSaveProfiles($storeDir, $storeFile, $data)) {
+                cfResponse(['success' => false, 'message' => 'Đã đọc được cấu hình Cloudflare đang chạy nhưng không thể tái tạo profiles.json.'], 500);
+            }
+            $recoveryNotice = $runtimeMerge['added']
+                ? '[VBOT] Đã tự tái tạo hồ sơ từ service/config Cloudflare đang có. Tên hồ sơ: '.$recoveredProfile['name'].'.'
+                : '[VBOT] Đã đồng bộ hồ sơ trong profiles.json với service/config Cloudflare đang có. Tên hồ sơ: '.$recoveredProfile['name'].'.';
+            error_log('[CLOUDFLARE TUNNEL INFO] '.$recoveryNotice);
+            $profileRecovered = true;
+        }
     }
     if ($serviceIsActive) {
         $matchedProfile = cfRuntimeProfileId($data['profiles'], $result['output']);
@@ -379,9 +513,9 @@ if ($action === 'status') {
     }
     cfResponse([
         'success' => $result['exit_code'] === 0,
-        'message' => $cloudflaredInstalled ? ($result['output'] !== '' ? $result['output'] : 'Không lấy được trạng thái cloudflared.') : 'Cloudflared chưa được cài đặt. Hãy mở mục hướng dẫn để cài đặt trước khi kích hoạt tunnel.',
+        'message' => $cloudflaredInstalled ? ($result['output'] !== '' ? $result['output'].($profileRecovered ? "\n\n".$recoveryNotice : '') : 'Không lấy được trạng thái cloudflared.') : 'Cloudflared chưa được cài đặt. Hãy mở mục hướng dẫn để cài đặt trước khi kích hoạt tunnel.',
         'data' => cfPublicData($data),
-        'runtime' => ['installed' => $cloudflaredInstalled, 'active' => $serviceIsActive, 'public_url' => $publicUrl]
+        'runtime' => ['installed' => $cloudflaredInstalled, 'active' => $serviceIsActive, 'public_url' => $publicUrl, 'profile_recovered' => $profileRecovered]
     ], $result['exit_code'] === 0 ? 200 : 500);
 }
 

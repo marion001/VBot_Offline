@@ -211,7 +211,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                         showMessagePHP('Không tìm thấy phần tử có id là: ' + resultDiv_Id + ' để hiển thị kết quả.');
                         return;
                     }
-                    if (response.success) {
+                    if (response.success && response.data !== null && typeof response.data !== 'undefined') {
                         showMessageText(response.message);
                         var table = '<table class="table table-bordered border-primary">';
                         table += '<tr><th colspan="5" class="text-primary" style="text-align: center; vertical-align: middle;">' + vbotEscapeHtml(source_backup) + '</th></tr>';
@@ -270,13 +270,18 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             codeElement.className = 'language-txt';
                         }
                     } else {
-                        show_message('Không có dữ liệu');
+                        show_message(response.message || 'Không có dữ liệu');
                     }
                 } catch (e) {
                     show_message('Lỗi xử lý dữ liệu: ' + e);
                 }
             } else {
-                show_message('Lỗi tải dữ liệu: ' + xhr.status);
+                try {
+                    var errorResponse = JSON.parse(xhr.responseText);
+                    show_message(errorResponse.message || ('Lỗi tải dữ liệu: ' + xhr.status));
+                } catch (e) {
+                    show_message('Lỗi tải dữ liệu: ' + xhr.status);
+                }
             }
         };
         xhr.onerror = function() {

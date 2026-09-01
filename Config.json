@@ -59,6 +59,7 @@
         "external": {
             "active": true
         },
+        "file_access_security": false,
         "errors_display": false,
         "path": "/home/pi/VBot_Offline/html"
     },
@@ -393,8 +394,8 @@
         },
         "button_active": {
             "active": true,
+            "button_type": "aio",
             "encoder_rotary": {
-                "active": false,
                 "gpio_clk": 7,
                 "gpio_dt": 8,
                 "gpio_sw": 27,
@@ -413,7 +414,6 @@
             "down": {
                 "active": true,
                 "gpio": 25,
-                "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
@@ -423,7 +423,6 @@
             "up": {
                 "active": true,
                 "gpio": 5,
-                "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
@@ -433,7 +432,6 @@
             "wakeup": {
                 "active": true,
                 "gpio": 26,
-                "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
@@ -443,7 +441,6 @@
             "mic": {
                 "active": true,
                 "gpio": 6,
-                "pulled_high": false,
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,

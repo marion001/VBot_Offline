@@ -619,6 +619,18 @@ include 'html_head.php';
         $Exclude_Files_Folder = is_array($Exclude_Files_Folder) ? $Exclude_Files_Folder : [];
         $Exclude_File_Format = is_array($Exclude_File_Format) ? $Exclude_File_Format : [];
         $Backup_To_Cloud = $_POST['vbot_program_cloud_backup'] ?? '';
+        $upgradeLockHandle = null;
+        $upgradeMarkerPath = null;
+        $programUpgradeAllowed = true;
+        if ($Backup_Upgrade_Program === "yes_vbot_upgrade") {
+            $programUpgradeAllowed = vbotAcquireUpgradeLock(
+                $VBot_Offline,
+                $messages,
+                'PROGRAM',
+                $upgradeLockHandle,
+                $upgradeMarkerPath
+            );
+        }
         foreach ($directoriessss as $directory) {
             createDirectory($directory);
         }
@@ -793,6 +805,9 @@ include 'html_head.php';
                 }
             }
             //Xử lý nếu dữ liệu là nút nhấn cập nhật
+            elseif ($Backup_Upgrade_Program === "yes_vbot_upgrade" && !$programUpgradeAllowed) {
+                $messages[] = "<font color=red><b>- Đã hủy cập nhật chương trình để tránh chạy đồng thời.</b></font>";
+            }
             elseif ($Backup_Upgrade_Program === "yes_vbot_upgrade") {
                 delete_in_Dir($Download_Path);
                 $rollbackProgramOnStartFailure = (bool) (
@@ -967,30 +982,8 @@ include 'html_head.php';
                     } else {
                         $messages[] = "- Sao lưu dữ liệu trước khi cập nhật bị tắt, sẽ không có bản sao lưu nào được tạo ra";
                     }
-                    // Giữ VBot hoạt động trong lúc cập nhật, nhưng đặt cờ để tiến trình
-                    // đang chạy không ghi Config.json từ RAM lên file vừa merge.
-                    $upgradeMarkerPath = $VBot_Offline . '.program_upgrade_in_progress';
-                    clearstatcache(true, $upgradeMarkerPath);
-                    if (is_file($upgradeMarkerPath)) {
-                        $markerAge = time() - (int) @filemtime($upgradeMarkerPath);
-                        if ($markerAge < 1800) {
-                            vbotUpgradeReportError($messages, 'PROGRAM', 'khóa cập nhật', 'Một tiến trình cập nhật khác đang hoạt động');
-                            $upgradeMarkerCreated = false;
-                        } else {
-                            @unlink($upgradeMarkerPath);
-                            error_log('[UPGRADE PROGRAM WARNING] Đã xóa cờ cập nhật bị sót quá 30 phút');
-                            $upgradeMarkerCreated = null;
-                        }
-                    } else {
-                        $upgradeMarkerCreated = null;
-                    }
-                    if ($upgradeMarkerCreated !== false) {
-                        $upgradeMarkerCreated = file_put_contents(
-                            $upgradeMarkerPath,
-                            date('c') . "\n",
-                            LOCK_EX
-                        ) !== false;
-                    }
+                    // Khóa flock và marker đã được tạo trước bước tải xuống.
+                    $upgradeMarkerCreated = $programUpgradeAllowed && is_resource($upgradeLockHandle);
                     if (!$upgradeMarkerCreated) {
                         $messages[] = "<font color=red><b>- Không thể tạo cờ bảo vệ Config.json; đã hủy cập nhật.</b></font>";
                         error_log('[PHP Program ERROR] Không thể tạo cờ nâng cấp: ' . $upgradeMarkerPath);
@@ -1016,12 +1009,10 @@ include 'html_head.php';
 
                         if (!$oldConfigSaved || !$newTemplateValid || !copy($config_template_path, $config_upgrade_temp)) {
                             @unlink($config_upgrade_temp);
-                            @unlink($upgradeMarkerPath);
                             $messages[] = "<font color=red><b>- Config cũ hoặc mẫu Config mới không hợp lệ; đã hủy cập nhật.</b></font>";
                             error_log('[PHP Program ERROR] Không thể chuẩn bị hai tệp Config để merge khi nâng cấp');
                         } elseif (!replace_values_json_file($config_upgrade_temp, $config_old_path)) {
                             @unlink($config_upgrade_temp);
-                            @unlink($upgradeMarkerPath);
                             $messages[] = "<font color=red><b>- Merge Config backup vào Config mới thất bại; đã hủy cập nhật.</b></font>";
                         } else {
                             // Không bao giờ chép Config.json/.bak từ GitHub trực tiếp vào hệ thống.
@@ -1051,7 +1042,6 @@ include 'html_head.php';
                                     )) {
                                     @unlink($config_upgrade_temp);
                                     vbotUpgradeRollbackTransaction($programRollbackPath, $VBot_Offline, $messages, 'PROGRAM');
-                                    @unlink($upgradeMarkerPath);
                                     $messages[] = "<font color=red><b>- Không thể cài đặt Config.json đã merge; VBot vẫn chạy phiên bản hiện tại.</b></font>";
                                     error_log('[PHP Program ERROR] Không thể thay Config.json đã merge');
                                 } else {
@@ -1066,7 +1056,6 @@ include 'html_head.php';
                                     $restartCommand = 'systemctl --user restart VBot_Offline.service'
                                         . ' && sleep 3 && systemctl --user is-active --quiet VBot_Offline.service';
                                     if (vbotProgramRunSshCommand($connection, $restartCommand, $restartOutput)) {
-                                        @unlink($upgradeMarkerPath);
                                         deleteDirectory($Extract_Path);
                                         deleteDirectory($Download_Path);
                                         $programUpdateHealthy = true;
@@ -1090,7 +1079,6 @@ include 'html_head.php';
                                             $messages[] = "<font color=orange>- Tự động rollback đang tắt; giữ nguyên phiên bản vừa cập nhật để kiểm tra thủ công.</font><br/>";
                                             error_log('[UPGRADE PROGRAM WARNING] VBot lỗi sau cập nhật nhưng rollback tự động đang tắt trong Config.json');
                                         }
-                                        @unlink($upgradeMarkerPath);
                                         vbotUpgradeReportError($messages, 'PROGRAM', 'xác minh service', 'VBot không duy trì trạng thái active sau restart: ' . $restartOutput);
                                         error_log('[PHP Program ERROR] Không thể restart VBot sau nâng cấp: ' . $restartOutput);
                                     }
@@ -1110,7 +1098,6 @@ include 'html_head.php';
                                 }
                             } else {
                                 @unlink($config_upgrade_temp);
-                                @unlink($upgradeMarkerPath);
                                 $messages[] = "<font color=red>- Lỗi sao chép chương trình mới; Config.json cũ vẫn được giữ nguyên.</font>";
                             }
                         }

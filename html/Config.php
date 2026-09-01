@@ -264,6 +264,7 @@ if (isset($_POST['all_config_save'])) {
   $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
   $Config['web_interface']['errors_display'] = isset($_POST['webui_errors_display']) ? true : false;
   $Config['web_interface']['external']['active'] = isset($_POST['webui_external']) ? true : false;
+  $Config['web_interface']['file_access_security'] = isset($_POST['webui_file_access_security']) ? true : false;
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
   $Config['home_assistant']['minimum_threshold'] = floatval($_POST['hass_minimum_threshold']);
@@ -425,9 +426,14 @@ if (isset($_POST['all_config_save'])) {
 
   #CẬP NHẬT cẤU hình BUTTON NÚT NHẤN
   $Config['smart_config']['button_active']['active'] = isset($_POST['button_active']) ? true : false;
+  $validButtonTypes = ['aio', 'touch_low', 'touch_high', 'encoder_rotary'];
+  $buttonType = isset($_POST['button_type']) ? trim($_POST['button_type']) : 'touch_low';
+  if (!in_array($buttonType, $validButtonTypes, true)) {
+    $buttonType = 'touch_low';
+  }
+  $Config['smart_config']['button_active']['button_type'] = $buttonType;
   foreach ($_POST['button'] as $buttonName => $buttonData) {
     $Config['smart_config']['button'][$buttonName]['gpio'] = intval($buttonData['gpio']);
-    $Config['smart_config']['button'][$buttonName]['pulled_high'] = isset($buttonData['pulled_high']) ? (bool)$buttonData['pulled_high'] : false;
     $Config['smart_config']['button'][$buttonName]['active'] = isset($buttonData['active']) ? (bool)$buttonData['active'] : false;
     $Config['smart_config']['button'][$buttonName]['bounce_time'] = intval($buttonData['bounce_time']);
     $Config['smart_config']['button'][$buttonName]['long_press']['active'] = isset($buttonData['long_press']['active']) ? (bool)$buttonData['long_press']['active'] : false;
@@ -742,7 +748,6 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['news_paper']['active'] = isset($_POST['news_paper_active']) ? true : false;
 
   #Cập Nhật Nút Nhấn Encoder Rotary
-  $Config['smart_config']['button_active']['encoder_rotary']['active'] = isset($_POST['encoder_rotary_active']) ? true : false;
   $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] = isset($_POST['ncoder_rotary_long_press_active']) ? true : false;
   $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] = isset($_POST['encoder_rotating_show_logs']) ? true : false;
   $Config['smart_config']['button_active']['encoder_rotary']['gpio_clk'] = intval($_POST['encoder_rotary_gpio_clk']);
@@ -1298,7 +1303,7 @@ include 'html_head.php';
             <div class="card accordion" id="accordion_button_webui_path">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
-                  Cấu Hình Web Interface/Cloudflare Tunnel (Giao Diện):
+                  Cấu Hình Web Interface/Cloudflare Tunnel/Tailscale Funnel (Giao Diện):
                 </h5>
                 <div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
                 <div class="alert alert-success" role="alert">   <div class="row mb-3">
@@ -1310,11 +1315,20 @@ include 'html_head.php';
                     </div>
                   </div>
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Cloudflared Tunnel Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Cho Phép Truy Cập Bên Ngoài Internet <i class="bi bi-question-circle-fill" onclick="show_message('Cần kích hoạt lần đầu trong Tab: <b>Command/Terminal -> WebUI External -> Kích Hoạt WebUI Ra Internet</b><br/><br/> - Sau đó Reboot lại hệ thống hoặc restart lại Apache2 để áp dụng<br/><br/>- Bạn có thể trỏ Tên Miền, Domain, DNS, thông qua Modem, Route, VPN, V..v... về địa chỉ ip Local của thiết bị này bình thường<br/><br/>- Để đảm bảo an toàn khi truy cập bên ngoài Internet bạn nên kích hoạt mật khẩu đăng nhập WebUI và đổi mật khẩu mặc định: <b>Cá Nhân -> Cài Đặt -> Bật Đăng Nhập WebUI</b>')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="webui_external" id="webui_external" <?php echo $Config['web_interface']['external']['active'] ? 'checked' : ''; ?>>
                       </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Bảo Mật: Chặn Xem/Tải Tệp <i class="bi bi-question-circle-fill" onclick="show_message('Khi bật, WebUI chặn xem và tải xuống Config.json, token, credentials và chỉ cho phép truy cập các vùng tệp công khai khi không bật đăng nhập. Khi tắt, WebUI cho phép xem và tải tệp theo quyền truy cập đường dẫn cũ. Chỉ nên tắt tạm thời trong mạng nội bộ tin cậy.')"></i> :</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="webui_file_access_security" id="webui_file_access_security" <?php echo !array_key_exists('file_access_security', $Config['web_interface']) || !empty($Config['web_interface']['file_access_security']) ? 'checked' : ''; ?>>
+                      </div>
+                      <div class="form-text text-danger">Khuyến nghị luôn bật khi sử dụng Cloudflare Tunnel hoặc Tailscale Funnel.</div>
                     </div>
                   </div>
                   <?php
@@ -1326,6 +1340,14 @@ include 'html_head.php';
                       <a href="Cloudflare_Tunnel.php" class="btn btn-primary btn-sm" onclick="loading('show')"><i class="bi bi-cloud-check"></i> Quản Lý Cloudflare Tunnel</a>
                       <a href="FAQ.php#accordion_button_Cloudflare_Tunnel" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Xem Hướng Dẫn Cài Đặt</a>
                     </div>
+                  </div>
+                  <div class="row mb-3">
+                    <b class="text-danger">Nếu sử dụng Tailscale Funnel để tạo URL HTTPS truy cập WebUI từ bên ngoài Internet:</b>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                      <a href="Tailscale_Funnel.php" class="btn btn-success btn-sm" onclick="loading('show')"><i class="bi bi-globe2"></i> Quản Lý Tailscale Funnel</a>
+                      <a href="FAQ.php#accordion_button_Tailscale_Funnel" class="btn btn-outline-success btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Xem Hướng Dẫn Cài Đặt</a>
+                    </div>
+                    <div class="form-text mt-2"><i class="bi bi-terminal"></i> Cài đặt, đăng nhập hoặc cấp quyền Funnel lần đầu cần truy cập SSH để chạy lệnh và mở URL xác thực do Tailscale cung cấp.</div>
                   </div>
                 </div>
               </div>
@@ -2586,27 +2608,57 @@ echo htmlspecialchars($textareaContent_tts_viettel);
             <div class="card accordion" id="accordion_button_multype_button_config">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_multype_button_config" aria-expanded="false" aria-controls="collapse_button_multype_button_config">
-                  Cấu Hình Sử Dụng Nút Nhấn: [Dạng Thường <?php echo $Config['smart_config']['button_active']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>] [Dạng Xoay Encoder <?php echo $Config['smart_config']['button_active']['encoder_rotary']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>]</h5>
+                  Cấu Hình Sử Dụng Nút Nhấn: <?php echo $Config['smart_config']['button_active']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
                 <div id="collapse_button_multype_button_config" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_multype_button_config">
 <div class="alert alert-success" role="alert">
+                  <?php
+                  $buttonType = $Config['smart_config']['button_active']['button_type'] ??
+                    (!empty($Config['smart_config']['button_active']['encoder_rotary']['active']) ? 'encoder_rotary' : 'touch_low');
+                  $buttonTypeLabels = [
+                    'aio' => 'Nhấn Nhả => Sử dụng mạch VBot AIO, Vietbot AIO',
+                    'touch_low' => 'Nhấn Nhả => Nút nhấn chạm mức thấp (GPIO chạm GND)',
+                    'touch_high' => 'Nhấn Nhả => Nút nhấn chạm mức cao (GPIO chạm 3V3)',
+                    'encoder_rotary' => 'Nút nhấn dạng xoay (Encoder Rotary)',
+                  ];
+                  if (!isset($buttonTypeLabels[$buttonType])) {
+                    $buttonType = 'touch_low';
+                  }
+                  ?>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích Hoạt:</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="button_active" id="button_active" <?php echo $Config['smart_config']['button_active']['active'] ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label" for="button_type">
+                      Loại Nút Nhấn
+                      <i class="bi bi-question-circle-fill" onclick="show_message('Chọn đúng một loại nút. Với AIO: GPIO22 nối 3V3, GPIO23 và GPIO24 nối GND để kiểm tra bo mạch. Nếu kiểm tra AIO không đúng, VBot tự chuyển sang nút chạm mức thấp.')"></i>:
+                    </label>
+                    <div class="col-sm-9">
+                      <select name="button_type" id="button_type" class="form-select border-success">
+                        <?php foreach ($buttonTypeLabels as $value => $label) { ?>
+                          <option value="<?php echo htmlspecialchars($value, ENT_QUOTES, 'UTF-8'); ?>" <?php echo $buttonType === $value ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($label, ENT_QUOTES, 'UTF-8'); ?>
+                          </option>
+                        <?php } ?>
+                      </select>
+                      <div class="form-text">Lựa chọn được áp dụng sau khi lưu cấu hình và khởi động lại VBot.</div>
+                    </div>
+                  </div>
                   <div class="card accordion" id="accordion_button_setting_bton">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_bton" aria-expanded="false" aria-controls="collapse_button_setting_bton">
                         Cấu Hình Nút Nhấn Dạng Thường <font color=red> (Nhấn Nhả)</font>:
                       </h5>
                       <div id="collapse_button_setting_bton" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_bton" style="">
-                        <div class="alert alert-primary" role="alert"> <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn hoặc không sử dụng, <a href=\'https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074\' target=\'_blank\'>Xem Sơ Đồ Mạch Nút Nhấn</a>')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="form-switch">
-                              <input class="form-check-input border-success" type="checkbox" name="button_active" id="button_active" <?php echo $Config['smart_config']['button_active']['active'] ? 'checked' : ''; ?>>
-                            </div>
-                          </div>
-                        </div>
+                        <div class="alert alert-primary" role="alert">
                         <table class="table table-bordered border-primary">
                           <thead>
                             <tr>
-                              <th scope="col" colspan="3">
+                              <th scope="col" colspan="2">
                                 <center>
                                   <font color=red>Cấu Hình Chung</font>
                                 </center>
@@ -2631,11 +2683,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               <th scope="col">
                                 <center>
                                   <font color=blue>GPIO</font>
-                                </center>
-                              </th>
-                              <th scope="col">
-                                <center>
-                                  <font color=blue>Kéo mức thấp</font>
                                 </center>
                               </th>
                               <th scope="col">
@@ -2666,7 +2713,6 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                               echo '<tr>';
                               echo '<th scope="row" style="text-align: center; vertical-align: middle;"><center>' . $buttonName . ':</center></th>';
                               echo '<td style="text-align: center; vertical-align: middle;"><!-- GPIO --><input required type="number" style="width: 90px;" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
-                              echo '<td style="text-align: center; vertical-align: middle;"><!-- Pulled High --><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][pulled_high]"' . ($buttonData['pulled_high'] ? ' checked' : '') . '></div></td>';
                               echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn nhả --> <div class="form-switch"><center><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
                               echo '<td><center><!-- bounce_time --><input required type="number" min="20" max="500" step="10" style="width: 100px;" class="form-control border-success" title="" name="button[' . $buttonName . '][bounce_time]" value="' . $buttonData['bounce_time'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
                               echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
@@ -2689,14 +2735,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Encoder_Rotary" aria-expanded="false" aria-controls="collapse_button_Encoder_Rotary">
                         Cấu Hình Nút Nhấn Dạng Xoay <font color=red> (Sử Dụng Encoder Rotary)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Sử Dụng Nút Nhấn Dạng Xoay Encoder, Tương Thích Với Các Module Encoder Có 5 Chân Trên Thị Trường Như:  <b>KY-040 RV09 EC11</b><br/>- Khuyến Nghị Chỉ Nên Kích Hoạt Sử Dụng 1 Trong 2 Kiểu Nút Nhấn Là: <b> Nút Nhấn Dạng Xoay Encoder</b> Hoặc <b>Nút Nhấn Nhả Dạng Thường</b>')"></i>:</h5>
                       <div id="collapse_button_Encoder_Rotary" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Encoder_Rotary">
-                        <div class="alert alert-info" role="alert"> <div class="row mb-3">
-                          <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng nút nhấn dạng Encoder Rotary hoặc không sử dụng')"></i> :</label>
-                          <div class="col-sm-9">
-                            <div class="form-switch">
-                              <input class="form-check-input border-success" type="checkbox" name="encoder_rotary_active" id="encoder_rotary_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['active'] ? 'checked' : ''; ?>>
-                            </div>
-                          </div>
-                        </div>
+                        <div class="alert alert-info" role="alert">
 
                         <table class="table table-bordered border-primary">
                           <thead>
@@ -3933,6 +3972,11 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 		  <?php
 			echo select_field('weather_source', 'Nguồn xử lý dữ liệu thời tiết', ['virtual_assistant' => 'Sử Dụng Trợ Lý Ảo Assistant', 'vbot_system' => 'Sử Dụng Hệ Thống VBot', 'dev_weather' => 'Người Dùng Tự Code [Dev_Weather.py]'], $Config['weather']['source'], []);
 		  ?>
+		  <div class="alert alert-info mt-3 mb-0" role="alert">
+			<b>Ghi chú:</b> Khi chọn <b>Sử Dụng Hệ Thống VBot</b>, dữ liệu thời tiết sẽ sử dụng
+			<b>Vĩ độ (latitude)</b> và <b>Kinh độ (longitude)</b> đã cấu hình trong mục Thông Tin Liên Hệ.
+			Nếu chưa có tọa độ hợp lệ, hệ thống sẽ tra cứu vị trí theo Xã/Huyện và Tỉnh đã cấu hình.
+		  </div>
 		</div>
 
 		  </div>

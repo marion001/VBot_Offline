@@ -167,7 +167,12 @@
       </li>
       <li title="Quản lý Quick Tunnel và domain riêng qua Cloudflare" onclick="loading('show')">
         <a href="Cloudflare_Tunnel.php">
-          <i class="bi bi-circle"></i><span>Cloudflare Tunnel</span>
+          <i class="bi bi-circle"></i><span>[Public WebUI] Cloudflare Tunnel</span>
+        </a>
+      </li>
+      <li title="Quản lý Tailscale Funnel và Serve" onclick="loading('show')">
+        <a href="Tailscale_Funnel.php">
+          <i class="bi bi-circle"></i><span>[Public WebUI] Tailscale Funnel</span>
         </a>
       </li>
     </ul>

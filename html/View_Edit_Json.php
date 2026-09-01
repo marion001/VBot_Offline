@@ -189,6 +189,12 @@ include 'html_head.php';
           if (xhr.status === 200) {
             try {
               var json = JSON.parse(xhr.responseText);
+              if (!json.success || json.data === null || typeof json.data === 'undefined') {
+                editor.setValue("");
+                loading('hide');
+                show_message(json.message || 'Không có dữ liệu');
+                return;
+              }
               editor.setValue(JSON.stringify(json.data, null, 4));
               loading('hide');
               //showMessagePHP('Đã tải nội dung File JSON', 5);
@@ -198,7 +204,12 @@ include 'html_head.php';
             }
           } else {
             loading('hide');
-            show_message('Không thể tải nội dung file JSON');
+            try {
+              var errorResponse = JSON.parse(xhr.responseText);
+              show_message(errorResponse.message || 'Không thể tải nội dung file JSON');
+            } catch (e) {
+              show_message('Không thể tải nội dung file JSON');
+            }
           }
         }
       };
