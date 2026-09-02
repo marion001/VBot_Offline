@@ -341,6 +341,19 @@ def LED_STARTUP():
 
 
 #Led khi âm lượng được thay đổi volume_change sẽ là giá trị âm lượng được truyền vào hàm có giá trị từ 0 tới 100
+def LED_UPDATE():
+    """Dynamic color runner used while a background update is active."""
+    global Lib
+    from Led import _run_update_effect
+    Lib.led_effect_active = True
+    strip.setBrightness(Lib.led_brightness)
+    def render(frame):
+        for i, (r, g, b) in enumerate(frame):
+            strip.setPixelColor(i, Color(r, g, b))
+        strip.show()
+    _run_update_effect(strip.numPixels(), render)
+
+
 def LED_VOLUME(volume_change):
     strip.setBrightness(Lib.led_brightness)
     def wheel(pos):

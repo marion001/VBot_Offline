@@ -2215,13 +2215,13 @@
           }
         },
         "url": {
-          "raw": "http://192.168.14.113:5002",
+          "raw": "http://192.168.14.175:5002",
           "protocol": "http",
           "host": [
             "192",
             "168",
             "14",
-            "113"
+            "175"
           ],
           "port": "5002"
         }
@@ -2418,6 +2418,34 @@
             "168",
             "14",
             "169"
+          ],
+          "port": "5002"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "(Hiệu Ứng) LED UPDATE",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"type\": 2,\r\n    \"data\":\"led\",\r\n    \"action\": \"update\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://192.168.14.175:5002",
+          "protocol": "http",
+          "host": [
+            "192",
+            "168",
+            "14",
+            "175"
           ],
           "port": "5002"
         }

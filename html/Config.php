@@ -2593,6 +2593,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                           <option value="pause">LED_PAUSE (Hiệu Ứng Khi Tạm Dừng Phát)</option>
                           <option value="loading">LED_LOADING (Hiệu Ứng Khi Xử Lý Thông Tin, Dữ Liệu)</option>
                           <option value="startup">LED_STARTUP (Hiệu Ứng Khi Đang Khởi Động)</option>
+                          <option value="update">LED_UPDATE (Hiệu Ứng Khi Đang Cập Nhật)</option>
                           <option value="error">LED_ERROR (Hiệu Ứng Khi Có Lỗi Xảy Ra)</option>
                         </select>
                         <button class="btn btn-success border-success" type="button" onclick="get_test_led()">Kiểm Tra Hiệu Ứng</button>
@@ -4769,6 +4770,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
         case "pause":
         case "loading":
         case "startup":
+        case "update":
         case "error":
           led_action = action;
           led_value = null;
