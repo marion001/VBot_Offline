@@ -101,15 +101,6 @@ if (isset($_POST['learn'])) {
          .' --timeout '.max(5, min(60, intval($ir['learn_timeout'] ?? 20))).' --carrier '.intval($ir['carrier'] ?? 38000);
     vbotApiJsonResponse(internalIrRun($cmd,$VBot_Offline,$ssh_host,$ssh_port,$ssh_user,$ssh_password));
 }
-if (isset($_POST['send'])) {
-    if (empty($ir['tx_active']) && empty($ir['active'])) vbotApiJsonResponse(['success'=>false,'message'=>'IR phát (TX) đang tắt trong Config.json'], 409);
-    $decoded = json_decode($_POST['data'] ?? '', true);
-    if (!internalIrValidCommand($decoded)) vbotApiJsonResponse(['success'=>false,'message'=>'Mã IR không hợp lệ hoặc quá lớn'], 400);
-    $payload = strtr(base64_encode(json_encode($decoded, JSON_UNESCAPED_SLASHES)), '+/', '-_');
-    $cmd = 'python3 '.escapeshellarg($VBot_Offline.'resource/internal_ir/internal_ir_cli.py').' send --device '.escapeshellarg($ir['tx_device'] ?? '/dev/lirc0')
-         .' --repeat '.max(1,min(10,intval($ir['repeat'] ?? 1))).' --rx-guard-ms '.max(0,min(3000,intval($ir['tx_rx_guard_ms'] ?? 500))).' --data '.escapeshellarg($payload);
-    vbotApiJsonResponse(internalIrRun($cmd,$VBot_Offline,$ssh_host,$ssh_port,$ssh_user,$ssh_password));
-}
 if (isset($_POST['save'])) {
     $name = trim($_POST['name'] ?? ''); $reply = trim($_POST['reply'] ?? '');
     $action = internalIrAction($_POST['action'] ?? 'none');
