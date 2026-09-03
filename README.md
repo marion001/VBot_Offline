@@ -11,8 +11,10 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 - [Kiến trúc chương trình](#kiến-trúc-chương-trình)
 - [Luồng xử lý giọng nói](#luồng-xử-lý-giọng-nói)
 - [Audio, AirPlay và Bluetooth](#audio-airplay-và-bluetooth)
+- [Multiroom Audio](#multiroom-audio)
 - [WebSocket Streaming](#websocket-streaming)
 - [REST API, SSE và MQTT](#rest-api-sse-và-mqtt)
+- [Cập nhật chương trình và WebUI](#cập-nhật-chương-trình-và-webui)
 - [Runtime Diagnostics và Watchdog](#runtime-diagnostics-và-watchdog)
 - [WebUI](#webui)
 - [Cài đặt và khởi chạy](#cài-đặt-và-khởi-chạy)
@@ -67,11 +69,23 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 
 - Scheduler cho thông báo, báo thức, phát media, thay đổi âm lượng, LED và microphone.
 - Nút nhấn và rotary encoder.
-- LED báo trạng thái chờ, nghe, xử lý, phát âm thanh, mute, pause, lỗi và thay đổi âm lượng.
+- LED báo trạng thái chờ, nghe, xử lý, phát âm thanh, mute, pause, cập nhật, lỗi và thay đổi âm lượng.
 - Zeroconf/mDNS để phát hiện thiết bị trong LAN.
 - WebUI cấu hình, xem log, quản lý client và cập nhật chương trình.
 - Backup cấu hình khi người dùng lưu từ WebUI.
 - Runtime diagnostics và watchdog nhẹ cho các luồng quan trọng.
+
+### Các tính năng mới nổi bật
+
+- **Multiroom Audio:** một VBot làm coordinator phát đồng bộ tới nhiều loa VBot trong LAN; hỗ trợ nhóm loa, metadata, volume tổng và volume từng luồng.
+- **Trạng thái media thống nhất:** Local Media, AirPlay, Bluetooth và Multiroom cùng đi qua state machine dùng chung để hạn chế LED, pause/resume và metadata bị lệch trạng thái.
+- **Playlist mở rộng:** quản lý nhiều playlist có ID/tên riêng, chế độ phát, next/previous, loop và xuất trạng thái qua API/MQTT.
+- **XiaoZhi MCP:** hỗ trợ công cụ điều khiển hệ thống, Home Assistant, playlist, lịch nhắc và plugin MCP do người dùng tự viết.
+- **Runtime Diagnostics:** quan sát thread, queue, audio source, client streaming, MQTT, SSE và lịch sử phục hồi watchdog ngay trên WebUI.
+- **Cập nhật an toàn:** chung một bộ điều phối cho WebUI, REST API, MQTT và cập nhật thủ công; có khóa chống chạy trùng, rollback, bảo vệ dữ liệu người dùng và bàn giao kết quả qua restart.
+- **LED cập nhật riêng:** dùng hiệu ứng `UPDATE` trong toàn bộ thời gian nâng cấp; `Dev_Led.py` chưa định nghĩa `LED_UPDATE` sẽ tự dùng `LED_STARTUP` làm dự phòng.
+- **Thông báo cập nhật đúng thứ tự:** ghi log và phát hết âm báo thành công/thất bại trước khi restart service ở bước cuối.
+- **Truy cập từ xa có kiểm soát:** WebUI có trang quản lý Cloudflare Tunnel và Tailscale Funnel; REST API hỗ trợ API key.
 
 ## Phần cứng và nền tảng
 
@@ -111,11 +125,17 @@ Các thành phần chính:
 | `TTS_Processing.cpython-39-arm-linux-gnueabihf.so` | Chọn và gọi nguồn Text-to-Speech. |
 | `Media_Player.cpython-39-arm-linux-gnueabihf.so` | Media player nội bộ và vòng đời phát nhạc. |
 | `Api.cpython-39-arm-linux-gnueabihf.so` | REST API, SSE, MQTT, AirPlay DBus, diagnostics và watchdog. |
+| `Api_HTTP.py`, `Api_MQTT.py` | Các handler HTTP/MQTT được tách khỏi lớp điều phối API chính. |
 | `Streaming.cpython-39-arm-linux-gnueabihf.so` | WebSocket server, session client và streaming STT. |
 | `Bluetooth.cpython-39-arm-linux-gnueabihf.so` | Theo dõi BlueZ, metadata và trạng thái Bluetooth. |
 | `Button.cpython-39-arm-linux-gnueabihf.so` | Nút nhấn và rotary encoder. |
 | `Led.cpython-39-arm-linux-gnueabihf.so` | Hiệu ứng LED và khôi phục trạng thái nghỉ. |
 | `Scheduler.cpython-39-arm-linux-gnueabihf.so` | Lịch thông báo và tác vụ định kỳ. |
+| `Update_Manager.py` | Điều phối cập nhật từ WebUI, REST API và MQTT; quản lý LED, âm báo, log và restart. |
+| `Manual_Update_Program.py` | Cập nhật/rollback chương trình qua SSH và bàn giao kết quả cho Update Manager. |
+| `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI. |
+| `VBot_Multiroom_*.py` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
+| `Lib_System.py`, `Lib_Audio.py`, `Lib_AirPlay.py`, `Lib_Bluetooth.py`, `Lib_Multiroom.py` | Các lớp chức năng được tách khỏi facade `Lib.py`. |
 | `html/` | WebUI PHP, JavaScript, CSS và tài nguyên giao diện. |
 | `resource/` | Âm thanh, service, script cài đặt và dữ liệu tích hợp. |
 
@@ -219,6 +239,24 @@ Agent Bluetooth nằm tại:
 resource/bluetooth/bluetooth_agent.py
 ```
 
+## Multiroom Audio
+
+Multiroom cho phép một loa VBot làm **coordinator** và phân phối audio tới các loa thành viên trong cùng mạng LAN. Kiến trúc gồm bridge điều phối nguồn, receiver trên từng loa, controller và kho cấu hình nhóm.
+
+Các khả năng chính:
+
+- Tạo, đổi tên và xóa nhóm loa.
+- Thêm hoặc loại bỏ thành viên trong nhóm.
+- Chuyển giữa phát Local và Multiroom.
+- Start, stop, pause, continue và điều khiển volume từ API/MQTT.
+- Đồng bộ title, artist, album, cover, URL, duration và vị trí phát.
+- Phân biệt volume tổng của coordinator với volume luồng tại receiver.
+- Tự phát hiện VBot trong LAN qua mDNS/Zeroconf.
+- Khôi phục nguồn Local và trạng thái LED khi phiên Multiroom kết thúc hoặc mất kết nối.
+- Không đánh dấu VBot sẵn sàng nhận stream cho đến khi chuỗi khởi động và âm báo startup hoàn tất.
+
+Trạng thái Multiroom được đưa vào payload media dùng chung và endpoint diagnostics. Khi Multiroom đang phát, LED và API không được báo nhầm thành Local Media.
+
 ## WebSocket Streaming
 
 Streaming chỉ sử dụng WebSocket; logic UDP legacy không còn được sử dụng.
@@ -288,6 +326,58 @@ MQTT dùng command/state topic để tích hợp Home Assistant hoặc Node-RED.
 - Publish worker.
 - Queue giới hạn để tránh chiếm RAM khi broker mất kết nối.
 - Cơ chế reconnect và đăng ký lại topic.
+- Snapshot media gồm nguồn phát, metadata, timeline và trạng thái playlist.
+- Topic runtime cho danh sách playlist và trạng thái Multiroom.
+- Điều khiển playlist theo ID, next/previous và điều khiển nhóm Multiroom.
+- Kích hoạt cập nhật `program` hoặc `interface` qua cùng `Update_Manager` như REST API.
+
+## Cập nhật chương trình và WebUI
+
+VBot dùng chung `Update_Manager.py` cho yêu cầu cập nhật từ WebUI, REST API và MQTT. Trình cập nhật thủ công qua SSH cũng sử dụng cùng định dạng file kết quả để hành vi giữa các đường cập nhật nhất quán.
+
+### Vòng đời cập nhật chương trình
+
+```text
+Nhận yêu cầu cập nhật
+        │
+        ▼
+Khóa nâng cấp + bật LED UPDATE
+        │
+        ▼
+Tải và kiểm tra gói → backup → merge Config → cài đặt
+        │
+        ├── lỗi: rollback dữ liệu
+        │
+        ▼
+Ghi kết quả thành công/thất bại vào log
+        │
+        ▼
+Phát hết âm báo kết quả → khôi phục LED
+        │
+        ▼
+Restart VBot_Offline.service ở bước cuối
+```
+
+Các đặc điểm an toàn:
+
+- Không cho hai tác vụ cập nhật chương trình chạy đồng thời.
+- Marker và `flock` giúp nhận biết updater thật sự còn hoạt động sau khi bàn giao giữa các process.
+- Không dùng timeout cố định 180 giây trong lúc chờ đóng gói backup lớn.
+- Tự phục hồi nếu updater kết thúc nhưng không ghi được file kết quả.
+- Xác thực `status`, `target` và tên service trước khi xóa file kết quả.
+- Kiểm tra mã trả về khi yêu cầu systemd lên lịch restart.
+- `--check-only` không ghi kết quả, không phát âm báo và không restart.
+- `--no-restart` vẫn ghi/phát kết quả nhưng giữ service hiện tại.
+
+Trong lúc cập nhật, VBot dùng hiệu ứng LED `UPDATE`. Với LED tùy chỉnh, có thể thêm:
+
+```python
+def LED_UPDATE():
+    # Hiệu ứng cập nhật tùy chỉnh
+    ...
+```
+
+Nếu `Dev_Led.py` không có hàm này, hệ thống tự dùng `LED_STARTUP` và ghi cảnh báo thay vì làm hỏng tác vụ cập nhật.
 
 ## Runtime Diagnostics và Watchdog
 
@@ -377,6 +467,9 @@ Các khu vực chính:
 - Thông tin hệ thống.
 - Chẩn đoán Runtime.
 - Backup và nâng cấp.
+- Multiroom, playlist và trạng thái media đang phát.
+- Cloudflare Tunnel và Tailscale Funnel.
+- Quản lý XiaoZhi MCP, mô tả công cụ và plugin tùy chỉnh.
 - DEV Customize.
 
 Nếu giao diện chưa nhận JavaScript/CSS mới, tải lại bằng `Ctrl + F5` hoặc xóa cache trình duyệt.
@@ -660,7 +753,7 @@ python3 Manual_Update_WebUI.py --help
 ### Cập nhật chương trình
 
 Chạy không có `--apply` sẽ cập nhật ngay, merge giá trị `Config.json` cũ vào mẫu Config mới,
-tạo rollback, kiểm tra service và restart `VBot_Offline.service`:
+tạo rollback, ghi log, phát âm báo kết quả rồi mới restart `VBot_Offline.service` ở bước cuối:
 
 ```bash
 python3 Manual_Update_Program.py
@@ -777,8 +870,10 @@ Rollback chương trình không thay đổi `html`; rollback WebUI chỉ khôi p
 - Trình cập nhật WebUI chỉ chmod `html`, bỏ qua `html/Backup_Upgrade`, `*.lock` và symlink.
 - Khi nhấn `Ctrl+C` sau lúc bắt đầu ghi, công cụ rollback dữ liệu đã thay đổi, khôi phục Config,
   xóa marker và thoát với mã `130`. Không nhấn `Ctrl+C` lần hai trong khi đang rollback.
-- Tất cả tiến trình được in ra console; chỉ lỗi phát sinh được ghi vào
-  `resource/log/Vbot_error.log`.
+- Tất cả tiến trình được in ra console. Lỗi phát sinh và kết quả cuối cùng (thành công hoặc thất bại)
+  được ghi vào `resource/log/Vbot_error.log`.
+- Nếu VBot đang chạy, updater thủ công bàn giao kết quả cho `Update_Manager`. Nếu không có watcher
+  nhận kết quả trong thời gian chờ, updater tự phát âm báo bằng trình phát hệ thống rồi restart.
 
 ```bash
 tail -f /home/pi/VBot_Offline/resource/log/Vbot_error.log

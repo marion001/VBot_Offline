@@ -38,6 +38,8 @@ ERROR_LOG = ROOT / "resource/log/Vbot_error.log"
 MARKER = ROOT / ".program_upgrade_in_progress"
 UPGRADE_LOCK = ROOT / ".vbot_upgrade.lock"
 UPDATE_RESULT = ROOT / ".vbot_update_result.json"
+SUCCESS_SOUND = ROOT / "resource/sound/default/vbot_program_updated_successfully.mp3"
+ERROR_SOUND = ROOT / "resource/sound/default/vbot_program_update_failed.mp3"
 CORE_UPDATE_JSON = {
     "Version.json",
     "Action.json",
@@ -62,6 +64,58 @@ def log(message, error=False):
         ERROR_LOG.parent.mkdir(parents=True, exist_ok=True)
         with ERROR_LOG.open("a", encoding="utf-8") as handle:
             handle.write(line + "\n")
+
+def log_result(message, error=False):
+    """Persist the final outcome; ordinary progress remains console-only."""
+    level = "ERROR" if error else "INFO"
+    line = f"[{dt.datetime.now():%H:%M:%S %d-%m-%Y}] [MANUAL PROGRAM {level}] {message}"
+    print(line)
+    ERROR_LOG.parent.mkdir(parents=True, exist_ok=True)
+    with ERROR_LOG.open("a", encoding="utf-8") as handle:
+        handle.write(line + "\n")
+
+def play_result_sound(path):
+    path = Path(path)
+    if not path.is_file():
+        log_result(f"Không tìm thấy âm báo kết quả: {path}", error=True)
+        return False
+    candidates = (
+        ("mpg123", ["mpg123", "-q", str(path)]),
+        ("cvlc", ["cvlc", "--play-and-exit", "--quiet", str(path)]),
+        ("ffplay", ["ffplay", "-nodisp", "-autoexit", "-loglevel", "quiet", str(path)]),
+    )
+    for executable, command in candidates:
+        if not shutil.which(executable):
+            continue
+        try:
+            result = subprocess.run(command, check=False, timeout=60)
+            if result.returncode == 0:
+                return True
+        except (OSError, subprocess.SubprocessError) as error:
+            log(f"Trình phát {executable} không phát được âm báo: {error}", error=True)
+    log_result("Không thể phát âm báo kết quả bằng mpg123, cvlc hoặc ffplay", error=True)
+    return False
+
+def finish_without_update_manager(result, restart_required, service_name="VBot_Offline.service"):
+    """Fallback for SSH/manual runs when no active VBot watcher accepts the result."""
+    if not restart_required:
+        return
+    deadline = time.monotonic() + 10
+    while UPDATE_RESULT.exists() and time.monotonic() < deadline:
+        time.sleep(0.25)
+    if not UPDATE_RESULT.exists():
+        log("Update Manager đã nhận kết quả và sẽ restart service sau âm báo")
+        return
+    # Tránh service mới đọc lại cùng kết quả và restart lần thứ hai.
+    UPDATE_RESULT.unlink(missing_ok=True)
+    status = result.get("status")
+    message = str(result.get("message") or "Không có nội dung kết quả cập nhật")
+    log_result(f"[Update] {message}", error=status != "success")
+    play_result_sound(SUCCESS_SOUND if status == "success" else ERROR_SOUND)
+    log_result(f"[Update] Đã hoàn tất âm báo, tiến hành restart {service_name}")
+    restarted = service(["restart", service_name])
+    if restarted.returncode:
+        raise RuntimeError("Không thể restart service sau thông báo kết quả: " + restarted.stdout.strip())
 
 def read_json(path):
     with Path(path).open("r", encoding="utf-8-sig") as handle:
@@ -649,19 +703,32 @@ def main():
         help="Khôi phục FILE backup; nếu không truyền FILE sẽ dùng bản .tar.gz mới nhất",
     )
     args = parser.parse_args()
+    check_only = not args.apply and args.rollback is None
+    restart_required = not args.no_restart
+    # Mọi đường cập nhật đều hoãn restart: kết quả, log và âm báo phải hoàn
+    # tất trước. Update Manager hoặc fallback bên dưới sẽ restart cuối cùng.
+    args.no_restart = True
     started_at = int(time.time())
     try:
         update(args)
-        result = {"target": "program", "status": "success", "message": "Cập nhật chương trình VBot thành công", "started_at": started_at, "finished_at": int(time.time())}
+        if check_only:
+            log("Kiểm tra gói cập nhật hoàn tất; không ghi kết quả, không phát âm báo và không restart service")
+            return 0
+        result = {"target": "program", "status": "success", "message": "Cập nhật chương trình VBot thành công", "started_at": started_at, "finished_at": int(time.time()), "restart_required": restart_required, "service": args.service}
         atomic_json_write(UPDATE_RESULT, result)
+        finish_without_update_manager(result, restart_required, args.service)
         return 0
     except KeyboardInterrupt:
         log("Đã nhận Ctrl+C; dữ liệu tạm và marker cập nhật đã được dọn dẹp", error=True)
         return 130
     except Exception as error:
         log(f"Lỗi cập nhật chương trình: {error}", error=True)
-        result = {"target": "program", "status": "error", "message": f"Cập nhật chương trình VBot thất bại: {error}", "started_at": started_at, "finished_at": int(time.time())}
+        result = {"target": "program", "status": "error", "message": f"Cập nhật chương trình VBot thất bại: {error}", "started_at": started_at, "finished_at": int(time.time()), "restart_required": restart_required, "service": args.service}
         atomic_json_write(UPDATE_RESULT, result)
+        try:
+            finish_without_update_manager(result, restart_required, args.service)
+        except Exception as finish_error:
+            log(f"Lỗi hoàn tất cập nhật: {finish_error}", error=True)
         return 1
 
 if __name__ == "__main__":
