@@ -1,4 +1,4 @@
-<?php include 'Configuration.php'; if ($Config['contact_info']['user_login']['active']) { session_start(); if (empty($_SESSION['user_login'])) { header('Location: Login.php'); exit; } } ?>
+<?php include 'Configuration.php'; require_once __DIR__.'/includes/ActionRegistry.php'; if ($Config['contact_info']['user_login']['active']) { session_start(); if (empty($_SESSION['user_login'])) { header('Location: Login.php'); exit; } } ?>
 <!DOCTYPE html><html lang="vi"><?php include 'html_head.php'; ?><body>
 <?php include 'html_header_bar.php'; include 'html_sidebar.php'; ?>
 <main id="main" class="main"><div class="pagetitle"><h1>IR, Remote GPIO Nội Bộ <i class="bi bi-question-circle-fill" onclick="show_message('Cần tích hợp với các Module thu phát IR, kết nối Module thông qua các chân GPIO')"></i></h1></div>
@@ -51,15 +51,7 @@ function irPost(values){const body=new URLSearchParams();Object.entries(values).
 function notice(r){const message=r&&r.message?r.message:'Hoàn tất';if(r&&r.success){showMessagePHP(message);}else{show_message(message);}}
 function learnNotice(r){const el=document.getElementById('irLearnStatus');const ok=r&&r.success;el.className='alert text-center '+(ok?'alert-success':'alert-danger');el.innerHTML=`<i class="bi ${ok?'bi-check-circle':'bi-exclamation-triangle'}"></i> ${escapeHtml(r&&r.message?r.message:'Có lỗi xảy ra')}`;}
 function escapeHtml(v){const d=document.createElement('div');d.textContent=v;return d.innerHTML;}
-const irActions=[
-  ['none','Không thực hiện'],['wakeup','Đánh thức VBot'],
-  ['volume_up','Tăng âm lượng'],['volume_down','Giảm âm lượng'],['volume_max','Âm lượng lớn nhất'],['volume_min','Âm lượng nhỏ nhất'],
-  ['mic_toggle','Bật/Tắt microphone'],['conversation_toggle','Bật/Tắt chế độ hội thoại'],
-  ['wakeup_reply_toggle','Bật/Tắt chế độ câu phản hồi'],['stop_tts','Dừng câu trả lời TTS'],['cancel_wakeup','Hủy wakeup/thu âm hiện tại'],
-  ['media_play_pause','Phát/Tạm dừng media'],['media_stop','Dừng media'],['media_next','Bài tiếp theo'],['media_previous','Bài trước đó'],
-  ['mute','Tắt tiếng loa (Mute)'],['unmute','Mở tiếng loa (Unmute)'],['play_all_local','Phát toàn bộ nhạc Local'],
-  ['restart_vbot','Khởi động lại service VBot'],['reboot_os','Khởi động lại Raspberry Pi']
-];
+const irActions=<?= json_encode(array_map(null, array_keys(vbotActionRegistryStatic()), array_values(vbotActionRegistryStatic())), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
 function actionOptions(value){const selected=value||'none';const options=[...irActions,...irPlaylists.map(x=>[`playlist:${x.id}`,`Phát Playlist: ${x.name}`]),...irRadios.map(x=>[`radio:${x.id}`,`Phát Radio: ${x.name}`])];if((selected.startsWith('playlist:')||selected.startsWith('radio:'))&&!options.some(x=>x[0]===selected))options.push([selected,'Nguồn phát không còn tồn tại']);return options.map(([key,label])=>`<option value="${escapeHtml(key)}" ${key===selected?'selected':''}>${escapeHtml(label)}</option>`).join('');}
 function renderRows(){document.getElementById('irRows').innerHTML=savedIr.map((x,i)=>`<tr data-index="${i}"><td class="text-center"><div class="form-switch d-inline-block"><input class="form-check-input ir-active border-success" type="checkbox" role="switch" ${x.active!==false?'checked':''}></div></td><td><input class="form-control border-success ir-name" maxlength="100" value="${escapeHtml(x.name||'')}"></td><td><input class="form-control border-success ir-reply" maxlength="500" value="${escapeHtml(x.reply||'')}"></td><td><select class="form-select border-success ir-action">${actionOptions(x.action)}</select></td><td><textarea class="form-control border-success font-monospace ir-code" rows="4">${escapeHtml(JSON.stringify(x.data))}</textarea></td><td class="text-nowrap"><button class="btn btn-sm btn-primary" onclick="sendRow(${i})"><i class="bi bi-send"></i> Gửi Lệnh</button> <button class="btn btn-sm btn-danger" onclick="deleteIr(${i})"><i class="bi bi-trash"></i> Xóa</button></td></tr>`).join('');}
 async function loadIr(){const r=await irPost({list:1});if(!r.success)return notice(r);savedIr=r.data.commands||[];irPlaylists=Array.isArray(r.playlists)?r.playlists:[];irRadios=Array.isArray(r.radios)?r.radios:[];const c=r.config;const states=[];states.push(`Phát TX: ${c.tx_active?'bật':'tắt'} (GPIO${c.tx_gpio})`);states.push(`Thu RX: ${c.rx_active?'bật':'tắt'} (GPIO${c.rx_gpio})`);states.push(`Điều khiển nền: ${c.rx_control_active?'bật':'tắt'}`);notice({success:true,message:states.join(' — ')});renderRows();}

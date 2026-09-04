@@ -30,6 +30,83 @@ register_shutdown_function(static function () use ($phpErrorLog): void {
 });
 
 include 'Configuration.php';
+require_once __DIR__.'/includes/ActionRegistry.php';
+
+function vbotButtonActionOptions($Config): array
+{
+  $options = [];
+  foreach (vbotActionRegistryOptions($Config) as $id => $label) $options['vbot_action:'.$id] = $label;
+  return $options;
+}
+
+function vbotRenderButtonActionOptions($Config, $selected): string
+{
+  $html = '';
+  foreach (vbotButtonActionOptions($Config) as $value => $label) {
+    $html .= '<option value="'.htmlspecialchars($value, ENT_QUOTES, 'UTF-8').'"'.($value === $selected ? ' selected' : '').'>'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</option>';
+  }
+  return $html;
+}
+
+function vbotNormalizeButtonAction($Config, $action): string
+{
+  $action = trim((string)$action);
+  return array_key_exists($action, vbotButtonActionOptions($Config)) ? $action : 'vbot_action:none';
+}
+
+function vbotRenderStateActionFields($Config, array $value, string $namePrefix, array $defaults=[]): string
+{
+  $html = '<div style="min-width:260px">';
+  foreach (vbotActionRegistryStates() as $state => $label) {
+    $selected = (string)($value['actions_by_state'][$state] ?? $defaults[$state] ?? $value['action'] ?? 'none');
+    $selectId = 'button_action_'.substr(sha1($namePrefix.'_'.$state), 0, 12);
+    $html .= '<div class="form-floating mb-2">'
+      .'<select class="form-select border-success" id="'.$selectId.'" name="'.$namePrefix.'[actions_by_state]['.$state.']" aria-label="'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'">'
+      .vbotActionRegistryRender($Config, $selected).'</select>'
+      .'<label for="'.$selectId.'">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</label>'
+      .'</div>';
+  }
+  return $html.'</div>';
+}
+
+function vbotLegacyButtonHoldStateActions(string $buttonName): array
+{
+  $common = [
+    'down'=>'volume_min', 'up'=>'volume_max',
+  ];
+  if (isset($common[$buttonName])) return array_fill_keys(array_keys(vbotActionRegistryStates()), $common[$buttonName]);
+  if ($buttonName === 'wakeup') return [
+    'playlist'=>'media_stop', 'idle'=>'conversation_toggle', 'media'=>'media_stop',
+    'media_paused'=>'media_play', 'tts'=>'stop_tts', 'recording'=>'cancel_wakeup'
+  ];
+  if ($buttonName === 'mic') return [
+    'playlist'=>'media_stop', 'idle'=>'wakeup_reply_toggle', 'media'=>'media_stop',
+    'media_paused'=>'media_play', 'tts'=>'stop_tts', 'recording'=>'cancel_wakeup'
+  ];
+  return array_fill_keys(array_keys(vbotActionRegistryStates()), 'none');
+}
+
+function vbotLegacyEncoderHoldStateActions(array $config): array
+{
+  $legacy = (string)($config['action_gpio_sw'] ?? 'mic');
+  $direct = [
+    'wakeup'=>'wakeup', 'mic'=>'mic_toggle', 'conversation_mode'=>'conversation_toggle',
+    'play_playlist'=>'playlist:default', 'pause_media'=>'media_play_pause',
+    'stop_media_player'=>'media_stop', 'restart_vbot'=>'restart_vbot', 'reboot_os'=>'reboot_os'
+  ];
+  $action = $direct[$legacy] ?? 'none';
+  return array_fill_keys(array_keys(vbotActionRegistryStates()), $action);
+}
+
+function vbotSaveStateActions($Config, $posted, $fallback='none'): array
+{
+  $result = [];
+  $posted = is_array($posted) ? $posted : [];
+  foreach (vbotActionRegistryStates() as $state => $_label) {
+    $result[$state] = vbotActionRegistryNormalize($Config, $posted[$state] ?? $fallback);
+  }
+  return $result;
+}
 
 function vbotConfigSetFullPermissions($filePath, $label)
 {
@@ -438,6 +515,14 @@ if (isset($_POST['all_config_save'])) {
     $Config['smart_config']['button'][$buttonName]['bounce_time'] = intval($buttonData['bounce_time']);
     $Config['smart_config']['button'][$buttonName]['long_press']['active'] = isset($buttonData['long_press']['active']) ? (bool)$buttonData['long_press']['active'] : false;
     $Config['smart_config']['button'][$buttonName]['long_press']['duration'] = intval($buttonData['long_press']['duration']);
+    $Config['smart_config']['button'][$buttonName]['long_press']['actions_by_state'] = vbotSaveStateActions(
+      $Config, $buttonData['long_press']['actions_by_state'] ?? [], 'none'
+    );
+    $Config['smart_config']['button'][$buttonName]['double_press']['active'] = isset($buttonData['double_press']['active']) ? (bool)$buttonData['double_press']['active'] : false;
+    $doublePressInterval = intval($buttonData['double_press']['interval_ms'] ?? 200);
+    $Config['smart_config']['button'][$buttonName]['double_press']['interval_ms'] = max(50, min(1000, $doublePressInterval));
+    $Config['smart_config']['button'][$buttonName]['double_press']['action'] = vbotNormalizeButtonAction($Config, $buttonData['double_press']['action'] ?? 'vbot_action:none');
+    $Config['smart_config']['button'][$buttonName]['double_press']['actions_by_state'] = vbotSaveStateActions($Config, $buttonData['double_press']['actions_by_state'] ?? []);
   }
 
   #CẬP NHẬT CẤU HÌNH ÂM THANH HỆ THỐNG
@@ -757,7 +842,13 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['button_active']['encoder_rotary']['bounce_time_gpio_sw'] = intval($_POST['encoder_rotary_bounce_time_sw']);
   $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] = $_POST['encoder_rotary_action_gpio_sw'];
   $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['duration'] = intval($_POST['encoder_rotary_long_press_duration']);
-  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] = $_POST['encoder_rotary_long_press_action_gpio_sw'];
+  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] = $_POST['encoder_rotary_long_press_action_gpio_sw'] ?? ($Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] ?? 'mic');
+  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['actions_by_state'] = vbotSaveStateActions($Config, $_POST['encoder_rotary_long_press']['actions_by_state'] ?? []);
+  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['active'] = isset($_POST['encoder_rotary_double_press_active']) ? true : false;
+  $encoderDoublePressInterval = intval($_POST['encoder_rotary_double_press_interval_ms'] ?? 200);
+  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['interval_ms'] = max(50, min(1000, $encoderDoublePressInterval));
+  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['action'] = vbotNormalizeButtonAction($Config, $_POST['encoder_rotary_double_press_action'] ?? ($Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['action'] ?? 'vbot_action:none'));
+  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['actions_by_state'] = vbotSaveStateActions($Config, $_POST['encoder_rotary_double_press']['actions_by_state'] ?? []);
 
   #Cập nhật Custom Skill active
   $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
@@ -2656,7 +2747,19 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       </h5>
                       <div id="collapse_button_setting_bton" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_bton" style="">
                         <div class="alert alert-primary" role="alert">
-                        <table class="table table-bordered border-primary">
+                        <style>
+                          .vbot-button-table th, .vbot-button-table td { vertical-align: middle; }
+                          .vbot-button-table th:nth-child(4), .vbot-button-table td:nth-child(4),
+                          .vbot-button-table th:nth-child(6), .vbot-button-table td:nth-child(6),
+                          .vbot-button-table th:nth-child(9), .vbot-button-table td:nth-child(9) { text-align: center; }
+                          .vbot-button-table td:nth-child(4) input,
+                          .vbot-button-table td:nth-child(6) input,
+                          .vbot-button-table td:nth-child(9) input { display: block; margin-left: auto; margin-right: auto; }
+                          .vbot-button-table .form-switch { display: flex; justify-content: center; padding-left: 0; }
+                          .vbot-button-table .form-switch .form-check-input { margin-left: 0; }
+                        </style>
+                        <div class="table-responsive w-100">
+                        <table class="table table-bordered border-primary align-middle mb-0 vbot-button-table" style="min-width:1280px">
                           <thead>
                             <tr>
                               <th scope="col" colspan="2">
@@ -2669,9 +2772,14 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                   <font color=red>Nhấn Nhả</font>
                                 </center>
                               </th>
-                              <th scope="col" colspan="2">
+                              <th scope="col" colspan="3">
                                 <center>
                                   <font color=red>Nhấn Giữ</font>
+                                </center>
+                              </th>
+                              <th scope="col" colspan="3">
+                                <center>
+                                  <font color=red>Nhấn Đúp (2 Lần)</font>
                                 </center>
                               </th>
                             </tr>
@@ -2706,6 +2814,18 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                   <font color=blue>Thời Gian Giữ (s)</font>
                                 </center>
                               </th>
+                              <th scope="col"><center><font color=blue>Nhấn Giữ Theo Trạng Thái</font></center></th>
+                              <th scope="col">
+                                <center>
+                                  <font color=blue>Kích Hoạt</font>
+                                </center>
+                              </th>
+                              <th scope="col">
+                                <center>
+                                  <font color=blue>Khoảng Cách (ms)</font>
+                                </center>
+                              </th>
+                              <th scope="col"><center><font color=blue>Nhấn Đúp Theo Trạng Thái</font></center></th>
                             </tr>
                           </thead>
                           <tbody>
@@ -2713,16 +2833,24 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                             foreach ($Config['smart_config']['button'] as $buttonName => $buttonData) {
                               echo '<tr>';
                               echo '<th scope="row" style="text-align: center; vertical-align: middle;"><center>' . $buttonName . ':</center></th>';
-                              echo '<td style="text-align: center; vertical-align: middle;"><!-- GPIO --><input required type="number" style="width: 90px;" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
-                              echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn nhả --> <div class="form-switch"><center><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
+                               echo '<td class="text-center align-middle"><input required type="number" style="width:90px;margin:auto" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+                               echo '<td class="text-center align-middle"><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][active]"' . ($buttonData['active'] ? ' checked' : '') . '></div></td>';
                               echo '<td><center><!-- bounce_time --><input required type="number" min="20" max="500" step="10" style="width: 100px;" class="form-control border-success" title="" name="button[' . $buttonName . '][bounce_time]" value="' . $buttonData['bounce_time'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
                               echo '<td style="text-align: center; vertical-align: middle;"><!-- Active nhấn giữ --><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][long_press][active]"' . ($buttonData['long_press']['active'] ? ' checked' : '') . '></div></td>';
-                              echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="2" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+                               echo '<td><center><!-- Thời gian Giữ --><input required type="number" min="2" step="1" max="10" style="width: 80px;" class="form-control border-success" title="" name="button[' . $buttonName . '][long_press][duration]" value="' . $buttonData['long_press']['duration'] . '" ></center><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
+                               echo '<td>'.vbotRenderStateActionFields($Config, $buttonData['long_press'] ?? [], 'button['.$buttonName.'][long_press]', vbotLegacyButtonHoldStateActions($buttonName)).'</td>';
+                              $doublePress = isset($buttonData['double_press']) && is_array($buttonData['double_press']) ? $buttonData['double_press'] : [];
+                              $doublePressActive = !empty($doublePress['active']);
+                              $doublePressInterval = isset($doublePress['interval_ms']) ? intval($doublePress['interval_ms']) : 200;
+                              echo '<td style="text-align: center; vertical-align: middle;"><div class="form-switch"><input type="checkbox" class="form-check-input border-success" name="button[' . $buttonName . '][double_press][active]"' . ($doublePressActive ? ' checked' : '') . '></div></td>';
+                              echo '<td><center><input required type="number" min="50" max="1000" step="10" style="width: 100px;" class="form-control border-success" name="button[' . $buttonName . '][double_press][interval_ms]" value="' . $doublePressInterval . '"></center><div class="invalid-feedback">Khoảng nhấn đúp từ 50 đến 1000 ms</div></td>';
+                               echo '<td>'.vbotRenderStateActionFields($Config, $doublePress, 'button['.$buttonName.'][double_press]').'</td>';
                               echo '</tr>';
                             }
                             ?>
                           </tbody>
                         </table>
+                        </div>
                   <div class="row mb-3">
                     <b class="text-danger">Sơ Đồ 4 Nút Nhấn Nhả: <a href="https://github.com/user-attachments/assets/8c43d1fd-bf39-47db-a939-052e6540e074" target="_blank">Nhấn Vào Đây Để Xem Sơ Đồ</a></b>
                   </div>
@@ -2738,99 +2866,237 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                       <div id="collapse_button_Encoder_Rotary" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_Encoder_Rotary">
                         <div class="alert alert-info" role="alert">
 
-                        <table class="table table-bordered border-primary">
-                          <thead>
+<?php
+  $encoderDoublePress = $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw'] ?? [];
+  $encoderDoublePressActive = !empty($encoderDoublePress['active']);
+  $encoderDoublePressInterval = isset($encoderDoublePress['interval_ms']) ? intval($encoderDoublePress['interval_ms']) : 200;
+?>
 
-                            <tr>
-                              <th scope="col" colspan="2" style="text-align: center; vertical-align: middle;">
-                                <font color="red">Cấu hình Encoder</font>
-                              </th>
-                              <th scope="col" colspan="4" style="text-align: center; vertical-align: middle;">
-                                <font color="red">Chức Năng Nút Nhấn SW, KEY</font>
-                              </th>
-                            </tr>
+<table class="table table-bordered border-primary">
+  <thead>
+    <tr>
+      <th scope="col" colspan="2" style="text-align: center; vertical-align: middle;">
+        <font color="red">Cấu hình Encoder</font>
+      </th>
 
-                          </thead>
-                          <tbody>
-                            <tr>
-                              <th scope="row" style="text-align: center; vertical-align: middle;">
-                                <font color="blue">CLK, S1 = GPIO:</font>
-                              </th>
-                              <td><input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_clk" id="encoder_rotary_gpio_clk" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_clk']; ?>"></td>
-                              <th colspan="2" scope="col" style="text-align: center; vertical-align: middle;">
-                                <font color="red">Nhấn Nhả</font>
-                              </th>
-                              <th colspan="2" scope="col" style="text-align: center; vertical-align: middle;">
-                                <font color="red">Nhấn Giữ </font>
-                              </th>
-                            </tr>
-                            <tr>
-                              <th scope="row" style="text-align: center; vertical-align: middle;">
-                                <font color="blue">DT, S2 = GPIO:</font>
-                              </th>
-                              <td><input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_dt" id="encoder_rotary_gpio_dt" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_dt']; ?>"></td>
-                              <th scope="col" style="text-align: center; vertical-align: middle;">Thời Gian Nhấn (ms):</th>
-                              <td><input class="form-control border-success" step="1" min="1" max="1000" type="number" name="encoder_rotary_bounce_time_sw" id="encoder_rotary_bounce_time_sw" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['bounce_time_gpio_sw']; ?>"></td>
-                              <th scope="col" style="text-align: center; vertical-align: middle;">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng tính năng Nhấn Giữ')"></i>:</th>
-                              <td scope="col" style="text-align: center; vertical-align: middle;">
-                                <div class="form-switch">
-                                  <input class="form-check-input border-success" type="checkbox" name="ncoder_rotary_long_press_active" id="ncoder_rotary_long_press_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] ? 'checked' : ''; ?>>
-                                </div>
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row" style="text-align: center; vertical-align: middle;">
-                                <font color="blue">SW, KEY = GPIO:</font>
-                              </th>
-                              <td><input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_ws" id="encoder_rotary_gpio_ws" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_sw']; ?>"></td>
-                              <th style="text-align: center; vertical-align: middle;">Hành Động:</th>
-                              <td>
-                                <select name="encoder_rotary_action_gpio_sw" id="encoder_rotary_action_gpio_sw" class="form-select border-success" aria-label="Default select example">
-                                  <option value="wakeup" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] === 'wakeup' ? 'selected' : ''; ?>>Đánh Thức (WakeUP)</option>
-                                  <option value="mic" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] === 'mic' ? 'selected' : ''; ?>>Bật/Tắt Mic</option>
-                                </select>
-                              </td>
-                              <th style="text-align: center; vertical-align: middle;">Thời Gian Giữ (s):</th>
-                              <td>
-                                <input class="form-control border-success" step="1" min="1" max="10" type="number" name="encoder_rotary_long_press_duration" id="encoder_rotary_long_press_duration" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['duration']; ?>">
-                              </td>
-                            </tr>
-                            <tr>
-                              <th scope="row" style="text-align: center; vertical-align: middle;">
-                                <font color="blue">Bước Xoay, Step:</font>
-                              </th>
-                              <td><input class="form-control border-success" step="1" min="1" max="10" type="number" name="encoder_rotary_gpio_step" id="encoder_rotary_gpio_step" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_step']; ?>"></td>
-                              <td colspan="2"></td>
+      <th scope="col" colspan="6" style="text-align: center; vertical-align: middle;">
+        <font color="red">Chức Năng Nút Nhấn SW, KEY</font>
+      </th>
+    </tr>
+  </thead>
 
-                              <th style="text-align: center; vertical-align: middle;">Hành Động <i class="bi bi-question-circle-fill" onclick="show_message('Các Thao Tác Nâng Cao Khác Khi Nhấn Giữ Bạn Có Thể Tham Khảo Tại Đây: <a href=\'FAQ.php\' target=\'_blank\'>Hướng Dẫn</a>')"></i>:</th>
-                              <td>
-                                <select name="encoder_rotary_long_press_action_gpio_sw" id="encoder_rotary_long_press_action_gpio_sw" class="form-select border-success" aria-label="Default select example">
-                                  <option value="wakeup" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'wakeup' ? 'selected' : ''; ?>>Đánh Thức (WakeUP)</option>
-                                  <option value="mic" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'mic' ? 'selected' : ''; ?>>Bật/Tắt Mic</option>
-                                  <option value="conversation_mode" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'conversation_mode' ? 'selected' : ''; ?>>Bật/Tắt Chế Độ Hội Thoại</option>
-                                  <option value="play_playlist" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'play_playlist' ? 'selected' : ''; ?>>Phát Danh Sách Nhạc</option>
-                                  <option value="pause_media" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'pause_media' ? 'selected' : ''; ?>>Tạm Dừng Phát</option>
-                                  <option value="stop_media_player" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'stop_media_player' ? 'selected' : ''; ?>>Dừng Phát Nhạc</option>
-                                  <option value="restart_vbot" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'restart_vbot' ? 'selected' : ''; ?>>Restart VBot</option>
-                                  <option value="reboot_os" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'reboot_os' ? 'selected' : ''; ?>>Reboot OS</option>
-                                </select>
-                              </td>
-                            </tr>
+  <tbody>
 
-                            <tr>
-                              <th colspan="1" style="text-align: center; vertical-align: middle;">
-                                <font color="blue">Hiển Thị Logs Khi Xoay:</font>
-                              </th>
-                              <td colspan="1" style="text-align: center; vertical-align: middle;">
-                                <div class="form-switch">
-                                  <input class="form-check-input border-success" type="checkbox" name="encoder_rotating_show_logs" id="encoder_rotating_show_logs" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] ? 'checked' : ''; ?>>
-                                </div>
-                              </td>
-                              <td colspan="4">
-                              </td>
-                            </tr>
-                          </tbody>
-                        </table>
+    <!-- HEADER CHỨC NĂNG -->
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;">
+        <font color="blue">CLK, S1 = GPIO:</font>
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_clk" id="encoder_rotary_gpio_clk" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_clk']; ?>">
+      </td>
+
+      <th colspan="2" scope="col" style="text-align: center; vertical-align: middle;">
+        <font color="red">Nhấn Nhả</font>
+      </th>
+
+      <th colspan="2" scope="col" style="text-align: center; vertical-align: middle;">
+        <font color="red">Nhấn Giữ</font>
+      </th>
+
+      <th colspan="2" scope="col" style="text-align: center; vertical-align: middle;">
+        <font color="red">Nhấn Đúp (2 Lần)</font>
+      </th>
+    </tr>
+
+    <!-- HÀNG 1 -->
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;">
+        <font color="blue">DT, S2 = GPIO:</font>
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_dt" id="encoder_rotary_gpio_dt" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_dt']; ?>">
+      </td>
+
+      <!-- NHẤN NHẢ -->
+      <th style="text-align: center; vertical-align: middle;">
+        Thời Gian Nhấn (ms):
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="1" min="1" max="1000" type="number" name="encoder_rotary_bounce_time_sw" id="encoder_rotary_bounce_time_sw" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['bounce_time_gpio_sw']; ?>">
+      </td>
+
+      <!-- NHẤN GIỮ -->
+      <th style="text-align: center; vertical-align: middle;">
+        Kích Hoạt
+        <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng tính năng Nhấn Giữ')"></i>:
+      </th>
+
+      <td style="text-align: center; vertical-align: middle;">
+        <div class="form-switch">
+          <input class="form-check-input border-success" type="checkbox" name="ncoder_rotary_long_press_active" id="ncoder_rotary_long_press_active" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] ? 'checked' : ''; ?>>
+        </div>
+      </td>
+
+      <!-- NHẤN ĐÚP -->
+      <th style="text-align: center; vertical-align: middle;">
+        Kích Hoạt
+        <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng tính năng Nhấn Đúp (Nhấn 2 lần liên tiếp)')"></i>:
+      </th>
+
+      <td style="text-align: center; vertical-align: middle;">
+        <div class="form-switch">
+          <input class="form-check-input border-success" type="checkbox" name="encoder_rotary_double_press_active" id="encoder_rotary_double_press_active" <?php echo $encoderDoublePressActive ? 'checked' : ''; ?>>
+        </div>
+      </td>
+    </tr>
+
+    <!-- HÀNG 2 -->
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;">
+        <font color="blue">SW, KEY = GPIO:</font>
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="1" min="1" max="35" type="number" name="encoder_rotary_gpio_ws" id="encoder_rotary_gpio_ws" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['gpio_sw']; ?>">
+      </td>
+
+      <!-- NHẤN NHẢ -->
+      <th style="text-align: center; vertical-align: middle;">
+        Hành Động:
+      </th>
+
+      <td>
+        <select name="encoder_rotary_action_gpio_sw" id="encoder_rotary_action_gpio_sw" class="form-select border-success">
+          <option value="wakeup" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] === 'wakeup' ? 'selected' : ''; ?>>
+            Đánh Thức (WakeUP)
+          </option>
+          <option value="mic" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] === 'mic' ? 'selected' : ''; ?>>
+            Bật/Tắt Mic
+          </option>
+        </select>
+      </td>
+
+      <!-- NHẤN GIỮ -->
+      <th style="text-align: center; vertical-align: middle;">
+        Thời Gian Giữ (s):
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="1" min="1" max="10" type="number" name="encoder_rotary_long_press_duration" id="encoder_rotary_long_press_duration" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['duration']; ?>">
+      </td>
+
+      <!-- NHẤN ĐÚP -->
+      <th style="text-align: center; vertical-align: middle;">
+        Khoảng Cách (ms):
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="10" min="50" max="1000" type="number" name="encoder_rotary_double_press_interval_ms" id="encoder_rotary_double_press_interval_ms" value="<?php echo $encoderDoublePressInterval; ?>">
+      </td>
+    </tr>
+
+    <!-- HÀNG 3 -->
+    <tr>
+      <th scope="row" style="text-align: center; vertical-align: middle;">
+        <font color="blue">Bước Xoay, Step:</font>
+      </th>
+
+      <td>
+        <input class="form-control border-success" step="1" min="1" max="10" type="number" name="encoder_rotary_gpio_step" id="encoder_rotary_gpio_step" value="<?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_step']; ?>">
+      </td>
+
+      <!-- NHẤN NHẢ -->
+      <td colspan="2"></td>
+
+      <!-- NHẤN GIỮ -->
+      <th style="text-align: center; vertical-align: middle;">
+        Hành Động
+        <i class="bi bi-question-circle-fill" onclick="show_message('Các Thao Tác Nâng Cao Khác Khi Nhấn Giữ Bạn Có Thể Tham Khảo Tại Đây: <a href=\'FAQ.php\' target=\'_blank\'>Hướng Dẫn</a>')"></i>:
+      </th>
+
+      <td>
+        <input type="hidden" name="encoder_rotary_long_press_action_gpio_sw" value="<?php echo htmlspecialchars((string)($Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] ?? 'mic'), ENT_QUOTES, 'UTF-8'); ?>">
+        <small class="text-muted">Cấu hình riêng theo trạng thái bên dưới</small>
+        <select hidden id="encoder_rotary_long_press_action_gpio_sw">
+          <option value="wakeup" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'wakeup' ? 'selected' : ''; ?>>
+            Đánh Thức (WakeUP)
+          </option>
+
+          <option value="mic" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'mic' ? 'selected' : ''; ?>>
+            Bật/Tắt Mic
+          </option>
+
+          <option value="conversation_mode" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'conversation_mode' ? 'selected' : ''; ?>>
+            Bật/Tắt Chế Độ Hội Thoại
+          </option>
+
+          <option value="play_playlist" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'play_playlist' ? 'selected' : ''; ?>>
+            Phát Danh Sách Nhạc
+          </option>
+
+          <option value="pause_media" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'pause_media' ? 'selected' : ''; ?>>
+            Tạm Dừng Phát
+          </option>
+
+          <option value="stop_media_player" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'stop_media_player' ? 'selected' : ''; ?>>
+            Dừng Phát Nhạc
+          </option>
+
+          <option value="restart_vbot" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'restart_vbot' ? 'selected' : ''; ?>>
+            Restart VBot
+          </option>
+
+          <option value="reboot_os" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] === 'reboot_os' ? 'selected' : ''; ?>>
+            Reboot OS
+          </option>
+        </select>
+      </td>
+
+      <!-- NHẤN ĐÚP -->
+      <th style="text-align: center; vertical-align: middle;">
+        Hành Động
+        <i class="bi bi-question-circle-fill" onclick="show_message('Chọn hành động sẽ thực thi khi Nhấn Đúp')"></i>:
+      </th>
+
+      <td>
+        <input type="hidden" name="encoder_rotary_double_press_action" value="<?php echo htmlspecialchars((string)($encoderDoublePress['action'] ?? 'vbot_action:none'), ENT_QUOTES, 'UTF-8'); ?>">
+        <small class="text-muted">Cấu hình riêng theo trạng thái bên dưới</small>
+        <select hidden id="encoder_rotary_double_press_action">
+          <?php
+            echo vbotRenderButtonActionOptions($Config, (string)($encoderDoublePress['action'] ?? 'vbot_action:none'));
+          ?>
+        </select>
+      </td>
+    </tr>
+
+    <tr>
+      <th colspan="2" class="text-primary" style="text-align: center; vertical-align: middle;">Nhấn Giữ Theo Trạng Thái</th>
+      <td colspan="6"><?php $encoderLongConfig = $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw'] ?? []; echo vbotRenderStateActionFields($Config, $encoderLongConfig, 'encoder_rotary_long_press', vbotLegacyEncoderHoldStateActions($encoderLongConfig)); ?></td>
+    </tr>
+    <tr>
+      <th colspan="2" class="text-primary" style="text-align: center; vertical-align: middle;">Nhấn Đúp Theo Trạng Thái</th>
+      <td colspan="6"><?php echo vbotRenderStateActionFields($Config, $encoderDoublePress, 'encoder_rotary_double_press'); ?></td>
+    </tr>
+
+    <!-- LOG XOAY -->
+    <tr>
+      <th style="text-align: center; vertical-align: middle;">
+        <font color="blue">Hiển Thị Logs Khi Xoay:</font>
+      </th>
+      <td style="text-align: center; vertical-align: middle;">
+        <div class="form-switch">
+          <input class="form-check-input border-success" type="checkbox" name="encoder_rotating_show_logs" id="encoder_rotating_show_logs" <?php echo $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] ? 'checked' : ''; ?>>
+        </div>
+      </td>
+      <td colspan="6"></td>
+    </tr>
+
+  </tbody>
+</table>
 
                       </div>
                       </div>

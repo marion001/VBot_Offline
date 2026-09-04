@@ -406,7 +406,28 @@
                 "long_press_gpio_sw": {
                     "active": true,
                     "duration": 2,
-                    "action_gpio_sw": "play_playlist"
+                    "action_gpio_sw": "play_playlist",
+                    "actions_by_state": {
+                        "playlist": "media_stop",
+                        "idle": "mic_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
+                },
+                "double_press_gpio_sw": {
+                    "active": false,
+                    "interval_ms": 180,
+                    "action": "vbot_action:none",
+                    "actions_by_state": {
+                        "playlist": "none",
+                        "idle": "none",
+                        "media": "none",
+                        "media_paused": "none",
+                        "tts": "none",
+                        "recording": "none"
+                    }
                 }
             }
         },
@@ -417,7 +438,28 @@
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
-                    "duration": 4
+                    "duration": 4,
+                    "actions_by_state": {
+                        "playlist": "volume_min",
+                        "idle": "volume_min",
+                        "media": "volume_min",
+                        "media_paused": "volume_min",
+                        "tts": "volume_min",
+                        "recording": "volume_min"
+                    }
+                },
+                "double_press": {
+                    "active": true,
+                    "interval_ms": 180,
+                    "action": "vbot_action:none",
+                    "actions_by_state": {
+                        "playlist": "media_previous",
+                        "idle": "none",
+                        "media": "media_previous",
+                        "media_paused": "media_play_pause",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
                 }
             },
             "up": {
@@ -426,7 +468,28 @@
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
-                    "duration": 4
+                    "duration": 4,
+                    "actions_by_state": {
+                        "playlist": "volume_max",
+                        "idle": "volume_max",
+                        "media": "volume_max",
+                        "media_paused": "volume_max",
+                        "tts": "volume_max",
+                        "recording": "volume_max"
+                    }
+                },
+                "double_press": {
+                    "active": true,
+                    "interval_ms": 180,
+                    "action": "vbot_action:none",
+                    "actions_by_state": {
+                        "playlist": "media_next",
+                        "idle": "none",
+                        "media": "media_next",
+                        "media_paused": "media_play_pause",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
                 }
             },
             "wakeup": {
@@ -435,7 +498,28 @@
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
-                    "duration": 4
+                    "duration": 4,
+                    "actions_by_state": {
+                        "playlist": "media_stop",
+                        "idle": "conversation_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
+                },
+                "double_press": {
+                    "active": true,
+                    "interval_ms": 180,
+                    "action": "vbot_action:none",
+                    "actions_by_state": {
+                        "playlist": "wakeup",
+                        "idle": "conversation_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
                 }
             },
             "mic": {
@@ -444,7 +528,28 @@
                 "bounce_time": 100,
                 "long_press": {
                     "active": true,
-                    "duration": 4
+                    "duration": 4,
+                    "actions_by_state": {
+                        "playlist": "media_stop",
+                        "idle": "wakeup_reply_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
+                },
+                "double_press": {
+                    "active": true,
+                    "interval_ms": 180,
+                    "action": "vbot_action:none",
+                    "actions_by_state": {
+                        "playlist": "media_stop",
+                        "idle": "wakeup_reply_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
                 }
             }
         },

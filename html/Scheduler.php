@@ -7,6 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+require_once __DIR__.'/includes/ActionRegistry.php';
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -835,13 +836,7 @@ include 'html_head.php';
           } elseif ($task_key === 'mic_on_off') {
             $parameter = in_array($parameter, ['on', 'off'], true) ? $parameter : 'off';
           } elseif ($task_key === 'vbot_action') {
-            $parameter = trim((string)$parameter);
-            $static_vbot_actions = ['none','wakeup','volume_up','volume_down','volume_max','volume_min','mic_toggle','conversation_toggle','wakeup_reply_toggle','stop_tts','cancel_wakeup','media_play_pause','media_stop','media_next','media_previous','mute','unmute','play_all_local','restart_vbot','reboot_os'];
-            if (!in_array($parameter, $static_vbot_actions, true)
-                && !preg_match('/^playlist:[A-Za-z0-9_-]{1,100}$/', $parameter)
-                && !preg_match('/^radio:[a-f0-9]{12}$/', $parameter)) {
-              $parameter = 'none';
-            }
+            $parameter = vbotActionRegistryNormalize($Config, $parameter);
           } else {
             $parameter = null;
           }
@@ -1188,33 +1183,7 @@ include 'html_head.php';
             'mic_on_off'=>'Bật/Tắt microphone',
             'send_notify_upgrade_vbot_home_assistant'=>'Kiểm tra và thông báo cập nhật VBot'
           ];
-          $vbotActionOptions = [
-            'none'=>'Không thực hiện', 'wakeup'=>'Đánh thức VBot',
-            'volume_up'=>'Tăng âm lượng', 'volume_down'=>'Giảm âm lượng',
-            'volume_max'=>'Âm lượng lớn nhất', 'volume_min'=>'Âm lượng nhỏ nhất',
-            'mic_toggle'=>'Bật/Tắt microphone', 'conversation_toggle'=>'Bật/Tắt chế độ hội thoại',
-            'wakeup_reply_toggle'=>'Bật/Tắt chế độ câu phản hồi', 'stop_tts'=>'Dừng câu trả lời TTS',
-            'cancel_wakeup'=>'Hủy wakeup/thu âm hiện tại', 'media_play_pause'=>'Phát/Tạm dừng media',
-            'media_stop'=>'Dừng media', 'media_next'=>'Bài tiếp theo', 'media_previous'=>'Bài trước đó',
-            'mute'=>'Tắt tiếng loa (Mute)', 'unmute'=>'Mở tiếng loa (Unmute)',
-            'play_all_local'=>'Phát toàn bộ nhạc Local', 'restart_vbot'=>'Khởi động lại service VBot',
-            'reboot_os'=>'Khởi động lại Raspberry Pi'
-          ];
-          $schedulerPlaylistManifestPathForActions = __DIR__.'/includes/cache/PlayLists.json';
-          if (is_file($schedulerPlaylistManifestPathForActions)) {
-            $manifestForActions = json_decode((string)file_get_contents($schedulerPlaylistManifestPathForActions), true);
-            foreach (($manifestForActions['playlists'] ?? []) as $playlist) {
-              $id = trim((string)($playlist['id'] ?? ''));
-              if ($id !== '') $vbotActionOptions['playlist:'.$id] = 'Phát Playlist: '.((string)($playlist['name'] ?? $id));
-            }
-          }
-          foreach (($Config['media_player']['radio_data'] ?? []) as $radio) {
-            $radioName = trim((string)($radio['name'] ?? ''));
-            $radioLink = trim((string)($radio['link'] ?? ''));
-            if ($radioName !== '' && $radioLink !== '') {
-              $vbotActionOptions['radio:'.substr(sha1($radioName."\n".$radioLink), 0, 12)] = 'Phát Radio: '.$radioName;
-            }
-          }
+          $vbotActionOptions = vbotActionRegistryOptions($Config);
           // Hiển thị trực tiếp từng thao tác trong danh sách loại tác vụ. Giá trị
           // vẫn được chuẩn hóa về task=vbot_action + parameter khi lưu JSON.
           $directVbotTaskLabels = [];

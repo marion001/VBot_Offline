@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__.'/Api_Helpers.php';
+require_once dirname(__DIR__).'/ActionRegistry.php';
 vbotApiInitialize(['POST']);
 include '../../Configuration.php';
 if ($Config['contact_info']['user_login']['active']) {
@@ -38,17 +39,10 @@ function internalIrValidCommand($command) {
     }
     return true;
 }
-function internalIrAction($value) {
+function internalIrAction($value, array $config) {
     $action = trim((string)$value);
-    $allowed = [
-        'none','wakeup','volume_up','volume_down','volume_max','volume_min',
-        'mic_toggle','media_play_pause','media_stop','media_next','media_previous',
-        'conversation_toggle','wakeup_reply_toggle','stop_tts','cancel_wakeup',
-        'restart_vbot','reboot_os','play_all_local','mute','unmute'
-    ];
-    if (in_array($action, $allowed, true)) return $action;
-    if (preg_match('/^playlist:[A-Za-z0-9_-]{1,80}$/', $action)) return $action;
-    return preg_match('/^radio:[a-f0-9]{12}$/', $action) ? $action : null;
+    if (strpos($action, 'vbot_action:') === 0) $action = substr($action, 12);
+    return array_key_exists($action, vbotActionRegistryOptions($config)) ? $action : null;
 }
 function internalIrPlaylists($root) {
     $manifest = json_decode((string)@file_get_contents($root.'html/includes/cache/PlayLists.json'), true);
@@ -103,7 +97,7 @@ if (isset($_POST['learn'])) {
 }
 if (isset($_POST['save'])) {
     $name = trim($_POST['name'] ?? ''); $reply = trim($_POST['reply'] ?? '');
-    $action = internalIrAction($_POST['action'] ?? 'none');
+    $action = internalIrAction($_POST['action'] ?? 'none', $Config);
     $command = json_decode($_POST['data'] ?? '', true);
     if ($name==='' || mb_strlen($name)>100 || $action === null || !internalIrValidCommand($command))
         vbotApiJsonResponse(['success'=>false,'message'=>'Tên hoặc dữ liệu IR không hợp lệ'], 400);
@@ -128,7 +122,7 @@ if (isset($_POST['bulk_save'])) {
             vbotApiJsonResponse(['success'=>false,'message'=>'Dòng '.($index+1).' không hợp lệ'],400);
         $name = trim((string)($item['name'] ?? ''));
         $reply = trim((string)($item['reply'] ?? ''));
-        $action = internalIrAction($item['action'] ?? 'none');
+        $action = internalIrAction($item['action'] ?? 'none', $Config);
         $command = $item['data'] ?? null;
         $nameKey = mb_strtolower($name, 'UTF-8');
         if ($name === '' || mb_strlen($name) > 100 || mb_strlen($reply) > 500 || $action === null || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $name.$reply))
@@ -159,7 +153,7 @@ if (isset($_POST['edit'])) {
     $index = filter_var($_POST['index'] ?? null, FILTER_VALIDATE_INT);
     $name = trim($_POST['name'] ?? '');
     $reply = trim($_POST['reply'] ?? '');
-    $action = internalIrAction($_POST['action'] ?? 'none');
+    $action = internalIrAction($_POST['action'] ?? 'none', $Config);
     $command = json_decode($_POST['data'] ?? '', true);
     $active = ($_POST['active'] ?? '0') === '1';
     if ($index === false || $name === '' || mb_strlen($name) > 100 || mb_strlen($reply) > 500 || $action === null || !internalIrValidCommand($command))
