@@ -1,8 +1,8 @@
 {
-    "version": "1.2.5",
+    "version": "1.2.6",
     "projectName": "Program VBot Offline",
-    "description": "Fix Lỗi Sử Dụng Thời Tiết Hệ Thống VBot, Bổ sung cập nhật chương trình và giao diện VBot thông qua API hoặc Custom_Component Home Assistant, Bổ Sung Tailscale Funnel - Truy cập WebUI Ngoài Internet",
-    "releaseDate": "02/09/2026",
+	"description": "Nâng cấp cấu hình sử dụng nút nhấn và tùy biến lựa chọn chức năng cần sử dụng",
+    "releaseDate": "04/09/2026",
     "changes": [
         {
             "type": "feature",
