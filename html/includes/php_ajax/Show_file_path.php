@@ -23,6 +23,9 @@ $anonymousReadableRoots = vbotApiAllowedRoots([
   $directory_path.'/includes/other_data',
   $directory_path.'/Backup_Upgrade',
 ]);
+$publicReadableFiles = array_values(array_filter([
+  realpath($VBot_Offline.'resource/VietNam_Localtion.json'),
+]));
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -277,8 +280,12 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
     'data' => null
   ];
   $file_path = vbotApiResolveExistingPath($_GET['file'], $allowedFileRoots, 'file');
+  $isPublicReadableFile = $file_path !== false
+    && in_array($file_path, $publicReadableFiles, true)
+    && !vbotApiIsSensitiveFilePath($file_path);
   if (
-    vbotApiCanExposeFile($file_path, $loginActive, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity)
+    ($isPublicReadableFile
+      || vbotApiCanExposeFile($file_path, $loginActive, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity))
     && is_readable($file_path)
   ) {
     $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);

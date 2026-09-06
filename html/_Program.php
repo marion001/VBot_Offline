@@ -1085,8 +1085,13 @@ include 'html_head.php';
 
                                     $Sound_updated_the_program_successfully_OK = isset($_POST['sound_updated_the_program_successfully']);
                                     if ($programUpdateHealthy && $Sound_updated_the_program_successfully_OK) {
-                                        $sound_updated_the_program_successfully = $VBot_Offline . $Config['smart_config']['smart_wakeup']['sound']['default']['updated_the_program_successfully'];
-                                        echo "<script>playAudio_upgrade('$sound_updated_the_program_successfully');</script>";
+                                        // Dùng cùng tệp thành công chuẩn với Update_Manager.py. Không lấy
+                                        // đường dẫn legacy từ Config đã merge vì bản cấu hình cũ có thể
+                                        // trỏ nhầm tới nội dung thông báo cập nhật thất bại.
+                                        $sound_updated_the_program_successfully = $VBot_Offline . 'resource/sound/default/successfully_updated_the_vbot_program.mp3';
+                                        echo '<script>playAudio_upgrade('
+                                            . json_encode($sound_updated_the_program_successfully, JSON_UNESCAPED_SLASHES)
+                                            . ');</script>';
                                     }
                                     if ($programUpdateHealthy) {
                                         $messages[] = "<br/><font color=green><b>- Cập nhật dữ liệu hoàn tất</b></font>";
