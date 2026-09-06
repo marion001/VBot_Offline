@@ -2743,7 +2743,7 @@ v22.22.3</code></pre>
                   <pre class="bg-dark text-light p-3 rounded"><code>cd /home/pi/VBot_Offline/resource/HomeKit</code></pre>
 
                   <p><strong>Bước 3:Lần lượt cấp quyền chạy và thực hiện cài đặt</strong></p>
-                  <pre class="bg-dark text-light p-3 rounded"><code>chmod +x install.sh
+                  <pre class="bg-dark text-light p-3 rounded"><code>sudo chmod +x install.sh
 ./install.sh</code></pre>
 
                   <p><strong>Bước 4: Bật HomeKit trong trang Cấu hình Config -> Lưu và khởi động lại chương trình VBot</strong></p>
