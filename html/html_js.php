@@ -1993,7 +1993,8 @@ function command_php(command_line, reload_page = null) {
         'check_version_picovoice_porcupine', 'list_time_zones', 'check_time_zones', 'fix_time_zones',
         'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
         'enabled_vbot_api_external', 'disable_vbot_api_external',
-        'install_picovoice', 'install_porcupine', 'set_time_zones', 'submit_rename_airplay'
+        'install_picovoice', 'install_porcupine', 'set_time_zones', 'submit_rename_airplay',
+        'reset_homekit_pairing'
     ];
     if (allowedCommands.indexOf(command_line) === -1) {
         show_message('Thao tác không được hỗ trợ.');
@@ -2010,12 +2011,17 @@ function command_php(command_line, reload_page = null) {
         && !confirm('Tác vụ này sẽ tắt các service không cần thiết và khởi động lại VBot. Bạn có chắc chắn muốn tiếp tục?')) {
         return;
     }
+    if (command_line === 'reset_homekit_pairing'
+        && !confirm('Thao tác này sẽ sao lưu và đặt lại dữ liệu ghép đôi HomeKit trên loa hiện tại. Loa sẽ phải được thêm lại vào ứng dụng Nhà. Bạn có chắc chắn muốn tiếp tục?')) {
+        return;
+    }
     const fileChangeActions = [
         'alsamixer_asound_to_alsamixer', 'update_btwifiset_py', 'fix_airplay_services',
         'install_bluetooth_agent_py', 'install_bthelper', 'install_bluealsa',
         'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_bluetooth_default', 'fix_time_zones',
         'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
-        'enabled_vbot_api_external', 'disable_vbot_api_external', 'install_picovoice', 'install_porcupine'
+        'enabled_vbot_api_external', 'disable_vbot_api_external', 'install_picovoice', 'install_porcupine',
+        'reset_homekit_pairing'
     ];
     if (fileChangeActions.indexOf(command_line) !== -1
         && !confirm('Thao tác này sẽ thay đổi file hoặc service hệ thống. Bạn có chắc chắn muốn tiếp tục?')) {

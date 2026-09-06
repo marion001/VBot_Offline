@@ -2752,8 +2752,48 @@ v22.22.3</code></pre>
                   <pre class="bg-dark text-light p-3 rounded"><code>systemctl --user status vbot-homekit.service --no-pager -l
 avahi-browse -rt _hap._tcp</code></pre>
 
-                  <div class="alert alert-info mb-0">
+                  <div class="alert alert-info">
                     Khi log báo đã kết nối SSE và đã quảng bá qua mDNS, trở lại trang Cấu hình và bấm <b>Mã QR</b> cạnh ô <b>Mã Ghép Đôi, Pairing</b>. Mở ứng dụng Nhà trên iPhone, chọn thêm phụ kiện rồi quét mã QR; bạn vẫn có thể nhập mã ghép đôi thủ công.
+                  </div>
+
+                  <hr>
+                  <h6><strong>Sửa lỗi “Phụ kiện đã ở trong một Nhà khác”</strong></h6>
+                  <p>
+                    Lỗi này thường do dữ liệu ghép đôi HAP cũ còn nằm trong
+                    <code>/home/pi/VBot_Node/HomeKit/persist</code>, đặc biệt sau khi clone thẻ nhớ,
+                    phục hồi hệ thống hoặc sao chép dữ liệu từ một loa VBot khác. Chỉ thực hiện các
+                    lệnh dưới đây trên <strong>loa đang báo lỗi</strong>; không đặt lại loa đã ghép đôi
+                    và đang hoạt động bình thường.
+                  </p>
+
+                  <p><strong>Bước 1: Kiểm tra hai loa có HomeKit ID khác nhau</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>systemctl --user status vbot-homekit.service --no-pager -l -n 100 | grep -E 'ID |cổng|Bridge'</code></pre>
+                  <p>
+                    Dòng <code>ID XX:XX:XX:XX:XX:XX</code> của mỗi loa phải khác nhau.
+                    Hai loa cùng dùng cổng <code>51826</code> là bình thường vì chúng có địa chỉ IP riêng.
+                    Trong <code>Config.json</code> nên giữ <code>homekit.username</code> là <code>auto</code>.
+                  </p>
+
+                  <p><strong>Bước 2: Sao lưu và tạo lại dữ liệu pairing trên loa bị lỗi</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>systemctl --user stop vbot-homekit.service
+mv /home/pi/VBot_Node/HomeKit/persist /home/pi/VBot_Node/HomeKit/persist.old
+mkdir -p /home/pi/VBot_Node/HomeKit/persist
+chmod 0777 /home/pi/VBot_Node/HomeKit/persist
+systemctl --user restart VBot_Offline.service</code></pre>
+
+                  <div class="alert alert-warning">
+                    Nếu lệnh <code>mv</code> báo thư mục không tồn tại, hãy bỏ qua dòng đó rồi tiếp tục
+                    tạo thư mục <code>persist</code>. Thao tác này xóa trạng thái ghép đôi của riêng loa
+                    đang sửa, vì vậy loa đó phải được quét mã QR và thêm lại vào ứng dụng Nhà.
+                  </div>
+
+                  <p><strong>Bước 3: Mở lại WebUI, lấy mã QR mới và thêm phụ kiện vào ứng dụng Nhà.</strong></p>
+                  <p>Sau khi ghép đôi thành công và kiểm tra loa hoạt động ổn định, có thể xóa bản sao:</p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>rm -rf /home/pi/VBot_Node/HomeKit/persist.old</code></pre>
+
+                  <div class="alert alert-danger mb-0">
+                    Không chạy lệnh xóa hoặc đổi tên <code>persist</code> trên loa đang ghép đôi bình
+                    thường, nếu không loa đó cũng sẽ bị mất pairing và phải thêm lại vào Apple Home.
                   </div>
                 </div>
               </div>

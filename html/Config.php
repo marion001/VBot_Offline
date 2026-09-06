@@ -2612,6 +2612,19 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                     echo input_field('homekit_port', 'Cổng Kết Nối', $homekitConfig['port'] ?? 51826, 'required readonly', 'number', '1', '1', '65535', '', 'border-danger');
                     echo input_field('homekit_request_timeout_ms', 'API Timeout (ms)', $homekitConfig['request_timeout_ms'] ?? 4000, 'required', 'number', '100', '500', '60000', '', 'border-success');
                     echo input_field('homekit_sse_reconnect_ms', 'SSE Reconnect (ms)', $homekitConfig['sse_reconnect_ms'] ?? 3000, 'required', 'number', '100', '500', '60000', '', 'border-success');
+                    ?>
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label">Đặt Lại Dữ Liệu Ghép Đôi HomeKit:</label>
+                      <div class="col-sm-9">
+                        <button type="button" class="btn btn-danger rounded-pill" onclick="command_php('reset_homekit_pairing')">
+                          <i class="bi bi-arrow-counterclockwise"></i> Reset, Đặt Lại Dữ Liệu
+                        </button>
+                        <div class="form-text text-danger">
+                          Dùng khi ứng dụng Nhà báo lỗi: phụ kiện đã ở trong một Nhà khác. Dữ liệu pairing hiện tại sẽ được sao lưu và loa phải được thêm lại bằng mã QR.
+                        </div>
+                      </div>
+                    </div>
+                    <?php
                     $homekitRemoteDefaults = [
                       'arrow_up' => ['Phím Lên <i class="bi bi-chevron-up text-danger"></i>', 'volume_up'], 'arrow_down' => ['Phím Xuống <i class="bi bi-chevron-down text-danger"></i>', 'volume_down'],
                       'arrow_left' => ['Phím Trái <i class="bi bi-chevron-left text-danger"></i>', 'media_previous'], 'arrow_right' => ['Phím Phải <i class="bi bi-chevron-right text-danger"></i>', 'media_next'],

@@ -65,7 +65,7 @@ $allowedActions = [
     'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
     'enabled_vbot_api_external', 'disable_vbot_api_external',
     'install_picovoice', 'install_porcupine', 'set_time_zones',
-    'submit_rename_airplay',
+    'submit_rename_airplay', 'reset_homekit_pairing',
 ];
 if (!in_array($action, $allowedActions, true)) {
     error_log('Command AJAX rejected unsupported action: '.$action);
@@ -83,6 +83,7 @@ $confirmationActions = [
     'install_bluetooth_agent_service', 'install_bluetooth_config_main', 'fix_bluetooth_default', 'fix_time_zones',
     'config_auto', 'auto_wifi_manager_only', 'auto_wifi_manager_and_speaker_ip',
     'enabled_vbot_api_external', 'disable_vbot_api_external', 'install_picovoice', 'install_porcupine',
+    'reset_homekit_pairing',
 ];
 if (in_array($action, $confirmationActions, true)
     && (!isset($_POST['confirmed']) || $_POST['confirmed'] !== '1')) {
@@ -222,6 +223,7 @@ $successMessages = [
     'install_porcupine' => 'Đã cài đặt model Porcupine.',
     'set_time_zones' => 'Đã thiết lập múi giờ hệ thống.',
     'submit_rename_airplay' => 'Đã đổi tên AirPlay.',
+    'reset_homekit_pairing' => 'Đã đặt lại dữ liệu ghép đôi HomeKit.',
 ];
 
 if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
@@ -246,6 +248,25 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
         }
         $commands[] = ['command' => $systemCommand, 'label' => $target];
     }
+} elseif ($action === 'reset_homekit_pairing') {
+    $jobSuffix = str_replace('.', '-', uniqid('', true));
+    $persistPath = '/home/pi/VBot_Node/HomeKit/persist';
+    $backupPath = '/home/pi/VBot_Node/HomeKit/persist.old';
+    // Không xóa bản pairing cũ. Nếu persist.old đã có, tạo thêm bản có timestamp.
+    // Restart VBot được lên lịch trễ để phản hồi JSON kịp về trình duyệt.
+    $resetCommand = 'persist='.escapeshellarg($persistPath)
+        .'; backup='.escapeshellarg($backupPath)
+        .'; systemctl --user stop vbot-homekit.service || exit $?'
+        .'; if [ -e "$persist" ]; then '
+        .'if [ -e "$backup" ]; then backup="$backup.$(date +%Y%m%d_%H%M%S)"; fi; '
+        .'mv -- "$persist" "$backup" || exit $?; fi'
+        .'; mkdir -p -- "$persist" && chmod 0777 -- "$persist" || exit $?'
+        .'; if systemctl --user is-active --quiet VBot_Offline.service; then '
+        .'systemd-run --user --quiet --on-active=2s --unit='.escapeshellarg('vbot-homekit-pairing-reset-'.$jobSuffix)
+        .' /usr/bin/systemctl --user restart VBot_Offline.service || exit $?; '
+        .'printf "VBOT_SERVICE_RESTART_SCHEDULED"; '
+        .'else printf "VBOT_MANUAL_RESTART_REQUIRED"; fi';
+    $commands[] = ['command' => $resetCommand, 'label' => 'Đặt lại dữ liệu ghép đôi HomeKit'];
 } elseif ($action === 'fix_asound_airplay') {
     $imageInfoPath = '/os_image_created.txt';
     if (!is_file($imageInfoPath)) {
@@ -610,6 +631,11 @@ $responsePayload = [
     'message' => $successMessages[$action],
     'command_log' => $commandLog
 ];
+if ($action === 'reset_homekit_pairing') {
+    $responsePayload['message'] = strpos($cleanOutput, 'VBOT_SERVICE_RESTART_SCHEDULED') !== false
+        ? 'Đã sao lưu và tạo lại dữ liệu ghép đôi HomeKit. VBot đang chạy bằng service nên hệ thống sẽ tự khởi động lại VBot.'
+        : 'Đã sao lưu và tạo lại dữ liệu ghép đôi HomeKit. VBot đang chạy thủ công; hãy tự khởi động lại chương trình VBot rồi lấy mã QR mới để ghép đôi.';
+}
 if (in_array($action, $outputActions, true)) {
     $responsePayload['display'] = 'modal';
     $responsePayload['data'] = $commandLog;
