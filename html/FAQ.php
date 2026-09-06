@@ -2727,9 +2727,37 @@ v22.22.3</code></pre>
         </div>
     </div>
 </div>
+            <div class="card accordion mt-3" id="accordion_button_homekit_install">
+              <div class="card-body">
+                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_homekit_install" aria-expanded="false" aria-controls="collapse_button_homekit_install">
+                  <i class="bi bi-apple"></i> Hướng Dẫn Thiết Lập VBot HomeKit Lần Đầu
+                </h5>
+                <div id="collapse_button_homekit_install" class="accordion-collapse collapse" data-bs-parent="#accordion_button_homekit_install">
+                  <div class="alert alert-warning">
+                    Chỉ thực hiện một lần trên thiết bị chạy chương trình VBot
+                  </div>
 
+                  <p><strong>Bước 1: Mở Terminal hoặc đăng nhập vào SSH của hệ thống VBot</strong></p>
 
+                  <p><strong>Bước 2: Đi tới thư mục HomeKit</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>cd /home/pi/VBot_Offline/resource/HomeKit</code></pre>
 
+                  <p><strong>Bước 3:Lần lượt cấp quyền chạy và thực hiện cài đặt</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>chmod +x install.sh
+./install.sh</code></pre>
+
+                  <p><strong>Bước 4: Bật HomeKit trong trang Cấu hình Config -> Lưu và khởi động lại chương trình VBot</strong></p>
+
+                  <p><strong>Bước 5: Kiểm tra dịch vụ</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>systemctl --user status vbot-homekit.service --no-pager -l
+avahi-browse -rt _hap._tcp</code></pre>
+
+                  <div class="alert alert-info mb-0">
+                    Khi log báo đã kết nối SSE và đã quảng bá qua mDNS, trở lại trang Cấu hình và bấm <b>Mã QR</b> cạnh ô <b>Mã Ghép Đôi, Pairing</b>. Mở ứng dụng Nhà trên iPhone, chọn thêm phụ kiện rồi quét mã QR; bạn vẫn có thể nhập mã ghép đôi thủ công.
+                  </div>
+                </div>
+              </div>
+            </div>
 
           </div>
     </section>

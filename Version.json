@@ -1,8 +1,8 @@
 {
-    "version": "1.2.6",
+    "version": "1.2.7",
     "projectName": "Program VBot Offline",
-	"description": "Nâng cấp cấu hình sử dụng nút nhấn và tùy biến lựa chọn chức năng cần sử dụng",
-    "releaseDate": "04/09/2026",
+	"description": "Hỗ trợ liên kết với HomeKit, Nâng cấp cấu hình sử dụng nút nhấn và tùy biến lựa chọn chức năng cần sử dụng",
+    "releaseDate": "06/09/2026",
     "changes": [
         {
             "type": "feature",

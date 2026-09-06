@@ -609,10 +609,26 @@ include 'html_head.php';
 					</b>
 				</div>
 			</div>
-
                 </div>
 			  </div>
-			  
+
+            <div class="card-body">
+              <h5 class="card-title"><i class="bi bi-house-fill"></i> HomeKit:</span> </h5>
+              <div class="activity">
+                <div class="activity-item d-flex">
+                  <div class="form-switch">
+					<input class="form-check-input border-danger"disabled type="checkbox" name="homekit_active" id="homekit_active" <?php echo $Config['homekit']['active'] ? 'checked' : ''; ?>>
+                  </div>
+                  <i class="bi bi-dash-lg"></i>
+                  <div class="activity-content">
+                    <b>
+                      <font color="red"> Kích Hoạt </font>
+                    </b>
+                  </div>
+                </div>
+                </div>
+			  </div>
+
             <div class="card-body">
               <h5 class="card-title"><i class="bi bi-speaker"></i> Multiroom Audio > <i class="bi bi-patch-question-fill" onclick="show_message('Phát âm thanh đa vùng trên các loa chạy VBot trong cùng lớp mạng nội bộ, Lan Local')"></i>:</span> </h5>
               <div class="activity">
@@ -628,7 +644,7 @@ include 'html_head.php';
                   </div>
                 </div>
                 </div>
-			  </div>
+			</div>
 			  
           </div>
           <!-- kết thúc chức năng chung -->

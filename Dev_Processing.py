@@ -74,7 +74,7 @@ def tts_client_url(filename):
 ##Sau đó gọi hàm này để bắt đầu phát: media_player.Play_Media('/home/pi/nhac.mp3')
 
 
-#Hàm: media_player.Pause_Media()                    =>      (Dùng để tạm dừng phát nhạc)
+#Hàm: media_player.Pause_Media(user_initiated=True) =>      (Người dùng chủ động tạm dừng phát nhạc)
 #Hàm: media_player.Stop_Media()                     =>      (Dùng để dừng phát nhạc)
 #Hàm: media_player.Stop_Answer()                    =>      (Dùng để dừng phát TTS)
 #Hàm: media_player.play_playlist_song('next')       =>      (Dùng để chuyển sang bài kế tiếp khi đang phát Playlist, Danh sách nhạc)

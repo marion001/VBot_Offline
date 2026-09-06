@@ -1,0 +1,19 @@
+[Unit]
+Description=VBot HomeKit Smart Speaker Bridge
+After=network-online.target VBot_Offline.service
+Wants=network-online.target
+PartOf=VBot_Offline.service
+
+[Service]
+Type=simple
+WorkingDirectory=/home/pi/VBot_Offline/resource/HomeKit
+Environment=NODE_ENV=production
+Environment=VBOT_CONFIG=/home/pi/VBot_Offline/Config.json
+Environment=NODE_PATH=/home/pi/VBot_Node/HomeKit/node_modules
+ExecStart=/usr/local/bin/node /home/pi/VBot_Offline/resource/HomeKit/VBot_HomeKit.js
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+
+[Install]
+# Không enable lúc boot; VBot đọc homekit.active rồi khởi chạy service này.

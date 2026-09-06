@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "controls": [
+    {"id":"volume_up","name":"Tăng âm lượng","group":"system","service":"button","api_method":"action","api_action":"volume_up"},
+    {"id":"volume_down","name":"Giảm âm lượng","group":"system","service":"button","api_method":"action","api_action":"volume_down"},
+    {"id":"vbot_volume_slider","name":"Âm lượng VBot","group":"system","service":"volume","state_key":"volume","api_method":"local_volume"},
+    {"id":"led_brightness","name":"Độ sáng LED","group":"system","service":"brightness","state_key":"ledBrightness","api_name":"led_brightness"},
+    {"id":"music_local","name":"Nguồn nhạc Local","group":"media","service":"switch","state_key":"musicLocal","api_name":"music_local"},
+    {"id":"podcast","name":"Nguồn Podcast","group":"media","service":"switch","state_key":"podcast","api_name":"podcast"},
+    {"id":"radio_source","name":"Nguồn Radio","group":"media","service":"switch","state_key":"radioSource","api_name":"radio"},
+    {"id":"youtube","name":"Nguồn YouTube","group":"media","service":"switch","state_key":"youtube","api_name":"youtube"},
+    {"id":"zing_mp3","name":"Nguồn Zing MP3","group":"media","service":"switch","state_key":"zingMp3","api_name":"zing_mp3"},
+    {"id":"nhaccuatui","name":"Nguồn NhacCuaTui","group":"media","service":"switch","state_key":"nhacCuaTui","api_name":"nhaccuatui"},
+    {"id":"airplay_enabled","name":"AirPlay đang bật","group":"status","service":"occupancy","state_key":"airplayActive"},
+    {"id":"bluetooth_enabled","name":"Bluetooth đang bật","group":"status","service":"occupancy","state_key":"bluetoothActive"},
+    {"id":"multiroom_session","name":"Multiroom đang hoạt động","group":"status","service":"occupancy","state_key":"multiroomActive"},
+    {"id":"waiting_wakeup","name":"VBot đang chờ đánh thức","group":"status","service":"occupancy","state_key":"waitingWakeup"},
+    {"id":"recording","name":"VBot đang thu âm","group":"status","service":"occupancy","state_key":"recording"},
+    {"id":"stt_processing","name":"VBot đang nhận dạng STT","group":"status","service":"occupancy","state_key":"sttProcessing"},
+    {"id":"assistant_processing","name":"Trợ lý đang xử lý","group":"status","service":"occupancy","state_key":"assistantProcessing"},
+    {"id":"tts_active","name":"VBot đang phát TTS","group":"status","service":"occupancy","state_key":"ttsActive"},
+    {"id":"media_playing","name":"VBot đang phát media","group":"status","service":"occupancy","state_key":"mediaPlaying"},
+    {"id":"mqtt_enabled","name":"MQTT đã kích hoạt","group":"status","service":"occupancy","state_key":"mqttEnabled"},
+    {"id":"mqtt_connected","name":"MQTT đang kết nối","group":"status","service":"occupancy","state_key":"mqttConnected"},
+    {"id":"multiroom_coordinator","name":"Multiroom Coordinator","group":"status","service":"occupancy","state_key":"multiroomCoordinator"},
+    {"id":"multiroom_client","name":"Multiroom Client","group":"status","service":"occupancy","state_key":"multiroomClient"}
+    ,{"id":"multiroom_pause","name":"Tạm dừng Multiroom","group":"multiroom","service":"button","api_method":"multiroom_action","api_action":"pause"}
+    ,{"id":"multiroom_resume","name":"Tiếp tục Multiroom","group":"multiroom","service":"button","api_method":"multiroom_action","api_action":"resume"}
+    ,{"id":"multiroom_stop","name":"Dừng Multiroom","group":"multiroom","service":"button","api_method":"multiroom_action","api_action":"stop"}
+    ,{"id":"multiroom_mute","name":"Tắt tiếng Multiroom","group":"multiroom","service":"switch","state_key":"multiroomMuted","api_method":"multiroom_mute"}
+    ,{"id":"multiroom_master_volume","name":"Âm lượng Multiroom","group":"multiroom","service":"volume","state_key":"multiroomMasterVolume","api_method":"multiroom_volume"}
+    ,{"id":"multiroom_paused","name":"Multiroom đang tạm dừng","group":"status","service":"occupancy","state_key":"multiroomPaused"}
+  ]
+}

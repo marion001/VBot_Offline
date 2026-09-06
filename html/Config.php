@@ -337,6 +337,69 @@ if (isset($_POST['all_config_save'])) {
   $Config['api']['auth']['active'] = isset($_POST['api_auth_active']);
   $Config['api']['auth']['api_key'] = $_POST['api_auth_key'];
 
+  #Cấu hình VBot HomeKit Bridge
+  $homekitCurrent = isset($Config['homekit']) && is_array($Config['homekit']) ? $Config['homekit'] : [];
+  $Config['homekit']['active'] = isset($_POST['homekit_active']);
+  $homekitAccessoryType = strtolower(trim((string)($_POST['homekit_accessory_type'] ?? 'hybrid')));
+  $Config['homekit']['accessory_type'] = in_array($homekitAccessoryType, ['speaker', 'television', 'switches', 'hybrid'], true)
+    ? $homekitAccessoryType : 'hybrid';
+  $Config['homekit']['manufacturer'] = trim((string)($_POST['homekit_manufacturer'] ?? 'VBot')) ?: 'VBot';
+  $Config['homekit']['model'] = trim((string)($_POST['homekit_model'] ?? 'VBot Smart Speaker')) ?: 'VBot Smart Speaker';
+  $Config['homekit']['serial_number'] = trim((string)($_POST['homekit_serial_number'] ?? 'VBot-Assistant')) ?: 'VBot-Assistant';
+  $homekitPincode = trim((string)($_POST['homekit_pincode'] ?? '031-45-154'));
+  #Cho phép nhập 031-45-154, 03145154 hoặc 0314-5154; luôn lưu theo chuẩn HAP XXX-XX-XXX.
+  $homekitPincodeDigits = preg_replace('/[^0-9]/', '', $homekitPincode);
+  if (preg_match('/^\d{8}$/', $homekitPincodeDigits)) {
+    $Config['homekit']['pincode'] = substr($homekitPincodeDigits, 0, 3) . '-'
+      . substr($homekitPincodeDigits, 3, 2) . '-'
+      . substr($homekitPincodeDigits, 5, 3);
+  } else {
+    $Config['homekit']['pincode'] = $homekitCurrent['pincode'] ?? '031-45-154';
+  }
+  $homekitUsername = strtoupper(trim((string)($_POST['homekit_username'] ?? 'auto')));
+  $Config['homekit']['username'] = ($homekitUsername === 'AUTO' || preg_match('/^([0-9A-F]{2}:){5}[0-9A-F]{2}$/', $homekitUsername))
+    ? ($homekitUsername === 'AUTO' ? 'auto' : $homekitUsername)
+    : ($homekitCurrent['username'] ?? 'auto');
+  $Config['homekit']['port'] = max(1, min(65535, intval($_POST['homekit_port'] ?? 51826)));
+  $Config['homekit']['request_timeout_ms'] = max(500, min(60000, intval($_POST['homekit_request_timeout_ms'] ?? 4000)));
+  $Config['homekit']['sse_reconnect_ms'] = max(500, min(60000, intval($_POST['homekit_sse_reconnect_ms'] ?? 3000)));
+  $homekitRemoteDefaults = [
+    'arrow_up' => 'volume_up', 'arrow_down' => 'volume_down',
+    'arrow_left' => 'media_previous', 'arrow_right' => 'media_next',
+    'select' => 'wakeup', 'back' => 'cancel_wakeup', 'exit' => 'media_stop',
+    'play_pause' => 'media_play_pause', 'information' => 'speak_volume',
+    'rewind' => 'media_previous', 'fast_forward' => 'media_next',
+    'next_track' => 'media_next', 'previous_track' => 'media_previous',
+    'volume_up' => 'volume_up', 'volume_down' => 'volume_down',
+    'mute' => 'mute', 'power' => 'media_stop'
+  ];
+  foreach ($homekitRemoteDefaults as $homekitRemoteKey => $homekitRemoteDefault) {
+    $homekitCurrentRemote = $homekitCurrent['remote_buttons'][$homekitRemoteKey] ?? $homekitRemoteDefault;
+    if (!is_array($homekitCurrentRemote)) {
+      $homekitCurrentRemote = ['action' => (string)$homekitCurrentRemote, 'actions_by_state' => []];
+    }
+    $homekitFallbackAction = vbotActionRegistryNormalize(
+      $Config,
+      $homekitCurrentRemote['action'] ?? $homekitRemoteDefault
+    );
+    $homekitPostedRemote = $_POST['homekit_remote_' . $homekitRemoteKey] ?? [];
+    $homekitPostedRemote = is_array($homekitPostedRemote) ? $homekitPostedRemote : [];
+    $Config['homekit']['remote_buttons'][$homekitRemoteKey] = [
+      'action' => $homekitFallbackAction,
+      'actions_by_state' => vbotSaveStateActions(
+        $Config,
+        $homekitPostedRemote['actions_by_state'] ?? [],
+        $homekitFallbackAction
+      )
+    ];
+  }
+  // iOS co the gui cung mot vung trai/phai bang ma ARROW hoac TRACK tuy
+  // phien ban/ngu canh. Luu hai ma cung mot cau hinh de khong thuc thi nham.
+  $Config['homekit']['remote_buttons']['previous_track'] = $Config['homekit']['remote_buttons']['arrow_left'];
+  $Config['homekit']['remote_buttons']['rewind'] = $Config['homekit']['remote_buttons']['arrow_left'];
+  $Config['homekit']['remote_buttons']['next_track'] = $Config['homekit']['remote_buttons']['arrow_right'];
+  $Config['homekit']['remote_buttons']['fast_forward'] = $Config['homekit']['remote_buttons']['arrow_right'];
+
   #Cập nhật giá trị đường dẫn path web ui
   $Config['web_interface']['path'] = isset($_POST['webui_path']) ? $_POST['webui_path'] : $directory_path;
   $Config['web_interface']['errors_display'] = isset($_POST['webui_errors_display']) ? true : false;
@@ -2500,6 +2563,126 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                 </div>
               </div>
             </div>
+            </div>
+
+            <?php
+              $homekitConfig = isset($Config['homekit']) && is_array($Config['homekit']) ? $Config['homekit'] : [];
+              $homekitQrPath = '/home/pi/VBot_Node/HomeKit/HomeKit_Pairing_QR.svg';
+              $homekitQrSvg = @file_get_contents($homekitQrPath);
+              $homekitQrDataUri = (is_string($homekitQrSvg) && strpos(ltrim($homekitQrSvg), '<svg') === 0)
+                ? 'data:image/svg+xml;base64,' . base64_encode($homekitQrSvg) : '';
+              $homekitPairingDigits = preg_replace('/[^0-9]/', '', (string)($homekitConfig['pincode'] ?? '031-45-154'));
+            ?>
+            <div class="card accordion" id="accordion_button_setting_homekit">
+              <div class="card-body">
+                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_homekit" aria-expanded="false" aria-controls="collapse_button_setting_homekit">
+                  <i class="bi bi-apple"></i>&nbsp; Liên Kết, Thêm Loa VBot Vào HomeKit: <?php echo !empty($homekitConfig['active']) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
+                </h5>
+                <div id="collapse_button_setting_homekit" class="accordion-collapse collapse" data-bs-parent="#accordion_button_setting_homekit">
+                  <div class="alert alert-success" role="alert">
+				  <div class="alert alert-warning mt-3 mb-0"><i class="bi bi-info-circle"></i> 
+				  <br/> - Lần đầu sử dụng, cần chạy file thiết lập cấu hình HomeKit vào hệ thống: <a class="alert-link" href="FAQ.php#accordion_button_homekit_install" target="_blank" rel="noopener noreferrer">Nhấn để xem hướng dẫn install.sh</a><br/>
+				  - HomeKit chỉ chạy sau khi API VBot sẵn sàng. Sau khi thay đổi, hãy lưu và khởi động lại VBot.</div>
+
+                    <div class="row mb-3">
+                      <label class="col-sm-3 col-form-label" for="homekit_active">Kích hoạt:</label>
+                      <div class="col-sm-9"><div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="homekit_active" id="homekit_active" <?php echo !empty($homekitConfig['active']) ? 'checked' : ''; ?>>
+                      </div></div>
+                    </div>
+                    <?php
+                    echo select_field('homekit_accessory_type', 'Kiểu Phụ Kiện Chính', [
+                      'hybrid' => 'Kết hợp Loa + Remote (Khuyên dùng)',
+                      'speaker' => 'Loa thông minh (SmartSpeaker)',
+                      'television' => 'Remote điều khiển media (Television)',
+                      'switches' => 'Chỉ dùng Nút và Công tắc'
+                    ], $homekitConfig['accessory_type'] ?? 'hybrid', ['speaker','television', 'switches']);
+                    echo input_field('homekit_manufacturer', 'Nhà Sản Xuất', $homekitConfig['manufacturer'] ?? 'VBot', 'required', 'text', '', '', '', '', 'border-success');
+                    echo input_field('homekit_model', 'Model', $homekitConfig['model'] ?? 'VBot Smart Speaker', 'required', 'text', '', '', '', '', 'border-success');
+                    echo input_field('homekit_serial_number', 'Serial Number Dự Phòng', $homekitConfig['serial_number'] ?? 'VBot-Assistant', 'required', 'text', '', '', '', 'HomeKit Chỉ dùng giá trị này khi thiết bị không đọc được OTP định danh riêng cho mỗi thiết bị, Mỗi Serial Number sẽ định danh riêng cho thiết bị, nếu có nhiều thiết bị VBot cần thay đổi Serial Number khác nhau để tránh bị trùng', 'border-success');
+                    echo input_field(
+                      'homekit_pincode', 'Mã Ghép Đôi, Pairing', $homekitConfig['pincode'] ?? '000-00-000',
+                      'required', 'text', '', '', '',
+                      '- 8 ký tự số, có thể thay đổi cách nhập tùy ý như: 000-00-00, 00000000 hoặc 0000-0000 Hệ thống tự động chuẩn hóa khi lưu<br/><br/>- Tuy nhiên không phải mọi dãy số đều hợp lệ. Theo công cụ chính thức của Apple, không được dùng mã toàn một số lặp lại <b>(Nên Dùng Số Ngẫu Nhiên)</b>',
+                      'border-success', '<i class="bi bi-qr-code"></i> Xem Mã QR',
+                      "bootstrap.Modal.getOrCreateInstance(document.getElementById('homekitPairingQrModal')).show()",
+                      'btn btn-primary border-success'
+                    );
+                    echo input_field('homekit_username', 'HomeKit Username', $homekitConfig['username'] ?? 'auto', 'required readonly', 'text', '', '', '', 'Nên giữ auto, nếu thay đổi có thể phải ghép đôi lại.', 'border-danger');
+                    echo input_field('homekit_port', 'Cổng Kết Nối', $homekitConfig['port'] ?? 51826, 'required readonly', 'number', '1', '1', '65535', '', 'border-danger');
+                    echo input_field('homekit_request_timeout_ms', 'API Timeout (ms)', $homekitConfig['request_timeout_ms'] ?? 4000, 'required', 'number', '100', '500', '60000', '', 'border-success');
+                    echo input_field('homekit_sse_reconnect_ms', 'SSE Reconnect (ms)', $homekitConfig['sse_reconnect_ms'] ?? 3000, 'required', 'number', '100', '500', '60000', '', 'border-success');
+                    $homekitRemoteDefaults = [
+                      'arrow_up' => ['Phím Lên <i class="bi bi-chevron-up text-danger"></i>', 'volume_up'], 'arrow_down' => ['Phím Xuống <i class="bi bi-chevron-down text-danger"></i>', 'volume_down'],
+                      'arrow_left' => ['Phím Trái <i class="bi bi-chevron-left text-danger"></i>', 'media_previous'], 'arrow_right' => ['Phím Phải <i class="bi bi-chevron-right text-danger"></i>', 'media_next'],
+                      'select' => ['Phím Giữa Chọn/OK <i class="bi bi-circle text-danger"></i>', 'wakeup'], 'back' => ['Phím <font class="text-danger">Quay Lại</font>', 'cancel_wakeup'],
+                      'exit' => ['Phím Thoát', 'media_stop'], 'play_pause' => ['Phím Phát/Tạm Dừng <i class="bi bi-play-fill text-danger"></i><i class="bi bi-pause-fill text-danger"></i>', 'media_play_pause'],
+                      'information' => ['Phím Thông Tin <i class="bi bi-info text-danger"></i>', 'speak_volume'], 'rewind' => ['Phím Tua Lùi', 'media_previous'],
+                      'fast_forward' => ['Phím Tua Tới', 'media_next'], 'next_track' => ['Phím Bài Tiếp', 'media_next'],
+                      'previous_track' => ['Phím Bài Trước', 'media_previous'],
+                      'volume_up' => ['Phím Volume + <font class="text-danger">(Nút nhấn vật lý)</font>', 'volume_up'],
+                      'volume_down' => ['Phím Volume - <font class="text-danger">(Nút nhấn vật lý)</font>', 'volume_down'],
+                      'mute' => ['Phím Mute <i class="bi bi-volume-mute text-danger"></i>', 'mute'],
+                      'power' => ['Phím Nguồn <i class="bi bi-power text-danger"></i>', 'media_stop']
+                    ];
+                    echo '<div class="alert alert-danger">
+							- Gán Chức Năng VBot vào Phím trên APP hệ thống của IOS là: <b>ĐK Từ Xa (Remote)</b><br/>
+							- Mỗi phím có thể thực hiện hành động khác nhau theo 6 trạng thái của VBot.<br/>
+							- Chọn (Không thực hiện) để vô hiệu hóa phím ở trạng thái tương ứng.</div>';
+                    echo '<div class="table-responsive w-100">'
+                      .'<table class="table table-bordered border-primary align-middle mb-0 vbot-homekit-remote-table">'
+                      .'<thead class="table-primary"><tr>'
+                      .'<th scope="col" style="text-align: center; vertical-align: middle;">Tên phím</th>'
+                      .'<th scope="col" style="text-align: center; vertical-align: middle;">Hành động tương ứng</th>'
+                      .'</tr></thead><tbody>';
+                    foreach ($homekitRemoteDefaults as $homekitRemoteKey => $homekitRemoteDefinition) {
+                      // PREVIOUS/NEXT_TRACK la ma thay the ma iOS co the gui cho
+                      // chinh Phim Trai/Phai; khong hien them dong cau hinh trung.
+                      if (in_array($homekitRemoteKey, ['previous_track', 'rewind', 'next_track', 'fast_forward'], true)) continue;
+                      $homekitRemoteValue = $homekitConfig['remote_buttons'][$homekitRemoteKey] ?? $homekitRemoteDefinition[1];
+                      if (!is_array($homekitRemoteValue)) {
+                        $homekitRemoteValue = ['action' => (string)$homekitRemoteValue, 'actions_by_state' => []];
+                      }
+                      $homekitRemoteBaseAction = vbotActionRegistryNormalize($Config, $homekitRemoteValue['action'] ?? $homekitRemoteDefinition[1]);
+                      $homekitRemoteStateDefaults = array_fill_keys(array_keys(vbotActionRegistryStates()), $homekitRemoteBaseAction);
+                      echo '<tr>'
+                        .'<th scope="row" class="fw-semibold" style="text-align: center; vertical-align: middle;">'.$homekitRemoteDefinition[0].'</th>'
+                        .'<td>'
+                        .vbotRenderStateActionFields($Config, $homekitRemoteValue, 'homekit_remote_' . $homekitRemoteKey, $homekitRemoteStateDefaults)
+                        .'</td></tr>';
+                    }
+                    echo '</tbody></table></div>';
+                    ?>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="modal fade" id="homekitPairingQrModal" tabindex="-1" aria-labelledby="homekitPairingQrModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="homekitPairingQrModalLabel">Mã QR Ghép Đôi VBot HomeKit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+                  </div>
+                  <div class="modal-body text-center">
+                    <?php if ($homekitQrDataUri !== ''): ?>
+                      <img src="<?php echo htmlspecialchars($homekitQrDataUri, ENT_QUOTES); ?>" class="img-fluid bg-white rounded p-2" style="max-width:360px" alt="Mã QR ghép đôi VBot HomeKit">
+						<div class="alert alert-danger" role="alert">
+Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối bằng mã thủ công bên dưới đây
+</div>
+                      <div class="mt-3">Mã nhập thủ công: <strong class="fs-4 font-monospace"><?php echo htmlspecialchars(substr($homekitPairingDigits, 0, 4) . '-' . substr($homekitPairingDigits, 4, 4), ENT_QUOTES); ?></strong></div>
+                      <div class="text-muted mt-2">Mở ứng dụng <b>Nhà</b> trên iPhone, chọn <b>Thêm phụ kiện</b> rồi quét mã này.</div>
+                    <?php else: ?>
+                      <div class="alert alert-warning mb-0"> - Chưa có mã QR. Hãy chạy file cài đặt, bật HomeKit và khởi động VBot để bridge tạo mã QR lần đầu<br/>
+					  <a class="alert-link" href="FAQ.php#accordion_button_homekit_install" target="_blank" rel="noopener noreferrer">- Nhấn để xem hướng dẫn install.sh</a></div>
+                    <?php endif; ?>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <div class="card accordion" id="accordion_button_setting_homeassistant">

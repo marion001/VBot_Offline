@@ -55,6 +55,207 @@
             }
         }
     },
+    "homekit": {
+        "active": false,
+        "accessory_type": "hybrid",
+        "manufacturer": "VBot",
+        "model": "VBot Smart Speaker",
+        "serial_number": "VBot-Assistant",
+        "pincode": "140-82-020",
+        "username": "auto",
+        "port": 51826,
+        "request_timeout_ms": 4000,
+        "sse_reconnect_ms": 3000,
+        "remote_buttons": {
+            "arrow_up": {
+                "action": "volume_up",
+                "actions_by_state": {
+                    "playlist": "volume_up",
+                    "idle": "volume_up",
+                    "media": "volume_up",
+                    "media_paused": "volume_up",
+                    "tts": "volume_up",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "arrow_down": {
+                "action": "volume_down",
+                "actions_by_state": {
+                    "playlist": "volume_down",
+                    "idle": "volume_down",
+                    "media": "volume_down",
+                    "media_paused": "volume_down",
+                    "tts": "volume_down",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "arrow_left": {
+                "action": "media_previous",
+                "actions_by_state": {
+                    "playlist": "media_previous",
+                    "idle": "volume_min",
+                    "media": "media_previous",
+                    "media_paused": "media_previous",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "arrow_right": {
+                "action": "media_next",
+                "actions_by_state": {
+                    "playlist": "media_next",
+                    "idle": "volume_max",
+                    "media": "media_next",
+                    "media_paused": "media_next",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "select": {
+                "action": "wakeup",
+                "actions_by_state": {
+                    "playlist": "wakeup",
+                    "idle": "wakeup",
+                    "media": "wakeup",
+                    "media_paused": "wakeup",
+                    "tts": "wakeup",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "back": {
+                "action": "cancel_wakeup",
+                "actions_by_state": {
+                    "playlist": "media_stop",
+                    "idle": "none",
+                    "media": "media_stop",
+                    "media_paused": "media_stop",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "exit": {
+                "action": "media_stop",
+                "actions_by_state": {
+                    "playlist": "media_stop",
+                    "idle": "media_stop",
+                    "media": "media_stop",
+                    "media_paused": "media_stop",
+                    "tts": "media_stop",
+                    "recording": "media_stop"
+                }
+            },
+            "play_pause": {
+                "action": "media_play_pause",
+                "actions_by_state": {
+                    "playlist": "media_play_pause",
+                    "idle": "media_play_pause",
+                    "media": "media_play_pause",
+                    "media_paused": "media_play_pause",
+                    "tts": "stop_tts",
+                    "recording": "media_play_pause"
+                }
+            },
+            "information": {
+                "action": "speak_volume",
+                "actions_by_state": {
+                    "playlist": "speak_volume",
+                    "idle": "speak_volume",
+                    "media": "speak_volume",
+                    "media_paused": "speak_volume",
+                    "tts": "speak_volume",
+                    "recording": "speak_volume"
+                }
+            },
+            "rewind": {
+                "action": "media_previous",
+                "actions_by_state": {
+                    "playlist": "media_previous",
+                    "idle": "volume_min",
+                    "media": "media_previous",
+                    "media_paused": "media_previous",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "fast_forward": {
+                "action": "media_next",
+                "actions_by_state": {
+                    "playlist": "media_next",
+                    "idle": "volume_max",
+                    "media": "media_next",
+                    "media_paused": "media_next",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "next_track": {
+                "action": "media_next",
+                "actions_by_state": {
+                    "playlist": "media_next",
+                    "idle": "volume_max",
+                    "media": "media_next",
+                    "media_paused": "media_next",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "previous_track": {
+                "action": "media_previous",
+                "actions_by_state": {
+                    "playlist": "media_previous",
+                    "idle": "volume_min",
+                    "media": "media_previous",
+                    "media_paused": "media_previous",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "volume_up": {
+                "action": "volume_up",
+                "actions_by_state": {
+                    "playlist": "volume_up",
+                    "idle": "volume_up",
+                    "media": "volume_up",
+                    "media_paused": "volume_up",
+                    "tts": "volume_up",
+                    "recording": "none"
+                }
+            },
+            "volume_down": {
+                "action": "volume_down",
+                "actions_by_state": {
+                    "playlist": "volume_down",
+                    "idle": "volume_down",
+                    "media": "volume_down",
+                    "media_paused": "volume_down",
+                    "tts": "volume_down",
+                    "recording": "none"
+                }
+            },
+            "power": {
+                "action": "media_stop",
+                "actions_by_state": {
+                    "playlist": "media_stop",
+                    "idle": "none",
+                    "media": "media_stop",
+                    "media_paused": "media_stop",
+                    "tts": "stop_tts",
+                    "recording": "cancel_wakeup"
+                }
+            },
+            "mute": {
+                "action": "mute",
+                "actions_by_state": {
+                    "playlist": "mute",
+                    "idle": "mic_on_off",
+                    "media": "mute",
+                    "media_paused": "none",
+                    "tts": "none",
+                    "recording": "none"
+                }
+            }
+        }
+    },
     "web_interface": {
         "external": {
             "active": true

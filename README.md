@@ -2,6 +2,22 @@
 
 VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Raspberry Pi, được tối ưu cho Raspberry Pi Zero 2W. Dự án thuần Việt dùng để điều khiển nhà thông minh trong mạng nội bộ gia đình (Local), kết hợp nhận diện từ khóa đánh thức (Picovoice, Snowboy), Speech-to-Text (STT), xử lý lệnh, trợ lý AI, Text-to-Speech (TTS), phát media, Home Assistant, MQTT, AirPlay, Bluetooth, WebSocket client và giao diện quản trị WebUI.
 
+### VBot HomeKit Bridge
+
+VBot có thể liên kết trực tiếp với **Apple HomeKit** để xuất loa, media, Remote iOS,
+microphone, trợ lý AI, playlist, radio, điều khiển hệ thống và Multiroom lên ứng dụng
+**Nhà** trên iPhone/iPad. Lệnh điều khiển được gửi vào REST API VBot, còn trạng thái
+được cập nhật hai chiều theo thời gian thực qua SSE `all_info`.
+
+Bridge hỗ trợ các kiểu phụ kiện `speaker`, `television`, `switches` và `hybrid`;
+phím trong giao diện **ĐK Từ Xa (Remote)** của iOS có thể gán chức năng riêng theo
+sáu trạng thái hoạt động của VBot. HomeKit chạy và dừng theo vòng đời VBot, sử dụng
+OTP phần cứng Raspberry Pi làm danh tính ổn định và giữ dữ liệu pairing bên ngoài
+thư mục mã nguồn.
+
+Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặc
+[tài liệu HomeKit chi tiết](resource/HomeKit/README.md).
+
 ## Mục lục
 - Tài Liệu OS IMG Liên Quan Tới VBot: [Google Drive - VBot Images](https://drive.google.com/drive/folders/1rB3P8rev2byxgRsXS7mAdkKRj7j0M4xZ)
 - [Cài VBot Client Cho ESP, PhicommR1](https://github.com/marion001/VBot_Client_Offline)
@@ -12,6 +28,7 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 - [Luồng xử lý giọng nói](#luồng-xử-lý-giọng-nói)
 - [Audio, AirPlay và Bluetooth](#audio-airplay-và-bluetooth)
 - [Multiroom Audio](#multiroom-audio)
+- [Liên kết Apple HomeKit](#liên-kết-apple-homekit)
 - [WebSocket Streaming](#websocket-streaming)
 - [REST API, SSE và MQTT](#rest-api-sse-và-mqtt)
 - [Cập nhật chương trình và WebUI](#cập-nhật-chương-trình-và-webui)
@@ -78,6 +95,7 @@ VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Rasp
 ### Các tính năng mới nổi bật
 
 - **Multiroom Audio:** một VBot làm coordinator phát đồng bộ tới nhiều loa VBot trong LAN; hỗ trợ nhóm loa, metadata, volume tổng và volume từng luồng.
+- **Apple HomeKit:** đưa loa, Remote iOS, media, trợ lý, playlist, radio, hệ thống và Multiroom vào ứng dụng Nhà qua VBot HomeKit Bridge; trạng thái được đồng bộ bằng SSE và lệnh điều khiển gọi trực tiếp API VBot.
 - **Trạng thái media thống nhất:** Local Media, AirPlay, Bluetooth và Multiroom cùng đi qua state machine dùng chung để hạn chế LED, pause/resume và metadata bị lệch trạng thái.
 - **Playlist mở rộng:** quản lý nhiều playlist có ID/tên riêng, chế độ phát, next/previous, loop và xuất trạng thái qua API/MQTT.
 - **XiaoZhi MCP:** hỗ trợ công cụ điều khiển hệ thống, Home Assistant, playlist, lịch nhắc và plugin MCP do người dùng tự viết.
@@ -135,6 +153,7 @@ Các thành phần chính:
 | `Manual_Update_Program.py` | Cập nhật/rollback chương trình qua SSH và bàn giao kết quả cho Update Manager. |
 | `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI. |
 | `VBot_Multiroom_*.py` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
+| `resource/HomeKit/` | VBot HomeKit Bridge, registry phụ kiện, trình cài Node.js và systemd user service. |
 | `Lib_System.py`, `Lib_Audio.py`, `Lib_AirPlay.py`, `Lib_Bluetooth.py`, `Lib_Multiroom.py` | Các lớp chức năng được tách khỏi facade `Lib.py`. |
 | `html/` | WebUI PHP, JavaScript, CSS và tài nguyên giao diện. |
 | `resource/` | Âm thanh, service, script cài đặt và dữ liệu tích hợp. |
@@ -256,6 +275,57 @@ Các khả năng chính:
 - Không đánh dấu VBot sẵn sàng nhận stream cho đến khi chuỗi khởi động và âm báo startup hoàn tất.
 
 Trạng thái Multiroom được đưa vào payload media dùng chung và endpoint diagnostics. Khi Multiroom đang phát, LED và API không được báo nhầm thành Local Media.
+
+## Liên kết Apple HomeKit
+
+VBot có thể xuất các chức năng của loa lên ứng dụng **Nhà (Apple Home)** thông qua
+**VBot HomeKit Bridge**, xây dựng bằng HAP-NodeJS. Bridge chạy hoàn toàn trong mạng
+nội bộ và liên kết với chương trình VBot qua hai luồng:
+
+- REST API VBot nhận lệnh điều khiển như volume, mute/unmute, phát/tạm dừng,
+  wakeup, microphone, chế độ hội thoại, playlist, radio và Multiroom.
+- SSE `all_info` đẩy trạng thái hiện tại trở lại HomeKit mà không cần polling liên tục.
+
+Người dùng có thể chọn kiểu phụ kiện chính `speaker`, `television`, `switches` hoặc
+`hybrid`. Chế độ `hybrid` cung cấp đồng thời loa, các tile điều khiển tương thích rộng
+và giao diện **ĐK Từ Xa (Remote)** của iOS. Các phím Remote có thể được gán action
+riêng theo sáu trạng thái: Playlist, chờ, đang phát, đang tạm dừng, TTS và thu âm.
+Phím Volume +/− trong cấu hình tương ứng với hai phím âm lượng vật lý cạnh iPhone
+khi Remote đang mở.
+
+HomeKit dùng OTP hàng `28:` từ `vcgencmd otp_dump` làm danh tính phần cứng ổn định,
+tránh trùng accessory khi nhiều loa được tạo từ cùng một image hệ điều hành. Dữ liệu
+pairing được giữ tại `/home/pi/VBot_Node/HomeKit/persist`; không xóa thư mục này khi
+cập nhật nếu muốn giữ nguyên liên kết với Apple Home.
+
+### Cài đặt HomeKit lần đầu
+
+```bash
+cd /home/pi/VBot_Offline/resource/HomeKit
+chmod +x install.sh
+./install.sh
+```
+
+Trình cài đặt kiểm tra và cài đúng Node.js, đặt dependency tại
+`/home/pi/VBot_Node/HomeKit/node_modules`, cài `vbot-homekit.service` và không tự chạy
+VBot. Sau đó mở WebUI, vào **Config → Liên Kết, Thêm Loa VBot Vào HomeKit**, bật
+HomeKit, chọn kiểu phụ kiện, lưu cấu hình rồi khởi động lại VBot. Bridge chỉ được chạy
+sau khi API VBot sẵn sàng và sẽ dừng theo vòng đời VBot.
+
+Mã QR ghép đôi được tạo tại:
+
+```text
+/home/pi/VBot_Node/HomeKit/HomeKit_Pairing_QR.svg
+```
+
+Có thể mở mã QR ngay trong WebUI rồi chọn **Nhà → + → Thêm phụ kiện** trên iPhone.
+Thay đổi cấu hình không cần chạy lại `install.sh` hoặc pair lại; chỉ cần lưu và khởi
+động lại VBot. Bridge không theo dõi file và không tự restart giữa lúc VBot đang chạy,
+nhằm giữ kết nối ổn định và tránh dồn lệnh điều khiển.
+
+Tài liệu chi tiết, kiểm tra và xử lý sự cố nằm tại
+[`resource/HomeKit/README.md`](resource/HomeKit/README.md) và mục HomeKit trong
+[`html/FAQ.php`](html/FAQ.php).
 
 ## WebSocket Streaming
 

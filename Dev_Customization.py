@@ -41,7 +41,7 @@ from Media_Player import media_player
 #Các tham số sử dụng cho Play_Sound như: Lib.Sound_Finish, Lib.Sound_Start, Lib.Sound_Volume_Change
 
 #media_player.Play_Media("http://fdsf.vn/thuyen_quyen.mp3") = dùng để phát nhạc, podcast, audio, radio, stream (có tích hợp các lệnh để điều khiển: play, pause, stop, continue)
-#Các tham số để điều khiển Play_Media: media_player.Pause_Media(), media_player.Stop_Media(), media_player.continue_play()
+#Các tham số để điều khiển Play_Media: media_player.Pause_Media(user_initiated=True), media_player.Stop_Media(), media_player.continue_play()
 #Tham số để Tua khi đang phát Play_Media:  media_player.media_player.set_time(124587) 124587 là ví dụ về thời gian cần tua, dưới dạng số nguyên dương của vlc
 
 #Các tham số khác khi sử dụng media_player: Lib.audio_media_title, Lib.audio_media_url, Lib.media_player_source, Lib.audio_media_cover
@@ -151,7 +151,7 @@ async def dev_skill(input_text):
     
     #Sử dụng các lệnh điều khiển Media Player:
     #Tạm dừng phát nhạc
-    media_player.Pause_Media()
+    media_player.Pause_Media(user_initiated=True)
     #Tiếp tục phát nhạc đã tạm dừng trước đó
     media_player.continue_play()
     #Stop, dừng phát nhạc
