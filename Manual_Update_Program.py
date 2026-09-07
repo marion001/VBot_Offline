@@ -38,7 +38,7 @@ ERROR_LOG = ROOT / "resource/log/Vbot_error.log"
 MARKER = ROOT / ".program_upgrade_in_progress"
 UPGRADE_LOCK = ROOT / ".vbot_upgrade.lock"
 UPDATE_RESULT = ROOT / ".vbot_update_result.json"
-SUCCESS_SOUND = ROOT / "resource/sound/default/vbot_program_updated_successfully.mp3"
+SUCCESS_SOUND = ROOT / "resource/sound/default/updated_the_program_successfully.mp3"
 ERROR_SOUND = ROOT / "resource/sound/default/vbot_program_update_failed.mp3"
 CORE_UPDATE_JSON = {
     "Version.json",
