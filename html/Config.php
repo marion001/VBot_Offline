@@ -1562,7 +1562,7 @@ include 'html_head.php';
 				<?php
 				echo input_field('api_auth_key', 'Key Authentication', $Config['api']['auth']['api_key'], '', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
 				?>
-				<p class="text-primary"><b>Lưu Ý:</b> <br/> - Khi chức năng này được kích hoạt, bạn cần phải bật thêm tính năng: <b>[Cấu Hình Web Interface/Cloudflare Tunnel (Giao Diện) => Cho Phép Truy Cập Bên Ngoài Internet]</b> để có thể dùng được API tương tác với giao diện WebUI<br/>- Khi sử dụng API cần thêm Header là: VBot-API-Key với tham số dữ liệu value là Key Authentication được bạn cấu hình bên trên.</p>
+				<p class="text-primary"><b>Lưu Ý:</b><br/>- Khi bật API Auth, WebUI cần bật đăng nhập tài khoản và bật <b>[Cấu Hình Web Interface/Cloudflare Tunnel (Giao Diện) =&gt; Cho Phép Truy Cập Bên Ngoài Internet]</b>. Đăng nhập rồi tải lại trang để nhận phiên truy cập API.<br/>- Ứng dụng gọi API trực tiếp cần gửi header <b>VBot-API-Key</b> với khóa đã cấu hình bên trên.</p>
 				</div>
                 </div>
               </div>

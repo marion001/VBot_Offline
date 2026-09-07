@@ -658,7 +658,35 @@ $Port_API = $Config['api']['port'];
 //$Port_Server_Streaming_Audio_UDP = null;
 $Port_Server_Streaming_Audio_Socket = $Config['api']['streaming_server']['protocol']['socket']['port'];
 
-$API_AUTH_KEY = $Config['api']['auth']['api_key'];
+$API_AUTH_KEY = getenv('VBOT_API_KEY') ?: trim((string)$Config['api']['auth']['api_key']);
+
+// EventSource cannot send an API-key header. A logged-in WebUI receives a
+// signed, HttpOnly cookie scoped to the reverse proxy instead of trusting XFF.
+if ((!empty($Config['api']['auth']['active']) || getenv('VBOT_API_KEY')) && $API_AUTH_KEY !== ''
+    && $loginActive && $requestScript !== 'Login.php' && !headers_sent()) {
+    $apiSessionOpened = false;
+    if (session_status() !== PHP_SESSION_ACTIVE && isset($_COOKIE[session_name()])) {
+        session_start();
+        $apiSessionOpened = true;
+    }
+    if (session_status() === PHP_SESSION_ACTIVE
+        && !empty($_SESSION['user_login']['logged_in'])
+        && isset($_SESSION['user_login']['login_time'])
+        && time() - (int)$_SESSION['user_login']['login_time'] < 43200) {
+        $apiCookieExpires = time() + 43200;
+        $apiCookieValue = $apiCookieExpires.'.'.hash_hmac(
+            'sha256', 'vbot-webui:'.$apiCookieExpires, $API_AUTH_KEY
+        );
+        setcookie('vbot_api_session', $apiCookieValue, [
+            'expires' => $apiCookieExpires,
+            'path' => '/vbot_api_external/',
+            'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+    }
+    if ($apiSessionOpened) session_write_close();
+}
 
 //Tìm tất cả các tệp có tên bắt đầu bằng 'avata_user'
 $files = glob('assets/img/avata_user.*');

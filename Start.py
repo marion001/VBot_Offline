@@ -13,8 +13,15 @@ import signal
 import subprocess
 import sys
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
+
+# asyncio.to_thread() lazily imports ThreadPoolExecutor on first use.  VBot
+# starts several background components concurrently, so preload it completely
+# on the main thread before importing VBot to avoid a partially initialized
+# concurrent.futures.thread module during startup.
+_THREAD_POOL_EXECUTOR_CLASS = ThreadPoolExecutor
 
 VBOT_PATH = Path(__file__).resolve().parent
 PAHO_MQTT_REQUIRED_VERSION = "1.6.1"

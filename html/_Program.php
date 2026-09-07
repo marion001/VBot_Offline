@@ -1049,17 +1049,31 @@ include 'html_head.php';
                                     vbotSetFullPermissions($VBot_Offline . 'Config.json', 'Config.json sau nâng cấp');
                                     $messages[] = "<font color=green><b>- Đã merge Config backup vào mẫu Config mới và cài đặt thành công.</b></font><br/>";
 
-                                    // Chỉ đến đây mới restart. Cờ vẫn tồn tại trong lúc tiến
-                                    // trình cũ thoát nên save_config_now() không thể ghi đè.
-                                    $restartOutput = '';
+                                    // Bàn giao kết quả cho Update_Manager của VBot. Trình quản lý sẽ
+                                    // phát hết âm báo thành công rồi mới restart service. Phải nhả
+                                    // marker/flock trước khi ghi result, nếu không service mới có thể
+                                    // hiểu nhầm marker còn sót là một lần cập nhật bị thất bại.
                                     $programUpdateHealthy = false;
-                                    $restartCommand = 'systemctl --user restart VBot_Offline.service'
-                                        . ' && sleep 3 && systemctl --user is-active --quiet VBot_Offline.service';
-                                    if (vbotProgramRunSshCommand($connection, $restartCommand, $restartOutput)) {
+                                    @unlink($upgradeMarkerPath);
+                                    if (is_resource($upgradeLockHandle)) {
+                                        @flock($upgradeLockHandle, LOCK_UN);
+                                        @fclose($upgradeLockHandle);
+                                    }
+                                    $upgradeLockHandle = null;
+                                    $updateResult = [
+                                        'target' => 'program',
+                                        'status' => 'success',
+                                        'message' => 'Cập nhật chương trình VBot thành công',
+                                        'started_at' => time(),
+                                        'finished_at' => time(),
+                                        'restart_required' => true,
+                                        'service' => 'VBot_Offline.service',
+                                    ];
+                                    if (vbotProgramWriteJson($VBot_Offline . '.vbot_update_result.json', $updateResult, 'kết quả cập nhật chương trình')) {
                                         deleteDirectory($Extract_Path);
                                         deleteDirectory($Download_Path);
                                         $programUpdateHealthy = true;
-                                        $messages[] = "<font color=green><br/>- Cập nhật hoàn tất và đã restart VBot bằng Config.json mới.</font><br/>";
+                                        $messages[] = "<font color=green><br/>- Cập nhật hoàn tất; loa sẽ phát âm báo thành công rồi mới restart VBot.</font><br/>";
                                     } else {
                                         if ($rollbackProgramOnStartFailure) {
                                             vbotUpgradeRollbackTransaction($programRollbackPath, $VBot_Offline, $messages, 'PROGRAM');
@@ -1069,30 +1083,14 @@ include 'html_head.php';
                                             } else {
                                                 vbotUpgradeReportError($messages, 'PROGRAM', 'rollback Config', 'Không thể phục hồi Config.json cũ');
                                             }
-                                            $rollbackRestartOutput = '';
-                                            vbotProgramRunSshCommand(
-                                                $connection,
-                                                'systemctl --user restart VBot_Offline.service && sleep 3 && systemctl --user is-active --quiet VBot_Offline.service',
-                                                $rollbackRestartOutput
-                                            );
                                         } else {
                                             $messages[] = "<font color=orange>- Tự động rollback đang tắt; giữ nguyên phiên bản vừa cập nhật để kiểm tra thủ công.</font><br/>";
                                             error_log('[UPGRADE PROGRAM WARNING] VBot lỗi sau cập nhật nhưng rollback tự động đang tắt trong Config.json');
                                         }
-                                        vbotUpgradeReportError($messages, 'PROGRAM', 'xác minh service', 'VBot không duy trì trạng thái active sau restart: ' . $restartOutput);
-                                        error_log('[PHP Program ERROR] Không thể restart VBot sau nâng cấp: ' . $restartOutput);
+                                        vbotUpgradeReportError($messages, 'PROGRAM', 'bàn giao kết quả', 'Không thể ghi kết quả để phát âm báo và restart VBot');
+                                        error_log('[PHP Program ERROR] Không thể bàn giao kết quả cập nhật cho Update_Manager');
                                     }
 
-                                    $Sound_updated_the_program_successfully_OK = isset($_POST['sound_updated_the_program_successfully']);
-                                    if ($programUpdateHealthy && $Sound_updated_the_program_successfully_OK) {
-                                        // Dùng cùng tệp thành công chuẩn với Update_Manager.py. Không lấy
-                                        // đường dẫn legacy từ Config đã merge vì bản cấu hình cũ có thể
-                                        // trỏ nhầm tới nội dung thông báo cập nhật thất bại.
-                                        $sound_updated_the_program_successfully = $VBot_Offline . 'resource/sound/default/successfully_updated_the_vbot_program.mp3';
-                                        echo '<script>playAudio_upgrade('
-                                            . json_encode($sound_updated_the_program_successfully, JSON_UNESCAPED_SLASHES)
-                                            . ');</script>';
-                                    }
                                     if ($programUpdateHealthy) {
                                         $messages[] = "<br/><font color=green><b>- Cập nhật dữ liệu hoàn tất</b></font>";
                                     } elseif ($rollbackProgramOnStartFailure) {

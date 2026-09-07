@@ -269,6 +269,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_password'])) {
 //Đăng xuất
 if (isset($_GET['logout'])) {
   unset($_SESSION['user_login']);
+  setcookie('vbot_api_session', '', [
+    'expires' => time() - 3600, 'path' => '/vbot_api_external/',
+    'httponly' => true, 'samesite' => 'Strict',
+    'secure' => !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
+  ]);
   header('Location: Login.php');
   exit;
 }

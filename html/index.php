@@ -1321,14 +1321,23 @@ include 'html_head.php';
       });
       container.innerHTML = availableDevices.map(d => {
         const isSelected = selectedMembers.includes(d.id);
+        const normalizeIdentity = value => String(value||'').trim().toLowerCase().replace(/\.$/, '');
+        const localIdentity = multiroomSnapshot.local_device || multiroomSnapshot.receiver || {};
+        const isCurrentDevice = (normalizeIdentity(localIdentity.id) && normalizeIdentity(d.id) === normalizeIdentity(localIdentity.id))
+          || (normalizeIdentity(localIdentity.host) && normalizeIdentity(d.host) === normalizeIdentity(localIdentity.host));
+        const safeId = vbotEscapeHtml(String(d.id || ''));
+        const safeName = vbotEscapeHtml(String(d.name || d.id || 'N/A'));
         const status = d.online===false ? '<span class="text-danger">offline</span>' : '<span class="text-success">online</span>';
-		return '<div class="form-check">' +
-		  '<input class="form-check-input mr-device-checkbox border-success" type="checkbox" id="device_' + d.id + '" data-device-id="' + d.id + '" ' +
+		const currentBadge = isCurrentDevice
+		  ? ' <span class="badge bg-primary"><i class="bi bi-geo-alt-fill"></i> Thiết bị hiện tại</span>'
+		  : '';
+		return '<div class="form-check ' + (isCurrentDevice ? 'py-2 ps-4 pe-2 mb-1 rounded border border-primary bg-primary-subtle' : '') + '">' +
+		  '<input class="form-check-input mr-device-checkbox border-success" type="checkbox" id="device_' + safeId + '" data-device-id="' + safeId + '" ' +
 			(isSelected ? 'checked' : '') + ' ' +
 			(disabled ? 'disabled' : '') +
 		  '>' +
-		  '<label class="form-check-label" for="device_' + d.id + '">' +
-			'<i class="bi bi-speaker"></i> ' + (d.name || d.id || 'N/A') + ' - ' + d.id + ' ' + status +
+		  '<label class="form-check-label" for="device_' + safeId + '">' +
+			'<i class="bi bi-speaker"></i> ' + safeName + ' - ' + safeId + ' ' + currentBadge + ' ' + status +
 		  '</label>' +
 		'</div>';
       }).join('') || '<div class="text-muted">Không tìm thấy loa.</div>';
@@ -1519,12 +1528,20 @@ include 'html_head.php';
       // Render devices list
       const devices=document.getElementById('mr-devices'); 
       const runtimeSpeakerMap = Object.fromEntries(((multiroomSnapshot.controller||{}).speakers||[]).map(s => [s.id, s]));
+      const normalizeMrIdentity = value => String(value||'').trim().toLowerCase().replace(/\.$/, '');
+      const localIdentity = multiroomSnapshot.local_device || multiroomSnapshot.receiver || {};
+      const localIdentityId = normalizeMrIdentity(localIdentity.id);
+      const localIdentityHost = normalizeMrIdentity(localIdentity.host);
       devices.replaceChildren();
       const multiroomDevices = multiroomSnapshot.devices || [];
       multiroomDevices.forEach(d=>{
         const online = runtimeSpeakerMap[d.id]?.online ?? d.online;
+        const isCurrentDevice = (localIdentityId && normalizeMrIdentity(d.id) === localIdentityId)
+          || (localIdentityHost && normalizeMrIdentity(d.host) === localIdentityHost);
         const item = document.createElement('div');
-        item.className = 'py-1';
+        item.className = isCurrentDevice
+          ? 'py-2 px-2 mb-1 rounded border border-primary bg-primary-subtle'
+          : 'py-1 px-2';
         const icon = document.createElement('i');
         icon.className = 'bi bi-speaker';
         const status = document.createElement('span');
@@ -1533,6 +1550,12 @@ include 'html_head.php';
         status.textContent = '●';
         item.appendChild(icon);
         item.appendChild(document.createTextNode(' ' + String(d.name || d.id || 'N/A') + ' - ' + String(d.id || '') + ' '));
+        if(isCurrentDevice) {
+          const currentBadge = document.createElement('span');
+          currentBadge.className = 'badge bg-primary me-1';
+          currentBadge.innerHTML = '<i class="bi bi-geo-alt-fill"></i> Thiết bị hiện tại';
+          item.appendChild(currentBadge);
+        }
         item.appendChild(status);
         devices.appendChild(item);
       });
