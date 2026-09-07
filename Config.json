@@ -1054,6 +1054,8 @@
                     "eng",
                     "vi",
                     "library",
+                    "cpu_info",
+                    "cpu_serial",
                     "__pycache__"
                 ]
             }
@@ -1098,6 +1100,8 @@
                     "Data_VBot_Client.json",
                     "PlayList_Local.json",
                     "__pycache__",
+                    "cpu_info",
+                    "cpu_serial",
                     "playlists"
                 ]
             }
