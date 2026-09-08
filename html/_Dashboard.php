@@ -160,6 +160,7 @@ include 'html_head.php';
         $messages[] = "<font color=green>- Đang tiến hành tải xuống bản cập nhật...</font>";
         $repoName = basename(parse_url($repoUrl, PHP_URL_PATH));
         $zipFile = $destinationDir . "/" . $repoName . ".zip";
+        $partialFile = $zipFile . '.part';
         $zipUrl = rtrim($repoUrl, '/') . "/archive/refs/heads/main.zip";
         if (!is_dir($destinationDir)) {
             if (!mkdir($destinationDir, 0777, true) && !is_dir($destinationDir)) {
@@ -167,14 +168,77 @@ include 'html_head.php';
                 return null;
             }
         }
-        $remoteStream = @fopen($zipUrl, 'rb');
-        if ($remoteStream === false || file_put_contents($zipFile, $remoteStream, LOCK_EX) === false) {
-            if (is_resource($remoteStream)) fclose($remoteStream);
-            $messages[] = "<font color=red>- Không thể tải dữ liệu cập nhật từ GitHub</font>";
-            error_log('[PHP Dashboard ERROR] Không thể tải repo: ' . $zipUrl);
+        if (!function_exists('curl_init')) {
+            $messages[] = "<font color=red>- PHP chưa cài extension cURL để tải bản cập nhật</font>";
+            error_log('[UPGRADE INTERFACE ERROR] [kiểm tra môi trường] PHP thiếu cURL');
             return null;
         }
-        fclose($remoteStream);
+
+        ignore_user_abort(true);
+        @set_time_limit(600);
+        @unlink($partialFile);
+        @unlink($zipFile);
+        $downloaded = false;
+        $retryDelays = [2, 5];
+        for ($attempt = 1; $attempt <= 3; $attempt++) {
+            $output = @fopen($partialFile, 'wb');
+            if ($output === false) {
+                $lastError = error_get_last();
+                error_log('[UPGRADE INTERFACE ERROR] [ghi tệp] Không thể mở tệp tạm: ' . $partialFile
+                    . ' | ' . ($lastError['message'] ?? 'không rõ nguyên nhân'));
+                break;
+            }
+
+            $curl = curl_init($zipUrl);
+            $curlOptions = [
+                CURLOPT_FILE => $output,
+                CURLOPT_FOLLOWLOCATION => true,
+                CURLOPT_CONNECTTIMEOUT => 15,
+                CURLOPT_TIMEOUT => 300,
+                CURLOPT_USERAGENT => 'VBot-WebUI-Updater/1.0',
+                CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_FAILONERROR => false,
+            ];
+            // Lần cuối dùng IPv4 để vượt qua mạng có IPv6 chập chờn.
+            if ($attempt === 3 && defined('CURLOPT_IPRESOLVE') && defined('CURL_IPRESOLVE_V4')) {
+                $curlOptions[CURLOPT_IPRESOLVE] = CURL_IPRESOLVE_V4;
+            }
+            curl_setopt_array($curl, $curlOptions);
+            $curlResult = curl_exec($curl);
+            $curlErrorNumber = curl_errno($curl);
+            $curlError = curl_error($curl);
+            $httpCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            curl_close($curl);
+            fflush($output);
+            fclose($output);
+            clearstatcache(true, $partialFile);
+            $downloadSize = is_file($partialFile) ? (int) filesize($partialFile) : 0;
+
+            if ($curlResult !== false && $curlErrorNumber === 0 && $httpCode === 200 && $downloadSize >= 1024) {
+                $downloaded = true;
+                break;
+            }
+
+            error_log('[UPGRADE INTERFACE ERROR] [tải xuống] Lần ' . $attempt
+                . ' thất bại | HTTP ' . $httpCode . ' | cURL ' . $curlErrorNumber . ': '
+                . ($curlError !== '' ? $curlError : 'không có thông báo') . ' | bytes=' . $downloadSize);
+            @unlink($partialFile);
+            if ($attempt < 3) {
+                sleep($retryDelays[$attempt - 1]);
+            }
+        }
+
+        if (!$downloaded || !@rename($partialFile, $zipFile)) {
+            $lastError = error_get_last();
+            @unlink($partialFile);
+            @unlink($zipFile);
+            $messages[] = "<font color=red>- Không thể tải dữ liệu cập nhật từ GitHub sau 3 lần thử</font>";
+            error_log('[PHP Dashboard ERROR] Không thể hoàn tất tệp tải về: ' . $zipUrl
+                . ' | ' . ($lastError['message'] ?? 'xem các lỗi tải xuống phía trước'));
+            return null;
+        }
+
         clearstatcache(true, $zipFile);
         if (!is_file($zipFile) || filesize($zipFile) < 1024) {
             $messages[] = "<font color=red>- Gói ZIP tải về bị rỗng hoặc quá nhỏ</font>";
