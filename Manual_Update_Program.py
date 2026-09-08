@@ -763,6 +763,22 @@ def main():
         return 0
     except KeyboardInterrupt:
         log("Đã nhận Ctrl+C; dữ liệu tạm và marker cập nhật đã được dọn dẹp", error=True)
+        result = {
+            "target": "program",
+            "status": "error",
+            "message": "Cập nhật chương trình VBot đã bị dừng bởi người dùng",
+            "started_at": started_at,
+            "finished_at": int(time.time()),
+            "restart_required": restart_required,
+            "service": args.service,
+            "service_stopped_for_update": bool(getattr(args, "service_stopped_for_update", False)),
+            "sound_notification": not args.no_result_sound,
+        }
+        try:
+            atomic_json_write(UPDATE_RESULT, result)
+            finish_without_update_manager(result, restart_required, args.service)
+        except Exception as finish_error:
+            log(f"Không thể phục hồi service sau khi updater bị dừng: {finish_error}", error=True)
         return 130
     except Exception as error:
         log(f"Lỗi cập nhật chương trình: {error}", error=True)
