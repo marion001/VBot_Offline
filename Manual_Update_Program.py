@@ -111,7 +111,9 @@ def finish_without_update_manager(result, restart_required, service_name="VBot_O
     status = result.get("status")
     message = str(result.get("message") or "Không có nội dung kết quả cập nhật")
     log_result(f"[Update] {message}", error=status != "success")
-    play_result_sound(SUCCESS_SOUND if status == "success" else ERROR_SOUND)
+    if not play_result_sound(SUCCESS_SOUND if status == "success" else ERROR_SOUND):
+        log_result("Không restart VBot vì chưa phát xong âm báo kết quả", error=True)
+        return
     log_result(f"[Update] Đã hoàn tất âm báo, tiến hành restart {service_name}")
     restarted = service(["restart", service_name])
     if restarted.returncode:
@@ -444,6 +446,9 @@ def rollback_latest(args):
             restored = restore_full_tree(extracted, ROOT, skip_html=True)
             log(f"Đã khôi phục {restored} tệp chương trình từ backup đầy đủ")
         apply_project_permissions(ROOT)
+    if args.no_restart:
+        log(f"Rollback hoàn tất từ {archive.name}; hoãn restart đến sau âm báo kết quả")
+        return
     log(f"Đang restart service sau rollback: {args.service}")
     restarted = service(["restart", args.service])
     if restarted.returncode:
@@ -503,6 +508,11 @@ def copy_transaction(source, rollback, keep_entries, replace_json):
             continue
         destination = ROOT / relative
         relative_text = relative.as_posix()
+        # Device-local CPU identity must never come from an update package,
+        # even when the destination file does not exist yet.
+        if relative.name in {"cpu_info", "cpu_serial"}:
+            preserved.append(relative_text)
+            continue
         preserve_existing_json = (
             destination.exists()
             and relative.suffix.lower() == ".json"

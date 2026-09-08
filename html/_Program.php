@@ -622,6 +622,7 @@ include 'html_head.php';
         $upgradeLockHandle = null;
         $upgradeMarkerPath = null;
         $programUpgradeAllowed = true;
+        $programResultPublished = false;
         if ($Backup_Upgrade_Program === "yes_vbot_upgrade") {
             $programUpgradeAllowed = vbotAcquireUpgradeLock(
                 $VBot_Offline,
@@ -630,6 +631,22 @@ include 'html_head.php';
                 $upgradeLockHandle,
                 $upgradeMarkerPath
             );
+            if ($programUpgradeAllowed) {
+                // Registered after lock cleanup: publish failures only after the
+                // update has stopped writing files and released its lock.
+                register_shutdown_function(function () use (&$programResultPublished, $VBot_Offline) {
+                    if (!$programResultPublished) {
+                        vbotProgramWriteJson($VBot_Offline . '.vbot_update_result.json', [
+                            'target' => 'program',
+                            'status' => 'error',
+                            'message' => 'Cập nhật chương trình VBot thất bại; xem nhật ký cập nhật để biết chi tiết',
+                            'finished_at' => time(),
+                            'restart_required' => true,
+                            'service' => 'VBot_Offline.service',
+                        ], 'kết quả cập nhật chương trình thất bại');
+                    }
+                });
+            }
         }
         foreach ($directoriessss as $directory) {
             createDirectory($directory);
@@ -1070,6 +1087,7 @@ include 'html_head.php';
                                         'service' => 'VBot_Offline.service',
                                     ];
                                     if (vbotProgramWriteJson($VBot_Offline . '.vbot_update_result.json', $updateResult, 'kết quả cập nhật chương trình')) {
+                                        $programResultPublished = true;
                                         deleteDirectory($Extract_Path);
                                         deleteDirectory($Download_Path);
                                         $programUpdateHealthy = true;

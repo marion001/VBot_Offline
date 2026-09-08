@@ -1,8 +1,8 @@
 {
-    "version": "1.2.7",
+    "version": "1.2.8",
     "projectName": "Program VBot Offline",
-	"description": "Hỗ trợ liên kết với HomeKit, Nâng cấp cấu hình sử dụng nút nhấn và tùy biến lựa chọn chức năng cần sử dụng",
-    "releaseDate": "07/09/2026",
+	"description": "Sửa Lỗi STT EDGE, Lỗi File Âm Thanh Cập Nhật Chương Trình, và một số sửa lỗi khác",
+    "releaseDate": "08/09/2026",
     "changes": [
         {
             "type": "feature",

@@ -525,6 +525,11 @@ if (!function_exists('vbotUpgradeLintPhpTree')) {
 if (!function_exists('vbotUpgradeTransactionalCopy')) {
     function vbotUpgradeTransactionalCopy($source, $destination, array $keepList, $rollbackRoot, &$messages, $component)
     {
+        // Keep device-local CPU identity out of program updates, including
+        // files that do not exist on the destination yet.
+        if ($component === 'PROGRAM') {
+            $keepList = array_values(array_unique(array_merge($keepList, ['cpu_info', 'cpu_serial'])));
+        }
         $source = rtrim($source, '/\\');
         $destination = rtrim($destination, '/\\');
         $rollbackRoot = rtrim($rollbackRoot, '/\\');
