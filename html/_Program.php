@@ -674,6 +674,109 @@ include 'html_head.php';
         }
     }
 
+    // Chương trình không được tự ghi đè Python/Cython trong khi VBot
+    // đang chạy. WebUI chỉ yêu cầu Update_Manager; transient updater sẽ phát
+    // xong âm báo, dừng service, thay tệp và restart đúng một lần.
+    function vbotStartManagedProgramUpdate($port, $apiKey, $restartRequired, $soundNotification, &$errorMessage, &$apiUnavailable)
+    {
+        $apiUnavailable = false;
+        if (!function_exists('curl_init')) {
+            $errorMessage = 'PHP thiếu extension cURL';
+            $apiUnavailable = true;
+            return false;
+        }
+        $payload = json_encode([
+            'type' => 3,
+            'data' => 'update',
+            'action' => 'program',
+            'restart_required' => (bool) $restartRequired,
+            'sound_notification' => (bool) $soundNotification,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($payload === false) {
+            $errorMessage = 'Không thể mã hóa yêu cầu cập nhật';
+            return false;
+        }
+        $headers = ['Content-Type: application/json'];
+        if (is_string($apiKey) && trim($apiKey) !== '') {
+            $headers[] = 'VBot-API-Key: ' . trim($apiKey);
+        }
+        $curl = curl_init('http://127.0.0.1:' . intval($port) . '/');
+        curl_setopt_array($curl, [
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => $headers,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+        ]);
+        $response = curl_exec($curl);
+        $curlError = curl_error($curl);
+        $httpCode = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+        curl_close($curl);
+        $apiUnavailable = ($response === false || $httpCode === 0);
+        $decoded = is_string($response) ? json_decode($response, true) : null;
+        if ($httpCode === 202 && is_array($decoded) && !empty($decoded['success'])) {
+            return true;
+        }
+        $errorMessage = is_array($decoded) && !empty($decoded['message'])
+            ? (string) $decoded['message']
+            : ($curlError !== '' ? $curlError : 'VBot API trả HTTP ' . $httpCode);
+        error_log('[PHP Program ERROR] Không thể bắt đầu updater độc lập: ' . $errorMessage);
+        return false;
+    }
+
+    // Khi VBot/API không chạy, WebUI khởi động updater trong systemd user unit
+    // của tài khoản SSH. Unit này độc lập với PHP/Apache và tiếp tục chạy sau
+    // khi request WebUI kết thúc.
+    function vbotStartStandaloneProgramUpdate(
+        $sshHost,
+        $sshPort,
+        $sshUser,
+        $sshPassword,
+        $vbotRoot,
+        $restartRequired,
+        $soundNotification,
+        &$errorMessage
+    ) {
+        if (!function_exists('ssh2_connect') || !function_exists('ssh2_auth_password')) {
+            $errorMessage = 'PHP thiếu extension SSH2 để chạy updater dự phòng';
+            return false;
+        }
+        $root = realpath(rtrim((string) $vbotRoot, '/\\'));
+        $script = $root !== false ? realpath($root . DIRECTORY_SEPARATOR . 'Manual_Update_Program.py') : false;
+        if ($root === false || $script === false || dirname($script) !== $root || !is_file($script)) {
+            $errorMessage = 'Không tìm thấy Manual_Update_Program.py hợp lệ trong thư mục VBot';
+            return false;
+        }
+        $connection = @ssh2_connect((string) $sshHost, intval($sshPort));
+        if (!$connection || !@ssh2_auth_password($connection, (string) $sshUser, (string) $sshPassword)) {
+            $errorMessage = 'Không thể xác thực SSH để chạy updater dự phòng';
+            return false;
+        }
+        $unit = 'vbot-webui-update-program-' . time() . '-' . bin2hex(random_bytes(3));
+        $arguments = ['python3', $script];
+        if ($soundNotification) {
+            $arguments[] = '--start-sound';
+        } else {
+            $arguments[] = '--no-result-sound';
+        }
+        if (!$restartRequired) {
+            $arguments[] = '--no-restart';
+        }
+        $command = 'systemd-run --user --collect --quiet --no-block'
+            . ' --unit=' . escapeshellarg($unit)
+            . ' --working-directory=' . escapeshellarg($root)
+            . ' -- ' . implode(' ', array_map('escapeshellarg', $arguments));
+        $output = '';
+        if (!vbotProgramRunSshCommand($connection, $command, $output)) {
+            $errorMessage = 'systemd không nhận updater dự phòng'
+                . ($output !== '' ? ': ' . $output : '');
+            error_log('[PHP Program ERROR] ' . $errorMessage);
+            return false;
+        }
+        return true;
+    }
+
     #Sao Lưu chương trình VBot
     if (isset($_POST['Backup_Upgrade_Program'])) {
         $messages = [];
@@ -687,6 +790,48 @@ include 'html_head.php';
         $upgradeMarkerPath = null;
         $programUpgradeAllowed = true;
         $programResultPublished = false;
+        if ($Backup_Upgrade_Program === "yes_vbot_upgrade") {
+            $managedUpdateError = '';
+            $vbotApiUnavailable = false;
+            $managedRestart = isset($_POST['auto_restart_vbot']);
+            $managedSound = isset($_POST['sound_updated_the_program_successfully']);
+            if (vbotStartManagedProgramUpdate(
+                $Port_API,
+                $API_AUTH_KEY,
+                $managedRestart,
+                $managedSound,
+                $managedUpdateError,
+                $vbotApiUnavailable
+            )) {
+                $messages[] = "<font color=green><b>- Đã bàn giao cập nhật cho VBot Update Manager. Âm báo sẽ phát xong trước khi service dừng và thay tệp.</b></font><br/>";
+                $Backup_Upgrade_Program = "managed_update_started";
+            } else {
+                $standaloneUpdateError = '';
+                if ($vbotApiUnavailable && vbotStartStandaloneProgramUpdate(
+                    $ssh_host,
+                    $ssh_port,
+                    $ssh_user,
+                    $ssh_password,
+                    $VBot_Offline,
+                    $managedRestart,
+                    $managedSound,
+                    $standaloneUpdateError
+                )) {
+                    $messages[] = "<font color=green><b>- VBot API không hoạt động; WebUI đã tự khởi động updater độc lập qua systemd.</b></font><br/>";
+                    $Backup_Upgrade_Program = "standalone_update_started";
+                } else {
+                    if (!$vbotApiUnavailable) {
+                        $standaloneUpdateError = 'không chạy fallback vì API vẫn hoạt động và đã từ chối yêu cầu';
+                    }
+                    $messages[] = "<font color=red><b>- Không thể bắt đầu cập nhật an toàn.</b> API: "
+                        . htmlspecialchars($managedUpdateError, ENT_QUOTES, 'UTF-8')
+                        . "; updater dự phòng: "
+                        . htmlspecialchars($standaloneUpdateError, ENT_QUOTES, 'UTF-8') . "</font><br/>";
+                    // Tuyệt đối không fallback sang ghi đè module trong tiến trình PHP.
+                    $Backup_Upgrade_Program = "managed_update_failed";
+                }
+            }
+        }
         if ($Backup_Upgrade_Program === "yes_vbot_upgrade") {
             $programUpgradeAllowed = vbotAcquireUpgradeLock(
                 $VBot_Offline,

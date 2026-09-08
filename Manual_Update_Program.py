@@ -38,6 +38,7 @@ ERROR_LOG = ROOT / "resource/log/Vbot_error.log"
 MARKER = ROOT / ".program_upgrade_in_progress"
 UPGRADE_LOCK = ROOT / ".vbot_upgrade.lock"
 UPDATE_RESULT = ROOT / ".vbot_update_result.json"
+START_SOUND = ROOT / "resource/sound/default/update_the_vbot_program.mp3"
 SUCCESS_SOUND = ROOT / "resource/sound/default/updated_the_program_successfully.mp3"
 ERROR_SOUND = ROOT / "resource/sound/default/vbot_program_update_failed.mp3"
 CORE_UPDATE_JSON = {
@@ -98,23 +99,31 @@ def play_result_sound(path):
 
 def finish_without_update_manager(result, restart_required, service_name="VBot_Offline.service"):
     """Fallback for SSH/manual runs when no active VBot watcher accepts the result."""
-    if not restart_required:
-        return
-    deadline = time.monotonic() + 10
-    while UPDATE_RESULT.exists() and time.monotonic() < deadline:
-        time.sleep(0.25)
-    if not UPDATE_RESULT.exists():
-        log("Update Manager đã nhận kết quả và sẽ restart service sau âm báo")
-        return
+    service_stopped = bool(result.get("service_stopped_for_update"))
+    if not service_stopped:
+        deadline = time.monotonic() + 10
+        while UPDATE_RESULT.exists() and time.monotonic() < deadline:
+            time.sleep(0.25)
+        if not UPDATE_RESULT.exists():
+            log("Update Manager đã nhận kết quả và sẽ restart service sau âm báo")
+            return
     # Tránh service mới đọc lại cùng kết quả và restart lần thứ hai.
     UPDATE_RESULT.unlink(missing_ok=True)
     status = result.get("status")
     message = str(result.get("message") or "Không có nội dung kết quả cập nhật")
     log_result(f"[Update] {message}", error=status != "success")
-    if not play_result_sound(SUCCESS_SOUND if status == "success" else ERROR_SOUND):
-        log_result("Không restart VBot vì chưa phát xong âm báo kết quả", error=True)
+    sound_enabled = bool(result.get("sound_notification", True))
+    played = True
+    if sound_enabled:
+        played = play_result_sound(SUCCESS_SOUND if status == "success" else ERROR_SOUND)
+        if not played:
+            log_result("Không thể phát hết âm báo kết quả; vẫn khôi phục service để tránh VBot bị dừng", error=True)
+    else:
+        log_result("Đã tắt thông báo âm thanh kết quả cập nhật")
+    if not restart_required:
+        log_result("Đã hoàn tất cập nhật; giữ service ở trạng thái dừng theo cấu hình không tự restart")
         return
-    log_result(f"[Update] Đã hoàn tất âm báo, tiến hành restart {service_name}")
+    log_result(f"[Update] Đã hoàn tất bước âm báo, tiến hành restart {service_name}")
     restarted = service(["restart", service_name])
     if restarted.returncode:
         raise RuntimeError("Không thể restart service sau thông báo kết quả: " + restarted.stdout.strip())
@@ -620,6 +629,22 @@ def _update(args):
             if str(value).strip("/\\")
         }
         log(f"Đã nạp {len(keep_entries)} mục cần giữ từ Config.json, các JSON người dùng hiện có sẽ không bị ghi đè")
+        # Never replace Python/Cython modules inside the running VBot process.
+        # A transient updater unit survives this intentional service stop and
+        # owns result audio plus the single final restart.
+        args.service_stopped_for_update = True
+        active = service(["is-active", "--quiet", args.service]).returncode == 0
+        if active:
+            log(f"Đang dừng {args.service} an toàn trước khi thay tệp chương trình...")
+            stopped = service(["stop", args.service])
+            if stopped.returncode:
+                raise RuntimeError("Không thể dừng service trước cập nhật: " + stopped.stdout.strip())
+            if service(["is-active", "--quiet", args.service]).returncode == 0:
+                raise RuntimeError("Service vẫn còn active; đã hủy thay tệp chương trình")
+            log(f"Đã dừng {args.service}; bắt đầu thay tệp khi tiến trình VBot không còn chạy")
+        else:
+            log(f"{args.service} đã ở trạng thái dừng trước khi thay tệp chương trình")
+
         rollback.mkdir(parents=True, exist_ok=False)
         atomic_copy_file(ROOT / "Config.json", rollback / "Config.json")
         log(f"Đã tạo vùng rollback: {rollback}")
@@ -708,6 +733,11 @@ def main():
         help="Chỉ tải và kiểm tra gói, không cập nhật; mặc định công cụ cập nhật ngay",
     )
     parser.add_argument("--no-restart", action="store_true")
+    parser.add_argument("--no-result-sound", action="store_true")
+    parser.add_argument(
+        "--start-sound", action="store_true",
+        help="Phát hết âm báo bắt đầu trước khi tải và cài đặt; dùng cho WebUI khi VBot API không chạy",
+    )
     parser.add_argument(
         "--rollback", nargs="?", const="latest", default=None, metavar="FILE",
         help="Khôi phục FILE backup; nếu không truyền FILE sẽ dùng bản .tar.gz mới nhất",
@@ -720,11 +750,14 @@ def main():
     args.no_restart = True
     started_at = int(time.time())
     try:
+        if args.start_sound and not check_only:
+            if not play_result_sound(START_SOUND):
+                raise RuntimeError("Không thể phát hết âm báo bắt đầu cập nhật")
         update(args)
         if check_only:
             log("Kiểm tra gói cập nhật hoàn tất; không ghi kết quả, không phát âm báo và không restart service")
             return 0
-        result = {"target": "program", "status": "success", "message": "Cập nhật chương trình VBot thành công", "started_at": started_at, "finished_at": int(time.time()), "restart_required": restart_required, "service": args.service}
+        result = {"target": "program", "status": "success", "message": "Cập nhật chương trình VBot thành công", "started_at": started_at, "finished_at": int(time.time()), "restart_required": restart_required, "service": args.service, "service_stopped_for_update": bool(getattr(args, "service_stopped_for_update", False)), "sound_notification": not args.no_result_sound}
         atomic_json_write(UPDATE_RESULT, result)
         finish_without_update_manager(result, restart_required, args.service)
         return 0
@@ -733,7 +766,7 @@ def main():
         return 130
     except Exception as error:
         log(f"Lỗi cập nhật chương trình: {error}", error=True)
-        result = {"target": "program", "status": "error", "message": f"Cập nhật chương trình VBot thất bại: {error}", "started_at": started_at, "finished_at": int(time.time()), "restart_required": restart_required, "service": args.service}
+        result = {"target": "program", "status": "error", "message": f"Cập nhật chương trình VBot thất bại: {error}", "started_at": started_at, "finished_at": int(time.time()), "restart_required": restart_required, "service": args.service, "service_stopped_for_update": bool(getattr(args, "service_stopped_for_update", False)), "sound_notification": not args.no_result_sound}
         atomic_json_write(UPDATE_RESULT, result)
         try:
             finish_without_update_manager(result, restart_required, args.service)
