@@ -83,7 +83,8 @@ $directory_path = dirname(__FILE__);
 $HostName = gethostname();
 
 //Lấy User Hiện Tại: pi
-$GET_current_USER = get_current_user();
+//$GET_current_USER = get_current_user();
+$GET_current_USER = "pi";
 
 //Lấy địa chỉ IP của máy chủ
 $serverIp = isset($_SERVER['SERVER_ADDR']) ? $_SERVER['SERVER_ADDR'] : '127.0.0.1';
