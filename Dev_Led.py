@@ -6,6 +6,19 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- VBot import file này làm bộ hiệu ứng WS281x; không chạy trực tiếp và không đổi tên các hàm ``LED_*``.
+- Chỉ sửa nội dung hiệu ứng. Vòng lặp dài phải kiểm tra ``Lib.led_effect_active`` và
+  ``Lib.current_led_effect`` để hiệu ứng có thể dừng/chuyển trạng thái.
+- Biến toàn cục: ``LED_COUNT`` số LED, ``LED_PIN`` GPIO, ``LED_FREQ_HZ`` tần số,
+  ``LED_DMA`` kênh DMA, ``LED_INVERT`` đảo tín hiệu, ``LED_BRIGHTNESS`` độ sáng 0-255.
+- ``strip`` là đối tượng phần cứng dùng chung; không khởi tạo thêm trong từng hiệu ứng.
+- ``LED_COUNT``, ``LED_PIN``, ``LED_INVERT`` và độ sáng mặc định được lấy từ ``Lib.config``/``Lib``.
+  Khi cần thay cấu hình thường xuyên, ưu tiên sửa trong WebUI thay vì ghi cứng tại đây.
+- Các hàm dùng trạng thái ``Lib.*`` dùng chung; không cần và không nên khai báo lại module ``Lib``.
+"""
+
 #Code Mẫu sử dụng Led WS2812
 #Các Hàm hiệu ứng def cần được giữ nguyên, code sửa đổi hiệu ứng thay đổi bên trong hàm đó
 #Các Loại Led Khác cũng tự tự và cần thêm thư viện tương ứng
@@ -56,7 +69,6 @@ Các Hiệu Ứng Của LED
 #Tắt LED
 #chỉ thay đổi code bên trong hàm "def LED_OFF()"
 def LED_OFF():
-    global Lib
     #Khóa Luồng, Đảm bảo chỉ có 1 hiệu ứng led được chạy
     with Lib.led_effect_lock:
         Lib.led_effect_active = False
@@ -68,7 +80,6 @@ def LED_OFF():
 #Hiệu ứng LED_LOADING Xử Lý Dữ Liệu
 #chỉ thay đổi code bên trong hàm "def LED_LOADING()"
 def LED_LOADING():
-    global Lib
     Lib.led_effect_active = True
     num_pixels = strip.numPixels()
     #Số LED sáng cùng lúc trên mỗi nửa
@@ -112,7 +123,6 @@ def LED_LOADING():
 #Led LED_THINK khi được đánh thức wake up, Lắng nghe Câu Lệnh
 #chỉ thay đổi code bên trong hàm "def LED_THINK()"
 def LED_THINK(color_hex=Lib.config['smart_config']['led']['effect']['led_think']):
-    global Lib
     Lib.led_effect_active = True
     num_pixels = strip.numPixels()
     #Chuyển đổi màu từ HEX trong Config.json sang số nguyên
@@ -146,7 +156,6 @@ def LED_THINK(color_hex=Lib.config['smart_config']['led']['effect']['led_think']
 #Tắt Mic LED_MUTE
 #chỉ thay đổi code bên trong hàm "def LED_MUTE()"
 def LED_MUTE(color_hex=Lib.config['smart_config']['led']['effect']['led_mute']):
-    global Lib
     Lib.led_effect_active = True
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
     while Lib.led_effect_active:
@@ -168,7 +177,6 @@ def LED_MUTE(color_hex=Lib.config['smart_config']['led']['effect']['led_mute']):
 #Led báo lỗi LED_ERROR
 #chỉ thay đổi code bên trong hàm "def LED_ERROR()"
 def LED_ERROR():
-    global Lib
     Lib.led_effect_active = True
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
     while Lib.led_effect_active:
@@ -197,7 +205,6 @@ def LED_ERROR():
 #Led khi tạm dừng phát LED_PAUSE
 #chỉ thay đổi code bên trong hàm "def LED_PAUSE()"
 def LED_PAUSE():
-    global Lib
     Lib.led_effect_active = True
     def set_strip_color_brightness(hue, brightness):
         color = hsv_to_rgb(hue / 360.0, 1.0, 1.0)
@@ -247,7 +254,6 @@ def LED_PAUSE():
 #Led Speak TTS, trạng thái led khi phát kết quả, dữ liệu, âm nhạc
 #Chỉ thay đổi code bên trong hàm "def LED_SPEAK()"
 def LED_SPEAK():
-    global Lib
     Lib.led_effect_active = True
     num_pixels = strip.numPixels()
     #Số LED sáng cùng lúc trên mỗi nửa
@@ -291,7 +297,6 @@ def LED_SPEAK():
 #Led khi khởi động chương trình VBot
 #Chỉ thay đổi code bên trong hàm "def LED_STARTUP()"
 def LED_STARTUP():
-    global Lib
     Lib.led_effect_active = True
     num_pixels = strip.numPixels()
     #Danh Sách Màu
@@ -343,7 +348,6 @@ def LED_STARTUP():
 #Led khi âm lượng được thay đổi volume_change sẽ là giá trị âm lượng được truyền vào hàm có giá trị từ 0 tới 100
 def LED_UPDATE():
     """Dynamic color runner used while a background update is active."""
-    global Lib
     from Led import _run_update_effect
     Lib.led_effect_active = True
     strip.setBrightness(Lib.led_brightness)

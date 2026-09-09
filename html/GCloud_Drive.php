@@ -419,15 +419,30 @@ include 'html_head.php';
 
           #Lưu dữ liệu secret_json vào file json
           if (isset($_POST['save_client_secret_json'])) {
-            // Lấy nội dung từ textarea
-            $new_client_secret_json = json_decode(trim($_POST['client_secret_json']));
-            $pretty_json = json_encode($new_client_secret_json, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-            // Lưu dữ liệu vào file
-            file_put_contents($authConfigPath, $pretty_json);
-            echo '<script type="text/javascript">
-                        window.location.href = window.location.href;
-                      </script>';
-            exit();
+            $rawClientSecret = trim((string)($_POST['client_secret_json'] ?? ''));
+            $newClientSecret = json_decode($rawClientSecret, true);
+            $installed = is_array($newClientSecret) && isset($newClientSecret['installed']) && is_array($newClientSecret['installed'])
+              ? $newClientSecret['installed'] : null;
+            $requiredOauthFields = ['client_id', 'project_id', 'auth_uri', 'token_uri', 'client_secret', 'redirect_uris'];
+            $missingOauthFields = [];
+            foreach ($requiredOauthFields as $oauthField) {
+              if (!isset($installed[$oauthField]) || $installed[$oauthField] === '' || ($oauthField === 'redirect_uris' && !is_array($installed[$oauthField]))) {
+                $missingOauthFields[] = $oauthField;
+              }
+            }
+            if (json_last_error() !== JSON_ERROR_NONE || $installed === null || !empty($missingOauthFields)) {
+              $notifications[] = '<font color=red>- Không lưu client_secret.json: JSON OAuth Desktop không hợp lệ hoặc thiếu trường: <b>'
+                . htmlspecialchars(implode(', ', $missingOauthFields), ENT_QUOTES, 'UTF-8') . '</b></font>';
+            } else {
+              $prettyJson = json_encode($newClientSecret, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+              if ($prettyJson === false || !vbotAtomicWriteFile($authConfigPath, $prettyJson, 'client_secret Google Drive')) {
+                $notifications[] = '<font color=red>- Không thể ghi client_secret.json an toàn.</font>';
+              } else {
+                vbotSetFullPermissions($authConfigPath, 'client_secret Google Drive');
+                echo '<script type="text/javascript">window.location.href = window.location.href;</script>';
+                exit();
+              }
+            }
           }
         ?>
           <?php
@@ -495,7 +510,9 @@ include 'html_head.php';
                     // Kiểm tra và lưu token vào file JSON
                     if (!empty($accessToken['access_token'])) {
                       // Lưu token vào file
-                      file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                      $encodedAccessToken = json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                      vbotAtomicWriteFile($tokenPath, $encodedAccessToken, 'token Google Drive');
+                      vbotSetFullPermissions($tokenPath, 'token Google Drive');
                       echo "<center>Xác thực thành công, Token đã được lưu trữ<br/><br/>";
                       echo "<p class='card-title text-success'>Trang sẽ được tải lại sau <span id='countdown'><font color=red size=5>5</font></span> giây.";
                       echo "<script>startCountdown(5);</script>";
@@ -524,8 +541,12 @@ include 'html_head.php';
                     $newAccessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                     // Kiểm tra xem token mới có tồn tại không
                     if (isset($newAccessToken['access_token'])) {
-                      // Lưu token mới vào file
-                      file_put_contents($tokenPath, json_encode($newAccessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+                      // Google thường không trả lại refresh_token khi làm mới, vì vậy
+                      // phải giữ các trường cũ rồi mới ghi token đã hợp nhất.
+                      $accessToken = array_merge($accessToken, $newAccessToken);
+                      vbotAtomicWriteFile($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'token Google Drive');
+                      vbotSetFullPermissions($tokenPath, 'token Google Drive');
+                      $client->setAccessToken($accessToken);
                       echo "<center><p class='card-title text-success'>Token đã được tự động làm mới thành công</p></center>";
                       echo "<center><p class='card-title text-success'>Trang sẽ được tải lại sau <span id='countdown'><font color='red' size='5'>5</font></span> giây.</p></center>";
                       echo "<script>startCountdown(5);</script>";

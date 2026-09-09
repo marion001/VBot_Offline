@@ -6,6 +6,15 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- VBot tự gọi ``await custom_weather(text_input, text_input_handle)``.
+- Giữ nguyên tên hàm và trả về ``(audio, text)``; mẫu này trả audio rỗng để hệ thống tự tạo TTS.
+- ``text_input`` là câu gốc, ``text_input_handle`` là câu đã chuẩn hóa để xác định hôm nay/ngày mai.
+- Sửa ``latitude``, ``longitude`` và ``location_name`` trong hàm hoặc đọc chúng từ ``Lib.config``.
+- File không có biến toàn cục cấu hình; mọi request mạng phải có timeout và bắt lỗi như mẫu.
+"""
+
 #Thư Viện VBot: Lib
 import Lib
 import aiohttp

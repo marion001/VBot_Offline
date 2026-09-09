@@ -530,6 +530,8 @@ if (isset($_POST['all_config_save'])) {
   $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'] = $_POST['gcloud_drive_backup_folder_name'];
   $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'] = $_POST['gcloud_drive_backup_folder_vbot_name'];
   $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'] = $_POST['gcloud_drive_backup_folder_interface_name'];
+  $gdriveSharingPermission = isset($_POST['gcloud_drive_sharing_permission']) ? trim((string) $_POST['gcloud_drive_sharing_permission']) : 'private';
+  $Config['backup_upgrade']['google_cloud_drive']['sharing_permission'] = in_array($gdriveSharingPermission, ['private', 'anyone_with_link'], true) ? $gdriveSharingPermission : 'private';
   $Config['backup_upgrade']['google_cloud_drive']['setAccessType'] = $_POST['gcloud_drive_setAccessType'];
   $Config['backup_upgrade']['google_cloud_drive']['setPrompt'] = $_POST['gcloud_drive_setPrompt'];
 
@@ -1184,7 +1186,7 @@ if (file_exists($tts_token_google_cloud)) {
   $read_tts_token_google_cloud = file_get_contents($tts_token_google_cloud);
 } else {
   $read_tts_token_google_cloud = '';
-  $messages[] = 'Lỗi: File read_stt_token_google_cloud không tồn tại.';
+  $messages[] = 'Lỗi: File read_tts_token_google_cloud không tồn tại.';
 }
 
 #Tự Sinh HTML
@@ -4787,6 +4789,11 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
                       echo input_field('gcloud_drive_backup_folder_name', "Tên Thư Mục Cha Sao Lưu <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'], false, 'text', "Tên Thư Mục Sao Lưu Trên Google Cloud Drive (Thư Mục Cha), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
                       echo input_field('gcloud_drive_backup_folder_vbot_name', "Tên Thư Mục Sao Lưu Chương Trình VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_vbot_name'], false, 'text', "Tên Thư Mục Sao Lưu Chương Trình VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
                       echo input_field('gcloud_drive_backup_folder_interface_name', "Tên Thư Mục Sao Lưu Giao Diện VBot <font color='red' size='6' title='Bắt Buộc Nhập'>*</font>", $Config['backup_upgrade']['google_cloud_drive']['backup_folder_interface_name'], false, 'text', "Tên Thư Mục Sao Lưu Giao Diện VBot Trên Google Cloud Drive (Thư Mục Con), Nếu thư mục không tồn tại sẽ tự động được tạo mới");
+                      echo select_field(
+                        'gcloud_drive_sharing_permission',
+                        "Quyền Truy Cập Bản Sao Lưu <i class='bi bi-question-circle-fill' onclick=\"show_message('Chỉ mình tôi: giữ dữ liệu riêng tư trong tài khoản Google Drive.<br/>Bất kỳ ai có đường liên kết: người có liên kết có thể xem và tải bản sao lưu.')\"></i>",
+                        ['private' => 'Chỉ mình tôi - Khuyến nghị', 'anyone_with_link' => 'Bất kỳ ai có đường liên kết'],
+                        isset($Config['backup_upgrade']['google_cloud_drive']['sharing_permission']) ? $Config['backup_upgrade']['google_cloud_drive']['sharing_permission'] : 'private', []);
                       echo select_field(
                         'gcloud_drive_setAccessType',
                         "Kiểu Loại Truy Cập <i class='bi bi-question-circle-fill' onclick=\"show_message('- Để giá trị là offline thì sẽ tự động làm mới lại mã token xác thực khi hết hạn<br/>- Để giá trị là online thì mỗi lần mã token xác thực hết hạn bạn cần lấy lại bằng thao tác thủ công')\"></i>",

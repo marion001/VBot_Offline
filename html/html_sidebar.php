@@ -266,6 +266,12 @@
       <span>Chẩn đoán Runtime</span>
     </a>
   </li>
+  <li class="nav-item">
+    <a class="nav-link collapsed" href="VBot_Processing_Flow.php">
+      <i class="bi bi-diagram-3"></i>
+      <span>Sơ Đồ Xử Lý VBot</span>
+    </a>
+  </li>
   <li class="nav-item" onclick="loading('show')">
     <a class="nav-link collapsed" href="FAQ.php">
       <i class="bi bi-question-circle"></i>

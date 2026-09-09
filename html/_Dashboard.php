@@ -16,7 +16,7 @@ function vbotDashboardWriteJson($filePath, array $data, $label)
         error_log('[PHP Dashboard ERROR] Không thể mã hóa ' . $label . ': ' . json_last_error_msg());
         return false;
     }
-    if (file_put_contents($filePath, $encoded, LOCK_EX) === false) {
+    if (!vbotAtomicWriteFile($filePath, $encoded, $label)) {
         error_log('[PHP Dashboard ERROR] Không thể ghi ' . $label . ': ' . $filePath);
         return false;
     }
@@ -266,6 +266,18 @@ include 'html_head.php';
                     error_log('[PHP Dashboard ERROR] ZIP chứa đường dẫn không an toàn: ' . $entryName);
                     return null;
                 }
+                $zipOpsys = 0;
+                $zipAttributes = 0;
+                if ($zip->getExternalAttributesIndex($zipIndex, $zipOpsys, $zipAttributes)) {
+                    $entryType = ($zipAttributes >> 16) & 0170000;
+                    if ($entryType === 0120000) {
+                        $zip->close();
+                        @unlink($zipFile);
+                        $messages[] = "<font color=red>- Tệp cập nhật chứa symbolic link không an toàn</font>";
+                        error_log('[PHP Dashboard ERROR] ZIP chứa symbolic link: ' . $entryName);
+                        return null;
+                    }
+                }
             }
             $extractedFolder = $destinationDir . "/" . $repoName . "-main";
             if (!$zip->extractTo($destinationDir)) {
@@ -302,6 +314,15 @@ include 'html_head.php';
             $entry = str_replace('\\', '/', trim($entry));
             if ($entry === '' || $entry[0] === '/' || preg_match('/(^|\/)\.\.($|\/)/', $entry)) {
                 error_log('[PHP Dashboard ERROR] Archive chứa đường dẫn không an toàn: ' . $entry);
+                return false;
+            }
+        }
+        exec("tar -tvzf " . escapeshellarg($tarFilePath) . " 2>&1", $archiveDetails, $detailResult);
+        if ($detailResult !== 0 || empty($archiveDetails)) return false;
+        foreach ($archiveDetails as $detail) {
+            $type = substr(ltrim((string) $detail), 0, 1);
+            if (in_array($type, ['l', 'h', 'b', 'c', 'p'], true)) {
+                error_log('[PHP Dashboard ERROR] Archive chứa liên kết hoặc entry đặc biệt không an toàn: ' . $detail);
                 return false;
             }
         }
@@ -396,20 +417,25 @@ include 'html_head.php';
                 return null;
             }
         }
+        $excludeRules = vbotBackupPrepareExclusions($Exclude_Files_Folder, $Exclude_File_Format, $messages, 'INTERFACE BACKUP');
+        if ($excludeRules === null) return null;
         $Version_VBot_Interface_releaseDate = preg_replace('/[^0-9A-Za-z._-]/', '-', (string) ($Version_VBot_Interface['releaseDate'] ?? 'unknown-date'));
         $Version_VBot_Interface_version = preg_replace('/[^0-9A-Za-z._-]/', '-', (string) ($Version_VBot_Interface['version'] ?? 'unknown-version'));
         $Backup_File_Name_Web = $Backup_Dir_Save_Web . '/VBot_Interface_' . date('dmY_His') . '_' . $Version_VBot_Interface_releaseDate . '_' . $Version_VBot_Interface_version . '.tar.gz'; // Đường dẫn file backup
         $tarCommand = "tar -czvf " . escapeshellarg($Backup_File_Name_Web) . " -C " . escapeshellarg($HTML_VBot_Offline);
-        foreach ($Exclude_Files_Folder as $item) {
+        foreach ($excludeRules['folders'] as $item) {
             $tarCommand .= " --exclude=" . escapeshellarg($item);
         }
-        foreach ($Exclude_File_Format as $ext) {
-            $ext = ltrim(trim((string) $ext), '*.');
-            if ($ext !== '') $tarCommand .= " --exclude=" . escapeshellarg('*.' . $ext);
+        foreach ($excludeRules['format_patterns'] as $pattern) {
+            $tarCommand .= " --exclude=" . escapeshellarg($pattern);
         }
         $tarCommand .= " . --warning=all 2>&1";
         exec($tarCommand, $output, $returnCode);
         if ($returnCode === 0) {
+            if (!vbotBackupValidateArchiveExclusions($Backup_File_Name_Web, $excludeRules, $messages, 'INTERFACE BACKUP')) {
+                @unlink($Backup_File_Name_Web);
+                return null;
+            }
             if (!vbotSetFullPermissions($Backup_File_Name_Web, 'tệp backup giao diện')) error_log('[PHP Dashboard ERROR] Không thể đặt quyền backup: ' . $Backup_File_Name_Web);
             $messages[] = "Tạo bản sao lưu giao diện thành công: <font color=blue><a title='Tải Xuống file backup: " . basename($Backup_File_Name_Web) . "' onclick=\"downloadFile('" . $HTML_VBot_Offline . "/" . $Backup_File_Name_Web . "')\">" . basename($Backup_File_Name_Web) . "</a></font> <a title='Tải Xuống file backup: " . basename($Backup_File_Name_Web) . "' onclick=\"downloadFile('" . $HTML_VBot_Offline . "/" . $Backup_File_Name_Web . "')\"><font color=green>Tải Xuống</font></a>";
             /*
@@ -492,7 +518,9 @@ include 'html_head.php';
                 if ($client->getRefreshToken()) {
                     $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                     if (isset($token['access_token'])) {
-                vbotDashboardWriteJson($tokenPath, $token, 'token Google Drive');
+                        $accessToken = array_merge($accessToken, $token);
+                        vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
+                        $client->setAccessToken($accessToken);
                         $libPath_exist = true;
                         $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                     } else {
@@ -614,7 +642,9 @@ include 'html_head.php';
                                     if ($client->getRefreshToken()) {
                                         $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                                         if (isset($token['access_token'])) {
-                                            vbotDashboardWriteJson($tokenPath, $token, 'token Google Drive');
+                                            $accessToken = array_merge($accessToken, $token);
+                                            vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
+                                            $client->setAccessToken($accessToken);
                                             $libPath_exist = true;
                                             $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                                         } else {
@@ -647,7 +677,7 @@ include 'html_head.php';
                                         $backupFolder = $service->files->create($backupFolderMetadata, array('fields' => 'id'));
                                         $backupFolderId = $backupFolder->id;
                                         $messages[] = "<font color=green>- Thư mục $backupFolderName đã được tạo với ID: " . $backupFolderId . "</font>";
-                                        $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
+                                        if ($google_cloud_drive_sharing_permission === 'anyone_with_link') $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
                                         $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$backupFolderName</b></font>";
                                     }
                                 } else {
@@ -655,19 +685,26 @@ include 'html_head.php';
                                     $folder = $service->files->create($folderMetadata, array('fields' => 'id'));
                                     $folderId = $folder->id;
                                     $messages[] = "<font color=green>- Thư mục <b>" . $folderName . "</b> đã được tạo với ID: " . $folderId . "</font>";
-                                    $service->permissions->create($folderId, $permission, ['fields' => 'id']);
+                                    if ($google_cloud_drive_sharing_permission === 'anyone_with_link') $service->permissions->create($folderId, $permission, ['fields' => 'id']);
                                     $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$folderName</b></font>";
                                     //Tạo thư mục Backup_Interface bên trong
                                     $backupFolderMetadata = new DriveFile(array('name' => $backupFolderName, 'mimeType' => 'application/vnd.google-apps.folder', 'parents' => array($folderId)));
                                     $backupFolder = $service->files->create($backupFolderMetadata, array('fields' => 'id'));
                                     $backupFolderId = $backupFolder->id;
                                     $messages[] = "<br/><font color=green>- Thư mục con: <b>$backupFolderName</b> đã được tạo bên trong thư mục <b>$folderName</b> với ID: " . $backupFolderId . "</font>";
-                                    $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
+                                    if ($google_cloud_drive_sharing_permission === 'anyone_with_link') $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
                                     $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$backupFolderName</b></font>";
                                 }
                                 //Kiểm tra số lượng tệp trong thư mục Backup_Interface
+                                if ($google_cloud_drive_sharing_permission === 'private') {
+                                    vbotGoogleDriveRemovePublicAccess($service, $folderId);
+                                    vbotGoogleDriveRemovePublicAccess($service, $backupFolderId);
+                                }
                                 $fileQuery = "mimeType != 'application/vnd.google-apps.folder' and '$backupFolderId' in parents and trashed = false";
                                 $fileResponse = $service->files->listFiles(array('q' => $fileQuery, 'fields' => 'files(id, name, createdTime)'));
+                                if ($google_cloud_drive_sharing_permission === 'private') {
+                                    foreach ($fileResponse->files as $existingDriveFile) vbotGoogleDriveRemovePublicAccess($service, $existingDriveFile->id);
+                                }
                                 $fileCount = count($fileResponse->files);
                                 $messages[] = "<font color=green>- Số tệp hiện tại trên Google Drive <b>$backupFolderName: $fileCount</b></font>";
                                 if ($fileCount >= $Config['backup_upgrade']['google_cloud_drive']['limit_backup_files']) {
@@ -689,9 +726,13 @@ include 'html_head.php';
                                     $content = file_get_contents($FileName_Backup_VBot);
                                     $file = $service->files->create($fileMetadata, array('data' => $content, 'mimeType' => mime_content_type($FileName_Backup_VBot), 'uploadType' => 'multipart', 'fields' => 'id'));
                                     $messages[] = "<br/><font color=green>- Tệp <b>" . $fileName . "</b> đã được tải lên với ID: <b>" . $file->id . "</b></font>";
-                                    $permission = new \Google\Service\Drive\Permission(array('role' => 'reader', 'type' => 'anyone'));
-                                    $service->permissions->create($file->id, $permission);
-                                    $messages[] = "<font color=green>- Quyền công khai đã được thiết lập cho tệp: <b>" . $fileName . "</b> ai có liên kết cũng có thể xem và tải xuống tệp</font>";
+                                    if ($google_cloud_drive_sharing_permission === 'anyone_with_link') {
+                                        $permission = new \Google\Service\Drive\Permission(array('role' => 'reader', 'type' => 'anyone'));
+                                        $service->permissions->create($file->id, $permission);
+                                        $messages[] = "<font color=green>- Người có đường liên kết có thể xem và tải tệp: <b>" . $fileName . "</b></font>";
+                                    } else {
+                                        $messages[] = "<font color=green>- Tệp <b>" . $fileName . "</b> chỉ tài khoản Google Drive của bạn có thể truy cập</font>";
+                                    }
                                     $messages[] = "<br/><font color=green>- Google Cloud Drive: <a href='https://drive.google.com/file/d/" . $file->id . "/view?usp=drive_link' target='_bank' title='Xem, Tải xuống file " . $fileName . "'><b>Tải Xuống File " . $fileName . "</b></a></font>";
                                 } catch (Exception $e) {
                                     $messages[] = '<font color=red>- Có lỗi xảy ra khi tải tệp lên: ' . $e->getMessage() . '</font>';
@@ -765,7 +806,9 @@ include 'html_head.php';
                                             if ($client->getRefreshToken()) {
                                                 $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                                                 if (isset($token['access_token'])) {
-                                                    vbotDashboardWriteJson($tokenPath, $token, 'token Google Drive');
+                                                    $accessToken = array_merge($accessToken, $token);
+                                                    vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
+                                                    $client->setAccessToken($accessToken);
                                                     $libPath_exist = true;
                                                     $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                                                 } else {
@@ -798,7 +841,7 @@ include 'html_head.php';
                                                 $backupFolder = $service->files->create($backupFolderMetadata, array('fields' => 'id'));
                                                 $backupFolderId = $backupFolder->id;
                                                 $messages[] = "<font color=green>- Thư mục $backupFolderName đã được tạo với ID: " . $backupFolderId . "</font>";
-                                                $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
+                                                if ($google_cloud_drive_sharing_permission === 'anyone_with_link') $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
                                                 $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$backupFolderName</b></font>";
                                             }
                                         } else {
@@ -807,18 +850,25 @@ include 'html_head.php';
                                             $folder = $service->files->create($folderMetadata, array('fields' => 'id'));
                                             $folderId = $folder->id;
                                             $messages[] = "<font color=green>- Thư mục <b>" . $folderName . "</b> đã được tạo với ID: " . $folderId . "</font>";
-                                            $service->permissions->create($folderId, $permission, ['fields' => 'id']);
+                                            if ($google_cloud_drive_sharing_permission === 'anyone_with_link') $service->permissions->create($folderId, $permission, ['fields' => 'id']);
                                             $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$folderName</b></font>";
                                             $backupFolderMetadata = new DriveFile(array('name' => $backupFolderName, 'mimeType' => 'application/vnd.google-apps.folder', 'parents' => array($folderId)));
                                             $backupFolder = $service->files->create($backupFolderMetadata, array('fields' => 'id'));
                                             $backupFolderId = $backupFolder->id;
                                             $messages[] = "<br/><font color=green>- Thư mục con: <b>$backupFolderName</b> đã được tạo bên trong thư mục <b>$folderName</b> với ID: " . $backupFolderId . "</font>";
-                                            $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
+                                            if ($google_cloud_drive_sharing_permission === 'anyone_with_link') $service->permissions->create($backupFolderId, $permission, ['fields' => 'id']);
                                             $messages[] = "<font color=green>- Quyền truy cập công khai đã được cấp cho thư mục <b>$backupFolderName</b></font>";
                                         }
                                         //Kiểm tra số lượng tệp trong thư mục Backup_Interface
+                                        if ($google_cloud_drive_sharing_permission === 'private') {
+                                            vbotGoogleDriveRemovePublicAccess($service, $folderId);
+                                            vbotGoogleDriveRemovePublicAccess($service, $backupFolderId);
+                                        }
                                         $fileQuery = "mimeType != 'application/vnd.google-apps.folder' and '$backupFolderId' in parents and trashed = false";
                                         $fileResponse = $service->files->listFiles(array('q' => $fileQuery, 'fields' => 'files(id, name, createdTime)'));
+                                        if ($google_cloud_drive_sharing_permission === 'private') {
+                                            foreach ($fileResponse->files as $existingDriveFile) vbotGoogleDriveRemovePublicAccess($service, $existingDriveFile->id);
+                                        }
                                         $fileCount = count($fileResponse->files);
                                         $messages[] = "<font color=green>- Số tệp hiện tại trên Google Drive <b>$backupFolderName: $fileCount</b></font>";
                                         $limitBackupFiles = (int) $Config['backup_upgrade']['google_cloud_drive']['limit_backup_files'];
@@ -841,9 +891,13 @@ include 'html_head.php';
                                             $content = file_get_contents($FileName_Backup_VBot);
                                             $file = $service->files->create($fileMetadata, array('data' => $content, 'mimeType' => mime_content_type($FileName_Backup_VBot), 'uploadType' => 'multipart', 'fields' => 'id'));
                                             $messages[] = "<br/><font color=green>- Tệp <b>" . $fileName . "</b> đã được tải lên với ID: <b>" . $file->id . "</b></font>";
-                                            $permission = new \Google\Service\Drive\Permission(array('role' => 'reader', 'type' => 'anyone'));
-                                            $service->permissions->create($file->id, $permission);
-                                            $messages[] = "<font color=green>- Quyền công khai đã được thiết lập cho tệp: <b>" . $fileName . "</b> ai có liên kết cũng có thể xem và tải xuống tệp</font>";
+                                            if ($google_cloud_drive_sharing_permission === 'anyone_with_link') {
+                                                $permission = new \Google\Service\Drive\Permission(array('role' => 'reader', 'type' => 'anyone'));
+                                                $service->permissions->create($file->id, $permission);
+                                                $messages[] = "<font color=green>- Người có đường liên kết có thể xem và tải tệp: <b>" . $fileName . "</b></font>";
+                                            } else {
+                                                $messages[] = "<font color=green>- Tệp <b>" . $fileName . "</b> chỉ tài khoản Google Drive của bạn có thể truy cập</font>";
+                                            }
                                             $messages[] = "<br/><font color=green>- Google Cloud Drive: <a href='https://drive.google.com/file/d/" . $file->id . "/view?usp=drive_link' target='_bank' title='Xem, Tải xuống file " . $fileName . "'><b>Tải Xuống File " . $fileName . "</b></a></font>";
                                         } catch (Exception $e) {
                                             $messages[] = '<font color=red>- Có lỗi xảy ra khi tải tệp lên: ' . $e->getMessage() . '</font>';
@@ -912,13 +966,15 @@ include 'html_head.php';
 
     //Tải xuống tệp từ google cloud drive
     function downloadFileFromDrive($fileId, $destinationDirectory){
-        global $messages, $client, $tokenPath;
+        global $messages, $client, $tokenPath, $accessToken;
         $messages[] = "<font color=green>- Đang tiến hành tải xuống tệp sao lưu có ID là: <b>$fileId</b>";
         if ($client->isAccessTokenExpired()) {
             if ($client->getRefreshToken()) {
                 $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
                 if (isset($token['access_token'])) {
-                    vbotDashboardWriteJson($tokenPath, $token, 'token Google Drive');
+                    $accessToken = array_merge($accessToken, $token);
+                    vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
+                    $client->setAccessToken($accessToken);
                     $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                 } else {
                     $messages[] = '<font color=green>- Xảy ra lỗi, Token Làm Mới Không Tồn Tại Để Xác Thực</font>';

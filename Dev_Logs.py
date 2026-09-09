@@ -6,6 +6,14 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- VBot tự gọi ``logs_dev(logs_text)`` cho mỗi dòng log khi chế độ log tùy chỉnh được bật.
+- Giữ nguyên tên hàm; chỉ chỉnh phần thân để in ra màn hình, ghi tệp hoặc gửi sang máy chủ khác.
+- Không gọi lại hàm ghi log chính của VBot từ đây nếu việc đó lại kích hoạt ``logs_dev`` (tránh đệ quy).
+- File không có biến toàn cục cấu hình; ``Lib.time`` được dùng để tạo thời gian hiển thị.
+"""
+
 #Thư viện Lib của VBot
 import Lib
 

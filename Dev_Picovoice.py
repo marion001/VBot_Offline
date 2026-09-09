@@ -6,6 +6,16 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- File này được VBot import để lấy cấu hình hotword Picovoice; không chạy trực tiếp.
+- ``keyword_paths``: danh sách đường dẫn tuyệt đối tới các file ``.ppn``.
+- ``sensitivities``: độ nhạy 0.0-1.0; số phần tử bắt buộc bằng số phần tử ``keyword_paths``.
+- ``model_file_path``: đường dẫn model ngôn ngữ ``.pv`` tương thích phiên bản Porcupine đang cài.
+- Ba tên biến trên là giao diện toàn cục bắt buộc, không đổi tên. Chỉ thay giá trị của chúng.
+- AccessKey Picovoice được lấy từ ``Config.json``; không ghi khóa bí mật trực tiếp vào file này.
+"""
+
 '''
 Hệ thống OS sử dụng phiên bản 3.0 trong dải được hỗ trợ từ:
     - Phiên bản Picovoice tương thích từ 3.0 -> 3.0.x

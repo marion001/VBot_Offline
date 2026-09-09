@@ -278,6 +278,20 @@ if (defined('VBOT_JSON_API') && VBOT_JSON_API === true) {
 
 $stt_token_google_cloud = $VBot_Offline . $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['authentication_json_file'];
 $tts_token_google_cloud = $VBot_Offline . $Config['smart_config']['smart_answer']['text_to_speak']['tts_ggcloud']['authentication_json_file'];
+
+//Bảo đảm các tệp xác thực Google Cloud luôn tồn tại và là JSON hợp lệ.
+//Chỉ khởi tạo khi thiếu, tuyệt đối không ghi đè thông tin xác thực đã có.
+foreach ([$stt_token_google_cloud, $tts_token_google_cloud] as $googleCloudTokenFile) {
+    if (!file_exists($googleCloudTokenFile)) {
+        if (vbotAtomicWriteFile($googleCloudTokenFile, '{}', basename($googleCloudTokenFile))) {
+            if (!@chmod($googleCloudTokenFile, 0777)) {
+                error_log('[PHP FILE ERROR] Không thể đặt quyền 0777 cho: '.$googleCloudTokenFile);
+            }
+        } else {
+            error_log('[PHP FILE ERROR] Không thể khởi tạo tệp Google Cloud: '.$googleCloudTokenFile);
+        }
+    }
+}
 $Backlist_File_Name = $VBot_Offline . $Config['smart_config']['backlist_file_name'];
 
 #ĐƯờng dẫn lưu file backup Vbot
@@ -546,12 +560,25 @@ if (!function_exists('vbotUpgradeTransactionalCopy')) {
             new RecursiveDirectoryIterator($source, FilesystemIterator::SKIP_DOTS),
             RecursiveIteratorIterator::LEAVES_ONLY
         );
+        $normalizedKeep = [];
+        foreach ($keepList as $keepEntry) {
+            $keepEntry = trim(str_replace('\\', '/', (string) $keepEntry), '/');
+            if ($keepEntry !== '') $normalizedKeep[] = $keepEntry;
+        }
         foreach ($iterator as $item) {
-            if (!$item->isFile() || in_array($item->getFilename(), $keepList, true)) continue;
+            if (!$item->isFile()) continue;
             $relative = str_replace('\\', '/', substr($item->getPathname(), strlen($source) + 1));
             if ($relative === '' || strpos($relative, '../') !== false) {
                 return vbotUpgradeReportError($messages, $component, 'kiểm tra đường dẫn', 'Đường dẫn không an toàn: ' . $relative);
             }
+            $keepItem = false;
+            foreach ($normalizedKeep as $keepEntry) {
+                if ($relative === $keepEntry || strpos($relative, $keepEntry . '/') === 0 || $item->getFilename() === $keepEntry) {
+                    $keepItem = true;
+                    break;
+                }
+            }
+            if ($keepItem) continue;
             $files[] = [$item->getPathname(), $relative];
         }
         if (empty($files)) {
@@ -581,8 +608,10 @@ if (!function_exists('vbotUpgradeTransactionalCopy')) {
             // Đăng ký rollback trước khi copy vì copy() có thể tạo/ghi dở tệp đích.
             $processed[] = [$destPath, $backupPath, $existed];
             $manifest[] = ['relative' => $relative, 'existed' => $existed];
-            if (!copy($srcPath, $destPath)) {
-                $failure = 'Không thể sao chép tệp: ' . $relative;
+            $temporaryPath = @tempnam(dirname($destPath), '.vbot-update-');
+            if ($temporaryPath === false || !copy($srcPath, $temporaryPath) || !@rename($temporaryPath, $destPath)) {
+                if (is_string($temporaryPath) && is_file($temporaryPath)) @unlink($temporaryPath);
+                $failure = 'Không thể thay tệp nguyên tử: ' . $relative;
                 break;
             }
             clearstatcache(true, $destPath);
@@ -655,8 +684,136 @@ if (!function_exists('vbotUpgradeRollbackTransaction')) {
     }
 }
 
+if (!function_exists('vbotBackupPrepareExclusions')) {
+    function vbotBackupPrepareExclusions(array $folderEntries, array $formatEntries, &$messages, $component)
+    {
+        $folders = [];
+        foreach ($folderEntries as $value) {
+            if (!is_string($value)) {
+                vbotUpgradeReportError($messages, $component, 'cấu hình sao lưu', 'Tên tệp/thư mục loại trừ phải là chuỗi');
+                return null;
+            }
+            $value = trim(str_replace('\\', '/', $value), '/');
+            if ($value === '') continue;
+            if (preg_match('/(^|\/)\.\.($|\/)|[*?\[\]]/', $value)) {
+                vbotUpgradeReportError($messages, $component, 'cấu hình sao lưu', 'Tên tệp/thư mục loại trừ không hợp lệ: ' . $value);
+                return null;
+            }
+            if (!in_array($value, $folders, true)) $folders[] = $value;
+        }
+
+        $formats = [];
+        $formatPatterns = [];
+        foreach ($formatEntries as $value) {
+            if (!is_string($value)) {
+                vbotUpgradeReportError($messages, $component, 'cấu hình sao lưu', 'Định dạng tệp loại trừ phải là chuỗi');
+                return null;
+            }
+            $extension = ltrim(trim($value), '*.');
+            if ($extension === '') continue;
+            if (!preg_match('/^[A-Za-z0-9._+-]+$/', $extension)) {
+                vbotUpgradeReportError($messages, $component, 'cấu hình sao lưu', 'Định dạng tệp loại trừ không hợp lệ: ' . $value);
+                return null;
+            }
+            $extension = strtolower($extension);
+            if (in_array($extension, $formats, true)) continue;
+            $formats[] = $extension;
+            $pattern = '*.';
+            foreach (str_split($extension) as $character) {
+                if ($character >= 'a' && $character <= 'z') {
+                    $pattern .= '[' . $character . strtoupper($character) . ']';
+                } else {
+                    $pattern .= $character;
+                }
+            }
+            $formatPatterns[] = $pattern;
+        }
+        return ['folders' => $folders, 'formats' => $formats, 'format_patterns' => $formatPatterns];
+    }
+}
+
+if (!function_exists('vbotBackupValidateArchiveExclusions')) {
+    function vbotBackupValidateArchiveExclusions($archivePath, array $rules, &$messages, $component)
+    {
+        exec('tar -tzf ' . escapeshellarg($archivePath) . ' 2>&1', $entries, $returnCode);
+        if ($returnCode !== 0 || empty($entries)) {
+            return vbotUpgradeReportError($messages, $component, 'hậu kiểm sao lưu', 'Tệp backup không đọc được hoặc không chứa dữ liệu');
+        }
+        foreach ($entries as $rawEntry) {
+            $entry = trim(str_replace('\\', '/', (string) $rawEntry));
+            $entry = preg_replace('#^\./#', '', $entry);
+            $entry = rtrim($entry, '/');
+            if ($entry === '') continue;
+            $parts = explode('/', $entry);
+            foreach ($rules['folders'] as $folder) {
+                $excluded = strpos($folder, '/') === false
+                    ? in_array($folder, $parts, true)
+                    : ($entry === $folder || strpos($entry, $folder . '/') === 0);
+                if ($excluded) {
+                    return vbotUpgradeReportError($messages, $component, 'hậu kiểm sao lưu', 'Archive vẫn chứa mục đã yêu cầu loại trừ: ' . $entry);
+                }
+            }
+            $lowerEntry = strtolower($entry);
+            foreach ($rules['formats'] as $extension) {
+                $suffix = '.' . $extension;
+                if (strlen($lowerEntry) >= strlen($suffix) && substr($lowerEntry, -strlen($suffix)) === $suffix) {
+                    return vbotUpgradeReportError($messages, $component, 'hậu kiểm sao lưu', 'Archive vẫn chứa định dạng đã yêu cầu loại trừ: ' . $entry);
+                }
+            }
+        }
+        return true;
+    }
+}
+
 //Kiểm tra xem google cloud backup có được bật hay không:
 $google_cloud_drive_active = $Config['backup_upgrade']['google_cloud_drive']['active'];
+$google_cloud_drive_sharing_permission = isset($Config['backup_upgrade']['google_cloud_drive']['sharing_permission'])
+    && $Config['backup_upgrade']['google_cloud_drive']['sharing_permission'] === 'anyone_with_link'
+    ? 'anyone_with_link'
+    : 'private';
+
+if (!function_exists('vbotGoogleDriveRemovePublicAccess')) {
+    function vbotGoogleDriveRemovePublicAccess($service, $fileId)
+    {
+        try {
+            $permissions = $service->permissions->listPermissions($fileId, ['fields' => 'permissions(id,type)']);
+            foreach ($permissions->getPermissions() as $permission) {
+                if ($permission->getType() === 'anyone') {
+                    $service->permissions->delete($fileId, $permission->getId());
+                }
+            }
+            return true;
+        } catch (Throwable $error) {
+            error_log('[Google Drive ERROR] Không thể gỡ quyền công khai của ' . $fileId . ': ' . $error->getMessage());
+            return false;
+        }
+    }
+}
+
+if (!function_exists('vbotGoogleDriveApplySharing')) {
+    function vbotGoogleDriveApplySharing($service, $fileId, $sharingPermission)
+    {
+        try {
+            $permissions = $service->permissions->listPermissions($fileId, ['fields' => 'permissions(id,type)']);
+            $publicPermissions = [];
+            foreach ($permissions->getPermissions() as $permission) {
+                if ($permission->getType() === 'anyone') $publicPermissions[] = $permission;
+            }
+            if ($sharingPermission === 'anyone_with_link') {
+                if (empty($publicPermissions)) {
+                    $permission = new \Google\Service\Drive\Permission(['role' => 'reader', 'type' => 'anyone']);
+                    $service->permissions->create($fileId, $permission, ['fields' => 'id']);
+                }
+            } else {
+                foreach ($publicPermissions as $permission) $service->permissions->delete($fileId, $permission->getId());
+            }
+            return true;
+        } catch (Throwable $error) {
+            error_log('[Google Drive ERROR] Không thể đồng bộ quyền chia sẻ của ' . $fileId . ': ' . $error->getMessage());
+            return false;
+        }
+    }
+}
 
 //Cổng port của đường API
 $Port_API = $Config['api']['port'];

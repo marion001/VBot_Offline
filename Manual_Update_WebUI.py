@@ -28,6 +28,8 @@ import time
 import urllib.request
 import zipfile
 
+from Update_Backup import create_full_backup
+
 try:
     import fcntl
 except ImportError:
@@ -398,7 +400,30 @@ def validate_package(repo_root):
 
 def should_keep(relative, keep_paths):
     value = relative.as_posix().strip("/")
-    return any(value == keep or value.startswith(keep + "/") for keep in keep_paths)
+    return any(
+        value == keep or value.startswith(keep + "/") or relative.name == keep
+        for keep in keep_paths
+    )
+
+def configured_keep_paths(config_path=ROOT / "Config.json"):
+    try:
+        config = read_json_object(config_path)
+        values = config["backup_upgrade"]["web_interface"]["upgrade"]["keep_file_directory"]
+    except (OSError, KeyError, TypeError, ValueError, json.JSONDecodeError) as error:
+        raise RuntimeError(
+            "Không đọc được backup_upgrade.web_interface.upgrade.keep_file_directory; "
+            "đã hủy cập nhật để tránh ghi đè dữ liệu cần giữ lại"
+        ) from error
+    if not isinstance(values, list):
+        raise RuntimeError(
+            "backup_upgrade.web_interface.upgrade.keep_file_directory không phải danh sách; "
+            "đã hủy cập nhật để tránh ghi đè dữ liệu cần giữ lại"
+        )
+    return {
+        value.replace("\\", "/").strip("/")
+        for value in values
+        if isinstance(value, str) and value.strip("/\\")
+    }
 
 def copy_transaction(source, rollback, keep_paths, replace_json):
     files_root = rollback / "files"
@@ -460,7 +485,12 @@ def _update(args):
         return
     stamp = dt.datetime.now().strftime("%Y%m%d_%H%M%S")
     rollback = ROOT / "Backup_Upgrade/Manual_WebUI" / stamp
-    keep_paths = {value.strip("/\\") for value in args.keep if value.strip("/\\")}
+    keep_paths = set() if args.no_configured_keep else configured_keep_paths()
+    keep_paths.update(
+        str(value).replace("\\", "/").strip("/")
+        for value in args.keep
+        if str(value).strip("/\\")
+    )
     replace_json = {
         str(value).replace("\\", "/").strip("/")
         for value in args.replace_json
@@ -477,6 +507,33 @@ def _update(args):
         old_release_date, old_version = backup_version_metadata(HTML_ROOT / "Version.json")
         manual_backup_limit = backup_limit(ROOT / "Config.json", "web_interface")
         log(f"Giới hạn backup WebUI thủ công: {manual_backup_limit} tệp")
+        config = read_json_object(ROOT / "Config.json")
+        section = config.get("backup_upgrade", {}).get("web_interface", {})
+        backup_options = section.get("backup", {}) if isinstance(section, dict) else {}
+        upgrade_options = section.get("upgrade", {}) if isinstance(section, dict) else {}
+        make_full_backup = args.backup_before_update
+        if make_full_backup is None:
+            make_full_backup = upgrade_options.get("backup_before_updating", False)
+            if not isinstance(make_full_backup, bool):
+                raise RuntimeError("backup_before_updating phải là true hoặc false")
+        configured_folders = backup_options.get("exclude_files_folder", [])
+        configured_formats = backup_options.get("exclude_file_format", [])
+        if not isinstance(configured_folders, (list, tuple, set)) or not isinstance(configured_formats, (list, tuple, set)):
+            raise RuntimeError("Danh sách loại trừ full backup WebUI không hợp lệ")
+        backup_folders = [] if args.no_configured_backup_excludes else configured_folders
+        backup_formats = [] if args.no_configured_backup_excludes else configured_formats
+        backup_folders = list(backup_folders) + list(args.backup_exclude)
+        backup_formats = list(backup_formats) + list(args.backup_exclude_format)
+        if make_full_backup:
+            backup_path = Path(str(backup_options.get("backup_path", "Backup_Upgrade/Backup_Interface")))
+            if not backup_path.is_absolute():
+                backup_path = HTML_ROOT / backup_path
+            create_full_backup(
+                HTML_ROOT, backup_path, "VBot_Interface", old_release_date, old_version,
+                backup_folders, backup_formats, manual_backup_limit, log,
+            )
+        else:
+            log("Đã tắt full backup trước cập nhật; rollback giao dịch vẫn luôn được tạo")
         rollback.mkdir(parents=True, exist_ok=False)
         log(f"Đã tạo vùng rollback: {rollback}")
         try:
@@ -541,9 +598,16 @@ def main():
     parser.add_argument("--zip", help="Dùng gói ZIP local thay vì tải GitHub")
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument(
-        "--keep", action="append", default=["includes/other_data"],
+        "--keep", action="append", default=[],
         help="Đường dẫn tương đối trong html cần giữ lại; có thể dùng nhiều lần",
     )
+    parser.add_argument("--no-configured-keep", action="store_true", help="Không nạp danh sách giữ lại từ Config.json")
+    parser.set_defaults(backup_before_update=None)
+    parser.add_argument("--backup-before-update", dest="backup_before_update", action="store_true")
+    parser.add_argument("--no-backup-before-update", dest="backup_before_update", action="store_false")
+    parser.add_argument("--backup-exclude", action="append", default=[])
+    parser.add_argument("--backup-exclude-format", action="append", default=[])
+    parser.add_argument("--no-configured-backup-excludes", action="store_true")
     parser.add_argument(
         "--replace-json", action="append", default=[],
         help="Cho phép thay thế một JSON hiện có; dùng đường dẫn tương đối trong html",
@@ -561,6 +625,9 @@ def main():
     started_at = int(time.time())
     try:
         update(args)
+        if not args.apply and args.rollback is None:
+            log("Kiểm tra gói cập nhật WebUI hoàn tất; không ghi kết quả cập nhật")
+            return 0
         result = {"target": "interface", "status": "success", "message": "Cập nhật giao diện VBot thành công", "started_at": started_at, "finished_at": int(time.time())}
         atomic_json_write(UPDATE_RESULT, result)
         return 0

@@ -32,7 +32,7 @@ $responseData = [
     'data' => []
 ];
 
-if (!$google_cloud_drive_active === true) {
+if ($google_cloud_drive_active !== true) {
     $responseData['success'] = false;
     $responseData['gcloud_notification'] = "Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active)";
     $responseData['message'] = "Cloud Backup -> Google Cloud Drive Không được Kích Hoạt Trong Config.json (backup_upgrade->google_cloud_drive->active)";
@@ -73,7 +73,9 @@ if ($activve_show === true) {
     $client->setAuthConfig($authConfigPath);
     $client->setAccessType('offline');
     $client->setIncludeGrantedScopes(true);
-    $client->addScope(Drive::DRIVE_READONLY);
+    // Endpoint này vừa đọc vừa xóa các file do ứng dụng tạo, vì vậy dùng cùng
+    // scope DRIVE_FILE với trang cấu hình/upload.
+    $client->addScope(Drive::DRIVE_FILE);
     if (file_exists($tokenPath)) {
         $accessToken = json_decode(file_get_contents($tokenPath), true);
         if (json_last_error() === JSON_ERROR_NONE && isset($accessToken['access_token'])) {
@@ -91,8 +93,11 @@ if ($activve_show === true) {
             if (isset($newAccessToken['access_token'])) {
                 //echo "Làm mới token thành công";
                 $accessToken = array_merge($accessToken, $newAccessToken);
-                file_put_contents($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
-                @chmod($tokenPath, 0777);
+                $encodedToken = json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                if ($encodedToken === false || !vbotAtomicWriteFile($tokenPath, $encodedToken, 'token Google Drive')) {
+                    vbotApiJsonResponse(['success' => false, 'message' => 'Không thể lưu token Google Drive đã làm mới'], 500);
+                }
+                vbotSetFullPermissions($tokenPath, 'token Google Drive');
                 $responseData['gcloud_notification'] = "Làm mới mã Token thành công";
                 $client->setAccessToken($accessToken);
             } else {
@@ -123,7 +128,7 @@ if (isset($_POST['Scan'])) {
     }
     $driveService = new Drive($client);
     $response = $driveService->files->listFiles([
-        'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s'", str_replace(["\\", "'"], ["\\\\", "\\'"], $folderName)),
+        'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s' and trashed=false", str_replace(["\\", "'"], ["\\\\", "\\'"], $folderName)),
         'fields' => 'files(id, name)',
         'pageSize' => 1,
     ]);
@@ -131,17 +136,25 @@ if (isset($_POST['Scan'])) {
         $responseData['message'] = "Không tìm thấy thư mục: $folderName trên Google Cloud Drive";
     } else {
         $folderId = $response->getFiles()[0]->getId();
-        $filesResponse = $driveService->files->listFiles([
-            'q' => sprintf("'%s' in parents", $folderId),
-            'fields' => 'files(id, name, mimeType, size)',
-            'pageSize' => 100, //Điều chỉnh số lượng kết quả cần tìm
-        ]);
-        if (count($filesResponse->getFiles()) == 0) {
+        $driveFiles = [];
+        $pageToken = null;
+        do {
+            $listOptions = [
+                'q' => sprintf("'%s' in parents and trashed=false", $folderId),
+                'fields' => 'nextPageToken, files(id, name, mimeType, size, createdTime)',
+                'pageSize' => 1000,
+            ];
+            if ($pageToken !== null) $listOptions['pageToken'] = $pageToken;
+            $filesResponse = $driveService->files->listFiles($listOptions);
+            foreach ($filesResponse->getFiles() as $driveFile) $driveFiles[] = $driveFile;
+            $pageToken = $filesResponse->getNextPageToken();
+        } while (!empty($pageToken));
+        if (count($driveFiles) == 0) {
             $responseData['message'] = "Không tìm thấy tệp sao lưu nào trong thư mục: $folderName trên Google Cloud Drive";
         } else {
             $responseData['success'] = true;
             $responseData['message'] = "Danh sách tệp trong thư mục: $folderName trên Google Cloud Drive";
-            foreach ($filesResponse->getFiles() as $file) {
+            foreach ($driveFiles as $file) {
                 $size = isset($file->size) ? convertSize($file->size) : 'N/A';
                 $createdTime = isset($file->createdTime) ? $file->createdTime : 'N/A';
                 $formattedTime = $createdTime !== 'N/A' ? date('d-m-Y H:i:s', strtotime($createdTime)) : 'N/A';

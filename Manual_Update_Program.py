@@ -28,6 +28,8 @@ import time
 import urllib.request
 import zipfile
 
+from Update_Backup import create_full_backup
+
 try:
     import fcntl
 except ImportError:
@@ -503,6 +505,22 @@ def matches_keep_entry(relative, keep_entries):
         for entry in keep_entries
     )
 
+def configured_keep_entries(config, section):
+    values = (
+        config.get("backup_upgrade", {})
+        .get(section, {})
+        .get("upgrade", {})
+        .get("keep_file_directory", [])
+    )
+    if not isinstance(values, (list, tuple, set)):
+        log(f"backup_upgrade.{section}.upgrade.keep_file_directory không phải danh sách; bỏ qua")
+        return set()
+    return {
+        value.replace("\\", "/").strip("/")
+        for value in values
+        if isinstance(value, str) and value.strip("/\\")
+    }
+
 def copy_transaction(source, rollback, keep_entries, replace_json):
     files_root = rollback / "files"
     created = []
@@ -609,26 +627,46 @@ def _update(args):
         log("Đã đọc Config.json hiện tại")
         merged_config = merge_config(read_json(source / "Config.json"), old_config)
         log("Đã merge giá trị Config cũ vào mẫu Config mới")
-        configured_keep = (
-            old_config.get("backup_upgrade", {})
-            .get("vbot_program", {})
-            .get("upgrade", {})
-            .get("keep_file_directory", [])
-        )
-        if not isinstance(configured_keep, (list, tuple, set)):
-            log("keep_file_directory không phải danh sách; bỏ qua cấu hình giữ tệp này")
-            configured_keep = []
-        keep_entries = {
+        keep_entries = configured_keep_entries(old_config, "vbot_program")
+        if args.no_configured_keep:
+            keep_entries = set()
+        keep_entries.update(
             str(value).replace("\\", "/").strip("/")
-            for value in configured_keep
-            if isinstance(value, str) and value.strip("/\\")
-        }
+            for value in args.keep
+            if str(value).strip("/\\")
+        )
         replace_json = {
             str(value).replace("\\", "/").strip("/")
             for value in args.replace_json
             if str(value).strip("/\\")
         }
         log(f"Đã nạp {len(keep_entries)} mục cần giữ từ Config.json, các JSON người dùng hiện có sẽ không bị ghi đè")
+        backup_config = old_config.get("backup_upgrade", {}).get("vbot_program", {})
+        backup_options = backup_config.get("backup", {}) if isinstance(backup_config, dict) else {}
+        upgrade_options = backup_config.get("upgrade", {}) if isinstance(backup_config, dict) else {}
+        make_full_backup = args.backup_before_update
+        if make_full_backup is None:
+            make_full_backup = upgrade_options.get("backup_before_updating", False)
+            if not isinstance(make_full_backup, bool):
+                raise RuntimeError("backup_before_updating phải là true hoặc false")
+        configured_folders = backup_options.get("exclude_files_folder", [])
+        configured_formats = backup_options.get("exclude_file_format", [])
+        if not isinstance(configured_folders, (list, tuple, set)) or not isinstance(configured_formats, (list, tuple, set)):
+            raise RuntimeError("Danh sách loại trừ full backup chương trình không hợp lệ")
+        backup_folders = [] if args.no_configured_backup_excludes else configured_folders
+        backup_formats = [] if args.no_configured_backup_excludes else configured_formats
+        backup_folders = list(backup_folders) + list(args.backup_exclude)
+        backup_formats = list(backup_formats) + list(args.backup_exclude_format)
+        if make_full_backup:
+            backup_path = Path(str(backup_options.get("backup_path", "Backup_Upgrade/Backup_Program")))
+            if not backup_path.is_absolute():
+                backup_path = ROOT / "html" / backup_path
+            create_full_backup(
+                ROOT, backup_path, "VBot_Program", old_release_date, old_version,
+                backup_folders, backup_formats, manual_backup_limit, log,
+            )
+        else:
+            log("Đã tắt full backup trước cập nhật; rollback giao dịch vẫn luôn được tạo")
         # Never replace Python/Cython modules inside the running VBot process.
         # A transient updater unit survives this intentional service stop and
         # owns result audio plus the single final restart.
@@ -723,6 +761,14 @@ def main():
     parser.add_argument("--zip", help="Dùng gói ZIP local thay vì tải GitHub")
     parser.add_argument("--timeout", type=int, default=60)
     parser.add_argument("--service", default="VBot_Offline.service")
+    parser.add_argument("--keep", action="append", default=[], help="Tệp/thư mục tương đối cần giữ lại")
+    parser.add_argument("--no-configured-keep", action="store_true", help="Không nạp danh sách giữ lại từ Config.json")
+    parser.set_defaults(backup_before_update=None)
+    parser.add_argument("--backup-before-update", dest="backup_before_update", action="store_true")
+    parser.add_argument("--no-backup-before-update", dest="backup_before_update", action="store_false")
+    parser.add_argument("--backup-exclude", action="append", default=[])
+    parser.add_argument("--backup-exclude-format", action="append", default=[])
+    parser.add_argument("--no-configured-backup-excludes", action="store_true")
     parser.add_argument(
         "--replace-json", action="append", default=[],
         help="Cho phép thay thế một JSON hiện có; dùng đường dẫn tương đối và có thể lặp lại",

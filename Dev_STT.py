@@ -6,6 +6,19 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- VBot gọi ``await dev_stt()`` cho mic local hoặc ``await dev_stt_streaming(...)`` cho client streaming;
+  giữ nguyên tên hàm, coroutine và kiểu kết quả văn bản/``None``.
+- Đặt đường dẫn credentials Google tại ``GOOGLE_APPLICATION_CREDENTIALS``; không chia sẻ tệp JSON.
+- Biến toàn cục có thể cấu hình: ``maximum_recording_time`` (giây),
+  ``dev_stt_interim_results`` (True/False), ``STT_GAIN_VALUE_FLOAT`` (gain), ``RATE`` (Hz),
+  ``Language_Code`` (ví dụ ``vi-VN``). Ba giá trị đầu đang đọc từ ``Lib.config``.
+- ``client`` là Google SpeechClient dùng chung, chỉ nên khởi tạo một lần. Kết quả cuối phải được
+  trả về và gán vào ``Lib.stt_transcript`` như mẫu để pipeline tiếp tục xử lý.
+- Không đọc microphone trực tiếp ngoài cổng ``Lib.read_recorder_frame`` vì có thể xung đột luồng âm thanh.
+"""
+
 import Lib
 import time
 from Media_Player import media_player

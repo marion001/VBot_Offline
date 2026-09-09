@@ -6,6 +6,15 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- VBot tự gọi ``await dev_tts(text_input)``; hàm phải trả đường dẫn MP3 local hoặc URL audio.
+- Thay ``apikey`` bằng khóa thật và điều chỉnh ``speaker_id``/``speed`` theo nhà cung cấp.
+- Không chia sẻ API key trong GitHub hoặc log. File âm thanh được ghi nguyên tử và đặt quyền 0777.
+- Biến toàn cục ``DEV_TTS_TIMEOUT`` là tổng thời gian chờ request (giây), hiện đọc từ
+  ``Config.json -> xiaozhi -> tts_time_out`` và có giá trị dự phòng là 20 giây.
+"""
+
 import Lib
 import aiohttp
 

@@ -6,6 +6,16 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Mail: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- VBot tự gọi ``await dev_assistant(text_input, used_for=None)``; không cần chạy file này trực tiếp.
+- Giữ nguyên tên hàm và kiểu trả về ``(audio, text)``. Trả ``(None, lỗi)`` khi API thất bại.
+- Thay ``api_key_gemini`` trong hàm bằng API key của bạn; không đăng key lên GitHub hoặc log.
+- ``text_input`` là câu hỏi đã nhận dạng; ``used_for`` dành cho phân loại nguồn gọi nếu cần mở rộng.
+- File này không có biến toàn cục do người dùng cấu hình. Timeout được đọc từ
+  ``Lib.time_out_google_gemini`` và TTS được tạo bởi ``TTS_Processing``.
+"""
+
 import Lib
 import TTS_Processing
 import aiohttp

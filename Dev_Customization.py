@@ -7,6 +7,17 @@ Mail: VBot.Assistant@gmail.com
 '''
 
 """
+HƯỚNG DẪN SỬ DỤNG
+- VBot tự gọi ``await dev_skill(input_text)`` khi bật Custom Skill; không chạy file trực tiếp.
+- Giữ nguyên tên hàm. Trả ``True`` khi câu lệnh đã được xử lý, trả ``False`` để hệ thống tiếp tục
+  thử các bộ xử lý khác. Không đặt ví dụ có ``await`` ở cấp mô-đun ngoài hàm.
+- File không khai báo biến toàn cục riêng. Những biến ``Lib.*`` là trạng thái dùng chung của VBot:
+  ưu tiên API như ``Lib.vbot_state.set_media_metadata`` và ``Lib.finish_processing`` thay vì gán rời rạc.
+- Khi phát media, đặt đủ URL, tiêu đề, ảnh và nguồn trước khi gọi Media Player. Với API bên ngoài,
+  luôn đặt timeout, bắt lỗi và không ghi khóa bí mật trực tiếp vào log/mã nguồn công khai.
+"""
+
+"""
 Phần xử lý dữ liệu các bạn sẽ tự code và xử lý theo ý, sở thích và tùy biến của bạn
 Tôi sẽ cung cấp các tài liệu và ví dụ đủ để các bạn xây dựng và phát triển thỏa mãn mày mò, học hỏi
 """

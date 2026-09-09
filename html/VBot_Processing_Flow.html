@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Sơ đồ xử lý hoàn chỉnh của VBot</title>
+  <style>
+    :root{--bg:#07111f;--panel:#0d1b2d;--line:#2b4a6d;--text:#e8f1fb;--muted:#9fb3c8;--blue:#39a9ff;--green:#35d39a;--yellow:#ffcc66;--red:#ff6b7a;--violet:#b18cff}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:linear-gradient(135deg,#07111f,#0a1728 50%,#07111f);color:var(--text);font:15px/1.58 system-ui,-apple-system,"Segoe UI",sans-serif}
+    aside{position:fixed;inset:0 auto 0 0;width:270px;padding:20px 16px;overflow:auto;background:#07101ddd;border-right:1px solid var(--line);backdrop-filter:blur(10px)}
+    aside h2{font-size:18px;margin:0 0 12px;color:var(--blue)}aside a{display:block;color:var(--muted);text-decoration:none;padding:7px 9px;border-radius:8px}aside a:hover{background:#132844;color:#fff}
+    main{max-width:1250px;margin-left:270px;padding:32px}.hero{padding:30px;border:1px solid var(--line);border-radius:18px;background:linear-gradient(145deg,#10243d,#0a1728)}
+    h1{font-size:34px;margin:0 0 8px}h2{margin-top:42px;padding-bottom:8px;border-bottom:1px solid var(--line);color:#d8eaff}h3{color:var(--blue)}code{color:#9bd7ff;background:#07111f;padding:2px 5px;border-radius:5px}
+    .muted{color:var(--muted)}.flow{display:flex;align-items:stretch;gap:9px;overflow:auto;padding:18px 4px}.node{min-width:145px;padding:13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);text-align:center}.arrow{display:flex;align-items:center;color:var(--blue);font-size:22px}.decision{border-color:var(--yellow);transform:skew(-3deg)}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}.card{padding:16px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}.card h3{margin-top:0}
+    .ok{border-left:4px solid var(--green)}.warn{border-left:4px solid var(--yellow)}.danger{border-left:4px solid var(--red)}
+    table{width:100%;border-collapse:collapse;background:var(--panel)}th,td{padding:10px;border:1px solid var(--line);vertical-align:top}th{background:#112943;text-align:left;color:#bfe3ff}
+    .lane{display:grid;grid-template-columns:150px 1fr;border:1px solid var(--line);border-bottom:0}.lane:last-child{border-bottom:1px solid var(--line)}.lane>strong,.lane>div{padding:12px}.lane>strong{background:#10243d}.step{display:inline-block;margin:3px;padding:6px 9px;border:1px solid var(--line);border-radius:8px;background:#081522}.step::after{content:" →";color:var(--blue)}.step:last-child::after{content:""}
+    .legend span{display:inline-block;margin:5px 10px 5px 0}.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:5px}.toolbar{display:flex;gap:8px;margin-top:15px}button{padding:8px 12px;border:1px solid var(--line);border-radius:8px;background:#102943;color:#fff;cursor:pointer}
+    @media(max-width:850px){aside{position:static;width:auto;border-right:0;border-bottom:1px solid var(--line)}main{margin:0;padding:18px}.lane{grid-template-columns:1fr}.flow{align-items:center;flex-direction:column}.arrow{transform:rotate(90deg)}}
+    @media print{aside,.toolbar{display:none}main{margin:0;max-width:none;padding:0}body{background:white;color:#111}.hero,.card,.node,table{background:white;color:#111;border-color:#aaa}h2,h3,code{color:#123}.muted{color:#555}}
+  </style>
+</head>
+<body>
+<aside>
+  <h2>VBot Processing Flow</h2>
+  <a href="#overview">1. Tổng quan</a><a href="#startup">2. Khởi động</a><a href="#input">3. Nguồn đầu vào</a><a href="#stt">4. STT</a><a href="#processing">5. Xử lý ý định</a><a href="#dev">6. Dev hooks</a><a href="#output">7. Assistant/TTS/Media</a><a href="#ownership">8. Ownership</a><a href="#integrations">9. Tích hợp</a><a href="#update">10. Update/Backup/Rollback</a><a href="#errors">11. Luồng lỗi</a><a href="#files">12. Bản đồ file</a><a href="#timeline">13. Timeline câu lệnh</a><a href="#shutdown">14. Shutdown</a><a href="#invariants">15. Bất biến</a><a href="#checklist">16. Checklist</a>
+</aside>
+<main>
+  <section class="hero" id="overview">
+    <h1>Sơ đồ xử lý hoàn chỉnh của VBot</h1>
+    <p class="muted">Tài liệu trực quan, chạy offline, đối chiếu theo mã nguồn hiện tại. Bản Markdown chi tiết nằm tại <code>VBOT_PROCESSING_FLOW.md</code>.</p>
+    <div class="toolbar"><button onclick="window.print()">In / Xuất PDF</button><button onclick="document.body.classList.toggle('compact')">Chuyển cách xem</button></div>
+    <div class="legend"><span><i class="dot" style="background:var(--blue)"></i>Luồng chính</span><span><i class="dot" style="background:var(--green)"></i>Thành công</span><span><i class="dot" style="background:var(--yellow)"></i>Điều kiện/cảnh báo</span><span><i class="dot" style="background:var(--red)"></i>Lỗi/rollback</span></div>
+  </section>
+
+  <section>
+    <h2>Luồng từ đầu vào đến phản hồi</h2>
+    <div class="flow"><div class="node">Wake word<br>API / MQTT<br>Streaming</div><div class="arrow">→</div><div class="node">Mic/PCM/Text<br>+ owner/generation</div><div class="arrow">→</div><div class="node">STT<br><code>Select_STT</code></div><div class="arrow">→</div><div class="node decision">Data Processing<br>hay Dev Processing?</div><div class="arrow">→</div><div class="node">Handler / Assistant<br>Home Assistant</div><div class="arrow">→</div><div class="node">TTS / Media</div><div class="arrow">→</div><div class="node">finish_processing<br>Idle / hội thoại</div></div>
+  </section>
+
+  <section id="startup"><h2>2. Khởi động</h2>
+    <div class="lane"><strong>OS/systemd</strong><div><span class="step">Khởi chạy</span><span class="step">Giám sát service</span><span class="step">Restart khi cần</span></div></div>
+    <div class="lane"><strong>Start.py</strong><div><span class="step">Kiểm tra runtime</span><span class="step">Kiểm tra phụ thuộc</span><span class="step">Gọi VBot</span></div></div>
+    <div class="lane"><strong>Lib.py</strong><div><span class="step">Đọc Config</span><span class="step">Tạo state/lock</span><span class="step">Khởi tạo log</span><span class="step">Chuẩn bị thiết bị</span></div></div>
+    <div class="lane"><strong>VBot.py</strong><div><span class="step">Mic + wake word</span><span class="step">LED</span><span class="step">Media</span><span class="step">API/MQTT/Streaming</span><span class="step">Chờ input</span></div></div>
+    <div class="card warn"><b>Nguyên tắc:</b> dependency tùy chọn chỉ được import khi chức năng tương ứng bật. Lỗi một tích hợp không nên làm chết toàn bộ runtime.</div>
+  </section>
+
+  <section id="input"><h2>3. Nguồn đầu vào</h2><div class="grid">
+    <div class="card"><h3>Mic local</h3><p>Wake word → xin owner mic → thu frame qua cổng đọc chung → STT → transcript.</p></div>
+    <div class="card"><h3>Streaming client</h3><p>WebSocket tạo session và generation → queue PCM có giới hạn → STT backend → mode xử lý → phản hồi client.</p></div>
+    <div class="card"><h3>HTTP API</h3><p>Text/control/status/update. Không đọc mic nếu request đã có text. Update được bàn giao Update Manager.</p></div>
+    <div class="card"><h3>MQTT</h3><p>Lệnh theo registry/topic, điều khiển state và phản hồi sau khi thay đổi runtime hoàn tất.</p></div>
+    <div class="card"><h3>Scheduler</h3><p>Nhắc việc/lịch chạy nền nhưng vẫn phải tuân thủ audio ownership và media takeover.</p></div>
+    <div class="card"><h3>XiaoZhi / Home Assistant</h3><p>Yêu cầu giao thức hoặc điều khiển entity được validate trước khi gọi handler.</p></div>
+  </div></section>
+
+  <section id="stt"><h2>4. STT</h2>
+    <div class="flow"><div class="node">PCM local/client</div><div class="arrow">→</div><div class="node decision">Backend từ Config</div><div class="arrow">→</div><div class="node">Default / Google V1/V2 / Dev</div><div class="arrow">→</div><div class="node decision">Transcript / timeout / cancel?</div><div class="arrow">→</div><div class="node">Outcome + cleanup</div></div>
+    <table><tr><th>Điểm vào</th><th>Hợp đồng</th><th>An toàn</th></tr><tr><td><code>STT_Processing.Select_STT()</code></td><td>Điều phối backend, trả transcript/None.</td><td>Cancel task và stream khi wake-up bị hủy.</td></tr><tr><td><code>Dev_STT.dev_stt()</code></td><td>Mic local, trả <code>str | None</code>.</td><td>Chỉ đọc qua <code>Lib.read_recorder_frame</code>.</td></tr><tr><td><code>dev_stt_streaming(...)</code></td><td>Nhận PCM client, không đọc mic local.</td><td>Bỏ kết quả generation cũ.</td></tr></table>
+  </section>
+
+  <section id="processing"><h2>5. Xử lý ý định</h2>
+    <ol><li>Chuẩn hóa input và nhận processing owner.</li><li>Tách multi-command nếu có.</li><li>Thử lệnh hệ thống, mic, âm lượng và media ưu tiên.</li><li>Thử Home Assistant, lịch, thời tiết, nhắc việc, radio, podcast, báo và nhạc.</li><li>Gọi Custom Skill nếu được bật.</li><li>Chuyển Assistant khi không handler nào nhận.</li><li>Phát kết quả và nhả đúng owner.</li></ol>
+    <div class="grid"><div class="card ok"><h3>Custom Skill trả True</h3><p>Đã xử lý xong; dừng router phía sau.</p></div><div class="card"><h3>Trả False/None</h3><p>Bỏ qua; VBot tiếp tục handler mặc định.</p></div><div class="card danger"><h3>Exception</h3><p>Ghi log có context; cleanup và thử fallback nếu hợp lệ.</p></div></div>
+  </section>
+
+  <section id="dev"><h2>6. Các điểm mở rộng Dev</h2>
+    <table><tr><th>File</th><th>Điểm vào/biến bắt buộc</th><th>Kết quả</th></tr>
+      <tr><td>Dev_Assistant.py</td><td><code>dev_assistant(text_input, used_for)</code></td><td>(audio, text)</td></tr><tr><td>Dev_Customization.py</td><td><code>dev_skill(input_text)</code></td><td>True hoặc False/None</td></tr><tr><td>Dev_Led.py</td><td><code>LED_OFF/THINK/SPEAK/.../UPDATE/VOLUME</code></td><td>Hiệu ứng LED</td></tr><tr><td>Dev_Logs.py</td><td><code>logs_dev(logs_text)</code></td><td>Không gọi logger gây đệ quy</td></tr><tr><td>Dev_Music.py</td><td><code>custom_music_async(input_text)</code></td><td>(url,title,cover,source)</td></tr><tr><td>Dev_Picovoice.py</td><td>keyword_paths, sensitivities, model_file_path</td><td>Cấu hình module</td></tr><tr><td>Dev_Processing.py</td><td><code>dev_processing(text_input)</code></td><td>Xử lý toàn pipeline</td></tr><tr><td>Dev_STT.py</td><td><code>dev_stt</code>, <code>dev_stt_streaming</code></td><td>Transcript/None</td></tr><tr><td>Dev_TTS.py</td><td><code>dev_tts(text_input)</code></td><td>Path/URL/None</td></tr><tr><td>Dev_Weather.py</td><td><code>custom_weather(...)</code></td><td>(audio,text)</td></tr>
+    </table>
+  </section>
+
+  <section id="output"><h2>7. Assistant, TTS và Media</h2>
+    <div class="flow"><div class="node">Handler trả text/audio/media</div><div class="arrow">→</div><div class="node decision">Loại kết quả</div><div class="arrow">→</div><div class="node">TTS cache/backend<br>hoặc Media metadata</div><div class="arrow">→</div><div class="node">Sound / Answer / Media</div><div class="arrow">→</div><div class="node">Callback đúng generation</div></div>
+    <div class="grid"><div class="card"><h3>Sound</h3><p>Âm báo ngắn của hệ thống.</p></div><div class="card"><h3>Answer</h3><p>Câu trả lời TTS, phát một lần.</p></div><div class="card"><h3>Media</h3><p>Nhạc, stream, radio, podcast, playlist dài.</p></div></div>
+  </section>
+
+  <section id="ownership"><h2>8. Ownership và vòng đời</h2>
+    <div class="card danger"><b>Quy tắc quan trọng nhất:</b> task chỉ được giải phóng owner/generation mà chính nó nhận. Timeout của phiên cũ không được clear trạng thái phiên mới.</div>
+    <div class="flow"><div class="node">Claim owner</div><div class="arrow">→</div><div class="node">Chụp generation</div><div class="arrow">→</div><div class="node">Thực thi có timeout/cancel</div><div class="arrow">→</div><div class="node decision">Owner còn đúng?</div><div class="arrow">→</div><div class="node">finish_processing(owner)</div><div class="arrow">→</div><div class="node">Conversation hoặc Idle</div></div>
+  </section>
+
+  <section id="integrations"><h2>9. Tích hợp chạy song song</h2><div class="grid"><div class="card"><h3>Home Assistant</h3><p>Entity/action → API → kết quả hoặc fallback.</p></div><div class="card"><h3>XiaoZhi</h3><p>Protocol/MCP schema → action → media takeover có kiểm soát.</p></div><div class="card"><h3>Multiroom</h3><p>Đồng bộ metadata, pause, mute và quyền ưu tiên nguồn.</p></div><div class="card"><h3>WebUI/SSE</h3><p>Snapshot runtime dùng chung, giới hạn client và reconnect an toàn.</p></div></div></section>
+
+  <section id="update"><h2>10. Update, backup và rollback</h2>
+    <div class="flow"><div class="node">WebUI options</div><div class="arrow">→</div><div class="node">Backup local</div><div class="arrow">→</div><div class="node decision">Google Drive?</div><div class="arrow">→</div><div class="node">Update Manager</div><div class="arrow">→</div><div class="node">Python updater</div><div class="arrow">→</div><div class="node">Lock / copy / Config merge</div><div class="arrow">→</div><div class="node decision">Health OK?</div><div class="arrow">→</div><div class="node">Success hoặc rollback</div></div>
+    <div class="grid"><div class="card ok"><h3>Backup local thành công</h3><p>Là bản bảo vệ chính trước cập nhật.</p></div><div class="card warn"><h3>Google Drive lỗi</h3><p>Chỉ cảnh báo; giữ backup local và tiếp tục cập nhật.</p></div><div class="card danger"><h3>Copy/health lỗi</h3><p>Rollback code và Config, phục hồi service và ghi result.</p></div></div>
+    <p>Chạy thủ công file Python không tải Google Drive. Quyền Drive là <code>private</code> hoặc <code>anyone_with_link</code>; refresh token luôn được merge với token mới trước khi lưu.</p>
+  </section>
+
+  <section id="errors"><h2>11. Ma trận lỗi</h2><table><tr><th>Lỗi</th><th>Xử lý</th></tr><tr><td>Mic đã có owner</td><td>Không đọc mic, kết thúc phiên mới.</td></tr><tr><td>STT timeout/cancel</td><td>Đóng stream/worker, ghi outcome, nhả owner.</td></tr><tr><td>TTS lỗi</td><td>Không phát file tạm; trả None/fallback.</td></tr><tr><td>Media callback cũ</td><td>Bỏ qua theo generation.</td></tr><tr><td>Client disconnect</td><td>Hủy task, queue và owner của client.</td></tr><tr><td>Drive lỗi</td><td>Cảnh báo, giữ local backup, không chặn update.</td></tr><tr><td>ZIP không hợp lệ</td><td>Không thay code hiện tại.</td></tr><tr><td>Restart/health lỗi</td><td>Rollback và phục hồi service.</td></tr></table></section>
+
+  <section id="files"><h2>12. Bản đồ mã nguồn</h2><table><tr><th>Khu vực</th><th>File chính</th></tr><tr><td>Khởi động/state</td><td>Start.py, VBot.py, Lib.py</td></tr><tr><td>STT/TTS</td><td>STT_Processing.py, TTS_Processing.py, Dev_STT.py, Dev_TTS.py</td></tr><tr><td>Router</td><td>Data_Processing.py, Def_Processing.py, Dev_Processing.py</td></tr><tr><td>Assistant</td><td>Assistant.py, Dev_Assistant.py</td></tr><tr><td>Audio</td><td>Media_Player.py, Audio_Manager.py</td></tr><tr><td>Kết nối</td><td>Api_HTTP.py, Api_MQTT.py, Streaming.py</td></tr><tr><td>Update</td><td>Update_Manager.py, Manual_Update_Program.py, Manual_Update_WebUI.py</td></tr><tr><td>WebUI update/backup</td><td>html/_Program.php, html/_Dashboard.php, html/GCloud_Drive.php</td></tr></table></section>
+
+  <section id="timeline"><h2>13. Timeline một câu lệnh local</h2>
+    <div class="lane"><strong>Hotword</strong><div><span class="step">Kiểm tra policy</span><span class="step">Claim mic</span><span class="step">Sound Start</span><span class="step">Finalize session</span></div></div>
+    <div class="lane"><strong>STT</strong><div><span class="step">Đọc PCM theo owner</span><span class="step">Backend có timeout</span><span class="step">Transcript/outcome</span><span class="step">Đóng iterator</span></div></div>
+    <div class="lane"><strong>Processing</strong><div><span class="step">Claim processing</span><span class="step">Router</span><span class="step">Handler/Assistant</span><span class="step">TTS</span></div></div>
+    <div class="lane"><strong>Output</strong><div><span class="step">Play Answer/Media</span><span class="step">Callback generation</span><span class="step">Finish owner</span><span class="step">Conversation/Idle</span></div></div>
+  </section>
+
+  <section id="shutdown"><h2>14. Shutdown có kiểm soát</h2>
+    <div class="flow"><div class="node">SIGTERM / SIGINT</div><div class="arrow">→</div><div class="node">Chặn shutdown lặp</div><div class="arrow">→</div><div class="node">Dừng watchdog</div><div class="arrow">→</div><div class="node">Dừng input/API/client</div><div class="arrow">→</div><div class="node">Dừng audio/media</div><div class="arrow">→</div><div class="node">Dừng tích hợp/LED</div><div class="arrow">→</div><div class="node">Đóng event loop</div></div>
+    <div class="card warn">Watchdog phải dừng trước các dịch vụ mà nó có thể tự phục hồi. Media Player chỉ force-clear owner trong shutdown toàn ứng dụng.</div>
+  </section>
+
+  <section id="invariants"><h2>15. Các bất biến phải giữ</h2><table><tr><th>Bất biến</th><th>Mục đích</th></tr><tr><td>Một processing owner tại một thời điểm</td><td>Không phát hai phản hồi cạnh tranh.</td></tr><tr><td>Chỉ mic owner được đọc recorder</td><td>Không chia sai PCM hoặc lỗi native read.</td></tr><tr><td>Generation cũ không commit kết quả</td><td>Không hồi sinh session đã reconnect/cancel.</td></tr><tr><td>Media command được serialize</td><td>Không đua play/pause/stop trên VLC.</td></tr><tr><td>File được công bố sau ghi nguyên tử</td><td>Không dùng dữ liệu dở.</td></tr><tr><td>Backup local độc lập Cloud</td><td>Lỗi mạng không chặn update/rollback.</td></tr><tr><td>Cleanup đúng owner trong mọi kết thúc</td><td>Không treo mic, LED, queue hoặc processing.</td></tr></table></section>
+
+  <section id="checklist"><h2>16. Checklist phát triển</h2><ol><li>Xác định coroutine/thread, owner và generation.</li><li>Validate input và schema dữ liệu ngoài.</li><li>Đặt timeout; chuyển I/O blocking ra worker.</li><li>Không log secret/token/password.</li><li>Dùng state/facade chung cho media.</li><li>Cleanup trong mọi nhánh success/error/cancel.</li><li>Không dùng kết quả worker cũ.</li><li>Ghi file nguyên tử; không phát file tạm.</li><li>Giữ hợp đồng các hàm Dev.</li><li>Thêm test success, timeout, cancel và reconnect.</li></ol></section>
+</main>
+</body>
+</html>

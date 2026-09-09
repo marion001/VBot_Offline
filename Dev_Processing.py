@@ -6,6 +6,19 @@ Facebook: https://www.facebook.com/TWFyaW9uMDAx
 Email: VBot.Assistant@gmail.com
 '''
 
+"""
+HƯỚNG DẪN SỬ DỤNG
+- Chọn chế độ xử lý dành cho nhà phát triển trong WebUI; VBot sẽ gọi ``dev_processing``.
+- Giữ nguyên các hàm công khai và hợp đồng async. Đặt logic riêng trong vùng xử lý được chú thích.
+- Mọi nhánh phải hoàn tất ownership bằng ``dev_finish_processing_async`` hoặc cơ chế tương đương;
+  không tự gán cờ xử lý nếu đã có API ownership của ``Lib``.
+- Biến toàn cục nội bộ ``_DEV_PROCESSING_OWNER`` là tên owner khóa pipeline, không đổi khi không sửa
+  đồng bộ toàn bộ luồng. Các trạng thái ``Lib.conversation_mode``, ``Lib.active_client``,
+  ``Lib.mic_on_off`` và metadata media là trạng thái dùng chung: đọc trực tiếp, còn cập nhật media
+  nên dùng ``Lib.vbot_state.set_media_metadata(...)``.
+- Hàm ``dev_handle_cache_tts`` minh họa TTS cho loa local/client; trả Boolean báo phát thành công.
+"""
+
 #Ở File Này, Người Dùng Sẽ Phải Tự Code Xử Lý Dữ Liệu
 #Cần vào Web UI chọn "Chế Độ Khởi Chạy Toàn Bộ Chương Trình = Người Dùng Tự Code Xử Lý Dữ Liệu - Dev_Processing.py" Thì Mới Chạy Được File Này Nhé
 #Đây chỉ là mẫu Demo, mình viết đơn giản dễ hiểu nhất để mọi người có thể áp dụng được
