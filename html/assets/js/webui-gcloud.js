@@ -10,7 +10,7 @@
             .replace(/'/g, '&#39;');
     }
 
-    window.gcloud_scan = function (folderName, sourceBackup, resultDivId) {
+    window.gcloud_scan = function (folderName, sourceBackup, resultDivId, parentFolderName) {
         loading('show');
         var xhr = vbotCreateXhr(90000);
         xhr.open('POST', 'includes/php_ajax/GCloud_Act.php', true);
@@ -63,7 +63,8 @@
                         + 'data-file-id="' + fileId + '" data-file-name="' + encodedFileName + '" '
                         + 'data-folder="' + encodeURIComponent(folderName) + '" '
                         + 'data-source="' + encodeURIComponent(sourceBackup) + '" '
-                        + 'data-result-id="' + encodeURIComponent(resultDivId) + '">'
+                        + 'data-result-id="' + encodeURIComponent(resultDivId) + '" '
+                        + 'data-parent-folder="' + encodeURIComponent(parentFolderName || '') + '">'
                         + '<i class="bi bi-trash"></i></button></td></tr>';
                 });
                 table += '</table>';
@@ -76,10 +77,12 @@
             loading('hide');
             show_message('Lỗi kết nối Google Cloud');
         };
-        xhr.send('Scan=1&Folder_Name=' + encodeURIComponent(folderName));
+        xhr.send('Scan=1&Folder_Name=' + encodeURIComponent(folderName)
+            + '&Parent_Folder_Name=' + encodeURIComponent(parentFolderName || '')
+            + '&_=' + Date.now());
     };
 
-    window.deleteFile_gcloud = function (fileId, fileName, folderName, sourceName, resultDivId) {
+    window.deleteFile_gcloud = function (fileId, fileName, folderName, sourceName, resultDivId, parentFolderName) {
         if (!window.confirm("Bạn có chắc chắn muốn xóa file: '" + fileName + "' trên Google Cloud Drive không?")) {
             return;
         }
@@ -105,7 +108,7 @@
                 }
                 showMessagePHP(response.message, 3);
                 if (document.getElementById(resultDivId)) {
-                    window.gcloud_scan(folderName, sourceName, resultDivId);
+                    window.gcloud_scan(folderName, sourceName, resultDivId, parentFolderName);
                 }
             } catch (error) {
                 show_message('Lỗi xử lý dữ liệu: ' + error.message);
@@ -128,7 +131,8 @@
             decodeURIComponent(button.dataset.fileName),
             decodeURIComponent(button.dataset.folder),
             decodeURIComponent(button.dataset.source),
-            decodeURIComponent(button.dataset.resultId)
+            decodeURIComponent(button.dataset.resultId),
+            decodeURIComponent(button.dataset.parentFolder || '')
         );
     });
 })();

@@ -116,6 +116,8 @@ if ($activve_show === true) {
 #Scan thư mục trong GDriver
 if (isset($_POST['Scan'])) {
     vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
     if (isset($_POST['Folder_Name']) && !empty($_POST['Folder_Name'])) {
         $folderName = trim($_POST['Folder_Name']);
         if (mb_strlen($folderName) > 150) {
@@ -126,16 +128,47 @@ if (isset($_POST['Scan'])) {
         $responseData['message'] = "Cần Nhập Tên Thư Mục Cần Scan";
         vbotApiJsonResponse($responseData, 400);
     }
+    $parentFolderName = trim((string) ($_POST['Parent_Folder_Name'] ?? ''));
+    if ($parentFolderName === '') {
+        $parentFolderName = trim((string) ($Config['backup_upgrade']['google_cloud_drive']['backup_folder_name'] ?? ''));
+    }
+    if ($parentFolderName === '' || mb_strlen($parentFolderName) > 150) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Tên thư mục Google Drive cha không hợp lệ'], 400);
+    }
     $driveService = new Drive($client);
-    $response = $driveService->files->listFiles([
-        'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s' and trashed=false", str_replace(["\\", "'"], ["\\\\", "\\'"], $folderName)),
+    $escapeDriveQueryValue = static function ($value) {
+        return str_replace(["\\", "'"], ["\\\\", "\\'"], (string) $value);
+    };
+    $parentResponse = $driveService->files->listFiles([
+        'q' => sprintf("mimeType='application/vnd.google-apps.folder' and name='%s' and trashed=false", $escapeDriveQueryValue($parentFolderName)),
         'fields' => 'files(id, name)',
-        'pageSize' => 1,
+        'pageSize' => 100,
+        'orderBy' => 'createdTime desc',
     ]);
-    if (count($response->getFiles()) == 0) {
-        $responseData['message'] = "Không tìm thấy thư mục: $folderName trên Google Cloud Drive";
+    if (count($parentResponse->getFiles()) === 0) {
+        $responseData['message'] = "Không tìm thấy thư mục cha: $parentFolderName trên Google Cloud Drive";
     } else {
-        $folderId = $response->getFiles()[0]->getId();
+        $folderId = null;
+        foreach ($parentResponse->getFiles() as $parentFolder) {
+            $childResponse = $driveService->files->listFiles([
+                'q' => sprintf(
+                    "mimeType='application/vnd.google-apps.folder' and name='%s' and '%s' in parents and trashed=false",
+                    $escapeDriveQueryValue($folderName),
+                    $escapeDriveQueryValue($parentFolder->getId())
+                ),
+                'fields' => 'files(id, name)',
+                'pageSize' => 100,
+                'orderBy' => 'createdTime desc',
+            ]);
+            if (count($childResponse->getFiles()) > 0) {
+                $folderId = $childResponse->getFiles()[0]->getId();
+                break;
+            }
+        }
+        if ($folderId === null) {
+            $responseData['message'] = "Không tìm thấy thư mục: $parentFolderName/$folderName trên Google Cloud Drive";
+            vbotApiJsonResponse($responseData, 404);
+        }
         $driveFiles = [];
         $pageToken = null;
         do {
@@ -143,6 +176,7 @@ if (isset($_POST['Scan'])) {
                 'q' => sprintf("'%s' in parents and trashed=false", $folderId),
                 'fields' => 'nextPageToken, files(id, name, mimeType, size, createdTime)',
                 'pageSize' => 1000,
+                'orderBy' => 'createdTime desc',
             ];
             if ($pageToken !== null) $listOptions['pageToken'] = $pageToken;
             $filesResponse = $driveService->files->listFiles($listOptions);
@@ -154,6 +188,9 @@ if (isset($_POST['Scan'])) {
         } else {
             $responseData['success'] = true;
             $responseData['message'] = "Danh sách tệp trong thư mục: $folderName trên Google Cloud Drive";
+            usort($driveFiles, static function ($left, $right) {
+                return strcmp((string) $right->getCreatedTime(), (string) $left->getCreatedTime());
+            });
             foreach ($driveFiles as $file) {
                 $size = isset($file->size) ? convertSize($file->size) : 'N/A';
                 $createdTime = isset($file->createdTime) ? $file->createdTime : 'N/A';

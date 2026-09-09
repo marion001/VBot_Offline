@@ -1983,7 +1983,7 @@ if (isset($_POST['Check_For_Upgrade'])) {
                         <center>
                             <button type="submit" name="Backup_Upgrade_Program" value="no_vbot_upgrade" class="btn btn-primary rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn tạo bản sao lưu VBot với Cấu Hình Sao Lưu bên trên?')">Tạo Bản Sao Lưu VBot</button>
                             <button type="button" name="show_all_file_in_directoryyyy" class="btn btn-success rounded-pill" onclick="show_all_file_in_directory('<?php echo $HTML_VBot_Offline . '/' . $Backup_Dir_Save_VBot; ?>', 'Tệp Sao Lưu Chương Trình Trên Hệ Thống', 'show_all_file_folder_Backup_Program')">Tệp Sao Lưu Hệ Thống</button>
-                            <button type="button" name="show_all_file_in_directory_gcloud" class="btn btn-info rounded-pill" onclick="gcloud_scan('<?php echo $backupFolderName; ?>', 'Tệp Sao Lưu Chương Trình Trên Google Cloud Drive',  'show_all_file_folder_Backup_Program')">Tệp Sao Lưu Google Cloud Drive</button>
+                            <button type="button" name="show_all_file_in_directory_gcloud" class="btn btn-info rounded-pill" onclick='gcloud_scan(<?php echo json_encode($backupFolderName, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>, "Tệp Sao Lưu Chương Trình Trên Google Cloud Drive", "show_all_file_folder_Backup_Program", <?php echo json_encode($Config["backup_upgrade"]["google_cloud_drive"]["backup_folder_name"], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT); ?>)'>Tệp Sao Lưu Google Cloud Drive</button>
                             <div class="limited-height" id="show_all_file_folder_Backup_Program"></div>
                         </center>
                         <!-- Bootstrap Modal -->
