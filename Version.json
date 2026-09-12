@@ -2,7 +2,7 @@
     "version": "1.2.9",
     "projectName": "Program VBot Offline",
 	"description": "Sửa Lỗi STT EDGE, Lỗi File Âm Thanh Cập Nhật Chương Trình, và một số sửa lỗi khác",
-    "releaseDate": "10/09/2026",
+    "releaseDate": "12/09/2026",
     "changes": [
         {
             "type": "feature",
