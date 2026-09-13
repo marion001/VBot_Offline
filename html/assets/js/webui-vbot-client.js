@@ -14,6 +14,11 @@
 
     //Quét các thiết bị sử dụng VBot trong cùng lớp mạng
     function scan_VBot_Device() {
+        if (window.vbotDeviceScanInProgress) {
+            showMessagePHP('Đang quét thiết bị VBot, vui lòng chờ lượt quét hiện tại hoàn tất', 3);
+            return false;
+        }
+        window.vbotDeviceScanInProgress = true;
         loading('show');
         showMessagePHP('Đang tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng Lan', 12);
         const url = "includes/php_ajax/Scanner.php";
@@ -23,6 +28,7 @@
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
         xhr.onreadystatechange = function() {
             if (xhr.readyState === 4) {
+                window.vbotDeviceScanInProgress = false;
                 loading('hide');
                 if (xhr.status === 200) {
                     try {
@@ -40,6 +46,9 @@
                                     }
                                     return 0;
                                 });
+                                window.dispatchEvent(new CustomEvent('vbot:devices-scanned', {
+                                    detail: { devices: data }
+                                }));
                                 let tableHTML =
                                     '<table class="table table-bordered border-primary" cellspacing="0" cellpadding="5">' +
                                     '<thead>' +
@@ -79,6 +88,9 @@
                                 check_Device_Status_VBot_Server('on');
                                 fetchAndPopulateDevices_chatbot();
                             } else {
+                                window.dispatchEvent(new CustomEvent('vbot:devices-scanned', {
+                                    detail: { devices: [] }
+                                }));
                                 document.getElementById("vbot_Scan_devices").innerHTML = "Không tìm thấy thiết bị nào.";
                             }
                         } else {

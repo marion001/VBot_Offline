@@ -7,6 +7,7 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+require_once __DIR__.'/includes/DeviceIdentity.php';
 
 $data = array(
     "info" => array(
@@ -16,6 +17,7 @@ $data = array(
         "project_name" => "VBot Offline"
     ),
     "success" => true,
+    "device_id" => vbotStableDeviceId(),
     "user_name" => $Config['contact_info']['full_name'],
     "ip_address" => $Domain,
     "port_api" => $Config['api']['port'],

@@ -2,7 +2,9 @@ import ipaddress
 import json
 import re
 import subprocess
+import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
 
 import requests
 
@@ -11,6 +13,34 @@ NMAP_TIMEOUT_SECONDS = 30
 HTTP_TIMEOUT_SECONDS = 1.5
 MAX_SCAN_ADDRESSES = 4096
 MAX_WORKERS = 32
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+
+def scan_mdns_devices(timeout=1.8):
+    """Use the resident VBot DNS-SD identity first; IP scanning remains fallback."""
+    try:
+        import VBot_mDNS
+        devices = VBot_mDNS.discover_assistants(timeout=timeout, public=True)
+    except Exception:
+        return []
+    results = []
+    for device in devices:
+        ip = str(device.get("ip_address") or "").strip()
+        port = device.get("api_port")
+        if not ip or not port:
+            continue
+        results.append({
+            "device_id": str(device.get("id") or ""),
+            "ip_address": ip,
+            "port_api": int(port),
+            "host_name": str(device.get("host") or ""),
+            "user_name": str(device.get("name") or ""),
+            "discovery": "mdns",
+        })
+    return results
 
 
 def emit(success, message, data=None):
@@ -96,6 +126,9 @@ def check_device(ip):
             return None
         host_name = str(payload.get("host_name") or "").strip()[:255]
         user_name = str(payload.get("user_name") or "").strip()[:255]
+        device_id = re.sub(r"[^0-9a-z-]", "", str(payload.get("device_id") or "").strip().lower())
+        if len(device_id) > 64:
+            device_id = ""
         if not host_name or not user_name:
             return None
         # IP nguồn quét là dữ liệu đáng tin cậy hơn trường do thiết bị trả về.
@@ -104,6 +137,8 @@ def check_device(ip):
             "port_api": port_api,
             "host_name": host_name,
             "user_name": user_name,
+            "device_id": device_id,
+            "discovery": "nmap",
         }
     except (requests.RequestException, ValueError, TypeError, KeyError):
         return None
@@ -111,6 +146,10 @@ def check_device(ip):
 
 def scan_and_check_devices():
     try:
+        mdns_devices = scan_mdns_devices()
+        if mdns_devices:
+            emit(True, f"Tìm thấy {len(mdns_devices)} thiết bị VBot qua mDNS", mdns_devices)
+            return
         interface, source_ip, network = get_primary_network()
         active_ips = scan_active_ips(network)
         found_devices = []

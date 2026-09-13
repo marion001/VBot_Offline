@@ -47,6 +47,7 @@
                     "maximum_recording_time": 5,
                     "maximum_client_connected": 3,
                     "max_concurrent_stt": 2,
+                    "thread_join_timeout": 10,
                     "source_stt": "stt_ggcloud",
                     "select_wakeup": "snowboy",
                     "client_conversation_mode": true,

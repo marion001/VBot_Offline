@@ -8,6 +8,7 @@
 
 include 'Configuration.php';
 require_once __DIR__.'/includes/ActionRegistry.php';
+require_once __DIR__.'/includes/DeviceIdentity.php';
 
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
@@ -185,6 +186,27 @@ include 'html_head.php';
     <form method="POST" class="row g-3 needs-validation" action="" enctype="multipart/form-data" novalidate onsubmit="return validateFormVBot()">
       <?php
       $json_file = $VBot_Offline . $Config['schedule']['data_json_file'];
+      $scheduler_device_cache = $VBot_Offline . 'html/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json';
+      $scheduler_local_device_id = strtolower(vbotStableDeviceId());
+      $scheduler_local_speaker_name = trim((string)($Config['contact_info']['full_name'] ?? ''));
+      if ($scheduler_local_speaker_name === '') {
+        $scheduler_local_speaker_name = 'VBot';
+      }
+      $scheduler_devices = [];
+      if (is_file($scheduler_device_cache)) {
+        $scheduler_devices_value = json_decode(file_get_contents($scheduler_device_cache), true);
+        if (is_array($scheduler_devices_value)) {
+          foreach ($scheduler_devices_value as $scheduler_device) {
+            if (!is_array($scheduler_device)) {
+              continue;
+            }
+            $scheduler_device_id = strtolower(trim((string)($scheduler_device['device_id'] ?? '')));
+            if ($scheduler_device_id !== '' && $scheduler_device_id !== $scheduler_local_device_id) {
+              $scheduler_devices[] = $scheduler_device;
+            }
+          }
+        }
+      }
       //Mảng lưu thông báo lỗi
       $errorMessages = [];
       $successMessage = [];
@@ -597,6 +619,17 @@ include 'html_head.php';
               'skip_if_media_playing' => isset($conditions['skip_if_media_playing']),
               'skip_if_bluetooth_playing' => isset($conditions['skip_if_bluetooth_playing']),
               'skip_if_airplay_playing' => isset($conditions['skip_if_airplay_playing'])
+            ];
+            $targets = isset($task['targets']) && is_array($task['targets']) ? $task['targets'] : [];
+            $target_ids = isset($targets['device_ids']) && is_array($targets['device_ids']) ? $targets['device_ids'] : [];
+            $target_ids = array_values(array_unique(array_slice(array_filter(array_map(function ($device_id) {
+              $device_id = strtolower(trim((string)$device_id));
+              return preg_match('/^[a-z0-9-]{1,64}$/', $device_id) ? $device_id : null;
+            }, $target_ids)), 0, 32)));
+            $task['targets'] = [
+              'local' => true,
+              'device_ids' => $target_ids,
+              'require_all' => isset($targets['require_all'])
             ];
             $task['time'] = isset($task['time']) && is_array($task['time'])
               ? array_values(array_filter(array_map('trim', $task['time']), function ($time) {
@@ -1028,12 +1061,59 @@ include 'html_head.php';
                         <div class="row mb-3">
                           <label class="col-sm-3 col-form-label">Thời gian tối đa (giây/s)<i class="bi bi-question-circle-fill" onclick="show_message('Là khoảng thời gian lâu nhất mà một tác vụ thông báo được phép phát. Tác vụ được chạy tối đa 60 giây. Khi hết 60 giây mà TTS, file âm thanh hoặc URL media vẫn chưa kết thúc, Scheduler sẽ tự dừng tác vụ và ghi lịch sử trạng thái: 0: không giới hạn, chờ tác vụ phát xong.')"></i>:</label>
                           <div class="col-sm-9">
-                            <input type="number" min="0" max="86400" class="form-control border-success" name="notification_schedule[<?= $index ?>][data][max_duration_seconds]" value="<?= intval($notification['data']['max_duration_seconds'] ?? 0) ?>">
+                             <input type="number" min="0" max="86400" class="form-control border-success" name="notification_schedule[<?= $index ?>][data][max_duration_seconds]" value="<?= intval($notification['data']['max_duration_seconds'] ?? 0) ?>">
                             <small class="text-muted">Đơn vị giây, đặt 0 để không giới hạn, chờ tác vụ phát xong.</small>
                           </div>
                         </div>
-                        <?php
-                          $recurrence = $notification['recurrence'] ?? ['type' => 'legacy'];
+                         <?php
+                           $saved_targets = isset($notification['targets']) && is_array($notification['targets'])
+                             ? $notification['targets'] : ['local' => true, 'device_ids' => [], 'require_all' => false];
+                           $saved_target_ids = is_array($saved_targets['device_ids'] ?? null) ? $saved_targets['device_ids'] : [];
+                           $saved_local_enabled = !array_key_exists('local', $saved_targets) || !empty($saved_targets['local']) ||
+                             ($scheduler_local_device_id !== '' && in_array($scheduler_local_device_id, $saved_target_ids, true));
+                           if ($scheduler_local_device_id !== '') {
+                             $saved_target_ids = array_values(array_filter($saved_target_ids, function ($target_id) use ($scheduler_local_device_id) {
+                               return strtolower((string)$target_id) !== $scheduler_local_device_id;
+                             }));
+                           }
+                           $visible_target_ids = array_map(function ($device) {
+                             return strtolower((string)($device['device_id'] ?? ''));
+                           }, $scheduler_devices);
+                         ?>
+
+							<div class="row mb-3 scheduler-speaker-targets" data-scheduler-index="<?= $index ?>">
+								<div class="col-sm-3">
+									<label class="col-form-label">Loa thực hiện:</label>
+									<br>
+									<button type="button"
+											class="btn btn-sm btn-primary mt-2 scheduler-scan-devices"
+											onclick="runWebuiVbotClientAction('scan_VBot_Device')">
+										<i class="bi bi-radar"></i> Quét thiết bị
+									</button>
+								</div>
+								<div class="col-sm-9 border rounded p-2">
+                              <input type="hidden" name="notification_schedule[<?= $index ?>][targets][local]" value="1">
+                              <label class="me-3"><input type="checkbox" class="form-check-input border-success" checked disabled> <?= htmlspecialchars($scheduler_local_speaker_name) ?> (loa hiện tại)</label>
+                              <span class="scheduler-remote-speaker-options">
+                             <?php foreach ($scheduler_devices as $scheduler_device):
+                               $target_id = strtolower((string)$scheduler_device['device_id']);
+                               $target_name = (string)($scheduler_device['user_name'] ?? $scheduler_device['host_name'] ?? $target_id);
+                             ?>
+                               <label class="me-3"><input type="checkbox" class="form-check-input border-primary" name="notification_schedule[<?= $index ?>][targets][device_ids][]" value="<?= htmlspecialchars($target_id) ?>" <?= in_array($target_id, $saved_target_ids, true) ? 'checked' : '' ?>> <?= htmlspecialchars($target_name) ?></label>
+                             <?php endforeach; ?>
+                              <?php foreach ($saved_target_ids as $offline_target_id):
+                               $offline_target_id = strtolower((string)$offline_target_id);
+                               if ($offline_target_id === '' || in_array($offline_target_id, $visible_target_ids, true)) continue;
+                             ?>
+                                <label class="me-3 text-warning"><input type="checkbox" class="form-check-input border-warning" name="notification_schedule[<?= $index ?>][targets][device_ids][]" value="<?= htmlspecialchars($offline_target_id) ?>" checked> <?= htmlspecialchars($offline_target_id) ?> (đang offline)</label>
+                              <?php endforeach; ?>
+                              </span>
+                             <div class="mt-2"><label><input type="checkbox" class="form-check-input border-danger" name="notification_schedule[<?= $index ?>][targets][require_all]" <?= !empty($saved_targets['require_all']) ? 'checked' : '' ?>> Yêu cầu tất cả loa tiếp nhận</label></div>
+                             <small class="text-muted">Tìm kiếm thiết bị dùng định danh mDNS</small>
+                           </div>
+                         </div>
+                         <?php
+                           $recurrence = $notification['recurrence'] ?? ['type' => 'legacy'];
                           $conditions = $notification['conditions'] ?? [];
                           $has_saved_conditions = (($conditions['mic_state'] ?? 'any') !== 'any') || !empty($conditions['only_when_idle']) || !empty($conditions['skip_if_media_playing']) || !empty($conditions['skip_if_bluetooth_playing']) || !empty($conditions['skip_if_airplay_playing']);
                           $condition_mode_ui = $conditions['mode'] ?? ($has_saved_conditions ? 'conditional' : 'always');
@@ -2245,6 +2325,62 @@ function loadAudioFiles(selectId) {
       }
     }
 
+    let schedulerVbotDevices = <?= json_encode($scheduler_devices, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const schedulerLocalSpeakerName = <?= json_encode($scheduler_local_speaker_name, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    const schedulerLocalDeviceId = <?= json_encode($scheduler_local_device_id, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+    function schedulerEscapeHtml(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+    }
+    function buildSchedulerTargetFields(index) {
+      let html = "<div class='row mb-3 scheduler-speaker-targets' data-scheduler-index='" + index + "'><div class='col-sm-3'><label class='col-form-label'>Loa thực hiện:</label><br><button type='button' class='btn btn-sm btn-primary mt-2 scheduler-scan-devices' onclick=\"runWebuiVbotClientAction('scan_VBot_Device')\"><i class='bi bi-radar'></i> Quét thiết bị</button></div><div class='col-sm-9 border rounded p-2'>";
+      html += "<input type='hidden' name='notification_schedule[" + index + "][targets][local]' value='1'>";
+      html += "<label class='me-3'><input type='checkbox' class='form-check-input border-success' checked disabled> " + schedulerEscapeHtml(schedulerLocalSpeakerName) + " (loa hiện tại)</label><span class='scheduler-remote-speaker-options'>";
+      schedulerVbotDevices.forEach(device => {
+        const id = schedulerEscapeHtml(String(device.device_id || '').toLowerCase());
+        const name = schedulerEscapeHtml(device.user_name || device.host_name || id);
+        if (id) html += "<label class='me-3'><input type='checkbox' class='form-check-input border-primary' name='notification_schedule[" + index + "][targets][device_ids][]' value='" + id + "'> " + name + "</label>";
+      });
+      html += "</span><div class='mt-2'><label><input type='checkbox' class='form-check-input border-danger' name='notification_schedule[" + index + "][targets][require_all]'> Yêu cầu tất cả loa tiếp nhận</label></div>";
+      html += "<small class='text-muted'>Tìm kiếm thiết bị dùng định danh mDNS</small></div></div>";
+      return html;
+    }
+
+    function updateSchedulerSpeakerTargets(devices) {
+      const normalized = [];
+      const seen = new Set();
+      (Array.isArray(devices) ? devices : []).forEach(device => {
+        const id = String(device && device.device_id || '').trim().toLowerCase();
+        if (!/^[a-z0-9-]{1,64}$/.test(id) || id === schedulerLocalDeviceId || seen.has(id)) return;
+        seen.add(id);
+        normalized.push(device);
+      });
+      schedulerVbotDevices = normalized;
+      document.querySelectorAll('.scheduler-speaker-targets').forEach(group => {
+        const index = group.dataset.schedulerIndex;
+        const container = group.querySelector('.scheduler-remote-speaker-options');
+        if (!container || index == null) return;
+        const selected = new Set(Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(input => input.value));
+        let html = '';
+        normalized.forEach(device => {
+          const id = String(device.device_id || '').trim().toLowerCase();
+          const name = schedulerEscapeHtml(device.user_name || device.host_name || id);
+          html += "<label class='me-3'><input type='checkbox' class='form-check-input border-primary' name='notification_schedule[" + schedulerEscapeHtml(index) + "][targets][device_ids][]' value='" + schedulerEscapeHtml(id) + "' " + (selected.has(id) ? 'checked' : '') + "> " + name + "</label>";
+          selected.delete(id);
+        });
+        selected.forEach(id => {
+          if (!/^[a-z0-9-]{1,64}$/.test(id) || id === schedulerLocalDeviceId) return;
+          html += "<label class='me-3 text-warning'><input type='checkbox' class='form-check-input border-warning' name='notification_schedule[" + schedulerEscapeHtml(index) + "][targets][device_ids][]' value='" + schedulerEscapeHtml(id) + "' checked> " + schedulerEscapeHtml(id) + " (đang offline)</label>";
+        });
+        container.innerHTML = html || "<span class='text-muted'>Không tìm thấy loa khác trong mạng.</span>";
+      });
+    }
+
+    window.addEventListener('vbot:devices-scanned', event => {
+      updateSchedulerSpeakerTargets(event.detail && event.detail.devices);
+    });
+
     function addNewTask() {
       const taskContainer = document.getElementById('task-container');
       let taskHtml =
@@ -2259,6 +2395,7 @@ function loadAudioFiles(selectId) {
         "</div>" +
         "</div>" +
         "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Thời gian tối đa (giây/s) <i class='bi bi-question-circle-fill' onclick=\"show_message('Là khoảng thời gian lâu nhất mà một tác vụ thông báo được phép phát. Tác vụ được chạy tối đa 60 giây. Khi hết 60 giây mà TTS, file âm thanh hoặc URL media vẫn chưa kết thúc, Scheduler sẽ tự dừng tác vụ và ghi lịch sử trạng thái: 0: không giới hạn, chờ tác vụ phát xong.')\"></i>:</label><div class='col-sm-9'><input type='number' min='0' max='86400' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][data][max_duration_seconds]' value='0'><small class='text-muted'>Đơn vị giây, đặt 0 để không giới hạn, chờ tác vụ phát xong.</small></div></div>" +
+        buildSchedulerTargetFields(newTaskIndex) +
         "<div class='row mb-3'><label class='col-sm-3 col-form-label'>Chế độ chạy:</label><div class='col-sm-9'>" +
         "<select class='form-select border-success scheduler-recurrence-type' data-scheduler-index='" + newTaskIndex + "' name='notification_schedule[" + newTaskIndex + "][recurrence][type]'><option value='legacy'>Theo thứ trong tuần</option><option value='daily'>Hằng ngày</option><option value='daily_months'>Hằng ngày (Lựa chọn tháng)</option><option value='weekdays'>Ngày làm việc (Thứ Hai–Thứ Sáu)</option><option value='weekends'>Cuối tuần (Thứ Bảy–Chủ Nhật)</option><option value='once'>Chỉ một lần</option><option value='monthly'>Một ngày mỗi tháng</option><option value='days_of_month'>N ngày trong tháng</option></select>" +
         "<div class='input-group mt-2 scheduler-recurrence-fields' data-recurrence-for='weekdays weekends monthly'><span class='input-group-text border-success'>Bắt đầu</span><input type='date' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][recurrence][start_date]'><span class='input-group-text border-success'>Kết thúc</span><input type='date' class='form-control border-success' name='notification_schedule[" + newTaskIndex + "][recurrence][end_date]'></div>" +
