@@ -1,89 +1,110 @@
 <?php
 #Code By: Vũ Tuyển
-#Designed by: BootstrapMade
-#GitHub VBot: https://github.com/marion001/VBot_Offline.git
-#Facebook Group: https://www.facebook.com/groups/1148385343358824
-#Facebook: https://www.facebook.com/TWFyaW9uMDAx
-#Email: VBot.Assistant@gmail.com
-
-include 'Configuration.php';
-
-$output_notify = ''; // Biến tạm để lưu nội dung
-$i_count = 0; // Khai báo biến toàn cục để đếm
-
-function fetchContent($url)
-{
-  $curl = curl_init();
-  curl_setopt($curl, CURLOPT_URL, $url);
-  curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-  curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
-  curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 5);
-  curl_setopt($curl, CURLOPT_TIMEOUT, 15);
-  curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, true);
-  curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, 2);
-  $response = curl_exec($curl);
-  $error = curl_error($curl);
-  $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
-  curl_close($curl);
-  if ($httpCode !== 200 || $error) {
-    return false;
-  }
-  return $response;
-}
-
-function checkPermissions($dir)
-{
-    global $output_notify, $i_count, $excluded_items_chmod;
-    $items = scandir($dir);
-    foreach ($items as $item) {
-        if ($item == '.' || $item == '..') continue;
-        if (in_array($item, $excluded_items_chmod)) continue;
-        $path = $dir . '/' . $item;
-        $permissions = substr(sprintf('%o', fileperms($path)), -3);
-        if ($permissions != '777') {
-            $i_count++;
-        }
-        if (is_dir($path)) {
-            checkPermissions($path);
-        }
-    }
-    static $printed = false;
-    if (!$printed && $i_count > 0) {
-        $printed = true;
-        $output_notify .= '
-        <li>
-            <hr class="dropdown-divider">
-        </li>
-        <li class="notification-item" onclick="command_php(\'chmod_vbot\', true)" style="cursor: pointer;">
-            <i class="bi bi-exclamation-circle text-warning"></i>
-            <div>
-                <h4 class="text-danger">Cấp Quyền Chmod</h4>
-                <p class="text-primary">Có: <b>' . $i_count . '</b> file, thư mục chưa được cấp quyền thao tác</p>
-                <p class="text-success">Nhấn Để Cấp Quyền</p>
-            </div>
-        </li>';
-    }
-}
-
-$real_directory_path = realpath($directory_path . '/');
-$real_base_path = realpath($VBot_Offline);
-if ($real_directory_path !== false && strpos($real_directory_path, $real_base_path) === 0) {
-  checkPermissions($VBot_Offline);
-} else {
-  checkPermissions($directory_path . '/');
-  checkPermissions($VBot_Offline);
-}
-
+#Kiểm tra chmod chạy bất đồng bộ sau khi WebUI tải xong để không chặn render trang.
 ?>
-<a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" title="Thông báo">
+<a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown" data-bs-auto-close="outside" title="Thông báo">
   <i class="bi bi-bell text-success"></i>
-  <span id="number_notification" class="badge bg-primary badge-number"><?php if ($i_count != 0) { echo $i_count; } ?></span>
+  <span id="number_notification" class="badge bg-primary badge-number"></span>
 </a>
-<!-- End Notification Icon -->
-<ul id="notification" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="max-height:400px; overflow-y: auto; width: auto; height: auto;">
-  <li class="dropdown-header">
-    <font id="number_notification_1" color=red>Bạn có <b><?php echo $i_count; ?></b> thông báo mới.</font>
-  </li>
-  <?php echo $output_notify; ?>
+<ul id="notification" class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="max-height:400px; overflow-y:auto; width:auto; height:auto;">
+  <li class="dropdown-header"><font id="number_notification_1" color="red">Bạn có <b>0</b> thông báo mới.</font></li>
 </ul>
-<!-- End Notification Dropdown Items -->
+<script>
+(function () {
+  'use strict';
+
+  function incrementNotificationCount() {
+    const badge = document.getElementById('number_notification');
+    const text = document.getElementById('number_notification_1');
+    const next = (parseInt(badge?.textContent || '0', 10) || 0) + 1;
+    if (badge) badge.textContent = String(next);
+    if (text) text.innerHTML = 'Bạn có <b>' + next + '</b> thông báo mới.';
+  }
+
+  function renderChmodNotification(issues) {
+    const notificationList = document.getElementById('notification');
+    if (!notificationList || !Array.isArray(issues) || issues.length === 0
+        || document.getElementById('chmod_permission_notification')) return;
+
+    const divider = document.createElement('li');
+    divider.dataset.chmodNotification = 'true';
+    divider.innerHTML = '<hr class="dropdown-divider">';
+    const item = document.createElement('li');
+    item.id = 'chmod_permission_notification';
+    item.className = 'notification-item align-items-start';
+    item.style.padding = '10px';
+    const icon = document.createElement('i');
+    icon.className = 'bi bi-exclamation-circle text-warning';
+    const content = document.createElement('div');
+    content.className = 'overflow-hidden';
+    content.style.width = '230px';
+    content.style.maxWidth = '230px';
+    const title = document.createElement('h4');
+    title.className = 'text-danger';
+    title.textContent = 'Cấp Quyền Chmod';
+    const summaryText = document.createElement('p');
+    summaryText.className = 'text-primary mb-1';
+    summaryText.append('Có: ');
+    const count = document.createElement('b');
+    count.textContent = String(issues.length);
+    summaryText.append(count, ' file, thư mục chưa có quyền 0777');
+    const details = document.createElement('details');
+    details.className = 'mb-2 small';
+    const summary = document.createElement('summary');
+    summary.className = 'text-info';
+    summary.style.cursor = 'pointer';
+    summary.textContent = 'Xem chi tiết quyền';
+    const list = document.createElement('ul');
+    list.className = 'small mt-2 ps-3 mb-2 overflow-auto';
+    list.style.maxHeight = '120px';
+    list.style.wordBreak = 'break-word';
+    issues.forEach(function (issue) {
+      const row = document.createElement('li');
+      row.className = 'mb-1';
+      const path = document.createElement('code');
+      path.className = 'text-break';
+      path.textContent = String(issue.path || '');
+      const mode = document.createElement('span');
+      mode.className = 'badge bg-danger ms-1';
+      mode.textContent = String(issue.mode || 'không xác định');
+      row.append(path, mode);
+      list.appendChild(row);
+    });
+    details.append(summary, list);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn btn-sm btn-warning py-0 px-2';
+    button.textContent = 'Cấp quyền 0777';
+    button.addEventListener('click', function (event) {
+      event.stopPropagation();
+      if (typeof command_php === 'function') command_php('chmod_vbot', true);
+    });
+    content.append(title, summaryText, details, button);
+    item.append(icon, content);
+    notificationList.append(divider, item);
+    incrementNotificationCount();
+  }
+
+  function scanChmodPermissionsInBackground() {
+    if (window.vbotChmodPermissionScanStarted) return;
+    window.vbotChmodPermissionScanStarted = true;
+    const url = 'includes/php_ajax/Check_Connection.php?check_chmod_permissions=true&_=' + Date.now();
+    const options = {method: 'GET', credentials: 'same-origin', headers: {'Accept': 'application/json'}};
+    const request = typeof vbotFetchWithTimeout === 'function'
+      ? vbotFetchWithTimeout(url, options, 120000)
+      : fetch(url, options);
+    request.then(function (response) {
+      if (!response.ok) throw new Error('HTTP ' + response.status);
+      return response.json();
+    }).then(function (response) {
+      if (response && response.success) renderChmodNotification(response.issues || []);
+    }).catch(function (error) {
+      console.warn('Không thể kiểm tra quyền chmod nền:', error);
+    });
+  }
+
+  window.addEventListener('load', function () {
+    window.setTimeout(scanChmodPermissionsInBackground, 1500);
+  }, {once: true});
+})();
+</script>

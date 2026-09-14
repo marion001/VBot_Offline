@@ -36,6 +36,40 @@ function vbotCheckIsPrivateLanIpv4($ipAddress)
         || ($ip >= ip2long('192.168.0.0') && $ip <= ip2long('192.168.255.255'));
 }
 
+function vbotCollectChmodPermissionIssues($dir, array $excludedItems, array &$issues)
+{
+    $items = @scandir($dir);
+    if ($items === false) {
+        $issues[] = ['path' => $dir, 'mode' => 'không thể đọc'];
+        return;
+    }
+    foreach ($items as $item) {
+        if ($item === '.' || $item === '..' || in_array($item, $excludedItems, true)) continue;
+        $path = $dir . DIRECTORY_SEPARATOR . $item;
+        clearstatcache(true, $path);
+        $filePermissions = @fileperms($path);
+        $permissions = $filePermissions === false ? 'không xác định' : substr(sprintf('%o', $filePermissions), -3);
+        if ($permissions !== '777') $issues[] = ['path' => $path, 'mode' => $permissions];
+        if (is_dir($path) && !is_link($path)) {
+            vbotCollectChmodPermissionIssues($path, $excludedItems, $issues);
+        }
+    }
+}
+
+if (isset($_GET['check_chmod_permissions'])) {
+    $issues = [];
+    $realHtmlPath = realpath($directory_path);
+    $realBasePath = realpath($VBot_Offline);
+    if ($realHtmlPath !== false && $realBasePath !== false
+        && strpos($realHtmlPath, rtrim($realBasePath, '/\\') . DIRECTORY_SEPARATOR) === 0) {
+        vbotCollectChmodPermissionIssues($realBasePath, $excluded_items_chmod, $issues);
+    } else {
+        if ($realHtmlPath !== false) vbotCollectChmodPermissionIssues($realHtmlPath, $excluded_items_chmod, $issues);
+        if ($realBasePath !== false) vbotCollectChmodPermissionIssues($realBasePath, $excluded_items_chmod, $issues);
+    }
+    vbotApiJsonResponse(['success' => true, 'count' => count($issues), 'issues' => $issues]);
+}
+
 function vbotHassConfiguredUrl($requestedUrl, array $config)
 {
     $requestedUrl = rtrim(trim((string)$requestedUrl), '/');
@@ -158,25 +192,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ping_status'])) {
 if (isset($_GET['check_status_vbot_server_in_lan'])) {
     $ip = isset($_GET['ip']) ? $_GET['ip'] : '';
     $port = isset($_GET['port']) ? $_GET['port'] : '';
+    $deviceType = isset($_GET['device_type']) ? strtolower(trim((string)$_GET['device_type'])) : 'vbot_server';
     if (empty($ip) || empty($port)) {
         vbotApiJsonResponse(['success' => false, 'message' => 'Thiếu IP hoặc cổng PORT'], 400);
     }
     if (!vbotCheckIsPrivateLanIpv4($ip) || !ctype_digit((string)$port) || (int)$port < 1 || (int)$port > 65535) {
         vbotApiJsonResponse(['success' => false, 'message' => 'IP hoặc cổng PORT không hợp lệ'], 400);
     }
-    $url = "http://" . $ip . ":" . $port;
+    if (!in_array($deviceType, ['vbot_server', 'esp32_client', 'android_client'], true)) {
+        vbotApiJsonResponse(['success' => false, 'message' => 'Loại thiết bị không hợp lệ'], 400);
+    }
+    $statusPath = in_array($deviceType, ['esp32_client', 'android_client'], true)
+        ? '/VBot_Client_Info'
+        : '';
+    $url = "http://" . $ip . ":" . $port . $statusPath;
     $curl = curl_init();
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_TIMEOUT => 5,
-        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_FOLLOWLOCATION => false,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'GET',
     ));
     $response = curl_exec($curl);
     if (curl_errno($curl)) {
-        error_log('VBot server status cURL failed for '.$ip.':'.$port.': '.curl_error($curl));
+        error_log('VBot device status cURL failed for '.$ip.':'.$port.' ('.$deviceType.'): '.curl_error($curl));
         curl_close($curl);
         vbotApiJsonResponse(['success' => false, 'message' => 'Không thể kết nối tới thiết bị'], 502);
     }

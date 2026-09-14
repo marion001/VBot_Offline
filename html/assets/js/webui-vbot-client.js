@@ -12,9 +12,23 @@
         return encodeURIComponent(String(value == null ? '' : value)).replace(/'/g, '%27');
     }
 
+    function getVBotDeviceType(device) {
+        const explicitType = String(device && device.device_type || '').toLowerCase();
+        const identity = [device && device.device_id, device && device.user_name, device && device.host_name]
+            .map(function(value) { return String(value || '').toLowerCase(); }).join(' ');
+        if (explicitType === 'esp32_client' || identity.indexOf('esp32') !== -1) return 'esp32_client';
+        if (
+            explicitType === 'android_client'
+            || Number(device && device.port_api) === 8081
+            || identity.indexOf('phicomm') !== -1
+        ) return 'android_client';
+        return 'vbot_server';
+    }
+
     function publishVBotScannedDevices(devices) {
         const safeDevices = Array.isArray(devices) ? devices : [];
         let schedulerUpdated = false;
+        let ttsUpdated = false;
         // Scheduler exposes a direct callback so its checkbox list is updated
         // immediately. The event remains available to other pages/components.
         if (typeof window.updateSchedulerSpeakerTargets === 'function') {
@@ -25,8 +39,18 @@
                 console.error('Không thể cập nhật danh sách loa Scheduler:', error);
             }
         }
+        //Trang chủ nhận thẳng dữ liệu phản hồi scan để render checkbox TTS,
+        //không phụ thuộc vào lần đọc cache hoặc thứ tự đăng ký CustomEvent.
+        if (typeof window.updateTtsSpeakerTargets === 'function') {
+            try {
+                window.updateTtsSpeakerTargets(safeDevices);
+                ttsUpdated = true;
+            } catch (error) {
+                console.error('Không thể cập nhật danh sách loa phát thông báo:', error);
+            }
+        }
         window.dispatchEvent(new CustomEvent('vbot:devices-scanned', {
-            detail: { devices: safeDevices, schedulerUpdated: schedulerUpdated }
+            detail: { devices: safeDevices, schedulerUpdated: schedulerUpdated, ttsUpdated: ttsUpdated }
         }));
     }
 
@@ -79,6 +103,7 @@
                                     '<tbody>';
                                 data.forEach((device, index) => {
                                     const rowId = 'device_row_' + index;
+                                    const deviceType = getVBotDeviceType(device);
                                     const deviceName = escapeVBotDeviceHtml(device.user_name);
                                     const ipAddress = escapeVBotDeviceHtml(device.ip_address);
                                     const portApi = escapeVBotDeviceHtml(device.port_api);
@@ -86,13 +111,13 @@
                                     const encodedIp = encodeVBotDeviceArgument(device.ip_address);
                                     const encodedName = encodeVBotDeviceArgument(device.user_name);
                                     tableHTML +=
-                                        '<tr id="' + rowId + '">' +
+                                        '<tr id="' + rowId + '" data-device-type="' + deviceType + '">' +
                                         '<td id="' + rowId + '_name" style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + deviceName + '</p></b></td>' +
                                         '<td id="' + rowId + '_ip" style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + ipAddress + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + ipAddress + '</a></b></td>' +
                                         '<td id="' + rowId + '_port" style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + ipAddress + ':' + portApi + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + portApi + '</a></b></td>' +
                                         '<td id="' + rowId + '_host" style="text-align: center; vertical-align: middle;"><b>' + hostName + '</b></td>' +
                                         '<td id="' + rowId + '_action" style="text-align: center; vertical-align: middle;">' +
-                                        '<button class="btn btn-danger" title="Xóa ' + ipAddress + '" onclick="delete_IP_VBot_Server(decodeURIComponent(\'' + encodedIp + '\'))"><i class="bi bi-trash"></i></button>' +
+                                        '<button class="btn btn-danger" title="Xóa ' + deviceName + '" onclick="delete_IP_VBot_Server(decodeURIComponent(\'' + encodedIp + '\'), decodeURIComponent(\'' + encodedName + '\'))"><i class="bi bi-trash"></i></button>' +
                                         ' <button class="btn btn-primary" title="WebUI ' + ipAddress + '" onclick="showIframeModal(decodeURIComponent(\'' + encodedIp + '\'), decodeURIComponent(\'' + encodedName + '\'))"><i class="bi bi-gear-wide-connected"></i></button>' +
                                         '</td>' +
                                         '</tr>';
@@ -142,8 +167,9 @@
             }
             const ip = ipCell.textContent;
             const port = portCell.textContent;
+            const deviceType = row.dataset.deviceType || 'vbot_server';
         const xhr = vbotCreateXhr(30000);
-            const url = 'includes/php_ajax/Check_Connection.php?check_status_vbot_server_in_lan=true&ip=' + encodeURIComponent(ip) + '&port=' + encodeURIComponent(port);
+            const url = 'includes/php_ajax/Check_Connection.php?check_status_vbot_server_in_lan=true&ip=' + encodeURIComponent(ip) + '&port=' + encodeURIComponent(port) + '&device_type=' + encodeURIComponent(deviceType);
             xhr.open('GET', url, true);
             xhr.onload = function() {
                 let isOnline = false;
@@ -212,6 +238,7 @@
                             '<tbody>';
                         jsonData.data.forEach((device, index) => {
                             const rowId = 'device_row_' + index;
+                            const deviceType = getVBotDeviceType(device);
                             const deviceName = String(device.user_name || '');
                             const deviceIp = String(device.ip_address || '');
                             const devicePort = String(device.port_api || '');
@@ -223,13 +250,13 @@
                             const encodedIp = encodeVBotDeviceArgument(deviceIp);
                             const encodedName = encodeVBotDeviceArgument(deviceName);
                             tableHTML +=
-                                '<tr id="' + rowId + '">' +
+                                '<tr id="' + rowId + '" data-device-type="' + deviceType + '">' +
                                 '<td id="' + rowId + '_name" style="text-align: center; vertical-align: middle;"><b><p class="text-success">' + safeName + '</p></b></td>' +
                                 '<td id="' + rowId + '_ip" style="text-align: center; vertical-align: middle;"><b><a class="text-danger" href="http://' + safeIp + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + safeIp + '</a></b></td>' +
                                 '<td id="' + rowId + '_port" style="text-align: center; vertical-align: middle;"><b><a class="text-success" href="http://' + safeIp + ':' + safePort + '" target="_blank" rel="noopener noreferrer" title="Mở Trong Tab Mới">' + safePort + '</a></b></td>' +
                                 '<td id="' + rowId + '_host" style="text-align: center; vertical-align: middle;"><b>' + safeHost + '</b></td>' +
                                 '<td id="' + rowId + '_action" style="text-align: center; vertical-align: middle;">' +
-                                '<button class="btn btn-danger" title="Xóa ' + safeIp + '" onclick="delete_IP_VBot_Server(decodeURIComponent(\'' + encodedIp + '\'))"><i class="bi bi-trash"></i></button>' +
+                                '<button class="btn btn-danger" title="Xóa ' + safeName + '" onclick="delete_IP_VBot_Server(decodeURIComponent(\'' + encodedIp + '\'), decodeURIComponent(\'' + encodedName + '\'))"><i class="bi bi-trash"></i></button>' +
                                 ' <button class="btn btn-primary" title="WebUI ' + safeIp + '" onclick="showIframeModal(decodeURIComponent(\'' + encodedIp + '\'), decodeURIComponent(\'' + encodedName + '\'))"><i class="bi bi-gear-wide-connected"></i></button>' +
                                 '</td>' +
                                 '</tr>';
@@ -339,13 +366,16 @@
     }
 
     //Xóa ip VBot Server đã scan được
-    function delete_IP_VBot_Server(ip) {
-        loading('show');
+    function delete_IP_VBot_Server(ip, deviceName = '') {
         if (!ip || !ip.startsWith('192.168')) {
             alert("Địa chỉ IP không hợp lệ. IP phải bắt đầu bằng '192.168'.");
-            loading('hide');
             return;
         }
+        const displayName = String(deviceName || '').trim() || ip;
+        if (!window.confirm('Bạn có muốn xóa thiết bị: ' + displayName + ' không?')) {
+            return;
+        }
+        loading('show');
         const url = 'includes/php_ajax/Check_Connection.php';
         const xhr = vbotCreateXhr(30000);
         xhr.open('POST', url, true);

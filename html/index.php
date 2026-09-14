@@ -400,14 +400,28 @@ include 'html_head.php';
             <div class="col-12">
               <div class="card">
                 <div class="card-body">
-                  <h5 class="card-title d-flex align-items-center">Phát Thông Báo &nbsp;<i class="bi bi-megaphone"></i> &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Phát nội dung cần thông báo ra loa')"></i>
-                    &nbsp; Tới Thiết Bị:&nbsp;
-                    <select class="form-select border-success" style="width: auto;" name="source_text_to_speak_api" id="source_text_to_speak_api">
-                      <option value="<?php echo $URL_API_VBOT; ?>" data-full_name_tts_api="<?php echo $Config['contact_info']['full_name']; ?>" selected><?php echo $Config['contact_info']['full_name']; ?> - Mặc Định</option>
-
-                    </select>
-
-                  </h5>
+                  <h5 class="card-title d-flex align-items-center">Phát Thông Báo &nbsp;<i class="bi bi-megaphone"></i> &nbsp;<i class="bi bi-question-circle-fill" onclick="show_message('Phát nội dung cần thông báo ra loa')"></i></h5>
+                  <div class="mb-3">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
+                      <span class="fw-semibold">Tới Thiết Bị:</span>
+                      <button type="button" id="tts_scan_devices_button" class="btn btn-outline-warning btn-sm"
+                        onclick="runWebuiVbotClientAction('scan_VBot_Device')"
+                        title="Quét lại các loa VBot và ESP32 Client trong mạng LAN">
+                        <i class="bi bi-radar"></i> Quét Thiết Bị
+                      </button>
+                    </div>
+                    <div id="source_text_to_speak_api" class="d-flex flex-wrap align-items-center gap-3 border border-success rounded px-3 py-2 w-100" role="group" aria-label="Chọn thiết bị phát thông báo">
+                      <div class="form-check mb-0">
+                        <input class="form-check-input border-success tts-device-checkbox" type="checkbox"
+                          id="tts_device_current" value="<?php echo htmlspecialchars($URL_API_VBOT, ENT_QUOTES, 'UTF-8'); ?>"
+                          data-full_name_tts_api="<?php echo htmlspecialchars($Config['contact_info']['full_name'], ENT_QUOTES, 'UTF-8'); ?>" checked>
+                        <label class="form-check-label d-inline-flex align-items-center gap-1" for="tts_device_current">
+                          <span class="tts-device-status-dot text-success" title="Thiết bị đang trực tuyến" aria-label="Trực tuyến">●</span>
+                          <span><?php echo htmlspecialchars($Config['contact_info']['full_name'], ENT_QUOTES, 'UTF-8'); ?> - Mặc Định</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
                   <div class="form-floating mb-3">
                     <textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_speaker_notify" id="tts_speaker_notify">
 </textarea>
@@ -1973,12 +1987,20 @@ include 'html_head.php';
 	}
 
 	//Phát thông báo TTS
-	function tts_speaker_notify_send(del_text_input = null) {
+	async function tts_speaker_notify_send(del_text_input = null) {
 	  const textEl = document.getElementById('tts_speaker_notify');
-	  const sourceEl = document.getElementById('source_text_to_speak_api');
 	  if (del_text_input === "delete_text_tts") {
 		textEl.value = '';
 		showMessagePHP("Đã xóa nội dung trong nhập liệu thông báo", 5);
+		return;
+	  }
+	  const selectedDevices = Array.from(document.querySelectorAll('.tts-device-checkbox:checked')).map(device => ({
+		url: device.value,
+		name: device.dataset.full_name_tts_api || 'Thiết bị',
+		type: device.dataset.deviceType || 'vbot_server'
+	  }));
+	  if (selectedDevices.length === 0) {
+		show_message("Cần chọn tối thiểu 1 loa để phát thông báo");
 		return;
 	  }
 	  const text = textEl.value?.trim();
@@ -1987,57 +2009,76 @@ include 'html_head.php';
 		return;
 	  }
 	  loading("show");
-	  let url = sourceEl.value;
-	  let payload;
-	  if (url === 'send_notify_home_assistant') {
-		url = '<?php echo $URL_API_VBOT ?>';
-		payload = {
-		  type: 3,
-		  data: "tts",
-		  action: "home_assistant",
-		  title: "VBot - <?php echo $Config['contact_info']['full_name']; ?>",
-		  messenger: text
-		};
-	  } else {
-		payload = {
-		  type: 3,
-		  data: "tts",
-		  action: "notify",
-		  value: text
-		};
-	  }
-	  vbotFetchWithTimeout(url, {
-		method: "POST",
-		headers: {"Content-Type": "application/json"},
-		body: JSON.stringify(payload)
-	  })
-	  .then(res => {
-		if (!res.ok) {
-		  throw new Error("Lỗi HTTP: " + res.status);
-		}
-		return res.json();
-	  })
-	  .then(response => {
-		if (!response.success) {
-		  throw new Error(response.message || "Không rõ lỗi");
-		}
-		const msg = response?.text_tts?.trim() ? response.text_tts : response.text_messenger + '. Tới Home Assistant';
-		showMessagePHP("Đã phát thông báo: " + msg, 7);
-		let audioPath = response.audio_tts;
-		if (Array.isArray(audioPath)) {
-		  audioPath = audioPath[0];
-		} else if (typeof audioPath === "string" && audioPath.startsWith("TTS_Audio")) {
+	  try {
+		const results = await Promise.all(selectedDevices.map(async device => {
+		  const isHomeAssistant = device.url === 'send_notify_home_assistant';
+		  const isEsp32Client = device.type === 'esp32_client';
+		  const isAndroidClient = device.type === 'android_client';
+		  let url = isHomeAssistant
+			? <?php echo json_encode($URL_API_VBOT, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>
+			: (isEsp32Client
+			  ? device.url.replace(/\/$/, '') + '/google_tts'
+			  : (isAndroidClient ? device.url.replace(/\/$/, '') + '/tts' : device.url));
+		  if (isAndroidClient) {
+			url += '?' + new URLSearchParams({text: text, lang: 'vi-VN', speed: '1.0'}).toString();
+		  }
+		  const payload = isHomeAssistant ? {
+			type: 3, data: "tts", action: "home_assistant",
+			title: <?php echo json_encode('VBot - ' . $Config['contact_info']['full_name'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>, messenger: text
+		  } : {
+			type: 3, data: "tts", action: "notify", value: text
+		  };
+		  try {
+			const requestOptions = isEsp32Client ? {
+			  method: "POST",
+			  headers: {"Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"},
+			  body: new URLSearchParams({text: text}).toString()
+			} : isAndroidClient ? {
+			  method: "POST"
+			} : {
+			  method: "POST",
+			  headers: {"Content-Type": "application/json"},
+			  body: JSON.stringify(payload)
+			};
+			const res = await vbotFetchWithTimeout(url, requestOptions);
+			if (!res.ok) throw new Error("HTTP " + res.status);
+			const responseText = await res.text();
+			let response;
+			try {
+			  response = JSON.parse(responseText);
+			} catch (error) {
+			  response = {success: res.ok, message: responseText};
+			}
+			if (!response.success) throw new Error(response.message || "Không rõ lỗi");
+			return {success: true, device, response};
+		  } catch (error) {
+			return {success: false, device, error};
+		  }
+		}));
+
+		const successful = results.filter(result => result.success);
+		const failed = results.filter(result => !result.success);
+		const localUrl = <?php echo json_encode($URL_API_VBOT, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+		const localResult = successful.find(result => result.device.url === localUrl);
+		let audioPath = localResult?.response?.audio_tts;
+		if (Array.isArray(audioPath)) audioPath = audioPath[0];
+		if (typeof audioPath === "string" && audioPath.startsWith("TTS_Audio")) {
 		  audioPath = "<?php echo $VBot_Offline; ?>" + audioPath;
 		}
 		if (audioPath) {
-		  document.getElementById('download_tts_audio') ?.setAttribute('onclick', `downloadFile('${audioPath}')`);
-		  document.getElementById('playAudio_tts_audio') ?.setAttribute('onclick', `playAudio('${audioPath}')`);
+		  document.getElementById('download_tts_audio')?.setAttribute('onclick', `downloadFile('${audioPath}')`);
+		  document.getElementById('playAudio_tts_audio')?.setAttribute('onclick', `playAudio('${audioPath}')`);
 		}
-	  })
-	  .catch(err => {
-		show_message('Lỗi Phát TTS: ' + err.message + '. Kiểm tra mạng, API, hoặc Bot');
-	  })
-	  .finally(() => loading("hide"));
+
+		if (failed.length === 0) {
+		  showMessagePHP(`Đã phát thông báo tới ${successful.length} thiết bị`, 7);
+		} else {
+		  const failedNames = failed.map(result => result.device.name).join(', ');
+		  show_message(`Đã phát tới ${successful.length}/${results.length} thiết bị. Không thể phát tới: ${failedNames}`);
+		}
+	  } finally {
+		loading("hide");
+	  }
 	}
   </script>
   
@@ -3267,15 +3308,112 @@ function update_index_data(data){
 	  actions[value]?.();
 	});
 
-    //Phát Thông báo tts tới loa được chọn (điền dữ liệu vào thẻ select)
-    function fetchAndPopulateDevices_tts() {
-      const selectElement = document.getElementById('source_text_to_speak_api');
-      if (!selectElement) {
-        return;
+    //Phát Thông báo TTS tới một hoặc nhiều loa được chọn bằng checkbox
+    function populateDevicesTtsCheckboxes(devices) {
+      const deviceContainer = document.getElementById('source_text_to_speak_api');
+      if (!deviceContainer || !Array.isArray(devices)) return;
+      const serverIp = '<?php echo $serverIp; ?>';
+      const selectedDeviceUrls = new Set(
+        Array.from(deviceContainer.querySelectorAll('.tts-device-checkbox:checked')).map(device => device.value)
+      );
+      deviceContainer.querySelectorAll('[data-dynamic-device="true"]').forEach(element => element.remove());
+      let dynamicDeviceIndex = 0;
+      const updateTtsDeviceStatusDot = (dot, isOnline) => {
+        if (!dot) return;
+        dot.classList.remove('text-secondary', 'text-success', 'text-danger');
+        dot.classList.add(isOnline ? 'text-success' : 'text-danger');
+        dot.title = isOnline ? 'Thiết bị đang trực tuyến' : 'Thiết bị đang ngoại tuyến';
+        dot.setAttribute('aria-label', isOnline ? 'Trực tuyến' : 'Ngoại tuyến');
+      };
+      const checkTtsDeviceOnlineStatus = (dot, device) => {
+        if (!dot || !device?.ip_address || !device?.port_api) return;
+        const xhr = vbotCreateXhr(30000);
+        const url = 'includes/php_ajax/Check_Connection.php?check_status_vbot_server_in_lan=true'
+          + '&ip=' + encodeURIComponent(device.ip_address)
+          + '&port=' + encodeURIComponent(device.port_api)
+          + '&device_type=' + encodeURIComponent(device.device_type || 'vbot_server')
+          + '&_=' + Date.now();
+        xhr.open('GET', url, true);
+        xhr.onload = function() {
+          let isOnline = false;
+          if (xhr.status >= 200 && xhr.status < 300) {
+            try {
+              isOnline = JSON.parse(xhr.responseText).success === true;
+            } catch (error) {
+              isOnline = false;
+            }
+          }
+          updateTtsDeviceStatusDot(dot, isOnline);
+        };
+        xhr.onerror = function() {
+          updateTtsDeviceStatusDot(dot, false);
+        };
+        xhr.send();
+      };
+      const appendDeviceCheckbox = (value, name, deviceType = 'vbot_server', statusDevice = null) => {
+        dynamicDeviceIndex += 1;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'form-check mb-0';
+        wrapper.dataset.dynamicDevice = 'true';
+        const checkbox = document.createElement('input');
+        checkbox.className = 'form-check-input border-success tts-device-checkbox';
+        checkbox.type = 'checkbox';
+        checkbox.id = 'tts_device_dynamic_' + dynamicDeviceIndex;
+        checkbox.value = value;
+        checkbox.dataset.full_name_tts_api = name;
+        checkbox.dataset.deviceType = deviceType;
+        checkbox.checked = selectedDeviceUrls.has(value);
+        const label = document.createElement('label');
+        label.className = 'form-check-label d-inline-flex align-items-center gap-1';
+        label.htmlFor = checkbox.id;
+        const statusDot = document.createElement('span');
+        statusDot.className = 'tts-device-status-dot text-secondary';
+        statusDot.textContent = '●';
+        statusDot.title = statusDevice ? 'Đang kiểm tra trạng thái thiết bị' : 'Chưa có thông tin trạng thái';
+        statusDot.setAttribute('aria-label', statusDevice ? 'Đang kiểm tra' : 'Chưa xác định');
+        const nameText = document.createElement('span');
+        nameText.textContent = name;
+        label.append(statusDot, nameText);
+        wrapper.append(checkbox, label);
+        deviceContainer.appendChild(wrapper);
+        if (statusDevice) checkTtsDeviceOnlineStatus(statusDot, statusDevice);
+      };
+      devices.forEach(device => {
+        if (device.ip_address !== serverIp) {
+          const identityText = [device.device_type, device.device_id, device.user_name, device.host_name]
+            .map(value => String(value || '').toLowerCase()).join(' ');
+          let deviceType = 'vbot_server';
+          if (device.device_type === 'esp32_client' || identityText.includes('esp32')) {
+            deviceType = 'esp32_client';
+          } else if (
+            device.device_type === 'android_client'
+            || Number(device.port_api) === 8081
+            || identityText.includes('phicomm')
+          ) {
+            deviceType = 'android_client';
+          }
+          appendDeviceCheckbox(
+            'http://' + device.ip_address + ':' + device.port_api + '/',
+            device.user_name || device.ip_address,
+            deviceType,
+            {
+              ip_address: device.ip_address,
+              port_api: device.port_api,
+              device_type: deviceType
+            }
+          );
+        }
+      });
+      if (<?php echo $Config['home_assistant']['active'] ? 'true' : 'false'; ?>) {
+        appendDeviceCheckbox('send_notify_home_assistant', 'Home Assistant (HASS)');
       }
+    }
+    window.updateTtsSpeakerTargets = populateDevicesTtsCheckboxes;
+
+    function fetchAndPopulateDevices_tts() {
       const url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=<?php echo $directory_path . "/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json"; ?>';;
       const xhr = vbotCreateXhr();
-      xhr.open('GET', url, true);
+      xhr.open('GET', url + '&_=' + Date.now(), true);
       xhr.onload = function() {
         if (xhr.status >= 200 && xhr.status < 300) {
           try {
@@ -3286,26 +3424,7 @@ function update_index_data(data){
             if (!data.data || !Array.isArray(data.data)) {
               return;
             }
-            const serverIp = '<?php echo $serverIp; ?>';
-            while (selectElement.options.length > 1) {
-              selectElement.remove(1);
-            }
-            data.data.forEach(device => {
-              if (device.ip_address !== serverIp) {
-                const option = document.createElement('option');
-                option.value = 'http://' + device.ip_address + ':' + device.port_api + '/';
-                option.text = device.user_name;
-                option.setAttribute('data-full_name_tts_api', device.user_name);
-                selectElement.appendChild(option);
-              }
-            });
-            if (<?php echo $Config['home_assistant']['active'] ? 'true' : 'false'; ?>) {
-              const option = document.createElement('option');
-              option.value = 'send_notify_home_assistant';
-              option.text = 'Home Assistant (HASS)';
-              option.setAttribute('data-full_name_tts_api', "VBot - <?php echo $Config['contact_info']['full_name']; ?>");
-              selectElement.appendChild(option);
-            }
+            populateDevicesTtsCheckboxes(data.data);
           } catch (e) {
             showMessagePHP('Lỗi phát tts: Không thể phân tích JSON - ' + e.message, 5);
           }
@@ -3318,6 +3437,14 @@ function update_index_data(data){
       };
       xhr.send();
     }
+
+    //Nút quét chung phát sự kiện này ngay sau khi Scanner.php đã cập nhật cache.
+    //Nạp lại trực tiếp danh sách checkbox TTS để người dùng không phải tải lại trang.
+    window.addEventListener('vbot:devices-scanned', event => {
+      if (event.detail?.ttsUpdated !== true) {
+        populateDevicesTtsCheckboxes(event.detail?.devices || []);
+      }
+    });
   </script>
   <script>
     //Hiệu Ứng Sóng Nhạc Khi Phát Media Player
@@ -3326,18 +3453,25 @@ function update_index_data(data){
     let previousStatus_SongNHAC = null;
     const canvas_SN = document.getElementById("waveCanvas_songNhac");
     const ctx = canvas_SN.getContext("2d");
+    let waveAnimationFrameId = null;
 
     function resizeCanvas_SN() {
       const container = document.getElementById("waveContainer_song_nhac");
       canvas_SN.width = container.clientWidth || window.innerWidth;
       canvas_SN.height = 70;
     }
-    window.addEventListener("resize", resizeCanvas_SN);
+    window.addEventListener("resize", function() {
+      resizeCanvas_SN();
+      if (currentStatus_SongNHAC && isPaused_SongNHAC) startWaveAnimation();
+    });
     resizeCanvas_SN();
     let time_SongNhac = 0;
 
-    function drawWaves() {
-      resizeCanvas_SN();
+    function drawWaves(timestamp) {
+      if (!currentStatus_SongNHAC) {
+        waveAnimationFrameId = null;
+        return;
+      }
       const width = canvas_SN.width;
       const height = canvas_SN.height;
       ctx.clearRect(0, 0, width, height);
@@ -3378,7 +3512,29 @@ function update_index_data(data){
       } else {
         document.getElementById("waveContainer_song_nhac").style.display = "none";
       }
-      requestAnimationFrame(drawWaves);
+      if (isPaused_SongNHAC) {
+        waveAnimationFrameId = null;
+      } else {
+        waveAnimationFrameId = requestAnimationFrame(drawWaves);
+      }
+    }
+
+    function startWaveAnimation() {
+      if (waveAnimationFrameId !== null || !currentStatus_SongNHAC) return;
+      const container = document.getElementById("waveContainer_song_nhac");
+      if (container) container.style.display = "flex";
+      resizeCanvas_SN();
+      waveAnimationFrameId = requestAnimationFrame(drawWaves);
+    }
+
+    function stopWaveAnimation(hideWave = true) {
+      if (waveAnimationFrameId !== null) cancelAnimationFrame(waveAnimationFrameId);
+      waveAnimationFrameId = null;
+      if (hideWave) {
+        const container = document.getElementById("waveContainer_song_nhac");
+        if (container) container.style.display = "none";
+        ctx.clearRect(0, 0, canvas_SN.width, canvas_SN.height);
+      }
     }
 
     function updateDisplay_SongNhac(status_SN, paused_SN = false) {
@@ -3392,11 +3548,18 @@ function update_index_data(data){
       if (isPaused_SongNHAC && time_SongNhac === 0) {
         time_SongNhac = 1.25;
       }
+      if (currentStatus_SongNHAC && !isPaused_SongNHAC) {
+        startWaveAnimation();
+      } else if (currentStatus_SongNHAC) {
+        stopWaveAnimation(false);
+        startWaveAnimation();
+      } else {
+        stopWaveAnimation(true);
+      }
     }
 
-    //Khởi động vòng vẽ sóng và list thiết bị dùng cho tts
+    //Chỉ nạp list thiết bị TTS; vòng sóng sẽ tự chạy khi media thực sự phát.
     window.addEventListener("DOMContentLoaded", () => {
-      drawWaves();
       fetchAndPopulateDevices_tts();
     });
     //Bắt sự kiện nhấn Enter khi nhập liệu tìm kiếm bài hát

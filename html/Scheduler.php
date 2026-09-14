@@ -2403,6 +2403,9 @@ function loadAudioFiles(selectId) {
           }
           const devices = Array.isArray(response.data) ? response.data : [];
           updateSchedulerSpeakerTargets(devices);
+          if (typeof window.schedulerOriginalVbotClientRunner === 'function') {
+            window.schedulerOriginalVbotClientRunner('get_vbotScanDevices');
+          }
           showMessagePHP('Đã cập nhật ' + devices.length + ' thiết bị vào danh sách loa thực hiện', 4);
         } catch (error) {
           show_message('Không thể cập nhật danh sách loa: ' + error.message);
@@ -3346,6 +3349,7 @@ function validateFormVBot() {
     // danh sách checkbox loa từ chính phản hồi API quét.
     (function() {
       const originalRunner = window.runWebuiVbotClientAction;
+      window.schedulerOriginalVbotClientRunner = originalRunner;
       window.runWebuiVbotClientAction = function(actionName) {
         if (actionName === 'scan_VBot_Device') {
           return window.schedulerScanVBotDevices();

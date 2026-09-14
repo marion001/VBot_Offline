@@ -157,7 +157,7 @@ if (isset($_POST['VBot_Device_Scaner'])) {
     if (!file_exists($json_file_path)) {
         try {
             file_put_contents($json_file_path, json_encode([]), LOCK_EX);
-            @chmod($json_file_path, 0660);
+            @chmod($json_file_path, 0777);
         } catch (Exception $e) {
             error_log('VBot scanner JSON creation failed: '.$e->getMessage());
             vbotApiJsonResponse([
@@ -226,7 +226,7 @@ if (isset($_POST['VBot_Device_Scaner'])) {
                 if ($encodedData === false || !vbotAtomicWriteFile($json_file_path, $encodedData, 'VBot device scan cache')) {
                     throw new Exception('Không thể ghi dữ liệu vào file JSON.');
                 }
-                @chmod($json_file_path, 0660);
+                @chmod($json_file_path, 0777);
             } catch (Exception $e) {
                 error_log('VBot scanner data save failed: '.$e->getMessage());
                 vbotApiJsonResponse([

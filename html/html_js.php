@@ -2413,7 +2413,7 @@ function command_php(command_line, reload_page = null) {
         }
         window.webuiVbotClientModulePromise = new Promise(function(resolve, reject) {
             var script = document.createElement('script');
-            script.src = 'assets/js/webui-vbot-client.js?v=<?php echo rawurlencode((string)$Cache_UI_Ver); ?>';
+            script.src = 'assets/js/webui-vbot-client.js?v=<?php echo rawurlencode((string)$Cache_UI_Ver); ?>&m=<?php echo (int)@filemtime(__DIR__ . '/assets/js/webui-vbot-client.js'); ?>';
             script.onload = resolve;
             script.onerror = function() {
                 window.webuiVbotClientModulePromise = null;

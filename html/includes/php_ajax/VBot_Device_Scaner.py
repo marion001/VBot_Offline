@@ -38,6 +38,8 @@ def scan_mdns_devices(timeout=1.8):
             "port_api": int(port),
             "host_name": str(device.get("host") or ""),
             "user_name": str(device.get("name") or ""),
+            "device_type": str(device.get("device_type") or "vbot_server"),
+            "board": str(device.get("board") or ""),
             "discovery": "mdns",
         })
     return results
@@ -138,6 +140,7 @@ def check_device(ip):
             "host_name": host_name,
             "user_name": user_name,
             "device_id": device_id,
+            "device_type": "vbot_server",
             "discovery": "nmap",
         }
     except (requests.RequestException, ValueError, TypeError, KeyError):
