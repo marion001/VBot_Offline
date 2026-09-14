@@ -1087,7 +1087,7 @@ include 'html_head.php';
 									<br>
 									<button type="button"
 											class="btn btn-sm btn-primary mt-2 scheduler-scan-devices"
-											onclick="runWebuiVbotClientAction('scan_VBot_Device')">
+											onclick="schedulerScanVBotDevices()">
 										<i class="bi bi-radar"></i> Quét thiết bị
 									</button>
 								</div>
@@ -2334,7 +2334,7 @@ function loadAudioFiles(selectId) {
       })[character]);
     }
     function buildSchedulerTargetFields(index) {
-      let html = "<div class='row mb-3 scheduler-speaker-targets' data-scheduler-index='" + index + "'><div class='col-sm-3'><label class='col-form-label'>Loa thực hiện:</label><br><button type='button' class='btn btn-sm btn-primary mt-2 scheduler-scan-devices' onclick=\"runWebuiVbotClientAction('scan_VBot_Device')\"><i class='bi bi-radar'></i> Quét thiết bị</button></div><div class='col-sm-9 border rounded p-2'>";
+      let html = "<div class='row mb-3 scheduler-speaker-targets' data-scheduler-index='" + index + "'><div class='col-sm-3'><label class='col-form-label'>Loa thực hiện:</label><br><button type='button' class='btn btn-sm btn-primary mt-2 scheduler-scan-devices' onclick=\"schedulerScanVBotDevices()\"><i class='bi bi-radar'></i> Quét thiết bị</button></div><div class='col-sm-9 border rounded p-2'>";
       html += "<input type='hidden' name='notification_schedule[" + index + "][targets][local]' value='1'>";
       html += "<label class='me-3'><input type='checkbox' class='form-check-input border-success' checked disabled> " + schedulerEscapeHtml(schedulerLocalSpeakerName) + " (loa hiện tại)</label><span class='scheduler-remote-speaker-options'>";
       schedulerVbotDevices.forEach(device => {
@@ -2377,8 +2377,51 @@ function loadAudioFiles(selectId) {
       });
     }
 
+    window.updateSchedulerSpeakerTargets = updateSchedulerSpeakerTargets;
+
+    let schedulerDeviceScanInProgress = false;
+    function schedulerScanVBotDevices() {
+      if (schedulerDeviceScanInProgress) {
+        showMessagePHP('Đang quét thiết bị VBot, vui lòng chờ', 3);
+        return false;
+      }
+      schedulerDeviceScanInProgress = true;
+      loading('show');
+      showMessagePHP('Đang tìm kiếm các thiết bị chạy VBot trong cùng lớp mạng Lan', 12);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'includes/php_ajax/Scanner.php', true);
+      xhr.timeout = 45000;
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+      xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+      xhr.onload = function() {
+        schedulerDeviceScanInProgress = false;
+        loading('hide');
+        try {
+          const response = JSON.parse(xhr.responseText);
+          if (xhr.status < 200 || xhr.status >= 300 || !response.success) {
+            throw new Error(response.message || ('HTTP ' + xhr.status));
+          }
+          const devices = Array.isArray(response.data) ? response.data : [];
+          updateSchedulerSpeakerTargets(devices);
+          showMessagePHP('Đã cập nhật ' + devices.length + ' thiết bị vào danh sách loa thực hiện', 4);
+        } catch (error) {
+          show_message('Không thể cập nhật danh sách loa: ' + error.message);
+        }
+      };
+      xhr.onerror = xhr.ontimeout = function() {
+        schedulerDeviceScanInProgress = false;
+        loading('hide');
+        show_message('Không thể quét thiết bị VBot hoặc yêu cầu đã quá thời gian chờ');
+      };
+      xhr.send('VBot_Device_Scaner=1');
+      return false;
+    }
+    window.schedulerScanVBotDevices = schedulerScanVBotDevices;
+
     window.addEventListener('vbot:devices-scanned', event => {
-      updateSchedulerSpeakerTargets(event.detail && event.detail.devices);
+      if (!event.detail || !event.detail.schedulerUpdated) {
+        updateSchedulerSpeakerTargets(event.detail && event.detail.devices);
+      }
     });
 
     function addNewTask() {
@@ -3298,6 +3341,19 @@ function validateFormVBot() {
   <?php
   include 'html_js.php';
   ?>
+  <script>
+    // Trên trang Scheduler, nút quét chung ở header cũng cập nhật trực tiếp
+    // danh sách checkbox loa từ chính phản hồi API quét.
+    (function() {
+      const originalRunner = window.runWebuiVbotClientAction;
+      window.runWebuiVbotClientAction = function(actionName) {
+        if (actionName === 'scan_VBot_Device') {
+          return window.schedulerScanVBotDevices();
+        }
+        return originalRunner.apply(window, arguments);
+      };
+    })();
+  </script>
 </body>
 
 </html>

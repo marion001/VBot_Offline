@@ -53,8 +53,11 @@ if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);
 }
 
-//Chạy hiển thị thời gian khi trang đã tải xong
-window.onload = setInterval(updateTime, 1000);
+// Chạy đồng hồ sau khi DOM sẵn sàng, không ghi đè window.onload của trang khác.
+window.addEventListener('DOMContentLoaded', function () {
+    updateTime();
+    window.setInterval(updateTime, 1000);
+});
 
 function updateTime() {
     var d = new Date();

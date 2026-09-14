@@ -563,7 +563,8 @@ class WPAConf:
             wifi      PianoLED    
         """
         #c this will return ssid with spaces as one entry in foundSSIDs
-        out = subprocess.run("nmcli -f TYPE,NAME con show", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
+        out = subprocess.run(["nmcli", "-f", "TYPE,NAME", "con", "show"], shell=False,
+                             capture_output=True, encoding='utf-8', text=True, timeout=10).stdout
         networks = re.findall(r"(\S+)\s+(.+)", out,re.M)
         foundSSIDs = []  #contains the net name - not necessarily the actual ssid name
         for type,ssid in networks:
@@ -575,7 +576,8 @@ class WPAConf:
         #   the NAME may have been created differently if the same SSID was created once open and once locked for example 
         #   Netwrok Manager may have added a number to the ssid name - so read wireless.ssid to get the correct ssid
         for netName in foundSSIDs:
-            out = subprocess.run(f"nmcli --show-secrets connection show {netName}", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
+            out = subprocess.run(["nmcli", "--show-secrets", "connection", "show", netName], shell=False,
+                                 capture_output=True, encoding='utf-8', text=True, timeout=10).stdout
             realssidArr = re.findall(r"wireless.ssid:(.+)", out,re.M)
             ssid = realssidArr[0].strip() if len(realssidArr) == 1 else netName
             keyMgmt = re.findall(r"wireless-security.key-mgmt:\s+([\w-]+).+", out,re.DOTALL)
@@ -996,21 +998,21 @@ class WpaSupplicant:
             if ssid_in_wpa and (known_network is not None):
                 mLOG.log(f'requesting known network {ssid}')
                 if len(pw) > 0:
-                    mLOG.log(f'entered password {pw} - calling change password')
+                    mLOG.log('entered password - calling change password')
                     if self.changePassword(known_network,pw):
                         self.connect(known_network)
                 else:
                     mLOG.log(f'arrived with no password - nothing to change - connecting')
                     self.connect(known_network)
             else:
-                mLOG.log(f'ssid was scanned {ssid} - new network with password: {pw}')
+                mLOG.log(f'ssid was scanned {ssid} - new network with password supplied')
                 new_network = self.add_network(ssid,pw)
                 if new_network is not None:
                     self.connect(new_network,True)
         else: 
             #ssid is not in AP_list - user as entered a hidden ssid
             if ssid_in_wpa and (known_network is not None):
-                mLOG.log(f'hidden ssid {ssid} not scanned - but is a known network - calling change password always - password: {pw}')
+                mLOG.log(f'hidden ssid {ssid} not scanned - but is a known network - calling change password')
                 #change password stored (even if it might be right in the file) - ensure scan_ssid is set for it
                 if self.changePassword(known_network,pw,True):
                         self.connect(known_network)
@@ -1111,17 +1113,17 @@ class WpaSupplicant:
             temp_psk = re.findall(r'(psk=[^\s]+)\s+\}', out, re.DOTALL)
             if len(temp_psk)>0: 
                 psk = temp_psk[0]
-        mLOG.log(f'psk from get_psk: {psk}')
+        mLOG.log('get_psk completed')
         return psk
 
     def changePassword(self,network,pw,hidden=False):
         #SAME
         """returns false if password length is illegal or  if error"""
         try:
-            mLOG.log(f'changing Password for  {network.ssid} to  {pw}')
+            mLOG.log(f'changing password for {network.ssid}')
             psk = self.get_psk(network.ssid,pw)
             if len(psk) == 0:
-                mLOG.log(f"Password {pw} has an illegal length: {len(psk)}")
+                mLOG.log(f"Password has an illegal length: {len(pw)}")
                 return False
 
             ssid_num = str(network.number)
@@ -1138,7 +1140,7 @@ class WpaSupplicant:
                     mLOG.log('set key_mgmt to WPA_PSK',out)
                     out = subprocess.run(f'wpa_cli -i wlan0 set_network {ssid_num} psk {psk[4:]}', 
                             shell=True,capture_output=True,encoding='utf-8',text=True).stdout
-                    mLOG.log('set psk',out)
+                    mLOG.log('set psk completed')
                 if hidden:
                     out = subprocess.run(f'wpa_cli -i wlan0 set_network {ssid_num} scan_ssid 1', 
                                 shell=True,capture_output=True,encoding='utf-8',text=True).stdout
@@ -1165,13 +1167,13 @@ class WpaSupplicant:
         note: it does not add the new_network to wpa list nor save the config.
         allow ios to send password = either NONE or blank (empty string) for open network
         """
-        mLOG.log(f'adding network password:{pw}, ssid:{ssid}')
+        mLOG.log(f'adding network with supplied password, ssid:{ssid}')
         if len(pw) == 0:
             psk = self.get_psk(ssid,'NONE') # forces open network
         else:
             psk = self.get_psk(ssid,pw)
         if len(psk) == 0:
-                mLOG.log(f"Password {pw} has an illegal length: {len(pw)}")
+                mLOG.log(f"Password has an illegal length: {len(pw)}")
                 return None
         network_num=''
         try:
@@ -1190,7 +1192,7 @@ class WpaSupplicant:
             else:
                 out = subprocess.run(f'wpa_cli -i wlan0 set_network {network_num} psk {psk[4:]}', 
                             shell=True,capture_output=True,encoding='utf-8',text=True).stdout
-                mLOG.log(f' set psk: {out}')
+                mLOG.log('set psk completed')
             if hidden:    
                 out = subprocess.run(f'wpa_cli -i wlan0 set_network {network_num} scan_ssid 1', 
                                 shell=True,capture_output=True,encoding='utf-8',text=True).stdout
@@ -2901,7 +2903,7 @@ class WifiSetService(Service):
                         self.notifications.setNotification(f'3111{self.phone_quitting_message["ssid"]}',"wifi")
                         return
                     #normal code to connect to a ssid
-                    mLOG.log(f'about to connect to ssid:{self.current_requested_ssid}, with password:{self.current_requested_pw}')
+                    mLOG.log(f'about to connect to ssid:{self.current_requested_ssid}, with password supplied')
                     connected_ssid = self.mgr.request_connection(self.current_requested_ssid,self.current_requested_pw)
                     if len(connected_ssid)>0:
                         mLOG.log(f'adding {connected_ssid} to notifications')

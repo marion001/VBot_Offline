@@ -12,6 +12,24 @@
         return encodeURIComponent(String(value == null ? '' : value)).replace(/'/g, '%27');
     }
 
+    function publishVBotScannedDevices(devices) {
+        const safeDevices = Array.isArray(devices) ? devices : [];
+        let schedulerUpdated = false;
+        // Scheduler exposes a direct callback so its checkbox list is updated
+        // immediately. The event remains available to other pages/components.
+        if (typeof window.updateSchedulerSpeakerTargets === 'function') {
+            try {
+                window.updateSchedulerSpeakerTargets(safeDevices);
+                schedulerUpdated = true;
+            } catch (error) {
+                console.error('Không thể cập nhật danh sách loa Scheduler:', error);
+            }
+        }
+        window.dispatchEvent(new CustomEvent('vbot:devices-scanned', {
+            detail: { devices: safeDevices, schedulerUpdated: schedulerUpdated }
+        }));
+    }
+
     //Quét các thiết bị sử dụng VBot trong cùng lớp mạng
     function scan_VBot_Device() {
         if (window.vbotDeviceScanInProgress) {
@@ -46,9 +64,7 @@
                                     }
                                     return 0;
                                 });
-                                window.dispatchEvent(new CustomEvent('vbot:devices-scanned', {
-                                    detail: { devices: data }
-                                }));
+                                publishVBotScannedDevices(data);
                                 let tableHTML =
                                     '<table class="table table-bordered border-primary" cellspacing="0" cellpadding="5">' +
                                     '<thead>' +
@@ -88,9 +104,7 @@
                                 check_Device_Status_VBot_Server('on');
                                 fetchAndPopulateDevices_chatbot();
                             } else {
-                                window.dispatchEvent(new CustomEvent('vbot:devices-scanned', {
-                                    detail: { devices: [] }
-                                }));
+                                publishVBotScannedDevices([]);
                                 document.getElementById("vbot_Scan_devices").innerHTML = "Không tìm thấy thiết bị nào.";
                             }
                         } else {
