@@ -404,11 +404,7 @@ include 'html_head.php';
                   <div class="mb-3">
                     <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
                       <span class="fw-semibold">Tới Thiết Bị:</span>
-                      <button type="button" id="tts_scan_devices_button" class="btn btn-outline-warning btn-sm"
-                        onclick="runWebuiVbotClientAction('scan_VBot_Device')"
-                        title="Quét lại các loa VBot và ESP32 Client trong mạng LAN">
-                        <i class="bi bi-radar"></i> Quét Thiết Bị
-                      </button>
+                      <button type="button" id="tts_scan_devices_button" class="btn btn-success btn-sm" onclick="runWebuiVbotClientAction('scan_VBot_Device')" title="Quét lại các loa VBot và ESP32 Client trong mạng LAN"><i class="bi bi-radar"></i> Quét Thiết Bị</button>
                     </div>
                     <div id="source_text_to_speak_api" class="d-flex flex-wrap align-items-center gap-3 border border-success rounded px-3 py-2 w-100" role="group" aria-label="Chọn thiết bị phát thông báo">
                       <div class="form-check mb-0">
@@ -934,9 +930,17 @@ include 'html_head.php';
             <div class="card border-success mb-3"><div class="card-body"><h6 class="card-title"><i class="bi bi-play-circle"></i> Lựa Chọn Nhóm Để Phát Âm Thanh</h6>
               <div class="input-group mb-2">
                 <select id="mr-session-group-select" class="form-select border-success" title="Chọn nhóm loa để phát âm thanh đa vùng"></select>
-                <button class="btn btn-success border-success" onclick="multiroomSession('start')" title="Phát nhóm đã chọn"><i class="bi bi-play-fill"></i> Kết Nối</button>
+                <button class="btn btn-success border-success" onclick="multiroomSession('start')" title="Phát nhóm đã chọn"><i class="bi bi-collection-play"></i> Kết Nối Nhóm</button>
               </div>
-              <button class="btn btn-danger w-100 btn-sm" onclick="multiroomSession('local')" title="Dừng phát group, chuyển về loa local"><i class="bi bi-stop-circle"></i> Dừng kết nối & Phát Về Loa Chủ</button>
+              <div class="border border-primary rounded p-2 mb-2 bg-light">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <small class="text-success"><b><i class="bi bi-lightning-charge"></i> Kết Nối Nhanh Không Cần Tạo Nhóm Loa</b></small>
+                  <span id="mr-quick-group-id" class="badge bg-secondary">webui_vbot_*</span>
+                </div>
+                <div id="mr-quick-members" class="border rounded p-2 mb-2 bg-white" style="max-height:180px;overflow-y:auto;"></div>
+                <button id="mr-quick-connect" class="btn btn-success btn-sm w-100" onclick="multiroomQuickConnect()" disabled><i class="bi bi-broadcast"></i> Kết Nối Nhanh Các Loa Đã Chọn</button>
+              </div>
+              <button class="btn btn-danger w-100 btn-sm" onclick="multiroomSession('local')" title="Dừng phát group, chuyển về loa local"><i class="bi bi-stop-circle"></i> Dừng kết nối Multiroom & Phát Về Loa Chủ</button>
             </div></div>
 
             <!-- Card Quản Lý Loa Trong Phiên Phát -->
@@ -1051,6 +1055,8 @@ include 'html_head.php';
     const multiroomVolumeDrafts = {};
     let multiroomLoadingDepth = 0;
     let multiroomGroupEditorMode = null;
+    let multiroomQuickSelectionInitialized = false;
+    const multiroomQuickSelectedSpeakers = new Set();
     let multiroomAPIConnected = false;
     let multiroomMasterVolumeDragging = false;
     let multiroomDisabledNoticeShown = false;
@@ -1060,7 +1066,7 @@ include 'html_head.php';
 
     function setMultiroomAPIConnected(connected) {
       multiroomAPIConnected = connected === true;
-      ['mr-group-create', 'mr-group-edit', 'mr-group-delete', 'mr-group-confirm'].forEach(id => {
+      ['mr-group-create', 'mr-group-edit', 'mr-group-delete', 'mr-group-confirm', 'mr-quick-connect'].forEach(id => {
         const button = document.getElementById(id);
         if(button) button.disabled = !multiroomAPIConnected;
       });
@@ -1226,11 +1232,25 @@ include 'html_head.php';
       }, 20000);
     }
     
+    let multiroomLastPopupError = '';
+
     function mrMessage(text, error=false) { 
       const el=document.getElementById('multiroom-ui-message'); 
-      if(!el)return; 
-      el.textContent=text; 
-      el.className='alert '+(error?'alert-danger':'alert-success'); 
+      const message=String(text == null ? '' : text);
+      if(el) {
+        el.textContent=message; 
+        el.className='alert '+(error?'alert-danger':'alert-success');
+      }
+      if(error) {
+        // Keep the inline context and also surface each distinct error as a
+        // popup. Repeated SSE/discovery retries must not spam the same modal.
+        if(message && message !== multiroomLastPopupError && typeof show_message === 'function') {
+          multiroomLastPopupError=message;
+          show_message(message);
+        }
+      } else {
+        multiroomLastPopupError='';
+      }
     }
 
     function multiroomSuccess(text, timeout=5) {
@@ -1410,6 +1430,77 @@ include 'html_head.php';
       } finally { multiroomLoadingEnd(); }
     }
     
+    function multiroomQuickGroupId() {
+      const localIdentity = multiroomSnapshot.local_device || multiroomSnapshot.receiver || {};
+      const suffix = multiroomGroupIdFromName(String(localIdentity.id || '').trim());
+      return suffix ? 'webui_vbot_' + suffix : '';
+    }
+
+    function toggleMultiroomQuickSpeaker(speakerId, isChecked) {
+      if(isChecked) multiroomQuickSelectedSpeakers.add(String(speakerId));
+      else multiroomQuickSelectedSpeakers.delete(String(speakerId));
+    }
+
+    async function multiroomQuickConnect() {
+      multiroomLoadingStart('Đang tạo nhóm nhanh và kết nối các loa...');
+      try {
+        if(!multiroomAPIConnected) throw new Error(multiroomGroupRequiresVBot);
+        const groupId = multiroomQuickGroupId();
+        if(!groupId) throw new Error('Không xác định được ID loa chủ');
+        const devices = multiroomSnapshot.devices || [];
+        const onlineIds = new Set(devices.filter(device => device.online !== false).map(device => String(device.id)));
+        const members = [...multiroomQuickSelectedSpeakers].filter(id => onlineIds.has(id));
+        const localIdentity = multiroomSnapshot.local_device || multiroomSnapshot.receiver || {};
+        const localId = String(localIdentity.id || '').trim();
+        if(localId && !members.includes(localId)) members.unshift(localId);
+        if(members.filter(id => id !== localId).length === 0) {
+          throw new Error('Hãy chọn ít nhất một loa nhận đang online');
+        }
+        await multiroomRequest({
+          action:'temporary_start', group_id:groupId, speaker_ids:members
+        });
+        multiroomSuccess('Đã kết nối nhóm nhanh ' + groupId);
+      } catch(e) {
+        mrMessage(e.message, true);
+      } finally { multiroomLoadingEnd(); }
+    }
+
+    function renderMultiroomQuickGroup() {
+      const container = document.getElementById('mr-quick-members');
+      const badge = document.getElementById('mr-quick-group-id');
+      if(!container || !badge) return;
+      const devices = multiroomSnapshot.devices || [];
+      const localIdentity = multiroomSnapshot.local_device || multiroomSnapshot.receiver || {};
+      const localId = String(localIdentity.id || '').trim();
+      const groupId = multiroomQuickGroupId();
+      badge.textContent = groupId || 'webui_vbot_*';
+      if(!multiroomQuickSelectionInitialized && devices.length) {
+        multiroomQuickSelectedSpeakers.clear();
+        if(localId) multiroomQuickSelectedSpeakers.add(localId);
+        ((multiroomSnapshot.controller || {}).speakers || []).forEach(speaker => {
+          if(speaker.id) multiroomQuickSelectedSpeakers.add(String(speaker.id));
+        });
+        multiroomQuickSelectionInitialized = true;
+      }
+      container.innerHTML = devices.map(device => {
+        const id = String(device.id || '');
+        const encodedId = vbotEncodeInlineValue(id);
+        const safeId = vbotEscapeHtml(id);
+        const safeName = vbotEscapeHtml(device.name || id || 'Loa');
+        const isLocal = id === localId;
+        const offline = device.online === false;
+        const checked = isLocal || multiroomQuickSelectedSpeakers.has(id);
+        const disabled = isLocal || offline;
+        return '<div class="form-check py-1">' +
+          '<input class="form-check-input border-success" type="checkbox" ' +
+          (checked ? 'checked ' : '') + (disabled ? 'disabled ' : '') +
+          'onchange="toggleMultiroomQuickSpeaker(decodeURIComponent(\'' + encodedId + '\'), this.checked)">' +
+          '<label class="form-check-label"><i class="bi bi-speaker"></i> ' + safeName + ' - ' + safeId +
+          (isLocal ? ' <span class="badge bg-primary">Loa chủ</span>' : '') +
+          ' <span class="' + (offline ? 'text-danger' : 'text-success') + '">' + (offline ? 'offline' : 'online') + '</span></label></div>';
+      }).join('') || '<div class="text-muted">Không tìm thấy loa.</div>';
+    }
+
     function toggleSessionSpeaker(speakerId, isChecked) {
       multiroomPendingSpeakerChanges[speakerId] = isChecked;
     }
@@ -1538,6 +1629,7 @@ include 'html_head.php';
         (multiroomSnapshot.groups||[]).forEach(g=>sessionSelect.add(new Option(g.name+' ('+g.member_count+' loa)',g.id)));
         if(oldSession)sessionSelect.value=oldSession;
       }
+      renderMultiroomQuickGroup();
       
       // Render devices list
       const devices=document.getElementById('mr-devices'); 
@@ -1732,6 +1824,8 @@ include 'html_head.php';
       document.getElementById('multiroom-ui-message').className='alert d-none'; 
       multiroomDisabledNoticeShown = false;
       multiroomPendingSpeakerChanges = {}; // Reset changes when opening modal
+      multiroomQuickSelectionInitialized = false;
+      multiroomQuickSelectedSpeakers.clear();
       multiroomSSEWasDisconnected = false;
       setMultiroomAPIConnected(false);
       multiroomPrepareInitialLoadingState();
