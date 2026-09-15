@@ -111,7 +111,7 @@ $Config_filePath = $VBot_Offline . 'Config.json';
 $Github_Repo_Vbot = "https://github.com/marion001/VBot_Offline";
 
 //Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
-$excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt'];
+$excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt', 'cpu_info', 'cpu_serial'];
 
 //Đọc và giải mã dữ liệu JSON
 $Config = null;
