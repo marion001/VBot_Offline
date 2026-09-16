@@ -1871,6 +1871,7 @@ if (isset($_POST['Check_For_Upgrade'])) {
                                 <center>
                                     <button type="submit" name="Check_For_Upgrade" class="btn btn-primary rounded-pill" onclick="loading('show')">Kiểm Tra Bản Cập Nhật</button>
                                     <button type="submit" name="Backup_Upgrade_Program" value="yes_vbot_upgrade" class="btn btn-success rounded-pill" onclick="return confirmRestore('Bạn có chắc chắn muốn cập nhật phiên bản chương trình VBot mới?')">Cập Nhật Chương Trình</button>
+                                    <a href="FAQ.php#accordion_manual_update_ssh" class="btn btn-outline-warning rounded-pill" title="Hướng dẫn cập nhật thủ công qua SSH khi WebUI bị lỗi"><i class="bi bi-terminal"></i> Hướng Dẫn Cập Nhật Thủ Công</a>
                                 </center>
                             </div>
                         </div>

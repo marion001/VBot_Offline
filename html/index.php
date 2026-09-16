@@ -352,7 +352,7 @@ include 'html_head.php';
                         <button type="button" id="media_next_Button" title="Chuyển bài kế tiếp theo nguồn đang phát" class="btn btn-outline-primary" onclick="control_media('next')"><i class="bi bi-skip-forward-fill"></i></button>
                       </div>
                     </div>
-                    <button type="button" id="playlist_play_Button" title="Phát Playlist mặc định" class="btn btn-primary btn-sm rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> Phát Playlist mặc định</button>
+                    <button type="button" id="playlist_play_Button" title="Phát Playlist mặc định" class="btn btn-primary btn-sm rounded-pill" onclick="playlist_media_control()"><i class="bi bi-music-note-list"></i> <span id="playlist_play_Button_label">Phát Playlist mặc định</span></button>
                   </div>
                 </div>
                 <hr />
@@ -3014,6 +3014,27 @@ function update_index_data(data){
       }
     }
 
+    function updateDefaultPlaylistButton(manager) {
+      const button = document.getElementById('playlist_play_Button');
+      const label = document.getElementById('playlist_play_Button_label');
+      if(!button || !label) return;
+      const playlists = Array.isArray(manager?.playlists) ? manager.playlists : [];
+      const active = playlists.find(item => item.id === manager?.active_id) || playlists.find(item => item.active === true);
+      const playlistName = String(active?.name || '').trim();
+      label.textContent = playlistName ? 'Phát Playlist: ' + playlistName : 'Phát Playlist mặc định';
+      button.title = playlistName ? 'Phát Playlist mặc định: ' + playlistName : 'Phát Playlist mặc định';
+    }
+
+    async function loadDefaultPlaylistButton() {
+      try {
+        const response = await vbotFetchWithTimeout('includes/php_ajax/Media_Player_Search.php?Playlist_Manager=1', {cache:'no-store'}, 30000);
+        const manager = await response.json();
+        if(response.ok && manager.success !== false) updateDefaultPlaylistButton(manager);
+      } catch(error) {
+        // Giữ nhãn dự phòng; lỗi này không được làm gián đoạn quá trình tải WebUI.
+      }
+    }
+
     let playlistManagerDialogAction = null;
 
     function playlistCurrentMeta() {
@@ -3109,6 +3130,14 @@ function update_index_data(data){
         const data = await response.json();
         if(!response.ok || !data.success) throw new Error(data.message || 'Thao tác PlayList thất bại');
         if(action === 'create' || action === 'clone' || action === 'select') selectedPlaylistId = data.playlist_id || data.active_id;
+        if(action === 'select') {
+          const activeId = data.active_id || selectedPlaylistId;
+          playlistManagerCache.active_id = activeId;
+          (playlistManagerCache.playlists || []).forEach(item => {
+            item.active = item.id === activeId;
+          });
+          updateDefaultPlaylistButton(playlistManagerCache);
+        }
         if(action === 'delete') selectedPlaylistId = data.active_id;
         bootstrap.Modal.getInstance(document.getElementById('playlistManagerDialog'))?.hide();
         showMessagePHP(data.message, 5);
@@ -3266,6 +3295,7 @@ function update_index_data(data){
 
     function renderPlayList(manager) {
       playlistManagerCache = manager;
+      updateDefaultPlaylistButton(manager);
       const selectedMeta = (manager.playlists||[]).find(item => item.id === selectedPlaylistId) || {};
       const bulkTargetOptions = (manager.playlists||[]).filter(item => item.id !== selectedPlaylistId).map(item => '<option value="' + playlistEscapeHtml(item.id) + '">' + playlistEscapeHtml(item.name) + '</option>').join('');
       const playlistOptions = (manager.playlists||[]).map(item =>
@@ -3655,6 +3685,7 @@ function update_index_data(data){
     //Chỉ nạp list thiết bị TTS; vòng sóng sẽ tự chạy khi media thực sự phát.
     window.addEventListener("DOMContentLoaded", () => {
       fetchAndPopulateDevices_tts();
+      loadDefaultPlaylistButton();
     });
     //Bắt sự kiện nhấn Enter khi nhập liệu tìm kiếm bài hát
     document.addEventListener("keypress", function(e) {

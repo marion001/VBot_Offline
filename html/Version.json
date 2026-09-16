@@ -1,8 +1,8 @@
 {
-    "version": "1.3.0",
+    "version": "1.3.1",
     "projectName": "WebUI VBot Offline",
-    "description": "Hỗ trợ lập lịch thông báo tương tác với các loa khác trong cùng mạng, sửa lỗi hệ thống",
-    "releaseDate": "14/09/2026",
+    "description": "Sửa lỗi tương tác Multiroom với Custom Home Assistant, và các lỗi hệ thống khác",
+    "releaseDate": "16/09/2026",
     "changes": [
         {
             "type": "feature",
