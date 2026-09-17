@@ -560,12 +560,12 @@ Chọn image theo phần cứng audio:
 
 Quy trình chung:
 
-1. Ghi image bằng Raspberry Pi Imager hoặc Balena Etcher.
-2. Khởi động Raspberry Pi và cấu hình Wi-Fi (Có thể cấu hình bằng kết nối wifi phát ra hoặc APP Bluetooth).
-3. Truy cập WebUI bằng địa chỉ IP của thiết bị.
+1. Flash Ghi image bằng Raspberry Pi Imager hoặc Balena Etcher.
+2. Khởi động Raspberry Pi và cấu hình Wi-Fi (Có thể cấu hình bằng kết nối wifi phát ra từ pi hoặc thông qua bluetooth với APP tên là: BTBerryWifi).
+3. Khi kết nối Wifi thành công sau khoảng 1-2 phút loa sẽ đọc địa chỉ ip, truy cập WebUI bằng địa chỉ IP của thiết bị.
 4. Kiểm tra microphone, loa, LED và nút nhấn.
 5. Cập nhật thông tin cá nhân, API key và token dịch vụ trong WebUI.
-6. Khởi động lại VBot sau khi thay đổi cấu hình quan trọng.
+6. Khởi động lại VBot (Restart vbot) sau khi mỗi lần thay đổi cấu hình để áp dụng dữ liệu
 
 ### Chạy bằng service
 
