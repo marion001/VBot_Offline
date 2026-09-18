@@ -36,6 +36,15 @@ function vbotCheckIsPrivateLanIpv4($ipAddress)
         || ($ip >= ip2long('192.168.0.0') && $ip <= ip2long('192.168.255.255'));
 }
 
+function vbotIsExcludedChmodItem($item, array $excludedItems)
+{
+    foreach ($excludedItems as $excluded) {
+        if ($excluded === '') {continue;}
+        if (fnmatch($excluded, $item)) {return true;}
+    }
+    return false;
+}
+
 function vbotCollectChmodPermissionIssues($dir, array $excludedItems, array &$issues)
 {
     $items = @scandir($dir);
@@ -44,12 +53,14 @@ function vbotCollectChmodPermissionIssues($dir, array $excludedItems, array &$is
         return;
     }
     foreach ($items as $item) {
-        if ($item === '.' || $item === '..' || in_array($item, $excludedItems, true)) continue;
+        if (vbotIsExcludedChmodItem($item, $excludedItems)) {continue;}
         $path = $dir . DIRECTORY_SEPARATOR . $item;
         clearstatcache(true, $path);
         $filePermissions = @fileperms($path);
-        $permissions = $filePermissions === false ? 'không xác định' : substr(sprintf('%o', $filePermissions), -3);
-        if ($permissions !== '777') $issues[] = ['path' => $path, 'mode' => $permissions];
+        $permissions = ($filePermissions === false) ? 'không xác định' : substr(sprintf('%o', $filePermissions), -3);
+        if ($permissions !== '777') {
+            $issues[] = ['path' => $path, 'mode' => $permissions];
+        }
         if (is_dir($path) && !is_link($path)) {
             vbotCollectChmodPermissionIssues($path, $excludedItems, $issues);
         }
@@ -60,14 +71,20 @@ if (isset($_GET['check_chmod_permissions'])) {
     $issues = [];
     $realHtmlPath = realpath($directory_path);
     $realBasePath = realpath($VBot_Offline);
-    if ($realHtmlPath !== false && $realBasePath !== false
-        && strpos($realHtmlPath, rtrim($realBasePath, '/\\') . DIRECTORY_SEPARATOR) === 0) {
+    if (
+        $realHtmlPath !== false &&
+        $realBasePath !== false &&
+        strpos($realHtmlPath, rtrim($realBasePath, '/\\') . DIRECTORY_SEPARATOR) === 0
+    ) {
         vbotCollectChmodPermissionIssues($realBasePath, $excluded_items_chmod, $issues);
     } else {
-        if ($realHtmlPath !== false) vbotCollectChmodPermissionIssues($realHtmlPath, $excluded_items_chmod, $issues);
-        if ($realBasePath !== false) vbotCollectChmodPermissionIssues($realBasePath, $excluded_items_chmod, $issues);
+        if ($realHtmlPath !== false) {
+			vbotCollectChmodPermissionIssues($realHtmlPath, $excluded_items_chmod, $issues);
+        }
+        if ($realBasePath !== false) {vbotCollectChmodPermissionIssues($realBasePath, $excluded_items_chmod, $issues);
+        }
     }
-    vbotApiJsonResponse(['success' => true, 'count' => count($issues), 'issues' => $issues]);
+    vbotApiJsonResponse(['success' => true, 'count'   => count($issues), 'issues'  => $issues]);
 }
 
 function vbotHassConfiguredUrl($requestedUrl, array $config)
@@ -202,9 +219,7 @@ if (isset($_GET['check_status_vbot_server_in_lan'])) {
     if (!in_array($deviceType, ['vbot_server', 'esp32_client', 'android_client'], true)) {
         vbotApiJsonResponse(['success' => false, 'message' => 'Loại thiết bị không hợp lệ'], 400);
     }
-    $statusPath = in_array($deviceType, ['esp32_client', 'android_client'], true)
-        ? '/VBot_Client_Info'
-        : '';
+    $statusPath = in_array($deviceType, ['esp32_client', 'android_client'], true) ? '/VBot_Client_Info' : '';
     $url = "http://" . $ip . ":" . $port . $statusPath;
     $curl = curl_init();
     curl_setopt_array($curl, array(
