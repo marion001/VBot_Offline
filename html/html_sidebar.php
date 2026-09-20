@@ -232,6 +232,11 @@
           <i class="bi bi-circle"></i><span>DEV Logs (Customize Xử Lý Logs)</span>
         </a>
       </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Lịch Âm Dương">
+        <a href="DEV_Calendar.php">
+          <i class="bi bi-circle"></i><span>DEV Lịch Âm/Dương (Customize Lunisolar Calendar)</span>
+        </a>
+      </li>
     </ul>
   </li>
 

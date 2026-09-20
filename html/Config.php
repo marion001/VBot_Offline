@@ -4462,16 +4462,16 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 			  <?php
 				$calendar_source = $Config['calendar']['source'] ?? 'system';
 				echo select_field('calendar_source', 'Nguồn xử lý dữ liệu lịch âm và dương', [
-				  'system' => 'Sử Dụng Hệ Thống VBot (Không Cần Internet)',
+				  'system' => 'Sử Dụng Hệ Thống VBot',
 				  'virtual_assistant_priority' => 'Ưu Tiên Trợ Lý Ảo Assistant',
 				  'dev_calendar' => 'Người Dùng Tự Code [Dev_Calendar.py]'
 				], $calendar_source, []);
 			  ?>
 			  <div class="alert alert-info mt-3 mb-0" role="alert">
-				<b>Ghi chú:</b> Hệ thống hỗ trợ hôm nay, hôm qua, ngày mai, ngày kia và ngày cụ thể.
-				Chế độ <b>Ưu Tiên Trợ Lý Ảo</b> sẽ dùng lịch hệ thống khi trợ lý không phản hồi.
-				Chế độ <b>Dev_Calendar.py</b> cũng tự quay về lịch hệ thống nếu mã tùy chỉnh lỗi hoặc không có kết quả.
-				Cần khởi động lại VBot sau khi thay đổi nguồn xử lý.
+				<b>Ghi chú:</b><br>- Hệ thống hỗ trợ hôm nay, hôm qua, ngày mai, ngày kia và ngày cụ thể.<br/>
+				- Chế độ <b>Ưu Tiên Trợ Lý Ảo</b> sẽ dùng lịch hệ thống khi trợ lý không phản hồi.<br/>
+				- Chế độ <b>Dev_Calendar.py</b> cũng tự quay về lịch hệ thống nếu mã tùy chỉnh lỗi hoặc không có kết quả.<br/>
+				- Cần khởi động lại VBot sau khi thay đổi nguồn xử lý.
 			  </div>
 			  </div>
 			  </div>
