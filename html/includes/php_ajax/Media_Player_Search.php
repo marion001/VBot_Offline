@@ -10,7 +10,14 @@ require_once __DIR__.'/Api_Helpers.php';
 vbotApiInitialize(['GET', 'POST']);
 include '../../Configuration.php';
 
-if ($Config['contact_info']['user_login']['active']) {
+$providedApiKey = isset($_SERVER['HTTP_VBOT_API_KEY'])
+	? trim((string)$_SERVER['HTTP_VBOT_API_KEY'])
+	: '';
+$apiKeyAuthorized = $API_AUTH_KEY !== ''
+	&& $providedApiKey !== ''
+	&& hash_equals($API_AUTH_KEY, $providedApiKey);
+
+if ($Config['contact_info']['user_login']['active'] && !$apiKeyAuthorized) {
 	session_start();
 	if (
 		!isset($_SESSION['user_login']) ||
