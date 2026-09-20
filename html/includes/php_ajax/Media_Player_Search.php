@@ -13,9 +13,12 @@ include '../../Configuration.php';
 $providedApiKey = isset($_SERVER['HTTP_VBOT_API_KEY'])
 	? trim((string)$_SERVER['HTTP_VBOT_API_KEY'])
 	: '';
-$apiKeyAuthorized = $API_AUTH_KEY !== ''
+$apiAuthEnabled = !empty($Config['api']['auth']['active']) || getenv('VBOT_API_KEY');
+$apiKeyAuthorized = !$apiAuthEnabled || (
+	$API_AUTH_KEY !== ''
 	&& $providedApiKey !== ''
-	&& hash_equals($API_AUTH_KEY, $providedApiKey);
+	&& hash_equals($API_AUTH_KEY, $providedApiKey)
+);
 
 if ($Config['contact_info']['user_login']['active'] && !$apiKeyAuthorized) {
 	session_start();
@@ -31,6 +34,22 @@ if ($Config['contact_info']['user_login']['active'] && !$apiKeyAuthorized) {
 		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
+}
+
+if (isset($_GET['Media_Source_Health'])) {
+	vbotApiJsonResponse([
+		'success' => true,
+		'media_api_version' => 2,
+		'capabilities' => [
+			'local',
+			'playlist',
+			'playlist_play_all',
+			'radio',
+			'search',
+			'cache',
+			'youtube_direct',
+		],
+	]);
 }
 
 $Cover_URL_Local = dirname(dirname(dirname($Current_URL)));

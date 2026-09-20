@@ -623,6 +623,11 @@ if (isset($_POST['all_config_save'])) {
   #Cập nhật cấu hình nguồn xử lý thời tiết
   $Config['weather']['source'] = isset($_POST['weather_source']) ? $_POST['weather_source'] : 'virtual_assistant';
 
+  #Cập nhật nguồn xử lý lịch âm/dương; chỉ chấp nhận các giá trị hệ thống hỗ trợ
+  $calendar_sources = ['system', 'virtual_assistant_priority', 'dev_calendar'];
+  $calendar_source = isset($_POST['calendar_source']) ? trim((string)$_POST['calendar_source']) : 'system';
+  $Config['calendar']['source'] = in_array($calendar_source, $calendar_sources, true) ? $calendar_source : 'system';
+
   #cập nhật đồng bộ hóa media với web ui
   $Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
   $Config['media_player']['media_sync_ui']['delay_time'] = intval($_POST['media_sync_ui_delay_time']);
@@ -4444,11 +4449,36 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 		  </div>
 		</div>
 
-		  </div>
-		  </div>
-		  </div>
+			  </div>
+			  </div>
+			  </div>
 
-            <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
+			  <div class="card accordion" id="accordion_button_calendar_cfg">
+			  <div class="card-body">
+			  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_calendar_cfg" aria-expanded="false" aria-controls="collapse_button_calendar_cfg">
+			  Cấu Hình Lịch Âm/Dương, Calendar:</h5>
+			  <div id="collapse_button_calendar_cfg" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_calendar_cfg">
+			  <div class="alert alert-primary" role="alert">
+			  <?php
+				$calendar_source = $Config['calendar']['source'] ?? 'system';
+				echo select_field('calendar_source', 'Nguồn xử lý dữ liệu lịch âm và dương', [
+				  'system' => 'Sử Dụng Hệ Thống VBot (Không Cần Internet)',
+				  'virtual_assistant_priority' => 'Ưu Tiên Trợ Lý Ảo Assistant',
+				  'dev_calendar' => 'Người Dùng Tự Code [Dev_Calendar.py]'
+				], $calendar_source, []);
+			  ?>
+			  <div class="alert alert-info mt-3 mb-0" role="alert">
+				<b>Ghi chú:</b> Hệ thống hỗ trợ hôm nay, hôm qua, ngày mai, ngày kia và ngày cụ thể.
+				Chế độ <b>Ưu Tiên Trợ Lý Ảo</b> sẽ dùng lịch hệ thống khi trợ lý không phản hồi.
+				Chế độ <b>Dev_Calendar.py</b> cũng tự quay về lịch hệ thống nếu mã tùy chỉnh lỗi hoặc không có kết quả.
+				Cần khởi động lại VBot sau khi thay đổi nguồn xử lý.
+			  </div>
+			  </div>
+			  </div>
+			  </div>
+			  </div>
+
+			  <div class="card accordion" id="accordion_button_sao_luu_cap_nhat">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_sao_luu_cap_nhat" aria-expanded="false" aria-controls="collapse_button_sao_luu_cap_nhat">
                   Cấu Hình Cài Đặt Sao Lưu/Cập Nhật:

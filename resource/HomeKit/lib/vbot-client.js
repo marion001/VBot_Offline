@@ -89,11 +89,29 @@ class VBotClient extends EventEmitter {
     this.retryTimer = null;
     this.multiroomRetryTimer = null;
     this.multiroomDiscoveryTimer = null;
+    this.multiroomDiscoveryInFlight = false;
     this.streamController = null;
     this.multiroomStreamController = null;
     this.running = false;
     this.lastSignature = "";
     this.commandCooldowns = new Map();
+    this.consecutiveTimeouts = new Map();
+  }
+
+  markClientSuccess(scope) {
+    this.consecutiveTimeouts.delete(scope);
+  }
+
+  reportClientError(scope, error) {
+    const isTimeout = /VBot API timeout sau \d+ms/.test(String(error?.message || ""));
+    if (!isTimeout) {
+      this.consecutiveTimeouts.delete(scope);
+      this.emit("clientError", error);
+      return;
+    }
+    const count = (this.consecutiveTimeouts.get(scope) || 0) + 1;
+    this.consecutiveTimeouts.set(scope, count);
+    if (count === 3) this.emit("clientError", error);
   }
 
   headers(json = false) {
@@ -147,7 +165,9 @@ class VBotClient extends EventEmitter {
         });
       });
       request.setTimeout(this.config.requestTimeoutMs, () => {
-        request.destroy(new Error(`VBot API timeout sau ${this.config.requestTimeoutMs}ms`));
+        request.destroy(new Error(
+          `VBot API timeout sau ${this.config.requestTimeoutMs}ms (${options.method || "GET"} ${target.pathname}${target.search})`,
+        ));
       });
       request.on("error", reject);
       if (body) request.write(body);
@@ -183,6 +203,7 @@ class VBotClient extends EventEmitter {
     }
     if (!response.ok) throw new Error(`VBot SSE HTTP ${response.status}`);
     if (!response.body) throw new Error("VBot SSE không có response body");
+    this.markClientSuccess("state-sse");
     this.emit("sse", true);
 
     const decoder = new TextDecoder();
@@ -352,7 +373,7 @@ class VBotClient extends EventEmitter {
         if (!this.running) break;
         this.emit("sse", false);
         this.emit("online", false);
-        this.emit("clientError", error);
+        this.reportClientError("state-sse", error);
         // GET chỉ là snapshot dự phòng trong thời gian SSE đang kết nối lại.
         try { this.publishState(await this.request("/?type=1&data=all_info")); } catch (_) {}
         await new Promise(resolve => { this.retryTimer = setTimeout(resolve, this.config.sseReconnectMs); });
@@ -364,10 +385,14 @@ class VBotClient extends EventEmitter {
       while (this.running) {
         try {
           this.multiroomStreamController = new AbortController();
-          const response = await this.fetch(`${this.config.baseUrl}/multiroom/events`, {
+          const response = await this.fetch(
+            `${this.config.baseUrl}/multiroom/events?interval=${this.config.sseIntervalSeconds}`,
+            {
             headers: { ...this.headers(), Accept: "text/event-stream" }, signal: this.multiroomStreamController.signal,
-          });
+            },
+          );
           if (!response.ok || !response.body) throw new Error(`Multiroom SSE HTTP ${response.status}`);
+          this.markClientSuccess("multiroom-sse");
           const decoder = new TextDecoder();
           let buffer = "";
           for await (const chunk of response.body) {
@@ -383,23 +408,27 @@ class VBotClient extends EventEmitter {
           }
         } catch (error) {
           if (!this.running) break;
-          this.emit("clientError", error);
+          this.reportClientError("multiroom-sse", error);
           await new Promise(resolve => { this.multiroomRetryTimer = setTimeout(resolve, this.config.sseReconnectMs); });
         }
       }
     };
     runMultiroom();
     const discoverMultiroom = async () => {
-      if (!this.running) return;
+      if (!this.running || this.multiroomDiscoveryInFlight) return;
+      this.multiroomDiscoveryInFlight = true;
       try {
         const payload = await this.request("/multiroom?discover=true");
+        this.markClientSuccess("multiroom-discovery");
         if (payload?.multiroom) this.emit("multiroomState", payload.multiroom);
       } catch (error) {
-        if (this.running) this.emit("clientError", error);
+        if (this.running) this.reportClientError("multiroom-discovery", error);
+      } finally {
+        this.multiroomDiscoveryInFlight = false;
       }
     };
     discoverMultiroom();
-    this.multiroomDiscoveryTimer = setInterval(discoverMultiroom, 30000);
+    this.multiroomDiscoveryTimer = setInterval(discoverMultiroom, 60000);
   }
 
   stop() {
@@ -411,6 +440,7 @@ class VBotClient extends EventEmitter {
     this.multiroomRetryTimer = null;
     this.multiroomDiscoveryTimer = null;
     this.commandCooldowns.clear();
+    this.consecutiveTimeouts.clear();
     if (this.streamController) this.streamController.abort();
     if (this.multiroomStreamController) this.multiroomStreamController.abort();
     this.streamController = null;

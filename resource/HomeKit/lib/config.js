@@ -7,7 +7,7 @@ const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 
 const HOMEKIT_PERSIST_PATH = "/home/pi/VBot_Node/HomeKit/persist";
-const VBOT_SSE_PATH = "/?type=1&data=all_info&stream=sse&interval=1";
+const DEFAULT_SSE_INTERVAL_SECONDS = 2;
 const REMOTE_BUTTON_DEFAULTS = Object.freeze({
   arrow_up: "volume_up", arrow_down: "volume_down",
   arrow_left: "media_previous", arrow_right: "media_next",
@@ -192,6 +192,10 @@ function buildConfig(vbotConfig, vbotConfigPath, suppliedVersionConfig = null) {
     throw new Error(`homekit.accessory_type không hợp lệ: ${accessoryType}`);
   }
   const actionControls = loadActionControls(vbotConfig, vbotConfigPath);
+  const configuredSseInterval = Number(vbotConfig.media_player?.media_sync_ui?.delay_time);
+  const sseIntervalSeconds = Number.isFinite(configuredSseInterval) && configuredSseInterval > 0
+    ? Math.max(0.5, Math.min(10, configuredSseInterval))
+    : DEFAULT_SSE_INTERVAL_SECONDS;
   return {
     active: homekit.active === true,
     accessoryType,
@@ -212,7 +216,8 @@ function buildConfig(vbotConfig, vbotConfigPath, suppliedVersionConfig = null) {
       baseUrl: `http://127.0.0.1:${port}`,
       apiKey,
       requestTimeoutMs: Math.max(500, Number(homekit.request_timeout_ms || 4000)),
-      ssePath: VBOT_SSE_PATH,
+      sseIntervalSeconds,
+      ssePath: `/?type=1&data=all_info&stream=sse&interval=${sseIntervalSeconds}`,
       sseReconnectMs: Math.max(500, Number(homekit.sse_reconnect_ms || 3000)),
     },
     configPath: vbotConfigPath,
@@ -235,4 +240,4 @@ function loadConfig(configPath) {
   return config;
 }
 
-module.exports = { HOMEKIT_PERSIST_PATH, VBOT_SSE_PATH, REMOTE_BUTTON_DEFAULTS, REMOTE_BUTTON_STATES, raspberryPiOtpSerial, fallbackHardwareIdentity, autoUsername, buildConfig, loadActionControls, loadHomeKitRegistry, loadRemoteButtons, loadConfig, sanitizeHomeKitName };
+module.exports = { HOMEKIT_PERSIST_PATH, DEFAULT_SSE_INTERVAL_SECONDS, REMOTE_BUTTON_DEFAULTS, REMOTE_BUTTON_STATES, raspberryPiOtpSerial, fallbackHardwareIdentity, autoUsername, buildConfig, loadActionControls, loadHomeKitRegistry, loadRemoteButtons, loadConfig, sanitizeHomeKitName };

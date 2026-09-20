@@ -48,7 +48,8 @@ Bridge đọc trực tiếp mục `homekit` cùng `api.port`, `api.auth.active` 
 
 - Tên HomeKit lấy từ `contact_info.full_name`.
 - Firmware lấy từ trường `version` trong `/home/pi/VBot_Offline/Version.json`.
-- SSE luôn dùng `/?type=1&data=all_info&stream=sse&interval=1` để đồng bộ cả
+- Chu kỳ SSE lấy từ `media_player.media_sync_ui.delay_time` trong `Config.json`
+  và dùng `/?type=1&data=all_info&stream=sse&interval=<delay_time>` để đồng bộ cả
   media, micro, wakeup và chế độ hội thoại.
 - Pairing luôn lưu tại `/home/pi/VBot_Node/HomeKit/persist`.
 
