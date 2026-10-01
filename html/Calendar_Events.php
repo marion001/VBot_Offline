@@ -298,7 +298,7 @@ $activeEventLocale=str_replace('_','-',(string)($Config['language']['primary']??
 </head>
 <body><?php include 'html_header_bar.php'; include 'html_sidebar.php'; ?>
 <main id="main" class="main">
-  <div class="pagetitle"><h1>Quản Lý Sự Kiện, Events, Ngày Lễ, Kỉ Niệm</h1><nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li><li class="breadcrumb-item active">Events</li>&nbsp;| Trạng Thái Kích Hoạt: <?php echo ($Config['calendar']['events']['active'] ?? false) ? '<p class="text-success">&nbsp; Đang Bật</p>' : 'class="text-danger">&nbsp; Đang Tắt</p>'; ?></ol></nav></div>
+  <div class="pagetitle"><h1>Quản Lý Sự Kiện, Events, Ngày Lễ, Kỉ Niệm</h1><nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li><li class="breadcrumb-item active">Events</li>&nbsp;| Trạng Thái Kích Hoạt: <?php echo ($Config['calendar']['events']['active'] ?? false) ? '<p class="text-success">&nbsp; Đang Bật</p>' : '<p class="text-danger">&nbsp; Đang Tắt</p>'; ?></ol></nav></div>
   <?php if (isset($statusMessages[$pageStatus])): ?><div class="alert alert-<?php echo in_array($pageStatus,['saved','deleted','imported','restored','backup_deleted','history_cleared'],true)?'success':'danger'; ?>"><?php echo calendarEventsText($statusMessages[$pageStatus]); ?></div><?php endif; ?>
 
   <div class="card alert alert-success"><div class="card-body pt-3">
