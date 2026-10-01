@@ -1,0 +1,897 @@
+{
+  "actions": {
+    "adjust": [
+      "adjust"
+    ],
+    "auto": [
+      "automatic",
+      "auto"
+    ],
+    "bigger": [
+      "bigger",
+      "larger"
+    ],
+    "change": [
+      "change"
+    ],
+    "check": [
+      "check",
+      "status"
+    ],
+    "closed": [
+      "close",
+      "shut"
+    ],
+    "connect": [
+      "connect"
+    ],
+    "continue": [
+      "continue",
+      "resume"
+    ],
+    "cool": [
+      "cool",
+      "cooling"
+    ],
+    "decrase": [
+      "decrease",
+      "lower"
+    ],
+    "disable": [
+      "disable",
+      "deactivate"
+    ],
+    "disconnect": [
+      "disconnect"
+    ],
+    "display": [
+      "display",
+      "show"
+    ],
+    "down": [
+      "down"
+    ],
+    "download": [
+      "download"
+    ],
+    "dry": [
+      "dry",
+      "dehumidify"
+    ],
+    "enable": [
+      "enable",
+      "activate"
+    ],
+    "execute": [
+      "execute",
+      "perform"
+    ],
+    "fan_only": [
+      "fan only",
+      "fan mode"
+    ],
+    "heat": [
+      "heat",
+      "heating"
+    ],
+    "idle": [
+      "idle",
+      "unknown"
+    ],
+    "incrase": [
+      "increase",
+      "raise"
+    ],
+    "listen": [
+      "listen"
+    ],
+    "mode": [
+      "mode",
+      "function"
+    ],
+    "notice": [
+      "alert",
+      "notify",
+      "warning"
+    ],
+    "off": [
+      "turn off",
+      "switch off"
+    ],
+    "on": [
+      "turn on",
+      "switch on"
+    ],
+    "open": [
+      "open"
+    ],
+    "pause": [
+      "pause",
+      "hold"
+    ],
+    "play": [
+      "play"
+    ],
+    "read": [
+      "read"
+    ],
+    "reminder": [
+      "reminder",
+      "remind me",
+      "notification"
+    ],
+    "schedule": [
+      "schedule",
+      "set a schedule",
+      "appointment",
+      "set a timer"
+    ],
+    "script": [
+      "run script",
+      "execute script"
+    ],
+    "send": [
+      "send",
+      "transfer"
+    ],
+    "setup": [
+      "set",
+      "set up",
+      "configure"
+    ],
+    "sing": [
+      "sing"
+    ],
+    "smaller": [
+      "smaller",
+      "quieter"
+    ],
+    "stop": [
+      "stop",
+      "stop playing",
+      "stop music"
+    ],
+    "swing": [
+      "swing",
+      "oscillate"
+    ],
+    "tell": [
+      "tell"
+    ],
+    "up": [
+      "up"
+    ],
+    "upload": [
+      "upload"
+    ]
+  },
+  "adverbs": {
+    "action_command_together": [
+      "on",
+      "off",
+      "open",
+      "closed",
+      "enable",
+      "disable",
+      "script",
+      "check",
+      "setup"
+    ],
+    "air_conditioner": [
+      "air conditioner",
+      "air conditioning",
+      "ac"
+    ],
+    "automation": [
+      "automation"
+    ],
+    "bigger": [
+      "bigger",
+      "larger",
+      "loudest"
+    ],
+    "conversation": [
+      "conversation",
+      "continuous conversation",
+      "chat mode"
+    ],
+    "decrease": [
+      "decrease",
+      "lower",
+      "turn down"
+    ],
+    "fan": [
+      "fan"
+    ],
+    "high": [
+      "high",
+      "higher"
+    ],
+    "increase": [
+      "increase",
+      "raise",
+      "turn up"
+    ],
+    "light": [
+      "light",
+      "brightness"
+    ],
+    "local": [
+      "local",
+      "on device"
+    ],
+    "lower": [
+      "low",
+      "lower"
+    ],
+    "maximum": [
+      "maximum",
+      "highest",
+      "full"
+    ],
+    "mic": [
+      "mic",
+      "microphone"
+    ],
+    "minimum": [
+      "minimum",
+      "lowest"
+    ],
+    "multi_command": [
+      "multiple commands"
+    ],
+    "music": [
+      "music"
+    ],
+    "nhaccuatui": [
+      "nhaccuatui",
+      "nhac cua tui",
+      "nhaccuatui.com"
+    ],
+    "on_speaker": [
+      "on speaker",
+      "to speaker",
+      "at speaker"
+    ],
+    "playlist": [
+      "list",
+      "music list",
+      "playlist"
+    ],
+    "sing": [
+      "sing"
+    ],
+    "smaller": [
+      "smaller",
+      "quieter",
+      "quietest"
+    ],
+    "song": [
+      "song",
+      "track"
+    ],
+    "split_keywords": [
+      "and",
+      "then",
+      "after that"
+    ],
+    "temperature": [
+      "temperature",
+      "degrees",
+      "degree",
+      "celsius",
+      "°c",
+      "°C"
+    ],
+    "wakeup_reply": [
+      "wake response",
+      "reply",
+      "acknowledgement"
+    ],
+    "youtube": [
+      "youtube"
+    ],
+    "zing_mp3": [
+      "zing mp3",
+      "zingmp3",
+      "zing"
+    ],
+    "zingmp3_unwanted_words_when_searching": [
+      "play",
+      "song",
+      "open",
+      "turn on",
+      "sing",
+      "on"
+    ]
+  },
+  "inherit_fallback": false,
+  "locale": "en-US",
+  "name": "English (United States)",
+  "objects": {
+    "curtain": [
+      "curtain",
+      "blind",
+      "shade"
+    ],
+    "lunar_day": [
+      "lunar calendar",
+      "lunar date"
+    ],
+    "news": [
+      "news",
+      "headlines",
+      "news report"
+    ],
+    "play_music": [
+      "play music",
+      "play a song",
+      "song",
+      "music"
+    ],
+    "podcast": [
+      "podcast",
+      "story",
+      "tell a story"
+    ],
+    "radio": [
+      "radio",
+      "station"
+    ],
+    "solar_day": [
+      "calendar",
+      "Gregorian calendar",
+      "solar date",
+      "what day",
+      "what date",
+      "which day of the week"
+    ],
+    "calendar_event": [
+      "event", "what event", "which event", "upcoming event", "important date", "special day",
+      "how long until", "how many days until"
+    ],
+    "volume": [
+      "volume",
+      "sound level"
+    ],
+    "weather": [
+      "weather",
+      "forecast"
+    ],
+    "what_time": [
+      "what time",
+      "current time",
+      "time now"
+    ],
+    "window": [
+      "window",
+      "door"
+    ]
+  },
+  "responses": {
+    "api": {
+      "json_field_too_long": "A JSON field name is too long",
+      "json_list_too_long": "A JSON list exceeds the limit",
+      "json_string_too_long": "A JSON string exceeds the limit",
+      "json_too_deep": "JSON nesting is too deep",
+      "json_too_many_fields": "JSON contains too many fields",
+      "media_action_invalid": "Failed: action must be resume, pause, stop, previous, or next",
+      "proxy_dns_invalid": "The audio proxy URL or DNS is invalid",
+      "proxy_invalid": "The audio proxy URL is invalid",
+      "proxy_private": "The audio proxy cannot use a private or loopback address",
+      "proxy_unresolved": "The audio proxy address could not be resolved"
+    },
+    "api_media": {
+      "already_paused": "Media Player is already paused",
+      "cleared_invalid_pause": "Cleared an invalid paused state",
+      "pause_airplay": "Sent the pause command to AirPlay",
+      "pause_bluetooth": "Paused Bluetooth playback",
+      "pause_multiroom": "Paused Multiroom on the speaker group",
+      "pause_superseded": "Media Player was stopped or paused by an earlier request",
+      "resume_airplay": "Sent the resume command to AirPlay",
+      "resume_bluetooth": "Resumed Bluetooth playback",
+      "resume_multiroom": "Resumed Multiroom playback on the speaker group",
+      "stop_bluetooth": "Sent the stop command to Bluetooth",
+      "stop_multiroom": "Stopped the Multiroom session",
+      "track_airplay": "Sent {action} to AirPlay",
+      "track_bluetooth": "Sent {action} to Bluetooth"
+    },
+    "button": {
+      "current_date": "Today is {weekday}, {month}/{day}/{year}",
+      "current_volume": "The current volume is {volume} percent",
+      "ip_address": "VBot's IP address is {ip}",
+      "ip_unavailable": "The current IP address is unavailable",
+      "no_update": "VBot is up to date",
+      "update_available": "A new VBot update is available",
+      "update_check_failed": "VBot updates cannot be checked right now"
+    },
+    "calendar": {
+      "invalid_date": "The requested date is invalid. Please check it and try again.",
+      "labels": {
+        "hôm nay": "today",
+        "hôm qua": "yesterday",
+        "ngày kia": "the day after tomorrow",
+        "ngày kìa": "three days from today",
+        "ngày mai": "tomorrow",
+        "ngày được hỏi": "the requested date"
+      },
+      "leap": " leap",
+      "lunar_day": "day {day}",
+      "lunar_day_first": "day {day}",
+      "lunar_explicit": "The lunar date for {solar_date} is {lunar_day} of month {month}{leap}, year {year_name}.",
+      "lunar_relative": "The lunar date {label} is {lunar_day} of month {month}{leap}, year {year_name}.",
+      "solar_date": "{month}/{day}/{year}",
+      "solar_explicit": "{weekday}, {solar_date}.",
+      "solar_relative": "{label} is {weekday}, {solar_date}.",
+      "weekdays": {
+        "chủ nhật": "Sunday",
+        "thứ ba": "Tuesday",
+        "thứ bảy": "Saturday",
+        "thứ hai": "Monday",
+        "thứ năm": "Thursday",
+        "thứ sáu": "Friday",
+        "thứ tư": "Wednesday"
+      }
+    },
+    "calendar_events": {
+      "none": "There are no important dates in this period.",
+      "today": "Today is {event}.",
+      "upcoming": "{event} is in {days} days.",
+      "disabled": "Important-date events are currently disabled.",
+      "countdown_today": "Today is {event}.",
+      "countdown_one": "{event} is in one day.",
+      "countdown": "{event} is in {days} days.",
+      "upcoming_one": "{event} is in one day.",
+      "on_date": "{label} has these events: {events}.",
+      "upcoming_item": "{event} on {date}",
+      "upcoming_item_age": "{event} on {date}, age {age}",
+      "upcoming_item_year": "{event} on {date}, 1 year",
+      "upcoming_item_years": "{event} on {date}, {years} years",
+      "event_with_age": "{event}, age {age}",
+      "event_with_year": "{event}, 1 year",
+      "event_with_years": "{event}, {years} years",
+      "upcoming_list": "Upcoming events: {events}."
+    },
+    "device_status": {
+      "position_detail": ", at {position}%",
+      "state": "{name} is {state}{detail}",
+      "temperature_detail": ", with a current temperature of {temperature} degrees",
+      "unknown": "in an unknown state; please try again later",
+      "value": "{name} {state}{unit}"
+    },
+    "general": {
+      "no_response": "Sorry, no response was received for this request.",
+      "no_text": "No text response was returned.",
+      "request_replaced": "The request was replaced by a newer request."
+    },
+    "home_assistant": {
+      "already_set": "{name} is already {action}",
+      "control_error": "Home Assistant control error for {entity}: {error}",
+      "control_http_error": "Could not control {entity}. HTTP status: {status}",
+      "control_unavailable": "Could not control device: {entity}",
+      "cover_action_missing": "No valid cover action was found in the command.",
+      "device_not_found": "No matching Home Assistant device was found for {request}, or it did not meet the configured threshold.",
+      "disabled": "{request} failed because Home Assistant was not enabled when VBot started",
+      "failure": "Could not {action} {name}. Error: {error}",
+      "failure_with_value": "Could not {action} {name} {value}. Error: {error}",
+      "invalid_token": "The Home Assistant token is invalid or expired. Please check it.",
+      "mode_value": "mode {value}",
+      "state_unavailable": "The current state of {name} is unavailable.",
+      "success": "Successfully {action} {name}",
+      "success_with_value": "Successfully {action} {name} {value}",
+      "temperature_value": "{value} degrees",
+      "unreachable": "Home Assistant could not be reached. Please check its URL and server status."
+    },
+    "logs": {
+      "all_assistants_failed": "All virtual assistants did not respond or are unavailable.",
+      "assistant_call_failed": "Could not call assistant {name}: {error}",
+      "assistant_error": "[{context}] Assistant error: {error}",
+      "audio_stream_error": "[{context}] Could not stream audio {url}: {error}",
+      "backend_error": "[{context}] Error running {backend}: {error}",
+      "backend_invalid": "[{context}] Backend {backend} is invalid or has not been initialized",
+      "cache_write_error": "[{context}] Could not save the cache: {error}",
+      "client_send_error": "[{context}] Could not send data to the client: {error}",
+      "connection_error": "[{context}] Connection error: {error}",
+      "entity_state_error": "[{context}] Entity state error at {url}: {error}",
+      "error": "[{context}] Error: {error}",
+      "feature_disabled": "[{context}] The feature is not enabled",
+      "file_missing": "[{context}] File not found: {path}",
+      "handler_error": "[{context}] Processing error: {error}",
+      "http_error": "[{context}] HTTP error {status}: {error}",
+      "http_status_error": "[{context}] HTTP error {status}",
+      "invalid_json": "[{context}] The response is not valid JSON: {error}",
+      "invalid_response": "[{context}] Invalid response structure: {error}",
+      "media_search_error": "[{context}] Media Player search failed for {query}: {error}",
+      "module_disabled_error": "[{context}] Initialization failed and the feature was disabled: {error}",
+      "module_load_error": "[{context}] Could not load the custom module: {error}",
+      "network_devices_error": "Could not read the VBot device list: {error}",
+      "network_devices_invalid": "VBot_Devices_Network.json is invalid JSON",
+      "network_devices_missing": "VBot_Devices_Network.json was not found",
+      "scheduler_cleanup": "[Scheduler] Cleaned notification data after completing task: '{name}'",
+      "scheduler_invalid_json": "[Scheduler] The schedule file is invalid JSON: {error}",
+      "scheduler_manual_error": "[Scheduler MANUAL] Error running task manually ({name}): {error}",
+      "scheduler_once_disabled": "[Scheduler] Automatically disabled one-time task: '{name}'",
+      "scheduler_reminder_error": "[Scheduler] Could not create the reminder: {error}",
+      "scheduler_worker_abandoned": "[Scheduler Worker] Skipped notification after {retries} attempts: '{name}'",
+      "scheduler_worker_error": "[Scheduler Worker] Error running notification '{name}': {error}",
+      "server_start_error": "[{context}] Could not start the server: {error}",
+      "stt_transcription_timeout": "[STT GCloud] Timed out while transcribing the audio file",
+      "task_failed": "[{context}] Task '{name}' failed: {error}",
+      "task_stop_error": "[{context}] Could not stop task {name}: {error}",
+      "temp_delete_error": "[{context}] Could not delete the temporary file: {error}",
+      "timeout": "[{context}] Timed out waiting for the server response",
+      "token_refresh_error": "[{context}] Could not refresh the token: {error}",
+      "url_connection_error": "[{context}] Connection error at {url}: {error}",
+      "weather_stale_cache": "[Weather Cache] Open-Meteo failed ({error}); using data cached within the last 24 hours",
+      "worker_error": "[{context}] Background worker error: {error}"
+    },
+    "mcp": {
+      "available_playlists": " Available playlists: {names}.",
+      "default": "default",
+      "invalid_action": "Action {action} is invalid",
+      "led_brightness": "The speaker LED brightness is set to {brightness}%",
+      "local_media_not_found": "No local playlist media was found",
+      "media_next": "Skipped to the next track",
+      "media_not_found": "No media was found for: {query}",
+      "media_previous": "Returned to the previous track",
+      "playlist_invalid": "No valid data was found in playlist {name}",
+      "playlist_not_found": "Playlist not found: {name}.{detail}",
+      "processing_error": "An error occurred while processing your request: {error}",
+      "wifi_info": "The connected Wi-Fi network is '{ssid}', and the IP address is '{ip}'"
+    },
+    "media": {
+      "continued": "Resumed playback",
+      "control_disabled": "Media Player controls are not enabled",
+      "control_error": "Could not control Media Player: {error}",
+      "device_action_failure": "Could not {action} playback on {device}",
+      "device_action_success": "Successfully {action} playback on {device}",
+      "disabled": "Media Player was not enabled when VBot started",
+      "invalid_action": "Media Player action '{action}' is invalid",
+      "local_library_title": "the entire local music library",
+      "local_playlist_failed": "Could not play the local music folder",
+      "news_data_not_found": "No news data was found from {name}",
+      "news_disabled": "Media Player or News was not enabled when VBot started",
+      "news_not_found": "No matching news source was found",
+      "nothing_to_continue": "There is no paused media to resume",
+      "nothing_to_pause": "There is no playing media to pause",
+      "nothing_to_stop": "There is no playing media to stop",
+      "paused": "Paused playback",
+      "play_on_device_failed": "Could not start playback on {device}",
+      "playing_on_device": "Playing {title} on {device}",
+      "playlist_client_unsupported": "This client does not support playlists",
+      "playlist_invalid": "The playlist JSON data is invalid",
+      "playlist_title": "the playlist",
+      "podcast_disabled": "Media Player or Podcasts were not enabled when VBot started",
+      "radio_disabled": "Media Player or Radio was not enabled when VBot started",
+      "radio_not_found": "No matching radio station was found",
+      "stopped": "Stopped playback"
+    },
+    "microphone": {
+      "already_off": "The microphone is already off",
+      "already_on": "The microphone is already on",
+      "turned_off": "Turned off the microphone",
+      "turned_on": "Turned on the microphone"
+    },
+    "reminder": {
+      "created": "Created reminder: {name}",
+      "disabled": "Reminders were not enabled when VBot started",
+      "failed": "The requested reminder could not be scheduled",
+      "scheduled": "{message} at {time} on {date}"
+    },
+    "remote_control": {
+      "action_off": "off",
+      "action_on": "on",
+      "broadlink_success": "Successfully sent remote command '{command}'",
+      "conversation_failure": "Could not change conversation mode on {device}: {action}",
+      "conversation_success": "Successfully changed conversation mode on {device}: {action}",
+      "ir_success": "Successfully sent IR command '{command}'",
+      "mic_failure": "Could not change the microphone on {device}: {action}",
+      "mic_success": "Successfully changed the microphone on {device}: {action}",
+      "wakeup_reply_failure": "Could not change wake response mode on {device}: {action}",
+      "wakeup_reply_success": "Successfully changed wake response mode on {device}: {action}"
+    },
+    "scheduler": {
+      "action_error": "Error running VBot action '{action}': {error}",
+      "action_failed": "Could not run VBot action: {action}",
+      "action_invalid": "The VBot action is invalid",
+      "action_none": "No VBot action was performed",
+      "action_success": "Ran VBot action: {action}",
+      "brightness_parameter_invalid": "The LED brightness parameter must be a number from 0 to 100",
+      "local_music_error": "Could not play the scheduled local music list: {error}",
+      "local_music_started": "Started the scheduled local music list",
+      "media_stopped": "Stopped Media Player from Scheduler",
+      "mic_parameter_invalid": "mic_on_off parameter must be 'on' or 'off'",
+      "none_active": "No Scheduler task is currently playing",
+      "playlist_error": "Could not process the scheduled playlist: {error}",
+      "playlist_started": "Started scheduled playlist: {name}",
+      "reboot_error": "Could not reboot the system from Scheduler: {error}",
+      "rebooted": "Started a system reboot from Scheduler",
+      "restart_error": "Could not restart VBot from Scheduler: {error}",
+      "restarted": "Restarted VBot from Scheduler",
+      "stop_media_error": "Could not stop scheduled Media Player playback: {error}",
+      "stopped": "Stopped task: {name}",
+      "unsupported": "The task is invalid or unsupported",
+      "updates_checked": "Checked for VBot updates",
+      "volume_changed": "Changed volume to {volume}%",
+      "volume_parameter_invalid": "The volume parameter must be a number from 0 to 100"
+    },
+    "setup": {
+      "brightness_percent_missing": "Please specify the brightness percentage.",
+      "cover_percent_missing": "Please specify the percentage to open the cover.",
+      "fan_percent_missing": "Please specify the fan speed percentage.",
+      "temperature_missing": "Please specify the temperature to set.",
+      "volume_percent_missing": "Please specify the volume percentage."
+    },
+    "system": {
+      "cpu_temperature": "The current CPU temperature is {temperature} degrees Celsius",
+      "ip_address": "Your IP address is {ip}",
+      "rebooting_os": "Restarting the operating system",
+      "restarting_vbot": "Restarting VBot",
+      "uptime": "The device has been running for {days} days, {hours} hours, {minutes} minutes, and {seconds} seconds",
+      "web_interface_restarted": "The Web interface was restarted successfully",
+      "web_interface_started": "The Web interface was started successfully",
+      "web_interface_stopped": "The Web interface was stopped successfully",
+      "wifi_name": "The connected Wi-Fi network is {ssid}"
+    },
+    "time": {
+      "current": "It is {hour_12}:{minute} {period}"
+    },
+    "updates": {
+      "interface_available": "A new VBot Web interface update is available: {detail}",
+      "program_available": "A new VBot program update is available: {detail}"
+    },
+    "volume": {
+      "error": "Could not change the volume: {error}",
+      "not_understood": "I could not determine the requested volume level",
+      "set": "Volume is set to {volume}%"
+    },
+    "weather": {
+      "codes": {
+        "0": "clear sky",
+        "1": "mainly clear",
+        "2": "partly cloudy",
+        "3": "overcast",
+        "45": "foggy",
+        "48": "freezing fog",
+        "51": "light drizzle",
+        "53": "moderate drizzle",
+        "55": "dense drizzle",
+        "56": "light freezing drizzle",
+        "57": "dense freezing drizzle",
+        "61": "light rain",
+        "63": "moderate rain",
+        "65": "heavy rain",
+        "66": "light freezing rain",
+        "67": "heavy freezing rain",
+        "71": "light snow",
+        "73": "moderate snow",
+        "75": "heavy snow",
+        "77": "snow grains",
+        "80": "light rain showers",
+        "81": "moderate rain showers",
+        "82": "violent rain showers",
+        "85": "light snow showers",
+        "86": "heavy snow showers",
+        "95": "thunderstorms",
+        "96": "thunderstorms with light hail",
+        "99": "thunderstorms with heavy hail"
+      },
+      "connection_error": "Open-Meteo connection error: {error}",
+      "coordinate": "coordinates {latitude}, {longitude}",
+      "day_incomplete": "Weather data for {day_label} is incomplete.",
+      "day_unavailable": "Weather data is unavailable for {day_label}.",
+      "location_missing": "Config.json has no valid coordinates or address for weather information.",
+      "location_not_found": "The location was not found and Config.json has no valid default location.",
+      "processing_error": "Weather data processing error: {error}",
+      "summary": "Weather for {day_label} in {location_name}: {condition}. The low is {temperature_min} degrees Celsius, the high is {temperature_max} degrees Celsius, maximum humidity is {humidity_max} percent, and the maximum chance of rain is {precipitation_max} percent.",
+      "unknown_code": "weather code {code}"
+    }
+  },
+  "schema_version": 1,
+  "values": {
+    "calendar_events": {
+      "countdown_terms": ["how long", "how many days"],
+      "birthday_terms": ["birthday"],
+      "month_terms": ["this month"],
+      "day_number_prefixes": ["day"],
+      "month_number_prefixes": ["month"],
+      "year_number_prefixes": ["year"],
+      "date_order": "mdy",
+      "allow_bare_year": true,
+      "explicit_date_label": "{month}/{day}/{year}",
+      "week_queries": [
+        {"week_offset": 0, "label": "this week", "terms": ["this week"]},
+        {"week_offset": 1, "label": "next week", "terms": ["next week"]}
+      ],
+      "range_start_terms": ["between", "from"],
+      "range_end_terms": ["and", "to"],
+      "next_days_prefixes": ["in the next", "within the next"],
+      "next_days_suffixes": ["days", "day"],
+      "range_label": "from {start} to {end}",
+      "next_days_label": "in the next {days} days",
+      "month_names": [
+        {"month": 1, "terms": ["January"]},
+        {"month": 2, "terms": ["February"]},
+        {"month": 3, "terms": ["March"]},
+        {"month": 4, "terms": ["April"]},
+        {"month": 5, "terms": ["May"]},
+        {"month": 6, "terms": ["June"]},
+        {"month": 7, "terms": ["July"]},
+        {"month": 8, "terms": ["August"]},
+        {"month": 9, "terms": ["September"]},
+        {"month": 10, "terms": ["October"]},
+        {"month": 11, "terms": ["November"]},
+        {"month": 12, "terms": ["December"]}
+      ],
+      "upcoming_terms": ["upcoming", "nearest", "next event", "read events"],
+      "month_label": "this month",
+      "month_number_label": "month {month}, {year}",
+      "upcoming_label": "upcoming",
+      "date_format": "%m/%d/%Y"
+    },
+    "inactive_states": [
+      "off",
+      "closed",
+      "idle"
+    ],
+    "language_instruction": "English",
+    "multi_command_joiner": "and",
+    "reminder_time_terms": [
+      "tomorrow",
+      "the next day",
+      "today",
+      "the day after tomorrow",
+      "tonight",
+      "this morning"
+    ]
+  },
+  "weather": {
+    "administrative_prefixes": {
+      "all": [
+        "village",
+        "ward",
+        "town",
+        "district",
+        "county",
+        "borough",
+        "state",
+        "province",
+        "city"
+      ],
+      "district": [
+        "village",
+        "ward",
+        "town",
+        "district",
+        "county",
+        "borough"
+      ],
+      "province": [
+        "state",
+        "province",
+        "city"
+      ]
+    },
+    "country_code": "US",
+    "days": [
+      {
+        "label": "yesterday",
+        "offset": -1,
+        "phrases": [
+          "yesterday"
+        ]
+      },
+      {
+        "label": "today",
+        "offset": 0,
+        "phrases": [
+          "today"
+        ]
+      },
+      {
+        "label": "tomorrow",
+        "offset": 1,
+        "phrases": [
+          "tomorrow"
+        ]
+      },
+      {
+        "label": "the day after tomorrow",
+        "offset": 2,
+        "phrases": [
+          "the day after tomorrow"
+        ]
+      }
+    ],
+    "default_day": {
+      "label": "today",
+      "offset": 0
+    },
+    "geocoding_language": "en",
+    "intent": {
+      "condition_phrases": [
+        "how is it",
+        "rain",
+        "raining",
+        "hot",
+        "cold",
+        "freezing"
+      ],
+      "direct_phrases": [
+        "weather",
+        "forecast"
+      ],
+      "outdoor_phrases": [
+        "outside",
+        "outdoors"
+      ],
+      "rain_phrases": [
+        "rain",
+        "raining",
+        "will it rain"
+      ],
+      "temperature_contexts": [
+        "outside",
+        "in",
+        "at",
+        "today",
+        "tomorrow",
+        "the day after tomorrow",
+        "yesterday"
+      ],
+      "temperature_excludes": [
+        "cpu"
+      ],
+      "temperature_phrases": [
+        "temperature"
+      ],
+      "time_phrases": [
+        "today",
+        "tomorrow",
+        "the day after tomorrow",
+        "yesterday"
+      ]
+    },
+    "location_cleanup": {
+      "conjunctions": [
+        "and",
+        "then",
+        "after that"
+      ],
+      "polite_suffixes": [
+        "please",
+        "thanks",
+        "thank you"
+      ],
+      "prefixes": [
+        "in",
+        "at",
+        "for"
+      ],
+      "remove_phrases": [
+        "weather forecast",
+        "weather",
+        "forecast",
+        "temperature",
+        "yesterday",
+        "today",
+        "tomorrow",
+        "the day after tomorrow",
+        "right now",
+        "now",
+        "tell me",
+        "show me",
+        "please check",
+        "please",
+        "check",
+        "will it rain",
+        "is it raining",
+        "outside",
+        "outdoors",
+        "how is it",
+        "what is it like"
+      ]
+    },
+    "location_connector": "in"
+  }
+}

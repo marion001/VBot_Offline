@@ -298,7 +298,7 @@ include 'html_head.php';
     }
 
     #Chỉ sao chép các tệp cần thiết từ thư mục nguồn sang thư mục đích
-    //$files = ["Config.json", "Action.json", "Adverbs.json", "Object.json"];
+    //$files = ["Config.json", "resource/lang_keywords/vi-VN.json"];
     function copyFilesToDestination($sourceDir, $destinationDir, $files){
         global $messages;
         if (!is_dir($destinationDir)) {

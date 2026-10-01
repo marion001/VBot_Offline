@@ -1,0 +1,925 @@
+{
+  "actions": {
+    "adjust": [
+      "điều chỉnh"
+    ],
+    "auto": [
+      "tự động",
+      "auto"
+    ],
+    "bigger": [
+      "to hơn",
+      "lớn hơn"
+    ],
+    "change": [
+      "thay đổi"
+    ],
+    "check": [
+      "kiểm tra"
+    ],
+    "closed": [
+      "đóng"
+    ],
+    "connect": [
+      "nối"
+    ],
+    "continue": [
+      "tiếp tục"
+    ],
+    "cool": [
+      "làm mát",
+      "làm lạnh",
+      "làm nạnh"
+    ],
+    "decrase": [
+      "giảm"
+    ],
+    "disable": [
+      "vô hiệu"
+    ],
+    "disconnect": [
+      "ngắt"
+    ],
+    "display": [
+      "hiển thị"
+    ],
+    "down": [
+      "xuống"
+    ],
+    "download": [
+      "download"
+    ],
+    "dry": [
+      "làm khô",
+      "hút ẩm"
+    ],
+    "enable": [
+      "kích hoạt"
+    ],
+    "execute": [
+      "thực hiện"
+    ],
+    "fan_only": [
+      "chỉ quạt gió",
+      "chỉ quạt",
+      "quạt gió"
+    ],
+    "heat": [
+      "sưởi ấm",
+      "nóng"
+    ],
+    "idle": [
+      "không xác định"
+    ],
+    "incrase": [
+      "tăng"
+    ],
+    "listen": [
+      "nghe"
+    ],
+    "mode": [
+      "chế độ",
+      "chức năng"
+    ],
+    "notice": [
+      "cảnh cáo",
+      "cảnh báo"
+    ],
+    "off": [
+      "tắt"
+    ],
+    "on": [
+      "bật"
+    ],
+    "open": [
+      "mở"
+    ],
+    "pause": [
+      "tạm dừng",
+      "tạm ngừng"
+    ],
+    "play": [
+      "chơi"
+    ],
+    "read": [
+      "đọc"
+    ],
+    "reminder": [
+      "lời nhắc",
+      "nhắc tôi",
+      "thông báo",
+      "nhắc nhở"
+    ],
+    "schedule": [
+      "lập lịch",
+      "đặt lịch",
+      "lịch hẹn",
+      "hẹn giờ"
+    ],
+    "script": [
+      "thực thi",
+      "thi hành"
+    ],
+    "send": [
+      "gửi",
+      "chuyển"
+    ],
+    "setup": [
+      "thiết lập",
+      "cài đặt"
+    ],
+    "sing": [
+      "hát"
+    ],
+    "smaller": [
+      "bé đi",
+      "nhỏ đi"
+    ],
+    "stop": [
+      "dừng",
+      "stop",
+      "rừng",
+      "rừng lại",
+      "dừng lại",
+      "ngừng lại",
+      "dừng phát",
+      "ngừng phát",
+      "dừng nhạc",
+      "ngừng nhạc"
+    ],
+    "swing": [
+      "đảo gió",
+      "quay",
+      "xoay"
+    ],
+    "tell": [
+      "kể"
+    ],
+    "up": [
+      "lên"
+    ],
+    "upload": [
+      "upload"
+    ]
+  },
+  "adverbs": {
+    "action_command_together": [
+      "on",
+      "off",
+      "open",
+      "closed",
+      "enable",
+      "disable",
+      "script",
+      "check",
+      "setup"
+    ],
+    "air_conditioner": [
+      "điều hòa",
+      "máy lạnh"
+    ],
+    "automation": [
+      "tự động hóa"
+    ],
+    "bigger": [
+      "to hơn",
+      "lớn hơn",
+      "lớn nhất",
+      "to nhất"
+    ],
+    "conversation": [
+      "hội thoại",
+      "trò chuyện",
+      "liên tục"
+    ],
+    "decrease": [
+      "giảm"
+    ],
+    "fan": [
+      "quạt"
+    ],
+    "high": [
+      "cao"
+    ],
+    "increase": [
+      "tăng"
+    ],
+    "light": [
+      "ánh sáng",
+      "độ sáng"
+    ],
+    "local": [
+      "nội bộ",
+      "local"
+    ],
+    "lower": [
+      "thấp"
+    ],
+    "maximum": [
+      "tối đa",
+      "cao nhất",
+      "full"
+    ],
+    "mic": [
+      "mic",
+      "microphone",
+      "mích"
+    ],
+    "minimum": [
+      "tối thiểu",
+      "thấp nhất"
+    ],
+    "multi_command": [
+      "đa lệnh"
+    ],
+    "music": [
+      "nhạc"
+    ],
+    "nhaccuatui": [
+      "nhaccuatui",
+      "nhạc của tui",
+      "nhaccuatui.com"
+    ],
+    "on_speaker": [
+      "trên loa",
+      "tới loa",
+      "đến loa",
+      "ở loa"
+    ],
+    "playlist": [
+      "danh sách",
+      "danh sách nhạc",
+      "playlist"
+    ],
+    "sing": [
+      "hát"
+    ],
+    "smaller": [
+      "bé đi",
+      "nhỏ đi",
+      "nhỏ nhất"
+    ],
+    "song": [
+      "bài"
+    ],
+    "split_keywords": [
+      "và",
+      "rồi",
+      "sau đó"
+    ],
+    "temperature": [
+      "nhiệt độ",
+      "độ xê",
+      "độ",
+      "°c",
+      "°C"
+    ],
+    "wakeup_reply": [
+      "phản hồi",
+      "lời đáp"
+    ],
+    "youtube": [
+      "youtube",
+      "du tút"
+    ],
+    "zing_mp3": [
+      "zing mp3",
+      "zingmp3",
+      "zing"
+    ],
+    "zingmp3_unwanted_words_when_searching": [
+      "phát",
+      "bài",
+      "mở",
+      "bật",
+      "hát",
+      "ở",
+      "trên"
+    ]
+  },
+  "locale": "vi-VN",
+  "name": "Tiếng Việt",
+  "objects": {
+    "curtain": [
+      "rèm",
+      "dèm"
+    ],
+    "lunar_day": [
+      "lịch âm",
+      "âm lịch",
+      "mồng mấy",
+      "mùng mấy",
+      "lich am",
+      "am lich"
+    ],
+    "news": [
+      "tin tức",
+      "đọc báo",
+      "báo",
+      "thời sự"
+    ],
+    "play_music": [
+      "bài",
+      "phát"
+    ],
+    "podcast": [
+      "kể truyện",
+      "kể chuyện",
+      "câu chuyện",
+      "câu truyện",
+      "truyện",
+      "chuyện"
+    ],
+    "radio": [
+      "radio",
+      "đài"
+    ],
+    "solar_day": [
+      "lịch dương",
+      "dương lịch",
+      "thứ mấy",
+      "ngày gì",
+      "lich duong",
+      "duong lich",
+      "thu may",
+      "ngay gi"
+    ],
+    "calendar_event": [
+      "sự kiện", "sự kiện gì", "sự kiện nào", "sự kiện sắp tới", "ngày quan trọng", "ngày gì đặc biệt",
+      "còn bao lâu nữa đến", "còn bao nhiêu ngày đến", "su kien gi", "su kien nao",
+      "ngay quan trong", "ngay gi dac biet", "con bao lau nua den"
+    ],
+    "volume": [
+      "volume",
+      "âm lượng"
+    ],
+    "weather": [
+      "thời tiết"
+    ],
+    "what_time": [
+      "mấy giờ",
+      "mấy dờ",
+      "mấy rờ"
+    ],
+    "window": [
+      "cửa"
+    ]
+  },
+  "responses": {
+    "api": {
+      "json_field_too_long": "Tên trường JSON quá dài",
+      "json_list_too_long": "Danh sách JSON vượt quá giới hạn",
+      "json_string_too_long": "Chuỗi trong JSON vượt quá giới hạn",
+      "json_too_deep": "JSON lồng nhau quá sâu",
+      "json_too_many_fields": "JSON có quá nhiều trường",
+      "media_action_invalid": "Thất bại, action chỉ chấp nhận: resume, pause, stop, previous, next",
+      "proxy_dns_invalid": "URL hoặc DNS audio proxy không hợp lệ",
+      "proxy_invalid": "URL audio proxy không hợp lệ",
+      "proxy_private": "Audio proxy không cho phép địa chỉ nội bộ hoặc loopback",
+      "proxy_unresolved": "Không phân giải được địa chỉ audio proxy"
+    },
+    "api_media": {
+      "already_paused": "Media Player đã được tạm dừng từ trước đó",
+      "cleared_invalid_pause": "Đã xóa trạng thái tạm dừng không hợp lệ",
+      "pause_airplay": "Đã gửi lệnh tạm dừng tới AirPlay",
+      "pause_bluetooth": "Đã tạm dừng phát nhạc từ Bluetooth",
+      "pause_multiroom": "Đã tạm dừng Multiroom trên nhóm loa",
+      "pause_superseded": "Media Player đã dừng hoặc được tạm dừng bởi yêu cầu trước đó",
+      "resume_airplay": "Đã gửi lệnh tiếp tục phát tới AirPlay",
+      "resume_bluetooth": "Thực hiện Play, tiếp tục phát nhạc từ nguồn kết nối Bluetooth",
+      "resume_multiroom": "Tiếp tục phát Multiroom trên nhóm loa",
+      "stop_bluetooth": "Đã gửi lệnh Stop, dừng phát từ Bluetooth",
+      "stop_multiroom": "Đã dừng phiên Multiroom",
+      "track_airplay": "Đã gửi lệnh {action} tới AirPlay",
+      "track_bluetooth": "Đã gửi lệnh {action} tới Bluetooth"
+    },
+    "button": {
+      "current_date": "Hôm nay là {weekday}, ngày {day}, tháng {month}, năm {year}",
+      "current_volume": "Âm lượng hiện tại là {volume} phần trăm",
+      "ip_address": "Địa chỉ IP của VBot là {ip}",
+      "ip_unavailable": "Không thể xác định địa chỉ IP hiện tại",
+      "no_update": "VBot hiện không có bản cập nhật mới",
+      "update_available": "Có bản cập nhật VBot mới",
+      "update_check_failed": "Không thể kiểm tra cập nhật VBot lúc này"
+    },
+    "calendar": {
+      "invalid_date": "Ngày tháng bạn yêu cầu không hợp lệ, vui lòng kiểm tra và thử lại.",
+      "labels": {
+        "hôm nay": "hôm nay",
+        "hôm qua": "hôm qua",
+        "ngày kia": "ngày kia",
+        "ngày kìa": "ngày kìa",
+        "ngày mai": "ngày mai",
+        "ngày được hỏi": "ngày được hỏi"
+      },
+      "leap": " nhuận",
+      "lunar_day": "ngày {day}",
+      "lunar_day_first": "mùng {day}",
+      "lunar_explicit": "Âm lịch {solar_date} là {lunar_day} tháng {month}{leap} năm {year_name}.",
+      "lunar_relative": "Âm lịch {label} là {lunar_day} tháng {month}{leap} năm {year_name}.",
+      "solar_date": "ngày {day} tháng {month} năm {year}",
+      "solar_explicit": "{weekday}, {solar_date}.",
+      "solar_relative": "{label} là {weekday}, {solar_date}.",
+      "weekdays": {
+        "chủ nhật": "chủ nhật",
+        "thứ ba": "thứ ba",
+        "thứ bảy": "thứ bảy",
+        "thứ hai": "thứ hai",
+        "thứ năm": "thứ năm",
+        "thứ sáu": "thứ sáu",
+        "thứ tư": "thứ tư"
+      }
+    },
+    "calendar_events": {
+      "none": "Không có ngày quan trọng nào trong khoảng thời gian này.",
+      "today": "Hôm nay là {event}.",
+      "upcoming": "Còn {days} ngày nữa đến {event}.",
+      "disabled": "Lịch ngày quan trọng hiện đang tắt.",
+      "countdown_today": "Hôm nay là {event}.",
+      "countdown_one": "Còn một ngày nữa đến {event}.",
+      "countdown": "Còn {days} ngày nữa đến {event}.",
+      "upcoming_one": "Còn một ngày nữa đến {event}.",
+      "on_date": "{label} có sự kiện: {events}.",
+      "upcoming_item": "{event} vào ngày {date}",
+      "upcoming_item_age": "{event} vào ngày {date}, {age} tuổi",
+      "upcoming_item_year": "{event} vào ngày {date}, 1 năm",
+      "upcoming_item_years": "{event} vào ngày {date}, {years} năm",
+      "event_with_age": "{event}, {age} tuổi",
+      "event_with_year": "{event}, 1 năm",
+      "event_with_years": "{event}, {years} năm",
+      "upcoming_list": "Các sự kiện sắp tới: {events}."
+    },
+    "device_status": {
+      "position_detail": ", ở vị trí: {position}%",
+      "state": "{name} đang {state}{detail}",
+      "temperature_detail": ", với nhiệt độ đang là {temperature} độ",
+      "unknown": "không xác định được trạng thái cụ thể, vui lòng thử lại sau",
+      "value": "{name} {state}{unit}"
+    },
+    "general": {
+      "no_response": "Xin lỗi, tôi chưa nhận được dữ liệu phản hồi cho yêu cầu này.",
+      "no_text": "Không có dữ liệu văn bản trả về.",
+      "request_replaced": "Yêu cầu đã được thay thế bởi yêu cầu mới hơn."
+    },
+    "home_assistant": {
+      "already_set": "{name} đã {action} sẵn",
+      "control_error": "Lỗi điều khiển Home Assistant {entity}: {error}",
+      "control_http_error": "Không thể điều khiển {entity}, Mã lỗi: {status}",
+      "control_unavailable": "Không thể điều khiển thiết bị: {entity}",
+      "cover_action_missing": "Không tìm thấy hành động trong câu lệnh để thao tác với rèm",
+      "device_not_found": "Không tìm thấy thiết bị trong Home Assistant phù hợp với: {request}, hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập",
+      "disabled": "{request} thất bại, Home Assistant không được kích hoạt khi khởi chạy chương trình",
+      "failure": "{action} {name} thất bại, Mã lỗi: {error}",
+      "failure_with_value": "{action} {name} {value} thất bại, Mã lỗi: {error}",
+      "invalid_token": "Mã token Home Assistant không hợp lệ hoặc đã hết hạn, vui lòng kiểm tra lại.",
+      "mode_value": "chế độ {value}",
+      "state_unavailable": "Không thể lấy trạng thái hiện tại của {name}",
+      "success": "Đã {action} {name} thành công",
+      "success_with_value": "Đã {action} {name} {value} thành công",
+      "temperature_value": "{value} độ",
+      "unreachable": "Lỗi, các địa chỉ Home Assistant đều không thể kết nối. Hãy kiểm tra lại URL hoặc máy chủ Home Assistant không hoạt động."
+    },
+    "logs": {
+      "all_assistants_failed": "Tất cả các trợ lý ảo đều không phản hồi hoặc không hoạt động.",
+      "assistant_call_failed": "Lỗi gọi trợ lý ảo {name}: {error}",
+      "assistant_error": "[{context}] Lỗi trợ lý: {error}",
+      "audio_stream_error": "[{context}] Lỗi stream audio {url}: {error}",
+      "backend_error": "[{context}] Lỗi khi thực thi {backend}: {error}",
+      "backend_invalid": "[{context}] Backend {backend} không hợp lệ hoặc chưa được khởi tạo",
+      "cache_write_error": "[{context}] Không thể lưu cache: {error}",
+      "client_send_error": "[{context}] Lỗi gửi tới client: {error}",
+      "connection_error": "[{context}] Lỗi kết nối: {error}",
+      "entity_state_error": "[{context}] Lỗi trạng thái thực thể tại {url}: {error}",
+      "error": "[{context}] Lỗi: {error}",
+      "feature_disabled": "[{context}] Chức năng chưa được kích hoạt",
+      "file_missing": "[{context}] File không tồn tại: {path}",
+      "handler_error": "[{context}] Lỗi xử lý: {error}",
+      "http_error": "[{context}] Lỗi HTTP {status}: {error}",
+      "http_status_error": "[{context}] Lỗi HTTP {status}",
+      "invalid_json": "[{context}] Phản hồi không phải là JSON hợp lệ: {error}",
+      "invalid_response": "[{context}] Cấu trúc phản hồi không hợp lệ: {error}",
+      "media_search_error": "[{context}] Media Player lỗi khi tìm kiếm {query}: {error}",
+      "module_disabled_error": "[{context}] Khởi tạo thất bại, chức năng đã bị vô hiệu hóa: {error}",
+      "module_load_error": "[{context}] Không thể nạp module tùy chỉnh: {error}",
+      "network_devices_error": "Lỗi đọc danh sách thiết bị VBot: {error}",
+      "network_devices_invalid": "File JSON không đúng định dạng: VBot_Devices_Network.json",
+      "network_devices_missing": "Không tìm thấy file VBot_Devices_Network.json chứa thông tin thiết bị trong cùng lớp mạng",
+      "scheduler_cleanup": "[Scheduler] Đã dọn dẹp dữ liệu thông báo sau khi thực thi xong tác vụ: '{name}'",
+      "scheduler_invalid_json": "[Scheduler] File lịch không đúng định dạng JSON: {error}",
+      "scheduler_manual_error": "[Scheduler MANUAL] Lỗi khi chạy thủ công ({name}): {error}",
+      "scheduler_once_disabled": "[Scheduler] Đã tự tắt tác vụ chạy một lần: '{name}'",
+      "scheduler_reminder_error": "[Scheduler] Đã xảy ra lỗi khi lập lời nhắc: {error}",
+      "scheduler_worker_abandoned": "[Scheduler Worker] Bỏ qua notification sau {retries} lần thử: '{name}'",
+      "scheduler_worker_error": "[Scheduler Worker] Lỗi khi chạy notification '{name}': {error}",
+      "server_start_error": "[{context}] Không thể chạy server: {error}",
+      "stt_transcription_timeout": "[STT GCloud] Hết thời gian chờ khi chuyển file audio sang văn bản",
+      "task_failed": "[{context}] Tác vụ '{name}' thất bại: {error}",
+      "task_stop_error": "[{context}] Lỗi khi dừng task {name}: {error}",
+      "temp_delete_error": "[{context}] Không xóa được file tạm: {error}",
+      "timeout": "[{context}] Hết thời gian chờ phản hồi từ máy chủ",
+      "token_refresh_error": "[{context}] Lỗi làm mới token: {error}",
+      "url_connection_error": "[{context}] Lỗi kết nối {url}: {error}",
+      "weather_stale_cache": "[Weather Cache] Open-Meteo lỗi ({error}); dùng dữ liệu gần nhất trong 24 giờ",
+      "worker_error": "[{context}] Lỗi luồng nền: {error}"
+    },
+    "mcp": {
+      "available_playlists": " Các PlayList hiện có: {names}.",
+      "default": "mặc định",
+      "invalid_action": "Hành động {action} không hợp lệ",
+      "led_brightness": "Độ sáng đèn LED trên loa đã được đặt thành {brightness}%",
+      "local_media_not_found": "Không tìm thấy dữ liệu bạn yêu cầu phát danh sách nhạc",
+      "media_next": "Đã chuyển sang bài tiếp theo",
+      "media_not_found": "Không tìm thấy dữ liệu bạn yêu cầu là: {query}",
+      "media_previous": "Đã quay lại bài trước",
+      "playlist_invalid": "Không tìm thấy dữ liệu hợp lệ trong PlayList {name}",
+      "playlist_not_found": "Không tìm thấy PlayList: {name}.{detail}",
+      "processing_error": "Lỗi xảy ra khi xử lý yêu cầu của bạn: {error}",
+      "wifi_info": "Tên mạng Wifi đang kết nối là: '{ssid}', địa chỉ IP là: '{ip}'"
+    },
+    "media": {
+      "continued": "Đã tiếp tục phát nhạc",
+      "control_disabled": "Media Player không được kích hoạt để thực hiện thao tác điều khiển",
+      "control_error": "Không thể điều khiển Media Player: {error}",
+      "device_action_failure": "Có lỗi xảy ra khi {action} phát trên thiết bị: {device}",
+      "device_action_success": "Đã {action} phát trên thiết bị: {device}",
+      "disabled": "Media Player không được kích hoạt khi chương trình khởi chạy",
+      "invalid_action": "Hành động Media Player '{action}' không hợp lệ",
+      "local_library_title": "toàn bộ bài nhạc nội bộ",
+      "local_playlist_failed": "Có lỗi xảy ra khi phát toàn bộ nhạc có trong thư mục nội bộ, Local",
+      "news_data_not_found": "Không tìm thấy dữ liệu Báo, Tin Tức từ: {name}",
+      "news_disabled": "Media Player hoặc Báo, Tin Tức không được kích hoạt khi chương trình khởi chạy",
+      "news_not_found": "Không tìm thấy trang báo, tin tức với từ khóa của bạn",
+      "nothing_to_continue": "Không có nhạc đang tạm dừng phát để tiếp tục",
+      "nothing_to_pause": "Không có nhạc đang phát để tạm dừng",
+      "nothing_to_stop": "Nhạc KHÔNG được phát để dừng lại",
+      "paused": "Đã tạm dừng phát nhạc",
+      "play_on_device_failed": "Có lỗi xảy ra khi yêu cầu phát trên thiết bị: {device}",
+      "playing_on_device": "Đang tiến hành phát {title} trên thiết bị: {device}",
+      "playlist_client_unsupported": "Client chưa hỗ trợ phát PlayList, không phát danh sách nhạc trên Server",
+      "playlist_invalid": "Có Lỗi Xảy Ra, Dữ Liệu Tệp Json PlayList Không Hợp Lệ",
+      "playlist_title": "danh sách nhạc",
+      "podcast_disabled": "Media Player hoặc Truyện/PodCast không được kích hoạt khi chương trình khởi chạy",
+      "radio_disabled": "Media Player hoặc Đài Radio không được kích hoạt khi chương trình khởi chạy",
+      "radio_not_found": "Không tìm thấy đài phát thanh với từ khóa của bạn",
+      "stopped": "Đã dừng phát nhạc"
+    },
+    "microphone": {
+      "already_off": "Mic đã tắt sẵn",
+      "already_on": "Mic đã bật sẵn",
+      "turned_off": "Đã tắt Mic",
+      "turned_on": "Đã bật Mic"
+    },
+    "reminder": {
+      "created": "Đã lập thông báo: {name}",
+      "disabled": "Lời nhắc, thông báo không được kích hoạt khi chương trình khởi chạy",
+      "failed": "Lỗi Xảy ra khi tiến hành lên lịch, lời nhắc theo yêu cầu của bạn",
+      "scheduled": "{message} thời gian vào lúc: {time} ngày: {date}"
+    },
+    "remote_control": {
+      "action_off": "tắt",
+      "action_on": "bật",
+      "broadlink_success": "Đã gửi lệnh Remote '{command}' thành công",
+      "conversation_failure": "Có lỗi xảy ra khi {action} chế độ hội thoại trên thiết bị: {device}",
+      "conversation_success": "Đã {action} chế độ hội thoại trên thiết bị: {device}",
+      "ir_success": "Đã phát lệnh IR '{command}' thành công",
+      "mic_failure": "Có lỗi xảy ra khi {action} Mic trên thiết bị {device}",
+      "mic_success": "Đã {action} Mic trên thiết bị: {device}",
+      "wakeup_reply_failure": "Có lỗi xảy ra khi {action} chế độ câu phản hồi trên thiết bị {device}",
+      "wakeup_reply_success": "Đã {action} chế độ câu phản hồi trên thiết bị: {device}"
+    },
+    "scheduler": {
+      "action_error": "Lỗi thực hiện thao tác VBot '{action}': {error}",
+      "action_failed": "Không thể thực hiện thao tác VBot: {action}",
+      "action_invalid": "Thao tác VBot không hợp lệ",
+      "action_none": "Không thực hiện thao tác VBot",
+      "action_success": "Đã thực hiện thao tác VBot: {action}",
+      "brightness_parameter_invalid": "Dữ liệu parameter của brightness độ sáng đèn phải là số từ 0 đến 100",
+      "local_music_error": "Lỗi xử lý phát danh sách nhạc nội bộ Local từ Scheduler: {error}",
+      "local_music_started": "Tiến hành phát nhạc từ danh sách nội bộ Local từ Scheduler",
+      "media_stopped": "Đã dừng phát Media Player từ Scheduler",
+      "mic_parameter_invalid": "parameter của mic_on_off phải là 'on' hoặc 'off'",
+      "none_active": "Không có tác vụ Scheduler nào đang phát",
+      "playlist_error": "Lỗi xử lý dữ liệu phát danh sách nhạc từ Scheduler: {error}",
+      "playlist_started": "Tiến hành phát PlayList từ Scheduler: {name}",
+      "reboot_error": "Lỗi khi thực hiện Reboot hệ thống SYSTEM từ Scheduler: {error}",
+      "rebooted": "Đã tiến hành Reboot hệ thống SYSTEM từ Scheduler",
+      "restart_error": "Lỗi khi thực hiện Restart VBot từ Scheduler: {error}",
+      "restarted": "Đã thực hiện Restart VBot từ Scheduler",
+      "stop_media_error": "Lỗi dừng phát Media Player từ Scheduler: {error}",
+      "stopped": "Đã dừng tác vụ: {name}",
+      "unsupported": "Tác vụ không đúng hoặc không được hỗ trợ",
+      "updates_checked": "Đã kiểm tra cập nhật VBot",
+      "volume_changed": "Thay đổi âm lượng thành: {volume}%",
+      "volume_parameter_invalid": "Dữ liệu parameter của volume phải là số từ 0 - 100"
+    },
+    "setup": {
+      "brightness_percent_missing": "Không thể xác định phần trăm độ sáng, bạn hãy thử nói rõ số phần trăm",
+      "cover_percent_missing": "Không thể xác định phần trăm mở rèm, bạn hãy thử nói rõ số phần trăm",
+      "fan_percent_missing": "Không thể xác định phần trăm tốc độ quạt, bạn hãy thử nói rõ số phần trăm",
+      "temperature_missing": "Không thể xác định nhiệt độ, bạn hãy thử nói rõ số độ cần thiết lập.",
+      "volume_percent_missing": "Không thể xác định mức âm lượng, bạn hãy thử nói rõ số phần trăm."
+    },
+    "system": {
+      "cpu_temperature": "Nhiệt độ CPU hiện tại đang là: {temperature} độ C",
+      "ip_address": "Địa chỉ ip của bạn là: {ip}",
+      "rebooting_os": "Đang tiến hành khởi động lại hệ điều hành",
+      "restarting_vbot": "Đang tiến hành khởi động lại chương trình VBot",
+      "uptime": "Thiết bị đã khởi động được: {days} ngày, {hours} giờ, {minutes} phút, {seconds} giây",
+      "web_interface_restarted": "Đã khởi động lại giao diện Web thành công",
+      "web_interface_started": "Đã chạy giao diện Web thành công",
+      "web_interface_stopped": "Đã dừng giao diện Web thành công",
+      "wifi_name": "Tên mạng Wi-Fi đang kết nối là: {ssid}"
+    },
+    "time": {
+      "current": "Bây giờ là: {hour_24} giờ, {minute} phút"
+    },
+    "updates": {
+      "interface_available": "Có bản cập nhật giao diện VBot mới: {detail}",
+      "program_available": "Có bản cập nhật chương trình VBot mới: {detail}"
+    },
+    "volume": {
+      "error": "Lỗi thay đổi âm lượng: {error}",
+      "not_understood": "Không xác định được mức âm lượng cần thay đổi",
+      "set": "Âm lượng được đặt thành: {volume}%"
+    },
+    "weather": {
+      "codes": {
+        "0": "trời quang",
+        "1": "trời chủ yếu quang",
+        "2": "trời có mây rải rác",
+        "3": "trời nhiều mây",
+        "45": "có sương mù",
+        "48": "có sương mù đóng băng",
+        "51": "mưa phùn nhẹ",
+        "53": "mưa phùn vừa",
+        "55": "mưa phùn dày",
+        "56": "mưa phùn đóng băng nhẹ",
+        "57": "mưa phùn đóng băng dày",
+        "61": "mưa nhỏ",
+        "63": "mưa vừa",
+        "65": "mưa to",
+        "66": "mưa đóng băng nhẹ",
+        "67": "mưa đóng băng nặng",
+        "71": "tuyết rơi nhẹ",
+        "73": "tuyết rơi vừa",
+        "75": "tuyết rơi dày",
+        "77": "có hạt tuyết",
+        "80": "mưa rào nhẹ",
+        "81": "mưa rào vừa",
+        "82": "mưa rào rất mạnh",
+        "85": "mưa tuyết nhẹ",
+        "86": "mưa tuyết nặng",
+        "95": "có giông",
+        "96": "có giông kèm mưa đá nhẹ",
+        "99": "có giông kèm mưa đá nặng"
+      },
+      "connection_error": "Lỗi kết nối Open-Meteo: {error}",
+      "coordinate": "tọa độ {latitude}, {longitude}",
+      "day_incomplete": "Dữ liệu thời tiết cho {day_label} không đầy đủ.",
+      "day_unavailable": "Không có dữ liệu thời tiết cho {day_label}.",
+      "location_missing": "Config.json không có tọa độ hoặc địa chỉ hợp lệ để lấy thời tiết.",
+      "location_not_found": "Không tìm thấy địa danh và Config.json không có vị trí mặc định hợp lệ.",
+      "processing_error": "Lỗi xử lý dữ liệu thời tiết: {error}",
+      "summary": "Thời tiết {day_label} ở {location_name}: {condition}. Nhiệt độ thấp nhất {temperature_min} độ C, cao nhất {temperature_max} độ C, độ ẩm cao nhất {humidity_max} phần trăm, xác suất mưa cao nhất {precipitation_max} phần trăm.",
+      "unknown_code": "mã thời tiết {code}"
+    }
+  },
+  "schema_version": 1,
+  "values": {
+    "calendar_events": {
+      "countdown_terms": ["còn bao lâu", "bao nhiêu ngày", "còn mấy ngày"],
+      "birthday_terms": ["sinh nhật", "sinh nhat"],
+      "month_terms": ["tháng này"],
+      "day_number_prefixes": ["ngày", "ngay"],
+      "month_number_prefixes": ["tháng", "thang"],
+      "year_number_prefixes": ["năm", "nam"],
+      "date_order": "dmy",
+      "allow_bare_year": false,
+      "explicit_date_label": "ngày {day} tháng {month} năm {year}",
+      "week_queries": [
+        {"week_offset": 0, "label": "tuần này", "terms": ["tuần này", "tuan nay"]},
+        {"week_offset": 1, "label": "tuần sau", "terms": ["tuần sau", "tuan sau"]}
+      ],
+      "range_start_terms": ["từ", "tu"],
+      "range_end_terms": ["đến", "den", "tới", "toi"],
+      "next_days_prefixes": ["trong"],
+      "next_days_suffixes": ["ngày tới", "ngày tiếp theo", "ngay toi", "ngay tiep theo"],
+      "range_label": "từ {start} đến {end}",
+      "next_days_label": "trong {days} ngày tới",
+      "month_names": [
+        {"month": 1, "terms": ["tháng một", "tháng nhất", "thang mot", "thang nhat"]},
+        {"month": 2, "terms": ["tháng hai", "thang hai"]},
+        {"month": 3, "terms": ["tháng ba", "thang ba"]},
+        {"month": 4, "terms": ["tháng tư", "thang tu"]},
+        {"month": 5, "terms": ["tháng năm", "thang nam"]},
+        {"month": 6, "terms": ["tháng sáu", "thang sau"]},
+        {"month": 7, "terms": ["tháng bảy", "thang bay"]},
+        {"month": 8, "terms": ["tháng tám", "thang tam"]},
+        {"month": 9, "terms": ["tháng chín", "thang chin"]},
+        {"month": 10, "terms": ["tháng mười", "thang muoi"]},
+        {"month": 11, "terms": ["tháng mười một", "thang muoi mot"]},
+        {"month": 12, "terms": ["tháng mười hai", "thang muoi hai"]}
+      ],
+      "upcoming_terms": ["sắp tới", "gần nhất", "đọc các sự kiện"],
+      "month_label": "tháng này",
+      "month_number_label": "tháng {month} năm {year}",
+      "upcoming_label": "sắp tới",
+      "date_format": "%d/%m/%Y"
+    },
+    "inactive_states": [
+      "off",
+      "closed",
+      "idle"
+    ],
+    "language_instruction": "tiếng Việt",
+    "multi_command_joiner": "và",
+    "reminder_time_terms": [
+      "mai",
+      "hôm sau",
+      "hôm nay",
+      "ngày mai",
+      "ngày kia",
+      "tối nay",
+      "sáng nay",
+      "đêm nay"
+    ]
+  },
+  "weather": {
+    "administrative_prefixes": {
+      "all": [
+        "xã",
+        "phường",
+        "thị trấn",
+        "huyện",
+        "quận",
+        "thị xã",
+        "tỉnh",
+        "thành phố"
+      ],
+      "district": [
+        "xã",
+        "phường",
+        "thị trấn",
+        "huyện",
+        "quận",
+        "thị xã"
+      ],
+      "province": [
+        "tỉnh",
+        "thành phố"
+      ]
+    },
+    "country_code": "VN",
+    "days": [
+      {
+        "label": "hôm qua",
+        "offset": -1,
+        "phrases": [
+          "ngày hôm qua",
+          "hôm qua"
+        ]
+      },
+      {
+        "label": "hôm nay",
+        "offset": 0,
+        "phrases": [
+          "ngày hôm nay",
+          "hôm nay"
+        ]
+      },
+      {
+        "label": "ngày mai",
+        "offset": 1,
+        "phrases": [
+          "ngày mai"
+        ],
+        "standalone_phrases": [
+          "mai"
+        ]
+      },
+      {
+        "label": "ngày kia",
+        "offset": 2,
+        "phrases": [
+          "ngày kia"
+        ]
+      },
+      {
+        "label": "ngày kìa",
+        "offset": 3,
+        "phrases": [
+          "ngày kìa"
+        ]
+      }
+    ],
+    "default_day": {
+      "label": "hôm nay",
+      "offset": 0
+    },
+    "geocoding_language": "vi",
+    "intent": {
+      "condition_phrases": [
+        "thế nào",
+        "có mưa",
+        "nóng",
+        "lạnh",
+        "rét"
+      ],
+      "direct_phrases": [
+        "thời tiết",
+        "thời tiếc",
+        "dự báo"
+      ],
+      "outdoor_phrases": [
+        "ngoài trời"
+      ],
+      "rain_phrases": [
+        "mưa",
+        "có mưa"
+      ],
+      "temperature_contexts": [
+        "ngoài trời",
+        "ở",
+        "tại",
+        "hôm nay",
+        "ngày mai",
+        "ngày kia",
+        "hôm qua"
+      ],
+      "temperature_excludes": [
+        "cpu"
+      ],
+      "temperature_phrases": [
+        "nhiệt độ"
+      ],
+      "time_phrases": [
+        "hôm nay",
+        "ngày mai",
+        "ngày kia",
+        "hôm qua"
+      ]
+    },
+    "location_cleanup": {
+      "conjunctions": [
+        "và",
+        "rồi",
+        "sau đó"
+      ],
+      "polite_suffixes": [
+        "vậy",
+        "ạ",
+        "nhỉ",
+        "hả",
+        "thế"
+      ],
+      "prefixes": [
+        "ở",
+        "tại"
+      ],
+      "remove_phrases": [
+        "dự báo thời tiết",
+        "dự báo thời tiếc",
+        "thời tiết",
+        "thời tiếc",
+        "dự báo",
+        "nhiệt độ",
+        "thoi tiet",
+        "thoi tiec",
+        "du bao",
+        "nhiet do",
+        "ngày hôm qua",
+        "hôm qua",
+        "ngày hôm nay",
+        "hôm nay",
+        "ngày mai",
+        "ngày kia",
+        "ngay hom qua",
+        "hom qua",
+        "ngay hom nay",
+        "hom nay",
+        "ngay mai",
+        "ngay kia",
+        "hiện tại",
+        "bây giờ",
+        "cho tôi biết",
+        "cho tôi xem",
+        "xem giúp tôi",
+        "kiểm tra giúp tôi",
+        "xem",
+        "giúp tôi",
+        "có mưa không",
+        "có mưa",
+        "ngoài trời",
+        "như thế nào vậy",
+        "như thế nào",
+        "như nào vậy",
+        "như nào",
+        "thế nào vậy",
+        "thế nào",
+        "ra sao vậy",
+        "ra sao"
+      ]
+    },
+    "location_connector": "tại"
+  }
+}

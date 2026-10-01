@@ -1,5 +1,9 @@
 {
     "launch_source": "VBot_Assistant",
+    "language": {
+        "primary": "vi-VN",
+        "fallback": "vi-VN"
+    },
     "contact_info": {
         "full_name": "Loa VBot 😀",
         "email": "",
@@ -1183,6 +1187,9 @@
         "assistant_pcm_frame_delay_ms": 5
     },
     "calendar": {
-        "source": "system"
+        "source": "system",
+        "events": {
+            "active": false
+        }
     }
 }

@@ -1,0 +1,856 @@
+{
+    "schema_version": 1,
+    "description": "Các ngày quan trọng của VBot. year=null dùng cho sự kiện lặp hằng năm.",
+    "events": [
+        {
+            "id": "new_year",
+            "name": "Tết Dương lịch",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 1,
+            "event_day": 1,
+            "months": [
+                1
+            ],
+            "days": [
+                1
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "ngày lễ"
+            ],
+            "description": "Ngày đầu năm dương lịch",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    1,
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là tết dương lịch"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "lunar_new_year",
+            "name": "Tết Nguyên Đán Âm Lịch",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 1,
+            "event_day": 1,
+            "months": [
+                1
+            ],
+            "days": [
+                1
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Tết âm lịch"
+            ],
+            "description": "Ngày mùng một Tết âm lịch",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    7,
+                    3,
+                    1,
+                    0
+                ],
+                "repeat": 1,
+                "message": "Chúc mừng năm mới, Hôm nay là ngày mùng một Tết âm lịch"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "gi-t-h-ng-v-ng",
+            "name": "Giỗ Tổ Hùng Vương",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 3,
+            "event_day": 10,
+            "months": [
+                3
+            ],
+            "days": [
+                10
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Giỗ Tổ Hùng Vương",
+                "Giỗ Vua Hùng"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là giỗ tổ Hùng Vương"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-gi-i-ph-ng-mi-n-nam",
+            "name": "Ngày Giải phóng miền Nam",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": 1975,
+            "event_month": 4,
+            "event_day": 30,
+            "months": [
+                4
+            ],
+            "days": [
+                30
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Giải phóng Miền Nam",
+                "ngày 30 tháng 4"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là ngày Giải phóng Miền Nam, thống nhất đất nước, xe tăng quân Giải phóng tiến vào húc đổ cổng Dinh Độc Lập"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-qu-c-t-lao-d-ng",
+            "name": "Ngày Quốc tế Lao động",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 5,
+            "event_day": 1,
+            "months": [
+                5
+            ],
+            "days": [
+                1
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày Quốc tế Lao động",
+                "ngày 1 tháng 5"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày Quốc tế Lao động"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-qu-c-kh-nh",
+            "name": "Ngày Quốc Khánh",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 9,
+            "event_day": 2,
+            "months": [
+                9
+            ],
+            "days": [
+                2
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày Quốc Khánh",
+                "ngày 2 táng 9"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm này là ngày Quốc Khánh"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-th-nh-l-p-d-ng-c-ng-s-n-vi-t-nam",
+            "name": "Ngày thành lập Đảng Cộng sản Việt Nam",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": 1930,
+            "event_month": 2,
+            "event_day": 3,
+            "months": [
+                2
+            ],
+            "days": [
+                3
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày thành lập Đảng Cộng sản Việt Nam"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Ngày thành lập Đảng Cộng sản Việt Nam."
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-qu-c-t-ph-n",
+            "name": "Ngày Quốc tế Phụ nữ",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 3,
+            "event_day": 8,
+            "months": [
+                3
+            ],
+            "days": [
+                8
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Quốc tế Phụ nữ"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày Quốc tế Phụ nữ"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-sinh-ch-t-ch-h-ch-minh",
+            "name": "Ngày sinh Chủ tịch Hồ Chí Minh",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 5,
+            "event_day": 19,
+            "months": [
+                5
+            ],
+            "days": [
+                19
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày sinh Chủ tịch Hồ Chí Minh"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Ngày sinh Chủ tịch Hồ Chí Minh"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-th-nh-l-p-do-n-tncs-h-ch-minh",
+            "name": "Ngày thành lập Đoàn TNCS Hồ Chí Minh",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 3,
+            "event_day": 26,
+            "months": [
+                3
+            ],
+            "days": [
+                26
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày thành lập Đoàn TNCS Hồ Chí Minh",
+                "Ngày thành lập Đoàn thanh niên cộng sản Hồ Chí"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày thành lập Đoàn thanh niên cộng sản Hồ Chí Minh"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-qu-c-t-thi-u-nhi",
+            "name": "Ngày Quốc tế Thiếu nhi",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 6,
+            "event_day": 1,
+            "months": [
+                6
+            ],
+            "days": [
+                1
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Quốc tế Thiếu nhi",
+                "ngày 1 tháng 6"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày Quốc tế Thiếu nhi"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-th-ng-binh-li-t-s",
+            "name": "Ngày Thương binh - Liệt sĩ",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": 1947,
+            "event_month": 7,
+            "event_day": 27,
+            "months": [
+                7
+            ],
+            "days": [
+                27
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày Thương binh Liệt sĩ"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày Thương binh - Liệt sĩ"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-th-nh-l-p-h-i-li-n-hi-p-ph-n-vi-t-nam",
+            "name": "Ngày thành lập Hội Liên hiệp Phụ nữ Việt Nam",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 10,
+            "event_day": 20,
+            "months": [
+                10
+            ],
+            "days": [
+                20
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày thành lập Hội Liên hiệp Phụ nữ Việt Nam"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Ngày thành lập Hội Liên hiệp Phụ nữ Việt Nam"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-nh-gi-o-vi-t-nam",
+            "name": "Ngày Nhà giáo Việt Nam",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 11,
+            "event_day": 20,
+            "months": [
+                11
+            ],
+            "days": [
+                20
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày Nhà giáo Việt Nam"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày Nhà giáo Việt Nam"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-th-nh-l-p-qu-n-d-i-nh-n-d-n-vi-t-nam",
+            "name": "Ngày thành lập Quân đội Nhân dân Việt Nam",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 12,
+            "event_day": 22,
+            "months": [
+                12
+            ],
+            "days": [
+                22
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày thành lập Quân đội Nhân dân Việt Nam"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Ngày thành lập Quân đội Nhân dân Việt Nam"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "d-m-gi-ng-sinh-noel",
+            "name": "Đêm Giáng Sinh Noel",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 12,
+            "event_day": 24,
+            "months": [
+                12
+            ],
+            "days": [
+                24
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Đêm nay là ngày lễ giáng sinh",
+                "Đêm nay là ngày lễ Noel"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Đêm nay là ngày lễ giáng sinh"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-l-gi-ng-sinh-noel",
+            "name": "Ngày Lễ Giáng sinh (Noel)",
+            "active": true,
+            "event_calendar": "solar",
+            "calendar": "solar",
+            "year": null,
+            "event_month": 12,
+            "event_day": 25,
+            "months": [
+                12
+            ],
+            "days": [
+                25
+            ],
+            "leap_month": null,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Lễ Giáng sinh, Noel"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "Hôm nay là Ngày Lễ Giáng sinh, Noel"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "r-m-th-ng-gi-ng",
+            "name": "Rằm tháng Giêng",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 1,
+            "event_day": 15,
+            "months": [
+                1
+            ],
+            "days": [
+                15
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Rằm tháng Giêng",
+                "Rằm tháng 1"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là ngày Rằm tháng Giêng"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "t-t-h-n-th-c",
+            "name": "Tết Hàn thực",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 3,
+            "event_day": 3,
+            "months": [
+                3
+            ],
+            "days": [
+                3
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Tết Hàn thực",
+                "ngày 3 tháng 3"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Tết Hàn thực"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "t-t-doan-ng",
+            "name": "Tết Đoan ngọ",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 5,
+            "event_day": 5,
+            "months": [
+                5
+            ],
+            "days": [
+                5
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Tết Đoan ngọ"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Tết Đoan ngọ"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "t-t-trung-thu",
+            "name": "Tết Trung thu",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 8,
+            "event_day": 15,
+            "months": [
+                8
+            ],
+            "days": [
+                15
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Tết Trung thu"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Tết Trung thu"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        },
+        {
+            "id": "ng-y-ng-t-o-ch-u-tr-i",
+            "name": "Ngày ông Táo chầu trời",
+            "active": true,
+            "event_calendar": "lunar",
+            "calendar": "lunar",
+            "year": null,
+            "event_month": 12,
+            "event_day": 23,
+            "months": [
+                12
+            ],
+            "days": [
+                23
+            ],
+            "leap_month": false,
+            "recurrence": "yearly",
+            "times": [
+                "08:00"
+            ],
+            "tags": [
+                "Ngày ông Táo chầu trời",
+                "ngày ông công, ông táo"
+            ],
+            "description": "",
+            "notification": {
+                "active": true,
+                "before_days": [
+                    0
+                ],
+                "repeat": 1,
+                "message": "hôm nay là Ngày ông Táo chầu trời"
+            },
+            "execution": {
+                "active": false,
+                "action": "none",
+                "media_url": ""
+            }
+        }
+    ]
+}

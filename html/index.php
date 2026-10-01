@@ -543,7 +543,7 @@ include 'html_head.php';
                   <i class="bi bi-dash-lg"></i>
                   <div class="activity-content">
                     <b>
-                      <font color="green"> Bật, Tắt Chế độ xử lý đa câu lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh trong 1 câu: <b>và, sau đó, rồi</b> trong file: <b>Adverbs.json</b>')"></i></font>
+                      <font color="green"> Bật, Tắt Chế độ xử lý đa câu lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh nằm trong file locale tại <b>resource/lang_keywords</b>')"></i></font>
                     </b>
                   </div>
                 </div>

@@ -11,6 +11,12 @@ ini_set('log_errors', '1');
 ini_set('error_log', $phpErrorLog);
 error_reporting(E_ALL);
 
+// Yêu cầu kiểm tra ngôn ngữ trả JSON trong cùng endpoint nhưng không render lại trang.
+$keywordLanguageCheckAjax = isset($_GET['keyword_language_check']) && $_GET['keyword_language_check'] === '1';
+if ($keywordLanguageCheckAjax) {
+  ob_start();
+}
+
 // Fatal/parse/runtime errors có thể làm trang tải lại trước khi người dùng đọc
 // được thông báo. Shutdown handler bảo đảm chúng vẫn được ghi vào log chung.
 register_shutdown_function(static function () use ($phpErrorLog): void {
@@ -627,6 +633,9 @@ if (isset($_POST['all_config_save'])) {
   $calendar_sources = ['system', 'virtual_assistant_priority', 'dev_calendar'];
   $calendar_source = isset($_POST['calendar_source']) ? trim((string)$_POST['calendar_source']) : 'system';
   $Config['calendar']['source'] = in_array($calendar_source, $calendar_sources, true) ? $calendar_source : 'system';
+  $Config['calendar']['events'] = [
+    'active' => isset($_POST['calendar_events_active']),
+  ];
 
   #cập nhật đồng bộ hóa media với web ui
   $Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
@@ -965,6 +974,17 @@ if (isset($_POST['all_config_save'])) {
   }
   #Cập nhật chế độ chạy toàn bộ chương trình
   $Config['launch_source'] = !empty($_POST['launch_source']) ? $_POST['launch_source'] : 'VBot_Assistant';
+  #Cập nhật locale keyword; dữ liệu chỉ được áp dụng sau khi restart VBot
+  $keywordLocale = str_replace('_', '-', trim((string)($_POST['keyword_language_primary'] ?? 'vi-VN')));
+  if (!preg_match('/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/', $keywordLocale)) {
+    $messages[] = '- Locale keyword không hợp lệ, giữ nguyên cấu hình hiện tại';
+  } else {
+    if (!isset($Config['language']) || !is_array($Config['language'])) {
+      $Config['language'] = [];
+    }
+    $Config['language']['primary'] = $keywordLocale;
+    $Config['language']['fallback'] = 'vi-VN';
+  }
 
   ##############################################
   //Cập nhật radio_data từ POST
@@ -1370,6 +1390,23 @@ include 'html_head.php';
       .config-toolbar { top: 58px; }
       .config-toolbar .btn, .config-toolbar .form-select { white-space: nowrap; }
     }
+    @media (max-width: 575.98px) {
+      #keyword-language-checker .input-group > .form-select {
+        flex: 1 0 100%;
+        width: 100%;
+        margin-bottom: 0.5rem;
+        border-radius: 0.375rem;
+      }
+      #keyword-language-checker .input-group > .btn {
+        flex: 1 1 auto;
+      }
+      #keyword-language-checker .input-group > .btn:first-of-type {
+        border-radius: 0.375rem 0 0 0.375rem;
+      }
+      #keyword-language-checker .input-group > .btn:last-child {
+        border-radius: 0 0.375rem 0.375rem 0;
+      }
+    }
   </style>
 </head>
 
@@ -1438,6 +1475,346 @@ include 'html_head.php';
                   <option value="XiaoZhi_AI" <?php if ($Config['launch_source'] === "XiaoZhi_AI") echo "selected"; ?>>Chỉ Chạy XiaoZhi AI</option>
                   <option value="DEV_Processing" <?php if ($Config['launch_source'] === "DEV_Processing") echo "selected"; ?>>Người Dùng Tự Code Xử Lý Dữ Liệu - Dev_Processing.py</option>
                 </select>
+              </div>
+            </div>
+
+            <div class="row mb-3 align-items-center">
+              <label for="keyword_language_primary" class="col-sm-3 col-form-label fw-semibold text-danger">Ngôn Ngữ Câu Lệnh Hệ Thống <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi ngôn ngữ dùng một file resource/lang_keywords/&lt;locale&gt;.json, bao gồm vi-VN.json.<br/>Sau khi thay đổi cần Lưu Cài Đặt Và Restart VBot.')"></i>:</label>
+              <div class="col-sm-9">
+                <?php
+                $keywordLocaleCurrent = str_replace('_', '-', (string)($Config['language']['primary'] ?? 'vi-VN'));
+                $keywordLocaleOptions = [];
+                $keywordLocaleStatuses = [];
+                $keywordLocaleConflicts = [];
+                $keywordLocaleInvalidFiles = [];
+                $keywordLocaleReports = [];
+                $keywordGroupsAreValid = static function ($groups) {
+                  if (!is_array($groups) || $groups === []) return false;
+                  foreach ($groups as $category => $phrases) {
+                    if (!is_string($category) || trim($category) === '' || !is_array($phrases)) return false;
+                    foreach ($phrases as $phrase) {
+                      if (!is_string($phrase)) return false;
+                    }
+                  }
+                  return true;
+                };
+                $keywordPhraseListIsValid = static function ($phrases) {
+                  if (!is_array($phrases) || count($phrases) > 512) return false;
+                  foreach ($phrases as $phrase) {
+                    if (!is_string($phrase) || strlen($phrase) > 1024) return false;
+                  }
+                  return true;
+                };
+                $keywordWeatherIsValid = static function ($weather) use ($keywordPhraseListIsValid) {
+                  if (!is_array($weather)) return false;
+                  foreach (['intent', 'location_cleanup', 'administrative_prefixes'] as $section) {
+                    $groups = $weather[$section] ?? [];
+                    if (!is_array($groups)) return false;
+                    foreach ($groups as $phrases) {
+                      if (!$keywordPhraseListIsValid($phrases)) return false;
+                    }
+                  }
+                  $days = $weather['days'] ?? [];
+                  if (!is_array($days) || count($days) > 32) return false;
+                  foreach ($days as $day) {
+                    if (!is_array($day) || !is_int($day['offset'] ?? null) || !is_string($day['label'] ?? null)) return false;
+                    foreach (['phrases', 'standalone_phrases'] as $field) {
+                      if (!$keywordPhraseListIsValid($day[$field] ?? [])) return false;
+                    }
+                  }
+                  $defaultDay = $weather['default_day'] ?? null;
+                  return is_array($defaultDay)
+                    && is_int($defaultDay['offset'] ?? null)
+                    && is_string($defaultDay['label'] ?? null);
+                };
+                $keywordResponsesAreValid = null;
+                $keywordResponsesAreValid = static function ($responses, $depth = 0) use (&$keywordResponsesAreValid) {
+                  if (!is_array($responses) || $depth > 3 || count($responses) > 256) return false;
+                  foreach ($responses as $key => $value) {
+                    // json_decode chuyển khóa JSON dạng "0", "45"... trong
+                    // responses.weather.codes thành int. Đây vẫn là khóa hợp lệ.
+                    if ((!is_string($key) && !is_int($key)) || trim((string)$key) === '') return false;
+                    if (is_array($value)) {
+                      if (!$keywordResponsesAreValid($value, $depth + 1)) return false;
+                    } elseif (!is_string($value) || strlen($value) > 4096) {
+                      return false;
+                    }
+                  }
+                  return true;
+                };
+                $keywordArrayIsList = static function ($value) {
+                  if (!is_array($value)) return false;
+                  return array_keys($value) === range(0, count($value) - 1);
+                };
+                $keywordMissingKeys = null;
+                $keywordMissingKeys = static function ($reference, $candidate, $path = '') use (&$keywordMissingKeys, $keywordArrayIsList) {
+                  if (!is_array($reference) || $keywordArrayIsList($reference)) return [];
+                  if (!is_array($candidate) || $keywordArrayIsList($candidate)) return [$path !== '' ? $path : '(gốc)'];
+                  $missing = [];
+                  foreach ($reference as $key => $referenceValue) {
+                    $childPath = $path === '' ? (string)$key : $path . '.' . $key;
+                    if (!array_key_exists($key, $candidate)) {
+                      $missing[] = $childPath;
+                    } elseif (is_array($referenceValue) && !$keywordArrayIsList($referenceValue)) {
+                      $missing = array_merge($missing, $keywordMissingKeys($referenceValue, $candidate[$key], $childPath));
+                    }
+                  }
+                  return $missing;
+                };
+                $keywordPlaceholderErrors = null;
+                $keywordPlaceholderErrors = static function ($reference, $candidate, $path = '') use (&$keywordPlaceholderErrors, $keywordArrayIsList) {
+                  if (!is_array($reference) || !is_array($candidate)
+                      || $keywordArrayIsList($reference) || $keywordArrayIsList($candidate)) return [];
+                  $errors = [];
+                  foreach ($reference as $key => $referenceValue) {
+                    if (!array_key_exists($key, $candidate)) continue;
+                    $candidateValue = $candidate[$key];
+                    $childPath = $path === '' ? (string)$key : $path . '.' . $key;
+                    if (is_array($referenceValue)) {
+                      $errors = array_merge($errors, $keywordPlaceholderErrors($referenceValue, $candidateValue, $childPath));
+                    } elseif (is_string($referenceValue) && is_string($candidateValue)) {
+                      preg_match_all('/\{[A-Za-z_][A-Za-z0-9_]*\}/', $referenceValue, $referenceMatches);
+                      preg_match_all('/\{[A-Za-z_][A-Za-z0-9_]*\}/', $candidateValue, $candidateMatches);
+                      $referencePlaceholders = array_values(array_unique($referenceMatches[0] ?? []));
+                      $candidatePlaceholders = array_values(array_unique($candidateMatches[0] ?? []));
+                      sort($referencePlaceholders);
+                      sort($candidatePlaceholders);
+                      // Câu giờ được phép chọn định dạng 24 giờ hoặc 12 giờ.
+                      if ($childPath === 'responses.time.current') {
+                        $allowedTimePlaceholders = ['{hour_12}', '{hour_24}', '{minute}', '{period}'];
+                        if (!in_array('{minute}', $candidatePlaceholders, true)
+                            || array_diff($candidatePlaceholders, $allowedTimePlaceholders) !== []) {
+                          $errors[] = $childPath;
+                        }
+                      } elseif ($referencePlaceholders !== $candidatePlaceholders) {
+                        $errors[] = $childPath;
+                      }
+                    }
+                  }
+                  return $errors;
+                };
+                $keywordTypeErrors = null;
+                $keywordTypeErrors = static function ($reference, $candidate, $path = '') use (&$keywordTypeErrors, $keywordArrayIsList) {
+                  $errors = [];
+                  if (is_array($reference)) {
+                    if (!is_array($candidate) || $keywordArrayIsList($reference) !== $keywordArrayIsList($candidate)) {
+                      return [$path !== '' ? $path : '(gốc)'];
+                    }
+                    if ($keywordArrayIsList($reference)) {
+                      if ($reference !== [] && $candidate !== []) {
+                        $referenceType = gettype($reference[0]);
+                        foreach ($candidate as $item) {
+                          if (gettype($item) !== $referenceType) return [$path];
+                        }
+                      }
+                      return [];
+                    }
+                    foreach ($reference as $key => $referenceValue) {
+                      if (!array_key_exists($key, $candidate)) continue;
+                      $childPath = $path === '' ? (string)$key : $path . '.' . $key;
+                      $errors = array_merge($errors, $keywordTypeErrors($referenceValue, $candidate[$key], $childPath));
+                    }
+                    return $errors;
+                  }
+                  if (gettype($reference) !== gettype($candidate)) $errors[] = $path;
+                  return $errors;
+                };
+                $keywordReferenceFile = dirname(__DIR__) . '/resource/lang_keywords/vi-VN.json';
+                $keywordReferenceRaw = @file_get_contents($keywordReferenceFile);
+                $keywordReferenceData = is_string($keywordReferenceRaw) ? json_decode($keywordReferenceRaw, true) : null;
+                if (!is_array($keywordReferenceData)) $keywordReferenceData = [];
+                $keywordSchemaSections = ['actions', 'objects', 'adverbs', 'weather', 'responses', 'values'];
+                $keywordReferenceSchema = array_intersect_key($keywordReferenceData, array_flip($keywordSchemaSections));
+                $keywordFindConflicts = static function ($data) {
+                  $conflicts = [];
+                  // Trùng trong adverbs thường là có chủ đích (từ bổ nghĩa/làm sạch).
+                  // Chỉ cảnh báo nhóm có thể làm thay đổi intent chính.
+                  foreach (['actions', 'objects'] as $section) {
+                    $locations = [];
+                    foreach (($data[$section] ?? []) as $category => $phrases) {
+                      if (!is_array($phrases)) continue;
+                      foreach ($phrases as $phrase) {
+                        if (!is_string($phrase)) continue;
+                        $normalized = preg_replace('/\s+/u', ' ', trim($phrase));
+                        $normalized = function_exists('mb_strtolower')
+                          ? mb_strtolower($normalized, 'UTF-8') : strtolower($normalized);
+                        if ($normalized === '') continue;
+                        $locations[$normalized][$section . '.' . $category] = true;
+                      }
+                    }
+                    foreach ($locations as $phrase => $groups) {
+                      if (count($groups) > 1) $conflicts[$phrase] = $groups;
+                    }
+                  }
+                  return $conflicts;
+                };
+                foreach (glob(dirname(__DIR__) . '/resource/lang_keywords/*.json') ?: [] as $keywordLocaleFile) {
+                  if (substr(basename($keywordLocaleFile), -13) === '.example.json') {
+                    continue;
+                  }
+                  $keywordLocaleName = pathinfo($keywordLocaleFile, PATHINFO_FILENAME);
+                  $keywordLocaleValid = preg_match('/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/', $keywordLocaleName) === 1;
+                  $keywordLocaleSize = @filesize($keywordLocaleFile);
+                  $keywordLocaleRaw = ($keywordLocaleValid && $keywordLocaleSize !== false && $keywordLocaleSize > 0 && $keywordLocaleSize <= 524288)
+                    ? @file_get_contents($keywordLocaleFile) : false;
+                  $keywordLocaleData = is_string($keywordLocaleRaw) ? json_decode($keywordLocaleRaw, true) : null;
+                  $keywordLocaleDeclared = is_array($keywordLocaleData) ? str_replace('_', '-', trim((string)($keywordLocaleData['locale'] ?? ''))) : '';
+                  $keywordLocaleSections = is_array($keywordLocaleData)
+                    ? array_values(array_intersect(['actions', 'objects', 'adverbs'], array_keys($keywordLocaleData))) : [];
+                  $keywordLocaleValid = $keywordLocaleValid
+                    && is_array($keywordLocaleData)
+                    && json_last_error() === JSON_ERROR_NONE
+                    && strcasecmp($keywordLocaleDeclared, $keywordLocaleName) === 0
+                    && (!isset($keywordLocaleData['schema_version']) || $keywordLocaleData['schema_version'] === 1)
+                    && (!isset($keywordLocaleData['inherit_fallback']) || is_bool($keywordLocaleData['inherit_fallback']))
+                    && $keywordLocaleSections !== [];
+                  foreach ($keywordLocaleSections as $keywordLocaleSection) {
+                    if (!$keywordGroupsAreValid($keywordLocaleData[$keywordLocaleSection])) {
+                      $keywordLocaleValid = false;
+                      break;
+                    }
+                  }
+                  if (isset($keywordLocaleData['weather']) && !$keywordWeatherIsValid($keywordLocaleData['weather'])) {
+                    $keywordLocaleValid = false;
+                  }
+                  if (isset($keywordLocaleData['responses']) && !$keywordResponsesAreValid($keywordLocaleData['responses'])) {
+                    $keywordLocaleValid = false;
+                  }
+                  if (isset($keywordLocaleData['values']) && !is_array($keywordLocaleData['values'])) {
+                    $keywordLocaleValid = false;
+                  }
+                  if (strcasecmp($keywordLocaleName, 'vi-VN') === 0
+                      && count($keywordLocaleSections) !== 3) {
+                    $keywordLocaleValid = false;
+                  }
+                  $keywordCandidateSchema = is_array($keywordLocaleData)
+                    ? array_intersect_key($keywordLocaleData, array_flip($keywordSchemaSections)) : [];
+                  $keywordLocaleMissingKeys = $keywordLocaleValid
+                    ? $keywordMissingKeys($keywordReferenceSchema, $keywordCandidateSchema) : [];
+                  $keywordLocalePlaceholderErrors = $keywordLocaleValid
+                    ? $keywordPlaceholderErrors($keywordReferenceSchema, $keywordCandidateSchema) : [];
+                  $keywordLocaleTypeErrors = $keywordLocaleValid
+                    ? $keywordTypeErrors($keywordReferenceSchema, $keywordCandidateSchema) : [];
+                  $keywordLocaleInherits = is_array($keywordLocaleData)
+                    && ($keywordLocaleData['inherit_fallback'] ?? true) !== false;
+                  if ($keywordLocalePlaceholderErrors !== [] || $keywordLocaleTypeErrors !== []
+                      || ($keywordLocaleMissingKeys !== [] && !$keywordLocaleInherits)) {
+                    $keywordLocaleValid = false;
+                  }
+                  $keywordInvalidReason = '';
+                  $keywordLocaleFoundConflicts = is_array($keywordLocaleData)
+                    ? $keywordFindConflicts($keywordLocaleData) : [];
+                  if ($keywordLocaleValid) {
+                    $keywordLocaleLabel = trim((string)($keywordLocaleData['name'] ?? ''));
+                    $keywordLocaleOptions[$keywordLocaleName] = $keywordLocaleLabel !== ''
+                      ? $keywordLocaleLabel : $keywordLocaleName;
+                    $keywordLocaleConflicts[$keywordLocaleName] = $keywordLocaleFoundConflicts;
+                    $keywordLocaleStatus = $keywordLocaleMissingKeys === []
+                      ? 'Hợp lệ'
+                      : 'Thiếu ' . count($keywordLocaleMissingKeys) . ' khóa — kế thừa vi-VN';
+                    $keywordLocaleStatuses[$keywordLocaleName] = $keywordLocaleStatus;
+                  } else {
+                    $keywordInvalidReason = 'sai cấu trúc hoặc kiểu dữ liệu';
+                    if (is_array($keywordLocaleData)
+                        && isset($keywordLocaleData['schema_version'])
+                        && $keywordLocaleData['schema_version'] !== 1) {
+                      $keywordInvalidReason = 'schema_version không được hỗ trợ; hiện chỉ chấp nhận phiên bản 1';
+                    } elseif ($keywordLocaleSize !== false && $keywordLocaleSize > 524288) {
+                      $keywordInvalidReason = 'kích thước vượt quá 512 KB';
+                    } elseif ($keywordLocalePlaceholderErrors !== []) {
+                      $keywordInvalidReason = 'sai placeholder: ' . implode(', ', array_slice($keywordLocalePlaceholderErrors, 0, 3));
+                    } elseif ($keywordLocaleTypeErrors !== []) {
+                      $keywordInvalidReason = 'sai kiểu dữ liệu: ' . implode(', ', array_slice($keywordLocaleTypeErrors, 0, 3));
+                    } elseif ($keywordLocaleMissingKeys !== [] && !$keywordLocaleInherits) {
+                      $keywordInvalidReason = 'thiếu ' . count($keywordLocaleMissingKeys) . ' khóa nhưng đã tắt kế thừa';
+                    }
+                    $keywordLocaleInvalidFiles[] = basename($keywordLocaleFile) . ' (' . $keywordInvalidReason . ')';
+                  }
+                  $keywordLocaleReports[basename($keywordLocaleFile)] = [
+                    'file' => basename($keywordLocaleFile),
+                    'locale' => $keywordLocaleDeclared,
+                    'size' => $keywordLocaleSize !== false ? (int)$keywordLocaleSize : 0,
+                    'valid' => (bool)$keywordLocaleValid,
+                    'inherits' => (bool)$keywordLocaleInherits,
+                    'status' => $keywordLocaleValid
+                      ? ($keywordLocaleStatuses[$keywordLocaleName] ?? 'Hợp lệ')
+                      : 'Không hợp lệ: ' . $keywordInvalidReason,
+                    'sections' => $keywordLocaleSections,
+                    'missing' => array_values($keywordLocaleMissingKeys),
+                    'placeholders' => array_values($keywordLocalePlaceholderErrors),
+                    'types' => array_values($keywordLocaleTypeErrors),
+                    'conflicts' => array_keys($keywordLocaleFoundConflicts),
+                  ];
+                }
+                ksort($keywordLocaleOptions, SORT_NATURAL | SORT_FLAG_CASE);
+                ksort($keywordLocaleReports, SORT_NATURAL | SORT_FLAG_CASE);
+                if ($keywordLanguageCheckAjax) {
+                  $keywordCheckFile = (string)($_GET['file'] ?? '');
+                  $keywordCheckSafe = $keywordCheckFile !== ''
+                    && strlen($keywordCheckFile) <= 128
+                    && basename($keywordCheckFile) === $keywordCheckFile
+                    && preg_match('/^[A-Za-z0-9._-]+\.json$/', $keywordCheckFile) === 1;
+                  if (ob_get_level() > 0) ob_clean();
+                  header('Content-Type: application/json; charset=UTF-8');
+                  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+                  header('X-Content-Type-Options: nosniff');
+                  if (!$keywordCheckSafe || !isset($keywordLocaleReports[$keywordCheckFile])) {
+                    http_response_code(404);
+                    echo json_encode(['success' => false, 'error' => 'Không tìm thấy file ngôn ngữ hợp lệ.'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                  } else {
+                    echo json_encode(['success' => true, 'report' => $keywordLocaleReports[$keywordCheckFile]], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                  }
+                  exit;
+                }
+                $keywordLocaleCurrentAvailable = false;
+                foreach (array_keys($keywordLocaleOptions) as $keywordLocaleAvailable) {
+                  if (strcasecmp($keywordLocaleCurrent, $keywordLocaleAvailable) === 0) {
+                    $keywordLocaleCurrent = $keywordLocaleAvailable;
+                    $keywordLocaleCurrentAvailable = true;
+                    break;
+                  }
+                }
+                ?>
+                <select class="form-select border-success" name="keyword_language_primary" id="keyword_language_primary" required>
+                  <?php if (!$keywordLocaleCurrentAvailable): ?>
+                    <option value="<?php echo htmlspecialchars($keywordLocaleCurrent, ENT_QUOTES, 'UTF-8'); ?>" selected>
+                      <?php echo htmlspecialchars($keywordLocaleCurrent . ' (không tìm thấy hoặc không hợp lệ)', ENT_QUOTES, 'UTF-8'); ?>
+                    </option>
+                  <?php endif; ?>
+                  <?php foreach ($keywordLocaleOptions as $keywordLocaleOption => $keywordLocaleLabel): ?>
+                    <option value="<?php echo htmlspecialchars($keywordLocaleOption, ENT_QUOTES, 'UTF-8'); ?>" <?php echo strcasecmp($keywordLocaleCurrent, $keywordLocaleOption) === 0 ? 'selected' : ''; ?>>
+                      <?php echo htmlspecialchars($keywordLocaleLabel . ' — ' . $keywordLocaleOption . '.json [' . ($keywordLocaleStatuses[$keywordLocaleOption] ?? 'Hợp lệ') . ']', ENT_QUOTES, 'UTF-8'); ?>
+                    </option>
+                  <?php endforeach; ?>
+                </select>
+                <div class="form-text">Tự quét và đối chiếu file JSON với vi-VN.json khi tải trang. Trạng thái Hợp lệ hoặc Thiếu khóa được hiển thị trong danh sách, cần restart VBot để áp dụng.</div>
+                <div class="form-text text-danger fw-semibold">Lưu ý: Cần lựa chọn Speak To Text (STT) và Text To Speak (TTS) có ngôn ngữ tương ứng với ngôn ngữ câu lệnh để nhận dạng và phản hồi chính xác.</div>
+                <?php if (($keywordLocaleConflicts[$keywordLocaleCurrent] ?? []) !== []): ?>
+                  <div class="small text-warning mt-1">Cảnh báo: File đang chọn có <?php echo count($keywordLocaleConflicts[$keywordLocaleCurrent]); ?> keyword nằm trong nhiều category của cùng một nhóm chức năng. File vẫn hợp lệ nhưng nên kiểm tra để tránh nhận nhầm lệnh.</div>
+                <?php endif; ?>
+                <?php if ($keywordLocaleInvalidFiles !== []): ?>
+                  <div class="small text-warning mt-1">Bỏ qua file không hợp lệ: <?php echo htmlspecialchars(implode(', ', $keywordLocaleInvalidFiles), ENT_QUOTES, 'UTF-8'); ?></div>
+                <?php endif; ?>
+                <div class="card border-primary mt-3" id="keyword-language-checker">
+                  <div class="card-body py-3">
+                    <strong class="text-primary d-block mb-2"><i class="bi bi-filetype-json"></i> Kiểm Tra Cấu Trúc File Json Ngôn Ngữ</strong>
+                    <div class="input-group mb-3">
+                      <select class="form-select border-primary" id="keyword_language_check_file" aria-label="File ngôn ngữ cần kiểm tra">
+                        <?php foreach ($keywordLocaleReports as $keywordReportFile => $keywordReport): ?>
+                          <option value="<?php echo htmlspecialchars($keywordReportFile, ENT_QUOTES, 'UTF-8'); ?>" <?php echo strcasecmp($keywordReportFile, $keywordLocaleCurrent . '.json') === 0 ? 'selected' : ''; ?>>
+                            <?php echo htmlspecialchars($keywordReportFile . ' — ' . $keywordReport['status'], ENT_QUOTES, 'UTF-8'); ?>
+                          </option>
+                        <?php endforeach; ?>
+                      </select>
+                      <button type="button" class="btn btn-secondary" id="keyword_language_check_view"><i class="bi bi-eye"></i> Xem JSON</button>
+                      <button type="button" class="btn btn-primary" id="keyword_language_check_run"><i class="bi bi-check2-circle"></i> Kiểm Tra</button>
+                    </div>
+                    <button type="button" class="btn btn-sm btn-success mb-2" id="keyword_language_check_download" disabled><i class="bi bi-download"></i> Tải Báo Cáo JSON</button>
+                    <div id="keyword_language_check_result" class="small alert alert-secondary mb-0" role="status" aria-live="polite">Chọn file và bấm Xem Kết Quả.</div>
+                    <div class="form-text">Công cụ chỉ đọc và kiểm tra file trong <code>resource/lang_keywords</code>; không lưu cấu hình và không restart VBot.</div>
+                  </div>
+                </div>
+
               </div>
             </div>
 		</div>
@@ -2592,7 +2969,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
 				  - HomeKit chỉ chạy sau khi API VBot sẵn sàng. Sau khi thay đổi, hãy lưu và khởi động lại VBot.</div>
 
                     <div class="row mb-3">
-                      <label class="col-sm-3 col-form-label" for="homekit_active">Kích hoạt:</label>
+                      <label class="col-sm-3 col-form-label">Kích hoạt:</label>
                       <div class="col-sm-9"><div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="homekit_active" id="homekit_active" <?php echo !empty($homekitConfig['active']) ? 'checked' : ''; ?>>
                       </div></div>
@@ -4431,27 +4808,35 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             </div>
             </div>
 
-
-		  <div class="card accordion" id="accordion_button_weather_cfg">
-		  <div class="card-body">
-		  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_weather_cfg" aria-expanded="false" aria-controls="collapse_button_weather_cfg">
-		  Cấu Hình Thời Tiết, Weather:</h5>
-		  <div id="collapse_button_weather_cfg" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_weather_cfg">
-
-		  <div class="alert alert-primary" role="alert">
-		  <?php
-			echo select_field('weather_source', 'Nguồn xử lý dữ liệu thời tiết', ['virtual_assistant' => 'Sử Dụng Trợ Lý Ảo Assistant', 'vbot_system' => 'Sử Dụng Hệ Thống VBot', 'dev_weather' => 'Người Dùng Tự Code [Dev_Weather.py]'], $Config['weather']['source'], []);
-		  ?>
-		  <div class="alert alert-info mt-3 mb-0" role="alert">
-			<b>Ghi chú:</b> Khi chọn <b>Sử Dụng Hệ Thống VBot</b>, dữ liệu thời tiết sẽ sử dụng
-			<b>Vĩ độ (latitude)</b> và <b>Kinh độ (longitude)</b> đã cấu hình trong mục Thông Tin Liên Hệ.
-			Nếu chưa có tọa độ hợp lệ, hệ thống sẽ tra cứu vị trí theo Xã/Huyện và Tỉnh đã cấu hình.
-		  </div>
-		</div>
-
-			  </div>
-			  </div>
-			  </div>
+      <div class="card accordion" id="accordion_button_calendar_events">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_calendar_events" aria-expanded="false" aria-controls="collapse_button_calendar_events">
+      Cấu Hình Events, Ngày Lễ, Kỉ Kiệm, Sự Kiện Cá Nhân:</h5>
+      <div id="collapse_button_calendar_events" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_calendar_events">
+	  <div class="alert alert-primary" role="alert">
+	  <div class="row mb-3">
+		<label class="col-sm-3 col-form-label" for="calendar_events_active">Kích Hoạt:</label>
+		<div class="col-sm-9"><div class="form-switch">
+		  <input class="form-check-input border-success" type="checkbox" name="calendar_events_active" id="calendar_events_active" <?php echo ($calendar_events_cfg['active'] ?? true) ? 'checked' : ''; ?>>
+		</div></div>
+	  </div>
+	  <div class="alert alert-light border mb-3" role="note">
+		<div class="fw-bold mb-2"><i class="bi bi-chat-dots"></i> Cách hỏi VBot về Events</div>
+		<div class="small mb-2">Sau khi bật Events, lưu cấu hình và khởi động lại VBot, người dùng có thể hỏi tự nhiên bằng tên Event hoặc Tags đã khai báo:</div>
+		<ul class="small mb-2 ps-3">
+		  <li><code>Hôm nay có sự kiện gì?</code></li>
+		  <li><code>Ngày mai có sự kiện gì?</code> hoặc <code>Ngày 2 tháng 10 có sự kiện gì?</code></li>
+		  <li><code>Tháng này có ngày quan trọng nào?</code></li>
+		  <li><code>Đọc các sự kiện sắp tới</code> hoặc <code>Đọc các sự kiện gia đình sắp tới</code></li>
+		  <li><code>Còn bao lâu nữa đến Tết Nguyên Đán?</code> hoặc <code>Còn mấy ngày nữa đến sinh nhật mẹ?</code></li>
+		</ul>
+		<div class="small text-muted">Tên Event và Tags giúp VBot tìm đúng sự kiện. Các câu hỏi chỉ tra cứu; hành động cấu hình của Event chỉ chạy khi đến đúng lịch hoặc khi người dùng chủ động nhấn nút thực thi trong trang quản lý.</div>
+	  </div>
+	  <a class="btn btn-primary mb-3" href="Calendar_Events.php"><i class="bi bi-calendar-event"></i> Nhấn Để Truy Cập Trang Quản Lý Events</a>
+      </div>
+      </div>
+      </div>
+      </div>
 
 			  <div class="card accordion" id="accordion_button_calendar_cfg">
 			  <div class="card-body">
@@ -4466,14 +4851,36 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 				  'virtual_assistant_priority' => 'Ưu Tiên Trợ Lý Ảo Assistant',
 				  'dev_calendar' => 'Người Dùng Tự Code [Dev_Calendar.py]'
 				], $calendar_source, []);
+				$calendar_events_cfg = $Config['calendar']['events'] ?? [];
 			  ?>
+			  <hr>
+
 			  <div class="alert alert-info mt-3 mb-0" role="alert">
 				<b>Ghi chú:</b><br>- Hệ thống hỗ trợ hôm nay, hôm qua, ngày mai, ngày kia và ngày cụ thể.<br/>
 				- Chế độ <b>Ưu Tiên Trợ Lý Ảo</b> sẽ dùng lịch hệ thống khi trợ lý không phản hồi.<br/>
 				- Chế độ <b>Dev_Calendar.py</b> cũng tự quay về lịch hệ thống nếu mã tùy chỉnh lỗi hoặc không có kết quả.<br/>
-				- Cần khởi động lại VBot sau khi thay đổi nguồn xử lý.
+				- Cần khởi động lại VBot sau khi áp dụng thay đổi
 			  </div>
 			  </div>
+			  </div>
+			  </div>
+			  </div>
+
+		  <div class="card accordion" id="accordion_button_weather_cfg">
+		  <div class="card-body">
+		  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_weather_cfg" aria-expanded="false" aria-controls="collapse_button_weather_cfg">
+		  Cấu Hình Thời Tiết, Weather:</h5>
+		  <div id="collapse_button_weather_cfg" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_weather_cfg">
+		  <div class="alert alert-primary" role="alert">
+		  <?php
+			echo select_field('weather_source', 'Nguồn xử lý dữ liệu thời tiết', ['virtual_assistant' => 'Sử Dụng Trợ Lý Ảo Assistant', 'vbot_system' => 'Sử Dụng Hệ Thống VBot', 'dev_weather' => 'Người Dùng Tự Code [Dev_Weather.py]'], $Config['weather']['source'], []);
+		  ?>
+		  <div class="alert alert-info mt-3 mb-0" role="alert">
+			<b>Ghi chú:</b> Khi chọn <b>Sử Dụng Hệ Thống VBot</b>, dữ liệu thời tiết sẽ sử dụng
+			<b>Vĩ độ (latitude)</b> và <b>Kinh độ (longitude)</b> đã cấu hình trong mục Thông Tin Liên Hệ.
+			Nếu chưa có tọa độ hợp lệ, hệ thống sẽ tra cứu vị trí theo Xã/Huyện và Tỉnh đã cấu hình.
+		  </div>
+		</div>
 			  </div>
 			  </div>
 			  </div>
@@ -4948,7 +5355,7 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
 
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">Chế Độ Xử Lý Đa Lệnh Trong 1 Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh trong 1 câu: <b>và, sau đó, rồi</b> trong file: <b>Adverbs.json</b>')"></i> :</h5>
+                <h5 class="card-title">Chế Độ Xử Lý Đa Lệnh Trong 1 Câu Lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Khi được Bật, sẽ kích hoạt chế độ xử lý nhiều hành động trong 1 câu lệnh, Ví dụ câu lệnh: <br/>- Bật đèn ngủ và tắt đèn phòng khách<br/> - Bật đèn phòng ngủ sau đó phát danh sách nhạc<br/> Từ khóa phân tách nhiều lệnh nằm trong file locale tại <b>resource/lang_keywords</b>')"></i> :</h5>
                <div class="alert alert-success" role="alert">
 			   <div class="row mb-3">
                   <label class="col-sm-3 col-form-label">Kích hoạt chế độ xử lý đa lệnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chế độ đa lệnh trong 1 câu')"></i> :</label>
@@ -5144,6 +5551,120 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
     ); ?>;
   </script>
   <script src="assets/js/Config.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+
+<script>
+(() => {
+  const initializeKeywordLanguageChecker = () => {
+	const select = document.getElementById('keyword_language_check_file');
+	const result = document.getElementById('keyword_language_check_result');
+	const runButton = document.getElementById('keyword_language_check_run');
+	const viewButton = document.getElementById('keyword_language_check_view');
+	const downloadButton = document.getElementById('keyword_language_check_download');
+	if (!select || !result || !runButton || !viewButton || !downloadButton) return;
+	let reports = {};
+	let lastCheckedFile = '';
+	const escapeHtml = (value) => String(value ?? '').replace(/[&<>'"]/g, character => ({
+	  '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+	})[character]);
+	const renderList = (label, values, cssClass) => {
+	  if (!Array.isArray(values) || values.length === 0) return '';
+	  const shown = values.slice(0, 20).map(escapeHtml).join(', ');
+	  const remaining = values.length > 20 ? ' … và ' + (values.length - 20) + ' mục khác' : '';
+	  return '<div class="' + cssClass + '"><strong>' + label + ' (' + values.length + '):</strong> ' + shown + remaining + '</div>';
+	};
+	const render = (report) => {
+	  if (!report) {
+		result.className = 'small alert alert-warning mb-0';
+		result.textContent = 'Không có dữ liệu kiểm tra cho file đã chọn.';
+		return;
+	  }
+	  const valid = report.valid === true;
+	  result.className = 'small alert ' + (valid ? 'alert-success' : 'alert-danger') + ' mb-0';
+		result.innerHTML =
+			'<div><strong>' + escapeHtml(report.file) + '</strong> — ' + escapeHtml(report.status) + '</div>' +
+			'<div>Locale khai báo: <code>' + escapeHtml(report.locale || '(không có)') + '</code>; kích thước: ' + escapeHtml(report.size) + ' byte; kế thừa vi-VN: ' + (report.inherits ? 'Có' : 'Không') + '.</div>' +
+			'<div>Nhóm nhận dạng: ' + escapeHtml((report.sections || []).join(', ') || '(không có)') + '.</div>' +
+			renderList('Thiếu khóa', report.missing, 'text-warning') +
+			renderList('Sai placeholder', report.placeholders, 'text-danger') +
+			renderList('Sai kiểu dữ liệu', report.types, 'text-danger') +
+			renderList('Keyword trùng nhóm', report.conflicts, 'text-warning');
+	};
+	select.addEventListener('change', () => {
+	  lastCheckedFile = '';
+	  downloadButton.disabled = true;
+	  result.className = 'small alert alert-secondary mb-0';
+	  result.textContent = 'Đã đổi file. Bấm Kiểm Tra để bắt đầu kiểm tra.';
+	});
+	viewButton.addEventListener('click', () => {
+	  const languageDirectory = <?php echo json_encode(dirname(__DIR__) . '/resource/lang_keywords/', JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+	  readJSON_file_path(languageDirectory + select.value);
+	});
+	runButton.addEventListener('click', async () => {
+	  const selectedFile = select.value;
+	  runButton.disabled = true;
+	  downloadButton.disabled = true;
+	  result.className = 'small alert alert-info mb-0';
+	  result.textContent = 'Đang đọc và kiểm tra file từ ổ đĩa...';
+	  try {
+		const url = 'Config.php?keyword_language_check=1&file=' + encodeURIComponent(selectedFile);
+		const response = await fetch(url, {
+		  method: 'GET',
+		  headers: {'Accept': 'application/json'},
+		  cache: 'no-store',
+		  credentials: 'same-origin'
+		});
+		const payload = await response.json();
+		if (!response.ok || payload.success !== true || !payload.report) {
+		  throw new Error(payload.error || 'HTTP ' + response.status);
+		}
+		reports[selectedFile] = payload.report;
+		lastCheckedFile = selectedFile;
+		render(payload.report);
+		downloadButton.disabled = false;
+	  } catch (error) {
+		lastCheckedFile = '';
+		result.className = 'small alert alert-danger mb-0';
+		result.textContent = 'Không thể kiểm tra file: ' + error.message;
+	  } finally {
+		runButton.disabled = false;
+	  }
+	});
+	downloadButton.addEventListener('click', () => {
+	  const report = lastCheckedFile === select.value ? reports[lastCheckedFile] : null;
+	  if (!report) {
+		result.className = 'small alert alert-warning mb-0';
+		result.textContent = 'Không có dữ liệu báo cáo để tải xuống.';
+		return;
+	  }
+	  const exportData = {
+		report_schema: 1,
+		generated_at: new Date().toISOString(),
+		source_directory: 'resource/lang_keywords',
+		...report
+	  };
+	  const blob = new Blob([JSON.stringify(exportData, null, 2) + '\n'], {type: 'application/json;charset=utf-8'});
+	  const objectUrl = URL.createObjectURL(blob);
+	  const link = document.createElement('a');
+	  const baseName = String(report.file || 'language.json')
+		.replace(/\.json$/i, '')
+		.replace(/[^A-Za-z0-9._-]+/g, '_')
+		.slice(0, 80) || 'language';
+	  link.href = objectUrl;
+	  link.download = baseName + '-lang-vbot-validation-report.json';
+	  document.body.appendChild(link);
+	  link.click();
+	  link.remove();
+	  window.setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+	});
+  };
+  if (document.readyState === 'loading') {
+	document.addEventListener('DOMContentLoaded', initializeKeywordLanguageChecker, {once: true});
+  } else {
+	initializeKeywordLanguageChecker();
+  }
+})();
+</script>
+
   <script>
     //Xóa file backup Config
     function delete_file_backup_json_config(filePath) {

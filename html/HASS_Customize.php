@@ -762,6 +762,26 @@ include 'html_head.php';
                 '</div></div>' +
                 '</div>';
             document.getElementById('accordion-container').insertAdjacentHTML('beforeend', newSection);
+            const addedSection = document.getElementById(sectionID);
+            const taskSearch = document.getElementById('hass-custom-task-search');
+            if (taskSearch && taskSearch.value) {
+                taskSearch.value = '';
+                taskSearch.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+            if (addedSection) {
+                const nameInput = addedSection.querySelector('input[name$="[name]"]');
+                window.requestAnimationFrame(function() {
+                    window.requestAnimationFrame(function() {
+                        addedSection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        if (nameInput) {
+                            nameInput.focus({ preventScroll: true });
+                        }
+                    });
+                });
+            }
             sectionCounter++;
         }
     </script>

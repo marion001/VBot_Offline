@@ -781,6 +781,16 @@ foreach ($MCP_data_json['tools'] as $tool) {
             $playlist_choices_html = '<div class="alert alert-warning py-1 px-2 mt-2 mb-0 small">Chưa có PlayList hợp lệ để XiaoZhi lựa chọn.</div>';
         }
     }
+    if (($tool['name'] ?? '') === '_VBot_Calendar_Events') {
+        $xiaozhi_ready = !empty($Config['xiaozhi']['active']);
+        $events_ready = !empty($Config['calendar']['events']['active']);
+        $dependency_ready = $xiaozhi_ready && $events_ready;
+        $playlist_choices_html .= '<div class="mt-2 p-2 border rounded '.($dependency_ready?'bg-light':'alert-warning').'">'
+            .'<small><b><i class="bi bi-calendar-event"></i> Điều kiện sử dụng:</b> '
+            .'<span class="badge '.($xiaozhi_ready?'bg-success':'bg-danger').'">XiaoZhi '.($xiaozhi_ready?'đang bật':'đang tắt').'</span> '
+            .'<span class="badge '.($events_ready?'bg-success':'bg-danger').'">Calendar Events '.($events_ready?'đang bật':'đang tắt').'</span></small>'
+            .'<div class="small text-muted mt-1">Tool chỉ được gửi tới server XiaoZhi khi hai điều kiện trên và công tắc MCP này đều bật.</div></div>';
+    }
     echo "<tr>
             <th scope='row' style='text-align: center; vertical-align: middle;'>{$stt_mcp}</th>
             <td style='vertical-align: middle;' class='text-success'><b>{$name}</b></td>

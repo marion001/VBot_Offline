@@ -8,6 +8,7 @@
         "_VBot_MediaControl",
         "_VBot_Wifi_Info",
         "_VBot_Scheduler",
+        "_VBot_Calendar_Events",
         "_VBot_HomeAssistant"
     ],
     "tools": [
@@ -220,6 +221,41 @@
                     "active": {
                         "type": "boolean",
                         "description": "Trạng thái bật hoặc tắt"
+                    }
+                },
+                "required": ["action"]
+            }
+        },
+        {
+            "name": "_VBot_Calendar_Events",
+            "description": "Đọc và tra cứu các sự kiện Calendar Events nội bộ của VBot. Dùng công cụ này khi người dùng hỏi danh sách sự kiện, sự kiện sắp tới, sự kiện vào một ngày cụ thể hoặc tìm sự kiện theo tên/tag. Chỉ khả dụng khi XiaoZhi, Calendar Events và chính MCP này đều được bật.",
+            "inputSchema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                    "action": {
+                        "type": "string",
+                        "enum": ["list", "upcoming", "on_date", "find"],
+                        "description": "list: liệt kê; upcoming: sự kiện sắp tới; on_date: sự kiện đúng ngày; find: tìm theo tên hoặc tag"
+                    },
+                    "date": {
+                        "type": "string",
+                        "description": "Ngày YYYY-MM-DD, bắt buộc khi action=on_date"
+                    },
+                    "days": {
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 366,
+                        "description": "Số ngày cần xem trước khi action=upcoming, mặc định 31"
+                    },
+                    "query": {
+                        "type": "string",
+                        "minLength": 1,
+                        "description": "Tên hoặc tag sự kiện cần tìm khi action=find"
+                    },
+                    "include_inactive": {
+                        "type": "boolean",
+                        "description": "Có gửi cả Event đang tắt hay không, mặc định false"
                     }
                 },
                 "required": ["action"]

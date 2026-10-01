@@ -22,6 +22,22 @@ if ($Config['contact_info']['user_login']['active']) {
   }
 }
 
+//Xử lý ngay trong trang hồ sơ để tài khoản đang đăng nhập không bị
+//Login.php chuyển hướng về index.php trước khi nhận phản hồi JSON.
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['profile_forgot_password'])) {
+  header('Content-Type: application/json; charset=UTF-8');
+  header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+  $email = trim((string)($_POST['mail'] ?? ''));
+  if ($email === '') {
+    echo json_encode(['success'=>false, 'message'=>'Vui lòng nhập email!'], JSON_UNESCAPED_UNICODE);
+  } elseif (!hash_equals(strtolower((string)$Config['contact_info']['email']), strtolower($email))) {
+    echo json_encode(['success'=>false, 'message'=>'Email không khớp!'], JSON_UNESCAPED_UNICODE);
+  } else {
+    echo json_encode(['success'=>true, 'message'=>(string)$Config['contact_info']['user_login']['user_password']], JSON_UNESCAPED_UNICODE);
+  }
+  exit;
+}
+
 //Chuyển đổi danh sách định dạng hình ảnh thành chuỗi cho thuộc tính accept
 $accept_types = implode(", ", array_map(function ($type) {
   return ".{$type}";

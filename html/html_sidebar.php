@@ -61,11 +61,6 @@
             <i class="bi bi-circle"></i><span>Kiểm Tra Thư Viện python pip</span>
           </a>
         </li>
-        <li title="Lập Lịch, Lên Tác Vụ, Báo Thức, Thông Báo (Scheduler)">
-          <a href="Scheduler.php">
-            <i class="bi bi-circle"></i><span>Lên Lịch: Báo Thức, Lời Nhắc, Thông Báo (Scheduler)</span>
-          </a>
-        </li>
         <li title="Chỉnh sửa nội dung các tệp Json">
           <a href="View_Edit_Json.php">
             <i class="bi bi-circle"></i><span>Chỉnh Sửa Tệp JSON</span>
@@ -96,6 +91,28 @@
     </li>
   </ul>
   </li>
+
+    <li class="nav-item">
+      <a class="nav-link collapsed" data-bs-target="#calendar-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
+        <i class="bi bi-calendar-check"></i> Tác Vụ Lịch, Calendar<i class="bi bi-chevron-down ms-auto"></i>
+      </a>
+      <ul id="calendar-nav" class="nav-content collapse " data-bs-parent="#calendar-nav">
+  <li class="nav-item" onclick="loading('show')" title="Lập Lịch, Lên Tác Vụ, Báo Thức, Thông Báo (Scheduler)">
+    <a class="nav-link collapsed" href="Scheduler.php">
+      <i class="bi bi-circle"></i>
+      <span>Tạo Lịch: Báo Thức, Lời Nhắc, Thông Báo, Tác Vụ Hệ Thống</span>
+    </a>
+  </li>
+
+  <li class="nav-item" onclick="loading('show')" title="Quản lý lịch Sự Kiện, Events, Ngày Lễ, Kỉ Niệm">
+    <a class="nav-link collapsed" href="Calendar_Events.php">
+      <i class="bi bi-circle"></i>
+      <span>Tạo Lịch: Sự Kiện, Events, Ngày Lễ, Kỉ Niệm</span>
+    </a>
+  </li>
+      </ul>
+    </li>
+  
   <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#icons-nav" data-bs-toggle="collapse" href="#">
       <i class="bi bi-journal-code"></i><span>Log, Cache</span><i class="bi bi-chevron-down ms-auto"></i>

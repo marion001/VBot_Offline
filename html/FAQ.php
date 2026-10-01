@@ -108,6 +108,7 @@ include 'html_head.php';
       <div class="faq-search-toolbar" aria-label="Tìm kiếm nhanh nội dung FAQ">
         <div class="row g-2 align-items-center">
           <div class="col-12 col-md">
+            <span id="faq-search-status" class="small text-muted d-block mb-1" aria-live="polite">Nhập nội dung để tìm kiếm nhanh</span>
             <div class="position-relative">
               <div class="input-group">
                 <span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span>
@@ -118,9 +119,6 @@ include 'html_head.php';
               </div>
               <div id="faq-search-results" class="list-group faq-search-results d-none" role="listbox" aria-label="Kết quả tìm kiếm FAQ"></div>
             </div>
-          </div>
-          <div class="col-12 col-md-auto">
-            <span id="faq-search-status" class="small text-muted" aria-live="polite">Nhập nội dung để tìm kiếm nhanh</span>
           </div>
         </div>
       </div>
@@ -236,8 +234,8 @@ $:> python3 Manual_Update_WebUI.py --help</code></pre>
                         bao gồm <code>BackList.json</code>, <code>stt_token_google_cloud.json</code>,
                         <code>tts_token_google_cloud.json</code>, <code>Home_Assistant.json</code>,
                         <code>Home_Assistant_Custom.json</code> và các JSON dữ liệu người dùng khác. JSON chỉ có trong gói mới
-                        vẫn được cài đặt. Các JSON lõi <code>Version.json</code>, <code>Action.json</code>,
-                        <code>Adverbs.json</code>, <code>Object.json</code> và một số JSON hệ thống trong
+                        vẫn được cài đặt. Các JSON lõi <code>Version.json</code>, <code>resource/lang_keywords/vi-VN.json</code>
+                        và một số JSON hệ thống trong
                         <code>resource</code> vẫn được nâng cấp vì chúng thuộc mã nguồn.
                       </div>
                       <div class="alert alert-warning">
@@ -1723,7 +1721,7 @@ curl  -L https://raw.githubusercontent.com/marion001/Rpi-SetWiFi-viaBluetooth/ma
                   <div id="vbot_on_speaker_guide" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#vbot_on_speaker_guide">
                     - B1: Trong Giao Diện WebUI Cần <b>Quét Để Tìm Kiếm Các Thiết Bị Chạy VBot Trong Cùng Lớp Mạng Lan</b><br />
                     - B2: Đặt tên định danh (là duy nhất) cho Loa của bạn: <b>Cá Nhân -> Chỉnh Sửa Hồ Sơ -> Tên</b> Ví dụ đặt là: (<b>Loa Phòng Ngủ</b> hoặc <b>Phòng Ngủ</b>)<br /><br />
-                    - B3: Câu lệnh để từ Loa VBot1 thực thi trên loa VBot2 trong file: <b>Adverbs.json -> on_speaker</b><br /><br />
+                    - B3: Câu lệnh để từ Loa VBot1 thực thi trên loa VBot2 nằm tại: <b>resource/lang_keywords/vi-VN.json -> adverbs -> on_speaker</b><br /><br />
                     - B4:<br />
                     Ví Dụ Câu Lệnh 1: Phát danh sách nhạc trên loa phòng ngủ<br />
                     Ví Dụ Câu Lệnh 2: Bật/Tắt Mic trên loa phòng ngủ<br />

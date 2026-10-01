@@ -364,8 +364,7 @@ function apiListEscapeHtml(value) {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#39;');
+        .replace(/"/g, '&quot;');
 }
 
 function highlightCode(code) {
@@ -380,17 +379,80 @@ function highlightCode(code) {
 
 let currentApiTestRequest = null;
 
+// Lấy lại JSON từ phần code người dùng vừa chỉnh sửa. Đoạn code chỉ dùng để
+// hiển thị/chỉnh body; tuyệt đối không eval JavaScript trong trình duyệt.
+function apiListReadEditedRequestBody() {
+    const codeElement = document.getElementById('code_send_api_test');
+    if (!codeElement) {
+        throw new Error('Không tìm thấy nội dung request để kiểm tra.');
+    }
+    const source = codeElement.innerText || codeElement.textContent || '';
+    const marker = 'JSON.stringify(';
+    const markerIndex = source.indexOf(marker);
+    if (markerIndex < 0) {
+        throw new Error('Không tìm thấy JSON.stringify(...) trong nội dung đã chỉnh sửa.');
+    }
+    const jsonStart = markerIndex + marker.length;
+    let parenthesesDepth = 1;
+    let inString = false;
+    let escaped = false;
+    let jsonEnd = -1;
+    for (let index = jsonStart; index < source.length; index += 1) {
+        const character = source[index];
+        if (inString) {
+            if (escaped) {
+                escaped = false;
+            } else if (character === '\\') {
+                escaped = true;
+            } else if (character === '"') {
+                inString = false;
+            }
+            continue;
+        }
+        if (character === '"') {
+            inString = true;
+        } else if (character === '(') {
+            parenthesesDepth += 1;
+        } else if (character === ')') {
+            parenthesesDepth -= 1;
+            if (parenthesesDepth === 0) {
+                jsonEnd = index;
+                break;
+            }
+        }
+    }
+    if (jsonEnd < 0 || inString) {
+        throw new Error('Nội dung JSON.stringify(...) chưa đóng đầy đủ.');
+    }
+    const jsonText = source.slice(jsonStart, jsonEnd).trim();
+    if (jsonText === '') {
+        throw new Error('Body JSON đang để trống.');
+    }
+    return JSON.parse(jsonText);
+}
+
 // Chạy request đã chọn mà không thực thi mã JavaScript tùy ý.
 document.getElementById("run_api_code").onclick = function() {
     if (!currentApiTestRequest) {
         document.getElementById('reponse_tets_code_api').textContent = 'Chưa chọn API để kiểm tra.';
         return;
     }
+    let requestBody = currentApiTestRequest.body;
+    if (!['GET', 'HEAD'].includes(currentApiTestRequest.method)) {
+        try {
+            requestBody = apiListReadEditedRequestBody();
+            currentApiTestRequest.body = requestBody;
+        } catch (error) {
+            document.getElementById('reponse_tets_code_api').textContent =
+                'Body JSON đã chỉnh sửa không hợp lệ: ' + error.message;
+            return;
+        }
+    }
     loading('show');
     vbotFetchWithTimeout(currentApiTestRequest.url, {
         method: currentApiTestRequest.method,
         headers: {'Content-Type': 'application/json'},
-        body: ['GET', 'HEAD'].includes(currentApiTestRequest.method) ? undefined : JSON.stringify(currentApiTestRequest.body)
+        body: ['GET', 'HEAD'].includes(currentApiTestRequest.method) ? undefined : JSON.stringify(requestBody)
     })
     .then(async response => {
         const responseText = await response.text();

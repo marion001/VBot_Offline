@@ -2096,7 +2096,9 @@ function read_YAML_file_path(fileName) {
             var codeElement = document.getElementById('code_config');
             codeElement.textContent = xhr.responseText.trim();
             codeElement.className = 'language-yaml';
-            Prism.highlightElement(codeElement);
+            if (window.Prism && typeof window.Prism.highlightElement === 'function') {
+                window.Prism.highlightElement(codeElement);
+            }
             showMessagePHP("Lấy Dữ Liệu: " + fileName + " thành công", 3)
             document.getElementById('name_file_showzz').textContent = "Tên File: " + fileName.split('/').pop();
             $('#myModal_Config').modal('show');

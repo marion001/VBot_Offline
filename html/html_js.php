@@ -250,6 +250,12 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     }
 
 <?php } ?>
+    // Tô màu cú pháp là tùy chọn: nội dung vẫn phải hiển thị nếu Prism chưa được nạp.
+    function vbotHighlightElement(element) {
+        if (element && window.Prism && typeof window.Prism.highlightElement === 'function') {
+            window.Prism.highlightElement(element);
+        }
+    }
     //Đọc dữ liệu file theo path
     function read_loadFile(path) {
         var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(path);
@@ -264,7 +270,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                     if (response.success) {
                         if (typeof response.data === 'object') {
                             codeElement.textContent = JSON.stringify(response.data, null, 2);
-                            Prism.highlightElement(codeElement);
+                            vbotHighlightElement(codeElement);
                         } else {
                             codeElement.textContent = response.data;
                             codeElement.className = 'language-txt';
@@ -363,7 +369,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                             var modalContentElement = document.getElementById('modal-body-content');
                             modalContentElement.textContent = fileContent;
                             modalContentElement.className = 'language-yaml';
-                            Prism.highlightElement(modalContentElement);
+                            vbotHighlightElement(modalContentElement);
                         }
                         $('#responseModal_read_files_in_backup').modal('show');
                     } else {
@@ -397,7 +403,13 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             return false;
         }
         var xhr = vbotCreateXhr();
+<?php if ($webui_page_name === 'Users_Profile.php') { ?>
+        var forgotEndpoint = 'Users_Profile.php';
+        xhr.open("POST", "Users_Profile.php", true);
+<?php } else { ?>
+        var forgotEndpoint = 'Login.php';
         xhr.open("POST", "Login.php", true);
+<?php } ?>
         xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
         xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
         xhr.onreadystatechange = function() {
@@ -411,7 +423,8 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 }
             }
         };
-        xhr.send("forgot_password=1&mail=" + encodeURIComponent(email));
+        var forgotAction = forgotEndpoint === 'Users_Profile.php' ? 'profile_forgot_password=1' : 'forgot_password=1';
+        xhr.send(forgotAction + "&mail=" + encodeURIComponent(email));
     }
 
 <?php } ?>
