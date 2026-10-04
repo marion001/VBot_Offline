@@ -11,6 +11,7 @@ vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 
 $ir = $Config['internal_ir'] ?? [];
 $jsonPath = $VBot_Offline.($ir['json_file'] ?? 'resource/internal_ir/commands.json');
+$irBackupDir = $VBot_Offline.'html/Backup_Upgrade/Backup_Internal_IR';
 if (!is_dir(dirname($jsonPath))) @mkdir(dirname($jsonPath), 0777, true);
 if (!file_exists($jsonPath)) file_put_contents($jsonPath, "{\n  \"commands\": []\n}", LOCK_EX);
 
@@ -18,24 +19,36 @@ function internalIrRead($path) {
     $data = json_decode((string)@file_get_contents($path), true);
     return is_array($data) ? $data : ['commands'=>[]];
 }
-function internalIrWrite($path, $data) {
+function internalIrWrite($path, $data, $alreadyLocked = false) {
     $encoded = json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     if ($encoded === false) return false;
+    $lock = $alreadyLocked ? null : @fopen($path.'.lock', 'c');
+    if (!$alreadyLocked && (!$lock || !flock($lock, LOCK_EX))) { if ($lock) fclose($lock); return false; }
     $tmp = $path.'.tmp.'.bin2hex(random_bytes(6));
-    if (file_put_contents($tmp, $encoded."\n", LOCK_EX) === false) return false;
-    @chmod($tmp, 0777);
-    if (!@rename($tmp, $path)) { @unlink($tmp); return false; }
-    @chmod($path, 0777);
-    return true;
+    try {
+        if (file_put_contents($tmp, $encoded."\n", LOCK_EX) === false) return false;
+        @chmod($tmp, 0777);
+        if (!@rename($tmp, $path)) return false;
+        @chmod($path, 0777);
+        return true;
+    } finally {
+        if (is_file($tmp)) @unlink($tmp);
+        if ($lock) { flock($lock, LOCK_UN); fclose($lock); }
+    }
 }
 function internalIrValidCommand($command) {
     if (!is_array($command) || !isset($command['format'], $command['keys']['command'])) return false;
     $parts = $command['keys']['command'];
+    if (!is_array($parts) || $parts !== array_values($parts)) return false;
     $raw = isset($parts[0]) && is_array($parts[0]) ? $parts[0] : $parts;
-    if (!is_array($raw) || count($raw) < 3 || count($raw) > 20000) return false;
+    if (!is_array($raw) || $raw !== array_values($raw) || count($raw) < 3 || count($raw) > 20000) return false;
+    $format = $command['format'];
+    if (!is_array($format) || ($format['coding'] ?? null) !== 'raw') return false;
+    $timebase = $format['timebase'] ?? 1;
+    if (!is_int($timebase) || $timebase < 1 || $timebase > 1000000) return false;
     foreach ($raw as $duration) {
-        if (!is_int($duration) && !ctype_digit((string)$duration)) return false;
-        if ((int)$duration < 1 || (int)$duration > 2000000) return false;
+        if (!is_int($duration) && !(is_string($duration) && ctype_digit($duration))) return false;
+        if ((int)$duration < 1 || (int)$duration > intdiv(2000000, $timebase)) return false;
     }
     return true;
 }
@@ -43,6 +56,68 @@ function internalIrAction($value, array $config) {
     $action = trim((string)$value);
     if (strpos($action, 'vbot_action:') === 0) $action = substr($action, 12);
     return array_key_exists($action, vbotActionRegistryOptions($config)) ? $action : null;
+}
+function internalIrValidBackup($data, array $config) {
+    if (!is_array($data) || !isset($data['commands']) || !is_array($data['commands']) || count($data['commands']) > 500) return false;
+    if ($data['commands'] !== array_values($data['commands'])) return false;
+    $names = [];
+    foreach ($data['commands'] as $item) {
+        if (!is_array($item) || !is_string($item['name'] ?? null) || !is_string($item['reply'] ?? '') || !is_string($item['action'] ?? 'none')) return false;
+        $name = trim($item['name']); $reply = $item['reply'] ?? '';
+        if ($name === '' || mb_strlen($name) > 100 || mb_strlen($reply) > 500 || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $name.$reply)) return false;
+        if (array_key_exists('active', $item) && !is_bool($item['active'])) return false;
+        // Saved playlist/radio references may outlive the corresponding source.
+        $action = $item['action'] ?? 'none';
+        if (internalIrAction($action, $config) === null && !preg_match('/^(?:playlist|radio):[A-Za-z0-9_-]{1,80}$/', $action)) return false;
+        if (!internalIrValidCommand($item['data'] ?? null)) return false;
+        $format = $item['data']['format'];
+        if (!is_array($format) || ($format['coding'] ?? 'raw') !== 'raw') return false;
+        foreach (['carrier', 'timebase'] as $field) {
+            if (isset($format[$field]) && (!is_int($format[$field]) || $format[$field] < 1 || $format[$field] > 1000000)) return false;
+        }
+        $key = mb_strtolower($name, 'UTF-8');
+        if (isset($names[$key])) return false;
+        $names[$key] = true;
+    }
+    return true;
+}
+function internalIrBackupPath($directory, $name) {
+    if (!is_string($name) || !preg_match('/^internal_ir_[0-9]{8}_[0-9]{6}_[a-f0-9]{12}\.json$/D', $name)) return false;
+    $root = realpath($directory);
+    $path = realpath($directory.DIRECTORY_SEPARATOR.$name);
+    return $root !== false && $path !== false && dirname($path) === $root && is_file($path) && !is_link($directory.DIRECTORY_SEPARATOR.$name) ? $path : false;
+}
+function internalIrCreateBackup($source, $directory) {
+    $raw = @file_get_contents($source);
+    if (!is_string($raw) || $raw === '' || strlen($raw) > 20971520) return false;
+    if (!is_dir($directory) && !@mkdir($directory, 0777, true) && !is_dir($directory)) return false;
+    $name = 'internal_ir_'.date('Ymd_His').'_'.bin2hex(random_bytes(6)).'.json';
+    if (!vbotAtomicWriteFile($directory.DIRECTORY_SEPARATOR.$name, $raw, 'internal IR backup')) return false;
+    @chmod($directory.DIRECTORY_SEPARATOR.$name, 0777);
+    return $name;
+}
+function internalIrListBackups($directory) {
+    $rows = [];
+    foreach (glob($directory.'/internal_ir_*.json') ?: [] as $file) {
+        $name = basename($file);
+        if (internalIrBackupPath($directory, $name) === false) continue;
+        $rows[] = ['name'=>$name, 'created_at'=>date('d-m-Y H:i:s', filemtime($file)), 'size'=>filesize($file)];
+    }
+    usort($rows, fn($a, $b)=>strcmp($b['name'], $a['name']));
+    return $rows;
+}
+function internalIrRestoreBackup($source, $directory, $raw, array $config) {
+    if (!is_string($raw) || strlen($raw) > 20971520) return ['success'=>false, 'message'=>'Tệp sao lưu vượt quá 20 MB hoặc không hợp lệ'];
+    $data = json_decode($raw, true);
+    if (!internalIrValidBackup($data, $config)) return ['success'=>false, 'message'=>'Tệp sao lưu không đúng cấu trúc lệnh IR, có tên trùng hoặc mã/chức năng không hợp lệ'];
+    $lock = @fopen($source.'.lock', 'c');
+    if (!$lock || !flock($lock, LOCK_EX)) { if ($lock) fclose($lock); return ['success'=>false, 'message'=>'Không khóa được file lệnh IR']; }
+    try {
+        $before = internalIrCreateBackup($source, $directory);
+        if ($before === false) return ['success'=>false, 'message'=>'Không thể sao lưu dữ liệu hiện tại; chưa thực hiện khôi phục'];
+        if (!internalIrWrite($source, $data, true)) return ['success'=>false, 'message'=>'Không thể ghi dữ liệu khôi phục. Bản sao trước khôi phục: '.$before];
+        return ['success'=>true, 'message'=>'Đã khôi phục '.count($data['commands']).' lệnh IR. Đã sao lưu dữ liệu trước khôi phục.', 'before_backup'=>$before];
+    } finally { flock($lock, LOCK_UN); fclose($lock); }
 }
 function internalIrPlaylists($root) {
     $manifest = json_decode((string)@file_get_contents($root.'html/includes/cache/PlayLists.json'), true);
@@ -79,6 +154,38 @@ function internalIrRun($command, $VBot_Offline, $ssh_host, $ssh_port, $ssh_user,
 
 }
 
+if (isset($_POST['backup_list'])) {
+    vbotApiJsonResponse(['success'=>true, 'backups'=>internalIrListBackups($irBackupDir)]);
+}
+if (isset($_POST['backup_create'])) {
+    $name = internalIrCreateBackup($jsonPath, $irBackupDir);
+    if ($name === false) vbotApiJsonResponse(['success'=>false, 'message'=>'Không thể tạo bản sao lưu IR'], 500);
+    vbotApiJsonResponse(['success'=>true, 'message'=>'Đã tạo bản sao lưu IR', 'name'=>$name]);
+}
+if (isset($_POST['backup_download'])) {
+    $path = internalIrBackupPath($irBackupDir, $_POST['name'] ?? null);
+    if ($path === false) vbotApiJsonResponse(['success'=>false, 'message'=>'Không tìm thấy bản sao lưu'], 404);
+    if (filesize($path) > 20971520) vbotApiJsonResponse(['success'=>false, 'message'=>'Tệp sao lưu vượt quá 20 MB'], 400);
+    $raw = @file_get_contents($path);
+    if (!is_string($raw)) vbotApiJsonResponse(['success'=>false, 'message'=>'Không đọc được bản sao lưu'], 500);
+    vbotApiJsonResponse(['success'=>true, 'name'=>basename($path), 'content'=>$raw]);
+}
+if (isset($_POST['backup_restore'])) {
+    $path = internalIrBackupPath($irBackupDir, $_POST['name'] ?? null);
+    if ($path === false) vbotApiJsonResponse(['success'=>false, 'message'=>'Không tìm thấy bản sao lưu'], 404);
+    if (filesize($path) > 20971520) vbotApiJsonResponse(['success'=>false, 'message'=>'Tệp sao lưu vượt quá 20 MB'], 400);
+    $result = internalIrRestoreBackup($jsonPath, $irBackupDir, @file_get_contents($path), $Config);
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 400);
+}
+if (isset($_POST['backup_upload'])) {
+    $file = $_FILES['backup_file'] ?? [];
+    if (($file['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'] ?? '') ||
+        ($file['size'] ?? 0) < 1 || ($file['size'] ?? 0) > 20971520 || strtolower(pathinfo($file['name'] ?? '', PATHINFO_EXTENSION)) !== 'json') {
+        vbotApiJsonResponse(['success'=>false, 'message'=>'Chọn tệp sao lưu .json hợp lệ, tối đa 20 MB'], 400);
+    }
+    $result = internalIrRestoreBackup($jsonPath, $irBackupDir, file_get_contents($file['tmp_name']), $Config);
+    vbotApiJsonResponse($result, $result['success'] ? 200 : 400);
+}
 if (isset($_POST['list'])) {
     vbotApiJsonResponse(['success'=>true,'data'=>internalIrRead($jsonPath),'playlists'=>internalIrPlaylists($VBot_Offline),'radios'=>internalIrRadios($Config),'config'=>[
         'tx_active'=>(bool)($ir['tx_active'] ?? ($ir['active'] ?? false)),

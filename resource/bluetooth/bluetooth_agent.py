@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VBot Bluetooth Agent revision: 8
+# VBot Bluetooth Agent revision: 9
 
 '''
 Code By: Vũ Tuyển
@@ -99,6 +99,7 @@ suspended_playback_device = None        # MAC cần khôi phục sau khi AirPlay
 playback_generation = 0                 # vô hiệu hóa callback delayed-start cũ
 pending_audio_start = {}                # MAC -> GLib source id, tránh health-check hiểu nhầm là process đã chết
 last_audio_start_at = {}                # MAC -> thời điểm spawn bluealsa-aplay gần nhất
+disconnected_health_checks = {}         # Xác nhận mất link qua hai lượt health-check
 external_playback_pid = None            # PID bluealsa-aplay hệ thống (ví dụ: /usr/bin/bluealsa-aplay -S)
 external_playback_cmdline = None
 external_playback_announced_for = None  # tránh lặp log khi player hệ thống đã được phát hiện
@@ -564,6 +565,8 @@ def use_external_bluealsa_player(mac, player=None):
         return False
 
     pid, cmdline = player
+    if active_playback_process is not None and not stop_bluealsa_playback():
+        return False
     cancel_pending_audio_start()
     with playback_lock:
         playback_generation += 1
@@ -578,6 +581,23 @@ def use_external_bluealsa_player(mac, player=None):
         external_playback_announced_for = announce_key
     return True
 
+def _stop_owned_process(process):
+    """Bound terminate/kill/reap errors and retain ownership if reaping fails."""
+    try:
+        if process.poll() is not None:
+            return True
+        try:
+            process.terminate()
+            process.wait(timeout=2)
+            return True
+        except subprocess.TimeoutExpired:
+            process.kill()
+            process.wait(timeout=2)
+            return True
+    except Exception as error:
+        log(f"Không thể reap bluealsa-aplay: {error}")
+        return False
+
 def stop_bluealsa_playback():
     global active_playback_process, active_playback_device, playback_generation
     global external_playback_announced_for
@@ -586,20 +606,15 @@ def stop_bluealsa_playback():
         playback_generation += 1
         process = active_playback_process
         device = active_playback_device
-        active_playback_process = None
         active_playback_device = None
     external_playback_announced_for = None
     # Chỉ dừng process do chính agent tạo. bluealsa-aplay hệ thống phải được giữ nguyên.
-    if process and process.poll() is None:
-        try:
-            process.terminate()
-            process.wait(timeout=2)
-            log(f"Dừng phát âm thanh từ thiết bị: {device_info_str(device)}")
-        except subprocess.TimeoutExpired:
-            process.kill()
-            process.wait(timeout=2)
-        except Exception as error:
-            log(f"Lỗi khi dừng bluealsa-aplay: {error}")
+    if process is not None and not _stop_owned_process(process):
+        return False
+    with playback_lock:
+        if active_playback_process is process:
+            active_playback_process = None
+    return True
 
 def start_bluealsa_playback(mac, delay=AUDIO_START_DELAY):
     global active_playback_process, active_playback_device, playback_generation
@@ -637,7 +652,8 @@ def start_bluealsa_playback(mac, delay=AUDIO_START_DELAY):
         if active_playback_device == mac and mac in pending_audio_start:
             return
 
-    stop_bluealsa_playback()
+    if not stop_bluealsa_playback():
+        return
     with playback_lock:
         active_playback_device = mac
         playback_generation += 1
@@ -651,11 +667,14 @@ def start_bluealsa_playback(mac, delay=AUDIO_START_DELAY):
         log(f"Không thể lên lịch phát BlueALSA cho {mac}: {error}")
 
 def _delayed_start_audio(mac, generation):
-    global active_playback_process
+    global active_playback_process, suspended_playback_device
     pending_audio_start.pop(mac, None)
     with playback_lock:
         if (shutdown_requested or generation != playback_generation or active_playback_device != mac):
             return False
+    if os.path.exists(BT_AUDIO_SUSPEND_FILE):
+        suspended_playback_device = mac
+        return False
     if mac in pairing_devices:
         log(f"Pairing vẫn đang diễn ra, chưa mở BlueALSA PCM cho: {device_info_str(mac)}")
         return False
@@ -680,16 +699,15 @@ def _delayed_start_audio(mac, generation):
         process = subprocess.Popen(["bluealsa-aplay", "--volume=software", mac], stdout=subprocess.DEVNULL, stderr=None)
         last_audio_start_at[mac] = time.time()
         with playback_lock:
-            stale = generation != playback_generation or active_playback_device != mac
+            stale = (shutdown_requested or generation != playback_generation
+                     or active_playback_device != mac or os.path.exists(BT_AUDIO_SUSPEND_FILE))
             if not stale:
                 active_playback_process = process
         if stale:
-            process.terminate()
-            try:
-                process.wait(timeout=2)
-            except subprocess.TimeoutExpired:
-                process.kill()
-                process.wait(timeout=2)
+            if not _stop_owned_process(process):
+                with playback_lock:
+                    if active_playback_process is None:
+                        active_playback_process = process
             return False
     except Exception as error:
         log(f"Không thể khởi động bluealsa-aplay cho {mac}: {error}")
@@ -715,11 +733,46 @@ def ensure_primary_audio():
         # hay tạo player riêng; không log lặp mỗi health-check khi điện thoại idle.
         start_bluealsa_playback(primary)
 
+def reconcile_connected_devices():
+    """Also verify idle devices; missing PCM alone never means disconnected."""
+    global suspended_playback_device
+    kernel_connections = None
+    kernel_checked = False
+    for mac in list(connected_devices):
+        if is_actually_connected(mac):
+            disconnected_health_checks.pop(mac, None)
+            continue
+        if not kernel_checked:
+            kernel_connections = get_kernel_connected_macs()
+            kernel_checked = True
+        if kernel_connections is not None and mac.upper() in kernel_connections:
+            disconnected_health_checks.pop(mac, None)
+            continue
+        count = disconnected_health_checks.get(mac, 0) + 1
+        disconnected_health_checks[mac] = count
+        if count < 2:
+            continue
+        disconnected_health_checks.pop(mac, None)
+        connected_devices.pop(mac, None)
+        last_connected_at.pop(mac, None)
+        softvolume_enabled.discard(mac)
+        default_volume_applied.discard(mac)
+        cancel_pending_audio_start(mac)
+        if suspended_playback_device == mac:
+            suspended_playback_device = None
+        if active_playback_device == mac:
+            stop_bluealsa_playback()
+        if should_post_pair_reconnect(mac):
+            schedule_post_pair_disconnect_confirm(mac)
+        if not connected_devices:
+            set_visibility(True)
+
 #Chỉ khởi động lại tiến trình phát lại đã chọn nếu bị thoát đột ngột
 def playback_health_check():
     global suspended_playback_device, external_playback_pid, external_playback_cmdline
     if shutdown_requested:
         return False
+    reconcile_connected_devices()
     if os.path.exists(BT_AUDIO_SUSPEND_FILE):
         if active_playback_device:
             suspended_playback_device = active_playback_device
@@ -819,6 +872,7 @@ def set_visibility(visible):
 
 def clear_device_state(mac):
     if not mac: return
+    disconnected_health_checks.pop(mac, None)
     cancel_pending_audio_start(mac)
     last_audio_start_at.pop(mac, None)
     cancel_pending_device_task(pending_unpaired_cleanup, mac)
@@ -1365,6 +1419,7 @@ def cleanup_agent():
     pre_pair_connected.clear()
     pending_audio_start.clear()
     last_audio_start_at.clear()
+    disconnected_health_checks.clear()
     softvolume_enabled.clear()
     default_volume_applied.clear()
     visibility_timer = None

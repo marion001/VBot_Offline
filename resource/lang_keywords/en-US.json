@@ -460,15 +460,54 @@
       "value": "{name} {state}{unit}"
     },
     "general": {
+      "negated_command": "I will not execute controls in this negated request.",
       "no_response": "Sorry, no response was received for this request.",
       "no_text": "No text response was returned.",
       "request_replaced": "The request was replaced by a newer request."
     },
     "home_assistant": {
+      "area_control_result": "Processed {done}/{total} devices; failed or undetermined: {failed}.",
+      "area_timeout_unknown": "Some targets timed out; commands may have been received. Check their state before sending again.",
+      "custom_ambiguous": "Multiple Home Assistant commands match. Please specify the command to execute.",
+      "ambiguous_device": "Multiple devices have similar names. Please say the full name of the device to control.",
+      "clarify_device": "Which device do you mean: {names}? Say its name or cancel.",
+      "clarify_temperature_device": "Which device should be set to {value} degrees: {names}? Say its name or cancel.",
+      "control_already_set": "{name} is already in the requested state; no command needs to be sent.",
+      "control_delivery_unknown": "It is unclear whether Home Assistant received the command for {name}. Check the device before sending it again; VBot will not resend it automatically.",
+      "control_verified": "Confirmed the requested state of {name}.",
+      "control_moving": "Sent the command to {name}; the cover is moving and has not reached the requested position yet.",
+      "control_unconfirmed": "Sent the command to {name}, but could not confirm its state. VBot will not resend it automatically.",
+      "control_not_verifiable": "Sent the command to {name}; state verification is not supported for this action.",
+      "area_verification_result": "State confirmed: {confirmed}; moving: {moving}; unconfirmed or unsupported: {unconfirmed}.",
+      "clarify_cover_position_device": "Which cover should be set to {value}%: {names}? Say its specific name or cancel.",
+      "cover_position_success": "Sent a request to set {name} to {value}%.",
+      "cover_position_already_set": "{name} is already at {value}%.",
+      "cover_position_invalid": "Invalid position {value}%; use 0 to 100%.",
+      "cover_position_unsupported": "{name} does not support position control or its capability is unknown.",
+      "clarify_fan_speed_device": "Which fan should be set to {value}% speed: {names}? Say its name or cancel.",
+      "fan_speed_success": "Set {name} speed to {value}% successfully.",
+      "fan_speed_already_set": "{name} is already at {value}% speed.",
+      "fan_speed_invalid": "Speed {value}% is invalid; use a value from 0 to 100%.",
+      "fan_speed_unsupported": "{name} does not support speed or its speed capability is unknown.",
+      "clarify_brightness_device": "Which light should be set to {value}% brightness: {names}? Say its name or cancel.",
+      "brightness_success": "Set {name} brightness to {value}% successfully.",
+      "brightness_already_set": "{name} is already at {value}% brightness.",
+      "brightness_invalid": "Brightness {value}% is invalid; use a value from 0 to 100%.",
+      "brightness_unsupported": "{name} does not support brightness or its brightness capability is unknown.",
+      "temperature_success": "Set {name} to {value} degrees successfully.",
+      "temperature_already_set": "{name} is already set to {value} degrees.",
+      "temperature_invalid": "Temperature {value} is invalid or outside the supported range of {name}.",
+      "clarify_expired": "The pending command expired. Please say the full command again.",
+      "clarify_cancelled": "Pending command cancelled.",
+      "clarify_unavailable": "Home Assistant or the target is unavailable. Please say the command again.",
+      "clarify_retry": "I could not identify the device. Say its full name or cancel.",
+      "clarify_done": "Completed: {action} {name}.",
       "already_set": "{name} is already {action}",
       "control_error": "Home Assistant control error for {entity}: {error}",
       "control_http_error": "Could not control {entity}. HTTP status: {status}",
       "control_unavailable": "Could not control device: {entity}",
+      "entity_not_allowed": "Entity control is blocked by configuration: {entity}",
+      "custom_target_blocked": "This Home Assistant command is blocked. Specify entity IDs permitted by the domain settings and allow/block lists.",
       "cover_action_missing": "No valid cover action was found in the command.",
       "device_not_found": "No matching Home Assistant device was found for {request}, or it did not meet the configured threshold.",
       "disabled": "{request} failed because Home Assistant was not enabled when VBot started",
@@ -620,6 +659,7 @@
       "cover_percent_missing": "Please specify the percentage to open the cover.",
       "fan_percent_missing": "Please specify the fan speed percentage.",
       "temperature_missing": "Please specify the temperature to set.",
+      "entity_value_missing": "Specify one temperature or percentage value outside the entity ID.",
       "volume_percent_missing": "Please specify the volume percentage."
     },
     "system": {
@@ -689,6 +729,42 @@
   },
   "schema_version": 1,
   "values": {
+    "cover_position_terms": ["position", "opening"],
+    "fan_speed_terms": ["fan speed", "speed"],
+    "brightness_terms": ["brightness"],
+    "percent_terms": ["percent", "per cent"],
+    "command_matching": {
+      "area_control": {
+        "device_keywords": {"light": ["light", "lights"], "fan": ["fan", "fans"], "climate": ["air conditioner", "air conditioners", "thermostat"], "cover": ["curtain", "curtains", "blind", "blinds", "cover", "covers"]},
+        "all_phrases": ["all", "every"],
+        "scope_fillers": ["in", "at", "the"]
+      },
+      "negation_phrases": [
+            "do not",
+            "don't",
+            "dont",
+            "never"
+      ],
+      "negation_fillers": [
+            "please",
+            "ever",
+            "actually"
+      ],
+      "command_verbs": [
+            "turn",
+            "switch",
+            "restart",
+            "reboot",
+            "set",
+            "run"
+      ],
+      "action_keywords": {
+            "restart": [
+                  "restart",
+                  "reboot"
+            ]
+      }
+},
     "calendar_events": {
       "countdown_terms": ["how long", "how many days"],
       "birthday_terms": ["birthday"],

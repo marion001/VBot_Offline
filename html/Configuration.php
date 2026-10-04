@@ -7,10 +7,11 @@
 #Email: VBot.Assistant@gmail.com
 
 date_default_timezone_set('Asia/Ho_Chi_Minh');
+require_once __DIR__ . '/includes/Google_Drive_Token.php';
 
 //Khóa liên tiến trình dùng chung với Lib_System.py và ghi file bằng rename nguyên tử.
 if (!function_exists('vbotAtomicWriteFile')) {
-function vbotAtomicWriteFile($filePath, $content, $label = 'file')
+function vbotAtomicWriteFile($filePath, $content, $label = 'file', $alreadyLocked = false)
 {
     if (!is_string($filePath) || $filePath === '' || !is_string($content)) {
         error_log('[PHP FILE ERROR] Dữ liệu ghi không hợp lệ: '.$label);
@@ -21,8 +22,8 @@ function vbotAtomicWriteFile($filePath, $content, $label = 'file')
         error_log('[PHP FILE ERROR] Thư mục không tồn tại: '.$directory);
         return false;
     }
-    $lockHandle = @fopen($filePath.'.lock', 'c+');
-    if ($lockHandle === false || !@flock($lockHandle, LOCK_EX)) {
+    $lockHandle = $alreadyLocked ? null : @fopen($filePath.'.lock', 'c+');
+    if (!$alreadyLocked && ($lockHandle === false || !@flock($lockHandle, LOCK_EX))) {
         if (is_resource($lockHandle)) fclose($lockHandle);
         error_log('[PHP FILE ERROR] Không thể khóa file: '.$filePath);
         return false;
@@ -52,12 +53,15 @@ function vbotAtomicWriteFile($filePath, $content, $label = 'file')
         error_log('[PHP FILE ERROR] '.$label.': '.$error->getMessage());
     } finally {
         if (!$success && is_string($tempPath) && is_file($tempPath)) @unlink($tempPath);
-        flock($lockHandle, LOCK_UN);
-        fclose($lockHandle);
+        if (!$alreadyLocked) {
+            flock($lockHandle, LOCK_UN);
+            fclose($lockHandle);
+        }
     }
     return $success;
 }
 }
+require_once __DIR__ . '/includes/Config_Storage.php';
 
 // Luôn ghi mọi lỗi PHP vào log chung, kể cả lỗi xảy ra khi đang nạp Config.json.
 $phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
@@ -156,56 +160,8 @@ $Current_URL = $Protocol . $Domain . $Path;
 $Backup_dir = $HTML_VBot_Offline . '/Backup_Upgrade/Backup_Config/';
 
 // Kiểm tra file không tồn tại hoặc rỗng
-$needCopy = false;
-if (!file_exists($Config_filePath)) {
-    $needCopy = true;
-} else {
-    $fileContent = file_get_contents($Config_filePath);
-    if (empty(trim($fileContent))) {
-        $needCopy = true;
-    }
-}
-if ($needCopy) {
-    $backupFiles = glob($Backup_dir . 'Config_*.json');
-    if (!empty($backupFiles)) {
-        usort($backupFiles, function ($a, $b) {
-            return filemtime($b) - filemtime($a);
-        });
-        $latestBackup = $backupFiles[0];
-        //echo "Backup được chọn: $latestBackup\n";
-        //echo "Sao chép tới: $Config_filePath\n";
-        if (file_exists($Config_filePath)) {
-            @unlink($Config_filePath);
-        }
-        $dirPath = dirname($Config_filePath);
-        @chmod($dirPath, 0777);
-        if (@copy($latestBackup, $Config_filePath)) {
-            $Configuration_Load_Status['recovered'] = true;
-            $Configuration_Load_Status['backup_file'] = basename($latestBackup);
-            @chmod($Config_filePath, 0777);
-            $fileContent = file_get_contents($Config_filePath);
-        } else {
-            //echo "Không thể sao chép file backup vào: $Config_filePath\n";
-            $Configuration_Load_Status['error'] = 'Không thể khôi phục Config.json từ bản sao lưu mới nhất.';
-            $Config = null;
-        }
-    } else {
-        //echo "Không tìm thấy file backup nào trong: $Backup_dir\n";
-        $Configuration_Load_Status['error'] = 'Không tìm thấy bản sao lưu để khôi phục Config.json.';
-        $Config = null;
-    }
-}
-
-// Giải mã JSON nếu file tồn tại và không lỗi
-if (!empty($fileContent)) {
-    $Config = json_decode($fileContent, true);
-    if (json_last_error() !== JSON_ERROR_NONE) {
-        $Configuration_Load_Status['error'] = 'Lỗi giải mã Config.json: ' . json_last_error_msg();
-        $Config = null;
-    }
-} else {
-    $Config = null;
-}
+$Config = vbotConfigLoadRecover($Config_filePath, $Backup_dir, $Configuration_Load_Status);
+$VBot_Config_Load_Snapshot = $Config;
 
 //CSRF độc lập với đăng nhập: WebUI không yêu cầu mật khẩu vẫn phải có session/token hợp lệ.
 $requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : '';
@@ -590,6 +546,7 @@ if (!function_exists('vbotUpgradeTransactionalCopy')) {
         $manifest = [];
         foreach ($files as [$srcPath, $relative]) {
             $destPath = $destination . '/' . $relative;
+            if (vbotGoogleDrivePreserveCredential($destPath)) continue;
             $backupPath = $rollbackRoot . '/' . $relative;
             $existed = is_file($destPath);
             if ($existed) {

@@ -25,6 +25,20 @@ if ($Config['contact_info']['user_login']['active']) {
     </ol></nav>
   </div>
   <section class="section">
+    <div class="card">
+      <div class="card-body pt-3">
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
+          <h2 class="card-title mb-0 py-0">Sơ đồ kết nối I2S VBot</h2>
+          <a class="btn btn-sm btn-outline-primary ms-auto" href="assets/img/Schematic_VBot_i2s.png" target="_blank" rel="noopener">
+            <i class="bi bi-box-arrow-up-right"></i> Xem ảnh gốc
+          </a>
+        </div>
+        <a href="assets/img/Schematic_VBot_i2s.png" target="_blank" rel="noopener" title="Mở sơ đồ I2S ở kích thước gốc">
+          <img src="assets/img/Schematic_VBot_i2s.png" class="img-fluid rounded border d-block mx-auto" alt="Sơ đồ kết nối I2S VBot" style="height:auto" decoding="async">
+        </a>
+        <p class="text-muted small mt-2 mb-0">Nhấn vào ảnh hoặc chọn Xem ảnh gốc để xem rõ các chi tiết kết nối.</p>
+      </div>
+    </div>
     <div class="card"><div class="card-body pt-3">
       <div class="d-flex flex-wrap gap-2 align-items-center mb-3">
         <span class="text-muted">Tài liệu kỹ thuật tương tác, hoạt động offline.</span>

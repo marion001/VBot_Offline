@@ -292,6 +292,19 @@ Chạy lại `install_internal_ir.sh`, sau đó reboot. Kiểm tra các dòng `d
 - Kiểm tra GND chung.
 - Hướng remote gần module thu và giữ nút trong khoảng một giây.
 
+### Sao lưu và khôi phục trên WebUI
+
+Trong trang **IR, Remote GPIO Nội Bộ**, mục **Sao lưu và khôi phục lệnh IR** cho phép:
+
+- Tạo bản sao từ dữ liệu đã lưu và xem danh sách bản sao.
+- Tải bản sao JSON xuống máy tính.
+- Khôi phục bản đã lưu hoặc tải lên tệp JSON tối đa 20 MB.
+
+Các bản sao nằm trong `html/Backup_Upgrade/Backup_Internal_IR`. Khôi phục thay
+thế toàn bộ danh sách lệnh; dữ liệu hiện tại được sao lưu trước khi thay thế.
+Tệp được kiểm tra cấu trúc, mã IR, tên trùng và chức năng khi nhận. Khôi phục
+không phát tín hiệu IR. Khởi động lại VBot sau khi khôi phục để nạp lại danh sách.
+
 ### Không phát được IR
 
 - Kiểm tra đã bật IR phát (TX).

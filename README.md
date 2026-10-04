@@ -61,7 +61,7 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - Google Gemini, ChatGPT, XiaoZhi và các nguồn trợ lý được bật trong `Config.json`.
 - Home Assistant Assist và câu lệnh Home Assistant tùy chỉnh.
 - Các điểm mở rộng `Dev_*.py` dành cho logic cá nhân, (Người dùng, lập trình có thể tự code theo ý muốn).
-- Phân tích từ khóa thông qua `Action.json`, `Adverbs.json` và `Object.json`.
+- Phân tích từ khóa theo locale qua `resource/lang_keywords/<locale>.json`; mặc định dùng `vi-VN.json`.
 
 ### Media và kết nối âm thanh
 
@@ -530,6 +530,9 @@ Các khu vực chính:
 - Dashboard.
 - Cấu hình `Config.json`.
 - Command/Terminal.
+- Kiểm tra câu lệnh (`Command_Test.php`): xem keyword, hành động, đích dự kiến,
+  điểm khớp/ngưỡng và lý do từ chối. Chế độ thử không chạy lệnh; có thể chọn
+  đọc danh sách thiết bị Home Assistant để kiểm tra việc chọn đích.
 - REST API.
 - Scheduler.
 - Log VBot, TTS và API.
@@ -867,7 +870,7 @@ python3 Manual_Update_WebUI.py --zip /home/pi/VBot_Offline-main.zip
 
 Các JSON đang tồn tại được giữ lại mặc định, gồm `BackList.json`, token STT/TTS,
 `Home_Assistant.json`, `Home_Assistant_Custom.json` và những JSON dữ liệu khác. JSON lõi như
-`Version.json`, `Action.json`, `Adverbs.json`, `Object.json` và một số JSON hệ thống vẫn được
+`Version.json`, `resource/lang_keywords/vi-VN.json` và một số JSON hệ thống vẫn được
 cập nhật. Chỉ ghi đè một JSON dữ liệu khi thực sự cần:
 
 ```bash
@@ -984,3 +987,29 @@ VBot Assistant hướng tới một nền tảng loa thông minh tiếng Việt 
 ## Home Assistant Custom Component (HASS)
 
 <img width="2688" height="1360" alt="Image" src="https://github.com/user-attachments/assets/b917e0a2-e6ff-452c-9823-14d04e664791" />
+## Tra cứu âm lịch và dương lịch
+
+VBot có thể lấy ngày hiện tại từ đồng hồ hệ thống, nhận các mốc `hôm nay`,
+`ngày mai`, `ngày kia`, `hôm qua` hoặc ngày cụ thể dạng `20/09/2026` và
+`ngày 20 tháng 9 năm 2026`. Khi hỏi âm lịch, ngày dương được chuyển sang âm
+lịch Việt Nam theo múi giờ UTC+7, bao gồm tháng nhuận và tên năm Can Chi.
+
+Chọn nguồn xử lý trong `Config.json`:
+
+```json
+"calendar": {
+    "source": "system"
+}
+```
+
+Các giá trị hỗ trợ:
+
+- `system`: VBot tự xử lý lịch âm và dương, không cần Internet.
+- `virtual_assistant_priority`: ưu tiên trợ lý ảo; nếu trợ lý không phản hồi thì
+  tự động dùng lịch hệ thống.
+- `dev_calendar`: gọi `Dev_Calendar.py`; nếu file tùy chỉnh lỗi hoặc không trả
+  kết quả thì tự động dùng lịch hệ thống.
+
+Hàm `custom_calendar()` trong `Dev_Calendar.py` nhận câu gốc, câu đã chuẩn hóa,
+loại lịch và dữ liệu ngày đã quy đổi; hàm phải trả về `(audio, text)`. Sau khi
+đổi cấu hình nguồn, hãy khởi động lại chương trình VBot để nạp đúng module.

@@ -89,12 +89,12 @@ if ($activve_show === true) {
     //Kiểm tra và làm mới token nếu cần
     if ($client->isAccessTokenExpired()) {
         if ($client->getRefreshToken()) {
-            $newAccessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            $newAccessToken = vbotGoogleDriveRefreshToken($client, $tokenPath, $accessToken);
             if (isset($newAccessToken['access_token'])) {
                 //echo "Làm mới token thành công";
                 $accessToken = array_merge($accessToken, $newAccessToken);
                 $encodedToken = json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                if ($encodedToken === false || !vbotAtomicWriteFile($tokenPath, $encodedToken, 'token Google Drive')) {
+                if ($encodedToken === false) {
                     vbotApiJsonResponse(['success' => false, 'message' => 'Không thể lưu token Google Drive đã làm mới'], 500);
                 }
                 vbotSetFullPermissions($tokenPath, 'token Google Drive');

@@ -358,6 +358,7 @@ include 'html_head.php';
             if ($file != '.' && $file != '..') {
                 $srcPath = rtrim($source, '/') . '/' . $file;
                 $destPath = rtrim($destination, '/') . '/' . $file;
+                if (vbotGoogleDrivePreserveCredential($destPath)) continue;
                 if (in_array($file, $keepList)) {
                     $messages[] = "<font color=orange>- Bỏ qua tệp/thư mục: </font><font color=blue><b>$file</b></font>";
                     continue;
@@ -516,10 +517,9 @@ include 'html_head.php';
             $client->setAccessToken($accessToken);
             if ($client->isAccessTokenExpired()) {
                 if ($client->getRefreshToken()) {
-                    $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                    $token = vbotGoogleDriveRefreshToken($client, $tokenPath, $accessToken);
                     if (isset($token['access_token'])) {
                         $accessToken = array_merge($accessToken, $token);
-                        vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
                         $client->setAccessToken($accessToken);
                         $libPath_exist = true;
                         $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
@@ -640,10 +640,9 @@ include 'html_head.php';
                                 $client->setAccessToken($accessToken);
                                 if ($client->isAccessTokenExpired()) {
                                     if ($client->getRefreshToken()) {
-                                        $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                                        $token = vbotGoogleDriveRefreshToken($client, $tokenPath, $accessToken);
                                         if (isset($token['access_token'])) {
                                             $accessToken = array_merge($accessToken, $token);
-                                            vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
                                             $client->setAccessToken($accessToken);
                                             $libPath_exist = true;
                                             $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
@@ -804,10 +803,9 @@ include 'html_head.php';
                                         $client->setAccessToken($accessToken);
                                         if ($client->isAccessTokenExpired()) {
                                             if ($client->getRefreshToken()) {
-                                                $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                                                $token = vbotGoogleDriveRefreshToken($client, $tokenPath, $accessToken);
                                                 if (isset($token['access_token'])) {
                                                     $accessToken = array_merge($accessToken, $token);
-                                                    vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
                                                     $client->setAccessToken($accessToken);
                                                     $libPath_exist = true;
                                                     $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
@@ -970,10 +968,9 @@ include 'html_head.php';
         $messages[] = "<font color=green>- Đang tiến hành tải xuống tệp sao lưu có ID là: <b>$fileId</b>";
         if ($client->isAccessTokenExpired()) {
             if ($client->getRefreshToken()) {
-                $token = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                $token = vbotGoogleDriveRefreshToken($client, $tokenPath, $accessToken);
                 if (isset($token['access_token'])) {
                     $accessToken = array_merge($accessToken, $token);
-                    vbotDashboardWriteJson($tokenPath, $accessToken, 'token Google Drive');
                     $client->setAccessToken($accessToken);
                     $messages[] = '<font color=green>- Tự động làm mới và cập nhật Token Google Cloud Drive Thành Công</font>';
                 } else {

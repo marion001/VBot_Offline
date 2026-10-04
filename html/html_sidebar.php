@@ -41,6 +41,11 @@
         <span>Command/Terminal</span>
       </a>
     </li>
+    <li class="nav-item" onclick="loading('show')">
+      <a class="nav-link collapsed" href="Command_Test.php">
+        <i class="bi bi-search"></i><span>Kiểm tra câu lệnh</span>
+      </a>
+    </li>
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#hass-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
         <i class="bi bi-code-slash"></i><span>Thiết Lập Nâng Cao </span><i class="bi bi-chevron-down ms-auto"></i>

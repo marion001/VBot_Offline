@@ -282,6 +282,41 @@
     },
     "home_assistant": {
         "active": false,
+        "search_sources": {
+            "friendly_name": true,
+            "entity_id": false,
+            "aliases": false,
+            "area": false
+        },
+        "entity_types": {
+            "switch": true,
+            "light": true,
+            "fan": true,
+            "media_player": true,
+            "climate": true,
+            "automation": true,
+            "cover": true,
+            "script": true
+        },
+        "on_off_entity_types": [
+            "switch",
+            "light",
+            "fan",
+            "media_player"
+        ],
+        "check_state_before_control": true,
+        "verify_after_control": false,
+        "area_control": {
+            "allow_multiple": false
+        },
+        "allowed_entities": {
+            "active": false,
+            "entity_ids": []
+        },
+        "blocked_entities": {
+            "active": false,
+            "entity_ids": []
+        },
         "minimum_threshold": 0.6,
         "lowest_to_display_logs": 0.39,
         "internal_url": "http://192.168.14.17:8123",

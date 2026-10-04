@@ -273,6 +273,7 @@ Các giá trị ngôn ngữ có cấu trúc được nhiều chức năng dùng 
     "reminder_time_terms": ["today", "tomorrow", "tonight"],
     "calendar_events": {
         "countdown_terms": ["how long", "how many days"],
+        "birthday_terms": ["birthday"],
         "month_terms": ["this month"],
         "day_number_prefixes": ["day"],
         "month_number_prefixes": ["month"],
@@ -307,7 +308,7 @@ Các giá trị ngôn ngữ có cấu trúc được nhiều chức năng dùng 
 - `multi_command_joiner`: từ nối khi ghép nhiều câu lệnh.
 - `inactive_states`: trạng thái được hiểu là không hoạt động.
 - `reminder_time_terms`: từ thời gian dùng khi phân tích lời nhắc.
-- `calendar_events`: cụm nhận diện truy vấn Events, nhãn phạm vi và định dạng ngày trả về. Các khóa `day_number_prefixes`, `month_number_prefixes` và `year_number_prefixes` lần lượt chứa từ đứng trước số ngày, tháng và năm. `month_names` ánh xạ tháng `1–12` tới các cách gọi. `date_order` nhận `dmy` hoặc `mdy`; `allow_bare_year` cho phép năm không có tiền tố. `week_queries` khai báo tuần hiện tại (`week_offset: 0`) hoặc tuần sau (`1`). Các cặp `range_start_terms`/`range_end_terms` và `next_days_prefixes`/`next_days_suffixes` điều khiển truy vấn khoảng ngày. Mỗi khoảng bị giới hạn tối đa 366 ngày. Các khóa `explicit_date_label`, `range_label`, `next_days_label` định dạng nhãn trả lời. Chỉ nhập cụm từ thông thường, không dùng regex.
+- `calendar_events`: cụm nhận diện truy vấn Events, nhãn phạm vi và định dạng ngày trả về. Với Event `recurrence: yearly` có `year`, VBot tính số năm kể từ năm bắt đầu; nếu tên hoặc Tags khớp `birthday_terms` thì số năm được đọc thành tuổi. Event một lần hoặc không có năm không hiển thị số năm. Các khóa `day_number_prefixes`, `month_number_prefixes` và `year_number_prefixes` lần lượt chứa từ đứng trước số ngày, tháng và năm. `month_names` ánh xạ tháng `1–12` tới các cách gọi. `date_order` nhận `dmy` hoặc `mdy`; `allow_bare_year` cho phép năm không có tiền tố. `week_queries` khai báo tuần hiện tại (`week_offset: 0`) hoặc tuần sau (`1`). Các cặp `range_start_terms`/`range_end_terms` và `next_days_prefixes`/`next_days_suffixes` điều khiển truy vấn khoảng ngày. Mỗi khoảng bị giới hạn tối đa 366 ngày. Các khóa `explicit_date_label`, `range_label`, `next_days_label` định dạng nhãn trả lời. Chỉ nhập cụm từ thông thường, không dùng regex.
 - `language_instruction`: tên ngôn ngữ dùng trong chỉ dẫn cho trợ lý ảo.
 
 ## 6. Placeholder trong câu phản hồi

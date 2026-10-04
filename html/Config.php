@@ -165,6 +165,14 @@ function vbotConfigWriteFile($filePath, $content, $label)
 
 function vbotConfigWriteJson($filePath, array $data, $label)
 {
+  global $Config_filePath, $VBot_Config_Load_Snapshot, $Config;
+  if ($filePath === $Config_filePath && is_array($VBot_Config_Load_Snapshot)) {
+    if (!vbotConfigWriteChanges($filePath, $VBot_Config_Load_Snapshot, $data, $saved)) return false;
+    $Config = $saved;
+    $VBot_Config_Load_Snapshot = $saved;
+    vbotConfigSetFullPermissions($filePath, $label);
+    return true;
+  }
   $encoded = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   if ($encoded === false) {
     error_log('[PHP Config ERROR] Không thể mã hóa ' . $label . ': ' . json_last_error_msg(), 0);
@@ -289,7 +297,7 @@ if (isset($_POST['all_config_save'])) {
   #error_log('[PHP Config] Bắt đầu xử lý yêu cầu lưu Config.json', 0);
   if ($Config['backup_upgrade']['config_json']['active'] === true) {
     $dateTime = new DateTime();
-    $newFileName = 'Config_' . $dateTime->format('dmY_His') . '.json';
+    $newFileName = 'Config_' . $dateTime->format('dmY_His') . '_' . bin2hex(random_bytes(6)) . '.json';
     $destinationFile_Backup_Config = $directoryPath_Backup_Config . '/' . $newFileName;
     if (is_dir($directoryPath_Backup_Config) && copy($Config_filePath, $destinationFile_Backup_Config)) {
       vbotConfigSetFullPermissions($destinationFile_Backup_Config, 'bản backup Config');
@@ -413,6 +421,46 @@ if (isset($_POST['all_config_save'])) {
   $Config['web_interface']['file_access_security'] = isset($_POST['webui_file_access_security']) ? true : false;
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
+  $hassKnownDomains = ['switch','light','fan','media_player','climate','automation','cover','script'];
+  $hassExtraDomains = preg_split('/[\s,;]+/', trim((string)($_POST['hass_extra_domains'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
+  $hassInvalidDomains = array_filter($hassExtraDomains, function($domain) {return !preg_match('/^[a-z][a-z0-9_]*$/D', $domain);});
+  if ($hassInvalidDomains) {$hassExtraDomains = []; $messages[] = 'Loại thực thể bổ sung không hợp lệ; chỉ dùng chữ thường, số và dấu gạch dưới.';}
+  $hassPreviousDomains = $Config['home_assistant']['entity_types'] ?? array_fill_keys($hassKnownDomains, true);
+  $hassPostedEnabled = is_array($_POST['hass_domain_enabled'] ?? null) ? $_POST['hass_domain_enabled'] : [];
+  $hassPostedOnOff = is_array($_POST['hass_domain_on_off'] ?? null) ? $_POST['hass_domain_on_off'] : [];
+  $Config['home_assistant']['entity_types'] = [];
+  $Config['home_assistant']['on_off_entity_types'] = [];
+  foreach (array_unique(array_merge($hassKnownDomains, $hassExtraDomains)) as $domain) {
+    $isNewDomain = !array_key_exists($domain, $hassPreviousDomains) && !in_array($domain, $hassKnownDomains, true);
+    $enabled = isset($hassPostedEnabled[$domain]) || $isNewDomain;
+    $Config['home_assistant']['entity_types'][$domain] = $enabled;
+    if ($enabled && !in_array($domain, ['cover','script'], true) && (isset($hassPostedOnOff[$domain]) || $isNewDomain)) $Config['home_assistant']['on_off_entity_types'][] = $domain;
+  }
+  $Config['home_assistant']['search_sources']['friendly_name'] = isset($_POST['hass_search_name']);
+  $Config['home_assistant']['search_sources']['entity_id'] = isset($_POST['hass_search_entity_id']);
+  $Config['home_assistant']['search_sources']['aliases'] = isset($_POST['hass_search_aliases']);
+  if (!$Config['home_assistant']['search_sources']['friendly_name'] && !$Config['home_assistant']['search_sources']['entity_id'] && !$Config['home_assistant']['search_sources']['aliases']) {
+    $Config['home_assistant']['search_sources']['friendly_name'] = true;
+    $messages[] = '- Cần chọn ít nhất một nguồn tên thiết bị; đã bật friendly_name.';
+  }
+  $allowedHassIds = preg_split('/[\s,;]+/', trim((string)($_POST['hass_allowed_entity_ids'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
+  $invalidHassIds = array_filter($allowedHassIds, fn($id)=>!preg_match('/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/D', $id));
+  $Config['home_assistant']['allowed_entities']['active'] = isset($_POST['hass_allowed_entities_active']);
+  $Config['home_assistant']['allowed_entities']['entity_ids'] = $invalidHassIds ? [] : array_values(array_unique($allowedHassIds));
+  if ($invalidHassIds) $messages[] = '- Danh sách entity_id không hợp lệ; đã để danh sách cho phép trống. Khi bật giới hạn, mọi đích sẽ bị chặn.';
+  $Config['home_assistant']['search_sources']['area'] = isset($_POST['hass_search_area']);
+  $blockedHassText = $_POST['hass_blocked_entity_ids'] ?? '';
+  $blockedHassIds = is_string($blockedHassText) ? preg_split('/[\s,;]+/', trim($blockedHassText), -1, PREG_SPLIT_NO_EMPTY) : [];
+  $invalidBlockedHassIds = !is_string($blockedHassText) || array_filter($blockedHassIds, fn($id)=>!preg_match('/^[a-z_][a-z0-9_]*\.[a-z0-9_]+$/D', $id));
+  if ($invalidBlockedHassIds) {
+    $messages[] = '- Danh sách entity_id bị chặn không hợp lệ; giữ nguyên danh sách và trạng thái chặn đã lưu trước đó.';
+  } else {
+    $Config['home_assistant']['blocked_entities']['active'] = isset($_POST['hass_blocked_entities_active']);
+    $Config['home_assistant']['blocked_entities']['entity_ids'] = array_values(array_unique($blockedHassIds));
+  }
+  $Config['home_assistant']['area_control']['allow_multiple'] = isset($_POST['hass_area_allow_multiple']);
+  $Config['home_assistant']['verify_after_control'] = isset($_POST['hass_verify_after_control']);
+  $Config['home_assistant']['check_state_before_control'] = isset($_POST['hass_check_state_before_control']);
   $Config['home_assistant']['minimum_threshold'] = floatval($_POST['hass_minimum_threshold']);
   $Config['home_assistant']['lowest_to_display_logs'] = floatval($_POST['hass_lowest_to_display_logs']);
   $Config['home_assistant']['time_out'] = intval($_POST['hass_time_out']);
@@ -431,7 +479,12 @@ if (isset($_POST['all_config_save'])) {
   $Config['mqtt_broker']['mqtt_port'] = intval($_POST['mqtt_port']);
   $Config['mqtt_broker']['mqtt_time_out'] = intval($_POST['mqtt_time_out']);
   $Config['mqtt_broker']['mqtt_connection_waiting_time'] = intval($_POST['mqtt_connection_waiting_time']);
-  $Config['mqtt_broker']['mqtt_qos'] = intval($_POST['mqtt_qos']);
+  $mqttQos = $_POST['mqtt_qos'] ?? null;
+  if (is_string($mqttQos) && in_array($mqttQos, ['0', '1', '2'], true)) {
+    $Config['mqtt_broker']['mqtt_qos'] = intval($mqttQos);
+  } else {
+    $messages[] = '- QoS MQTT không hợp lệ: chỉ chấp nhận 0, 1 hoặc 2. Đã giữ giá trị hiện tại.';
+  }
   $Config['mqtt_broker']['mqtt_username'] = $_POST['mqtt_username'];
   $Config['mqtt_broker']['mqtt_password'] = $_POST['mqtt_password'];
   $Config['mqtt_broker']['mqtt_client_name'] = $_POST['mqtt_client_name'];
@@ -606,6 +659,12 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['led']['led_type'] = $_POST['led_type_select'];
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
   $Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
+  $ledFreqHz = filter_var($_POST['led_freq_hz'] ?? ($Config['smart_config']['led']['led_freq_hz'] ?? 1000000), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 2147483647]]);
+  if ($ledFreqHz === false) {
+    $messages[] = '- led_freq_hz không hợp lệ: cần số nguyên dương không vượt quá 2147483647 Hz. Đã giữ giá trị hiện tại.';
+  } else {
+    $Config['smart_config']['led']['led_freq_hz'] = $ledFreqHz;
+  }
   $Config['smart_config']['led']['brightness'] = intval(min(100, max(0, intval($_POST['led_brightness']))) * 255 / 100);
   $Config['smart_config']['led']['led_invert'] = isset($_POST['led_invert']) ? true : false;
   $Config['smart_config']['led']['led_reversed'] = isset($_POST['led_reversed']) ? true : false;
@@ -824,23 +883,23 @@ if (isset($_POST['all_config_save'])) {
   $internalIrDebounceMs = filter_var($_POST['internal_ir_receive_debounce_ms'] ?? null, FILTER_VALIDATE_INT);
   $internalIrTxRxGuardMs = filter_var($_POST['internal_ir_tx_rx_guard_ms'] ?? null, FILTER_VALIDATE_INT);
   if ($internalIrMatchThreshold === false || $internalIrMatchThreshold < 0.4 || $internalIrMatchThreshold > 0.99) {
-      $errorMessages[] = '- Ngưỡng khớp mã IR phải từ 0.40 đến 0.99';
+      $messages[] = '- Ngưỡng khớp mã IR phải từ 0.40 đến 0.99';
       $internalIrMatchThreshold = floatval($Config['internal_ir']['receive_match_threshold'] ?? 0.92);
   }
   if ($internalIrMatchMargin === false || $internalIrMatchMargin < 0 || $internalIrMatchMargin > 0.30) {
-      $errorMessages[] = '- Khoảng cách phân biệt mã IR phải từ 0.00 đến 0.30';
+      $messages[] = '- Khoảng cách phân biệt mã IR phải từ 0.00 đến 0.30';
       $internalIrMatchMargin = floatval($Config['internal_ir']['receive_match_margin'] ?? 0.06);
   }
   if ($internalIrMinimumPulses === false || $internalIrMinimumPulses < 7 || $internalIrMinimumPulses > 500) {
-      $errorMessages[] = '- Số xung IR tối thiểu phải từ 7 đến 500';
+      $messages[] = '- Số xung IR tối thiểu phải từ 7 đến 500';
       $internalIrMinimumPulses = intval($Config['internal_ir']['receive_minimum_pulses'] ?? 20);
   }
   if ($internalIrDebounceMs === false || $internalIrDebounceMs < 100 || $internalIrDebounceMs > 3000) {
-      $errorMessages[] = '- Thời gian chống lặp IR phải từ 100 đến 3000 mili giây';
+      $messages[] = '- Thời gian chống lặp IR phải từ 100 đến 3000 mili giây';
       $internalIrDebounceMs = intval($Config['internal_ir']['receive_debounce_ms'] ?? 450);
   }
   if ($internalIrTxRxGuardMs === false || $internalIrTxRxGuardMs < 0 || $internalIrTxRxGuardMs > 3000) {
-      $errorMessages[] = '- Thời gian tạm khóa mắt thu sau khi phát IR phải từ 0 đến 3000 mili giây';
+      $messages[] = '- Thời gian tạm khóa mắt thu sau khi phát IR phải từ 0 đến 3000 mili giây';
       $internalIrTxRxGuardMs = intval($Config['internal_ir']['tx_rx_guard_ms'] ?? 500);
   }
   $Config['internal_ir']['receive_match_threshold'] = round($internalIrMatchThreshold, 2);
@@ -853,7 +912,7 @@ if (isset($_POST['all_config_save'])) {
   $internalIrTxGpio = filter_var($_POST['internal_ir_tx_gpio'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 27]]);
   $internalIrRxGpio = filter_var($_POST['internal_ir_rx_gpio'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0, 'max_range' => 27]]);
   if ($internalIrTxGpio === false || $internalIrRxGpio === false || $internalIrTxGpio === $internalIrRxGpio || $internalIrTxGpio === 10 || $internalIrRxGpio === 10) {
-      $errorMessages[] = '- GPIO phát/thu IR phải thuộc BCM 0-27, không trùng nhau và không được dùng GPIO10 vì GPIO10 đang điều khiển LED';
+      $messages[] = '- GPIO phát/thu IR phải thuộc BCM 0-27, không trùng nhau và không được dùng GPIO10 vì GPIO10 đang điều khiển LED';
       $internalIrTxGpio = intval($Config['internal_ir']['tx_gpio'] ?? 17);
       $internalIrRxGpio = intval($Config['internal_ir']['rx_gpio'] ?? 4);
   }
@@ -3105,6 +3164,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                   echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Thời gian chờ phản hồi tối đa khi kết nối với Hass, Home Assistant', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
+				  
 				<div class="alert alert-primary" role="alert">
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
@@ -3118,6 +3178,81 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
 				echo input_field('hass_custom_commands_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['custom_commands']['minimum_threshold'] ?? 0.85, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 1</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
 				  ?>
 				</div>
+
+                <div class="border rounded mb-3">
+				<div class="alert alert-primary" role="alert">
+                  <h6 class="fw-bold">Kiểm tra trạng thái thiết bị trước và sau khi điều khiển</h6>
+                  <div class="form-switch mb-2">
+                    <input class="form-check-input border-success" type="checkbox" name="hass_check_state_before_control" id="hass_check_state_before_control" <?php echo ($Config['home_assistant']['check_state_before_control'] ?? true) !== false ? 'checked' : ''; ?>>
+                    <label class="form-check-label">Kiểm tra trạng thái thiết bị trước khi thực thi lệnh</label>
+                  </div>
+                  <p class="small">Mặc định bật, mỗi lần đọc lại trạng thái chờ tối đa 3 giây. Nếu thiết bị đã ở trạng thái hoặc giá trị yêu cầu thì thông báo và bỏ qua lệnh. Nếu trạng thái không xác định hoặc không đọc được thì vẫn thực hiện đúng hành động đã yêu cầu. Tắt mục này để luôn gửi hành động hợp lệ, kể cả thiết bị đã bật/tắt hoặc đã đúng giá trị. Việc tìm đúng đích, hỏi lại khi có nhiều đích, giới hạn quyền và khả năng thiết bị vẫn được kiểm tra. Tùy chọn này độc lập với xác nhận sau khi gửi lệnh ở dưới.</p>
+                  <div class="form-switch">
+                    <input class="form-check-input border-success" type="checkbox" name="hass_verify_after_control" id="hass_verify_after_control" <?php echo ($Config['home_assistant']['verify_after_control'] ?? false) === true ? 'checked' : ''; ?>>
+                    <label class="form-check-label">Kiểm tra lại trạng thái Home Assistant sau khi đã thực thi lệnh</label>
+                  </div>
+                  <p class="small mt-2 mb-0">Mặc định tắt. Khi bật, kiểm tra tối đa 3 giây cho mỗi thiết bị, phản hồi có thể chậm hơn. Kiểm tra trạng thái bật/tắt, độ sáng, tốc độ quạt, độ mở rèm và chế độ/nhiệt độ đặt của điều hòa. Rèm đang di chuyển được báo riêng. Nếu chưa xác nhận được, VBot báo đã gửi lệnh và không tự gửi lại. Script, automation và hành động chưa hỗ trợ chỉ báo đã gửi. Lệnh tùy chỉnh qua dịch vụ riêng không áp dụng kiểm tra này.</p>
+                </div>
+                </div>
+
+                 <div class="border rounded mb-3">
+				   <div class="alert alert-primary" role="alert">
+                   <h6 class="fw-bold">Nguồn tìm kiếm thiết bị</h6>
+                 <p class="small text-primary">Cơ chế tìm kiếm thiết bị trên home assistant sẽ tìm theo friendly_name bạn cần đổi tên friendly_name tương ứng để VBot có thể tìm thấy thiết bị điều khiển</p>
+                   <p class="small">Có thể chọn nhiều nguồn. Mặc định dùng friendly_name, alias là tên thay thế của thực thể trong Home Assistant. entity_id được khớp chính xác, không chọn tên gần giống nếu mã không tồn tại. Nếu bỏ cả ba nguồn tên, WebUI giữ friendly_name để vẫn có thể tìm thiết bị.</p>
+                   <div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="hass_search_name" id="hass_search_name" <?php echo ($Config['home_assistant']['search_sources']['friendly_name'] ?? true) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; Tên hiển thị (friendly_name)</label></div>
+                   <div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="hass_search_entity_id" id="hass_search_entity_id" <?php echo !empty($Config['home_assistant']['search_sources']['entity_id']) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; entity_id chính xác — ví dụ bật light.den_ban</label></div>
+                   <div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="hass_search_aliases" id="hass_search_aliases" <?php echo !empty($Config['home_assistant']['search_sources']['aliases']) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; Alias riêng của thực thể trong Home Assistant</label></div>
+                   <div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="hass_search_area" id="hass_search_area" <?php echo !empty($Config['home_assistant']['search_sources']['area']) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; Tìm theo phòng/khu vực (Area), bao gồm alias của Area</label></div>
+                   <div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="hass_area_allow_multiple" id="hass_area_allow_multiple" <?php echo !empty($Config['home_assistant']['area_control']['allow_multiple']) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; Cho phép điều khiển nhiều thiết bị trong một Area khi câu có “tất cả”</label></div>
+                   <p class="small mb-0 mt-2 text-danger">Gán thiết bị hoặc thực thể vào Area trong Home Assistant. Ví dụ: “bật đèn bàn phòng ngủ”, “tắt tất cả đèn phòng khách”. Nếu có nhiều đích mà không nói “tất cả”, VBot sẽ từ chối. Tối đa 20 thiết bị mỗi lệnh. Thông tin Area được lưu cache 5 phút, khi không đọc được dữ liệu, VBot không điều khiển. Cần khởi động lại VBot sau khi lưu cấu hình.</p>
+                   <div class="text-center"><button type="button" class="btn btn-primary btn-sm mt-2" id="hass-refresh-registry">Làm mới dữ liệu Area và alias</button></div>
+                   <p id="hass-refresh-status" class="small mt-2" role="status"></p>
+
+                   </div>
+				   <div class="alert alert-primary" role="alert">
+                   <details class="rounded mb-3" open><summary class="fw-bold">Loại thực thể được tìm kiếm và điều khiển</summary>
+                   <?php
+                     $hassUiKnown = ['switch','light','fan','media_player','climate','automation','cover','script'];
+                     $hassUiDomains = $Config['home_assistant']['entity_types'] ?? array_fill_keys($hassUiKnown, true);
+                     $hassUiOnOff = $Config['home_assistant']['on_off_entity_types'] ?? ['switch','light','fan','media_player'];
+                   ?>
+                   <div class="table-responsive"><table class="table table-sm"><thead><tr><th>Loại (domain)</th><th>Cho phép tìm kiếm</th><th>Tìm trong nhóm bật/tắt thông thường</th></tr></thead><tbody>
+                   <?php foreach (array_unique(array_merge($hassUiKnown, array_keys($hassUiDomains))) as $domain): if (!preg_match('/^[a-z][a-z0-9_]*$/D', $domain)) continue; $escapedDomain=htmlspecialchars($domain, ENT_QUOTES, 'UTF-8'); ?>
+                     <tr><td><code><?php echo $escapedDomain; ?></code></td>
+                       <td><div class="form-switch"><input type="checkbox" class="form-check-input border-success" aria-label="Cho phép <?php echo $escapedDomain; ?>" name="hass_domain_enabled[<?php echo $escapedDomain; ?>]" <?php echo !empty($hassUiDomains[$domain]) ? 'checked' : ''; ?>></div></td>
+                       <td><?php if (!in_array($domain, ['cover','script'], true)): ?><div class="form-switch"><input type="checkbox" class="form-check-input border-success" aria-label="Bật/tắt <?php echo $escapedDomain; ?>" name="hass_domain_on_off[<?php echo $escapedDomain; ?>]" <?php echo in_array($domain, $hassUiOnOff, true) ? 'checked' : ''; ?>></div><?php else: ?>Dùng lệnh rèm/kịch bản riêng<?php endif; ?></td></tr>
+                   <?php endforeach; ?></tbody></table></div>
+                   <div class="row mb-3 align-items-start">
+                     <label class="col-sm-3 col-form-label">Loại thực thể bổ sung<br><small class="text-muted">Mỗi dòng một loại</small></label>
+                     <div class="col-sm-9">
+                       <textarea class="form-control font-monospace border-success" name="hass_extra_domains" id="hass_extra_domains" rows="4" maxlength="2000" placeholder="Ví dụ: input_boolean"><?php echo htmlspecialchars(implode("\n", array_diff(array_keys($hassUiDomains), $hassUiKnown)), ENT_QUOTES, 'UTF-8'); ?></textarea>
+                     </div>
+                   </div>
+                   <p class="small mt-2 text-danger">Nếu Tắt “Cho phép tìm kiếm” sẽ loại domain khỏi tìm kiếm trực tiếp, entity_id và Area. Nhóm bật/tắt mặc định gồm switch, light, fan, media_player; có thể thêm climate hoặc automation. Domain bổ sung mới được bật và thêm vào nhóm bật/tắt khi lưu; cần có dịch vụ turn_on/turn_off tương ứng trong Home Assistant. Thêm domain không tự tạo hỗ trợ hành động đặc biệt. Lệnh tùy chỉnh dùng giới hạn entity_id ở dưới. Lưu và khởi động lại VBot để áp dụng.</p>
+                   <p class="small text-danger">Đích entity_id của lệnh tùy chỉnh cũng phải thuộc domain được bật. Nếu tắt một domain, lệnh tùy chỉnh phải chỉ rõ entity_id; đích Area/device/floor/label hoặc không chỉ rõ thực thể sẽ bị chặn.</p>
+					
+                   </details></div>
+                   <div class="rounded mb-3">
+				   <div class="alert alert-primary" role="alert">
+                   <h6 class="fw-bold">Giới hạn thực thể được điều khiển</h6>
+                   <div class="row g-3">
+                    <div class="col-12 col-lg-6"><div class="border rounded p-3 h-100">
+                   <div class="form-switch mt-3"><input class="form-check-input border-success" type="checkbox" name="hass_allowed_entities_active" id="hass_allowed_entities_active" <?php echo !empty($Config['home_assistant']['allowed_entities']['active']) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; Kích hoạt chỉ cho phép các thực thể trong danh sách dưới đây</label></div>
+                   <label for="hass_allowed_entity_ids" class="form-label mt-2">Nhập entity_id được phép (mỗi dòng một mã)</label>
+                   <textarea name="hass_allowed_entity_ids" id="hass_allowed_entity_ids" class="form-control font-monospace border-success" rows="4" maxlength="30000" placeholder="Ví dụ:&#10;light.den_phong_khach&#10;switch.quat_phong_ngu&#10;climate.dieu_hoa"><?php echo htmlspecialchars(implode("\n", $Config['home_assistant']['allowed_entities']['entity_ids'] ?? []), ENT_QUOTES, 'UTF-8'); ?></textarea>
+                   <p class="small text-danger">Bỏ tích: không giới hạn. Tích và để trống: chặn mọi đích. Áp dụng cả điều khiển trực tiếp, nhóm Area và lệnh tùy chỉnh. Lệnh tùy chỉnh phải có entity_id cụ thể; không dùng đích area_id/device_id/toàn bộ. Danh sách này độc lập với Expose của Assist. Script/automation được phép vẫn có thể chạy các hành động bên trong của nó.</p>
+                    </div></div>
+                    <div class="col-12 col-lg-6"><div class="border rounded p-3 h-100">
+                   <div class="form-switch mt-3"><input class="form-check-input border-success" type="checkbox" name="hass_blocked_entities_active" id="hass_blocked_entities_active" <?php echo !empty($Config['home_assistant']['blocked_entities']['active']) ? 'checked' : ''; ?>><label class="form-check-label">&nbsp; Kích hoạt chặn điều khiển các thực thể trong danh sách dưới đây</label></div>
+                   <label for="hass_blocked_entity_ids" class="form-label mt-2">Nhập entity_id không được phép điều khiển (mỗi dòng một mã)</label>
+                   <textarea name="hass_blocked_entity_ids" id="hass_blocked_entity_ids" class="form-control font-monospace border-success" rows="4" maxlength="30000" placeholder="Ví dụ: switch.binh_nong_lanh"><?php echo htmlspecialchars(implode("\n", $Config['home_assistant']['blocked_entities']['entity_ids'] ?? []), ENT_QUOTES, 'UTF-8'); ?></textarea>
+                   <p class="small text-danger">Danh sách chặn ưu tiên hơn danh sách cho phép và hoạt động độc lập khi được bật. Bật nhưng để trống: không chặn thêm thực thể nào. Áp dụng cả tìm theo tên/alias/entity_id, Area và lệnh tùy chỉnh. Khi bật danh sách chặn, lệnh tùy chỉnh phải chỉ rõ entity_id, không dùng đích Area/device/floor/label hoặc không rõ đích. Lưu và khởi động lại VBot để áp dụng.</p>
+                    </div></div>
+                   </div>
+                   </div>
+                   </div>
+                 </div>
                 </div>
                 </div>
               </div>
@@ -3154,10 +3289,11 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                   echo input_field('mqtt_time_out', 'Thời gian chờ (Time Out) (giây)', htmlspecialchars($Config['mqtt_broker']['mqtt_time_out'] ?? 60), '', 'number', '1', '20', '120', 'Thời gian chờ tối đa trong quá trình kết nối, nếu quá thời gian chờ mà không kết nối được thì sẽ thông báo và hệ thống sẽ tự động kết nối lại cho đến khi thành công', 'border-success', '', '', '', '', '');
                   echo input_field('mqtt_connection_waiting_time', 'Thời gian chờ kết nối lại (giây)', htmlspecialchars($Config['mqtt_broker']['mqtt_connection_waiting_time'] ?? 300), '', 'number', '1', '10', '9999', 'Thời gian chờ để kết nối lại khi bị mỗi lần bị mất kết nối hoặc kết nối không thành công, hệ thống sẽ tự động kết nối lại cho đến khi thành công', 'border-success', '', '', '', '', '');
                   echo select_field('mqtt_qos',
-                    'QoS <i class="bi bi-question-circle-fill" onclick="show_message(\'- QoS 0 (At most once): Tin nhắn được gửi một lần duy nhất mà không có sự xác nhận. Điều này có thể dẫn đến việc mất tin nhắn nếu có sự cố kết nối<br/><br/>- QoS 1 (At least once): Tin nhắn được gửi ít nhất một lần và sẽ có xác nhận từ phía người nhận. Điều này đảm bảo rằng tin nhắn sẽ đến nơi, nhưng có thể nhận được tin nhắn trùng lặp.<br/><br/>- QoS 2 (Exactly once): Tin nhắn sẽ được gửi một lần duy nhất, không trùng lặp và không bị mất. Đây là mức độ bảo mật cao nhất, nhưng cũng đòi hỏi nhiều tài nguyên hơn và độ trễ cao hơn\')"></i>',
+                    'QoS <i class="bi bi-question-circle-fill" onclick="show_message(\'- QoS 0: Không có ACK; bản tin có thể mất khi kết nối lỗi.<br/><br/>- QoS 1: Có ACK; bản tin có thể được nhận trùng.<br/><br/>- QoS 2: Dùng bắt tay MQTT để giao bản tin một lần trong phiên giao thức; cần nhiều tài nguyên và độ trễ hơn. Không đảm bảo lệnh điều khiển chỉ chạy một lần qua mọi lần khởi động lại hoặc kết nối lại. QoS không phải mức độ bảo mật.\')"></i>',
                     ['0' => '0 (At most once)', '1' => '1 (At least once)', '2' => '2 (Exactly once)'],
                     $Config['mqtt_broker']['mqtt_qos'], []);
                   ?>
+                  <p class="small">QoS áp dụng cho publish, Last Will và mức subscribe yêu cầu của VBot. QoS nhận thực tế còn phụ thuộc bên gửi và mức broker cấp; xem log SUBACK để xác nhận. ACK xác nhận giao thức với broker, không xác nhận thiết bị đã thực hiện lệnh. Cần khởi động lại VBot sau khi lưu.</p>
                   <div class="row mb-3">
                     <label class="col-sm-3 col-form-label">Retain <i class="bi bi-question-circle-fill" onclick="show_message('- retain=True: Khi bạn gửi một tin nhắn với retain=True, MQTT broker sẽ giữ lại tin nhắn đó và gửi lại cho bất kỳ client nào kết nối vào MQTT đó sau này, ngay cả khi client đó đã không nhận dữ liệu ban đầu.<br/><br/>- retain=False: Tin nhắn sẽ không được lưu trữ. Khi client kết nối vào MQTT, nó sẽ không nhận lại tin nhắn cũ')"></i> :</label>
                     <div class="col-sm-9">
@@ -3195,6 +3331,30 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                     $Config['smart_config']['led']['led_type'], []);
                   echo input_field('led_gpio', 'LED Pin GPIO', htmlspecialchars($Config['smart_config']['led']['led_gpio'] ?? 10), '', 'number', '1', '0', '60', 'Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO, Mặc định GPIO10 (Không thay đổi được)', 'border-success', '', '', '', '', '_blank');
                   echo input_field('number_led', 'Số lượng LED', htmlspecialchars($Config['smart_config']['led']['number_led'] ?? 24), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
+                  echo input_field('led_freq_hz', 'Tần số tín hiệu LED (Hz)', htmlspecialchars($Config['smart_config']['led']['led_freq_hz'] ?? 1000000), '', 'number', '1', '1', '2147483647', 'Tần số tín hiệu điều khiển LED WS2812/NeoPixel, đơn vị Hz', 'border-success', '', '', '', '', '_blank');
+                  ?>
+
+					<div class="row mb-3">
+					  <div class="col-sm-9 offset-sm-3">
+						<div class="small mb-3">
+						<div class="alert alert-primary" role="alert">
+						  <p><strong>Lưu ý về <code>Tần số tín hiệu LED (Hz)</code>:</strong></p>
+						  <p><code>Tần số tín hiệu LED (Hz)</code> là tần số tín hiệu điều khiển LED WS2812/NeoPixel, đơn vị <strong>Hz</strong>.</p>
+						  <ul>
+							<li>Giá trị tiêu chuẩn: <code>800000</code> Hz (800 kHz), nên sử dụng 1000000 để có thể tương thích với nhiều chip Led khác trên thị trường</li>
+							<li>Tùy loại LED, phần cứng và cách tạo tín hiệu trên Raspberry Pi, có thể cần điều chỉnh <code>led_freq_hz</code> để LED hoạt động ổn định.</li>
+							<li>Nếu LED bị <strong>sáng trắng, sai màu, nhấp nháy, không tắt hoàn toàn hoặc LED đầu tiên sáng hoặc hiển thị bất thường</strong>, hãy thử tăng dần <code>led_freq_hz</code>.</li>
+							<li>Với GPIO10/SPI trên Raspberry Pi, có thể thử các giá trị từ <code>800000</code>, <code>810000</code>, <code>820000</code> ... đến <code>1000000</code> hoặc cao hơn nữa.</li>
+							<li>Nếu <code>800000</code> không ổn định, hãy thử <code>850000</code>, <code>900000</code>, <code>950000</code> hoặc <code>1000000</code>.</li>
+							<li>Chỉ nên thay đổi từng bước và kiểm tra hoạt động của LED sau mỗi lần thay đổi.</li>
+						  </ul>
+						</div>
+						</div>
+					  </div>
+					</div>
+
+				 
+                  <?php
                   echo input_field('led_brightness', 'Độ sáng đèn LED', htmlspecialchars(intval(($Config['smart_config']['led']['brightness'] ?? 255) * 100 / 255)), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
                   ?>
                   <div class="row mb-3">
@@ -4811,7 +4971,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
       <div class="card accordion" id="accordion_button_calendar_events">
       <div class="card-body">
       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_calendar_events" aria-expanded="false" aria-controls="collapse_button_calendar_events">
-      Cấu Hình Events, Ngày Lễ, Kỉ Kiệm, Sự Kiện Cá Nhân:</h5>
+      Cấu Hình Events, Ngày Lễ, Kỉ Kiệm, Sự Kiện Cá Nhân: <?php echo $Config['calendar']['events']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
       <div id="collapse_button_calendar_events" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_calendar_events">
 	  <div class="alert alert-primary" role="alert">
 	  <div class="row mb-3">
@@ -5551,7 +5711,15 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
     ); ?>;
   </script>
   <script src="assets/js/Config.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
-
+<script>
+document.getElementById('hass-refresh-registry').addEventListener('click', async function() {
+ this.disabled=true; const status=document.getElementById('hass-refresh-status'); status.textContent='Đang đọc lại dữ liệu từ Home Assistant…';
+ try {const data=new FormData(); data.set('action','refresh_hass'); data.set('csrf_token',window.VBOT_CSRF_TOKEN||'');
+   const response=await fetch('Command_Test.php',{method:'POST',body:data,credentials:'same-origin'}); const result=await response.json();
+   status.textContent=result.message||'Không làm mới được dữ liệu.';
+ } catch(error) {status.textContent='Không kết nối được API VBot: '+error.message;} finally {this.disabled=false;}
+});
+</script>
 <script>
 (() => {
   const initializeKeywordLanguageChecker = () => {

@@ -340,6 +340,19 @@ include 'html_head.php';
                       <font color=red>00:00:00 / 00:00:00</font>
                     </div>
                   </div>
+				  <div class="alert alert-success" role="alert">
+                  <div class="input-group my-2">
+                    <label class="input-group-text border-success" for="media_source_select">Chuyển nguồn phát:</label>
+                    <select class="form-select border-success" id="media_source_select" onchange="selectMediaSource(this.value)">
+                      <option value="" disabled selected>N/A Đang chờ trạng thái nguồn phát</option>
+                      <option value="local_media">Local / nhạc do VBot phát</option>
+                      <option value="bluetooth">Bluetooth</option>
+                      <option value="airplay">AirPlay</option>
+                      <option value="multiroom">Multiroom Audio</option>
+                    </select>
+                  </div>
+                  <small class="text-primary d-block mb-2">VBot giữ phiên kết nối như AirPlay, Bluetooth, Multiroom, và nhường đầu ra khi chọn Chuyển nguồn phát tương ứng</small>
+					</div>
                   <div class="d-flex flex-column align-items-center gap-2">
                     <div class="d-flex flex-row align-items-center justify-content-center gap-2" aria-label="Các nút điều khiển media">
                       <div class="btn-group" role="group" aria-label="Điều khiển phát nhạc">
@@ -2178,6 +2191,30 @@ include 'html_head.php';
   
   <script>
 //Command bluetooth api
+let mediaSourceChanging = false;
+async function selectMediaSource(source) {
+    const select = document.getElementById('media_source_select');
+    if (mediaSourceChanging || !['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(source)) return;
+    mediaSourceChanging = true;
+    select.disabled = true;
+    try {
+        const response = await vbotFetchWithTimeout('<?php echo $URL_API_VBOT; ?>', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({type: 1, data: 'media_control', action: 'select_source', source: source})
+        }, 30000);
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const result = await response.json();
+        if (result.success !== true) throw new Error(result.message || 'Không thể chuyển nguồn');
+        showMessagePHP(result.message, 5);
+    } catch (error) {
+        showMessagePHP('Chuyển nguồn phát: ' + error.message, 8);
+    } finally {
+        mediaSourceChanging = false;
+        select.disabled = false;
+        select.value = select.dataset.currentSource || '';
+    }
+}
+
 function bluetooth_control(action, value) {
     if (action === "disconnect") {
         if (!confirm("Bạn có chắc chắn muốn ngắt kết nối Bluetooth không?")) {
@@ -2385,6 +2422,13 @@ function update_index_data(data){
 					? 'playing' : 'idle'
 			);
 			const mediaIsPlaying = mediaPlaybackState === 'playing';
+            const sourceSelect = document.getElementById('media_source_select');
+            sourceSelect.dataset.currentSource = ['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(mediaSourceKind) ? mediaSourceKind : '';
+            sourceSelect.options[0].textContent = 'Chưa có nguồn phát';
+            sourceSelect.querySelector('[value="multiroom"]').disabled = !media.multiroom_active;
+            sourceSelect.querySelector('[value="bluetooth"]').disabled = !(data.bluetooth?.active && data.bluetooth?.is_connected);
+            sourceSelect.querySelector('[value="airplay"]').disabled = !media.airplay_active;
+            if (!mediaSourceChanging && document.activeElement !== sourceSelect) sourceSelect.value = sourceSelect.dataset.currentSource;
 			const mediaIsPaused = mediaPlaybackState === 'paused';
 			const multiroomActive = media.multiroom_active === true || mediaSourceKind === 'multiroom';
 			updateMultiroomConnectionIndicators(multiroomActive);

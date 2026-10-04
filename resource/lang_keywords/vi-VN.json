@@ -126,7 +126,8 @@
     ],
     "setup": [
       "thiết lập",
-      "cài đặt"
+      "cài đặt",
+      "đặt"
     ],
     "sing": [
       "hát"
@@ -457,15 +458,54 @@
       "value": "{name} {state}{unit}"
     },
     "general": {
+      "negated_command": "Tôi không thực hiện lệnh điều khiển trong yêu cầu phủ định này.",
       "no_response": "Xin lỗi, tôi chưa nhận được dữ liệu phản hồi cho yêu cầu này.",
       "no_text": "Không có dữ liệu văn bản trả về.",
       "request_replaced": "Yêu cầu đã được thay thế bởi yêu cầu mới hơn."
     },
     "home_assistant": {
+      "area_control_result": "Đã xử lý {done}/{total} thiết bị; lỗi hoặc chưa xác định {failed}.",
+      "area_timeout_unknown": "Có đích hết thời gian chờ; lệnh có thể đã được nhận. Hãy kiểm tra trạng thái trước khi gửi lại.",
+      "custom_ambiguous": "Có nhiều lệnh Home Assistant phù hợp. Bạn hãy nói rõ lệnh cần thực hiện.",
+      "ambiguous_device": "Có nhiều thiết bị có tên gần giống nhau. Bạn hãy nói đầy đủ tên thiết bị cần điều khiển.",
+      "clarify_device": "Bạn muốn chọn thiết bị nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
+      "clarify_temperature_device": "Bạn muốn đặt {value} độ cho thiết bị nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
+      "control_already_set": "{name} đã ở trạng thái yêu cầu; không cần gửi lại lệnh.",
+      "control_delivery_unknown": "Chưa xác định Home Assistant đã nhận lệnh cho {name} hay chưa. Hãy kiểm tra thiết bị trước khi gửi lại; VBot không tự gửi lại lệnh.",
+      "control_verified": "Đã xác nhận trạng thái của {name} theo yêu cầu.",
+      "control_moving": "Đã gửi lệnh cho {name}; rèm đang di chuyển, chưa xác nhận tới vị trí yêu cầu.",
+      "control_unconfirmed": "Đã gửi lệnh cho {name} nhưng chưa xác nhận được trạng thái. VBot không tự gửi lại lệnh.",
+      "control_not_verifiable": "Đã gửi lệnh cho {name}; hành động này chưa hỗ trợ xác nhận trạng thái.",
+      "area_verification_result": "Xác nhận trạng thái: {confirmed}; đang di chuyển: {moving}; chưa xác nhận hoặc chưa hỗ trợ: {unconfirmed}.",
+      "clarify_cover_position_device": "Bạn muốn đặt độ mở {value}% cho rèm nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
+      "cover_position_success": "Đã gửi lệnh đặt độ mở {name} ở {value}%.",
+      "cover_position_already_set": "{name} đã ở độ mở {value}% sẵn.",
+      "cover_position_invalid": "Độ mở {value}% không hợp lệ; cần từ 0 đến 100%.",
+      "cover_position_unsupported": "{name} không hỗ trợ hoặc chưa xác định được khả năng đặt vị trí.",
+      "clarify_fan_speed_device": "Bạn muốn đặt tốc độ {value}% cho quạt nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
+      "fan_speed_success": "Đã đặt tốc độ {name} ở {value}% thành công.",
+      "fan_speed_already_set": "{name} đã ở tốc độ {value}% sẵn.",
+      "fan_speed_invalid": "Tốc độ {value}% không hợp lệ; cần từ 0 đến 100%.",
+      "fan_speed_unsupported": "{name} không hỗ trợ hoặc chưa xác định được khả năng chỉnh tốc độ.",
+      "clarify_brightness_device": "Bạn muốn đặt độ sáng {value}% cho đèn nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
+      "brightness_success": "Đã đặt độ sáng {name} ở {value}% thành công.",
+      "brightness_already_set": "{name} đã ở độ sáng {value}% sẵn.",
+      "brightness_invalid": "Độ sáng {value}% không hợp lệ; cần từ 0 đến 100%.",
+      "brightness_unsupported": "{name} không hỗ trợ hoặc chưa xác định được khả năng chỉnh độ sáng.",
+      "temperature_success": "Đã đặt {name} ở {value} độ thành công.",
+      "temperature_already_set": "{name} đã đặt ở {value} độ sẵn.",
+      "temperature_invalid": "Nhiệt độ {value} không hợp lệ hoặc ngoài khoảng hỗ trợ của {name}.",
+      "clarify_expired": "Lệnh chờ đã hết hạn. Bạn hãy nói lại lệnh đầy đủ.",
+      "clarify_cancelled": "Đã hủy lệnh chờ.",
+      "clarify_unavailable": "Home Assistant hoặc thiết bị không sẵn sàng. Bạn hãy nói lại lệnh.",
+      "clarify_retry": "Chưa xác định được thiết bị. Hãy nói tên đầy đủ hoặc hủy.",
+      "clarify_done": "Đã {action} {name}.",
       "already_set": "{name} đã {action} sẵn",
       "control_error": "Lỗi điều khiển Home Assistant {entity}: {error}",
       "control_http_error": "Không thể điều khiển {entity}, Mã lỗi: {status}",
       "control_unavailable": "Không thể điều khiển thiết bị: {entity}",
+      "entity_not_allowed": "Thực thể không được phép điều khiển theo cấu hình: {entity}",
+      "custom_target_blocked": "Lệnh Home Assistant bị chặn. Chỉ định entity_id được phép theo cấu hình loại thực thể và danh sách cho phép/chặn.",
       "cover_action_missing": "Không tìm thấy hành động trong câu lệnh để thao tác với rèm",
       "device_not_found": "Không tìm thấy thiết bị trong Home Assistant phù hợp với: {request}, hoặc thiết bị chưa đạt tới ngưỡng đã thiết lập",
       "disabled": "{request} thất bại, Home Assistant không được kích hoạt khi khởi chạy chương trình",
@@ -617,6 +657,7 @@
       "cover_percent_missing": "Không thể xác định phần trăm mở rèm, bạn hãy thử nói rõ số phần trăm",
       "fan_percent_missing": "Không thể xác định phần trăm tốc độ quạt, bạn hãy thử nói rõ số phần trăm",
       "temperature_missing": "Không thể xác định nhiệt độ, bạn hãy thử nói rõ số độ cần thiết lập.",
+      "entity_value_missing": "Cần một giá trị nhiệt độ hoặc phần trăm bên ngoài entity_id.",
       "volume_percent_missing": "Không thể xác định mức âm lượng, bạn hãy thử nói rõ số phần trăm."
     },
     "system": {
@@ -686,6 +727,39 @@
   },
   "schema_version": 1,
   "values": {
+    "cover_position_terms": ["độ mở", "vị trí"],
+    "fan_speed_terms": ["tốc độ"],
+    "brightness_terms": ["độ sáng", "ánh sáng"],
+    "percent_terms": ["phần trăm"],
+    "command_matching": {
+      "area_control": {
+        "device_keywords": {"light": ["đèn"], "fan": ["quạt"], "climate": ["điều hòa", "máy lạnh"], "cover": ["rèm", "cửa sổ"]},
+        "all_phrases": ["tất cả", "toàn bộ"],
+        "scope_fillers": ["ở", "trong", "tại", "khu vực"]
+      },
+      "negation_phrases": [
+            "không",
+            "đừng",
+            "chớ"
+      ],
+      "negation_fillers": [
+            "hãy",
+            "có",
+            "được",
+            "giúp",
+            "hộ"
+      ],
+      "command_verbs": [
+            "khởi động",
+            "chạy",
+            "đọc"
+      ],
+      "action_keywords": {
+            "restart": [
+                  "khởi động lại"
+            ]
+      }
+},
     "calendar_events": {
       "countdown_terms": ["còn bao lâu", "bao nhiêu ngày", "còn mấy ngày"],
       "birthday_terms": ["sinh nhật", "sinh nhat"],

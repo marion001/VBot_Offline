@@ -508,10 +508,8 @@ include 'html_head.php';
                     // Lấy Access Token từ mã xác thực
                     $accessToken = $client->fetchAccessTokenWithAuthCode($authCode_check);
                     // Kiểm tra và lưu token vào file JSON
-                    if (!empty($accessToken['access_token'])) {
+                    if (!empty($accessToken['access_token']) && vbotGoogleDriveSaveAuthorization($tokenPath, $accessToken)) {
                       // Lưu token vào file
-                      $encodedAccessToken = json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-                      vbotAtomicWriteFile($tokenPath, $encodedAccessToken, 'token Google Drive');
                       vbotSetFullPermissions($tokenPath, 'token Google Drive');
                       echo "<center>Xác thực thành công, Token đã được lưu trữ<br/><br/>";
                       echo "<p class='card-title text-success'>Trang sẽ được tải lại sau <span id='countdown'><font color=red size=5>5</font></span> giây.";
@@ -519,7 +517,7 @@ include 'html_head.php';
                       echo '<br/><br/><button type="button" class="btn btn-info" onclick="reload_page()">Tải Lại</button></center>';
                       #echo $accessToken;
                     } else {
-                      echo "<center><p class='card-title text-danger'>Không thể lấy Access Token. Vui lòng kiểm tra mã xác thực ủy quyền không đúng</p><br/><br/>";
+                      echo "<center><p class='card-title text-danger'>Không thể lưu xác thực có quyền offline. Token cũ được giữ nguyên. Kiểm tra access_type=offline, prompt=consent và quyền ghi file.</p><br/><br/>";
                       echo '<button type="button" class="btn btn-info" onclick="reload_page()">Tải Lại</button></center>';
                     }
                   }
@@ -538,13 +536,12 @@ include 'html_head.php';
                 if ($client->isAccessTokenExpired()) {
                   if ($client->getRefreshToken()) {
                     // Nếu đã có Refresh Token, cố gắng làm mới Access Token
-                    $newAccessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+                    $newAccessToken = vbotGoogleDriveRefreshToken($client, $tokenPath, $accessToken);
                     // Kiểm tra xem token mới có tồn tại không
                     if (isset($newAccessToken['access_token'])) {
                       // Google thường không trả lại refresh_token khi làm mới, vì vậy
                       // phải giữ các trường cũ rồi mới ghi token đã hợp nhất.
                       $accessToken = array_merge($accessToken, $newAccessToken);
-                      vbotAtomicWriteFile($tokenPath, json_encode($accessToken, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'token Google Drive');
                       vbotSetFullPermissions($tokenPath, 'token Google Drive');
                       $client->setAccessToken($accessToken);
                       echo "<center><p class='card-title text-success'>Token đã được tự động làm mới thành công</p></center>";

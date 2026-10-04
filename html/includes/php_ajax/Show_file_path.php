@@ -299,6 +299,10 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
       } else {
         $response['data'] = $content;
         header('Content-Type: text/plain');
+        if (in_array(strtolower($file_extension), ['log', 'logs'], true)) {
+          require_once __DIR__ . '/../Log_Display.php';
+          $content = vbotFormatLogTimestamps($content);
+        }
         $response['data'] = nl2br(htmlspecialchars($content));
       }
     } else {
