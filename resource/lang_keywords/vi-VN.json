@@ -346,9 +346,19 @@
       "ngay gi"
     ],
     "calendar_event": [
-      "sự kiện", "sự kiện gì", "sự kiện nào", "sự kiện sắp tới", "ngày quan trọng", "ngày gì đặc biệt",
-      "còn bao lâu nữa đến", "còn bao nhiêu ngày đến", "su kien gi", "su kien nao",
-      "ngay quan trong", "ngay gi dac biet", "con bao lau nua den"
+      "sự kiện",
+      "sự kiện gì",
+      "sự kiện nào",
+      "sự kiện sắp tới",
+      "ngày quan trọng",
+      "ngày gì đặc biệt",
+      "còn bao lâu nữa đến",
+      "còn bao nhiêu ngày đến",
+      "su kien gi",
+      "su kien nao",
+      "ngay quan trong",
+      "ngay gi dac biet",
+      "con bao lau nua den"
     ],
     "volume": [
       "volume",
@@ -517,7 +527,17 @@
       "success": "Đã {action} {name} thành công",
       "success_with_value": "Đã {action} {name} {value} thành công",
       "temperature_value": "{value} độ",
-      "unreachable": "Lỗi, các địa chỉ Home Assistant đều không thể kết nối. Hãy kiểm tra lại URL hoặc máy chủ Home Assistant không hoạt động."
+      "unreachable": "Lỗi, các địa chỉ Home Assistant đều không thể kết nối. Hãy kiểm tra lại URL hoặc máy chủ Home Assistant không hoạt động.",
+      "schedule_created": "Đã hẹn {action} {name} lúc {time}. Mã lịch {id}.",
+      "schedule_target_missing": "Không xác định được thiết bị để hẹn giờ. Hãy nói đầy đủ tên thiết bị.",
+      "schedule_preview": "Chế độ thử: không lưu lịch và không gửi lệnh.",
+      "schedule_disabled": "Cần bật Scheduler và Home Assistant để hẹn giờ điều khiển.",
+      "schedule_single_target": "Hiện chỉ hỗ trợ hẹn giờ một thiết bị. Hãy nói tên thiết bị cụ thể.",
+      "schedule_failed": "Không lưu được thay đổi lịch.",
+      "schedule_invalid": "Thời gian chưa hợp lệ. Hãy nói sau 15 phút hoặc lúc 9 giờ tối.",
+      "schedule_cancel_id": "Hãy nói hủy lịch kèm mã lịch hiển thị trên WebUI.",
+      "schedule_cancelled": "Đã hủy lịch {id}.",
+      "schedule_not_pending": "Không tìm thấy lịch {id} đang chờ; chưa hủy lịch nào."
     },
     "logs": {
       "all_assistants_failed": "Tất cả các trợ lý ảo đều không phản hồi hoặc không hoạt động.",
@@ -727,74 +747,232 @@
   },
   "schema_version": 1,
   "values": {
-    "cover_position_terms": ["độ mở", "vị trí"],
-    "fan_speed_terms": ["tốc độ"],
-    "brightness_terms": ["độ sáng", "ánh sáng"],
-    "percent_terms": ["phần trăm"],
+    "cover_position_terms": [
+      "độ mở",
+      "vị trí"
+    ],
+    "fan_speed_terms": [
+      "tốc độ"
+    ],
+    "brightness_terms": [
+      "độ sáng",
+      "ánh sáng"
+    ],
+    "percent_terms": [
+      "phần trăm"
+    ],
     "command_matching": {
       "area_control": {
-        "device_keywords": {"light": ["đèn"], "fan": ["quạt"], "climate": ["điều hòa", "máy lạnh"], "cover": ["rèm", "cửa sổ"]},
-        "all_phrases": ["tất cả", "toàn bộ"],
-        "scope_fillers": ["ở", "trong", "tại", "khu vực"]
+        "device_keywords": {
+          "light": [
+            "đèn"
+          ],
+          "fan": [
+            "quạt"
+          ],
+          "climate": [
+            "điều hòa",
+            "máy lạnh"
+          ],
+          "cover": [
+            "rèm",
+            "cửa sổ"
+          ]
+        },
+        "all_phrases": [
+          "tất cả",
+          "toàn bộ"
+        ],
+        "scope_fillers": [
+          "ở",
+          "trong",
+          "tại",
+          "khu vực"
+        ]
       },
       "negation_phrases": [
-            "không",
-            "đừng",
-            "chớ"
+        "không",
+        "đừng",
+        "chớ"
       ],
       "negation_fillers": [
-            "hãy",
-            "có",
-            "được",
-            "giúp",
-            "hộ"
+        "hãy",
+        "có",
+        "được",
+        "giúp",
+        "hộ"
       ],
       "command_verbs": [
-            "khởi động",
-            "chạy",
-            "đọc"
+        "khởi động",
+        "chạy",
+        "đọc"
       ],
       "action_keywords": {
-            "restart": [
-                  "khởi động lại"
-            ]
+        "restart": [
+          "khởi động lại"
+        ]
       }
-},
+    },
     "calendar_events": {
-      "countdown_terms": ["còn bao lâu", "bao nhiêu ngày", "còn mấy ngày"],
-      "birthday_terms": ["sinh nhật", "sinh nhat"],
-      "month_terms": ["tháng này"],
-      "day_number_prefixes": ["ngày", "ngay"],
-      "month_number_prefixes": ["tháng", "thang"],
-      "year_number_prefixes": ["năm", "nam"],
+      "countdown_terms": [
+        "còn bao lâu",
+        "bao nhiêu ngày",
+        "còn mấy ngày"
+      ],
+      "birthday_terms": [
+        "sinh nhật",
+        "sinh nhat"
+      ],
+      "month_terms": [
+        "tháng này"
+      ],
+      "day_number_prefixes": [
+        "ngày",
+        "ngay"
+      ],
+      "month_number_prefixes": [
+        "tháng",
+        "thang"
+      ],
+      "year_number_prefixes": [
+        "năm",
+        "nam"
+      ],
       "date_order": "dmy",
       "allow_bare_year": false,
       "explicit_date_label": "ngày {day} tháng {month} năm {year}",
       "week_queries": [
-        {"week_offset": 0, "label": "tuần này", "terms": ["tuần này", "tuan nay"]},
-        {"week_offset": 1, "label": "tuần sau", "terms": ["tuần sau", "tuan sau"]}
+        {
+          "week_offset": 0,
+          "label": "tuần này",
+          "terms": [
+            "tuần này",
+            "tuan nay"
+          ]
+        },
+        {
+          "week_offset": 1,
+          "label": "tuần sau",
+          "terms": [
+            "tuần sau",
+            "tuan sau"
+          ]
+        }
       ],
-      "range_start_terms": ["từ", "tu"],
-      "range_end_terms": ["đến", "den", "tới", "toi"],
-      "next_days_prefixes": ["trong"],
-      "next_days_suffixes": ["ngày tới", "ngày tiếp theo", "ngay toi", "ngay tiep theo"],
+      "range_start_terms": [
+        "từ",
+        "tu"
+      ],
+      "range_end_terms": [
+        "đến",
+        "den",
+        "tới",
+        "toi"
+      ],
+      "next_days_prefixes": [
+        "trong"
+      ],
+      "next_days_suffixes": [
+        "ngày tới",
+        "ngày tiếp theo",
+        "ngay toi",
+        "ngay tiep theo"
+      ],
       "range_label": "từ {start} đến {end}",
       "next_days_label": "trong {days} ngày tới",
       "month_names": [
-        {"month": 1, "terms": ["tháng một", "tháng nhất", "thang mot", "thang nhat"]},
-        {"month": 2, "terms": ["tháng hai", "thang hai"]},
-        {"month": 3, "terms": ["tháng ba", "thang ba"]},
-        {"month": 4, "terms": ["tháng tư", "thang tu"]},
-        {"month": 5, "terms": ["tháng năm", "thang nam"]},
-        {"month": 6, "terms": ["tháng sáu", "thang sau"]},
-        {"month": 7, "terms": ["tháng bảy", "thang bay"]},
-        {"month": 8, "terms": ["tháng tám", "thang tam"]},
-        {"month": 9, "terms": ["tháng chín", "thang chin"]},
-        {"month": 10, "terms": ["tháng mười", "thang muoi"]},
-        {"month": 11, "terms": ["tháng mười một", "thang muoi mot"]},
-        {"month": 12, "terms": ["tháng mười hai", "thang muoi hai"]}
+        {
+          "month": 1,
+          "terms": [
+            "tháng một",
+            "tháng nhất",
+            "thang mot",
+            "thang nhat"
+          ]
+        },
+        {
+          "month": 2,
+          "terms": [
+            "tháng hai",
+            "thang hai"
+          ]
+        },
+        {
+          "month": 3,
+          "terms": [
+            "tháng ba",
+            "thang ba"
+          ]
+        },
+        {
+          "month": 4,
+          "terms": [
+            "tháng tư",
+            "thang tu"
+          ]
+        },
+        {
+          "month": 5,
+          "terms": [
+            "tháng năm",
+            "thang nam"
+          ]
+        },
+        {
+          "month": 6,
+          "terms": [
+            "tháng sáu",
+            "thang sau"
+          ]
+        },
+        {
+          "month": 7,
+          "terms": [
+            "tháng bảy",
+            "thang bay"
+          ]
+        },
+        {
+          "month": 8,
+          "terms": [
+            "tháng tám",
+            "thang tam"
+          ]
+        },
+        {
+          "month": 9,
+          "terms": [
+            "tháng chín",
+            "thang chin"
+          ]
+        },
+        {
+          "month": 10,
+          "terms": [
+            "tháng mười",
+            "thang muoi"
+          ]
+        },
+        {
+          "month": 11,
+          "terms": [
+            "tháng mười một",
+            "thang muoi mot"
+          ]
+        },
+        {
+          "month": 12,
+          "terms": [
+            "tháng mười hai",
+            "thang muoi hai"
+          ]
+        }
       ],
-      "upcoming_terms": ["sắp tới", "gần nhất", "đọc các sự kiện"],
+      "upcoming_terms": [
+        "sắp tới",
+        "gần nhất",
+        "đọc các sự kiện"
+      ],
       "month_label": "tháng này",
       "month_number_label": "tháng {month} năm {year}",
       "upcoming_label": "sắp tới",
@@ -816,7 +994,47 @@
       "tối nay",
       "sáng nay",
       "đêm nay"
-    ]
+    ],
+    "control_schedule": {
+      "after": [
+        "sau"
+      ],
+      "at": [
+        "lúc"
+      ],
+      "minutes": [
+        "phút"
+      ],
+      "hours": [
+        "giờ"
+      ],
+      "seconds": [
+        "giây"
+      ],
+      "periods": [
+        "sáng",
+        "chiều",
+        "tối",
+        "đêm"
+      ],
+      "pm": [
+        "chiều",
+        "tối",
+        "đêm"
+      ],
+      "cancel": [
+        "hủy lịch",
+        "huỷ lịch"
+      ],
+      "markers": [
+        "ngày mai",
+        "ngày mốt",
+        "hôm nay",
+        "tối nay",
+        "sáng mai",
+        "vào"
+      ]
+    }
   },
   "weather": {
     "administrative_prefixes": {

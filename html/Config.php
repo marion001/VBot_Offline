@@ -1003,6 +1003,7 @@ if (isset($_POST['all_config_save'])) {
 
   #Cập nhật lịch, lời nhắc, thông báo
   $Config['schedule']['active'] = isset($_POST['schedule_active']) ? true : false;
+  $Config['schedule']['auto_delete_completed_voice_control'] = isset($_POST['schedule_auto_delete_completed_voice_control']);
   #Cập nhật xử lý lỗi
   $Config['smart_config']['auto_restart_program_error'] = isset($_POST['auto_restart_program_error']) ? true : false;
   $Config['smart_config']['fix_time_sync_error'] = isset($_POST['fix_time_sync_error']) ? true : false;
@@ -3164,10 +3165,10 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                   echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Thời gian chờ phản hồi tối đa khi kết nối với Hass, Home Assistant', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
-				  
+
 				<div class="alert alert-primary" role="alert">
                   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Lệnh tùy chỉnh (Customize Command) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để sử dụng câu lệnh tùy chỉnh (Custom Command) cho điều khiển nhà thông minh Home Assistant<br/>- Thiết lập câu lệnh trong: <b>Thiết Lập Nâng Cao -> Home Assistant Customize Command</b>')"></i> :</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="hass_custom_commands_active" id="hass_custom_commands_active" <?php echo $Config['home_assistant']['custom_commands']['active'] ? 'checked' : ''; ?>>
@@ -3177,24 +3178,23 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
 				  <?php
 				echo input_field('hass_custom_commands_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['custom_commands']['minimum_threshold'] ?? 0.85, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 1</b> ngưỡng càng cao thì yêu cầu độ chính xác cao khi bot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
 				  ?>
+				  <a class="btn btn-primary mb-3" href="HASS_Customize.php">Đi tới Home Assistant Customize Command</a>
 				</div>
-
-                <div class="border rounded mb-3">
+				<div class="border rounded mb-3">
 				<div class="alert alert-primary" role="alert">
-                  <h6 class="fw-bold">Kiểm tra trạng thái thiết bị trước và sau khi điều khiển</h6>
+                  <h6 class="fw-bold">Kiểm tra trạng thái trước và sau khi điều khiển</h6>
                   <div class="form-switch mb-2">
                     <input class="form-check-input border-success" type="checkbox" name="hass_check_state_before_control" id="hass_check_state_before_control" <?php echo ($Config['home_assistant']['check_state_before_control'] ?? true) !== false ? 'checked' : ''; ?>>
-                    <label class="form-check-label">Kiểm tra trạng thái thiết bị trước khi thực thi lệnh</label>
+                    <label class="form-check-label">Kiểm tra trạng thái thiết bị trước khi thực hiện hành động</label>
                   </div>
-                  <p class="small">Mặc định bật, mỗi lần đọc lại trạng thái chờ tối đa 3 giây. Nếu thiết bị đã ở trạng thái hoặc giá trị yêu cầu thì thông báo và bỏ qua lệnh. Nếu trạng thái không xác định hoặc không đọc được thì vẫn thực hiện đúng hành động đã yêu cầu. Tắt mục này để luôn gửi hành động hợp lệ, kể cả thiết bị đã bật/tắt hoặc đã đúng giá trị. Việc tìm đúng đích, hỏi lại khi có nhiều đích, giới hạn quyền và khả năng thiết bị vẫn được kiểm tra. Tùy chọn này độc lập với xác nhận sau khi gửi lệnh ở dưới.</p>
+                  <p class="small text-danger">Mặc định sẽ bật, mỗi lần đọc lại trạng thái chờ tối đa 3 giây. Nếu thiết bị đã ở trạng thái hoặc giá trị yêu cầu thì thông báo và bỏ qua lệnh. Nếu trạng thái không xác định hoặc không đọc được thì vẫn thực hiện đúng hành động đã yêu cầu. Tắt mục này để luôn gửi hành động hợp lệ, kể cả thiết bị đã bật/tắt hoặc đã đúng giá trị. Việc tìm đúng đích, hỏi lại khi có nhiều đích, giới hạn quyền và khả năng thiết bị vẫn được kiểm tra. Tùy chọn này độc lập với xác nhận sau khi gửi lệnh ở dưới.</p>
                   <div class="form-switch">
                     <input class="form-check-input border-success" type="checkbox" name="hass_verify_after_control" id="hass_verify_after_control" <?php echo ($Config['home_assistant']['verify_after_control'] ?? false) === true ? 'checked' : ''; ?>>
-                    <label class="form-check-label">Kiểm tra lại trạng thái Home Assistant sau khi đã thực thi lệnh</label>
+                    <label class="form-check-label">Đọc lại trạng thái Home Assistant sau khi gửi lệnh</label>
                   </div>
-                  <p class="small mt-2 mb-0">Mặc định tắt. Khi bật, kiểm tra tối đa 3 giây cho mỗi thiết bị, phản hồi có thể chậm hơn. Kiểm tra trạng thái bật/tắt, độ sáng, tốc độ quạt, độ mở rèm và chế độ/nhiệt độ đặt của điều hòa. Rèm đang di chuyển được báo riêng. Nếu chưa xác nhận được, VBot báo đã gửi lệnh và không tự gửi lại. Script, automation và hành động chưa hỗ trợ chỉ báo đã gửi. Lệnh tùy chỉnh qua dịch vụ riêng không áp dụng kiểm tra này.</p>
+                  <p class="small mt-2 mb-0 text-danger">Mặc định sẽ tắt, Khi bật, kiểm tra tối đa 3 giây cho mỗi thiết bị, phản hồi có thể chậm hơn. Kiểm tra trạng thái bật/tắt, độ sáng, tốc độ quạt, độ mở rèm và chế độ/nhiệt độ đặt của điều hòa. Rèm đang di chuyển được báo riêng. Nếu chưa xác nhận được, VBot báo đã gửi lệnh và không tự gửi lại. Script, automation và hành động chưa hỗ trợ chỉ báo đã gửi. Lệnh tùy chỉnh qua dịch vụ riêng không áp dụng kiểm tra này.</p>
                 </div>
                 </div>
-
                  <div class="border rounded mb-3">
 				   <div class="alert alert-primary" role="alert">
                    <h6 class="fw-bold">Nguồn tìm kiếm thiết bị</h6>
@@ -4960,9 +4960,15 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   echo input_field('schedule_data_json_file', 'Tệp Lưu Trữ Dữ Liệu Cấu Hình', $schedule_json_file, 'readonly', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$schedule_json_file')", 'btn btn-success border-danger', 'onclick', '');
                   echo input_field('schedule_audio_path', 'Thư Mục Chứa Tệp Âm Thanh', htmlspecialchars($Config['schedule']['audio_path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   ?>
+                  <div class="form-switch mb-3">
+                    <input class="form-check-input border-success" type="checkbox" name="schedule_auto_delete_completed_voice_control" id="schedule_auto_delete_completed_voice_control" <?= ($Config['schedule']['auto_delete_completed_voice_control'] ?? false) === true ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="schedule_auto_delete_completed_voice_control">Tự xóa lịch điều khiển do VBot tạo bằng giọng nói sau khi hoàn thành</label>
+                    <div class="form-text">Bật: xóa lịch hoàn thành sau khi lưu kết quả vào lịch sử Scheduler. Tắt: giữ lại lịch. Chỉ áp dụng lịch điều khiển bằng giọng nói của VBot; lịch tạo trên WebUI không bị xóa. Lịch lỗi hoặc chưa xác định kết quả được giữ lại để kiểm tra. Lưu cấu hình và khởi động lại VBot để áp dụng.</div>
+                  </div>
                   <div class="row mb-3">
                     <b class="text-danger">Yêu Cầu: Cần Nhập Thêm KEY Trợ Lý Gemini Để Có Thể (Hoa Mỹ, Mỹ Miều) Lời Nhắc Khi Lập Lịch</b>
                   </div>
+				  <a class="btn btn-primary mb-3" href="Scheduler.php">Đi tới: Lập Lịch, Báo Thức, Lời Nhắc, Thông Báo (Scheduler) </a>
                 </div>
               </div>
             </div>

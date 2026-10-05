@@ -64,3 +64,14 @@ The setting applies to direct commands, clarification follow-ups, Area groups an
 ## Lost service-call responses
 
 If a service POST times out or loses its response, VBot reports `delivery_unknown`: Home Assistant may already have received the action. Direct and custom control calls do not try another URL in this case. Direct control also stops assistant fallback, and a matched custom command that fails stops normal command dispatch. A connection failure before establishing the connection can still use another configured URL. Check the device before manually sending the action again. This protection applies independently of both state-check settings.
+
+## Hẹn giờ điều khiển bằng giọng nói
+
+- Bật Scheduler và Home Assistant, cập nhật file keyword của ngôn ngữ đang dùng rồi khởi động lại VBot.
+- Hỗ trợ bật/tắt một thiết bị: “Tắt đèn phòng ngủ sau 15 phút”, “Bật điều hòa lúc 9 giờ tối”, “Bật đèn lúc 21:30”. Tiếng Anh: “Turn off bedroom light in 15 minutes”, “Turn on AC at 9 pm”. Thời gian dùng chữ số; các từ chỉ thời gian nằm trong `values.control_schedule` của file ngôn ngữ.
+- Giờ cụ thể đã qua trong hôm nay được hẹn sang ngày mai. Khoảng chờ từ 5 giây đến 366 ngày. Bộ lập lịch kiểm tra mỗi 5 giây, không bảo đảm chính xác từng giây. Chưa hỗ trợ lịch lặp, điều chỉnh nhiệt độ hoặc hẹn cả nhóm Area bằng luồng này.
+- Trùng tên thì hỏi lại, giữ nguyên giờ đã hẹn và lưu `entity_id` được chọn. Không bỏ lịch chỉ vì thiết bị hiện đã bật/tắt đúng trạng thái: kiểm tra trạng thái được thực hiện khi đến giờ theo cấu hình HASS.
+- Lịch nằm trong khóa `voice_control_schedule` của `Data_Schedule.json` hiện có, lưu qua lần khởi động lại. Khi chạy, kiểm tra lại quyền, domain và sự tồn tại của thiết bị. Lịch quá hạn hơn 5 phút được đánh dấu `missed`, không chạy bù. Nếu VBot dừng giữa lúc chạy hoặc mất phản hồi, không tự gửi lại lệnh.
+- Xem kết quả và hủy lịch đang chờ trong `Scheduler.php`; cũng có thể nói “Hủy lịch <mã lịch>”. Lịch đã bắt đầu chạy không thể hủy bằng thao tác này. `Command_Test.php` hiển thị thời gian hẹn; chế độ thử không lưu lịch và không gửi lệnh.
+- `schedule.auto_delete_completed_voice_control`: `true` tự xóa lịch điều khiển do VBot tạo bằng giọng nói khi hoàn thành và đã lưu lịch sử; `false` giữ lại. Config.php có công tắc trong mục Scheduler. Config.json đi kèm bật mặc định; cấu hình cũ thiếu khóa giữ hành vi không xóa. Lịch WebUI, lịch lỗi, lịch mất phản hồi, lịch quá hạn và lịch đã hủy không bị xóa bởi tùy chọn này. Lịch giọng nói cũ trong `voice_control_schedule` chưa có trường `source` vẫn được nhận diện là lịch của VBot. Lưu cấu hình và khởi động lại VBot để áp dụng.
+- Không giới hạn số lịch kết thúc được giữ lại khi tắt tự xóa; giới hạn 100 chỉ áp dụng số lịch đang chờ/đang chạy. Kết quả xác nhận `unconfirmed`, `moving` hoặc `not_verifiable` được giữ lại thay vì đánh dấu hoàn thành để tự xóa.

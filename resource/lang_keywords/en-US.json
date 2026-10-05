@@ -347,8 +347,14 @@
       "which day of the week"
     ],
     "calendar_event": [
-      "event", "what event", "which event", "upcoming event", "important date", "special day",
-      "how long until", "how many days until"
+      "event",
+      "what event",
+      "which event",
+      "upcoming event",
+      "important date",
+      "special day",
+      "how long until",
+      "how many days until"
     ],
     "volume": [
       "volume",
@@ -519,7 +525,17 @@
       "success": "Successfully {action} {name}",
       "success_with_value": "Successfully {action} {name} {value}",
       "temperature_value": "{value} degrees",
-      "unreachable": "Home Assistant could not be reached. Please check its URL and server status."
+      "unreachable": "Home Assistant could not be reached. Please check its URL and server status.",
+      "schedule_created": "Scheduled {action} {name} for {time}. Schedule ID {id}.",
+      "schedule_preview": "Preview only: no schedule saved and no command sent.",
+      "schedule_failed": "Could not save the control schedule; no command was executed.",
+      "schedule_invalid": "Invalid or unsupported time. Say in 15 minutes or at 9 pm.",
+      "schedule_disabled": "Enable Scheduler and Home Assistant to schedule device control.",
+      "schedule_target_missing": "Could not identify the target. Please say its full name.",
+      "schedule_cancel_id": "Say cancel schedule followed by the schedule ID shown in WebUI.",
+      "schedule_cancelled": "Cancelled schedule {id}.",
+      "schedule_not_pending": "No pending schedule {id} was found; no schedule was cancelled.",
+      "schedule_single_target": "Only one device can be scheduled at a time. Please say its specific name."
     },
     "logs": {
       "all_assistants_failed": "All virtual assistants did not respond or are unavailable.",
@@ -729,77 +745,219 @@
   },
   "schema_version": 1,
   "values": {
-    "cover_position_terms": ["position", "opening"],
-    "fan_speed_terms": ["fan speed", "speed"],
-    "brightness_terms": ["brightness"],
-    "percent_terms": ["percent", "per cent"],
+    "cover_position_terms": [
+      "position",
+      "opening"
+    ],
+    "fan_speed_terms": [
+      "fan speed",
+      "speed"
+    ],
+    "brightness_terms": [
+      "brightness"
+    ],
+    "percent_terms": [
+      "percent",
+      "per cent"
+    ],
     "command_matching": {
       "area_control": {
-        "device_keywords": {"light": ["light", "lights"], "fan": ["fan", "fans"], "climate": ["air conditioner", "air conditioners", "thermostat"], "cover": ["curtain", "curtains", "blind", "blinds", "cover", "covers"]},
-        "all_phrases": ["all", "every"],
-        "scope_fillers": ["in", "at", "the"]
+        "device_keywords": {
+          "light": [
+            "light",
+            "lights"
+          ],
+          "fan": [
+            "fan",
+            "fans"
+          ],
+          "climate": [
+            "air conditioner",
+            "air conditioners",
+            "thermostat"
+          ],
+          "cover": [
+            "curtain",
+            "curtains",
+            "blind",
+            "blinds",
+            "cover",
+            "covers"
+          ]
+        },
+        "all_phrases": [
+          "all",
+          "every"
+        ],
+        "scope_fillers": [
+          "in",
+          "at",
+          "the"
+        ]
       },
       "negation_phrases": [
-            "do not",
-            "don't",
-            "dont",
-            "never"
+        "do not",
+        "don't",
+        "dont",
+        "never"
       ],
       "negation_fillers": [
-            "please",
-            "ever",
-            "actually"
+        "please",
+        "ever",
+        "actually"
       ],
       "command_verbs": [
-            "turn",
-            "switch",
-            "restart",
-            "reboot",
-            "set",
-            "run"
+        "turn",
+        "switch",
+        "restart",
+        "reboot",
+        "set",
+        "run"
       ],
       "action_keywords": {
-            "restart": [
-                  "restart",
-                  "reboot"
-            ]
+        "restart": [
+          "restart",
+          "reboot"
+        ]
       }
-},
+    },
     "calendar_events": {
-      "countdown_terms": ["how long", "how many days"],
-      "birthday_terms": ["birthday"],
-      "month_terms": ["this month"],
-      "day_number_prefixes": ["day"],
-      "month_number_prefixes": ["month"],
-      "year_number_prefixes": ["year"],
+      "countdown_terms": [
+        "how long",
+        "how many days"
+      ],
+      "birthday_terms": [
+        "birthday"
+      ],
+      "month_terms": [
+        "this month"
+      ],
+      "day_number_prefixes": [
+        "day"
+      ],
+      "month_number_prefixes": [
+        "month"
+      ],
+      "year_number_prefixes": [
+        "year"
+      ],
       "date_order": "mdy",
       "allow_bare_year": true,
       "explicit_date_label": "{month}/{day}/{year}",
       "week_queries": [
-        {"week_offset": 0, "label": "this week", "terms": ["this week"]},
-        {"week_offset": 1, "label": "next week", "terms": ["next week"]}
+        {
+          "week_offset": 0,
+          "label": "this week",
+          "terms": [
+            "this week"
+          ]
+        },
+        {
+          "week_offset": 1,
+          "label": "next week",
+          "terms": [
+            "next week"
+          ]
+        }
       ],
-      "range_start_terms": ["between", "from"],
-      "range_end_terms": ["and", "to"],
-      "next_days_prefixes": ["in the next", "within the next"],
-      "next_days_suffixes": ["days", "day"],
+      "range_start_terms": [
+        "between",
+        "from"
+      ],
+      "range_end_terms": [
+        "and",
+        "to"
+      ],
+      "next_days_prefixes": [
+        "in the next",
+        "within the next"
+      ],
+      "next_days_suffixes": [
+        "days",
+        "day"
+      ],
       "range_label": "from {start} to {end}",
       "next_days_label": "in the next {days} days",
       "month_names": [
-        {"month": 1, "terms": ["January"]},
-        {"month": 2, "terms": ["February"]},
-        {"month": 3, "terms": ["March"]},
-        {"month": 4, "terms": ["April"]},
-        {"month": 5, "terms": ["May"]},
-        {"month": 6, "terms": ["June"]},
-        {"month": 7, "terms": ["July"]},
-        {"month": 8, "terms": ["August"]},
-        {"month": 9, "terms": ["September"]},
-        {"month": 10, "terms": ["October"]},
-        {"month": 11, "terms": ["November"]},
-        {"month": 12, "terms": ["December"]}
+        {
+          "month": 1,
+          "terms": [
+            "January"
+          ]
+        },
+        {
+          "month": 2,
+          "terms": [
+            "February"
+          ]
+        },
+        {
+          "month": 3,
+          "terms": [
+            "March"
+          ]
+        },
+        {
+          "month": 4,
+          "terms": [
+            "April"
+          ]
+        },
+        {
+          "month": 5,
+          "terms": [
+            "May"
+          ]
+        },
+        {
+          "month": 6,
+          "terms": [
+            "June"
+          ]
+        },
+        {
+          "month": 7,
+          "terms": [
+            "July"
+          ]
+        },
+        {
+          "month": 8,
+          "terms": [
+            "August"
+          ]
+        },
+        {
+          "month": 9,
+          "terms": [
+            "September"
+          ]
+        },
+        {
+          "month": 10,
+          "terms": [
+            "October"
+          ]
+        },
+        {
+          "month": 11,
+          "terms": [
+            "November"
+          ]
+        },
+        {
+          "month": 12,
+          "terms": [
+            "December"
+          ]
+        }
       ],
-      "upcoming_terms": ["upcoming", "nearest", "next event", "read events"],
+      "upcoming_terms": [
+        "upcoming",
+        "nearest",
+        "next event",
+        "read events"
+      ],
       "month_label": "this month",
       "month_number_label": "month {month}, {year}",
       "upcoming_label": "upcoming",
@@ -819,7 +977,44 @@
       "the day after tomorrow",
       "tonight",
       "this morning"
-    ]
+    ],
+    "control_schedule": {
+      "after": [
+        "after",
+        "in"
+      ],
+      "at": [
+        "at"
+      ],
+      "minutes": [
+        "minutes",
+        "minute"
+      ],
+      "hours": [
+        "hours",
+        "hour"
+      ],
+      "seconds": [
+        "seconds",
+        "second"
+      ],
+      "periods": [
+        "am",
+        "pm"
+      ],
+      "pm": [
+        "pm"
+      ],
+      "cancel": [
+        "cancel schedule"
+      ],
+      "markers": [
+        "tomorrow",
+        "today",
+        "tonight",
+        "next"
+      ]
+    }
   },
   "weather": {
     "administrative_prefixes": {

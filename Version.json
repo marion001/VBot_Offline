@@ -1,8 +1,8 @@
 {
-    "version": "1.3.4",
+    "version": "1.3.5",
     "projectName": "Program VBot Offline",
 	"description": "Thêm mới chức năng lập lịch Sự Kiện, Events, Ngày Lễ, Kỉ Niệm. Hỗ trợ thêm các ngôn ngữ khác liên quan tới câu lệnh điều khiển hệ thống",
-    "releaseDate": "01/10/2026-1",
+    "releaseDate": "05/10/2026",
     "changes": [
         {
             "type": "feature",

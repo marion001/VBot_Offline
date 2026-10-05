@@ -10,6 +10,19 @@ include 'Configuration.php';
 require_once __DIR__.'/includes/ActionRegistry.php';
 require_once __DIR__.'/includes/DeviceIdentity.php';
 
+function vbotSchedulerWritePreservingVoice($path, &$proposed)
+{
+  $lock = @fopen($path.'.lock', 'c+');
+  if (!$lock || !flock($lock, LOCK_EX)) { if ($lock) fclose($lock); return false; }
+  try {
+    $current = json_decode(file_get_contents($path), true);
+    if (!is_array($current)) return false;
+    $proposed['voice_control_schedule'] = $current['voice_control_schedule'] ?? [];
+    $encoded = json_encode($proposed, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    return $encoded !== false && vbotAtomicWriteFile($path, $encoded, 'dữ liệu Scheduler', true);
+  } finally { flock($lock, LOCK_UN); fclose($lock); }
+}
+
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
   if (
@@ -22,6 +35,9 @@ if ($Config['contact_info']['user_login']['active']) {
     exit;
   }
 }
+
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (empty($_SESSION['voice_schedule_csrf'])) $_SESSION['voice_schedule_csrf'] = bin2hex(random_bytes(32));
 
 //Fallback chỉ đọc lịch sử trực tiếp khi tiến trình/API VBot không hoạt động.
 if (isset($_GET['scheduler_history_fallback'])) {
@@ -183,7 +199,7 @@ include 'html_head.php';
         </ol>
       </nav>
     </div>
-    <form method="POST" class="row g-3 needs-validation" action="" enctype="multipart/form-data" novalidate onsubmit="return validateFormVBot()">
+    <form method="POST" class="row g-3 needs-validation" action="" enctype="multipart/form-data" novalidate onsubmit="return validateFormVBot(event)">
       <?php
       $json_file = $VBot_Offline . $Config['schedule']['data_json_file'];
       $scheduler_device_cache = $VBot_Offline . 'html/includes/other_data/VBot_Server_Data/VBot_Devices_Network.json';
@@ -346,6 +362,34 @@ include 'html_head.php';
         exit();
       }
       // Các ngày trong tuần
+      if (isset($_POST['voice_cancel_id'])) {
+        $cancel_id = (string)$_POST['voice_cancel_id'];
+        $token = (string)($_POST['voice_schedule_csrf'] ?? '');
+        if (!hash_equals($_SESSION['voice_schedule_csrf'], $token) || !preg_match('/^[a-f0-9]{8}$/', $cancel_id)) {
+          $errorMessages[] = 'Yêu cầu hủy lịch không hợp lệ.';
+        } else {
+          $lock = @fopen($json_file.'.lock', 'c+');
+          if ($lock && flock($lock, LOCK_EX)) {
+            try {
+              $latest = json_decode(file_get_contents($json_file), true);
+              $cancelled = false;
+              if (is_array($latest)) {
+                foreach ($latest['voice_control_schedule'] ?? [] as $index => $job) {
+                  if (($job['id'] ?? '') === $cancel_id && ($job['status'] ?? '') === 'pending') {
+                    $latest['voice_control_schedule'][$index]['status'] = 'cancelled';
+                    $latest['voice_control_schedule'][$index]['message'] = 'Đã hủy trên WebUI.';
+                    $cancelled = true; break;
+                  }
+                }
+                if ($cancelled && vbotAtomicWriteFile($json_file, json_encode($latest, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'hủy lịch điều khiển', true)) {
+                  $data = $latest;
+                  $successMessage[] = 'Đã hủy lịch '.$cancel_id;
+                } else { $errorMessages[] = 'Không hủy được lịch: lịch đã chạy, đã hủy hoặc lỗi lưu dữ liệu.'; }
+              }
+            } finally { flock($lock, LOCK_UN); fclose($lock); }
+          } else { if ($lock) fclose($lock); $errorMessages[] = 'Không khóa được dữ liệu lịch.'; }
+        }
+      }
       $week_days = [
         "Monday" => "Thứ Hai",
         "Tuesday" => "Thứ Ba",
@@ -912,7 +956,7 @@ include 'html_head.php';
           $save_error = "Không thể mã hóa dữ liệu Scheduler: " . json_last_error_msg();
           $errorMessages[] = $save_error;
           error_log($save_error);
-        } elseif (!vbotAtomicWriteFile($json_file, $encoded_schedule, 'dữ liệu Scheduler')) {
+        } elseif (!vbotSchedulerWritePreservingVoice($json_file, $data)) {
           $save_error = "Không thể ghi dữ liệu Scheduler vào tệp: " . $json_file;
           $errorMessages[] = $save_error;
           error_log($save_error);
@@ -979,6 +1023,29 @@ include 'html_head.php';
             echo '</div>';
           }
           ?>
+          <div class="card mb-3 border-info">
+            <div class="card-body">
+              <h5 class="card-title">Hẹn giờ điều khiển Home Assistant bằng giọng nói</h5>
+              <input type="hidden" name="voice_schedule_csrf" value="<?= htmlspecialchars($_SESSION['voice_schedule_csrf'], ENT_QUOTES, 'UTF-8') ?>">
+              <p class="text-muted">Ví dụ: “Tắt đèn phòng ngủ sau 15 phút”, “Bật điều hòa lúc 9 giờ tối”. Lịch dùng giờ hệ thống của VBot, lưu qua lần khởi động lại và kiểm tra lại quyền điều khiển khi chạy. Lịch quá hạn hơn 5 phút không tự chạy bù; lệnh mất phản hồi không tự gửi lại.</p>
+              <div class="table-responsive"><table class="table table-bordered align-middle">
+                <thead><tr><th>Mã lịch</th><th>Thiết bị</th><th>Hành động</th><th>Thời gian</th><th>Trạng thái / kết quả</th></tr></thead>
+                <tbody>
+                <?php foreach (array_reverse($data['voice_control_schedule'] ?? []) as $voice_job): ?>
+                  <tr>
+                    <td><?= htmlspecialchars((string)($voice_job['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars((string)($voice_job['name'] ?? ''), ENT_QUOTES, 'UTF-8') ?><br><small><?= htmlspecialchars((string)($voice_job['entity_id'] ?? ''), ENT_QUOTES, 'UTF-8') ?></small></td>
+                    <td><?= ($voice_job['action'] ?? '') === 'turn_on' ? 'Bật' : 'Tắt' ?></td>
+                    <td><?= htmlspecialchars((string)($voice_job['due_at'] ?? ''), ENT_QUOTES, 'UTF-8') ?></td>
+                    <td><?= htmlspecialchars((string)($voice_job['status'] ?? ''), ENT_QUOTES, 'UTF-8') ?><br><?= htmlspecialchars((string)($voice_job['message'] ?? ''), ENT_QUOTES, 'UTF-8') ?>
+                    <?php if (($voice_job['status'] ?? '') === 'pending'): ?><br><button type="submit" formnovalidate class="btn btn-sm btn-outline-danger" name="voice_cancel_id" value="<?= htmlspecialchars((string)($voice_job['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">Hủy lịch</button><?php endif; ?></td>
+                  </tr>
+                <?php endforeach; ?>
+                <?php if (empty($data['voice_control_schedule'])): ?><tr><td colspan="5" class="text-muted">Chưa có lịch điều khiển bằng giọng nói.</td></tr><?php endif; ?>
+                </tbody>
+              </table></div>
+            </div>
+          </div>
           <div class="card mb-3 border-info">
             <div class="card-body">
               <h5 class="card-title">Theo dõi tiến trình, tác vụ:</h5>
@@ -3138,7 +3205,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 //Kiểm tra và thông báo lỗi nếu Submit có giá trị input trống
-function validateFormVBot() {
+function validateFormVBot(event) {
+    if (event && event.submitter && event.submitter.name === 'voice_cancel_id') return true;
     initializeSchedulerTime24();
     let firstInvalidTime = null;
     document.querySelectorAll('input.scheduler-time-24h').forEach(input => {

@@ -129,6 +129,7 @@ if ($isAnalysisPost) {
     const details = document.getElementById('dialogue-details'); details.replaceChildren();
     addField(details, 'Chế độ', dialogue.mode === 'execute' ? 'Thực thi thật' : 'Thử không thực thi');
     addField(details, 'Lệnh gốc', dialogue.original_text);
+    if (dialogue.scheduled_at) addField(details, 'Thời gian hẹn đã lưu trong hội thoại', dialogue.scheduled_at);
     addField(details, 'Hành động đã lưu', dialogue.action);
     if (dialogue.value !== null && dialogue.value !== undefined) addField(details, 'Giá trị đã lưu từ câu đầu', dialogue.value);
     addField(details, 'Kết quả / lý do', dialogue.reason);
@@ -232,6 +233,7 @@ if ($isAnalysisPost) {
         if (command.score !== undefined) addField(block,'Điểm khớp / ngưỡng', `${command.score} / ${command.threshold ?? '—'}`);
         if (command.service) addField(block,'Dịch vụ dự kiến',command.service);
         if (command.service_data) addField(block,'Dữ liệu dịch vụ',command.service_data);
+        if (command.scheduled_at) addField(block,'Thời gian hẹn điều khiển',command.scheduled_at);
         if (command.query !== undefined) addField(block,'Tên dùng để tìm đích',command.query);
         if (command.entity_types) addField(block,'Loại thiết bị được tìm',command.entity_types);
         if (command.state !== undefined) addField(block,'Trạng thái hiện tại',command.state);

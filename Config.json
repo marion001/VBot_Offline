@@ -440,6 +440,7 @@
     },
     "schedule": {
         "active": false,
+        "auto_delete_completed_voice_control": true,
         "data_json_file": "resource/schedule/Data_Schedule.json",
         "audio_path": "Media/Audio_Scheduler"
     },
@@ -622,7 +623,7 @@
             "notes_led_type": "ReSpeaker_Mic_Array_v2.0, ws281x, apa102, dev_custom_led",
             "number_led": 24,
             "brightness": 255,
-            "led_freq_hz": 800000,
+            "led_freq_hz": 1000000,
             "led_dma": 10,
             "remember_last_brightness": true,
             "led_invert": false,
