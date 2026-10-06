@@ -327,6 +327,34 @@ Tài liệu chi tiết, kiểm tra và xử lý sự cố nằm tại
 [`resource/HomeKit/README.md`](resource/HomeKit/README.md) và mục HomeKit trong
 [`html/FAQ.php`](html/FAQ.php).
 
+## Tra cứu âm lịch và dương lịch
+
+VBot có thể lấy ngày hiện tại từ đồng hồ hệ thống, nhận các mốc `hôm nay`,
+`ngày mai`, `ngày kia`, `hôm qua` hoặc ngày cụ thể dạng `20/09/2026` và
+`ngày 20 tháng 9 năm 2026`. Khi hỏi âm lịch, ngày dương được chuyển sang âm
+lịch Việt Nam theo múi giờ UTC+7, bao gồm tháng nhuận và tên năm Can Chi.
+
+Chọn nguồn xử lý trong `Config.json`:
+
+```json
+"calendar": {
+    "source": "system"
+}
+```
+
+Các giá trị hỗ trợ:
+
+- `system`: VBot tự xử lý lịch âm và dương, không cần Internet.
+- `virtual_assistant_priority`: ưu tiên trợ lý ảo; nếu trợ lý không phản hồi thì
+  tự động dùng lịch hệ thống.
+- `dev_calendar`: gọi `Dev_Calendar.py`; nếu file tùy chỉnh lỗi hoặc không trả
+  kết quả thì tự động dùng lịch hệ thống.
+
+Hàm `custom_calendar()` trong `Dev_Calendar.py` nhận câu gốc, câu đã chuẩn hóa,
+loại lịch và dữ liệu ngày đã quy đổi; hàm phải trả về `(audio, text)`. Sau khi
+đổi cấu hình nguồn, hãy khởi động lại chương trình VBot để nạp đúng module.
+
+
 ## WebSocket Streaming
 
 Streaming chỉ sử dụng WebSocket; logic UDP legacy không còn được sử dụng.
@@ -981,35 +1009,11 @@ Khuyến nghị:
 
 VBot Assistant hướng tới một nền tảng loa thông minh tiếng Việt có thể tự triển khai, tùy biến và tích hợp sâu với hệ sinh thái nhà thông minh.
 
+## Sơ Đồ Đi Dây
+<img width="1863" height="1494" alt="Image" src="https://github.com/user-attachments/assets/fa6e6391-126a-4a12-b450-365e3f1b3cf8" />
+
 ## WebUI VBot
 <img width="2688" height="1360" alt="Image" src="https://github.com/user-attachments/assets/fc2ac10b-00d0-4b20-9c63-2367c3a101d0" />
 
 ## Home Assistant Custom Component (HASS)
-
 <img width="2688" height="1360" alt="Image" src="https://github.com/user-attachments/assets/b917e0a2-e6ff-452c-9823-14d04e664791" />
-## Tra cứu âm lịch và dương lịch
-
-VBot có thể lấy ngày hiện tại từ đồng hồ hệ thống, nhận các mốc `hôm nay`,
-`ngày mai`, `ngày kia`, `hôm qua` hoặc ngày cụ thể dạng `20/09/2026` và
-`ngày 20 tháng 9 năm 2026`. Khi hỏi âm lịch, ngày dương được chuyển sang âm
-lịch Việt Nam theo múi giờ UTC+7, bao gồm tháng nhuận và tên năm Can Chi.
-
-Chọn nguồn xử lý trong `Config.json`:
-
-```json
-"calendar": {
-    "source": "system"
-}
-```
-
-Các giá trị hỗ trợ:
-
-- `system`: VBot tự xử lý lịch âm và dương, không cần Internet.
-- `virtual_assistant_priority`: ưu tiên trợ lý ảo; nếu trợ lý không phản hồi thì
-  tự động dùng lịch hệ thống.
-- `dev_calendar`: gọi `Dev_Calendar.py`; nếu file tùy chỉnh lỗi hoặc không trả
-  kết quả thì tự động dùng lịch hệ thống.
-
-Hàm `custom_calendar()` trong `Dev_Calendar.py` nhận câu gốc, câu đã chuẩn hóa,
-loại lịch và dữ liệu ngày đã quy đổi; hàm phải trả về `(audio, text)`. Sau khi
-đổi cấu hình nguồn, hãy khởi động lại chương trình VBot để nạp đúng module.
