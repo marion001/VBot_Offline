@@ -5,14 +5,27 @@ function vbotConfigReadObject($path, &$content)
     $content = @file_get_contents($path);
     if (!is_string($content) || substr(ltrim($content), 0, 1) !== '{') return null;
     $decoded = json_decode($content, true);
-    return json_last_error() === JSON_ERROR_NONE && is_array($decoded) ? $decoded : null;
+    return json_last_error() === JSON_ERROR_NONE && is_array($decoded) && $decoded !== [] ? $decoded : null;
 }
 
-function vbotConfigLoadRecover($path, $backupDirectory, &$status)
+function vbotConfigLoadRecover($path, $backupDirectory, &$status, $readOnly=false)
 {
     $current = vbotConfigReadObject($path, $content);
     if ($current !== null) return $current;
+    if ($readOnly) {
+        $backups=glob(rtrim($backupDirectory,'/\\').'/Config_*.json')?:[];
+        usort($backups,static function($a,$b){return @filemtime($b)<=>@filemtime($a);});
+        array_unshift($backups,$path.'.before-lan-save.json',$path.'.bak');
+        foreach ($backups as $backup) {
+            if (!is_file($backup) || is_link($backup)) continue;
+            $candidate=vbotConfigReadObject($backup,$content);
+            if ($candidate!==null) return $candidate;
+        }
+        $status['error']='Không đọc được cấu hình; trang này không được phép khôi phục Config.json.';
+        return null;
+    }
     $lock = @fopen($path.'.lock', 'c+');
+    if (is_resource($lock)) @chmod($path.'.lock',0777);
     if ($lock === false || !@flock($lock, LOCK_EX)) {
         if (is_resource($lock)) fclose($lock);
         $status['error'] = 'Không thể khóa Config.json để khôi phục.';
@@ -25,6 +38,7 @@ function vbotConfigLoadRecover($path, $backupDirectory, &$status)
         $backups = glob(rtrim($backupDirectory, '/\\').'/Config_*.json') ?: [];
         usort($backups, static function ($a, $b) { return @filemtime($b) <=> @filemtime($a); });
         array_unshift($backups, $path.'.bak');
+        array_unshift($backups, $path.'.before-lan-save.json');
         foreach ($backups as $backup) {
             if (!is_file($backup) || is_link($backup)) continue;
             $candidate = vbotConfigReadObject($backup, $content);
@@ -71,7 +85,12 @@ function vbotConfigMergeChanges($baseline, $proposed, $current)
 
 function vbotConfigWriteChanges($path, array $baseline, array $proposed, &$saved)
 {
+    if ($baseline === [] || $proposed === []) {
+        error_log('[PHP Config ERROR] Refusing to save empty Config.json');
+        return false;
+    }
     $lock = @fopen($path.'.lock', 'c+');
+    if (is_resource($lock)) @chmod($path.'.lock',0777);
     if ($lock === false || !@flock($lock, LOCK_EX)) {
         if (is_resource($lock)) fclose($lock);
         return false;
@@ -83,6 +102,13 @@ function vbotConfigWriteChanges($path, array $baseline, array $proposed, &$saved
             return false;
         }
         $merged = vbotConfigMergeChanges($baseline, $proposed, $current);
+        // A settings form must never remove an existing root section.
+        foreach (['web_interface','smart_config','api','media_player','contact_info','voice_command_system'] as $section) {
+            if (isset($current[$section]) && is_array($current[$section]) && (!isset($merged[$section]) || !is_array($merged[$section]))) {
+                error_log('[PHP Config ERROR] Refusing to remove required section: '.$section);
+                return false;
+            }
+        }
         $encoded = json_encode($merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
         if ($encoded === false || !vbotAtomicWriteFile($path, $encoded, 'Config.json merged', true)) return false;
         $saved = $merged;

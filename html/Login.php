@@ -39,16 +39,16 @@ function rejectInvalidLoginCsrf()
   exit;
 }
 
-$filePath_Data = 'includes/other_data/WebUI_Login_Security/Login_Data.json';
+$filePath_Data = __DIR__ . '/includes/other_data/WebUI_Login_Security/Login_Data.json';
 $dirPath_Data  = dirname($filePath_Data);
 $logDir  = $VBot_Offline . 'resource/log';
 $logFile = $logDir . "/Vbot_error.log";
 if (!file_exists($logDir)) {
-  mkdir($logDir, 0777, true);
+  @mkdir($logDir, 0777, true);
 }
 @chmod($logDir, 0777);
 if (!file_exists($logFile)) {
-  file_put_contents($logFile, "");
+  @file_put_contents($logFile, "");
 }
 @chmod($logFile, 0777);
 function Logs($message)
@@ -82,12 +82,57 @@ function vbotNormalizeLoginData($data, $clientKey)
   return $data;
 }
 
-function vbotUpdateLoginData($filePath, $clientKey, callable $callback)
+function vbotLoginRepairPermissionsViaSsh()
 {
+  global $ssh_host,$ssh_port,$ssh_user,$ssh_password;
+  if (!function_exists('ssh2_connect') || !function_exists('ssh2_auth_password') || !function_exists('ssh2_exec')) throw new RuntimeException('PHP chưa có extension SSH2 để sửa quyền trên loa');
+  $connection=@ssh2_connect($ssh_host,(int)$ssh_port);
+  if (!$connection || !@ssh2_auth_password($connection,$ssh_user,$ssh_password)) throw new RuntimeException('Không đăng nhập được SSH để cấp quyền cho thư mục VBot');
+  // Fixed, explicitly authorized target; never interpolate a request path into sudo.
+  $command='sudo -S -p \'\' chmod -R 0777 /home/pi/VBot_Offline 2>&1; printf \'\\nVBOT_CHMOD_EXIT=%s\\n\' "$?"';
+  $stream=@ssh2_exec($connection,$command);
+  if (!is_resource($stream)) throw new RuntimeException('Không thực thi được lệnh sudo chmod qua SSH');
+  try {
+    stream_set_timeout($stream,30);
+    stream_set_blocking($stream,true);
+    if (fwrite($stream,(string)$ssh_password."\n")===false) throw new RuntimeException('Không gửi được xác thực sudo qua SSH');
+    fflush($stream);
+    $output=stream_get_contents($stream,65536);
+    $metadata=stream_get_meta_data($stream);
+    if (!empty($metadata['timed_out']) || !is_string($output) || !preg_match('/VBOT_CHMOD_EXIT=0\s*$/',$output)) throw new RuntimeException('Lệnh sudo chmod qua SSH chưa thành công; kiểm tra quyền sudo của tài khoản SSH');
+  } finally { fclose($stream); }
+  clearstatcache();
+  error_log('[WebUI Login] Đã cấp quyền 0777 cho /home/pi/VBot_Offline qua SSH');
+}
+
+function vbotUpdateLoginData($filePath, $clientKey, callable $callback, $allowRepair=true)
+{
+  $directory=dirname($filePath);
+  if (!is_dir($directory) && !@mkdir($directory,0777,true) && !is_dir($directory)) {
+    if ($allowRepair) {
+      vbotLoginRepairPermissionsViaSsh();
+      return vbotUpdateLoginData($filePath,$clientKey,$callback,false);
+    }
+    throw new RuntimeException('Không tạo được thư mục dữ liệu bảo mật đăng nhập. Hãy cấp quyền 0777 cho thư mục VBot.');
+  }
+  @chmod($directory,0777);
+  if (is_file($filePath)) @chmod($filePath,0777);
   $handle = @fopen($filePath, 'c+');
-  if ($handle === false || !@flock($handle, LOCK_EX)) {
-    if (is_resource($handle)) fclose($handle);
-    throw new RuntimeException('Không thể khóa dữ liệu bảo mật đăng nhập');
+  if ($handle === false) {
+    if ($allowRepair) {
+      vbotLoginRepairPermissionsViaSsh();
+      return vbotUpdateLoginData($filePath,$clientKey,$callback,false);
+    }
+    throw new RuntimeException('Không mở được Login_Data.json để ghi. Hãy cấp quyền 0777 cho file và thư mục VBot trên loa.');
+  }
+  @chmod($filePath,0777);
+  if (!@flock($handle, LOCK_EX)) {
+    fclose($handle);
+    if ($allowRepair) {
+      vbotLoginRepairPermissionsViaSsh();
+      return vbotUpdateLoginData($filePath,$clientKey,$callback,false);
+    }
+    throw new RuntimeException('Không khóa được Login_Data.json. Kiểm tra quyền và hệ thống lưu trữ trên loa.');
   }
   try {
     rewind($handle);
@@ -123,25 +168,20 @@ function vbotLoginAttemptState(array $data, $clientKey, $maxAttempts, $lockSecon
   ];
 }
 
-if (!is_dir($dirPath_Data)) {
-  mkdir($dirPath_Data, 0777, true);
-}
-@chmod($dirPath_Data, 0777);
-
-if (!file_exists($filePath_Data)) {
-  $defaultData = [
-    "attempts_by_client" => []
-  ];
-  file_put_contents($filePath_Data, json_encode($defaultData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-}
-@chmod($filePath_Data, 0777);
-
 $loginClientKey = vbotLoginClientKey();
 $maxLoginAttempts = max(1, (int)($Config['contact_info']['user_login']['login_attempts'] ?? 5));
 $loginLockSeconds = max(1, (int)($Config['contact_info']['user_login']['login_lock_time'] ?? 900));
-$loginReadResult = vbotUpdateLoginData($filePath_Data, $loginClientKey, function (&$data) {
-  return null;
-});
+try {
+  $loginReadResult = vbotUpdateLoginData($filePath_Data, $loginClientKey, function (&$data) {
+    return null;
+  });
+} catch (RuntimeException $error) {
+  error_log('[WebUI Login] '.$error->getMessage());
+  http_response_code(503);
+  header('Content-Type: text/html; charset=utf-8');
+  echo '<h2>Chưa truy cập được dữ liệu đăng nhập</h2><p>'.htmlspecialchars($error->getMessage(),ENT_QUOTES,'UTF-8').'</p><p>Sau khi sửa quyền, tải lại trang đăng nhập.</p>';
+  exit;
+}
 $Login_Data = $loginReadResult['data'];
 $error1 = '';
 $error = '';

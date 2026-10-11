@@ -13,15 +13,48 @@ $ir = $Config['internal_ir'] ?? [];
 $jsonPath = $VBot_Offline.($ir['json_file'] ?? 'resource/internal_ir/commands.json');
 $irBackupDir = $VBot_Offline.'html/Backup_Upgrade/Backup_Internal_IR';
 if (!is_dir(dirname($jsonPath))) @mkdir(dirname($jsonPath), 0777, true);
-if (!file_exists($jsonPath)) file_put_contents($jsonPath, "{\n  \"commands\": []\n}", LOCK_EX);
+// Serialize the whole read/modify/write request, not just the final rename.
+// Learning does not touch the command file and must not hold this lock.
+$internalIrRequestLock = null;
+if (!isset($_POST['learn'])) {
+    $internalIrRequestLock = @fopen($jsonPath.'.lock', 'c');
+    if (!$internalIrRequestLock || !flock($internalIrRequestLock, LOCK_EX))
+        vbotApiJsonResponse(['success'=>false, 'message'=>'Không khóa được file lệnh IR'], 500);
+    register_shutdown_function(function () use ($internalIrRequestLock) {
+        if (is_resource($internalIrRequestLock)) { flock($internalIrRequestLock, LOCK_UN); fclose($internalIrRequestLock); }
+    });
+    if (!file_exists($jsonPath) && !internalIrWrite($jsonPath, ['commands'=>[]], true))
+        vbotApiJsonResponse(['success'=>false, 'message'=>'Không tạo được file lệnh IR'], 500);
+}
+set_exception_handler(function ($error) {
+    if ($error instanceof LengthException)
+        vbotApiJsonResponse(['success'=>false, 'message'=>'Tổng dữ liệu lệnh IR vượt quá 20 MB. Hãy giảm số lệnh hoặc độ dài mã raw; file hiện tại được giữ nguyên.'], 413);
+    vbotApiJsonResponse(['success'=>false, 'message'=>'Không đọc được danh sách lệnh IR hợp lệ. File hiện tại được giữ nguyên; hãy dùng Sao lưu và khôi phục để phục hồi dữ liệu.'], 500);
+});
+if (isset($_POST['save']) || isset($_POST['bulk_save']) || isset($_POST['edit']) || isset($_POST['delete'])) {
+    if (isset($_POST['revision']) && !hash_equals(hash_file('sha256', $jsonPath), (string)$_POST['revision']))
+        vbotApiJsonResponse(['success'=>false, 'message'=>'Danh sách IR đã thay đổi ở phiên khác. Hãy tải lại trang trước khi lưu; thay đổi hiện tại chưa được ghi.'], 409);
+}
 
 function internalIrRead($path) {
-    $data = json_decode((string)@file_get_contents($path), true);
-    return is_array($data) ? $data : ['commands'=>[]];
+    $raw = @file_get_contents($path);
+    $data = is_string($raw) ? json_decode($raw, true) : null;
+    if (!is_array($data) || !isset($data['commands']) || !is_array($data['commands']) ||
+        $data['commands'] !== array_values($data['commands']))
+        throw new RuntimeException('Invalid IR command file');
+    foreach ($data['commands'] as $item) {
+        if (!is_array($item) || !is_string($item['name'] ?? null) || !is_array($item['data'] ?? null))
+            throw new RuntimeException('Invalid IR command entry');
+    }
+    return $data;
 }
 function internalIrWrite($path, $data, $alreadyLocked = false) {
+    global $internalIrRequestLock, $jsonPath;
+    $alreadyLocked = $alreadyLocked || ($path === $jsonPath && is_resource($internalIrRequestLock));
     $encoded = json_encode($data, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES);
     if ($encoded === false) return false;
+    if (strlen($encoded) + 1 > 20971520)
+        throw new LengthException('IR data exceeds 20 MB');
     $lock = $alreadyLocked ? null : @fopen($path.'.lock', 'c');
     if (!$alreadyLocked && (!$lock || !flock($lock, LOCK_EX))) { if ($lock) fclose($lock); return false; }
     $tmp = $path.'.tmp.'.bin2hex(random_bytes(6));
@@ -44,6 +77,7 @@ function internalIrValidCommand($command) {
     if (!is_array($raw) || $raw !== array_values($raw) || count($raw) < 3 || count($raw) > 20000) return false;
     $format = $command['format'];
     if (!is_array($format) || ($format['coding'] ?? null) !== 'raw') return false;
+    if (isset($format['carrier']) && (!is_int($format['carrier']) || $format['carrier'] < 1 || $format['carrier'] > 1000000)) return false;
     $timebase = $format['timebase'] ?? 1;
     if (!is_int($timebase) || $timebase < 1 || $timebase > 1000000) return false;
     foreach ($raw as $duration) {
@@ -89,7 +123,7 @@ function internalIrBackupPath($directory, $name) {
 }
 function internalIrCreateBackup($source, $directory) {
     $raw = @file_get_contents($source);
-    if (!is_string($raw) || $raw === '' || strlen($raw) > 20971520) return false;
+    if (!is_string($raw) || strlen($raw) > 20971520) return false;
     if (!is_dir($directory) && !@mkdir($directory, 0777, true) && !is_dir($directory)) return false;
     $name = 'internal_ir_'.date('Ymd_His').'_'.bin2hex(random_bytes(6)).'.json';
     if (!vbotAtomicWriteFile($directory.DIRECTORY_SEPARATOR.$name, $raw, 'internal IR backup')) return false;
@@ -107,17 +141,19 @@ function internalIrListBackups($directory) {
     return $rows;
 }
 function internalIrRestoreBackup($source, $directory, $raw, array $config) {
+    global $internalIrRequestLock, $jsonPath;
     if (!is_string($raw) || strlen($raw) > 20971520) return ['success'=>false, 'message'=>'Tệp sao lưu vượt quá 20 MB hoặc không hợp lệ'];
     $data = json_decode($raw, true);
     if (!internalIrValidBackup($data, $config)) return ['success'=>false, 'message'=>'Tệp sao lưu không đúng cấu trúc lệnh IR, có tên trùng hoặc mã/chức năng không hợp lệ'];
-    $lock = @fopen($source.'.lock', 'c');
-    if (!$lock || !flock($lock, LOCK_EX)) { if ($lock) fclose($lock); return ['success'=>false, 'message'=>'Không khóa được file lệnh IR']; }
+    $requestLocked = $source === $jsonPath && is_resource($internalIrRequestLock);
+    $lock = $requestLocked ? null : @fopen($source.'.lock', 'c');
+    if (!$requestLocked && (!$lock || !flock($lock, LOCK_EX))) { if ($lock) fclose($lock); return ['success'=>false, 'message'=>'Không khóa được file lệnh IR']; }
     try {
         $before = internalIrCreateBackup($source, $directory);
         if ($before === false) return ['success'=>false, 'message'=>'Không thể sao lưu dữ liệu hiện tại; chưa thực hiện khôi phục'];
         if (!internalIrWrite($source, $data, true)) return ['success'=>false, 'message'=>'Không thể ghi dữ liệu khôi phục. Bản sao trước khôi phục: '.$before];
         return ['success'=>true, 'message'=>'Đã khôi phục '.count($data['commands']).' lệnh IR. Đã sao lưu dữ liệu trước khôi phục.', 'before_backup'=>$before];
-    } finally { flock($lock, LOCK_UN); fclose($lock); }
+    } finally { if ($lock) { flock($lock, LOCK_UN); fclose($lock); } }
 }
 function internalIrPlaylists($root) {
     $manifest = json_decode((string)@file_get_contents($root.'html/includes/cache/PlayLists.json'), true);
@@ -187,7 +223,7 @@ if (isset($_POST['backup_upload'])) {
     vbotApiJsonResponse($result, $result['success'] ? 200 : 400);
 }
 if (isset($_POST['list'])) {
-    vbotApiJsonResponse(['success'=>true,'data'=>internalIrRead($jsonPath),'playlists'=>internalIrPlaylists($VBot_Offline),'radios'=>internalIrRadios($Config),'config'=>[
+    vbotApiJsonResponse(['success'=>true,'data'=>internalIrRead($jsonPath),'revision'=>hash_file('sha256', $jsonPath),'playlists'=>internalIrPlaylists($VBot_Offline),'radios'=>internalIrRadios($Config),'config'=>[
         'tx_active'=>(bool)($ir['tx_active'] ?? ($ir['active'] ?? false)),
         'rx_active'=>(bool)($ir['rx_active'] ?? ($ir['active'] ?? false)),
         'rx_control_active'=>(bool)($ir['rx_control_active'] ?? false),
@@ -206,10 +242,13 @@ if (isset($_POST['save'])) {
     $name = trim($_POST['name'] ?? ''); $reply = trim($_POST['reply'] ?? '');
     $action = internalIrAction($_POST['action'] ?? 'none', $Config);
     $command = json_decode($_POST['data'] ?? '', true);
-    if ($name==='' || mb_strlen($name)>100 || $action === null || !internalIrValidCommand($command))
+    if ($name==='' || mb_strlen($name)>100 || mb_strlen($reply)>500 ||
+        preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $name.$reply) || $action === null || !internalIrValidCommand($command))
         vbotApiJsonResponse(['success'=>false,'message'=>'Tên hoặc dữ liệu IR không hợp lệ'], 400);
     $data = internalIrRead($jsonPath); $data['commands'] = $data['commands'] ?? [];
-    foreach ($data['commands'] as $item) if (strcasecmp($item['name'] ?? '', $name)===0)
+    if (count($data['commands']) >= 500)
+        vbotApiJsonResponse(['success'=>false,'message'=>'Danh sách IR đã đạt giới hạn 500 lệnh. Hãy xóa lệnh không dùng trước khi thêm.'], 400);
+    foreach ($data['commands'] as $item) if (mb_strtolower($item['name'] ?? '', 'UTF-8')===mb_strtolower($name, 'UTF-8'))
         vbotApiJsonResponse(['success'=>false,'message'=>'Tên lệnh đã tồn tại'], 409);
     $data['commands'][]=['active'=>true,'name'=>$name,'reply'=>$reply,'action'=>$action,'data'=>$command,'created_at'=>date('H:i:s d-m-Y')];
     if (!internalIrWrite($jsonPath,$data)) vbotApiJsonResponse(['success'=>false,'message'=>'Không thể lưu file lệnh'],500);
@@ -217,7 +256,7 @@ if (isset($_POST['save'])) {
 }
 if (isset($_POST['bulk_save'])) {
     $commands = json_decode($_POST['commands'] ?? '', true);
-    if (!is_array($commands) || count($commands) > 500)
+    if (!is_array($commands) || $commands !== array_values($commands) || count($commands) > 500)
         vbotApiJsonResponse(['success'=>false,'message'=>'Danh sách lệnh IR không hợp lệ'],400);
 
     $stored = internalIrRead($jsonPath);
@@ -263,11 +302,11 @@ if (isset($_POST['edit'])) {
     $action = internalIrAction($_POST['action'] ?? 'none', $Config);
     $command = json_decode($_POST['data'] ?? '', true);
     $active = ($_POST['active'] ?? '0') === '1';
-    if ($index === false || $name === '' || mb_strlen($name) > 100 || mb_strlen($reply) > 500 || $action === null || !internalIrValidCommand($command))
+    if ($index === false || $name === '' || mb_strlen($name) > 100 || mb_strlen($reply) > 500 || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $name.$reply) || $action === null || !internalIrValidCommand($command))
         vbotApiJsonResponse(['success'=>false,'message'=>'Thông tin hoặc mã IR chỉnh sửa không hợp lệ'],400);
     $stored = internalIrRead($jsonPath); $commands = $stored['commands'] ?? [];
     if (!isset($commands[$index])) vbotApiJsonResponse(['success'=>false,'message'=>'Không tìm thấy lệnh IR'],404);
-    foreach ($commands as $i=>$item) if ($i !== $index && strcasecmp($item['name'] ?? '', $name) === 0)
+    foreach ($commands as $i=>$item) if ($i !== $index && mb_strtolower($item['name'] ?? '', 'UTF-8') === mb_strtolower($name, 'UTF-8'))
         vbotApiJsonResponse(['success'=>false,'message'=>'Tên lệnh đã tồn tại'],409);
     $commands[$index]['active']=$active;
     $commands[$index]['name']=$name;

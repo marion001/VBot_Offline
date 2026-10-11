@@ -696,6 +696,14 @@ include 'html_head.php';
               (!empty($task['date']) || $task['recurrence']['type'] !== 'legacy') &&
               ($task['data']['message'] !== '' || $task['data']['audio_file'] !== '')
             ) {
+              // Control payload comes from stored MCP data, never from browser input.
+              unset($task['home_assistant_control']);
+              foreach ($data['notification_schedule'] ?? [] as $stored_task) {
+                if (!empty($task['id']) && ($stored_task['id'] ?? '') === $task['id'] && ($stored_task['create_words'] ?? '') === 'xiaozhi_mcp') {
+                  if (isset($stored_task['home_assistant_control'])) $task['home_assistant_control'] = $stored_task['home_assistant_control'];
+                  break;
+                }
+              }
               $updated_schedule[] = $task;
             }
           }
@@ -1080,7 +1088,9 @@ include 'html_head.php';
                             <font color="red" size="6" title="Bắt Buộc Nhập">*</font> :
                           </label>
                           <div class="col-sm-9">
+                            <input type="hidden" name="notification_schedule[<?= $index ?>][id]" value="<?= htmlspecialchars((string)($notification['id'] ?? ''), ENT_QUOTES, 'UTF-8') ?>">
                             <input required class="form-control border-success" type="text" id="name-<?= $index ?>" name="notification_schedule[<?= $index ?>][name]" placeholder="<?= htmlspecialchars($notification['name']) ?>" value="<?= htmlspecialchars($notification['name']) ?>" title="Đặt Tên Định Danh Cho Lịch, Tác Vụ Này">
+                            <?php if (!empty($notification['home_assistant_control'])): ?><small class="text-success">Điều khiển Home Assistant: <?= htmlspecialchars(json_encode($notification['home_assistant_control'], JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') ?>. Nội dung thông báo không thay thế hành động này.</small><?php endif; ?>
                             <div class="invalid-feedback">Cần đặt tên định danh cho tác vụ thông báo này</div>
                           </div>
                         </div>

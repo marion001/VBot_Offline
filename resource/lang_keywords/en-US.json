@@ -375,6 +375,39 @@
     ]
   },
   "responses": {
+    "voice_routines": {
+      "load_error": "Could not load the routine configuration. Please check the WebUI.",
+      "not_found": "No enabled routine matches that name.",
+      "completed": "Routine {name} completed.",
+      "failed": "Routine {name} did not complete. Please check the logs for details.",
+      "failed_step": "Routine {name} stopped at step {step}. Please check the logs for details.",
+      "partial": "Routine {name} finished with errors in steps: {steps}.",
+      "cancelled": "Routine {name} stopped.",
+      "busy": "Another routine is running.",
+      "disabled": "Voice routines are disabled in the startup configuration.",
+      "outside_date": "Routine {name} is outside its allowed date range.",
+      "outside_time": "Routine {name} is outside its allowed hours, {start} to {end}.",
+      "timeout": "The routine exceeded its maximum duration of 10 minutes."
+    },
+    "lan_calls": {
+      "cancelled": "Speaker selection cancelled.",
+      "not_found": "Speaker not found. Please say the speaker name again.",
+      "ambiguous": "Multiple speakers have that name. Please say the full name or device ID.",
+      "no_peers": "No speakers are loaded. Save the speaker list and restart VBot.",
+      "disabled": "LAN calling is not running. Enable it and restart VBot.",
+      "call": "Calling {name}.",
+      "accept": "Call accepted.",
+      "reject": "Call rejected.",
+      "end": "Call ended.",
+      "error": "Could not complete the call. Please check the logs and the connection between the speakers.",
+      "busy": "The speaker is busy or already in a call.",
+      "no_call": "There is no call for this action.",
+      "mic_busy": "The microphone is busy or not ready.",
+      "not_configured": "The target speaker has not been configured.",
+      "wrong_key": "The LAN call keys do not match between the speakers.",
+      "not_allowed": "The sending speaker is not allowed to connect.",
+      "stale": "This call is no longer valid. Please call again."
+    },
     "api": {
       "json_field_too_long": "A JSON field name is too long",
       "json_list_too_long": "A JSON list exceeds the limit",
@@ -456,7 +489,13 @@
       "event_with_age": "{event}, age {age}",
       "event_with_year": "{event}, 1 year",
       "event_with_years": "{event}, {years} years",
-      "upcoming_list": "Upcoming events: {events}."
+      "upcoming_list": "Upcoming events: {events}.",
+      "upcoming_item_lunar": "{event} on {date}, corresponding to lunar date {lunar_date}",
+      "upcoming_item_weekday": "{event} on {weekday}, {date}",
+      "upcoming_item_lunar_weekday": "{event} on {weekday}, {date}, corresponding to lunar date {lunar_date}",
+      "upcoming_item_age_weekday": "{event} on {weekday}, {date}, age {age}",
+      "upcoming_item_year_weekday": "{event} on {weekday}, {date}, 1 year",
+      "upcoming_item_years_weekday": "{event} on {weekday}, {date}, {years} years"
     },
     "device_status": {
       "position_detail": ", at {position}%",
@@ -477,6 +516,7 @@
       "custom_ambiguous": "Multiple Home Assistant commands match. Please specify the command to execute.",
       "ambiguous_device": "Multiple devices have similar names. Please say the full name of the device to control.",
       "clarify_device": "Which device do you mean: {names}? Say its name or cancel.",
+      "clarify_many_devices": "Several devices match. Please say the full name of the device you want to control, or say cancel.",
       "clarify_temperature_device": "Which device should be set to {value} degrees: {names}? Say its name or cancel.",
       "control_already_set": "{name} is already in the requested state; no command needs to be sent.",
       "control_delivery_unknown": "It is unclear whether Home Assistant received the command for {name}. Check the device before sending it again; VBot will not resend it automatically.",
@@ -535,7 +575,36 @@
       "schedule_cancel_id": "Say cancel schedule followed by the schedule ID shown in WebUI.",
       "schedule_cancelled": "Cancelled schedule {id}.",
       "schedule_not_pending": "No pending schedule {id} was found; no schedule was cancelled.",
-      "schedule_single_target": "Only one device can be scheduled at a time. Please say its specific name."
+      "schedule_single_target": "Only one device can be scheduled at a time. Please say its specific name.",
+      "context_cancelled": "Device control context cleared.",
+      "context_missing": "Which device do you want to control? Please say its full name.",
+      "context_unavailable": "The remembered device is unavailable or is no longer allowed.",
+      "context_invalid": "The action or value is not suitable for the remembered device. Please say the full command.",
+      "context_preview": "Preview only: no command sent.",
+      "context_success": "{action} completed for {name}.",
+      "context_value_success": "Set {name} to {value}{unit}.",
+      "status_context_missing": "No device is selected in this session. Please select a device with a complete command first.",
+      "status_read_failed": "Could not read the latest state of {name}.",
+      "status_state": "{name} is currently {state}.",
+      "status_temperature": "{name} is set to {value} {unit}.",
+      "status_current_temperature": "The current temperature reported by {name} is {value} {unit}.",
+      "status_brightness": "The brightness of {name} is {value}%.",
+      "status_speed": "The speed of {name} is {value}%.",
+      "status_position": "{name} is {value}% open.",
+      "status_unknown": "Home Assistant has no reliable information for this query about {name}.",
+      "status_context_mismatch": "The selected device is {name}. Please select the intended device with a complete command first.",
+      "status_search_failed": "Could not read the Home Assistant device list.",
+      "status_target_missing": "Could not identify the device. Please say its full name.",
+      "relative_invalid": "The adjustment must be a positive number.",
+      "relative_unknown": "Cannot read the current setting of {name}. Please specify an absolute value.",
+      "relative_out_of_range": "The new value {value} is invalid or unsupported by {name}. Please specify an absolute value.",
+      "relative_preview": "Preview: change {name} from {current} to {value}; no command is sent.",
+      "relative_success": "Changed {name} from {current}{unit} to {value}{unit}.",
+      "climate_mode_wrong_device": "The selected device is {name}. Select an air conditioner before changing its mode.",
+      "climate_mode_unsupported": "{name} does not support the requested mode or its capabilities are unknown. Known modes: {modes}.",
+      "climate_modes_unknown": "unknown",
+      "climate_mode_preview": "Preview: set {name} {mode}; no command is sent.",
+      "climate_mode_success": "Set {name} {mode}."
     },
     "logs": {
       "all_assistants_failed": "All virtual assistants did not respond or are unavailable.",
@@ -592,6 +661,7 @@
       "playlist_invalid": "No valid data was found in playlist {name}",
       "playlist_not_found": "Playlist not found: {name}.{detail}",
       "processing_error": "An error occurred while processing your request: {error}",
+      "ip_separator": " dot ",
       "wifi_info": "The connected Wi-Fi network is '{ssid}', and the IP address is '{ip}'"
     },
     "media": {
@@ -668,7 +738,14 @@
       "unsupported": "The task is invalid or unsupported",
       "updates_checked": "Checked for VBot updates",
       "volume_changed": "Changed volume to {volume}%",
-      "volume_parameter_invalid": "The volume parameter must be a number from 0 to 100"
+      "volume_parameter_invalid": "The volume parameter must be a number from 0 to 100",
+      "pending_none": "No pending schedules {scope}.",
+      "pending_item": "{name} at {time}.",
+      "pending_list": "Pending schedules {scope}: {items}",
+      "pending_more": "There are {count} more schedules; view them in WebUI.",
+      "pending_disabled": "Scheduler is disabled; schedules will not run.",
+      "pending_failed": "Could not read pending schedules.",
+      "pending_reminder": "{name}: {message}"
     },
     "setup": {
       "brightness_percent_missing": "Please specify the brightness percentage.",
@@ -745,6 +822,17 @@
   },
   "schema_version": 1,
   "values": {
+    "calendar": {"spoken_date_patterns": ["\\bday\\s+(\\d{1,2})\\s+month\\s+(\\d{1,2})(?:\\s+year\\s+(\\d{4}))?\\b"], "relative_days": [{"label": "yesterday", "offset": -1, "phrases": ["yesterday"]}, {"label": "today", "offset": 0, "phrases": ["today"]}, {"label": "tomorrow", "offset": 1, "phrases": ["tomorrow"]}, {"label": "the day after tomorrow", "offset": 2, "phrases": ["the day after tomorrow"]}]},
+    "voice_routines": {"prefixes": ["run routine", "run the routine", "activate routine", "activate the routine"], "negations": ["not", "never", "don't", "do not"]},
+    "hass_clarification": {"cancel": ["cancel", "never mind"], "number_prefixes": ["number", "light", "device"]},
+    "lan_calls": {
+      "speaker_prefixes": ["speaker"],
+      "call": ["call the speaker in", "call speaker in", "call the speaker", "call speaker", "make a call to", "call"],
+      "accept": ["accept call", "accept the call", "answer call", "answer the call"],
+      "reject": ["reject call", "reject the call", "decline call", "decline the call"],
+      "end": ["end call", "end the call", "hang up", "disconnect call"],
+      "cancel": ["cancel", "cancel call", "cancel the call"]
+    },
     "cover_position_terms": [
       "position",
       "opening"
@@ -961,7 +1049,12 @@
       "month_label": "this month",
       "month_number_label": "month {month}, {year}",
       "upcoming_label": "upcoming",
-      "date_format": "%m/%d/%Y"
+      "date_format": "%m/%d/%Y",
+      "lunar_terms": [
+        "lunar"
+      ],
+      "leap_month_label": "leap month",
+      "date_format_short": "%m/%d"
     },
     "inactive_states": [
       "off",
@@ -1013,7 +1106,194 @@
         "today",
         "tonight",
         "next"
-      ]
+      ],
+      "delay_suffixes": [
+        "later",
+        "from now"
+      ],
+      "list_queries": {
+        "all": [
+          "what schedules are pending",
+          "read pending schedules"
+        ],
+        "today": [
+          "what schedules are due today"
+        ],
+        "tomorrow": [
+          "what schedules are due tomorrow"
+        ],
+        "week": [
+          "what schedules are due this week"
+        ]
+      },
+      "scope_labels": {
+        "all": "next",
+        "today": "today",
+        "tomorrow": "tomorrow",
+        "week": "this week"
+      }
+    },
+    "hass_context": {
+      "fillers": [
+        "it",
+        "that device",
+        "that",
+        "to",
+        "back"
+      ],
+      "cancel": [
+        "end conversation",
+        "cancel conversation"
+      ],
+      "status_queries": {
+        "state": [
+          "is it on or off",
+          "what is its state",
+          "what is the device status",
+          "is the light on or off"
+        ],
+        "temperature": [
+          "what temperature is it set to",
+          "what is the set temperature"
+        ],
+        "current_temperature": [
+          "what is the current temperature"
+        ],
+        "brightness": [
+          "what is the brightness",
+          "how bright is it"
+        ],
+        "speed": [
+          "what is the current fan speed",
+          "what is the fan speed"
+        ],
+        "position": [
+          "how far is it open",
+          "what is the cover position"
+        ]
+      },
+      "state_labels": {
+        "on": "on",
+        "off": "off",
+        "open": "open",
+        "closed": "closed",
+        "opening": "opening",
+        "closing": "closing",
+        "cool": "in cooling mode",
+        "heat": "in heating mode",
+        "auto": "in automatic mode",
+        "heat_cool": "in heating/cooling mode",
+        "dry": "in dry mode",
+        "fan_only": "in fan mode",
+        "idle": "idle"
+      },
+      "status_subjects": {
+        "light": [
+          "light"
+        ],
+        "fan": [
+          "fan"
+        ],
+        "cover": [
+          "cover"
+        ],
+        "climate": [
+          "air conditioner"
+        ]
+      },
+      "temperature_unit_label": "degrees",
+      "named_status_queries": {
+        "state": [
+          "is {target} on or off",
+          "what is the status of {target}"
+        ],
+        "temperature": [
+          "what temperature is {target} set to"
+        ],
+        "current_temperature": [
+          "what is the current temperature of {target}"
+        ],
+        "brightness": [
+          "what is the brightness of {target}"
+        ],
+        "speed": [
+          "what is the speed of {target}"
+        ],
+        "position": [
+          "how far is {target} open",
+          "what is the position of {target}"
+        ]
+      },
+      "relative_queries": {
+        "temperature": {
+          "increase": [
+            "increase by {value} degrees",
+            "increase temperature by {value} degrees"
+          ],
+          "decrease": [
+            "decrease by {value} degrees",
+            "decrease temperature by {value} degrees"
+          ]
+        },
+        "brightness": {
+          "increase": [
+            "increase brightness by {value}%"
+          ],
+          "decrease": [
+            "decrease brightness by {value}%"
+          ]
+        },
+        "speed": {
+          "increase": [
+            "increase fan speed by {value}%"
+          ],
+          "decrease": [
+            "decrease fan speed by {value}%"
+          ]
+        },
+        "position": {
+          "increase": [
+            "open by another {value}%"
+          ],
+          "decrease": [
+            "close by another {value}%"
+          ]
+        },
+        "percent": {
+          "increase": [
+            "increase by {value}%"
+          ],
+          "decrease": [
+            "decrease by {value}%"
+          ]
+        }
+      },
+      "climate_mode_queries": {
+        "cool": [
+          "switch to cooling mode",
+          "cooling mode"
+        ],
+        "heat": [
+          "switch to heating mode",
+          "heating mode"
+        ],
+        "auto": [
+          "switch to automatic mode",
+          "automatic mode"
+        ],
+        "heat_cool": [
+          "switch to automatic heating and cooling mode",
+          "automatic heating and cooling mode"
+        ],
+        "dry": [
+          "switch to dry mode",
+          "dry mode"
+        ],
+        "fan_only": [
+          "switch to fan mode",
+          "fan mode"
+        ]
+      }
     }
   },
   "weather": {

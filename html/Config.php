@@ -6,6 +6,34 @@
 #Facebook: https://www.facebook.com/TWFyaW9uMDAx
 #Email: VBot.Assistant@gmail.com
 
+// Both configuration pages edit the same speaker location in Config.json.
+function vbotSpeakerLocationUpdate(array &$config, array $post): ?string {
+    if (!isset($post['speaker_location_present'])) return null;
+    $active=isset($post['speaker_location_active']);
+    $room=$post['speaker_location_room']??'';
+    if (!is_string($room) || strlen($room)>400 || preg_match('/[\x00-\x1f\x7f]/',$room))
+        return 'Tên phòng đặt loa không hợp lệ; cấu hình phòng được giữ nguyên.';
+    $room=trim($room);
+    if ($active && $room==='') return 'Cần nhập tên phòng đặt loa khi bật tính năng; cấu hình phòng được giữ nguyên.';
+    $config['speaker_location']=array_merge($config['speaker_location']??[],['active'=>$active,'room'=>$room]);
+    return null;
+}
+function vbotSpeakerLocationSwitch(array $config): void {
+    $checked=($config['speaker_location']['active']??false)===true?'checked':'';
+    echo '<div class="row mb-3 align-items-center"><label class="col-sm-3 col-form-label" for="speaker_location_active">Sử dụng phòng đặt loa:</label>
+      <div class="col-sm-9"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="speaker_location_active" id="speaker_location_active" '.$checked.'><label class="form-check-label" for="speaker_location_active">Ưu tiên thiết bị Home Assistant trong phòng đặt loa</label></div>
+      <div class="form-text mt-2">Khi bật, câu gọi chỉ nêu loại thiết bị sẽ dùng phòng đặt loa đã cấu hình. Ví dụ loa đặt ở <strong>Phòng ngủ</strong>: nói <strong>“bật đèn”</strong>, <strong>“tắt đèn”</strong> hoặc <strong>“bật quạt”</strong> để tìm thiết bị tương ứng trong phòng ngủ. Nếu có một thiết bị phù hợp, VBot thực hiện ngay; nếu có nhiều thiết bị, VBot hỏi lại để bạn nói tên cụ thể hoặc hủy trong phiên hiện tại.<br>
+      Nếu nói rõ phòng khác, như <strong>“bật đèn phòng khách”</strong>, hoặc nhập Entity ID, VBot ưu tiên đích được chỉ rõ. Câu gọi có tên thiết bị cụ thể, như <strong>“bật đèn bàn”</strong>, vẫn tìm theo tên thiết bị. Cần gán thiết bị vào Area tương ứng trong Home Assistant; nếu không xác định được phòng hoặc thiết bị hợp lệ, VBot không tự chọn thiết bị ở phòng khác. Khi tắt, VBot tìm kiếm theo cách thông thường. Lưu và khởi động lại VBot sau khi thay đổi.</div></div></div>';
+}
+function vbotSpeakerLocationFields(array $config, bool $showSwitch=true): void {
+    $location=$config['speaker_location']??[];
+    $room=htmlspecialchars((string)($location['room']??''),ENT_QUOTES,'UTF-8');
+    echo '<input type="hidden" name="speaker_location_present" value="1">';
+    if ($showSwitch) vbotSpeakerLocationSwitch($config);
+    echo '<div class="row mb-3"><label class="col-sm-3 col-form-label fw-semibold text-danger" for="speaker_location_room">Phòng Đặt Loa:</label><div class="col-sm-9"><input class="form-control border-success" type="text" name="speaker_location_room" id="speaker_location_room" maxlength="100" value="'.$room.'" placeholder="Ví dụ: Phòng ngủ / Bedroom">
+      <div class="form-text">Nhập tên, bí danh hoặc Area ID của phòng trong Home Assistant, theo ngôn ngữ bạn sử dụng. Khi nói “bật đèn”, VBot tìm đèn trong phòng này; nhiều thiết bị sẽ được hỏi lại theo phiên. Câu nêu rõ phòng khác hoặc Entity ID được ưu tiên. Cần gán thiết bị vào Area và bật Home Assistant. Lưu rồi khởi động lại VBot để áp dụng.</div></div></div>';
+}
+
 $phpErrorLog = __DIR__ . '/../resource/log/Vbot_error.log';
 ini_set('log_errors', '1');
 ini_set('error_log', $phpErrorLog);
@@ -37,6 +65,8 @@ register_shutdown_function(static function () use ($phpErrorLog): void {
 
 include 'Configuration.php';
 require_once __DIR__.'/includes/ActionRegistry.php';
+require_once __DIR__.'/includes/LANCalls.php';
+$lanConfigError='';
 
 function vbotButtonActionOptions($Config): array
 {
@@ -294,6 +324,15 @@ if (isset($_POST['start_recovery_config_json'])) {
 
 #Lưu lại các giá trị Config.json
 if (isset($_POST['all_config_save'])) {
+  if (isset($_POST['lan_settings_present'])) {
+    try {
+      $lanButtons=$Config['smart_config']['button']??[];
+      foreach ($lanButtons as $name=>&$button) $button['active']=isset($_POST['button'][$name]['active']);
+      unset($button);
+      $Config['lan_calls']=vbotLANCallsSettings($_POST,$Config['lan_calls']??[],$lanButtons,$Config['contact_info']['full_name']??'Loa VBot');
+    }
+    catch (Throwable $error) { $lanConfigError=$error->getMessage(); $messages[]='Chưa lưu cấu hình: '.$lanConfigError; }
+  }
   #error_log('[PHP Config] Bắt đầu xử lý yêu cầu lưu Config.json', 0);
   if ($Config['backup_upgrade']['config_json']['active'] === true) {
     $dateTime = new DateTime();
@@ -692,9 +731,10 @@ if (isset($_POST['all_config_save'])) {
   $calendar_sources = ['system', 'virtual_assistant_priority', 'dev_calendar'];
   $calendar_source = isset($_POST['calendar_source']) ? trim((string)$_POST['calendar_source']) : 'system';
   $Config['calendar']['source'] = in_array($calendar_source, $calendar_sources, true) ? $calendar_source : 'system';
-  $Config['calendar']['events'] = [
+  $Config['calendar']['events'] = array_merge($Config['calendar']['events']??[], [
     'active' => isset($_POST['calendar_events_active']),
-  ];
+    'minimum_threshold' => max(0.1,min(1.0,floatval($_POST['calendar_events_minimum_threshold']??($Config['calendar']['events']['minimum_threshold']??0.90)))),
+  ]);
 
   #cập nhật đồng bộ hóa media với web ui
   $Config['media_player']['media_sync_ui']['active'] = isset($_POST['media_sync_ui']) ? true : false;
@@ -1002,6 +1042,10 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_wakeup']['speak_to_text']['stt_ggcloud']['stt_ggcloud_v2']['model'] = $_POST['stt_ggcloud_v2_model'];
 
   #Cập nhật lịch, lời nhắc, thông báo
+  if (isset($_POST['voice_routines_setting_present'])) {
+    $Config['voice_routines']['active'] = isset($_POST['voice_routines_active']) ? true : false;
+    $Config['voice_routines']['minimum_threshold'] = max(0.1,min(1.0,floatval($_POST['voice_routines_minimum_threshold']??($Config['voice_routines']['minimum_threshold']??0.90))));
+  }
   $Config['schedule']['active'] = isset($_POST['schedule_active']) ? true : false;
   $Config['schedule']['auto_delete_completed_voice_control'] = isset($_POST['schedule_auto_delete_completed_voice_control']);
   #Cập nhật xử lý lỗi
@@ -1032,6 +1076,8 @@ if (isset($_POST['all_config_save'])) {
     // Bắt buộc lần khởi động sau lấy lại endpoint/token từ OTA mới.
     $Config['xiaozhi']['system_options']['network']['ota_config_source'] = '';
   }
+  $speakerLocationError=vbotSpeakerLocationUpdate($Config,$_POST);
+  if ($speakerLocationError!==null) $messages[]='- '.$speakerLocationError;
   #Cập nhật chế độ chạy toàn bộ chương trình
   $Config['launch_source'] = !empty($_POST['launch_source']) ? $_POST['launch_source'] : 'VBot_Assistant';
   #Cập nhật locale keyword; dữ liệu chỉ được áp dụng sau khi restart VBot
@@ -1132,7 +1178,7 @@ if (isset($_POST['all_config_save'])) {
   } else {
     $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
   }
-  $configSaved = vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
+  $configSaved = $lanConfigError==='' && vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
   if ($configSaved) {
     $messages[] = "Cấu hình đã được lưu thành công!";
   } else {
@@ -1537,8 +1583,11 @@ include 'html_head.php';
                 </select>
               </div>
             </div>
+            <?php vbotSpeakerLocationFields($Config,false); ?>
 
+<div class="alert alert-primary" role="alert">
             <div class="row mb-3 align-items-center">
+			
               <label for="keyword_language_primary" class="col-sm-3 col-form-label fw-semibold text-danger">Ngôn Ngữ Câu Lệnh Hệ Thống <i class="bi bi-question-circle-fill" onclick="show_message('Mỗi ngôn ngữ dùng một file resource/lang_keywords/&lt;locale&gt;.json, bao gồm vi-VN.json.<br/>Sau khi thay đổi cần Lưu Cài Đặt Và Restart VBot.')"></i>:</label>
               <div class="col-sm-9">
                 <?php
@@ -1877,6 +1926,7 @@ include 'html_head.php';
 
               </div>
             </div>
+            </div>
 		</div>
             <div class="card accordion" id="accordion_button_ssh">
               <div class="card-body">
@@ -1898,6 +1948,94 @@ include 'html_head.php';
               </div>
             </div>
             </div>
+      <div class="card accordion" id="accordion_button_call_local_lan">
+      <div class="card-body">
+<!-- 
+      <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_call_local_lan" aria-expanded="false" aria-controls="collapse_button_call_local_lan">
+      Gọi Điện Trong Mạng Nội Bộ, Call Local Lan:</h5>
+      <div id="collapse_button_call_local_lan" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_call_local_lan">
+	  -->
+
+<h5 class="card-title accordion-button collapsed text-danger disabled" aria-expanded="false" aria-disabled="true" style="pointer-events: none; opacity: 0.5; cursor: not-allowed;">
+    Gọi Điện Trong Mạng Nội Bộ, Call Local Lan (Disabled):
+</h5>
+
+<div id="collapse_button_call_local_lan" class="accordion-collapse collapse" aria-labelledby="headingThree">
+            <?php
+$lanSettings=$Config['lan_calls']??[];
+if (!empty($lanConfigError)) {
+    foreach ($_POST as $field=>$value) if (strpos($field,'lan_')===0 && is_string($value)) $lanSettings[substr($field,4)]=$value;
+    $lanSettings['active']=isset($_POST['lan_active']);
+    $lanSettings['use_mdns_id']=isset($_POST['lan_use_mdns_id']);
+}
+$lanAutomaticIdentity=($lanSettings['use_mdns_id']??true)===true;
+$lanLocalIdentity=$lanAutomaticIdentity?vbotStableDeviceId():($lanSettings['id']??'');
+$lanDisplayKey=trim((string)($lanSettings['shared_key']??''));
+?>
+<div disabled class="col-12" id="lanCallConfiguration"><div class="card"><div class="card-body pt-3">
+<h2 class="h5">Cấu hình gọi nội bộ</h2>
+<input type="hidden" name="lan_settings_present" value="1">
+<p class="form-text">Các tùy chọn được lưu vào Config.json → lan_calls. Lưu cài đặt và khởi động lại VBot để áp dụng. Danh sách loa và thao tác gọi nằm ở <a href="LAN_Calls.php">Gọi điện LAN</a>.</p>
+<label class="form-check form-switch mb-3"><input disabled class="form-check-input" type="checkbox" name="lan_active" <?= !empty($lanSettings['active'])?'checked':'' ?>> Bật gọi điện LAN khi VBot khởi động</label>
+<label class="form-check form-switch mb-3"><input disabled class="form-check-input" type="checkbox" name="lan_use_mdns_id" id="lanUseMdnsId" <?= $lanAutomaticIdentity?'checked':'' ?>> Dùng ID mDNS ổn định của loa (dùng chung với Multiroom)</label>
+<div class="row g-3">
+<?php foreach (['id'=>['ID loa này','vbot_local'],'control_port'=>['Cổng kết nối cuộc gọi (TCP)',5010],'audio_port'=>['Cổng âm thanh (UDP)',5011],'output_device'=>['Thiết bị phát ALSA','default'],'ring_timeout'=>['Chờ nhận cuộc gọi (giây)',30],'max_duration'=>['Thời lượng tối đa (giây)',3600]] as $key=>$field): ?>
+<div class="col-md-6"><label class="form-label" for="lan_<?= $key ?>"><?= $field[0] ?></label><input disabled class="form-control" id="lan_<?= $key ?>" name="lan_<?= $key ?>" required <?= $key==='id' && $lanAutomaticIdentity?'readonly':'' ?> <?= is_int($field[1])?'type="number"':'type="text"' ?> value="<?= vbotLANEscape($key==='id' && $lanLocalIdentity!==''?$lanLocalIdentity:($lanSettings[$key]??$field[1])) ?>"><?php if ($key==='id'): ?><div class="form-text">Khi dùng ID mDNS, ID được lấy tự động từ danh tính phần cứng của loa. Sao chép ID này vào danh sách loa đích trên loa còn lại; không dùng ID MQTT thay thế.</div><?php endif; ?></div>
+<?php endforeach; ?>
+<p class="form-text">Tên loa được lấy từ hồ sơ: <strong><?= vbotLANEscape($Config['contact_info']['full_name']??'Loa VBot') ?></strong>. Chỉnh tên tại <a href="Users_Profile.php">Hồ sơ người dùng</a> rồi khởi động lại VBot để áp dụng.</p>
+<div class="col-md-6"><label class="form-label" for="lan_shared_key">Khóa chung giữa các loa</label><input disabled class="form-control" id="lan_shared_key" type="text" name="lan_shared_key" autocomplete="off" spellcheck="false" maxlength="200" value="<?= vbotLANEscape($lanDisplayKey) ?>" placeholder="Nhập khóa từ 16 đến 200 ký tự"><div class="form-text">Khóa đã lưu hiển thị tại đây để đối chiếu. Các loa cần cùng khóa, từ 16–200 ký tự ASCII và không có khoảng trắng bên trong. Khoảng trắng đầu/cuối được tự bỏ khi lưu.</div></div>
+<div class="col-md-6"><label class="form-label" for="lan_mode">Chế độ microphone khi nhận</label><select disabled class="form-select" id="lan_mode" name="lan_mode"><option value="full_duplex" <?= ($lanSettings['mode']??'full_duplex')==='full_duplex'?'selected':'' ?>>Hai chiều đồng thời</option><option value="push_to_talk" <?= ($lanSettings['mode']??'')==='push_to_talk'?'selected':'' ?>>Nhấn giữ để nói</option></select></div>
+<div class="col-md-6"><label class="form-label" for="lan_ringtone">Nhạc chuông cuộc gọi đến</label><select disabled class="form-select" id="lan_ringtone" name="lan_ringtone">
+<?php $lanRingtones=vbotLANRingtones();$lanRingtone=$lanSettings['ringtone']??(in_array('call_iphone.mp3',$lanRingtones,true)?'call_iphone.mp3':''); ?>
+<option value="" <?= $lanRingtone===''?'selected':'' ?>>Âm báo mặc định của VBot</option>
+<?php foreach ($lanRingtones as $ringtone): ?><option value="<?= vbotLANEscape($ringtone) ?>" <?= $lanRingtone===$ringtone?'selected':'' ?>><?= vbotLANEscape($ringtone) ?></option><?php endforeach; ?>
+</select><div class="input-group mt-2"><input disabled class="form-control" type="file" id="lan_ringtone_upload" accept=".mp3,.wav,.ogg,.flac,.m4a"><button type="button" class="btn btn-success" id="lan_ringtone_upload_button"><i class="bi bi-upload"></i> Tải lên</button></div>
+<div id="lan_ringtone_upload_status" class="form-text" role="status"></div>
+<div class="form-text">Tải file âm thanh tối đa 20 MB vào resource/sound/call_ringtone/. Khi tải xong, file được chọn tự động. Nhấn ngắn WakeUp để nhận cuộc gọi; kết thúc bằng nút và kiểu nhấn đã chọn bên dưới. Lưu và khởi động lại VBot để áp dụng nhạc chuông.</div></div>
+</div>
+<div class="mt-3">
+<input type="hidden" name="lan_ptt_present" value="1">
+<label class="form-check form-switch"><input disabled class="form-check-input" type="checkbox" name="lan_ptt_button_active" <?= !empty($lanSettings['ptt_button_active'])?'checked':'' ?>> Dùng nút vật lý nhấn giữ để nói trong cuộc gọi</label>
+<label class="form-label" for="lan_ptt_button">Nút nhấn giữ để nói</label>
+<select class="form-select" id="lan_ptt_button" name="lan_ptt_button"><option value="">Chọn nút đã cấu hình</option>
+<?php foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button): ?>
+<option value="<?= vbotLANEscape($buttonName) ?>" <?= ($lanSettings['ptt_button']??'')===$buttonName?'selected':'' ?>><?= vbotLANEscape($buttonName) ?> — GPIO <?= vbotLANEscape($button['gpio']??'') ?><?= empty($button['active'])?' (đang tắt)':'' ?></option>
+<?php endforeach; ?></select>
+<div class="form-text">Chỉ hoạt động khi tùy chọn này bật, nút được bật trong cấu hình Button và cuộc gọi dùng chế độ “Nhấn giữ để nói”. Giữ nút để truyền microphone, thả để ngừng truyền. Trong cuộc gọi, nút được chọn ưu tiên chức năng này thay cho thao tác nhấn ngắn/nhấn giữ/nhấn đúp; nếu chọn MIC, dùng WebUI để kết thúc. Ngoài cuộc gọi nút giữ chức năng thông thường.</div>
+</div>
+<div class="mt-3">
+<input type="hidden" name="lan_end_button_present" value="1">
+<label class="form-check form-switch"><input disabled class="form-check-input" type="checkbox" name="lan_end_button_active" <?= ($lanSettings['end_button_active']??true)?'checked':'' ?>> Dùng nút vật lý ngắt cuộc gọi</label>
+<label class="form-label" for="lan_end_button">Nút ngắt cuộc gọi</label>
+<select class="form-select mb-2" id="lan_end_button" name="lan_end_button"><option value="">Chọn nút đã cấu hình</option>
+<?php foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button): ?><option value="<?= vbotLANEscape($buttonName) ?>" <?= ($lanSettings['end_button']??'mic')===$buttonName?'selected':'' ?>><?= vbotLANEscape($buttonName) ?> — GPIO <?= vbotLANEscape($button['gpio']??'') ?><?= empty($button['active'])?' (đang tắt)':'' ?></option><?php endforeach; ?></select>
+<label class="form-label" for="lan_end_button_press">Thao tác ngắt cuộc gọi</label>
+<select class="form-select" id="lan_end_button_press" name="lan_end_button_press">
+<?php foreach (['short'=>'Nhấn nhả','hold'=>'Nhấn giữ','both'=>'Cả nhấn nhả và nhấn giữ'] as $value=>$label): ?><option value="<?= $value ?>" <?= ($lanSettings['end_button_press']??'short')===$value?'selected':'' ?>><?= $label ?></option><?php endforeach; ?></select>
+<div class="form-text">Áp dụng khi đang kết nối hoặc trò chuyện. Nhấn giữ dùng thời gian giữ của nút trong cấu hình Button (mặc định 2 giây), ngắt ngay khi đạt thời gian này. Ngoài cuộc gọi nút giữ chức năng cũ. Nút ngắt và nút nhấn giữ để nói phải khác nhau khi dùng chế độ nhấn giữ để nói.</div>
+</div>
+</div></div></div>
+<script>document.getElementById('lanUseMdnsId').addEventListener('change',function(){document.getElementById('lan_id').readOnly=this.checked;});</script>
+<script>
+document.getElementById('lan_ringtone_upload_button').addEventListener('click',async function(){
+    const input=document.getElementById('lan_ringtone_upload'),status=document.getElementById('lan_ringtone_upload_status'),file=input.files[0];
+    if(!file){status.textContent='Hãy chọn file âm thanh để tải lên.';return;}
+    if(file.size>20*1024*1024){status.textContent='File không được vượt quá 20 MB.';return;}
+    this.disabled=true;status.textContent='Đang tải nhạc chuông…';
+    try {
+        const data=new FormData();data.append('ringtone',file);
+        const response=await fetch('includes/php_ajax/LAN_Ringtone_Upload.php',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':window.VBOT_CSRF_TOKEN||''},body:data});
+        const result=await response.json();if(!response.ok || !result.success)throw Error(result.message||'Tải nhạc chuông thất bại');
+        const select=document.getElementById('lan_ringtone');select.replaceChildren(new Option('Âm báo mặc định của VBot',''));
+        for(const name of result.files)select.add(new Option(name,name));
+        select.value=result.name;input.value='';status.textContent=result.message;
+    } catch(error){status.textContent=error.message;} finally{this.disabled=false;}
+});
+</script>
+
+      </div>
+      </div>
+      </div>
             <div class="card accordion" id="accordion_button_webui_path">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_webui_path" aria-expanded="false" aria-controls="collapse_button_webui_path">
@@ -3162,6 +3300,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                   echo input_field('hass_external_url', 'URL bên ngoài ', htmlspecialchars($Config['home_assistant']['external_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_external_url')", 'btn btn-success border-success', 'onclick', '_blank');
                   echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác từ khóa cao khi VBot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
                   echo input_field('hass_lowest_to_display_logs', 'Ngưỡng tối thiểu hiển thị ra logs', $Config['home_assistant']['lowest_to_display_logs'] ?? 0.39, 'required', 'number', '0.01', '0', '0.45', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-danger', '', '', '', '', '');
+                  vbotSpeakerLocationSwitch($Config);
                   echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Thời gian chờ phản hồi tối đa khi kết nối với Hass, Home Assistant', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
@@ -4939,6 +5078,31 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             </div>
           </div>
 
+
+			
+			
+      <div class="card accordion" id="accordion_button_voice_routines">
+      <div class="card-body">
+      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_voice_routines" aria-expanded="false" aria-controls="collapse_button_voice_routines">
+      Kịch Bản Nhiều Bước (Dùng Câu Lệnh): <?php echo $Config['voice_routines']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
+      <div id="collapse_button_voice_routines" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_voice_routines">
+				<div class="alert alert-primary" role="alert">
+                <input type="hidden" name="voice_routines_setting_present" value="1">
+                <div class="row mb-3">
+                  <label class="col-sm-3 col-form-label" for="voice_routines_active">Kích hoạt:</label>
+                  <div class="col-sm-9"><div class="form-switch">
+                    <input class="form-check-input border-success" type="checkbox" name="voice_routines_active" id="voice_routines_active" <?= ($Config['voice_routines']['active']??true)===true?'checked':'' ?>>
+                  </div></div>
+                </div>
+                <div class="row mb-3"><label class="col-sm-3 col-form-label" for="voice_routines_minimum_threshold">Ngưỡng kết quả tối thiểu:</label><div class="col-sm-9"><input class="form-control border-success" type="number" id="voice_routines_minimum_threshold" name="voice_routines_minimum_threshold" min="0.1" max="1" step="0.01" required value="<?= htmlspecialchars((string)($Config['voice_routines']['minimum_threshold']??0.90),ENT_QUOTES,'UTF-8') ?>"><div class="form-text">Mặc định 0.90. Giá trị 1 yêu cầu khớp hoàn toàn; giảm ngưỡng để chấp nhận câu gọi gần khớp. Nếu nhiều kịch bản khớp gần ngang nhau, VBot không tự chọn.</div></div></div>
+                <p class="small text-muted">Lưu và khởi động lại VBot để áp dụng. Khi tắt, lệnh giọng nói và API không chạy kịch bản; bạn vẫn có thể chỉnh cấu hình kịch bản.</p>
+                <a class="btn btn-primary mb-3" href="Voice_Routines.php">Đi tới cấu hình kịch bản giọng nói</a>
+
+      </div>
+      </div>
+      </div>
+      </div>
+			
             <div class="card accordion" id="accordion_button_schedule_lich">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_schedule_lich" aria-expanded="false" aria-controls="collapse_button_schedule_lich">
@@ -4986,6 +5150,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 		  <input class="form-check-input border-success" type="checkbox" name="calendar_events_active" id="calendar_events_active" <?php echo ($calendar_events_cfg['active'] ?? true) ? 'checked' : ''; ?>>
 		</div></div>
 	  </div>
+	  <div class="row mb-3"><label class="col-sm-3 col-form-label" for="calendar_events_minimum_threshold">Ngưỡng kết quả tối thiểu:</label><div class="col-sm-9"><input class="form-control border-success" type="number" id="calendar_events_minimum_threshold" name="calendar_events_minimum_threshold" min="0.1" max="1" step="0.01" required value="<?= htmlspecialchars((string)($Config['calendar']['events']['minimum_threshold']??0.90),ENT_QUOTES,'UTF-8') ?>"><div class="form-text">Mặc định 0.90, áp dụng tìm tên Event và Tags trong câu hỏi. Giá trị 1 yêu cầu khớp hoàn toàn; không thay đổi thời điểm tự chạy sự kiện.</div></div></div>
 	  <div class="alert alert-light border mb-3" role="note">
 		<div class="fw-bold mb-2"><i class="bi bi-chat-dots"></i> Cách hỏi VBot về Events</div>
 		<div class="small mb-2">Sau khi bật Events, lưu cấu hình và khởi động lại VBot, người dùng có thể hỏi tự nhiên bằng tên Event hoặc Tags đã khai báo:</div>

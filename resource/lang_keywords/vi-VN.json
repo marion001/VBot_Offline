@@ -377,6 +377,39 @@
     ]
   },
   "responses": {
+    "voice_routines": {
+      "load_error": "Không đọc được cấu hình kịch bản. Hãy kiểm tra trên WebUI.",
+      "not_found": "Không tìm thấy kịch bản đang bật có tên này.",
+      "completed": "Kịch bản {name} hoàn tất",
+      "failed": "Kịch bản {name} không hoàn tất. Hãy kiểm tra nhật ký để biết chi tiết.",
+      "failed_step": "Kịch bản {name} dừng ở bước {step}. Hãy kiểm tra nhật ký để biết chi tiết.",
+      "partial": "Kịch bản {name} kết thúc, bước lỗi: {steps}",
+      "cancelled": "Đã dừng kịch bản {name}",
+      "busy": "Một kịch bản khác đang chạy",
+      "disabled": "Kịch bản giọng nói đang tắt theo cấu hình khi VBot khởi động",
+      "outside_date": "Kịch bản {name} nằm ngoài khoảng ngày được phép",
+      "outside_time": "Kịch bản {name} nằm ngoài khung giờ {start}–{end}",
+      "timeout": "Kịch bản vượt quá thời gian chạy tối đa 10 phút"
+    },
+    "lan_calls": {
+      "cancelled": "Đã hủy chọn loa để gọi.",
+      "not_found": "Không tìm thấy loa để gọi. Bạn hãy đọc lại tên loa.",
+      "ambiguous": "Có nhiều loa trùng tên. Bạn hãy đọc tên đầy đủ hoặc ID của loa.",
+      "no_peers": "Chưa có loa đích trong danh sách đang chạy. Hãy lưu danh sách loa và khởi động lại VBot.",
+      "disabled": "Gọi LAN chưa chạy. Hãy bật gọi LAN và khởi động lại VBot.",
+      "call": "Đang gọi {name}.",
+      "accept": "Đã nhận cuộc gọi.",
+      "reject": "Đã từ chối cuộc gọi.",
+      "end": "Đã kết thúc cuộc gọi.",
+      "error": "Không thực hiện được cuộc gọi. Hãy kiểm tra nhật ký và kết nối giữa các loa.",
+      "busy": "Loa đang bận hoặc đang có cuộc gọi.",
+      "no_call": "Không có cuộc gọi để thực hiện thao tác này.",
+      "mic_busy": "Microphone đang bận hoặc chưa sẵn sàng.",
+      "not_configured": "Loa đích chưa được cấu hình.",
+      "wrong_key": "Khóa gọi LAN không khớp giữa các loa.",
+      "not_allowed": "Loa gửi chưa được phép kết nối.",
+      "stale": "Cuộc gọi không còn hiệu lực. Hãy gọi lại."
+    },
     "api": {
       "json_field_too_long": "Tên trường JSON quá dài",
       "json_list_too_long": "Danh sách JSON vượt quá giới hạn",
@@ -458,7 +491,13 @@
       "event_with_age": "{event}, {age} tuổi",
       "event_with_year": "{event}, 1 năm",
       "event_with_years": "{event}, {years} năm",
-      "upcoming_list": "Các sự kiện sắp tới: {events}."
+      "upcoming_list": "Các sự kiện sắp tới: {events}.",
+      "upcoming_item_lunar": "{event} vào ngày {date}, tức ngày {lunar_date} âm lịch",
+      "upcoming_item_weekday": "{event} vào {weekday}, ngày {date}",
+      "upcoming_item_lunar_weekday": "{event} vào {weekday}, ngày {date}, tức ngày {lunar_date} âm lịch",
+      "upcoming_item_age_weekday": "{event} vào {weekday}, ngày {date}, {age} tuổi",
+      "upcoming_item_year_weekday": "{event} vào {weekday}, ngày {date}, 1 năm",
+      "upcoming_item_years_weekday": "{event} vào {weekday}, ngày {date}, {years} năm"
     },
     "device_status": {
       "position_detail": ", ở vị trí: {position}%",
@@ -479,6 +518,7 @@
       "custom_ambiguous": "Có nhiều lệnh Home Assistant phù hợp. Bạn hãy nói rõ lệnh cần thực hiện.",
       "ambiguous_device": "Có nhiều thiết bị có tên gần giống nhau. Bạn hãy nói đầy đủ tên thiết bị cần điều khiển.",
       "clarify_device": "Bạn muốn chọn thiết bị nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
+      "clarify_many_devices": "Có nhiều thiết bị phù hợp. Bạn hãy nói tên đầy đủ của thiết bị muốn điều khiển hoặc nói hủy.",
       "clarify_temperature_device": "Bạn muốn đặt {value} độ cho thiết bị nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
       "control_already_set": "{name} đã ở trạng thái yêu cầu; không cần gửi lại lệnh.",
       "control_delivery_unknown": "Chưa xác định Home Assistant đã nhận lệnh cho {name} hay chưa. Hãy kiểm tra thiết bị trước khi gửi lại; VBot không tự gửi lại lệnh.",
@@ -537,7 +577,36 @@
       "schedule_invalid": "Thời gian chưa hợp lệ. Hãy nói sau 15 phút hoặc lúc 9 giờ tối.",
       "schedule_cancel_id": "Hãy nói hủy lịch kèm mã lịch hiển thị trên WebUI.",
       "schedule_cancelled": "Đã hủy lịch {id}.",
-      "schedule_not_pending": "Không tìm thấy lịch {id} đang chờ; chưa hủy lịch nào."
+      "schedule_not_pending": "Không tìm thấy lịch {id} đang chờ; chưa hủy lịch nào.",
+      "context_cancelled": "Đã kết thúc ngữ cảnh điều khiển.",
+      "context_missing": "Bạn muốn điều khiển thiết bị nào? Hãy nói đầy đủ tên.",
+      "relative_invalid": "Mức tăng hoặc giảm phải là số dương.",
+      "relative_unknown": "Không đọc được mức hiện tại của {name}. Hãy nói mức cụ thể.",
+      "relative_out_of_range": "Mức mới {value} không hợp lệ hoặc {name} không hỗ trợ. Hãy nói mức cụ thể.",
+      "relative_preview": "Chế độ thử: sẽ đổi {name} từ {current} sang {value}, không gửi lệnh.",
+      "relative_success": "Đã đặt {name} từ {current}{unit} sang {value}{unit}.",
+      "climate_mode_wrong_device": "Thiết bị đang nhớ là {name}. Hãy chọn điều hòa trước khi đổi chế độ.",
+      "climate_mode_unsupported": "{name} không hỗ trợ hoặc chưa xác định được chế độ yêu cầu. Chế độ đã xác định: {modes}.",
+      "climate_modes_unknown": "chưa xác định",
+      "climate_mode_preview": "Chế độ thử: sẽ đặt {name} {mode}, không gửi lệnh.",
+      "climate_mode_success": "Đã đặt {name} {mode}.",
+      "status_context_missing": "Chưa có thiết bị trong phiên này. Hãy chọn thiết bị bằng một lệnh đầy đủ trước.",
+      "status_context_mismatch": "Thiết bị đang nhớ là {name}. Hãy chọn đúng thiết bị bằng một lệnh đầy đủ trước.",
+      "status_read_failed": "Không đọc được trạng thái mới nhất của {name}.",
+      "status_search_failed": "Không đọc được danh sách thiết bị Home Assistant.",
+      "status_target_missing": "Chưa xác định được thiết bị cần đọc trạng thái. Hãy nói đầy đủ tên thiết bị.",
+      "status_state": "{name} hiện {state}.",
+      "status_temperature": "{name} đang đặt {value} {unit}.",
+      "status_current_temperature": "Nhiệt độ hiện tại do {name} báo là {value} {unit}.",
+      "status_brightness": "Độ sáng của {name} là {value}%.",
+      "status_speed": "Tốc độ của {name} là {value}%.",
+      "status_position": "{name} đang mở {value}%.",
+      "status_unknown": "Chưa xác định được thông tin này của {name} từ Home Assistant.",
+      "context_unavailable": "Thiết bị trong ngữ cảnh không còn sẵn sàng hoặc không được phép điều khiển.",
+      "context_invalid": "Hành động hoặc giá trị chưa phù hợp với thiết bị đang nhớ. Hãy nói lại lệnh đầy đủ.",
+      "context_preview": "Chế độ thử: không gửi lệnh điều khiển.",
+      "context_success": "Đã {action} {name}.",
+      "context_value_success": "Đã đặt {name} ở mức {value}{unit}."
     },
     "logs": {
       "all_assistants_failed": "Tất cả các trợ lý ảo đều không phản hồi hoặc không hoạt động.",
@@ -594,6 +663,7 @@
       "playlist_invalid": "Không tìm thấy dữ liệu hợp lệ trong PlayList {name}",
       "playlist_not_found": "Không tìm thấy PlayList: {name}.{detail}",
       "processing_error": "Lỗi xảy ra khi xử lý yêu cầu của bạn: {error}",
+      "ip_separator": " chấm ",
       "wifi_info": "Tên mạng Wifi đang kết nối là: '{ssid}', địa chỉ IP là: '{ip}'"
     },
     "media": {
@@ -670,7 +740,14 @@
       "unsupported": "Tác vụ không đúng hoặc không được hỗ trợ",
       "updates_checked": "Đã kiểm tra cập nhật VBot",
       "volume_changed": "Thay đổi âm lượng thành: {volume}%",
-      "volume_parameter_invalid": "Dữ liệu parameter của volume phải là số từ 0 - 100"
+      "volume_parameter_invalid": "Dữ liệu parameter của volume phải là số từ 0 - 100",
+      "pending_none": "Không có lịch đang chờ {scope}.",
+      "pending_item": "{name} lúc {time}.",
+      "pending_list": "Các lịch đang chờ {scope}: {items}",
+      "pending_more": "Còn {count} lịch khác; bạn có thể xem trên WebUI.",
+      "pending_disabled": "Scheduler đang tắt; lịch chưa được thực hiện.",
+      "pending_failed": "Không đọc được danh sách lịch đang chờ.",
+      "pending_reminder": "{name}: {message}"
     },
     "setup": {
       "brightness_percent_missing": "Không thể xác định phần trăm độ sáng, bạn hãy thử nói rõ số phần trăm",
@@ -747,6 +824,17 @@
   },
   "schema_version": 1,
   "values": {
+    "calendar": {"spoken_date_patterns": ["\\bngay\\s+(\\d{1,2})\\s+thang\\s+(\\d{1,2})(?:\\s+nam\\s+(\\d{4}))?\\b"], "relative_days": [{"label": "hôm qua", "offset": -1, "phrases": ["ngày hôm qua", "hôm qua"]}, {"label": "hôm nay", "offset": 0, "phrases": ["ngày hôm nay", "hôm nay"]}, {"label": "ngày mai", "offset": 1, "phrases": ["ngày mai"], "standalone_phrases": ["mai"]}, {"label": "ngày kia", "offset": 2, "phrases": ["ngày kia"]}, {"label": "ngày kìa", "offset": 3, "phrases": ["ngày kìa"]}]},
+    "voice_routines": {"prefixes": ["chạy kịch bản", "kích hoạt kịch bản"], "negations": ["không", "đừng", "chớ"]},
+    "hass_clarification": {"cancel": ["hủy", "huỷ", "huy", "thôi", "thoi"], "number_prefixes": ["số", "so", "đèn số", "den so", "thiết bị", "thiet bi"]},
+    "lan_calls": {
+      "speaker_prefixes": ["loa"],
+      "call": ["gọi điện tới loa", "gọi điện đến loa", "gọi điện cho loa", "gọi tới loa", "gọi đến loa", "gọi cho loa", "gọi điện tới", "gọi điện đến", "gọi điện cho", "gọi loa", "gọi"],
+      "accept": ["nhận cuộc gọi", "trả lời cuộc gọi"],
+      "reject": ["từ chối cuộc gọi"],
+      "end": ["kết thúc cuộc gọi", "ngắt cuộc gọi", "cúp máy"],
+      "cancel": ["hủy", "huỷ", "hủy gọi", "không gọi nữa"]
+    },
     "cover_position_terms": [
       "độ mở",
       "vị trí"
@@ -887,7 +975,9 @@
             "tháng một",
             "tháng nhất",
             "thang mot",
-            "thang nhat"
+            "thang nhat",
+            "tháng giêng",
+            "thang gieng"
           ]
         },
         {
@@ -964,7 +1054,9 @@
           "month": 12,
           "terms": [
             "tháng mười hai",
-            "thang muoi hai"
+            "thang muoi hai",
+            "tháng chạp",
+            "thang chap"
           ]
         }
       ],
@@ -976,7 +1068,13 @@
       "month_label": "tháng này",
       "month_number_label": "tháng {month} năm {year}",
       "upcoming_label": "sắp tới",
-      "date_format": "%d/%m/%Y"
+      "date_format": "%d/%m/%Y",
+      "lunar_terms": [
+        "âm lịch",
+        "lịch âm"
+      ],
+      "leap_month_label": "nhuận",
+      "date_format_short": "%d/%m"
     },
     "inactive_states": [
       "off",
@@ -997,7 +1095,8 @@
     ],
     "control_schedule": {
       "after": [
-        "sau"
+        "sau",
+        "cho"
       ],
       "at": [
         "lúc"
@@ -1033,6 +1132,81 @@
         "tối nay",
         "sáng mai",
         "vào"
+      ],
+      "delay_suffixes": [
+        "nữa"
+      ],
+      "list_queries": {
+        "all": [
+          "có lịch nào đang chờ",
+          "có lịch điều khiển nào đang chờ",
+          "đọc lịch đang chờ"
+        ],
+        "today": [
+          "hôm nay có lịch gì"
+        ],
+        "tomorrow": [
+          "ngày mai có lịch gì"
+        ],
+        "week": [
+          "tuần này có lịch gì"
+        ]
+      },
+      "scope_labels": {
+        "all": "gần nhất",
+        "today": "hôm nay",
+        "tomorrow": "ngày mai",
+        "week": "tuần này"
+      }
+    },
+    "hass_context": {
+      "climate_mode_queries": {
+        "cool": ["chuyển sang chế độ làm lạnh", "chế độ làm lạnh", "bật chế độ làm lạnh"],
+        "heat": ["chuyển sang chế độ sưởi", "chế độ sưởi", "bật chế độ sưởi"],
+        "auto": ["chuyển sang chế độ tự động", "chế độ tự động", "bật chế độ tự động"],
+        "heat_cool": ["chuyển sang chế độ sưởi và làm lạnh tự động"],
+        "dry": ["chuyển sang chế độ hút ẩm", "chế độ hút ẩm", "bật chế độ hút ẩm"],
+        "fan_only": ["chuyển sang chế độ quạt", "chế độ quạt", "bật chế độ quạt"]
+      },
+      "relative_queries": {
+        "temperature": {"increase": ["tăng thêm {value} độ", "tăng {value} độ", "tăng nhiệt độ thêm {value} độ"], "decrease": ["giảm {value} độ", "giảm thêm {value} độ", "giảm nhiệt độ {value} độ"]},
+        "brightness": {"increase": ["tăng độ sáng thêm {value}%", "tăng độ sáng {value}%"], "decrease": ["giảm độ sáng {value}%", "giảm độ sáng bớt {value}%"]},
+        "speed": {"increase": ["tăng tốc độ quạt {value}%", "tăng tốc độ {value}%"], "decrease": ["giảm tốc độ {value}%", "giảm tốc độ quạt {value}%"]},
+        "position": {"increase": ["mở thêm {value}%", "mở rèm thêm {value}%"], "decrease": ["đóng bớt {value}%", "đóng rèm bớt {value}%"]},
+        "percent": {"increase": ["tăng thêm {value}%", "tăng thêm {value} phần trăm"], "decrease": ["giảm {value}%", "giảm {value} phần trăm"]}
+      },
+      "named_status_queries": {
+        "state": ["{target} đang bật hay tắt", "trạng thái của {target}", "{target} đang thế nào"],
+        "temperature": ["{target} đang đặt bao nhiêu độ", "nhiệt độ cài đặt của {target} bao nhiêu"],
+        "current_temperature": ["nhiệt độ hiện tại của {target} bao nhiêu"],
+        "brightness": ["độ sáng của {target} bao nhiêu", "{target} sáng bao nhiêu phần trăm"],
+        "speed": ["{target} đang chạy bao nhiêu phần trăm", "tốc độ của {target} bao nhiêu"],
+        "position": ["{target} mở bao nhiêu phần trăm", "{target} đang mở bao nhiêu phần trăm"]
+      },
+      "status_subjects": {"light": ["đèn"], "fan": ["quạt"], "cover": ["rèm"], "climate": ["điều hòa"]},
+      "temperature_unit_label": "độ",
+      "status_queries": {
+        "state": ["đang bật hay tắt", "nó đang bật hay tắt", "đèn đang bật hay tắt", "trạng thái hiện tại", "thiết bị đang thế nào"],
+        "temperature": ["đang đặt bao nhiêu độ", "nó đang đặt bao nhiêu độ", "điều hòa đang đặt bao nhiêu độ", "nhiệt độ cài đặt bao nhiêu"],
+        "current_temperature": ["nhiệt độ hiện tại bao nhiêu", "nhiệt độ hiện tại là bao nhiêu"],
+        "brightness": ["độ sáng bao nhiêu", "độ sáng hiện tại bao nhiêu", "đèn sáng bao nhiêu phần trăm"],
+        "speed": ["tốc độ hiện tại bao nhiêu", "tốc độ quạt bao nhiêu", "quạt đang chạy bao nhiêu phần trăm"],
+        "position": ["đang mở bao nhiêu phần trăm", "rèm đang mở bao nhiêu phần trăm", "rèm mở bao nhiêu phần trăm"]
+      },
+      "state_labels": {"on": "đang bật", "off": "đang tắt", "open": "đang mở", "closed": "đang đóng", "opening": "đang mở dần", "closing": "đang đóng dần", "cool": "ở chế độ làm lạnh", "heat": "ở chế độ sưởi", "auto": "ở chế độ tự động", "heat_cool": "ở chế độ sưởi/làm lạnh tự động", "dry": "ở chế độ hút ẩm", "fan_only": "ở chế độ quạt", "idle": "đang nghỉ"},
+      "fillers": [
+        "nó",
+        "thiết bị đó",
+        "cái đó",
+        "đi",
+        "lại",
+        "xuống",
+        "lên",
+        "về"
+      ],
+      "cancel": [
+        "hủy hội thoại",
+        "kết thúc hội thoại"
       ]
     }
   },

@@ -5,8 +5,11 @@
 <section class="section"><div class="card"><div class="card-body pt-3">
   <div class="mb-3 d-flex flex-wrap justify-content-center gap-2">
     <button class="btn btn-warning" type="button" onclick="openLearnModal()"><i class="bi bi-broadcast"></i> Học lệnh</button>
+    <button class="btn btn-success" type="button" onclick="openManualModal()"><i class="bi bi-plus-circle"></i> Thêm lệnh thủ công</button>
     <a class="btn btn-outline-primary" href="FAQ.php#internal-ir-setup" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn</a>
   </div>
+  <p class="small text-muted">Danh sách hỗ trợ tối đa 500 lệnh và tổng dữ liệu 20 MB. Nếu dữ liệu đã thay đổi ở tab khác, hãy tải lại trang trước khi lưu để tránh ghi đè.</p>
+  <div id="irUnsavedNotice" class="alert alert-warning d-none" role="status">Bảng có thay đổi chưa lưu. Nhấn “Lưu toàn bộ cấu hình” trước khi thêm hoặc xóa lệnh để giữ thay đổi.</div>
   <div class="table-responsive"><table class="table table-striped align-middle"><thead><tr><th>Kích hoạt</th><th style="min-width:180px">Tên câu lệnh</th>
   <th style="min-width:200px">Câu phản hồi <i class="bi bi-question-circle-fill" onclick="show_message('Khi thực thi lệnh xong sẽ phát câu phản hồi tts tương ứng, để trống nếu không dùng câu phản hồi')"></i></th>
   <th style="min-width:220px">Thao tác khi nhận mã <i class="bi bi-question-circle-fill" onclick="show_message('Dùng chính nút đã học trên remote để điều khiển các chức năng của loa VBot thông qua mã lệnh đã học')"></i></th><th style="min-width:360px">Mã IR</th><th>Hành động</th></tr></thead><tbody id="irRows"></tbody></table></div>
@@ -29,6 +32,7 @@
   <label for="irBackupFile" class="form-label">Khôi phục từ tệp trên máy tính (.json, tối đa 20 MB)</label>
   <div class="d-flex flex-wrap gap-2"><input id="irBackupFile" type="file" accept=".json,application/json" class="form-control" style="max-width:480px"><button class="btn btn-warning" type="button" onclick="uploadIrBackup()"><i class="bi bi-upload"></i> Tải lên và khôi phục</button></div>
   <p class="small text-muted mt-3">Khôi phục thay thế toàn bộ danh sách lệnh hiện tại. Hệ thống tự tạo bản sao trước khi khôi phục; không phát tín hiệu IR. Bản sao được lưu trong <code>html/Backup_Upgrade/Backup_Internal_IR</code>. Sau khi khôi phục, khởi động lại VBot để bảo đảm danh sách lệnh đang chạy được nạp lại.</p>
+  <p class="small text-muted">Nếu file lệnh hiện tại hỏng, hệ thống từ chối lưu để giữ nguyên dữ liệu. Hãy chọn một bản sao hợp lệ hoặc tải tệp JSON hợp lệ lên để khôi phục; nội dung file hỏng cũng được sao lưu trước khi thay thế.</p>
 </div></div>
 </section></main>
 <div class="modal fade" id="irBackupJsonModal" tabindex="-1" aria-labelledby="irBackupJsonModalLabel" aria-hidden="true">
@@ -52,13 +56,14 @@
         <div class="col-md-6"><label for="irReply" class="form-label">Câu Phản hồi</label><input id="irReply" class="form-control border-success" maxlength="500" placeholder="Câu phản hồi (không bắt buộc)"></div>
         <div class="col-12"><label for="irNewAction" class="form-label">Chức năng khi nhận</label><select id="irNewAction" class="form-select border-success"></select></div>
       </div>
-      <label for="irData" class="form-label">Mã IR đã học</label>
+      <label id="irDataLabel" for="irData" class="form-label">Mã IR đã học</label>
       <textarea id="irData" class="form-control font-monospace border-success" rows="7" readonly placeholder="Dữ liệu học được sẽ xuất hiện ở đây"></textarea>
+      <div id="irManualHelp" class="form-text mt-2 d-none">Dán mã IR dạng JSON gồm <code>format</code> và <code>keys.command</code> như cột Mã IR trong bảng. Chỉ hỗ trợ mã raw; mã HEX/Pronto cần chuyển đổi trước. Lưu lệnh không phát tín hiệu IR; chỉ nút Thử phát mới gửi lệnh.</div>
     </div>
     <div class="modal-footer d-flex flex-column align-items-stretch">
 <div class="d-flex flex-wrap gap-2 justify-content-center w-100">
-    <button type="button" class="btn btn-warning text-nowrap" onclick="learnIr()"><i class="bi bi-broadcast"></i> Học lại</button>
-    <button type="button" class="btn btn-primary text-nowrap" onclick="sendIr(currentData,true)"><i class="bi bi-send"></i> Thử phát</button>
+    <button type="button" id="irLearnAgain" class="btn btn-warning text-nowrap" onclick="learnIr()"><i class="bi bi-broadcast"></i> Học lại</button>
+    <button type="button" class="btn btn-primary text-nowrap" onclick="sendModalIr()"><i class="bi bi-send"></i> Thử phát</button>
     <button type="button" class="btn btn-success text-nowrap" onclick="saveIr()"><i class="bi bi-plus-circle"></i> Lưu Lệnh</button>
 </div>
       <div class="d-flex justify-content-center w-100 mt-2">
@@ -69,26 +74,86 @@
 </div>
 <?php include 'html_footer.php'; ?><a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a><?php include 'html_js.php'; ?>
 <script>
-let currentData=null, savedIr=[], irPlaylists=[], irRadios=[], irOperation=false;
+let currentData=null, savedIr=[], irPlaylists=[], irRadios=[], irOperation=false, irManualMode=false, irLearnTimer=null, irRevision='', irRowsBaseline='[]';
 const endpoint='includes/php_ajax/Internal_IR_Ajax.php';
 const irSendApi=<?= json_encode(rtrim($URL_API_VBOT, '/').'/internal-ir/send', JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
 const irApiKey=<?= json_encode(!empty($Config['api']['auth']['active']) ? (string)($Config['api']['auth']['api_key'] ?? '') : '', JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
-function irPost(values){const body=new URLSearchParams();Object.entries(values).forEach(([k,v])=>body.set(k,v));body.set('csrf_token',window.VBOT_CSRF_TOKEN||'');return fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''},body:body.toString()}).then(r=>r.json()).catch(error=>({success:false,message:'Không thể kết nối hoặc máy chủ trả về dữ liệu không hợp lệ: '+error.message}));}
+function irPost(values){const body=new URLSearchParams();Object.entries(values).forEach(([k,v])=>body.set(k,v));body.set('csrf_token',window.VBOT_CSRF_TOKEN||'');if(irRevision)body.set('revision',irRevision);return fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8','X-CSRF-Token':window.VBOT_CSRF_TOKEN||''},body:body.toString()}).then(r=>r.json()).catch(error=>({success:false,message:'Không thể kết nối hoặc máy chủ trả về dữ liệu không hợp lệ: '+error.message}));}
 function notice(r){const message=r&&r.message?r.message:'Hoàn tất';if(r&&r.success){showMessagePHP(message);}else{show_message(message);}}
 function learnNotice(r){const el=document.getElementById('irLearnStatus');const ok=r&&r.success;el.className='alert text-center '+(ok?'alert-success':'alert-danger');el.innerHTML=`<i class="bi ${ok?'bi-check-circle':'bi-exclamation-triangle'}"></i> ${escapeHtml(r&&r.message?r.message:'Có lỗi xảy ra')}`;}
 function escapeHtml(v){const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 const irActions=<?= json_encode(array_map(null, array_keys(vbotActionRegistryStatic()), array_values(vbotActionRegistryStatic())), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
 function actionOptions(value){const selected=value||'none';const options=[...irActions,...irPlaylists.map(x=>[`playlist:${x.id}`,`Phát Playlist: ${x.name}`]),...irRadios.map(x=>[`radio:${x.id}`,`Phát Radio: ${x.name}`])];if((selected.startsWith('playlist:')||selected.startsWith('radio:'))&&!options.some(x=>x[0]===selected))options.push([selected,'Nguồn phát không còn tồn tại']);return options.map(([key,label])=>`<option value="${escapeHtml(key)}" ${key===selected?'selected':''}>${escapeHtml(label)}</option>`).join('');}
-function renderRows(){document.getElementById('irRows').innerHTML=savedIr.map((x,i)=>`<tr data-index="${i}"><td class="text-center"><div class="form-switch d-inline-block"><input class="form-check-input ir-active border-success" type="checkbox" role="switch" ${x.active!==false?'checked':''}></div></td><td><input class="form-control border-success ir-name" maxlength="100" value="${escapeHtml(x.name||'')}"></td><td><input class="form-control border-success ir-reply" maxlength="500" value="${escapeHtml(x.reply||'')}"></td><td><select class="form-select border-success ir-action">${actionOptions(x.action)}</select></td><td><textarea class="form-control border-success font-monospace ir-code" rows="4">${escapeHtml(JSON.stringify(x.data))}</textarea></td><td class="text-nowrap"><button class="btn btn-sm btn-primary" onclick="sendRow(${i})"><i class="bi bi-send"></i> Gửi Lệnh</button> <button class="btn btn-sm btn-danger" onclick="deleteIr(${i})"><i class="bi bi-trash"></i> Xóa</button></td></tr>`).join('');}
-async function loadIr(){const r=await irPost({list:1});if(!r.success)return notice(r);savedIr=r.data.commands||[];irPlaylists=Array.isArray(r.playlists)?r.playlists:[];irRadios=Array.isArray(r.radios)?r.radios:[];const c=r.config;const states=[];states.push(`Phát TX: ${c.tx_active?'bật':'tắt'} (GPIO${c.tx_gpio})`);states.push(`Thu RX: ${c.rx_active?'bật':'tắt'} (GPIO${c.rx_gpio})`);states.push(`Điều khiển nền: ${c.rx_control_active?'bật':'tắt'}`);notice({success:true,message:states.join(' — ')});renderRows();}
-function openLearnModal(){currentData=null;document.getElementById('irData').value='';const action=document.getElementById('irNewAction');action.innerHTML=actionOptions('none');action.value='none';document.getElementById('irLearnStatus').className='alert alert-warning text-center';document.getElementById('irLearnStatus').innerHTML='<i class="bi bi-broadcast"></i> Hãy hướng remote vào mắt thu và nhấn nút...';$('#internalIrLearnModal').modal('show');setTimeout(learnIr,250);}
-async function learnIr(){if(irOperation)return learnNotice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});irOperation=true;const el=document.getElementById('irLearnStatus');el.className='alert alert-warning text-center';el.innerHTML='<span class="spinner-border spinner-border-sm me-2" role="status"></span> Hãy hướng remote vào mắt thu và nhấn nút...';try{const r=await irPost({learn:1});learnNotice(r);if(r.success){currentData=r.data;document.getElementById('irData').value=JSON.stringify(r.data);}}finally{irOperation=false;}}
+function renderRows(){document.getElementById('irRows').innerHTML=savedIr.map((x,i)=>`<tr data-index="${i}"><td class="text-center"><div class="form-switch d-inline-block"><input class="form-check-input ir-active border-success" type="checkbox" role="switch" ${x.active!==false?'checked':''}></div></td><td><input class="form-control border-success ir-name" maxlength="100" value="${escapeHtml(x.name||'')}"></td><td><input class="form-control border-success ir-reply" maxlength="500" value="${escapeHtml(x.reply||'')}"></td><td><select class="form-select border-success ir-action">${actionOptions(x.action)}</select></td><td><textarea class="form-control border-success font-monospace ir-code" rows="4">${escapeHtml(JSON.stringify(x.data))}</textarea></td><td class="text-nowrap"><button class="btn btn-sm btn-primary" onclick="sendRow(${i})"><i class="bi bi-send"></i> Gửi Lệnh</button> <button class="btn btn-sm btn-danger" onclick="deleteIr(${i})"><i class="bi bi-trash"></i> Xóa</button></td></tr>`).join('');irRowsBaseline=JSON.stringify(savedIr.map((_,i)=>readRow(i)));irRefreshDirtyNotice();}
+async function loadIr(){const r=await irPost({list:1});if(!r.success)return notice(r);irRevision=r.revision||'';savedIr=r.data.commands||[];irPlaylists=Array.isArray(r.playlists)?r.playlists:[];irRadios=Array.isArray(r.radios)?r.radios:[];const c=r.config;const states=[];states.push(`Phát TX: ${c.tx_active?'bật':'tắt'} (GPIO${c.tx_gpio})`);states.push(`Thu RX: ${c.rx_active?'bật':'tắt'} (GPIO${c.rx_gpio})`);states.push(`Điều khiển nền: ${c.rx_control_active?'bật':'tắt'}`);notice({success:true,message:states.join(' — ')});renderRows();}
+function openIrModal(manual){
+  if(irOperation)return notice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});
+  clearTimeout(irLearnTimer);
+  irManualMode=manual;currentData=null;
+  document.getElementById('irName').value='';document.getElementById('irReply').value='';
+  const data=document.getElementById('irData');data.value='';data.readOnly=!manual;
+  data.placeholder=manual?'Dán JSON mã IR raw có sẵn gồm format và keys.command':'Dữ liệu học được sẽ xuất hiện ở đây';
+  document.getElementById('internalIrLearnModalLabel').innerHTML=manual?'<i class="bi bi-plus-circle"></i> Thêm lệnh IR thủ công':'<i class="bi bi-broadcast"></i> Học lệnh IR';
+  document.getElementById('irDataLabel').textContent=manual?'Mã IR có sẵn (JSON)':'Mã IR đã học';
+  document.getElementById('irManualHelp').classList.toggle('d-none',!manual);
+  document.getElementById('irLearnAgain').classList.toggle('d-none',manual);
+  const action=document.getElementById('irNewAction');action.innerHTML=actionOptions('none');action.value='none';
+  const status=document.getElementById('irLearnStatus');status.className='alert alert-info text-center';
+  status.textContent=manual?'Nhập tên lệnh và dán mã IR có sẵn, sau đó nhấn Lưu lệnh.':'Hãy hướng remote vào mắt thu và nhấn nút...';
+  $('#internalIrLearnModal').modal('show');
+  if(!manual)irLearnTimer=setTimeout(()=>{if(!irManualMode&&document.getElementById('internalIrLearnModal').classList.contains('show'))learnIr();},250);
+}
+function openLearnModal(){openIrModal(false);}
+function openManualModal(){openIrModal(true);}
+function modalIrData(){
+  if(!irManualMode){if(!currentData)throw new Error('Hãy học lệnh trước');return currentData;}
+  const text=document.getElementById('irData').value.trim();
+  if(!text)throw new Error('Hãy dán mã IR có sẵn dạng JSON');
+  let data;try{data=JSON.parse(text);}catch(error){throw new Error('JSON mã IR không hợp lệ: '+error.message);}
+  if(!data||Array.isArray(data)||typeof data!=='object'||data.format?.coding!=='raw'||!Array.isArray(data.keys?.command))throw new Error('Mã IR phải gồm format.coding="raw" và keys.command dạng mảng');
+  return data;
+}
+async function sendModalIr(){let data;try{data=modalIrData();}catch(error){return learnNotice({success:false,message:error.message});}await sendIr(data,true);}
+async function learnIr(){if(irManualMode)return;if(irOperation)return learnNotice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});irOperation=true;const el=document.getElementById('irLearnStatus');el.className='alert alert-warning text-center';el.innerHTML='<span class="spinner-border spinner-border-sm me-2" role="status"></span> Hãy hướng remote vào mắt thu và nhấn nút...';try{const r=await irPost({learn:1});learnNotice(r);if(r.success){currentData=r.data;document.getElementById('irData').value=JSON.stringify(r.data);}}finally{irOperation=false;}}
 async function sendIr(data,inModal=false){if(!data){const r={success:false,message:'Chưa có dữ liệu IR'};return inModal?learnNotice(r):notice(r);}if(irOperation){const r={success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'};return inModal?learnNotice(r):notice(r);}irOperation=true;try{const headers={'Content-Type':'application/json'};if(irApiKey)headers['VBot-API-Key']=irApiKey;let r;try{const response=await fetch(irSendApi,{method:'POST',headers,body:JSON.stringify({command:data})});const responseText=await response.text();let parsed=null;try{parsed=responseText?JSON.parse(responseText):null;}catch(_error){}if(!response.ok){r={success:false,message:(parsed&&parsed.message)||`VBot/API không hoạt động hoặc không phản hồi đúng (HTTP ${response.status})`};}else if(!parsed||typeof parsed!=='object'){r={success:false,message:'VBot/API không hoạt động hoặc trả về dữ liệu không hợp lệ'};}else{r=parsed;}}catch(error){r={success:false,message:'Không thể kết nối VBot/API. Hãy kiểm tra VBot đang chạy và API đã được bật.'};}if(inModal)learnNotice(r);else notice(r);}finally{irOperation=false;}}
 function readRow(i){const row=document.querySelector(`#irRows tr[data-index="${i}"]`);if(!row)throw new Error('Không tìm thấy dòng '+i);let data;try{data=JSON.parse(row.querySelector('.ir-code').value);}catch(e){throw new Error(`Mã IR ở dòng ${i+1} không hợp lệ: ${e.message}`);}return {active:row.querySelector('.ir-active').checked,name:row.querySelector('.ir-name').value.trim(),reply:row.querySelector('.ir-reply').value.trim(),action:row.querySelector('.ir-action').value,data,created_at:savedIr[i]?.created_at||''};}
 function sendRow(i){try{sendIr(readRow(i).data);}catch(e){notice({success:false,message:e.message});}}
-async function saveIr(){if(!currentData)return learnNotice({success:false,message:'Hãy học lệnh trước'});const r=await irPost({save:1,name:document.getElementById('irName').value.trim(),reply:document.getElementById('irReply').value.trim(),action:document.getElementById('irNewAction').value||'none',data:JSON.stringify(currentData)});if(!r.success)return learnNotice(r);notice(r);currentData=null;document.getElementById('irData').value='';document.getElementById('irName').value='';document.getElementById('irReply').value='';document.getElementById('irNewAction').value='none';$('#internalIrLearnModal').modal('hide');loadIr();}
-async function saveAllIr(){let commands=[];try{commands=savedIr.map((_,i)=>readRow(i));}catch(e){return notice({success:false,message:e.message});}const r=await irPost({bulk_save:1,commands:JSON.stringify(commands)});notice(r);if(r.success)loadIr();}
-async function deleteIr(i){if(!confirm('Xóa lệnh IR này?'))return;const r=await irPost({delete:1,index:i});notice(r);if(r.success)loadIr();}
+async function saveIr(){
+  if(irOperation)return learnNotice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});
+  let data;try{data=modalIrData();}catch(error){return learnNotice({success:false,message:error.message});}
+  const name=document.getElementById('irName').value.trim();
+  if(!name)return learnNotice({success:false,message:'Hãy nhập tên câu lệnh'});
+  if(!irConfirmDiscardChanges())return;
+  irOperation=true;
+  setIrRowsBusy(true);
+  try{
+    const r=await irPost({save:1,name,reply:document.getElementById('irReply').value.trim(),action:document.getElementById('irNewAction').value||'none',data:JSON.stringify(data)});
+    if(!r.success)return learnNotice(r);
+    notice(r);currentData=null;document.getElementById('irData').value='';document.getElementById('irName').value='';document.getElementById('irReply').value='';document.getElementById('irNewAction').value='none';
+    $('#internalIrLearnModal').modal('hide');await loadIr();
+  }finally{irOperation=false;setIrRowsBusy(false);}
+}
+function irHasUnsavedChanges(){try{return JSON.stringify(savedIr.map((_,i)=>readRow(i)))!==irRowsBaseline;}catch(error){return true;}}
+function irRefreshDirtyNotice(){document.getElementById('irUnsavedNotice').classList.toggle('d-none',!irHasUnsavedChanges());}
+function irConfirmDiscardChanges(){return !irHasUnsavedChanges()||confirm('Bảng có thay đổi chưa lưu. Tiếp tục sẽ tải lại bảng và bỏ các thay đổi đó. Bạn muốn tiếp tục?');}
+function setIrRowsBusy(busy){document.querySelectorAll('#irRows input, #irRows select, #irRows textarea, #irRows button').forEach(el=>el.disabled=busy);}
+document.getElementById('irRows').addEventListener('input',irRefreshDirtyNotice);
+document.getElementById('irRows').addEventListener('change',irRefreshDirtyNotice);
+window.addEventListener('beforeunload',event=>{if(irHasUnsavedChanges()){event.preventDefault();event.returnValue='';}});
+async function saveAllIr(){
+  if(irOperation)return notice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});
+  let commands=[];try{commands=savedIr.map((_,i)=>readRow(i));}catch(e){return notice({success:false,message:e.message});}
+  irOperation=true;setIrRowsBusy(true);
+  try{const r=await irPost({bulk_save:1,commands:JSON.stringify(commands)});notice(r);if(r.success)await loadIr();}
+  finally{irOperation=false;setIrRowsBusy(false);}
+}
+async function deleteIr(i){
+  if(irOperation)return notice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});
+  if(!irConfirmDiscardChanges()||!confirm('Xóa lệnh IR này?'))return;
+  irOperation=true;setIrRowsBusy(true);
+  try{const r=await irPost({delete:1,index:i});notice(r);if(r.success)await loadIr();}
+  finally{irOperation=false;setIrRowsBusy(false);}
+}
 let irBackups=[], irBackupOperation=false;
 function irBackupStatus(message, success=true){const el=document.getElementById('irBackupStatus');el.textContent=message;el.className='alert '+(success?'alert-info':'alert-danger');}
 async function loadIrBackups(){
@@ -146,9 +211,9 @@ async function restoreIrBackup(index){
   const backup=irBackups[index];if(!backup||irBackupOperation)return;
   if(irOperation)return irBackupStatus('Một thao tác IR đang chạy. Hãy chờ thao tác kết thúc.',false);
   if(!confirm(`Khôi phục ${backup.name}? Danh sách lệnh hiện tại và thay đổi chưa lưu sẽ được thay thế. Dữ liệu đã lưu sẽ được sao lưu trước khi khôi phục.`))return;
-  irBackupOperation=true;irOperation=true;
+  irBackupOperation=true;irOperation=true;setIrRowsBusy(true);
   try{const result=await irPost({backup_restore:1,name:backup.name});if(result.success){await loadIr();await loadIrBackups();}irBackupStatus(result.message,result.success);}
-  finally{irBackupOperation=false;irOperation=false;}
+  finally{irBackupOperation=false;irOperation=false;setIrRowsBusy(false);}
 }
 async function uploadIrBackup(){
   if(irBackupOperation)return;
@@ -156,13 +221,13 @@ async function uploadIrBackup(){
   const input=document.getElementById('irBackupFile');const file=input.files[0];
   if(!file||!file.name.toLowerCase().endsWith('.json')||file.size<1||file.size>20971520)return irBackupStatus('Chọn tệp .json hợp lệ, tối đa 20 MB.',false);
   if(!confirm('Khôi phục từ tệp đã chọn? Danh sách lệnh hiện tại và thay đổi chưa lưu sẽ được thay thế. Dữ liệu đã lưu sẽ được sao lưu trước khi khôi phục.'))return;
-  irBackupOperation=true;irOperation=true;
+  irBackupOperation=true;irOperation=true;setIrRowsBusy(true);
   try{
     const body=new FormData();body.set('backup_upload','1');body.set('backup_file',file);body.set('csrf_token',window.VBOT_CSRF_TOKEN||'');
     const response=await fetch(endpoint,{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':window.VBOT_CSRF_TOKEN||''},body});
     const result=await response.json();if(result.success){input.value='';await loadIr();await loadIrBackups();}irBackupStatus(result.message,result.success);
   }catch(error){irBackupStatus('Không tải lên được tệp sao lưu: '+error.message,false);}
-  finally{irBackupOperation=false;irOperation=false;}
+  finally{irBackupOperation=false;irOperation=false;setIrRowsBusy(false);}
 }
 loadIr();
 loadIrBackups();

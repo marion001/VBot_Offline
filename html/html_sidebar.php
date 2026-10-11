@@ -56,6 +56,24 @@
             <i class="bi bi-circle"></i><span>Home Assistant Customize Command</span>
           </a>
         </li>
+
+
+  <!-- 
+    <li class="nav-item" onclick="loading('show')" title="Gọi điện giữa các loa VBot trong LAN">
+      <a class="nav-link collapsed text-danger" href="LAN_Calls.php"><i class="bi bi-telephone"></i><span>Gọi điện LAN (disabled)</span></a>
+    </li>
+	-->
+<li class="nav-item" title="Tính năng gọi điện LAN đang bị vô hiệu hóa">
+  <a class="nav-link collapsed text-danger disabled"
+     tabindex="-1"
+     aria-disabled="true"
+     style="pointer-events: none; opacity: 0.5; cursor: not-allowed;">
+    <i class="bi bi-telephone"></i>
+    <span>Gọi điện LAN (Disabled)</span>
+  </a>
+</li>
+
+
         <li title="Danh Sách API VBot">
           <a href="API_List.php">
             <i class="bi bi-circle"></i><span>Giao Tiếp API (API REST)</span>
@@ -99,7 +117,7 @@
 
     <li class="nav-item">
       <a class="nav-link collapsed" data-bs-target="#calendar-nav" data-bs-toggle="collapse" href="#" title="Tùy chỉnh thiết lập nâng cao">
-        <i class="bi bi-calendar-check"></i> Tác Vụ Lịch, Calendar<i class="bi bi-chevron-down ms-auto"></i>
+        <i class="bi bi-calendar-check"></i> Tác Vụ Lịch, Calendar, Kịch Bản, Sự Kiện, Lời Nhắc<i class="bi bi-chevron-down ms-auto"></i>
       </a>
       <ul id="calendar-nav" class="nav-content collapse " data-bs-parent="#calendar-nav">
   <li class="nav-item" onclick="loading('show')" title="Lập Lịch, Lên Tác Vụ, Báo Thức, Thông Báo (Scheduler)">
@@ -113,6 +131,11 @@
     <a class="nav-link collapsed" href="Calendar_Events.php">
       <i class="bi bi-circle"></i>
       <span>Tạo Lịch: Sự Kiện, Events, Ngày Lễ, Kỉ Niệm</span>
+    </a>
+  </li>
+    <li class="nav-item" onclick="loading('show')" title="Kịch bản nhiều bước bằng giọng nói">
+    <a class="nav-link collapsed" href="Voice_Routines.php">
+      <i class="bi bi-circle"></i><span>Thiết Lập: Kịch Bản Nhiều Bước</span>
     </a>
   </li>
       </ul>

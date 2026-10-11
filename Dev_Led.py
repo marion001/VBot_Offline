@@ -358,6 +358,30 @@ def LED_UPDATE():
     _run_update_effect(strip.numPixels(), render)
 
 
+def _run_custom_call_effect(effect):
+    """Render LAN call effects on the existing custom LED strip."""
+    from Led import _run_call_effect
+
+    strip.setBrightness(Lib.led_brightness)
+
+    def render(frame):
+        for i, (r, g, b) in enumerate(frame):
+            strip.setPixelColor(i, Color(r, g, b))
+        strip.show()
+
+    _run_call_effect(effect, strip.numPixels(), render)
+
+
+def LED_CALL_RINGING():
+    """Cuộc gọi đến: nháy xanh cyan hai lần rồi nghỉ."""
+    _run_custom_call_effect("CALL_RINGING")
+
+
+def LED_CALL_ACTIVE():
+    """Đang trong cuộc gọi: xanh lá sáng tối nhẹ liên tục."""
+    _run_custom_call_effect("CALL_ACTIVE")
+
+
 def LED_VOLUME(volume_change):
     strip.setBrightness(Lib.led_brightness)
     def wheel(pos):

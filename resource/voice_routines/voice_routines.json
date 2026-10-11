@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "routines": [
+    {
+      "id": "good_night",
+      "name": "Đi ngủ",
+      "enabled": false,
+      "stop_on_error": true,
+      "triggers": ["Tôi đi ngủ", "Đến giờ đi ngủ"],
+      "steps": [
+        {"type": "action", "action": "media_stop"},
+        {"type": "volume", "value": 25},
+        {"type": "wait", "seconds": 1},
+        {"type": "speak", "text": "Chúc bạn ngủ ngon"}
+      ]
+    }
+  ]
+}

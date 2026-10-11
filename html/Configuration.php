@@ -23,6 +23,7 @@ function vbotAtomicWriteFile($filePath, $content, $label = 'file', $alreadyLocke
         return false;
     }
     $lockHandle = $alreadyLocked ? null : @fopen($filePath.'.lock', 'c+');
+    if (!$alreadyLocked && is_resource($lockHandle)) @chmod($filePath.'.lock',0777);
     if (!$alreadyLocked && ($lockHandle === false || !@flock($lockHandle, LOCK_EX))) {
         if (is_resource($lockHandle)) fclose($lockHandle);
         error_log('[PHP FILE ERROR] Không thể khóa file: '.$filePath);
@@ -160,7 +161,7 @@ $Current_URL = $Protocol . $Domain . $Path;
 $Backup_dir = $HTML_VBot_Offline . '/Backup_Upgrade/Backup_Config/';
 
 // Kiểm tra file không tồn tại hoặc rỗng
-$Config = vbotConfigLoadRecover($Config_filePath, $Backup_dir, $Configuration_Load_Status);
+$Config = vbotConfigLoadRecover($Config_filePath, $Backup_dir, $Configuration_Load_Status, !empty($VBot_Config_Read_Only));
 $VBot_Config_Load_Snapshot = $Config;
 
 //CSRF độc lập với đăng nhập: WebUI không yêu cầu mật khẩu vẫn phải có session/token hợp lệ.

@@ -89,6 +89,8 @@
                                     return 0;
                                 });
                                 publishVBotScannedDevices(data);
+                                // Các trang chỉ dùng gợi ý nhận dữ liệu qua sự kiện.
+                                if (!document.getElementById('vbot_Scan_devices')) return;
                                 let tableHTML =
                                     '<table class="table table-bordered border-primary" cellspacing="0" cellpadding="5">' +
                                     '<thead>' +
@@ -126,25 +128,24 @@
                                     '</tbody>' +
                                     '</table>';
                                 document.getElementById("vbot_Scan_devices").innerHTML = tableHTML;
-                                check_Device_Status_VBot_Server('on');
-                                fetchAndPopulateDevices_chatbot();
+                                if (typeof check_Device_Status_VBot_Server === 'function') check_Device_Status_VBot_Server('on');
+                                if (typeof fetchAndPopulateDevices_chatbot === 'function') fetchAndPopulateDevices_chatbot();
                             } else {
                                 publishVBotScannedDevices([]);
-                                document.getElementById("vbot_Scan_devices").innerHTML = "Không tìm thấy thiết bị nào.";
+                                if (document.getElementById('vbot_Scan_devices')) document.getElementById("vbot_Scan_devices").innerHTML = "Không tìm thấy thiết bị nào.";
                             }
                         } else {
                             show_message("Đã xảy ra lỗi: " + (response.message || response.error || "Không rõ lỗi"));
                         }
                     } catch (error) {
-                        document.getElementById("vbot_Scan_devices").textContent = "Đã xảy ra lỗi khi xử lý dữ liệu: " + xhr.responseText;
+                        show_message('Đã xảy ra lỗi khi xử lý dữ liệu quét: ' + error.message);
                     }
                 } else {
                     try {
                         const response = JSON.parse(xhr.responseText);
-                        document.getElementById("vbot_Scan_devices").textContent =
-                            response.message || response.error || ("Không thể kết nối tới máy chủ: " + xhr.status);
+                        show_message(response.message || response.error || ("Không thể kết nối tới máy chủ: " + xhr.status));
                     } catch (error) {
-                        document.getElementById("vbot_Scan_devices").innerHTML = "Không thể kết nối tới máy chủ: " + xhr.status;
+                        show_message("Không thể kết nối tới máy chủ: " + xhr.status);
                     }
                 }
             }
