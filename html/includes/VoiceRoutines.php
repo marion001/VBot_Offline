@@ -61,7 +61,73 @@ function vbotRoutineCondition($condition): void {
         if (strcmp($condition['start_date'],$condition['end_date'])>0) throw new InvalidArgumentException('Ngày bắt đầu phải trước hoặc bằng ngày kết thúc');
     }
 }
-function vbotRoutineWrite($path, $content): bool {
+function vbotRoutineDirectoryPermissions($directory): bool {
+    clearstatcache(true,$directory);
+    $permissions=@fileperms($directory);
+    // Do not run a system command when the directory already has 0777.
+    if ($permissions===false || ($permissions & 0777)!==0777) {
+        if (PHP_OS_FAMILY!=='Windows' && is_callable('exec')) {
+            $command='chmod 0777 -- '.escapeshellarg($directory);
+            $output=[];$status=1;
+            @exec($command.' 2>&1',$output,$status);
+            // Existing directories may belong to pi/root. Never prompt from PHP.
+            if ($status!==0) {
+                $output=[];
+                @exec('sudo -n '.$command.' 2>&1',$output,$status);
+            }
+        }
+        clearstatcache(true,$directory);
+    }
+    // Actual access is authoritative; ACLs/ownership can differ from mode bits.
+    return is_dir($directory) && is_readable($directory) && is_writable($directory);
+}
+
+function vbotRoutineStoragePath($root): string {
+    $directory=rtrim($root,'/\\').'/resource/voice_routines';
+    if (is_link($directory)) throw new RuntimeException('Thư mục kịch bản không được là liên kết');
+    if (!is_dir($directory) && !@mkdir($directory,0777,true) && !is_dir($directory))
+        throw new RuntimeException('Không tạo được thư mục kịch bản');
+    if (!vbotRoutineDirectoryPermissions($directory)) throw new RuntimeException('Thư mục kịch bản không có quyền đọc/ghi: '.$directory);
+    return $directory.'/voice_routines.json';
+}
+
+function vbotRoutineStorageMigrate($path): void {
+    // Caller holds the NEW path lock; also serialize with legacy WebUI writers.
+    $legacy=dirname(dirname($path)).'/voice_routines.json';
+    if (!is_file($legacy) && !is_file($legacy.'.bak')) return;
+    $lock=@fopen($legacy.'.lock','c+');
+    if (!$lock || !flock($lock,LOCK_EX)) {
+        if (is_resource($lock)) fclose($lock);
+        throw new RuntimeException('Không khóa được cấu hình kịch bản cũ');
+    }
+    try {
+        foreach (['','.bak'] as $suffix) {
+            $source=$legacy.$suffix;$target=$path.$suffix;
+            if (is_link($source) || is_link($target)) throw new RuntimeException('File kịch bản không được là liên kết');
+            // Never overwrite an existing configuration at the new location.
+            if (is_file($source) && !file_exists($target) && !@rename($source,$target))
+                throw new RuntimeException('Không chuyển được cấu hình kịch bản cũ');
+        }
+    } finally {flock($lock,LOCK_UN);fclose($lock);}
+}
+
+function vbotRoutineFilePermissions0777($path): bool {
+    // Windows does not provide Unix mode bits; Linux deployment requires 0777.
+    if (PHP_OS_FAMILY==='Windows') return true;
+    if (!is_callable('exec')) return false;
+    $command='chmod 0777 -- '.escapeshellarg($path);
+    $output=[];$status=1;
+    @exec($command.' 2>&1',$output,$status);
+    if ($status!==0) {
+        $output=[];
+        @exec('sudo -n '.$command.' 2>&1',$output,$status);
+    }
+    clearstatcache(true,$path);
+    $permissions=@fileperms($path);
+    return $status===0 && $permissions!==false && ($permissions & 0777)===0777;
+}
+
+function vbotRoutineWrite($path, $content, $permissions=0644): bool {
     // Caller holds the main config lock for both backup and replacement.
     // Set permissions BEFORE rename so the Python service can always read it.
     $temporary=@tempnam(dirname($path),'.vbot-routine-');
@@ -80,7 +146,9 @@ function vbotRoutineWrite($path, $content): bool {
         if (!fflush($handle)) return false;
         if (function_exists('fsync') && !fsync($handle)) return false;
         fclose($handle); $handle=null;
-        if (!@chmod($temporary,0644)) return false;
+        if ($permissions===0777) {
+            if (!vbotRoutineFilePermissions0777($temporary)) return false;
+        } elseif (!@chmod($temporary,0644)) return false;
         return @rename($temporary,$path);
     } finally {
         if (is_resource($handle)) fclose($handle);
