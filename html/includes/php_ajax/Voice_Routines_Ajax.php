@@ -11,6 +11,35 @@ vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 if (session_status()===PHP_SESSION_ACTIVE) session_write_close();
 try {$path=vbotRoutineStoragePath($VBot_Offline);}
 catch (Throwable $error) {error_log('Voice routines storage: '.$error->getMessage());vbotApiJsonResponse(['success'=>false,'message'=>'Không tạo được thư mục kịch bản; kiểm tra quyền truy cập.'],500);}
+$action=$_POST['action']??'';
+if (in_array($action,['history','clear_history'],true)) {
+    $historyPath=dirname($path).'/history.json';
+    if (is_link($historyPath) || is_link($historyPath.'.lock')) vbotApiJsonResponse(['success'=>false,'message'=>'Đường dẫn lịch sử không hợp lệ'],400);
+    $historyLock=@fopen($historyPath.'.lock','c+');
+    if (!$historyLock || !vbotRoutineFilePermissions0777($historyPath.'.lock') || !flock($historyLock,LOCK_EX)) {
+        if (is_resource($historyLock)) fclose($historyLock);
+        vbotApiJsonResponse(['success'=>false,'message'=>'Không khóa được lịch sử kịch bản'],500);
+    }
+    try {
+        if ($action==='clear_history') {
+            if (!vbotRoutineWrite($historyPath,"[]\n")) throw new RuntimeException('Không xóa được lịch sử');
+            $history=[];
+        } else {
+            $history=[];
+            if (is_file($historyPath)) {
+                if (filesize($historyPath)>4194304) throw new RuntimeException('Lịch sử vượt quá giới hạn');
+                $history=json_decode(file_get_contents($historyPath),true);
+                if (!vbotRoutineList($history)) throw new RuntimeException('File lịch sử không hợp lệ');
+            }
+        }
+    } catch (Throwable $error) {
+        error_log('Voice routines history: '.$error->getMessage());
+        flock($historyLock,LOCK_UN);fclose($historyLock);
+        vbotApiJsonResponse(['success'=>false,'message'=>'Không đọc/ghi được lịch sử; kiểm tra quyền và log VBot'],500);
+    }
+    flock($historyLock,LOCK_UN);fclose($historyLock);
+    vbotApiJsonResponse(['success'=>true,'history'=>array_reverse(array_slice($history,-100)),'message'=>$action==='clear_history'?'Đã xóa lịch sử kịch bản':'Đã tải lịch sử kịch bản']);
+}
 $lock=@fopen($path.'.lock','c+');
 if (is_resource($lock) && !vbotRoutineFilePermissions0777($path.'.lock')) {
     fclose($lock);

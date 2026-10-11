@@ -387,6 +387,7 @@
       "disabled": "Voice routines are disabled in the startup configuration.",
       "outside_date": "Routine {name} is outside its allowed date range.",
       "outside_time": "Routine {name} is outside its allowed hours, {start} to {end}.",
+      "outside_times": "Routine {name} is outside its allowed time windows: {ranges}.",
       "timeout": "The routine exceeded its maximum duration of 10 minutes."
     },
     "lan_calls": {
@@ -738,6 +739,7 @@
       "unsupported": "The task is invalid or unsupported",
       "updates_checked": "Checked for VBot updates",
       "volume_changed": "Changed volume to {volume}%",
+      "volume_backend_failed": "Could not apply the volume to the audio backend",
       "volume_parameter_invalid": "The volume parameter must be a number from 0 to 100",
       "pending_none": "No pending schedules {scope}.",
       "pending_item": "{name} at {time}.",

@@ -49,10 +49,15 @@ function vbotRoutineCondition($condition): void {
     if ($condition===null) return;
     if (!is_array($condition) || !in_array($condition['mode']??null,['none','time','date_time'],true)) throw new InvalidArgumentException('Loại điều kiện kịch bản không hợp lệ');
     if ($condition['mode']==='none') return;
-    foreach (['start_time','end_time'] as $field) {
-        if (!is_string($condition[$field]??null) || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/D',$condition[$field])) throw new InvalidArgumentException('Giờ điều kiện phải đúng định dạng 24 giờ HH:MM');
+    $windows=array_key_exists('time_windows',$condition)?$condition['time_windows']:[$condition];
+    if (!vbotRoutineList($windows) || count($windows)<1 || count($windows)>30) throw new InvalidArgumentException('Kịch bản cần từ 1 đến 30 khung giờ');
+    foreach ($windows as $window) {
+        if (!is_array($window)) throw new InvalidArgumentException('Khung giờ điều kiện không hợp lệ');
+        foreach (['start_time','end_time'] as $field) {
+            if (!is_string($window[$field]??null) || !preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/D',$window[$field])) throw new InvalidArgumentException('Giờ điều kiện phải đúng định dạng 24 giờ HH:MM');
+        }
+        if ($window['start_time']===$window['end_time']) throw new InvalidArgumentException('Giờ bắt đầu và kết thúc phải khác nhau');
     }
-    if ($condition['start_time']===$condition['end_time']) throw new InvalidArgumentException('Giờ bắt đầu và kết thúc phải khác nhau');
     if ($condition['mode']==='date_time') {
         foreach (['start_date','end_date'] as $field) {
             $value=$condition[$field]??null;
@@ -180,6 +185,7 @@ function vbotRoutinesValidate($data): array {
         foreach (['enabled','stop_on_error'] as $field)
             if (!is_bool($item[$field]??null)) throw new InvalidArgumentException($field.' phải là true/false');
         vbotRoutineCondition($item['condition']??null);
+        if (!in_array($item['after_completion']??'default',['default','continue','wait'],true)) throw new InvalidArgumentException('Trạng thái sau khi hoàn tất kịch bản không hợp lệ');
         if (!vbotRoutineList($item['triggers']??null) || count($item['triggers'])<1 || count($item['triggers'])>10)
             throw new InvalidArgumentException('Mỗi kịch bản cần 1 đến 10 câu gọi');
         $keys=[];

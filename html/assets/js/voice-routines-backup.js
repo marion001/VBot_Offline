@@ -6,7 +6,11 @@
     let busy=false, revision='', editorRevisionAtRefresh='';
     const mutationRevision=()=>{const current=editor.getRevision();return current && current!==editorRevisionAtRefresh?current:revision || current;};
     const escape=value=>String(value || '').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    function notice(message,ok=true){const box=byId('routineBackupNotice');box.className='alert '+(ok?'alert-info':'alert-danger');box.textContent=message;}
+    function notice(message,ok=true,popup=true){
+        const box=byId('routineBackupNotice');box.className='alert '+(ok?'alert-info':'alert-danger');box.textContent=message;
+        if(popup && typeof window.showMessagePHP==='function') window.showMessagePHP(escape(message));
+        if(popup && !ok && typeof window.show_message==='function') window.show_message(escape(message));
+    }
     async function post(action,extra={}) {
         const body=new URLSearchParams({action,csrf_token:window.VBOT_CSRF_TOKEN || '',...extra});
         const response=await fetch('includes/php_ajax/Voice_Routines_Backup.php',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':window.VBOT_CSRF_TOKEN || ''},body});
@@ -26,17 +30,19 @@
     async function operation(work,mutates=false) {
         if (busy || (mutates && editor.isBusy())) return;
         busy=true;
+        const endLoading=typeof window.vbotBeginLoading==='function'?window.vbotBeginLoading():()=>{};
         section.querySelectorAll('.routine-backup-control').forEach(control=>{control.disabled=true;});
         if (mutates) editor.setExternalBusy(true);
         try { await work(); } catch(error){notice(error.message,false);}
         finally {
             if (mutates) editor.setExternalBusy(false);
             busy=false;section.querySelectorAll('.routine-backup-control').forEach(control=>{control.disabled=false;});
+            endLoading();
         }
     }
     async function refresh() {
         const result=await post('list');revision=result.revision;editorRevisionAtRefresh=editor.getRevision();renderBackups(result.backups);
-        notice(result.current_valid===false?'File kịch bản hiện tại không hợp lệ. Bạn có thể xem/tải xuống file và khôi phục bằng bản hợp lệ.':'Có '+result.backups.length+' bản sao lưu. Thao tác xem/tải xuống dùng dữ liệu đã lưu.');
+        notice(result.current_valid===false?'File kịch bản hiện tại không hợp lệ. Bạn có thể xem/tải xuống file và khôi phục bằng bản hợp lệ.':'Có '+result.backups.length+' bản sao lưu. Thao tác xem/tải xuống dùng dữ liệu đã lưu.',result.current_valid!==false,result.current_valid===false);
     }
     function confirmReplace(label) {
         const unsaved=editor.hasUnsavedChanges()?' Các thay đổi chưa lưu trên trang sẽ bị bỏ.':'';

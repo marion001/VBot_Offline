@@ -2,6 +2,7 @@
     'use strict';
     const options = window.voiceRoutineOptions;
     const byId = id => document.getElementById(id);
+    const beginLoading=()=>typeof window.vbotBeginLoading==='function'?window.vbotBeginLoading():()=>{};
     let data = {version: 1, routines: []}, revision = '', dirty = false, ready = false, busy = false, runningTest = false;
     let hassEntities = [], hassById = new Map(), hassLoading = false, hassMessage = 'Đang đọc dữ liệu Home Assistant đã lưu…';
     let localFiles = [], localLoaded = false, localLoading = false, localMessage = 'Chưa đọc danh sách nhạc Local.';
@@ -10,8 +11,17 @@
     const hassLabels = {turn_on:'Bật / kích hoạt', turn_off:'Tắt', turn_setup:'Đặt giá trị', turn_open:'Mở rèm', turn_close:'Đóng rèm', turn_stop:'Dừng rèm', turn_cool:'Làm lạnh', turn_auto:'Tự động', turn_heat:'Sưởi', turn_dry:'Hút ẩm', turn_fan_only:'Chỉ quạt'};
     const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     const selectOptions = (values, selected) => Object.entries(values).map(([value, label]) => `<option value="${escape(value)}" ${value===selected?'selected':''}>${escape(label)}</option>`).join('');
-    const notice = (message, ok=true) => { byId('routineNotice').className = `alert ${ok?'alert-info':'alert-danger'} mt-3 mb-0`; byId('routineNotice').textContent = message; };
-    function setDirty() { dirty = true; notice('Có thay đổi chưa lưu. Lưu toàn bộ trước khi chạy thử.'); }
+    const notice = (message, ok=true, popup=true) => {
+        byId('routineNotice').className = `alert ${ok?'alert-info':'alert-danger'} mt-3 mb-0`;
+        byId('routineNotice').textContent = message;
+        if (popup && typeof window.showMessagePHP === 'function') window.showMessagePHP(escape(message));
+        if (popup && !ok && typeof window.show_message === 'function') window.show_message(escape(message));
+    };
+    function setDirty() {
+        const wasDirty=dirty;
+        dirty = true;
+        if (!wasDirty) notice('Có thay đổi chưa lưu. Lưu toàn bộ trước khi chạy thử.');
+    }
     async function post(action, extra={}) {
         const body = new URLSearchParams({action, csrf_token:window.VBOT_CSRF_TOKEN || '', ...extra});
         const response = await fetch(options.endpoint, {method:'POST', credentials:'same-origin', headers:{'X-CSRF-Token':window.VBOT_CSRF_TOKEN || ''}, body});
@@ -55,6 +65,7 @@
     async function loadHassCache(refresh=false) {
         if (hassLoading) return;
         hassLoading = true;
+        const endLoading=beginLoading();
         hassMessage = refresh ? 'Đang tải toàn bộ thực thể từ Home Assistant…' : 'Đang đọc dữ liệu Home Assistant đã lưu…';
         updateHassUi();
         try {
@@ -77,9 +88,11 @@
             hassById=new Map(hassEntities.map(entity=>[entity.entity_id,entity]));
             const time=result.data.updated_at?new Date(result.data.updated_at).toLocaleString('vi-VN'):'';
             hassMessage=hassEntities.length?`Đã có ${hassEntities.length} thực thể${time?' — cập nhật '+time:''}. Tìm theo tên hoặc Entity ID.`:'Chưa có thực thể đã lưu. Nhấn “Tải dữ liệu Home Assistant” hoặc nhập Entity ID trực tiếp.';
+            if (refresh) notice(hassMessage);
         } catch (error) {
             hassMessage=error.message+(hassEntities.length?' Danh sách đang có vẫn được giữ.':' Bạn vẫn có thể nhập Entity ID trực tiếp.');
-        } finally { hassLoading=false; updateHassUi(); }
+            notice(hassMessage,false);
+        } finally { hassLoading=false; updateHassUi(); endLoading(); }
     }
     function showHassResults(input) {
         const picker=input.closest('.hass-picker'), results=picker.querySelector('.hass-results');
@@ -142,14 +155,19 @@
     async function loadLocalFiles() {
         if (localLoading) return;
         localLoading=true; localMessage='Đang đọc thư mục nhạc Local…'; updateLocalUi();
+        const endLoading=beginLoading();
         try {
             const response=await fetch(options.localMedia,{credentials:'same-origin',cache:'no-store'});
             const result=await response.json();
             if (!response.ok || !result.success || !Array.isArray(result.files)) throw new Error(result.message || 'Không đọc được danh sách nhạc Local');
             localFiles=result.files;
             localMessage=`Có ${localFiles.length} bài nhạc. Tìm theo tên; hiển thị tối đa 250 kết quả mỗi lần.`;
-        } catch(error) { localMessage=error.message+(localFiles.length?' Danh sách đang có được giữ nguyên.':''); }
-        finally { localLoaded=true; localLoading=false; updateLocalUi(); }
+            notice(localMessage);
+        } catch(error) {
+            localMessage=error.message+(localFiles.length?' Danh sách đang có được giữ nguyên.':'');
+            notice(localMessage,false);
+        }
+        finally { localLoaded=true; localLoading=false; updateLocalUi(); endLoading(); }
     }
     function actionMediaFields(step) {
         if (step.action==='play_local_file') return `<div class="mt-2"><label class="form-label">Bài nhạc Local</label>
@@ -187,13 +205,14 @@
     }
     function conditionFields(routine) {
         const condition=routine.condition || {mode:'none'};
+        const windows=condition.time_windows || [{start_time:condition.start_time || '08:00',end_time:condition.end_time || '22:00'}];
         const modes={none:'Không sử dụng điều kiện',time:'Chỉ chạy trong khung giờ',date_time:'Từ ngày đến ngày, trong khung giờ'};
         return `<div class="col-12"><label class="form-label">Điều kiện chạy kịch bản</label><select class="form-select border-success" data-cfield="mode">${selectOptions(modes,condition.mode)}</select>
             ${condition.mode!=='none'?`<div class="row g-2 mt-1">
                 ${condition.mode==='date_time'?`<div class="col-md-6"><label class="form-label">Từ ngày</label><input class="form-control border-success" type="date" data-cfield="start_date" value="${escape(condition.start_date || '')}"></div><div class="col-md-6"><label class="form-label">Đến ngày</label><input class="form-control border-success" type="date" data-cfield="end_date" value="${escape(condition.end_date || '')}"></div>`:''}
-                <div class="col-md-6"><label class="form-label">Từ giờ (24 giờ)</label><input class="form-control border-success" data-cfield="start_time" maxlength="5" placeholder="08:00" value="${escape(condition.start_time || '')}"></div>
-                <div class="col-md-6"><label class="form-label">Đến giờ (24 giờ)</label><input class="form-control border-success" data-cfield="end_time" maxlength="5" placeholder="22:00" value="${escape(condition.end_time || '')}"></div>
-                <div class="col-12 form-text">Định dạng HH:MM, theo giờ hệ thống VBot. Hỗ trợ qua nửa đêm, ví dụ 22:00–06:00; giờ đầu/cuối được tính cả phút đó. Hai giờ phải khác nhau. Ngày bắt đầu/kết thúc được tính cả ngày đó; khung giờ áp dụng hằng ngày trong khoảng đã chọn.</div></div>`:''}</div>`;
+                ${windows.map((window,index)=>`<div class="col-12" data-time-window="${index}"><div class="row g-2 align-items-end"><div class="col-md-5"><label class="form-label">Từ giờ (24 giờ)</label><input class="form-control border-success" data-cfield="start_time" maxlength="5" placeholder="07:00" value="${escape(window.start_time)}"></div><div class="col-md-5"><label class="form-label">Đến giờ (24 giờ)</label><input class="form-control border-success" data-cfield="end_time" maxlength="5" placeholder="08:00" value="${escape(window.end_time)}"></div><div class="col-md-2"><button type="button" class="btn btn-outline-danger" data-command="delete-window" ${windows.length===1?'disabled':''}>Xóa khung giờ</button></div></div></div>`).join('')}
+                <div class="col-12"><button type="button" class="btn btn-outline-success" data-command="add-window" ${windows.length>=30?'disabled':''}>Thêm khung giờ</button></div>
+                <div class="col-12 form-text">Chạy khi nằm trong bất kỳ khung giờ nào đã đặt (tối đa 30 khung giờ). Định dạng HH:MM, theo giờ hệ thống VBot. Hỗ trợ qua nửa đêm, ví dụ 22:00–06:00; giờ đầu/cuối được tính cả phút đó. Hai giờ phải khác nhau. Ngày bắt đầu/kết thúc được tính cả ngày đó; các khung giờ áp dụng hằng ngày trong khoảng đã chọn.</div></div>`:''}</div>`;
     }
     const expandedRoutines = new Set();
     let routineQuery = '';
@@ -212,7 +231,7 @@
             <div id="routineBody${index}" class="collapse ${expandedRoutines.has(routine.id)?'show':''} pt-3">
             <div class="row g-3">
                 <div class="col-md-6"><label class="form-label">Tên kịch bản</label><input class="form-control border-success" data-rfield="name" maxlength="100" value="${escape(routine.name)}"></div>
-                <div class="col-md-6"><label class="form-label">Câu gọi (mỗi dòng một câu)</label><textarea class="form-control border-success" data-rfield="triggers" maxlength="2010" rows="3">${escape(routine.triggers.join('\n'))}</textarea></div>
+                <div class="col-md-6"><label class="form-label">Câu lệnh (mỗi dòng một câu)</label><textarea class="form-control border-success" data-rfield="triggers" maxlength="2010" rows="3">${escape(routine.triggers.join('\n'))}</textarea></div>
                 <div class="col-12 d-flex flex-wrap gap-4"><div class="form-check form-switch"><input id="routineEnabled${index}" type="checkbox" role="switch" class="form-check-input border-success" data-rfield="enabled" ${routine.enabled?'checked':''}><label class="form-check-label" for="routineEnabled${index}">Kích hoạt</label></div>
                 <div class="form-check form-switch"><input id="routineStopOnError${index}" type="checkbox" role="switch" class="form-check-input border-success" data-rfield="stop_on_error" ${routine.stop_on_error?'checked':''}><label class="form-check-label" for="routineStopOnError${index}">Dừng khi một bước lỗi</label></div></div>
                 ${conditionFields(routine)}
@@ -225,7 +244,9 @@
                     <button type="button" class="btn btn-outline-danger btn-sm" data-command="delete-step">Xóa bước</button></div>${stepFields(step)}
                 </div>`).join('')}</div>
             <div class="d-flex gap-2 mt-3"><button type="button" class="btn btn-outline-primary" data-command="add-step">Thêm bước</button>
+                <button type="button" class="btn btn-outline-secondary" data-command="duplicate">Nhân bản kịch bản</button>
                 <button type="button" class="btn btn-warning" data-command="run">Chạy thử bản đã lưu</button></div>
+            <div class="mt-3"><label class="form-label">Sau khi chạy xong kịch bản</label><select class="form-select border-success" data-rfield="after_completion">${selectOptions({default:'Theo chế độ hội thoại hệ thống',continue:'Tiếp tục đánh thức khi chế độ hội thoại bật',wait:'Quay về trạng thái chờ'},routine.after_completion || 'default')}</select><div class="form-text">Áp dụng ở cuối khi kịch bản hoàn tất. Chọn quay về chờ để không thu âm lượt tiếp theo, kể cả khi conversation_mode đang bật.</div></div>
         </div></div></div></div>`).join('') || '<div class="alert alert-secondary">Chưa có kịch bản. Nhấn “Thêm kịch bản” để bắt đầu.</div>';
         applyRoutineSearch();
         updateHassUi();
@@ -241,10 +262,18 @@
             const key=target.dataset.cfield;
             if (key==='mode') {
                 const previous=routine.condition || {};
-                routine.condition=target.value==='none'?{mode:'none'}:{mode:target.value,start_time:previous.start_time || '08:00',end_time:previous.end_time || '22:00',
+                routine.condition=target.value==='none'?{mode:'none'}:{mode:target.value,time_windows:previous.time_windows || [{start_time:previous.start_time || '08:00',end_time:previous.end_time || '22:00'}],
                     ...(target.value==='date_time'?{start_date:previous.start_date || '',end_date:previous.end_date || ''}:{})};
                 render();
-            } else { routine.condition=routine.condition || {mode:'none'};routine.condition[key]=target.value.trim(); }
+            } else {
+                routine.condition=routine.condition || {mode:'none'};
+                const row=target.closest('[data-time-window]');
+                if(row) {
+                    if(!routine.condition.time_windows) routine.condition.time_windows=[{start_time:routine.condition.start_time || '08:00',end_time:routine.condition.end_time || '22:00'}];
+                    routine.condition.time_windows[Number(row.dataset.timeWindow)][key]=target.value.trim();
+                    delete routine.condition.start_time;delete routine.condition.end_time;
+                } else routine.condition[key]=target.value.trim();
+            }
             setDirty();return;
         }
         if (target.classList.contains('routine-local-search')) { updateLocalUi(); return; }
@@ -288,25 +317,56 @@
         if (busy) return;
         if (dirty && !confirm('Tải lại sẽ bỏ thay đổi chưa lưu. Bạn muốn tiếp tục?')) return;
         busy = true; byId('routineCards').inert=true; byId('routineAdd').disabled=true;
+        const endLoading=beginLoading();
         try { const result = await post('list'); data = result.data; revision = result.revision; dirty=false; ready=true; render(); notice('Đã tải cấu hình. Lưu trước khi chạy thử.'); }
         catch (error) { notice(error.message,false); }
-        finally { busy=false; byId('routineCards').inert=false; byId('routineAdd').disabled=false; }
+        finally { busy=false; byId('routineCards').inert=false; byId('routineAdd').disabled=false; endLoading(); }
     }
     async function save() {
         if (!ready || busy) return;
         busy=true; byId('routineCards').inert=true; byId('routineAdd').disabled=true;
-        try { const result=await post('save',{revision,data:JSON.stringify(data)}); data=result.data; revision=result.revision; dirty=false; render(); notice(result.message); }
-        catch (error) { notice(error.message,false); }
-        finally { busy=false; byId('routineCards').inert=false; byId('routineAdd').disabled=false; }
+        const endLoading=beginLoading();
+        try {
+            const result=await post('save',{revision,data:JSON.stringify(data)});
+            data=result.data; revision=result.revision; dirty=false; render(); notice(result.message);
+        }
+        catch (error) {
+            notice(error.message,false);
+        }
+        finally { busy=false; byId('routineCards').inert=false; byId('routineAdd').disabled=false; endLoading(); }
     }
     function renderStatus(state) {
         byId('routineRuntime').innerHTML = `<p class="${state.status==='failed'?'text-danger':''}">${escape(state.message)}${state.running?` — bước ${escape(state.step)}/${escape(state.total)}`:''}</p>
             <ol>${(state.steps || []).map(step=>`<li class="${step.success?'text-success':'text-danger'}">Bước ${escape(step.step)}: ${escape(step.message)}</li>`).join('')}</ol>`;
     }
-    async function refreshStatus() {
+    async function refreshStatus(showLoading=true) {
+        const endLoading=showLoading?beginLoading():()=>{};
         try { await api(); }
-        catch (error) { byId('routineRuntime').textContent='Không lấy được trạng thái. Kiểm tra VBot đang chạy và kết nối API. '+error.message; }
+        catch (error) {
+            const message='Không lấy được trạng thái. Kiểm tra VBot đang chạy và kết nối API. '+error.message;
+            byId('routineRuntime').textContent=message;
+            notice(message,false);
+        }
+        finally {endLoading();}
     }
+    let historyBusy=false;
+    async function refreshHistory(showLoading=true,clear=false) {
+        if(historyBusy) return;
+        if(clear && !confirm('Xóa toàn bộ lịch sử chạy kịch bản?')) return;
+        historyBusy=true;
+        const endLoading=showLoading?beginLoading():()=>{};
+        byId('routineHistoryRefresh').disabled=true;byId('routineHistoryClear').disabled=true;
+        try {
+            const result=await post(clear?'clear_history':'history');
+            const statuses={completed:'Hoàn tất',failed:'Lỗi',blocked:'Ngoài điều kiện',cancelled:'Đã dừng',disabled:'Đang tắt',busy:'Đang có kịch bản khác chạy',unmatched:'Không tìm thấy kịch bản'};
+            const policies={default:'Theo hội thoại hệ thống',continue:'Tiếp tục khi hội thoại bật',wait:'Quay về chờ'};
+            byId('routineHistory').innerHTML=result.history.map(row=>`<details class="border rounded p-2 mb-2"><summary>${escape(row.started_at || row.finished_at)} — <strong>${escape(row.name)}</strong> — ${escape(statuses[row.status] || row.status)}</summary><div class="mt-2">Câu lệnh: ${escape(row.input)}<br>Điểm khớp / ngưỡng: ${escape(row.score ?? '—')} / ${escape(row.threshold)}<br>Kết quả: ${escape(row.message)}<br>Hoàn tất lúc: ${escape(row.finished_at)}<br>Sau khi hoàn tất: ${row.status==='completed'?escape(policies[row.after_completion] || row.after_completion):'Không áp dụng'}<ol>${(row.steps || []).map(step=>`<li class="${step.success?'text-success':'text-danger'}">Bước ${escape(step.step)} (${escape(step.type)}, ${escape(step.duration_seconds ?? '—')} giây): ${escape(step.message)}</li>`).join('')}</ol></div></details>`).join('') || '<p class="text-muted">Chưa có lịch sử chạy kịch bản.</p>';
+            if(clear) notice(result.message);
+        } catch(error) {byId('routineHistory').textContent=error.message;notice(error.message,false);}
+        finally {historyBusy=false;byId('routineHistoryRefresh').disabled=false;byId('routineHistoryClear').disabled=false;endLoading();}
+    }
+    byId('routineHistoryRefresh').addEventListener('click',()=>refreshHistory());
+    byId('routineHistoryClear').addEventListener('click',()=>refreshHistory(true,true));
     byId('routineCards').addEventListener('input',readInput);
     byId('routineCards').addEventListener('change',event => {
         const target=event.target;
@@ -354,13 +414,41 @@
             if (!routine.enabled) return notice('Hãy bật kịch bản và lưu trước khi chạy.',false);
             if (runningTest) return notice('Đang chờ kết quả chạy thử.',false);
             runningTest=true; notice('Đang chạy thử '+routine.name+'…');
-            const poll=setInterval(refreshStatus,1500);
+            const endLoading=beginLoading();
+            const poll=setInterval(()=>refreshStatus(false),1500);
             try { const result=await api({action:'run',id:routine.id}); notice(result.message); }
             catch (error) { notice(error.message+'. Xem trạng thái trước khi chạy lại.',false); }
-            finally { clearInterval(poll); runningTest=false; await refreshStatus(); }
+            finally { clearInterval(poll); runningTest=false; try {await refreshStatus(false);await refreshHistory(false);} finally {endLoading();} }
             return;
         }
         if (command==='delete') { if (!confirm('Xóa kịch bản này khỏi bản đang sửa?')) return; data.routines.splice(index,1); }
+        if (command==='duplicate') {
+            if(data.routines.length>=50) return notice('Tối đa 50 kịch bản.',false);
+            const copied=JSON.parse(JSON.stringify(routine));
+            const used=new Set(data.routines.flatMap(item=>[item.name,...item.triggers]).map(value=>value.trim().normalize('NFC').toLowerCase()));
+            let number=1,name;
+            do {name=(routine.name.trim() || 'Kịch bản').slice(0,75)+' (bản sao '+number+')';number++;} while(used.has(name.toLowerCase()));
+            copied.id='routine_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,8);
+            copied.name=name;copied.triggers=[name];copied.enabled=false;
+            data.routines.push(copied);expandedRoutines.add(copied.id);
+            routineQuery='';byId('routineSearch').value='';setDirty();render();
+            notice('Đã nhân bản. Bản sao đang tắt và dùng câu lệnh riêng: '+name+'. Kiểm tra rồi lưu trước khi kích hoạt.');
+            const input=byId('routineCards').querySelector(`[data-routine="${data.routines.length-1}"] [data-rfield="name"]`);
+            if(input){input.focus({preventScroll:true});input.scrollIntoView({behavior:'smooth',block:'center'});}
+            return;
+        }
+        if (command==='add-window' || command==='delete-window') {
+            const condition=routine.condition;
+            if(!condition.time_windows) condition.time_windows=[{start_time:condition.start_time || '08:00',end_time:condition.end_time || '22:00'}];
+            if(command==='add-window') {
+                if(condition.time_windows.length>=30) return notice('Tối đa 30 khung giờ.',false);
+                condition.time_windows.push({start_time:'',end_time:''});
+            } else {
+                if(condition.time_windows.length<=1) return notice('Cần ít nhất một khung giờ.',false);
+                condition.time_windows.splice(Number(button.closest('[data-time-window]').dataset.timeWindow),1);
+            }
+            delete condition.start_time;delete condition.end_time;
+        }
         if (command==='add-step') { if (routine.steps.length>=30) return notice('Tối đa 30 bước.',false); routine.steps.push(defaults('action')); }
         if (command==='delete-step') { if (routine.steps.length===1) return notice('Kịch bản cần ít nhất một bước.',false); routine.steps.splice(step,1); }
         if (command==='up' && step>0) [routine.steps[step-1],routine.steps[step]]=[routine.steps[step],routine.steps[step-1]];
@@ -386,7 +474,12 @@
     byId('routineSave').addEventListener('click',save);
     byId('routineReload').addEventListener('click',load);
     byId('routineStatusRefresh').addEventListener('click',refreshStatus);
-    byId('routineCancel').addEventListener('click',async () => { try { const result=await api({action:'cancel'}); notice(result.message); } catch (error) { notice(error.message,false); } });
+    byId('routineCancel').addEventListener('click',async () => {
+        const endLoading=beginLoading();
+        try { const result=await api({action:'cancel'}); notice(result.message); }
+        catch (error) { notice(error.message,false); }
+        finally {endLoading();}
+    });
     byId('routineExport').addEventListener('click',() => {
         if (!ready) return;
         const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
@@ -395,9 +488,10 @@
     window.voiceRoutineEditor={
         hasUnsavedChanges:()=>dirty, isBusy:()=>busy, getRevision:()=>revision,
         setExternalBusy(value){busy=value;byId('routineCards').inert=value;byId('routineAdd').disabled=value;},
-        applySaved(result){data=result.data;revision=result.revision;dirty=false;ready=true;render();notice(result.message);}
+        applySaved(result){data=result.data;revision=result.revision;dirty=false;ready=true;render();notice(result.message,true,false);}
     };
     window.addEventListener('beforeunload',event => { if (dirty) { event.preventDefault(); event.returnValue=''; } });
     loadHassCache();
     load();
+    refreshHistory(false);
 })();

@@ -21,7 +21,7 @@ function vbotProfileSaveConfig(): bool {
 // Both configuration pages edit the same speaker location in Config.json.
 function vbotSpeakerLocationUpdate(array &$config, array $post): ?string {
     if (!isset($post['speaker_location_present'])) return null;
-    $active=isset($post['speaker_location_active']);
+    $active=($config['speaker_location']['active']??false)===true;
     $room=$post['speaker_location_room']??'';
     if (!is_string($room) || strlen($room)>400 || preg_match('/[\x00-\x1f\x7f]/',$room))
         return 'Tên phòng đặt loa không hợp lệ; cấu hình phòng được giữ nguyên.';
@@ -30,20 +30,13 @@ function vbotSpeakerLocationUpdate(array &$config, array $post): ?string {
     $config['speaker_location']=array_merge($config['speaker_location']??[],['active'=>$active,'room'=>$room]);
     return null;
 }
-function vbotSpeakerLocationSwitch(array $config): void {
-    $checked=($config['speaker_location']['active']??false)===true?'checked':'';
-    echo '<div class="row mb-3 align-items-center"><label class="col-sm-3 col-form-label" for="speaker_location_active">Sử dụng phòng đặt loa:</label>
-      <div class="col-sm-9"><div class="form-check form-switch"><input class="form-check-input" type="checkbox" name="speaker_location_active" id="speaker_location_active" '.$checked.'><label class="form-check-label" for="speaker_location_active">Ưu tiên thiết bị Home Assistant trong phòng đặt loa</label></div>
-      <div class="form-text mt-2">Khi bật, câu gọi chỉ nêu loại thiết bị sẽ dùng phòng đặt loa đã cấu hình. Ví dụ loa đặt ở <strong>Phòng ngủ</strong>: nói <strong>“bật đèn”</strong>, <strong>“tắt đèn”</strong> hoặc <strong>“bật quạt”</strong> để tìm thiết bị tương ứng trong phòng ngủ. Nếu có một thiết bị phù hợp, VBot thực hiện ngay; nếu có nhiều thiết bị, VBot hỏi lại để bạn nói tên cụ thể hoặc hủy trong phiên hiện tại.<br>
-      Nếu nói rõ phòng khác, như <strong>“bật đèn phòng khách”</strong>, hoặc nhập Entity ID, VBot ưu tiên đích được chỉ rõ. Câu gọi có tên thiết bị cụ thể, như <strong>“bật đèn bàn”</strong>, vẫn tìm theo tên thiết bị. Cần gán thiết bị vào Area tương ứng trong Home Assistant; nếu không xác định được phòng hoặc thiết bị hợp lệ, VBot không tự chọn thiết bị ở phòng khác. Khi tắt, VBot tìm kiếm theo cách thông thường. Lưu và khởi động lại VBot sau khi thay đổi.</div></div></div>';
-}
-function vbotSpeakerLocationFields(array $config, bool $showSwitch=true): void {
+function vbotSpeakerLocationFields(array $config): void {
     $location=$config['speaker_location']??[];
     $room=htmlspecialchars((string)($location['room']??''),ENT_QUOTES,'UTF-8');
     echo '<input type="hidden" name="speaker_location_present" value="1">';
-    if ($showSwitch) vbotSpeakerLocationSwitch($config);
-    echo '<div class="row mb-3"><label class="col-sm-3 col-form-label" for="speaker_location_room">Phòng đặt loa:</label><div class="col-sm-9"><input class="form-control border-success" type="text" name="speaker_location_room" id="speaker_location_room" maxlength="100" value="'.$room.'" placeholder="Ví dụ: Phòng ngủ / Bedroom">
-      <div class="form-text">Nhập tên, bí danh hoặc Area ID của phòng trong Home Assistant, theo ngôn ngữ bạn sử dụng. Khi nói “bật đèn”, VBot tìm đèn trong phòng này; nhiều thiết bị sẽ được hỏi lại theo phiên. Câu nêu rõ phòng khác hoặc Entity ID được ưu tiên. Cần gán thiết bị vào Area và bật Home Assistant. Lưu rồi khởi động lại VBot để áp dụng.</div></div></div>';
+    $help='Nhập tên, bí danh hoặc Area ID của phòng trong Home Assistant, theo ngôn ngữ bạn sử dụng. Khi nói “bật đèn”, VBot tìm đèn trong phòng này; nhiều thiết bị sẽ được hỏi lại theo phiên. Câu nêu rõ phòng khác hoặc Entity ID được ưu tiên. Cần gán thiết bị vào Area và bật Home Assistant. Lưu rồi khởi động lại VBot để áp dụng.';
+    $helpArgument=htmlspecialchars(json_encode($help,JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT),ENT_QUOTES,'UTF-8');
+    echo '<div class="row mb-3"><label class="col-sm-3 col-form-label" for="speaker_location_room">Phòng đặt loa: <i class="bi bi-question-circle-fill" role="button" tabindex="0" title="Hướng dẫn cấu hình phòng đặt loa" onclick="event.preventDefault();show_message('.$helpArgument.')" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}"></i></label><div class="col-sm-9"><input class="form-control border-success" type="text" name="speaker_location_room" id="speaker_location_room" maxlength="100" value="'.$room.'" placeholder="Ví dụ: Phòng ngủ / Bedroom"></div></div>';
 }
 
 if ($Config['contact_info']['user_login']['active']) {

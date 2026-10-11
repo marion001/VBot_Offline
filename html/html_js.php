@@ -30,7 +30,7 @@ if (in_array($webui_page_name, $webui_datatable_pages, true)) {
 <script src="assets/vendor/popper/popper.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script src="assets/vendor/hls/hls.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script src="assets/js/main.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
-<script src="assets/js/VBot.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/VBot.js?v=<?php echo $Cache_UI_Ver; ?>&loading=2"></script>
 <?php
 if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     echo '<script src="assets/js/webui-gcloud.js?v='
@@ -164,6 +164,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         }
 
         const endpoint = 'includes/php_ajax/Download_file_path.php?file=' + encodeURIComponent(requestedPath);
+        const endLoading = typeof window.vbotBeginLoading==='function'?window.vbotBeginLoading():()=>{};
         try {
             const checkResponse = await vbotFetchWithTimeout(endpoint + '&check=1', {
                 method: 'GET',
@@ -191,6 +192,8 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             link.remove();
         } catch (error) {
             showMessagePHP('Không thể kiểm tra tệp tải xuống: ' + error.message, 4);
+        } finally {
+            endLoading();
         }
     }
 
@@ -258,9 +261,11 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     }
     //Đọc dữ liệu file theo path
     function read_loadFile(path) {
+        const endLoading = typeof window.vbotBeginLoading==='function'?window.vbotBeginLoading():()=>{};
         var url = 'includes/php_ajax/Show_file_path.php?read_file_path&file=' + encodeURIComponent(path);
         var xhr = vbotCreateXhr();
         xhr.open('GET', url);
+        xhr.addEventListener('loadend', endLoading);
         xhr.onload = function() {
             if (xhr.status === 200) {
                 try {

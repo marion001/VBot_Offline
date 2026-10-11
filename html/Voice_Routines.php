@@ -1,6 +1,7 @@
 <?php
 include 'Configuration.php';
 require_once __DIR__.'/includes/VoiceRoutines.php';
+$voiceRoutinesActive=($Config['voice_routines']['active']??true)===true;
 if (!empty($Config['contact_info']['user_login']['active'])) {
     if (session_status()!==PHP_SESSION_ACTIVE) session_start();
     if (empty($_SESSION['user_login'])) { header('Location: Login.php'); exit; }
@@ -18,11 +19,11 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
 #routineCards .card-title .routine-enabled-status{color:#fff;font-size:.75rem;font-weight:600;white-space:nowrap}
 </style>
 <main id="main" class="main">
-  <div class="pagetitle"><h1>Kịch bản nhiều bước bằng giọng nói</h1></div>
+  <div class="pagetitle"><h1>Kịch bản nhiều bước bằng giọng nói <span class="badge <?= $voiceRoutinesActive?'bg-success':'bg-secondary' ?> fs-6 align-middle"><?= $voiceRoutinesActive?'Đang bật':'Đang tắt' ?></span></h1></div>
   <section class="section">
     <div class="card"><div class="card-body pt-3">
       <p>Tạo một câu gọi để VBot thực hiện lần lượt nhiều bước. Ví dụ: “Tôi đi ngủ” → tắt đèn → dừng nhạc → giảm âm lượng → đọc lời chúc.</p>
-      <p class="small">Kích hoạt khi VBot khởi động: <strong><?= ($Config['voice_routines']['active']??true)===true?'Bật':'Tắt' ?></strong>. Đổi mục <code>voice_routines.active</code> trong Config.json hoặc <a href="Config.php#voice-routines-setting">Cấu hình VBot</a>, sau đó khởi động lại VBot.</p>
+      <p class="small">Kích hoạt khi VBot khởi động: <strong><?= $voiceRoutinesActive?'Bật':'Tắt' ?></strong>. Đổi mục <code>voice_routines.active</code> trong Config.json hoặc <a href="Config.php#voice-routines-setting">Cấu hình VBot</a>, sau đó khởi động lại VBot.</p>
       <p class="small text-muted">Ngưỡng khớp câu gọi: <?= number_format((float)($Config['voice_routines']['minimum_threshold']??0.90),2) ?> (đổi trong Config.php). So sánh toàn câu; có thể gọi “chạy kịch bản” + tên. Lưu kịch bản có hiệu lực ngay cho lần gọi tiếp theo; đổi ngưỡng cần khởi động lại VBot. Tối đa 50 kịch bản, 30 bước mỗi kịch bản; mỗi bước chờ tối đa 120 giây, tổng chờ tối đa 300 giây. Một lượt chạy tối đa 10 phút.</p>
       <div id="routineNotice" class="alert alert-info mt-3 mb-0" role="status">Đang tải cấu hình…</div>
     </div></div>
@@ -47,6 +48,12 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
         <button id="routineCancel" class="btn btn-warning" type="button">Dừng kịch bản đang chạy</button>
       </div>
       <div id="routineRuntime" role="status">Chưa lấy trạng thái.</div>
+    </div></div>
+    <div class="card"><div class="card-body pt-3">
+      <h2 class="h5">Lịch sử chạy kịch bản</h2>
+      <p class="small text-muted">Giữ tối đa 100 lượt trong resource/voice_routines/history.json. Ghi câu lệnh, điểm khớp, thời gian và kết quả từng bước; xem trước trong Command Test không tạo lượt chạy.</p>
+      <div class="d-flex gap-2 mb-3"><button type="button" class="btn btn-outline-primary" id="routineHistoryRefresh">Tải lại lịch sử</button><button type="button" class="btn btn-outline-danger" id="routineHistoryClear">Xóa lịch sử</button></div>
+      <div id="routineHistory" role="status">Đang tải lịch sử…</div>
     </div></div>
     <div class="card" id="routineBackupSection"><div class="card-body pt-3">
       <h2 class="h5">Nhập, tải xuống, xem dữ liệu JSON, sao lưu và khôi phục</h2>
@@ -89,6 +96,13 @@ window.voiceRoutineOptions=<?= json_encode([
     'localMedia'=>'includes/php_ajax/Voice_Routines_Local.php',
 ],JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
 </script>
-<script src="assets/js/voice-routines.js?v=14"></script>
-<script src="assets/js/voice-routines-backup.js?v=1"></script>
+<script>
+document.getElementById('main').addEventListener('click',event=>{
+    if(event.target.closest('button') && typeof window.vbotBeginLoading==='function') {
+        const endLoading=window.vbotBeginLoading();setTimeout(endLoading,0);
+    }
+},true);
+</script>
+<script src="assets/js/voice-routines.js?v=21"></script>
+<script src="assets/js/voice-routines-backup.js?v=4"></script>
 </body></html>

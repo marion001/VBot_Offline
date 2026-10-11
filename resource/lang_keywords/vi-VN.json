@@ -389,6 +389,7 @@
       "disabled": "Kịch bản giọng nói đang tắt theo cấu hình khi VBot khởi động",
       "outside_date": "Kịch bản {name} nằm ngoài khoảng ngày được phép",
       "outside_time": "Kịch bản {name} nằm ngoài khung giờ {start}–{end}",
+      "outside_times": "Kịch bản {name} nằm ngoài các khung giờ được phép: {ranges}.",
       "timeout": "Kịch bản vượt quá thời gian chạy tối đa 10 phút"
     },
     "lan_calls": {
@@ -740,6 +741,7 @@
       "unsupported": "Tác vụ không đúng hoặc không được hỗ trợ",
       "updates_checked": "Đã kiểm tra cập nhật VBot",
       "volume_changed": "Thay đổi âm lượng thành: {volume}%",
+      "volume_backend_failed": "Không áp dụng được âm lượng trên backend âm thanh",
       "volume_parameter_invalid": "Dữ liệu parameter của volume phải là số từ 0 - 100",
       "pending_none": "Không có lịch đang chờ {scope}.",
       "pending_item": "{name} lúc {time}.",

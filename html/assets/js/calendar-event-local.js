@@ -19,6 +19,7 @@
     async function loadFiles() {
         if (loading) return;
         loading=true; refresh.disabled=true; status.textContent='Đang đọc thư mục nhạc Local…';
+        const endLoading=typeof window.vbotBeginLoading==='function'?window.vbotBeginLoading():()=>{};
         try {
             const response=await fetch('includes/php_ajax/Voice_Routines_Local.php',{credentials:'same-origin',cache:'no-store'});
             const result=await response.json();
@@ -26,7 +27,7 @@
             files=result.files;
             status.textContent=`Có ${files.length} bài nhạc. Tìm theo tên; hiển thị tối đa 250 kết quả mỗi lần.`;
         } catch (error) { status.textContent=error.message+(files.length?' Danh sách đang có được giữ nguyên.':''); }
-        finally { loaded=true; loading=false; refresh.disabled=false; renderOptions(); }
+        finally { loaded=true; loading=false; refresh.disabled=false; renderOptions(); endLoading(); }
     }
     function updateVisibility() {
         const visible=action.value==='media_local';

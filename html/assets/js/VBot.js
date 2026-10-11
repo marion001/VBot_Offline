@@ -98,6 +98,17 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 //Hàm để hiển thị hoặc ẩn overlay
+let vbotLoadingTasks = 0;
+function vbotBeginLoading() {
+    if (vbotLoadingTasks++ === 0) loading('show');
+    let finished = false;
+    return () => {
+        if (finished) return;
+        finished = true;
+        if (--vbotLoadingTasks === 0) loading('hide');
+    };
+}
+
 function loading(action) {
     const overlay = document.getElementById('loadingOverlay');
     if (action === 'show') {

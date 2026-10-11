@@ -221,6 +221,14 @@ if ($isAnalysisPost) {
         addTable(container, 'Kiểm tra trạng thái trước/sau điều khiển', report.execution.verification_results);
       }
       addField(container, 'Cấu hình đang dùng', report.configuration);
+      if (report.voice_routines) {
+        const routines=report.voice_routines;
+        addField(container,'Voice Routines đang bật',routines.active);
+        addField(container,'Kịch bản khớp',routines.matched_name);
+        addField(container,'Ngưỡng khớp kịch bản',routines.threshold);
+        addField(container,'Điều kiện / lý do',routines.reason);
+        addTable(container,'Xếp hạng kịch bản (chỉ phân tích)',routines.candidates);
+      }
       for (const command of report.commands) {
         const block = document.createElement('div'); block.className='border rounded p-3 mb-3';
         addField(block, 'Câu đã chuẩn hóa', command.text);
@@ -231,6 +239,8 @@ if ($isAnalysisPost) {
           addField(block, 'Tên / alias khớp', command.target.matched_name);
         }
         if (command.score !== undefined) addField(block,'Điểm khớp / ngưỡng', `${command.score} / ${command.threshold ?? '—'}`);
+        if (command.routine_name) addField(block,'Kịch bản khớp',command.routine_name);
+        if (command.after_completion) addField(block,'Sau khi hoàn tất',command.after_completion);
         if (command.service) addField(block,'Dịch vụ dự kiến',command.service);
         if (command.service_data) addField(block,'Dữ liệu dịch vụ',command.service_data);
         if (command.scheduled_at) addField(block,'Thời gian hẹn điều khiển',command.scheduled_at);
