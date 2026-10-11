@@ -333,6 +333,23 @@ VBot_Interface_DDMMYYYY_HHMMSS_releaseDate_version.tar.gz</code></pre>
                         trong lúc đang khôi phục.
                       </div>
 
+                      <h5 class="border-bottom border-danger pb-2 mt-4">10. Xử lý thông báo cập nhật và restart lặp đi lặp lại</h5>
+                      <p>Nếu log liên tục báo <code>Updater chương trình đã kết thúc nhưng không ghi kết quả cập nhật</code>
+                        rồi restart <code>VBot_Offline.service</code>, file đánh dấu cập nhật có thể còn sót lại:
+                        <code>/home/pi/VBot_Offline/.program_upgrade_in_progress</code>.
+                        Đây là file ẩn, có dấu chấm ở đầu tên.</p>
+                      <div class="alert alert-warning">
+                        Chỉ xóa file này khi tác vụ cập nhật đã kết thúc. Không xóa khi công cụ đang tải, sao chép
+                        hoặc rollback. Nếu vừa chạy cập nhật qua SSH, hãy chờ lệnh trả về dấu nhắc trước khi xử lý.
+                      </div>
+                      <p>Đăng nhập SSH bằng tài khoản chạy VBot, dừng service, xóa marker còn sót rồi khởi động lại:</p>
+                      <pre class="bg-dark text-light p-3 rounded"><code>$:> systemctl --user stop VBot_Offline.service
+$:> sudo rm -f /home/pi/VBot_Offline/.program_upgrade_in_progress
+$:> systemctl --user start VBot_Offline.service
+$:> systemctl --user status VBot_Offline.service --no-pager</code></pre>
+                      <p>Cần dùng bản <code>Update_Manager.py</code> đã sửa lỗi dọn marker để tránh tái diễn.
+                        Nếu chương trình nạp <code>Update_Manager.so</code>, cần build lại module tương ứng.</p>
+
                       <div class="alert alert-secondary mt-4">
                         <b>Lưu ý:</b> không đóng cửa sổ SSH, ngắt nguồn hoặc reboot thiết bị khi công cụ đang tải,
                         giải nén, merge Config, sao chép hoặc rollback. Chỉ thao tác lại khi lệnh đã kết thúc và trả

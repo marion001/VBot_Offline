@@ -11,12 +11,19 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
 vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 if (session_status()===PHP_SESSION_ACTIVE) session_write_close();
 header('Cache-Control: no-store');
-$path=rtrim($VBot_Offline,'/\\').'/resource/voice_routines.json';
-$directory=rtrim($VBot_Offline,'/\\').'/resource/voice_routines_backups';
+try {$path=vbotRoutineStoragePath($VBot_Offline);}
+catch (Throwable $error) {error_log('Voice routines storage: '.$error->getMessage());vbotApiJsonResponse(['success'=>false,'message'=>'Không tạo được thư mục kịch bản; kiểm tra quyền truy cập.'],500);}
+$directory=rtrim($VBot_Offline,'/\\').'/html/Backup_Upgrade/Backup_Voice_Routines';
 $lock=@fopen($path.'.lock','c+');
+if (is_resource($lock) && !vbotRoutineFilePermissions0777($path.'.lock')) {
+    fclose($lock);
+    vbotApiJsonResponse(['success'=>false,'message'=>'Không cấp được quyền 0777 cho file khóa kịch bản'],500);
+}
 if (!$lock || !flock($lock,LOCK_EX)) vbotApiJsonResponse(['success'=>false,'message'=>'Không khóa được dữ liệu kịch bản'],500);
 register_shutdown_function(function()use($lock){flock($lock,LOCK_UN);fclose($lock);});
 try {
+    vbotRoutineStorageMigrate($path);
+    vbotRoutineBackupMigrate(rtrim($VBot_Offline,'/\\').'/resource/voice_routines_backups',$directory);
     $raw=vbotRoutineBackupRaw($path); $revision=hash('sha256',$raw);
     $action=$_POST['action']??'';
     if ($action==='list') {

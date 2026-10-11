@@ -8,11 +8,18 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
     if (empty($_SESSION['user_login'])) vbotApiJsonResponse(['success'=>false,'message'=>'Bạn chưa đăng nhập'],401);
 }
 vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
-$path=rtrim($VBot_Offline,'/\\').'/resource/voice_routines.json';
+if (session_status()===PHP_SESSION_ACTIVE) session_write_close();
+try {$path=vbotRoutineStoragePath($VBot_Offline);}
+catch (Throwable $error) {error_log('Voice routines storage: '.$error->getMessage());vbotApiJsonResponse(['success'=>false,'message'=>'Không tạo được thư mục kịch bản; kiểm tra quyền truy cập.'],500);}
 $lock=@fopen($path.'.lock','c+');
+if (is_resource($lock) && !vbotRoutineFilePermissions0777($path.'.lock')) {
+    fclose($lock);
+    vbotApiJsonResponse(['success'=>false,'message'=>'Không cấp được quyền 0777 cho file khóa kịch bản'],500);
+}
 if (!$lock || !flock($lock,LOCK_EX)) vbotApiJsonResponse(['success'=>false,'message'=>'Không khóa được cấu hình kịch bản'],500);
 register_shutdown_function(function () use ($lock) { flock($lock,LOCK_UN); fclose($lock); });
 try {
+    vbotRoutineStorageMigrate($path);
     $raw=is_file($path)?file_get_contents($path):'{"version":1,"routines":[]}';
     if (!is_string($raw) || strlen($raw)>1048576) throw new RuntimeException('Không đọc được cấu hình hoặc file vượt quá 1 MB');
     $current=vbotRoutinesValidate(json_decode($raw,true));

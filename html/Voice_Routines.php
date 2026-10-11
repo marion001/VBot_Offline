@@ -27,7 +27,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
       <div id="routineNotice" class="alert alert-info mt-3 mb-0" role="status">Đang tải cấu hình…</div>
     </div></div>
     <div class="routine-toolbar" role="toolbar" aria-label="Tìm kiếm và quản lý kịch bản">
-      <div class="input-group mb-2"><span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span><input id="routineSearch" type="search" class="form-control border-primary" placeholder="Tìm tên kịch bản, câu gọi, Entity ID hoặc nội dung bước..." aria-label="Tìm kịch bản" autocomplete="off"><button id="routineSearchClear" type="button" class="btn btn-outline-secondary" aria-label="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></button></div>
+      <div class="input-group mb-2"><span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span><input id="routineSearch" type="search" class="form-control border-success" placeholder="Tìm tên kịch bản, câu gọi, Entity ID hoặc nội dung bước..." aria-label="Tìm kịch bản" autocomplete="off"><button id="routineSearchClear" type="button" class="btn btn-outline-secondary" aria-label="Xóa tìm kiếm"><i class="bi bi-x-lg"></i></button></div>
       <div class="d-flex flex-wrap gap-2 justify-content-center">
         <button id="routineAdd" type="button" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Thêm kịch bản</button>
         <button id="routineSave" type="button" class="btn btn-success"><i class="bi bi-floppy"></i> Lưu toàn bộ</button>
@@ -50,7 +50,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
     </div></div>
     <div class="card" id="routineBackupSection"><div class="card-body pt-3">
       <h2 class="h5">Nhập, tải xuống, xem dữ liệu JSON, sao lưu và khôi phục</h2>
-      <p class="small text-muted">Dữ liệu đã lưu gồm các kịch bản và bước thực hiện. Tệp JSON tối đa 1 MB. Trước khi nhập hoặc khôi phục, hệ thống tự sao lưu dữ liệu hiện tại; giữ tối đa 10 bản trong <code>resource/voice_routines_backups</code>.</p>
+      <p class="small text-muted">Dữ liệu đã lưu gồm các kịch bản và bước thực hiện. Tệp JSON tối đa 1 MB. Trước khi nhập hoặc khôi phục, hệ thống tự sao lưu dữ liệu hiện tại; giữ tối đa 10 bản trong <code>html/Backup_Upgrade/Backup_Voice_Routines</code>.</p>
       <div class="d-flex flex-wrap gap-2 mb-3">
         <button type="button" class="btn btn-outline-primary routine-backup-control" id="routineJsonView">Xem JSON đã lưu</button>
         <button type="button" class="btn btn-primary routine-backup-control" id="routineJsonDownload">Tải xuống JSON đã lưu</button>
@@ -60,7 +60,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
       <div id="routineBackupNotice" class="alert alert-info" role="status">Đang tải danh sách sao lưu…</div>
       <label for="routineBackupSelect" class="form-label">Bản sao lưu trên thiết bị</label>
       <div class="d-flex flex-wrap gap-2 mb-3">
-        <select id="routineBackupSelect" class="form-select routine-backup-control" style="max-width:600px"><option value="">Chọn bản sao lưu…</option></select>
+        <select id="routineBackupSelect" class="form-select routine-backup-control border-success" style="max-width:600px"><option value="">Chọn bản sao lưu…</option></select>
         <button type="button" class="btn btn-outline-primary routine-backup-control" id="routineBackupView">Xem JSON</button>
         <button type="button" class="btn btn-primary routine-backup-control" id="routineBackupDownload">Tải xuống</button>
         <button type="button" class="btn btn-warning routine-backup-control" id="routineBackupRestore">Khôi phục bản này</button>
@@ -68,10 +68,10 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
       <pre id="routineBackupJson" class="d-none bg-light border rounded p-3" style="max-height:480px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere" tabindex="0"></pre>
       <hr>
       <div class="row g-3">
-        <div class="col-md-8"><label for="routineImportFile" class="form-label">Tải lên tệp JSON để nhập / khôi phục</label><input id="routineImportFile" type="file" accept=".json,application/json" class="form-control routine-backup-control"></div>
-        <div class="col-md-4"><label for="routineImportMode" class="form-label">Cách nhập</label><select id="routineImportMode" class="form-select routine-backup-control"><option value="merge">Gộp theo ID (ID trùng được thay thế)</option><option value="replace">Thay thế toàn bộ / khôi phục</option></select></div>
+        <div class="col-md-8"><label for="routineImportFile" class="form-label">Tải lên tệp JSON để nhập / khôi phục</label><input id="routineImportFile" type="file" accept=".json,application/json" class="form-control routine-backup-control border-success"></div>
+        <div class="col-md-4"><label for="routineImportMode" class="form-label">Cách nhập</label><select id="routineImportMode" class="form-select routine-backup-control border-success"><option value="merge">Gộp theo ID (ID trùng được thay thế)</option><option value="replace">Thay thế toàn bộ / khôi phục</option></select></div>
         <div class="col-12"><button type="button" class="btn btn-success routine-backup-control" id="routineImportUpload">Tải lên và nhập / khôi phục</button></div>
-        <div class="col-12"><label for="routineImportText" class="form-label">Hoặc dán nội dung JSON</label><textarea id="routineImportText" class="form-control font-monospace routine-backup-control" rows="6" placeholder='{"version":1,"routines":[]}'></textarea></div>
+        <div class="col-12"><label for="routineImportText" class="form-label">Hoặc dán nội dung JSON</label><textarea id="routineImportText" class="form-control font-monospace routine-backup-control border-success" rows="6" placeholder='{"version":1,"routines":[]}'></textarea></div>
         <div class="col-12"><button type="button" class="btn btn-outline-success routine-backup-control" id="routineImportPaste">Nhập JSON đã dán</button></div>
       </div>
     </div></div>
@@ -89,6 +89,6 @@ window.voiceRoutineOptions=<?= json_encode([
     'localMedia'=>'includes/php_ajax/Voice_Routines_Local.php',
 ],JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
 </script>
-<script src="assets/js/voice-routines.js?v=13"></script>
+<script src="assets/js/voice-routines.js?v=14"></script>
 <script src="assets/js/voice-routines-backup.js?v=1"></script>
 </body></html>

@@ -118,8 +118,8 @@
         const allowed=options.hassActions[domain] || ['turn_on','turn_off','turn_setup'];
         const actions=Object.fromEntries(allowed.map(key=>[key,hassLabels[key] || key]));
         if (!actions[step.action]) actions[step.action]='Thao tác đã lưu: '+step.action;
-        return `<label class="form-label">Thao tác</label><select class="form-select mb-2" data-field="action">${selectOptions(actions,step.action)}</select>
-            ${step.action==='turn_setup'?`<label class="form-label">${domain==='climate'?'Nhiệt độ (5–40 °C)':'Mức đặt (0–100 %)'}</label><input class="form-control" data-field="value" type="number" min="${domain==='climate'?5:0}" max="${domain==='climate'?40:100}" step="0.1" value="${escape(step.value)}">`:''}`;
+        return `<label class="form-label">Thao tác</label><select class="form-select mb-2 border-success" data-field="action">${selectOptions(actions,step.action)}</select>
+            ${step.action==='turn_setup'?`<label class="form-label">${domain==='climate'?'Nhiệt độ (5–40 °C)':'Mức đặt (0–100 %)'}</label><input class="form-control border-success" data-field="value" type="number" min="${domain==='climate'?5:0}" max="${domain==='climate'?40:100}" step="0.1" value="${escape(step.value)}">`:''}`;
     }
     function localTrackOptions(selected,query='') {
         const words=searchText(query).split(' ').filter(Boolean);
@@ -153,33 +153,33 @@
     }
     function actionMediaFields(step) {
         if (step.action==='play_local_file') return `<div class="mt-2"><label class="form-label">Bài nhạc Local</label>
-            <div class="input-group mb-2"><input class="form-control routine-local-search" placeholder="Tìm theo tên bài nhạc" aria-label="Tìm bài nhạc Local">
+            <div class="input-group mb-2"><input class="form-control routine-local-search border-success" placeholder="Tìm theo tên bài nhạc" aria-label="Tìm bài nhạc Local">
             <button class="btn btn-outline-primary" type="button" data-command="refresh-local">Tải lại danh sách nhạc</button></div>
-            <select class="form-select routine-local-track" data-field="path" aria-label="Bài nhạc Local">${localTrackOptions(step.path || '')}</select>
+            <select class="form-select routine-local-track border-success" data-field="path" aria-label="Bài nhạc Local">${localTrackOptions(step.path || '')}</select>
             <div class="form-text routine-local-info">${escape(localMessage)}</div>
-            <label class="form-label mt-2">Tên hiển thị (không bắt buộc)</label><input class="form-control" data-field="title" maxlength="200" value="${escape(step.title || '')}"></div>`;
+            <label class="form-label mt-2">Tên hiển thị (không bắt buộc)</label><input class="form-control border-success" data-field="title" maxlength="200" value="${escape(step.title || '')}"></div>`;
         if (urlActions.includes(step.action)) {
-            return `<div class="mt-2"><label class="form-label">Link / URL phát media</label><input class="form-control" data-field="url" type="url" maxlength="8192" placeholder="URL trực tiếp, stream, YouTube, Zing MP3 hoặc NhacCuaTui" value="${escape(step.url || '')}">
-                <label class="form-label mt-2">Tên hiển thị (không bắt buộc)</label><input class="form-control" data-field="title" maxlength="200" value="${escape(step.title || '')}">
+            return `<div class="mt-2"><label class="form-label">Link / URL phát media</label><input class="form-control border-success" data-field="url" type="url" maxlength="8192" placeholder="URL trực tiếp, stream, YouTube, Zing MP3 hoặc NhacCuaTui" value="${escape(step.url || '')}">
+                <label class="form-label mt-2">Tên hiển thị (không bắt buộc)</label><input class="form-control border-success" data-field="title" maxlength="200" value="${escape(step.title || '')}">
                 <div class="form-text">Hỗ trợ HTTP/HTTPS, link âm thanh trực tiếp, stream, YouTube, Zing MP3 và NhacCuaTui. VBot lấy link phát mới mỗi lần chạy. Bước hoàn tất khi media bắt đầu phát.</div></div>`;
         }
         return '';
     }
     function stepFields(step) {
-        if (step.type==='wait') return `<label class="form-label">Chờ (giây)</label><input class="form-control" data-field="seconds" type="number" min="0" max="120" step="0.1" value="${escape(step.seconds)}">`;
-        if (step.type==='volume') return `<label class="form-label">Âm lượng (%)</label><input class="form-control" data-field="value" type="number" min="0" max="100" value="${escape(step.value)}">`;
-        if (step.type==='led_brightness') return `<label class="form-label">Độ sáng LED ở loa (%)</label><input class="form-control" data-field="value" type="number" min="0" max="100" value="${escape(step.value)}"><div class="form-text">0% tắt sáng, 100% sáng tối đa. Đèn LED phải được bật trong cấu hình loa.</div>`;
-        if (step.type==='speak') return `<label class="form-label">Nội dung thông báo</label><textarea class="form-control" data-field="text" rows="2" maxlength="500">${escape(step.text)}</textarea>`;
+        if (step.type==='wait') return `<label class="form-label">Chờ (giây)</label><input class="form-control border-success" data-field="seconds" type="number" min="0" max="120" step="0.1" value="${escape(step.seconds)}">`;
+        if (step.type==='volume') return `<label class="form-label">Âm lượng (%)</label><input class="form-control border-success" data-field="value" type="number" min="0" max="100" value="${escape(step.value)}">`;
+        if (step.type==='led_brightness') return `<label class="form-label">Độ sáng LED ở loa (%)</label><input class="form-control border-success" data-field="value" type="number" min="0" max="100" value="${escape(step.value)}"><div class="form-text">0% tắt sáng, 100% sáng tối đa. Đèn LED phải được bật trong cấu hình loa.</div>`;
+        if (step.type==='speak') return `<label class="form-label">Nội dung thông báo</label><textarea class="form-control border-success" data-field="text" rows="2" maxlength="500">${escape(step.text)}</textarea>`;
         if (step.type==='action') {
             const actions = {...options.actions};
             for (const legacy of urlActions.filter(action=>action!=='play_url')) delete actions[legacy];
             const selected = urlActions.includes(step.action) ? 'play_url' : step.action;
             if (!actions[selected]) actions[selected] = 'Nguồn/thao tác đã lưu: '+selected;
-            return `<label class="form-label">Thao tác</label><select class="form-select" data-field="action">${selectOptions(actions,selected)}</select>${actionMediaFields(step)}`;
+            return `<label class="form-label">Thao tác</label><select class="form-select border-success" data-field="action">${selectOptions(actions,selected)}</select>${actionMediaFields(step)}`;
         }
         return `<div class="hass-controls mb-2">${hassControlFields(step)}</div>
             <div class="hass-picker mb-2"><label class="form-label">Entity ID trong Home Assistant</label>
-            <div class="input-group"><input class="form-control" data-field="entity_id" maxlength="150" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" placeholder="Tìm tên thiết bị hoặc nhập Entity ID" value="${escape(step.entity_id)}">
+            <div class="input-group"><input class="form-control border-success" data-field="entity_id" maxlength="150" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" placeholder="Tìm tên thiết bị hoặc nhập Entity ID" value="${escape(step.entity_id)}">
             <button type="button" class="btn btn-outline-primary" data-command="fetch-hass">Tải dữ liệu Home Assistant</button></div>
             <div class="hass-results list-group mt-1 d-none" role="listbox" style="max-height:320px;overflow-y:auto"></div>
             <div class="hass-entity-name form-text"></div><div class="hass-cache-info form-text"></div></div>
@@ -188,11 +188,11 @@
     function conditionFields(routine) {
         const condition=routine.condition || {mode:'none'};
         const modes={none:'Không sử dụng điều kiện',time:'Chỉ chạy trong khung giờ',date_time:'Từ ngày đến ngày, trong khung giờ'};
-        return `<div class="col-12"><label class="form-label">Điều kiện chạy kịch bản</label><select class="form-select" data-cfield="mode">${selectOptions(modes,condition.mode)}</select>
+        return `<div class="col-12"><label class="form-label">Điều kiện chạy kịch bản</label><select class="form-select border-success" data-cfield="mode">${selectOptions(modes,condition.mode)}</select>
             ${condition.mode!=='none'?`<div class="row g-2 mt-1">
-                ${condition.mode==='date_time'?`<div class="col-md-6"><label class="form-label">Từ ngày</label><input class="form-control" type="date" data-cfield="start_date" value="${escape(condition.start_date || '')}"></div><div class="col-md-6"><label class="form-label">Đến ngày</label><input class="form-control" type="date" data-cfield="end_date" value="${escape(condition.end_date || '')}"></div>`:''}
-                <div class="col-md-6"><label class="form-label">Từ giờ (24 giờ)</label><input class="form-control" data-cfield="start_time" maxlength="5" placeholder="08:00" value="${escape(condition.start_time || '')}"></div>
-                <div class="col-md-6"><label class="form-label">Đến giờ (24 giờ)</label><input class="form-control" data-cfield="end_time" maxlength="5" placeholder="22:00" value="${escape(condition.end_time || '')}"></div>
+                ${condition.mode==='date_time'?`<div class="col-md-6"><label class="form-label">Từ ngày</label><input class="form-control border-success" type="date" data-cfield="start_date" value="${escape(condition.start_date || '')}"></div><div class="col-md-6"><label class="form-label">Đến ngày</label><input class="form-control border-success" type="date" data-cfield="end_date" value="${escape(condition.end_date || '')}"></div>`:''}
+                <div class="col-md-6"><label class="form-label">Từ giờ (24 giờ)</label><input class="form-control border-success" data-cfield="start_time" maxlength="5" placeholder="08:00" value="${escape(condition.start_time || '')}"></div>
+                <div class="col-md-6"><label class="form-label">Đến giờ (24 giờ)</label><input class="form-control border-success" data-cfield="end_time" maxlength="5" placeholder="22:00" value="${escape(condition.end_time || '')}"></div>
                 <div class="col-12 form-text">Định dạng HH:MM, theo giờ hệ thống VBot. Hỗ trợ qua nửa đêm, ví dụ 22:00–06:00; giờ đầu/cuối được tính cả phút đó. Hai giờ phải khác nhau. Ngày bắt đầu/kết thúc được tính cả ngày đó; khung giờ áp dụng hằng ngày trong khoảng đã chọn.</div></div>`:''}</div>`;
     }
     const expandedRoutines = new Set();
@@ -211,15 +211,15 @@
             <div class="d-flex align-items-center gap-2"><h2 class="h5 flex-grow-1 mb-0"><button type="button" class="card-title accordion-button mb-0 ${expandedRoutines.has(routine.id)?'':'collapsed'}" data-command="toggle" aria-expanded="${expandedRoutines.has(routine.id)}" aria-controls="routineBody${index}"><span class="routine-heading">${escape(routine.name.trim() || 'Kịch bản '+(index+1))}</span><span class="routine-enabled-status badge ${routine.enabled?'bg-success':'bg-secondary'} ms-3" aria-live="polite">${routine.enabled?'Đang bật':'Đang tắt'}</span></button></h2><button type="button" class="btn btn-outline-danger btn-sm" data-command="delete">Xóa kịch bản</button></div>
             <div id="routineBody${index}" class="collapse ${expandedRoutines.has(routine.id)?'show':''} pt-3">
             <div class="row g-3">
-                <div class="col-md-6"><label class="form-label">Tên kịch bản</label><input class="form-control" data-rfield="name" maxlength="100" value="${escape(routine.name)}"></div>
-                <div class="col-md-6"><label class="form-label">Câu gọi (mỗi dòng một câu)</label><textarea class="form-control" data-rfield="triggers" maxlength="2010" rows="3">${escape(routine.triggers.join('\n'))}</textarea></div>
+                <div class="col-md-6"><label class="form-label">Tên kịch bản</label><input class="form-control border-success" data-rfield="name" maxlength="100" value="${escape(routine.name)}"></div>
+                <div class="col-md-6"><label class="form-label">Câu gọi (mỗi dòng một câu)</label><textarea class="form-control border-success" data-rfield="triggers" maxlength="2010" rows="3">${escape(routine.triggers.join('\n'))}</textarea></div>
                 <div class="col-12 d-flex flex-wrap gap-4"><div class="form-check form-switch"><input id="routineEnabled${index}" type="checkbox" role="switch" class="form-check-input border-success" data-rfield="enabled" ${routine.enabled?'checked':''}><label class="form-check-label" for="routineEnabled${index}">Kích hoạt</label></div>
                 <div class="form-check form-switch"><input id="routineStopOnError${index}" type="checkbox" role="switch" class="form-check-input border-success" data-rfield="stop_on_error" ${routine.stop_on_error?'checked':''}><label class="form-check-label" for="routineStopOnError${index}">Dừng khi một bước lỗi</label></div></div>
                 ${conditionFields(routine)}
             </div>
             <div class="mt-3">${routine.steps.map((step, number) => `<div class="border rounded p-3 mb-2" data-step="${number}">
                 <div class="d-flex flex-wrap gap-2 align-items-center mb-2"><strong>Bước ${number+1}</strong>
-                    <select class="form-select w-auto" data-field="type" aria-label="Loại bước">${selectOptions(types,step.type)}</select>
+                    <select class="form-select w-auto border-success" data-field="type" aria-label="Loại bước">${selectOptions(types,step.type)}</select>
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-command="up" ${number===0?'disabled':''} aria-label="Đưa bước lên">↑</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" data-command="down" ${number===routine.steps.length-1?'disabled':''} aria-label="Đưa bước xuống">↓</button>
                     <button type="button" class="btn btn-outline-danger btn-sm" data-command="delete-step">Xóa bước</button></div>${stepFields(step)}

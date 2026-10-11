@@ -96,6 +96,10 @@ function vbotRoutineStorageMigrate($path): void {
     $legacy=dirname(dirname($path)).'/voice_routines.json';
     if (!is_file($legacy) && !is_file($legacy.'.bak')) return;
     $lock=@fopen($legacy.'.lock','c+');
+    if (is_resource($lock) && !vbotRoutineFilePermissions0777($legacy.'.lock')) {
+        fclose($lock);
+        throw new RuntimeException('Không cấp được quyền 0777 cho khóa cấu hình cũ');
+    }
     if (!$lock || !flock($lock,LOCK_EX)) {
         if (is_resource($lock)) fclose($lock);
         throw new RuntimeException('Không khóa được cấu hình kịch bản cũ');
@@ -114,6 +118,9 @@ function vbotRoutineStorageMigrate($path): void {
 function vbotRoutineFilePermissions0777($path): bool {
     // Windows does not provide Unix mode bits; Linux deployment requires 0777.
     if (PHP_OS_FAMILY==='Windows') return true;
+    clearstatcache(true,$path);
+    $permissions=@fileperms($path);
+    if ($permissions!==false && ($permissions & 0777)===0777) return true;
     if (!is_callable('exec')) return false;
     $command='chmod 0777 -- '.escapeshellarg($path);
     $output=[];$status=1;
@@ -127,7 +134,7 @@ function vbotRoutineFilePermissions0777($path): bool {
     return $status===0 && $permissions!==false && ($permissions & 0777)===0777;
 }
 
-function vbotRoutineWrite($path, $content, $permissions=0644): bool {
+function vbotRoutineWrite($path, $content, $permissions=0777): bool {
     // Caller holds the main config lock for both backup and replacement.
     // Set permissions BEFORE rename so the Python service can always read it.
     $temporary=@tempnam(dirname($path),'.vbot-routine-');
