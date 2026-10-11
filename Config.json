@@ -1,5 +1,28 @@
 {
     "launch_source": "VBot_Assistant",
+    "lan_calls": {
+        "active": false,
+        "use_mdns_id": true,
+        "id": "vbot_local",
+        "shared_key": "",
+        "control_port": 5010,
+        "audio_port": 5011,
+        "output_device": "default",
+        "mode": "full_duplex",
+        "ringtone": "call_iphone.mp3",
+        "ptt_button_active": false,
+        "ptt_button": "wakeup",
+        "end_button_active": true,
+        "end_button": "mic",
+        "end_button_press": "short",
+        "ring_timeout": 30,
+        "max_duration": 3600,
+        "peers": []
+    },
+    "speaker_location": {
+        "active": false,
+        "room": ""
+    },
     "language": {
         "primary": "vi-VN",
         "fallback": "vi-VN"
@@ -437,6 +460,10 @@
     },
     "weather": {
         "source": "virtual_assistant"
+    },
+    "voice_routines": {
+        "active": true,
+        "minimum_threshold": 0.9
     },
     "schedule": {
         "active": false,
@@ -1225,7 +1252,8 @@
     "calendar": {
         "source": "system",
         "events": {
-            "active": false
+            "active": false,
+            "minimum_threshold": 0.9
         }
     }
 }
