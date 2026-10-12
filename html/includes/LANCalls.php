@@ -1,5 +1,14 @@
 <?php
 require_once __DIR__.'/DeviceIdentity.php';
+function vbotLANCallsSettingsSubmitted(array $post): bool {
+    if (!isset($post['lan_settings_present'])) return false;
+    // Disabled controls are absent from browser POSTs. Older cached pages still
+    // send their hidden marker; do not treat it as an editable LAN form.
+    foreach (['lan_mode','lan_id','lan_output_device','lan_control_port'] as $field) {
+        if (array_key_exists($field,$post)) return true;
+    }
+    return false;
+}
 function vbotLANCallsSettings(array $post, array $old, array $buttons=[], $profileName=null): array {
     $settings=$old;
     $settings['active']=isset($post['lan_active']);

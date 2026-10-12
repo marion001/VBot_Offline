@@ -326,15 +326,8 @@ if (isset($_POST['start_recovery_config_json'])) {
 
 #Lưu lại các giá trị Config.json
 if (isset($_POST['all_config_save'])) {
-  if (isset($_POST['lan_settings_present'])) {
-    try {
-      $lanButtons=$Config['smart_config']['button']??[];
-      foreach ($lanButtons as $name=>&$button) $button['active']=isset($_POST['button'][$name]['active']);
-      unset($button);
-      $Config['lan_calls']=vbotLANCallsSettings($_POST,$Config['lan_calls']??[],$lanButtons,$Config['contact_info']['full_name']??'Loa VBot');
-    }
-    catch (Throwable $error) { $lanConfigError=$error->getMessage(); $messages[]='Chưa lưu cấu hình: '.$lanConfigError; }
-  }
+  // LAN calling is disabled pending testing. Ignore all LAN POST fields and
+  // preserve the existing lan_calls configuration when saving other settings.
   #error_log('[PHP Config] Bắt đầu xử lý yêu cầu lưu Config.json', 0);
   if ($Config['backup_upgrade']['config_json']['active'] === true) {
     $dateTime = new DateTime();
@@ -1180,7 +1173,7 @@ if (isset($_POST['all_config_save'])) {
   } else {
     $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
   }
-  $configSaved = $lanConfigError==='' && vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
+  $configSaved = vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
   if ($configSaved) {
     $messages[] = "Cấu hình đã được lưu thành công!";
   } else {
@@ -1976,7 +1969,7 @@ $lanDisplayKey=trim((string)($lanSettings['shared_key']??''));
 ?>
 <div disabled class="col-12" id="lanCallConfiguration"><div class="card"><div class="card-body pt-3">
 <h2 class="h5">Cấu hình gọi nội bộ</h2>
-<input type="hidden" name="lan_settings_present" value="1">
+<input disabled type="hidden" name="lan_settings_present" value="1">
 <p class="form-text">Các tùy chọn được lưu vào Config.json → lan_calls. Lưu cài đặt và khởi động lại VBot để áp dụng. Danh sách loa và thao tác gọi nằm ở <a href="LAN_Calls.php">Gọi điện LAN</a>.</p>
 <label class="form-check form-switch mb-3"><input disabled class="form-check-input" type="checkbox" name="lan_active" <?= !empty($lanSettings['active'])?'checked':'' ?>> Bật gọi điện LAN khi VBot khởi động</label>
 <label class="form-check form-switch mb-3"><input disabled class="form-check-input" type="checkbox" name="lan_use_mdns_id" id="lanUseMdnsId" <?= $lanAutomaticIdentity?'checked':'' ?>> Dùng ID mDNS ổn định của loa (dùng chung với Multiroom)</label>
