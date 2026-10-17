@@ -4,7 +4,7 @@
         "active": false,
         "use_mdns_id": true,
         "id": "vbot_local",
-        "shared_key": "",
+        "shared_key": "vbot_call_lan_audio",
         "control_port": 5010,
         "audio_port": 5011,
         "output_device": "default",
@@ -19,11 +19,25 @@
         "max_duration": 3600,
         "peers": [],
         "pjsip": {
-            "sip_port": 5060
+            "sip_port": 5060,
+            "runtime": "/home/pi/VBot_AEC3/pjsip",
+            "rtp_port": 40000,
+            "codec": "G722/16000/1",
+            "capture_gain": 3.0,
+            "output_gain": 0.5,
+            "capture_delay_ms": 32,
+            "render_clock_ppm": 980,
+            "playback_latency_ms": 100
         },
         "browser_call": {
             "active": true
-        }
+        },
+        "outgoing_ringtone": "Cho_Cuoc_Goi_1.mp3",
+        "auto_accept_delay": 3,
+        "accept_button_active": false,
+        "accept_button": "wakeup",
+        "accept_button_press": "short",
+        "mic_button_mute": true
     },
     "speaker_location": {
         "active": false,
@@ -1069,7 +1083,7 @@
             },
             "aec3": {
                 "active": true,
-                "library": "/home/pi/VBot_AEC3/music_test/libvbot_aec3_music.so",
+                "library": "/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so",
                 "output": "linear",
                 "playback_device": "default",
                 "playback_latency_ms": 100,

@@ -29,6 +29,7 @@ import urllib.request
 import zipfile
 
 from Update_Backup import create_full_backup
+from Update_Paths import relative_target, rollback_plan
 
 try:
     import fcntl
@@ -278,6 +279,7 @@ def safe_extract(archive, target):
     with zipfile.ZipFile(archive) as package:
         for info in package.infolist():
             name = PurePosixPath(info.filename.replace("\\", "/"))
+            relative_target(target, info.filename)
             mode = (info.external_attr >> 16) & 0o170000
             if name.is_absolute() or ".." in name.parts or mode == stat.S_IFLNK:
                 raise RuntimeError(f"ZIP chứa đường dẫn/liên kết không an toàn: {info.filename}")
@@ -297,6 +299,8 @@ def safe_extract_tar(archive, target):
             raise RuntimeError("Tệp rollback tar.gz không chứa dữ liệu")
         for member in members:
             name = PurePosixPath(member.name.replace("\\", "/"))
+            if name.parts:
+                relative_target(target, member.name)
             if name.is_absolute() or ".." in name.parts or member.issym() or member.islnk() or member.isdev():
                 raise RuntimeError(f"Tệp rollback chứa mục không an toàn: {member.name}")
         package.extractall(target, members=members)
@@ -309,7 +313,7 @@ def newest_backup(paths, prefix):
         for directory in paths
         if directory.is_dir()
         for item in directory.glob(f"{prefix}_*.tar.gz")
-        if item.is_file()
+        if item.is_file() and not item.is_symlink()
     ]
     if not candidates:
         locations = ", ".join(str(path) for path in paths)
@@ -337,7 +341,7 @@ def restore_full_tree(source, destination):
     restored = 0
     for item in source.rglob("*"):
         if item.is_file():
-            atomic_copy_file(item, destination / item.relative_to(source))
+            atomic_copy_file(item, relative_target(destination, item.relative_to(source).as_posix()))
             restored += 1
     if restored == 0:
         raise RuntimeError("Backup không chứa tệp nào có thể khôi phục")
@@ -430,14 +434,14 @@ def copy_transaction(source, rollback, keep_paths, replace_json):
     created = []
     preserved_json = []
     created_file = rollback / "created.json"
-    created_file.write_text("[]", encoding="utf-8")
+    atomic_json_write(created_file, [])
     for item in source.rglob("*"):
         if not item.is_file():
             continue
         relative = item.relative_to(source)
         if should_keep(relative, keep_paths):
             continue
-        destination = HTML_ROOT / relative
+        destination = relative_target(HTML_ROOT, relative.as_posix())
         relative_text = relative.as_posix()
         preserve_existing_json = (
             destination.exists()
@@ -455,7 +459,7 @@ def copy_transaction(source, rollback, keep_paths, replace_json):
             atomic_copy_file(destination, backup)
         else:
             created.append(relative.as_posix())
-            created_file.write_text(json.dumps(created, indent=2), encoding="utf-8")
+            atomic_json_write(created_file, created)
         atomic_copy_file(item, destination)
     log(f"Đã sao chép WebUI mới; có {len(created)} tệp mới được tạo")
     if preserved_json:
@@ -465,18 +469,12 @@ def copy_transaction(source, rollback, keep_paths, replace_json):
 
 def rollback_transaction(rollback):
     log("Đang khôi phục WebUI từ rollback...")
-    created_file = rollback / "created.json"
-    if created_file.is_file():
-        for relative in json.loads(created_file.read_text(encoding="utf-8")):
-            target = HTML_ROOT / relative
-            if target.is_file() or target.is_symlink():
-                target.unlink()
-    files_root = rollback / "files"
-    if files_root.is_dir():
-        for backup in files_root.rglob("*"):
-            if backup.is_file():
-                destination = HTML_ROOT / backup.relative_to(files_root)
-                atomic_copy_file(backup, destination)
+    created, restored = rollback_plan(rollback, HTML_ROOT)
+    for target in created:
+        if target.is_file():
+            target.unlink()
+    for backup, destination in restored:
+        atomic_copy_file(backup, destination)
     log("Đã khôi phục WebUI cũ")
 
 def _update(args):

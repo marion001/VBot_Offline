@@ -1962,15 +1962,6 @@ include 'html_head.php';
               </div>
             </div>
             </div>
-      <div class="card" id="wakeOnLanConfiguration"><div class="card-body pt-3">
-        <h5 class="card-title">Wake-on-LAN — Bật máy tính</h5>
-        <input type="hidden" name="wol_settings_present" value="1">
-        <div class="form-check form-switch mb-3">
-          <input class="form-check-input" type="checkbox" id="wol-active" name="wol_active" <?= vbotWakeOnLANActive($Config,dirname(__DIR__).'/resource/wake_on_lan/devices.json')?'checked':'' ?>>
-          <label class="form-check-label" for="wol-active">Bật Wake-on-LAN bằng web và giọng nói</label>
-        </div>
-        <p class="form-text">Nhấn Lưu Cài Đặt để áp dụng, không cần khởi động lại VBot. Quản lý MAC và bật máy tại <a href="Wake_On_LAN.php">Wake-on-LAN</a>.</p>
-      </div></div>
       <div class="card accordion" id="accordion_button_call_local_lan">
       <div class="card-body">
 <!-- 
@@ -5707,6 +5698,19 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
               </div>
             </div>
 
+      <div class="card" id="wakeOnLanConfiguration"><div class="card-body pt-3">
+        <h5 class="card-title">Wake-on-LAN — Bật máy tính</h5>
+        <input type="hidden" name="wol_settings_present" value="1">
+        <div class="row mb-3">
+          <label class="col-sm-3 col-form-label" for="wol-active">Bật Wake-on-LAN bằng web và giọng nói <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt chức năng bật máy tính qua Wake-on-LAN bằng WebUI và giọng nói')"></i> :</label>
+          <div class="col-sm-9">
+            <div class="form-switch">
+              <input class="form-check-input border-success" type="checkbox" id="wol-active" name="wol_active" <?= vbotWakeOnLANActive($Config,dirname(__DIR__).'/resource/wake_on_lan/devices.json')?'checked':'' ?>>
+            </div>
+          </div>
+        </div>
+        <p class="form-text">Nhấn Lưu Cài Đặt để áp dụng, không cần khởi động lại VBot. Quản lý MAC và bật máy tại <a href="Wake_On_LAN.php">Wake-on-LAN</a>.</p>
+      </div></div>
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Đọc địa chỉ IP khi chương trình VBot khởi chạy:</h5>

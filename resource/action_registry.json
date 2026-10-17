@@ -3,6 +3,8 @@
   "actions": [
     {"id": "none", "label": "Không thực hiện"},
     {"id": "wakeup", "label": "Đánh thức VBot"},
+    {"id": "lan_call_toggle", "label": "Gọi LAN: Nhận hoặc kết thúc cuộc gọi"},
+    {"id": "lan_call_end", "label": "Gọi LAN: Kết thúc / từ chối cuộc gọi"},
     {"id": "volume_up", "label": "Tăng âm lượng"},
     {"id": "volume_down", "label": "Giảm âm lượng"},
     {"id": "volume_max", "label": "Âm lượng lớn nhất"},

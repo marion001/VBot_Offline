@@ -12,8 +12,8 @@ HƯỚNG DẪN SỬ DỤNG
   giữ nguyên tên hàm, coroutine và kiểu kết quả văn bản/``None``.
 - Đặt đường dẫn credentials Google tại ``GOOGLE_APPLICATION_CREDENTIALS``; không chia sẻ tệp JSON.
 - Biến toàn cục có thể cấu hình: ``maximum_recording_time`` (giây),
-  ``dev_stt_interim_results`` (True/False), ``STT_GAIN_VALUE_FLOAT`` (gain), ``RATE`` (Hz),
-  ``Language_Code`` (ví dụ ``vi-VN``). Ba giá trị đầu đang đọc từ ``Lib.config``.
+  ``dev_stt_interim_results`` (True/False), ``RATE`` (Hz), ``Language_Code`` (ví dụ ``vi-VN``).
+  PCM mic local được xử lý bằng WebRTC NS/AGC tại cổng đọc chung trong Lib.
 - ``client`` là Google SpeechClient dùng chung, chỉ nên khởi tạo một lần. Kết quả cuối phải được
   trả về và gán vào ``Lib.stt_transcript`` như mẫu để pipeline tiếp tục xử lý.
 - Không đọc microphone trực tiếp ngoài cổng ``Lib.read_recorder_frame`` vì có thể xung đột luồng âm thanh.
@@ -38,8 +38,7 @@ maximum_recording_time = Lib.config["smart_config"]["smart_wakeup"]["speak_to_te
 
 dev_stt_interim_results = Lib.config["smart_config"]["smart_wakeup"]["speak_to_text"]["interim_results"]
 
-#Tham số cấu hình nhân Gain, khuếch đại âm thanh thu từ Mic
-STT_GAIN_VALUE_FLOAT = float(Lib.config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'])
+#PCM đã qua WebRTC NS/AGC trong cổng đọc mic chung.
 
 #Mỗi giây ghi lại 16.000 giá trị âm thanh (16 kHz)
 RATE = 16000
@@ -94,43 +93,8 @@ async def dev_stt():
                 pcm_bytes = Lib.array.array('h', audio_frame).tobytes()
 
                 #Nhân Khuếch Đại Gain Mic
-                if Lib.stt_gain_active:
-                    pcm_bytes = Lib.audioop.mul(pcm_bytes, 2, STT_GAIN_VALUE_FLOAT)
-
-                #Nếu bật lọc nhiễu âm thanh đầu vào Mic: Noise + AGC 
-                if Lib.Noise_Auto_Gain:
-
-                    #Thêm dữ liệu PCM mới (pcm_bytes) vào bộ đệm agc_buffer
-                    agc_buffer.extend(pcm_bytes)
-                    
-                    #Khi buffer có đủ 320 bytes thì xử lý
-                    while len(agc_buffer) >= 320:  #10ms @16kHz
-
-                        #Lấy 320 bytes đầu tiên (1 frame 10ms) để xử lý
-                        chunk = agc_buffer[:320]
-                        
-                        #Xóa phần đã lấy khỏi buffer để chuẩn bị cho frame tiếp theo
-                        del agc_buffer[:320]
-
-                        #Đưa frame 10ms vào bộ xử lý AGC
-                        result = Lib.Noise_Auto_Gain.Process10ms(bytes(chunk))
-                         
-                        #Gửi frame audio đã xử lý vào Google Streaming STT
-                        Lib.append_stt_input_pcm(result.audio)
-                        yield speech.StreamingRecognizeRequest(audio_content=result.audio)
-
-                #Nếu không bật tự động cân bằng âm thanh AGC thì dùng Speex Noise (Lọc Nhiễu Nền)
-                elif Lib.Noise_STT:
-                    #Gửi frame audio đã xử lý vào Google Streaming STT
-                    processed_audio = Lib.Noise_STT.process(pcm_bytes)
-                    Lib.append_stt_input_pcm(processed_audio)
-                    yield speech.StreamingRecognizeRequest(audio_content=processed_audio)
-
-                #Nếu không bật lọc nhiễu âm thanh đầu vào Mic => gửi trực tiếp dữ liệu âm thanh tới stt gcloud
-                else:
-                    #Gửi frame audio vào Google Streaming STT
-                    Lib.append_stt_input_pcm(pcm_bytes)
-                    yield speech.StreamingRecognizeRequest(audio_content=pcm_bytes)
+                Lib.append_stt_input_pcm(pcm_bytes)
+                yield speech.StreamingRecognizeRequest(audio_content=pcm_bytes)
             else:
                 #Dừng nếu im lặng quá lâu
                 if time.time() - last_audio_time > 2.0:  #2 giây im lặng

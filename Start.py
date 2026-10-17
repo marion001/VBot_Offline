@@ -26,7 +26,7 @@ _THREAD_POOL_EXECUTOR_CLASS = ThreadPoolExecutor
 VBOT_PATH = Path(__file__).resolve().parent
 PAHO_MQTT_REQUIRED_VERSION = "1.6.1"
 
-def _write_startup_log(message: str, *, error: bool = False) -> None:
+def _write_startup_log(message: str, *, error: bool = False, context: str = 'Start MQTT') -> None:
     text = str(message)
     timestamp = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
     rendered = "\n".join(f"[{timestamp}] - {line}" for line in (text.splitlines() or [""]))
@@ -42,9 +42,9 @@ def _write_startup_log(message: str, *, error: bool = False) -> None:
         log_file = VBOT_PATH / "resource" / "log" / "Vbot_error.log"
         log_file.parent.mkdir(parents=True, exist_ok=True)
         with log_file.open("a", encoding="utf-8") as handle:
-            handle.write(f"[{timestamp}] [Start MQTT] {text}\n")
+            handle.write(f"[{timestamp}] [{context}] {text}\n")
     except Exception as log_error:
-        print(f"[{timestamp}] - [Start MQTT] Không thể ghi file log: {log_error}", file=sys.stderr)
+        print(f"[{timestamp}] - [{context}] Không thể ghi file log: {log_error}", file=sys.stderr)
 
 def _mqtt_is_enabled() -> bool:
     for config_name in ("Config.json", "Config.json.bak"):
@@ -52,6 +52,9 @@ def _mqtt_is_enabled() -> bool:
         try:
             with config_path.open("r", encoding="utf-8-sig") as handle:
                 config = json.load(handle)
+            if not isinstance(config, dict):
+                _write_startup_log(f"Cấu trúc cấu hình không hợp lệ: {config_path}", error=True)
+                continue
             mqtt_config = config.get("mqtt_broker", {})
             if isinstance(mqtt_config, dict):
                 return mqtt_config.get("mqtt_active") is True
@@ -119,8 +122,78 @@ def check_paho_mqtt_version() -> bool:
         _write_startup_log(f"Lỗi khi cài đặt paho-mqtt: {error}{suffix}", error=True)
         return False
 
+def ensure_loopback_module() -> bool:
+    if not sys.platform.startswith("linux"):
+        return True
+    source = VBOT_PATH / "resource" / "vbot-loopback.conf"
+    destination = Path("/etc/modules-load.d/vbot-loopback.conf")
+    try:
+        expected = source.read_bytes()
+        privileged = [] if os.geteuid() == 0 else ["sudo", "-n"]
+        if not destination.is_file() or destination.read_bytes() != expected:
+            subprocess.run(
+                privileged + ["install", "-D", "-m", "644", str(source), str(destination)],
+                check=True, capture_output=True, text=True, timeout=15,
+            )
+            _write_startup_log("Đã cài vbot-loopback.conf để tự nạp snd-aloop khi boot.")
+        if not Path("/sys/module/snd_aloop").is_dir():
+            subprocess.run(
+                privileged + ["modprobe", "snd-aloop"],
+                check=True, capture_output=True, text=True, timeout=15,
+            )
+            if not Path("/sys/module/snd_aloop").is_dir():
+                raise RuntimeError("Module snd-aloop vẫn chưa xuất hiện sau modprobe")
+            _write_startup_log("Đã nạp snd-aloop cho đường âm thanh Loopback.")
+        return True
+    except Exception as error:
+        detail = getattr(error, "stderr", None)
+        suffix = f" | {str(detail).strip()}" if detail else ""
+        _write_startup_log(
+            f"Không thể chuẩn bị snd-aloop: {error}{suffix}. "
+            "VBot tiếp tục khởi động; đường âm thanh Loopback có thể chưa dùng được.",
+            error=True, context="Start ALSA",
+        )
+        return False
+
+
+def ensure_shared_media_routes() -> bool:
+    if not sys.platform.startswith('linux'):
+        return True
+    try:
+        script = VBOT_PATH / 'resource' / 'vbot_aec3' / 'install_media_routes.py'
+        privileged = [] if os.geteuid() == 0 else ['sudo', '-n']
+        result = subprocess.run(
+            privileged + [sys.executable, str(script), '--root', str(VBOT_PATH),
+                          '--ensure', '--startup-pid', str(os.getpid())],
+            capture_output=True, text=True, check=True,
+        )
+        if 'SHARED_MEDIA_CONFIG_REPAIRED' in result.stdout:
+            _write_startup_log('[Âm thanh chung] Đã đồng bộ cấu hình với đường âm thanh đã cài; không khởi động lại dịch vụ. ' + result.stdout.strip())
+        elif 'SHARED_MEDIA_ROUTES_READY' not in result.stdout:
+            _write_startup_log('[Âm thanh chung] Đã cài đường AirPlay/Bluetooth/Multiroom. ' + result.stdout.strip())
+        return True
+    except Exception as error:
+        detail = getattr(error, 'stderr', '') or str(error)
+        _write_startup_log(
+            '[Âm thanh chung] Chưa chuẩn bị được đường âm thanh chung: ' + detail.strip()
+            + '. VBot vẫn tiếp tục chạy. Xem FAQ: Cài đường âm thanh chung cho loa.',
+            error=True, context='Start Audio Routes',
+        )
+        return False
+
+
 def main() -> int:
     try:
+        if os.name=='posix':
+            from Lib_System import ensure_permissions
+            permissions=ensure_permissions(VBOT_PATH)
+            if permissions['changed']:
+                _write_startup_log(f"Đã cấp quyền 0777 cho {permissions['changed']} file/thư mục VBot.")
+            if permissions['failed']:
+                _write_startup_log(f"Không đổi được quyền của {permissions['failed']} file/thư mục. Chạy trên loa: sudo chmod -R 0777 /home/pi/VBot_Offline",error=True,context='Start Quyền')
+                for path,error in permissions['errors']:_write_startup_log(f"Quyền: {path}: {error}",error=True,context='Start Quyền')
+        ensure_loopback_module()
+        ensure_shared_media_routes()
         if _mqtt_is_enabled() and not check_paho_mqtt_version():
             _write_startup_log("Không thể bảo đảm phiên bản paho-mqtt yêu cầu, VBot vẫn tiếp tục khởi động.", error=True)
         import VBot
