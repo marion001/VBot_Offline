@@ -8,6 +8,7 @@
 
 include 'Configuration.php';
 require_once __DIR__.'/includes/ActionRegistry.php';
+require_once __DIR__.'/includes/SchedulerRoutines.php';
 require_once __DIR__.'/includes/DeviceIdentity.php';
 
 function vbotSchedulerWritePreservingVoice($path, &$proposed)
@@ -921,7 +922,7 @@ include 'html_head.php';
           } elseif ($task_key === 'mic_on_off') {
             $parameter = in_array($parameter, ['on', 'off'], true) ? $parameter : 'off';
           } elseif ($task_key === 'vbot_action') {
-            $parameter = vbotActionRegistryNormalize($Config, $parameter);
+            $parameter = vbotSchedulerNormalizeAction($Config, $parameter);
           } else {
             $parameter = null;
           }
@@ -935,6 +936,8 @@ include 'html_head.php';
           $condition = isset($schedule_option['conditions']) && is_array($schedule_option['conditions']) ? $schedule_option['conditions'] : [];
           $grouped_system_schedules[$task_key][] = [
             'id' => preg_match('/^[a-zA-Z0-9_-]{1,80}$/', (string)($schedule_option['id'] ?? '')) ? (string)$schedule_option['id'] : ('system_' . time() . '_' . intval($schedule_index)),
+            'name' => is_string($schedule_option['name']??null) ? (preg_replace('/^(.{0,120}).*$/us','$1',trim($schedule_option['name']))??'') : '',
+            'create_words' => ($schedule_option['create_words']??'')==='xiaozhi_mcp' ? 'xiaozhi_mcp' : '',
             'active' => isset($schedule_option['active']),
             'slots' => [['time' => $slot_time, 'parameter' => $parameter]],
             'time' => [$slot_time], 'parameter' => $parameter,
@@ -1340,7 +1343,16 @@ include 'html_head.php';
             'mic_on_off'=>'Bật/Tắt microphone',
             'send_notify_upgrade_vbot_home_assistant'=>'Kiểm tra và thông báo cập nhật VBot'
           ];
-          $vbotActionOptions = vbotActionRegistryOptions($Config);
+          $vbotActionOptions = vbotSchedulerActionOptions($Config);
+          foreach ($independentSystemSchedules as $savedSchedule) {
+            $savedAction = (string)($savedSchedule['slots'][0]['parameter'] ?? $savedSchedule['parameter'] ?? '');
+            if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^routine:[A-Za-z0-9_-]{1,64}$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
+              $vbotActionOptions[$savedAction] = 'Kịch bản không còn tồn tại: '.substr($savedAction, 8);
+            }
+            if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^wol:[A-Za-z0-9_-]{1,64}$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
+              $vbotActionOptions[$savedAction] = 'Máy tính Wake-on-LAN không còn tồn tại: '.substr($savedAction, 4);
+            }
+          }
           // Hiển thị trực tiếp từng thao tác trong danh sách loại tác vụ. Giá trị
           // vẫn được chuẩn hóa về task=vbot_action + parameter khi lưu JSON.
           $directVbotTaskLabels = [];
@@ -1367,6 +1379,9 @@ include 'html_head.php';
                     <div class="card-body">
                       <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][id]" value="<?= htmlspecialchars($systemSchedule['id'] ?? ('system_'.$systemScheduleIndex)) ?>">
                       <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][source_task]" value="<?= htmlspecialchars($systemTask) ?>">
+                      <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][name]" value="<?= htmlspecialchars($systemSchedule['name']??'',ENT_QUOTES,'UTF-8') ?>">
+                      <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][create_words]" value="<?= htmlspecialchars($systemSchedule['create_words']??'',ENT_QUOTES,'UTF-8') ?>">
+                      <?php if (!empty($systemSchedule['name'])): ?><p class="fw-bold text-primary"><?= htmlspecialchars($systemSchedule['name'],ENT_QUOTES,'UTF-8') ?></p><?php endif; ?>
                       <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch tác vụ #<?= $systemScheduleIndex + 1 ?></b><button class="btn btn-danger btn-sm system-task-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
                       <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[<?= $systemScheduleIndex ?>][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= htmlspecialchars($key) ?>" <?= $systemTaskSelectValue===$key?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[<?= $systemScheduleIndex ?>][time]" value="<?= htmlspecialchars($systemSlot['time'] ?? '') ?>"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[<?= $systemScheduleIndex ?>][parameter]" value="<?= htmlspecialchars((string)($systemSlot['parameter'] ?? '')) ?>"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[<?= $systemScheduleIndex ?>][active]" <?= !isset($systemSchedule['active']) || $systemSchedule['active']?'checked':'' ?>><label class="form-check-label">Bật</label></div></div></div>
                       <?php render_system_scheduler_options('independent_'.$systemScheduleIndex, $systemSchedule, 'Tác vụ hệ thống', '', 'system_task_schedules['.$systemScheduleIndex.'][date]', 'system_task_schedules['.$systemScheduleIndex.']'); ?>

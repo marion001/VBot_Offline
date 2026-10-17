@@ -98,7 +98,8 @@ window.voiceRoutineOptions=<?= json_encode([
 </script>
 <script>
 document.getElementById('main').addEventListener('click',event=>{
-    if(event.target.closest('button') && typeof window.vbotBeginLoading==='function') {
+    const button=event.target.closest('button');
+    if(button && !button.matches('[data-command="toggle"], #routineExpandAll, #routineCollapseAll') && typeof window.vbotBeginLoading==='function') {
         const endLoading=window.vbotBeginLoading();setTimeout(endLoading,0);
     }
 },true);

@@ -58,18 +58,10 @@
         </li>
 
 
-  <!-- 
-    <li class="nav-item" onclick="loading('show')" title="Gọi điện giữa các loa VBot trong LAN">
-      <a class="nav-link collapsed text-danger" href="LAN_Calls.php"><i class="bi bi-telephone"></i><span>Gọi điện LAN (disabled)</span></a>
-    </li>
-	-->
-<li class="nav-item" title="Tính năng gọi điện LAN đang bị vô hiệu hóa">
-  <a class="nav-link collapsed text-danger disabled"
-     tabindex="-1"
-     aria-disabled="true"
-     style="pointer-events: none; opacity: 0.5; cursor: not-allowed;">
+<li class="nav-item" onclick="loading('show')" title="Gọi điện giữa các loa VBot trong LAN">
+  <a class="nav-link collapsed text-danger" href="LAN_Calls.php">
     <i class="bi bi-telephone"></i>
-    <span>Gọi điện LAN (Disabled)</span>
+    <span>Gọi điện LAN</span>
   </a>
 </li>
 
@@ -200,6 +192,11 @@
       <i class="bi bi-share-fill"></i><span>Liên Kết Thiết Bị, Dịch Vụ</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="icons-tbdv" class="nav-content collapse " data-bs-parent="#sidebar-tbdv">
+      <li onclick="loading('show')">
+        <a href="Wake_On_LAN.php">
+          <i class="bi bi-circle"></i><span>Wake-on-LAN — Bật máy tính</span>
+        </a>
+      </li>
       <li>
         <a href="BroadLink_Remote.php">
           <i class="bi bi-circle"></i><span>BroadLink Remote</span>

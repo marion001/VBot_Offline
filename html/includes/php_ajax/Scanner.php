@@ -334,68 +334,23 @@ if (isset($_GET['VBot_Client_Device_Scaner'])) {
 
 //Kiểm tra phiên bản Bluetooth hoặc AirPlay
 if (isset($_GET['check_version'])) {
-    $type = strtolower(trim($_GET['check_version']));
-    switch ($type) {
-        case "bluetooth":
-            $CMD = "bluealsad -V";
-            break;
-        case "airplay":
-            $CMD = "shairport-sync --version";
-            break;
-        default:
-            vbotApiJsonResponse([
-                'success' => false,
-                'message' => 'Tham số không hợp lệ. Chỉ hỗ trợ bluetooth hoặc airplay.',
-                'data' => []
-            ], 400);
+    require_once dirname(__DIR__).'/LocalProcess.php';
+    $type = strtolower(trim((string)$_GET['check_version']));
+    $commands = ['bluetooth'=>['bluealsad','-V'], 'airplay'=>['shairport-sync','--version']];
+    if (!isset($commands[$type])) vbotApiJsonResponse(['success'=>false,'message'=>'Chỉ hỗ trợ bluetooth hoặc airplay.','data'=>[]],400);
+    // WebUI runs on this speaker; version reads do not need an SSH channel.
+    if (session_status()===PHP_SESSION_ACTIVE) session_write_close();
+    try {
+        $result = vbotRunLocalProcess($commands[$type], '', 5);
+        $version = trim($result['stdout']."\n".$result['stderr']);
+        if ($result['exit'] !== 0 || $version === '') throw new RuntimeException('Không lấy được phiên bản '.$type);
+        vbotApiJsonResponse(['success'=>true,'message'=>'Đã đọc phiên bản '.$type,'version'=>$version]);
+    } catch (Throwable $error) {
+        error_log('Version scanner: '.$error->getMessage());
+        vbotApiJsonResponse(['success'=>false,'message'=>$error->getMessage(),'data'=>[]],502);
     }
-    $connection = ssh2_connect($ssh_host, $ssh_port);
-    if (!$connection) {
-        vbotApiJsonResponse([
-            'success' => false,
-            'message' => 'Không thể kết nối tới máy chủ SSH.',
-            'data' => []
-        ], 502);
-    }
-    if (!ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
-        vbotApiJsonResponse([
-            'success' => false,
-            'message' => 'Xác thực SSH không thành công.',
-            'data' => []
-        ], 502);
-    }
-    $stream = ssh2_exec($connection, escapeshellcmd($CMD));
-    if (!$stream) {
-        vbotApiJsonResponse([
-            'success' => false,
-            'message' => 'Không thể thực thi lệnh trên máy chủ SSH.',
-            'data' => []
-        ], 502);
-    }
-    stream_set_blocking($stream, true);
-    $stdout = ssh2_fetch_stream($stream, SSH2_STREAM_STDIO);
-    $stderr = ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
-    $output = trim(stream_get_contents($stdout));
-    $error_output = trim(stream_get_contents($stderr));
-    fclose($stdout);
-    fclose($stderr);
-    fclose($stream);
-    if (!empty($error_output)) {
-        error_log('Version scanner command failed: '.$error_output);
-        vbotApiJsonResponse([
-            'success' => false,
-            'message' => 'Không thể lấy thông tin phiên bản '.$type.'.',
-            'data' => []
-        ], 502);
-    }
-    vbotApiJsonResponse([
-        'success' => true,
-        'message' => 'Lấy phiên bản ' . $type . ' thành công.',
-        'version' => $output
-    ]);
 }
 
-#Xác Thực, Liên Kết Với XiaoZhi
 if (isset($_GET['XiaoZhi_Active'])) {
     $action = isset($_GET['action']) ? $_GET['action'] : '';
     $xiaozhiScript = escapeshellarg($directory_path . '/includes/php_ajax/XiaoZhi_Active.py');

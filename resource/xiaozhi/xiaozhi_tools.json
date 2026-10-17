@@ -175,14 +175,19 @@
         },
         {
             "name": "_VBot_Scheduler",
-            "description": "Quản lý lịch, lời nhắc và thông báo nội bộ của VBot. Hỗ trợ tạo, liệt kê, xóa, bật hoặc tắt lịch. Lịch một lần cần date dạng YYYY-MM-DD và time dạng HH:MM theo giờ địa phương.",
+            "description": "Quản lý lịch, lời nhắc và thông báo nội bộ của VBot. Hỗ trợ tạo, liệt kê, xóa, bật hoặc tắt lịch. Lịch một lần cần date dạng YYYY-MM-DD và time dạng HH:MM theo giờ địa phương. For delayed Home Assistant device control, first resolve a unique entity_id with _VBot_HomeAssistant, then create a schedule with home_assistant_control. message alone ONLY creates a spoken reminder, never controls devices. Never confirm a device-control schedule unless home_assistant_control was saved.",
             "inputSchema": {
                 "type": "object",
                 "additionalProperties": false,
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["create", "list", "delete", "set_active"],
+                        "enum": [
+                            "create",
+                            "list",
+                            "delete",
+                            "set_active"
+                        ],
                         "description": "Thao tác cần thực hiện"
                     },
                     "name": {
@@ -201,7 +206,13 @@
                     },
                     "recurrence": {
                         "type": "string",
-                        "enum": ["once", "daily", "weekdays", "weekends", "weekly"],
+                        "enum": [
+                            "once",
+                            "daily",
+                            "weekdays",
+                            "weekends",
+                            "weekly"
+                        ],
                         "description": "Kiểu lặp của lịch"
                     },
                     "date": {
@@ -221,9 +232,43 @@
                     "active": {
                         "type": "boolean",
                         "description": "Trạng thái bật hoặc tắt"
+                    },
+                    "home_assistant_control": {
+                        "type": "object",
+                        "additionalProperties": false,
+                        "properties": {
+                            "entity_id": {
+                                "type": "string"
+                            },
+                            "action": {
+                                "type": "string",
+                                "enum": [
+                                    "turn_on",
+                                    "turn_off"
+                                ]
+                            },
+                            "name": {
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "entity_id",
+                            "action"
+                        ],
+                        "description": "Actual Home Assistant action at scheduled time; repeat must be 1. Omit for TTS reminders."
+                    },
+                    "kind": {
+                        "type": "string",
+                        "enum": [
+                            "reminder",
+                            "home_assistant"
+                        ],
+                        "description": "Use home_assistant for device actions and provide home_assistant_control; use reminder only for spoken notifications."
                     }
                 },
-                "required": ["action"]
+                "required": [
+                    "action"
+                ]
             }
         },
         {
@@ -235,7 +280,12 @@
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["list", "upcoming", "on_date", "find"],
+                        "enum": [
+                            "list",
+                            "upcoming",
+                            "on_date",
+                            "find"
+                        ],
                         "description": "list: liệt kê; upcoming: sự kiện sắp tới; on_date: sự kiện đúng ngày; find: tìm theo tên hoặc tag"
                     },
                     "date": {
@@ -258,7 +308,9 @@
                         "description": "Có gửi cả Event đang tắt hay không, mặc định false"
                     }
                 },
-                "required": ["action"]
+                "required": [
+                    "action"
+                ]
             }
         },
         {
@@ -270,12 +322,24 @@
                 "properties": {
                     "action": {
                         "type": "string",
-                        "enum": ["list_devices", "find_device", "get_state", "control"],
+                        "enum": [
+                            "list_devices",
+                            "find_device",
+                            "get_state",
+                            "control"
+                        ],
                         "description": "list_devices để liệt kê, find_device để tìm theo friendly_name, get_state để đọc trạng thái, control để điều khiển"
                     },
                     "domain": {
                         "type": "string",
-                        "enum": ["climate", "fan", "switch", "light", "cover", "sensor"],
+                        "enum": [
+                            "climate",
+                            "fan",
+                            "switch",
+                            "light",
+                            "cover",
+                            "sensor"
+                        ],
                         "description": "Lọc loại thiết bị khi dùng list_devices"
                     },
                     "friendly_name": {
@@ -289,14 +353,25 @@
                     },
                     "command": {
                         "type": "string",
-                        "enum": ["turn_on", "turn_off", "set_temperature", "set_percentage", "set_hvac_mode", "open", "close", "stop"],
+                        "enum": [
+                            "turn_on",
+                            "turn_off",
+                            "set_temperature",
+                            "set_percentage",
+                            "set_hvac_mode",
+                            "open",
+                            "close",
+                            "stop"
+                        ],
                         "description": "Lệnh điều khiển phù hợp với domain thiết bị"
                     },
                     "value": {
                         "description": "Giá trị nhiệt độ, phần trăm hoặc chế độ HVAC tùy command"
                     }
                 },
-                "required": ["action"]
+                "required": [
+                    "action"
+                ]
             }
         }
     ]

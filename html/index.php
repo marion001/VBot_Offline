@@ -1436,7 +1436,12 @@ include 'html_head.php';
       try { 
         const p={action:action}; 
         if(action==='start') p.group_id=document.getElementById('mr-session-group-select').value; 
-        await multiroomRequest(p); 
+        await multiroomRequest(p);
+        if(action === 'local' || action === 'multiroom_stop') {
+          multiroomQuickSelectedSpeakers.clear();
+          multiroomQuickSelectionInitialized = true;
+          renderMultiroomQuickGroup();
+        }
         multiroomSuccess(action==='start'?'Đã kết nối âm thanh đa vùng':'Đã dừng Multiroom và chuyển về loa local'); 
       } catch(e){
         mrMessage(e.message,true);
@@ -1489,7 +1494,6 @@ include 'html_head.php';
       badge.textContent = groupId || 'webui_vbot_*';
       if(!multiroomQuickSelectionInitialized && devices.length) {
         multiroomQuickSelectedSpeakers.clear();
-        if(localId) multiroomQuickSelectedSpeakers.add(localId);
         ((multiroomSnapshot.controller || {}).speakers || []).forEach(speaker => {
           if(speaker.id) multiroomQuickSelectedSpeakers.add(String(speaker.id));
         });

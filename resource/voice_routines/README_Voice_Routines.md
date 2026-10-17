@@ -67,7 +67,7 @@ Câu gọi được so sánh trên toàn bộ câu, bỏ qua chữ hoa/thường
 
 Mỗi kịch bản có thể chọn **Không sử dụng điều kiện**, **Chỉ chạy trong khung giờ**, hoặc **Từ ngày đến ngày, trong khung giờ**. Điều kiện giới hạn quyền chạy khi nhận câu gọi hoặc yêu cầu chạy thử/API; không tự lên lịch chạy.
 
-Giờ nhập theo định dạng 24 giờ `HH:MM`, ngày theo `YYYY-MM-DD`, dùng giờ hệ thống của VBot. Hai giờ phải khác nhau. Khung `22:00–06:00` cho phép chạy qua nửa đêm. Bao gồm phút bắt đầu/kết thúc và ngày đầu/cuối; với khoảng ngày, ngày hiện tại phải nằm trong khoảng đã chọn kể cả khung qua nửa đêm.
+Giờ nhập theo định dạng 24 giờ `HH:MM`, ngày theo `YYYY-MM-DD`, dùng giờ hệ thống của VBot. Có thể thêm/xóa tối đa 30 khung giờ trong mỗi kịch bản; chỉ cần nằm trong một khung giờ là được chạy. Hai giờ trong mỗi khung phải khác nhau. Khung `22:00–06:00` cho phép chạy qua nửa đêm. Bao gồm phút bắt đầu/kết thúc và ngày đầu/cuối; với khoảng ngày, ngày hiện tại phải nằm trong khoảng đã chọn kể cả khung qua nửa đêm.
 
 Điều kiện được kiểm tra trước từng bước. Khi hết thời gian cho phép, kịch bản dừng và báo bị chặn; thao tác đã gửi hoặc bước chờ đang chạy hoàn tất trước lần kiểm tra tiếp theo. Kịch bản cũ không có trường `condition` mặc định không giới hạn.
 
@@ -76,29 +76,53 @@ Giờ nhập theo định dạng 24 giờ `HH:MM`, ngày theo `YYYY-MM-DD`, dùn
   "mode": "date_time",
   "start_date": "2026-10-08",
   "end_date": "2026-10-31",
-  "start_time": "18:00",
-  "end_time": "23:00"
+  "time_windows": [
+    {"start_time": "07:00", "end_time": "08:00"},
+    {"start_time": "10:00", "end_time": "12:00"}
+  ]
 }
 ```
 
-Chế độ `time` chỉ cần `start_time` và `end_time`; chế độ `none` không cần ngày/giờ. Lưu, nhập và khôi phục bản sao lưu đều kiểm tra định dạng điều kiện.
+Chế độ `time` chỉ cần `time_windows`; chế độ `none` không cần ngày/giờ. Dữ liệu cũ dùng `start_time` và `end_time` vẫn được hỗ trợ như một khung giờ. Lưu, nhập và khôi phục bản sao lưu đều kiểm tra định dạng điều kiện. Khi dùng nhiều khung giờ, cần cập nhật cả Python, WebUI và file ngôn ngữ cùng phiên bản.
 
 ## Thực thi và lưu trữ
+
+WebUI có mục **Lịch sử chạy kịch bản**, đọc/xóa dữ liệu trong
+`resource/voice_routines/history.json`. Giữ tối đa 100 lượt: câu lệnh,
+điểm khớp/ngưỡng, thời gian bắt đầu/kết thúc, trạng thái và kết quả/thời gian
+từng bước. Lỗi ghi lịch sử được ghi log, không chạy lại thao tác thiết bị.
+Các lần chạy bị chặn bởi điều kiện hoặc bản kịch bản đang tắt cũng có thể
+được ghi để đối chiếu. File lịch sử và khóa được cấp quyền 0777 trên Linux.
+
+Nút **Nhân bản kịch bản** sao chép bước, điều kiện và lựa chọn sau khi hoàn tất;
+tạo ID, tên và câu lệnh riêng, mặc định tắt. Kiểm tra rồi lưu trước khi kích hoạt.
+**Sau khi chạy xong kịch bản** nằm cuối cấu hình, sau danh sách bước.
+
+Trong `Command_Test.php`, phân tích hiển thị kịch bản khớp, điểm/ngưỡng,
+điều kiện và các ứng viên. Chế độ phân tích không chạy bước, không phát TTS
+và không ghi lịch sử chạy; tùy chọn thực thi sẵn có vẫn thực hiện thao tác thật.
+
+Trong WebUI, mục **Sau khi chạy xong kịch bản** lưu trường `after_completion`:
+`default` dùng chế độ hội thoại hệ thống (cũng là mặc định cho dữ liệu cũ);
+`continue` tiếp tục đánh thức khi `conversation_mode` bật;
+`wait` kết thúc phiên và quay về chờ, kể cả khi chế độ hội thoại bật.
+Lựa chọn này áp dụng khi chạy bằng câu lệnh và kịch bản hoàn tất;
+không thay đổi cấu hình hội thoại chung, không áp dụng cho kịch bản lỗi/bị chặn.
 
 Các bước chạy lần lượt và chờ kết quả của bước trước. Mặc định dừng khi lỗi; bỏ chọn **Dừng khi một bước lỗi** để tiếp tục các bước sau, nhưng kết quả toàn kịch bản vẫn báo có lỗi. Không tự thử lại thao tác thiết bị.
 
 Chỉ một kịch bản chạy tại một thời điểm. Mỗi bước thao tác có giới hạn 60 giây; toàn lượt chạy tối đa 10 phút. Nút **Dừng kịch bản đang chạy**, hủy request hoặc một request giọng nói mới thay thế request hiện tại sẽ ngăn các bước còn lại. Thao tác đã thực hiện không được hoàn tác; thao tác đang gửi hoặc chạy trong thread có thể vẫn hoàn tất.
 
-Dữ liệu lưu riêng tại `resource/voice_routines.json`, gồm `version: 1` và danh sách `routines`. File tối đa 1 MB, tối đa 50 kịch bản, 10 câu gọi và 30 bước mỗi kịch bản. Runtime nạp lại file ở mỗi lần gọi; một lượt đang chạy giữ bản cấu hình tại thời điểm bắt đầu.
+Dữ liệu lưu riêng tại `resource/voice_routines/voice_routines.json`, gồm `version: 1` và danh sách `routines`. File tối đa 1 MB, tối đa 50 kịch bản, 10 câu gọi và 30 bước mỗi kịch bản. Runtime nạp lại file ở mỗi lần gọi; một lượt đang chạy giữ bản cấu hình tại thời điểm bắt đầu.
 
-WebUI kiểm tra dữ liệu, khóa file khi lưu, ghi bằng thay thế nguyên tử và giữ bản cũ tại `resource/voice_routines.json.bak`. Mã revision ngăn hai tab ghi đè nhau. Nút **Xuất bản đang sửa** giúp giữ thay đổi trước khi tải lại. Khi file cấu hình hỏng, trang từ chối ghi đè; có thể phục hồi file `.bak` sau khi kiểm tra nội dung. Cơ chế cập nhật chương trình hiện có giữ lại JSON người dùng, trừ khi bạn chủ động chọn thay thế file.
+WebUI kiểm tra dữ liệu, khóa file khi lưu, ghi bằng thay thế nguyên tử và giữ bản cũ tại `resource/voice_routines/voice_routines.json.bak`. Mã revision ngăn hai tab ghi đè nhau. Nút **Xuất bản đang sửa** giúp giữ thay đổi trước khi tải lại. Khi file cấu hình hỏng, trang từ chối ghi đè; có thể phục hồi file `.bak` sau khi kiểm tra nội dung. Cơ chế cập nhật chương trình hiện có giữ lại JSON người dùng, trừ khi bạn chủ động chọn thay thế file.
 
 ### Nhập, tải xuống, xem JSON, sao lưu và khôi phục
 
 Khu vực cuối `Voice_Routines.php` có các thao tác:
 
 - **Xem JSON đã lưu / Tải xuống JSON đã lưu:** dùng nội dung trên thiết bị. Nút **Xuất bản đang sửa** phía trên dùng dữ liệu đang chỉnh trên trang.
-- **Tạo bản sao lưu:** tạo tệp riêng trong `resource/voice_routines_backups`, giữ tối đa 10 bản; danh sách cho phép xem JSON, tải xuống hoặc khôi phục một bản.
+- **Tạo bản sao lưu:** tạo tệp riêng trong `html/Backup_Upgrade/Backup_Voice_Routines`, tự tạo thư mục và cấp quyền `0777`. File sao lưu mới cũng được cấp quyền `0777` bằng lệnh hệ thống trước khi hoàn tất ghi nguyên tử. Giữ tối đa 10 bản; danh sách cho phép xem JSON, tải xuống hoặc khôi phục một bản. Bản sao lưu trong thư mục cũ được chuyển sang khi sử dụng chức năng sao lưu.
 - **Tải lên tệp JSON / Dán JSON:** nhập theo ID (bản nhập thay các ID trùng) hoặc thay thế toàn bộ để khôi phục. File tối đa 1 MB, phải đúng schema và không có câu gọi/tên trùng sau khi gộp.
 
 Nhập/khôi phục tự sao lưu nguyên trạng file hiện tại trước khi thay thế, kiểm tra revision và ghi nguyên tử. File không hợp lệ hoặc thao tác lỗi không thay thế cấu hình đang dùng. Có thể phục hồi file JSON bị hỏng bằng chế độ thay thế hoặc một bản sao hợp lệ; nguyên trạng file hỏng cũng được giữ trong bản sao trước thao tác. Các thay đổi chưa lưu trên trang chỉ bị bỏ sau khi người dùng xác nhận và nhập/khôi phục thành công. Mọi thao tác dùng đăng nhập và CSRF của WebUI.

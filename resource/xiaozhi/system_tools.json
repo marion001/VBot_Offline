@@ -1,0 +1,236 @@
+{
+  "tools": [
+    {
+      "name": "_VBot_HASS_Custom",
+      "description": "Liệt kê và chạy tác vụ Home Assistant tùy chỉnh đã lưu trong HASS_Customize.php. Dùng action=list để lấy ID, tên và câu lệnh mẫu; sau đó action=run với id hoặc tên chính xác. Chỉ chạy tác vụ đang bật khi người dùng yêu cầu. Không tự tạo YAML, service, entity_id hoặc tham số mới; không đoán ID. Tuân theo giới hạn thực thể Home Assistant của VBot.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {"type": "string", "enum": ["list", "run"]},
+          "id": {"type": "string", "maxLength": 100},
+          "name": {"type": "string", "maxLength": 200}
+        },
+        "required": ["action"]
+      }
+    },
+    {
+      "name": "_VBot_Calendar_Control",
+      "description": "Tạo lịch sự kiện, ngày lễ, kỉ niệm trên VBot. Chỉ tạo/xóa/bật/tắt khi người dùng yêu cầu rõ; dùng _VBot_Calendar_Events để tra cứu ID. Ngày âm lịch dùng calendar=lunar.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "create",
+              "delete",
+              "set_active"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "date": {
+            "type": "string",
+            "description": "Ngày YYYY-MM-DD theo loại lịch đã chọn"
+          },
+          "calendar": {
+            "type": "string",
+            "enum": [
+              "solar",
+              "lunar"
+            ]
+          },
+          "recurrence": {
+            "type": "string",
+            "enum": [
+              "once",
+              "yearly"
+            ]
+          },
+          "times": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 24
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 1000
+          },
+          "active": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      }
+    },
+    {
+      "name": "_VBot_Voice_Routines",
+      "description": "Liệt kê và chạy kịch bản nhiều bước đã lưu trên VBot theo ID hoặc tên chính xác. Không tự tạo các bước hoặc đoán ID.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "status",
+              "run",
+              "cancel"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "action"
+        ]
+      }
+    },
+    {
+      "name": "_VBot_LAN_Calls",
+      "description": "Gọi điện LAN tới loa đã cấu hình, nhận/từ chối/kết thúc và bật/tắt mic cuộc gọi. Liệt kê để chọn đúng loa; chỉ gọi khi người dùng yêu cầu.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "status",
+              "call",
+              "accept",
+              "reject",
+              "end",
+              "mute"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "muted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "action"
+        ]
+      }
+    },
+    {
+      "name": "_VBot_Wake_On_LAN",
+      "description": "Bật máy tính đã cấu hình Wake-on-LAN trên VBot. Liệt kê máy để chọn ID hoặc tên chính xác; kết quả chỉ xác nhận đã gửi gói, không khẳng định máy đã bật.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "wake"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "action"
+        ]
+      }
+    },
+    {
+      "name": "_VBot_Internal_IR",
+      "description": "Liệt kê hoặc phát lệnh IR Remote GPIO đã lưu trên VBot theo tên chính xác. Không nhận mã IR thô hoặc lệnh hệ thống.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "list",
+              "send"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "action"
+        ]
+      }
+    }
+  ],
+  "extensions": {
+    "_VBot_Scheduler": {
+      "description_append": "Hỗ trợ lập lịch CHẠY kịch bản đã lưu hoặc BẬT máy tính đã cấu hình: dùng kind=routine hoặc kind=wake_on_lan. Gọi action=targets với kind tương ứng để lấy ID, sau đó action=create với name là tên lịch, target_id (hoặc target_name), time và recurrence; date bắt buộc nếu once. Không thực thi mục tiêu ngay lúc tạo lịch. Với hai loại này message không phải hành động và repeat phải bằng 1. Khi list/delete/set_active lịch tác vụ, giữ đúng kind; có thể chọn id lịch từ kết quả list. Không đoán ID.",
+      "actions_add": [
+        "targets"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "reminder",
+            "home_assistant",
+            "routine",
+            "wake_on_lan"
+          ],
+          "description": "Loại lịch: lời nhắc, Home Assistant, kịch bản đã lưu hoặc bật máy tính."
+        },
+        "target_id": {
+          "type": "string",
+          "maxLength": 100,
+          "description": "ID kịch bản hoặc máy tính lấy từ targets; không phải ID lịch."
+        },
+        "target_name": {
+          "type": "string",
+          "maxLength": 200,
+          "description": "Tên chính xác của kịch bản hoặc máy tính nếu không dùng target_id."
+        },
+        "id": {
+          "type": "string",
+          "maxLength": 80,
+          "description": "ID lịch dùng khi xóa hoặc bật/tắt lịch tác vụ."
+        }
+      }
+    }
+  }
+}

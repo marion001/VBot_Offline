@@ -31,6 +31,20 @@ AGENT_PATH = "/com/vbot/agent"
 DEFAULT_CONFIG_PATH = "/home/pi/VBot_Offline/Config.json"
 DEFAULT_BLUETOOTH_ADAPTER = "hci0"
 
+def bluetooth_playback_route(config_path=None):
+    """Keep agent-created players on the installer-managed shared media PCM."""
+    path = config_path or os.environ.get("VBOT_CONFIG_PATH", DEFAULT_CONFIG_PATH)
+    try:
+        with open(path, "r", encoding="utf-8-sig") as config_file:
+            config = json.load(config_file)
+        smart = config.get('smart_config', {})
+        aec = smart.get('audio_processing', {}).get('aec3', smart.get('aec3', {}))
+        if aec.get('external_sources', False):
+            return ['--pcm=vbot_aec_media', '--pcm-buffer-time=200000', '--pcm-period-time=50000']
+    except (OSError, ValueError, TypeError, AttributeError):
+        pass
+    return []
+
 #Đọc adapter từ Config.json, mọi dữ liệu thiếu/sai đều trả về hci0
 def load_bluetooth_adapter(config_path=None):
     path = config_path or os.environ.get("VBOT_CONFIG_PATH", DEFAULT_CONFIG_PATH)
@@ -696,7 +710,7 @@ def _delayed_start_audio(mac, generation):
 
         # Nếu agent phải tự tạo player, ép software-volume ngay từ lúc mở PCM
         # để không có cửa sổ native/AVRCP trước khi SoftVolume được set.
-        process = subprocess.Popen(["bluealsa-aplay", "--volume=software", mac], stdout=subprocess.DEVNULL, stderr=None)
+        process = subprocess.Popen(["bluealsa-aplay", "--volume=software"] + bluetooth_playback_route() + [mac], stdout=subprocess.DEVNULL, stderr=None)
         last_audio_start_at[mac] = time.time()
         with playback_lock:
             stale = (shutdown_requested or generation != playback_generation

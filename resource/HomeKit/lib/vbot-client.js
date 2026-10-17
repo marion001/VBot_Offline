@@ -96,13 +96,25 @@ class VBotClient extends EventEmitter {
     this.lastSignature = "";
     this.commandCooldowns = new Map();
     this.consecutiveTimeouts = new Map();
+    this.sseFailures = new Map();
+    this.sseErrorReports = new Map();
   }
 
   markClientSuccess(scope) {
     this.consecutiveTimeouts.delete(scope);
+    this.sseFailures.delete(scope);
+    this.sseErrorReports.delete(scope);
   }
 
   reportClientError(scope, error) {
+    if (error?.status === 503) {
+      const now = Date.now(), previous = this.sseErrorReports.get(scope);
+      if (!previous || previous.message !== error.message || now - previous.at >= 60000) {
+        this.sseErrorReports.set(scope, { message: error.message, at: now });
+        this.emit("clientError", error);
+      }
+      return;
+    }
     const isTimeout = /VBot API timeout sau \d+ms/.test(String(error?.message || ""));
     if (!isTimeout) {
       this.consecutiveTimeouts.delete(scope);
@@ -112,6 +124,24 @@ class VBotClient extends EventEmitter {
     const count = (this.consecutiveTimeouts.get(scope) || 0) + 1;
     this.consecutiveTimeouts.set(scope, count);
     if (count === 3) this.emit("clientError", error);
+  }
+
+  async sseHttpError(label, response) {
+    const raw = await response.text().catch(() => "");
+    let detail = "";
+    try { detail = JSON.parse(raw).message || ""; }
+    catch (_) { detail = raw.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim().slice(0, 400); }
+    const error = new Error(`${label} SSE HTTP ${response.status}${detail ? ": " + detail : ""}`);
+    error.status = response.status;
+    error.retryAfterMs = Math.min(60000, Math.max(0, Number(response.headers?.get("retry-after")) || 0) * 1000);
+    return error;
+  }
+
+  reconnectDelay(scope, error) {
+    const failures = (this.sseFailures.get(scope) || 0) + 1;
+    this.sseFailures.set(scope, failures);
+    const base = Math.max(500, Number(this.config.sseReconnectMs) || 3000);
+    return Math.max(Math.min(30000, base * 2 ** Math.min(failures - 1, 5)), error?.retryAfterMs || 0);
   }
 
   headers(json = false) {
@@ -201,7 +231,7 @@ class VBotClient extends EventEmitter {
     } finally {
       clearTimeout(connectTimeout);
     }
-    if (!response.ok) throw new Error(`VBot SSE HTTP ${response.status}`);
+    if (!response.ok) throw await this.sseHttpError("VBot", response);
     if (!response.body) throw new Error("VBot SSE không có response body");
     this.markClientSuccess("state-sse");
     this.emit("sse", true);
@@ -374,9 +404,10 @@ class VBotClient extends EventEmitter {
         this.emit("sse", false);
         this.emit("online", false);
         this.reportClientError("state-sse", error);
+        if (this.streamController) this.streamController.abort();
         // GET chỉ là snapshot dự phòng trong thời gian SSE đang kết nối lại.
         try { this.publishState(await this.request("/?type=1&data=all_info")); } catch (_) {}
-        await new Promise(resolve => { this.retryTimer = setTimeout(resolve, this.config.sseReconnectMs); });
+        await new Promise(resolve => { this.retryTimer = setTimeout(resolve, this.reconnectDelay("state-sse", error)); });
       }
       }
     };
@@ -391,7 +422,8 @@ class VBotClient extends EventEmitter {
             headers: { ...this.headers(), Accept: "text/event-stream" }, signal: this.multiroomStreamController.signal,
             },
           );
-          if (!response.ok || !response.body) throw new Error(`Multiroom SSE HTTP ${response.status}`);
+          if (!response.ok) throw await this.sseHttpError("Multiroom", response);
+          if (!response.body) throw new Error("Multiroom SSE không có response body");
           this.markClientSuccess("multiroom-sse");
           const decoder = new TextDecoder();
           let buffer = "";
@@ -409,7 +441,8 @@ class VBotClient extends EventEmitter {
         } catch (error) {
           if (!this.running) break;
           this.reportClientError("multiroom-sse", error);
-          await new Promise(resolve => { this.multiroomRetryTimer = setTimeout(resolve, this.config.sseReconnectMs); });
+          if (this.multiroomStreamController) this.multiroomStreamController.abort();
+          await new Promise(resolve => { this.multiroomRetryTimer = setTimeout(resolve, this.reconnectDelay("multiroom-sse", error)); });
         }
       }
     };
@@ -441,6 +474,8 @@ class VBotClient extends EventEmitter {
     this.multiroomDiscoveryTimer = null;
     this.commandCooldowns.clear();
     this.consecutiveTimeouts.clear();
+    this.sseFailures.clear();
+    this.sseErrorReports.clear();
     if (this.streamController) this.streamController.abort();
     if (this.multiroomStreamController) this.multiroomStreamController.abort();
     this.streamController = null;

@@ -701,7 +701,7 @@ function handleAudioReplyType() {
             '<label for="tts_audio_reply_voice_name">Giọng đọc:</label>' +
             '</div>' +
             '<button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts(\'tts_audio_reply\', \'ok\')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>' +
-            '<button type="button" class="btn btn-success" onclick="play_tts_sample_gcloud(\'tts_audio_reply_voice_name\')"><i class="bi bi-play-circle"></i></button>' +
+            '<button type="button" class="btn btn-success" onclick="play_tts_sample_gcloud(\'tts_audio_reply_voice_name\')"><i class="bi bi-play-circle"></i></button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>' +
             '</div>' +
             '<div class="form-floating mb-3">' +
             '<textarea type="text" class="form-control border-success" style="height: 100px;" name="tts_audio_reply_input_text" id="tts_audio_reply_input_text"></textarea>' +
@@ -709,7 +709,7 @@ function handleAudioReplyType() {
             '</div>' +
             '<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
             '<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
-            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>' +
             '<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
             '</div>' +
             '<center>' +
@@ -743,7 +743,7 @@ function handleAudioReplyType() {
             '</div>' +
             '<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;"><span class="input-group-text border-danger">File Âm Thanh:</span>' +
             '<input type="text" id="tts_audio_reply_output_path" name="tts_audio_reply_output_path" class="form-control border-danger" readonly placeholder="Đường dẫn file âm thanh">' +
-            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p" onclick="playAudio(\'\')" title="Nghe thử file âm thanh vừa tạo"><i class="bi bi-megaphone"></i> Nghe Thử</button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>' +
             '<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p" title="Tải Xuống File Âm Thanh" onclick="downloadFile(\'\')"><i class="bi bi-download"></i></button>' +
             '</div>' +
             '<center>' +
@@ -770,7 +770,7 @@ function handleAudioReplyType() {
             '<div class="input-group mb-3 border-success" id="showww_tts_audio_reply_output_path" style="display: none;">' +
             '<span class="input-group-text border-danger">File Âm Thanh:</span>' +
             '<input type="text" id="tts_audio_reply_output_path" class="form-control border-danger" readonly>' +
-            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p"><i class="bi bi-megaphone"></i> Nghe Thử</button>' +
+            '<button type="button" class="btn btn-primary border-danger" id="btn_play_audio_reply_out_p"><i class="bi bi-megaphone"></i> Nghe Thử</button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>' +
             '<button type="button" class="btn btn-warning border-danger" id="btn_download_audio_reply_out_p"><i class="bi bi-download"></i></button>' +
             '</div>' +
             '<center>' +
@@ -2042,7 +2042,7 @@ function loadWakeupReply(pathVBot_PY) {
                             '<input readonly class="form-control border-danger" type="text" name="save_wakeup_reply_file_name_' + index + '" value="' + safeFileName + '">' +
                             '</td>' +
                             '<td style="text-align: center;">' +
-                            '<button type="button" title="Nghe thử: ' + safeFileName + '" class="btn btn-primary" onclick="' + vbotInlineHandler('playAudio', [wakeupFilePath]) + '"><i class="bi bi-play-circle"></i></button> ' +
+                            '<button type="button" title="Nghe thử: ' + safeFileName + '" class="btn btn-primary" onclick="' + vbotInlineHandler('playAudio', [wakeupFilePath]) + '"><i class="bi bi-play-circle"></i></button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button> ' +
                             ' <button type="button" class="btn btn-success" onclick="' + vbotInlineHandler('downloadFile', [wakeupFilePath]) + '" title="Tải Xuống File: ' + safeFileName + '"><i class="bi bi-download"></i></button> ' +
                             ' <button type="button" class="btn btn-danger" title="Xóa file: ' + safeFileName + '" onclick="' + vbotInlineHandler('deleteFile', [wakeupFilePath, 'wakeup_reply']) + '"><i class="bi bi-trash"></i></button>' +
                             '</td>' +

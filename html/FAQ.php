@@ -20,6 +20,33 @@ if ($Config['contact_info']['user_login']['active']) {
     exit;
   }
 }
+// Fixed download names only; reuse the FAQ login check above.
+if (isset($_GET['audio_native_download'])) {
+  $audioNativeRoot = dirname(__DIR__);
+  $audioNativeFiles = [
+    'zip' => [$audioNativeRoot . '/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip', 'application/zip'],
+    'checksum' => [$audioNativeRoot . '/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip.sha256', 'text/plain; charset=utf-8'],
+    'manual' => [$audioNativeRoot . '/resource/tools/README_INSTALL_WEBRTC21_PJSIP_MANUAL.md', 'text/plain; charset=utf-8'],
+    'prebuilt' => [$audioNativeRoot . '/resource/tools/README_INSTALL_WEBRTC21_PJSIP_PREBUILT.md', 'text/plain; charset=utf-8'],
+  ];
+  $audioNativeKey = $_GET['audio_native_download'];
+  if (!is_string($audioNativeKey) || !isset($audioNativeFiles[$audioNativeKey])) {
+    http_response_code(404);
+    exit('Không tìm thấy tài liệu hoặc gói thư viện.');
+  }
+  [$audioNativeFile, $audioNativeType] = $audioNativeFiles[$audioNativeKey];
+  if (!is_file($audioNativeFile) || !is_readable($audioNativeFile)) {
+    http_response_code(404);
+    exit('File chưa có trong bản cài này.');
+  }
+  if (session_status() === PHP_SESSION_ACTIVE) session_write_close();
+  header('Content-Type: ' . $audioNativeType);
+  header('Content-Disposition: attachment; filename="' . basename($audioNativeFile) . '"');
+  header('Content-Length: ' . filesize($audioNativeFile));
+  header('X-Content-Type-Options: nosniff');
+  readfile($audioNativeFile);
+  exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -144,6 +171,8 @@ include 'html_head.php';
 <hr/>Hướng Dẫn Tháo Lắp Mạch VBot AIO: <a href="https://docs.google.com/document/d/1X_xGqGQt0HfPNDXM6c_joUwHxwr-mGiS/edit" target="_blank">https://docs.google.com/document/d/1X_xGqGQt0HfPNDXM6c_joUwHxwr-mGiS</a>
 <hr/>Hướng Dẫn Cấu Hình Ban Đầu: <a href="https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M/edit" target="_blank">https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M</a>
               </div>
+
+              <?php include __DIR__ . '/includes/FAQAudioNativeSection.php'; ?>
 
               <div class="card accordion mb-3" id="internal-ir-setup">
                 <div class="card-body">
@@ -3165,8 +3194,17 @@ systemctl --user restart VBot_Offline.service</code></pre>
       const target = document.getElementById(hash.slice(1));
       if (!target) return;
       const collapse = target.querySelector('.accordion-collapse');
-      if (collapse && window.bootstrap && bootstrap.Collapse) {
-        bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
+      if (window.bootstrap && bootstrap.Collapse) {
+        const parents = [];
+        let parent = target.parentElement;
+        while (parent) {
+          if (parent.classList.contains('accordion-collapse')) parents.unshift(parent);
+          parent = parent.parentElement;
+        }
+        parents.forEach(function(element) {
+          bootstrap.Collapse.getOrCreateInstance(element, {toggle: false}).show();
+        });
+        if (collapse) bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
       }
       window.setTimeout(function() {
         target.scrollIntoView({behavior: 'smooth', block: 'start'});

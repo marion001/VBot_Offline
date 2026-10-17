@@ -1,0 +1,1046 @@
+{
+  "launch_source": "VBot_Assistant",
+  "lan_calls": {
+    "active": false,
+    "pjsip": {
+      "runtime": "/home/pi/VBot_AEC3/pjsip",
+      "sip_port": 5060,
+      "rtp_port": 40000,
+      "codec": "G722/16000/1",
+      "capture_gain": 10.0,
+      "output_gain": 0.5,
+      "capture_delay_ms": 32,
+      "render_clock_ppm": 980,
+      "playback_latency_ms": 100
+    },
+    "use_mdns_id": true,
+    "id": "vbot_local",
+    "shared_key": "",
+    "control_port": 5010,
+    "audio_port": 5011,
+    "output_device": "default",
+    "mode": "full_duplex",
+    "ringtone": "call_iphone.mp3",
+    "ptt_button_active": false,
+    "ptt_button": "wakeup",
+    "end_button_active": true,
+    "end_button": "mic",
+    "end_button_press": "short",
+    "ring_timeout": 30,
+    "max_duration": 3600,
+    "peers": []
+  },
+  "speaker_location": {
+    "active": false,
+    "room": ""
+  },
+  "language": {
+    "primary": "vi-VN",
+    "fallback": "vi-VN"
+  },
+  "contact_info": {
+    "full_name": "Loa VBot",
+    "email": "",
+    "avata": "",
+    "address": {
+      "province": "Tỉnh Hưng Yên",
+      "district": "Xã Nghĩa Trụ",
+      "id_district": "10915036",
+      "id_province": "05"
+    },
+    "location": {
+      "latitude": 21.0245,
+      "longitude": 105.8412
+    },
+    "user_login": {
+      "active": false,
+      "user_password": "",
+      "login_attempts": 5,
+      "login_lock_time": 900
+    }
+  },
+  "ssh_server": {
+    "ssh_port": 22,
+    "ssh_username": "pi",
+    "ssh_password": ""
+  },
+  "api": {
+    "active": false,
+    "port": 5002,
+    "auth": {
+      "active": false,
+      "api_key": ""
+    },
+    "show_log": {
+      "active": false,
+      "max_log": 30,
+      "log_lever": "DEBUG"
+    },
+    "streaming_server": {
+      "active": false,
+      "connection_protocol": "socket",
+      "protocol": {
+        "socket": {
+          "port": 5003,
+          "maximum_recording_time": 5,
+          "maximum_client_connected": 3,
+          "max_concurrent_stt": 2,
+          "thread_join_timeout": 10,
+          "source_stt": "stt_ggcloud",
+          "select_wakeup": "porcupine",
+          "client_conversation_mode": true,
+          "data_client_name": "Data_VBot_Client.json"
+        }
+      }
+    }
+  },
+  "homekit": {
+    "active": false,
+    "accessory_type": "hybrid",
+    "manufacturer": "VBot",
+    "model": "VBot Smart Speaker",
+    "serial_number": "VBot-Assistant",
+    "pincode": "171-12-104",
+    "username": "auto",
+    "port": 51826,
+    "request_timeout_ms": 4000,
+    "sse_reconnect_ms": 3000,
+    "remote_buttons": {
+      "arrow_up": {
+        "action": "volume_up",
+        "actions_by_state": {
+          "playlist": "volume_up",
+          "idle": "volume_up",
+          "media": "volume_up",
+          "media_paused": "volume_up",
+          "tts": "volume_up",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "arrow_down": {
+        "action": "volume_down",
+        "actions_by_state": {
+          "playlist": "volume_down",
+          "idle": "volume_down",
+          "media": "volume_down",
+          "media_paused": "volume_down",
+          "tts": "volume_down",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "arrow_left": {
+        "action": "media_previous",
+        "actions_by_state": {
+          "playlist": "media_previous",
+          "idle": "volume_min",
+          "media": "media_previous",
+          "media_paused": "media_previous",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "arrow_right": {
+        "action": "media_next",
+        "actions_by_state": {
+          "playlist": "media_next",
+          "idle": "volume_max",
+          "media": "media_next",
+          "media_paused": "media_next",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "select": {
+        "action": "wakeup",
+        "actions_by_state": {
+          "playlist": "wakeup",
+          "idle": "wakeup",
+          "media": "wakeup",
+          "media_paused": "wakeup",
+          "tts": "wakeup",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "back": {
+        "action": "cancel_wakeup",
+        "actions_by_state": {
+          "playlist": "media_stop",
+          "idle": "none",
+          "media": "media_stop",
+          "media_paused": "media_stop",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "exit": {
+        "action": "media_stop",
+        "actions_by_state": {
+          "playlist": "media_stop",
+          "idle": "media_stop",
+          "media": "media_stop",
+          "media_paused": "media_stop",
+          "tts": "media_stop",
+          "recording": "media_stop"
+        }
+      },
+      "play_pause": {
+        "action": "media_play_pause",
+        "actions_by_state": {
+          "playlist": "media_play_pause",
+          "idle": "media_play_pause",
+          "media": "media_play_pause",
+          "media_paused": "media_play_pause",
+          "tts": "stop_tts",
+          "recording": "media_play_pause"
+        }
+      },
+      "information": {
+        "action": "speak_volume",
+        "actions_by_state": {
+          "playlist": "speak_volume",
+          "idle": "speak_volume",
+          "media": "speak_volume",
+          "media_paused": "speak_volume",
+          "tts": "speak_volume",
+          "recording": "speak_volume"
+        }
+      },
+      "rewind": {
+        "action": "media_previous",
+        "actions_by_state": {
+          "playlist": "media_previous",
+          "idle": "volume_min",
+          "media": "media_previous",
+          "media_paused": "media_previous",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "fast_forward": {
+        "action": "media_next",
+        "actions_by_state": {
+          "playlist": "media_next",
+          "idle": "volume_max",
+          "media": "media_next",
+          "media_paused": "media_next",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "next_track": {
+        "action": "media_next",
+        "actions_by_state": {
+          "playlist": "media_next",
+          "idle": "volume_max",
+          "media": "media_next",
+          "media_paused": "media_next",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "previous_track": {
+        "action": "media_previous",
+        "actions_by_state": {
+          "playlist": "media_previous",
+          "idle": "volume_min",
+          "media": "media_previous",
+          "media_paused": "media_previous",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "volume_up": {
+        "action": "volume_up",
+        "actions_by_state": {
+          "playlist": "volume_up",
+          "idle": "volume_up",
+          "media": "volume_up",
+          "media_paused": "volume_up",
+          "tts": "volume_up",
+          "recording": "none"
+        }
+      },
+      "volume_down": {
+        "action": "volume_down",
+        "actions_by_state": {
+          "playlist": "volume_down",
+          "idle": "volume_down",
+          "media": "volume_down",
+          "media_paused": "volume_down",
+          "tts": "volume_down",
+          "recording": "none"
+        }
+      },
+      "power": {
+        "action": "media_stop",
+        "actions_by_state": {
+          "playlist": "media_stop",
+          "idle": "none",
+          "media": "media_stop",
+          "media_paused": "media_stop",
+          "tts": "stop_tts",
+          "recording": "cancel_wakeup"
+        }
+      },
+      "mute": {
+        "action": "mute",
+        "actions_by_state": {
+          "playlist": "mute",
+          "idle": "mic_on_off",
+          "media": "mute",
+          "media_paused": "none",
+          "tts": "none",
+          "recording": "none"
+        }
+      }
+    }
+  },
+  "web_interface": {
+    "external": {
+      "active": false
+    },
+    "file_access_security": false,
+    "errors_display": true,
+    "path": "/home/pi/VBot_Offline/html"
+  },
+  "zeroconf_mdns": {
+    "active": false
+  },
+  "bluetooth": {
+    "adapter": "hci0",
+    "sync_agent_runtime_on_boot": false
+  },
+  "voice_command_system": {
+    "active": false,
+    "minimum_result_threshold": 0.74
+  },
+  "home_assistant": {
+    "active": false,
+    "search_sources": {
+      "friendly_name": true,
+      "entity_id": false,
+      "aliases": false,
+      "area": false
+    },
+    "entity_types": {
+      "switch": true,
+      "light": true,
+      "fan": true,
+      "media_player": true,
+      "climate": true,
+      "automation": true,
+      "cover": true,
+      "script": true
+    },
+    "on_off_entity_types": [],
+    "check_state_before_control": true,
+    "verify_after_control": false,
+    "area_control": {
+      "allow_multiple": false
+    },
+    "allowed_entities": {
+      "active": false,
+      "entity_ids": []
+    },
+    "blocked_entities": {
+      "active": false,
+      "entity_ids": []
+    },
+    "minimum_threshold": 0.7,
+    "lowest_to_display_logs": 0.39,
+    "internal_url": "http://192.168.14.17:8123",
+    "external_url": "https://vutuyen.duckdns.org",
+    "long_token": "",
+    "time_out": 15,
+    "custom_commands": {
+      "active": false,
+      "minimum_threshold": 0.85,
+      "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
+    }
+  },
+  "broadlink": {
+    "remote": {
+      "active": false,
+      "minimum_threshold": 0.85
+    },
+    "json_file": "resource/broadlink/broadlink.json",
+    "backup_path": "Backup_Upgrade/Backup_Broadlink"
+  },
+  "internal_ir": {
+    "tx_active": true,
+    "rx_active": true,
+    "backend": "ir_ctl",
+    "tx_gpio": 17,
+    "rx_gpio": 4,
+    "tx_device": "/dev/lirc0",
+    "rx_device": "/dev/lirc1",
+    "carrier": 38000,
+    "learn_timeout": 20,
+    "repeat": 1,
+    "minimum_threshold": 0.85,
+    "json_file": "resource/internal_ir/commands.json",
+    "receive_match_threshold": 0.92,
+    "receive_debounce_ms": 450,
+    "rx_control_active": true,
+    "tx_rx_guard_ms": 500,
+    "receive_match_margin": 0.06,
+    "receive_minimum_pulses": 20
+  },
+  "mqtt_broker": {
+    "mqtt_active": true,
+    "mqtt_host": "192.168.14.17",
+    "mqtt_port": 1883,
+    "mqtt_username": "tuyenmqtt",
+    "mqtt_password": "",
+    "mqtt_client_name": "VBot_DEV",
+    "mqtt_retain": true,
+    "mqtt_qos": 1,
+    "mqtt_time_out": 60,
+    "mqtt_connection_waiting_time": 300,
+    "mqtt_skip_the_first_time": 20,
+    "mqtt_show_logs_reconnect": true
+  },
+  "virtual_assistant": {
+    "cache_active": false,
+    "prioritize_virtual_assistants": [],
+    "default_assistant": {
+      "active": false,
+      "time_out": 10,
+      "convert_audio_to_text": {
+        "used_for_chatbox": true,
+        "used_for_display_and_logs": false
+      }
+    },
+    "olli": {
+      "active": false,
+      "time_out": 10,
+      "username": "+84961150161",
+      "password": "",
+      "voice_name": "vn_north",
+      "device_session_id": "",
+      "access_token": "",
+      "expire_time": 1791279533,
+      "convert_audio_to_text": {
+        "used_for_chatbox": true,
+        "used_for_display_and_logs": false
+      }
+    },
+    "dify_ai": {
+      "active": false,
+      "session_chat_conversation": true,
+      "api_key": "",
+      "user_id": "VBot_Assistant",
+      "time_out": 15
+    },
+    "zalo_assistant": {
+      "active": false,
+      "time_out": 15,
+      "device_token": "",
+      "expire_time": 1770639616,
+      "set_expiration_time": 86400
+    },
+    "google_gemini": {
+      "active": false,
+      "time_out": 25,
+      "api_key": "",
+      "model_name": "gemini-2.5-flash-lite",
+      "api_version": "v1beta"
+    },
+    "chat_gpt": {
+      "active": false,
+      "url_api": "https://api.openai.com/v1/chat/completions",
+      "time_out": 15,
+      "model": "gpt-3.5-turbo",
+      "role_system_content": "Bạn là một trợ lý thông minh",
+      "key_chat_gpt": ""
+    },
+    "customize_developer_assistant": {
+      "active": false
+    }
+  },
+  "weather": {
+    "source": "vbot_system"
+  },
+  "voice_routines": {
+    "active": false,
+    "minimum_threshold": 0.9
+  },
+  "schedule": {
+    "active": false,
+    "auto_delete_completed_voice_control": true,
+    "data_json_file": "resource/schedule/Data_Schedule.json",
+    "audio_path": "Media/Audio_Scheduler"
+  },
+  "media_player": {
+    "active": false,
+    "time_out": 30,
+    "wake_up_in_media_player": false,
+    "media_sync_ui": {
+      "active": false,
+      "delay_time": 2
+    },
+    "prioritize_music_source": [],
+    "play_list": {
+      "music_play_mode": "random",
+      "newspaper_play_mode": "sequential",
+      "loop": false
+    },
+    "youtube": {
+      "active": false,
+      "google_apis_key": ""
+    },
+    "zing_mp3": {
+      "active": false,
+      "authentication_zmp3_rqid": "",
+      "expire_time": 1789892009
+    },
+    "nhaccuatui": {
+      "active": false
+    },
+    "dev_custom_music": {
+      "active": false
+    },
+    "news_paper": {
+      "active": false,
+      "path": "Media/News_Paper",
+      "newspaper_file_name": "News_Paper.json"
+    },
+    "news_paper_data": [],
+    "podcast": {
+      "active": false,
+      "allows_priority_use_of_virtual_assistants": false,
+      "time_out": 7,
+      "device_session_id": "",
+      "voice_name": "vn_north",
+      "access_token": "",
+      "expire_time": 1786707144
+    },
+    "radio": {
+      "active": false
+    },
+    "radio_data": [],
+    "music_local": {
+      "active": false,
+      "path": "Media/Music_Local",
+      "minimum_threshold": 0.6,
+      "allowed_formats": []
+    },
+    "multiroom_audio": {
+      "active": false,
+      "default_volume": 90,
+      "default_muted": false,
+      "allowed_url_schemes": [],
+      "url_timeout_seconds": 15,
+      "url_reconnect": true,
+      "vlc_loopback_output_device": "plughw:Loopback,0,0",
+      "vlc_loopback_capture_device": "plughw:Loopback,1,0",
+      "local_playback_device": "default",
+      "bridge_switch_delay_ms": 80,
+      "alsa_capture_command": "arecord",
+      "alsa_playback_command": "aplay"
+    }
+  },
+  "developer_customization": {
+    "active": false,
+    "if_custom_skill_can_not_handle": {
+      "vbot_processing": true
+    }
+  },
+  "multiple_command": {
+    "active": false,
+    "continue_listening_after_commands": true
+  },
+  "smart_config": {
+    "backlist_file_name": "BackList.json",
+    "read_information_startup": {
+      "active": false,
+      "read_number": 2
+    },
+    "show_log": {
+      "active": false,
+      "log_display_style": "console",
+      "notes": "console, all, api, dev_custom"
+    },
+    "mic": {
+      "id": -1,
+      "scan_on_boot": false
+    },
+    "speaker": {
+      "system": {
+        "alsamixer_name": "VBot_DAC_Speaker",
+        "id": 0
+      },
+      "volume": 82,
+      "volume_min": 0,
+      "volume_max": 90,
+      "volume_step": 10,
+      "remember_last_volume": true
+    },
+    "led": {
+      "active": false,
+      "led_gpio": 10,
+      "led_type": "ws281x",
+      "notes_led_type": "ReSpeaker_Mic_Array_v2.0, ws281x, apa102, dev_custom_led",
+      "number_led": 24,
+      "brightness": 171,
+      "led_freq_hz": 1000000,
+      "led_dma": 10,
+      "remember_last_brightness": true,
+      "led_invert": false,
+      "led_reversed": true,
+      "led_starting_up": true,
+      "effect": {
+        "led_think": "0000FF",
+        "led_mute": "FF0000"
+      }
+    },
+    "button_active": {
+      "active": false,
+      "button_type": "aio",
+      "encoder_rotary": {
+        "gpio_clk": 7,
+        "gpio_dt": 8,
+        "gpio_sw": 27,
+        "rotating_step": 2,
+        "rotating_show_logs": false,
+        "bounce_time_gpio_sw": 120,
+        "action_gpio_sw": "wakeup",
+        "long_press_gpio_sw": {
+          "active": false,
+          "duration": 2,
+          "action_gpio_sw": "mic",
+          "actions_by_state": {
+            "playlist": "media_stop",
+            "idle": "mic_toggle",
+            "media": "media_stop",
+            "media_paused": "media_play",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        },
+        "double_press_gpio_sw": {
+          "active": false,
+          "interval_ms": 200,
+          "action": "vbot_action:none",
+          "actions_by_state": {
+            "playlist": "none",
+            "idle": "none",
+            "media": "none",
+            "media_paused": "none",
+            "tts": "none",
+            "recording": "none"
+          }
+        }
+      }
+    },
+    "button": {
+      "down": {
+        "active": false,
+        "gpio": 25,
+        "bounce_time": 20,
+        "long_press": {
+          "active": false,
+          "duration": 2,
+          "actions_by_state": {
+            "playlist": "volume_min",
+            "idle": "volume_min",
+            "media": "volume_min",
+            "media_paused": "volume_min",
+            "tts": "volume_min",
+            "recording": "volume_min"
+          }
+        },
+        "double_press": {
+          "active": false,
+          "interval_ms": 200,
+          "action": "vbot_action:none",
+          "actions_by_state": {
+            "playlist": "media_previous",
+            "idle": "none",
+            "media": "media_previous",
+            "media_paused": "media_play_pause",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        }
+      },
+      "up": {
+        "active": false,
+        "gpio": 5,
+        "bounce_time": 20,
+        "long_press": {
+          "active": false,
+          "duration": 2,
+          "actions_by_state": {
+            "playlist": "volume_max",
+            "idle": "volume_max",
+            "media": "volume_max",
+            "media_paused": "volume_max",
+            "tts": "volume_max",
+            "recording": "volume_max"
+          }
+        },
+        "double_press": {
+          "active": false,
+          "interval_ms": 200,
+          "action": "vbot_action:none",
+          "actions_by_state": {
+            "playlist": "media_next",
+            "idle": "none",
+            "media": "media_next",
+            "media_paused": "media_play_pause",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        }
+      },
+      "wakeup": {
+        "active": false,
+        "gpio": 26,
+        "bounce_time": 20,
+        "long_press": {
+          "active": false,
+          "duration": 2,
+          "actions_by_state": {
+            "playlist": "media_stop",
+            "idle": "conversation_toggle",
+            "media": "media_stop",
+            "media_paused": "media_play",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        },
+        "double_press": {
+          "active": false,
+          "interval_ms": 200,
+          "action": "vbot_action:none",
+          "actions_by_state": {
+            "playlist": "wakeup",
+            "idle": "conversation_toggle",
+            "media": "media_stop",
+            "media_paused": "media_play",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        }
+      },
+      "mic": {
+        "active": false,
+        "gpio": 6,
+        "bounce_time": 20,
+        "long_press": {
+          "active": false,
+          "duration": 2,
+          "actions_by_state": {
+            "playlist": "media_stop",
+            "idle": "wakeup_reply_toggle",
+            "media": "media_stop",
+            "media_paused": "media_play",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        },
+        "double_press": {
+          "active": false,
+          "interval_ms": 200,
+          "action": "vbot_action:none",
+          "actions_by_state": {
+            "playlist": "media_stop",
+            "idle": "wakeup_reply_toggle",
+            "media": "media_stop",
+            "media_paused": "media_play",
+            "tts": "stop_tts",
+            "recording": "cancel_wakeup"
+          }
+        }
+      }
+    },
+    "smart_wakeup": {
+      "speak_to_text": {
+        "stt_select": "stt_ggcloud",
+        "duration_recording": 6,
+        "interim_results": false,
+        "stt_default": [],
+        "stt_viettel": {
+          "api_key": []
+        },
+        "stt_ggcloud": {
+          "authentication_json_file": "",
+          "rate": 16000,
+          "channels": 1,
+          "chunk": 1024,
+          "language_code": "vi-VN",
+          "single_utterance": true,
+          "stt_ggcloud_v2": {
+            "recognizer_id": "vbot-stt-tts-v2",
+            "model": "short",
+            "time_out": 60
+          }
+        },
+        "stt_dev": [],
+        "connection_timeout": 5,
+        "streaming_session_timeout": 30,
+        "result_timeout": 15,
+        "failure_cooldown": 2.5
+      },
+      "conversation_mode": true,
+      "sound": {
+        "default": {
+          "start": "resource/sound/default/ding.mp3",
+          "finish": "resource/sound/default/dong.mp3",
+          "mic_on": "resource/sound/default/mic_on.mp3",
+          "mic_off": "resource/sound/default/mic_off.mp3",
+          "volume_change": "resource/sound/default/tut_tut.mp3",
+          "wakeup_reply_on": "resource/sound/default/wakeup_reply_on.mp3",
+          "wakeup_reply_off": "resource/sound/default/wakeup_reply_off.mp3",
+          "conversation_mode_on": "resource/sound/default/conversation_mode_on.mp3",
+          "conversation_mode_off": "resource/sound/default/conversation_mode_off.mp3",
+          "keys_tts_in_backlist": "",
+          "tts_select_error": "resource/sound/default/tts_select_error.mp3",
+          "stt_select_error": "resource/sound/default/stt_select_error.mp3",
+          "all_virtual_assistants_no_response": "resource/sound/default/all_virtual_assistants_no_response.mp3",
+          "home_assistant_active_false": "resource/sound/default/home_assistant_active_false.mp3",
+          "play_music_call_error": "resource/sound/default/play_music_call_error.mp3",
+          "updated_the_program_successfully": "resource/sound/default/updated_the_program_successfully.mp3",
+          "interface_updated_successfully": "resource/sound/default/interface_updated_successfully.mp3",
+          "network_error": "resource/sound/default/network_error.mp3",
+          "music_sound_pause": "resource/sound/default/music_pause.mp3",
+          "music_sound_stops": "resource/sound/default/music_stops.mp3",
+          "start_playlist_play": "resource/sound/default/start_playlist_play.mp3",
+          "play_answer_error": "resource/sound/default/play_answer_error.mp3",
+          "stt_to_text_error": "resource/sound/default/stt_to_text_error.mp3",
+          "connected_successfully": "resource/sound/default/connected_successfully.mp3"
+        },
+        "welcome": {
+          "active": false,
+          "welcome_file": "resource/sound/welcome/computer-startup.mp3"
+        }
+      },
+      "wakeup_reply": {
+        "active": false,
+        "sound_file": []
+      },
+      "hotword_engine": {
+        "use_the_key": "",
+        "key": "",
+        "notes": "use_the_key: user sẽ sử dụng key của người dùng, system_default: sử dụng key mặc định hệ thống"
+      },
+      "hotword": {
+        "select_wakeup": "porcupine",
+        "continue_running_if_hotword_initialization_fails": true,
+        "ring_buffer_porcupine": 5,
+        "ring_buffer_snowboy": 15,
+        "notes": "select_wakeup sẽ có 3 giá trị sử dụng từ đánh thức là: porcupine hoặc snowboy, (hoặc null không nằm trong dấu nháy)",
+        "lang": "vi",
+        "library": {
+          "vi": {
+            "modelFilePath": "porcupine_params_vn.pv"
+          },
+          "eng": {
+            "modelFilePath": "porcupine_params.pv"
+          }
+        },
+        "hotword_language_error": "Ngôn ngữ Hotword không được hỗ trợ, chỉ hỗ trợ giá trị 'lang' là 'eng hoặc vi'",
+        "porcupine": {
+          "vi": [],
+          "eng": []
+        },
+        "snowboy": []
+      }
+    },
+    "smart_answer": {
+      "cache_tts": {
+        "active": false
+      },
+      "text_to_speak": {
+        "tts_select": "tts_ggcloud",
+        "tts_ggcloud": {
+          "language_code": "vi-VN",
+          "voice_name": "vi-VN-Wavenet-A",
+          "speaking_speed": 1,
+          "authentication_json_file": ""
+        },
+        "tts_ggcloud_key": {
+          "language_code": "vi-VN",
+          "voice_name": "vi-VN-Chirp3-HD-Sulafat",
+          "speaking_speed": 1,
+          "token_key": ""
+        },
+        "tts_default": {
+          "speaking_speed": 0.9,
+          "quality": 0,
+          "voice_name": 2,
+          "authentication_zai_did": "",
+          "expires_zai_did": "2027-04-24T11:41:57+00:00"
+        },
+        "tts_zalo": {
+          "api_key": [],
+          "voice_name": 1,
+          "speaking_speed": 0.9
+        },
+        "tts_viettel": {
+          "api_key": [],
+          "voice_name": "hn-phuongtrang",
+          "speaking_speed": 1,
+          "without_filter": false
+        },
+        "tts_edge": {
+          "voice_name": "vi-VN-HoaiMyNeural",
+          "language_code": "vi-VN",
+          "speaking_speed": 1.2,
+          "retry": 4
+        },
+        "tts_dev_customize": {
+          "active": false
+        },
+        "directory_tts": "TTS_Audio",
+        "clean_cache_tts_max_file": 999
+      }
+    },
+    "auto_restart_program_error": true,
+    "fix_time_sync_error": true,
+    "audio_processing": {
+      "active": false,
+      "noise_suppression": "low",
+      "high_pass_filter": true,
+      "agc": {
+        "active": false,
+        "target_level_dbfs": 6,
+        "compression_gain_db": 9,
+        "limiter": true
+      },
+      "aec3": {
+        "active": false,
+        "library": "/home/pi/VBot_AEC3/music_test/libvbot_aec3_music.so",
+        "output": "linear",
+        "playback_device": "default",
+        "playback_latency_ms": 100,
+        "capture_delay_ms": 32,
+        "render_clock_ppm": 980,
+        "capture_gain": 1.0,
+        "wake_gain": 1.0,
+        "external_sources": false
+      }
+    }
+  },
+  "backup_upgrade": {
+    "download_path": "Backup_Upgrade/Download",
+    "extract_path": "Backup_Upgrade/Extract",
+    "config_json": {
+      "active": false,
+      "limit_backup_files": 5,
+      "backup_path": "Backup_Upgrade/Backup_Config"
+    },
+    "vbot_program": {
+      "backup": {
+        "backup_path": "Backup_Upgrade/Backup_Program",
+        "limit_backup_files": 5,
+        "exclude_files_folder": [],
+        "exclude_file_format": [],
+        "backup_to_cloud": {
+          "google_drive": true
+        }
+      },
+      "upgrade": {
+        "backup_before_updating": true,
+        "keep_file_directory": []
+      }
+    },
+    "web_interface": {
+      "backup": {
+        "backup_path": "Backup_Upgrade/Backup_Interface",
+        "limit_backup_files": 5,
+        "exclude_files_folder": [],
+        "exclude_file_format": [],
+        "backup_to_cloud": {
+          "google_drive": true
+        }
+      },
+      "upgrade": {
+        "backup_before_updating": true,
+        "keep_file_directory": []
+      }
+    },
+    "advanced_settings": {
+      "automatically_check_for_updates": true,
+      "restart_vbot": true,
+      "rollback_program_on_start_failure": false,
+      "sound_notification": true,
+      "refresh_page_ui": true
+    },
+    "custom_home_assistant": {
+      "active": false,
+      "backup_path": "Backup_Upgrade/Backup_Custom_HomeAssistant",
+      "limit_backup_files": 6
+    },
+    "scheduler": {
+      "active": false,
+      "backup_path": "Backup_Upgrade/Backup_Scheduler",
+      "limit_backup_files": 5
+    },
+    "google_cloud_drive": {
+      "active": false,
+      "backup_folder_name": "Vbot_Assistant_Backup",
+      "backup_folder_vbot_name": "Backup_Program",
+      "backup_folder_interface_name": "Backup_Interface",
+      "limit_backup_files": 5,
+      "sharing_permission": "private",
+      "setAccessType": "offline",
+      "setPrompt": "consent"
+    }
+  },
+  "xiaozhi": {
+    "active": false,
+    "mcp_system_control": true,
+    "activation_status": true,
+    "time_out_output_stream": 0.5,
+    "start_the_protocol": "websocket",
+    "device_id": null,
+    "serial_number": "",
+    "hmac_key": "",
+    "device_activation_code": "",
+    "tts_time_out": 20,
+    "reconnection_timeout": 3,
+    "auto_reconnect": false,
+    "tts_stream_silence_time": 5,
+    "version_active": "2.2.6",
+    "call_tools_file": "resource/xiaozhi/xiaozhi_tools.json",
+    "system_options": {
+      "client_id": "29569c36-6189-42b1-ad7f-0cb7ca58c0d5",
+      "device_id": "88:a2:9e:06:1c:fa",
+      "network": {
+        "ota_version_url": "https://api.tenclass.net/xiaozhi/ota/",
+        "websocket_url": "wss://api.tenclass.net/xiaozhi/v1/",
+        "websocket_access_token": "",
+        "firmware": {
+          "version": "2.2.6",
+          "url": ""
+        },
+        "mqtt_info": {
+          "endpoint": "mqtt.xiaozhi.me",
+          "client_id": "GID_test@@@88_a2_9e_06_1c_fa@@@29569c36-6189-42b1-ad7f-0cb7ca58c0d5",
+          "username": "eyJpcCI6IjExNi4xMDEuMjE4LjQyIiwiYyI6MH0=",
+          "password": "",
+          "publish_topic": "device-server",
+          "subscribe_topic": "null"
+        },
+        "ota_config_source": "https://api.tenclass.net/xiaozhi/ota/"
+      }
+    },
+    "fake_mac": {
+      "active": false,
+      "address": "ee:29:06:d4:b9:4a"
+    },
+    "pcm_output_gain": 0.3,
+    "assistant_text_max_length": 12,
+    "assistant_input_mode": "audio",
+    "assistant_pcm_frame_delay_ms": 5
+  },
+  "calendar": {
+    "source": "system",
+    "events": {
+      "active": false,
+      "minimum_threshold": 0.9
+    }
+  }
+}

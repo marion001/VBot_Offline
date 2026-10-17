@@ -9,6 +9,30 @@
 include 'Configuration.php';
 require_once __DIR__.'/includes/php_ajax/Api_Helpers.php';
 
+// Merge new built-ins without replacing saved enabledTools or custom descriptions.
+function vbotSystemMcpMerge($data) {
+    if (!is_array($data) || !isset($data['tools']) || !is_array($data['tools'])) return $data;
+    $catalogPath=dirname(__DIR__).'/resource/xiaozhi/system_tools.json';
+    if (!is_file($catalogPath) || filesize($catalogPath)>1048576) return $data;
+    $catalog=json_decode((string)file_get_contents($catalogPath),true);
+    $names=array_fill_keys(array_column($data['tools'],'name'),true);
+    foreach (($catalog['tools']??[]) as $tool) {
+        if (!isset($names[$tool['name']])) $data['tools'][]=$tool;
+    }
+    foreach ($data['tools'] as &$tool) {
+        $extension=$catalog['extensions'][$tool['name']??'']??null;
+        if (!$extension) continue;
+        $suffix=$extension['description_append']??'';
+        if ($suffix!=='' && strpos($tool['description']??'',$suffix)===false) $tool['description']=($tool['description']??'').' '.$suffix;
+        foreach (($extension['properties']??[]) as $key=>$value) $tool['inputSchema']['properties'][$key]=$value;
+        foreach (($extension['actions_add']??[]) as $action) {
+            if (!in_array($action,$tool['inputSchema']['properties']['action']['enum']??[],true)) $tool['inputSchema']['properties']['action']['enum'][]=$action;
+        }
+    }
+    unset($tool);
+    return $data;
+}
+
 //Giữ properties={} là JSON object khi PHP mã hóa lại associative array.
 function normalize_mcp_empty_properties(&$tool) {
     if (
@@ -447,7 +471,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_builtin_mcp_desc
             'message' => 'Tên MCP hoặc mô tả không hợp lệ; mô tả phải từ 1 đến 4000 ký tự.'
         ], 400);
     }
-    $tools_data = json_decode((string) @file_get_contents($mcp_json_file), true);
+    $tools_data = vbotSystemMcpMerge(json_decode((string) @file_get_contents($mcp_json_file), true));
     if (!is_array($tools_data) || !isset($tools_data['tools']) || !is_array($tools_data['tools'])) {
         vbotApiJsonResponse(['success' => false, 'message' => 'xiaozhi_tools.json không hợp lệ.'], 500);
     }
@@ -488,7 +512,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_builtin_mcp_desc
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_mcp'])) {
     if (file_exists($mcp_json_file)) {
         $json_data = file_get_contents($mcp_json_file);
-        $data = json_decode($json_data, true);
+        $data = vbotSystemMcpMerge(json_decode($json_data, true));
         if (isset($data['tools']) && is_array($data['tools'])) {
             $enabled_tools = [];
             foreach ($data['tools'] as &$tool) {
@@ -553,7 +577,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['save_mcp'])) {
 }
 // Đọc nội dung JSON
 $mcp_json_data = file_get_contents($mcp_json_file);
-$MCP_data_json = json_decode($mcp_json_data, true);
+$MCP_data_json = vbotSystemMcpMerge(json_decode($mcp_json_data, true));
 $enabled_mcp_tools = [];
 if (is_array($MCP_data_json)) {
     if (isset($MCP_data_json['enabledTools']) && is_array($MCP_data_json['enabledTools'])) {
@@ -742,6 +766,9 @@ include 'html_head.php';
           <div class="card" id="mcp-config-section">
             <div class="card-body">
               <h5 class="card-title" id="mcp-builtin-section">MCP Nội Bộ Hệ Thống System VBot Control <i class="bi bi-question-circle-fill" onclick="show_message('Máy chủ, Server khi được kết nối sẽ có thể tương tác được với hệ thống VBot')"></i></h5>
+              <p class="small text-muted">Các MCP mới mặc định tắt. Chọn công tắc tương ứng rồi lưu và khởi động lại VBot để cập nhật danh sách công cụ XiaoZhi. Chức năng gốc cũng cần được bật trong Config.php.</p>
+              <p class="small"><a href="Calendar_Events.php">Sự kiện, ngày lễ, kỉ niệm</a> · <a href="Voice_Routines.php">Kịch bản nhiều bước</a> · <a href="LAN_Calls.php">Gọi LAN</a> · <a href="Wake_On_LAN.php">Wake-on-LAN</a> · <a href="Internal_IR.php">IR Remote GPIO</a> · <a href="HASS_Customize.php">Home Assistant tùy chỉnh (Custom HASS)</a></p>
+              <p class="small text-muted">MCP <code>_VBot_HASS_Custom</code> đọc các tác vụ đã lưu trong Custom HASS, liệt kê và chạy theo tên hoặc ID. Tác vụ đang tắt sẽ không được thực thi; không cần chép dữ liệu sang file MCP.</p>
 <?php
 if (!$MCP_data_json || !isset($MCP_data_json['tools'])) {
     die("<center><p style='color:red;'>Dữ liệu JSON không hợp lệ hoặc thiếu trường 'tools': $mcp_json_file</p></center>");
@@ -780,6 +807,12 @@ foreach ($MCP_data_json['tools'] as $tool) {
         } else {
             $playlist_choices_html = '<div class="alert alert-warning py-1 px-2 mt-2 mb-0 small">Chưa có PlayList hợp lệ để XiaoZhi lựa chọn.</div>';
         }
+    }
+    if (($tool['name'] ?? '') === '_VBot_Scheduler') {
+        $playlist_choices_html .= '<div class="mt-2 p-2 border rounded bg-light small">'
+            .'<b>Lập lịch tác vụ:</b> chạy kịch bản nhiều bước đã lưu hoặc bật máy tính Wake-on-LAN đã cấu hình. '
+            .'Ví dụ: “Mỗi ngày lúc 7 giờ chạy kịch bản chào buổi sáng”, “Ngày mai lúc 8 giờ bật máy tính văn phòng”. '
+            .'Lịch xuất hiện tại <a href="Scheduler.php">Scheduler</a>. Cần bật Scheduler và chức năng đích; không thêm công tắc MCP riêng.</div>';
     }
     if (($tool['name'] ?? '') === '_VBot_Calendar_Events') {
         $xiaozhi_ready = !empty($Config['xiaozhi']['active']);

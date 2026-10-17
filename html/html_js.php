@@ -1589,7 +1589,25 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
 
 <?php } ?>
     //xử lý Nghe thử các file âm thanh
+    let audioPreviewRequest = null;
+    let audioPreviewGeneration = 0;
+    function stopAudio() {
+        audioPreviewGeneration++;
+        if (audioPreviewRequest) {
+            audioPreviewRequest.abort();
+            audioPreviewRequest = null;
+        }
+        const player = document.getElementById('audioPlayer');
+        if (player) {
+            player.pause();
+            player.removeAttribute('src');
+            player.load();
+        }
+        loading("hide");
+    }
     function playAudio(filePath) {
+        stopAudio();
+        const generation = audioPreviewGeneration;
         loading("show");
         function getMimeType(extension) {
             const mimeTypes = {
@@ -1597,6 +1615,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
                 'wav': 'audio/wav',
                 'ogg': 'audio/ogg',
                 'aac': 'audio/aac',
+                'm4a': 'audio/mp4',
                 'flac': 'audio/flac',
             };
             return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
@@ -1617,8 +1636,11 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
         }
         const xhr = vbotCreateXhr();
         xhr.open('GET', 'includes/php_ajax/Show_file_path.php?audio_b64&path=' + encodeURIComponent(filePath), true);
+        audioPreviewRequest = xhr;
         xhr.responseType = 'text';
         xhr.onload = function() {
+            if (generation !== audioPreviewGeneration) return;
+            audioPreviewRequest = null;
             loading("hide");
             if (xhr.readyState === 4 && xhr.status === 200) {
                 const response = JSON.parse(xhr.responseText);
@@ -1634,6 +1656,8 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             }
         };
         xhr.onerror = function() {
+            if (generation !== audioPreviewGeneration) return;
+            audioPreviewRequest = null;
             loading("hide");
             show_message('Yêu cầu phát âm thanh không thành công');
         };

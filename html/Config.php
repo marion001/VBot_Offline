@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__.'/includes/AEC3Settings.php';
+$aec3ConfigError='';
 #Code By: Vũ Tuyển
 #Designed by: BootstrapMade
 #GitHub VBot: https://github.com/marion001/VBot_Offline.git
@@ -68,6 +70,7 @@ register_shutdown_function(static function () use ($phpErrorLog): void {
 include 'Configuration.php';
 require_once __DIR__.'/includes/ActionRegistry.php';
 require_once __DIR__.'/includes/LANCalls.php';
+require_once __DIR__.'/includes/WakeOnLANSettings.php';
 $lanConfigError='';
 
 function vbotButtonActionOptions($Config): array
@@ -326,8 +329,20 @@ if (isset($_POST['start_recovery_config_json'])) {
 
 #Lưu lại các giá trị Config.json
 if (isset($_POST['all_config_save'])) {
-  // LAN calling is disabled pending testing. Ignore all LAN POST fields and
-  // preserve the existing lan_calls configuration when saving other settings.
+  if (isset($_POST['wol_settings_present'])) {
+    $Config['wake_on_lan']['active']=isset($_POST['wol_active']);
+  }
+  $lanConfigError='';
+  if (vbotLANCallsSettingsSubmitted($_POST)) {
+    try {
+      $Config['lan_calls']=vbotLANCallsSettings($_POST,$Config['lan_calls']??[],
+        $Config['smart_config']['button']??[],$Config['contact_info']['full_name']??'Loa VBot');
+    } catch (InvalidArgumentException $error) {
+      $lanConfigError=$error->getMessage();
+      $configErrorFocus=['field'=>$error instanceof VBotLANFieldError?$error->field:'lanCallConfiguration','message'=>$lanConfigError];
+      $messages[]='Chưa lưu cấu hình: '.$lanConfigError;
+    }
+  }
   #error_log('[PHP Config] Bắt đầu xử lý yêu cầu lưu Config.json', 0);
   if ($Config['backup_upgrade']['config_json']['active'] === true) {
     $dateTime = new DateTime();
@@ -455,20 +470,20 @@ if (isset($_POST['all_config_save'])) {
   $Config['web_interface']['file_access_security'] = isset($_POST['webui_file_access_security']) ? true : false;
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG home_assistant
-  $hassKnownDomains = ['switch','light','fan','media_player','climate','automation','cover','script'];
+  $hassKnownDomains = ['switch','light','fan','media_player','climate','automation','cover','script','button','scene','input_boolean','humidifier'];
   $hassExtraDomains = preg_split('/[\s,;]+/', trim((string)($_POST['hass_extra_domains'] ?? '')), -1, PREG_SPLIT_NO_EMPTY);
   $hassInvalidDomains = array_filter($hassExtraDomains, function($domain) {return !preg_match('/^[a-z][a-z0-9_]*$/D', $domain);});
   if ($hassInvalidDomains) {$hassExtraDomains = []; $messages[] = 'Loại thực thể bổ sung không hợp lệ; chỉ dùng chữ thường, số và dấu gạch dưới.';}
-  $hassPreviousDomains = $Config['home_assistant']['entity_types'] ?? array_fill_keys($hassKnownDomains, true);
+  $hassPreviousDomains = $Config['home_assistant']['entity_types'] ?? [];
   $hassPostedEnabled = is_array($_POST['hass_domain_enabled'] ?? null) ? $_POST['hass_domain_enabled'] : [];
   $hassPostedOnOff = is_array($_POST['hass_domain_on_off'] ?? null) ? $_POST['hass_domain_on_off'] : [];
   $Config['home_assistant']['entity_types'] = [];
   $Config['home_assistant']['on_off_entity_types'] = [];
   foreach (array_unique(array_merge($hassKnownDomains, $hassExtraDomains)) as $domain) {
-    $isNewDomain = !array_key_exists($domain, $hassPreviousDomains) && !in_array($domain, $hassKnownDomains, true);
+    $isNewDomain = !array_key_exists($domain, $hassPreviousDomains) && (!in_array($domain, $hassKnownDomains, true) || in_array($domain, $hassExtraDomains, true));
     $enabled = isset($hassPostedEnabled[$domain]) || $isNewDomain;
     $Config['home_assistant']['entity_types'][$domain] = $enabled;
-    if ($enabled && !in_array($domain, ['cover','script'], true) && (isset($hassPostedOnOff[$domain]) || $isNewDomain)) $Config['home_assistant']['on_off_entity_types'][] = $domain;
+    if ($enabled && !in_array($domain, ['cover','script','button','scene'], true) && (isset($hassPostedOnOff[$domain]) || $isNewDomain)) $Config['home_assistant']['on_off_entity_types'][] = $domain;
   }
   $Config['home_assistant']['search_sources']['friendly_name'] = isset($_POST['hass_search_name']);
   $Config['home_assistant']['search_sources']['entity_id'] = isset($_POST['hass_search_entity_id']);
@@ -547,8 +562,6 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_wakeup']['speak_to_text']['failure_cooldown'] = floatval($_POST['failure_cooldown']);
   unset($Config['smart_config']['smart_wakeup']['speak_to_text']['timeout_connect']);
   unset($Config['smart_config']['smart_wakeup']['speak_to_text']['stt_default_session_timeout']);
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] = floatval($_POST['stt_gain']);
-  $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] = isset($_POST['stt_gain_active']) ? true : false;
   $Config['smart_config']['smart_wakeup']['speak_to_text']['interim_results'] = isset($_POST['stt_interim_results']) ? true : false;
 	if (isset($_POST['stt_select'])) {
 		$stt = $_POST['stt_select'];
@@ -573,8 +586,6 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'] = ($_POST['hotword_select_wakeup'] === "null") ? null : $_POST['hotword_select_wakeup'];
   $Config['smart_config']['smart_wakeup']['hotword_engine']['use_the_key'] = $_POST['use_the_key_picovoice'] ?? 'system_default';
   $Config['smart_config']['smart_wakeup']['hotword']['continue_running_if_hotword_initialization_fails'] = isset($_POST['continue_running_if_hotword_initialization_fails']) ? true : false;
-  $Config['smart_config']['smart_wakeup']['hotword']['gain']['value_float'] = floatval($_POST['hotword_gain']);
-  $Config['smart_config']['smart_wakeup']['hotword']['gain']['active'] = isset($_POST['hotword_gain_active']) ? true : false;
   $Config['smart_config']['smart_wakeup']['hotword']['ring_buffer_porcupine'] = intval($_POST['ring_buffer_porcupine']);
   $Config['smart_config']['smart_wakeup']['hotword']['ring_buffer_snowboy'] = intval($_POST['ring_buffer_snowboy']);
 
@@ -605,13 +616,12 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['authentication_zai_did'] = $_POST['authentication_zai_did'];
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_default']['expires_zai_did'] = $_POST['expires_zai_did'];
 
-  #Cập nhật VAD
-  $Config['smart_config']['webrtcvad']['active'] = isset($_POST['webrtcvad_active']) ? true : false;
-  $Config['smart_config']['webrtcvad']['vad_mode'] = intval($_POST['vad_mode']);
-  $Config['smart_config']['webrtcvad']['rms_threshold'] = intval($_POST['vad_rms']);
-  $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['active'] = isset($_POST['webrtc_noise_gain_active']) ? true : false;
-  $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['auto_gain_dbfs'] = intval($_POST['auto_gain_dbfs']);
-  $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['noise_suppression_level'] = intval($_POST['noise_suppression_level']);
+  try {
+    $Config['smart_config']['audio_processing']=vbotAudioProcessingSettings($_POST,$Config['smart_config']);
+    unset($Config['smart_config']['webrtcvad'],$Config['smart_config']['aec3']);
+  } catch (Throwable $error) {
+    $aec3ConfigError=$error->getMessage(); $messages[]='Chưa lưu cấu hình: '.$aec3ConfigError;
+  }
 
   #cập nhật giá trị trong tts tts_edge
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_edge']['speaking_speed'] = floatval($_POST['tts_edge_speaking_speed']);
@@ -1173,7 +1183,7 @@ if (isset($_POST['all_config_save'])) {
   } else {
     $messages[] = 'Lỗi: Dữ liệu tts_token_google_cloud không phải là JSON hợp lệ.';
   }
-  $configSaved = vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
+  $configSaved = $aec3ConfigError==='' && $lanConfigError==='' && vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
   if ($configSaved) {
     $messages[] = "Cấu hình đã được lưu thành công!";
   } else {
@@ -1316,6 +1326,14 @@ if (file_exists($tts_token_google_cloud)) {
 }
 
 #Tự Sinh HTML
+function switch_field($name, $label, $checked, $help = '', $attributes = '', $id = null) {
+  $id = $id ?? $name;
+  $safeId = htmlspecialchars($id, ENT_QUOTES, 'UTF-8');
+  $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+  $helpHtml = $help !== '' ? '<div class="form-text">'.htmlspecialchars($help, ENT_QUOTES, 'UTF-8').'</div>' : '';
+  return '<div class="row mb-3"><label class="col-sm-3 col-form-label" for="'.$safeId.'">'.$label.':</label><div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="'.$safeName.'" id="'.$safeId.'" '.($checked?'checked':'').' '.$attributes.'></div>'.$helpHtml.'</div></div>';
+}
+
 function input_field($id, $label, $value = '', $disabled = '', $type = 'text', $step = '', $min = '', $max = '', $help = '',
   $extra_class = 'border-success',
   $button_label = '',
@@ -1351,7 +1369,7 @@ function input_field($id, $label, $value = '', $disabled = '', $type = 'text', $
     <div class='row mb-3'><label for='$id' class='col-sm-3 col-form-label'>$label $help_html $help_icon:</label><div class='col-sm-9'>$input_html</div></div>";
 }
 
-function select_field($id, $label, $options, $selected, $disabled_options = []){
+function select_field($id, $label, $options, $selected, $disabled_options = [], $help = ''){
   $html = "
   <div class='row mb-3'>
     <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
@@ -1362,7 +1380,8 @@ function select_field($id, $label, $options, $selected, $disabled_options = []){
     $dis = (in_array($value, $disabled_options)) ? 'disabled' : '';
     $html .= "<option value='$value' $sel $dis>$text</option>";
   }
-  $html .= "</select></div></div>";
+  $helpHtml = $help !== '' ? '<div class="form-text">'.htmlspecialchars($help, ENT_QUOTES, 'UTF-8').'</div>' : '';
+  $html .= "</select>$helpHtml</div></div>";
   return $html;
 }
 
@@ -1943,6 +1962,15 @@ include 'html_head.php';
               </div>
             </div>
             </div>
+      <div class="card" id="wakeOnLanConfiguration"><div class="card-body pt-3">
+        <h5 class="card-title">Wake-on-LAN — Bật máy tính</h5>
+        <input type="hidden" name="wol_settings_present" value="1">
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="wol-active" name="wol_active" <?= vbotWakeOnLANActive($Config,dirname(__DIR__).'/resource/wake_on_lan/devices.json')?'checked':'' ?>>
+          <label class="form-check-label" for="wol-active">Bật Wake-on-LAN bằng web và giọng nói</label>
+        </div>
+        <p class="form-text">Nhấn Lưu Cài Đặt để áp dụng, không cần khởi động lại VBot. Quản lý MAC và bật máy tại <a href="Wake_On_LAN.php">Wake-on-LAN</a>.</p>
+      </div></div>
       <div class="card accordion" id="accordion_button_call_local_lan">
       <div class="card-body">
 <!-- 
@@ -1951,8 +1979,8 @@ include 'html_head.php';
       <div id="collapse_button_call_local_lan" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_call_local_lan">
 	  -->
 
-<h5 class="card-title accordion-button collapsed text-danger disabled" aria-expanded="false" aria-disabled="true" style="pointer-events: none; opacity: 0.5; cursor: not-allowed;">
-    Gọi Điện Trong Mạng Nội Bộ, Call Local Lan (Disabled):
+<h5 class="card-title accordion-button collapsed text-danger" role="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_call_local_lan" aria-expanded="false" aria-controls="collapse_button_call_local_lan">
+    Gọi Điện Trong Mạng Nội Bộ, Call Local Lan:
 </h5>
 
 <div id="collapse_button_call_local_lan" class="accordion-collapse collapse" aria-labelledby="headingThree">
@@ -1966,67 +1994,86 @@ if (!empty($lanConfigError)) {
 $lanAutomaticIdentity=($lanSettings['use_mdns_id']??true)===true;
 $lanLocalIdentity=$lanAutomaticIdentity?vbotStableDeviceId():($lanSettings['id']??'');
 $lanDisplayKey=trim((string)($lanSettings['shared_key']??''));
+if ($lanDisplayKey==='') $lanDisplayKey='vbot_call_lan_audio';
 ?>
-<div disabled class="col-12" id="lanCallConfiguration"><div class="card"><div class="card-body pt-3">
+<div class="col-12" id="lanCallConfiguration"><div class="card"><div class="card-body pt-3">
 <h2 class="h5">Cấu hình gọi nội bộ</h2>
-<input disabled type="hidden" name="lan_settings_present" value="1">
+<p><a href="FAQ.php#native-audio-prebuilt" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn cài đặt PJSIP và WebRTC 2.1</a></p>
+<input type="hidden" name="lan_settings_present" value="1">
+<input type="hidden" name="lan_enabled_control_present" value="1">
+<input type="hidden" name="lan_browser_call_present" value="1">
+<input type="hidden" name="lan_audio_port" value="<?= vbotLANEscape($lanSettings['audio_port']??5011) ?>">
 <p class="form-text">Các tùy chọn được lưu vào Config.json → lan_calls. Lưu cài đặt và khởi động lại VBot để áp dụng. Danh sách loa và thao tác gọi nằm ở <a href="LAN_Calls.php">Gọi điện LAN</a>.</p>
-<label class="form-check form-switch mb-3"><input disabled class="form-check-input" type="checkbox" name="lan_active" <?= !empty($lanSettings['active'])?'checked':'' ?>> Bật gọi điện LAN khi VBot khởi động</label>
-<label class="form-check form-switch mb-3"><input disabled class="form-check-input" type="checkbox" name="lan_use_mdns_id" id="lanUseMdnsId" <?= $lanAutomaticIdentity?'checked':'' ?>> Dùng ID mDNS ổn định của loa (dùng chung với Multiroom)</label>
-<div class="row g-3">
-<?php foreach (['id'=>['ID loa này','vbot_local'],'control_port'=>['Cổng kết nối cuộc gọi (TCP)',5010],'audio_port'=>['Cổng âm thanh (UDP)',5011],'output_device'=>['Thiết bị phát ALSA','default'],'ring_timeout'=>['Chờ nhận cuộc gọi (giây)',30],'max_duration'=>['Thời lượng tối đa (giây)',3600]] as $key=>$field): ?>
-<div class="col-md-6"><label class="form-label" for="lan_<?= $key ?>"><?= $field[0] ?></label><input disabled class="form-control" id="lan_<?= $key ?>" name="lan_<?= $key ?>" required <?= $key==='id' && $lanAutomaticIdentity?'readonly':'' ?> <?= is_int($field[1])?'type="number"':'type="text"' ?> value="<?= vbotLANEscape($key==='id' && $lanLocalIdentity!==''?$lanLocalIdentity:($lanSettings[$key]??$field[1])) ?>"><?php if ($key==='id'): ?><div class="form-text">Khi dùng ID mDNS, ID được lấy tự động từ danh tính phần cứng của loa. Sao chép ID này vào danh sách loa đích trên loa còn lại; không dùng ID MQTT thay thế.</div><?php endif; ?></div>
-<?php endforeach; ?>
+<?php
+echo switch_field('lan_active','Bật gọi điện LAN khi VBot khởi động',!empty($lanSettings['active']));
+echo switch_field('lan_browser_call_active','Cho phép gọi từ trình duyệt tới loa này',!empty($lanSettings['browser_call']['active']),
+    'Cần bật gọi LAN và mở WebUI bằng HTTPS. Mic dùng chung với VBot; AEC/NS/AGC không xử lý hai lần.');
+echo switch_field('lan_use_mdns_id','Dùng ID mDNS ổn định của loa',$lanAutomaticIdentity,'Dùng chung danh tính với Multiroom.','','lanUseMdnsId');
+foreach (['id'=>['ID loa này','vbot_local'],'control_port'=>['Điều khiển cuộc gọi TCP',5010],'output_device'=>['Thiết bị phát ALSA','default'],'ring_timeout'=>['Chờ nhận cuộc gọi (giây)',30],'max_duration'=>['Thời lượng tối đa (giây)',3600]] as $key=>$field) {
+    $value=$key==='control_port'?5010:($key==='id' && $lanLocalIdentity!==''?$lanLocalIdentity:($lanSettings[$key]??$field[1]));
+    $attrs='required'.(($key==='control_port' || ($key==='id' && $lanAutomaticIdentity))?' readonly':'');
+    $help=$key==='id'?'Khi dùng ID mDNS, ID lấy tự động từ phần cứng của loa. Sao chép ID này vào danh sách loa đích trên loa còn lại; không dùng ID MQTT.':'';
+    echo input_field('lan_'.$key,$field[0],$value,$attrs,is_int($field[1])?'number':'text','','','',$help);
+}
+?>
 <p class="form-text">Tên loa được lấy từ hồ sơ: <strong><?= vbotLANEscape($Config['contact_info']['full_name']??'Loa VBot') ?></strong>. Chỉnh tên tại <a href="Users_Profile.php">Hồ sơ người dùng</a> rồi khởi động lại VBot để áp dụng.</p>
-<div class="col-md-6"><label class="form-label" for="lan_shared_key">Khóa chung giữa các loa</label><input disabled class="form-control" id="lan_shared_key" type="text" name="lan_shared_key" autocomplete="off" spellcheck="false" maxlength="200" value="<?= vbotLANEscape($lanDisplayKey) ?>" placeholder="Nhập khóa từ 16 đến 200 ký tự"><div class="form-text">Khóa đã lưu hiển thị tại đây để đối chiếu. Các loa cần cùng khóa, từ 16–200 ký tự ASCII và không có khoảng trắng bên trong. Khoảng trắng đầu/cuối được tự bỏ khi lưu.</div></div>
-<div class="col-md-6"><label class="form-label" for="lan_mode">Chế độ microphone khi nhận</label><select disabled class="form-select" id="lan_mode" name="lan_mode"><option value="full_duplex" <?= ($lanSettings['mode']??'full_duplex')==='full_duplex'?'selected':'' ?>>Hai chiều đồng thời</option><option value="push_to_talk" <?= ($lanSettings['mode']??'')==='push_to_talk'?'selected':'' ?>>Nhấn giữ để nói</option></select></div>
-<div class="col-md-6"><label class="form-label" for="lan_ringtone">Nhạc chuông cuộc gọi đến</label><select disabled class="form-select" id="lan_ringtone" name="lan_ringtone">
-<?php $lanRingtones=vbotLANRingtones();$lanRingtone=$lanSettings['ringtone']??(in_array('call_iphone.mp3',$lanRingtones,true)?'call_iphone.mp3':''); ?>
-<option value="" <?= $lanRingtone===''?'selected':'' ?>>Âm báo mặc định của VBot</option>
-<?php foreach ($lanRingtones as $ringtone): ?><option value="<?= vbotLANEscape($ringtone) ?>" <?= $lanRingtone===$ringtone?'selected':'' ?>><?= vbotLANEscape($ringtone) ?></option><?php endforeach; ?>
-</select><div class="input-group mt-2"><input disabled class="form-control" type="file" id="lan_ringtone_upload" accept=".mp3,.wav,.ogg,.flac,.m4a"><button type="button" class="btn btn-success" id="lan_ringtone_upload_button"><i class="bi bi-upload"></i> Tải lên</button></div>
-<div id="lan_ringtone_upload_status" class="form-text" role="status"></div>
-<div class="form-text">Tải file âm thanh tối đa 20 MB vào resource/sound/call_ringtone/. Khi tải xong, file được chọn tự động. Nhấn ngắn WakeUp để nhận cuộc gọi; kết thúc bằng nút và kiểu nhấn đã chọn bên dưới. Lưu và khởi động lại VBot để áp dụng nhạc chuông.</div></div>
-</div>
-<div class="mt-3">
+<?php
+echo input_field('lan_shared_key','Khóa chung giữa các loa',$lanDisplayKey,'autocomplete="off" spellcheck="false" maxlength="200" placeholder="Nhập khóa từ 16 đến 200 ký tự"','text','','','',
+    'Các loa cần cùng khóa, từ 16–200 ký tự ASCII, không có khoảng trắng bên trong. Khoảng trắng đầu/cuối tự bỏ khi lưu.');
+echo select_field('lan_mode','Chế độ microphone khi nhận',['full_duplex'=>'Hai chiều đồng thời','push_to_talk'=>'Nhấn giữ để nói'],$lanSettings['mode']??'full_duplex');
+require __DIR__.'/includes/LANCallRingtones.php';
+$lanButtonOptions=[];
+foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button) {
+    $lanButtonOptions[vbotLANEscape($buttonName)]=vbotLANEscape($buttonName.' — GPIO '.($button['gpio']??'').(empty($button['active'])?' (đang tắt)':''));
+}
+require __DIR__.'/includes/LANCallReceiveControls.php';
+?>
+<h6 class="mt-4 border-bottom pb-2">Nhấn giữ để nói</h6>
 <input type="hidden" name="lan_ptt_present" value="1">
-<label class="form-check form-switch"><input disabled class="form-check-input" type="checkbox" name="lan_ptt_button_active" <?= !empty($lanSettings['ptt_button_active'])?'checked':'' ?>> Dùng nút vật lý nhấn giữ để nói trong cuộc gọi</label>
-<label class="form-label" for="lan_ptt_button">Nút nhấn giữ để nói</label>
-<select class="form-select" id="lan_ptt_button" name="lan_ptt_button"><option value="">Chọn nút đã cấu hình</option>
-<?php foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button): ?>
-<option value="<?= vbotLANEscape($buttonName) ?>" <?= ($lanSettings['ptt_button']??'')===$buttonName?'selected':'' ?>><?= vbotLANEscape($buttonName) ?> — GPIO <?= vbotLANEscape($button['gpio']??'') ?><?= empty($button['active'])?' (đang tắt)':'' ?></option>
-<?php endforeach; ?></select>
-<div class="form-text">Chỉ hoạt động khi tùy chọn này bật, nút được bật trong cấu hình Button và cuộc gọi dùng chế độ “Nhấn giữ để nói”. Giữ nút để truyền microphone, thả để ngừng truyền. Trong cuộc gọi, nút được chọn ưu tiên chức năng này thay cho thao tác nhấn ngắn/nhấn giữ/nhấn đúp; nếu chọn MIC, dùng WebUI để kết thúc. Ngoài cuộc gọi nút giữ chức năng thông thường.</div>
-</div>
-<div class="mt-3">
+<?php
+echo switch_field('lan_ptt_button_active','Dùng nút vật lý nhấn giữ để nói',!empty($lanSettings['ptt_button_active']));
+echo select_field('lan_ptt_button','Nút nhấn giữ để nói',[''=>'Chọn nút đã cấu hình']+$lanButtonOptions,vbotLANEscape($lanSettings['ptt_button']??''),[],
+    'Chỉ hoạt động khi nút được bật trong cấu hình Button và cuộc gọi dùng chế độ nhấn giữ để nói. Giữ để truyền mic, thả để ngừng truyền. Trong cuộc gọi, nút ưu tiên chức năng này; ngoài cuộc gọi giữ chức năng cũ. Nếu chọn MIC, dùng WebUI để kết thúc.');
+?>
+<h6 class="mt-4 border-bottom pb-2">Kết thúc cuộc gọi</h6>
 <input type="hidden" name="lan_end_button_present" value="1">
-<label class="form-check form-switch"><input disabled class="form-check-input" type="checkbox" name="lan_end_button_active" <?= ($lanSettings['end_button_active']??true)?'checked':'' ?>> Dùng nút vật lý ngắt cuộc gọi</label>
-<label class="form-label" for="lan_end_button">Nút ngắt cuộc gọi</label>
-<select class="form-select mb-2" id="lan_end_button" name="lan_end_button"><option value="">Chọn nút đã cấu hình</option>
-<?php foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button): ?><option value="<?= vbotLANEscape($buttonName) ?>" <?= ($lanSettings['end_button']??'mic')===$buttonName?'selected':'' ?>><?= vbotLANEscape($buttonName) ?> — GPIO <?= vbotLANEscape($button['gpio']??'') ?><?= empty($button['active'])?' (đang tắt)':'' ?></option><?php endforeach; ?></select>
-<label class="form-label" for="lan_end_button_press">Thao tác ngắt cuộc gọi</label>
-<select class="form-select" id="lan_end_button_press" name="lan_end_button_press">
-<?php foreach (['short'=>'Nhấn nhả','hold'=>'Nhấn giữ','both'=>'Cả nhấn nhả và nhấn giữ'] as $value=>$label): ?><option value="<?= $value ?>" <?= ($lanSettings['end_button_press']??'short')===$value?'selected':'' ?>><?= $label ?></option><?php endforeach; ?></select>
-<div class="form-text">Áp dụng khi đang kết nối hoặc trò chuyện. Nhấn giữ dùng thời gian giữ của nút trong cấu hình Button (mặc định 2 giây), ngắt ngay khi đạt thời gian này. Ngoài cuộc gọi nút giữ chức năng cũ. Nút ngắt và nút nhấn giữ để nói phải khác nhau khi dùng chế độ nhấn giữ để nói.</div>
-</div>
+<?php
+echo switch_field('lan_end_button_active','Dùng nút vật lý ngắt cuộc gọi',$lanSettings['end_button_active']??true);
+echo select_field('lan_end_button','Nút ngắt cuộc gọi',[''=>'Chọn nút đã cấu hình']+$lanButtonOptions,vbotLANEscape($lanSettings['end_button']??'mic'));
+echo select_field('lan_end_button_press','Thao tác ngắt cuộc gọi',['short'=>'Nhấn nhả','hold'=>'Nhấn giữ','both'=>'Cả nhấn nhả và nhấn giữ'],
+    !empty($lanSettings['mic_button_mute']??true) && ($lanSettings['end_button']??'mic')==='mic'?'hold':($lanSettings['end_button_press']??'short'),[],
+    'Áp dụng khi đang kết nối hoặc trò chuyện. Thời gian giữ lấy từ cấu hình Button, mặc định 2 giây. Ngoài cuộc gọi nút giữ chức năng cũ. Nút ngắt và nút nhấn giữ nói phải khác nhau khi dùng chế độ nhấn giữ nói.');
+?>
+<h6 class="mt-4 border-bottom pb-2">Kết nối PJSIP</h6>
+<?php
+foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
+    echo input_field('lan_pjsip_'.$field,$field==='sip_port'?'SIP UDP (cố định)':'Cổng bắt đầu RTP UDP',
+        $field==='sip_port'?5060:($lanSettings['pjsip'][$field]??$default),$field==='sip_port'?'readonly':'','number','','1024',$field==='rtp_port'?'65526':'65535');
+}
+?>
+<p class="form-text">Mic dùng chung PvRecorder; AEC cuộc gọi và NS/AGC chung chỉ xử lý một lần. Cổng audio_port cũ không được sử dụng cho RTP PJSIP. Dừng bản calls_pjsip_test trước khi chạy VBot.</p>
 </div></div></div>
 <script>document.getElementById('lanUseMdnsId').addEventListener('change',function(){document.getElementById('lan_id').readOnly=this.checked;});</script>
 <script>
-document.getElementById('lan_ringtone_upload_button').addEventListener('click',async function(){
-    const input=document.getElementById('lan_ringtone_upload'),status=document.getElementById('lan_ringtone_upload_status'),file=input.files[0];
-    if(!file){status.textContent='Hãy chọn file âm thanh để tải lên.';return;}
-    if(file.size>20*1024*1024){status.textContent='File không được vượt quá 20 MB.';return;}
-    this.disabled=true;status.textContent='Đang tải nhạc chuông…';
-    try {
-        const data=new FormData();data.append('ringtone',file);
-        const response=await fetch('includes/php_ajax/LAN_Ringtone_Upload.php',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':window.VBOT_CSRF_TOKEN||''},body:data});
-        const result=await response.json();if(!response.ok || !result.success)throw Error(result.message||'Tải nhạc chuông thất bại');
-        const select=document.getElementById('lan_ringtone');select.replaceChildren(new Option('Âm báo mặc định của VBot',''));
-        for(const name of result.files)select.add(new Option(name,name));
-        select.value=result.name;input.value='';status.textContent=result.message;
-    } catch(error){status.textContent=error.message;} finally{this.disabled=false;}
-});
+(() => {
+    const container=document.getElementById('lanCallConfiguration');
+    const enabled=container.querySelector('[name="lan_active"]');
+    const requiredControls=Array.from(container.querySelectorAll('[required]'));
+    const sync=()=>requiredControls.forEach(control=>{ control.required=enabled.checked; });
+    enabled.addEventListener('change',sync);sync();
+    const mic=container.querySelector('[name="lan_mic_button_mute"]');
+    const endButton=container.querySelector('[name="lan_end_button"]');
+    const endPress=container.querySelector('[name="lan_end_button_press"]');
+    const syncMic=()=>{
+        const reserved=mic.checked && endButton.value==='mic';
+        for(const option of endPress.options)option.disabled=reserved && option.value!=='hold';
+        if(reserved)endPress.value='hold';
+    };
+    mic.addEventListener('change',syncMic);endButton.addEventListener('change',syncMic);syncMic();
+
+})();
 </script>
+<script src="assets/js/lan-ringtones.js?v=1" defer></script>
 
       </div>
       </div>
@@ -2226,7 +2273,7 @@ document.getElementById('lan_ringtone_upload_button').addEventListener('click',a
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic, Bluetooth, <font color=red>(Lọc Nhiễu Mic: VAD, Noise Suppression, Auto Gain - AGC: <?php echo $Config['smart_config']['webrtcvad']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
+                  Cấu Hình Âm Thanh Volume/Mic, Bluetooth, <font color=red>(Lọc Nhiễu Mic: WebRTC: NS, AEC3, AGC: <?php echo ($Config['smart_config']['audio_processing']['active']??true) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
@@ -2281,38 +2328,43 @@ document.getElementById('lan_ringtone_upload_button').addEventListener('click',a
 
 					<div class="card">
                     <div class="card-body">
-                      <h5 class="card-title" title="Âm Lượng (Volume)/Audio Out">Lọc Nhiễu Âm Thanh Đầu Vào MIC (VAD, Noise Suppression, Auto Gain - AGC) <font color=red>Nên Sử Dụng</font> <i class="bi bi-question-circle-fill" onclick="show_message('VAD WebRTC + Noise Suppression đây là chế độ lọc nhiễu đầu vào âm thanh của Microphone, Dùng để lọc giọng nói của Con Người. mức độ lọc nhiễu càng cao thì càng khó tính → dễ bỏ sót giọng nhỏ<hr/>- Lọc Thấp Nhất = Phòng rất yên tĩnh<br/>- Lọc Nhẹ = Dùng chung, an toàn<br/>- Lọc Trung Bình = Phòng có quạt, TV<br/>- Lọc Mạnh = Môi trường ồn<hr/> - Có thể khó đánh thức WakeUP với âm thanh nhỏ')"></i> &nbsp;:</h5>
+                      <h5 class="card-title">Xử lý âm thanh MIC — WebRTC Audio Processing</h5>
+                      <p><a href="FAQ.php#native-audio-prebuilt" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn cài đặt WebRTC 2.1 và PJSIP</a></p>
                       <div class="alert alert-primary" role="alert">
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt tính năng lọc nhiễu âm thanh đầu vào<br/> Có thể đánh thức loa khó hơn với âm thanh nhỏ')"></i> :</label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input class="form-check-input border-success" type="checkbox" name="webrtcvad_active" id="webrtcvad_active" <?php echo $Config['smart_config']['webrtcvad']['active'] ? 'checked' : ''; ?>>
-                          </div>
-                        </div>
-                      </div>
-					  <?php
-                      echo select_field('vad_mode', 'Mức Độ Lọc Nhiễu', ['0' => 'Lọc Thấp Nhất', '1' => 'Lọc Nhẹ (Khuyên Dùng)', '2' => 'Lọc Trung Bình (Khuyên Dùng)', '3' => 'Lọc Mạnh'], $Config['smart_config']['webrtcvad']['vad_mode'], []);
-					  echo input_field('vad_rms', 'Ngưỡng RMS Tối Thiếu', $Config['smart_config']['webrtcvad']['rms_threshold'] ?? 220, 'required', 'number', '1', '0', '1200', 'Ngưỡng biên độ RMS Của Mic, Dữ liệu biên độ âm thanh khi Mic thu âm được dưới ngưỡng tối thiếu được thiết lập sẽ bị bỏ qua, chỉ chấp nhận biên độ RMS trên ngưỡng được thiết lập, giá trị thiết lập ngưỡng còn phụ thuộc vào âm thanh môi trường thực tế. trung bình khoảng 200-300', 'border-success', '', '', '', '', '');
-					?>
-					<div class="alert alert-success" role="alert"><h5 class="card-title ">Chế Độ Tự Động Điều Chỉnh Cân Bằng Âm Thanh Thu Vào Từ Mic, <font color=red>Nên Sử Dụng </font> <i class="bi bi-question-circle-fill" onclick="show_message('Tự động tăng/giảm âm thanh thu được từ mic để giữ giọng nói luôn ở mức dễ nghe, không quá nhỏ – không bị vỡ khi nói to, <br/>- Nói xa → âm thanh thu vào được kéo to lên<br/>- Nói gần → âm thanh thu vào được hạ xuống<br/>Âm lượng ổn định → VAD, Wakeup, STT chính xác hơn')"></i></h5>
-                      <div class="row mb-3">
-                        <label class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Tự động tăng/giảm âm thanh thu được từ mic để giữ giọng nói luôn ở mức dễ nghe, không quá nhỏ – không bị vỡ khi nói to, <br/>- Nói xa → âm thanh thu vào được kéo to lên<br/>- Nói gần → âm thanh thu vào được hạ xuống<br/>Âm lượng ổn định → VAD, Wakeup, STT chính xác hơn')"></i> :</label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input class="form-check-input border-success" type="checkbox" name="webrtc_noise_gain_active" id="webrtc_noise_gain_active" <?php echo $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['active'] ? 'checked' : ''; ?>>
-                          </div>
-                        </div>
-                      </div>
-					<?php
-					echo input_field('auto_gain_dbfs', 'Ngưỡng tự động cân bằng âm thanh AGC (Auto Gain Control)', $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['auto_gain_dbfs'] ?? 4, 'required', 'number', '1', '0', '31', 'Ngưỡng có giá trị từ [0-31], 0=disabled (tắt tự động cân bằng âm thanh Mic). Giá trị hợp lý dùng chuẩn cho giọng nói trong khoảng từ [3-5], Mặc định là 4', 'border-success', '', '', '', '', '');
-                    echo select_field('noise_suppression_level', 'Mức khử nhiễu nền (Noise Suppression Level) <i class="bi bi-question-circle-fill" onclick="show_message(\'Ngưỡng có giá trị từ [0-4], 0=disabled (tắt khử nhiễu). Giá trị mặc định hợp lý nên dùng là 2.<br/><br/>0 => Tắt khử nhiễu<br/>1 => Khử nhiễu nhẹ<br/>2 => Khử nhiễu trung bình<br/>3 => Khử nhiễu mạnh<br/>4 => Khử nhiễu cực mạnh\')"></i>',
-                        ['0' => '0 => Tắt Khử Nhiễu', '1' => '1 => Khử Nhiễu Nhẹ', '2' => '2 => Khử Nhiễu Trung Bình (Khuyên Dùng)', '3' => '3 => Khử Nhiễu Mạnh', '4' => '4 => Khử Nhiễu Cực Mạnh'], $Config['smart_config']['webrtcvad']['webrtc_noise_gain']['noise_suppression_level'], []);
-					?>
-					</div>
-					<?php
-					echo input_field('', 'Cài Lọc Nhiễu Noise Suppression và Noise Gain', "http://$serverIp/FAQ.php", 'disabled', 'text', '', '', '', '', 'border-danger', 'Truy Cập', "http://$serverIp/FAQ.php", 'btn btn-success border-danger', 'link', '_blank');
+                      <?php
+                      $audio=vbotAudioProcessingSettings([], $Config['smart_config']);
+                      $aec3=array_replace(vbotAEC3Defaults(),$audio['aec3']);
                       ?>
+                      <input type="hidden" name="audio_processing_present" value="1">
+                      <?php echo switch_field('audio_processing_active','Bật xử lý mic WebRTC cho wake word và STT',$audio['active']); ?>
+                      <p class="form-text">Một đường xử lý chung từ PvRecorder: khử vọng khi phát nhạc → giảm nhiễu → AGC. Không lọc bỏ giọng nói bằng ngưỡng RMS/VAD cũ và không thay đổi alsamixer.</p>
+                      <?php
+                      echo select_field('audio_noise_suppression','Mức khử nhiễu nền',['off'=>'Tắt','low'=>'Nhẹ (khuyên dùng)','moderate'=>'Trung bình','high'=>'Mạnh','very_high'=>'Rất mạnh'],$audio['noise_suppression'],[]);
+                      ?>
+                      <?php echo switch_field('audio_high_pass_filter','Lọc tần số thấp của mic',$audio['high_pass_filter']); ?>
+                      <h6>Tự động cân bằng âm thanh mic — AGC kỹ thuật số</h6>
+                      <?php echo switch_field('audio_agc_active','Bật AGC',$audio['agc']['active']); ?>
+                      <?php echo switch_field('audio_agc_limiter','Giới hạn đỉnh âm thanh',$audio['agc']['limiter']); ?>
+                      <?php
+                      echo input_field('audio_agc_target_level_dbfs','Mức đỉnh mục tiêu AGC (dBFS)',$audio['agc']['target_level_dbfs'],'required','number','1','0','31','6 nghĩa là mục tiêu -6 dBFS. Giá trị 0 không tắt AGC; dùng công tắc Bật AGC.','border-success','','','','','');
+                      echo input_field('audio_agc_compression_gain_db','Gain nén AGC tối đa (dB)',$audio['agc']['compression_gain_db'],'required','number','1','0','90','Bắt đầu 9 dB. Tăng quá cao có thể kéo cả nhiễu và vọng dư lên.','border-success','','','','','');
+                      ?>
+                      <hr><h6>AEC3 — Khử nhạc lọt vào mic khi đánh thức</h6>
+                      <p class="form-text">AEC3 dùng công tắc riêng trong mục xử lý mic, độc lập với “Đánh thức khi Media Player hoạt động”. VLC/Multiroom dùng tham chiếu ALSA; Bluetooth/AirPlay cần cài đường PCM chung. Lưu và khởi động lại VBot cùng dịch vụ Multiroom để áp dụng.</p>
+                      <p class="form-text">Đường PCM chung Bluetooth/AirPlay: <?= !empty($aec3['external_sources'])?'Đã cấu hình':'Chưa cấu hình' ?>. Cấu hình này do công cụ cài đặt quản lý; tắt AEC3 chỉ tắt lọc mic.</p>
+                      <input type="hidden" name="aec3_settings_present" value="1">
+                      <?php echo switch_field('aec3_active','Bật AEC3 cho wake word khi phát nhạc',$aec3['active']); ?>
+                      <?php
+                      echo input_field('aec3_library','Thư viện AEC3',htmlspecialchars($aec3['library']),'required','text','','','','Đường dẫn thư viện đã build trên thiết bị. Linear cần thư viện hỗ trợ export linear.','border-success','','','','','');
+                      echo select_field('aec3_output','Tín hiệu cho wake word',['linear'=>'Tuyến tính — giữ giọng, còn âm dư','normal'=>'AEC thông thường — giảm vọng dư mạnh hơn'],$aec3['output'],[]);
+                      echo input_field('aec3_playback_device','Thiết bị loa ALSA',htmlspecialchars($aec3['playback_device']),'required','text','','','','Mặc định default. AEC3 giữ âm lượng phần mềm VLC, không chỉnh alsamixer.','border-success','','','','','');
+                      echo input_field('aec3_capture_gain','Gain mic trước AEC3',$aec3['capture_gain'],'required','number','0.1','0.1','8','Bắt đầu 1. Không cộng gain wake word cũ. Giảm nếu log báo clipping.','border-success','','','','','');
+                      echo input_field('aec3_wake_gain','Gain wake word sau AEC3',$aec3['wake_gain'],'required','number','0.1','0.1','8','Bắt đầu 1. Tăng có thể tăng kích hoạt nhầm.','border-success','','','','','');
+                      echo input_field('aec3_playback_latency_ms','Buffer loa (ms)',$aec3['playback_latency_ms'],'required','number','1','20','200','Mặc định 100.','border-success','','','','','');
+                      echo input_field('aec3_capture_delay_ms','Độ trễ mic bổ sung (ms)',$aec3['capture_delay_ms'],'required','number','1','0','500','Mặc định 32; cộng với độ trễ ALSA đo được.','border-success','','','','','');
+                      echo input_field('aec3_render_clock_ppm','Bù clock tham chiếu (ppm)',$aec3['render_clock_ppm'],'required','number','1','-3000','3000','980 đã đo ở hai loa test. Cần đo lại nếu thay thiết bị/đường âm thanh.','border-success','','','','','');
+                      ?>
+                      <p class="form-text">NS và AGC ở trên xử lý sau AEC3 cho cả linear và normal. Công tắc đánh thức khi phát nhạc chỉ điều khiển nhận wake word, không bật/tắt AEC3. Lưu và khởi động lại VBot để áp dụng; thư viện phải hỗ trợ vbot_mic_create.</p>
                     </div>
                     </div>
                   </div>
@@ -2390,20 +2442,6 @@ document.getElementById('lan_ringtone_upload_button').addEventListener('click',a
                         </div>
                       </div>
 					  <div class="alert alert-success" role="alert">
-						<h5 class="card-title">Khuếch Đại Âm Thanh Hotword WakeUp <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt Khuếch đại âm thanh đánh thức Hotword WakeUP Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại)')"></i> :</h5>
-						<div class="row mb-3">
-                        <label for="" class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khuếch đại âm thanh đánh thức Hotword WakeUP Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại. Lớn hơn 3.0 có thể sẽ bị méo tiếng, gây nhiễu, nhận diện kém)')"></i> :</label>
-                        <div class="col-sm-9">
-                          <div class="form-switch">
-                            <input class="form-check-input border-success" type="checkbox" name="hotword_gain_active" id="hotword_gain_active" <?php echo $Config['smart_config']['smart_wakeup']['hotword']['gain']['active'] ? 'checked' : ''; ?>>
-                          </div>
-                        </div>
-                      </div>
-                      <?php
-					  echo input_field('hotword_gain', 'Mức Nhân Khuếch Đại (Gain)', $Config['smart_config']['smart_wakeup']['hotword']['gain']['value_float'] ?? 2.0, 'required', 'number', '0.1', '1.0', '', 'Khuếch đại âm thanh từ Mic để đánh thức Hotword Wakeup, Nên có giá trị từ 1.1 -> 2.5, nếu đặt là <b>1, 1.0, dưới 1</b> sẽ không khuếch đại', 'border-success', '', '', '', '', '');
-					  ?>
-						</div>
-						<div class="alert alert-success" role="alert">
 						<?php
 						$value_select_wakeup = $Config['smart_config']['smart_wakeup']['hotword']['select_wakeup'];
 						if ($value_select_wakeup === null) {$value_select_wakeup = '';}
@@ -2521,21 +2559,7 @@ document.getElementById('lan_ringtone_upload_button').addEventListener('click',a
 			  </div>
 			</div>
 		  </div>
-				<div class="alert alert-primary" role="alert">
-				<h5 class="card-title">Khuếch Đại Âm Thanh STT <i class="bi bi-question-circle-fill" onclick="show_message('Khi được bật sẽ kích hoạt Khuếch đại âm thanh khi thu âm câu lệnh Speak To Text. Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại)')"></i> :</h5>
-			<div class="row mb-3">
-			<label for="" class="col-sm-3 col-form-label">Kích Hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Khuếch đại âm thanh khi thu âm câu lệnh Nên có giá trị từ 1.1 -> 2.5 (1 hoặc 1.0, hoặc dưới 1 sẽ không khuếch đại. Lớn hơn 3.0 có thể sẽ bị méo tiếng, gây nhiễu, nhận diện kém)')"></i> :</label>
-			<div class="col-sm-9">
-			  <div class="form-switch">
-				<input class="form-check-input border-success" type="checkbox" name="stt_gain_active" id="stt_gain_active" <?php echo $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['active'] ? 'checked' : ''; ?>>
-			  </div>
-			</div>
-		  </div>
-			  <?php
-			  echo input_field('stt_gain', 'Mức Nhân Khuếch Đại (Gain)', $Config['smart_config']['smart_wakeup']['speak_to_text']['gain']['value_float'] ?? 1.4, 'required', 'number', '0.1', '1.0', '', 'Khuếch đại âm thanh từ Mic để thu âm câu lệnh, Nên có giá trị từ 1.1 -> 2.5, nếu đặt là <b>1, 1.0, dưới 1</b> sẽ không khuếch đại', 'border-success', '', '', '', '', '');
-			  ?>
-				</div>
-                  <div class="row">
+				<div class="row">
                     <div class="col-lg-6">
                       <div class="card">
                         <div class="card-body">
@@ -2928,7 +2952,7 @@ document.getElementById('lan_ringtone_upload_button').addEventListener('click',a
                                 <label for="tts_ggcloud_voice_name">Giọng đọc:</label>
                               </div>
                               <button type="button" name="load_list_gcloud_tts" id="load_list_gcloud_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
-                              <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_voice_name')"><i class="bi bi-play-circle"></i></button>
+                              <button type="button" name="tts_sample_gcloud_play" id="tts_sample_gcloud_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_voice_name')"><i class="bi bi-play-circle"></i></button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>
 								<button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud" id="get_voice_name_gcloud" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="form-floating mb-3">
@@ -3122,7 +3146,7 @@ echo htmlspecialchars($textareaContent_tts_viettel);
                                 <label for="tts_ggcloud_key_voice_name">Giọng đọc:</label>
                               </div>
                               <button type="button" name="load_list_gcloudkey_tts" id="load_list_gcloudkey_tts" class="btn btn-primary" onclick="load_list_GoogleVoices_tts('tts_ggcloud_key', 'ok')" title="Tải danh sách giọng đọc TTS GCloud"><i class="bi bi-list-ul"></i></button>
-                              <button type="button" name="tts_sample_gcloud_key_play" id="tts_sample_gcloud_key_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_key_voice_name')"><i class="bi bi-play-circle"></i></button>
+                              <button type="button" name="tts_sample_gcloud_key_play" id="tts_sample_gcloud_key_play" class="btn btn-success" onclick="play_tts_sample_gcloud('tts_ggcloud_key_voice_name')"><i class="bi bi-play-circle"></i></button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>
                               <button type="button" title="Cập nhật danh sách giọng đọc từ Google" name="get_voice_name_gcloud_key" id="get_voice_name_gcloud_key" class="btn btn-info" onclick="voice_name_gcloud_get()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
                             </div>
                             <div class="form-floating mb-3">
@@ -3347,7 +3371,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
 				   <div class="alert alert-primary" role="alert">
                    <details class="rounded mb-3" open><summary class="fw-bold">Loại thực thể được tìm kiếm và điều khiển</summary>
                    <?php
-                     $hassUiKnown = ['switch','light','fan','media_player','climate','automation','cover','script'];
+                     $hassUiKnown = ['switch','light','fan','media_player','climate','automation','cover','script','button','scene','input_boolean','humidifier'];
                      $hassUiDomains = $Config['home_assistant']['entity_types'] ?? array_fill_keys($hassUiKnown, true);
                      $hassUiOnOff = $Config['home_assistant']['on_off_entity_types'] ?? ['switch','light','fan','media_player'];
                    ?>
@@ -3355,7 +3379,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                    <?php foreach (array_unique(array_merge($hassUiKnown, array_keys($hassUiDomains))) as $domain): if (!preg_match('/^[a-z][a-z0-9_]*$/D', $domain)) continue; $escapedDomain=htmlspecialchars($domain, ENT_QUOTES, 'UTF-8'); ?>
                      <tr><td><code><?php echo $escapedDomain; ?></code></td>
                        <td><div class="form-switch"><input type="checkbox" class="form-check-input border-success" aria-label="Cho phép <?php echo $escapedDomain; ?>" name="hass_domain_enabled[<?php echo $escapedDomain; ?>]" <?php echo !empty($hassUiDomains[$domain]) ? 'checked' : ''; ?>></div></td>
-                       <td><?php if (!in_array($domain, ['cover','script'], true)): ?><div class="form-switch"><input type="checkbox" class="form-check-input border-success" aria-label="Bật/tắt <?php echo $escapedDomain; ?>" name="hass_domain_on_off[<?php echo $escapedDomain; ?>]" <?php echo in_array($domain, $hassUiOnOff, true) ? 'checked' : ''; ?>></div><?php else: ?>Dùng lệnh rèm/kịch bản riêng<?php endif; ?></td></tr>
+                       <td><?php if (!in_array($domain, ['cover','script','button','scene'], true)): ?><div class="form-switch"><input type="checkbox" class="form-check-input border-success" aria-label="Bật/tắt <?php echo $escapedDomain; ?>" name="hass_domain_on_off[<?php echo $escapedDomain; ?>]" <?php echo in_array($domain, $hassUiOnOff, true) ? 'checked' : ''; ?>></div><?php else: ?><?php echo in_array($domain, ['button','scene'], true) ? 'Dùng lệnh tùy chỉnh: '.($domain === 'button' ? 'button.press' : 'scene.turn_on') : 'Dùng lệnh rèm/kịch bản riêng'; ?><?php endif; ?></td></tr>
                    <?php endforeach; ?></tbody></table></div>
                    <div class="row mb-3 align-items-start">
                      <label class="col-sm-3 col-form-label">Loại thực thể bổ sung<br><small class="text-muted">Mỗi dòng một loại</small></label>
@@ -4029,7 +4053,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                               echo "<script>showMessagePHP('Không thể mở thư mục welcome');</script>";
                             }
                             ?>
-                            <button class="btn btn-success border-success" id="play_Audio_Welcome" type="button"><i class="bi bi-play-circle"></i></button>
+                            <button class="btn btn-success border-success" id="play_Audio_Welcome" type="button"><i class="bi bi-play-circle"></i></button><button type="button" class="btn btn-outline-danger" onclick="stopAudio()" title="D&#7915;ng nghe th&#7917;" aria-label="D&#7915;ng nghe th&#7917;"><i class="bi bi-stop-circle"></i></button>
                           </div>
                         </div>
                       </div>
@@ -5017,40 +5041,19 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         <small class="text-muted">Khi bật, VBot chạy luồng thu IR nền để thực hiện chức năng đã chọn cho từng mã lệnh.</small>
                       </div>
                     </div>
-                    <div class="row g-3 mb-3">
-                      <div class="col-md-6"><div class="form-floating">
-                        <input class="form-control border-success" type="number" min="0.40" max="0.99" step="0.01" required name="internal_ir_receive_match_threshold" id="internal_ir_receive_match_threshold" value="<?php echo htmlspecialchars($Config['internal_ir']['receive_match_threshold'] ?? 0.92); ?>">
-                        <label for="internal_ir_receive_match_threshold">Ngưỡng khớp mã IR (0.40–0.99)</label>
-                      </div></div>
-                      <div class="col-md-6"><div class="form-floating">
-                        <input class="form-control border-success" type="number" min="0" max="0.30" step="0.01" required name="internal_ir_receive_match_margin" id="internal_ir_receive_match_margin" value="<?php echo htmlspecialchars($Config['internal_ir']['receive_match_margin'] ?? 0.06); ?>">
-                        <label for="internal_ir_receive_match_margin">Khoảng cách phân biệt mã</label>
-                      </div><small class="text-muted">Từ chối nếu mã tốt nhất không cao hơn mã đứng thứ hai đủ mức này. Khuyến nghị 0.04–0.08.</small></div>
-                      <div class="col-md-6"><div class="form-floating">
-                        <input class="form-control border-success" type="number" min="7" max="500" step="1" required name="internal_ir_receive_minimum_pulses" id="internal_ir_receive_minimum_pulses" value="<?php echo intval($Config['internal_ir']['receive_minimum_pulses'] ?? 20); ?>">
-                        <label for="internal_ir_receive_minimum_pulses">Số xung tối thiểu</label>
-                      </div><small class="text-muted">Loại bỏ tín hiệu ngắn hoặc frame IR bị thu thiếu. Khuyến nghị từ 15.</small></div>
-                      <div class="col-md-6"><div class="form-floating">
-                        <input class="form-control border-success" type="number" min="100" max="3000" step="50" required name="internal_ir_receive_debounce_ms" id="internal_ir_receive_debounce_ms" value="<?php echo intval($Config['internal_ir']['receive_debounce_ms'] ?? 450); ?>">
-                        <label for="internal_ir_receive_debounce_ms">Chống lặp remote (ms)</label>
-                      </div></div>
-                      <div class="col-md-6"><div class="form-floating">
-                        <input class="form-control border-success" type="number" min="0" max="3000" step="50" required name="internal_ir_tx_rx_guard_ms" id="internal_ir_tx_rx_guard_ms" value="<?php echo intval($Config['internal_ir']['tx_rx_guard_ms'] ?? 500); ?>">
-                        <label for="internal_ir_tx_rx_guard_ms">Tạm khóa RX sau khi phát (ms)</label>
-                      </div><small class="text-muted">Ngăn mắt thu tự nhận lại tín hiệu do chính VBot vừa phát. Khuyến nghị 300–700 ms.</small></div>
-                    </div>
-                  </div>
-                  <div class="row g-3 mb-3">
-                    <div class="col-md-6"><div class="form-floating">
-                      <input class="form-control border-success" type="number" min="0" max="27" required name="internal_ir_tx_gpio" id="internal_ir_tx_gpio" value="<?php echo intval($Config['internal_ir']['tx_gpio'] ?? 17); ?>">
-                      <label for="internal_ir_tx_gpio">GPIO phát IR (BCM)</label>
-                    </div></div>
-                    <div class="col-md-6"><div class="form-floating">
-                      <input class="form-control border-success" type="number" min="0" max="27" required name="internal_ir_rx_gpio" id="internal_ir_rx_gpio" value="<?php echo intval($Config['internal_ir']['rx_gpio'] ?? 4); ?>">
-                      <label for="internal_ir_rx_gpio">GPIO thu IR (BCM)</label>
-                    </div></div>
-                  </div>
-                  <p class="small text-danger">Không dùng GPIO10 vì đang điều khiển LED, không dùng GPIO16 vì đây là chân bật amplifier. Sau khi đổi GPIO, chạy lại script cài IR và reboot hoặc khởi động lại loa</p>
+                    <?php
+echo input_field('internal_ir_receive_match_threshold','Ngưỡng khớp mã IR (0.40–0.99)',($Config['internal_ir']['receive_match_threshold'] ?? 0.92),'required','number','0.01','0.40','0.99','');
+echo input_field('internal_ir_receive_match_margin','Khoảng cách phân biệt mã',($Config['internal_ir']['receive_match_margin'] ?? 0.06),'required','number','0.01','0','0.30','Từ chối nếu mã tốt nhất không cao hơn mã đứng thứ hai đủ mức này. Khuyến nghị 0.04–0.08.');
+echo input_field('internal_ir_receive_minimum_pulses','Số xung tối thiểu',($Config['internal_ir']['receive_minimum_pulses'] ?? 20),'required','number','1','7','500','Loại bỏ tín hiệu ngắn hoặc frame IR bị thu thiếu. Khuyến nghị từ 15.');
+echo input_field('internal_ir_receive_debounce_ms','Chống lặp remote (ms)',($Config['internal_ir']['receive_debounce_ms'] ?? 450),'required','number','50','100','3000','');
+echo input_field('internal_ir_tx_rx_guard_ms','Tạm khóa RX sau khi phát (ms)',($Config['internal_ir']['tx_rx_guard_ms'] ?? 500),'required','number','50','0','3000','Ngăn mắt thu tự nhận lại tín hiệu do chính VBot vừa phát. Khuyến nghị 300–700 ms.');
+?>
+</div>
+<?php
+echo input_field('internal_ir_tx_gpio','GPIO phát IR (BCM)',($Config['internal_ir']['tx_gpio'] ?? 17),'required','number','','0','27','');
+echo input_field('internal_ir_rx_gpio','GPIO thu IR (BCM)',($Config['internal_ir']['rx_gpio'] ?? 4),'required','number','','0','27','');
+?>
+<p class="small text-danger">Không dùng GPIO10 vì đang điều khiển LED, không dùng GPIO16 vì đây là chân bật amplifier. Sau khi đổi GPIO, chạy lại script cài IR và reboot hoặc khởi động lại loa</p>
                   <div class="alert alert-warning py-2">
                     <i class="bi bi-exclamation-triangle"></i> Để chức năng hoạt động, cần có <b>module phát IR</b> nối với GPIO TX và <b>module thu IR</b> nối với GPIO RX trên Raspberry Pi. Chỉ bật chức năng tương ứng với module đã kết nối.
                   </div>
@@ -5119,11 +5122,12 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                   echo input_field('schedule_data_json_file', 'Tệp Lưu Trữ Dữ Liệu Cấu Hình', $schedule_json_file, 'readonly', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$schedule_json_file')", 'btn btn-success border-danger', 'onclick', '');
                   echo input_field('schedule_audio_path', 'Thư Mục Chứa Tệp Âm Thanh', htmlspecialchars($Config['schedule']['audio_path']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
                   ?>
-                  <div class="form-switch mb-3">
-                    <input class="form-check-input border-success" type="checkbox" name="schedule_auto_delete_completed_voice_control" id="schedule_auto_delete_completed_voice_control" <?= ($Config['schedule']['auto_delete_completed_voice_control'] ?? false) === true ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="schedule_auto_delete_completed_voice_control">Tự xóa lịch điều khiển do VBot tạo bằng giọng nói sau khi hoàn thành</label>
-                    <div class="form-text">Bật: xóa lịch hoàn thành sau khi lưu kết quả vào lịch sử Scheduler. Tắt: giữ lại lịch. Chỉ áp dụng lịch điều khiển bằng giọng nói của VBot; lịch tạo trên WebUI không bị xóa. Lịch lỗi hoặc chưa xác định kết quả được giữ lại để kiểm tra. Lưu cấu hình và khởi động lại VBot để áp dụng.</div>
-                  </div>
+                  <?php echo switch_field(
+                    'schedule_auto_delete_completed_voice_control',
+                    'Tự xóa lịch điều khiển do VBot tạo bằng giọng nói sau khi hoàn thành',
+                    ($Config['schedule']['auto_delete_completed_voice_control'] ?? false) === true,
+                    'Bật: xóa lịch hoàn thành sau khi lưu kết quả vào lịch sử Scheduler. Tắt: giữ lại lịch. Chỉ áp dụng lịch điều khiển bằng giọng nói của VBot; lịch tạo trên WebUI không bị xóa. Lịch lỗi hoặc chưa xác định kết quả được giữ lại để kiểm tra. Lưu cấu hình và khởi động lại VBot để áp dụng.'
+                  ); ?>
                   <div class="row mb-3">
                     <b class="text-danger">Yêu Cầu: Cần Nhập Thêm KEY Trợ Lý Gemini Để Có Thể (Hoa Mỹ, Mỹ Miều) Lời Nhắc Khi Lập Lịch</b>
                   </div>
@@ -6313,6 +6317,8 @@ document.addEventListener('DOMContentLoaded', function () {
   applySearch();
 });
 </script>
+<script>window.configErrorFocus=<?= json_encode($configErrorFocus??null,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE) ?>;</script>
+<script src="assets/js/config-validation-focus.js"></script>
 </body>
 
 </html>
