@@ -17,7 +17,13 @@
         "end_button_press": "short",
         "ring_timeout": 30,
         "max_duration": 3600,
-        "peers": []
+        "peers": [],
+        "pjsip": {
+            "sip_port": 5060
+        },
+        "browser_call": {
+            "active": true
+        }
     },
     "speaker_location": {
         "active": false,
@@ -319,7 +325,11 @@
             "climate": true,
             "automation": true,
             "cover": true,
-            "script": true
+            "script": true,
+            "button": false,
+            "scene": false,
+            "input_boolean": false,
+            "humidifier": false
         },
         "on_off_entity_types": [
             "switch",
@@ -589,8 +599,8 @@
             ],
             "url_timeout_seconds": 15,
             "url_reconnect": true,
-            "vlc_loopback_output_device": "plughw:Loopback,0,0",
-            "vlc_loopback_capture_device": "plughw:Loopback,1,0",
+            "vlc_loopback_output_device": "vbot_aec_media",
+            "vlc_loopback_capture_device": "plughw:Loopback,1,1",
             "local_playback_device": "default",
             "bridge_switch_delay_ms": 80,
             "alsa_capture_command": "arecord",
@@ -617,16 +627,6 @@
             "active": true,
             "log_display_style": "console",
             "notes": "dev_custom, console, all, api"
-        },
-        "webrtcvad": {
-            "active": false,
-            "vad_mode": 1,
-            "rms_threshold": 100,
-            "webrtc_noise_gain": {
-                "active": false,
-                "auto_gain_dbfs": 4,
-                "noise_suppression_level": 2
-            }
         },
         "mic": {
             "id": 14,
@@ -827,10 +827,6 @@
                 "stt_select": "stt_default",
                 "duration_recording": 6,
                 "interim_results": false,
-                "gain": {
-                    "active": false,
-                    "value_float": 1.4
-                },
                 "stt_default": [],
                 "stt_viettel": {
                     "api_key": [
@@ -855,7 +851,11 @@
                 "connection_timeout": 5,
                 "streaming_session_timeout": 30,
                 "result_timeout": 15,
-                "failure_cooldown": 2.5
+                "failure_cooldown": 2.5,
+                "gain": {
+                    "active": false,
+                    "value_float": 1.4
+                }
             },
             "conversation_mode": true,
             "sound": {
@@ -923,10 +923,6 @@
             "hotword": {
                 "select_wakeup": "porcupine",
                 "continue_running_if_hotword_initialization_fails": true,
-                "gain": {
-                    "active": false,
-                    "value_float": 2
-                },
                 "ring_buffer_porcupine": 5,
                 "ring_buffer_snowboy": 15,
                 "notes": "select_wakeup sẽ có 3 giá trị sử dụng từ đánh thức là: porcupine hoặc snowboy, (hoặc null không nằm trong dấu nháy)",
@@ -997,7 +993,11 @@
                         "file_name": "ok_google.pmdl",
                         "sensitive": 0.5
                     }
-                ]
+                ],
+                "gain": {
+                    "active": false,
+                    "value_float": 2
+                }
             }
         },
         "smart_answer": {
@@ -1056,7 +1056,30 @@
             }
         },
         "auto_restart_program_error": true,
-        "fix_time_sync_error": true
+        "fix_time_sync_error": true,
+        "audio_processing": {
+            "active": false,
+            "noise_suppression": "low",
+            "high_pass_filter": true,
+            "agc": {
+                "active": true,
+                "target_level_dbfs": 6,
+                "compression_gain_db": 9,
+                "limiter": true
+            },
+            "aec3": {
+                "active": true,
+                "library": "/home/pi/VBot_AEC3/music_test/libvbot_aec3_music.so",
+                "output": "linear",
+                "playback_device": "default",
+                "playback_latency_ms": 100,
+                "capture_delay_ms": 32,
+                "render_clock_ppm": 980,
+                "capture_gain": 1,
+                "wake_gain": 1,
+                "external_sources": false
+            }
+        }
     },
     "backup_upgrade": {
         "download_path": "Backup_Upgrade/Download",
@@ -1255,5 +1278,8 @@
             "active": false,
             "minimum_threshold": 0.9
         }
+    },
+    "wake_on_lan": {
+        "active": false
     }
 }
