@@ -9,6 +9,11 @@ import statistics
 import threading
 import time
 
+try:
+    import audioop as _audioop
+except ImportError:
+    _audioop = None  # Offline tooling on Python 3.13; Pi runtime uses 3.9.
+
 ROOT = Path(__file__).resolve().parent
 FRAME_BYTES = 320
 
@@ -40,12 +45,21 @@ class ReferenceClock:
         self.step = 1 / (1 + ppm / 1000000)
         self.pending = array.array('h')
         self.position = 0.0
+        self.rate_state = None
+        self.backend = 'audioop' if _audioop is not None else 'python'
 
     def feed(self, pcm):
         if len(pcm) % 2:
             raise ValueError('PCM phải là S16_LE')
         if not self.ppm:
             return pcm
+        if _audioop is not None:
+            # Same streaming linear interpolation as the Python loop below,
+            # using an exact integer ppm ratio. Preserve state across packets.
+            # This changes only AEC reference PCM, never speaker playback.
+            output, self.rate_state = _audioop.ratecv(
+                pcm, 2, 1, 1000000, 1000000 + self.ppm, self.rate_state)
+            return output
         self.pending.extend(array.array('h', pcm))
         output = array.array('h')
         while self.position + 1 < len(self.pending):

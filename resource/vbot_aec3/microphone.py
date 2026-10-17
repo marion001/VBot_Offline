@@ -4,6 +4,8 @@ import ctypes as C
 from collections import deque
 import time
 
+AUDIO_DEBUG_LOGS = False
+
 DEFAULTS = dict(active=True, noise_suppression='low', high_pass_filter=True,
                 agc=dict(active=True, target_level_dbfs=6, compression_gain_db=9,
                          limiter=True))
@@ -98,7 +100,7 @@ class MicrophoneProcessor:
         del self.output[:size]
         if len(out) != len(frame):
             raise RuntimeError('WebRTC MIC frame size mismatch')
-        if now - self.last_log >= 30:
+        if AUDIO_DEBUG_LOGS and now - self.last_log >= 30:
             self.log('[WebRTC MIC] ' + str(self.snapshot()))
             self.last_log = now
         return out

@@ -31,7 +31,8 @@ $:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py 
 <pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py packages /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip
 $:> sudo apt-get install -y $(python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py packages /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip)</code></pre>
 <h5 class="border-bottom pb-2 mt-4">3. Kiểm tra gói trước khi cài</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> mkdir -p /home/pi/VBot_AEC3/tmp
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> sudo mkdir -p /home/pi/VBot_AEC3/tmp
+$:> sudo chown -R pi:pi /home/pi/VBot_AEC3
 $:> export TMPDIR=/home/pi/VBot_AEC3/tmp
 $:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py verify /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip</code></pre>
 <p>Công cụ kiểm tra đường dẫn ZIP, kích thước, checksum từng file và môi trường, rồi thử nạp WebRTC/PJSUA2 trong thư mục tạm. Nếu thiếu <code>.so</code> hệ thống hoặc có <code>GLIBC_* not found</code>, import lỗi, sai ABI/phiên bản thì không tiếp tục cài.</p>
@@ -53,7 +54,8 @@ $:> ldd /home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so</code></pre>
 <p>Không strip thêm file <code>.so</code> trước khi giữ bản sao lưu và kiểm tra import. Bản đã strip hợp lệ có thể đóng gói dùng lại bình thường.</p>
 <h5 class="border-bottom pb-2 mt-4">5. Cài đường âm thanh chung cho AirPlay, Bluetooth và multiroom</h5>
 <p>Dừng chương trình VBot rồi chạy một lần trên mỗi loa:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_Offline
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> systemctl --user stop VBot_Offline.service
+$:> cd /home/pi/VBot_Offline
 $:> sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --apply</code></pre>
 <p>Đây là bước riêng với cài ZIP thư viện: có sửa ALSA, dịch vụ âm thanh và đường Loopback trong Config.json, kèm sao lưu. Nếu đã cài thì không chạy lại <code>--apply</code>. Start.py mới tự kiểm tra và cài khi còn thiếu; nếu lỗi sẽ ghi log và tiếp tục. Xem <a href="#shared-media-routes">Cài đường âm thanh chung cho loa</a>.</p>

@@ -111,7 +111,7 @@ def main():
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     config_path = root / 'Config.json'
     cfg = json.loads(config_path.read_text())
-    if args.ensure:
+    if args.ensure or args.apply:
         asound_text = Path('/etc/asound.conf').read_text() if Path('/etc/asound.conf').exists() else ''
         smart = cfg.get('smart_config', {})
         aec = smart.get('audio_processing', {}).get('aec3', smart.get('aec3', {}))
@@ -140,7 +140,7 @@ def main():
                     vlc_loopback_capture_device='plughw:Loopback,1,1')
                 atomic_write(config_path, (json.dumps(cfg, ensure_ascii=False, indent=4) + '\n').encode())
                 print('SHARED_MEDIA_CONFIG_REPAIRED BACKUP', backup)
-            print('SHARED_MEDIA_ROUTES_READY')
+            print('SHARED_MEDIA_ROUTES_READY - Đường âm thanh chung đã được cài đặt và bật cấu hình từ trước; không cần cài lại.')
             return
     # A startup invocation may ignore only its own not-yet-initialized launcher.
     ancestors = set()
@@ -174,7 +174,7 @@ def main():
     smart = cfg.setdefault('smart_config', {})
     aec = smart.get('audio_processing', {}).get('aec3', smart.get('aec3', {}))
     if aec.get('external_sources'):
-        raise RuntimeError('Shared media routes already installed; use the saved restore command')
+        raise RuntimeError('Cấu hình đã bật đường âm thanh chung nhưng thiết lập hệ thống chưa đầy đủ. Cần kiểm tra hoặc khôi phục từ bản sao lưu trước khi cài lại.')
     prefix = Path('/home/pi/VBot_AEC3')
     backup = prefix / 'routing_backups' / datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     bus = (Path(__file__).with_name('media_bus.conf')).read_text()
