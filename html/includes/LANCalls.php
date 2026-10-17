@@ -42,6 +42,7 @@ function vbotLANCallsSettings(array $post, array $old, array $buttons=[], $profi
         if ($settings['mic_button_mute'] && !empty($post['lan_ptt_button_active']) && ($post['lan_ptt_button']??'')==='mic') throw new InvalidArgumentException('Nút Mic đang dùng bật/tắt mic; hãy chọn nút khác để nhấn giữ nói');
         if ($settings['accept_button_active']) {
             $selected=$settings['accept_button'];
+            if ($selected==='encoder' && isset($buttons['encoder']) && empty($buttons['encoder']['active'])) throw new InvalidArgumentException('Chọn Loại Nút Nhấn encoder_rotary để nhận cuộc gọi bằng Encoder');
             if ($selected!=='encoder' && empty($buttons[$selected]['active'])) throw new InvalidArgumentException('Hãy bật nút nhận cuộc gọi trong cấu hình Button');
         }
     }

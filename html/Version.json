@@ -2,7 +2,7 @@
     "version": "1.3.7",
     "projectName": "WebUI VBot Offline",
     "description": "Thêm mới chức năng: Tạo kịch bản nhiều bước (thực thi kịch bản bằng câu lệnh), và sửa các lỗi hệ thống khác",
-    "releaseDate": "17/10/2026",
+    "releaseDate": "17/10/2026-1",
     "changes": [
         {
             "type": "feature",

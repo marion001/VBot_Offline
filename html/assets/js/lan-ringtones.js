@@ -22,7 +22,7 @@
                 const previous=select.value;
                 select.replaceChildren(new Option('Âm báo mặc định của VBot',''));
                 for(const name of result.files)select.add(new Option(name,name));
-                select.value=select.id===byId('lan_ringtone_upload_target').value?result.name:previous;
+                select.value=result.files.includes(previous)?previous:'';
             }
             input.value='';status.textContent=result.message;
         } catch(error){status.textContent=error.message;} finally{this.disabled=false;}

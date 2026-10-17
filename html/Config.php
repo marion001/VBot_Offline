@@ -335,8 +335,15 @@ if (isset($_POST['all_config_save'])) {
   $lanConfigError='';
   if (vbotLANCallsSettingsSubmitted($_POST)) {
     try {
+      $lanAvailableButtons=$Config['smart_config']['button']??[];
+      foreach ($lanAvailableButtons as $name=>&$button) {
+        $button['active']=isset($_POST['button_active']) && (isset($_POST['button'])
+          ? !empty($_POST['button'][$name]['active']) : !empty($button['active']));
+      }
+      unset($button);
+      $lanAvailableButtons['encoder']=['active'=>isset($_POST['button_active']) && ($_POST['button_type']??$Config['smart_config']['button_active']['button_type']??'')==='encoder_rotary'];
       $Config['lan_calls']=vbotLANCallsSettings($_POST,$Config['lan_calls']??[],
-        $Config['smart_config']['button']??[],$Config['contact_info']['full_name']??'Loa VBot');
+        $lanAvailableButtons,$Config['contact_info']['full_name']??'Loa VBot');
     } catch (InvalidArgumentException $error) {
       $lanConfigError=$error->getMessage();
       $configErrorFocus=['field'=>$error instanceof VBotLANFieldError?$error->field:'lanCallConfiguration','message'=>$lanConfigError];
@@ -1326,10 +1333,46 @@ if (file_exists($tts_token_google_cloud)) {
 }
 
 #Tự Sinh HTML
-function switch_field($name, $label, $checked, $help = '', $attributes = '', $id = null) {
+function vbotConfigFieldHelp($name, $help = '') {
+  if ($help !== '') return $help;
+  $descriptions = [
+    'audio_processing_active'=>'Bật giảm nhiễu và tự cân bằng âm lượng mic cho wake word và STT. Cần cài WebRTC 2.1; nếu không nạp được thư viện, VBot ghi lỗi và tiếp tục dùng mic gốc.',
+    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Bắt đầu ở mức Nhẹ; mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc.',
+    'audio_high_pass_filter'=>'Giảm tiếng ù và rung ở tần số thấp. Nên bật khi mic thu tiếng rung bàn hoặc tiếng gió trầm; không thay thế bộ khử vọng AEC3.',
+    'audio_agc_active'=>'Tự điều chỉnh mức giọng thu được sau khử vọng và giảm nhiễu. Tăng gain quá cao có thể khuếch đại cả tiếng nền; không thay đổi âm lượng trong alsamixer.',
+    'audio_agc_limiter'=>'Giới hạn đỉnh tín hiệu sau AGC để giảm vỡ tiếng khi nói lớn. Nên bật khi dùng AGC; không sửa được tín hiệu đã vỡ ngay từ microphone.',
+    'aec3_active'=>'Dùng âm thanh đang phát làm tham chiếu để giảm nhạc lọt vào mic trước khi nhận wake word. Cần WebRTC 2.1 và đường âm thanh chung cho các nguồn bên ngoài. Công tắc này độc lập với tùy chọn cho phép wake khi phát nhạc.',
+    'aec3_output'=>'Normal giảm vọng dư mạnh hơn, nên dùng trước khi thử Linear. Linear giữ giọng tự nhiên hơn nhưng có thể còn nhạc dư khiến wake word nhận nhầm.',
+    'lan_active'=>'Khởi tạo dịch vụ gọi LAN cùng VBot để gọi và nhận cuộc gọi. Cần PJSIP và WebRTC 2.1; thiếu thư viện sẽ bỏ qua gọi LAN và ghi log, các chức năng khác vẫn chạy.',
+    'lan_control_port'=>'Cổng TCP điều khiển cuộc gọi giữa các loa, cố định 5010. Khác với cổng SIP UDP và các cổng RTP truyền âm thanh.',
+    'lan_output_device'=>'Thiết bị ALSA phát tiếng người gọi trên loa này. Mặc định default; chỉ thay khi đã kiểm tra tên thiết bị bằng aplay -L.',
+    'lan_ring_timeout'=>'Thời gian chờ người nhận bắt máy, mặc định 30 giây. Hết thời gian thì hủy cuộc gọi và dừng nhạc chuông.',
+    'lan_max_duration'=>'Giới hạn thời lượng một cuộc gọi để tránh giữ mic và kết nối quá lâu. Mặc định 3600 giây, tương đương 1 giờ.',
+    'lan_mode'=>'Hai chiều đồng thời cho phép hai bên cùng nói và nghe. Nhấn giữ để nói chỉ truyền mic khi giữ nút hoặc điều khiển PTT tương ứng.',
+    'lan_ptt_button_active'=>'Cho phép dùng nút GPIO đã cấu hình để nhấn giữ truyền mic. Chỉ có tác dụng trong cuộc gọi dùng chế độ nhấn giữ để nói.',
+    'lan_end_button_active'=>'Cho phép nút vật lý kết thúc cuộc gọi đang kết nối hoặc đang trò chuyện. Chọn nút và thao tác bên dưới; ngoài cuộc gọi nút giữ chức năng thông thường.',
+    'lan_end_button'=>'Chọn nút đã bật trong cấu hình Button để kết thúc cuộc gọi. Nếu dùng nút Mic đồng thời bật tắt mic, dùng nhấn giữ để kết thúc nhằm tránh trùng thao tác.',
+    'lan_accept_button_active'=>'Cho phép bắt máy bằng nút vật lý khi có cuộc gọi đến. Khi tắt vẫn có thể nhận bằng WebUI hoặc tự nhận theo cấu hình từng loa.',
+    'lan_accept_button'=>'Chọn nút đã cấu hình và bật để nhận cuộc gọi đến. Thao tác nhấn nhả, nhấn giữ hoặc nhấn đúp được chọn ở mục bên dưới.',
+    'lan_pjsip_sip_port'=>'Cổng UDP báo hiệu SIP, cố định 5060. Hai loa cần kết nối được tới cổng này để thiết lập cuộc gọi.',
+    'lan_pjsip_rtp_port'=>'Cổng UDP bắt đầu cho luồng âm thanh RTP, mặc định 40000. PJSIP có thể sử dụng thêm các cổng kế tiếp cho RTP/RTCP; cần tránh trùng dịch vụ khác.',
+  ];
+  return $descriptions[$name] ?? '';
+}
+
+function vbotConfigHelpIcon($help) {
+  if ($help === '') return '';
+  $action = htmlspecialchars('show_message('.json_encode($help, JSON_UNESCAPED_UNICODE|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_HEX_TAG|JSON_HEX_AMP).')', ENT_QUOTES, 'UTF-8');
+  return ' <i class="bi bi-question-circle-fill" role="button" tabindex="0" style="cursor:pointer" onclick="'.$action.'" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();this.click();}" aria-label="Giải thích cấu hình"></i>';
+}
+
+function switch_field($name, $label, $checked, $help = '', $attributes = '', $id = null, $tableCell = false) {
+  $help = vbotConfigFieldHelp($name, $help);
+  $label .= vbotConfigHelpIcon($help);
   $id = $id ?? $name;
   $safeId = htmlspecialchars($id, ENT_QUOTES, 'UTF-8');
   $safeName = htmlspecialchars($name, ENT_QUOTES, 'UTF-8');
+  if ($tableCell) return '<div class="form-switch"><input aria-label="'.htmlspecialchars(strip_tags($label),ENT_QUOTES,'UTF-8').'" class="form-check-input border-success" type="checkbox" name="'.$safeName.'" id="'.$safeId.'" '.($checked?'checked':'').' '.$attributes.'>'.vbotConfigHelpIcon($help).'</div>';
   $helpHtml = $help !== '' ? '<div class="form-text">'.htmlspecialchars($help, ENT_QUOTES, 'UTF-8').'</div>' : '';
   return '<div class="row mb-3"><label class="col-sm-3 col-form-label" for="'.$safeId.'">'.$label.':</label><div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="'.$safeName.'" id="'.$safeId.'" '.($checked?'checked':'').' '.$attributes.'></div>'.$helpHtml.'</div></div>';
 }
@@ -1341,6 +1384,7 @@ function input_field($id, $label, $value = '', $disabled = '', $type = 'text', $
   $button_class = 'btn btn-success border-success',
   $button_type = 'onclick',
   $button_target = '_blank') {
+  $help = vbotConfigFieldHelp($id, $help);
   $is_full_html = preg_match('/^\s*<[^>]+>.*<\/[^>]+>\s*$/s', $help);
   if ($is_full_html) {
     $help_icon = '';
@@ -1369,7 +1413,14 @@ function input_field($id, $label, $value = '', $disabled = '', $type = 'text', $
     <div class='row mb-3'><label for='$id' class='col-sm-3 col-form-label'>$label $help_html $help_icon:</label><div class='col-sm-9'>$input_html</div></div>";
 }
 
-function select_field($id, $label, $options, $selected, $disabled_options = [], $help = ''){
+function select_field($id, $label, $options, $selected, $disabled_options = [], $help = '', $tableCell = false){
+  $help = vbotConfigFieldHelp($id, $help);
+  if ($tableCell) {
+    $html='<select class="form-select border-success" name="'.htmlspecialchars($id,ENT_QUOTES,'UTF-8').'" id="'.htmlspecialchars($id,ENT_QUOTES,'UTF-8').'" aria-label="'.htmlspecialchars($label,ENT_QUOTES,'UTF-8').'">';
+    foreach ($options as $value=>$text) $html.='<option value="'.$value.'" '.($value===$selected?'selected':'').' '.(in_array($value,$disabled_options)?'disabled':'').'>'.$text.'</option>';
+    return $html.'</select>'.vbotConfigHelpIcon($help);
+  }
+  $label .= vbotConfigHelpIcon($help);
   $html = "
   <div class='row mb-3'>
     <label for='$id' class='col-sm-3 col-form-label'>$label:</label>
@@ -1962,7 +2013,7 @@ include 'html_head.php';
               </div>
             </div>
             </div>
-      <div class="card accordion" id="accordion_button_call_local_lan">
+      <div class="card accordion border-0" id="accordion_button_call_local_lan">
       <div class="card-body">
 <!-- 
       <h5 class="card-title accordion-button collapsed text-danger" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_call_local_lan" aria-expanded="false" aria-controls="collapse_button_call_local_lan">
@@ -1971,10 +2022,11 @@ include 'html_head.php';
 	  -->
 
 <h5 class="card-title accordion-button collapsed text-danger" role="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_call_local_lan" aria-expanded="false" aria-controls="collapse_button_call_local_lan">
-    Gọi Điện Trong Mạng Nội Bộ, Call Local Lan:
+    Gọi Điện Trong Mạng Nội Bộ, Call Local Lan: <?php echo !empty($Config['lan_calls']['active']) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
 </h5>
 
 <div id="collapse_button_call_local_lan" class="accordion-collapse collapse" aria-labelledby="headingThree">
+<div class="alert alert-success border-0" role="alert">
             <?php
 $lanSettings=$Config['lan_calls']??[];
 if (!empty($lanConfigError)) {
@@ -1987,7 +2039,7 @@ $lanLocalIdentity=$lanAutomaticIdentity?vbotStableDeviceId():($lanSettings['id']
 $lanDisplayKey=trim((string)($lanSettings['shared_key']??''));
 if ($lanDisplayKey==='') $lanDisplayKey='vbot_call_lan_audio';
 ?>
-<div class="col-12" id="lanCallConfiguration"><div class="card"><div class="card-body pt-3">
+<div class="col-12" id="lanCallConfiguration">
 <h2 class="h5">Cấu hình gọi nội bộ</h2>
 <p><a href="FAQ.php#native-audio-prebuilt" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn cài đặt PJSIP và WebRTC 2.1</a></p>
 <input type="hidden" name="lan_settings_present" value="1">
@@ -2004,14 +2056,16 @@ foreach (['id'=>['ID loa này','vbot_local'],'control_port'=>['Điều khiển c
     $value=$key==='control_port'?5010:($key==='id' && $lanLocalIdentity!==''?$lanLocalIdentity:($lanSettings[$key]??$field[1]));
     $attrs='required'.(($key==='control_port' || ($key==='id' && $lanAutomaticIdentity))?' readonly':'');
     $help=$key==='id'?'Khi dùng ID mDNS, ID lấy tự động từ phần cứng của loa. Sao chép ID này vào danh sách loa đích trên loa còn lại; không dùng ID MQTT.':'';
-    echo input_field('lan_'.$key,$field[0],$value,$attrs,is_int($field[1])?'number':'text','','','',$help);
+    echo input_field('lan_'.$key,$field[0],$value,$attrs,is_int($field[1])?'number':'text','','','',$help,in_array($key,['id','control_port','output_device'],true)?'border-danger':'border-success');
 }
 ?>
 <p class="form-text">Tên loa được lấy từ hồ sơ: <strong><?= vbotLANEscape($Config['contact_info']['full_name']??'Loa VBot') ?></strong>. Chỉnh tên tại <a href="Users_Profile.php">Hồ sơ người dùng</a> rồi khởi động lại VBot để áp dụng.</p>
 <?php
 echo input_field('lan_shared_key','Khóa chung giữa các loa',$lanDisplayKey,'autocomplete="off" spellcheck="false" maxlength="200" placeholder="Nhập khóa từ 16 đến 200 ký tự"','text','','','',
-    'Các loa cần cùng khóa, từ 16–200 ký tự ASCII, không có khoảng trắng bên trong. Khoảng trắng đầu/cuối tự bỏ khi lưu.');
+    'Các loa cần cùng khóa, từ 16–200 ký tự ASCII, không có khoảng trắng bên trong. Khoảng trắng đầu/cuối tự bỏ khi lưu.','border-danger');
 echo select_field('lan_mode','Chế độ microphone khi nhận',['full_duplex'=>'Hai chiều đồng thời','push_to_talk'=>'Nhấn giữ để nói'],$lanSettings['mode']??'full_duplex');
+echo input_field('lan_auto_accept_delay','Chờ trước khi tự nhận (giây)',$lanSettings['auto_accept_delay']??3,'','number','1','0','30',
+    'Mặc định 3 giây. Chỉ áp dụng cho loa được chọn tự nhận trong danh sách Gọi điện LAN; các loa khác nhận thủ công.');
 require __DIR__.'/includes/LANCallRingtones.php';
 $lanButtonOptions=[];
 foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button) {
@@ -2019,31 +2073,17 @@ foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button) {
 }
 require __DIR__.'/includes/LANCallReceiveControls.php';
 ?>
-<h6 class="mt-4 border-bottom pb-2">Nhấn giữ để nói</h6>
-<input type="hidden" name="lan_ptt_present" value="1">
-<?php
-echo switch_field('lan_ptt_button_active','Dùng nút vật lý nhấn giữ để nói',!empty($lanSettings['ptt_button_active']));
-echo select_field('lan_ptt_button','Nút nhấn giữ để nói',[''=>'Chọn nút đã cấu hình']+$lanButtonOptions,vbotLANEscape($lanSettings['ptt_button']??''),[],
-    'Chỉ hoạt động khi nút được bật trong cấu hình Button và cuộc gọi dùng chế độ nhấn giữ để nói. Giữ để truyền mic, thả để ngừng truyền. Trong cuộc gọi, nút ưu tiên chức năng này; ngoài cuộc gọi giữ chức năng cũ. Nếu chọn MIC, dùng WebUI để kết thúc.');
-?>
-<h6 class="mt-4 border-bottom pb-2">Kết thúc cuộc gọi</h6>
-<input type="hidden" name="lan_end_button_present" value="1">
-<?php
-echo switch_field('lan_end_button_active','Dùng nút vật lý ngắt cuộc gọi',$lanSettings['end_button_active']??true);
-echo select_field('lan_end_button','Nút ngắt cuộc gọi',[''=>'Chọn nút đã cấu hình']+$lanButtonOptions,vbotLANEscape($lanSettings['end_button']??'mic'));
-echo select_field('lan_end_button_press','Thao tác ngắt cuộc gọi',['short'=>'Nhấn nhả','hold'=>'Nhấn giữ','both'=>'Cả nhấn nhả và nhấn giữ'],
-    !empty($lanSettings['mic_button_mute']??true) && ($lanSettings['end_button']??'mic')==='mic'?'hold':($lanSettings['end_button_press']??'short'),[],
-    'Áp dụng khi đang kết nối hoặc trò chuyện. Thời gian giữ lấy từ cấu hình Button, mặc định 2 giây. Ngoài cuộc gọi nút giữ chức năng cũ. Nút ngắt và nút nhấn giữ nói phải khác nhau khi dùng chế độ nhấn giữ nói.');
-?>
-<h6 class="mt-4 border-bottom pb-2">Kết nối PJSIP</h6>
+<div class="border border-success rounded p-3 mb-3">
+<h6 class="border-bottom pb-2">Kết nối PJSIP</h6>
 <?php
 foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
     echo input_field('lan_pjsip_'.$field,$field==='sip_port'?'SIP UDP (cố định)':'Cổng bắt đầu RTP UDP',
-        $field==='sip_port'?5060:($lanSettings['pjsip'][$field]??$default),$field==='sip_port'?'readonly':'','number','','1024',$field==='rtp_port'?'65526':'65535');
+        $field==='sip_port'?5060:($lanSettings['pjsip'][$field]??$default),$field==='sip_port'?'readonly':'','number','','1024',$field==='rtp_port'?'65526':'65535','','border-danger');
 }
 ?>
 <p class="form-text">Mic dùng chung PvRecorder; AEC cuộc gọi và NS/AGC chung chỉ xử lý một lần. Cổng audio_port cũ không được sử dụng cho RTP PJSIP. Dừng bản calls_pjsip_test trước khi chạy VBot.</p>
-</div></div></div>
+</div>
+</div>
 <script>document.getElementById('lanUseMdnsId').addEventListener('change',function(){document.getElementById('lan_id').readOnly=this.checked;});</script>
 <script>
 (() => {
@@ -2064,8 +2104,9 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
 
 })();
 </script>
-<script src="assets/js/lan-ringtones.js?v=1" defer></script>
+<script src="assets/js/lan-ringtones.js?v=2" defer></script>
 
+      </div>
       </div>
       </div>
       </div>
@@ -2346,12 +2387,12 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                       <input type="hidden" name="aec3_settings_present" value="1">
                       <?php echo switch_field('aec3_active','Bật AEC3 cho wake word khi phát nhạc',$aec3['active']); ?>
                       <?php
-                      echo input_field('aec3_library','Thư viện AEC3',htmlspecialchars($aec3['library']),'required','text','','','','Đường dẫn thư viện đã build trên thiết bị. Linear cần thư viện hỗ trợ export linear.','border-success','','','','','');
+                      echo input_field('aec3_library','Thư viện AEC3',htmlspecialchars($aec3['library']),'required','text','','','','Đường dẫn thư viện đã build trên thiết bị. Linear cần thư viện hỗ trợ export linear.','border-danger','','','','','');
                       echo select_field('aec3_output','Tín hiệu cho wake word',['linear'=>'Tuyến tính — giữ giọng, còn âm dư','normal'=>'AEC thông thường — giảm vọng dư mạnh hơn'],$aec3['output'],[]);
-                      echo input_field('aec3_playback_device','Thiết bị loa ALSA',htmlspecialchars($aec3['playback_device']),'required','text','','','','Mặc định default. AEC3 giữ âm lượng phần mềm VLC, không chỉnh alsamixer.','border-success','','','','','');
+                      echo input_field('aec3_playback_device','Thiết bị loa ALSA',htmlspecialchars($aec3['playback_device']),'required','text','','','','Mặc định default. AEC3 giữ âm lượng phần mềm VLC, không chỉnh alsamixer.','border-danger','','','','','');
                       echo input_field('aec3_capture_gain','Gain mic trước AEC3',$aec3['capture_gain'],'required','number','0.1','0.1','8','Bắt đầu 1. Không cộng gain wake word cũ. Giảm nếu log báo clipping.','border-success','','','','','');
                       echo input_field('aec3_wake_gain','Gain wake word sau AEC3',$aec3['wake_gain'],'required','number','0.1','0.1','8','Bắt đầu 1. Tăng có thể tăng kích hoạt nhầm.','border-success','','','','','');
-                      echo input_field('aec3_playback_latency_ms','Buffer loa (ms)',$aec3['playback_latency_ms'],'required','number','1','20','200','Mặc định 100.','border-success','','','','','');
+                      echo input_field('aec3_playback_latency_ms','Buffer loa (ms)',$aec3['playback_latency_ms'],'required','number','1','20','200','Bộ đệm khi AEC3 trực tiếp phát ra ALSA, mặc định 100 ms. Giảm giúp giảm trễ nhưng dễ xẹt hoặc thiếu dữ liệu; tăng có thể ổn định hơn nhưng tăng trễ. Đường âm thanh chung dùng bộ đệm của bridge.','border-success','','','','','');
                       echo input_field('aec3_capture_delay_ms','Độ trễ mic bổ sung (ms)',$aec3['capture_delay_ms'],'required','number','1','0','500','Mặc định 32; cộng với độ trễ ALSA đo được.','border-success','','','','','');
                       echo input_field('aec3_render_clock_ppm','Bù clock tham chiếu (ppm)',$aec3['render_clock_ppm'],'required','number','1','-3000','3000','980 đã đo ở hai loa test. Cần đo lại nếu thay thiết bị/đường âm thanh.','border-success','','','','','');
                       ?>
@@ -4141,12 +4182,12 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </div>
                       </div>
                       <?php
-                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'vbot_aec_media', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC ghi âm thanh vào snd-aloop.', 'border-success');
-                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,1', 'required', 'text', '', '', '', 'Thiết bị ALSA mà Multiroom dùng để thu âm thanh từ snd-aloop.', 'border-success');
-                      echo input_field('multiroom_audio_local_playback_device', 'Thiết Bị Phát Âm Thanh Local', $multiroom_audio_config['local_playback_device'] ?? 'default', 'required', 'text', '', '', '', 'Thiết bị ALSA phát âm thanh trên chính loa này.', 'border-success');
+                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'vbot_aec_media', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC ghi âm thanh vào snd-aloop.<br>Mặc định đặt là: vbot_aec_media', 'border-danger');
+                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,1', 'required', 'text', '', '', '', 'Thiết bị ALSA mà Multiroom dùng để thu âm thanh từ snd-aloop.<br>Mặc định đặt là: plughw:Loopback,1,1', 'border-danger');
+                      echo input_field('multiroom_audio_local_playback_device', 'Thiết Bị Phát Âm Thanh Local', $multiroom_audio_config['local_playback_device'] ?? 'default', 'required', 'text', '', '', '', 'Thiết bị ALSA phát âm thanh trên chính loa này.', 'border-danger');
                       echo input_field('multiroom_audio_bridge_switch_delay_ms', 'Độ Trễ Chuyển Bridge (ms)', $multiroom_audio_config['bridge_switch_delay_ms'] ?? 80, 'required', 'number', '1', '0', '', 'Thời gian nghỉ khi Audio Bridge chuyển quyền capture giữa Local và Multiroom.', 'border-success');
-                      echo input_field('multiroom_audio_alsa_capture_command', 'Lệnh Thu ALSA', $multiroom_audio_config['alsa_capture_command'] ?? 'arecord', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để thu âm thanh.', 'border-success');
-                      echo input_field('multiroom_audio_alsa_playback_command', 'Lệnh Phát ALSA', $multiroom_audio_config['alsa_playback_command'] ?? 'aplay', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để phát âm thanh.', 'border-success');
+                      echo input_field('multiroom_audio_alsa_capture_command', 'Lệnh Thu ALSA', $multiroom_audio_config['alsa_capture_command'] ?? 'arecord', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để thu âm thanh.<br>Mặc định đặt là: arecord', 'border-danger');
+                      echo input_field('multiroom_audio_alsa_playback_command', 'Lệnh Phát ALSA', $multiroom_audio_config['alsa_playback_command'] ?? 'aplay', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để phát âm thanh.<br>Mặc định đặt là: aplay', 'border-danger');
                       ?>
                     </div>
                     </div>
@@ -5698,7 +5739,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
               </div>
             </div>
 
-      <div class="card" id="wakeOnLanConfiguration"><div class="card-body pt-3">
+      <div id="wakeOnLanConfiguration">
+        <div class="alert alert-success" role="alert">
         <h5 class="card-title">Wake-on-LAN — Bật máy tính</h5>
         <input type="hidden" name="wol_settings_present" value="1">
         <div class="row mb-3">
@@ -5710,7 +5752,8 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
           </div>
         </div>
         <p class="form-text">Nhấn Lưu Cài Đặt để áp dụng, không cần khởi động lại VBot. Quản lý MAC và bật máy tại <a href="Wake_On_LAN.php">Wake-on-LAN</a>.</p>
-      </div></div>
+        </div>
+      </div>
             <div class="card">
               <div class="card-body">
                 <h5 class="card-title">Đọc địa chỉ IP khi chương trình VBot khởi chạy:</h5>

@@ -57,7 +57,8 @@ Manifest không chứa file thư viện hệ thống của máy nguồn.
 ## 3. Kiểm tra gói trước khi cài
 
 ```bash
-mkdir -p /home/pi/VBot_AEC3/tmp
+sudo mkdir -p /home/pi/VBot_AEC3/tmp
+sudo chown -R pi:pi /home/pi/VBot_AEC3
 export TMPDIR=/home/pi/VBot_AEC3/tmp
 python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py verify /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip
 ```
@@ -101,6 +102,7 @@ Bản đã strip hợp lệ có thể đóng gói dùng lại bình thường.
 Dừng VBot rồi chạy một lần trên mỗi loa:
 
 ```bash
+systemctl --user stop VBot_Offline.service
 cd /home/pi/VBot_Offline
 sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --apply

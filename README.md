@@ -84,6 +84,8 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 
 ### Hệ thống và tiện ích
 
+- Kịch bản nhiều bước bằng giọng nói, cấu hình trên trang WebUI riêng `Voice_Routines.php`: Home Assistant, thao tác loa, âm lượng, thông báo và chờ. Xem [hướng dẫn kịch bản](resource/voice_routines/README_Voice_Routines.md).
+- Phòng đặt loa: lệnh như “bật đèn” tự tìm thiết bị Home Assistant trong phòng đã cấu hình, hỏi lại theo phiên nếu có nhiều thiết bị. Bật/tắt và sửa phòng tại Config hoặc hồ sơ người dùng. Xem [hướng dẫn phòng đặt loa](resource/README_Speaker_Location.md).
 - Scheduler cho thông báo, báo thức, phát media, thay đổi âm lượng, LED và microphone.
 - Nút nhấn và rotary encoder.
 - LED báo trạng thái chờ, nghe, xử lý, phát âm thanh, mute, pause, cập nhật, lỗi và thay đổi âm lượng.
@@ -93,6 +95,8 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - Runtime diagnostics và watchdog nhẹ cho các luồng quan trọng.
 
 ### Các tính năng mới nổi bật
+
+- **Gọi điện LAN giữa loa VBot Python:** gọi, nhận/từ chối, kết thúc, microphone riêng cho cuộc gọi và PCM hai chiều nội bộ; có chế độ nhấn giữ để nói. Cấu hình tại `LAN_Calls.php`. Xem [hướng dẫn gọi điện LAN](resource/README_LAN_Calls.md).
 
 - **Multiroom Audio:** một VBot làm coordinator phát đồng bộ tới nhiều loa VBot trong LAN; hỗ trợ nhóm loa, metadata, volume tổng và volume từng luồng.
 - **Apple HomeKit:** đưa loa, Remote iOS, media, trợ lý, playlist, radio, hệ thống và Multiroom vào ứng dụng Nhà qua VBot HomeKit Bridge; trạng thái được đồng bộ bằng SSE và lệnh điều khiển gọi trực tiếp API VBot.
@@ -258,6 +262,34 @@ Agent Bluetooth nằm tại:
 resource/bluetooth/bluetooth_agent.py
 ```
 
+## WebRTC 2.1 và PJSIP
+
+Thư viện được cài riêng tại `/home/pi/VBot_AEC3/`, không nằm trong môi trường Python ảo. Chọn một trong hai hướng dẫn:
+
+- [Cài từ ZIP đã build](resource/tools/README_INSTALL_WEBRTC21_PJSIP_PREBUILT.md), dành cho thiết bị có kiến trúc, Python và hệ điều hành tương thích.
+- [Build thủ công từng bước](resource/tools/README_INSTALL_WEBRTC21_PJSIP_MANUAL.md).
+
+Trước khi kiểm tra ZIP, chuẩn bị thư mục tạm và quyền ghi cho tài khoản `pi`:
+
+```bash
+sudo mkdir -p /home/pi/VBot_AEC3/tmp
+sudo chown -R pi:pi /home/pi/VBot_AEC3
+export TMPDIR=/home/pi/VBot_AEC3/tmp
+```
+
+Sau khi cài thư viện, chuẩn bị đường âm thanh chung cho AirPlay, Bluetooth và Multiroom trên mỗi loa:
+
+```bash
+systemctl --user stop VBot_Offline.service
+cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py \
+  --root /home/pi/VBot_Offline --ensure
+```
+
+Nếu VBot đang chạy thủ công, dừng bằng `Ctrl+C` trước khi chạy lệnh cài. Thông báo `SHARED_MEDIA_ROUTES_READY` nghĩa là đường âm thanh đã đầy đủ, không cần cài lại. Công cụ có sao lưu khi thay đổi cấu hình; nếu báo thiết lập chưa đầy đủ, xem [hướng dẫn đường âm thanh chung](resource/tools/README_INSTALL_SHARED_MEDIA_ROUTES.md).
+
+Bật WebRTC MIC và Gọi LAN theo nhu cầu trong `Config.php`, sau đó khởi động lại VBot. Tài liệu cũng có trong WebUI tại `FAQ.php`, mục **Cài WebRTC 2.1 và PJSIP**.
+
 ## Multiroom Audio
 
 Multiroom cho phép một loa VBot làm **coordinator** và phân phối audio tới các loa thành viên trong cùng mạng LAN. Kiến trúc gồm bridge điều phối nguồn, receiver trên từng loa, controller và kho cấu hình nhóm.
@@ -372,7 +404,7 @@ Các trách nhiệm chính của `Streaming.py`:
 
 Xem thêm:
 
-- [`README_Socket_Client.md`](README_Socket_Client.md)
+- [`README_Socket.md`](README_Socket.md)
 
 ## REST API, SSE và MQTT
 
