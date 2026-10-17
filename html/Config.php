@@ -760,8 +760,8 @@ if (isset($_POST['all_config_save'])) {
   $Config['media_player']['multiroom_audio']['url_reconnect'] = isset($_POST['multiroom_audio_url_reconnect']);
 
   $multiroom_string_defaults = [
-    'vlc_loopback_output_device' => 'plughw:Loopback,0,0',
-    'vlc_loopback_capture_device' => 'plughw:Loopback,1,0',
+    'vlc_loopback_output_device' => 'vbot_aec_media',
+    'vlc_loopback_capture_device' => 'plughw:Loopback,1,1',
     'local_playback_device' => 'default',
     'alsa_capture_command' => 'arecord',
     'alsa_playback_command' => 'aplay',
@@ -4150,8 +4150,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </div>
                       </div>
                       <?php
-                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'plughw:Loopback,0,0', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC ghi âm thanh vào snd-aloop.', 'border-success');
-                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,0', 'required', 'text', '', '', '', 'Thiết bị ALSA mà Multiroom dùng để thu âm thanh từ snd-aloop.', 'border-success');
+                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'vbot_aec_media', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC ghi âm thanh vào snd-aloop.', 'border-success');
+                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,1', 'required', 'text', '', '', '', 'Thiết bị ALSA mà Multiroom dùng để thu âm thanh từ snd-aloop.', 'border-success');
                       echo input_field('multiroom_audio_local_playback_device', 'Thiết Bị Phát Âm Thanh Local', $multiroom_audio_config['local_playback_device'] ?? 'default', 'required', 'text', '', '', '', 'Thiết bị ALSA phát âm thanh trên chính loa này.', 'border-success');
                       echo input_field('multiroom_audio_bridge_switch_delay_ms', 'Độ Trễ Chuyển Bridge (ms)', $multiroom_audio_config['bridge_switch_delay_ms'] ?? 80, 'required', 'number', '1', '0', '', 'Thời gian nghỉ khi Audio Bridge chuyển quyền capture giữa Local và Multiroom.', 'border-success');
                       echo input_field('multiroom_audio_alsa_capture_command', 'Lệnh Thu ALSA', $multiroom_audio_config['alsa_capture_command'] ?? 'arecord', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để thu âm thanh.', 'border-success');

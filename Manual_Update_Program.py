@@ -29,6 +29,7 @@ import urllib.request
 import zipfile
 
 from Update_Backup import create_full_backup
+from Update_Paths import relative_target, rollback_plan
 
 try:
     import fcntl
@@ -45,9 +46,7 @@ SUCCESS_SOUND = ROOT / "resource/sound/default/updated_the_program_successfully.
 ERROR_SOUND = ROOT / "resource/sound/default/vbot_program_update_failed.mp3"
 CORE_UPDATE_JSON = {
     "Version.json",
-    "Action.json",
-    "Adverbs.json",
-    "Object.json",
+    "resource/lang_keywords/vi-VN.json",
     "resource/SYS_CMD.json",
     "resource/VietNam_Localtion.json",
     "resource/API_VBot_OFFLINE.postman_collection.json",
@@ -208,6 +207,25 @@ def merge_config(template, old):
             result[key] = old_value
     return result
 
+def migrate_shared_media_routes(config):
+    """Upgrade legacy bus endpoints without replacing custom hardware routes."""
+    media = config.get('media_player', {})
+    if not isinstance(media, dict):
+        return False
+    routes = media.get('multiroom_audio', {})
+    if not isinstance(routes, dict):
+        return False
+    changed = False
+    for key, old, new in (
+        ('vlc_loopback_output_device', 'plughw:Loopback,0,0', 'vbot_aec_media'),
+        ('vlc_loopback_capture_device', 'plughw:Loopback,1,0', 'plughw:Loopback,1,1'),
+    ):
+        if routes.get(key) == old:
+            routes[key] = new
+            changed = True
+    return changed
+
+
 def download_with_progress(url, destination, timeout):
     request = urllib.request.Request(url, headers={"User-Agent": "VBot-Manual-Updater"})
     with urllib.request.urlopen(request, timeout=timeout) as response, destination.open("wb") as out:
@@ -363,6 +381,7 @@ def safe_extract(archive, target):
     with zipfile.ZipFile(archive) as package:
         for info in package.infolist():
             name = PurePosixPath(info.filename.replace("\\", "/"))
+            relative_target(target, info.filename)
             mode = (info.external_attr >> 16) & 0o170000
             if name.is_absolute() or ".." in name.parts or mode == stat.S_IFLNK:
                 raise RuntimeError(f"ZIP chứa đường dẫn/liên kết không an toàn: {info.filename}")
@@ -382,6 +401,8 @@ def safe_extract_tar(archive, target):
             raise RuntimeError("Tệp rollback tar.gz không chứa dữ liệu")
         for member in members:
             name = PurePosixPath(member.name.replace("\\", "/"))
+            if name.parts:
+                relative_target(target, member.name)
             if name.is_absolute() or ".." in name.parts or member.issym() or member.islnk() or member.isdev():
                 raise RuntimeError(f"Tệp rollback chứa mục không an toàn: {member.name}")
         package.extractall(target, members=members)
@@ -394,7 +415,7 @@ def newest_backup(paths, prefix):
         for directory in paths
         if directory.is_dir()
         for item in directory.glob(f"{prefix}_*.tar.gz")
-        if item.is_file()
+        if item.is_file() and not item.is_symlink()
     ]
     if not candidates:
         locations = ", ".join(str(path) for path in paths)
@@ -426,7 +447,7 @@ def restore_full_tree(source, destination, skip_html=False):
         relative = item.relative_to(source)
         if skip_html and relative.parts and relative.parts[0] == "html":
             continue
-        target = destination / relative
+        target = relative_target(destination, relative.as_posix())
         if relative.as_posix() == "Config.json":
             atomic_json_write(target, read_json(item))
         else:
@@ -526,22 +547,28 @@ def copy_transaction(source, rollback, keep_entries, replace_json):
     created = []
     preserved = []
     created_file = rollback / "created.json"
-    created_file.write_text("[]", encoding="utf-8")
+    atomic_json_write(created_file, [])
     for item in source.rglob("*"):
         if not item.is_file():
             continue
         relative = item.relative_to(source)
         if relative.parts[0] == "html" or relative.as_posix() in {"Config.json", "Config.json.bak"}:
             continue
-        destination = ROOT / relative
+        destination = relative_target(ROOT, relative.as_posix())
         relative_text = relative.as_posix()
         # Device-local CPU identity must never come from an update package,
         # even when the destination file does not exist yet.
         if relative.name in {"cpu_info", "cpu_serial"}:
             preserved.append(relative_text)
             continue
+        # A renamed user-data file is still existing data. Do not install the
+        # package's example at the new path before WebUI migrates the old file.
+        legacy_routines = (
+            relative_text == 'resource/voice_routines/voice_routines.json'
+            and (ROOT / 'resource/voice_routines.json').is_file()
+        )
         preserve_existing_json = (
-            destination.exists()
+            (destination.exists() or legacy_routines)
             and relative.suffix.lower() == ".json"
             and relative_text not in CORE_UPDATE_JSON
             and relative_text not in replace_json
@@ -555,7 +582,7 @@ def copy_transaction(source, rollback, keep_entries, replace_json):
             atomic_copy_file(destination, backup)
         else:
             created.append(relative.as_posix())
-            created_file.write_text(json.dumps(created, indent=2), encoding="utf-8")
+            atomic_json_write(created_file, created)
         atomic_copy_file(item, destination)
     log(f"Đã sao chép chương trình mới; có {len(created)} tệp mới được tạo")
     if preserved:
@@ -565,18 +592,12 @@ def copy_transaction(source, rollback, keep_entries, replace_json):
 
 def rollback_transaction(rollback):
     log("Đang khôi phục các tệp chương trình từ rollback...")
-    created_file = rollback / "created.json"
-    if created_file.is_file():
-        for relative in json.loads(created_file.read_text(encoding="utf-8")):
-            target = ROOT / relative
-            if target.is_file() or target.is_symlink():
-                target.unlink()
-    files_root = rollback / "files"
-    if files_root.is_dir():
-        for backup in files_root.rglob("*"):
-            if backup.is_file():
-                destination = ROOT / backup.relative_to(files_root)
-                atomic_copy_file(backup, destination)
+    created, restored = rollback_plan(rollback, ROOT)
+    for target in created:
+        if target.is_file():
+            target.unlink()
+    for backup, destination in restored:
+        atomic_copy_file(backup, destination)
     log("Đã khôi phục các tệp chương trình cũ")
 
 def service(command):
@@ -626,6 +647,8 @@ def _update(args):
         log(f"Giới hạn backup chương trình thủ công: {manual_backup_limit} tệp")
         log("Đã đọc Config.json hiện tại")
         merged_config = merge_config(read_json(source / "Config.json"), old_config)
+        if migrate_shared_media_routes(merged_config):
+            log("[Audio routes] Migrated legacy Loopback endpoints to the shared media bus")
         log("Đã merge giá trị Config cũ vào mẫu Config mới")
         keep_entries = configured_keep_entries(old_config, "vbot_program")
         if args.no_configured_keep:
