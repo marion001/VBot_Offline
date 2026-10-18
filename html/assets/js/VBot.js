@@ -27,17 +27,23 @@ function vbotMediaHandler(functionName, args) {
     });
     return vbotMediaEscape(safeName + '(' + values.join(',') + ')');
 }
-function setTheme(theme) {
+function setTheme(theme, persist = true) {
+    theme = theme === 'dark' ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('vbot_theme', theme);
+    document.documentElement.style.colorScheme = theme;
+    if (persist) {
+        try { localStorage.setItem('vbot_theme', theme); } catch (error) { /* Session-only theme remains usable. */ }
+    }
     if (themeToggle) {
         if (theme === 'dark') {
             themeToggle.classList.remove('bi-moon-stars-fill');
-            themeToggle.innerHTML = '<i class="bi bi-sun"></i> Chế độ sáng';
+            themeToggle.innerHTML = '<i class="bi bi-sun" aria-hidden="true"></i><span>Chế độ sáng</span>';
         } else {
             themeToggle.classList.remove('bi-sun');
-            themeToggle.innerHTML = '<i class="bi bi-moon-stars-fill"></i> Chế độ tối';
+            themeToggle.innerHTML = '<i class="bi bi-moon-stars-fill" aria-hidden="true"></i><span>Chế độ tối</span>';
         }
+        themeToggle.setAttribute('aria-label', theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối');
+        themeToggle.title = theme === 'dark' ? 'Chuyển sang chế độ sáng' : 'Chuyển sang chế độ tối';
     }
 }
 
@@ -47,8 +53,12 @@ function toggleTheme() {
     setTheme(newTheme);
 }
 
-const savedTheme = localStorage.getItem('vbot_theme') || 'light';
-setTheme(savedTheme);
+let savedTheme = document.documentElement.getAttribute('data-theme') || 'light';
+try { savedTheme = localStorage.getItem('vbot_theme') || savedTheme; } catch (error) { /* Storage may be blocked. */ }
+setTheme(savedTheme, false);
+window.addEventListener('storage', function (event) {
+    if (event.key === 'vbot_theme') setTheme(event.newValue, false);
+});
 if (themeToggle) {
     themeToggle.addEventListener('click', toggleTheme);
 }

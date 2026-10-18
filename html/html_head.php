@@ -22,6 +22,14 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 
 <head>
   <meta charset="utf-8">
+  <script>
+    (function () {
+      var theme = 'light';
+      try { theme = localStorage.getItem('vbot_theme') === 'dark' ? 'dark' : 'light'; } catch (error) {}
+      document.documentElement.setAttribute('data-theme', theme);
+      document.documentElement.style.colorScheme = theme;
+    })();
+  </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <meta name="vbot-csrf-token" content="<?php echo htmlspecialchars($VBot_Csrf_Token, ENT_QUOTES, 'UTF-8'); ?>">
   <script>

@@ -419,9 +419,9 @@ include_once 'Configuration.php';
             <button id="themeToggle" class="btn btn-primary"><i class="bi bi-moon"></i></button>
             -->
           <li>
-            <a class="dropdown-item d-flex align-items-center" id="themeToggle">
-              <span>Chế độ tối</span>
-            </a>
+            <button type="button" class="dropdown-item d-flex align-items-center" id="themeToggle" aria-label="Chuyển sang chế độ tối">
+              <i class="bi bi-moon-stars-fill" aria-hidden="true"></i><span>Chế độ tối</span>
+            </button>
           </li>
           <li>
             <hr class="dropdown-divider">
