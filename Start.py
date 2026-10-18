@@ -167,6 +167,9 @@ def ensure_shared_media_routes() -> bool:
                           '--ensure', '--startup-pid', str(os.getpid())],
             capture_output=True, text=True, check=True,
         )
+        for line in result.stdout.splitlines():
+            if line.startswith('AUDIO_HARDWARE_REPAIRED'):
+                _write_startup_log('[ALSA] Đã sửa định tuyến theo loại image. '+line)
         if 'SHARED_MEDIA_CONFIG_REPAIRED' in result.stdout:
             _write_startup_log('[Âm thanh chung] Đã đồng bộ cấu hình với đường âm thanh đã cài; không khởi động lại dịch vụ. ' + result.stdout.strip())
         elif 'SHARED_MEDIA_ROUTES_READY' not in result.stdout:

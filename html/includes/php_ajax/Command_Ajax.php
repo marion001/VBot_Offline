@@ -268,52 +268,13 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
         .'else printf "VBOT_MANUAL_RESTART_REQUIRED"; fi';
     $commands[] = ['command' => $resetCommand, 'label' => 'Đặt lại dữ liệu ghép đôi HomeKit'];
 } elseif ($action === 'fix_asound_airplay') {
-    $imageInfoPath = '/os_image_created.txt';
-    if (!is_file($imageInfoPath)) {
-        error_log('Command AJAX fix_asound_airplay failed: missing '.$imageInfoPath);
-        vbotApiJsonResponse([
-            'success' => false,
-            'status' => 'error',
-            'message' => 'Không tìm thấy file nhận diện OS: '.$imageInfoPath
-        ], 500);
-    }
-    $imageInfo = @file_get_contents($imageInfoPath);
-    if ($imageInfo === false) {
-        error_log('Command AJAX fix_asound_airplay failed: cannot read '.$imageInfoPath);
-        vbotApiJsonResponse([
-            'success' => false,
-            'status' => 'error',
-            'message' => 'Không thể đọc file nhận diện OS.'
-        ], 500);
-    }
-    $configName = stripos($imageInfo, 'i2s') !== false
-        ? 'default_i2s_asound.conf'
-        : 'default_wm8960_asound.conf';
-    $source = rtrim($VBot_Offline, '/').'/resource/asound_conf/'.$configName;
-    if (!is_file($source)) {
-        error_log('Command AJAX fix_asound_airplay failed: missing source '.$source);
-        vbotApiJsonResponse([
-            'success' => false,
-            'status' => 'error',
-            'message' => 'Không tìm thấy file cấu hình âm thanh nguồn: '.$configName
-        ], 500);
-    }
-
-    $target = '/etc/asound.conf';
-    $backup = '/etc/asound.conf.vbot-backup-'.str_replace('.', '-', uniqid('', true));
-    $sourceArg = escapeshellarg($source);
-    $targetArg = escapeshellarg($target);
-    $backupArg = escapeshellarg($backup);
-    $restoreCommand = '(had_backup=0; '
-        .'if sudo test -e '.$targetArg.'; then sudo cp -a -- '.$targetArg.' '.$backupArg.' || exit 1; had_backup=1; fi; '
-        .'result=0; sudo cp -- '.$sourceArg.' '.$targetArg
-        .' && sudo cmp -s -- '.$sourceArg.' '.$targetArg
-        .' && sudo systemctl restart alsa-state.service || result=$?; '
-        .'if [ "$result" -ne 0 ]; then '
-        .'if [ "$had_backup" -eq 1 ]; then sudo cp -a -- '.$backupArg.' '.$targetArg.'; else sudo rm -f -- '.$targetArg.'; fi; '
-        .'sudo systemctl restart alsa-state.service >/dev/null 2>&1; fi; '
-        .'sudo rm -f -- '.$backupArg.'; exit "$result")';
-    $commands[] = ['command' => $restoreCommand, 'label' => $target];
+    $hardwareScript = rtrim($VBot_Offline, '/').'/resource/vbot_aec3/hardware_routes.py';
+    $commands[] = [
+        'command' => 'sudo python3 '.escapeshellarg($hardwareScript)
+            .' --root '.escapeshellarg(rtrim($VBot_Offline, '/')).' --restore-default',
+        'label' => '/etc/asound.conf',
+    ];
+    $commands[] = ['command' => 'sudo systemctl restart alsa-state.service', 'label' => 'Reload ALSA'];
 } elseif ($action === 'Stop_Service_Unnecessary_Processes') {
     $scriptPath = rtrim($VBot_Offline, '/').'/resource/Stop_Unnecessary_Processes.sh';
     if (!is_file($scriptPath)) {
@@ -545,9 +506,11 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
             .'for CF_PATH in /usr/local/bin/cloudflared /usr/bin/cloudflared /bin/cloudflared; do '
             .'if [ -z "$CF_BIN" ] && [ -x "$CF_PATH" ]; then CF_BIN="$CF_PATH"; fi; done; '
             .'[ -n "$CF_BIN" ] && [ -x "$CF_BIN" ] && timeout 30s "$CF_BIN" tunnel list',
-        'save_asound_to_alsamixer' => 'sudo alsactl store && sudo cp -- /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state',
+        'save_asound_to_alsamixer' => 'sudo alsactl store && sudo cp -- /var/lib/alsa/asound.state /etc/wm8960-soundcard/wm8960_asound.state'
+            .' && if sudo test -f /var/lib/alsa/vbot-wm8960.state; then sudo alsactl -f /var/lib/alsa/vbot-wm8960.state store wm8960soundcard; fi',
         'alsamixer_asound_to_alsamixer' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state')
-            .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state').' /etc/wm8960-soundcard/wm8960_asound.state',
+            .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state').' /etc/wm8960-soundcard/wm8960_asound.state'
+            .' && if sudo test -f /var/lib/alsa/vbot-wm8960.state; then sudo cp -- /etc/wm8960-soundcard/wm8960_asound.state /var/lib/alsa/vbot-wm8960.state; fi',
         'update_btwifiset_py' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/set_wifi_via_ble/btwifiset.py')
             .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/set_wifi_via_ble/btwifiset.py').' /usr/local/btwifiset/btwifiset.py',
         'fix_airplay_services' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/airplay/shairport-sync.service')

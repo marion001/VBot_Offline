@@ -9,36 +9,37 @@
   <div class="card-body">
     <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_native_audio_prebuilt" aria-expanded="false" aria-controls="collapse_native_audio_prebuilt">Cài WebRTC 2.1 và PJSIP đã build sẵn (Khuyên Dùng)</h5>
     <div id="collapse_native_audio_prebuilt" class="accordion-collapse collapse" data-bs-parent="#native-audio-methods">
-      <div class="alert alert-info">Thực hiện các lệnh qua SSH trên loa. Dùng Python hệ thống, Thư viện cài vào <code>/home/pi/VBot_AEC3/</code>.</div>
+      <div class="alert alert-info">Thực hiện các lệnh qua SSH trên loa. Dùng Python hệ thống, thư viện cài vào <code>/home/pi/VBot_AEC3/</code>.</div>
       <p><a class="btn btn-primary btn-sm me-2 mb-2" href="FAQ.php?audio_native_download=zip">Tải ZIP thư viện</a><a class="btn btn-outline-primary btn-sm me-2 mb-2" href="FAQ.php?audio_native_download=checksum">Tải SHA-256</a><a class="btn btn-outline-secondary btn-sm mb-2" href="FAQ.php?audio_native_download=prebuilt">Tải hướng dẫn .md</a></p>
-      <h5 class="border-bottom pb-2 mt-4">Cài WebRTC 2.1 và PJSIP đã Build sẵn</h5>
+      <h5 class="border-bottom pb-2 mt-4">Cài WebRTC 2.1 và PJSIP từ ZIP đi kèm VBot</h5>
 <p>Bản phát hành VBot đã có sẵn hai file trong <code>resource/vbot_aec3/</code>:</p>
 <ul class="mb-2"><li><a href="FAQ.php?audio_native_download=zip">vbot_audio_runtime_armhf_py39.zip</a></li></ul>
 <ul class="mb-2"><li><a href="FAQ.php?audio_native_download=checksum">vbot_audio_runtime_armhf_py39.zip.sha256</a></li></ul>
-
-<p>Gói build sẵn đi kèm dành cho <strong>ARMv7/armhf 32-bit, Python 3.9, Raspbian 11</strong>. Có sẵn ZIP không có nghĩa là dùng được trên mọi hệ điều hành/Python: hãy kiểm tra tương thích trước khi cài. Thư viện sẽ được cài tại <code>/home/pi/VBot_AEC3/</code></p>
+<p><strong>Không cần tạo ZIP, chuyển ZIP từ loa khác hoặc build Python binding.</strong> Các lệnh bên dưới chạy qua SSH ngay trên loa cần cài, bằng user <code>pi</code>, dùng Python hệ thống, không dùng venv.</p>
+<p>Gói đi kèm dành cho <strong>ARMv7/armhf 32-bit, Python 3.9, Raspbian 11</strong>. Có sẵn ZIP không có nghĩa là dùng được trên mọi hệ điều hành/Python: hãy kiểm tra tương thích trước khi cài. Thư viện sẽ được cài tại <code>/home/pi/VBot_AEC3/</code>, còn mã VBot có thể nằm ở thư mục khác. Nếu VBot không nằm tại <code>/home/pi/VBot_Offline/</code>, thay đường dẫn tương ứng trong các lệnh bên dưới.</p>
 <p>Đây là gói thư viện WebRTC/PJSIP; vẫn cần các phụ thuộc và cấu hình phần cứng âm thanh của VBot như PvRecorder, VLC, python-vlc và ALSA.</p>
 <h5 class="border-bottom pb-2 mt-4">1. Kiểm tra ZIP và khả năng tương thích</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_Offline/resource/vbot_aec3
-$:> sudo apt-get update
-$:> sha256sum -c vbot_audio_runtime_armhf_py39.zip.sha256</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline/resource/vbot_aec3
+sudo apt-get update
+sha256sum -c vbot_audio_runtime_armhf_py39.zip.sha256</code></pre>
 <p>Checksum phải báo <code>OK</code>. Công cụ cài cũng có sẵn trong bản VBot:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py inspect /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip
-$:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py check-platform /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py inspect /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip
+python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py check-platform /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip</code></pre>
 <p>Phải có <code>PLATFORM_COMPATIBLE</code>. Nếu báo <code>Incompatible</code>, dùng image OS/Python phù hợp hoặc làm theo hướng dẫn build thủ công. Đổi tên file <code>_pjsua2*.so</code> không khắc phục được khác biệt Python ABI hay 32/64-bit.</p>
 <h5 class="border-bottom pb-2 mt-4">2. Cài các package runtime hệ thống</h5>
-
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py packages /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip
-$:> sudo apt-get install -y $(python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py packages /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip)</code></pre>
+<p>Không cần compiler, SWIG, Meson hay Abseil development files trên máy đích. Vẫn cần các shared library hệ thống mà extension native liên kết tới. Công cụ lấy danh sách package từ <code>ldd</code> và <code>dpkg-query</code> trên máy nguồn:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py packages /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip
+sudo apt-get install -y $(python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py packages /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip)</code></pre>
+<p>Danh sách thường có libc, libstdc++, ALSA, OpenSSL và UUID, tùy bộ build. Nếu apt không tìm được package, kiểm tra image OS/repository; không chép thư viện hệ thống từ loa nguồn vào <code>/usr/lib</code> hoặc đổi tên SONAME để chữa lỗi. Manifest không chứa file thư viện hệ thống của máy nguồn.</p>
 <h5 class="border-bottom pb-2 mt-4">3. Kiểm tra gói trước khi cài</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> sudo mkdir -p /home/pi/VBot_AEC3/tmp
-$:> sudo chown -R pi:pi /home/pi/VBot_AEC3
-$:> export TMPDIR=/home/pi/VBot_AEC3/tmp
-$:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py verify /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>sudo mkdir -p /home/pi/VBot_AEC3/tmp
+sudo chown -R pi:pi /home/pi/VBot_AEC3
+export TMPDIR=/home/pi/VBot_AEC3/tmp
+python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py verify /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip</code></pre>
 <p>Công cụ kiểm tra đường dẫn ZIP, kích thước, checksum từng file và môi trường, rồi thử nạp WebRTC/PJSUA2 trong thư mục tạm. Nếu thiếu <code>.so</code> hệ thống hoặc có <code>GLIBC_* not found</code>, import lỗi, sai ABI/phiên bản thì không tiếp tục cài.</p>
 <h5 class="border-bottom pb-2 mt-4">4. Cài thư viện vào đường dẫn cố định</h5>
-<p>Cần dừng chương trình VBot đang chạy, Công cụ sẽ từ chối cài nếu còn tiến trình VBot đang chạy trên hệ thống</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py install \
+<p>Dừng VBot và các chương trình test gọi trên loa mới. Công cụ sẽ từ chối cài nếu còn tiến trình <code>Start.py</code>, <code>VBot.py</code> hoặc launcher test được nhận diện.</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py install \
   /home/pi/VBot_Offline/resource/vbot_aec3/vbot_audio_runtime_armhf_py39.zip --root /home/pi/VBot_AEC3</code></pre>
 <p>Kết quả phải có <code>INSTALLED /home/pi/VBot_AEC3 BACKUP ...</code>.</p>
 <ul class="mb-2"><li>Chỉ cài các file runtime có trong manifest, không xóa source/build cũ.</li></ul>
@@ -48,25 +49,22 @@ $:> python3 /home/pi/VBot_Offline/resource/tools/audio_native/runtime_bundle.py 
 <p>  đã thay trong lượt đó; các thư mục rỗng tạo thêm có thể còn lại.</p>
 <ul class="mb-2"><li>Không sửa Config.json, Devices.json, ALSA, Bluetooth, AirPlay hoặc systemd.</li></ul>
 <p>Kiểm tra trực tiếp sau cài:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> PYTHONPATH=/home/pi/VBot_AEC3/pjsip/python python3 -c &#x27;import pjsua2; print(&quot;PJSUA2 import OK&quot;)&#x27;
-$:> ldd /home/pi/VBot_AEC3/pjsip/python/_pjsua2*.so
-$:> ldd /home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>PYTHONPATH=/home/pi/VBot_AEC3/pjsip/python python3 -c &#x27;import pjsua2; print(&quot;PJSUA2 import OK&quot;)&#x27;
+ldd /home/pi/VBot_AEC3/pjsip/python/_pjsua2*.so
+ldd /home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so</code></pre>
 <p>Không strip thêm file <code>.so</code> trước khi giữ bản sao lưu và kiểm tra import. Bản đã strip hợp lệ có thể đóng gói dùng lại bình thường.</p>
 <h5 class="border-bottom pb-2 mt-4">5. Cài đường âm thanh chung cho AirPlay, Bluetooth và multiroom</h5>
-<p>Dừng chương trình VBot rồi chạy một lần trên mỗi loa:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> systemctl --user stop VBot_Offline.service
-$:> cd /home/pi/VBot_Offline
-$:> sudo python3 resource/vbot_aec3/install_media_routes.py \
+<p>Dừng VBot rồi chạy một lần trên mỗi loa:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>systemctl --user stop VBot_Offline.service
+cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --apply</code></pre>
 <p>Đây là bước riêng với cài ZIP thư viện: có sửa ALSA, dịch vụ âm thanh và đường Loopback trong Config.json, kèm sao lưu. Nếu đã cài thì không chạy lại <code>--apply</code>. Start.py mới tự kiểm tra và cài khi còn thiếu; nếu lỗi sẽ ghi log và tiếp tục. Xem <a href="#shared-media-routes">Cài đường âm thanh chung cho loa</a>.</p>
 <h5 class="border-bottom pb-2 mt-4">6. Bật tính năng trên thiết bị mới</h5>
 <p>Cài mã VBot cùng các phụ thuộc Python/phần cứng như quy trình VBot hiện tại. Trên WebUI thiết bị mới:</p>
-<p>1. Bật WebRTC MIC nếu cần, đường dẫn wrapper:    <code>/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so</code>; AEC output <code>normal</code>
-<br/>2. Bật Call LAN, PJSIP runtime <code>/home/pi/VBot_AEC3/pjsip</code>
-<br/>3. Giữ ID mDNS riêng của từng loa; nhập cùng khóa chung và khai báo danh sách    loa hai chiều. Không sao chép nguyên cấu hình/ID máy nguồn sang máy đích
-<br/>4. TCP điều khiển 5010/SIP UDP 5060 cố định, RTP bắt đầu 40000 theo cấu hình
-<br/>5. Chọn mic, thiết bị phát và các nút phù hợp; lưu rồi khởi động lại VBot.</p>
-
+<p>1. Bật WebRTC MIC nếu cần, đường dẫn wrapper:    <code>/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so</code>; AEC output <code>normal</code>. 2. Bật Call LAN, PJSIP runtime <code>/home/pi/VBot_AEC3/pjsip</code>. 3. Giữ ID mDNS riêng của từng loa; nhập cùng khóa chung và khai báo danh sách    loa hai chiều. Không sao chép nguyên cấu hình/ID máy nguồn sang máy đích. 4. TCP điều khiển 5010/SIP UDP 5060 cố định, RTP bắt đầu 40000 theo cấu hình. 5. Chọn mic, thiết bị phát và các nút phù hợp; lưu rồi khởi động lại VBot.</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+python3 Start.py</code></pre>
 <p>Thử gọi hai chiều, tắt/bật mic, nhận/kết thúc và wake word khi phát nhạc. Kiểm tra import chỉ chứng minh bộ native nạp được, chưa chứng minh thiết bị âm thanh, mạng hoặc AEC đã được căn chỉnh đúng cho loa mới.</p>
 <p>Nếu đổi Python major.minor, kiến trúc hoặc image OS, tạo bộ build mới theo <a href="#native-audio-manual">README_INSTALL_WEBRTC21_PJSIP_MANUAL.md</a>.</p>
     </div>
@@ -76,52 +74,52 @@ $:> sudo python3 resource/vbot_aec3/install_media_routes.py \
   <div class="card-body">
     <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_native_audio_manual" aria-expanded="false" aria-controls="collapse_native_audio_manual">Build thủ công WebRTC 2.1 và PJSIP từng bước</h5>
     <div id="collapse_native_audio_manual" class="accordion-collapse collapse" data-bs-parent="#native-audio-methods">
-      <div class="alert alert-info">Thực hiện các lệnh qua SSH trên loa. Dùng Python hệ thống, không cần venv. Thư viện cài vào <code>/home/pi/VBot_AEC3/</code>.</div>
+      <div class="alert alert-info">Thực hiện các lệnh qua SSH trên loa. Dùng Python hệ thống, thư viện cài vào <code>/home/pi/VBot_AEC3/</code>.</div>
       <p><a class="btn btn-outline-secondary btn-sm mb-2" href="FAQ.php?audio_native_download=manual">Tải hướng dẫn .md</a></p>
       <h5 class="border-bottom pb-2 mt-4">Cài thủ công WebRTC Audio Processing 2.1 và PJSIP 2.17</h5>
 <p>Hướng dẫn cho Pi Zero 2 W chạy Raspberry Pi OS <strong>32-bit/armhf</strong>, dùng Python hệ thống, không dùng venv. Đây là hai phiên bản VBot hiện đang dùng, không phải chỉ dẫn tự chọn phiên bản mới nhất. Chạy lần lượt từng khối và dừng nếu có lỗi.</p>
 <p>Toàn bộ nguồn build và thư viện đặt dưới <code>/home/pi/VBot_AEC3/</code>; mã VBot có thể đặt ở nơi khác. Ví dụ dưới đây dùng <code>/home/pi/VBot_Offline/</code>.</p>
 <h5 class="border-bottom pb-2 mt-4">1. Kiểm tra máy và cài công cụ</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> uname -m
-$:> getconf LONG_BIT
-$:> dpkg --print-architecture
-$:> python3 --version
-$:> cat /etc/os-release
-$:> free -h
-$:> df -h /home/pi /tmp</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>uname -m
+getconf LONG_BIT
+dpkg --print-architecture
+python3 --version
+cat /etc/os-release
+free -h
+df -h /home/pi /tmp</code></pre>
 <p>Các cờ ARM bên dưới dành cho <code>armv7l</code>, <code>32</code>, <code>armhf</code>. Nếu máy là aarch64/64-bit, không dùng nguyên bộ cờ <code>-march=armv7-a -mfpu=neon -mfloat-abi=hard</code> này. Binding PJSIP được build cho đúng Python đang dùng; máy hiện tại dùng Python 3.9.</p>
 <p>Dừng VBot và các bản test đang chiếm mic/loa trước khi build/cài để giảm tải RAM. Giữ nguyên dịch vụ I2S keepalive đang dùng; hướng dẫn không sửa ALSA/Bluetooth/AirPlay.</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> sudo apt-get update
-$:> sudo apt-get install -y build-essential git pkg-config cmake ninja-build curl \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>sudo apt-get update
+sudo apt-get install -y build-essential git pkg-config cmake ninja-build curl \
   swig python3-dev python3-pip python3-setuptools python3-wheel \
   libasound2-dev libssl-dev uuid-dev alsa-utils binutils unzip
-$:> mkdir -p /home/pi/VBot_AEC3/tools/python
-$:> mkdir -p /home/pi/VBot_AEC3/webrtc-2.1/build /home/pi/VBot_AEC3/webrtc-2.1/vendor
-$:> mkdir -p /home/pi/VBot_AEC3/webrtc-2.1/tmp
-$:> mkdir -p /home/pi/VBot_AEC3/pjsip/build /home/pi/VBot_AEC3/pjsip/python
-$:> mkdir -p /home/pi/VBot_AEC3/pjsip/tmp</code></pre>
-<p>Cài Meson riêng vào thư mục công cụ bằng Python hệ thống:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> python3 -m pip install --no-deps --target /home/pi/VBot_AEC3/tools/python &#x27;meson==1.5.2&#x27;
-$:> export PYTHONPATH=/home/pi/VBot_AEC3/tools/python
-$:> python3 -m mesonbuild.mesonmain --version</code></pre>
+mkdir -p /home/pi/VBot_AEC3/tools/python
+mkdir -p /home/pi/VBot_AEC3/webrtc-2.1/build /home/pi/VBot_AEC3/webrtc-2.1/vendor
+mkdir -p /home/pi/VBot_AEC3/webrtc-2.1/tmp
+mkdir -p /home/pi/VBot_AEC3/pjsip/build /home/pi/VBot_AEC3/pjsip/python
+mkdir -p /home/pi/VBot_AEC3/pjsip/tmp</code></pre>
+<p>Cài Meson riêng vào thư mục công cụ bằng Python hệ thống, <strong>không tạo môi trường env</strong>:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>python3 -m pip install --no-deps --target /home/pi/VBot_AEC3/tools/python &#x27;meson==1.5.2&#x27;
+export PYTHONPATH=/home/pi/VBot_AEC3/tools/python
+python3 -m mesonbuild.mesonmain --version</code></pre>
 <p>Pi 512 MB chỉ dùng một job. Binding SWIG có thể dùng nhiều swap và biên dịch rất lâu. Kiểm tra bằng <code>free -h</code>, <code>vmstat 2 5</code>, <code>pgrep -a cc1plus</code>; không chạy hai lượt build cùng lúc. <code>TMPDIR</code> bên dưới đưa file tạm ra thẻ nhớ thay vì tmpfs.</p>
 <h5 class="border-bottom pb-2 mt-4">2. Tải Abseil và WebRTC 2.1</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/webrtc-2.1
-$:> export TMPDIR=/home/pi/VBot_AEC3/webrtc-2.1/tmp
-$:> curl --fail --location --retry 3 \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/webrtc-2.1
+export TMPDIR=/home/pi/VBot_AEC3/webrtc-2.1/tmp
+curl --fail --location --retry 3 \
   https://github.com/abseil/abseil-cpp/archive/refs/tags/20240722.0.tar.gz \
   -o abseil-20240722.0.tar.gz
-$:> curl --fail --location --retry 3 \
+curl --fail --location --retry 3 \
   https://gstreamer.freedesktop.org/src/mirror/webrtc-audio-processing/webrtc-audio-processing-2.1.tar.gz \
   -o webrtc-audio-processing-2.1.tar.gz
-$:> echo &#x27;f50e5ac311a81382da7fa75b97310e4b9006474f9560ac46f54a9967f07d4ae3  abseil-20240722.0.tar.gz&#x27; | sha256sum -c -
-$:> echo &#x27;35e86b986d02ea15f3d04741a1a5a735ba399bc0fac0ee089c39480e35fc3253  webrtc-audio-processing-2.1.tar.gz&#x27; | sha256sum -c -</code></pre>
+echo &#x27;f50e5ac311a81382da7fa75b97310e4b9006474f9560ac46f54a9967f07d4ae3  abseil-20240722.0.tar.gz&#x27; | sha256sum -c -
+echo &#x27;35e86b986d02ea15f3d04741a1a5a735ba399bc0fac0ee089c39480e35fc3253  webrtc-audio-processing-2.1.tar.gz&#x27; | sha256sum -c -</code></pre>
 <p>Chỉ tiếp tục khi cả hai checksum đều báo <code>OK</code>. Các hash là của bộ nguồn đã build cho hệ thống hiện tại. Abseil 20240722.0 được cố định để tái tạo bộ build này; nếu đổi sang bản vá khác, cần cập nhật hash và kiểm thử lại thư viện.</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> tar -xzf abseil-20240722.0.tar.gz -C build
-$:> tar -xzf webrtc-audio-processing-2.1.tar.gz -C build</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>tar -xzf abseil-20240722.0.tar.gz -C build
+tar -xzf webrtc-audio-processing-2.1.tar.gz -C build</code></pre>
 <h5 class="border-bottom pb-2 mt-4">3. Build Abseil static/PIC, C++17</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/webrtc-2.1
-$:> cmake -S build/abseil-cpp-20240722.0 -B build/abseil -G Ninja \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/webrtc-2.1
+cmake -S build/abseil-cpp-20240722.0 -B build/abseil -G Ninja \
   -DCMAKE_INSTALL_PREFIX=/home/pi/VBot_AEC3/webrtc-2.1/vendor \
   -DCMAKE_INSTALL_LIBDIR=lib \
   -DCMAKE_BUILD_TYPE=Release \
@@ -132,32 +130,32 @@ $:> cmake -S build/abseil-cpp-20240722.0 -B build/abseil -G Ninja \
   -DABSL_BUILD_TESTING=OFF \
   -DABSL_ENABLE_INSTALL=ON \
   -DABSL_PROPAGATE_CXX_STD=ON
-$:> cmake --build build/abseil --parallel 1
-$:> cmake --install build/abseil</code></pre>
+cmake --build build/abseil --parallel 1
+cmake --install build/abseil</code></pre>
 <h5 class="border-bottom pb-2 mt-4">4. Build WebRTC Audio Processing 2.1</h5>
 <p>Mở terminal mới thì cần khai báo lại <code>PYTHONPATH</code>, <code>PKG_CONFIG_PATH</code>, <code>TMPDIR</code>.</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/webrtc-2.1
-$:> export PYTHONPATH=/home/pi/VBot_AEC3/tools/python
-$:> export PKG_CONFIG_PATH=/home/pi/VBot_AEC3/webrtc-2.1/vendor/lib/pkgconfig
-$:> export TMPDIR=/home/pi/VBot_AEC3/webrtc-2.1/tmp
-$:> python3 -m mesonbuild.mesonmain setup build/webrtc build/webrtc-audio-processing-2.1 \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/webrtc-2.1
+export PYTHONPATH=/home/pi/VBot_AEC3/tools/python
+export PKG_CONFIG_PATH=/home/pi/VBot_AEC3/webrtc-2.1/vendor/lib/pkgconfig
+export TMPDIR=/home/pi/VBot_AEC3/webrtc-2.1/tmp
+python3 -m mesonbuild.mesonmain setup build/webrtc build/webrtc-audio-processing-2.1 \
   --prefix=/home/pi/VBot_AEC3/webrtc-2.1/vendor --libdir=lib \
   --buildtype=release --wrap-mode=nofallback \
   -Ddefault_library=shared -Dneon=enabled \
   -Dc_args=&quot;-march=armv7-a -mfpu=neon -mfloat-abi=hard&quot; \
   -Dcpp_args=&quot;-march=armv7-a -mfpu=neon -mfloat-abi=hard&quot;
-$:> python3 -m mesonbuild.mesonmain compile -C build/webrtc -j 1
-$:> python3 -m mesonbuild.mesonmain install -C build/webrtc
-$:> pkg-config --modversion webrtc-audio-processing-2
-$:> pkg-config --variable=prefix webrtc-audio-processing-2</code></pre>
+python3 -m mesonbuild.mesonmain compile -C build/webrtc -j 1
+python3 -m mesonbuild.mesonmain install -C build/webrtc
+pkg-config --modversion webrtc-audio-processing-2
+pkg-config --variable=prefix webrtc-audio-processing-2</code></pre>
 <p>Kết quả phải là <code>2.1</code> và prefix nằm trong thư mục <code>webrtc-2.1/vendor</code>. Nếu build directory đã được cấu hình, dùng <code>mesonmain setup --reconfigure ...</code> với cùng tham số; không ghi đè bằng prefix của bản 1.3.</p>
 <h5 class="border-bottom pb-2 mt-4">5. Build wrapper VBot cho AEC3 + NS + AGC</h5>
 <p>Wrapper là mã riêng của VBot, <strong>phải dùng bản dành cho 2.1</strong>. Hai file nguồn đi kèm hướng dẫn nằm trong <code>resource/tools/audio_native/</code>.</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cp /home/pi/VBot_Offline/resource/tools/audio_native/vbot_aec3_music_2_1.cpp /home/pi/VBot_AEC3/webrtc-2.1/
-$:> cp /home/pi/VBot_Offline/resource/tools/audio_native/check_native.py /home/pi/VBot_AEC3/webrtc-2.1/
-$:> cd /home/pi/VBot_AEC3/webrtc-2.1
-$:> export PKG_CONFIG_PATH=/home/pi/VBot_AEC3/webrtc-2.1/vendor/lib/pkgconfig
-$:> c++ -O2 -std=c++17 -fPIC -shared -DWEBRTC_APM_DEBUG_DUMP=0 \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cp /home/pi/VBot_Offline/resource/tools/audio_native/vbot_aec3_music_2_1.cpp /home/pi/VBot_AEC3/webrtc-2.1/
+cp /home/pi/VBot_Offline/resource/tools/audio_native/check_native.py /home/pi/VBot_AEC3/webrtc-2.1/
+cd /home/pi/VBot_AEC3/webrtc-2.1
+export PKG_CONFIG_PATH=/home/pi/VBot_AEC3/webrtc-2.1/vendor/lib/pkgconfig
+c++ -O2 -std=c++17 -fPIC -shared -DWEBRTC_APM_DEBUG_DUMP=0 \
   -DWEBRTC_POSIX -DWEBRTC_LINUX \
   -march=armv7-a -mfpu=neon -mfloat-abi=hard \
   vbot_aec3_music_2_1.cpp \
@@ -165,46 +163,45 @@ $:> c++ -O2 -std=c++17 -fPIC -shared -DWEBRTC_APM_DEBUG_DUMP=0 \
   $(pkg-config --cflags --libs webrtc-audio-processing-2) \
   &#x27;-Wl,-rpath,$ORIGIN/vendor/lib&#x27; -Wl,-z,defs \
   -o libvbot_aec3_music_2_1.so.new
-$:> ldd libvbot_aec3_music_2_1.so.new
-$:> python3 check_native.py ./libvbot_aec3_music_2_1.so.new --output native-check-2.1.json</code></pre>
+ldd libvbot_aec3_music_2_1.so.new
+python3 check_native.py ./libvbot_aec3_music_2_1.so.new --output native-check-2.1.json</code></pre>
 <p>Không được có <code>not found</code> trong <code>ldd</code>; kiểm tra native phải hoàn tất không lỗi. Nếu đang có thư viện cũ, sao lưu trước khi thay:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/webrtc-2.1
-$:> if [ -f libvbot_aec3_music_2_1.so ]; then
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/webrtc-2.1
+if [ -f libvbot_aec3_music_2_1.so ]; then
   cp -p libvbot_aec3_music_2_1.so &quot;libvbot_aec3_music_2_1.so.backup.$(date +%Y%m%d_%H%M%S)&quot;
 fi
-
-$:> mv libvbot_aec3_music_2_1.so.new libvbot_aec3_music_2_1.so</code></pre>
+mv libvbot_aec3_music_2_1.so.new libvbot_aec3_music_2_1.so</code></pre>
 <p>Thư viện này cần đi cùng <code>webrtc-2.1/vendor/lib/*.so*</code>; không chỉ giữ một file wrapper <code>.so</code> rồi xóa vendor. RPATH dùng <code>$ORIGIN/vendor/lib</code>, không cần thêm thư viện riêng vào <code>/usr/lib</code> hay sửa <code>LD_LIBRARY_PATH</code> toàn hệ thống.</p>
 <h5 class="border-bottom pb-2 mt-4">6. Tải và build PJSIP 2.17</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/pjsip
-$:> git clone --depth 1 --branch 2.17 https://github.com/pjsip/pjproject.git build/pjproject
-$:> cd build/pjproject
-$:> export CFLAGS=&#x27;-O2 -fPIC&#x27;
-$:> export CXXFLAGS=&#x27;-O2 -fPIC&#x27;
-$:> export TMPDIR=/home/pi/VBot_AEC3/pjsip/tmp
-$:> ./configure --prefix=/home/pi/VBot_AEC3/pjsip/runtime \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/pjsip
+git clone --depth 1 --branch 2.17 https://github.com/pjsip/pjproject.git build/pjproject
+cd build/pjproject
+export CFLAGS=&#x27;-O2 -fPIC&#x27;
+export CXXFLAGS=&#x27;-O2 -fPIC&#x27;
+export TMPDIR=/home/pi/VBot_AEC3/pjsip/tmp
+./configure --prefix=/home/pi/VBot_AEC3/pjsip/runtime \
   --disable-video --disable-portaudio --enable-libwebrtc-aec3
-$:> make dep
-$:> make -j1</code></pre>
+make dep
+make -j1</code></pre>
 <p>Nếu source đã tồn tại thì không clone đè; kiểm tra tag/commit trước khi build lại. Cấu hình trên giữ công thức PJSIP đã build cho hai loa hiện tại. ALSA cần được phát hiện trong bước configure. Không cần <code>make install</code>: binding bên dưới liên kết với các thư viện static trong source tree.</p>
 <p>PJSIP có AEC đi kèm trong bộ build, nhưng <strong>VBot tắt AEC của PJMEDIA</strong> (<code>ecTailLen=ecOptions=0</code>). Khi gọi, VBot dùng wrapper 2.1 riêng để xử lý AEC một lần, rồi NS/AGC chung một lần; không chạy hai bộ lọc chồng lên nhau.</p>
 <h5 class="border-bottom pb-2 mt-4">7. Build và cài Python binding trực tiếp</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/pjsip/build/pjproject/pjsip-apps/src/swig/python
-$:> export TMPDIR=/home/pi/VBot_AEC3/pjsip/tmp
-$:> make PYTHON_EXE=python3
-$:> python3 -m pip install . --no-build-isolation --no-deps \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/pjsip/build/pjproject/pjsip-apps/src/swig/python
+export TMPDIR=/home/pi/VBot_AEC3/pjsip/tmp
+make PYTHON_EXE=python3
+python3 -m pip install . --no-build-isolation --no-deps \
   --target /home/pi/VBot_AEC3/pjsip/python
-$:> PYTHONPATH=/home/pi/VBot_AEC3/pjsip/python python3 -c &#x27;import pjsua2; print(&quot;PJSUA2 import OK&quot;)&#x27;
-$:> ldd /home/pi/VBot_AEC3/pjsip/python/_pjsua2*.so</code></pre>
+PYTHONPATH=/home/pi/VBot_AEC3/pjsip/python python3 -c &#x27;import pjsua2; print(&quot;PJSUA2 import OK&quot;)&#x27;
+ldd /home/pi/VBot_AEC3/pjsip/python/_pjsua2*.so</code></pre>
 <p>Đây thường là bước nặng nhất trên Pi 512 MB. Các cảnh báo SWIG Doxygen và <code>PyEval_InitThreads</code> deprecated tự chúng không có nghĩa build thất bại; cần kiểm tra mã kết thúc, file <code>.so</code>, <code>ldd</code> và import thực tế.</p>
-<p>Nếu SSH có thể mất kết nối khi build, <strong>thay lệnh `make` ở trên</strong> bằng lệnh sau, không chạy song song với một lượt make khác. Không ghi log, chỉ ghi mã kết thúc:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_AEC3/pjsip/build/pjproject/pjsip-apps/src/swig/python
-$:> export TMPDIR=/home/pi/VBot_AEC3/pjsip/tmp
-$:> nohup sh -c &#x27;make PYTHON_EXE=python3; rc=$?; printf &quot;%s\n&quot; &quot;$rc&quot; &gt; binding.exit; exit &quot;$rc&quot;&#x27; &gt; /dev/null 2&gt;&amp;1 &lt; /dev/null &amp;</code></pre>
+<p>Nếu SSH có thể mất kết nối, <strong>thay lệnh `make` ở trên</strong> bằng lệnh sau, không chạy song song với một lượt make khác. Không ghi log, chỉ ghi mã kết thúc:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_AEC3/pjsip/build/pjproject/pjsip-apps/src/swig/python
+export TMPDIR=/home/pi/VBot_AEC3/pjsip/tmp
+nohup sh -c &#x27;make PYTHON_EXE=python3; rc=$?; printf &quot;%s\n&quot; &quot;$rc&quot; &gt; binding.exit; exit &quot;$rc&quot;&#x27; &gt; /dev/null 2&gt;&amp;1 &lt; /dev/null &amp;</code></pre>
 <p>Đợi tiến trình hoàn tất, <code>binding.exit</code> phải là <code>0</code>, rồi mới chạy <code>pip install</code> và kiểm tra import. Trước lượt build mới, đổi tên/xóa file trạng thái cũ nếu có để không nhầm kết quả cũ. Không cần build lại binding trên máy khác nếu máy đó tương thích với gói runtime theo README cài bản build sẵn.</p>
 <h5 class="border-bottom pb-2 mt-4">8. Kiểm tra và bật trong VBot</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_Offline
-$:> python3 - &lt;&lt;&#x27;PY&#x27;
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+python3 - &lt;&lt;&#x27;PY&#x27;
 import json
 from Lib_AEC3 import check_webrtc_library
 from LAN_Calls import check_dependencies
@@ -225,8 +222,8 @@ PY</code></pre>
 <p>Lưu cấu hình rồi chạy <code>python3 Start.py</code>. Nếu thư viện thiếu hoặc không tương thích, VBot ghi log, bỏ qua bộ lọc/Call LAN tương ứng và vẫn tiếp tục chạy. Việc thư viện nạp được chưa thay thế cho kiểm thử gọi, mic/loa và wake word.</p>
 <h5 class="border-bottom pb-2 mt-4">Cài đường âm thanh chung cho AirPlay, Bluetooth và multiroom</h5>
 <p>Sau khi cài thư viện, dừng VBot và chạy một lần trên mỗi loa:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_Offline
-$:> sudo python3 resource/vbot_aec3/install_media_routes.py \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --apply</code></pre>
 <p>Script sao lưu rồi cấu hình ALSA, AirPlay, Bluetooth và bridge sang <code>vbot_aec_media</code> / <code>plughw:Loopback,1,1</code>, bật <code>external_sources</code>. Nếu đã cài thì không chạy lại <code>--apply</code>. Start.py mới tự kiểm tra và cài khi còn thiếu; lỗi được ghi log và VBot vẫn tiếp tục chạy. Xem <a href="#shared-media-routes">Cài đường âm thanh chung cho loa</a>.</p>
 <h5 class="border-bottom pb-2 mt-4">Nguồn đối chiếu</h5>
@@ -252,20 +249,40 @@ $:> sudo python3 resource/vbot_aec3/install_media_routes.py \
 <ul class="mb-2"><li>Có snd-aloop (card Loopback). Start.py tự chuẩn bị module này khi khởi động.</li></ul>
 <ul class="mb-2"><li>Dừng VBot và các chương trình test âm thanh trước khi cài thủ công.</li></ul>
 <h5 class="border-bottom pb-2 mt-4">Cài thủ công</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_Offline
-$:> sudo python3 resource/vbot_aec3/install_media_routes.py \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --apply</code></pre>
 <p>Script sao lưu trước khi sửa <code>/etc/asound.conf</code>, cấu hình AirPlay, BlueALSA, bản Bluetooth agent đang cài và Config.json. Các dịch vụ âm thanh liên quan được khởi động lại; nhạc đang phát có thể bị ngắt. Nếu cài thất bại, script thử khôi phục bản sao lưu.</p>
-<p>Sau khi báo <code>Shared media routes installed</code>, đường phát chung là <code>vbot_aec_media</code>, bridge đọc <code>plughw:Loopback,1,1</code>, và <code>external_sources</code> được bật. Không cần build lại thư viện. Không đổi mic hoặc mức âm lượng mixer.</p>
+<p>Sau khi báo <code>Shared media routes installed</code>, đường phát chung là <code>vbot_aec_media</code>, bridge đọc <code>plughw:Loopback,1,1</code>, và <code>external_sources</code> được bật. Không cần build lại thư viện. Bước chuẩn bị có thể sửa tham chiếu card ALSA và số kênh WM8960 cũ; mức âm lượng mixer được giữ nguyên.</p>
 <h5 class="border-bottom pb-2 mt-4">Tự kiểm tra khi khởi động VBot</h5>
 <p>Start.py chạy bước kiểm tra trước khi nạp VBot và khởi tạo mic. Nếu đã đủ cấu hình thì bỏ qua, không khởi động lại dịch vụ. Nếu chưa cài thì tự cài bằng <code>sudo -n</code>; nếu thiếu quyền, phụ thuộc hoặc có VBot khác đang chạy, sẽ ghi log lỗi và tiếp tục khởi động. Không tự nhập mật khẩu, không tự cài lại thư viện.</p>
 <p>Nếu đường ALSA/AirPlay/Bluetooth đã đầy đủ nhưng Config.json chưa đồng bộ, script sao lưu rồi sửa riêng các giá trị đường âm thanh và <code>external_sources</code>, không khởi động lại dịch vụ. Nếu phần cấu hình hệ thống còn thiếu, script báo lỗi; dừng VBot, kiểm tra bản sao lưu và khôi phục trước khi cài lại.</p>
+<h5 class="border-bottom pb-2 mt-4">Sửa ALSA và đường âm thanh sau khi flash hoặc nâng cấp</h5>
+<p>Nếu <code>alsamixer</code> mở nhầm Loopback, WM8960 đổi số card hoặc mất tiếng sau reboot, có thể chạy công cụ sửa riêng mà không cần khởi chạy VBot.</p>
+<p>Dừng VBot trước. Nếu chạy bằng <code>python3 Start.py</code>, nhấn Ctrl+C trong terminal đang chạy; nếu dùng service thì chạy lệnh dừng dưới đây. Sau đó sửa ALSA:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>systemctl --user stop VBot_Offline.service
+cd /home/pi/VBot_Offline
+sudo python3 resource/tools/fix_audio_alsa.py</code></pre>
+<p>Công cụ đọc <code>/os_image_created.txt</code>: dòng image VBot có chữ <code>i2s</code> là image I2S; không có chữ này là image WM8960. Nó đối chiếu card thực tế trước khi sửa. WM8960 dùng tên cố định <code>wm8960soundcard</code>, thu phần cứng 2 kênh và mixer mặc định đúng card, tránh chọn nhầm Loopback khi thứ tự card thay đổi.</p>
+<p>Công cụ giữ cấu hình riêng nhận diện được, mức âm lượng mixer và khối đường phát chung <code>vbot_aec_media</code>. Với service WM8960 cũ, nó thêm cấu hình bảo vệ để service không xóa ALSA sau reboot. Các dịch vụ âm thanh đang chạy được nạp lại nên nhạc sẽ ngắt tạm thời; công cụ không khởi chạy VBot.</p>
+<p>Nếu cần khôi phục mẫu ALSA mặc định đúng image, dùng tùy chọn sau. Tùy chọn này thay phần cấu hình mic/loa tùy chỉnh bằng mẫu, nhưng vẫn giữ khối đường âm thanh chung đã có:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+sudo python3 resource/tools/fix_audio_alsa.py --restore-default</code></pre>
+<p>Các bản sao lưu được ghi tại <code>/home/pi/VBot_AEC3/hardware_backups/</code>; đường dẫn cụ thể hiện trong kết quả. Thiếu file nhận diện, không thấy đúng card hoặc gặp cấu hình chưa xác định thì công cụ báo lỗi, không tự đoán card để ghi đè.</p>
+<p>Cần có đầy đủ các file của bản cập nhật: <code>resource/tools/fix_audio_alsa.py</code>, <code>resource/vbot_aec3/hardware_routes.py</code> và các mẫu trong <code>resource/asound_conf/</code>. Công cụ ưu tiên <code>default_wm8960_asound_new.conf</code> hoặc <code>default_i2s_asound_new.conf</code> theo image; nếu chưa có thì dùng mẫu tên cũ. Công cụ dùng Python hệ thống, không cần build thêm <code>.so</code>.</p>
+<p>Hai mẫu mới có sẵn khối media bus. Khi khôi phục, công cụ giữ một khối đã có, không chèn trùng. Khi chưa cài đường chung, bước sửa phần cứng chỉ lấy cấu hình mic/loa; bước cài đường chung bên trên sẽ cấu hình đồng bộ ALSA, AirPlay và Bluetooth.</p>
+<p>Sau khi sửa, mở lại <code>alsamixer</code> để kiểm tra đúng card và xác minh đường chung:</p>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py \
+  --root /home/pi/VBot_Offline --ensure
+python3 VBot_Multiroom_Bridge_Audio.py status</code></pre>
+<p><code>fix_audio_alsa.py</code> sửa phần cứng ALSA và giữ/khôi phục khối media bus đã nhận diện; nó không thay thế bước cài mới toàn bộ đường AirPlay/Bluetooth ở trên. Nếu <code>--ensure</code> vẫn báo cấu hình hệ thống chưa đầy đủ, kiểm tra bản sao lưu trước khi cài lại; không tự xóa cấu hình đang có.</p>
 <h5 class="border-bottom pb-2 mt-4">Kiểm tra và khôi phục</h5>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> cd /home/pi/VBot_Offline
-$:> python3 VBot_Multiroom_Bridge_Audio.py status</code></pre>
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+python3 VBot_Multiroom_Bridge_Audio.py status</code></pre>
 <p>Kiểm tra <code>capture_device</code> là <code>plughw:Loopback,1,1</code> và không có lỗi passthrough. Thử phát AirPlay/Bluetooth khi VBot chưa chạy, sau đó chạy <code>python3 Start.py</code> để thử wake word và multiroom.</p>
 <p>Bản sao lưu nằm trong <code>/home/pi/VBot_AEC3/routing_backups/</code>. Để khôi phục, dừng VBot rồi dùng đúng đường dẫn bản sao lưu mà lượt cài đã in ra:</p>
-<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>$:> sudo python3 resource/vbot_aec3/install_media_routes.py \
+<pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --restore /home/pi/VBot_AEC3/routing_backups/THU_MUC_SAO_LUU</code></pre>
 <p>Lần chạy Start.py tiếp theo sẽ kiểm tra và cài lại nếu đường chung còn thiếu.</p></div>
   </div>

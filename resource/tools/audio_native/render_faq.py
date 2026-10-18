@@ -10,7 +10,7 @@ import re
 
 ROOT = Path(__file__).resolve().parents[3]
 GUIDES = [
-    ('prebuilt', 'Cài WebRTC 2.1 và PJSIP từ file ZIP đã build', 'README_INSTALL_WEBRTC21_PJSIP_PREBUILT.md'),
+    ('prebuilt', 'Cài WebRTC 2.1 và PJSIP đã build sẵn (Khuyên Dùng)', 'README_INSTALL_WEBRTC21_PJSIP_PREBUILT.md'),
     ('manual', 'Build thủ công WebRTC 2.1 và PJSIP từng bước', 'README_INSTALL_WEBRTC21_PJSIP_MANUAL.md'),
 ]
 
@@ -89,7 +89,7 @@ def render():
   <div class="card-body">
     <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_native_audio_{key}" aria-expanded="false" aria-controls="collapse_native_audio_{key}">{html.escape(title)}</h5>
     <div id="collapse_native_audio_{key}" class="accordion-collapse collapse" data-bs-parent="#native-audio-methods">
-      <div class="alert alert-info">Thực hiện các lệnh qua SSH trên loa. Dùng Python hệ thống, không cần venv. Thư viện cài vào <code>/home/pi/VBot_AEC3/</code>.</div>
+      <div class="alert alert-info">Thực hiện các lệnh qua SSH trên loa. Dùng Python hệ thống, thư viện cài vào <code>/home/pi/VBot_AEC3/</code>.</div>
       <p>{buttons}<a class="btn btn-outline-secondary btn-sm mb-2" href="FAQ.php?audio_native_download={key}">Tải hướng dẫn .md</a></p>
       {body}
     </div>

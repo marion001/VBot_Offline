@@ -2,7 +2,7 @@
     "version": "1.3.8",
     "projectName": "WebUI VBot Offline",
     "description": "Hỗ trợ gọi điện giữa các loa VBot trong mạng nội bộ Lan Local cần cài bổ sung cấu hình (Cài WebRTC 2.1 và PJSIP trong hướng dẫn), Hỗ trợ chỉnh EQ Âm Thanh — Equalizer, Hỗ trợ bật máy tính trong mạng bằng WOL - Wake On Lan, và các sửa lỗi khác",
-    "releaseDate": "18/10/2026",
+    "releaseDate": "18/10/2026-1",
     "changes": [
         {
             "type": "feature",

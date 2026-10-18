@@ -2,7 +2,8 @@
 
 Run sudo python3 ... --root /home/pi/VBot_Offline --apply.
 Restoration: sudo python3 ... --root ... --restore /home/pi/VBot_AEC3/...backup...
-Does not start VBot or change microphone/mixer settings.
+Does not start VBot or change mixer gain. Known legacy hardware mappings are
+repaired from the VBot image marker before preparing the shared media bus.
 """
 import argparse
 import datetime
@@ -110,6 +111,11 @@ def main():
     lock = open('/run/lock/vbot-media-routes.lock', 'a')
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     config_path = root / 'Config.json'
+    if (args.ensure or args.apply) and Path('/os_image_created.txt').is_file():
+        hardware = root / 'resource/vbot_aec3/hardware_routes.py'
+        prepared = run(sys.executable, str(hardware), '--root', str(root), '--routes-lock-held')
+        if 'AUDIO_HARDWARE_REPAIRED' in prepared.stdout:
+            print(prepared.stdout.strip())
     cfg = json.loads(config_path.read_text())
     if args.ensure or args.apply:
         asound_text = Path('/etc/asound.conf').read_text() if Path('/etc/asound.conf').exists() else ''
@@ -229,7 +235,7 @@ def main():
         restore(backup)
         raise
     print('Shared media routes installed. Backup:', backup)
-    print('Restart VBot after testing; no microphone or mixer settings changed.')
+    print('Restart VBot after testing; mixer gain settings are preserved.')
 
 
 if __name__ == '__main__':
