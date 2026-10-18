@@ -1,7 +1,21 @@
 {
     "launch_source": "VBot_Assistant",
+    "wake_on_lan": {
+        "active": false
+    },
     "lan_calls": {
         "active": false,
+        "pjsip": {
+            "runtime": "/home/pi/VBot_AEC3/pjsip",
+            "sip_port": 5060,
+            "rtp_port": 40000,
+            "codec": "G722/16000/1",
+            "capture_gain": 3,
+            "output_gain": 0.5,
+            "capture_delay_ms": 32,
+            "render_clock_ppm": 980,
+            "playback_latency_ms": 100
+        },
         "use_mdns_id": true,
         "id": "vbot_local",
         "shared_key": "vbot_call_lan_audio",
@@ -10,34 +24,23 @@
         "output_device": "default",
         "mode": "full_duplex",
         "ringtone": "call_iphone.mp3",
+        "outgoing_ringtone": "Cho_Cuoc_Goi_1.mp3",
         "ptt_button_active": false,
         "ptt_button": "wakeup",
         "end_button_active": true,
         "end_button": "mic",
         "end_button_press": "short",
-        "ring_timeout": 30,
-        "max_duration": 3600,
-        "peers": [],
-        "pjsip": {
-            "sip_port": 5060,
-            "runtime": "/home/pi/VBot_AEC3/pjsip",
-            "rtp_port": 40000,
-            "codec": "G722/16000/1",
-            "capture_gain": 3.0,
-            "output_gain": 0.5,
-            "capture_delay_ms": 32,
-            "render_clock_ppm": 980,
-            "playback_latency_ms": 100
-        },
-        "browser_call": {
-            "active": true
-        },
-        "outgoing_ringtone": "Cho_Cuoc_Goi_1.mp3",
         "auto_accept_delay": 3,
         "accept_button_active": false,
         "accept_button": "wakeup",
         "accept_button_press": "short",
-        "mic_button_mute": true
+        "mic_button_mute": true,
+        "ring_timeout": 30,
+        "max_duration": 3600,
+        "peers": [],
+        "browser_call": {
+            "active": true
+        }
     },
     "speaker_location": {
         "active": false,
@@ -619,6 +622,9 @@
             "bridge_switch_delay_ms": 80,
             "alsa_capture_command": "arecord",
             "alsa_playback_command": "aplay"
+        },
+        "equalizer": {
+            "active": false
         }
     },
     "developer_customization": {
@@ -865,11 +871,7 @@
                 "connection_timeout": 5,
                 "streaming_session_timeout": 30,
                 "result_timeout": 15,
-                "failure_cooldown": 2.5,
-                "gain": {
-                    "active": false,
-                    "value_float": 1.4
-                }
+                "failure_cooldown": 2.5
             },
             "conversation_mode": true,
             "sound": {
@@ -1007,11 +1009,7 @@
                         "file_name": "ok_google.pmdl",
                         "sensitive": 0.5
                     }
-                ],
-                "gain": {
-                    "active": false,
-                    "value_float": 2
-                }
+                ]
             }
         },
         "smart_answer": {
@@ -1292,8 +1290,5 @@
             "active": false,
             "minimum_threshold": 0.9
         }
-    },
-    "wake_on_lan": {
-        "active": false
     }
 }

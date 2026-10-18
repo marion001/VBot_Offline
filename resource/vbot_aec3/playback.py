@@ -5,13 +5,17 @@ import threading
 
 
 class ALSAPlayback:
-    def __init__(self, device, latency_ms, cancelled, rate=44100, channels=2):
+    def __init__(self, device, latency_ms, cancelled, rate=44100, channels=2, equalizer=False):
         self.handle = C.c_void_p()
         self.cancelled = cancelled
         self.lock = threading.Lock()
         self.delay_ms = 0
         self.rate, self.frame_bytes = rate, channels * 2
         self.recoveries = self.underruns = 0
+        self.equalizer = None
+        if equalizer and channels == 2:
+            from .equalizer import LiveEqualizer
+            self.equalizer = LiveEqualizer(rate)
         self.lib = C.CDLL(C.util.find_library('asound') or 'libasound.so.2')
         definitions = {
             'snd_pcm_open': ([C.POINTER(C.c_void_p), C.c_char_p, C.c_int, C.c_int], C.c_int),
@@ -43,6 +47,8 @@ class ALSAPlayback:
         with self.lock:
             if self.cancelled.is_set() or not self.handle:
                 return
+            if self.equalizer is not None:
+                pcm = self.equalizer.process(pcm)
             buffer = C.create_string_buffer(pcm)
             offset = 0
             retries = 0
@@ -91,3 +97,6 @@ class ALSAPlayback:
             if self.handle:
                 self.lib.snd_pcm_close(self.handle)
                 self.handle = C.c_void_p()
+            if getattr(self, 'equalizer', None) is not None:
+                self.equalizer.close()
+                self.equalizer = None

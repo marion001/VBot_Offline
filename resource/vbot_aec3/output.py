@@ -17,7 +17,7 @@ def main():
     args = parser.parse_args()
     _, _, Playback = _load_backend()
     from _vbot_media_aec3.reference import ReferenceSender
-    playback = Playback(args.device, args.latency, threading.Event(), args.rate, args.channels)
+    playback = Playback(args.device, args.latency, threading.Event(), args.rate, args.channels, equalizer=True)
     sender = ReferenceSender(args.rate, playback)
     pending = bytearray()
     try:

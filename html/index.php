@@ -410,6 +410,13 @@ include 'html_head.php';
             </div>
             <!-- End Reports -->
             <!-- TTS -->
+            <div class="col-12" id="speaker-eq-card">
+              <div class="card">
+                <div class="card-body">
+                  <?php require __DIR__.'/includes/AudioEqualizer.php'; ?>
+                </div>
+              </div>
+            </div>
             <div class="col-12">
               <div class="card">
                 <div class="card-body">

@@ -754,6 +754,9 @@ if (isset($_POST['all_config_save'])) {
 
   #Cập Nhật Bật hoặc tắt Sử dụng Media Player
   $Config['media_player']['active'] = isset($_POST['media_player_active']) ? true : false;
+  if (isset($_POST['speaker_eq_present'])) {
+    $Config['media_player']['equalizer']=['active'=>isset($_POST['speaker_eq_active'])];
+  }
   $Config['media_player']['multiroom_audio']['active'] = isset($_POST['multiroom_audio_active']) ? true : false;
   $Config['media_player']['multiroom_audio']['default_volume'] = max(0, min(100, intval($_POST['multiroom_audio_default_volume'] ?? 90)));
   $Config['media_player']['multiroom_audio']['default_muted'] = isset($_POST['multiroom_audio_default_muted']);
@@ -1193,6 +1196,15 @@ if (isset($_POST['all_config_save'])) {
   $configSaved = $aec3ConfigError==='' && $lanConfigError==='' && vbotConfigWriteJson($Config_filePath, $Config, 'Config.json');
   if ($configSaved) {
     $messages[] = "Cấu hình đã được lưu thành công!";
+    if (isset($_POST['speaker_eq_present']) && !empty($Config['media_player']['equalizer']['active'])) {
+      try {
+        require_once __DIR__.'/includes/EqualizerRuntime.php';
+        vbotEQEnsureRuntime($Config_filePath,$ssh_host,$ssh_port,$ssh_user,$ssh_password);
+      } catch (Throwable $error) {
+        $messages[] = 'Đã lưu cấu hình EQ nhưng chưa kích hoạt được đường âm thanh: '.$error->getMessage();
+        error_log('[EQ Runtime] '.$error->getMessage());
+      }
+    }
   } else {
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
   }
@@ -4141,7 +4153,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     </div>
                   </div>
 
-					<div class="card">
+					                  <div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Multiroom Audio (Liên Kết Nhiều Loa, Phát Âm Thanh Đa Vùng) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để kích hoạt sử dụng liên kết các loa VBot trong cùng mạng lan khi muốn phát Media âm thanh đa vùng thông qua mạng Wifi')"></i> :</h5>
                      <div class="alert alert-primary" role="alert"> <div class="row mb-3">
@@ -4271,6 +4283,20 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               </div>
             </div>
             </div>
+
+            <div class="card accordion" id="accordion_speaker_eq">
+                    <div class="card-body">
+                      <div class="mb-3">
+                        <h5 class="card-title accordion-button collapsed" data-bs-toggle="collapse" data-bs-target="#collapse_speaker_eq" role="button" aria-expanded="false" aria-controls="collapse_speaker_eq">EQ âm thanh loa — Equalizer: <font class="ms-2 <?= !empty($Config['media_player']['equalizer']['active'])?'text-success':'text-danger' ?>"><?= !empty($Config['media_player']['equalizer']['active'])?'Đang bật':'Đang tắt' ?></font></h5>
+                      <div id="collapse_speaker_eq" class="accordion-collapse collapse">
+                        <input type="hidden" name="speaker_eq_present" value="1">
+                        <?php echo str_replace(' for="speaker_eq_active"', '', switch_field('speaker_eq_active','Bật EQ âm thanh phát ra loa',!empty($Config['media_player']['equalizer']['active']),'Bật/tắt EQ cho đường âm thanh chung. Điều chỉnh dải tần và quản lý mẫu tại trang chủ, bên dưới Media Player.')); ?>
+                        <a href="index.php#speaker-eq-card" class="btn btn-outline-success btn-sm">Mở giao diện chỉnh EQ</a>
+                      </div>
+                      </div>
+                    </div>
+                  </div>
+
 
             <div class="card accordion" id="accordion_button_media_player_source">
               <div class="card-body">
