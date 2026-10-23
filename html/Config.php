@@ -1351,12 +1351,12 @@ function vbotConfigFieldHelp($name, $help = '') {
   if ($help !== '') return $help;
   $descriptions = [
     'audio_processing_active'=>'Bật giảm nhiễu và tự cân bằng âm lượng mic cho wake word và STT. Cần cài WebRTC 2.1; nếu không nạp được thư viện, VBot ghi lỗi và tiếp tục dùng mic gốc.',
-    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc.<br><br><b>Mạch VBot AIO I2S:</b> Nhẹ (low).<br><b>Mạch VBot AIO WM8960:</b> Trung bình (moderate), đo trên loa .136.<br>Đây là các mức tham khảo theo lượt thử, cần kiểm tra lại khi thay mic hoặc môi trường sử dụng.',
+    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc. Mạch VBot AIO I2S = Nhẹ (low). Mạch VBot AIO WM8960 = Trung bình (moderate)<br>Đây là các mức tham khảo theo lượt thử, cần kiểm tra lại khi thay mic hoặc môi trường sử dụng.',
     'audio_high_pass_filter'=>'Giảm tiếng ù và rung ở tần số thấp. Nên bật khi mic thu tiếng rung bàn hoặc tiếng gió trầm; không thay thế bộ khử vọng AEC3.',
     'audio_agc_active'=>'Tự điều chỉnh mức giọng thu được sau khử vọng và giảm nhiễu. Tăng gain quá cao có thể khuếch đại cả tiếng nền; không thay đổi âm lượng trong alsamixer.',
     'audio_agc_limiter'=>'Giới hạn đỉnh tín hiệu sau AGC để giảm vỡ tiếng khi nói lớn. Nên bật khi dùng AGC; không sửa được tín hiệu đã vỡ ngay từ microphone.',
     'aec3_active'=>'Dùng âm thanh đang phát làm tham chiếu để giảm nhạc lọt vào mic trước khi nhận wake word. Cần WebRTC 2.1 và đường âm thanh chung cho các nguồn bên ngoài. Công tắc này độc lập với tùy chọn cho phép wake khi phát nhạc.',
-    'aec3_output'=>'Normal giảm vọng dư mạnh hơn, nên dùng trước khi thử Linear. Linear giữ giọng tự nhiên hơn nhưng có thể còn nhạc dư khiến wake word nhận nhầm.<br><br><b>Mạch VBot AIO I2S:</b> Normal<br><b>Mạch VBot AIO WM8960:</b> Normal',
+    'aec3_output'=>'Normal giảm vọng dư mạnh hơn, nên dùng trước khi thử Linear. Linear giữ giọng tự nhiên hơn nhưng có thể còn nhạc dư khiến wake word nhận nhầm.',
     'lan_active'=>'Khởi tạo dịch vụ gọi LAN cùng VBot để gọi và nhận cuộc gọi. Cần PJSIP và WebRTC 2.1; thiếu thư viện sẽ bỏ qua gọi LAN và ghi log, các chức năng khác vẫn chạy.',
     'lan_control_port'=>'Cổng TCP điều khiển cuộc gọi giữa các loa, cố định 5010. Khác với cổng SIP UDP và các cổng RTP truyền âm thanh.',
     'lan_output_device'=>'Thiết bị ALSA phát tiếng người gọi trên loa này. Mặc định default; chỉ thay khi đã kiểm tra tên thiết bị bằng aplay -L.',
