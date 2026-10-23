@@ -2355,10 +2355,10 @@ class BLEBondRecovery:
 
     def classic_disconnected(self, path):
         """Prepare CTKD after Classic is released, before the app opens LE."""
-        if self.closed or path in self.classic_pair_pending:
-            return
-        self.classic_pair_pending[path] = GLib.timeout_add_seconds(
-            1, self.ensure_classic_phone_le_bond, path)
+        # A2DP/AVRCP can briefly drop and reconnect. Pairing from every such
+        # event causes iOS to enter a Classic reconnect loop. Wait for a real
+        # LE/GATT access instead; touch() then requests LE pairing safely.
+        return
 
     def ensure_classic_phone_le_bond(self, path):
         self.classic_pair_pending.pop(path, None)
@@ -2664,8 +2664,6 @@ class Blue:
             if Blue.recovery is not None:
                 if pythonDict.get('Connected') is True:
                     Blue.recovery.classic_connected(str(path))
-                elif pythonDict.get('Connected') is False:
-                    Blue.recovery.classic_disconnected(str(path))
             """
             this is implemented for future extension of the code.
             if bluetooth channel is functioning correctly - and if pi is Locked, encryption is OK (phone app and pi use same key)
