@@ -493,9 +493,16 @@ if (isset($_GET['check_version_airplay'])) {
         $result['message'] = 'Không đọc được Version.json.';
         vbotApiJsonResponse($result, 502);
     }
-    $result['latest_version'] = $version['build_date'];
+    // Version.json may use a build label such as
+    // VBot_22_10_2026-5.6.1. Compare/display the semantic release only.
+    $release_label = (string)($version['build_date'] ?? '');
+    $latest_version = $release_label;
+    if (preg_match('/\b(\d+\.\d+\.\d+)\b/', $release_label, $release_match)) {
+        $latest_version = $release_match[1];
+    }
+    $result['latest_version'] = $latest_version;
     $result['description'] = $version['description'];
-    $result['update'] = ($current_version !== $version['build_date']);
+    $result['update'] = ($current_version !== $latest_version);
     $result['success'] = true;
     vbotApiJsonResponse($result);
 }
