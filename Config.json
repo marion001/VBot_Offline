@@ -319,6 +319,8 @@
         "active": true
     },
     "bluetooth": {
+        "a2dp_sink_active": true,
+        "a2dp_source_active": true,
         "adapter": "hci0",
         "sync_agent_runtime_on_boot": false
     },

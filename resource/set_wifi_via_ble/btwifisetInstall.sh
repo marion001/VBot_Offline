@@ -337,12 +337,16 @@ $sudo rm -f /etc/systemd/system/btwifiset.service
 (cat <<EOF
 [Unit]
 Description=btwifiset Wi-Fi Configuration over Bluetooth
-#After=hciuart.service bluetooth.target
-After=bluetooth.target
+Wants=bluetooth.service
+After=dbus.service hciuart.service bluetooth.service
+StartLimitIntervalSec=120
+StartLimitBurst=4
 
 [Service]
 Type=simple
 ExecStart=$spython $btwifidir/btwifiset.py --syslog
+Restart=on-failure
+RestartSec=5
 
 [Install]
 WantedBy=multi-user.target

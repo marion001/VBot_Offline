@@ -810,7 +810,7 @@ client.on("online", online => onlineSensor.updateCharacteristic(
   Characteristic.OccupancyDetected,
   online ? Characteristic.OccupancyDetected.OCCUPANCY_DETECTED : Characteristic.OccupancyDetected.OCCUPANCY_NOT_DETECTED,
 ));
-client.on("clientError", error => logError("VBot API chưa sẵn sàng", error));
+client.on("clientError", error => logError("Yêu cầu VBot API chưa hoàn tất", error));
 client.on("sse", connected => {
   if (connected === sseConnected) return;
   sseConnected = connected;

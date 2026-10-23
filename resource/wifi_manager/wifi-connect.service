@@ -1,12 +1,15 @@
 [Unit]
 Description=Balena wifi connect service
 After=NetworkManager.service
+Wants=NetworkManager.service
 [Service]
 Type=simple
-ExecStart=/bin/sh /home/pi/start-wifi-connect.sh
+ExecStart=/bin/bash /home/pi/start-wifi-connect.sh
+Environment=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 Restart=on-failure
 SyslogIdentifier=wifi-connect
-Type=idle
+RestartSec=5
+TimeoutStopSec=20
 User=root
 [Install]
 WantedBy=multi-user.target

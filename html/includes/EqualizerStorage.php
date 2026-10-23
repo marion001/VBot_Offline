@@ -31,7 +31,9 @@ function vbotEQNormalize($value) {
         if (!is_string($id) || !preg_match('/^[a-z0-9_-]{1,64}$/D',$id) || isset($ids[$id]) || !is_string($name) || !preg_match('/^.{1,80}$/usD',$name) || preg_match('/[\x00-\x1f\x7f]/',$name)) throw new InvalidArgumentException('Tên hoặc ID mẫu EQ không hợp lệ');
         $ids[$id]=true;$presets[]=['id'=>$id,'name'=>$name,'bands'=>vbotEQBands($preset['bands']??null)];
     }
-    if (!isset($ids[$value['default_preset']??'']) || !isset($ids[$value['selected_preset']??''])) throw new InvalidArgumentException('Mẫu EQ mặc định hoặc đang chọn không tồn tại');
+    $selected=$value['selected_preset']??'';
+    $builtinSelected=is_string($selected) && in_array($selected,array_column(vbotEQBuiltinModes(),'id'),true);
+    if (!isset($ids[$value['default_preset']??'']) || (!isset($ids[$selected]) && !$builtinSelected)) throw new InvalidArgumentException('Mẫu EQ mặc định hoặc đang chọn không tồn tại');
     return ['version'=>1,'boot_id'=>(string)($value['boot_id']??''),'default_preset'=>$value['default_preset'],'selected_preset'=>$value['selected_preset'],
         'current'=>vbotEQBands($value['current']??null),'presets'=>$presets];
 }
@@ -53,14 +55,29 @@ function vbotEQRead($path,$legacy=[]) {
     }
     return $state;
 }
+function vbotEQBuiltinModes() {
+            $modes=['flat'=>[0,0,0,0,0,0],'bass'=>[4,2,0,-1,-1,0],'vocal'=>[-2,-1,0,2,2,0],'clear'=>[-2,-1,0,1,3,2],'warm'=>[3,2,0,-1,-2,-1],'rock'=>[4,2,-1,1,3,2],'night'=>[-3,-2,0,2,1,-2]];
+            $names=['flat'=>'Flat — Cân bằng','bass'=>'Bass Boost — Âm trầm','vocal'=>'Vocal — Giọng nói','clear'=>'Clarity — Chi tiết','warm'=>'Warm — Ấm áp','rock'=>'Rock — Sôi động','night'=>'Night — Nghe ban đêm'];
+    $result=[];
+    foreach ($modes as $id=>$gains) {
+        $bands=array_combine(['bass_db','low_mid_db','mid_db','high_mid_db','treble_db','air_db'],$gains);
+        $bands['preamp_db']=-3; $bands['wet_percent']=100;
+        $result[]=['id'=>'builtin:'.$id,'name'=>$names[$id],'bands'=>$bands];
+    }
+    return $result;
+}
 function vbotEQOperation($state,$data) {
     $action=$data['action']??'';
     $index=null;
     foreach ($state['presets'] as $i=>$preset) if ($preset['id']===($data['id']??null)) $index=$i;
     if ($action==='apply') $state['current']=vbotEQIncomingBands($data['bands']??null,$state['current']);
     elseif ($action==='select') {
-        if ($index===null) throw new InvalidArgumentException('Mẫu EQ không còn tồn tại');
-        $state['selected_preset']=$state['presets'][$index]['id'];$state['current']=$state['presets'][$index]['bands'];
+        if ($index===null) {
+            $builtin=null;
+            foreach(vbotEQBuiltinModes() as $mode) if($mode['id']===($data['id']??'')) { $builtin=$mode; break; }
+            if ($builtin===null) throw new InvalidArgumentException('Mẫu EQ không còn tồn tại');
+            $state['selected_preset']=$builtin['id'];$state['current']=$builtin['bands'];
+        } else {$state['selected_preset']=$state['presets'][$index]['id'];$state['current']=$state['presets'][$index]['bands'];}
     } elseif ($action==='save') {
         $name=$data['name']??null;
         if (!is_string($name) || !preg_match('/^.{1,80}$/usD',trim($name)) || preg_match('/[\x00-\x1f\x7f]/',$name)) throw new InvalidArgumentException('Nhập tên mẫu EQ hợp lệ, tối đa 80 ký tự tiếng Việt');
@@ -75,8 +92,11 @@ function vbotEQOperation($state,$data) {
         $builtin=$data['id']??'';
         if (is_string($builtin) && strpos($builtin,'builtin:')===0) {
             $key=substr($builtin,8);
-            $modes=['flat'=>[0,0,0,0,0,0],'bass'=>[4,2,0,-1,-1,0],'vocal'=>[-2,-1,0,2,2,0],'clear'=>[-2,-1,0,1,3,2],'warm'=>[3,2,0,-1,-2,-1],'rock'=>[4,2,-1,1,3,2],'night'=>[-3,-2,0,2,1,-2]];
-            $names=['flat'=>'Flat — Cân bằng','bass'=>'Bass Boost — Âm trầm','vocal'=>'Vocal — Giọng nói','clear'=>'Clarity — Chi tiết','warm'=>'Warm — Ấm áp','rock'=>'Rock — Sôi động','night'=>'Night — Nghe ban đêm'];
+            $modes=[];$names=[];
+            foreach(vbotEQBuiltinModes() as $mode) {
+                $modeID=substr($mode['id'],8);$names[$modeID]=$mode['name'];
+                $modes[$modeID]=array_values(array_intersect_key($mode['bands'],array_flip(['bass_db','low_mid_db','mid_db','high_mid_db','treble_db','air_db'])));
+            }
             if (!isset($modes[$key])) throw new InvalidArgumentException('Chế độ EQ không hợp lệ');
             $id='_builtin_'.$key;$index=null;
             foreach ($state['presets'] as $i=>$p) if ($p['id']===$id) $index=$i;

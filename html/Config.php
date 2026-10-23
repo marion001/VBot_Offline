@@ -393,6 +393,8 @@ if (isset($_POST['all_config_save'])) {
     $bluetoothAdapter = 'hci0';
   }
   $Config['bluetooth']['adapter'] = $bluetoothAdapter;
+  $Config['bluetooth']['a2dp_sink_active'] = isset($_POST['bluetooth_a2dp_sink_active']);
+  $Config['bluetooth']['a2dp_source_active'] = isset($_POST['bluetooth_a2dp_source_active']);
   $Config['bluetooth']['sync_agent_runtime_on_boot'] = isset($_POST['bluetooth_sync_agent_runtime_on_boot']);
 
   #CẬP NHẬT CÁC GIÁ TRỊ TRONG API
@@ -1349,12 +1351,12 @@ function vbotConfigFieldHelp($name, $help = '') {
   if ($help !== '') return $help;
   $descriptions = [
     'audio_processing_active'=>'Bật giảm nhiễu và tự cân bằng âm lượng mic cho wake word và STT. Cần cài WebRTC 2.1; nếu không nạp được thư viện, VBot ghi lỗi và tiếp tục dùng mic gốc.',
-    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Bắt đầu ở mức Nhẹ; mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc.',
+    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc.<br><br><b>Mạch VBot AIO I2S:</b> Nhẹ (low).<br><b>Mạch VBot AIO WM8960:</b> Trung bình (moderate), đo trên loa .136.<br>Đây là các mức tham khảo theo lượt thử, cần kiểm tra lại khi thay mic hoặc môi trường sử dụng.',
     'audio_high_pass_filter'=>'Giảm tiếng ù và rung ở tần số thấp. Nên bật khi mic thu tiếng rung bàn hoặc tiếng gió trầm; không thay thế bộ khử vọng AEC3.',
     'audio_agc_active'=>'Tự điều chỉnh mức giọng thu được sau khử vọng và giảm nhiễu. Tăng gain quá cao có thể khuếch đại cả tiếng nền; không thay đổi âm lượng trong alsamixer.',
     'audio_agc_limiter'=>'Giới hạn đỉnh tín hiệu sau AGC để giảm vỡ tiếng khi nói lớn. Nên bật khi dùng AGC; không sửa được tín hiệu đã vỡ ngay từ microphone.',
     'aec3_active'=>'Dùng âm thanh đang phát làm tham chiếu để giảm nhạc lọt vào mic trước khi nhận wake word. Cần WebRTC 2.1 và đường âm thanh chung cho các nguồn bên ngoài. Công tắc này độc lập với tùy chọn cho phép wake khi phát nhạc.',
-    'aec3_output'=>'Normal giảm vọng dư mạnh hơn, nên dùng trước khi thử Linear. Linear giữ giọng tự nhiên hơn nhưng có thể còn nhạc dư khiến wake word nhận nhầm.',
+    'aec3_output'=>'Normal giảm vọng dư mạnh hơn, nên dùng trước khi thử Linear. Linear giữ giọng tự nhiên hơn nhưng có thể còn nhạc dư khiến wake word nhận nhầm.<br><br><b>Mạch VBot AIO I2S:</b> Normal; chỉ thử Linear khi cần đối chiếu khả năng giữ giọng.<br><b>Mạch VBot AIO WM8960:</b> Normal, đã đo trên loa .136. Lượt đo với nhạc chưa thay thế kiểm tra wake word và giọng nói khi có nhạc.',
     'lan_active'=>'Khởi tạo dịch vụ gọi LAN cùng VBot để gọi và nhận cuộc gọi. Cần PJSIP và WebRTC 2.1; thiếu thư viện sẽ bỏ qua gọi LAN và ghi log, các chức năng khác vẫn chạy.',
     'lan_control_port'=>'Cổng TCP điều khiển cuộc gọi giữa các loa, cố định 5010. Khác với cổng SIP UDP và các cổng RTP truyền âm thanh.',
     'lan_output_device'=>'Thiết bị ALSA phát tiếng người gọi trên loa này. Mặc định default; chỉ thay khi đã kiểm tra tên thiết bị bằng aplay -L.',
@@ -2338,10 +2340,12 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                             'border-success', 'Tìm Kiếm Thiết Bị', "scan_bluetooth_adapters()", 'btn btn-success border-success', 'onclick', ''
                           );
                           ?>
+                          <div class="row mb-3"><label class="col-sm-3 col-form-label" for="bluetooth_a2dp_sink_active">Sử dụng A2DP Sink <i class="bi bi-question-circle-fill" onclick="show_message('Nhận nhạc từ điện thoại vào VBot. Tắt sẽ ngừng luồng nhận âm thanh; Bluetooth PAN và ghép đôi vẫn được giữ. Khởi động lại VBot sau khi lưu cấu hình để áp dụng các luồng runtime.')"></i></label><div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" id="bluetooth_a2dp_sink_active" name="bluetooth_a2dp_sink_active" <?= ($Config['bluetooth']['a2dp_sink_active']??true)?'checked':'' ?>></div></div></div>
+                          <div class="row mb-3"><label class="col-sm-3 col-form-label" for="bluetooth_a2dp_source_active">Sử dụng A2DP Source <i class="bi bi-question-circle-fill" onclick="show_message('Phát âm thanh từ VBot ra loa hoặc tai nghe Bluetooth. Tắt sẽ đưa đầu ra về loa VBot; không xóa ghép đôi hoặc tắt Bluetooth PAN. Khởi động lại VBot sau khi lưu cấu hình để áp dụng các luồng runtime.')"></i></label><div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" id="bluetooth_a2dp_source_active" name="bluetooth_a2dp_source_active" <?= ($Config['bluetooth']['a2dp_source_active']??true)?'checked':'' ?>></div></div></div>
                           <div class="row mb-3">
                             <label class="col-sm-3 col-form-label" for="bluetooth_sync_agent_runtime_on_boot">
-                              Đồng Bộ Bluetooth Agent Khi Khởi Động
-                              <i class="bi bi-question-circle-fill" onclick="show_message('Khi bật, mỗi lần VBot khởi động sẽ sao chép ghi đè file resource/bluetooth/bluetooth_agent.py vào /usr/local/bin/bluetooth_agent.py, xóa marker tạm và restart vbot-bluetooth-agent.service. Khi tắt, VBot sẽ bỏ qua toàn bộ bước đồng bộ này.')"></i>:
+                              Dọn Trạng Thái Bluetooth Audio Khi Khởi Động
+                              <i class="bi bi-question-circle-fill" onclick="show_message('Bật để xóa marker tạm treo nhận âm thanh Bluetooth từ lần chạy trước. File Bluetooth Agent luôn được Sync_System_Services kiểm tra khi khởi động; chỉ cập nhật và restart dịch vụ khi nội dung thay đổi. Tắt tùy chọn này chỉ bỏ qua bước dọn marker.')"></i>:
                             </label>
                             <div class="col-sm-9">
                               <div class="form-check form-switch">
@@ -2350,7 +2354,7 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                                   id="bluetooth_sync_agent_runtime_on_boot"
                                   <?php echo ($Config['bluetooth']['sync_agent_runtime_on_boot'] ?? false) ? 'checked' : ''; ?>>
                                 <label class="form-check-label" for="bluetooth_sync_agent_runtime_on_boot">
-                                  Cho phép ghi đè agent và restart service khi VBot khởi động
+                                  Dọn marker tạm Bluetooth Audio khi VBot khởi động
                                 </label>
                               </div>
                             </div>
@@ -2390,8 +2394,8 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                       <?php echo switch_field('audio_agc_active','Bật AGC',$audio['agc']['active']); ?>
                       <?php echo switch_field('audio_agc_limiter','Giới hạn đỉnh âm thanh',$audio['agc']['limiter']); ?>
                       <?php
-                      echo input_field('audio_agc_target_level_dbfs','Mức đỉnh mục tiêu AGC (dBFS)',$audio['agc']['target_level_dbfs'],'required','number','1','0','31','6 nghĩa là mục tiêu -6 dBFS. Giá trị 0 không tắt AGC; dùng công tắc Bật AGC.','border-success','','','','','');
-                      echo input_field('audio_agc_compression_gain_db','Gain nén AGC tối đa (dB)',$audio['agc']['compression_gain_db'],'required','number','1','0','90','Bắt đầu 9 dB. Tăng quá cao có thể kéo cả nhiễu và vọng dư lên.','border-success','','','','','');
+                      echo input_field('audio_agc_target_level_dbfs','Mức đỉnh mục tiêu AGC (dBFS)',$audio['agc']['target_level_dbfs'],'required','number','1','0','31','6 nghĩa là mục tiêu -6 dBFS. Giá trị 0 không tắt AGC; dùng công tắc Bật AGC.<br><br><b>Mạch VBot AIO I2S:</b> 6.<br><b>Mạch VBot AIO WM8960:</b> 6.','border-success','','','','','');
+                      echo input_field('audio_agc_compression_gain_db','Gain nén AGC tối đa (dB)',$audio['agc']['compression_gain_db'],'required','number','1','0','90','Tăng quá cao có thể kéo cả nhiễu và vọng dư lên.<br><br><b>Mạch VBot AIO I2S:</b> 9 dB.<br><b>Mạch VBot AIO WM8960:</b> 9 dB.','border-success','','','','','');
                       ?>
                       <hr><h6>AEC3 — Khử nhạc lọt vào mic khi đánh thức</h6>
                       <p class="form-text">AEC3 dùng công tắc riêng trong mục xử lý mic, độc lập với “Đánh thức khi Media Player hoạt động”. VLC/Multiroom dùng tham chiếu ALSA; Bluetooth/AirPlay cần cài đường PCM chung. Lưu và khởi động lại VBot cùng dịch vụ Multiroom để áp dụng.</p>
@@ -2402,13 +2406,23 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                       echo input_field('aec3_library','Thư viện AEC3',htmlspecialchars($aec3['library']),'required','text','','','','Đường dẫn thư viện đã build trên thiết bị. Linear cần thư viện hỗ trợ export linear.','border-danger','','','','','');
                       echo select_field('aec3_output','Tín hiệu cho wake word',['linear'=>'Tuyến tính — giữ giọng, còn âm dư','normal'=>'AEC thông thường — giảm vọng dư mạnh hơn'],$aec3['output'],[]);
                       echo input_field('aec3_playback_device','Thiết bị loa ALSA',htmlspecialchars($aec3['playback_device']),'required','text','','','','Mặc định default. AEC3 giữ âm lượng phần mềm VLC, không chỉnh alsamixer.','border-danger','','','','','');
-                      echo input_field('aec3_capture_gain','Gain mic trước AEC3',$aec3['capture_gain'],'required','number','0.1','0.1','8','Bắt đầu 1. Không cộng gain wake word cũ. Giảm nếu log báo clipping.','border-success','','','','','');
-                      echo input_field('aec3_wake_gain','Gain wake word sau AEC3',$aec3['wake_gain'],'required','number','0.1','0.1','8','Bắt đầu 1. Tăng có thể tăng kích hoạt nhầm.','border-success','','','','','');
-                      echo input_field('aec3_playback_latency_ms','Buffer loa (ms)',$aec3['playback_latency_ms'],'required','number','1','20','200','Bộ đệm khi AEC3 trực tiếp phát ra ALSA, mặc định 100 ms. Giảm giúp giảm trễ nhưng dễ xẹt hoặc thiếu dữ liệu; tăng có thể ổn định hơn nhưng tăng trễ. Đường âm thanh chung dùng bộ đệm của bridge.','border-success','','','','','');
-                      echo input_field('aec3_capture_delay_ms','Độ trễ mic bổ sung (ms)',$aec3['capture_delay_ms'],'required','number','1','0','500','Mặc định 32; cộng với độ trễ ALSA đo được.','border-success','','','','','');
-                      echo input_field('aec3_render_clock_ppm','Bù clock tham chiếu (ppm)',$aec3['render_clock_ppm'],'required','number','1','-3000','3000','980 đã đo ở hai loa test. Cần đo lại nếu thay thiết bị/đường âm thanh.','border-success','','','','','');
+                      echo input_field('aec3_capture_gain','Gain mic trước AEC3',$aec3['capture_gain'],'required','number','0.1','0.1','8','Không cộng gain wake word cũ. Gain phần mềm không sửa được tín hiệu đã clipping ngay tại ADC/mic.<br><br><b>Mạch VBot AIO I2S:</b> 1.<br><b>Mạch VBot AIO WM8960:</b> 1. Trên loa .136 đã giảm Input Boost phần cứng xuống 20 dB; Capture giữ 13,5 dB. Các mức mixer này là kết quả riêng của loa thử, không tự áp dụng bởi tùy chọn này.','border-success','','','','','');
+                      echo input_field('aec3_wake_gain','Gain wake word sau AEC3',$aec3['wake_gain'],'required','number','0.1','0.1','8','Tăng có thể tăng kích hoạt nhầm.<br><br><b>Mạch VBot AIO I2S:</b> 1.<br><b>Mạch VBot AIO WM8960:</b> 1.','border-success','','','','','');
+                      echo input_field('aec3_playback_latency_ms','Buffer loa (ms)',$aec3['playback_latency_ms'],'required','number','1','20','200','Bộ đệm khi AEC3 trực tiếp phát ra ALSA. Giảm giúp giảm trễ nhưng dễ xẹt hoặc thiếu dữ liệu; tăng có thể ổn định hơn nhưng tăng trễ. Đường âm thanh chung dùng bộ đệm của bridge.<br><br><b>Mạch VBot AIO I2S:</b> 100 ms.<br><b>Mạch VBot AIO WM8960:</b> 100 ms. Loa .136 còn dùng chu kỳ phát ALSA 10 ms (480 mẫu tại 48 kHz), buffer ALSA 4800 mẫu; chu kỳ này được đặt riêng trong /etc/asound.conf, không phải giá trị của ô này.','border-success','','','','','');
+                      echo input_field('aec3_capture_delay_ms','Độ trễ mic bổ sung (ms)',$aec3['capture_delay_ms'],'required','number','1','0','500','Cộng với độ trễ ALSA đo được, không phải tổng độ trễ âm thanh.<br><br><b>Mạch VBot AIO I2S:</b> 32 ms.<br><b>Mạch VBot AIO WM8960:</b> 32 ms. Không nhập lại toàn bộ độ trễ đo được vào đây để tránh cộng trễ hai lần.','border-success','','','','','');
+                      echo input_field('aec3_render_clock_ppm','Bù clock tham chiếu (ppm)',$aec3['render_clock_ppm'],'required','number','1','-3000','3000','Bù sai lệch tốc độ giữa clock phát và thu, không phải bù độ trễ. Cần đo lại khi thay thiết bị hoặc đường âm thanh.<br><br><b>Mạch VBot AIO I2S:</b> 980 ppm, đã đo ở hai loa I2S thử trước đây.<br><b>Mạch VBot AIO WM8960:</b> 0 ppm, đo trên loa .136 ngày 22/10/2026; không thấy độ trôi ở độ phân giải một mẫu trong khoảng đo 45 giây. Không dùng 980 ppm của I2S cho WM8960 khi chưa đo lại.','border-success','','','','','');
                       ?>
                       <p class="form-text">NS và AGC ở trên xử lý sau AEC3 cho cả linear và normal. Công tắc đánh thức khi phát nhạc chỉ điều khiển nhận wake word, không bật/tắt AEC3. Lưu và khởi động lại VBot để áp dụng; thư viện phải hỗ trợ vbot_mic_create.</p>
+                      <?php $audioBoardPreset = vbotAudioBoardPreset(); ?>
+                      <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-primary" id="audio_processing_reset_defaults"
+                          data-board-preset="<?= htmlspecialchars(json_encode($audioBoardPreset, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+                          onclick="resetMicrophoneBoardDefaults(this)" <?= $audioBoardPreset === null ? 'disabled' : '' ?>>
+                          <i class="bi bi-arrow-counterclockwise"></i> Đặt lại mặc định các thông số
+                        </button>
+                        <span class="form-text m-0"><?= $audioBoardPreset === null ? 'Không đọc được /os_image_created.txt để nhận diện mạch.' : 'Nhận diện từ image: '.htmlspecialchars($audioBoardPreset['label'], ENT_QUOTES, 'UTF-8') ?></span>
+                        <?= vbotConfigHelpIcon('Đọc /os_image_created.txt trên loa: có chữ i2s là mạch VBot AIO I2S; không có là mạch VBot AIO WM8960. Nút điền lại NS, AGC, high-pass, chế độ đầu ra AEC và các thông số gain/buffer/delay/clock theo bộ tham khảo của mạch. Giữ nguyên công tắc bật WebRTC/AEC3, đường dẫn thư viện và thiết bị loa. Nhấn Lưu Cài Đặt rồi khởi động lại VBot để áp dụng. Nút không chỉnh mixer hoặc /etc/asound.conf.') ?>
+                      </div>
                     </div>
                     </div>
                   </div>

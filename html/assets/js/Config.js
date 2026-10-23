@@ -2239,6 +2239,30 @@ function updateNewsPaperLinkName(index, select) {
   select.style.display = 'none';
 }
 
+// Fill the form only; the normal configuration save handles persistence.
+function resetMicrophoneBoardDefaults(button) {
+    try {
+        const preset = JSON.parse(button.dataset.boardPreset || 'null');
+        if (!preset || !['i2s', 'wm8960'].includes(preset.board) || !preset.fields) {
+            throw new Error('Không nhận diện được mạch từ /os_image_created.txt.');
+        }
+        const fields = Object.entries(preset.fields).map(([id, value]) => {
+            const element = document.getElementById(id);
+            if (!element) throw new Error('Không tìm thấy mục cấu hình: ' + id);
+            return {element, value};
+        });
+        fields.forEach(({element, value}) => {
+            if (element.type === 'checkbox') element.checked = value === true;
+            else element.value = String(value);
+            element.dispatchEvent(new Event('input', {bubbles: true}));
+            element.dispatchEvent(new Event('change', {bubbles: true}));
+        });
+        showMessagePHP('Đã điền thông số mặc định cho ' + preset.label + '. Nhấn Lưu Cài Đặt để lưu.', 6);
+    } catch (error) {
+        show_message('Không đặt lại được thông số mic: ' + error.message);
+    }
+}
+
 //Tạo Mac Giả
 function random_mac_address(inputId) {
 	const input = document.getElementById(inputId);

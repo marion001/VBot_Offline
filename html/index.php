@@ -7,8 +7,8 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
 if ($Config['contact_info']['user_login']['active']) {
-  session_start();
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -313,7 +313,6 @@ include 'html_head.php';
                     <?php endif; ?>
                     <label>Trình Phát Đa Phương Tiện - Media Player</label>
 					<span class="d-none" id="ble_active">
-						<i class="bi bi-bluetooth text-primary"></i> 
 						<span id="bluetooth_status" class="text-success"></span>
 					</span>
                   </div>
@@ -342,7 +341,7 @@ include 'html_head.php';
                   </div>
 				  <div class="alert alert-success" role="alert">
                   <div class="input-group my-2">
-                    <label class="input-group-text border-success" for="media_source_select">Chuyển nguồn phát:</label>
+                    <label class="input-group-text border-success" for="media_source_select">Chuyển nguồn phát đầu vào:</label>
                     <select class="form-select border-success" id="media_source_select" onchange="selectMediaSource(this.value)">
                       <option value="" disabled selected>N/A Đang chờ trạng thái nguồn phát</option>
                       <option value="local_media">Local / nhạc do VBot phát</option>
@@ -351,6 +350,14 @@ include 'html_head.php';
                       <option value="multiroom">Multiroom Audio</option>
                     </select>
                   </div>
+                  <div class="input-group my-2">
+                    <label class="input-group-text border-success" for="media_output_select">Chuyển nguồn phát đầu ra:</label>
+                    <select class="form-select border-success" id="media_output_select" disabled aria-label="Chọn loa phát âm thanh" data-local-label="<?= htmlspecialchars('Loa VBot' . (trim((string)($Config['contact_info']['full_name'] ?? '')) !== '' ? ' [' . trim((string)$Config['contact_info']['full_name']) . ']' : ''), ENT_QUOTES, 'UTF-8') ?>">
+                      <option value=""><?= htmlspecialchars('Loa VBot' . (trim((string)($Config['contact_info']['full_name'] ?? '')) !== '' ? ' [' . trim((string)$Config['contact_info']['full_name']) . ']' : ''), ENT_QUOTES, 'UTF-8') ?></option>
+                    </select>
+                    <button type="button" class="btn btn-outline-primary border-success" id="media_output_refresh" title="Làm mới danh sách loa Bluetooth"><i class="bi bi-arrow-clockwise"></i></button>
+                  </div>
+                  <small class="text-muted d-block mb-2">Chọn loa VBot hoặc loa Bluetooth đã kết nối. <i class="bi bi-question-circle" role="button" onclick="show_message('Đầu ra áp dụng cho âm thanh qua đường phát chung. Ghép đôi và kết nối loa trong trang Bluetooth_Source.php. A2DP Source đang thử nghiệm, có thể còn mất đoạn. Cuộc gọi và âm thanh phát trực tiếp ngoài đường chung vẫn dùng đầu ra riêng.')"></i></small>
                   <small class="text-primary d-block mb-2">VBot giữ phiên kết nối như AirPlay, Bluetooth, Multiroom, và nhường đầu ra khi chọn Chuyển nguồn phát tương ứng</small>
 					</div>
                   <div class="d-flex flex-column align-items-center gap-2">
@@ -884,6 +891,17 @@ include 'html_head.php';
         <!-- End Right side columns -->
       </div>
     </section>
+  <div class="modal fade" id="bluetoothDevicesModal" tabindex="-1" aria-labelledby="bluetoothDevicesModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-sm modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="bluetoothDevicesModalLabel"><i class="bi bi-bluetooth text-primary"></i> Thiết bị kết nối</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+        </div>
+        <div class="modal-body" id="bluetooth-devices-modal-body"></div>
+      </div>
+    </div>
+  </div>
   <div class="modal fade" id="multiroomModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
 
@@ -1060,6 +1078,8 @@ include 'html_head.php';
   <?php
   include 'html_js.php';
   ?>
+  <script src="assets/js/media-output.js?v=7"></script>
+  <script src="assets/js/media-input.js?v=1"></script>
   <script>
     const multiroomApiUrl = <?php echo json_encode(rtrim($URL_API_VBOT, '/') . '/multiroom'); ?>;
     let multiroomSnapshot = {};
@@ -2205,17 +2225,19 @@ include 'html_head.php';
 let mediaSourceChanging = false;
 async function selectMediaSource(source) {
     const select = document.getElementById('media_source_select');
-    if (mediaSourceChanging || !['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(source)) return;
+    const match = /^bluetooth:((?:[0-9A-F]{2}:){5}[0-9A-F]{2})$/.exec(source);
+    if (mediaSourceChanging || (!match && !['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(source))) return;
     mediaSourceChanging = true;
     select.disabled = true;
     try {
         const response = await vbotFetchWithTimeout('<?php echo $URL_API_VBOT; ?>', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({type: 1, data: 'media_control', action: 'select_source', source: source})
+            body: JSON.stringify({type: 1, data: 'media_control', action: 'select_source', source: match ? 'bluetooth' : source, ...(match ? {bluetooth_mac: match[1]} : {})})
         }, 30000);
         if (!response.ok) throw new Error('HTTP ' + response.status);
         const result = await response.json();
         if (result.success !== true) throw new Error(result.message || 'Không thể chuyển nguồn');
+        select.dataset.currentSource = source;
         showMessagePHP(result.message, 5);
     } catch (error) {
         showMessagePHP('Chuyển nguồn phát: ' + error.message, 8);
@@ -2277,7 +2299,7 @@ function bluetooth_control(action, value) {
 function renderBluetoothActive(bluetooth) {
     const el = document.getElementById('ble_active');
     if (!el) return;
-    if (bluetooth && bluetooth.active === true) {
+    if (bluetooth && (bluetooth.active === true || Object.keys(bluetooth.connected_devices || {}).length > 0)) {
         el.classList.remove('d-none');
     } else {
         el.classList.add('d-none');
@@ -2296,7 +2318,30 @@ function setBleButtons(enabled) {
 }
 
 //Cập nhật hiển thị danh sách thiết bị bluetooth đang kết nối
-let bluetoothSelectOpen = false;
+let bluetoothDisconnectBusy = false;
+let bluetoothRenderedSignature = null;
+async function disconnectBluetoothDevice(device) {
+    if (bluetoothDisconnectBusy || !device.mac) return;
+    if (!confirm('Ngắt Bluetooth với ' + device.name + '? Kết nối PAN của thiết bị này cũng sẽ ngắt nếu đang dùng.')) return;
+    bluetoothDisconnectBusy = true;
+    loading('show');
+    try {
+        const response = await vbotFetchWithTimeout('includes/php_ajax/Bluetooth_Source.php', {
+            method: 'POST', credentials: 'same-origin',
+            body: new URLSearchParams({action: 'device_disconnect', mac: device.mac, csrf_token: window.VBOT_CSRF_TOKEN || ''})
+        });
+        const data = await response.json();
+        if (!response.ok || !data.success) throw new Error(data.message || 'Không ngắt được thiết bị Bluetooth');
+        showMessagePHP('Đã ngắt kết nối thiết bị Bluetooth');
+    } catch (error) {
+        const safe = document.createElement('span');
+        safe.textContent = error.message;
+        show_message(safe.innerHTML);
+    } finally {
+        bluetoothDisconnectBusy = false;
+        loading('hide');
+    }
+}
 function getBluetoothAdapterName(device) {
     if (device && device.adapter) {
         return String(device.adapter);
@@ -2316,56 +2361,77 @@ function renderBluetoothStatus(bluetooth) {
     if (!statusEl) {
         return;
     }
-    const currentSelect = document.getElementById('bluetooth_device_select');
-
-    if (bluetoothSelectOpen || (currentSelect && document.activeElement === currentSelect)) {
+    if (bluetoothDisconnectBusy) return;
+    const devices = Object.values(bluetooth.connected_devices || bluetooth.bluetooth_devices || {}).filter(device => device.connected !== false);
+    setBleButtons(Boolean(bluetooth.is_connected));
+    const signature = JSON.stringify(devices.map(device => [device.path, device.mac, device.name, device.adapter]));
+    if (signature === bluetoothRenderedSignature) return;
+    bluetoothRenderedSignature = signature;
+    statusEl.replaceChildren();
+    const modalBody = document.getElementById('bluetooth-devices-modal-body');
+    if (modalBody) modalBody.replaceChildren();
+    if (!devices.length) {
+        const disconnected = document.createElement('span');
+        disconnected.className = 'text-danger';
+        disconnected.textContent = 'Chưa kết nối';
+        statusEl.appendChild(disconnected);
+        if (modalBody) modalBody.textContent = 'Chưa có thiết bị Bluetooth kết nối.';
         return;
     }
-    const devices = Object.values(bluetooth.bluetooth_devices || {});
-    if (!bluetooth.is_connected || devices.length === 0) {
-		statusEl.replaceChildren();
-		const disconnected = document.createElement('span');
-		disconnected.className = 'text-danger';
-		disconnected.textContent = 'Chưa kết nối';
-		statusEl.appendChild(disconnected);
-		setBleButtons(false);
-        return;
+    const makeDeviceRow = function(device, inModal = false) {
+        const row = document.createElement('span');
+        row.className = 'd-flex flex-wrap align-items-center gap-1 mb-1';
+        const label = document.createElement('span');
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-bluetooth text-primary';
+        icon.setAttribute('aria-hidden', 'true');
+        label.className = 'text-success';
+        label.textContent = formatBluetoothDeviceLabel(device);
+        label.title = device.mac || '';
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn btn-danger btn-sm py-0 px-2 ms-1';
+        button.textContent = 'Ngắt kết nối';
+        button.title = 'Ngắt Bluetooth của thiết bị này (bao gồm PAN nếu có)';
+        button.addEventListener('click', () => disconnectBluetoothDevice(device));
+        if (inModal) {
+            row.className = 'row align-items-center g-2 py-2 border-bottom mx-0';
+            const identity = document.createElement('span');
+            identity.className = 'col-7 d-flex align-items-start gap-2';
+            icon.className += ' flex-shrink-0';
+            label.className += ' text-break';
+            identity.append(icon, label);
+            const action = document.createElement('span');
+            action.className = 'col-5 text-end';
+            button.className = 'btn btn-danger btn-sm px-2 text-nowrap';
+            action.appendChild(button);
+            row.append(identity, action);
+        } else {
+            row.append(icon, label, button);
+        }
+        return row;
+    };
+    if (devices.length >= 3) {
+        const summary = document.createElement('button');
+        summary.type = 'button';
+        summary.className = 'btn btn-link p-0 text-success text-decoration-none';
+        summary.setAttribute('data-bs-toggle', 'modal');
+        summary.setAttribute('data-bs-target', '#bluetoothDevicesModal');
+        summary.title = 'Xem ' + devices.length + ' thiết bị Bluetooth đang kết nối';
+        const icon = document.createElement('i');
+        icon.className = 'bi bi-bluetooth text-primary me-1';
+        icon.setAttribute('aria-hidden', 'true');
+        const text = document.createElement('span');
+        text.className = 'text-success';
+        text.textContent = `${devices.length} thiết bị đang kết nối`;
+        summary.append(icon, text);
+        statusEl.appendChild(summary);
+    } else {
+        devices.forEach(device => statusEl.appendChild(makeDeviceRow(device)));
     }
-    if (devices.length === 1) {
-		statusEl.replaceChildren();
-		const deviceLabel = document.createElement('span');
-		deviceLabel.className = 'text-success';
-		deviceLabel.textContent = formatBluetoothDeviceLabel(devices[0]);
-		const disconnectButton = document.createElement('button');
-		disconnectButton.type = 'button';
-		disconnectButton.className = 'btn btn-danger btn-sm py-0 px-2 ms-1';
-		disconnectButton.style.fontSize = '0.75rem';
-		disconnectButton.title = 'Nhấn để ngắt kết nối Bluetooth với thiết bị đang kết nối hiện tại';
-		disconnectButton.textContent = 'Ngắt kết nối';
-		disconnectButton.addEventListener('click', function() { bluetooth_control('disconnect'); });
-		statusEl.appendChild(deviceLabel);
-		statusEl.appendChild(disconnectButton);
-		setBleButtons(true);
-        return;
-    }
-	statusEl.replaceChildren();
-	const deviceSelect = document.createElement('select');
-	deviceSelect.id = 'bluetooth_device_select';
-	deviceSelect.className = 'form-select form-select-sm border-success';
-	deviceSelect.style.width = 'auto';
-	deviceSelect.style.minWidth = '220px';
-	deviceSelect.addEventListener('focus', function() { bluetoothSelectOpen = true; });
-	deviceSelect.addEventListener('blur', function() { bluetoothSelectOpen = false; });
-	deviceSelect.addEventListener('change', function() { bluetooth_control('receive_signal', this.value); });
     devices.forEach(function(device) {
-		const option = document.createElement('option');
-		option.value = String(device.path || '');
-		option.textContent = formatBluetoothDeviceLabel(device);
-		option.selected = device.path === bluetooth.device_path;
-		deviceSelect.appendChild(option);
+        if (modalBody) modalBody.appendChild(makeDeviceRow(device, true));
     });
-	statusEl.appendChild(deviceSelect);
-	setBleButtons(true);
 }
   </script>
   
@@ -2373,6 +2439,8 @@ function renderBluetoothStatus(bluetooth) {
 
 function update_index_data(data){
           if (data.success) {
+            if(data.equalizer) window.dispatchEvent(new CustomEvent('vbot-equalizer-state',{detail:data.equalizer}));
+            if(data.bluetooth_output) window.dispatchEvent(new CustomEvent('vbot-bluetooth-output',{detail:data.bluetooth_output}));
             //console.log(data);
             document.getElementById('div_message_error').style.display = 'none';
             document.getElementById('show_conversation_mode').checked = data.conversation_mode ? true : false;
@@ -2434,12 +2502,7 @@ function update_index_data(data){
 			);
 			const mediaIsPlaying = mediaPlaybackState === 'playing';
             const sourceSelect = document.getElementById('media_source_select');
-            sourceSelect.dataset.currentSource = ['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(mediaSourceKind) ? mediaSourceKind : '';
-            sourceSelect.options[0].textContent = 'Chưa có nguồn phát';
-            sourceSelect.querySelector('[value="multiroom"]').disabled = !media.multiroom_active;
-            sourceSelect.querySelector('[value="bluetooth"]').disabled = !(data.bluetooth?.active && data.bluetooth?.is_connected);
-            sourceSelect.querySelector('[value="airplay"]').disabled = !media.airplay_active;
-            if (!mediaSourceChanging && document.activeElement !== sourceSelect) sourceSelect.value = sourceSelect.dataset.currentSource;
+            if (window.renderVbotMediaInputs) window.renderVbotMediaInputs(data, mediaSourceKind);
 			const mediaIsPaused = mediaPlaybackState === 'paused';
 			const multiroomActive = media.multiroom_active === true || mediaSourceKind === 'multiroom';
 			updateMultiroomConnectionIndicators(multiroomActive);

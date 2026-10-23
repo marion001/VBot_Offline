@@ -655,7 +655,7 @@ class BTCryptoManager:
                 msg_bytes = self.crypto.decryptFromReceived(cypher,self.nonce_counter)
                 #since this could be a retry message while in garbled process, which is now OK:
                 if self.timer is not None:
-                    self.timer.cancel
+                    self.timer.cancel()
                     self.timer = None
                     self.request_counter.resetCounter()
                     self.unknown_response = ""

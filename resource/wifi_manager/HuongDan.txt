@@ -1,5 +1,13 @@
 Hướng dẫn cài đặt auto Wifi Manager
 
+Phiên bản V5:
+- Chờ ban đầu 5 giây, rồi kiểm tra Wi-Fi router, không dùng ping Internet làm điều kiện phát AP.
+- Mỗi lượt chỉ thử một hồ sơ Wi-Fi có tự kết nối và đang nhìn thấy; tránh đợi lần lượt nhiều mạng lỗi.
+- Khi chưa có Wi-Fi router, phát VBot_Assistant; mở http://192.168.4.1 để cấu hình. PAN có mạng vẫn giữ AP cấu hình.
+- Không dừng AP sau 2 phút nữa. Nếu có điện thoại kết nối AP, tiếp tục giữ portal; khi AP rảnh sẽ định kỳ kiểm tra Wi-Fi đã lưu.
+- Portal chưa tạo AP sau 45 giây, hoặc mất AP 60 giây dù tiến trình còn chạy, sẽ được thử khởi động lại. Thời gian thực tế còn phụ thuộc NetworkManager và driver.
+- Nhật ký có dòng "AP đã hoạt động" sau khi NetworkManager báo đúng profile AP, thay vì chỉ báo đã gửi lệnh phát.
+
 start-wifi-connect.sh: Vừa wifi manager + đọc ip ra loa
 
 start-wifi-connect_wifi_only.sh: chỉ có wifi manager, không đọc ip ra loa

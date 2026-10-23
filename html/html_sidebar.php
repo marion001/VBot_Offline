@@ -186,6 +186,25 @@
   </li>
   </li>
 
+  <li class="nav-heading"><i class="bi bi-hdd-network"></i> Mạng, Network, Internet</li>
+  <li class="nav-item">
+
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="Wifi.php">
+      <i class="bi bi-wifi"></i>
+      <span>Wifi Network</span>
+    </a>
+  </li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="Bluetooth_PAN.php">
+      <i class="bi bi-bluetooth"></i>
+      <span>Bluetooth Network</span>
+    </a>
+  </li>
+  </li>
+
+  <li class="nav-item" onclick="loading('show')"><a class="nav-link collapsed" href="Bluetooth_Source.php"><i class="bi bi-speaker"></i><span>Quản Lý Thiết Bị Bluetooth</span></a></li>
+
   <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
   <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#icons-tbdv" data-bs-toggle="collapse" href="#">
@@ -295,12 +314,7 @@
     </ul>
   </li>
 
-  <li class="nav-item" onclick="loading('show')">
-    <a class="nav-link collapsed" href="Wifi.php">
-      <i class="bi bi-wifi"></i>
-      <span>Wifi Network</span>
-    </a>
-  </li>
+
   <li class="nav-item" onclick="loading('show')">
     <a class="nav-link collapsed" href="System_Information.php">
       <i class="bi bi-info-circle-fill"></i>

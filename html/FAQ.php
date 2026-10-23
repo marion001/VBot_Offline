@@ -173,6 +173,7 @@ include 'html_head.php';
               </div>
 
               <?php include __DIR__ . '/includes/FAQAudioNativeSection.php'; ?>
+              <?php include __DIR__ . '/includes/FAQBluetoothPANSection.php'; ?>
 
               <div class="card accordion mb-3" id="internal-ir-setup">
                 <div class="card-body">
@@ -1355,7 +1356,7 @@ sudo sed -i 's/post_max_size = .*/post_max_size = 350M/' /đường/dẫn/của/
                       </div>
                     </div>
 <div class="alert alert-primary mt-3">
-Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để Reset Đặt lại toàn bộ cấu hình mạng wifi<br/>
+Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 giây rồi nhả ra để đặt lại toàn bộ cấu hình Wi-Fi. VBot sẽ sao lưu và cập nhật <code>resource/set_wifi_via_ble/btwifiset.py</code> vào <code>/usr/local/btwifiset/btwifiset.py</code>, rồi khởi động lại riêng dịch vụ BLE để cấu hình Wi-Fi. Không xóa profile Bluetooth PAN hoặc Ethernet. Nếu chưa cài BLE, hệ thống vẫn reset Wi-Fi và dùng AP cấu hình.<br/>
 - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 15 giây rồi nhả ra để bật Bluetooth cấu hình Wifi (Khi đã được cấu hình Xem Chi Tiết Bên Dưới: <b>Cài Đặt Cấu Hình Wifi Qua Bluetooth</b>)<br/>
 - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 10 giây rồi nhả ra để đọc địa chỉ ip hiện tại<br/>
 - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 6 giây rồi nhả ra để ngắt kết nối bluetooth với thiết bị đang được kết nối (Khi đã được cài trên hệ thống <a href='FAQ.php' target='_blank'>Nhấn Để Xem Chi Tiết</a>)
@@ -1393,6 +1394,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     Nếu phát hiện địa chỉ IP Local bị thay đổi hoặc mạng wifi trước đo bị thay đổi sẽ tự đọc địa chỉ ip local mới<br />
                     <b>- Logs Auto Wifi Manager:</b> Kiểm Tra Logs Quá Trình Hoạt Động<br />
                     <b>- Status Auto Wifi Manager:</b> Kiểm tra trạng thái xem là: đang hoạt động hay không<br />
+                    <p class="mt-2">Khi chưa kết nối Wi-Fi router, VBot phát AP <b>VBot_Assistant</b>; kết nối AP rồi mở <b>http://192.168.4.1</b> để cấu hình. Bluetooth PAN có Internet vẫn không chặn AP. Phiên bản mới giữ AP khi có thiết bị đang cấu hình, không tự tắt theo chu kỳ 2 phút. Khi AP rảnh, hệ thống định kỳ thử lại một mạng đã lưu đang nhìn thấy; thời gian xuất hiện AP còn tùy NetworkManager và driver.</p>
+                    <p>Nếu AP chưa xuất hiện, xem <code>journalctl -u wifi-connect.service -n 80 --no-pager</code>. Dòng <b>AP đã hoạt động</b> cho biết NetworkManager đã kích hoạt profile AP; dòng <b>Tiến hành phát</b> chỉ là bắt đầu khởi tạo. Khi đang thử IP/DNS mới trong WebUI, hệ thống chờ xác nhận/khôi phục trước khi chuyển sang AP.</p>
                   </div>
                 </div>
               </div>
@@ -1406,8 +1409,35 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
     <strong>Hướng dẫn:</strong> Cấu hình Bluetooth & cài đặt <b>Rpi-SetWiFi-viaBluetooth</b> trên Raspberry Pi<br/>
 <br/>
 <b>Hướng Dẫn Sử Dụng APP BTBerryWifi Cấu Hình Wifi Cho Loa VBot: <a href="https://docs.google.com/document/d/1qX4mNQAQWzEbEEpk4AWL95_nlinlArLg/edit" target="_blank">https://docs.google.com/document/d/1qX4mNQAQWzEbEEpk4AWL95_nlinlArLg</a></b>
+<p class="mt-3"><b>Tự phục hồi liên kết BLE bị lỗi xác thực:</b> Khi dịch vụ BT WiFi Set đang chạy, VBot theo dõi tín hiệu lỗi xác thực của thiết bị vừa đọc/ghi dữ liệu cấu hình Wi-Fi trong 5 phút gần nhất. Nếu có ít nhất 3 lỗi trong 3 phút, thiết bị đã ngắt kết nối và không có PCM âm thanh hoặc Bluetooth PAN đang hoạt động, hệ thống sao lưu rồi xóa riêng liên kết ghép đôi cũ trên loa. Sau một lần phục hồi, hệ thống chờ app kết nối ổn định 13 giây mới cho phép tự phục hồi tiếp. Nếu chưa kết nối lại được, reboot loa sẽ xóa trạng thái chờ để thử lại từ đầu; restart riêng dịch vụ BLE không xóa trạng thái này. Mất sóng, chủ động ngắt kết nối hoặc lỗi không rõ nguyên nhân không làm xóa ghép đôi. BlueZ cũ không cung cấp tín hiệu lý do ngắt thì cần xử lý thủ công.</p>
+<p>Backup liên kết và dữ liệu giới hạn phục hồi nằm tại <code>/var/lib/vbot-ble-recovery/</code>, chỉ root được đọc vì có khóa ghép đôi; không đưa thư mục này vào bản phát hành. Xem log: <code>journalctl -u btwifiset.service -n 100 --no-pager</code>, tìm <code>[BLE Recovery]</code>. Sau phục hồi, kết nối lại app; nếu điện thoại còn lưu khóa cũ, cần chọn <b>Quên thiết bị</b> trên điện thoại. Loa không thể tự xóa khóa lưu trên điện thoại.</p>
+<p>Cập nhật bản BLE đã cài bằng mã nguồn đi kèm VBot (có backup, chỉ restart BT WiFi Set):</p>
+<pre class="bg-dark text-light p-3 rounded"><code>cd /home/pi/VBot_Offline
+sudo python3 resource/set_wifi_via_ble/fix_ble_startup.py --root /home/pi/VBot_Offline --apply --sync-source --restart</code></pre>
 	
   </div>
+
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-primary text-white">
+    <i class="bi bi-shield-lock"></i> Mật khẩu BTwifiSet và xác thực quản trị
+  </div>
+  <div class="card-body">
+    <p><b>Mật khẩu BTwifiSet</b> là mật khẩu riêng bảo vệ dịch vụ cấu hình Bluetooth trên loa. Mật khẩu này lưu tại <code>/usr/local/btwifiset/crypto</code>, không nằm trong <code>Config.json</code>; đây không phải mật khẩu Wi-Fi, SSH hoặc mã ghép đôi Bluetooth.</p>
+    <ol>
+      <li class="mb-3">SSH vào loa, mở hoặc tạo file mật khẩu:
+        <pre class="bg-dark text-light p-3 rounded mt-2"><code>sudo nano /usr/local/btwifiset/crypto</code></pre>
+        Nhập mật khẩu bạn tự chọn vào <b>dòng đầu tiên</b>. Nhấn <code>Ctrl+O</code>, <code>Enter</code> để lưu, rồi <code>Ctrl+X</code> để thoát.
+      </li>
+      <li class="mb-3">Đặt quyền đọc file và khởi động lại dịch vụ để nhận mật khẩu mới:
+        <pre class="bg-dark text-light p-3 rounded mt-2"><code>sudo chmod 600 /usr/local/btwifiset/crypto
+sudo systemctl restart btwifiset.service</code></pre>
+        Phiên cấu hình Bluetooth đang mở có thể bị ngắt; kết nối lại sau khi dịch vụ khởi động.
+      </li>
+      <li>Trong <b>VBotScanDevice / VBot Device Manager</b>, chọn loa ở tab <b>Bluetooth / Wi-Fi</b>, nhập cùng mật khẩu vào ô <b>Mật khẩu BTwifiSet</b> và kết nối Bluetooth. Mở <b>Quản trị VBot</b>, nhập lại mật khẩu nếu ô đã được xóa sau kết nối, rồi nhấn <b>Xác thực quản trị</b> và xác nhận.</li>
+    </ol>
+    <p class="mb-0">Xác thực quản trị sẽ khóa BTwifiSet và bật kết nối mã hóa cho các thao tác quản trị. Những lần kết nối sau cần nhập mật khẩu này. Mỗi loa lưu mật khẩu riêng; không đưa file <code>crypto</code> chứa mật khẩu vào bộ phát hành dùng chung.</p>
+  </div>
+</div>
 
 <div class="card shadow-sm mb-4">
     <div class="card-header bg-primary text-white">
@@ -2298,6 +2328,66 @@ EOF</code></pre>
 </div>
 </div>
 
+
+<div class="card accordion" id="accordion_wifi_bluetooth_coexistence">
+  <div class="card-body">
+    <h5 class="card-title accordion-button collapsed" role="button" data-bs-toggle="collapse" data-bs-target="#collapse_wifi_bluetooth_coexistence" aria-expanded="false" aria-controls="collapse_wifi_bluetooth_coexistence">Sửa Wi-Fi/Bluetooth — Nhạc ra loa Bluetooth bị giật trên Pi Zero 2 W</h5>
+    <div id="collapse_wifi_bluetooth_coexistence" class="accordion-collapse collapse">
+      <p>Pi Zero 2 W có thể bị mất đoạn nhạc khi Wi-Fi và Bluetooth cùng hoạt động. Bộ sửa nhận diện model, chip BCM43430/1 hoặc /2 và firmware đang nạp, chỉ chỉnh đúng file NVRAM tương ứng. Không phụ thuộc IMG I2S/WM8960; không sửa mic, mixer hay ALSA. Phần cứng không xác định được sẽ được bỏ qua.</p>
+      <div class="alert alert-warning">Tham số có thể giảm tốc độ Wi-Fi khi phát Bluetooth và không bảo đảm phù hợp mọi firmware. Hãy thử bằng nhạc thật. Luôn backup trước; sau khi sửa hoặc khôi phục cần reboot. Công cụ không tự ngắt Wi-Fi hoặc reboot.</div>
+<div class="accordion mb-3" id="faq-coexistence-methods">
+<div class="accordion-item">
+  <h2 class="accordion-header" id="faq-coexistence-methods-auto-heading">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-coexistence-methods-auto" aria-expanded="false" aria-controls="faq-coexistence-methods-auto">Chạy file tự động</button>
+  </h2>
+  <div id="faq-coexistence-methods-auto" class="accordion-collapse collapse" aria-labelledby="faq-coexistence-methods-auto-heading" data-bs-parent="#faq-coexistence-methods">
+    <div class="accordion-body"><pre class="bg-dark text-light p-3 rounded"><code>cd /home/pi/VBot_Offline
+# Kiểm tra phần cứng, chưa thay đổi cấu hình
+sudo python3 resource/bluetooth/fix_wifi_bluetooth.py --check
+# Tự nhận diện, backup rồi sửa đúng firmware; đã phù hợp thì không ghi lại
+sudo python3 resource/bluetooth/fix_wifi_bluetooth.py --apply
+# Chủ động khởi động lại khi thuận tiện
+sudo reboot</code></pre>
+      <p>Backup nằm trong <code>/home/pi/VBot_AEC3/bluetooth_coexistence_backups/</code>. Lệnh sẽ in đường dẫn cụ thể. Khôi phục bằng thư mục backup đó:</p>
+      <pre class="bg-dark text-light p-3 rounded"><code>sudo python3 resource/bluetooth/fix_wifi_bluetooth.py --restore /home/pi/VBot_AEC3/bluetooth_coexistence_backups/coexistence_THU_MUC_BACKUP
+sudo reboot</code></pre>
+      <p>Trên WebUI, nút <b>Cài đặt / Bật A2DP Source</b> trong <a href="Bluetooth_Source.php">Quản Lý Thiết Bị Bluetooth</a> và nút <b>Fix Bluetooth Về Cấu Hình Mặc Định</b> trong <a href="Command.php">Lệnh hệ thống</a> đều thực hiện bước kiểm tra/sửa này. Nút sửa mặc định cũng backup cấu hình dịch vụ Bluetooth trước khi ghi lại. Không cần chạy lại lệnh riêng nếu thao tác WebUI đã báo thành công.</p>
+      <p>Nếu chỉ muốn cài Source, không sửa firmware:</p>
+      <pre class="bg-dark text-light p-3 rounded"><code>sudo python3 resource/bluetooth/source_manager.py install --skip-coexistence</code></pre></div>
+  </div>
+</div>
+<div class="accordion-item">
+  <h2 class="accordion-header" id="faq-coexistence-methods-manual-heading">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-coexistence-methods-manual" aria-expanded="false" aria-controls="faq-coexistence-methods-manual">Chạy lệnh thủ công</button>
+  </h2>
+  <div id="faq-coexistence-methods-manual" class="accordion-collapse collapse" aria-labelledby="faq-coexistence-methods-manual-heading" data-bs-parent="#faq-coexistence-methods">
+    <div class="accordion-body"><p>Kiểm tra đúng chip trước. Nếu log không có dòng tương ứng thì dùng công cụ tự động để kiểm tra, không đoán theo tên IMG.</p>
+      <pre class="bg-dark text-light p-3 rounded"><code>sudo dmesg | grep -E 'brcmfmac.*using.*BCM43430'
+# Nếu dmesg không còn log khởi động:
+sudo journalctl -k -b --no-pager | grep -E 'brcmfmac.*using.*BCM43430'</code></pre>
+      <p>BCM43430/1 dùng <code>brcmfmac43436s-sdio</code>; BCM43430/2 dùng <code>brcmfmac43436-sdio</code>. Ví dụ dưới dành cho <b>/1</b>; với <b>/2</b> đổi tên file bỏ chữ <code>s</code> sau <code>43436</code>.</p>
+      <pre class="bg-dark text-light p-3 rounded"><code>FW=$(readlink -f /lib/firmware/brcm/brcmfmac43436s-sdio.raspberrypi,model-zero-2-w.txt)
+BACKUP=/home/pi/VBot_AEC3/bluetooth_coexistence_backups/manual_$(date +%Y%m%d_%H%M%S)
+sudo install -d -m 0700 "$BACKUP"
+sudo cp -p -- "$FW" "$BACKUP/firmware.txt"
+printf '%s\n' "$FW" | sudo tee "$BACKUP/original_path.txt" &gt; /dev/null
+sudo sha256sum "$BACKUP/firmware.txt"
+sudo nano "$FW"</code></pre>
+      <p>Thay các dòng cùng tên nếu đã có; mỗi tham số chỉ để một dòng:</p>
+      <pre class="bg-dark text-light p-3 rounded"><code>btc_mode=1
+btc_params8=0x4e20
+btc_params1=0x7530</code></pre>
+      <p>Lưu rồi chạy <code>sudo reboot</code>. Khi hoàn tác thủ công, đặt lại <code>FW</code> và <code>BACKUP</code> theo đường dẫn đã ghi, sau đó:</p>
+      <pre class="bg-dark text-light p-3 rounded"><code>sudo cp -p -- "$FW" "$BACKUP/before_restore.txt"
+sudo cp -p -- "$BACKUP/firmware.txt" "$FW"
+sudo reboot</code></pre>
+      <p>Backup thủ công không có manifest nên không dùng với <code>--restore</code>. Không xóa backup cho đến khi kiểm tra ổn định sau reboot. Tham khảo <a href="https://github.com/RPi-Distro/firmware-nonfree/issues/33" target="_blank" rel="noopener noreferrer">báo cáo của Raspberry Pi về Wi-Fi/Bluetooth coexistence</a>.</p></div>
+  </div>
+</div>
+</div>
+    </div>
+  </div>
+</div>
 
 <div class="card accordion" id="accordion_button_bluetooth_guide">
 <div class="card-body">

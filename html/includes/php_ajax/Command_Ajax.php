@@ -210,7 +210,7 @@ $successMessages = [
     'install_bluealsa' => 'Đã cài service BlueALSA.',
     'install_bluetooth_agent_service' => 'Đã cài service Bluetooth Agent.',
     'install_bluetooth_config_main' => 'Đã chạy trình cài đặt cấu hình Bluetooth.',
-    'fix_bluetooth_default' => 'Đã khôi phục cấu hình Bluetooth mặc định và khởi chạy BlueALSA, Bluetooth Agent, BlueALSA Player.',
+    'fix_bluetooth_default' => 'Đã sao lưu, khôi phục Bluetooth và kiểm tra sửa Wi-Fi/Bluetooth theo phần cứng. Nếu firmware vừa thay đổi, reboot để áp dụng; xem kết quả từng bước bên dưới.',
     'check_version_picovoice_porcupine' => 'Phiên bản Picovoice và Porcupine',
     'list_time_zones' => 'Danh sách múi giờ', 'check_time_zones' => 'Thông tin múi giờ hiện tại',
     'fix_time_zones' => 'Đã khôi phục cấu hình đồng bộ thời gian.',
@@ -312,20 +312,10 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
         'label' => $source,
     ];
 } elseif ($action === 'auto_wifi_manager_only' || $action === 'auto_wifi_manager_and_speaker_ip') {
-    $resourceRoot = rtrim($VBot_Offline, '/').'/resource/wifi_manager';
-    $wifiScript = $action === 'auto_wifi_manager_only'
-        ? $resourceRoot.'/start-wifi-connect_wifi_only.sh'
-        : $resourceRoot.'/start-wifi-connect.sh';
-    $wifiService = $resourceRoot.'/wifi-connect.service';
-    $systemCommand = 'test -f '.escapeshellarg($wifiScript).' && test -f '.escapeshellarg($wifiService)
-        .' && cp -- '.escapeshellarg($wifiScript).' /home/pi/start-wifi-connect.sh'
-        .' && sudo cp -- '.escapeshellarg($wifiService).' /etc/systemd/system/wifi-connect.service';
-    if ($action === 'auto_wifi_manager_and_speaker_ip') {
-        $ipScript = $resourceRoot.'/_VBot_IP.py';
-        $systemCommand .= ' && test -f '.escapeshellarg($ipScript).' && sudo cp -- '.escapeshellarg($ipScript).' /home/pi/_VBot_IP.py';
-    }
-    $systemCommand .= ' && dos2unix /home/pi/start-wifi-connect.sh && sudo systemctl daemon-reload'
-        .' && sudo systemctl enable wifi-connect.service && sudo systemctl restart wifi-connect.service';
+    $mode = $action === 'auto_wifi_manager_only' ? 'wifi-only' : 'with-ip';
+    $systemCommand = 'sudo -n python3 -c '.escapeshellarg('import sys; sys.path.insert(0, sys.argv[sys.argv.index(\'--root\')+1]); import Sync_System_Services as sync; sys.exit(sync.main())')
+        .' --root '.escapeshellarg(rtrim($VBot_Offline, '/'))
+        .' --apply --install --only wifi --wifi-mode '.escapeshellarg($mode);
     $commands[] = ['command' => $systemCommand, 'label' => $action];
 } elseif ($action === 'enabled_vbot_api_external' || $action === 'disable_vbot_api_external') {
     $apacheConfig = '/etc/apache2/sites-available/000-default.conf';
@@ -407,7 +397,7 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
     $bluetoothRoot = rtrim($VBot_Offline, '/').'/resource/bluetooth';
     $bluetoothFiles = [
         'bluetooth_agent.py', 'bthelper', 'bluealsa.service',
-        'vbot-bluetooth-agent.service', 'main.conf',
+        'vbot-bluetooth-agent.service', 'main.conf', 'fix_wifi_bluetooth.py',
     ];
     foreach ($bluetoothFiles as $bluetoothFile) {
         $source = $bluetoothRoot.'/'.$bluetoothFile;
@@ -416,11 +406,11 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
             'label' => 'Kiểm tra file '.$source,
         ];
     }
-    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/bluetooth_agent.py').' /usr/local/bin/bluetooth_agent.py', 'label' => 'Cài bluetooth_agent.py'];
-    $commands[] = ['command' => 'sudo chmod 0777 /usr/local/bin/bluetooth_agent.py', 'label' => 'Cấp quyền bluetooth_agent.py'];
+    $commands[] = ['command' => 'sudo python3 '.escapeshellarg($bluetoothRoot.'/fix_wifi_bluetooth.py').' --backup-bluetooth', 'label' => 'Sao lưu cấu hình Bluetooth trước khi sửa'];
+    $commands[] = ['command' => 'sudo python3 '.escapeshellarg($bluetoothRoot.'/fix_wifi_bluetooth.py').' --apply', 'label' => 'Nhận diện phần cứng và sửa Wi-Fi/Bluetooth nếu phù hợp'];
+    $commands[] = ['command' => 'sudo -n python3 -c '.escapeshellarg('import sys; sys.path.insert(0, sys.argv[sys.argv.index(\'--root\')+1]); import Sync_System_Services as sync; sys.exit(sync.main())').' --root '.escapeshellarg(rtrim($VBot_Offline, '/')).' --only bluetooth_agent --install --apply --no-restart', 'label' => 'Sync Bluetooth Agent'];
     $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/bthelper').' /usr/bin/bthelper', 'label' => 'Cài bthelper'];
     $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/bluealsa.service').' /etc/systemd/system/bluealsa.service', 'label' => 'Cài bluealsa.service'];
-    $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/vbot-bluetooth-agent.service').' /etc/systemd/system/vbot-bluetooth-agent.service', 'label' => 'Cài vbot-bluetooth-agent.service'];
     $commands[] = ['command' => 'sudo cp -- '.escapeshellarg($bluetoothRoot.'/main.conf').' /etc/bluetooth/main.conf', 'label' => 'Cài Bluetooth main.conf'];
     $commands[] = ['command' => 'sudo systemctl daemon-reload', 'label' => 'Nạp lại systemd'];
     $commands[] = ['command' => 'sudo systemctl enable bluealsa.service', 'label' => 'Bật tự khởi động BlueALSA'];
@@ -511,22 +501,20 @@ if ($action === 'chmod_vbot' || $action === 'owner_vbot') {
         'alsamixer_asound_to_alsamixer' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state')
             .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/wm8960_asound_default.state').' /etc/wm8960-soundcard/wm8960_asound.state'
             .' && if sudo test -f /var/lib/alsa/vbot-wm8960.state; then sudo cp -- /etc/wm8960-soundcard/wm8960_asound.state /var/lib/alsa/vbot-wm8960.state; fi',
-        'update_btwifiset_py' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/set_wifi_via_ble/btwifiset.py')
-            .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/set_wifi_via_ble/btwifiset.py').' /usr/local/btwifiset/btwifiset.py',
+        'update_btwifiset_py' => 'sudo -n python3 -c '.escapeshellarg('import sys; sys.path.insert(0, sys.argv[sys.argv.index(\'--root\')+1]); import Sync_System_Services as sync; sys.exit(sync.main())')
+            .' --root '.escapeshellarg(rtrim($VBot_Offline, '/')).' --only ble --apply --install',
         'fix_airplay_services' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/airplay/shairport-sync.service')
             .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/airplay/shairport-sync.service').' /lib/systemd/system/shairport-sync.service'
             .' && sudo systemctl daemon-reload && sudo systemctl restart shairport-sync.service',
-        'install_bluetooth_agent_py' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/bluetooth_agent.py')
-            .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/bluetooth_agent.py').' /usr/local/bin/bluetooth_agent.py'
-            .' && sudo chmod 0777 /usr/local/bin/bluetooth_agent.py',
+        'install_bluetooth_agent_py' => 'sudo -n python3 -c '.escapeshellarg('import sys; sys.path.insert(0, sys.argv[sys.argv.index(\'--root\')+1]); import Sync_System_Services as sync; sys.exit(sync.main())')
+            .' --root '.escapeshellarg(rtrim($VBot_Offline, '/')).' --only bluetooth_agent --apply --install',
         'install_bthelper' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/bthelper')
             .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/bthelper').' /usr/bin/bthelper',
         'install_bluealsa' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/bluealsa.service')
             .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/bluealsa.service').' /etc/systemd/system/bluealsa.service'
             .' && sudo systemctl daemon-reload && sudo systemctl enable bluealsa.service && sudo systemctl start bluealsa.service',
-        'install_bluetooth_agent_service' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/vbot-bluetooth-agent.service')
-            .' && sudo cp -- '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/vbot-bluetooth-agent.service').' /etc/systemd/system/vbot-bluetooth-agent.service'
-            .' && sudo systemctl daemon-reload && sudo systemctl enable vbot-bluetooth-agent.service && sudo systemctl start vbot-bluetooth-agent.service',
+        'install_bluetooth_agent_service' => 'sudo -n python3 -c '.escapeshellarg('import sys; sys.path.insert(0, sys.argv[sys.argv.index(\'--root\')+1]); import Sync_System_Services as sync; sys.exit(sync.main())')
+            .' --root '.escapeshellarg(rtrim($VBot_Offline, '/')).' --only bluetooth_agent --apply --install',
         'install_bluetooth_config_main' => 'sudo test -f '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/install_config_bluetooth.sh')
             .' && sudo bash '.escapeshellarg(rtrim($VBot_Offline, '/').'/resource/bluetooth/install_config_bluetooth.sh'),
         'check_version_picovoice_porcupine' => 'pip show picovoice pvporcupine',

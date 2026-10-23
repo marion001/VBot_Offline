@@ -10,6 +10,22 @@
     const status=byId('speaker-eq-status'),preset=byId('speaker-eq-preset'),nameInput=byId('speaker-eq-name');
     let state=window.vbotEqualizerState,timer=null,busy=false,revision=0;
     const queue=[];
+    let externalRevision=null,latestExternal=null,localChangedAt=0,externalTimer=null;
+    function receiveExternal(snapshot){
+        if(!snapshot || !snapshot.state || !snapshot.revision || snapshot.revision===externalRevision)return;
+        latestExternal=snapshot;
+        // Let local slider writes and text edits finish; never echo SSE into a POST.
+        if(externalTimer!==null){clearTimeout(externalTimer);externalTimer=null;}
+        if(document.activeElement===nameInput)return;
+        if(busy||timer!==null||queue.length||Date.now()-localChangedAt<1200){
+            externalTimer=setTimeout(()=>{externalTimer=null;if(latestExternal)receiveExternal(latestExternal);},Math.max(150,1200-(Date.now()-localChangedAt)));
+            return;
+        }
+        externalRevision=snapshot.revision;active=!!snapshot.active;render(snapshot.state);
+        latestExternal=null;
+    }
+    window.addEventListener('vbot-equalizer-state',event=>receiveExternal(event.detail));
+    nameInput.addEventListener('blur',()=>{if(latestExternal)receiveExternal(latestExternal);});
     const bands=()=>Object.fromEntries(fields.map(name=>[name,Number(get(name).value)]));
     function refreshView(){
         for(const field of fields){
@@ -114,8 +130,9 @@
         else queue.push(task);
         return work();
     }
-    function changed(){if(preset.value.startsWith('builtin:')){const id=preset.value.slice(8);if(!modes[id].every((v,i)=>v===Number(get(frequencyFields[i]).value))||Number(get('preamp_db').value)!==-3)preset.value='custom';}updateButtons();revision++;refreshView();clearTimeout(timer);timer=setTimeout(()=>{timer=null;if(valid())submit({action:'apply',bands:bands()},revision);},350);}
+    function changed(){localChangedAt=Date.now();if(preset.value.startsWith('builtin:')){const id=preset.value.slice(8);if(!modes[id].every((v,i)=>v===Number(get(frequencyFields[i]).value))||Number(get('preamp_db').value)!==-3)preset.value='custom';}updateButtons();revision++;refreshView();clearTimeout(timer);timer=setTimeout(()=>{timer=null;if(valid())submit({action:'apply',bands:bands()},revision);},350);}
     function command(data){
+        localChangedAt=Date.now();
         if(timer!==null){
             clearTimeout(timer);timer=null;
             if(['toggle','default','delete'].includes(data.action) && valid())submit({action:'apply',bands:bands()});
@@ -137,11 +154,9 @@
         updateButtons();
         if(preset.value==='custom')return;
         if(!preset.value.startsWith('builtin:')){command({action:'select',id:preset.value});return;}
-        const id=preset.value.slice(8),gains=modes[id];
-        if(!gains)return;
-        frequencyFields.forEach((field,i)=>{get(field).value=gains[i];get(field+'_range').value=gains[i];});
-        get('wet_percent').value=100;get('wet_percent_range').value=100;get('preamp_db').value=-3;get('preamp_db_range').value=-3;
-        nameInput.value=modeNames[id];changed();
+        const id=preset.value.slice(8);
+        if(!modes[id])return;
+        nameInput.value=modeNames[id];command({action:'select',id:preset.value});
     });
     nameInput.addEventListener('input',()=>{revision++;});
     byId('speaker-eq-flat').addEventListener('click',()=>{for(const field of fields){get(field).value=field==='wet_percent'?100:0;get(field+'_range').value=get(field).value;}changed();});

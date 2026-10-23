@@ -2107,6 +2107,10 @@ function command_php(command_line, reload_page = null) {
                 return;
             }
             showMessagePHP(response.message || 'Thao tác thành công.', 5);
+            if (command_line === 'fix_bluetooth_default') {
+                show_message('Đã hoàn tất sửa cấu hình Bluetooth. Vui lòng khởi động lại loa VBot để các thay đổi cấu hình được áp dụng đầy đủ. Hệ thống không tự khởi động lại.');
+                return;
+            }
             if (reload_page === true) {
                 window.setTimeout(function() {
                     location.reload();

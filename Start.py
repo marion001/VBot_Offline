@@ -7,10 +7,7 @@ Mail: VBot.Assistant@gmail.com
 '''
 
 import os
-import importlib
-import json
 import signal
-import subprocess
 import sys
 import traceback
 from concurrent.futures import ThreadPoolExecutor
@@ -24,7 +21,6 @@ from pathlib import Path
 _THREAD_POOL_EXECUTOR_CLASS = ThreadPoolExecutor
 
 VBOT_PATH = Path(__file__).resolve().parent
-PAHO_MQTT_REQUIRED_VERSION = "1.6.1"
 
 def _write_startup_log(message: str, *, error: bool = False, context: str = 'Start MQTT') -> None:
     text = str(message)
@@ -46,159 +42,14 @@ def _write_startup_log(message: str, *, error: bool = False, context: str = 'Sta
     except Exception as log_error:
         print(f"[{timestamp}] - [{context}] Không thể ghi file log: {log_error}", file=sys.stderr)
 
-def _mqtt_is_enabled() -> bool:
-    for config_name in ("Config.json", "Config.json.bak"):
-        config_path = VBOT_PATH / config_name
-        try:
-            with config_path.open("r", encoding="utf-8-sig") as handle:
-                config = json.load(handle)
-            if not isinstance(config, dict):
-                _write_startup_log(f"Cấu trúc cấu hình không hợp lệ: {config_path}", error=True)
-                continue
-            mqtt_config = config.get("mqtt_broker", {})
-            if isinstance(mqtt_config, dict):
-                return mqtt_config.get("mqtt_active") is True
-        except (OSError, ValueError, TypeError):
-            continue
-    return False
-
-def check_paho_mqtt_version() -> bool:
-    try:
-        from importlib.metadata import PackageNotFoundError, version
-    except ImportError:
-        from importlib_metadata import PackageNotFoundError, version
-    try:
-        from packaging.version import Version
-    except ImportError:
-        try:
-            from pip._vendor.packaging.version import Version
-        except ImportError as error:
-            _write_startup_log(f"Không thể kiểm tra phiên bản paho-mqtt vì thiếu packaging: {error}", error=True)
-            return False
-    try:
-        current_version = version("paho-mqtt")
-        #_write_startup_log(f"Phiên bản paho-mqtt hiện tại: {current_version}")
-        if Version(current_version) >= Version(PAHO_MQTT_REQUIRED_VERSION):
-            try:
-                importlib.import_module("paho.mqtt.client")
-                #_write_startup_log(f"paho-mqtt {current_version} đã đạt yêu cầu (>= {PAHO_MQTT_REQUIRED_VERSION}), không cần cập nhật.")
-                return True
-            except Exception as error:
-                _write_startup_log(f"paho-mqtt {current_version} có metadata nhưng không import được: {error}. Đang cài đặt lại...", error=True)
-        _write_startup_log(f"paho-mqtt {current_version} thấp hơn {PAHO_MQTT_REQUIRED_VERSION}. Đang nâng cấp...")
-    except PackageNotFoundError:
-        _write_startup_log(f"Chưa cài đặt paho-mqtt. Đang cài phiên bản {PAHO_MQTT_REQUIRED_VERSION}...")
-    except Exception as error:
-        _write_startup_log(f"Lỗi khi đọc phiên bản paho-mqtt: {error}", error=True)
-        return False
-    try:
-        result = subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "pip",
-                "install",
-                "--user",
-                "--upgrade",
-                f"paho-mqtt=={PAHO_MQTT_REQUIRED_VERSION}",
-            ],
-            check=True,
-            capture_output=True,
-            text=True,
-            timeout=180,
-        )
-        installed_version = version("paho-mqtt")
-        if Version(installed_version) < Version(PAHO_MQTT_REQUIRED_VERSION):
-            raise RuntimeError(f"pip hoàn tất nhưng phiên bản nhận được là {installed_version}")
-        importlib.invalidate_caches()
-        importlib.import_module("paho.mqtt.client")
-        _write_startup_log(f"Đã cài đặt paho-mqtt thành công: {installed_version}")
-        if result.stdout.strip():
-            _write_startup_log(result.stdout.strip())
-        return True
-    except Exception as error:
-        detail = getattr(error, "stderr", None)
-        suffix = f" | {str(detail).strip()}" if detail else ""
-        _write_startup_log(f"Lỗi khi cài đặt paho-mqtt: {error}{suffix}", error=True)
-        return False
-
-def ensure_loopback_module() -> bool:
-    if not sys.platform.startswith("linux"):
-        return True
-    source = VBOT_PATH / "resource" / "vbot-loopback.conf"
-    destination = Path("/etc/modules-load.d/vbot-loopback.conf")
-    try:
-        expected = source.read_bytes()
-        privileged = [] if os.geteuid() == 0 else ["sudo", "-n"]
-        if not destination.is_file() or destination.read_bytes() != expected:
-            subprocess.run(
-                privileged + ["install", "-D", "-m", "644", str(source), str(destination)],
-                check=True, capture_output=True, text=True, timeout=15,
-            )
-            _write_startup_log("Đã cài vbot-loopback.conf để tự nạp snd-aloop khi boot.")
-        if not Path("/sys/module/snd_aloop").is_dir():
-            subprocess.run(
-                privileged + ["modprobe", "snd-aloop"],
-                check=True, capture_output=True, text=True, timeout=15,
-            )
-            if not Path("/sys/module/snd_aloop").is_dir():
-                raise RuntimeError("Module snd-aloop vẫn chưa xuất hiện sau modprobe")
-            _write_startup_log("Đã nạp snd-aloop cho đường âm thanh Loopback.")
-        return True
-    except Exception as error:
-        detail = getattr(error, "stderr", None)
-        suffix = f" | {str(detail).strip()}" if detail else ""
-        _write_startup_log(
-            f"Không thể chuẩn bị snd-aloop: {error}{suffix}. "
-            "VBot tiếp tục khởi động; đường âm thanh Loopback có thể chưa dùng được.",
-            error=True, context="Start ALSA",
-        )
-        return False
-
-
-def ensure_shared_media_routes() -> bool:
-    if not sys.platform.startswith('linux'):
-        return True
-    try:
-        script = VBOT_PATH / 'resource' / 'vbot_aec3' / 'install_media_routes.py'
-        privileged = [] if os.geteuid() == 0 else ['sudo', '-n']
-        result = subprocess.run(
-            privileged + [sys.executable, str(script), '--root', str(VBOT_PATH),
-                          '--ensure', '--startup-pid', str(os.getpid())],
-            capture_output=True, text=True, check=True,
-        )
-        for line in result.stdout.splitlines():
-            if line.startswith('AUDIO_HARDWARE_REPAIRED'):
-                _write_startup_log('[ALSA] Đã sửa định tuyến theo loại image. '+line)
-        if 'SHARED_MEDIA_CONFIG_REPAIRED' in result.stdout:
-            _write_startup_log('[Âm thanh chung] Đã đồng bộ cấu hình với đường âm thanh đã cài; không khởi động lại dịch vụ. ' + result.stdout.strip())
-        elif 'SHARED_MEDIA_ROUTES_READY' not in result.stdout:
-            _write_startup_log('[Âm thanh chung] Đã cài đường AirPlay/Bluetooth/Multiroom. ' + result.stdout.strip())
-        return True
-    except Exception as error:
-        detail = getattr(error, 'stderr', '') or str(error)
-        _write_startup_log(
-            '[Âm thanh chung] Chưa chuẩn bị được đường âm thanh chung: ' + detail.strip()
-            + '. VBot vẫn tiếp tục chạy. Xem FAQ: Cài đường âm thanh chung cho loa.',
-            error=True, context='Start Audio Routes',
-        )
-        return False
-
 
 def main() -> int:
     try:
-        if os.name=='posix':
-            from Lib_System import ensure_permissions
-            permissions=ensure_permissions(VBOT_PATH)
-            if permissions['changed']:
-                _write_startup_log(f"Đã cấp quyền 0777 cho {permissions['changed']} file/thư mục VBot.")
-            if permissions['failed']:
-                _write_startup_log(f"Không đổi được quyền của {permissions['failed']} file/thư mục. Chạy trên loa: sudo chmod -R 0777 /home/pi/VBot_Offline",error=True,context='Start Quyền')
-                for path,error in permissions['errors']:_write_startup_log(f"Quyền: {path}: {error}",error=True,context='Start Quyền')
-        ensure_loopback_module()
-        ensure_shared_media_routes()
-        if _mqtt_is_enabled() and not check_paho_mqtt_version():
-            _write_startup_log("Không thể bảo đảm phiên bản paho-mqtt yêu cầu, VBot vẫn tiếp tục khởi động.", error=True)
+        try:
+            from Sync_System_Services import prepare_startup
+            prepare_startup(VBOT_PATH)
+        except Exception as error:
+            _write_startup_log(f'[System Sync] {error}', error=True, context='Start System Sync')
         import VBot
         shutdown_started = False
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VBot Bluetooth Agent revision: 9
+# VBot Bluetooth Agent revision: 11
 
 '''
 Code By: Vũ Tuyển
@@ -30,6 +30,42 @@ BUS_NAME = "org.bluez"
 AGENT_PATH = "/com/vbot/agent"
 DEFAULT_CONFIG_PATH = "/home/pi/VBot_Offline/Config.json"
 DEFAULT_BLUETOOTH_ADAPTER = "hci0"
+_profile_policy = None
+
+
+MAX_INPUT_CONNECTIONS = 2
+
+
+def input_connection_limit():
+    try:
+        value = json.loads(Path('/var/lib/vbot-bt-source/connection_limits.json').read_text())['max_input_connections']
+        if type(value) is int and 1 <= value <= 7:
+            return value
+    except (OSError, ValueError, KeyError, TypeError, AttributeError):
+        pass
+    return MAX_INPUT_CONNECTIONS
+
+
+def preferred_input():
+    try:
+        value = json.loads(Path('/var/lib/vbot-bt-source/input.json').read_text()).get('selected', '')
+        return value if isinstance(value, str) and value in connected_devices else None
+    except (OSError, ValueError, TypeError, AttributeError):
+        return None
+
+
+def sink_profile_enabled():
+    global _profile_policy
+    try:
+        if _profile_policy is None:
+            import importlib.util
+            path = Path(os.environ.get('VBOT_CONFIG_PATH', DEFAULT_CONFIG_PATH)).parent/'resource/bluetooth/profile_policy.py'
+            spec = importlib.util.spec_from_file_location('vbot_agent_profile_policy', path)
+            _profile_policy = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(_profile_policy)
+        return _profile_policy.read_roles(os.environ.get('VBOT_CONFIG_PATH', DEFAULT_CONFIG_PATH))['sink']
+    except (OSError, ImportError, AttributeError):
+        return True
 
 def bluetooth_playback_route(config_path=None):
     """Keep agent-created players on the installer-managed shared media PCM."""
@@ -106,6 +142,8 @@ pending_post_pair_expiry = {}           # MAC -> GLib source id, tự dọn cử
 pre_pair_connected = set()              # ACL/link tạm đã Connected=True nhưng chưa Paired, không coi là kết nối hoàn chỉnh
 connected_devices = OrderedDict()       #tập hợp các MAC đang kết nối
 visibility_timer = None                 # lưu ID của timer đang chờ thay đổi trạng thái hiển thị Bluetooth
+_visibility_log_state = None
+_visibility_last_poll = None
 
 active_playback_device = None           # MAC của thiết bị đang phát âm thanh
 active_playback_process = None          # process ID của bluealsa-aplay đang chạy
@@ -631,6 +669,11 @@ def stop_bluealsa_playback():
     return True
 
 def start_bluealsa_playback(mac, delay=AUDIO_START_DELAY):
+    if not sink_profile_enabled():
+        return False
+    preferred = preferred_input()
+    if preferred and preferred != mac:
+        return False
     global active_playback_process, active_playback_device, playback_generation
     if not mac:
         return
@@ -741,7 +784,7 @@ def switch_to_next_device():
 
 def ensure_primary_audio():
     if not connected_devices: stop_bluealsa_playback(); return
-    primary = next(iter(connected_devices))
+    primary = preferred_input() or next(iter(connected_devices))
     if active_playback_device != primary and is_paired(primary):
         # start_bluealsa_playback() tự quyết định dùng player hệ thống, chờ PCM
         # hay tạo player riêng; không log lặp mỗi health-check khi điện thoại idle.
@@ -784,9 +827,30 @@ def reconcile_connected_devices():
 #Chỉ khởi động lại tiến trình phát lại đã chọn nếu bị thoát đột ngột
 def playback_health_check():
     global suspended_playback_device, external_playback_pid, external_playback_cmdline
+    global _visibility_last_poll
     if shutdown_requested:
         return False
+    now = time.monotonic()
+    if _visibility_last_poll is None or now - _visibility_last_poll >= 15:
+        _visibility_last_poll = now
+        set_visibility(True)  # Read WebUI limits every 15s; connection events refresh immediately.
+    if not sink_profile_enabled():
+        cancel_pending_audio_start()
+        stop_bluealsa_playback()
+        # Disconnect only incoming A2DP; leave the ACL and PAN link intact.
+        for mac in list(connected_devices):
+            try:
+                if not is_a2dp_output_device(mac) and has_bluealsa_audio_pcm(mac):
+                    path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
+                    dbus.Interface(get_system_bus().get_object(BUS_NAME, path),
+                        'org.bluez.Device1').DisconnectProfile('0000110a-0000-1000-8000-00805f9b34fb', timeout=3)
+            except Exception as error:
+                log(f'A2DP Sink disabled: {mac}: {error}')
+        return True
     reconcile_connected_devices()
+    preferred = preferred_input()
+    if preferred and active_playback_device != preferred:
+        start_bluealsa_playback(preferred)
     if os.path.exists(BT_AUDIO_SUSPEND_FILE):
         if active_playback_device:
             suspended_playback_device = active_playback_device
@@ -872,17 +936,31 @@ def playback_health_check():
     return True
 
 def set_visibility(visible):
+    # Existing callers request a refresh; capacity, not a one-device timer,
+    # decides whether new phones may discover and pair with this adapter.
+    global _visibility_log_state
     try:
+        limit = input_connection_limit()
+        count = sum(is_actually_connected(mac) and is_paired(mac)
+                    and not is_a2dp_output_device(mac) for mac in list(connected_devices))
+        visible = count < limit
+        if not visible and visibility_timer is not None:
+            return  # Allow the current pairing handshake its existing 15-second grace.
         props = get_adapter_properties()
-        props.Set("org.bluez.Adapter1", "Pairable", dbus.Boolean(bool(visible)))
-        props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(bool(visible)))
+        current = props.GetAll("org.bluez.Adapter1")
+        for key in ('Pairable', 'Discoverable'):
+            if bool(current.get(key)) != visible:
+                props.Set("org.bluez.Adapter1", key, dbus.Boolean(visible))
     except Exception as error:
         log(f"Không thể đổi trạng thái hiển thị của {BLUETOOTH_ADAPTER}: {error}")
         return
-    if visible:
-        log("Trạng thái Bluetooth: Đã hiển thị tên thiết bị (Cho phép các thiết bị khác tìm thấy Bluetooth)")
-    else:
-        log("Trạng thái Bluetooth: Đã ẩn tên thiết bị (Để duy trì 1 kết nối với thiết bị hiện tại)")
+    state = (visible, count, limit)
+    if state != _visibility_log_state:
+        _visibility_log_state = state
+        if visible:
+            log(f"Trạng thái Bluetooth: Đã hiển thị tên thiết bị (Điện thoại → VBot: {count}/{limit}; còn chỗ kết nối)")
+        else:
+            log(f"Trạng thái Bluetooth: Đã ẩn tên thiết bị (Điện thoại → VBot: {count}/{limit}; đã đủ giới hạn kết nối)")
 
 def clear_device_state(mac):
     if not mac: return
@@ -1124,6 +1202,22 @@ def remember_pairing_device(device):
     log(f"Bắt đầu ghép đôi với thiết bị: {device_info_str(mac)}")
     return mac
 
+def is_a2dp_output_device(mac):
+    try:
+        state = json.loads(Path('/var/lib/vbot-bt-source/settings.json').read_text())
+        if state.get('selected') == mac.upper():
+            return True
+    except (OSError, ValueError, TypeError):
+        pass
+    try:
+        path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
+        props = dbus.Interface(get_system_bus().get_object(BUS_NAME, path), 'org.freedesktop.DBus.Properties')
+        uuids = {str(v).lower() for v in props.Get('org.bluez.Device1', 'UUIDs')}
+        return '0000110b-0000-1000-8000-00805f9b34fb' in uuids and '0000110a-0000-1000-8000-00805f9b34fb' not in uuids
+    except Exception:
+        return False
+
+
 def activate_paired_connection(mac, path=None, now=None):
     """Chỉ công nhận kết nối hoàn chỉnh sau khi cả Connected=True và Paired=True.
 
@@ -1133,6 +1227,8 @@ def activate_paired_connection(mac, path=None, now=None):
     global visibility_timer
     if not mac or not is_paired(mac) or not is_actually_connected(mac):
         return False
+    if is_a2dp_output_device(mac):
+        return False  # Output speaker belongs to Source, never bluealsa-aplay.
 
     now = now or time.time()
     pre_pair_connected.discard(mac)
@@ -1146,7 +1242,7 @@ def activate_paired_connection(mac, path=None, now=None):
         m for m in connected_devices
         if m != mac and is_actually_connected(m) and is_paired(m)
     ]
-    if other_active:
+    if len(other_active) >= input_connection_limit():
         log(f"Hệ thống đang giữ kết nối với thiết bị: {device_info_str(other_active[0])}, Từ chối kết nối mới tới thiết bị: {device_info_str(mac)}")
         try:
             device_path = path or f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
@@ -1198,6 +1294,10 @@ def watchdog(interface, changed, invalidated, path):
     global visibility_timer
     mac = device_path_to_mac(path)
     if not mac: return
+    if is_a2dp_output_device(mac):
+        clear_post_pair_reconnect(mac)
+        cancel_pending_device_task(pending_paired_reconnect, mac)
+        return
 
     if "Alias" in changed or "Name" in changed:
         name = str(changed.get("Alias", changed.get("Name", "")) or "")
@@ -1305,9 +1405,9 @@ def watchdog(interface, changed, invalidated, path):
 
 def _delayed_hide_visibility(mac):
     global visibility_timer
+    visibility_timer = None
     if mac in connected_devices and is_actually_connected(mac) and is_paired(mac):
         set_visibility(False)
-    visibility_timer = None
     return False
 
 def interfaces_added(path, interfaces):
@@ -1334,7 +1434,9 @@ class Agent(dbus.service.Object):
 
     def _reject_if_busy(self, device):
         mac = device_path_to_mac(device)
-        if any(m != mac and is_actually_connected(m) for m in connected_devices):
+        if is_a2dp_output_device(mac):
+            return
+        if sum(m != mac and is_actually_connected(m) for m in connected_devices) >= input_connection_limit():
             log(f"Hệ thống đang bận, từ chối yêu cầu từ thiết bị: {mac}")
             raise dbus.exceptions.DBusException("org.bluez.Error.Rejected")
 
@@ -1447,10 +1549,27 @@ def cleanup_agent():
         finally:
             agent_registered = False
 
+bluez_registration_lost = False
+
+
+def bluez_owner_changed(name, previous, current):
+    # BlueZ forgets AgentManager registrations when its bus owner disappears.
+    # Let systemd start a fresh agent instead of retaining dead proxies.
+    if str(previous) and str(previous) != str(current):
+        global bluez_registration_lost
+        bluez_registration_lost = True
+        log("BlueZ disconnected/restarted; restarting Bluetooth agent registration")
+        request_shutdown()
+
+
 if __name__ == "__main__":
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = get_system_bus()
     try:
+        bus.add_signal_receiver(
+            bluez_owner_changed, signal_name="NameOwnerChanged",
+            dbus_interface="org.freedesktop.DBus",
+            bus_name="org.freedesktop.DBus", arg0=BUS_NAME)
         select_available_adapter(bus)
         log(f"Sử dụng Bluetooth adapter: {BLUETOOTH_ADAPTER}")
         disable_unselected_adapters(bus)
@@ -1480,6 +1599,8 @@ if __name__ == "__main__":
                 if not mac:
                     continue
                 dev_props = interfaces["org.bluez.Device1"]
+                if is_a2dp_output_device(mac):
+                    continue
                 if not bool(dev_props.get("Paired")):
                     pre_pair_connected.add(mac)
                     log(f"Bỏ qua Connected chưa paired khi khởi động: {device_info_str(mac)}")
@@ -1511,3 +1632,5 @@ if __name__ == "__main__":
     finally:
         request_shutdown()
         cleanup_agent()
+    if bluez_registration_lost:
+        raise SystemExit(1)

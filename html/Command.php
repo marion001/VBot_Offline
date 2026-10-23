@@ -21,6 +21,8 @@ if ($Config['contact_info']['user_login']['active']) {
   }
 }
 
+if (session_status()!==PHP_SESSION_ACTIVE) session_start();
+
 // Khởi tạo biến để lưu output
 $output = '';
 
@@ -62,172 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['commandd'])) {
     $output .=  stream_get_contents($stream_out);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//Cài Đặt Hành Động Với LCD
-
-
-
-
-
-
-
-
-
-
-
-
-
-#Kết Thúc Cài Đặt Hành Động Với LCD
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//check_version_picovoice_porcupine
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 ?>
 <!DOCTYPE html>
@@ -450,23 +286,7 @@ include 'html_head.php';
                         </ul>
                       </div>
                     </div>
-                    <div class="btn-group">
-                      <div class="dropdown">
-                        <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Wifi Thông Qua Bluetooth">
-                         <i class="bi bi-bluetooth"></i> Set Wifi Via BLE</button>
-                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
-                          <button class="dropdown-item text-danger" name="start_btwifiset" type="button" title="Chạy Services Auto btwifiset" onclick="command_php('start_btwifiset')">Start btwifiset</button></li>
-                          <button class="dropdown-item text-danger" name="stop_btwifiset" type="button" title="Dừng Services Auto btwifiset" onclick="command_php('stop_btwifiset')">Stop btwifiset</button></li>
-						  <button class="dropdown-item text-danger" name="restart_btwifiset" type="button" title="Khởi động lại Services Auto Wifi Manaager" onclick="command_php('restart_btwifiset')">Restart Auto btwifiset</button>
-                          <button class="dropdown-item text-danger" name="enable_btwifiset" type="button" title="Kích Hoạt Services Auto btwifiset" onclick="command_php('enable_btwifiset')">Enable Auto btwifiset</button></li>
-                          <button class="dropdown-item text-danger" name="disabled_btwifiset" type="button" title="Vô Hiệu Services Auto btwifiset" onclick="command_php('disabled_btwifiset')">Disabled Auto btwifiset</button></li>
-                          <button class="dropdown-item text-danger" name="logs_btwifiset" type="button" title="Xem Logs Auto btwifiset" onclick="command_php('logs_btwifiset')">Logs Auto btwifiset</button></li>
-                          <button class="dropdown-item text-danger" name="status_btwifiset" type="button" title="Kiểm tra trạng thái btwifiset" onclick="command_php('status_btwifiset')">Status Auto btwifiset</button></li>
-                          <button class="dropdown-item text-danger" name="pass_crypto_btwifiset" type="button" title="Xem Mật Khẩu Mã Hóa Tín Hiệu btwifiset" onclick="command_php('pass_crypto_btwifiset')">Password Crypto btwifiset</button></li>
-                          <button class="dropdown-item text-danger" name="update_btwifiset_py" type="button" title="Cập nhật mới file btwifiset.py từ resource" onclick="command_php('update_btwifiset_py')">UPDATE btwifiset.py</button></li>
-                        </ul>
-                      </div>
-                    </div>
+
                     <div class="btn-group">
                       <div class="dropdown">
                         <button class="btn btn-success dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình AirPlay tương thích với Iphone, Ipad">
@@ -483,6 +303,23 @@ include 'html_head.php';
                           <button class="dropdown-item text-danger" name="version_airplay" type="button" title="Kiểm tra phiên bản AirPlay" onclick="command_php('version_airplay')">Phiên Bản AirPlay</button></li>
                           <button class="dropdown-item text-danger" name="fix_airplay_services" type="button" title="Tự động sửa lỗi AirPlay khi lỗi bị treo không tự động chạy lại" onclick="command_php('fix_airplay_services')">Fix shairport-sync.service AirPlay</button></li>
                           <button onclick="command_php('fix_asound_airplay')" class="dropdown-item text-danger" type="button" title="Tự động sửa lỗi âm thanh ở /etc/asound.conf khi sử dụng mạch: WM8960 hoặc I2S">Fix /etc/asound.conf AirPlay</button></li>
+                        </ul>
+                      </div>
+                    </div>
+                    <div class="btn-group">
+                      <div class="dropdown">
+                        <button class="btn btn-warning dropdown-toggle rounded-pill" data-bs-toggle="dropdown" aria-expanded="false" title="Cấu Hình Wifi Thông Qua Bluetooth">
+                         <i class="bi bi-bluetooth"></i> Set Wifi Via BLE</button>
+                        <ul class="dropdown-menu" style="max-height: 300px; overflow-y: auto;">
+                          <button class="dropdown-item text-danger" name="start_btwifiset" type="button" title="Chạy Services Auto btwifiset" onclick="command_php('start_btwifiset')">Start btwifiset</button></li>
+                          <button class="dropdown-item text-danger" name="stop_btwifiset" type="button" title="Dừng Services Auto btwifiset" onclick="command_php('stop_btwifiset')">Stop btwifiset</button></li>
+						  <button class="dropdown-item text-danger" name="restart_btwifiset" type="button" title="Khởi động lại Services Auto Wifi Manaager" onclick="command_php('restart_btwifiset')">Restart Auto btwifiset</button>
+                          <button class="dropdown-item text-danger" name="enable_btwifiset" type="button" title="Kích Hoạt Services Auto btwifiset" onclick="command_php('enable_btwifiset')">Enable Auto btwifiset</button></li>
+                          <button class="dropdown-item text-danger" name="disabled_btwifiset" type="button" title="Vô Hiệu Services Auto btwifiset" onclick="command_php('disabled_btwifiset')">Disabled Auto btwifiset</button></li>
+                          <button class="dropdown-item text-danger" name="logs_btwifiset" type="button" title="Xem Logs Auto btwifiset" onclick="command_php('logs_btwifiset')">Logs Auto btwifiset</button></li>
+                          <button class="dropdown-item text-danger" name="status_btwifiset" type="button" title="Kiểm tra trạng thái btwifiset" onclick="command_php('status_btwifiset')">Status Auto btwifiset</button></li>
+                          <button class="dropdown-item text-danger" name="pass_crypto_btwifiset" type="button" title="Xem Mật Khẩu Mã Hóa Tín Hiệu btwifiset" onclick="command_php('pass_crypto_btwifiset')">Password Crypto btwifiset</button></li>
+                          <button class="dropdown-item text-danger" name="update_btwifiset_py" type="button" title="Cập nhật mới file btwifiset.py từ resource" onclick="command_php('update_btwifiset_py')">UPDATE btwifiset.py</button></li>
                         </ul>
                       </div>
                     </div>
@@ -519,6 +356,9 @@ include 'html_head.php';
 						  <button class="dropdown-item text-danger" name="install_bluetooth_config_main" type="button" title="Cài đặt cấu hình config cho bluetooth" onclick="command_php('install_bluetooth_config_main')">install config bluetooth main.conf</button></li>
                         </ul>
                       </div>
+                    </div>
+                    <div class="btn-group" id="command-bluetooth-pan-group">
+                      <button class="btn btn-warning rounded-pill" type="button" id="bluetooth-pan-setup" data-bs-toggle="modal" data-bs-target="#bluetooth-pan-modal" title="Cài đặt, kiểm tra mạng Bluetooth PAN"><i class="bi bi-bluetooth"></i> Bluetooth PAN - Network</button>
                     </div>
               </form>
               <div id="command-empty-state" class="alert alert-info command-empty-state mt-3 mb-0" role="status">
@@ -635,6 +475,17 @@ include 'html_head.php';
     </section>
   </main>
   <!-- End #main -->
+  <div class="modal fade" id="bluetooth-pan-modal" tabindex="-1" aria-labelledby="bluetooth-pan-title" aria-hidden="true"><div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
+    <div class="modal-header"><h5 class="modal-title" id="bluetooth-pan-title">Bluetooth PAN - Network</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div>
+    <div class="modal-body">
+      <div class="alert alert-info" id="pan-setup-notice" role="status">Nhấn kiểm tra để xem trạng thái.</div>
+      <dl class="row" id="pan-setup-info"></dl>
+      <p>Cài thành phần còn thiếu, nạp BNEP sau reboot và chuẩn bị script Wi-Fi tương thích. Cần Internet khi tải gói, có thể mất vài phút. Không đổi tên Bluetooth, đường âm thanh hoặc trình quản lý mạng.</p>
+      <div class="d-flex flex-wrap justify-content-center gap-2"><button type="button" class="btn btn-outline-primary" id="pan-setup-check">Kiểm tra lại</button><button type="button" class="btn btn-primary" id="pan-setup-install">Cài đặt Bluetooth PAN - Network</button></div>
+
+    </div>
+    <div class="modal-footer"><a class="btn btn-outline-secondary" href="FAQ.php#faq-bluetooth-pan">Hướng dẫn</a><a class="btn btn-success" href="Bluetooth_PAN.php">Trang Cấu hình Bluetooth PAN - Network</a><button type="button" class="btn btn-danger" data-bs-dismiss="modal">Đóng</button></div>
+  </div></div></div>
   <!-- ======= Footer ======= -->
   <?php
   include 'html_footer.php';
@@ -643,6 +494,7 @@ include 'html_head.php';
   <?php
   include 'html_js.php';
   ?>
+  <script src="assets/js/bluetooth-pan-setup.js?v=1"></script>
   <script>
     function get_picovoice_version() {
       const xhr = vbotCreateXhr();
@@ -758,7 +610,7 @@ function rename_airplayyy() {
       const toolSections = Array.from(document.querySelectorAll('.command-tool-section'));
 
       groups.forEach(function(group, index) {
-        const toggle = group.querySelector('.dropdown-toggle');
+        const toggle = group.querySelector('.dropdown-toggle') || group.querySelector('button');
         const label = toggle ? toggle.textContent.replace(/\s+/g, ' ').trim() : 'Nhóm lệnh ' + (index + 1);
         group.classList.add('command-action-group');
         group.dataset.commandSearch = normalize_command_search_text(group.textContent + ' ' + label);

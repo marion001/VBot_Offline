@@ -1,4 +1,28 @@
 <?php
+function vbotAudioBoardPreset(string $imageFile = '/os_image_created.txt'): ?array {
+    $image = @file_get_contents($imageFile, false, null, 0, 4096);
+    if ($image === false || trim($image) === '') return null;
+    $i2s = stripos($image, 'i2s') !== false;
+    return [
+        'board'=>$i2s ? 'i2s' : 'wm8960',
+        'label'=>$i2s ? 'VBot AIO I2S' : 'VBot AIO WM8960',
+        'fields'=>[
+            'audio_noise_suppression'=>$i2s ? 'low' : 'moderate',
+            'audio_high_pass_filter'=>true,
+            'audio_agc_active'=>true,
+            'audio_agc_limiter'=>true,
+            'audio_agc_target_level_dbfs'=>6,
+            'audio_agc_compression_gain_db'=>9,
+            'aec3_output'=>'normal',
+            'aec3_capture_gain'=>1,
+            'aec3_wake_gain'=>1,
+            'aec3_playback_latency_ms'=>100,
+            'aec3_capture_delay_ms'=>32,
+            'aec3_render_clock_ppm'=>$i2s ? 980 : 0,
+        ],
+    ];
+}
+
 function vbotAEC3Defaults(): array {
     return ['active'=>false, 'library'=>'/home/pi/VBot_AEC3/music_test/libvbot_aec3_music.so',
         'output'=>'linear', 'playback_device'=>'default', 'playback_latency_ms'=>100,

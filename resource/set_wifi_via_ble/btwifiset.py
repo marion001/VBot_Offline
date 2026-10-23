@@ -2041,7 +2041,7 @@ class BTCryptoManager:
                 msg_bytes = self.crypto.decryptFromReceived(cypher,self.nonce_counter)
                 #since this could be a retry message while in garbled process, which is now OK:
                 if self.timer is not None:
-                    self.timer.cancel
+                    self.timer.cancel()
                     self.timer = None
                     self.request_counter.resetCounter()
                     self.unknown_response = ""
@@ -2286,7 +2286,194 @@ def dbus_to_python(data):
         data = new_data
     return data 
 
+class BLEBondRecovery:
+    """Repair only confirmed auth failures of a recently observed Wi-Fi client."""
+    def __init__(self, bus, log, state_dir=None, clock=None, boot_id=None):
+        self.bus, self.log = bus, log
+        self.root = pathlib.Path(state_dir or '/var/lib/vbot-ble-recovery')
+        self.clock = clock or time.time
+        self.peers, self.failures, self.pending = {}, {}, {}
+        self.closed = False
+        self.signal_match = None
+        self.stable = {}
+        try:
+            self.boot_id = boot_id or pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+        except OSError:
+            self.boot_id = 'unknown'  # Fail conservatively if boot identity is unavailable.
+
+    def load_session(self):
+        path = self.root / 'recovery_session.json'
+        state = json.loads(path.read_text()) if path.exists() else {}
+        if not isinstance(state, dict):
+            raise ValueError('Invalid BLE recovery session')
+        if state.get('boot_id') != self.boot_id:
+            return {'boot_id': self.boot_id, 'waiting': {}}
+        if not isinstance(state.get('waiting'), dict):
+            raise ValueError('Invalid BLE recovery waiting list')
+        return state
+
+    def save_session(self, state):
+        import tempfile
+        self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+        os.chmod(self.root, 0o700)
+        fd, temporary = tempfile.mkstemp(dir=str(self.root))
+        try:
+            with os.fdopen(fd, 'w') as stream:
+                json.dump(state, stream)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, self.root / 'recovery_session.json')
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+
+    def touch(self, options):
+        if self.closed:
+            return
+        path = str(options.get('device', ''))
+        if re.fullmatch(r'/org/bluez/hci\d+/dev_(?:[0-9A-Fa-f]{2}_){5}[0-9A-Fa-f]{2}', path):
+            self.peers[path] = self.clock()
+            if path not in self.stable:
+                self.stable[path] = GLib.timeout_add_seconds(13, self.confirm_stable, path)
+
+    def confirm_stable(self, path):
+        if path not in self.stable:
+            return False
+        self.stable.pop(path, None)
+        if self.closed:
+            return False
+        try:
+            props = dbus.Interface(self.bus.get_object('org.bluez', path),
+                                   'org.freedesktop.DBus.Properties').GetAll('org.bluez.Device1', timeout=5)
+            if not props.get('Connected'):
+                return False
+            adapter = str(props['Adapter'])
+            adapter_props = dbus.Interface(self.bus.get_object('org.bluez', adapter),
+                                           'org.freedesktop.DBus.Properties').GetAll('org.bluez.Adapter1', timeout=5)
+            key = str(adapter_props['Address']).upper() + '/' + str(props['Address']).upper()
+            state = self.load_session()
+            if key in state['waiting']:
+                del state['waiting'][key]
+                self.save_session(state)
+                self.log(f'[BLE Recovery] Wi-Fi client stable for 13s; recovery rearmed: {props.get("Alias", key)}')
+            self.failures.pop(path, None)
+        except Exception as error:
+            self.log(f'[BLE Recovery] Cannot confirm stable session: {error}')
+        return False
+
+    def listen(self):
+        self.signal_match = self.bus.add_signal_receiver(
+            self.disconnected, signal_name='Disconnected',
+            dbus_interface='org.bluez.Device1', bus_name='org.bluez', path_keyword='path')
+        self.log('[BLE Recovery] Enabled: 3 auth failures/180s; rearm after stable app session or reboot')
+
+    def disconnected(self, reason, message, path):
+        source = self.stable.pop(str(path), None)
+        if source is not None:
+            GLib.source_remove(source)
+        if self.closed or str(reason) != 'org.bluez.Reason.Authentication':
+            return
+        path, now = str(path), self.clock()
+        if path not in self.peers or not 0 <= now - self.peers[path] <= 300:
+            return  # Never infer a BLE Wi-Fi session merely from Device1.Connected.
+        failures = [stamp for stamp in self.failures.get(path, []) if 0 <= now - stamp < 180]
+        if failures and now - failures[-1] < 2:
+            return
+        failures.append(now)
+        self.failures[path] = failures
+        self.log(f'[BLE Recovery] Authentication failure {len(failures)}/3: {path}')
+        if len(failures) >= 3 and path not in self.pending:
+            self.pending[path] = GLib.timeout_add_seconds(3, self.repair, path)
+
+    def repair(self, path):
+        self.pending.pop(path, None)
+        self.failures.pop(path, None)
+        if self.closed:
+            return False
+        try:
+            now = self.clock()
+            if path not in self.peers or not 0 <= now - self.peers[path] <= 300:
+                return False
+            objects = dbus.Interface(self.bus.get_object('org.bluez', '/'),
+                                     'org.freedesktop.DBus.ObjectManager').GetManagedObjects(timeout=5)
+            props = objects.get(path, {}).get('org.bluez.Device1', {})
+            if not props or props.get('Connected') or not (props.get('Paired') or props.get('Bonded')):
+                return False
+            if any('org.bluez.Network1' in value and value['org.bluez.Network1'].get('Connected')
+                   for value in objects.values()) or any(pathlib.Path('/sys/class/net').glob('bnep*')):
+                self.log('[BLE Recovery] Skipped: Bluetooth PAN is active')
+                return False
+            mac = str(props['Address']).upper()
+            adapter = str(props['Adapter'])
+            adapter_mac = str(objects[adapter]['org.bluez.Adapter1']['Address']).upper()
+            if not all(re.fullmatch(r'(?:[0-9A-F]{2}:){5}[0-9A-F]{2}', v) for v in (mac, adapter_mac)):
+                return False
+            # An existing PCM is protected even when idle. Unknown D-Bus errors
+            # fail closed; only an absent BlueALSA service counts as no PCM.
+            try:
+                pcms = dbus.Interface(self.bus.get_object('org.bluealsa', '/org/bluealsa'),
+                                      'org.freedesktop.DBus.ObjectManager').GetManagedObjects(timeout=5)
+            except dbus.exceptions.DBusException as error:
+                if error.get_dbus_name() not in ('org.freedesktop.DBus.Error.ServiceUnknown',
+                                                'org.freedesktop.DBus.Error.NameHasNoOwner'):
+                    raise
+                pcms = {}
+            if any('/dev_' + mac.replace(':', '_') + '/' in str(p) for p in pcms):
+                self.log(f'[BLE Recovery] Skipped: audio PCM exists for {mac}')
+                return False
+            self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
+            os.chmod(self.root, 0o700)
+            state = self.load_session()
+            key = adapter_mac + '/' + mac
+            if key in state['waiting']:
+                self.log(f'[BLE Recovery] Skipped: waiting for successful app reconnect or reboot: {mac}')
+                return False
+            import shutil
+            import uuid
+            source = pathlib.Path('/var/lib/bluetooth') / adapter_mac / mac
+            if not source.is_dir() or source.is_symlink():
+                raise RuntimeError('Bond files unavailable; refusing removal without backup')
+            backup = self.root / ('bond_' + time.strftime('%Y%m%d_%H%M%S') + '_' + uuid.uuid4().hex[:8])
+            backup.mkdir(mode=0o700)
+            shutil.copytree(source, backup / mac)
+            (backup / 'metadata.json').write_text(json.dumps({
+                'device': mac, 'name': str(props.get('Alias', props.get('Name', mac))),
+                'adapter': adapter_mac, 'reason': 'repeated BLE authentication failures',
+                'original_path': str(source)}, ensure_ascii=False), encoding='utf-8')
+            # Restarting the BLE service retains this latch; reboot changes boot_id.
+            state['waiting'][key] = {'at': now, 'backup': str(backup)}
+            self.save_session(state)
+            # Recheck immediately before the destructive D-Bus operation.
+            live = dbus.Interface(self.bus.get_object('org.bluez', path),
+                                  'org.freedesktop.DBus.Properties')
+            if live.Get('org.bluez.Device1', 'Connected', timeout=5):
+                self.log(f'[BLE Recovery] Skipped: {mac} reconnected during backup')
+                return False
+            dbus.Interface(self.bus.get_object('org.bluez', adapter),
+                           'org.bluez.Adapter1').RemoveDevice(dbus.ObjectPath(path), timeout=10)
+            self.failures.pop(path, None)
+            self.peers.pop(path, None)
+            self.log(f'[BLE Recovery] Removed stale bond: {props.get("Alias", mac)} ({mac}); '
+                     f'backup={backup}. Reconnect BTBerryWiFi; forget device on phone if needed.')
+        except Exception as error:
+            self.log(f'[BLE Recovery] Repair skipped/failed; bond not forcibly removed: {error}')
+        return False
+
+    def close(self):
+        self.closed = True
+        if self.signal_match is not None:
+            self.signal_match.remove()
+            self.signal_match = None
+        for source in self.pending.values():
+            GLib.source_remove(source)
+        self.pending.clear()
+        for source in self.stable.values():
+            GLib.source_remove(source)
+        self.stable.clear()
+
+
 class Blue:
+    recovery = None
     adapter_name = ''
     bus = None
     adapter_obj = None
@@ -2295,43 +2482,41 @@ class Blue:
     user_ended_session = False
 
     @staticmethod
-    def set_adapter():
-        try:
-            found_flag = False
-            Blue.bus = dbus.SystemBus()
-            obj = Blue.bus.get_object('org.bluez','/')
-            obj_interface=dbus.Interface(obj,'org.freedesktop.DBus.ObjectManager')
-            all = obj_interface.GetManagedObjects()
-            for item in all.items(): #this gives a list of all bluez objects
-                # mLOG.log(f"BlueZ Adapter name: {item[0]}")
-                # mLOG.log(f"BlueZ Adapter data: {item[1]}\n")
-                # mLOG.log("******************************\n")
-                if  (item[0] == '/org/bluez/hci0') or ('org.bluez.LEAdvertisingManager1' in item[1].keys() and 'org.bluez.GattManager1' in item[1].keys() ):
-                    #this the bluez adapter1 object that we need
-                    # mLOG.log(f"Found BlueZ Adapter name: {item[0]}\n")
-                    found_flag = True
-                    Blue.adapter_name = item[0]
-                    Blue.adapter_obj = Blue.bus.get_object('org.bluez',Blue.adapter_name)
-                    #turn_on the adapter - to make sure (on rpi it may already be turned on)
-                    props = dbus.Interface(Blue.adapter_obj,'org.freedesktop.DBus.Properties')
-
-                    props.Set("org.bluez.Adapter1", "Powered", dbus.Boolean(1))
-                    props.Set("org.bluez.Adapter1", "Pairable", dbus.Boolean(0))
-                    props.Set("org.bluez.Adapter1", "PairableTimeout", dbus.UInt32(0))
-                    props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(1))
-                    props.Set("org.bluez.Adapter1", "DiscoverableTimeout", dbus.UInt32(0))
-
-                    break
-            if not found_flag:
-                mLOG.log("No suitable Bluetooth adapter found")
-                #raise Exception("No suitable Bluetooth adapter found")
-            
-        except dbus.exceptions.DBusException as e:
-            mLOG.log(f"DBus error in set_adapter: {str(e)}")
-            raise
-        except Exception as e:
-            mLOG.log(f"Error in set_adapter: {str(e)}")
-            raise
+    def set_adapter(timeout=45):
+        """Wait for UART/BlueZ and both BLE managers before constructing GATT."""
+        Blue.adapter_name = ''
+        Blue.adapter_obj = None
+        deadline = time.monotonic() + timeout
+        waiting_logged = False
+        last_error = 'adapter/GATT/advertising managers not ready'
+        required = {'org.bluez.Adapter1', 'org.bluez.GattManager1', 'org.bluez.LEAdvertisingManager1'}
+        while True:
+            try:
+                bus = dbus.SystemBus()
+                manager = dbus.Interface(bus.get_object('org.bluez', '/'), 'org.freedesktop.DBus.ObjectManager')
+                objects = manager.GetManagedObjects(timeout=5)
+                candidates = [(str(path), interfaces) for path, interfaces in objects.items()
+                              if required.issubset(interfaces)]
+                candidates.sort(key=lambda item: (item[0] != '/org/bluez/hci0', item[0]))
+                if candidates:
+                    path, interfaces = candidates[0]
+                    obj = bus.get_object('org.bluez', path)
+                    if not bool(interfaces['org.bluez.Adapter1'].get('Powered')):
+                        props = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
+                        props.Set('org.bluez.Adapter1', 'Powered', dbus.Boolean(True), timeout=5)
+                    # Pairable/Discoverable belong to the shared audio/PAN agent.
+                    # BLE advertisements do not require changing these settings.
+                    Blue.bus, Blue.adapter_name, Blue.adapter_obj = bus, path, obj
+                    mLOG.log('BLE adapter ready: ' + path)
+                    return
+            except dbus.exceptions.DBusException as error:
+                last_error = str(error)
+            if time.monotonic() >= deadline:
+                raise RuntimeError('BLE adapter unavailable after waiting: ' + last_error)
+            if not waiting_logged:
+                mLOG.log('Waiting for Bluetooth adapter, GATT and advertising managers...')
+                waiting_logged = True
+            time.sleep(1)
 
 
     @staticmethod
@@ -2378,7 +2563,7 @@ class Advertise(dbus.service.Object):
 
     def __init__(self, index,bleMgr):
         self.bleMgr = bleMgr
-        self.hostname = WifiUtil.get_hostname()
+        self.hostname = WifiUtil.vbot_ble_display_name().strip()
         self.properties = dict()
         self.properties["Type"] = dbus.String("peripheral")
         self.properties["ServiceUUIDs"] = dbus.Array([UUID_WIFISET],signature='s')
@@ -2436,11 +2621,10 @@ class Advertise(dbus.service.Object):
         
     def unregister(self):
         mLOG.log(f"De-Registering advertisement - path: {self.get_path()}")
-        self.ad_manager.UnregisterAdvertisement(self.get_path())
         try:
+            self.ad_manager.UnregisterAdvertisement(self.get_path())
+        finally:
             dbus.service.Object.remove_from_connection(self)
-        except Exception as ex:
-            mLOG.log(ex)
     
 
 
@@ -2684,6 +2868,274 @@ class Descriptor(dbus.service.Object):
 UUID_WIFISET = 'fda661b6-4ad0-4d5d-b82d-13ac464300ce'  # service WifiSet
 UUID_WIFIDATA = 'e622b297-6bfe-4f35-938e-39abfb697ac3' # characteristic WifiData: may be encrypted - used for all wifi data and commands
 UUID_INFO = '62d77092-41bb-49a7-8e8f-dc254767e3bf'    # characteristic InfoWifi: pass instructions - in clear
+UUID_VBOT_CAPABILITY = '9b04dc10-39af-476d-8a1f-ec1f4889cd61'
+
+
+class VBotBleAdmin:
+    """Bounded VBot operations; never evaluate shell text supplied over BLE."""
+    DIAGNOSTICS = {
+        'uptime': ['uptime'],
+        'memory': ['free', '-h'],
+        'disk': ['df', '-h', '/'],
+        'wifi': ['nmcli', '-t', '-f', 'DEVICE,TYPE,STATE,CONNECTION', 'device', 'status'],
+        'services': ['systemctl', '--no-pager', 'is-active', 'bluetooth', 'btwifiset', 'wifi-connect'],
+        'kernel': ['uname', '-a'],
+    }
+    SERVICES = {
+        'vbot': ('VBot_Offline.service', True),
+        'airplay': ('shairport-sync.service', False),
+        'bluetooth': ('bluetooth.service', False),
+        'btwifi': ('btwifiset.service', False),
+        'bridge': ('vbot-multiroom-bridge.service', False),
+    }
+
+    def __init__(self, root=None, state_dir=None):
+        import threading
+        self.root = pathlib.Path(root or os.environ.get('VBOT_ROOT', '/home/pi/VBot_Offline')).resolve()
+        self.state_dir = pathlib.Path(state_dir or '/var/lib/vbot-ble-admin')
+        self.lock = threading.Lock()
+        self.responses = {}
+
+    def profile(self):
+        try:
+            config = json.loads((self.root / 'Config.json').read_text(encoding='utf-8-sig'))
+            name = str(config.get('contact_info', {}).get('full_name') or '').strip()
+        except Exception:
+            name = ''
+        try:
+            version = json.loads((self.root / 'Version.json').read_text(encoding='utf-8-sig')).get('version', '')
+        except Exception:
+            version = ''
+        import socket
+        hostname = socket.gethostname()
+        return {'vbot_ble': 1, 'full_name': name or hostname, 'hostname': hostname,
+                'version': str(version), 'commands': list(self.DIAGNOSTICS),
+                'management_requires_lock': True,
+                'rescue_tools': True, 'services': list(self.SERVICES),
+                'update_program_available': (self.root / 'Manual_Update_Program.py').is_file(),
+                'update_web_available': (self.root / 'Manual_Update_WebUI.py').is_file()}
+
+    def run(self, command, timeout=8):
+        result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=timeout)
+        return {'exit_code': result.returncode, 'output': (result.stdout + result.stderr)[-1200:]}
+
+    def connectivity(self):
+        """Probe the updater's HTTPS host on the Pi, never on the desktop."""
+        import urllib.request
+        try:
+            request = urllib.request.Request('https://github.com/', method='HEAD',
+                                             headers={'User-Agent': 'VBot-Bluetooth-Network-Check'})
+            with urllib.request.urlopen(request, timeout=4) as response:
+                reachable = 200 <= response.status < 400
+            return {'internet': reachable, 'checked_at': int(time.time()), 'target': 'github.com'}
+        except (OSError, ValueError):
+            return {'internet': False, 'checked_at': int(time.time()), 'target': 'github.com'}
+
+    def system_status(self):
+        import shutil
+        memory = {}
+        for line in pathlib.Path('/proc/meminfo').read_text().splitlines():
+            key, value = line.split(':', 1)
+            if key in ('MemTotal', 'MemAvailable', 'SwapTotal', 'SwapFree'):
+                memory[key + '_kb'] = int(value.strip().split()[0])
+        disk = shutil.disk_usage(str(self.root))
+        try:
+            temperature = int(pathlib.Path('/sys/class/thermal/thermal_zone0/temp').read_text()) / 1000.0
+        except (OSError, ValueError):
+            temperature = None
+        return {'load_average_1_5_15m': list(os.getloadavg()), 'cpu_count': os.cpu_count(),
+                'uptime_seconds': float(pathlib.Path('/proc/uptime').read_text().split()[0]),
+                'temperature_c': temperature, 'memory': memory,
+                'disk_bytes': {'total': disk.total, 'used': disk.used, 'free': disk.free}}
+
+    def service_command(self, identifier, action):
+        if identifier not in self.SERVICES:
+            raise ValueError('Unsupported service')
+        unit, user_service = self.SERVICES[identifier]
+        command = ['/usr/bin/systemctl']
+        if user_service:
+            import pwd
+            account = pwd.getpwnam('pi')
+            command = ['/usr/sbin/runuser', '-u', 'pi', '--', '/usr/bin/env',
+                       'XDG_RUNTIME_DIR=/run/user/' + str(account.pw_uid),
+                       'DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/' + str(account.pw_uid) + '/bus',
+                       '/usr/bin/systemctl', '--user']
+        return command + [action, unit]
+
+    def service_status(self, identifier):
+        command = self.service_command(identifier, 'show')
+        return self.run(command + ['--no-pager', '-p', 'LoadState', '-p', 'ActiveState', '-p',
+                                   'SubState', '-p', 'MainPID', '-p', 'ExecMainStatus'], timeout=4)
+
+    def logs(self, command):
+        parts = str(command).split(':')
+        if len(parts) != 2 or parts[0] not in (*self.SERVICES, 'vbot_file') or parts[1] not in ('all', 'error'):
+            raise ValueError('Unsupported log source or filter')
+        if parts[0] == 'vbot_file':
+            relative = 'resource/log/Vbot_error.log' if parts[1] == 'error' else 'resource/log/service_log.log'
+            path = (self.root / relative).resolve()
+            path.relative_to(self.root)
+            if not path.is_file():
+                return {'exit_code': 0, 'output': 'No saved log file: ' + relative}
+            with path.open('rb') as stream:
+                stream.seek(0, 2)
+                stream.seek(max(0, stream.tell() - 8192))
+                output = '\n'.join(stream.read(8192).decode('utf-8', errors='replace').splitlines()[-40:])[-1200:]
+            return {'exit_code': 0, 'output': output, 'note': 'Bounded tail of saved VBot log file.'}
+        unit, user_service = self.SERVICES[parts[0]]
+        args = ['journalctl', '--no-pager', '-n', '40', '-o', 'short-iso']
+        if user_service:
+            import pwd
+            args += ['_SYSTEMD_USER_UNIT=' + unit, '_UID=' + str(pwd.getpwnam('pi').pw_uid)]
+        else:
+            args += ['-u', unit]
+        if parts[1] == 'error':
+            args += ['-p', 'err']
+        result = self.run(args, timeout=5)
+        result['note'] = 'Most recent 40 journal lines; output limited to 1200 characters.'
+        return result
+
+    def schedule_control(self, operation, command):
+        import uuid
+        if time.monotonic() < getattr(self, '_control_pending_until', 0):
+            raise RuntimeError('A system action was just scheduled; check its status before retrying')
+        if self.job().get('state') == 'running':
+            raise RuntimeError('A VBot update/reset task is running')
+        if operation == 'reboot':
+            args = ['/usr/bin/systemctl', 'reboot']
+        else:
+            parts = str(command).split(':')
+            if len(parts) != 2 or parts[1] not in ('start', 'stop', 'restart'):
+                raise ValueError('Unsupported service action')
+            args = self.service_command(parts[0], parts[1])
+        # Delay actions that can stop Bluetooth so the acknowledgement can be sent first.
+        unit = 'vbot-bt-control-' + uuid.uuid4().hex[:12]
+        result = self.run(['systemd-run', '--quiet', '--collect', '--on-active=5s', '--unit', unit,
+                           '--property=TimeoutStartSec=45', '--'] + args)
+        if result['exit_code']:
+            raise RuntimeError('Could not schedule system action: ' + result['output'])
+        self._control_pending_until = time.monotonic() + 10
+        return {'state': 'scheduled', 'delay_seconds': 5, 'unit': unit,
+                'operation': operation, 'command': str(command) if operation != 'reboot' else ''}
+
+    def job(self):
+        path = self.state_dir / 'job.json'
+        if not path.exists():
+            return {'state': 'idle'}
+        job = json.loads(path.read_text(encoding='utf-8'))
+        unit = job.get('unit', '')
+        if not re.fullmatch(r'vbot-ble-admin-[0-9a-f]{12}\.service', unit):
+            raise ValueError('Invalid saved job identifier')
+        status = self.run(['systemctl', 'show', unit, '-p', 'ActiveState', '-p', 'SubState', '-p', 'ExecMainStatus', '-p', 'LoadState'])
+        fields = dict(line.split('=', 1) for line in status['output'].splitlines() if '=' in line)
+        if fields.get('LoadState') == 'not-found':
+            job['state'] = 'unknown'
+        elif fields.get('SubState') == 'exited' and fields.get('ExecMainStatus') == '0':
+            job['state'] = 'success'
+        elif fields.get('ActiveState') in ('inactive', 'failed'):
+            job['state'] = 'error'
+        else:
+            job['state'] = 'running'
+        job['output'] = self.run(['journalctl', '-u', unit, '-n', '12', '--no-pager', '-o', 'cat'])['output']
+        return job
+
+    def start_job(self, operation):
+        import uuid
+        if time.monotonic() < getattr(self, '_control_pending_until', 0):
+            raise RuntimeError('A system action is pending; wait before updating or resetting Wi-Fi')
+        current = self.job()
+        if current.get('state') == 'running':
+            raise RuntimeError('A VBot BLE task is already running')
+        if current.get('unit'):
+            self.run(['systemctl', 'stop', current['unit']])
+        unit = 'vbot-ble-admin-' + uuid.uuid4().hex[:12] + '.service'
+        command = ['systemd-run', '--quiet', '--no-block', '--unit', unit,
+                   '--property=Type=oneshot', '--property=RemainAfterExit=yes', '--property=TimeoutStartSec=1200',
+                   '--setenv=VBOT_ROOT=' + str(self.root)]
+        if operation == 'reset_wifi':
+            command += ['/usr/bin/python3', str(pathlib.Path(__file__).resolve()), '--vbot-reset-wifi-job']
+        else:
+            if not self.connectivity()['internet']:
+                raise RuntimeError('No Internet on Raspberry Pi. Configure Wi-Fi before updating VBot.')
+            import pwd
+            account = pwd.getpwnam('pi')
+            script = self.root / ('Manual_Update_Program.py' if operation == 'update_program' else 'Manual_Update_WebUI.py')
+            if not script.is_file():
+                raise FileNotFoundError('Updater script is not installed: ' + script.name)
+            command += ['--uid=pi', '--setenv=HOME=' + account.pw_dir,
+                        '--setenv=XDG_RUNTIME_DIR=/run/user/' + str(account.pw_uid),
+                        '--setenv=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/' + str(account.pw_uid) + '/bus',
+                        '/usr/bin/python3', str(script), '--backup-before-update']
+        self.state_dir.mkdir(parents=True, exist_ok=True, mode=0o700)
+        os.chmod(self.state_dir, 0o700)
+        state = {'state': 'running', 'operation': operation, 'unit': unit, 'started_at': int(time.time())}
+        temp = self.state_dir / 'job.json.tmp'
+        temp.write_text(json.dumps(state), encoding='utf-8')
+        os.chmod(temp, 0o600)
+        os.replace(temp, self.state_dir / 'job.json')
+        if self.run(command)['exit_code']:
+            raise RuntimeError('Could not start the VBot task')
+        return state
+
+    def handle(self, request, authenticated=False):
+        identifier = request.get('id', '')
+        if not isinstance(identifier, str) or not re.fullmatch(r'[A-Za-z0-9_-]{1,40}', identifier):
+            raise ValueError('Invalid VBot BLE request ID')
+        operation = request.get('op')
+        if operation in ('reset_wifi', 'update_program', 'update_web', 'job', 'logs', 'service_control', 'reboot') and not authenticated:
+            raise PermissionError('Lock BTwifiSet and authenticate before using management actions')
+        if operation in ('reset_wifi', 'update_program', 'update_web', 'service_control', 'reboot') and request.get('confirm') is not True:
+            raise ValueError('Management action needs confirmation')
+        if identifier in self.responses:
+            return self.responses[identifier]
+        if operation == 'profile':
+            result = self.profile()
+        elif operation == 'connectivity':
+            result = self.connectivity()
+        elif operation == 'system_status':
+            result = self.system_status()
+        elif operation == 'service_status':
+            result = self.service_status(request.get('command'))
+        elif operation == 'logs':
+            result = self.logs(request.get('command'))
+        elif operation in ('service_control', 'reboot'):
+            result = self.schedule_control(operation, request.get('command', ''))
+        elif operation == 'diagnostic':
+            name = request.get('command')
+            if name not in self.DIAGNOSTICS:
+                raise ValueError('Unsupported system command')
+            result = self.run(self.DIAGNOSTICS[name])
+        elif operation == 'job':
+            result = self.job()
+        elif operation in ('reset_wifi', 'update_program', 'update_web'):
+            result = self.start_job(operation)
+        else:
+            raise ValueError('Unsupported VBot BLE action')
+        response = {'vbot_ble': 1, 'id': identifier, 'ok': True, 'result': result}
+        if len(self.responses) >= 16:
+            self.responses.pop(next(iter(self.responses)))
+        self.responses[identifier] = response
+        return response
+
+    def reset_wifi(self):
+        bootstrap = "import sys;sys.path.insert(0,sys.argv[sys.argv.index('--root')+1]);import Sync_System_Services as s;sys.exit(s.main())"
+        subprocess.run(['/usr/bin/python3', '-c', bootstrap, '--root', str(self.root), '--only', 'wifi',
+                        '--wifi-mode', 'with-ip', '--install', '--apply'], check=True, timeout=120)
+        profiles = subprocess.run(['nmcli', '-t', '-f', 'UUID,TYPE', 'connection', 'show'],
+                                  capture_output=True, text=True, check=True, timeout=10).stdout
+        for row in profiles.splitlines():
+            identifier, kind = row.split(':', 1)
+            if kind in ('802-11-wireless', 'wifi') and re.fullmatch(r'[0-9A-Fa-f-]{36}', identifier):
+                subprocess.run(['nmcli', '--wait', '10', 'connection', 'delete', 'uuid', identifier], check=True, timeout=15)
+        subprocess.run(['systemctl', 'restart', 'wifi-connect.service'], check=True, timeout=35)
+
+
+class VBotCapabilityCharacteristic(Characteristic):
+    def __init__(self, index, service):
+        Characteristic.__init__(self, index, UUID_VBOT_CAPABILITY, ['read'], service)
+
+    def ReadValue(self, options):
+        return [dbus.Byte(value) for value in b'{"vbot_ble":1}']
 
 
 
@@ -2701,6 +3153,8 @@ class WifiSetService(Service):
         Service.__init__(self, index, UUID_WIFISET, True)
         self.add_characteristic(WifiDataCharacteristic(0,self))
         self.add_characteristic(InfoCharacteristic(1,self))
+        self.add_characteristic(VBotCapabilityCharacteristic(2,self))
+        self.vbot_admin = VBotBleAdmin()
         self.sender = None
         self.phone_quitting_message = {"ssid":"#ssid-endBT#", "pw":"#pw-endBT#"}
         self.cryptomgr.setPhoneQuittingMessage(self.phone_quitting_message["ssid"]+SEPARATOR+self.phone_quitting_message["pw"])
@@ -2713,6 +3167,34 @@ class WifiSetService(Service):
         #returns either MACid or LOCKNonceMACId
         #Nonce must be exactly 12 bytes
         self.cryptomgr.piInfo()
+
+    def handle_vbot_request(self, payload):
+        import threading
+        try:
+            if len(payload.encode('utf-8')) > 2048:
+                raise ValueError('VBot BLE request is too large')
+            request = json.loads(payload)
+            if not isinstance(request, dict):
+                raise ValueError('Invalid VBot BLE request')
+            identifier = request.get('id', '')
+            if not self.vbot_admin.lock.acquire(blocking=False):
+                raise RuntimeError('A VBot BLE request is already being processed')
+        except Exception as error:
+            self.notifications.setJsonNotification({'vbot_ble': 1, 'id': locals().get('identifier', ''), 'ok': False, 'error': str(error)}, 'wifi')
+            return
+        authenticated = self.cryptomgr.crypto is not None and self.cryptomgr.pi_info.locked
+        def work():
+            try:
+                response = self.vbot_admin.handle(request, authenticated)
+            except Exception as error:
+                response = {'vbot_ble': 1, 'id': identifier, 'ok': False, 'error': str(error)}
+            finally:
+                self.vbot_admin.lock.release()
+            def deliver():
+                self.notifications.setJsonNotification(response, 'wifi')
+                return False
+            GLib.idle_add(deliver)
+        threading.Thread(target=work, name='VBotBleAdmin', daemon=True).start()
 
     def appMsgHandler(self,msg):
         """
@@ -2770,7 +3252,9 @@ class WifiSetService(Service):
         #PW+ maybe omited
         if val[0] == '':  #this means we received a request/command from ios (started with SEP)
             #********** WIFI management:
-            if val[1] == 'OFF':
+            if val[1].startswith('vbot:'):
+                self.handle_vbot_request(val[1][5:])
+            elif val[1] == 'OFF':
                 #call wifiwpa method to disconnect from current ssid
                 self.mgr.wifi_connect(False)
             elif val[1] == 'ON':
@@ -2947,6 +3431,8 @@ class InfoCharacteristic(Characteristic):
 
 
     def ReadValue(self, options):
+        if Blue.recovery is not None:
+            Blue.recovery.touch(options)
         mLOG.log("Reading value on info chracteristic")
         value = []
         msg_bytes = self.service.cryptomgr.getinformation()
@@ -3024,6 +3510,8 @@ class WifiDataCharacteristic(Characteristic):
         self.notifying = False
 
     def ReadValue(self, options):
+        if Blue.recovery is not None:
+            Blue.recovery.touch(options)
         #ios will read list of ap messages until empty
         value = []
         msg = SEPARATOR+'EMPTY' #ios looks for separator followed by empty to indicate list is over (EMPTY could be an ssid name...)
@@ -3038,6 +3526,8 @@ class WifiDataCharacteristic(Characteristic):
         return value
 
     def WriteValue(self, value, options):
+        if Blue.recovery is not None:
+            Blue.recovery.touch(options)
         #this is called by Bluez when the client (IOS) has written a value to the server (RPI)
         """
         messages are either:
@@ -3094,32 +3584,55 @@ class InfoWifiDescriptor(Descriptor):
 class BLEManager:
 
     def __init__(self):
+        self.app = None
+        self.advert = None
+        self._closed = False
+        self._device_signal_match = None
+        self._owner_signal_match = None
+        self._timeout_source = None
+        self.mainloop = GLib.MainLoop()
         signal.signal(signal.SIGTERM, self.graceful_quit)
         ConfigData.initialize()
         self.cryptoManager = BTCryptoManager()
-        self.mainloop = GLib.MainLoop()
         self.counter = 0
 
     def quitBT(self):
+        if self._closed:
+            return
+        self._closed = True
+        if Blue.recovery is not None:
+            Blue.recovery.close()
+            Blue.recovery = None
         mLOG.log(f"quitting Bluetooth - NEED_RESTART is {NEED_RESTART}")
-        self.cryptoManager.pi_info.saveInfo()
-        sleep(1)
+        if getattr(self, '_timeout_source', None) is not None:
+            GLib.source_remove(self._timeout_source)
+            self._timeout_source = None
+        if getattr(self, '_owner_signal_match', None) is not None:
+            self._owner_signal_match.remove()
+            self._owner_signal_match = None
+        if self._device_signal_match is not None:
+            try:
+                self._device_signal_match.remove()
+            except Exception as ex:
+                mLOG.log(ex)
+            self._device_signal_match = None
         try:
-            if self.advert: 
-                mLOG.log("calling advertisement de-registration")
-                self.advert.unregister()
-            if self.app: 
-                mLOG.log("calling application de-registration")
-                self.app.unregister()
-            sleep(1)
+            self.cryptoManager.pi_info.saveInfo()
         except Exception as ex:
             mLOG.log(ex)
+        for obj in (self.advert, self.app):
+            if obj is not None:
+                try:
+                    obj.unregister()
+                except Exception as ex:
+                    mLOG.log(ex)
         self.mainloop.quit()
 
 
     def graceful_quit(self,signum,frame):
         mLOG.log("stopping main loop on SIGTERM received")
         self.quitBT()
+        raise SystemExit(0)
 
     def check_button(self):
         #placeholder -  return true if button was pressed
@@ -3153,15 +3666,32 @@ class BLEManager:
         mLOG.log(f'BTwifiSet timeout: {int(ConfigData.TIMEOUT/60)} minutes')
         mLOG.log("starting BLE Server")
         
-        vbot_ble_name = WifiUtil.vbot_ble_display_name()
-        mLOG.log(f"BLE VBot display name: {vbot_ble_name}")
-        
         ConfigData.reset_timeout()
         
         dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
 
         Blue.set_adapter()
-        Blue.bus.add_signal_receiver(Blue.properties_changed,
+        if getattr(Blue, 'recovery', None) is not None:
+            Blue.recovery.close()
+        Blue.recovery = BLEBondRecovery(Blue.bus, mLOG.log)
+        Blue.recovery.listen()
+        # A new process also discards old exported objects and notification
+        # timers. systemd retries failures with a bounded restart policy.
+        owner = str(Blue.bus.get_name_owner('org.bluez'))
+        def bluez_owner_changed(name, previous, current):
+            global NEED_RESTART
+            if not getattr(self, '_closed', False) and str(previous) == owner and str(current) != owner:
+                mLOG.log('BlueZ disconnected/restarted; rebuilding BLE registration')
+                NEED_RESTART = True
+                self._bluez_lost = True
+                self.quitBT()
+        self._owner_signal_match = Blue.bus.add_signal_receiver(
+            bluez_owner_changed, signal_name='NameOwnerChanged',
+            dbus_interface='org.freedesktop.DBus',
+            bus_name='org.freedesktop.DBus', arg0='org.bluez')
+        vbot_ble_name = WifiUtil.vbot_ble_display_name()
+        mLOG.log(f"BLE VBot display name: {vbot_ble_name}")
+        self._device_signal_match = Blue.bus.add_signal_receiver(Blue.properties_changed,
                     dbus_interface = "org.freedesktop.DBus.Properties",
                     signal_name = "PropertiesChanged",
                     arg0 = "org.bluez.Device1",
@@ -3184,7 +3714,7 @@ class BLEManager:
         # self.advert.register()
 
         try:
-            GLib.timeout_add(BLE_SERVER_GLIB_TIMEOUT, self.timeout_manager)
+            self._timeout_source = GLib.timeout_add(BLE_SERVER_GLIB_TIMEOUT, self.timeout_manager)
             mLOG.log("starting main loop")
             self.mainloop.run()
         except KeyboardInterrupt:
@@ -3196,33 +3726,39 @@ class BLEManager:
 NEED_RESTART = False
 restart_count = 0
 
-def btRestart():
-        cmd = "systemctl stop bluetooth"
-        mLOG.log("stopping bluetooth service")
-        rstop = subprocess.run(cmd, shell=True,text=True, timeout = 10)
-        sleep(1)
-        cmd = "systemctl start bluetooth"
-        mLOG.log(f"starting bluetooth service - restart count = {restart_count}")
-        rstart = subprocess.run(cmd, shell=True,text=True, timeout = 10)
-        sleep(1)
-        cmd = "systemctl --no-pager status bluetooth"
-        mLOG.log("checking bluetooth")
-        s = subprocess.run(cmd, shell=True, capture_output=True,encoding='utf-8',text=True, timeout=10)
-        mLOG.log(s)
-
+def run_ble_server(max_attempts=3, retry_delay=5):
+    """Retry this BLE application without restarting shared Bluetooth/audio/PAN."""
+    global NEED_RESTART, restart_count
+    for attempt in range(1, max_attempts + 1):
+        NEED_RESTART = False
+        blemgr = None
+        try:
+            blemgr = BLEManager()
+            blemgr.start()
+        except Exception as error:
+            NEED_RESTART = True
+            mLOG.log(f'BLE startup/runtime failed ({attempt}/{max_attempts}): {error}')
+        finally:
+            if NEED_RESTART and blemgr is not None:
+                try:
+                    blemgr.quitBT()
+                except Exception as error:
+                    mLOG.log(f'BLE cleanup failed: {error}')
+        if blemgr is not None and getattr(blemgr, '_bluez_lost', False) is True:
+            return 1
+        if not NEED_RESTART:
+            mLOG.log('BLE session ended normally')
+            return 0
+        restart_count = attempt
+        if attempt < max_attempts:
+            mLOG.log(f'Retrying BLE application in {retry_delay} seconds...')
+            time.sleep(retry_delay)
+    mLOG.log('BLE retry limit reached; service manager may retry later')
+    return 1
 
 
 if __name__ == "__main__":
-    NEED_RESTART = True
-    while NEED_RESTART:
-        NEED_RESTART = False
-        blemgr = BLEManager()
-        blemgr.start()
-        mLOG.log(f"ble manager has exited with need restart = {NEED_RESTART}")
-        restart_count += 1
-        #allow only two restart of bluetooth (from advertisement error: maximum exceeded)
-        # in case we get one for failed app register and one for failed advert register
-        NEED_RESTART = NEED_RESTART and (restart_count < 3)
-        if NEED_RESTART: btRestart()
-
-    mLOG.log("btwifiset says: So long and thanks for all the fish")
+    if sys.argv[1:] == ['--vbot-reset-wifi-job']:
+        VBotBleAdmin().reset_wifi()
+        sys.exit(0)
+    sys.exit(run_ble_server())

@@ -7,10 +7,10 @@
 #Email: VBot.Assistant@gmail.com
 
 include 'Configuration.php';
+if (session_status()!==PHP_SESSION_ACTIVE) session_start();
 setlocale(LC_CTYPE, 'C.UTF-8', 'en_US.UTF-8', 'UTF-8');
 
 if ($Config['contact_info']['user_login']['active']) {
-    session_start();
     if (
         !isset($_SESSION['user_login']) ||
         (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
@@ -102,7 +102,23 @@ include 'html_head.php';
                     <div class="card">
                         <div class="card-body"><br/>
 <div id="wifiInfoResult"></div>
-                            <center>
+<input type="hidden" id="wifi-profile-uuid" value=""><center>
+<div class="border rounded p-3 mb-3">
+  <div class="d-flex flex-wrap gap-2 mb-2">
+    <button type="button" class="btn btn-primary btn-sm" id="wifi-probe">Kiểm tra Internet qua Wi-Fi</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="wifi-reload-info">Làm mới thông tin</button>
+  </div>
+  <p id="wifi-probe-result" class="small mb-2">Chưa kiểm tra Internet. Phép thử chỉ dùng Wi-Fi, không dùng PAN thay thế.</p>
+  <hr/>
+  <div class="d-flex flex-wrap gap-2">
+    <button type="button" class="btn btn-warning btn-sm" id="wifi-apply" disabled>Áp dụng kết nối đã lưu</button>
+    <button type="button" class="btn btn-secondary btn-sm" id="wifi-transaction">Kiểm tra áp dụng</button>
+    <button type="button" class="btn btn-success btn-sm" id="wifi-confirm" disabled>Xác nhận kết nối hoạt động</button>
+  </div>
+  <p class="small mt-2 mb-0" id="wifi-apply-info">Sau khi lưu IP/DNS, nhấn áp dụng ở đây. Nếu không xác nhận áp dụng trong 120 giây, loa sẽ khôi phục lại cấu hình cũ trước đó.</p>
+  <div id="wifi-new-address"></div>
+</div>
+                            
                                 <button id="loadWifiButton" name="loadWifiButton" class="btn btn-primary rounded-pill" onclick="Show_Wifi_List()">Danh Sách Wifi Đã Kết Nối</button>
                                 <button id="scanWifiButton" class="btn btn-success rounded-pill" onclick="fetchAndDisplayWifiList()">Quét Mạng Wifi</button>
 								<button type="button" class="btn btn-warning rounded-pill" data-bs-toggle="modal" data-bs-target="#exampleModal_ipDong">Cấu Hình IP</button>
@@ -125,6 +141,7 @@ include 'html_head.php';
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
+<div class="mb-3"><label class="form-label" for="wifi-dhcp-dns">DNS khi dùng DHCP (IP động)</label><select class="form-select" id="wifi-dhcp-dns"><option value="google" selected>Google DNS — 8.8.8.8 / 8.8.4.4 (mặc định)</option><option value="router">DNS do router cấp</option></select><div class="form-text">Lựa chọn này áp dụng khi nhấn Cấu hình Auto DHCP. DNS tùy chỉnh vẫn đặt được ở mục Cấu hình DNS.</div></div>
 
 <div class="form-floating mb-3">
 <input type="text" readonly class="form-control border-danger" title="Tên Mạng Đang kết Nối" name="connected_network_name" id="connected_network_name" value="Địa Chỉ IP Tĩnh Cần Đặt">
@@ -133,7 +150,7 @@ include 'html_head.php';
 
 <div class="form-floating mb-3">
 <input type="text" class="form-control border-success" title="Nhập Địa Chỉ IP Tĩnh Bạn Muốn Đặt" name="dia_chi_ip_tinh" id="dia_chi_ip_tinh" value="Địa Chỉ IP Tĩnh Cần Đặt">
-<label for="dia_chi_ip_tinh">Nhập Địa Chỉ IP Tĩnh:</label>
+<label for="dia_chi_ip_tinh">IP tĩnh, có thể kèm /prefix (ví dụ 192.168.1.10/24):</label>
 </div>
 
 <div class="form-floating mb-3">
@@ -251,8 +268,11 @@ include 'html_head.php';
             xhr.addEventListener("readystatechange", function() {
                 if (this.readyState === 4) {
                     //console.log(this.responseText);
-                    var response = JSON.parse(this.responseText);
+                    var response;
+                    try { response = JSON.parse(this.responseText); }
+                    catch (error) { loading('hide'); show_message('Không đọc được danh sách Wi-Fi. Hãy thử lại.'); return; }
                     var fileListDiv = document.getElementById('hienthiketqua');
+                    fileListDiv.classList.add('table-responsive');
                     fileListDiv.innerHTML = '';
                     // Kiểm tra xem response có thành công và có dữ liệu không
                     if (response.success && Array.isArray(response.data)) {
@@ -261,13 +281,13 @@ include 'html_head.php';
                         var thead = document.createElement('thead');
                         var titleRow = document.createElement('tr');
                         var titleCell = document.createElement('th');
-                        titleCell.colSpan = 6;
+                        titleCell.colSpan = 9;
                         titleCell.className = 'text-center align-middle';
                         titleCell.textContent = 'Danh Sách Wifi Đã Kết Nối';
                         titleRow.appendChild(titleCell);
                         thead.appendChild(titleRow);
                         var headerRow = document.createElement('tr');
-                        ['Tên Wifi', 'UUID', 'Interface', 'Kết Nối', 'Mật Khẩu', 'Xóa'].forEach(function(label) {
+                        ['Tên hồ sơ', 'UUID', 'Interface', 'Tự kết nối', 'Ưu tiên', 'Lưu', 'Kết Nối', 'Mật Khẩu', 'Xóa'].forEach(function(label) {
                             var th = document.createElement('th');
                             th.className = 'text-center align-middle';
                             th.textContent = label;
@@ -284,6 +304,13 @@ include 'html_head.php';
                                 td.textContent = value || '';
                                 row.appendChild(td);
                             });
+                            const autoCell = row.insertCell();
+                            const auto = document.createElement('input'); auto.type='checkbox'; auto.className='form-check-input'; auto.checked=!!wifi.autoconnect; auto.setAttribute('aria-label','Tự kết nối '+wifi.ssid); autoCell.append(auto);
+                            const priorityCell = row.insertCell();
+                            const priority = document.createElement('input'); priority.type='number'; priority.min='-999'; priority.max='999'; priority.step='1'; priority.value=wifi.priority || 0; priority.className='form-control form-control-sm'; priority.setAttribute('aria-label','Ưu tiên '+wifi.ssid); priority.title='Số lớn hơn được ưu tiên khi tự chọn mạng; không đổi mạng đang kết nối.'; priorityCell.append(priority);
+                            const saveCell = row.insertCell();
+                            const save = document.createElement('button'); save.type='button'; save.className='btn btn-sm btn-primary'; save.textContent='Lưu';
+                            save.addEventListener('click',()=>window.saveWifiPreferences(wifi.uuid,auto.checked,priority.value,save)); saveCell.append(save);
                             [
                                 ['Kết Nối', 'btn-success', function() { connectWifiOld(wifi.ssid, wifi.uuid); }],
                                 ['Mật Khẩu', 'btn-primary', function() { getWifiPassword(wifi.ssid, wifi.uuid); }],
@@ -388,81 +415,7 @@ include 'html_head.php';
         }
 
         // Kết nối tới WiFi
-        function connectWifiNew(ssid, security, action) {
-            loading("show");
-            var password = '';
-            var hiddenSSID = '';
-            if (security === '' || security === null) {
-                var confirmConnect = confirm('Mạng không có mật khẩu. Bạn có chắc chắn muốn kết nối?');
-                if (!confirmConnect) {
-                    loading("hide");
-                    return;
-                }
-            } else {
-                // Nếu tên WiFi có chữ "Mạng ẩn", yêu cầu nhập cả SSID và mật khẩu
-                if (ssid.includes('Mạng ẩn')) {
-                    do {
-                        hiddenSSID = prompt('Nhập tên mạng WiFi bị ẩn:');
-                        if (hiddenSSID === null) {
-                            //console.log('Nhập SSID bị hủy');
-                            loading("hide");
-                            return;
-                        }
-                        if (hiddenSSID.trim().length < 1) {
-                            show_message('Tên Wifi phải có ít nhất 1 ký tự. Vui lòng nhập lại.');
-                        }
-                    } while (hiddenSSID.trim().length < 1);
-                    do {
-                        password = prompt('Nhập mật khẩu cho mạng WiFi ' + ssid + ' (ít nhất 8 ký tự):');
-                        if (password === null) {
-                            //console.log('Nhập mật khẩu bị hủy');
-                            loading("hide");
-                            return;
-                        }
-                        if (password.trim().length < 8) {
-                            show_message('Mật khẩu phải có ít nhất 8 ký tự. Vui lòng nhập lại.');
-                        }
-                    } while (password.trim().length < 8);
-                } else {
-                    // Nếu không phải "Mạng ẩn", yêu cầu nhập mật khẩu và kiểm tra độ dài
-                    do {
-                        password = prompt('Nhập mật khẩu cho mạng WiFi ' + ssid + ' (ít nhất 8 ký tự):');
-                        if (password === null) {
-                            //console.log('Nhập mật khẩu bị hủy');
-                            loading("hide");
-                            return;
-                        }
-                        if (password.trim().length < 8) {
-                            show_message('Mật khẩu phải có ít nhất 8 ký tự. Vui lòng nhập lại.');
-                        }
-                    } while (password.trim().length < 8);
-                }
-            }
-            var xhr = vbotCreateXhr();
-            xhr.open('POST', 'includes/php_ajax/Wifi_Act.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    var response = JSON.parse(xhr.responseText);
-                    if (response.success) {
-                        show_message('<font color=green>Kết nối thành công: ' + response.message + '</font>');
-                    } else {
-                        show_message('<font color=red>Kết nối thất bại: ' + response.message + '</font>');
-                    }
-                } else {
-                    show_message('<font color=red>' + wifiApiErrorMessage(xhr, 'Có lỗi xảy ra: HTTP ' + xhr.status) + '</font>');
-                }
-                loading("hide");
-                getWifiNetworkInformation();
-            };
-            var data = 'Connect_Wifi=1&action=connect_and_save_wifi' +
-                '&ssid=' + encodeURIComponent(hiddenSSID || ssid) +
-                '&password=' + encodeURIComponent(password);
-            xhr.send(data);
-        }
 
-        //Xóa Wifi
         function deleteWifi(ssid, uuid) {
             if (!ssid || ssid.trim() === '') {
                 show_message('Tên WiFi không hợp lệ.');
@@ -603,6 +556,9 @@ include 'html_head.php';
                             fileListDiv.innerHTML = tableHTML;
 							document.getElementById('connected_network_name').value = response.data.ESSID;
 							document.getElementById('connected_network_name1').value = response.data.ESSID;
+                            document.getElementById('wifi-profile-uuid').value=response.data.uuid || '';
+                            if(window.wifiPopulateConfig) window.wifiPopulateConfig(response.data);
+                            if(window.wifiLoadTransaction) window.wifiLoadTransaction();
 							document.getElementById('dia_chi_ip_tinh').value = response.data.IP.split('/')[0] || '';
 							document.getElementById('ip_gateway_modem').value = response.data.Gateway;
 							const dnsArray = response.data.DNS.split(',').map(d => d.trim());
@@ -637,202 +593,8 @@ function close_ip_modal() {
 }
 
 //Đặt Địa Chỉ IP Tĩnh
-function set_static_ip() {
-    if (!confirm("Bạn có chắc muốn thiết lập IP tĩnh cho thiết bị này không?\n - Hãy Cẩn Thận Vì Rất Có Thể Bạn Sẽ Không Truy Cập Được Vào Thiết Bị Này Khi Cấu Hình IP Tĩnh Sai")) {
-        return;
-    }
-    const ipField = document.getElementById("dia_chi_ip_tinh");
-    const gatewayField = document.getElementById("ip_gateway_modem");
-    const dns1Field = document.getElementById("set_dns_1");
-    const dns2Field = document.getElementById("set_dns_2");
-    const connected_network_name = document.getElementById('connected_network_name').value.trim();
-    let ip = ipField.value.trim();
-    let gateway = gatewayField.value.trim();
-    let dns1 = dns1Field.value.trim();
-    let dns2 = dns2Field.value.trim();
-    if (connected_network_name === '') {
-		show_message("Tên mạng đang kết nối không được để trống!");
-        return;
-    }
-    if (!ip || !gateway) {
-		show_message("Vui lòng nhập đầy đủ thông tin IP tĩnh, Gateway");
-        return;
-    }
-    if (!dns1 && !dns2) {
-        dns1 = "8.8.8.8";
-        dns2 = "8.8.4.4";
-        dns1Field.value = dns1;
-        dns2Field.value = dns2;
-    }
-    const ipRegex = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/;
-    if (!ipRegex.test(ip)) {
-        show_message("Địa chỉ ip không hợp lệ.");
-        return;
-    }
-    if (!ipRegex.test(gateway)) {
-		show_message("Gateway không hợp lệ.");
-        return;
-    }
-    if (dns1 && !ipRegex.test(dns1)) {
-        show_message("DNS 1 không hợp lệ.");
-        return;
-    }
-    if (dns2 && !ipRegex.test(dns2)) {
-		show_message("DNS 2 không hợp lệ.");
-        return;
-    }
-	if (!confirm(
-		'Bạn có chắc muốn thiết lập IP tĩnh với các tham số:\n' +
-		'Tên mạng: ' + connected_network_name + '\n' +
-		'Địa Chỉ IP Tĩnh: ' + ip + '\n' +
-		'Gateway Modem Route: ' + gateway + '\n' +
-		'DNS 1: ' + dns1 + '\n' +
-		'DNS 2: ' + dns2
-	)) {
-		return;
-	}
-	loading("show");
-    let formData = new FormData();
-    formData.append("action", "set_static_ip");
-    formData.append("connected_network_name", connected_network_name);
-    formData.append("ip", ip);
-    formData.append("gateway", gateway);
-    formData.append("dns1", dns1);
-    formData.append("dns2", dns2);
-    let xhr = vbotCreateXhr();
-    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
-    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
-    xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4) {
-			loading("hide");
-			try {
-				var res = JSON.parse(xhr.responseText);
-				if (res.success === true) {
-					close_ip_modal();
-					show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
-				} else {
-					show_message("Lỗi: " + (res.message || "Không xác định"));
-				}
-			} catch (e) {
-				show_message("Lỗi phân tích phản hồi từ server: "+xhr.responseText);
-			}
-		}
-		else {
-			show_message("Lỗi xảy ra, không thể gửi yêu cầu");
-		}
-    };
-    xhr.send(formData);
-}
-
-//Đặt lại DHCP Động Do Modem Route cấp phát
-function set_dhcp_mode() {
-	var connected_network_name = document.getElementById("connected_network_name").value.trim();
-    if (connected_network_name === "") {
-        alert("Không xác định được tên mạng đang kết nối.");
-        return;
-    }
-    if (!confirm(connected_network_name+" Bạn có chắc muốn chuyển sang DHCP (IP động do Modem, Route Cung Cấp)?")) {
-        return;
-    }
-	loading("show");
-    var formData = new FormData();
-    formData.append("action", "use_dhcp_automatically");
-    formData.append("connected_network_name", connected_network_name);
-    var xhr = vbotCreateXhr();
-    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
-    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
-    xhr.onload = function () {
-        if (xhr.status === 200) {
-			loading("hide");
-            try {
-                var res = JSON.parse(xhr.responseText);
-                if (res.success) {
-					close_ip_modal();
-                    show_message('<font color=green>'+res.message+'</font><hr/> <button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
-                } else {
-                    show_message("Lỗi: " + res.message);
-                }
-            } catch (e) {
-				show_message("Lỗi phản hồi từ server: "+e);
-            }
-        } else {
-			loading("hide");
-            show_message(wifiApiErrorMessage(xhr, "Lỗi xảy ra, không thể gửi yêu cầu"));
-        }
-    };
-    xhr.send(formData);
-}
-
-//Cấu Hình DNS
-function set_dns_only() {
-    const dns1 = document.getElementById("set_dns_only_1").value.trim();
-    const dns2 = document.getElementById("set_dns_only_2").value.trim();
-    const connectionName = document.getElementById("connected_network_name").value.trim();
-    let d1 = dns1 !== "" ? dns1 : "8.8.8.8";
-    let d2 = dns2 !== "" ? dns2 : "8.8.4.4";
-    if (!confirm(
-        'Bạn có chắc muốn thiết lập DNS cho '+connectionName+':\n' +
-        'DNS 1: ' + d1 + '\nDNS 2: ' + d2
-    )) {return;}
-	loading("show");
-    let formData = new FormData();
-    formData.append("action", "set_dns_only");
-    formData.append("connection_name", connectionName);
-    formData.append("dns1", d1);
-    formData.append("dns2", d2);
-    let xhr = vbotCreateXhr();
-    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
-    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4) {
-            loading("hide");
-            try {
-                const res = JSON.parse(xhr.responseText);
-                if (res.success) {
-                    let modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal_dns_only'));
-                    if (modal) modal.hide();
-					show_message(res.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
-                } else {
-					show_message("Lỗi: "+res.message);
-                }
-            } catch (e) {
-				show_message("Lỗi không xác định: "+xhr.responseText);
-            }
-        }
-    };
-    xhr.send(formData);
-}
-
-//Đặt DNS Mặc Định DHCP MODEM, Route Cấp
-function resetDNS_DHCP() {
-    if (!confirm("Bạn có chắc muốn dùng DNS mặc định từ DHCP Modem, Route Cấp Phát?")) return;
-    loading("show");
-    let formData = new FormData();
-	const connectionName = document.getElementById("connected_network_name").value.trim();
-    formData.append("action", "reset_dns_dhcp");
-    formData.append("connection_name", connectionName);
-    let xhr = vbotCreateXhr();
-    xhr.open("POST", "includes/php_ajax/Wifi_Act.php", true);
-    xhr.setRequestHeader("X-CSRF-Token", window.VBOT_CSRF_TOKEN || "");
-    xhr.onload = function () {
-        let resp = {};
-        try { resp = JSON.parse(xhr.responseText); } catch (e) {
-			loading("hide");
-			show_message("Lỗi không xác định: "+xhr.responseText);
-		}
-        if (resp.success) {
-			let modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal_dns_only'));
-			if (modal) modal.hide();
-			loading("hide");
-            show_message(resp.message+'<hr/><button class="btn btn-danger rounded-pill" type="button" data-vbot-action="reboot-os">Nhấn Vào Đây Để Khởi Động Lại Hệ Thống, REBOOT OS</button>', {allowReboot: true});
-        } else {
-			loading("hide");
-			show_message("Lỗi: " + resp.message + "\nCMD: " + resp.cmd);
-        }
-    };
-    xhr.send(formData);
-}
 </script>
+<script src="assets/js/wifi-management.js?v=2"></script>
 </body>
 
 </html>

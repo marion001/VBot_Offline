@@ -248,15 +248,28 @@ sudo python3 resource/vbot_aec3/install_media_routes.py \
 <ul class="mb-2"><li>Đã cài hệ thống âm thanh VBot, Shairport Sync, BlueALSA, Bluetooth agent và dịch vụ multiroom bridge.</li></ul>
 <ul class="mb-2"><li>Có snd-aloop (card Loopback). Start.py tự chuẩn bị module này khi khởi động.</li></ul>
 <ul class="mb-2"><li>Dừng VBot và các chương trình test âm thanh trước khi cài thủ công.</li></ul>
-<h5 class="border-bottom pb-2 mt-4">Cài thủ công</h5>
+<div class="accordion mb-3" id="faq-shared-routes-methods">
+<div class="accordion-item">
+  <h2 class="accordion-header" id="faq-shared-routes-methods-auto-heading">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-shared-routes-methods-auto" aria-expanded="false" aria-controls="faq-shared-routes-methods-auto">Chạy file tự động</button>
+  </h2>
+  <div id="faq-shared-routes-methods-auto" class="accordion-collapse collapse" aria-labelledby="faq-shared-routes-methods-auto-heading" data-bs-parent="#faq-shared-routes-methods">
+    <div class="accordion-body"><p>Start.py chạy bước kiểm tra trước khi nạp VBot và khởi tạo mic. Nếu đã đủ cấu hình thì bỏ qua, không khởi động lại dịch vụ. Nếu chưa cài thì tự cài bằng <code>sudo -n</code>; nếu thiếu quyền, phụ thuộc hoặc có VBot khác đang chạy, sẽ ghi log lỗi và tiếp tục khởi động. Không tự nhập mật khẩu, không tự cài lại thư viện.</p>
+<p>Nếu đường ALSA/AirPlay/Bluetooth đã đầy đủ nhưng Config.json chưa đồng bộ, script sao lưu rồi sửa riêng các giá trị đường âm thanh và <code>external_sources</code>, không khởi động lại dịch vụ. Nếu phần cấu hình hệ thống còn thiếu, script báo lỗi; dừng VBot, kiểm tra bản sao lưu và khôi phục trước khi cài lại.</p>
 <pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py --root /home/pi/VBot_Offline --ensure</code></pre></div>
+  </div>
+</div>
+<div class="accordion-item">
+  <h2 class="accordion-header" id="faq-shared-routes-methods-manual-heading">
+    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq-shared-routes-methods-manual" aria-expanded="false" aria-controls="faq-shared-routes-methods-manual">Chạy lệnh thủ công</button>
+  </h2>
+  <div id="faq-shared-routes-methods-manual" class="accordion-collapse collapse" aria-labelledby="faq-shared-routes-methods-manual-heading" data-bs-parent="#faq-shared-routes-methods">
+    <div class="accordion-body"><pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
 sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --apply</code></pre>
 <p>Script sao lưu trước khi sửa <code>/etc/asound.conf</code>, cấu hình AirPlay, BlueALSA, bản Bluetooth agent đang cài và Config.json. Các dịch vụ âm thanh liên quan được khởi động lại; nhạc đang phát có thể bị ngắt. Nếu cài thất bại, script thử khôi phục bản sao lưu.</p>
 <p>Sau khi báo <code>Shared media routes installed</code>, đường phát chung là <code>vbot_aec_media</code>, bridge đọc <code>plughw:Loopback,1,1</code>, và <code>external_sources</code> được bật. Không cần build lại thư viện. Bước chuẩn bị có thể sửa tham chiếu card ALSA và số kênh WM8960 cũ; mức âm lượng mixer được giữ nguyên.</p>
-<h5 class="border-bottom pb-2 mt-4">Tự kiểm tra khi khởi động VBot</h5>
-<p>Start.py chạy bước kiểm tra trước khi nạp VBot và khởi tạo mic. Nếu đã đủ cấu hình thì bỏ qua, không khởi động lại dịch vụ. Nếu chưa cài thì tự cài bằng <code>sudo -n</code>; nếu thiếu quyền, phụ thuộc hoặc có VBot khác đang chạy, sẽ ghi log lỗi và tiếp tục khởi động. Không tự nhập mật khẩu, không tự cài lại thư viện.</p>
-<p>Nếu đường ALSA/AirPlay/Bluetooth đã đầy đủ nhưng Config.json chưa đồng bộ, script sao lưu rồi sửa riêng các giá trị đường âm thanh và <code>external_sources</code>, không khởi động lại dịch vụ. Nếu phần cấu hình hệ thống còn thiếu, script báo lỗi; dừng VBot, kiểm tra bản sao lưu và khôi phục trước khi cài lại.</p>
 <h5 class="border-bottom pb-2 mt-4">Sửa ALSA và đường âm thanh sau khi flash hoặc nâng cấp</h5>
 <p>Nếu <code>alsamixer</code> mở nhầm Loopback, WM8960 đổi số card hoặc mất tiếng sau reboot, có thể chạy công cụ sửa riêng mà không cần khởi chạy VBot.</p>
 <p>Dừng VBot trước. Nếu chạy bằng <code>python3 Start.py</code>, nhấn Ctrl+C trong terminal đang chạy; nếu dùng service thì chạy lệnh dừng dưới đây. Sau đó sửa ALSA:</p>
@@ -275,15 +288,19 @@ sudo python3 resource/tools/fix_audio_alsa.py --restore-default</code></pre>
 <pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
 sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --ensure
-python3 VBot_Multiroom_Bridge_Audio.py status</code></pre>
+python3 resource/tools/multiroom_bridge.py status</code></pre>
 <p><code>fix_audio_alsa.py</code> sửa phần cứng ALSA và giữ/khôi phục khối media bus đã nhận diện; nó không thay thế bước cài mới toàn bộ đường AirPlay/Bluetooth ở trên. Nếu <code>--ensure</code> vẫn báo cấu hình hệ thống chưa đầy đủ, kiểm tra bản sao lưu trước khi cài lại; không tự xóa cấu hình đang có.</p>
 <h5 class="border-bottom pb-2 mt-4">Kiểm tra và khôi phục</h5>
 <pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>cd /home/pi/VBot_Offline
-python3 VBot_Multiroom_Bridge_Audio.py status</code></pre>
+python3 resource/tools/multiroom_bridge.py status</code></pre>
+<p>File <code>resource/tools/multiroom_bridge.py</code> import module <code>VBot_Multiroom_Bridge_Audio</code> ở thư mục gốc rồi gọi <code>main()</code>, dùng được cả khi module là <code>.py</code> hoặc đã build thành <code>.so</code>. Giữ file chạy này ở dạng <code>.py</code>; không cần giữ file nguồn <code>.py</code> của module khi đã có <code>.so</code> phù hợp. Các module phụ thuộc của bridge cũng cần có đầy đủ và cùng phiên bản Python/kiến trúc. Lệnh <code>status</code> chỉ đọc trạng thái dịch vụ, không khởi chạy toàn bộ VBot.</p>
 <p>Kiểm tra <code>capture_device</code> là <code>plughw:Loopback,1,1</code> và không có lỗi passthrough. Thử phát AirPlay/Bluetooth khi VBot chưa chạy, sau đó chạy <code>python3 Start.py</code> để thử wake word và multiroom.</p>
 <p>Bản sao lưu nằm trong <code>/home/pi/VBot_AEC3/routing_backups/</code>. Để khôi phục, dừng VBot rồi dùng đúng đường dẫn bản sao lưu mà lượt cài đã in ra:</p>
 <pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>sudo python3 resource/vbot_aec3/install_media_routes.py \
   --root /home/pi/VBot_Offline --restore /home/pi/VBot_AEC3/routing_backups/THU_MUC_SAO_LUU</code></pre>
 <p>Lần chạy Start.py tiếp theo sẽ kiểm tra và cài lại nếu đường chung còn thiếu.</p></div>
+  </div>
+</div>
+</div></div>
   </div>
 </div>
