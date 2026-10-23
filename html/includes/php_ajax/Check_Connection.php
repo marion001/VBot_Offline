@@ -460,7 +460,10 @@ if (isset($_GET['check_version_airplay'])) {
     $stream = ssh2_exec($connection, "shairport-sync -V");
     stream_set_blocking($stream, true);
     $current = trim(stream_get_contents($stream));
-    if (preg_match('/^(VBot_[^-]+-[0-9.]+)/', $current, $match)) {
+    // shairport-sync -V includes the git revision and build features, e.g.
+    // "5.6.1-1-g...-AirPlay2...".  The WebUI should expose only the
+    // semantic release version and ignore the packaging/revision suffix.
+    if (preg_match('/\b(\d+\.\d+\.\d+)\b/', $current, $match)) {
         $current_version = $match[1];
     } else {
         $current_version = $current;

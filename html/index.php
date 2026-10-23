@@ -2922,8 +2922,10 @@ function update_index_data(data){
 				if (type === "bluetooth") {
 					document.getElementById("version_bluetooth").textContent = (data.version || "").split("-")[0];
 				} else if (type === "airplay") {
-					const parts = data.version.split("-");
-					document.getElementById("version_airplay").textContent = parts.length >= 2 ? parts.slice(0, 2).join("-") : data.version;
+					// Keep only the semantic release (5.6.1); omit package/git suffixes
+					// such as -1-g... returned by shairport-sync -V.
+					const match = String(data.version || "").match(/\d+\.\d+\.\d+/);
+					document.getElementById("version_airplay").textContent = match ? match[0] : (data.version || "N/A");
 				}
 			} else {
 				const message = data.message || "";
