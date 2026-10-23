@@ -9,6 +9,7 @@ from gi.repository import GLib
 from threading import Timer
 from time import sleep
 import argparse
+import configparser
 import dbus
 import dbus.mainloop.glib
 import dbus.service
@@ -2296,6 +2297,8 @@ class BLEBondRecovery:
         self.closed = False
         self.signal_match = None
         self.stable = {}
+        self.le_pair_pending, self.le_pair_attempted, self.le_pair_inflight = {}, set(), set()
+        self.classic_pair_pending = {}
         try:
             self.boot_id = boot_id or pathlib.Path('/proc/sys/kernel/random/boot_id').read_text().strip()
         except OSError:
@@ -2333,8 +2336,104 @@ class BLEBondRecovery:
         path = str(options.get('device', ''))
         if re.fullmatch(r'/org/bluez/hci\d+/dev_(?:[0-9A-Fa-f]{2}_){5}[0-9A-Fa-f]{2}', path):
             self.peers[path] = self.clock()
+            # A phone can already have a Classic bond without a usable LE key.
+            # Pair only after actual access to our Wi-Fi GATT service, not on
+            # generic Device1.Connected. Keep the GATT reply non-blocking.
+            if (str(options.get('link', '')).upper() == 'LE'
+                    and path not in self.le_pair_pending and path not in self.le_pair_attempted):
+                self.le_pair_pending[path] = GLib.timeout_add_seconds(1, self.ensure_phone_le_bond, path)
             if path not in self.stable:
                 self.stable[path] = GLib.timeout_add_seconds(13, self.confirm_stable, path)
+
+    def classic_connected(self, path):
+        """Complete CTKD when iPhone Settings created only a Classic bond."""
+        # Do not call Device1.Pair while the Classic bearer is active. BlueZ
+        # returns InProgress and iOS waits for that request, making the app
+        # appear frozen. The encrypted GATT characteristic below will start
+        # native LE pairing when BTBerryWiFi opens the service.
+        return
+
+    def classic_disconnected(self, path):
+        """Prepare CTKD after Classic is released, before the app opens LE."""
+        if self.closed or path in self.classic_pair_pending:
+            return
+        self.classic_pair_pending[path] = GLib.timeout_add_seconds(
+            1, self.ensure_classic_phone_le_bond, path)
+
+    def ensure_classic_phone_le_bond(self, path):
+        self.classic_pair_pending.pop(path, None)
+        if self.closed or path in self.le_pair_inflight:
+            return False
+        try:
+            props = dbus.Interface(self.bus.get_object('org.bluez', path),
+                                   'org.freedesktop.DBus.Properties').GetAll(
+                                       'org.bluez.Device1', timeout=5)
+            if not props.get('Connected') or not (props.get('Paired') or props.get('Bonded')):
+                return False
+            name = str(props.get('Alias', props.get('Name', '')))
+            if not (str(props.get('Icon', '')) == 'phone'
+                    or int(props.get('Appearance', 0)) >> 6 == 1
+                    or 'iphone' in name.lower()):
+                return False
+            adapter = str(props.get('Adapter', '/org/bluez/hci0'))
+            adapter_props = dbus.Interface(self.bus.get_object('org.bluez', adapter),
+                                           'org.freedesktop.DBus.Properties').GetAll(
+                                               'org.bluez.Adapter1', timeout=5)
+            address = str(props.get('Address', '')).upper()
+            bond = pathlib.Path('/var/lib/bluetooth') / str(adapter_props['Address']) / address / 'info'
+            sections = set()
+            if bond.exists():
+                parser = configparser.ConfigParser()
+                parser.read(bond)
+                sections = set(parser.sections())
+            if {'PeripheralLongTermKey', 'SlaveLongTermKey', 'IdentityResolvingKey'} & sections:
+                return False
+            self.le_pair_inflight.add(path)
+            self.log(f'[BLE Recovery] Classic-first phone has no LE keys; requesting CTKD pairing: {name} ({address})')
+            device = dbus.Interface(self.bus.get_object('org.bluez', path), 'org.bluez.Device1')
+            device.Pair(reply_handler=lambda: self.le_pair_done(path),
+                        error_handler=lambda error: self.le_pair_done(path, error), timeout=45)
+        except Exception as error:
+            self.log(f'[BLE Recovery] Classic-first LE pairing check failed: {error}')
+        return False
+
+    def ensure_phone_le_bond(self, path):
+        self.le_pair_pending.pop(path, None)
+        if self.closed or path in self.le_pair_attempted or self.le_pair_inflight:
+            return False
+        try:
+            props = dbus.Interface(self.bus.get_object('org.bluez', path),
+                                   'org.freedesktop.DBus.Properties').GetAll('org.bluez.Device1', timeout=5)
+            # Paired/Bonded may describe only the Classic LinkKey.  Do not
+            # return here: a Classic-first iPhone can still be missing its
+            # LE LTK, which is exactly when the GATT app needs Pair().
+            if not props.get('Connected'):
+                return False
+            # Preserve the unpaired desktop client protocol. This applies only
+            # to phones that have accessed Wi-Fi GATT over the LE bearer.
+            name = str(props.get('Alias', props.get('Name', '')))
+            if not (str(props.get('Icon', '')) == 'phone'
+                    or int(props.get('Appearance', 0)) >> 6 == 1
+                    or 'iphone' in name.lower()):
+                return False
+            self.le_pair_attempted.add(path)
+            self.le_pair_inflight.add(path)
+            self.log(f'[BLE Recovery] Requesting LE pairing for Wi-Fi phone: {name} ({props.get("Address", path)}); accept pairing on phone if prompted')
+            device = dbus.Interface(self.bus.get_object('org.bluez', path), 'org.bluez.Device1')
+            device.Pair(reply_handler=lambda: self.le_pair_done(path),
+                        error_handler=lambda error: self.le_pair_done(path, error), timeout=45)
+        except Exception as error:
+            self.le_pair_done(path, error)
+        return False
+
+    def le_pair_done(self, path, error=None):
+        self.le_pair_inflight.discard(path)
+        if self.closed:
+            return
+        if error is None:
+            self.log(f'[BLE Recovery] Wi-Fi phone LE pairing completed: {path}')
+        else:
+            self.log(f'[BLE Recovery] LE pairing not completed; Wi-Fi GATT remains available: {path}: {error}')
 
     def confirm_stable(self, path):
         if path not in self.stable:
@@ -2365,9 +2464,14 @@ class BLEBondRecovery:
         self.signal_match = self.bus.add_signal_receiver(
             self.disconnected, signal_name='Disconnected',
             dbus_interface='org.bluez.Device1', bus_name='org.bluez', path_keyword='path')
-        self.log('[BLE Recovery] Enabled: 3 auth failures/180s; rearm after stable app session or reboot')
+        self.log('[BLE Recovery] Enabled: 2 auth failures/180s; rearm after stable app session or reboot')
 
     def disconnected(self, reason, message, path):
+        timer = self.le_pair_pending.pop(str(path), None)
+        if timer is not None:
+            GLib.source_remove(timer)
+        self.le_pair_attempted.discard(str(path))
+        self.le_pair_inflight.discard(str(path))
         source = self.stable.pop(str(path), None)
         if source is not None:
             GLib.source_remove(source)
@@ -2381,8 +2485,8 @@ class BLEBondRecovery:
             return
         failures.append(now)
         self.failures[path] = failures
-        self.log(f'[BLE Recovery] Authentication failure {len(failures)}/3: {path}')
-        if len(failures) >= 3 and path not in self.pending:
+        self.log(f'[BLE Recovery] Authentication failure {len(failures)}/2: {path}')
+        if len(failures) >= 2 and path not in self.pending:
             self.pending[path] = GLib.timeout_add_seconds(3, self.repair, path)
 
     def repair(self, path):
@@ -2407,6 +2511,16 @@ class BLEBondRecovery:
             adapter = str(props['Adapter'])
             adapter_mac = str(objects[adapter]['org.bluez.Adapter1']['Address']).upper()
             if not all(re.fullmatch(r'(?:[0-9A-F]{2}:){5}[0-9A-F]{2}', v) for v in (mac, adapter_mac)):
+                return False
+            # A Classic-first iPhone can report LE authentication failures while
+            # CTKD is still being negotiated. Never delete its Classic bond;
+            # request LE pairing again and let the app retry instead.
+            device_name = str(props.get('Alias', props.get('Name', '')))
+            if (str(props.get('Icon', '')) == 'phone'
+                    or int(props.get('Appearance', 0)) >> 6 == 1
+                    or 'iphone' in device_name.lower()):
+                self.log(f'[BLE Recovery] Keeping Classic phone bond; retrying LE pairing: {device_name} ({mac})')
+                self.classic_connected(path)
                 return False
             # An existing PCM is protected even when idle. Unknown D-Bus errors
             # fail closed; only an absent BlueALSA service counts as no PCM.
@@ -2440,15 +2554,17 @@ class BLEBondRecovery:
                 'device': mac, 'name': str(props.get('Alias', props.get('Name', mac))),
                 'adapter': adapter_mac, 'reason': 'repeated BLE authentication failures',
                 'original_path': str(source)}, ensure_ascii=False), encoding='utf-8')
-            # Restarting the BLE service retains this latch; reboot changes boot_id.
-            state['waiting'][key] = {'at': now, 'backup': str(backup)}
-            self.save_session(state)
             # Recheck immediately before the destructive D-Bus operation.
             live = dbus.Interface(self.bus.get_object('org.bluez', path),
                                   'org.freedesktop.DBus.Properties')
             if live.Get('org.bluez.Device1', 'Connected', timeout=5):
                 self.log(f'[BLE Recovery] Skipped: {mac} reconnected during backup')
                 return False
+            # A skipped repair must not consume the attempt. Persist only once
+            # the final reconnect check passes, immediately before removal.
+            # Restarting BLE retains this latch; reboot changes boot_id.
+            state['waiting'][key] = {'at': now, 'backup': str(backup)}
+            self.save_session(state)
             dbus.Interface(self.bus.get_object('org.bluez', adapter),
                            'org.bluez.Adapter1').RemoveDevice(dbus.ObjectPath(path), timeout=10)
             self.failures.pop(path, None)
@@ -2461,6 +2577,14 @@ class BLEBondRecovery:
 
     def close(self):
         self.closed = True
+        for source in self.le_pair_pending.values():
+            GLib.source_remove(source)
+        self.le_pair_pending.clear()
+        for source in self.classic_pair_pending.values():
+            GLib.source_remove(source)
+        self.classic_pair_pending.clear()
+        self.le_pair_attempted.clear()
+        self.le_pair_inflight.clear()
         if self.signal_match is not None:
             self.signal_match.remove()
             self.signal_match = None
@@ -2537,6 +2661,11 @@ class Blue:
         Blue.counter+=1
         try: 
             pythonDict =  dbus_to_python(changed)
+            if Blue.recovery is not None:
+                if pythonDict.get('Connected') is True:
+                    Blue.recovery.classic_connected(str(path))
+                elif pythonDict.get('Connected') is False:
+                    Blue.recovery.classic_disconnected(str(path))
             """
             this is implemented for future extension of the code.
             if bluetooth channel is functioning correctly - and if pi is Locked, encryption is OK (phone app and pi use same key)
@@ -3402,7 +3531,11 @@ class WifiSetService(Service):
 
 class InfoCharacteristic(Characteristic):
     def __init__(self, index,service):
-        Characteristic.__init__(self, index,UUID_INFO,["read"], service)
+        # Force LE SMP encryption on the first app read.  This also repairs
+        # the iOS case where Classic was paired first and CTKD did not create
+        # an LE key; BlueZ then initiates native LE pairing instead of timing
+        # out with an LTK request negative reply.
+        Characteristic.__init__(self, index,UUID_INFO,["read", "encrypt-read"], service)
         self.add_descriptor(InfoDescriptor(0,self))
         self.mainloop = service.main_loop
 
@@ -3465,7 +3598,7 @@ class WifiDataCharacteristic(Characteristic):
     def __init__(self, index,service):
         self.notifying = False
         self.last_notification = -1
-        Characteristic.__init__(self, index,UUID_WIFIDATA,["notify", "read","write"], service)
+        Characteristic.__init__(self, index,UUID_WIFIDATA,["notify", "read", "write", "encrypt-read", "encrypt-write"], service)
         self.add_descriptor(InfoWifiDescriptor(0,self))
         self.mainloop = service.main_loop
 
