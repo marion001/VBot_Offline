@@ -2113,7 +2113,7 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
 
 })();
 </script>
-<script src="assets/js/lan-ringtones.js?v=2" defer></script>
+<script src="assets/js/lan-ringtones.js?v=<?php echo $Cache_UI_Ver; ?>" defer></script>
 
       </div>
       </div>
@@ -6400,7 +6400,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 <script>window.configErrorFocus=<?= json_encode($configErrorFocus??null,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE) ?>;</script>
-<script src="assets/js/config-validation-focus.js"></script>
+<script src="assets/js/config-validation-focus.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body>
 
 </html>

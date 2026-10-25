@@ -38,5 +38,5 @@ $panCsrf=$_SESSION['vbot_csrf_token'];
 </main>
 <?php include 'html_footer.php'; include 'html_js.php'; ?>
 <script>window.vbotPanCsrf=<?= json_encode($panCsrf,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/bluetooth-pan.js?v=13"></script>
+<script src="assets/js/bluetooth-pan.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

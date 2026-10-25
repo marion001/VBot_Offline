@@ -83,7 +83,7 @@ function lanEscape($value) {return htmlspecialchars((string)$value,ENT_QUOTES,'U
 <?php include 'html_footer.php';include 'html_js.php'; ?>
 <script>window.lanCallOptions=<?= json_encode(['active'=>($settings['active']??false)===true,'api'=>rtrim($URL_API_VBOT,'/').'/lan-calls','apiKey'=>!empty($Config['api']['auth']['active'])?($Config['api']['auth']['api_key']??''):'','peers'=>$peerDevices,'peerErrors'=>$peerErrors,'discoveredPeers'=>$discoveredPeers,'localId'=>$localId!==''?$localId:($settings['id']??'')],JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script>window.lanCallOptions.backupCsrf=<?= json_encode($_SESSION['lan_calls_csrf'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/lan-calls.js?v=17"></script>
-<script src="assets/js/lan-calls-backup.js?v=4"></script><script>window.browserCallCsrf=<?= json_encode($_SESSION['browser_call_csrf'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/browser-call-test.js?v=4"></script>
+<script src="assets/js/lan-calls.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/lan-calls-backup.js?v=<?php echo $Cache_UI_Ver; ?>"></script><script>window.browserCallCsrf=<?= json_encode($_SESSION['browser_call_csrf'],JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
+<script src="assets/js/browser-call-test.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

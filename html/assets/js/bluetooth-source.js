@@ -30,13 +30,14 @@
     byId('source-selected').textContent = selected ? `${selected.name} (${selected.mac})` : data.settings.selected || 'Chưa chọn loa Bluetooth';
     const known = device => device.paired || device.connected;
     const sorted = [...data.devices].sort((a, b) => Number(b.connected)-Number(a.connected) || String(a.name).localeCompare(String(b.name), 'vi'));
-    const palette = ['table-light', 'table-primary', 'table-info', 'table-secondary'];
+    const palette = ['table-primary', 'table-info', 'table-secondary', 'table-warning', 'table-danger'];
     const colors = new Map([...new Set(data.devices.map(device => device.mac))].sort().map((mac, index) => [mac, palette[index % palette.length]]));
     const groups = [
       {id: 'source-input-devices', role: 'input', devices: sorted.filter(device => known(device) && device.audio_source)},
       {id: 'source-devices', role: 'output', devices: sorted.filter(device => known(device) && device.audio_sink)},
       {id: 'source-other-devices', role: 'other', devices: sorted.filter(device => !known(device) || (!device.audio_source && !device.audio_sink))}
     ];
+    const deviceBorder = '#dc3545';
     for (const group of groups) {
       const body = byId(group.id);
       body.replaceChildren();
@@ -53,7 +54,14 @@
           value.textContent = text; value.className = color; value.style.whiteSpace = 'pre-line';
           row.append(value); return value;
         };
-        cell(`${device.name}\n${device.mac}`);
+        const identity = cell('');
+        const deviceName = document.createElement('strong');
+        deviceName.className = 'd-block text-danger';
+        deviceName.textContent = device.name || 'Bluetooth';
+        const deviceMac = document.createElement('strong');
+        deviceMac.className = 'd-block text-danger';
+        deviceMac.textContent = device.mac;
+        identity.append(deviceName, deviceMac);
         cell(device.paired ? 'Đã ghép đôi' : 'Chưa ghép đôi', device.paired ? 'text-primary' : 'text-danger');
         cell(device.connected ? 'Đã kết nối Bluetooth' : 'Không kết nối', device.connected ? 'text-success' : 'text-danger');
         const audio = cell(group.role === 'other' ? 'Chưa xác định' : connected ? running ? 'Luồng âm thanh đang chạy' : 'Đã kết nối âm thanh' : 'Chưa kết nối âm thanh', connected ? 'text-success' : group.role === 'other' ? 'text-secondary' : 'text-danger');
@@ -80,11 +88,14 @@
         const add = (label, action, danger = false, disabled = false) => {
           const button = document.createElement('button');
           button.type = 'button'; button.textContent = label;
-          button.className = `btn btn-sm ${danger ? 'btn-outline-danger' : 'btn-primary'}`;
+          button.className = `btn btn-sm ${danger ? 'btn-danger' : 'btn-primary'}`;
           button.disabled = disabled || (['connect','select'].includes(action) && data.roles?.source === false) || (action === 'sink_connect' && data.roles?.sink === false);
           button.addEventListener('click', () => request(action, device.mac));
           buttons.append(button);
         };
+        if (device.connected) {
+          add('Ngắt kết nối Bluetooth', 'device_disconnect', true);
+        }
         if (!device.paired) {
           add('Ghép đôi', 'pair');
         } else if (output) {
@@ -112,19 +123,36 @@
           item.append(forget); list.append(item); menu.append(toggle, list); buttons.append(menu);
         }
         actions.append(buttons); body.append(row);
+        const rowCells = row.querySelectorAll('td');
+        rowCells.forEach(td => {
+          td.classList.remove('border-0', 'border-bottom-0');
+          td.style.setProperty('border', '1px solid #adb5bd', 'important');
+        });
+        if (rowCells.length) {
+          rowCells.forEach(td => td.style.setProperty('border-top', `2px solid ${deviceBorder}`, 'important'));
+          rowCells[0].style.setProperty('border-left', `2px solid ${deviceBorder}`, 'important');
+          rowCells[rowCells.length - 1].style.setProperty('border-right', `2px solid ${deviceBorder}`, 'important');
+        }
         if (!known(device)) continue;
         const keyRow = body.insertRow();
         keyRow.className = deviceColor;
         const keyCell = keyRow.insertCell(); keyCell.colSpan = output ? 6 : 5;
+        keyCell.className = '';
+        keyCell.style.setProperty('border', '1px solid #adb5bd', 'important');
+        keyCell.style.setProperty('border-left', `2px solid ${deviceBorder}`, 'important');
+        keyCell.style.setProperty('border-right', `2px solid ${deviceBorder}`, 'important');
+        keyCell.style.setProperty('border-bottom', `2px solid ${deviceBorder}`, 'important');
         const keyHost = document.createElement('div');
-        keyHost.className = 'bt-device-keys border rounded p-2';
+        keyHost.className = 'bt-device-keys p-2';
         keyHost.dataset.mac = device.mac;
         keyHost.dataset.tableClass = deviceColor;
+        keyHost.dataset.borderColor = '#adb5bd';
         keyHost.textContent = 'Đang tải nút điều khiển của thiết bị…';
         keyCell.append(keyHost);
       }
       if (!group.devices.length) {
         const row = body.insertRow(); const cell = row.insertCell(); cell.colSpan = group.role === 'output' ? 6 : 5;
+        cell.style.setProperty('border', '2px solid #dc3545', 'important');
         cell.textContent = group.role === 'other' ? 'Không có thiết bị chưa xác định.' : 'Chưa có thiết bị trong nhóm. Bật chế độ ghép đôi rồi nhấn Quét thiết bị.';
       }
     }

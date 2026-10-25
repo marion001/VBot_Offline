@@ -60,5 +60,5 @@ $wolCsrf=$_SESSION['vbot_csrf_token'];
 </main>
 <?php include 'html_footer.php'; include 'html_js.php'; ?>
 <script>window.vbotWolCsrf=<?= json_encode($wolCsrf, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
-<script src="assets/js/wake-on-lan.js?v=5"></script>
+<script src="assets/js/wake-on-lan.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

@@ -594,7 +594,7 @@ function close_ip_modal() {
 
 //Đặt Địa Chỉ IP Tĩnh
 </script>
-<script src="assets/js/wifi-management.js?v=2"></script>
+<script src="assets/js/wifi-management.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body>
 
 </html>

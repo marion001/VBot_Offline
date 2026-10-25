@@ -104,6 +104,6 @@ document.getElementById('main').addEventListener('click',event=>{
     }
 },true);
 </script>
-<script src="assets/js/voice-routines.js?v=21"></script>
-<script src="assets/js/voice-routines-backup.js?v=4"></script>
+<script src="assets/js/voice-routines.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/voice-routines-backup.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

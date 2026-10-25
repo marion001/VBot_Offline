@@ -90,6 +90,8 @@
       }
       const responsive = document.createElement('div'); responsive.className = 'table-responsive';
       const table = document.createElement('table'); table.className = `table table-sm table-bordered align-middle mb-0 ${host.dataset.tableClass || ''}`;
+      table.style.setProperty('--bs-table-border-color', host.dataset.borderColor || '#dc3545');
+      table.style.setProperty('border-color', host.dataset.borderColor || '#dc3545');
       const head = document.createElement('thead');
       const heading = document.createElement('tr');
       for (const label of ['Mã nút', 'Tên nút', 'Chức năng', 'Kích hoạt', 'Thao tác']) {

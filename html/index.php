@@ -1078,8 +1078,8 @@ include 'html_head.php';
   <?php
   include 'html_js.php';
   ?>
-  <script src="assets/js/media-output.js?v=7"></script>
-  <script src="assets/js/media-input.js?v=1"></script>
+  <script src="assets/js/media-output.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+  <script src="assets/js/media-input.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
   <script>
     const multiroomApiUrl = <?php echo json_encode(rtrim($URL_API_VBOT, '/') . '/multiroom'); ?>;
     let multiroomSnapshot = {};

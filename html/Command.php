@@ -494,7 +494,7 @@ include 'html_head.php';
   <?php
   include 'html_js.php';
   ?>
-  <script src="assets/js/bluetooth-pan-setup.js?v=1"></script>
+  <script src="assets/js/bluetooth-pan-setup.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
   <script>
     function get_picovoice_version() {
       const xhr = vbotCreateXhr();
