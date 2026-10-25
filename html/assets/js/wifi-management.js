@@ -93,7 +93,7 @@
 
   // Real form inputs mask passwords and handle hidden/open networks separately.
   const container = document.createElement('div');
-  container.innerHTML = '<div class="modal fade" id="wifi-connect-modal" tabindex="-1" aria-labelledby="wifi-connect-title"><div class="modal-dialog"><form class="modal-content" id="wifi-connect-form"><div class="modal-header"><h5 class="modal-title" id="wifi-connect-title">Kết nối Wi-Fi</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body"><label class="form-label" for="wifi-connect-ssid">Tên mạng (SSID)</label><input class="form-control mb-3" id="wifi-connect-ssid" required><div class="form-check form-switch mb-3"><input class="form-check-input" type="checkbox" id="wifi-connect-secure"><label class="form-check-label" for="wifi-connect-secure">Mạng có mật khẩu (WPA Personal)</label></div><label class="form-label" for="wifi-connect-password">Mật khẩu</label><input class="form-control" type="password" autocomplete="new-password" id="wifi-connect-password"><p class="small text-muted mt-2">Kết nối mạng mới có thể đổi IP và làm ngắt WebUI. Hãy mở địa chỉ mới hoặc tìm loa trên router nếu cần.</p><div id="wifi-connect-error" class="text-danger" role="status"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary" id="wifi-connect-submit">Kết nối</button></div></form></div></div>';
+  container.innerHTML = '<div class="modal fade" id="wifi-connect-modal" tabindex="-1" aria-labelledby="wifi-connect-title"><div class="modal-dialog"><form class="modal-content" id="wifi-connect-form"><div class="modal-header"><h5 class="modal-title" id="wifi-connect-title">Kết nối Wi-Fi</h5><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button></div><div class="modal-body"><label class="form-label" for="wifi-connect-ssid">Tên mạng (SSID)</label><input class="form-control mb-3 border-success" id="wifi-connect-ssid" required><div class="form-check form-switch mb-3"><input class="form-check-input border-success" type="checkbox" id="wifi-connect-secure"><label class="form-check-label" for="wifi-connect-secure">Mạng có mật khẩu (WPA Personal)</label></div><label class="form-label" for="wifi-connect-password">Mật khẩu</label><input class="form-control border-success" type="password" autocomplete="new-password" id="wifi-connect-password"><label><input type="checkbox" class="form-check-input border-success" id="wifi-show-password"> Hiển thị mật khẩu</label><p class="small text-muted mt-2">Kết nối mạng mới có thể đổi IP và làm ngắt WebUI. Hãy mở địa chỉ mới hoặc tìm loa trên router nếu cần.</p><div id="wifi-connect-error" class="text-danger" role="status"></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button><button type="submit" class="btn btn-primary" id="wifi-connect-submit">Kết nối</button></div></form></div></div>';
   document.body.append(container);
   let hidden = false;
   function passwordState() { el('wifi-connect-password').disabled = !el('wifi-connect-secure').checked; }
@@ -122,3 +122,8 @@
   });
   window.wifiLoadTransaction();
 })();
+
+document.getElementById('wifi-show-password').addEventListener('change', function () {
+    document.getElementById('wifi-connect-password').type =
+        this.checked ? 'text' : 'password';
+});
