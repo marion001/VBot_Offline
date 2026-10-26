@@ -159,6 +159,31 @@ if (session_status() === PHP_SESSION_ACTIVE) {
   <!-- Favicons -->
   <link href="assets/img/favicon.png" rel="icon">
   <link href="assets/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <!-- PWA: cài WebUI như ứng dụng lên màn hình điện thoại/máy tính -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#111827">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VBot">
+  <script>
+    //Đăng ký service worker (cache asset tĩnh, mở WebUI nhanh như app).
+    //Đăng ký qua sw.php: shim phục vụ assets/js/sw.js kèm header
+    //Service-Worker-Allowed để scope bao phủ toàn bộ WebUI.
+    //Trình duyệt chỉ cho phép trên HTTPS hoặc localhost; trên HTTP nội bộ
+    //thì bỏ qua yên lặng, WebUI vẫn chạy bình thường.
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+      var host = window.location.hostname;
+      var isSecure = window.location.protocol === 'https:' || host === 'localhost' || host === '127.0.0.1';
+      if (!isSecure) return;
+      window.addEventListener('load', function () {
+        navigator.serviceWorker.register('sw.php', { scope: './' }).catch(function (error) {
+          console.warn('Không đăng ký được service worker VBot:', error);
+        });
+      });
+    })();
+  </script>
   <!-- Google Fonts
     <link href="https://fonts.gstatic.com" rel="preconnect">
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
