@@ -10,6 +10,37 @@ function vbotRoutineActions(array $config): array {
     return $actions + ['play_local_file'=>'Phát một bài nhạc Local cụ thể',
         'play_url'=>'Phát từ URL / link trực tiếp / stream'];
 }
+function vbotRoutineTuyaEntries(string $root): array {
+    $path=rtrim($root,'/\\').'/resource/tuya_local/tuya_local_devices.json';
+    if (!is_file($path) || is_link($path) || (@filesize($path) ?: 0)>10485760) return [];
+    $raw=@file_get_contents($path);
+    $data=is_string($raw)?json_decode($raw,true):null;
+    if (!is_array($data) || !is_array($data['devices']??null) || !is_array($data['selected_ids']??null)) return [];
+    $selected=array_fill_keys(array_map('strval',$data['selected_ids']),true);
+    $entries=[];
+    foreach ($data['devices'] as $device) {
+        if (!is_array($device)) continue;
+        $deviceId=(string)($device['device_id']??$device['id']??'');
+        if ($deviceId==='' || !isset($selected[$deviceId])) continue;
+        $deviceName=trim((string)($device['display_name']??$device['app_name']??$device['name']??$deviceId));
+        $dps=$device['tuya']['dps']??[];
+        if (!is_array($dps)) continue;
+        foreach ($dps as $entryKey=>$entry) {
+            if (!is_array($entry) || ($entry['enabled']??false)!==true || !isset($entry['dps_id'])) continue;
+            $entryKey=(string)$entryKey;
+            if ($entryKey==='' || strlen($entryKey)>128) continue;
+            $entryName=trim((string)($entry['display_name']??$entryKey));
+            $dpsId=(string)$entry['dps_id'];
+            $entries[]=[
+                'device_id'=>$deviceId,
+                'entry_key'=>$entryKey,
+                'label'=>$deviceName.' — '.$entryName.' (DPS '.$dpsId.')',
+            ];
+        }
+    }
+    usort($entries,static fn($a,$b)=>strnatcasecmp($a['label'],$b['label']));
+    return $entries;
+}
 function vbotRoutineMediaUrl($value): string {
     $url=vbotRoutineText($value,'Link media',8192);
     $parts=parse_url($url);
@@ -234,6 +265,14 @@ function vbotRoutinesValidate($data): array {
                         throw new InvalidArgumentException('Entity ID hoặc thao tác Home Assistant không hợp lệ');
                     if ($action==='turn_setup') vbotRoutineNumber($step['value']??null,$domain==='climate'?5:0,$domain==='climate'?40:100,'Giá trị thiết bị');
                     elseif (isset($step['value'])) throw new InvalidArgumentException('Chỉ bước đặt giá trị mới nhận giá trị thiết bị');
+                    break;
+                case 'tuya_local':
+                    $deviceId=vbotRoutineText($step['device_id']??null,'Device ID Tuya',128);
+                    $entryKey=vbotRoutineText($step['entry_key']??null,'Entry Tuya',128);
+                    if ($deviceId!==$step['device_id'] || !preg_match('/^[A-Za-z0-9_-]+$/D',$deviceId) ||
+                        $entryKey!==$step['entry_key'] || !preg_match('/^[A-Za-z0-9_.:-]+$/D',$entryKey) ||
+                        !in_array($step['action']??null,['turn_on','turn_off'],true))
+                        throw new InvalidArgumentException('Thiết bị, Entry hoặc thao tác Tuya Local không hợp lệ');
                     break;
                 default: throw new InvalidArgumentException('Loại bước không được hỗ trợ');
             }

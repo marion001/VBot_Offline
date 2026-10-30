@@ -12,6 +12,7 @@ $sourceCsrf=$_SESSION['vbot_csrf_token'];
 <main id="main" class="main">
   <div class="pagetitle"><h1>Quản Lý Thiết Bị Bluetooth — A2DP Sink / Source</h1><nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li><li class="breadcrumb-item active">Quản Lý Thiết Bị Bluetooth</li></ol></nav></div>
   <section class="section">
+    <div class="page-search-toolbar" data-search-items="#source-input-devices tr, #source-devices tr, #source-other-devices tr" data-search-watch="#source-input-devices, #source-devices, #source-other-devices" data-search-sections=".section .card" aria-label="Tìm kiếm và điều hướng thiết bị Bluetooth"><div class="row g-2 align-items-center"><div class="col-12 col-lg"><div class="input-group"><span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span><input type="search" class="form-control border-primary page-search-input" placeholder="Tìm tên thiết bị, địa chỉ MAC hoặc trạng thái..." autocomplete="off"><button type="button" class="btn btn-outline-secondary page-search-clear" title="Xóa nội dung tìm kiếm"><i class="bi bi-x-lg"></i></button></div></div><div class="col-12 col-lg-auto"><select class="form-select border-primary page-search-navigation" aria-label="Đi tới thiết bị Bluetooth hoặc khu vực"><option value="">Đi tới thiết bị hoặc khu vực...</option></select></div></div><div class="alert alert-info py-2 mt-2 mb-0 page-search-empty" role="status" style="display:none"><i class="bi bi-info-circle"></i> Không tìm thấy thiết bị Bluetooth phù hợp.</div></div>
     <div class="card"><div class="card-body pt-3">
       <h2 class="h5">Thiết lập nâng cao</h2>
       <div class="row align-items-center g-2 mb-3">
@@ -79,4 +80,5 @@ $sourceCsrf=$_SESSION['vbot_csrf_token'];
 <script>window.vbotSourceCsrf=<?= json_encode($sourceCsrf,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/bluetooth-source.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script src="assets/js/bluetooth-keys.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/page-search-navigation.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

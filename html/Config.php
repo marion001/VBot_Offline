@@ -14,7 +14,7 @@ function vbotSpeakerLocationUpdate(array &$config, array $post): ?string {
     $active=isset($post['speaker_location_active']);
     $room=$post['speaker_location_room']??'';
     if (!is_string($room) || strlen($room)>400 || preg_match('/[\x00-\x1f\x7f]/',$room))
-        return 'Tên phòng đặt loa không hợp lệ; cấu hình phòng được giữ nguyên.';
+        return 'Tên phòng đặt loa không hợp lệ, cấu hình phòng được giữ nguyên.';
     $room=trim($room);
     if ($active && $room==='') return 'Cần nhập tên phòng đặt loa khi bật tính năng; cấu hình phòng được giữ nguyên.';
     $config['speaker_location']=array_merge($config['speaker_location']??[],['active'=>$active,'room'=>$room]);
@@ -529,6 +529,14 @@ if (isset($_POST['all_config_save'])) {
   $Config['home_assistant']['custom_commands']['active'] = isset($_POST['hass_custom_commands_active']) ? true : false;
   $Config['home_assistant']['custom_commands']['minimum_threshold'] = floatval($_POST['hass_custom_commands_threshold']);
 
+  # Cập nhật cấu hình điều khiển Tuya Local
+  $Config['local_tuya'] = is_array($Config['local_tuya'] ?? null) ? $Config['local_tuya'] : [];
+  $Config['local_tuya']['active'] = isset($_POST['local_tuya_active']);
+  $localTuyaThreshold = $_POST['local_tuya_minimum_threshold'] ?? ($Config['local_tuya']['minimum_threshold'] ?? 0.7);
+  $Config['local_tuya']['minimum_threshold'] = is_numeric($localTuyaThreshold)
+    ? max(0.1, min(1.0, (float)$localTuyaThreshold))
+    : 0.7;
+
   #Cập nhật các giá trị trong MQTT Broker
   $Config['mqtt_broker']['mqtt_active'] = isset($_POST['mqtt_active']) ? true : false;
   $Config['mqtt_broker']['mqtt_show_logs_reconnect'] = isset($_POST['mqtt_show_logs_reconnect']) ? true : false;
@@ -600,6 +608,10 @@ if (isset($_POST['all_config_save'])) {
 
   #CẬP NHẬT CHẾ ĐỘ Text To Speak (TTS) text_to_speak:
   $Config['smart_config']['smart_answer']['cache_tts']['active'] = isset($_POST['cache_tts']) ? true : false;
+  $ttsOutputRoute = isset($_POST['tts_output_route']) ? trim((string)$_POST['tts_output_route']) : 'vbot';
+  $Config['smart_config']['smart_answer']['text_to_speak']['output_route'] = in_array($ttsOutputRoute, ['vbot', 'selected'], true) ? $ttsOutputRoute : 'vbot';
+  $playSoundOutputRoute = isset($_POST['play_sound_output_route']) ? trim((string)$_POST['play_sound_output_route']) : 'vbot';
+  $Config['smart_config']['speaker']['system']['play_sound_output_route'] = in_array($playSoundOutputRoute, ['vbot', 'selected'], true) ? $playSoundOutputRoute : 'vbot';
   $Config['smart_config']['smart_answer']['text_to_speak']['tts_select'] = $_POST['tts_select'];
   $Config['smart_config']['smart_answer']['text_to_speak']['directory_tts'] = $_POST['directory_tts'];
   $Config['smart_config']['smart_answer']['text_to_speak']['clean_cache_tts_max_file'] = intval($_POST['clean_cache_tts_max_file']);
@@ -1571,9 +1583,37 @@ include 'html_head.php';
     }
     .config-section-search-hidden { display: none !important; }
     #config-search-empty { display: none; }
+    #config-quick-navigation {
+      width: 100%;
+      min-height: 38px;
+      height: auto;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      text-align: left;
+      display: flex;
+      align-items: center;
+    }
+    #config-quick-navigation-menu {
+      width: 100%;
+      max-height: min(60vh, 480px);
+      overflow-y: auto;
+      white-space: normal;
+      overflow-wrap: anywhere;
+    }
+    #config-quick-navigation-menu .dropdown-item {
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: normal;
+      line-height: 1.35;
+    }
+    #config-quick-navigation-menu .dropdown-item:hover,
+    #config-quick-navigation-menu .dropdown-item:focus {
+      background-color: #e2e8f0;
+      color: #0a3622;
+    }
     @media (max-width: 767.98px) {
       .config-toolbar { top: 58px; }
-      .config-toolbar .btn, .config-toolbar .form-select { white-space: nowrap; }
+      .config-toolbar .btn { white-space: nowrap; }
     }
     @media (max-width: 575.98px) {
       #keyword-language-checker .input-group > .form-select {
@@ -1632,7 +1672,7 @@ include 'html_head.php';
         </ol>
       </nav>
     </div>
-    <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="" onsubmit="return validateFormVBot()">
+    <form class="row g-3 needs-validation" id="hotwordForm" enctype="multipart/form-data" novalidate method="POST" action="" onsubmit="return validateConfigSaveWithLoading()">
       <section class="section">
         <div class="row">
 		  <div class="col-12 config-toolbar border border-primary" id="config-toolbar" aria-label="Tìm kiếm và điều hướng cấu hình">
@@ -1642,7 +1682,12 @@ include 'html_head.php';
 				<input type="search" id="config-section-search" class="form-control border-primary" placeholder="Tìm cấu hình, ví dụ: Bluetooth, STT, Multiroom..." autocomplete="off">
 				<button type="button" id="config-search-clear" class="btn btn-outline-secondary" title="Xóa từ khóa"><i class="bi bi-x-lg"></i></button>
 			  </div></div>
-			  <div class="col-12 col-md-5 col-lg-3"><select id="config-quick-navigation" class="form-select border-primary" aria-label="Chuyển nhanh tới nhóm cấu hình"><option value="">Chuyển nhanh tới nhóm cấu hình...</option></select></div>
+			  <div class="col-12 col-md-5 col-lg-3">
+                <div class="dropdown w-100">
+                  <button type="button" id="config-quick-navigation" class="btn btn-outline-primary dropdown-toggle w-100 text-wrap" data-bs-toggle="dropdown" aria-expanded="false">Chuyển nhanh tới nhóm cấu hình...</button>
+                  <div id="config-quick-navigation-menu" class="dropdown-menu w-100" aria-label="Danh sách nhóm cấu hình"></div>
+                </div>
+              </div>
 			  <div class="col-12 col-md-7 col-lg-5 d-flex flex-wrap gap-2 justify-content-lg-end">
 				<button type="submit" name="all_config_save" value="" class="btn btn-primary rounded-pill flex-grow-1" title="Lưu toàn bộ cấu hình"><i class="bi bi-save"></i> Lưu Cài Đặt</button>
 				<button type="submit" name="all_config_save" value="and_restart_VBot" class="btn btn-danger rounded-pill flex-grow-1" title="Lưu cấu hình và khởi động lại VBot"><i class="bi bi-save"></i> Lưu Cài Đặt Và Restart VBot</button>
@@ -2314,7 +2359,7 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
             <div class="card accordion" id="accordion_button_volume_setting">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_volume_setting" aria-expanded="false" aria-controls="collapse_button_volume_setting">
-                  Cấu Hình Âm Thanh Volume/Mic, Bluetooth, <font color=red>(Lọc Nhiễu Mic: WebRTC: NS, AEC3, AGC: <?php echo ($Config['smart_config']['audio_processing']['active']??true) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
+                  Cấu Hình Luồng Âm Thanh, Volume, Mic, Bluetooth, V..v... <font color=red>(Lọc Nhiễu Mic: WebRTC: NS, AEC3, AGC: <?php echo ($Config['smart_config']['audio_processing']['active']??true) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
                  <div class="alert alert-success" role="alert">
@@ -2368,6 +2413,33 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                         </div>
                       </div>
                     </div>
+
+					<div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Định Tuyến Âm Thanh Bluetooth/AirPlay/TTS — Loopback</h5>
+                      <div class="alert alert-info" role="alert">Các thiết bị loopback dùng chung cho tuyến âm thanh nguồn ngoài như Bluetooth/AirPlay và tuyến VLC/TTS khi được cấu hình. Việc cài đặt tuyến PCM hệ thống do cấu hình AEC3/installer quản lý.</div>
+                      <?php
+                      $multiroom_audio_config = $Config['media_player']['multiroom_audio'] ?? [];
+                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'vbot_aec_media', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC và tuyến âm thanh dùng chung ghi vào loopback. Mặc định: vbot_aec_media.', 'border-danger');
+                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,1', 'required', 'text', '', '', '', 'Thiết bị ALSA được Audio Bridge dùng để thu PCM từ loopback. Mặc định: plughw:Loopback,1,1.', 'border-danger');
+                      $tts_output_route = $Config['smart_config']['smart_answer']['text_to_speak']['output_route'] ?? 'vbot';
+                      if (!in_array($tts_output_route, ['vbot', 'selected'], true)) $tts_output_route = 'vbot';
+                      echo select_field('tts_output_route', 'Đầu Ra Âm Thanh TTS', [
+                        'vbot' => 'Phát thẳng ra loa VBot',
+                        'selected' => 'Áp dụng theo nguồn phát đầu ra',
+                      ], $tts_output_route, []);
+                      echo '<p class="form-text">Chỉ áp dụng cho TTS (Text To Speak). Chọn theo nguồn phát đầu ra để TTS dùng tuyến Bluetooth/AirPlay hoặc Multiroom đã cấu hình.</p>';
+                      $play_sound_output_route = $Config['smart_config']['speaker']['system']['play_sound_output_route'] ?? 'vbot';
+                      if (!in_array($play_sound_output_route, ['vbot', 'selected'], true)) $play_sound_output_route = 'vbot';
+                      echo select_field('play_sound_output_route', 'Đầu Ra Các File Âm Thanh Mặc Định Có Trên Hệ Thống', [
+                        'vbot' => 'Phát thẳng ra loa VBot',
+                        'selected' => 'Áp dụng theo nguồn phát đầu ra',
+                      ], $play_sound_output_route, []);
+                      echo '<p class="form-text">Chỉ áp dụng cho file âm thanh cục bộ có sẵn trên hệ thống VBot</p>';
+                      ?>
+                    </div>
+                    </div>
+                  </div>
 
 					<div class="card">
                     <div class="card-body">
@@ -2467,10 +2539,9 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                     </div>
                   </div>
                   </div>
+                  </div>
                 </div>
               </div>
-            </div>
-            </div>
 
             <div class="card accordion" id="accordion_button_hotword_engine">
               <div class="card-body">
@@ -2818,7 +2889,7 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                 </h5>
                 <div id="collapse_button_setting_tts" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_setting_tts" style="">
                  <div class="alert alert-success" role="alert"> <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Kích hoạt Cache lại TTS:</label>
+                  <label class="col-sm-3 col-form-label">Kích hoạt Cache lại TTS:</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="cache_tts" id="cache_tts" <?php echo $Config['smart_config']['smart_answer']['cache_tts']['active'] ? 'checked' : ''; ?>>
@@ -3468,6 +3539,36 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                 </div>
               </div>
 			  
+            </div>
+            <div class="card accordion" id="accordion_button_local_tuya">
+              <div class="card-body">
+                <?php $localTuyaConfig = is_array($Config['local_tuya'] ?? null) ? $Config['local_tuya'] : []; ?>
+                <h5 class="card-title accordion-button collapsed" role="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_local_tuya" aria-expanded="false" aria-controls="collapse_button_local_tuya">
+                  Cấu Hình Tuya Smart/Smart Life Điều khiển thiết bị Tuya Local: <?php echo !empty($localTuyaConfig['active']) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
+                </h5>
+                <div id="collapse_button_local_tuya" class="accordion-collapse collapse" aria-labelledby="headingThree">
+                <div class="pt-3">
+                <div class="mb-3"><a class="btn btn-primary" href="Tuya_Local.php"><i class="bi bi-sliders"></i> Tới trang cấu hình và liên kết thiết bị Tuya Smart/Smart Life</a></div>
+                <div class="alert alert-success mb-0" role="alert">
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">Kích hoạt:</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="local_tuya_active" id="local_tuya_active" <?php echo !empty($localTuyaConfig['active']) ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <?php
+                  echo input_field('local_tuya_minimum_threshold', 'Ngưỡng khớp câu lệnh', htmlspecialchars((string)($localTuyaConfig['minimum_threshold'] ?? 0.7), ENT_QUOTES, 'UTF-8'), 'required', 'number', '0.01', '0.1', '1.0', 'Ngưỡng tương đồng từ 0.1 đến 1.0; ngưỡng càng cao càng cần câu lệnh khớp chính xác hơn. Chỉ thiết bị DPS đã kích hoạt ở Tab [Cấu Hình Tuya Smart/Smart Life -> Local Tuya] mới được điều khiển.', 'border-success', '', '', '', '', '');
+                  ?>
+                  <p class="small text-danger mb-0">Lưu cấu hình và khởi động lại VBot để áp dụng. Câu lệnh bật/tắt và tên dễ nhớ được cấu hình riêng cho từng thiết bị, DPS trong trang Tuya Local.</p>
+                </div>
+                <div class="mt-3">
+                  <a class="btn btn-info btn-sm" href="FAQ.php#accordion_button_tuya_local_install" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn cài đặt ban đầu Tuya Smart/Smart Life điều khiển Tuya Local</a>
+                </div>
+                </div>
+                </div>
+              </div>
             </div>
             <div class="card accordion" id="accordion_button_mqtt_tuyen">
               <div class="card-body">
@@ -4203,12 +4304,12 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </div>
                       </div>
                       <?php
-                      echo input_field('multiroom_audio_vlc_loopback_output_device', 'Thiết Bị VLC Loopback Output', $multiroom_audio_config['vlc_loopback_output_device'] ?? 'vbot_aec_media', 'required', 'text', '', '', '', 'Thiết bị ALSA để VLC ghi âm thanh vào snd-aloop.<br>Mặc định đặt là: vbot_aec_media', 'border-danger');
-                      echo input_field('multiroom_audio_vlc_loopback_capture_device', 'Thiết Bị Loopback Capture', $multiroom_audio_config['vlc_loopback_capture_device'] ?? 'plughw:Loopback,1,1', 'required', 'text', '', '', '', 'Thiết bị ALSA mà Multiroom dùng để thu âm thanh từ snd-aloop.<br>Mặc định đặt là: plughw:Loopback,1,1', 'border-danger');
+                      echo '<details class="border rounded p-3 mt-3"><summary class="fw-semibold">Cấu hình nâng cao Audio Bridge (ALSA)</summary><div class="pt-3">';
                       echo input_field('multiroom_audio_local_playback_device', 'Thiết Bị Phát Âm Thanh Local', $multiroom_audio_config['local_playback_device'] ?? 'default', 'required', 'text', '', '', '', 'Thiết bị ALSA phát âm thanh trên chính loa này.', 'border-danger');
                       echo input_field('multiroom_audio_bridge_switch_delay_ms', 'Độ Trễ Chuyển Bridge (ms)', $multiroom_audio_config['bridge_switch_delay_ms'] ?? 80, 'required', 'number', '1', '0', '', 'Thời gian nghỉ khi Audio Bridge chuyển quyền capture giữa Local và Multiroom.', 'border-success');
                       echo input_field('multiroom_audio_alsa_capture_command', 'Lệnh Thu ALSA', $multiroom_audio_config['alsa_capture_command'] ?? 'arecord', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để thu âm thanh.<br>Mặc định đặt là: arecord', 'border-danger');
                       echo input_field('multiroom_audio_alsa_playback_command', 'Lệnh Phát ALSA', $multiroom_audio_config['alsa_playback_command'] ?? 'aplay', 'required', 'text', '', '', '', 'Tên hoặc đường dẫn lệnh ALSA dùng để phát âm thanh.<br>Mặc định đặt là: aplay', 'border-danger');
+                      echo '</div></details>';
                       ?>
                     </div>
                     </div>
@@ -5962,6 +6063,13 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
       JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
     ); ?>;
   </script>
+  <script>
+    function validateConfigSaveWithLoading() {
+      if (!validateFormVBot()) return false;
+      loading('show');
+      return true;
+    }
+  </script>
   <script src="assets/js/Config.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script>
 document.getElementById('hass-refresh-registry').addEventListener('click', async function() {
@@ -6344,34 +6452,57 @@ document.addEventListener('DOMContentLoaded', function () {
   const search = document.getElementById('config-section-search');
   const clearButton = document.getElementById('config-search-clear');
   const navigation = document.getElementById('config-quick-navigation');
+  const navigationMenu = document.getElementById('config-quick-navigation-menu');
   const emptyState = document.getElementById('config-search-empty');
-  if (!form || !container || !search || !clearButton || !navigation || !emptyState) return;
+  if (!form || !container || !search || !clearButton || !navigation || !navigationMenu || !emptyState) return;
 
   const normalizeText = function (value) {
     return String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
       .toLowerCase().replace(/\s+/g, ' ').trim();
   };
-  const sections = Array.from(container.children).filter(function (element) {
-    return element.classList && element.classList.contains('card');
+  const sections = [];
+  const allCards = Array.from(container.querySelectorAll('.card'));
+  const topLevelAlerts = Array.from(container.querySelectorAll('.alert')).filter(function (alert) {
+    return !alert.parentElement.closest('.card') && !alert.parentElement.closest('.alert');
+  });
+  const searchableSections = allCards.concat(topLevelAlerts).sort(function (left, right) {
+    return left.compareDocumentPosition(right) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1;
   });
 
-  sections.forEach(function (section, index) {
-    if (!section.id) section.id = 'config-section-' + (index + 1);
-    const heading = section.querySelector(':scope > .card-body > .card-title') || section.querySelector('.card-title');
-    const label = (heading ? heading.textContent : 'Nhóm cấu hình ' + (index + 1)).replace(/\s+/g, ' ').trim();
-    section.dataset.configSearch = normalizeText(section.textContent);
-    const option = document.createElement('option');
-    option.value = section.id;
-    option.textContent = label;
-    navigation.appendChild(option);
+  searchableSections.forEach(function (card, index) {
+    const heading = card.querySelector(':scope > .card-body > .accordion-button, :scope > .card-body > .card-title, :scope > .card-header, :scope > .card-body > strong, :scope > .card-body > h1, :scope > .card-body > h2, :scope > .card-body > h3, :scope > .card-body > h4, :scope > .card-body > h5, :scope > .card-body > h6')
+      || card.querySelector(':scope > .card-body label, :scope > label, :scope > strong')
+      || null;
+    const collapseSelector = heading && heading.getAttribute ? heading.getAttribute('data-bs-target') : null;
+    const collapse = collapseSelector && collapseSelector.charAt(0) === '#'
+      ? document.getElementById(collapseSelector.slice(1))
+      : null;
+    if (collapse && !container.contains(collapse)) return;
+
+    if (!card.id) card.id = 'config-section-' + (index + 1);
+    card.dataset.configSearch = normalizeText(card.textContent + (collapse ? ' ' + collapse.textContent : ''));
+    const parentCollapses = [];
+    let ancestor = heading ? heading.parentElement : card.parentElement;
+    while (ancestor && ancestor !== container) {
+      if (ancestor.classList && ancestor.classList.contains('accordion-collapse')) parentCollapses.unshift(ancestor);
+      ancestor = ancestor.parentElement;
+    }
+    sections.push({element: card, heading: heading, collapse: collapse, parentCollapses: parentCollapses});
+
+    const menuItem = document.createElement('button');
+    menuItem.type = 'button';
+    menuItem.className = 'dropdown-item text-wrap';
+    menuItem.dataset.sectionId = card.id;
+    menuItem.textContent = heading ? heading.textContent.replace(/\s+/g, ' ').trim() : ('Nhóm cấu hình ' + (index + 1));
+    navigationMenu.appendChild(menuItem);
   });
 
   const applySearch = function () {
     const query = normalizeText(search.value);
     let visible = 0;
-    sections.forEach(function (section) {
-      const matched = !query || section.dataset.configSearch.includes(query);
-      section.classList.toggle('config-section-search-hidden', !matched);
+    sections.forEach(function (item) {
+      const matched = !query || item.element.dataset.configSearch.includes(query);
+      item.element.classList.toggle('config-section-search-hidden', !matched);
       if (matched) visible += 1;
     });
     emptyState.style.display = visible === 0 ? 'block' : 'none';
@@ -6383,17 +6514,30 @@ document.addEventListener('DOMContentLoaded', function () {
     applySearch();
     search.focus();
   });
-  navigation.addEventListener('change', function () {
-    const target = document.getElementById(navigation.value);
-    if (!target) return;
+  navigationMenu.addEventListener('click', function (event) {
+    const menuItem = event.target.closest('[data-section-id]');
+    if (!menuItem) return;
+    const selected = sections.find(function (item) { return item.element.id === menuItem.dataset.sectionId; });
+    if (!selected) return;
+    const target = selected.heading;
     search.value = '';
     applySearch();
-    const collapse = target.querySelector(':scope > .card-body > .accordion-collapse');
-    if (collapse && window.bootstrap && bootstrap.Collapse) {
-      bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
+    if (window.bootstrap && bootstrap.Collapse) {
+      const collapses = selected.parentCollapses.slice();
+      if (selected.collapse) collapses.push(selected.collapse);
+      collapses.forEach(function (collapse) {
+        bootstrap.Collapse.getOrCreateInstance(collapse, {toggle: false}).show();
+      });
     }
-    target.scrollIntoView({behavior: 'smooth', block: 'start'});
-    navigation.value = '';
+    navigation.textContent = 'Chuyển nhanh tới nhóm cấu hình...';
+    if (window.bootstrap && bootstrap.Dropdown) bootstrap.Dropdown.getOrCreateInstance(navigation).hide();
+    window.setTimeout(function () {
+      (target || selected.element).scrollIntoView({behavior: 'smooth', block: 'start'});
+    }, 350);
+  });
+
+  search.addEventListener('keydown', function (event) {
+    if (event.key === 'Enter') event.preventDefault();
   });
 
   applySearch();

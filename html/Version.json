@@ -1,8 +1,8 @@
 {
-    "version": "1.3.9",
+    "version": "1.4.0",
     "projectName": "WebUI VBot Offline",
-    "description": "Sửa Lỗi Home Assistant - Custom Home Assistant điều khiển thiết bị, Hỗ trợ Loa VBot kết nối tới các loa Bluetooth khác, Hỗ trợ kết nối mạng qua kết nối Bluetooth từ điện thoại chia sẻ, Sửa các lỗi kết nối wifi, bluetooth ban đầu khi Flash lại chương trình OS",
-    "releaseDate": "27/10/2026",
+    "description": "Hỗ trợ liên kết và điều khiển thiết bị từ APP Tuya Smart, Smart Life vào VBot -> Local Tuya, Hỗ trợ cấu hình tùy chỉnh các nguồn phát âm thanh đầu ra theo ý",
+    "releaseDate": "30/10/2026",
     "changes": [
         {
             "type": "feature",

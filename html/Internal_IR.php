@@ -2,7 +2,7 @@
 <!DOCTYPE html><html lang="vi"><?php include 'html_head.php'; ?><body>
 <?php include 'html_header_bar.php'; include 'html_sidebar.php'; ?>
 <main id="main" class="main"><div class="pagetitle"><h1>IR, Remote GPIO Nội Bộ <i class="bi bi-question-circle-fill" onclick="show_message('Cần tích hợp với các Module thu phát IR, kết nối Module thông qua các chân GPIO')"></i></h1></div>
-<section class="section"><div class="card"><div class="card-body pt-3">
+<section class="section"><div class="page-search-toolbar" data-search-items="#irRows tr" data-search-watch="#irRows" data-search-sections=".section > .card" aria-label="Tìm kiếm và điều hướng lệnh IR"><div class="row g-2 align-items-center"><div class="col-12 col-lg"><div class="input-group"><span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span><input type="search" class="form-control border-primary page-search-input" placeholder="Tìm tên lệnh, câu phản hồi, thao tác hoặc mã IR..." autocomplete="off"><button type="button" class="btn btn-outline-secondary page-search-clear" title="Xóa nội dung tìm kiếm"><i class="bi bi-x-lg"></i></button></div></div><div class="col-12 col-lg-auto"><select class="form-select border-primary page-search-navigation" aria-label="Đi tới lệnh IR hoặc khu vực"><option value="">Đi tới lệnh hoặc khu vực...</option></select></div></div><div class="alert alert-info py-2 mt-2 mb-0 page-search-empty" role="status" style="display:none"><i class="bi bi-info-circle"></i> Không tìm thấy lệnh IR phù hợp.</div></div><div class="card"><div class="card-body pt-3">
   <div class="mb-3 d-flex flex-wrap justify-content-center gap-2">
     <button class="btn btn-warning" type="button" onclick="openLearnModal()"><i class="bi bi-broadcast"></i> Học lệnh</button>
     <button class="btn btn-success" type="button" onclick="openManualModal()"><i class="bi bi-plus-circle"></i> Thêm lệnh thủ công</button>
@@ -231,4 +231,4 @@ async function uploadIrBackup(){
 }
 loadIr();
 loadIrBackups();
-</script></body></html>
+</script><script src="assets/js/page-search-navigation.js?v=<?php echo $Cache_UI_Ver; ?>"></script></body></html>

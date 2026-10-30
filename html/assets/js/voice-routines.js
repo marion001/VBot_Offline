@@ -7,7 +7,7 @@
     let hassEntities = [], hassById = new Map(), hassLoading = false, hassMessage = 'Đang đọc dữ liệu Home Assistant đã lưu…';
     let localFiles = [], localLoaded = false, localLoading = false, localMessage = 'Chưa đọc danh sách nhạc Local.';
     const urlActions = ['play_url','play_youtube','play_zingmp3','play_nhaccuatui'];
-    const types = {home_assistant: 'Home Assistant', action: 'Thao tác loa / phát playlist', volume: 'Đặt âm lượng', led_brightness: 'Đặt độ sáng LED ở loa', speak: 'Đọc thông báo', wait: 'Chờ'};
+    const types = {home_assistant: 'Home Assistant', tuya_local: 'Tuya Local', action: 'Thao tác loa / phát playlist', volume: 'Đặt âm lượng', led_brightness: 'Đặt độ sáng LED ở loa', speak: 'Đọc thông báo', wait: 'Chờ'};
     const hassLabels = {turn_on:'Bật / kích hoạt', turn_off:'Tắt', turn_setup:'Đặt giá trị', turn_open:'Mở rèm', turn_close:'Đóng rèm', turn_stop:'Dừng rèm', turn_cool:'Làm lạnh', turn_auto:'Tự động', turn_heat:'Sưởi', turn_dry:'Hút ẩm', turn_fan_only:'Chỉ quạt'};
     const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     const selectOptions = (values, selected) => Object.entries(values).map(([value, label]) => `<option value="${escape(value)}" ${value===selected?'selected':''}>${escape(label)}</option>`).join('');
@@ -40,7 +40,7 @@
         return result;
     }
     function defaults(type) {
-        return {home_assistant:{type,entity_id:'',action:'turn_off',value:null}, action:{type,action:'media_stop'},
+        return {home_assistant:{type,entity_id:'',action:'turn_off',value:null}, tuya_local:{type,device_id:'',entry_key:'',action:'turn_off'}, action:{type,action:'media_stop'},
             volume:{type,value:25}, led_brightness:{type,value:50}, speak:{type,text:''}, wait:{type,seconds:1}}[type];
     }
     const searchText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase().replace(/\s+/g,' ').trim();
@@ -195,6 +195,17 @@
             if (!actions[selected]) actions[selected] = 'Nguồn/thao tác đã lưu: '+selected;
             return `<label class="form-label">Thao tác</label><select class="form-select border-success" data-field="action">${selectOptions(actions,selected)}</select>${actionMediaFields(step)}`;
         }
+        if (step.type==='tuya_local') {
+            const tuyaEntries=Array.isArray(options.tuyaEntries)?options.tuyaEntries:[];
+            const selected=JSON.stringify([step.device_id || '',step.entry_key || '']);
+            const values={'':'Chọn entry Tuya Local đang bật…'};
+            for(const entry of tuyaEntries) values[JSON.stringify([entry.device_id,entry.entry_key])]=entry.label;
+            if(step.device_id && step.entry_key && !Object.prototype.hasOwnProperty.call(values,selected)) values[selected]='Entry đã lưu nhưng hiện không còn được bật';
+            return `<label class="form-label">Entries đang bật</label><select class="form-select border-success mb-2" data-field="tuya_entry">${selectOptions(values,selected)}</select>
+                <label class="form-label">Thao tác</label><select class="form-select border-success" data-field="action">${selectOptions({turn_on:'Bật',turn_off:'Tắt'},step.action || 'turn_off')}</select>
+                <div class="form-text">Danh sách chỉ gồm thiết bị đã liên kết và Entries được bật trong Tuya Local. Hành động sẽ dùng làm trạng thái bật/tắt đã lưu cho entry.</div>
+                ${tuyaEntries.length?'':'<div class="form-text text-warning">Chưa có Entry Tuya Local nào đang bật. Hãy bật Entry trong trang Tuya Local rồi tải lại trang này.</div>'}`;
+        }
         return `<div class="hass-controls mb-2">${hassControlFields(step)}</div>
             <div class="hass-picker mb-2"><label class="form-label">Entity ID trong Home Assistant</label>
             <div class="input-group"><input class="form-control border-success" data-field="entity_id" maxlength="150" autocomplete="off" role="combobox" aria-autocomplete="list" aria-expanded="false" placeholder="Tìm tên thiết bị hoặc nhập Entity ID" value="${escape(step.entity_id)}">
@@ -297,6 +308,13 @@
             if (key==='type') { routine.steps[index] = defaults(target.value); render(); }
             else {
                 const step = routine.steps[index];
+                if (step.type==='tuya_local' && key==='tuya_entry') {
+                    let selection=[];
+                    try { selection=JSON.parse(target.value); } catch (_) {}
+                    step.device_id=Array.isArray(selection)?String(selection[0] || ''):'';
+                    step.entry_key=Array.isArray(selection)?String(selection[1] || ''):'';
+                    setDirty(); render(); return;
+                }
                 step[key] = target.type==='number'?(target.value===''?null:Number(target.value)):
                     ['path','url'].includes(key)?target.value.trim():target.value.trim().normalize('NFC');
                 if (step.type==='home_assistant' && key==='entity_id') showHassResults(target);
@@ -370,6 +388,7 @@
     byId('routineCards').addEventListener('input',readInput);
     byId('routineCards').addEventListener('change',event => {
         const target=event.target;
+        if (target.dataset.field==='tuya_entry') { readInput(event); return; }
         if (busy || target.dataset.field!=='entity_id') return;
         const routine=data.routines[Number(target.closest('[data-routine]').dataset.routine)];
         const step=routine.steps[Number(target.closest('[data-step]').dataset.step)];

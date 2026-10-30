@@ -189,6 +189,7 @@ function vbotApiIsSensitiveFilePath($path)
         return true;
     }
     return strpos($normalized, '/backup_config/') !== false
+        || strpos($normalized, '/backup_tuya_local/') !== false
         || strpos($normalized, '/google_driver_php/') !== false
         || strpos($normalized, '/.cloudflared/') !== false
         || preg_match('/(?:^|\/)(?:stt|tts)[_-]token[^\/]*\.json$/i', $normalized) === 1;

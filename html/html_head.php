@@ -81,6 +81,40 @@ if (session_status() === PHP_SESSION_ACTIVE) {
           || /login\.php/i.test(text) && /(?:location|redirect|đăng nhập|dang nhap)/i.test(text);
       }
 
+      //Lỗi CSRF: server trả 403 kèm câu thông báo cố định khi token trong trang
+      //không còn khớp với phiên phía server (phiên hết hạn, VBot khởi động lại,
+      //mất cookie). Token mới chỉ được cấp khi nạp lại trang nên phải tải lại.
+      function responseIndicatesCsrfRejection(status, body) {
+        if (status !== 403) return false;
+        if (!body) return false;
+        const text = typeof body === 'string' ? body : JSON.stringify(body);
+        return /CSRF.{0,60}(?:hết hạn|het han)/i.test(text);
+      }
+
+      let csrfReloadTimer = null;
+
+      function reloadAfterCsrfRejection() {
+        if (csrfReloadTimer) return true;
+        try {
+          const lastReloadAt = parseInt(sessionStorage.getItem('vbot_csrf_reload_at') || '0', 10);
+          if (lastReloadAt > 0 && Date.now() - lastReloadAt < 30000) {
+            //Vừa tự tải lại mà vẫn lỗi CSRF: dừng để tránh vòng lặp tải lại vô hạn.
+            return true;
+          }
+        } catch (error) {}
+        try {
+          if (typeof show_message_text === 'function') {
+            show_message_text('Phiên làm việc đã hết hạn (CSRF token không hợp lệ hoặc đã hết hạn), đang tải lại trang...');
+          }
+        } catch (error) {}
+        csrfReloadTimer = window.setTimeout(function () {
+          csrfReloadTimer = null;
+          try { sessionStorage.setItem('vbot_csrf_reload_at', String(Date.now())); } catch (error) {}
+          window.location.reload();
+        }, typeof show_message_text === 'function' ? 1500 : 0);
+        return true;
+      }
+
       function redirectToLogin() {
         if (redirectingToLogin || isLoginPageUrl(window.location.href)) return;
         redirectingToLogin = true;
@@ -91,11 +125,15 @@ if (session_status() === PHP_SESSION_ACTIVE) {
         loginUrl: loginUrl,
         check: function (status, responseUrl, body, requestUrl) {
           if (!isSameOriginRequest(requestUrl || responseUrl || window.location.href)) return false;
+          if (responseIndicatesCsrfRejection(status, body)) {
+            return reloadAfterCsrfRejection();
+          }
           if (!responseIndicatesExpiredSession(status, responseUrl, body)) return false;
           redirectToLogin();
           return true;
         },
-        redirectToLogin: redirectToLogin
+        redirectToLogin: redirectToLogin,
+        reloadAfterCsrfRejection: reloadAfterCsrfRejection
       };
 
       if (typeof window.fetch === 'function') {

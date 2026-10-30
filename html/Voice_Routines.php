@@ -92,6 +92,7 @@ window.voiceRoutineOptions=<?= json_encode([
     'apiKey'=>!empty($Config['api']['auth']['active'])?(string)($Config['api']['auth']['api_key']??''):'',
     'actions'=>vbotRoutineActions($Config),
     'hassActions'=>vbotRoutineHassActions(),
+    'tuyaEntries'=>vbotRoutineTuyaEntries($VBot_Offline),
     'hassCache'=>'includes/php_ajax/Voice_Routines_Hass.php',
     'localMedia'=>'includes/php_ajax/Voice_Routines_Local.php',
 ],JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
@@ -104,6 +105,6 @@ document.getElementById('main').addEventListener('click',event=>{
     }
 },true);
 </script>
-<script src="assets/js/voice-routines.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/voice-routines.js?v=<?php echo $Cache_UI_Ver; ?>-tuya-local-1"></script>
 <script src="assets/js/voice-routines-backup.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

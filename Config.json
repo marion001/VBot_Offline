@@ -381,6 +381,10 @@
             "custom_command_file": "resource/hass/Home_Assistant_Custom.json"
         }
     },
+    "local_tuya": {
+        "active": false,
+        "minimum_threshold": 0.7
+    },
     "broadlink": {
         "remote": {
             "active": false,
@@ -657,7 +661,8 @@
         "speaker": {
             "system": {
                 "alsamixer_name": "Speaker",
-                "id": 0
+                "id": 0,
+                "play_sound_output_route": "vbot"
             },
             "volume": 50,
             "volume_min": 0,
@@ -1066,7 +1071,8 @@
                     "active": false
                 },
                 "directory_tts": "TTS_Audio",
-                "clean_cache_tts_max_file": 900
+                "clean_cache_tts_max_file": 900,
+                "output_route": "selected"
             }
         },
         "auto_restart_program_error": true,

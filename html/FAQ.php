@@ -2861,6 +2861,40 @@ v22.22.3</code></pre>
         </div>
     </div>
 </div>
+            <div class="card accordion mt-3" id="accordion_button_tuya_local_install">
+              <div class="card-body">
+                <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_tuya_local_install" aria-expanded="false" aria-controls="collapse_button_tuya_local_install">
+                  <i class="bi bi-lightbulb me-2"></i>Hướng dẫn cài đặt ban đầu Tuya Local
+                </h5>
+                <div id="collapse_button_tuya_local_install" class="accordion-collapse collapse" data-bs-parent="#accordion_button_tuya_local_install">
+                  <div class="alert alert-info">Thực hiện trên Raspberry Pi chạy VBot bằng SSH. Quy trình này cài TinyTuya, mã nguồn lấy Local Key và các thư viện cần thiết.</div>
+                  <p><strong>Bước 1: Cập nhật hệ thống và cài các gói phụ thuộc</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>sudo apt update
+sudo apt install -y git python3-pip libjpeg-dev zlib1g-dev libfreetype6-dev liblcms2-dev libopenjp2-7-dev libtiff-dev libwebp-dev libharfbuzz-dev libfribidi-dev build-essential python3-dev</code></pre>
+                  <p><strong>Bước 2: Cài TinyTuya phiên bản 1.20.0</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>python3 -m pip install --user tinytuya==1.20.0</code></pre>
+                  <p><strong>Bước 3: Tải mã nguồn Tuya Local</strong></p>
+                  <div class="alert alert-warning">Lệnh xóa bên dưới sẽ xóa thư mục mã nguồn <code>tuya-local-key</code> hiện có trước khi tải bản mới. Các file JSON cấu hình thiết bị nằm ngoài thư mục này.</div>
+                  <pre class="bg-dark text-light p-3 rounded"><code># Xóa mã nguồn cũ (chỉ chạy khi muốn thay mã nguồn)
+sudo rm -rf /home/pi/VBot_Offline/resource/tuya_local/tuya-local-key
+
+# Tải mã nguồn mới
+git clone https://github.com/vineetchoudhary/tuya-local-key.git /home/pi/VBot_Offline/resource/tuya_local/tuya-local-key
+
+# Cấp quyền sở hữu cho user pi
+sudo chown -R pi:pi /home/pi/VBot_Offline/resource/tuya_local/tuya-local-key</code></pre>
+                  <p><strong>Bước 4: Cài Pillow từ file wheel có sẵn</strong></p>
+                  <pre class="bg-dark text-light p-3 rounded"><code>python3 -m pip install --user /home/pi/VBot_Offline/resource/whl_build_file/pillow-11.3.0-cp39-cp39-linux_armv7l.whl</code></pre>
+                  <p><strong>Bước 5: Cài các thư viện của dự án</strong></p>
+                   <pre class="bg-dark text-light p-3 rounded"><code>python3 -m pip install --user -r /home/pi/VBot_Offline/resource/tuya_local/tuya-local-key/requirements.txt
+
+# requirements.txt có thể nâng TinyTuya; ghim lại đúng phiên bản VBot dùng
+python3 -m pip install --user --force-reinstall tinytuya==1.20.0</code></pre>
+                  <p class="mb-0"><strong>Bước 6:</strong> Mở trang <code>Tuya Local</code> trên WebUI, nhập Smart Life User Code và quét mã QR để lấy thông tin thiết bị.</p>
+                </div>
+              </div>
+            </div>
+
             <div class="card accordion mt-3" id="accordion_button_homekit_install">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_homekit_install" aria-expanded="false" aria-controls="collapse_button_homekit_install">

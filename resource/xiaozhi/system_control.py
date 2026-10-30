@@ -269,4 +269,29 @@ async def execute(name, args, lib):
         row=target(rows,args)
         await processing.send_internal_ir_command_async(row)
         return result(action,{'name':row['name']},'Đã gửi lệnh IR')
+    if name=='_VBot_TuyaLocal':
+        import Local_Tuya as tuya
+        if lib.config.get('local_tuya',{}).get('active') is not True:
+            raise ValueError('Tuya Local đang tắt trong cấu hình VBot')
+        rows=await asyncio.to_thread(tuya.list_enabled_entries)
+        if action=='list_devices':
+            return result(action,rows,'Các Entry Tuya Local đang bật')
+        if action=='find_device':
+            query=' '.join(tuya._normalize(str(args.get('query') or '').strip()))
+            if not query:raise ValueError('find_device yêu cầu query')
+            matches=[row for row in rows if query in ' '.join(tuya._normalize(
+                f"{row['device_name']} {row['entry_name']} {row['device_id']} {row['entry_key']} {row['dps_id']}"))]
+            return result(action,matches[:50],f'Tìm thấy {len(matches)} Entry Tuya Local đang bật')
+        if action!='control':raise ValueError('Thao tác Tuya Local không hợp lệ')
+        device_id=str(args.get('device_id') or '').strip()
+        entry_key=str(args.get('entry_key') or '').strip()
+        command=str(args.get('command') or '').strip().lower()
+        if not device_id or not entry_key:raise ValueError('control yêu cầu device_id và entry_key chính xác')
+        if command not in ('turn_on','turn_off'):raise ValueError('Tuya Local chỉ hỗ trợ turn_on hoặc turn_off')
+        selected=next((row for row in rows if row['device_id']==device_id and row['entry_key']==entry_key),None)
+        if selected is None:raise ValueError('Thiết bị hoặc Entry không được chọn, đã tắt, hoặc không phải DPS Boolean')
+        ok,message=await asyncio.to_thread(tuya.execute_entry,device_id,entry_key,command=='turn_on')
+        return result(action,{'device_id':device_id,'entry_key':entry_key,'dps_id':selected['dps_id'],
+                              'device_name':selected['device_name'],'entry_name':selected['entry_name'],
+                              'command':command},message,ok)
     raise ValueError('MCP chưa được hỗ trợ')

@@ -201,7 +201,33 @@ if ($csrfProtectedPost) {
             header('Content-Type: application/json; charset=utf-8');
             echo json_encode(['success' => false, 'status' => 'error', 'message' => 'CSRF token không hợp lệ hoặc đã hết hạn.']);
         } else {
-            echo 'Yêu cầu bị từ chối: CSRF token không hợp lệ hoặc đã hết hạn.';
+            //Form POST thường (không phải AJAX): thay vì trả về câu chữ trơn khiến
+            //trình duyệt kẹt trên trang trắng, trả về trang thông báo ngắn rồi tự
+            //quay lại đúng trang vừa gửi bằng GET để nhận CSRF token mới.
+            header('Content-Type: text/html; charset=utf-8');
+            header('Cache-Control: no-store');
+            $csrfBackUrl = (isset($_SERVER['REQUEST_URI']) && is_string($_SERVER['REQUEST_URI']) && $_SERVER['REQUEST_URI'] !== '')
+                ? $_SERVER['REQUEST_URI']
+                : '/';
+            $csrfBackUrlJs = json_encode($csrfBackUrl, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT);
+            if (!is_string($csrfBackUrlJs) || $csrfBackUrlJs === '') {
+                $csrfBackUrlJs = "'/'";
+            }
+            echo '<!DOCTYPE html><html lang="vi"><head><meta charset="utf-8">'
+                . '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+                . '<title>Yêu cầu bị từ chối</title>'
+                . '<style>html,body{height:100%;margin:0}body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;display:flex;align-items:center;justify-content:center;background:#f6f8fa;color:#24292f}'
+                . '.vbot-csrf-box{max-width:460px;text-align:center;padding:28px 32px;border:1px solid #d0d7de;border-radius:12px;background:#fff;box-sizing:border-box}'
+                . '.vbot-csrf-box h1{font-size:1.15rem;margin:0 0 10px;color:#cf222e}.vbot-csrf-box p{margin:6px 0;color:#57606a}.vbot-csrf-box a{color:#0969da}</style></head><body>'
+                . '<div class="vbot-csrf-box"><h1>Yêu cầu bị từ chối</h1>'
+                . '<p>CSRF token không hợp lệ hoặc đã hết hạn.</p>'
+                . '<p>Phiên làm việc đã hết hạn, trang sẽ tự tải lại sau <b id="vbot_csrf_countdown">3</b> giây...</p>'
+                . '<p><a href="' . htmlspecialchars($csrfBackUrl, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . '">Bấm vào đây nếu trang không tự tải lại</a></p></div>'
+                . '<script>(function(){var s=3,e=document.getElementById("vbot_csrf_countdown");'
+                . 'var t=setInterval(function(){s--;if(e)e.textContent=Math.max(s,0);if(s<=0){clearInterval(t);location.replace('
+                . $csrfBackUrlJs
+                . ');}},1000);})();</script>'
+                . '</body></html>';
         }
         exit;
     }

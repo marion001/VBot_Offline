@@ -13,7 +13,7 @@ $wolCsrf=$_SESSION['vbot_csrf_token'];
 <?php include 'html_header_bar.php'; include 'html_sidebar.php'; ?>
 <main id="main" class="main">
   <div class="pagetitle"><h1>Wake-on-LAN — Bật máy tính</h1></div>
-  <section class="section"><div class="card"><div class="card-body pt-3">
+  <section class="section"><div class="page-search-toolbar" data-search-items="#wol-buttons tr" data-search-watch="#wol-buttons" data-search-sections=".section > .card" aria-label="Tìm kiếm và điều hướng Wake-on-LAN"><div class="row g-2 align-items-center"><div class="col-12 col-lg"><div class="input-group"><span class="input-group-text border-primary"><i class="bi bi-search text-primary"></i></span><input type="search" class="form-control border-primary page-search-input" placeholder="Tìm tên máy tính, địa chỉ MAC, lệnh hoặc IP..." autocomplete="off"><button type="button" class="btn btn-outline-secondary page-search-clear" title="Xóa nội dung tìm kiếm"><i class="bi bi-x-lg"></i></button></div></div><div class="col-12 col-lg-auto"><select class="form-select border-primary page-search-navigation" aria-label="Đi tới máy tính hoặc khu vực"><option value="">Đi tới máy tính hoặc khu vực...</option></select></div></div><div class="alert alert-info py-2 mt-2 mb-0 page-search-empty" role="status" style="display:none"><i class="bi bi-info-circle"></i> Không tìm thấy máy tính phù hợp.</div></div><div class="card"><div class="card-body pt-3">
     <div class="d-flex flex-wrap gap-2 align-items-center">
       <button id="wol-add" class="btn btn-primary" type="button">Thêm máy tính mới</button>
       <a href="Config.php#wakeOnLanConfiguration" class="small">Bật/tắt Wake-on-LAN trong cấu hình VBot</a>
@@ -61,4 +61,5 @@ $wolCsrf=$_SESSION['vbot_csrf_token'];
 <?php include 'html_footer.php'; include 'html_js.php'; ?>
 <script>window.vbotWolCsrf=<?= json_encode($wolCsrf, JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
 <script src="assets/js/wake-on-lan.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/page-search-navigation.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

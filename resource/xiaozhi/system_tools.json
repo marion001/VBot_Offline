@@ -196,6 +196,41 @@
           "action"
         ]
       }
+    },
+    {
+      "name": "_VBot_TuyaLocal",
+      "description": "Liệt kê, tìm và điều khiển thiết bị Tuya Local trong mạng LAN. Chỉ sử dụng thiết bị đã liên kết và DPS có enabled=true trong tuya_local_devices.json. Trước khi điều khiển, hãy liệt kê hoặc tìm thiết bị để lấy chính xác device_id và entry_key; chỉ gọi control khi người dùng yêu cầu bật hoặc tắt.",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": ["list_devices", "find_device", "control"]
+          },
+          "query": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "Tên thiết bị/Entry cần tìm; bắt buộc với find_device"
+          },
+          "device_id": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Device ID chính xác lấy từ list_devices hoặc find_device"
+          },
+          "entry_key": {
+            "type": "string",
+            "maxLength": 100,
+            "description": "Khóa Entry chính xác, ví dụ switch_1, lấy từ danh sách"
+          },
+          "command": {
+            "type": "string",
+            "enum": ["turn_on", "turn_off"],
+            "description": "Chỉ hỗ trợ bật hoặc tắt DPS Boolean"
+          }
+        },
+        "required": ["action"]
+      }
     }
   ],
   "extensions": {

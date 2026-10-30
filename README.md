@@ -79,6 +79,7 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - MQTT command/state topic.
 - Broadlink IR/RF.
 - Custom command cho thiết bị, script và automation.
+- **Local Tuya:** Liên kết thiết bị từ ứng dụng **Tuya Smart** và **Smart Life** với VBot; điều khiển trực tiếp trong mạng LAN nội bộ bằng Local Tuya, không cần gửi lệnh điều khiển qua đám mây. Cấu hình thiết bị, DPS và câu lệnh tại `html/Tuya_Local.php`.
 - Tích hợp tham khảo:
   - [VBot Offline Custom Component](https://github.com/marion001/VBot_Offline_Custom_Component)
 

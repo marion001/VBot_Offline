@@ -211,11 +211,14 @@
       <i class="bi bi-share-fill"></i><span>Liên Kết Thiết Bị, Dịch Vụ</span><i class="bi bi-chevron-down ms-auto"></i>
     </a>
     <ul id="icons-tbdv" class="nav-content collapse " data-bs-parent="#sidebar-tbdv">
-      <li onclick="loading('show')">
-        <a href="Wake_On_LAN.php">
-          <i class="bi bi-circle"></i><span>Wake-on-LAN — Bật máy tính</span>
+
+
+      <li>
+        <a href="Tuya_Local.php">
+          <i class="bi bi-lightbulb"></i><span>Liên Kết, Cấu Hình Thiết Bị Tuya Smart/Smart Life</span>
         </a>
       </li>
+
       <li>
         <a href="BroadLink_Remote.php">
           <i class="bi bi-circle"></i><span>BroadLink Remote</span>
@@ -224,6 +227,11 @@
       <li>
         <a href="Internal_IR.php">
           <i class="bi bi-circle"></i><span>IR, Remote GPIO Nội Bộ</span>
+        </a>
+      </li>
+      <li onclick="loading('show')">
+        <a href="Wake_On_LAN.php">
+          <i class="bi bi-circle"></i><span>Wake-on-LAN — Bật máy tính</span>
         </a>
       </li>
       <li title="Quản lý Quick Tunnel và domain riêng qua Cloudflare" onclick="loading('show')">
