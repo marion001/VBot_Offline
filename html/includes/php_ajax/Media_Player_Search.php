@@ -826,7 +826,11 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
-	if (strpos($URL, "vnexpress.net") !== false) {
+	$parsedUrl = @parse_url($URL);
+	$urlScheme = isset($parsedUrl['scheme']) ? strtolower($parsedUrl['scheme']) : '';
+	$urlHost = isset($parsedUrl['host']) ? strtolower($parsedUrl['host']) : '';
+	if (($urlScheme === 'http' || $urlScheme === 'https')
+		&& ($urlHost === 'vnexpress.net' || substr($urlHost, -strlen('.vnexpress.net')) === '.vnexpress.net')) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $URL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1872,8 +1876,41 @@ echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UN
 exit();
 }
 
+// Chỉ cho phép URL http/https trỏ tới địa chỉ công cộng, chặn SSRF vào mạng nội bộ
+function vbotMp3UrlIsSafe($url)
+{
+	if (!is_string($url) || $url === '' || strlen($url) > 2048) {
+		return false;
+	}
+	$parsed = @parse_url($url);
+	if (!is_array($parsed) || empty($parsed['scheme']) || empty($parsed['host'])) {
+		return false;
+	}
+	$scheme = strtolower($parsed['scheme']);
+	if ($scheme !== 'http' && $scheme !== 'https') {
+		return false;
+	}
+	$host = strtolower($parsed['host']);
+	if (filter_var($host, FILTER_VALIDATE_IP)) {
+		$ips = [$host];
+	} else {
+		$resolved = @gethostbynamel($host);
+		if (!is_array($resolved) || empty($resolved)) {
+			return false;
+		}
+		$ips = $resolved;
+	}
+	foreach ($ips as $ip) {
+		if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE) === false) {
+			return false;
+		}
+	}
+	return true;
+}
+
 // Kiểm tra dữ liệu POST với key zing_download_mp3_to_local
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+	vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 	$input = file_get_contents('php://input');
 	$postData = json_decode($input, true);
 	if (json_last_error() !== JSON_ERROR_NONE) {
@@ -1886,9 +1923,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 	if (isset($postData['zing_download_mp3_to_local']) && is_array($postData['zing_download_mp3_to_local'])) {
 		$response = ['success' => false, 'message' => 'Dữ liệu POST không hợp lệ hoặc thiếu zing_download_mp3_to_local.'];
 		$data = $postData['zing_download_mp3_to_local'];
-		$mp3Url = isset($data['url']) ? filter_var($data['url'], FILTER_SANITIZE_URL) : '';
-		$songName = isset($data['name']) ? trim($data['name']) : '';
-		if (empty($mp3Url) || empty($songName) || !filter_var($mp3Url, FILTER_VALIDATE_URL)) {
+		$mp3Url = isset($data['url']) ? trim((string)$data['url']) : '';
+		$songName = isset($data['name']) ? trim((string)$data['name']) : '';
+		if (empty($mp3Url) || empty($songName) || !vbotMp3UrlIsSafe($mp3Url)) {
 			$response = [
 				'success' => false,
 				'message' => 'URL hoặc tên bài hát không hợp lệ.'
@@ -1914,25 +1951,48 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 					'message' => "Thư mục $savePath không có quyền ghi."
 				];
 			} else {
-				$ch = curl_init($mp3Url);
-				curl_setopt_array($ch, [
-					CURLOPT_RETURNTRANSFER => true,
-					CURLOPT_FOLLOWLOCATION => true,
-					CURLOPT_TIMEOUT => 90,
-					CURLOPT_FAILONERROR => true,
-					CURLOPT_CONNECTTIMEOUT => 8,
-					CURLOPT_SSL_VERIFYPEER => true,
-					CURLOPT_SSL_VERIFYHOST => 2,
-					CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
-				]);
-				$fileContent = curl_exec($ch);
-				if (curl_errno($ch)) {
+				$currentUrl = $mp3Url;
+				$fileContent = false;
+				$curlError = '';
+				$httpCode = 0;
+				for ($hop = 0; $hop <= 3; $hop++) {
+					$ch = curl_init($currentUrl);
+					curl_setopt_array($ch, [
+						CURLOPT_RETURNTRANSFER => true,
+						CURLOPT_FOLLOWLOCATION => false,
+						CURLOPT_TIMEOUT => 90,
+						CURLOPT_FAILONERROR => true,
+						CURLOPT_CONNECTTIMEOUT => 8,
+						CURLOPT_SSL_VERIFYPEER => true,
+						CURLOPT_SSL_VERIFYHOST => 2,
+						CURLOPT_USERAGENT => 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
+					]);
+					$fileContent = curl_exec($ch);
+					if (curl_errno($ch)) {
+						$curlError = curl_error($ch);
+						curl_close($ch);
+						break;
+					}
+					$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+					if (in_array($httpCode, [301, 302, 303, 307, 308], true)) {
+						$redirectUrl = curl_getinfo($ch, CURLINFO_REDIRECT_URL);
+						curl_close($ch);
+						if (!is_string($redirectUrl) || $redirectUrl === '' || !vbotMp3UrlIsSafe($redirectUrl)) {
+							$curlError = 'URL chuyển hướng không hợp lệ';
+							break;
+						}
+						$currentUrl = $redirectUrl;
+						continue;
+					}
+					curl_close($ch);
+					break;
+				}
+				if ($curlError !== '') {
 					$response = [
 						'success' => false,
-						'message' => 'Lỗi cURL: ' . curl_error($ch)
+						'message' => 'Lỗi cURL: ' . $curlError
 					];
 				} else {
-					$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 					if ($httpCode !== 200) {
 						$response = [
 							'success' => false,
@@ -1953,7 +2013,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 						}
 					}
 				}
-				curl_close($ch);
 			}
 		}
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

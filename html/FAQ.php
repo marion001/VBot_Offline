@@ -191,15 +191,18 @@ include 'html_head.php';
                     <pre class="bg-light border rounded p-2"><code>cd /home/pi/VBot_Offline/resource/internal_ir
 chmod 0777 install_internal_ir.sh
 ./install_internal_ir.sh</code></pre>
-                    <p>Script sẽ tự xin quyền sudo, cài <code>v4l-utils</code>, đọc GPIO từ <code>Config.json</code> và cấu hình overlay LIRC trong <code>/boot/config.txt</code> hoặc <code>/boot/firmware/config.txt</code>.</p>
-                    <p><b>Sau khi chạy file <code>install_internal_ir.sh</code> hoàn tất, bắt buộc reboot hệ thống để nạp cấu hình IR:</b></p>
+                    <p><b>Lưu ý trước khi chạy:</b> installer sẽ dừng và vô hiệu hóa dịch vụ <code>pigpiod</code> vì không dùng pigpio cho IR. Nếu hệ thống đang cần <code>pigpiod</code> cho chức năng khác, hãy cân nhắc trước khi tiếp tục. VBot cần quyền chạy <code>sudo -n dtoverlay</code> không hỏi mật khẩu để tự nạp/gỡ TX; installer không tự cấu hình quyền sudo này. Có thể kiểm tra bằng <code>sudo -n dtoverlay -l</code> dưới đúng user chạy VBot.</p>
+                    <p>Overlay RX được đặt trong cấu hình boot, còn overlay TX được VBot nạp/gỡ động theo <code>Config.json</code>. Sau khi cài lần đầu/chuyển từ cấu hình TX tĩnh cũ, cần reboot để áp dụng RX và loại bỏ TX tĩnh. Khi đổi <b>GPIO RX</b>, lưu cấu hình, chạy lại installer rồi reboot để cập nhật overlay RX. Khi chỉ đổi <b>GPIO TX</b> hoặc bật/tắt TX, chỉ cần khởi động lại VBot; không cần chạy lại installer hoặc reboot.</p>
                     <pre class="bg-light border rounded p-2"><code>sudo reboot</code></pre>
                     <p><b>Kiểm tra thiết bị sau khi khởi động:</b></p>
-                    <pre class="bg-light border rounded p-2"><code>ls -l /dev/lirc*
-ir-ctl --features -d /dev/lirc0
-ir-ctl --features -d /dev/lirc1</code></pre>
+                    <pre class="bg-light border rounded p-2"><code>for dev in /dev/lirc[0-9]*; do
+  [ -e "$dev" ] || continue
+  echo "=== $dev ==="
+  ir-ctl --features -d "$dev"
+done</code></pre>
+                    <p>Số thứ tự <code>/dev/lircN</code> có thể khác nhau giữa các lần khởi động/phần cứng. Hãy nhận diện TX bằng dòng <code>Device can send raw IR</code> và RX bằng <code>Device can receive raw IR</code>; không mặc định TX luôn là <code>/dev/lirc0</code>.</p>
                     <div class="alert alert-warning mb-0">
-                      Không dùng GPIO10 vì VBot dùng cho LED; không dùng GPIO16 khi sử dụng Google Voice HAT vì đây là chân điều khiển amplifier.
+                      IR không dùng GPIO10 (VBot dành cho LED) hoặc GPIO16 (installer giữ lại để tương thích amplifier/Google Voice HAT). GPIO16 vẫn có thể dùng làm nút thường nếu phần cứng không chiếm chân đó. Không cấu hình IR dùng chung GPIO với nút đang bật, ngoại trừ trường hợp TX GPIO17 + nút ReSpeaker: VBot tự nhường GPIO17 và bỏ qua TX tại runtime, còn RX vẫn hoạt động.
                     </div>
                   </div>
                 </div>

@@ -281,6 +281,7 @@ if (isset($_POST['Clean_VBot_Device_Scaner'])) {
 
 //Scan VBot Client trong Mạng Lan
 if (isset($_GET['VBot_Client_Device_Scaner'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $CMD = escapeshellcmd("python3 $directory_path/includes/php_ajax/VBot_Client_Device_Scaner.py");
     $connection = ssh2_connect($ssh_host, $ssh_port);
     if (!$connection) {
@@ -483,7 +484,7 @@ else if (isset($_POST['xiaozhi'])) {
         $Config['xiaozhi']['system_options']['network']['mqtt_info']['password'] = "";
         $Config['xiaozhi']['system_options']['network']['mqtt_info']['publish_topic'] = "";
         $Config['xiaozhi']['system_options']['network']['mqtt_info']['subscribe_topic'] = "";
-        $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $result_ConfigJson = vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         if ($result_ConfigJson !== false) {
             $messages = "Đã hủy liên kết và Reset lại dữ liệu cấu hình trên thiết bị này thành công, bạn cần truy cập trang chủ của Server để xóa liên kết với thiết bị này";
             $success = true;
@@ -498,12 +499,52 @@ else if (isset($_POST['xiaozhi'])) {
         ], $success ? 200 : 500);
     } else if ($action === 'active_success_save_data') {
         $json_data = isset($_POST['json_data']) ? $_POST['json_data'] : '';
-        $data = json_decode($json_data, true);
-        if (empty($data)) {
+        $data = is_string($json_data) ? json_decode($json_data, true) : null;
+        if (!is_array($data) || empty($data)) {
             vbotApiJsonResponse([
                 'success' => false,
                 'message' => 'Không có dữ liệu JSON hợp lệ'
             ], 400);
+        }
+        //Chỉ chấp nhận các khóa dữ liệu kích hoạt hợp lệ, tránh ghi dữ liệu không mong muốn vào Config.json
+        $allowedDataKeys = ['activation_status', 'activation_code', 'device_id', 'hmac_signature', 'serial_number', 'client_id', 'mac_address', 'websocket_url', 'websocket_token', 'mqtt', 'firmware_version'];
+        foreach ($allowedDataKeys as $dataKey) {
+            if (!array_key_exists($dataKey, $data)) {
+                vbotApiJsonResponse([
+                    'success' => false,
+                    'message' => 'Dữ liệu kích hoạt không hợp lệ, thiếu trường: ' . $dataKey
+                ], 400);
+            }
+        }
+        if (!is_bool($data['activation_status'])) {
+            vbotApiJsonResponse([
+                'success' => false,
+                'message' => 'Dữ liệu kích hoạt không hợp lệ, trường activation_status phải là boolean'
+            ], 400);
+        }
+        if (!is_array($data['mqtt'])) {
+            vbotApiJsonResponse([
+                'success' => false,
+                'message' => 'Dữ liệu kích hoạt không hợp lệ, trường mqtt phải là một đối tượng JSON'
+            ], 400);
+        }
+        //Chỉ giữ lại các khóa MQTT hợp lệ trong cấu hình xiaozhi
+        $mqttAllowedKeys = ['endpoint', 'client_id', 'username', 'password', 'publish_topic', 'subscribe_topic'];
+        $mqttData = [];
+        foreach ($mqttAllowedKeys as $mqttKey) {
+            if (isset($data['mqtt'][$mqttKey]) && is_scalar($data['mqtt'][$mqttKey])) {
+                $mqttData[$mqttKey] = (string)$data['mqtt'][$mqttKey];
+            }
+        }
+        $stringDataKeys = ['activation_code', 'device_id', 'hmac_signature', 'serial_number', 'client_id', 'mac_address', 'websocket_url', 'websocket_token', 'firmware_version'];
+        foreach ($stringDataKeys as $dataKey) {
+            if (!is_scalar($data[$dataKey])) {
+                vbotApiJsonResponse([
+                    'success' => false,
+                    'message' => 'Dữ liệu kích hoạt không hợp lệ, trường ' . $dataKey . ' phải là chuỗi ký tự'
+                ], 400);
+            }
+            $data[$dataKey] = (string)$data[$dataKey];
         }
         $Config['xiaozhi']['activation_status'] = $data['activation_status'];
         $Config['xiaozhi']['device_activation_code'] = $data['activation_code'];
@@ -514,9 +555,9 @@ else if (isset($_POST['xiaozhi'])) {
         $Config['xiaozhi']['system_options']['device_id'] = $data['mac_address'];
         $Config['xiaozhi']['system_options']['network']['websocket_url'] = $data['websocket_url'];
         $Config['xiaozhi']['system_options']['network']['websocket_access_token'] = $data['websocket_token'];
-        $Config['xiaozhi']['system_options']['network']['mqtt_info'] = $data['mqtt'];
+        $Config['xiaozhi']['system_options']['network']['mqtt_info'] = $mqttData;
         $Config['xiaozhi']['system_options']['network']['firmware']['version'] = $data['firmware_version'];
-        $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $result_ConfigJson = vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         if ($result_ConfigJson !== false) {
             vbotApiJsonResponse([
                 'success' => true,
@@ -532,7 +573,7 @@ else if (isset($_POST['xiaozhi'])) {
         }
     } else if ($action === 'activation_status_false') {
         $Config['xiaozhi']['activation_status'] = false;
-        $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $result_ConfigJson = vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         if ($result_ConfigJson !== false) {
             $messages = "Đã yêu cầu liên kết xác thực lại với máy chủ, Chương trình sẽ tự động xác thực lại ở phiên khởi động lần tới. Hoặc nhấn vào đây để: <center><button type='button' class='btn btn-sm btn-success ms-2' onclick='xiaozhi_active_device_info()'><i class='bi bi-link-45deg'></i> Tiến Hành Xác Thực Lại</button></center><br/>";
             $success = true;
@@ -547,7 +588,7 @@ else if (isset($_POST['xiaozhi'])) {
         ], $success ? 200 : 500);
     } else if ($action === 'activation_status_true') {
         $Config['xiaozhi']['activation_status'] = true;
-        $result_ConfigJson = file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+        $result_ConfigJson = vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         if ($result_ConfigJson !== false) {
             $messages = "Thay đổi giá trị thành công, thiết bị đã được liên kết với máy chủ Server";
             $success = true;

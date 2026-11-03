@@ -31,7 +31,8 @@
     ],
     "cool": [
       "cool",
-      "cooling"
+      "cooling",
+      "cool down"
     ],
     "decrase": [
       "decrease",
@@ -68,7 +69,8 @@
     ],
     "fan_only": [
       "fan only",
-      "fan mode"
+      "fan mode",
+      "fan operation"
     ],
     "heat": [
       "heat",
@@ -118,7 +120,8 @@
     "reminder": [
       "reminder",
       "remind me",
-      "notification"
+      "notification",
+      "remind"
     ],
     "schedule": [
       "schedule",
@@ -149,11 +152,15 @@
     "stop": [
       "stop",
       "stop playing",
-      "stop music"
+      "stop music",
+      "stop playback",
+      "stop the audio",
+      "stop the song"
     ],
     "swing": [
       "swing",
-      "oscillate"
+      "oscillate",
+      "rotate"
     ],
     "tell": [
       "tell"
@@ -188,7 +195,8 @@
     "bigger": [
       "bigger",
       "larger",
-      "loudest"
+      "loudest",
+      "biggest"
     ],
     "conversation": [
       "conversation",
@@ -231,7 +239,8 @@
     ],
     "mic": [
       "mic",
-      "microphone"
+      "microphone",
+      "mike"
     ],
     "minimum": [
       "minimum",
@@ -251,7 +260,8 @@
     "on_speaker": [
       "on speaker",
       "to speaker",
-      "at speaker"
+      "at speaker",
+      "through the speaker"
     ],
     "playlist": [
       "list",
@@ -289,7 +299,8 @@
       "acknowledgement"
     ],
     "youtube": [
-      "youtube"
+      "youtube",
+      "you tube"
     ],
     "zing_mp3": [
       "zing mp3",
@@ -316,12 +327,14 @@
     ],
     "lunar_day": [
       "lunar calendar",
-      "lunar date"
+      "lunar date",
+      "what is the lunar day"
     ],
     "news": [
       "news",
       "headlines",
-      "news report"
+      "news report",
+      "current affairs"
     ],
     "play_music": [
       "play music",
@@ -332,7 +345,8 @@
     "podcast": [
       "podcast",
       "story",
-      "tell a story"
+      "tell a story",
+      "tale"
     ],
     "radio": [
       "radio",
@@ -344,7 +358,9 @@
       "solar date",
       "what day",
       "what date",
-      "which day of the week"
+      "which day of the week",
+      "what day is it",
+      "what is today's date"
     ],
     "calendar_event": [
       "event",
@@ -354,7 +370,9 @@
       "important date",
       "special day",
       "how long until",
-      "how many days until"
+      "how many days until",
+      "what special dates are coming up",
+      "what events are there"
     ],
     "volume": [
       "volume",
@@ -824,16 +842,25 @@
   },
   "schema_version": 1,
   "values": {
-    "calendar": {"spoken_date_patterns": ["\\bday\\s+(\\d{1,2})\\s+month\\s+(\\d{1,2})(?:\\s+year\\s+(\\d{4}))?\\b"], "relative_days": [{"label": "yesterday", "offset": -1, "phrases": ["yesterday"]}, {"label": "today", "offset": 0, "phrases": ["today"]}, {"label": "tomorrow", "offset": 1, "phrases": ["tomorrow"]}, {"label": "the day after tomorrow", "offset": 2, "phrases": ["the day after tomorrow"]}]},
+    "calendar": {
+      "spoken_date_patterns": ["\\bday\\s+(\\d{1,2})\\s+month\\s+(\\d{1,2})(?:\\s+year\\s+(\\d{4}))?\\b"],
+      "relative_days": [
+        {"label": "yesterday", "offset": -1, "phrases": ["yesterday"]},
+        {"label": "today", "offset": 0, "phrases": ["today"]},
+        {"label": "tomorrow", "offset": 1, "phrases": ["tomorrow"]},
+        {"label": "the day after tomorrow", "offset": 2, "phrases": ["the day after tomorrow"]},
+        {"label": "in three days", "offset": 3, "phrases": ["in three days", "three days from now"]}
+      ]
+    },
     "voice_routines": {"prefixes": ["run routine", "run the routine", "activate routine", "activate the routine"], "negations": ["not", "never", "don't", "do not"]},
-    "hass_clarification": {"cancel": ["cancel", "never mind"], "number_prefixes": ["number", "light", "device"]},
+    "hass_clarification": {"cancel": ["cancel", "never mind", "forget it"], "number_prefixes": ["number", "light", "device"]},
     "lan_calls": {
       "speaker_prefixes": ["speaker"],
-      "call": ["call the speaker in", "call speaker in", "call the speaker", "call speaker", "make a call to", "call"],
+      "call": ["call the speaker in", "call speaker in", "call the speaker", "call speaker", "make a call to", "phone the speaker", "call"],
       "accept": ["accept call", "accept the call", "answer call", "answer the call"],
       "reject": ["reject call", "reject the call", "decline call", "decline the call"],
       "end": ["end call", "end the call", "hang up", "disconnect call"],
-      "cancel": ["cancel", "cancel call", "cancel the call"]
+      "cancel": ["cancel", "cancel call", "cancel the call", "don't call anymore"]
     },
     "cover_position_terms": [
       "position",
@@ -844,7 +871,9 @@
       "speed"
     ],
     "brightness_terms": [
-      "brightness"
+      "brightness",
+      "light level",
+      "illumination level"
     ],
     "percent_terms": [
       "percent",
@@ -882,7 +911,8 @@
         "scope_fillers": [
           "in",
           "at",
-          "the"
+          "the",
+          "area"
         ]
       },
       "negation_phrases": [
@@ -914,10 +944,12 @@
     "calendar_events": {
       "countdown_terms": [
         "how long",
-        "how many days"
+        "how many days",
+        "how many days are left"
       ],
       "birthday_terms": [
-        "birthday"
+        "birthday",
+        "birth date"
       ],
       "month_terms": [
         "this month"
@@ -956,7 +988,9 @@
       ],
       "range_end_terms": [
         "and",
-        "to"
+        "to",
+        "through",
+        "until"
       ],
       "next_days_prefixes": [
         "in the next",
@@ -964,7 +998,8 @@
       ],
       "next_days_suffixes": [
         "days",
-        "day"
+        "day",
+        "from now"
       ],
       "range_label": "from {start} to {end}",
       "next_days_label": "in the next {days} days",
@@ -1053,7 +1088,8 @@
       "upcoming_label": "upcoming",
       "date_format": "%m/%d/%Y",
       "lunar_terms": [
-        "lunar"
+        "lunar",
+        "lunar calendar"
       ],
       "leap_month_label": "leap month",
       "date_format_short": "%m/%d"
@@ -1071,7 +1107,9 @@
       "today",
       "the day after tomorrow",
       "tonight",
-      "this morning"
+      "this morning",
+      "this evening",
+      "later tonight"
     ],
     "control_schedule": {
       "after": [
@@ -1095,19 +1133,25 @@
       ],
       "periods": [
         "am",
-        "pm"
+        "pm",
+        "evening",
+        "night"
       ],
       "pm": [
-        "pm"
+        "pm",
+        "evening",
+        "night"
       ],
       "cancel": [
-        "cancel schedule"
+        "cancel schedule",
+        "cancel the schedule"
       ],
       "markers": [
         "tomorrow",
         "today",
         "tonight",
-        "next"
+        "next",
+        "tomorrow morning"
       ],
       "delay_suffixes": [
         "later",
@@ -1141,7 +1185,9 @@
         "that device",
         "that",
         "to",
-        "back"
+        "back",
+        "up",
+        "down"
       ],
       "cancel": [
         "end conversation",
@@ -1152,26 +1198,32 @@
           "is it on or off",
           "what is its state",
           "what is the device status",
-          "is the light on or off"
+          "is the light on or off",
+          "what is the device doing"
         ],
         "temperature": [
           "what temperature is it set to",
-          "what is the set temperature"
+          "what is the set temperature",
+          "what temperature is the air conditioner set to"
         ],
         "current_temperature": [
-          "what is the current temperature"
+          "what is the current temperature",
+          "what is the room temperature now"
         ],
         "brightness": [
           "what is the brightness",
-          "how bright is it"
+          "how bright is it",
+          "what percentage brightness is the light"
         ],
         "speed": [
           "what is the current fan speed",
-          "what is the fan speed"
+          "what is the fan speed",
+          "what percentage is the fan running at"
         ],
         "position": [
           "how far is it open",
-          "what is the cover position"
+          "what is the cover position",
+          "what percentage is the cover open"
         ]
       },
       "state_labels": {
@@ -1207,19 +1259,23 @@
       "named_status_queries": {
         "state": [
           "is {target} on or off",
-          "what is the status of {target}"
+          "what is the status of {target}",
+          "how is {target} doing"
         ],
         "temperature": [
-          "what temperature is {target} set to"
+          "what temperature is {target} set to",
+          "what is {target}'s set temperature"
         ],
         "current_temperature": [
           "what is the current temperature of {target}"
         ],
         "brightness": [
-          "what is the brightness of {target}"
+          "what is the brightness of {target}",
+          "how bright is {target}"
         ],
         "speed": [
-          "what is the speed of {target}"
+          "what is the speed of {target}",
+          "how fast is {target}"
         ],
         "position": [
           "how far is {target} open",
@@ -1230,58 +1286,71 @@
         "temperature": {
           "increase": [
             "increase by {value} degrees",
-            "increase temperature by {value} degrees"
+            "increase temperature by {value} degrees",
+            "raise the temperature by {value} degrees"
           ],
           "decrease": [
             "decrease by {value} degrees",
-            "decrease temperature by {value} degrees"
+            "decrease temperature by {value} degrees",
+            "lower the temperature by {value} degrees"
           ]
         },
         "brightness": {
           "increase": [
-            "increase brightness by {value}%"
+            "increase brightness by {value}%",
+            "raise brightness by {value}%"
           ],
           "decrease": [
-            "decrease brightness by {value}%"
+            "decrease brightness by {value}%",
+            "lower brightness by {value}%"
           ]
         },
         "speed": {
           "increase": [
-            "increase fan speed by {value}%"
+            "increase fan speed by {value}%",
+            "raise fan speed by {value}%"
           ],
           "decrease": [
-            "decrease fan speed by {value}%"
+            "decrease fan speed by {value}%",
+            "lower fan speed by {value}%"
           ]
         },
         "position": {
           "increase": [
-            "open by another {value}%"
+            "open by another {value}%",
+            "open the blinds another {value}%"
           ],
           "decrease": [
-            "close by another {value}%"
+            "close by another {value}%",
+            "close the blinds another {value}%"
           ]
         },
         "percent": {
           "increase": [
-            "increase by {value}%"
+            "increase by {value}%",
+            "increase by {value} percent"
           ],
           "decrease": [
-            "decrease by {value}%"
+            "decrease by {value}%",
+            "decrease by {value} percent"
           ]
         }
       },
       "climate_mode_queries": {
         "cool": [
           "switch to cooling mode",
-          "cooling mode"
+          "cooling mode",
+          "turn on cooling mode"
         ],
         "heat": [
           "switch to heating mode",
-          "heating mode"
+          "heating mode",
+          "turn on heating mode"
         ],
         "auto": [
           "switch to automatic mode",
-          "automatic mode"
+          "automatic mode",
+          "turn on automatic mode"
         ],
         "heat_cool": [
           "switch to automatic heating and cooling mode",
@@ -1289,11 +1358,13 @@
         ],
         "dry": [
           "switch to dry mode",
-          "dry mode"
+          "dry mode",
+          "turn on dehumidification mode"
         ],
         "fan_only": [
           "switch to fan mode",
-          "fan mode"
+          "fan mode",
+          "turn on fan mode"
         ]
       }
     }
@@ -1354,6 +1425,14 @@
         "phrases": [
           "the day after tomorrow"
         ]
+      },
+      {
+        "label": "in three days",
+        "offset": 3,
+        "phrases": [
+          "in three days",
+          "three days from now"
+        ]
       }
     ],
     "default_day": {
@@ -1372,7 +1451,9 @@
       ],
       "direct_phrases": [
         "weather",
-        "forecast"
+        "forecast",
+        "what is the weather like",
+        "what is the forecast"
       ],
       "outdoor_phrases": [
         "outside",

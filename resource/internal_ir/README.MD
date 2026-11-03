@@ -19,7 +19,8 @@ Cấu hình GPIO mặc định:
 Lưu ý:
 
 - Không sử dụng GPIO10 vì VBot đang dùng chân này để điều khiển LED.
-- Không sử dụng GPIO16 khi dùng Google Voice HAT vì đây là chân điều khiển amplifier.
+- Installer giữ GPIO16 cho khả năng tương thích amplifier/Google Voice HAT; không cấu hình IR TX/RX trên chân này. GPIO16 vẫn có thể dùng cho nút thường nếu phần cứng không chiếm chân đó. Không cấu hình IR dùng chung GPIO với nút đang bật, ngoại trừ TX GPIO17 + nút ReSpeaker được VBot phân xử như mô tả dưới đây.
+- Nếu chọn **ReSpeaker 2-Mics Pi HAT v1.0**, nút nhấn sử dụng GPIO17. VBot ưu tiên nút, bỏ qua TX trên GPIO17 ở runtime và vẫn giữ cấu hình TX trong `Config.json`; RX tiếp tục hoạt động nếu được bật.
 - GPIO phát và GPIO thu không được trùng nhau.
 - Không cấp tín hiệu 5 V trực tiếp vào GPIO của Raspberry Pi.
 
@@ -40,7 +41,7 @@ Tại đây có thể cấu hình độc lập:
 - **GPIO phát IR (BCM):** GPIO kết nối với module phát.
 - **GPIO thu IR (BCM):** GPIO kết nối với module thu.
 
-Có thể bật riêng TX, riêng RX hoặc bật đồng thời cả hai. Sau khi thay đổi, nhấn nút lưu cấu hình trước khi chạy bộ cài.
+Có thể bật riêng TX, riêng RX hoặc bật đồng thời cả hai. Sau khi thay đổi, nhấn nút lưu cấu hình trước khi chạy bộ cài. Khi chọn ReSpeaker và TX đặt GPIO17, đây là trường hợp VBot xử lý có chủ đích, không phải lỗi lưu cấu hình.
 
 Thông số của luồng điều khiển nền:
 
@@ -77,6 +78,8 @@ Các giá trị tương ứng được lưu trong `Config.json`:
 }
 ```
 
+`tx_device` và `rx_device` trong JSON là giá trị tương thích/tham khảo, không nên dựa vào số thứ tự `/dev/lircN` cố định. Khi khởi chạy, VBot dò các node bằng `ir-ctl --features` và chọn node thực sự hỗ trợ phát raw IR hoặc thu raw IR; vì vậy RX có thể là `/dev/lirc0` và TX là `/dev/lirc1` tùy hệ thống. Nếu Config cũ hoặc được sửa thủ công có GPIO IR trùng nút nhấn, LED (GPIO10), amplifier (GPIO16), hoặc TX/RX trùng nhau, VBot sẽ ghi chi tiết `[GPIO CONFLICT]` vào log và bỏ khởi tạo kênh IR bị xung đột, không tự sửa Config.json. Ngoại lệ ReSpeaker GPIO17 được xử lý như bàn giao chân: TX bị bỏ qua khi VBot chạy để nút dùng GPIO17.
+
 ## 3. Cài đặt và thiết lập LIRC
 
 Đăng nhập SSH vào Raspberry Pi bằng user `pi`, sau đó chạy lần lượt:
@@ -93,14 +96,25 @@ Script sẽ tự động:
 - Cài `v4l-utils` để cung cấp lệnh `ir-ctl`.
 - Đọc GPIO TX/RX từ `Config.json`.
 - Kiểm tra GPIO không trùng và không sử dụng chân đã bị VBot chiếm dụng.
-- Cấu hình `gpio-ir` và `gpio-ir-tx` trong file cấu hình boot.
+- Giữ overlay nhận `gpio-ir` trong file cấu hình boot; overlay phát `gpio-ir-tx` được VBot nạp/gỡ động theo `Config.json`.
 - Cấp quyền truy cập thiết bị LIRC cho user VBot và WebUI.
+- Dừng và vô hiệu hóa dịch vụ `pigpiod` vì IR dùng kernel LIRC, không dùng pigpio. Nếu hệ thống cần `pigpiod` cho chức năng khác, hãy cân nhắc trước khi chạy installer.
 
-Sau khi script chạy hoàn tất, bắt buộc khởi động lại hệ thống:
+Sau lần cài đầu tiên hoặc chuyển từ cách cấu hình TX tĩnh cũ, khởi động lại hệ thống một lần để áp dụng overlay RX và bỏ overlay TX tĩnh cũ:
 
 ```bash
 sudo reboot
 ```
+
+Khi đổi **GPIO RX**, lưu cấu hình, chạy lại installer để cập nhật overlay RX rồi reboot. Khi chỉ đổi **GPIO TX** hoặc bật/tắt TX, chỉ cần khởi động lại VBot; không chạy installer và không reboot. VBot gọi `sudo -n dtoverlay` để nạp/gỡ overlay TX theo cấu hình và tự nhường GPIO17 cho nút ReSpeaker khi cần; không thêm overlay TX vào `config.txt`.
+
+User chạy VBot cần được cấp quyền chạy `dtoverlay` bằng sudo không hỏi mật khẩu; installer không tự tạo cấu hình sudoers. Kiểm tra dưới đúng user chạy VBot:
+
+```bash
+sudo -n dtoverlay -l
+```
+
+Lệnh phải chạy không yêu cầu nhập mật khẩu. Nếu báo cần mật khẩu hoặc quyền bị từ chối, cần cấu hình quyền sudo phù hợp trước khi bật IR TX trong VBot.
 
 ## 4. Kiểm tra thiết bị sau khi reboot
 
@@ -110,21 +124,17 @@ Kiểm tra các thiết bị LIRC:
 ls -l /dev/lirc*
 ```
 
-Khi bật cả TX và RX, thông thường hệ thống có:
-
-```text
-/dev/lirc0  thiết bị phát IR
-/dev/lirc1  thiết bị thu IR
-```
-
-Kiểm tra tính năng từng thiết bị:
+Số thứ tự `/dev/lircN` không cố định; không mặc định `/dev/lirc0` là TX hay `/dev/lirc1` là RX. Liệt kê và kiểm tra khả năng thực tế của từng node:
 
 ```bash
-ir-ctl --features -d /dev/lirc0
-ir-ctl --features -d /dev/lirc1
+for dev in /dev/lirc[0-9]*; do
+  [ -e "$dev" ] || continue
+  echo "=== $dev ==="
+  ir-ctl --features -d "$dev"
+done
 ```
 
-Thiết bị TX cần hiển thị khả năng `Device can send raw IR`. Thiết bị RX cần hiển thị khả năng `Device can receive raw IR`.
+Node TX cần hiển thị `Device can send raw IR`; node RX cần hiển thị `Device can receive raw IR`. VBot tự tìm node theo khả năng này. Với lệnh CLI bên dưới, hãy thay `/dev/lircX` bằng node vừa nhận diện; không sao chép số node ví dụ một cách mặc định.
 
 ## 5. Học và quản lý lệnh bằng WebUI
 
@@ -218,15 +228,15 @@ Kiểm tra TX và RX:
 
 ```bash
 python3 resource/internal_ir/internal_ir_cli.py status \
-  --tx-device /dev/lirc0 \
-  --rx-device /dev/lirc1
+  --tx-device /dev/lircX \
+  --rx-device /dev/lircY
 ```
 
 Học một lệnh IR trong tối đa 30 giây:
 
 ```bash
 python3 resource/internal_ir/internal_ir_cli.py learn \
-  --device /dev/lirc1 \
+  --device /dev/lircY \
   --timeout 30 \
   --carrier 38000
 ```
@@ -281,9 +291,9 @@ Kết quả mong đợi là `True`.
 - Nếu vẫn bị nhận nhầm, học lại các nút trong cùng điều kiện khoảng cách và hướng remote, đồng thời tránh giữ nút quá lâu.
 - Dòng `Bỏ qua tín hiệu` trên console cho biết điểm tốt nhất, điểm mã thứ hai và khoảng cách thực tế để hiệu chỉnh.
 
-### Không có `/dev/lirc0` hoặc `/dev/lirc1`
+### Không tìm thấy thiết bị LIRC có khả năng TX hoặc RX
 
-Chạy lại `install_internal_ir.sh`, sau đó reboot. Kiểm tra các dòng `dtoverlay=gpio-ir` và `dtoverlay=gpio-ir-tx` trong `/boot/config.txt` hoặc `/boot/firmware/config.txt`.
+Kiểm tra mọi node bằng `ir-ctl --features` theo hướng dẫn ở mục 4. Nếu vừa cài lần đầu hoặc vừa đổi GPIO RX, chạy lại `install_internal_ir.sh` rồi reboot để áp dụng overlay RX. Nếu chỉ đổi TX, restart VBot là đủ. Kiểm tra có dòng `dtoverlay=gpio-ir` cho RX trong `/boot/config.txt` hoặc `/boot/firmware/config.txt`; không thêm `gpio-ir-tx` vào file này.
 
 ### Hết thời gian chờ tín hiệu IR
 
@@ -308,7 +318,7 @@ không phát tín hiệu IR. Khởi động lại VBot sau khi khôi phục đ�
 ### Không phát được IR
 
 - Kiểm tra đã bật IR phát (TX).
-- Kiểm tra `/dev/lirc0` có khả năng phát raw IR.
+- Tìm node có `Device can send raw IR` bằng lệnh kiểm tra ở mục 4; số thứ tự `/dev/lircN` có thể khác nhau.
 - Kiểm tra transistor, LED IR, điện trở và nguồn cấp của module phát.
 - Dùng camera điện thoại để quan sát LED IR khi phát thử.
 

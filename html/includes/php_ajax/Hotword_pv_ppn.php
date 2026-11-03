@@ -33,7 +33,7 @@ function vbotHotwordValidFile($fileName, array $extensions, $fileSize, $maxBytes
 function vbotHotwordSaveConfig($configFilePath, array $configData)
 {
     $encoded = json_encode($configData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    if ($encoded === false || file_put_contents($configFilePath, $encoded, LOCK_EX) === false) {
+    if ($encoded === false || !vbotAtomicWriteFile($configFilePath, $encoded, basename($configFilePath))) {
         error_log('Unable to save Hotword configuration: '.json_last_error_msg());
         return false;
     }

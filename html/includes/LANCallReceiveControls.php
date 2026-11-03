@@ -2,9 +2,11 @@
 $lanButtonOptions['encoder']='Nút nhấn Encoder';
 $lanDisabledButtons=[];
 foreach ($lanButtonOptions as $name=>$label) {
-    $enabled=!empty($Config['smart_config']['button_active']['active']) && ($name==='encoder'
-        ? ($Config['smart_config']['button_active']['button_type']??'')==='encoder_rotary'
-        : !empty($Config['smart_config']['button'][$name]['active']));
+    $enabled=!empty($Config['smart_config']['button_active']['active']) && ($name==='respeaker'
+        ? ($Config['smart_config']['button_active']['button_type']??'')==='respeaker_2_mic_pi_hat_v1_0'
+        : ($name==='encoder'
+            ? ($Config['smart_config']['button_active']['button_type']??'')==='encoder_rotary'
+            : !empty($Config['smart_config']['button'][$name]['active'])));
     if (!$enabled) $lanDisabledButtons[]=$name;
 }
 $endPress=!empty($lanSettings['mic_button_mute']??true) && ($lanSettings['end_button']??'mic')==='mic'?'hold':($lanSettings['end_button_press']??'short');
@@ -56,7 +58,9 @@ document.addEventListener('DOMContentLoaded', () => {
         for(const select of selects) for(const option of select.options){
             if(!option.value) continue;
             const control=document.getElementsByName('button['+option.value+'][active]')[0];
-            const enabled=active && (option.value==='encoder'?type==='encoder_rotary':control?.checked===true);
+            const enabled=active && (option.value==='respeaker'
+                ? type==='respeaker_2_mic_pi_hat_v1_0'
+                : (option.value==='encoder'?type==='encoder_rotary':control?.checked===true));
             option.disabled=!enabled;
             if(!option.dataset.baseLabel) option.dataset.baseLabel=option.textContent.replace(/\s*\(đang tắt\)\s*$/,'');
             option.textContent=option.dataset.baseLabel+(enabled?'':' (đang tắt)');

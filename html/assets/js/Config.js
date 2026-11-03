@@ -1750,6 +1750,7 @@ function checkSSHConnection(sshHost) {
         '&pass=' + encodeURIComponent(sshPass);
     xhr.open('GET', url, true);
     xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
     xhr.onreadystatechange = function () {
         if (xhr.readyState === 4) {
             loading("hide");

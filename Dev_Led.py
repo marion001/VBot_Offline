@@ -393,7 +393,7 @@ def LED_VOLUME(volume_change):
         else:
             pos -= 170
             return Color(0, pos * 3, 255 - pos * 3)
-    leds_on = int((volume_change / Lib.volume_Max) * LED_COUNT)
+    leds_on = min(LED_COUNT, int((volume_change / 100.0) * LED_COUNT))
     for i in range(leds_on):
         strip.setPixelColor(i, wheel((i * 256 // LED_COUNT) & 255))
     for i in range(leds_on, LED_COUNT):

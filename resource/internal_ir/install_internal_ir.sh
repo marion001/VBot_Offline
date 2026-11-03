@@ -35,10 +35,16 @@ add_overlay(){
   local line="$1"
   grep -Fxq "$line" "$CONFIG_FILE" || printf '%s\n' "$line" >> "$CONFIG_FILE"
 }
+RX_LINE="dtoverlay=gpio-ir,gpio_pin=${RX_GPIO}"
+RX_LINE_COUNT="$(grep -Fxc "$RX_LINE" "$CONFIG_FILE" || true)"
+TX_LINE_COUNT="$(grep -Ec '^dtoverlay=gpio-ir-tx,gpio_pin=[0-9][0-9]*$' "$CONFIG_FILE" || true)"
+BOOT_CONFIG_CHANGED=0
+if [[ ${RX_LINE_COUNT} != "1" || ${TX_LINE_COUNT} != "0" ]]; then BOOT_CONFIG_CHANGED=1; fi
 sed -i '/^dtoverlay=gpio-ir,gpio_pin=[0-9][0-9]*$/d' "$CONFIG_FILE"
 sed -i '/^dtoverlay=gpio-ir-tx,gpio_pin=[0-9][0-9]*$/d' "$CONFIG_FILE"
-add_overlay "dtoverlay=gpio-ir,gpio_pin=${RX_GPIO}"
-add_overlay "dtoverlay=gpio-ir-tx,gpio_pin=${TX_GPIO}"
+add_overlay "$RX_LINE"
+# TX is loaded/unloaded by VBot at runtime so GPIO17 can be handed to the
+# ReSpeaker button without editing config.txt for every configuration change.
 
 # Cho user gọi script được quyền truy cập /dev/lircX sau lần đăng nhập kế tiếp.
 TARGET_USER="${SUDO_USER:-pi}"
@@ -52,11 +58,10 @@ if id www-data >/dev/null 2>&1; then
   chmod 0664 "${VBOT_ROOT}/resource/internal_ir/commands.json"
 fi
 
-log "Đã cài LIRC/ir-ctl và cấu hình RX GPIO${RX_GPIO}, TX GPIO${TX_GPIO}."
-if [[ -e /dev/lirc0 && -e /dev/lirc1 ]]; then
-  ir-ctl -f -d /dev/lirc0 || true
-  ir-ctl -f -d /dev/lirc1 || true
-  log "Thiết bị LIRC đã sẵn sàng. Khởi động lại VBot để nạp cấu hình mới."
+log "Đã cài LIRC/ir-ctl và cấu hình RX GPIO${RX_GPIO}; TX GPIO${TX_GPIO} sẽ do VBot quản lý động."
+if [[ ${BOOT_CONFIG_CHANGED} -eq 1 ]]; then
+  log "Đã cập nhật overlay boot trong ${CONFIG_FILE}; cần reboot một lần để áp dụng RX và gỡ TX tĩnh cũ."
 else
-  log "Cần reboot để kernel tạo /dev/lirc0 và /dev/lirc1: sudo reboot"
+  log "Overlay boot đã đúng; không cần reboot."
 fi
+log "VBot sẽ tự nạp/gỡ gpio-ir-tx theo Config.json bằng sudo không hỏi mật khẩu; đổi cấu hình sau đó chỉ cần restart VBot."

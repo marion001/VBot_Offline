@@ -1859,18 +1859,24 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     }
 
     //thu âm từ Microphone
+    let activeRecording = null;
     function Recording_STT(stop_rec = 'vbot') {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         if (!SpeechRecognition) {
             show_message('Trình duyệt của bạn không hỗ trợ nhận diện giọng nói');
             return;
         }
-        const recognition = new SpeechRecognition();
         if (stop_rec === 'stop') {
             flag_mic_recording = false;
             isAutoClick_btn_send_msg = false;
-            recognition.stop();
+            if (activeRecording) {
+                activeRecording.stop();
+                activeRecording = null;
+            }
+            return;
         }
+        const recognition = new SpeechRecognition();
+        activeRecording = recognition;
         recognition.lang = 'vi-VN';
         recognition.interimResults = true; //Hiển thị kết quả tạm thời
         recognition.continuous = false; //tự động phát hiện kết thúc câu
@@ -1910,6 +1916,7 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             clearTimeout(timeoutId);
         };
         recognition.onend = function() {
+            if (activeRecording === recognition) activeRecording = null;
             animationDiv.style.display = 'none';
             if (sendButton && flag_mic_recording) {
                 isAutoClick_btn_send_msg = true;
@@ -2251,6 +2258,7 @@ function command_php(command_line, reload_page = null) {
                         var xhr2 = vbotCreateXhr();
                         xhr2.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
                         xhr2.setRequestHeader('Content-Type', 'application/json');
+                        xhr2.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
                         xhr2.onreadystatechange = function() {
                             if (xhr2.readyState === 4) {
                                 loading("hide");

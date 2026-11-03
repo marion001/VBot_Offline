@@ -70,7 +70,7 @@ if (file_exists($filePath)) {
                 }
                 $Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang] = array_values($Config['smart_config']['smart_wakeup']['hotword']['porcupine'][$lang]);
             }
-            file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+            vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         } elseif ($fileExtension === 'pv') {
             $message = 'File .pv: ' . vbotUtf8Basename($filePath) . ' đã được xóa thành công.';
         }
@@ -82,7 +82,7 @@ if (file_exists($filePath)) {
                 }
             }
             $Config['smart_config']['smart_wakeup']['hotword']['snowboy'] = array_values($Config['smart_config']['smart_wakeup']['hotword']['snowboy']);
-            file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+            vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         }
         #Nếu là các file âm thanh trong câu phản hồi
         elseif (strpos($filePath, 'sound/wakeup_reply') !== false) {
@@ -92,7 +92,7 @@ if (file_exists($filePath)) {
                 }
             }
             $Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file'] = array_values($Config['smart_config']['smart_wakeup']['wakeup_reply']['sound_file']);
-            file_put_contents($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), LOCK_EX);
+            vbotAtomicWriteFile($Config_filePath, json_encode($Config, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), 'Config.json');
         }
         vbotApiJsonResponse([
             'success' => true,

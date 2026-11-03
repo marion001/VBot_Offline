@@ -171,12 +171,13 @@ def apply_project_permissions(root):
 
     def chmod_path(path):
         nonlocal changed, already_correct
+        mode = 0o777
         try:
-            os.chmod(path, 0o777)
+            os.chmod(path, mode)
             changed += 1
         except OSError as error:
             try:
-                if stat.S_IMODE(os.stat(path, follow_symlinks=False).st_mode) == 0o777:
+                if stat.S_IMODE(os.stat(path, follow_symlinks=False).st_mode) == mode:
                     already_correct += 1
                     return
             except OSError:
@@ -202,8 +203,8 @@ def apply_project_permissions(root):
                 continue
             chmod_path(path)
     log(
-        f"Đã chmod 0777 cho {changed} file/thư mục trong {root}, "
-        f"{already_correct} lỗi chmod được bỏ qua vì quyền đã là 0777; "
+        f"Đã cập nhật quyền 0777 cho {changed} file/thư mục trong {root} "
+        f"({already_correct} mục đã đúng quyền); "
         f"đã loại trừ Backup_Upgrade, liên kết mềm và {skipped_locks} file *.lock"
     )
     if permission_errors:
@@ -213,7 +214,7 @@ def apply_project_permissions(root):
             error=True,
         )
         for detail in permission_errors:
-            log(f"Không thể chmod 0777: {detail}", error=True)
+            log(f"Không thể chmod: {detail}", error=True)
 
 def download_with_progress(url, destination, timeout):
     request = urllib.request.Request(url, headers={"User-Agent": "VBot-Manual-Updater"})

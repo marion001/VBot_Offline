@@ -2204,8 +2204,9 @@ include 'html_head.php';
 		  audioPath = "<?php echo $VBot_Offline; ?>" + audioPath;
 		}
 		if (audioPath) {
-		  document.getElementById('download_tts_audio')?.setAttribute('onclick', `downloadFile('${audioPath}')`);
-		  document.getElementById('playAudio_tts_audio')?.setAttribute('onclick', `playAudio('${audioPath}')`);
+		  const audioPathJs = JSON.stringify(audioPath);
+		  document.getElementById('download_tts_audio')?.setAttribute('onclick', `downloadFile(${audioPathJs})`);
+		  document.getElementById('playAudio_tts_audio')?.setAttribute('onclick', `playAudio(${audioPathJs})`);
 		}
 
 		if (failed.length === 0) {
@@ -2520,7 +2521,7 @@ function update_index_data(data){
 						? (
 							media.airplay_song_name &&
 							String(media.airplay_song_name).trim() !== 'N/A'
-								? media.airplay_song_name
+								? playlistEscapeHtml(media.airplay_song_name)
 								: 'N/A'
 						)
 						: (
@@ -2541,14 +2542,14 @@ function update_index_data(data){
 										}
 									}
 								}
-								return (mediaSourceKind === 'bluetooth' ? btName : null) ||
+								return playlistEscapeHtml((mediaSourceKind === 'bluetooth' ? btName : null) ||
 									(
 										(mediaIsPlaying || mediaIsPaused)
 											&& media.media_name &&
 											String(media.media_name).trim() !== 'N/A'
 											? media.media_name
 											: 'N/A'
-									);
+									));
 							})()
 						)
 				) +
@@ -2560,7 +2561,7 @@ function update_index_data(data){
 				'Nguồn Phát: <font color=blue>' +
 				(
 					mediaSourceKind === 'bluetooth'
-						? ('<i class="bi bi-bluetooth"></i>' + (data.bluetooth.device_name ? ' - ' + data.bluetooth.device_name : ''))
+						? ('<i class="bi bi-bluetooth"></i>' + (data.bluetooth.device_name ? ' - ' + playlistEscapeHtml(data.bluetooth.device_name) : ''))
 						: (
 							mediaSourceKind === 'airplay'
 								? 'AirPlay'
@@ -2569,7 +2570,7 @@ function update_index_data(data){
 										? (
 											media.media_player_source &&
 											String(media.media_player_source).trim() !== 'N/A'
-												? media.media_player_source
+												? playlistEscapeHtml(media.media_player_source)
 												: 'Local Audio'
 										  )
 										: 'N/A'
@@ -2586,7 +2587,7 @@ function update_index_data(data){
 				const coordinatorName = String(media.multiroom_coordinator_name || '').trim();
 				document.getElementById('audio-source').innerHTML =
 					'Nguồn Phát: <font color="blue">Multiroom' +
-					(coordinatorName ? ' - ' + coordinatorName : '') + '</font>';
+					(coordinatorName ? ' - ' + playlistEscapeHtml(coordinatorName) : '') + '</font>';
 			}
 
             //Cập nhật ảnh cover bài hát

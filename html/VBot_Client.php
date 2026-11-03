@@ -314,6 +314,7 @@ if ($Config['contact_info']['user_login']['active']) {
             const url = 'includes/php_ajax/Scanner.php?VBot_Client_Device_Scaner';
             const xhr = vbotCreateXhr();
             xhr.open('GET', url, true);
+            xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
             xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4) {
                     loading('hide');

@@ -234,6 +234,9 @@ def download_with_progress(url, destination, timeout):
         downloaded = 0
         started = time.monotonic()
         last_display = 0.0
+        # timeout chỉ áp cho từng lần đọc socket; chặn cả trường hợp server
+        # "nhỏ giọt" bằng deadline tổng cho toàn bộ tiến trình tải.
+        overall_deadline = started + 1200
         while True:
             chunk = response.read(64 * 1024)
             if not chunk:
@@ -241,6 +244,8 @@ def download_with_progress(url, destination, timeout):
             out.write(chunk)
             downloaded += len(chunk)
             now = time.monotonic()
+            if now > overall_deadline:
+                raise urllib.error.URLError(f"Tải xuống vượt quá 1200 giây, hủy tải {url}")
             if now - last_display < 0.2:
                 continue
             elapsed = max(now - started, 0.001)
@@ -322,12 +327,13 @@ def apply_project_permissions(root):
 
     def chmod_path(path):
         nonlocal changed, already_correct
+        mode = 0o777
         try:
-            os.chmod(path, 0o777)
+            os.chmod(path, mode)
             changed += 1
         except OSError as error:
             try:
-                if stat.S_IMODE(os.stat(path, follow_symlinks=False).st_mode) == 0o777:
+                if stat.S_IMODE(os.stat(path, follow_symlinks=False).st_mode) == mode:
                     already_correct += 1
                     return
             except OSError:
@@ -353,14 +359,14 @@ def apply_project_permissions(root):
                 continue
             chmod_path(path)
     log(
-        f"Đã chmod 0777 cho {changed} file/thư mục trong {root}; "
-        f"{already_correct} lỗi chmod được bỏ qua vì quyền đã là 0777; "
+        f"Đã cập nhật quyền 0777 cho {changed} file/thư mục trong {root} "
+        f"({already_correct} mục đã đúng quyền); "
         f"đã loại trừ TTS_Audio, Media, toàn bộ html, liên kết mềm và {skipped_locks} file *.lock"
     )
     if permission_errors:
         log(f"Có {len(permission_errors)} file/thư mục không thể chmod, bản cập nhật vẫn tiếp tục vì đây chỉ là lỗi metadata quyền", error=True)
         for detail in permission_errors:
-            log(f"Không thể chmod 0777: {detail}", error=True)
+            log(f"Không thể chmod: {detail}", error=True)
 
 def acquire_zip(args, work):
     archive = work / "update.zip"
@@ -706,6 +712,11 @@ def _update(args):
         else:
             log(f"{args.service} đã ở trạng thái dừng trước khi thay tệp chương trình")
 
+        base_rollback = rollback
+        attempt = 0
+        while rollback.exists():
+            attempt += 1
+            rollback = Path(f"{base_rollback}_{attempt}")
         rollback.mkdir(parents=True, exist_ok=False)
         atomic_copy_file(ROOT / "Config.json", rollback / "Config.json")
         log(f"Đã tạo vùng rollback: {rollback}")

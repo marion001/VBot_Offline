@@ -661,8 +661,8 @@
         "speaker": {
             "system": {
                 "alsamixer_name": "Speaker",
-                "id": 0,
-                "play_sound_output_route": "vbot"
+                "play_sound_output_route": "vbot",
+                "id": 0
             },
             "volume": 50,
             "volume_min": 0,
@@ -847,6 +847,44 @@
                         "recording": "cancel_wakeup"
                     }
                 }
+            },
+            "respeaker": {
+                "active": true,
+                "gpio": 17,
+                "bounce_time": 80,
+                "short_press": {
+                    "action": "vbot_action:wakeup"
+                },
+                "long_press": {
+                    "active": true,
+                    "duration": 2,
+                    "action": "vbot_action:mic_toggle",
+                    "actions_by_state": {
+                        "playlist": "media_stop",
+                        "idle": "conversation_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
+                },
+                "double_press": {
+                    "active": true,
+                    "interval_ms": 250,
+                    "action": "vbot_action:volume_up",
+                    "actions_by_state": {
+                        "playlist": "wakeup",
+                        "idle": "conversation_toggle",
+                        "media": "media_stop",
+                        "media_paused": "media_play",
+                        "tts": "stop_tts",
+                        "recording": "cancel_wakeup"
+                    }
+                },
+                "accept_call": {
+                    "active": true,
+                    "press": "short"
+                }
             }
         },
         "smart_wakeup": {
@@ -1025,6 +1063,7 @@
             },
             "text_to_speak": {
                 "tts_select": "tts_edge",
+                "output_route": "selected",
                 "tts_ggcloud": {
                     "language_code": "vi-VN",
                     "voice_name": "vi-VN-Wavenet-A",
@@ -1071,8 +1110,7 @@
                     "active": false
                 },
                 "directory_tts": "TTS_Audio",
-                "clean_cache_tts_max_file": 900,
-                "output_route": "selected"
+                "clean_cache_tts_max_file": 900
             }
         },
         "auto_restart_program_error": true,

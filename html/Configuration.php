@@ -163,7 +163,6 @@ $Backup_dir = $HTML_VBot_Offline . '/Backup_Upgrade/Backup_Config/';
 // Kiểm tra file không tồn tại hoặc rỗng
 $Config = vbotConfigLoadRecover($Config_filePath, $Backup_dir, $Configuration_Load_Status, !empty($VBot_Config_Read_Only));
 $VBot_Config_Load_Snapshot = $Config;
-
 //CSRF độc lập với đăng nhập: WebUI không yêu cầu mật khẩu vẫn phải có session/token hợp lệ.
 $requestMethod = isset($_SERVER['REQUEST_METHOD']) ? strtoupper($_SERVER['REQUEST_METHOD']) : '';
 $requestScript = basename(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '');

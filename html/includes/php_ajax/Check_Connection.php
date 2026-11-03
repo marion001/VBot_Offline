@@ -101,6 +101,7 @@ function vbotHassConfiguredUrl($requestedUrl, array $config)
 
 //Tets Code Yaml Hass
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['yaml_test_control_homeassistant'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $yamlError = null;
     $parsedYaml = vbotHassParseActionYaml($_POST['yaml_test_control_homeassistant'], $yamlError);
     $actionData = is_array($parsedYaml) ? vbotHassValidateAction($parsedYaml, $yamlError) : null;
@@ -367,6 +368,7 @@ if (isset($_POST['delete_ip_vbot_server'])) {
 
 #kiểm tra kết nối tới SSH Server
 if (isset($_GET['check_ssh'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $ssh_host = $_GET['host'];
     $ssh_port = $_GET['port'];
     $ssh_user = $_GET['user'];
@@ -643,6 +645,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['check_hass'])) {
 
 #Lấy dữ liệu HASS bằng POST + CSRF và chỉ kết nối URL đã lưu trong Config.
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['get_hass_all'])) {
+    vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
     $url = vbotHassConfiguredUrl($_POST['url_hass'] ?? '', $Config['home_assistant']);
     $token = (string)($Config['home_assistant']['long_token'] ?? '');
     if ($url !== false && $token !== '') {

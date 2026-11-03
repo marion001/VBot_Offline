@@ -183,6 +183,43 @@ function vbotConfigSetFullPermissions($filePath, $label)
   return true;
 }
 
+function vbotConfigPrepareLockFile(string $lockPath, string $label): bool
+{
+  global $ssh_host, $ssh_port, $ssh_user, $ssh_password;
+  clearstatcache(true, $lockPath);
+  if (is_file($lockPath) && is_writable($lockPath)) return true;
+  if (!file_exists($lockPath) && is_writable(dirname($lockPath))) return true;
+
+  if (function_exists('ssh2_connect') && function_exists('ssh2_auth_password') && function_exists('ssh2_exec')) {
+    $connection = @ssh2_connect($ssh_host, intval($ssh_port));
+    if ($connection && @ssh2_auth_password($connection, $ssh_user, $ssh_password)) {
+      // `pi` owns the application tree; run chmod as that configured account, never as root.
+      $command = 'if [ -e '.escapeshellarg($lockPath).' ]; then chmod 0777 -- '.escapeshellarg($lockPath)
+        .'; else touch -- '.escapeshellarg($lockPath).' && chmod 0777 -- '.escapeshellarg($lockPath).'; fi';
+      $stream = @ssh2_exec($connection, $command);
+      if ($stream !== false) {
+        $errorStream = @ssh2_fetch_stream($stream, SSH2_STREAM_STDERR);
+        stream_set_blocking($stream, true);
+        if (is_resource($errorStream)) stream_set_blocking($errorStream, true);
+        $stdout = stream_get_contents($stream);
+        $stderr = is_resource($errorStream) ? stream_get_contents($errorStream) : '';
+        fclose($stream);
+        if (is_resource($errorStream)) fclose($errorStream);
+        clearstatcache(true, $lockPath);
+        if (is_file($lockPath) && is_writable($lockPath)) return true;
+        error_log('[PHP Config ERROR] SSH không đặt được quyền lock 0777 cho '.$label.': '.trim((string)$stderr.' '.(string)$stdout));
+      } else {
+        error_log('[PHP Config ERROR] Không chạy được chmod SSH cho lock '.$label.': '.$lockPath);
+      }
+    } else {
+      error_log('[PHP Config ERROR] Không kết nối/xác thực SSH để sửa quyền lock '.$label);
+    }
+  } else {
+    error_log('[PHP Config ERROR] PHP SSH2 exec không khả dụng để sửa quyền lock '.$label);
+  }
+  return false;
+}
+
 function vbotConfigWriteFile($filePath, $content, $label)
 {
   if (!is_string($content)) {
@@ -275,7 +312,12 @@ if (isset($_POST['start_recovery_config_json'])) {
     if ($selectedBackup !== '') {
       if (vbotConfigIsValidJsonFile($start_recovery_config_json)) {
         $recoveryContent = @file_get_contents($start_recovery_config_json);
-        if (is_string($recoveryContent) && vbotAtomicWriteFile($Config_filePath, $recoveryContent, 'Config.json khôi phục')) {
+        $recoveryConfig = is_string($recoveryContent) ? json_decode($recoveryContent, true) : null;
+        if (!is_array($recoveryConfig)) {
+          $messages[] = "Lỗi: Nội dung tệp sao lưu Config.json không hợp lệ";
+        } elseif (vbotRejectRestoreGpioConflicts($recoveryConfig, 'bản sao lưu hệ thống')) {
+          $messages[] = "Không thể khôi phục Config.json do cấu hình GPIO bị xung đột; xem thông báo chi tiết.";
+        } elseif (vbotAtomicWriteFile($Config_filePath, $recoveryContent, 'Config.json khôi phục')) {
           vbotConfigSetFullPermissions($Config_filePath, 'Config.json sau khi khôi phục');
           $messages[] = "Đã khôi phục dữ liệu Config.json từ tệp sao lưu trên hệ thống thành công";
         } else {
@@ -311,6 +353,17 @@ if (isset($_POST['start_recovery_config_json'])) {
         $messages[] = "- Nội dung tệp Config.json không hợp lệ";
         $uploadOk = 0;
       }
+      if ($uploadOk === 1) {
+        $uploadedConfigContent = @file_get_contents($_FILES["fileToUpload_configjson_restore"]["tmp_name"]);
+        $uploadedConfig = is_string($uploadedConfigContent) ? json_decode($uploadedConfigContent, true) : null;
+        if (!is_array($uploadedConfig)) {
+          $messages[] = "- Nội dung tệp Config.json không hợp lệ";
+          $uploadOk = 0;
+        } elseif (vbotRejectRestoreGpioConflicts($uploadedConfig, 'tệp tải lên')) {
+          $messages[] = "- Không thể khôi phục Config.json do cấu hình GPIO bị xung đột; xem thông báo chi tiết";
+          $uploadOk = 0;
+        }
+      }
       if ($uploadOk == 0) {
         $messages[] = "- Tệp sao lưu không được tải lên";
       } else {
@@ -328,20 +381,164 @@ if (isset($_POST['start_recovery_config_json'])) {
 }
 
 #Lưu lại các giá trị Config.json
-if (isset($_POST['all_config_save'])) {
+function vbotConfigGpioConflicts(array $post, array $config): array {
+
+  $buttonActive = array_key_exists('button_active', $post)
+    ? isset($post['button_active'])
+    : !empty($config['smart_config']['button_active']['active']);
+  $buttonType = (string)($post['button_type'] ?? ($config['smart_config']['button_active']['button_type'] ?? 'touch_low'));
+  $usedPins = [];
+  if ($buttonActive && $buttonType === 'respeaker_2_mic_pi_hat_v1_0') {
+    $usedPins[] = ['gpio'=>17, 'label'=>'Nút ReSpeaker 2-Mics Pi HAT v1.0'];
+  } elseif ($buttonActive && $buttonType === 'encoder_rotary') {
+    $encoder = $config['smart_config']['button_active']['encoder_rotary'] ?? [];
+    foreach ([
+      'encoder_rotary_gpio_clk'=>['gpio_clk','Encoder CLK/S1'],
+      'encoder_rotary_gpio_dt'=>['gpio_dt','Encoder DT/S2'],
+      'encoder_rotary_gpio_ws'=>['gpio_sw','Encoder SW/KEY'],
+    ] as $postKey=>[$configKey,$label]) {
+      $value = filter_var($post[$postKey] ?? ($encoder[$configKey] ?? null), FILTER_VALIDATE_INT);
+      if ($value !== false && $value !== null) $usedPins[] = ['gpio'=>(int)$value,'label'=>$label];
+    }
+  } elseif ($buttonActive) {
+    $buttons = is_array($post['button'] ?? null) ? $post['button'] : ($config['smart_config']['button'] ?? []);
+    foreach ($buttons as $name=>$button) {
+      if (!is_array($button) || empty($button['active'])) continue;
+      $value = filter_var($button['gpio'] ?? null, FILTER_VALIDATE_INT);
+      if ($value !== false && $value !== null) {
+        $usedPins[] = ['gpio'=>(int)$value,'label'=>'Nút nhấn "'.(string)$name.'"'];
+      }
+    }
+  }
+
+  $conflicts = [];
+  $byPin = [];
+  foreach ($usedPins as $pin) $byPin[$pin['gpio']][] = $pin['label'];
+  foreach ($byPin as $gpio=>$labels) {
+    if (count($labels) > 1) $conflicts[] = 'GPIO'.$gpio.' bị dùng đồng thời bởi '.implode(' và ', $labels).'.';
+  }
+
+  $irConfig = $config['internal_ir'] ?? [];
+  foreach ([
+    ['field'=>'internal_ir_tx_active','gpio_field'=>'internal_ir_tx_gpio','config_key'=>'tx_gpio','label'=>'IR phát (TX)'],
+    ['field'=>'internal_ir_rx_active','gpio_field'=>'internal_ir_rx_gpio','config_key'=>'rx_gpio','label'=>'IR thu (RX)'],
+  ] as $ir) {
+    if (!isset($post[$ir['field']])) continue;
+    $gpio = filter_var($post[$ir['gpio_field']] ?? ($irConfig[$ir['config_key']] ?? null), FILTER_VALIDATE_INT);
+    if ($gpio === false || $gpio === null) continue;
+    $gpio = (int)$gpio;
+    foreach ($usedPins as $pin) {
+      if ($gpio === $pin['gpio']) {
+        // ReSpeaker GPIO17 intentionally owns the pin; Lib.py suppresses IR TX
+        // at runtime while preserving the requested TX setting in Config.json.
+        if ($ir['label'] === 'IR phát (TX)'
+            && $buttonType === 'respeaker_2_mic_pi_hat_v1_0'
+            && $gpio === 17
+            && $pin['label'] === 'Nút ReSpeaker 2-Mics Pi HAT v1.0') {
+          continue;
+        }
+        $conflicts[] = $ir['label'].' và '.$pin['label'].' cùng sử dụng GPIO'.$gpio.'.';
+      }
+    }
+    if ($gpio === 10) $conflicts[] = $ir['label'].' đang dùng GPIO10, chân này dành cho LED.';
+    if ($gpio === 16) $conflicts[] = $ir['label'].' đang dùng GPIO16, chân này được dành cho amplifier theo cấu hình phần cứng VBot.';
+  }
+
+  $txGpio = filter_var($post['internal_ir_tx_gpio'] ?? ($irConfig['tx_gpio'] ?? 17), FILTER_VALIDATE_INT);
+  $rxGpio = filter_var($post['internal_ir_rx_gpio'] ?? ($irConfig['rx_gpio'] ?? 4), FILTER_VALIDATE_INT);
+  $txActive = array_key_exists('internal_ir_tx_active', $post)
+    ? isset($post['internal_ir_tx_active'])
+    : !empty($irConfig['tx_active'] ?? $irConfig['active'] ?? false);
+  $rxActive = array_key_exists('internal_ir_rx_active', $post)
+    ? isset($post['internal_ir_rx_active'])
+    : !empty($irConfig['rx_active'] ?? $irConfig['active'] ?? false);
+  if ($txActive && $rxActive && $txGpio !== false && $rxGpio !== false && (int)$txGpio === (int)$rxGpio) {
+    $conflicts[] = 'IR phát (TX) và IR thu (RX) cùng được bật trên GPIO'.(int)$txGpio.'.';
+  }
+
+  return array_values(array_unique($conflicts));
+}
+
+function vbotConfigGpioConflictsFromConfig(array $candidate): array {
+  $smart = $candidate['smart_config'] ?? [];
+  $buttonActive = $smart['button_active'] ?? [];
+  $ir = $candidate['internal_ir'] ?? [];
+  $post = ['all_config_save' => '1'];
+  if (!empty($buttonActive['active'])) $post['button_active'] = '1';
+  if (isset($buttonActive['button_type'])) $post['button_type'] = $buttonActive['button_type'];
+  if (isset($smart['button']) && is_array($smart['button'])) $post['button'] = $smart['button'];
+  $encoder = $buttonActive['encoder_rotary'] ?? [];
+  foreach (['gpio_clk'=>'encoder_rotary_gpio_clk','gpio_dt'=>'encoder_rotary_gpio_dt','gpio_sw'=>'encoder_rotary_gpio_ws'] as $key=>$field) {
+    if (isset($encoder[$key])) $post[$field] = $encoder[$key];
+  }
+  foreach (['tx'=>'tx_gpio','rx'=>'rx_gpio'] as $direction=>$key) {
+    if (array_key_exists($direction.'_active', $ir)
+        ? !empty($ir[$direction.'_active'])
+        : !empty($ir['active'])) {
+      $post['internal_ir_'.$direction.'_active'] = '1';
+    }
+    if (isset($ir[$key])) $post['internal_ir_'.$direction.'_gpio'] = $ir[$key];
+  }
+  return vbotConfigGpioConflicts($post, $candidate);
+}
+
+function vbotRejectRestoreGpioConflicts(array $candidate, string $source): bool {
+  $conflicts = vbotConfigGpioConflictsFromConfig($candidate);
+  if ($conflicts === []) return false;
+  error_log('[PHP Config GPIO CONFLICT] Từ chối khôi phục Config.json từ '.$source.'. Chi tiết: '.implode(' | ', $conflicts), 0);
+  $GLOBALS['gpioConflictMessage'] = "Không thể khôi phục Config.json vì phát hiện xung đột GPIO:\n- ".implode("\n- ", $conflicts);
+  return true;
+}
+
+$configGpioConflicts = vbotConfigGpioConflicts($_POST, $Config);
+if ($configGpioConflicts !== []) {
+  $gpioConflictDetails = implode("\n- ", $configGpioConflicts);
+  error_log('[PHP Config GPIO CONFLICT] Từ chối toàn bộ lần lưu Config.json; không ghi cấu hình hoặc tạo backup. Chi tiết: '.implode(' | ', $configGpioConflicts), 0);
+  $gpioConflictMessage = "Không lưu được cấu hình vì phát hiện xung đột GPIO:\n- ".$gpioConflictDetails."\n\nHãy đổi GPIO hoặc tắt một chức năng đang dùng chung chân, rồi lưu lại.";
+}
+
+if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   if (isset($_POST['wol_settings_present'])) {
     $Config['wake_on_lan']['active']=isset($_POST['wol_active']);
   }
   $lanConfigError='';
+  $lanButtonRemapMessages=[];
   if (vbotLANCallsSettingsSubmitted($_POST)) {
     try {
-      $lanAvailableButtons=$Config['smart_config']['button']??[];
-      foreach ($lanAvailableButtons as $name=>&$button) {
-        $button['active']=isset($_POST['button_active']) && (isset($_POST['button'])
-          ? !empty($_POST['button'][$name]['active']) : !empty($button['active']));
+      $postedButtonType = (string)($_POST['button_type'] ?? ($Config['smart_config']['button_active']['button_type'] ?? 'touch_low'));
+      if ($postedButtonType==='respeaker_2_mic_pi_hat_v1_0') {
+        $lanAvailableButtons=['respeaker'=>['active'=>isset($_POST['button_active']),'gpio'=>17]];
+      } elseif ($postedButtonType==='encoder_rotary') {
+        $lanAvailableButtons=['encoder'=>['active'=>isset($_POST['button_active']),'gpio'=>$Config['smart_config']['button_active']['encoder_rotary']['gpio_sw']??null]];
+      } else {
+        $lanAvailableButtons=$Config['smart_config']['button']??[];
+        foreach ($lanAvailableButtons as $name=>&$button) {
+          $button['active']=isset($_POST['button_active']) && (isset($_POST['button'])
+            ? !empty($_POST['button'][$name]['active']) : !empty($button['active']));
+        }
+        unset($button);
       }
-      unset($button);
-      $lanAvailableButtons['encoder']=['active'=>isset($_POST['button_active']) && ($_POST['button_type']??$Config['smart_config']['button_active']['button_type']??'')==='encoder_rotary'];
+      // Prefer the physical "wakeup" button for LAN roles when available;
+      // otherwise use the first active button supported by the selected type.
+      $firstActiveLanButton=null;
+      if (!empty($lanAvailableButtons['wakeup']['active'])) $firstActiveLanButton='wakeup';
+      foreach ($lanAvailableButtons as $name=>$button) {
+        if ($firstActiveLanButton===null && !empty($button['active'])) $firstActiveLanButton=(string)$name;
+      }
+      foreach ([
+        ['lan_accept_controls_present','lan_accept_button_active','lan_accept_button','Nhận cuộc gọi'],
+        ['lan_end_button_present','lan_end_button_active','lan_end_button','Kết thúc cuộc gọi'],
+        ['lan_ptt_present','lan_ptt_button_active','lan_ptt_button','Nhấn giữ để nói'],
+      ] as [$marker,$activeField,$buttonField,$roleLabel]) {
+        if (!isset($_POST[$marker]) || !isset($_POST[$activeField])) continue;
+        $selected=(string)($_POST[$buttonField]??'');
+        if ((!isset($lanAvailableButtons[$selected]) || empty($lanAvailableButtons[$selected]['active'])) && $firstActiveLanButton!==null) {
+          $_POST[$buttonField]=$firstActiveLanButton;
+          $buttonLabel=$firstActiveLanButton==='respeaker'?'ReSpeaker — GPIO 17':($firstActiveLanButton==='encoder'?'Encoder':$firstActiveLanButton.' — GPIO '.($lanAvailableButtons[$firstActiveLanButton]['gpio']??'?'));
+          $oldLabel=$selected!==''?$selected:'chưa chọn';
+          $lanButtonRemapMessages[]='Đã tự động ánh xạ '.$roleLabel.' từ nút "'.$oldLabel.'" sang "'.$buttonLabel.'"'.($firstActiveLanButton==='wakeup'?' (ưu tiên nút wakeup khả dụng).':'.');
+        }
+      }
       $Config['lan_calls']=vbotLANCallsSettings($_POST,$Config['lan_calls']??[],
         $lanAvailableButtons,$Config['contact_info']['full_name']??'Loa VBot');
     } catch (InvalidArgumentException $error) {
@@ -377,7 +574,10 @@ if (isset($_POST['all_config_save'])) {
         }
       }
     } else {
-      error_log('[PHP Config ERROR] Không thể tạo bản backup Config trước khi lưu: ' . $destinationFile_Backup_Config, 0);
+      $backupError = error_get_last();
+      error_log('[PHP Config ERROR] Không thể tạo bản backup Config trước khi lưu: ' . $destinationFile_Backup_Config
+        . ' | thư mục tồn tại=' . (is_dir($directoryPath_Backup_Config) ? 'có' : 'không')
+        . ' | chi tiết=' . ($backupError['message'] ?? 'copy() thất bại hoặc Config.json không đọc được'), 0);
     }
   }
 
@@ -692,13 +892,38 @@ if (isset($_POST['all_config_save'])) {
 
   #CẬP NHẬT cẤU hình BUTTON NÚT NHẤN
   $Config['smart_config']['button_active']['active'] = isset($_POST['button_active']) ? true : false;
-  $validButtonTypes = ['aio', 'touch_low', 'touch_high', 'encoder_rotary'];
+  $validButtonTypes = ['aio', 'touch_low', 'touch_high', 'encoder_rotary', 'respeaker_2_mic_pi_hat_v1_0'];
   $buttonType = isset($_POST['button_type']) ? trim($_POST['button_type']) : 'touch_low';
   if (!in_array($buttonType, $validButtonTypes, true)) {
     $buttonType = 'touch_low';
   }
   $Config['smart_config']['button_active']['button_type'] = $buttonType;
-  foreach ($_POST['button'] as $buttonName => $buttonData) {
+  if ($buttonType === 'respeaker_2_mic_pi_hat_v1_0') {
+    $postedRespeaker = $_POST['respeaker_button'] ?? [];
+    $respeakerAction = static function($value) use ($Config): string {
+      $value = vbotNormalizeButtonAction($Config, $value ?? 'vbot_action:none');
+      return in_array($value, ['vbot_action:wakeup','vbot_action:mic_toggle','vbot_action:volume_up','vbot_action:volume_down'], true)
+        ? $value : 'vbot_action:none';
+    };
+    $respeakerLongDuration = max(1, min(10, intval($postedRespeaker['long_press']['duration'] ?? 2)));
+    $respeakerDoubleInterval = max(50, min(1000, intval($postedRespeaker['double_press']['interval_ms'] ?? 250)));
+    $respeakerLongFallback = $respeakerAction($postedRespeaker['long_press']['action'] ?? 'vbot_action:mic_toggle');
+    $respeakerDoubleFallback = $respeakerAction($postedRespeaker['double_press']['action'] ?? 'vbot_action:volume_up');
+    $Config['smart_config']['button']['respeaker'] = [
+      'active'=>true, 'gpio'=>17, 'bounce_time'=>80,
+      'short_press'=>['action'=>$respeakerAction($postedRespeaker['short_press']['action'] ?? 'vbot_action:wakeup')],
+      'long_press'=>[
+        'active'=>isset($postedRespeaker['long_press']['active']), 'duration'=>$respeakerLongDuration,
+        'action'=>$respeakerLongFallback,
+        'actions_by_state'=>vbotSaveStateActions($Config, $postedRespeaker['long_press']['actions_by_state'] ?? [], $respeakerLongFallback)
+      ],
+      'double_press'=>[
+        'active'=>isset($postedRespeaker['double_press']['active']), 'interval_ms'=>$respeakerDoubleInterval,
+        'action'=>$respeakerDoubleFallback,
+        'actions_by_state'=>vbotSaveStateActions($Config, $postedRespeaker['double_press']['actions_by_state'] ?? [], $respeakerDoubleFallback)
+      ]
+    ];
+  } elseif (isset($_POST['button']) && is_array($_POST['button'])) foreach ($_POST['button'] as $buttonName => $buttonData) {
     $Config['smart_config']['button'][$buttonName]['gpio'] = intval($buttonData['gpio']);
     $Config['smart_config']['button'][$buttonName]['active'] = isset($buttonData['active']) ? (bool)$buttonData['active'] : false;
     $Config['smart_config']['button'][$buttonName]['bounce_time'] = intval($buttonData['bounce_time']);
@@ -713,6 +938,15 @@ if (isset($_POST['all_config_save'])) {
     $Config['smart_config']['button'][$buttonName]['double_press']['action'] = vbotNormalizeButtonAction($Config, $buttonData['double_press']['action'] ?? 'vbot_action:none');
     $Config['smart_config']['button'][$buttonName]['double_press']['actions_by_state'] = vbotSaveStateActions($Config, $buttonData['double_press']['actions_by_state'] ?? []);
   }
+  if ($buttonType === 'respeaker_2_mic_pi_hat_v1_0' && isset($_POST['lan_accept_controls_present'])) {
+    $selected = (string)($_POST['lan_accept_button'] ?? 'respeaker');
+      if ($selected === 'respeaker') {
+      $acceptPress = (string)($_POST['lan_accept_button_press'] ?? 'short');
+      if (in_array($acceptPress, ['short','hold','double'], true)) {
+        $Config['smart_config']['button']['respeaker']['accept_call'] = ['active'=>isset($_POST['lan_accept_button_active']), 'press'=>$acceptPress];
+      }
+    }
+  }
 
   #CẬP NHẬT CẤU HÌNH ÂM THANH HỆ THỐNG
   $Config['smart_config']['smart_wakeup']['sound']['welcome']['active'] = isset($_POST['sound_welcome_active']) ? true : false;
@@ -723,7 +957,9 @@ if (isset($_POST['all_config_save'])) {
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
   $Config['smart_config']['led']['led_type'] = $_POST['led_type_select'];
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
-  $Config['smart_config']['led']['number_led'] = intval($_POST['number_led']);
+  $Config['smart_config']['led']['number_led'] = $_POST['led_type_select'] === 'ReSpeaker_2_Mics_Pi_HAT_v1.0'
+    ? 3
+    : intval($_POST['number_led']);
   $ledFreqHz = filter_var($_POST['led_freq_hz'] ?? ($Config['smart_config']['led']['led_freq_hz'] ?? 1000000), FILTER_VALIDATE_INT, ['options' => ['min_range' => 1, 'max_range' => 2147483647]]);
   if ($ledFreqHz === false) {
     $messages[] = '- led_freq_hz không hợp lệ: cần số nguyên dương không vượt quá 2147483647 Hz. Đã giữ giá trị hiện tại.';
@@ -943,7 +1179,14 @@ if (isset($_POST['all_config_save'])) {
   $Config['broadlink']['remote']['minimum_threshold'] = floatval($_POST['broadlink_remote_minimum_threshold']);
   #IR nội bộ Raspberry Pi
   if (!isset($Config['internal_ir'])) $Config['internal_ir'] = [];
-  $Config['internal_ir']['tx_active'] = isset($_POST['internal_ir_tx_active']);
+  $postedInternalIrTxGpio = filter_var($_POST['internal_ir_tx_gpio'] ?? ($Config['internal_ir']['tx_gpio'] ?? 17), FILTER_VALIDATE_INT);
+  if ($postedInternalIrTxGpio === false) $postedInternalIrTxGpio = (int)($Config['internal_ir']['tx_gpio'] ?? 17);
+  $respeakerOwnsInternalIrTxGpio = !empty($Config['smart_config']['button_active']['active'])
+    && ($Config['smart_config']['button_active']['button_type'] ?? '') === 'respeaker_2_mic_pi_hat_v1_0'
+    && (int)$postedInternalIrTxGpio === 17;
+  if (!$respeakerOwnsInternalIrTxGpio || isset($_POST['internal_ir_tx_active'])) {
+    $Config['internal_ir']['tx_active'] = isset($_POST['internal_ir_tx_active']);
+  }
   $Config['internal_ir']['rx_active'] = isset($_POST['internal_ir_rx_active']);
   $Config['internal_ir']['rx_control_active'] = $Config['internal_ir']['rx_active'] && isset($_POST['internal_ir_rx_control_active']);
   $internalIrMatchThreshold = filter_var($_POST['internal_ir_receive_match_threshold'] ?? null, FILTER_VALIDATE_FLOAT);
@@ -1039,23 +1282,36 @@ if (isset($_POST['all_config_save'])) {
   #Cập nhật bật tắt kích hoạt đọc báo, tin tức
   $Config['media_player']['news_paper']['active'] = isset($_POST['news_paper_active']) ? true : false;
 
-  #Cập Nhật Nút Nhấn Encoder Rotary
-  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['active'] = isset($_POST['ncoder_rotary_long_press_active']) ? true : false;
-  $Config['smart_config']['button_active']['encoder_rotary']['rotating_show_logs'] = isset($_POST['encoder_rotating_show_logs']) ? true : false;
-  $Config['smart_config']['button_active']['encoder_rotary']['gpio_clk'] = intval($_POST['encoder_rotary_gpio_clk']);
-  $Config['smart_config']['button_active']['encoder_rotary']['gpio_dt'] = intval($_POST['encoder_rotary_gpio_dt']);
-  $Config['smart_config']['button_active']['encoder_rotary']['gpio_sw'] = intval($_POST['encoder_rotary_gpio_ws']);
-  $Config['smart_config']['button_active']['encoder_rotary']['rotating_step'] = intval($_POST['encoder_rotary_gpio_step']);
-  $Config['smart_config']['button_active']['encoder_rotary']['bounce_time_gpio_sw'] = intval($_POST['encoder_rotary_bounce_time_sw']);
-  $Config['smart_config']['button_active']['encoder_rotary']['action_gpio_sw'] = $_POST['encoder_rotary_action_gpio_sw'];
-  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['duration'] = intval($_POST['encoder_rotary_long_press_duration']);
-  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] = $_POST['encoder_rotary_long_press_action_gpio_sw'] ?? ($Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['action_gpio_sw'] ?? 'mic');
-  $Config['smart_config']['button_active']['encoder_rotary']['long_press_gpio_sw']['actions_by_state'] = vbotSaveStateActions($Config, $_POST['encoder_rotary_long_press']['actions_by_state'] ?? []);
-  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['active'] = isset($_POST['encoder_rotary_double_press_active']) ? true : false;
-  $encoderDoublePressInterval = intval($_POST['encoder_rotary_double_press_interval_ms'] ?? 200);
-  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['interval_ms'] = max(50, min(1000, $encoderDoublePressInterval));
-  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['action'] = vbotNormalizeButtonAction($Config, $_POST['encoder_rotary_double_press_action'] ?? ($Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['action'] ?? 'vbot_action:none'));
-  $Config['smart_config']['button_active']['encoder_rotary']['double_press_gpio_sw']['actions_by_state'] = vbotSaveStateActions($Config, $_POST['encoder_rotary_double_press']['actions_by_state'] ?? []);
+  #Chỉ cập nhật cấu hình Encoder khi loại nút Encoder Rotary đang được chọn;
+  #các khu vực đang ẩn/disable không gửi POST nên phải giữ nguyên cấu hình cũ.
+  $encoderButtonType = (string)($_POST['button_type'] ?? ($Config['smart_config']['button_active']['button_type'] ?? 'touch_low'));
+  if ($encoderButtonType === 'encoder_rotary') {
+    $encoderConfig =& $Config['smart_config']['button_active']['encoder_rotary'];
+    $encoderConfig['long_press_gpio_sw'] = is_array($encoderConfig['long_press_gpio_sw'] ?? null) ? $encoderConfig['long_press_gpio_sw'] : [];
+    $encoderConfig['double_press_gpio_sw'] = is_array($encoderConfig['double_press_gpio_sw'] ?? null) ? $encoderConfig['double_press_gpio_sw'] : [];
+    $encoderConfig['long_press_gpio_sw']['active'] = isset($_POST['ncoder_rotary_long_press_active']);
+    $encoderConfig['rotating_show_logs'] = isset($_POST['encoder_rotating_show_logs']);
+    foreach (['gpio_clk'=>'encoder_rotary_gpio_clk','gpio_dt'=>'encoder_rotary_gpio_dt','gpio_sw'=>'encoder_rotary_gpio_ws',
+              'rotating_step'=>'encoder_rotary_gpio_step','bounce_time_gpio_sw'=>'encoder_rotary_bounce_time_sw'] as $configKey=>$postKey) {
+      if (isset($_POST[$postKey]) && is_numeric($_POST[$postKey])) $encoderConfig[$configKey] = (int)$_POST[$postKey];
+    }
+    if (isset($_POST['encoder_rotary_action_gpio_sw'])) $encoderConfig['action_gpio_sw'] = (string)$_POST['encoder_rotary_action_gpio_sw'];
+    if (isset($_POST['encoder_rotary_long_press_duration']) && is_numeric($_POST['encoder_rotary_long_press_duration'])) {
+      $encoderConfig['long_press_gpio_sw']['duration'] = (int)$_POST['encoder_rotary_long_press_duration'];
+    }
+    $encoderConfig['long_press_gpio_sw']['action_gpio_sw'] = $_POST['encoder_rotary_long_press_action_gpio_sw'] ?? ($encoderConfig['long_press_gpio_sw']['action_gpio_sw'] ?? 'mic');
+    if (isset($_POST['encoder_rotary_long_press'])) {
+      $encoderConfig['long_press_gpio_sw']['actions_by_state'] = vbotSaveStateActions($Config, $_POST['encoder_rotary_long_press']['actions_by_state'] ?? []);
+    }
+    $encoderConfig['double_press_gpio_sw']['active'] = isset($_POST['encoder_rotary_double_press_active']);
+    $encoderDoublePressInterval = intval($_POST['encoder_rotary_double_press_interval_ms'] ?? ($encoderConfig['double_press_gpio_sw']['interval_ms'] ?? 200));
+    $encoderConfig['double_press_gpio_sw']['interval_ms'] = max(50, min(1000, $encoderDoublePressInterval));
+    $encoderConfig['double_press_gpio_sw']['action'] = vbotNormalizeButtonAction($Config, $_POST['encoder_rotary_double_press_action'] ?? ($encoderConfig['double_press_gpio_sw']['action'] ?? 'vbot_action:none'));
+    if (isset($_POST['encoder_rotary_double_press'])) {
+      $encoderConfig['double_press_gpio_sw']['actions_by_state'] = vbotSaveStateActions($Config, $_POST['encoder_rotary_double_press']['actions_by_state'] ?? []);
+    }
+    unset($encoderConfig);
+  }
 
   #Cập nhật Custom Skill active
   $Config['developer_customization']['active'] = isset($_POST['developer_customization_active']) ? true : false;
@@ -1220,6 +1476,11 @@ if (isset($_POST['all_config_save'])) {
       }
     }
   } else {
+    $saveFailureReasons = [];
+    if ($aec3ConfigError !== '') $saveFailureReasons[] = 'Cấu hình audio: '.$aec3ConfigError;
+    if ($lanConfigError !== '') $saveFailureReasons[] = 'Cấu hình cuộc gọi LAN: '.$lanConfigError;
+    if ($aec3ConfigError === '' && $lanConfigError === '') $saveFailureReasons[] = 'Không ghi/gộp được Config.json; xem log PHP Config ERROR ngay trước dòng này để biết nguyên nhân chi tiết.';
+    error_log('[PHP Config ERROR] Lưu Config.json thất bại: '.implode(' | ', $saveFailureReasons), 0);
     $messages[] = "Đã xảy ra lỗi khi lưu cấu hình";
   }
 
@@ -1638,12 +1899,23 @@ include 'html_head.php';
 <body>
   <?php
   //Hiển thị thông báo php
+  if (!empty($gpioConflictMessage)) {
+    $gpioConflictHtml = nl2br(htmlspecialchars($gpioConflictMessage, ENT_QUOTES, 'UTF-8'), false);
+    $safeGpioConflictMessage = json_encode($gpioConflictHtml, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT);
+    // html_head.php defines show_message() before the modal body exists; wait
+    // until the parsed DOM contains #notificationModal .modal-body.
+    echo '<script>window.addEventListener("DOMContentLoaded",function(){if(typeof window.show_message==="function"){window.show_message('.$safeGpioConflictMessage.');}else if(typeof window.showMessagePHP==="function"){window.showMessagePHP('.$safeGpioConflictMessage.');}}, {once:true});</script>';
+  }
   if (!empty($messages)) {
     $safeMessages = array_map(function ($msg) {
       return htmlspecialchars($msg, ENT_QUOTES, 'UTF-8');
     }, $messages);
     $allMessages = implode("\\n", $safeMessages);
     echo "<script>showMessagePHP('$allMessages');</script>";
+  }
+  if (!empty($configSaved) && !empty($lanButtonRemapMessages)) {
+    $remapMessage=json_encode(implode('<br>', $lanButtonRemapMessages), JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT);
+    echo '<script>showMessagePHP('.$remapMessage.');</script>';
   }
   include 'html_header_bar.php';
   include 'html_sidebar.php';
@@ -2122,7 +2394,10 @@ echo input_field('lan_auto_accept_delay','Chờ trước khi tự nhận (giây)
     'Mặc định 3 giây. Chỉ áp dụng cho loa được chọn tự nhận trong danh sách Gọi điện LAN; các loa khác nhận thủ công.');
 require __DIR__.'/includes/LANCallRingtones.php';
 $lanButtonOptions=[];
-foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button) {
+if (($Config['smart_config']['button_active']['button_type']??'')==='respeaker_2_mic_pi_hat_v1_0') {
+    $lanButtonOptions['respeaker']=vbotLANEscape('ReSpeaker 2-Mics Pi HAT v1.0 (1 nút GPIO17)');
+    $lanDisabledButtons=[];
+} else foreach (($Config['smart_config']['button']??[]) as $buttonName=>$button) {
     $lanButtonOptions[vbotLANEscape($buttonName)]=vbotLANEscape($buttonName.' — GPIO '.($button['gpio']??'').(empty($button['active'])?' (đang tắt)':''));
 }
 require __DIR__.'/includes/LANCallReceiveControls.php';
@@ -3639,7 +3914,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                   <?php
                   echo select_field('led_type_select',
                     'Kiểu loại Led <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message(\'Nếu sử dụng LED dây APA102 thì cần hàn chân <b>SDI (MOSI) -> GPIO10</b> và chân <b>CKI (SCLK) -> GPIO11</b>\')"></i>',
-                    ['ws281x' => 'WS281x, SK6812, VBot AIO, Vietbot AIO', 'apa102' => 'APA102', 'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0', 'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'],
+                    ['ws281x' => 'WS281x, SK6812, VBot AIO, Vietbot AIO', 'apa102' => 'APA102', 'ReSpeaker_2_Mics_Pi_HAT_v1.0' => 'ReSpeaker 2-Mics Pi HAT v1.0 (3 APA102)', 'ReSpeaker_Mic_Array_v2.0' => 'ReSpeaker Mic Array v2.0', 'dev_custom_led' => 'DEV Custom Led: Dev_Led.py (Người dùng tự code)'],
                     $Config['smart_config']['led']['led_type'], []);
                   echo input_field('led_gpio', 'LED Pin GPIO', htmlspecialchars($Config['smart_config']['led']['led_gpio'] ?? 10), '', 'number', '1', '0', '60', 'Chân Data của LED sẽ được gán và điều khiển bởi chân GPIO, Mặc định GPIO10 (Không thay đổi được)', 'border-success', '', '', '', '', '_blank');
                   echo input_field('number_led', 'Số lượng LED', htmlspecialchars($Config['smart_config']['led']['number_led'] ?? 24), '', 'number', '1', '0', '100', 'Số lượng đèn LED bạn sử dụng (Mỗi mắt LED sẽ là 1)', 'border-success', '', '', '', '', '_blank');
@@ -3762,6 +4037,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                     'aio' => 'Nhấn Nhả => Sử dụng mạch VBot AIO, Vietbot AIO',
                     'touch_low' => 'Nhấn Nhả => Nút nhấn chạm mức thấp (GPIO chạm GND)',
                     'touch_high' => 'Nhấn Nhả => Nút nhấn chạm mức cao (GPIO chạm 3V3)',
+                    'respeaker_2_mic_pi_hat_v1_0' => 'Nhấn Nhả => ReSpeaker 2-Mics Pi HAT v1.0 (1 nút GPIO17)',
                     'encoder_rotary' => 'Nút nhấn dạng xoay (Encoder Rotary)',
                   ];
                   if (!isset($buttonTypeLabels[$buttonType])) {
@@ -3792,7 +4068,67 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                       <div class="form-text">Lựa chọn được áp dụng sau khi lưu cấu hình và khởi động lại VBot.</div>
                     </div>
                   </div>
-                  <div class="card accordion" id="accordion_button_setting_bton">
+                  <div class="alert alert-warning py-2 <?php echo !empty($Config['smart_config']['button_active']['active']) && $buttonType === 'respeaker_2_mic_pi_hat_v1_0' && (int)($Config['internal_ir']['tx_gpio'] ?? 17) === 17 ? '' : 'd-none'; ?>" id="respeaker-button-ir-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Nút ReSpeaker sử dụng GPIO17. IR phát TX nếu cũng đặt ở GPIO17 sẽ bị bỏ qua để nhường chân cho nút.
+                  </div>
+                  <?php
+                    $respeakerConfig = $Config['smart_config']['button']['respeaker'] ?? [];
+                    $respeakerActionOptions = [
+                      'wakeup'=>'wakeup - Đánh thức VBot', 'mic_toggle'=>'mic - Bật/Tắt microphone',
+                      'volume_up'=>'up - Tăng âm lượng', 'volume_down'=>'down - Giảm âm lượng'
+                    ];
+                    $renderRespeakerAction = static function(string $field, string $label, string $default) use ($respeakerConfig, $respeakerActionOptions): void {
+                      $selected = (string)($respeakerConfig[$field]['action'] ?? $default);
+                      echo '<div class="form-floating mb-3"><select class="form-select border-success" name="respeaker_button['.$field.'][action]" id="respeaker_'.$field.'_action">';
+                      foreach ($respeakerActionOptions as $value=>$text) {
+                        echo '<option value="vbot_action:'.htmlspecialchars($value, ENT_QUOTES, 'UTF-8').'"'.($selected === $value || $selected === 'vbot_action:'.$value ? ' selected' : '').'>'.htmlspecialchars($text, ENT_QUOTES, 'UTF-8').'</option>';
+                      }
+                      echo '</select><label for="respeaker_'.$field.'_action">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</label></div>';
+                    };
+                    $respeakerStateDefaults = static function(array $pressConfig, string $fallback): array {
+                      $action = (string)($pressConfig['action'] ?? $fallback);
+                      if (strpos($action, 'vbot_action:') === 0) $action = substr($action, 12);
+                      return array_fill_keys(array_keys(vbotActionRegistryStates()), $action);
+                    };
+                  ?>
+                  <div class="card border-primary mb-3" id="respeaker-single-button-config" style="display:<?php echo $buttonType === 'respeaker_2_mic_pi_hat_v1_0' ? 'block' : 'none'; ?>">
+                    <div class="card-body">
+                      <h6 class="card-title">Cấu hình nút ReSpeaker — GPIO17</h6>
+                      <p class="small text-muted">Nút trên HAT tác động mức thấp. Các thao tác và tùy chọn nhấn giữ/nhấn đúp được sắp xếp cùng bảng như cấu hình nút nhấn dạng thường.</p>
+                      <?php $respeakerLong = $respeakerConfig['long_press'] ?? []; $respeakerDouble = $respeakerConfig['double_press'] ?? []; ?>
+                      <div class="table-responsive w-100">
+                        <table class="table table-bordered border-primary align-middle mb-0 vbot-button-table" style="min-width:1450px">
+                          <thead>
+                            <tr>
+                              <th colspan="1" class="text-center text-danger">Cấu Hình Chung</th>
+                              <th colspan="1" class="text-center text-danger">Nhấn Nhả</th>
+                              <th colspan="3" class="text-center text-danger">Nhấn Giữ</th>
+                              <th colspan="3" class="text-center text-danger">Nhấn Đúp (2 Lần)</th>
+                            </tr>
+                            <tr>
+                              <th class="text-center">GPIO</th>
+                              <th class="text-center">Thao tác</th>
+                              <th class="text-center">Kích hoạt</th><th class="text-center">Thời gian giữ (s)</th><th class="text-center">Thao tác theo trạng thái</th>
+                              <th class="text-center">Kích hoạt</th><th class="text-center">Khoảng cách (ms)</th><th class="text-center">Thao tác theo trạng thái</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle">17</td>
+                              <td><?php $renderRespeakerAction('short_press', 'Thao tác nhấn nhả', 'wakeup'); ?></td>
+                              <td class="text-center align-middle"><div class="form-check form-switch d-flex justify-content-center"><input class="form-check-input border-success" type="checkbox" name="respeaker_button[long_press][active]" id="respeaker_long_active" <?php echo !empty($respeakerLong['active']) || !$respeakerConfig ? 'checked' : ''; ?>></div></td>
+                              <td><input class="form-control border-success" type="number" min="1" max="10" name="respeaker_button[long_press][duration]" value="<?php echo (int)($respeakerLong['duration'] ?? 2); ?>" aria-label="Thời gian nhấn giữ tính bằng giây"></td>
+                              <td><?php echo vbotRenderStateActionFields($Config, $respeakerLong, 'respeaker_button[long_press]', $respeakerStateDefaults($respeakerLong, 'mic_toggle')); ?></td>
+                              <td class="text-center align-middle"><div class="form-check form-switch d-flex justify-content-center"><input class="form-check-input border-success" type="checkbox" name="respeaker_button[double_press][active]" id="respeaker_double_active" <?php echo !empty($respeakerDouble['active']) ? 'checked' : ''; ?>></div></td>
+                              <td><input class="form-control border-success" type="number" min="50" max="1000" step="10" name="respeaker_button[double_press][interval_ms]" value="<?php echo (int)($respeakerDouble['interval_ms'] ?? 250); ?>" aria-label="Khoảng thời gian nhấn đúp tính bằng mili giây"></td>
+                              <td><?php echo vbotRenderStateActionFields($Config, $respeakerDouble, 'respeaker_button[double_press]', $respeakerStateDefaults($respeakerDouble, 'volume_up')); ?></td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+            <div class="card accordion" id="accordion_button_setting_bton" style="display:<?php echo in_array($buttonType, ['respeaker_2_mic_pi_hat_v1_0','encoder_rotary'], true) ? 'none' : 'block'; ?>">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_setting_bton" aria-expanded="false" aria-controls="collapse_button_setting_bton">
                         Cấu Hình Nút Nhấn Dạng Thường <font color=red> (Nhấn Nhả)</font>:
@@ -3883,6 +4219,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                           <tbody>
                             <?php
                             foreach ($Config['smart_config']['button'] as $buttonName => $buttonData) {
+                              if ($buttonName === 'respeaker') continue;
                               echo '<tr>';
                               echo '<th scope="row" style="text-align: center; vertical-align: middle;"><center>' . $buttonName . ':</center></th>';
                                echo '<td class="text-center align-middle"><input required type="number" style="width:90px;margin:auto" class="form-control border-success" min="1" step="1" max="30" name="button[' . $buttonName . '][gpio]" value="' . $buttonData['gpio'] . '" placeholder="' . $buttonData['gpio'] . '"><div class="invalid-feedback">Cần nhập Chân GPIO cho nút nhấn</div></td>';
@@ -3911,7 +4248,7 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                     </div>
                   </div>
 
-                  <div class="card accordion" id="accordion_button_Encoder_Rotary">
+                  <div class="card accordion" id="accordion_button_Encoder_Rotary" style="display:<?php echo $buttonType === 'encoder_rotary' ? 'block' : 'none'; ?>">
                     <div class="card-body">
                       <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Encoder_Rotary" aria-expanded="false" aria-controls="collapse_button_Encoder_Rotary">
                         Cấu Hình Nút Nhấn Dạng Xoay <font color=red> (Sử Dụng Encoder Rotary)</font> <i class="bi bi-question-circle-fill" onclick="show_message('Sử Dụng Nút Nhấn Dạng Xoay Encoder, Tương Thích Với Các Module Encoder Có 5 Chân Trên Thị Trường Như:  <b>KY-040 RV09 EC11</b><br/>- Khuyến Nghị Chỉ Nên Kích Hoạt Sử Dụng 1 Trong 2 Kiểu Nút Nhấn Là: <b> Nút Nhấn Dạng Xoay Encoder</b> Hoặc <b>Nút Nhấn Nhả Dạng Thường</b>')"></i>:</h5>
@@ -4166,6 +4503,54 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               </div>
             </div>
 
+            <script>
+            (() => {
+              const type=document.getElementById('button_type');
+              const standard=document.getElementById('accordion_button_setting_bton');
+              const encoder=document.getElementById('accordion_button_Encoder_Rotary');
+              const respeaker=document.getElementById('respeaker-single-button-config');
+              if (!type || !standard || !encoder || !respeaker) return;
+              const sync=()=>{
+                const selectedRespeaker=type.value==='respeaker_2_mic_pi_hat_v1_0';
+                const selectedEncoder=type.value==='encoder_rotary';
+                respeaker.style.display=selectedRespeaker?'block':'none';
+                standard.style.display=(selectedRespeaker||selectedEncoder)?'none':'';
+                encoder.style.display=selectedEncoder?'':'none';
+                respeaker.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=!selectedRespeaker);
+                standard.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=selectedRespeaker||selectedEncoder);
+                encoder.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=!selectedEncoder);
+                updateInternalIrRespeakerWarning();
+              };
+              type.addEventListener('change',sync);
+              sync();
+            })();
+            function updateInternalIrRespeakerWarning(){
+              const warning=document.getElementById('internal-ir-respeaker-warning');
+              const buttonWarning=document.getElementById('respeaker-button-ir-warning');
+              const active=document.getElementById('button_active')?.checked;
+              const respeaker=document.getElementById('button_type')?.value==='respeaker_2_mic_pi_hat_v1_0';
+              const gpio=document.getElementById('internal_ir_tx_gpio')?.value==='17';
+              const conflict=!!(active&&respeaker&&gpio);
+              if(warning) warning.classList.toggle('d-none',!conflict);
+              if(buttonWarning) buttonWarning.classList.toggle('d-none',!conflict);
+              const tx=document.getElementById('internal_ir_tx_active');
+              if(tx){
+                tx.disabled=false;
+                if(!tx.dataset.conflictGuard){
+                  tx.dataset.conflictGuard='1';
+                  tx.addEventListener('change',()=>{
+                    if(!tx.checked && warning && !warning.classList.contains('d-none')) tx.checked=true;
+                  });
+                }
+              }
+              const txLabel=document.querySelector('label[for="internal_ir_tx_active"]');
+              if(txLabel) txLabel.classList.toggle('text-muted',conflict);
+            }
+            document.addEventListener('DOMContentLoaded',()=>{
+              ['button_active','button_type','internal_ir_tx_gpio'].forEach(id=>document.getElementById(id)?.addEventListener('change',updateInternalIrRespeakerWarning));
+              updateInternalIrRespeakerWarning();
+            });
+            </script>
             <div class="card accordion" id="accordion_button_Sound_System">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_Sound_System" aria-expanded="false" aria-controls="collapse_button_Sound_System">
@@ -5189,7 +5574,11 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                 <?php
                   $internalIrTxActive = !empty($Config['internal_ir']['tx_active']);
                   $internalIrRxActive = !empty($Config['internal_ir']['rx_active']);
-                  if ($internalIrTxActive && $internalIrRxActive) echo '<font color=green>&nbsp;Phát + Thu đang bật</font>';
+                  $respeakerTxConflict = !empty($Config['smart_config']['button_active']['active'])
+                    && ($Config['smart_config']['button_active']['button_type'] ?? '') === 'respeaker_2_mic_pi_hat_v1_0'
+                    && (int)($Config['internal_ir']['tx_gpio'] ?? 17) === 17 && $internalIrTxActive;
+                  if ($respeakerTxConflict) echo '<font color=orange>&nbsp;TX nhường GPIO17 cho nút ReSpeaker</font>';
+                  elseif ($internalIrTxActive && $internalIrRxActive) echo '<font color=green>&nbsp;Phát + Thu đang bật</font>';
                   elseif ($internalIrTxActive) echo '<font color=green>&nbsp;Phát đang bật</font>';
                   elseif ($internalIrRxActive) echo '<font color=green>&nbsp;Thu đang bật</font>';
                   else echo '<font color=red>&nbsp;Đang tắt</font>';
@@ -5197,8 +5586,11 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
               </h5>
               <div id="collapse_internal_ir" class="accordion-collapse collapse">
                 <div class="alert alert-success" role="alert">
-                  <div class="row mb-3"><label class="col-sm-3 col-form-label">Kích hoạt IR phát (TX):</label>
-                    <div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="internal_ir_tx_active" id="internal_ir_tx_active" <?php echo !empty($Config['internal_ir']['tx_active']) ? 'checked' : ''; ?>></div></div>
+                  <div class="row mb-3"><label class="col-sm-3 col-form-label" for="internal_ir_tx_active">Kích hoạt IR phát (TX):</label>
+                    <div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="internal_ir_tx_active" id="internal_ir_tx_active" <?php echo !empty($Config['internal_ir']['tx_active']) ? 'checked' : ''; ?> <?php echo $respeakerTxConflict ? 'disabled' : ''; ?>></div></div>
+                  </div>
+                  <div class="alert alert-warning py-2 <?php echo !empty($Config['smart_config']['button_active']['active']) && ($Config['smart_config']['button_active']['button_type'] ?? '') === 'respeaker_2_mic_pi_hat_v1_0' && (int)($Config['internal_ir']['tx_gpio'] ?? 17) === 17 ? '' : 'd-none'; ?>" id="internal-ir-respeaker-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Nút ReSpeaker đang dùng GPIO17. IR phát (TX) trên GPIO17 sẽ được VBot bỏ qua và overlay TX động sẽ được gỡ khi VBot khởi chạy để nhường chân cho nút; IR thu (RX) vẫn hoạt động. Nếu đang chuyển từ bản cài IR TX tĩnh cũ, hãy chạy lại <code>resource/internal_ir/install_internal_ir.sh</code> rồi reboot một lần để xóa overlay TX khỏi cấu hình khởi động. Sau đó, đổi/bật/tắt TX chỉ cần khởi động lại VBot; đổi GPIO RX vẫn cần chạy lại installer và reboot.
                   </div>
                   <div class="row mb-3"><label class="col-sm-3 col-form-label">Kích hoạt IR thu (RX):</label>
                     <div class="col-sm-9"><div class="form-switch"><input class="form-check-input border-success" type="checkbox" name="internal_ir_rx_active" id="internal_ir_rx_active" onchange="toggleInternalIrRxControl()" <?php echo !empty($Config['internal_ir']['rx_active']) ? 'checked' : ''; ?>></div></div>
@@ -5221,7 +5613,7 @@ echo input_field('internal_ir_tx_rx_guard_ms','Tạm khóa RX sau khi phát (ms)
 echo input_field('internal_ir_tx_gpio','GPIO phát IR (BCM)',($Config['internal_ir']['tx_gpio'] ?? 17),'required','number','','0','27','');
 echo input_field('internal_ir_rx_gpio','GPIO thu IR (BCM)',($Config['internal_ir']['rx_gpio'] ?? 4),'required','number','','0','27','');
 ?>
-<p class="small text-danger">Không dùng GPIO10 vì đang điều khiển LED, không dùng GPIO16 vì đây là chân bật amplifier. Sau khi đổi GPIO, chạy lại script cài IR và reboot hoặc khởi động lại loa</p>
+<p class="small text-danger">IR không dùng GPIO10 (VBot dành cho LED) hoặc GPIO16 (installer giữ lại để tương thích amplifier/Google Voice HAT). GPIO16 vẫn có thể dùng làm nút thường nếu phần cứng không chiếm chân đó, nhưng không dùng chung GPIO giữa IR và nút đang bật. Nếu chọn ReSpeaker 2-Mics Pi HAT v1.0, nút chiếm GPIO17; VBot tự nhường GPIO17 và bỏ qua TX tại runtime, RX vẫn hoạt động. Đổi GPIO TX hoặc bật/tắt TX chỉ cần khởi động lại VBot; đổi GPIO RX cần chạy lại script cài IR rồi reboot để cập nhật overlay RX. Khi chuyển từ cấu hình TX tĩnh cũ sang overlay TX động, chạy script và reboot một lần.</p>
                   <div class="alert alert-warning py-2">
                     <i class="bi bi-exclamation-triangle"></i> Để chức năng hoạt động, cần có <b>module phát IR</b> nối với GPIO TX và <b>module thu IR</b> nối với GPIO RX trên Raspberry Pi. Chỉ bật chức năng tương ứng với module đã kết nối.
                   </div>
