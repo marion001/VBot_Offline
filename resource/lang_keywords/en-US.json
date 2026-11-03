@@ -463,6 +463,24 @@
       "update_available": "A new VBot update is available",
       "update_check_failed": "VBot updates cannot be checked right now"
     },
+    "tuya_local": {
+      "action_on": "on",
+      "action_off": "off",
+      "disabled": "Tuya Local is disabled in the VBot configuration.",
+      "entry_unavailable": "This Tuya Local entry is no longer enabled or the device is not linked.",
+      "ambiguous": "Could not uniquely identify the Tuya device to control.",
+      "credentials_missing": "The Device ID, IP address, or local key for {name} is missing. Check the Tuya Local configuration.",
+      "invalid_dps": "The DPS ID for {name} is not numeric. Scan the device again in Tuya Local.",
+      "unsupported_dps": "The DPS type for {name} was not identified as Boolean. Only Boolean on/off switches are supported.",
+      "send_failed": "Could not send the {action} command to {name} over the local network.",
+      "readback_failed": "The {action} command was sent to {name}, but its state could not be confirmed.",
+      "dps_missing": "The {action} command was sent to {name}, but the response did not include DPS {dps_id}.",
+      "state_not_boolean": "The command was sent, but DPS {dps_id} for {name} did not return a Boolean state.",
+      "state_not_changed": "The command was sent, but {name} did not change to {action}.",
+      "success": "Turned {name} {action}.",
+      "library_missing": "The TinyTuya library is not installed in VBot's Python environment.",
+      "control_error": "Error controlling {name} over the local network: {error}"
+    },
     "calendar": {
       "invalid_date": "The requested date is invalid. Please check it and try again.",
       "labels": {
@@ -843,6 +861,8 @@
   "schema_version": 1,
   "values": {
     "calendar": {
+      "default_label": "today",
+      "explicit_date_label": "the requested date",
       "spoken_date_patterns": ["\\bday\\s+(\\d{1,2})\\s+month\\s+(\\d{1,2})(?:\\s+year\\s+(\\d{4}))?\\b"],
       "relative_days": [
         {"label": "yesterday", "offset": -1, "phrases": ["yesterday"]},

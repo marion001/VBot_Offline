@@ -447,6 +447,24 @@
       "update_available": "Có bản cập nhật VBot mới",
       "update_check_failed": "Không thể kiểm tra cập nhật VBot lúc này"
     },
+    "tuya_local": {
+      "action_on": "bật",
+      "action_off": "tắt",
+      "disabled": "Tuya Local đang tắt trong cấu hình VBot.",
+      "entry_unavailable": "Entry Tuya Local không còn được bật hoặc thiết bị chưa được liên kết.",
+      "ambiguous": "Không xác định duy nhất được thiết bị Tuya cần điều khiển.",
+      "credentials_missing": "Thiếu Device ID, IP hoặc Local Key của {name}; hãy kiểm tra cấu hình Tuya Local.",
+      "invalid_dps": "Mã DPS của {name} không phải mã số hợp lệ; hãy quét lại thiết bị trong Tuya Local.",
+      "unsupported_dps": "DPS của {name} không được nhận diện là Boolean; hiện chỉ hỗ trợ công tắc bật/tắt Boolean.",
+      "send_failed": "Chưa gửi được lệnh {action} {name} qua mạng nội bộ.",
+      "readback_failed": "Đã gửi lệnh {action} {name} nhưng chưa đọc xác nhận được trạng thái thiết bị.",
+      "dps_missing": "Đã gửi lệnh {action} {name} nhưng phản hồi không có trạng thái DPS {dps_id}.",
+      "state_not_boolean": "Đã gửi lệnh nhưng trạng thái DPS {dps_id} của {name} không phải Boolean.",
+      "state_not_changed": "Đã gửi lệnh nhưng trạng thái {name} chưa chuyển sang {action}.",
+      "success": "Đã {action} {name}.",
+      "library_missing": "Chưa có thư viện TinyTuya trong môi trường Python của VBot.",
+      "control_error": "Lỗi điều khiển {name} qua mạng nội bộ: {error}"
+    },
     "calendar": {
       "invalid_date": "Ngày tháng bạn yêu cầu không hợp lệ, vui lòng kiểm tra và thử lại.",
       "labels": {
@@ -826,7 +844,7 @@
   },
   "schema_version": 1,
   "values": {
-    "calendar": {"spoken_date_patterns": ["\\bngay\\s+(\\d{1,2})\\s+thang\\s+(\\d{1,2})(?:\\s+nam\\s+(\\d{4}))?\\b"], "relative_days": [{"label": "hôm qua", "offset": -1, "phrases": ["ngày hôm qua", "hôm qua"]}, {"label": "hôm nay", "offset": 0, "phrases": ["ngày hôm nay", "hôm nay"]}, {"label": "ngày mai", "offset": 1, "phrases": ["ngày mai"], "standalone_phrases": ["mai"]}, {"label": "ngày kia", "offset": 2, "phrases": ["ngày kia"]}, {"label": "ngày kìa", "offset": 3, "phrases": ["ngày kìa"]}]},
+    "calendar": {"default_label": "hôm nay", "explicit_date_label": "ngày được hỏi", "spoken_date_patterns": ["\\bngay\\s+(\\d{1,2})\\s+thang\\s+(\\d{1,2})(?:\\s+nam\\s+(\\d{4}))?\\b"], "relative_days": [{"label": "hôm qua", "offset": -1, "phrases": ["ngày hôm qua", "hôm qua"]}, {"label": "hôm nay", "offset": 0, "phrases": ["ngày hôm nay", "hôm nay"]}, {"label": "ngày mai", "offset": 1, "phrases": ["ngày mai"], "standalone_phrases": ["mai"]}, {"label": "ngày kia", "offset": 2, "phrases": ["ngày kia"]}, {"label": "ngày kìa", "offset": 3, "phrases": ["ngày kìa"]}]},
     "voice_routines": {"prefixes": ["chạy kịch bản", "kích hoạt kịch bản"], "negations": ["không", "đừng", "chớ"]},
     "hass_clarification": {"cancel": ["hủy", "huỷ", "huy", "thôi", "thoi"], "number_prefixes": ["số", "so", "đèn số", "den so", "thiết bị", "thiet bi"]},
     "lan_calls": {

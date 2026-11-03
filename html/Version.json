@@ -1,8 +1,8 @@
 {
-    "version": "1.4.0",
+    "version": "1.4.1",
     "projectName": "WebUI VBot Offline",
     "description": "Hỗ trợ liên kết và điều khiển thiết bị từ APP Tuya Smart, Smart Life vào VBot -> Local Tuya, Hỗ trợ cấu hình tùy chỉnh các nguồn phát âm thanh đầu ra theo ý",
-    "releaseDate": "30/10/2026",
+    "releaseDate": "03/11/2026",
     "changes": [
         {
             "type": "feature",

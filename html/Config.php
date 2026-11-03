@@ -412,6 +412,22 @@ function vbotConfigGpioConflicts(array $post, array $config): array {
   }
 
   $conflicts = [];
+  $ledConfig = $config['smart_config']['led'] ?? [];
+  $ledActive = array_key_exists('led_active_on_off', $post)
+    ? isset($post['led_active_on_off'])
+    : !empty($ledConfig['active']);
+  $ledType = (string)($post['led_type_select'] ?? ($ledConfig['led_type'] ?? ''));
+  if ($buttonActive && $buttonType === 'encoder_rotary' && $ledActive
+      && in_array($ledType, ['apa102', 'ReSpeaker_2_Mics_Pi_HAT_v1.0'], true)) {
+    foreach ($usedPins as $pin) {
+      $spiPins = [10=>'SPI0 MOSI', 11=>'SPI0 SCLK'];
+      if (isset($spiPins[(int)$pin['gpio']])) {
+        $spiName = $spiPins[(int)$pin['gpio']];
+        $conflicts[] = $pin['label'].' GPIO'.$pin['gpio'].' xung đột với LED APA102 ('.$spiName.'). Hãy đổi GPIO Encoder hoặc tắt/đổi kiểu LED.';
+      }
+    }
+  }
+
   $byPin = [];
   foreach ($usedPins as $pin) $byPin[$pin['gpio']][] = $pin['label'];
   foreach ($byPin as $gpio=>$labels) {
