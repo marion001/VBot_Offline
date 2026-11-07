@@ -656,7 +656,7 @@
             "notes": "dev_custom, console, all, api"
         },
         "mic": {
-            "id": 14,
+            "id": 17,
             "scan_on_boot": false
         },
         "speaker": {
