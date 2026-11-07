@@ -1,0 +1,10 @@
+.vbot-searchable-native{display:none!important}
+.vbot-searchable-trigger{display:block;width:100%;overflow:hidden;background-image:none!important;text-align:left;text-overflow:ellipsis;white-space:nowrap}
+.vbot-searchable-trigger::after{float:right;margin-top:.55em}
+.vbot-searchable-panel{position:fixed;z-index:20000;display:flex;flex-direction:column;gap:.4rem;padding:.5rem;border:1px solid #86b7fe;border-radius:.375rem;background:#fff;box-shadow:0 .5rem 1rem rgba(0,0,0,.2)}
+.vbot-searchable-input{position:sticky;top:0;z-index:1;flex:none;background:#fff}
+.vbot-searchable-list{min-height:2rem;max-height:280px;flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain}
+.vbot-searchable-choice{display:block;width:100%;padding:.4rem .55rem;border:0;border-radius:.25rem;background:#fff;text-align:left;color:#212529}
+.vbot-searchable-choice:hover,.vbot-searchable-choice:focus{background:#e9f2ff;outline:0}
+.vbot-searchable-choice.selected{background:#d7e8ff;font-weight:600}
+.vbot-searchable-empty{padding:.5rem;color:#6c757d}

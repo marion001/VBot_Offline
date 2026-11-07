@@ -73,20 +73,11 @@ require_once __DIR__.'/includes/LANCalls.php';
 require_once __DIR__.'/includes/WakeOnLANSettings.php';
 $lanConfigError='';
 
-function vbotButtonActionOptions($Config): array
+function vbotButtonActionOptions($Config, bool $includeDeviceActions=true): array
 {
   $options = [];
-  foreach (vbotActionRegistryOptions($Config) as $id => $label) $options['vbot_action:'.$id] = $label;
+  foreach (vbotActionRegistryOptions($Config, $includeDeviceActions) as $id => $label) $options['vbot_action:'.$id] = $label;
   return $options;
-}
-
-function vbotRenderButtonActionOptions($Config, $selected): string
-{
-  $html = '';
-  foreach (vbotButtonActionOptions($Config) as $value => $label) {
-    $html .= '<option value="'.htmlspecialchars($value, ENT_QUOTES, 'UTF-8').'"'.($value === $selected ? ' selected' : '').'>'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</option>';
-  }
-  return $html;
 }
 
 function vbotNormalizeButtonAction($Config, $action): string
@@ -101,10 +92,10 @@ function vbotRenderStateActionFields($Config, array $value, string $namePrefix, 
   foreach (vbotActionRegistryStates() as $state => $label) {
     $selected = (string)($value['actions_by_state'][$state] ?? $defaults[$state] ?? $value['action'] ?? 'none');
     $selectId = 'button_action_'.substr(sha1($namePrefix.'_'.$state), 0, 12);
-    $html .= '<div class="form-floating mb-2">'
-      .'<select class="form-select border-success" id="'.$selectId.'" name="'.$namePrefix.'[actions_by_state]['.$state.']" aria-label="'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'">'
-      .vbotActionRegistryRender($Config, $selected).'</select>'
-      .'<label for="'.$selectId.'">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</label>'
+    $html .= '<div class="mb-2 vbot-config-action-field">'
+      .'<label class="form-label">'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</label>'
+      .'<select data-searchable-select data-search-placeholder="Tìm thao tác..." class="form-select border-success vbot-config-action-select" id="'.$selectId.'" name="'.$namePrefix.'[actions_by_state]['.$state.']" aria-label="'.htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'">'
+      .vbotActionRegistryRender($Config, $selected, '', false).'</select>'
       .'</div>';
   }
   return $html.'</div>';
@@ -742,6 +733,7 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   $Config['home_assistant']['external_url'] = $_POST['hass_external_url'];
   $Config['home_assistant']['long_token'] = $_POST['hass_long_token'];
   $Config['home_assistant']['active'] = isset($_POST['hass_active']) ? true : false;
+  $Config['home_assistant']['auto_refresh_on_startup'] = isset($_POST['hass_auto_refresh_on_startup']);
   $Config['home_assistant']['custom_commands']['active'] = isset($_POST['hass_custom_commands_active']) ? true : false;
   $Config['home_assistant']['custom_commands']['minimum_threshold'] = floatval($_POST['hass_custom_commands_threshold']);
 
@@ -2462,7 +2454,7 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                 </h5>
                 <div id="collapse_button_webui_path" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_webui_path">
                 <div class="alert alert-success" role="alert">   <div class="row mb-3">
-                    <label class="col-sm-3 col-form-label">Hiển Thị Lỗi <i class="bi bi-question-circle-fill" onclick="show_message('Chức Năng Này Chỉ Dành Cho Nhà Phát Triển DEV Debug')"></i> :</label>
+                    <label class="col-sm-3 col-form-label">Danh s&#225;ch thi&#7871;t b&#7883; &#273;&#227; &#273;&#7891;ng b&#7897;</label>
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="webui_errors_display" id="webui_errors_display" <?php echo $Config['web_interface']['errors_display'] ? 'checked' : ''; ?>>
@@ -3728,13 +3720,26 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                       </div>
                     </div>
                   </div>
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">T&#7921; &#272;&#7897;ng L&#224;m M&#7899;i V&#224; &#272;&#7891;ng B&#7897; D&#7919; Li&#7879;u Khi Kh&#7903;i Ch&#7841;y Ch&#432;&#417;ng Tr&#236;nh</label>
+                    <div class="col-sm-9">
+                      <div class="form-check form-switch mb-2">
+                        <input class="form-check-input border-success" type="checkbox" name="hass_auto_refresh_on_startup" id="hass_auto_refresh_on_startup" <?php echo !empty($Config['home_assistant']['auto_refresh_on_startup']) ? 'checked' : ''; ?>>
+                      </div>
+                      <div class="d-flex flex-wrap gap-2">
+                        <button type="button" class="btn btn-success btn-sm" id="hass-refresh-states"><i class="bi bi-arrow-repeat"></i> L&#224;m m&#7899;i v&#224; &#273;&#7891;ng b&#7897; Home_Assistant.json</button>
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="readJSON_file_path(<?php echo htmlspecialchars(json_encode($VBot_Offline.'resource/hass/Home_Assistant.json', JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8'); ?>)"><i class="bi bi-eye"></i> Xem D&#7919; Li&#7879;u Json</button>
+                      </div>
+                      <div id="hass-refresh-states-status" class="small mt-2" role="status"></div>
+                    </div>
+                  </div>
                   <?php
+                  vbotSpeakerLocationSwitch($Config);
                   echo input_field('hass_long_token', 'Mã Token (Long Token)', $Config['home_assistant']['long_token'], '', 'text', '', '', '', '', 'border-success', '', '', '', '', '');
                   echo input_field('hass_internal_url', 'URL nội bộ ', htmlspecialchars($Config['home_assistant']['internal_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_internal_url')", 'btn btn-success border-success', 'onclick', '_blank');
                   echo input_field('hass_external_url', 'URL bên ngoài ', htmlspecialchars($Config['home_assistant']['external_url']), '', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-success', 'Kiểm Tra', "CheckConnectionHomeAssistant('hass_external_url')", 'btn btn-success border-success', 'onclick', '_blank');
                   echo input_field('hass_minimum_threshold', 'Ngưỡng kết quả tối thiểu', $Config['home_assistant']['minimum_threshold'] ?? 0.7, 'required', 'number', '0.01', '0.5', '0.9', 'Ngưỡng kết quả cho phép từ <b>0.1 -> 0.9</b> ngưỡng càng cao thì yêu cầu độ chính xác từ khóa cao khi VBot tìm kiếm và lọc thiết bị', 'border-success', '', '', '', '', '');
                   echo input_field('hass_lowest_to_display_logs', 'Ngưỡng tối thiểu hiển thị ra logs', $Config['home_assistant']['lowest_to_display_logs'] ?? 0.39, 'required', 'number', '0.01', '0', '0.45', 'Ngưỡng kết quả tối thiểu để hiển thị các kết quả chưa đạt ngưỡng ra logs chỉ số từ <b>0 -> 0.45</b> là hợp lý, chỉ số hợp lý trong khoảng <b>0.35-0.39</b>, chỉ số này cần phải thấp hơn  chỉ số ngưỡng kết quả tối thiểu bên trên', 'border-danger', '', '', '', '', '');
-                  vbotSpeakerLocationSwitch($Config);
                   echo input_field('hass_time_out', 'Thời gian chờ tối đa (giây)', $Config['home_assistant']['time_out'] ?? 15, 'required', 'number', '1', '5', '60', 'Thời gian chờ phản hồi tối đa khi kết nối với Hass, Home Assistant', 'border-success', '', '', '', '', '');
                   echo input_field('', 'Liên Kết Loa VBot Qua HACS Lên Home Assistant (Hass)', 'https://github.com/marion001/VBot_Offline_Custom_Component', 'disabled', 'text', '', '', '', '<font color="red" size="6" title="Bắt Buộc Nhập">*</font>', 'border-danger', 'Truy Cập', "https://github.com/marion001/VBot_Offline_Custom_Component", 'btn btn-success border-danger', 'link', '_blank');
                   ?>
@@ -4470,11 +4475,6 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
       <td>
         <input type="hidden" name="encoder_rotary_double_press_action" value="<?php echo htmlspecialchars((string)($encoderDoublePress['action'] ?? 'vbot_action:none'), ENT_QUOTES, 'UTF-8'); ?>">
         <small class="text-muted">Cấu hình riêng theo trạng thái bên dưới</small>
-        <select hidden id="encoder_rotary_double_press_action">
-          <?php
-            echo vbotRenderButtonActionOptions($Config, (string)($encoderDoublePress['action'] ?? 'vbot_action:none'));
-          ?>
-        </select>
       </td>
     </tr>
 
@@ -6485,7 +6485,21 @@ document.getElementById('hass-refresh-registry').addEventListener('click', async
  try {const data=new FormData(); data.set('action','refresh_hass'); data.set('csrf_token',window.VBOT_CSRF_TOKEN||'');
    const response=await fetch('Command_Test.php',{method:'POST',body:data,credentials:'same-origin'}); const result=await response.json();
    status.textContent=result.message||'Không làm mới được dữ liệu.';
- } catch(error) {status.textContent='Không kết nối được API VBot: '+error.message;} finally {this.disabled=false;}
+ } catch(error) {status.textContent='Kh\u00f4ng l\u00e0m m\u1edbi \u0111\u01b0\u1ee3c d\u1eef li\u1ec7u Home_Assistant.json: '+error.message;}
+});
+document.getElementById('hass-refresh-states').addEventListener('click', async function() {
+ const button=this; const status=document.getElementById('hass-refresh-states-status');
+ button.disabled=true; status.textContent='\u0110ang t\u1ea3i danh s\u00e1ch th\u1ef1c th\u1ec3 t\u1eeb Home Assistant\u2026';
+ try {
+   const body=new URLSearchParams({action:'refresh',csrf_token:window.VBOT_CSRF_TOKEN||''});
+   const response=await fetch('includes/php_ajax/Voice_Routines_Hass.php',{method:'POST',body,credentials:'same-origin',headers:{'X-CSRF-Token':window.VBOT_CSRF_TOKEN||''},cache:'no-store'});
+   const result=await response.json();
+   if(!response.ok||!result.success) throw new Error(result.message||'Kh\u00f4ng \u0111\u1ed3ng b\u1ed9 \u0111\u01b0\u1ee3c d\u1eef li\u1ec7u Home Assistant.');
+   const count=Array.isArray(result.data&&result.data.get_hass_all)?result.data.get_hass_all.length:0;
+   status.textContent=(result.message||'\u0110\u00e3 \u0111\u1ed3ng b\u1ed9 d\u1eef li\u1ec7u Home Assistant.')+' C\u00f3 '+count+' th\u1ef1c th\u1ec3 trong Home_Assistant.json.';
+   window.dispatchEvent(new CustomEvent('vbot:hass-cache-updated'));
+ } catch(error) {status.textContent='Kh\u00f4ng l\u00e0m m\u1edbi \u0111\u01b0\u1ee3c d\u1eef li\u1ec7u Home_Assistant.json: '+error.message;}
+ finally {button.disabled=false;}
 });
 </script>
 <script>
@@ -6953,6 +6967,9 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 <script>window.configErrorFocus=<?= json_encode($configErrorFocus??null,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT|JSON_UNESCAPED_UNICODE) ?>;</script>
 <script src="assets/js/config-validation-focus.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<link rel="stylesheet" href="assets/css/searchable-select.css?v=<?php echo $Cache_UI_Ver; ?>-search-menu-2">
+<script src="assets/js/searchable-select.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4" defer></script>
+<script src="assets/js/config-button-actions.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4" defer></script>
 </body>
 
 </html>

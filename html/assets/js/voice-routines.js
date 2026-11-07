@@ -1,4 +1,4 @@
-(() => {
+﻿(() => {
     'use strict';
     const options = window.voiceRoutineOptions;
     const byId = id => document.getElementById(id);
@@ -7,10 +7,19 @@
     let hassEntities = [], hassById = new Map(), hassLoading = false, hassMessage = 'Đang đọc dữ liệu Home Assistant đã lưu…';
     let localFiles = [], localLoaded = false, localLoading = false, localMessage = 'Chưa đọc danh sách nhạc Local.';
     const urlActions = ['play_url','play_youtube','play_zingmp3','play_nhaccuatui'];
-    const types = {home_assistant: 'Home Assistant', tuya_local: 'Tuya Local', action: 'Thao tác loa / phát playlist', volume: 'Đặt âm lượng', led_brightness: 'Đặt độ sáng LED ở loa', speak: 'Đọc thông báo', wait: 'Chờ'};
-    const hassLabels = {turn_on:'Bật / kích hoạt', turn_off:'Tắt', turn_setup:'Đặt giá trị', turn_open:'Mở rèm', turn_close:'Đóng rèm', turn_stop:'Dừng rèm', turn_cool:'Làm lạnh', turn_auto:'Tự động', turn_heat:'Sưởi', turn_dry:'Hút ẩm', turn_fan_only:'Chỉ quạt'};
+    const toggleActions = new Set(['media_toggle','conversation_toggle','wakeup_reply_toggle']);
+    function isToggleAction(step) {
+        if (!step || typeof step.action !== 'string') return false;
+        if (step.type === 'home_assistant' || step.type === 'tuya_local') return step.action === 'toggle';
+        return step.type === 'action' && (step.action.startsWith('toggle:') || toggleActions.has(step.action));
+    }
+    const types = {home_assistant: 'Home Assistant', tuya_local: 'Tuya Local', action: 'Thao tác thiết bị, VBot hoặc media', volume: 'Đặt âm lượng', led_brightness: 'Đặt độ sáng LED ở loa', speak: 'Đọc thông báo', wait: 'Chờ'};
+    const hassLabels = {turn_on:'Bật / kích hoạt', turn_off:'Tắt', toggle:'Đảo bật/tắt theo trạng thái hiện tại', turn_setup:'Đặt giá trị', turn_open:'Mở rèm', turn_close:'Đóng rèm', turn_stop:'Dừng rèm', turn_cool:'Làm lạnh', turn_auto:'Tự động', turn_heat:'Sưởi', turn_dry:'Hút ẩm', turn_fan_only:'Chỉ quạt'};
     const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
     const selectOptions = (values, selected) => Object.entries(values).map(([value, label]) => `<option value="${escape(value)}" ${value===selected?'selected':''}>${escape(label)}</option>`).join('');
+    const searchableActionSelect = (values, selected, field='action', label='Tìm thao tác...') => {
+        return `<div class="routine-action-search-wrap"><select data-searchable-select data-search-placeholder="${escape(label)}" class="form-select border-success" data-field="${escape(field)}">${selectOptions(values,selected)}</select></div>`;
+    };
     const notice = (message, ok=true, popup=true) => {
         byId('routineNotice').className = `alert ${ok?'alert-info':'alert-danger'} mt-3 mb-0`;
         byId('routineNotice').textContent = message;
@@ -40,7 +49,7 @@
         return result;
     }
     function defaults(type) {
-        return {home_assistant:{type,entity_id:'',action:'turn_off',value:null}, tuya_local:{type,device_id:'',entry_key:'',action:'turn_off'}, action:{type,action:'media_stop'},
+        return {home_assistant:{type,entity_id:'',action:'turn_off',value:null,toggle_fallback:'error'}, tuya_local:{type,device_id:'',entry_key:'',action:'turn_off',toggle_fallback:'error'}, action:{type,action:'media_stop',toggle_fallback:'error'},
             volume:{type,value:25}, led_brightness:{type,value:50}, speak:{type,text:''}, wait:{type,seconds:1}}[type];
     }
     const searchText = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[đĐ]/g,'d').toLowerCase().replace(/\s+/g,' ').trim();
@@ -131,7 +140,7 @@
         const allowed=options.hassActions[domain] || ['turn_on','turn_off','turn_setup'];
         const actions=Object.fromEntries(allowed.map(key=>[key,hassLabels[key] || key]));
         if (!actions[step.action]) actions[step.action]='Thao tác đã lưu: '+step.action;
-        return `<label class="form-label">Thao tác</label><select class="form-select mb-2 border-success" data-field="action">${selectOptions(actions,step.action)}</select>
+        return `<label class="form-label">Thao tác</label><div class="mb-2">${searchableActionSelect(actions,step.action)}</div>${step.action==='toggle'?toggleFallbackSelect(step.toggle_fallback):''}
             ${step.action==='turn_setup'?`<label class="form-label">${domain==='climate'?'Nhiệt độ (5–40 °C)':'Mức đặt (0–100 %)'}</label><input class="form-control border-success" data-field="value" type="number" min="${domain==='climate'?5:0}" max="${domain==='climate'?40:100}" step="0.1" value="${escape(step.value)}">`:''}`;
     }
     function localTrackOptions(selected,query='') {
@@ -169,6 +178,9 @@
         }
         finally { localLoaded=true; localLoading=false; updateLocalUi(); endLoading(); }
     }
+    function toggleFallbackSelect(fallback) {
+        return `<label class="form-label mt-2">Nếu không đọc được trạng thái hiện tại</label><select class="form-select border-warning" data-field="toggle_fallback">${selectOptions({error:'Báo Lỗi Và Dừng',on:'Sẽ Bật',off:'Sẽ Tắt'},fallback || 'error')}</select>`;
+    }
     function actionMediaFields(step) {
         if (step.action==='play_local_file') return `<div class="mt-2"><label class="form-label">Bài nhạc Local</label>
             <div class="input-group mb-2"><input class="form-control routine-local-search border-success" placeholder="Tìm theo tên bài nhạc" aria-label="Tìm bài nhạc Local">
@@ -193,7 +205,8 @@
             for (const legacy of urlActions.filter(action=>action!=='play_url')) delete actions[legacy];
             const selected = urlActions.includes(step.action) ? 'play_url' : step.action;
             if (!actions[selected]) actions[selected] = 'Nguồn/thao tác đã lưu: '+selected;
-            return `<label class="form-label">Thao tác</label><select class="form-select border-success" data-field="action">${selectOptions(actions,selected)}</select>${actionMediaFields(step)}`;
+            if(['media_toggle','conversation_toggle','wakeup_reply_toggle'].includes(step.action) && !actions[step.action]) actions[step.action]=step.action==='media_toggle'?'Đảo bật/tắt phát nhạc':step.action==='conversation_toggle'?'Đảo bật/tắt chế độ hội thoại':'Đảo bật/tắt câu phản hồi';
+            return `<label class="form-label">Thao tác</label><div class="mb-2">${searchableActionSelect(actions,selected)}</div>${isToggleAction(step)?toggleFallbackSelect(step.toggle_fallback):''}${actionMediaFields(step)}`;
         }
         if (step.type==='tuya_local') {
             const tuyaEntries=Array.isArray(options.tuyaEntries)?options.tuyaEntries:[];
@@ -202,7 +215,7 @@
             for(const entry of tuyaEntries) values[JSON.stringify([entry.device_id,entry.entry_key])]=entry.label;
             if(step.device_id && step.entry_key && !Object.prototype.hasOwnProperty.call(values,selected)) values[selected]='Entry đã lưu nhưng hiện không còn được bật';
             return `<label class="form-label">Entries đang bật</label><select class="form-select border-success mb-2" data-field="tuya_entry">${selectOptions(values,selected)}</select>
-                <label class="form-label">Thao tác</label><select class="form-select border-success" data-field="action">${selectOptions({turn_on:'Bật',turn_off:'Tắt'},step.action || 'turn_off')}</select>
+                <label class="form-label">Thao tác</label>${searchableActionSelect({turn_on:'Bật',turn_off:'Tắt',toggle:'Đảo bật/tắt theo trạng thái hiện tại'},step.action || 'turn_off','action','Tìm thao tác Tuya...')}${step.action==='toggle'?toggleFallbackSelect(step.toggle_fallback):''}
                 <div class="form-text">Danh sách chỉ gồm thiết bị đã liên kết và Entries được bật trong Tuya Local. Hành động sẽ dùng làm trạng thái bật/tắt đã lưu cho entry.</div>
                 ${tuyaEntries.length?'':'<div class="form-text text-warning">Chưa có Entry Tuya Local nào đang bật. Hãy bật Entry trong trang Tuya Local rồi tải lại trang này.</div>'}`;
         }
@@ -260,6 +273,7 @@
             <div class="mt-3"><label class="form-label">Sau khi chạy xong kịch bản</label><select class="form-select border-success" data-rfield="after_completion">${selectOptions({default:'Theo chế độ hội thoại hệ thống',continue:'Tiếp tục đánh thức khi chế độ hội thoại bật',wait:'Quay về trạng thái chờ'},routine.after_completion || 'default')}</select><div class="form-text">Áp dụng ở cuối khi kịch bản hoàn tất. Chọn quay về chờ để không thu âm lượt tiếp theo, kể cả khi conversation_mode đang bật.</div></div>
         </div></div></div></div>`).join('') || '<div class="alert alert-secondary">Chưa có kịch bản. Nhấn “Thêm kịch bản” để bắt đầu.</div>';
         applyRoutineSearch();
+        if (window.VBotSearchableSelect) window.VBotSearchableSelect.init(byId('routineCards'));
         updateHassUi();
         updateLocalUi();
         if (!localLoaded && !localLoading && data.routines.some(routine=>routine.steps.some(step=>step.type==='action' && step.action==='play_local_file'))) loadLocalFiles();
@@ -288,6 +302,17 @@
             setDirty();return;
         }
         if (target.classList.contains('routine-local-search')) { updateLocalUi(); return; }
+        if (target.classList.contains('routine-action-search')) {
+            const select=target.closest('.routine-action-search-wrap')?.querySelector('select[data-searchable-select]');
+            if (!select) return;
+            const query=searchText(target.value), words=query.split(' ').filter(Boolean), current=select.value;
+            Array.from(select.options).forEach(option=>{
+                const haystack=searchText(option.textContent+' '+option.value);
+                option.hidden=Boolean(query) && !words.every(word=>haystack.includes(word));
+            });
+            if (current) select.value=current;
+            return;
+        }
         if (target.dataset.rfield) {
             const key = target.dataset.rfield;
             routine[key] = target.type==='checkbox'?target.checked:key==='triggers'?target.value.split('\n').map(x=>x.trim().normalize('NFC')).filter(Boolean):target.value.normalize('NFC');
@@ -318,6 +343,7 @@
                 step[key] = target.type==='number'?(target.value===''?null:Number(target.value)):
                     ['path','url'].includes(key)?target.value.trim():target.value.trim().normalize('NFC');
                 if (step.type==='home_assistant' && key==='entity_id') showHassResults(target);
+                if (step.type==='tuya_local' && key==='action') render();
                 if (step.type==='home_assistant' && key==='action') {
                     step.value = step.action==='turn_setup'?(step.entity_id.startsWith('climate.')?25:50):null;
                     render();
@@ -325,6 +351,10 @@
                 if (step.type==='action' && key==='action') {
                     if (step.action==='play_local_file') { step.path=step.path || ''; step.title=step.title || ''; }
                     if (urlActions.includes(step.action)) { step.url=step.url || ''; step.title=step.title || ''; }
+                    render();
+                }
+                if (key==='action' && isToggleAction(step)) {
+                    step.toggle_fallback = step.toggle_fallback || 'error';
                     render();
                 }
             }
@@ -388,7 +418,7 @@
     byId('routineCards').addEventListener('input',readInput);
     byId('routineCards').addEventListener('change',event => {
         const target=event.target;
-        if (target.dataset.field==='tuya_entry') { readInput(event); return; }
+        if (['tuya_entry','action','toggle_fallback'].includes(target.dataset.field)) { readInput(event); return; }
         if (busy || target.dataset.field!=='entity_id') return;
         const routine=data.routines[Number(target.closest('[data-routine]').dataset.routine)];
         const step=routine.steps[Number(target.closest('[data-step]').dataset.step)];

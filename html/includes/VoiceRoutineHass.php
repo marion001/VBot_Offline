@@ -32,7 +32,9 @@ function vbotRoutineHassSave($path, array $states) {
     vbotRoutineHassValidateStates($states);
     if (!is_dir(dirname($path)) && !@mkdir(dirname($path),0775,true))
         throw new RuntimeException('Không tạo được thư mục dữ liệu Home Assistant');
+    @chmod(dirname($path),0777);
     $lock=@fopen($path.'.lock','c+');
+    if (is_resource($lock)) @chmod($path.'.lock',0777);
     if (!$lock || !flock($lock,LOCK_EX)) {
         if (is_resource($lock)) fclose($lock);
         throw new RuntimeException('Không khóa được dữ liệu Home Assistant');

@@ -54,7 +54,7 @@
       <div class="row g-3 mb-3">
         <div class="col-md-6"><label for="irName" class="form-label">Tên câu lệnh </label><input id="irName" class="form-control border-success" maxlength="100" placeholder="Tên câu lệnh, ví dụ: bật điều hòa"></div>
         <div class="col-md-6"><label for="irReply" class="form-label">Câu Phản hồi</label><input id="irReply" class="form-control border-success" maxlength="500" placeholder="Câu phản hồi (không bắt buộc)"></div>
-        <div class="col-12"><label for="irNewAction" class="form-label">Chức năng khi nhận</label><select id="irNewAction" class="form-select border-success"></select></div>
+        <div class="col-12"><label for="irNewAction" class="form-label">Chức năng khi nhận</label><select id="irNewAction" class="form-select border-success"></select><div id="irNewFallback"></div></div>
       </div>
       <label id="irDataLabel" for="irData" class="form-label">Mã IR đã học</label>
       <textarea id="irData" class="form-control font-monospace border-success" rows="7" readonly placeholder="Dữ liệu học được sẽ xuất hiện ở đây"></textarea>
@@ -74,6 +74,7 @@
 </div>
 <?php include 'html_footer.php'; ?><a href="#" class="back-to-top d-flex align-items-center justify-content-center"><i class="bi bi-arrow-up-short"></i></a><?php include 'html_js.php'; ?>
 <script>
+let irActions=<?= json_encode(array_map(null, array_keys(vbotActionRegistryOptions($Config, true)), array_values(vbotActionRegistryOptions($Config, true))), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
 let currentData=null, savedIr=[], irPlaylists=[], irRadios=[], irOperation=false, irManualMode=false, irLearnTimer=null, irRevision='', irRowsBaseline='[]';
 const endpoint='includes/php_ajax/Internal_IR_Ajax.php';
 const irSendApi=<?= json_encode(rtrim($URL_API_VBOT, '/').'/internal-ir/send', JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
@@ -82,10 +83,13 @@ function irPost(values){const body=new URLSearchParams();Object.entries(values).
 function notice(r){const message=r&&r.message?r.message:'Hoàn tất';if(r&&r.success){showMessagePHP(message);}else{show_message(message);}}
 function learnNotice(r){const el=document.getElementById('irLearnStatus');const ok=r&&r.success;el.className='alert text-center '+(ok?'alert-success':'alert-danger');el.innerHTML=`<i class="bi ${ok?'bi-check-circle':'bi-exclamation-triangle'}"></i> ${escapeHtml(r&&r.message?r.message:'Có lỗi xảy ra')}`;}
 function escapeHtml(v){const d=document.createElement('div');d.textContent=String(v??'');return d.innerHTML.replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
-const irActions=<?= json_encode(array_map(null, array_keys(vbotActionRegistryStatic()), array_values(vbotActionRegistryStatic())), JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;
-function actionOptions(value){const selected=value||'none';const options=[...irActions,...irPlaylists.map(x=>[`playlist:${x.id}`,`Phát Playlist: ${x.name}`]),...irRadios.map(x=>[`radio:${x.id}`,`Phát Radio: ${x.name}`])];if((selected.startsWith('playlist:')||selected.startsWith('radio:'))&&!options.some(x=>x[0]===selected))options.push([selected,'Nguồn phát không còn tồn tại']);return options.map(([key,label])=>`<option value="${escapeHtml(key)}" ${key===selected?'selected':''}>${escapeHtml(label)}</option>`).join('');}
-function renderRows(){document.getElementById('irRows').innerHTML=savedIr.map((x,i)=>`<tr data-index="${i}"><td class="text-center"><div class="form-switch d-inline-block"><input class="form-check-input ir-active border-success" type="checkbox" role="switch" ${x.active!==false?'checked':''}></div></td><td><input class="form-control border-success ir-name" maxlength="100" value="${escapeHtml(x.name||'')}"></td><td><input class="form-control border-success ir-reply" maxlength="500" value="${escapeHtml(x.reply||'')}"></td><td><select class="form-select border-success ir-action">${actionOptions(x.action)}</select></td><td><textarea class="form-control border-success font-monospace ir-code" rows="4">${escapeHtml(JSON.stringify(x.data))}</textarea></td><td class="text-nowrap"><button class="btn btn-sm btn-primary" onclick="sendRow(${i})"><i class="bi bi-send"></i> Gửi Lệnh</button> <button class="btn btn-sm btn-danger" onclick="deleteIr(${i})"><i class="bi bi-trash"></i> Xóa</button></td></tr>`).join('');irRowsBaseline=JSON.stringify(savedIr.map((_,i)=>readRow(i)));irRefreshDirtyNotice();}
-async function loadIr(){const r=await irPost({list:1});if(!r.success)return notice(r);irRevision=r.revision||'';savedIr=r.data.commands||[];irPlaylists=Array.isArray(r.playlists)?r.playlists:[];irRadios=Array.isArray(r.radios)?r.radios:[];const c=r.config;const states=[];states.push(`Phát TX: ${c.tx_active?'bật':'tắt'} (GPIO${c.tx_gpio})`);states.push(`Thu RX: ${c.rx_active?'bật':'tắt'} (GPIO${c.rx_gpio})`);states.push(`Điều khiển nền: ${c.rx_control_active?'bật':'tắt'}`);notice({success:true,message:states.join(' — ')});renderRows();}
+
+function actionOptions(value,query=''){const selected=value||'none';const options=[...irActions,...irPlaylists.map(x=>[`playlist:${x.id}`,`Phát Playlist: ${x.name}`]),...irRadios.map(x=>[`radio:${x.id}`,`Phát Radio: ${x.name}`])];if(selected!=='none'&&!options.some(x=>x[0]===selected))options.push([selected,'Thao tác đã cấu hình không còn tồn tại']);const words=normalizeIrSearch(query).split(/\s+/).filter(Boolean);return options.filter(([key,label])=>key===selected||!words.length||words.every(word=>normalizeIrSearch(label+' '+key).includes(word))).map(([key,label])=>`<option value="${escapeHtml(key)}" ${key===selected?'selected':''}>${escapeHtml(label)}</option>`).join('');}
+function toggleFallbackOptions(action,value='error'){if(!/^(?:toggle:tuya:|toggle:hass:)/.test(action||''))return '';const selected=value||'error';return `<label class="form-label mt-2 mb-1">Nếu không đọc được trạng thái hiện tại</label><select class="form-select form-select-sm ir-toggle-fallback-value"><option value="error" ${selected==='error'?'selected':''}>Báo Lỗi Và Dừng</option><option value="on" ${selected==='on'?'selected':''}>Sẽ Bật</option><option value="off" ${selected==='off'?'selected':''}>Sẽ Tắt</option></select>`;}
+function normalizeIrSearch(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
+function renderRows(){document.getElementById('irRows').innerHTML=savedIr.map((x,i)=>`<tr data-index="${i}"><td class="text-center"><div class="form-switch d-inline-block"><input class="form-check-input ir-active border-success" type="checkbox" role="switch" ${x.active!==false?'checked':''}></div></td><td><input class="form-control border-success ir-name" maxlength="100" value="${escapeHtml(x.name||'')}"></td><td><input class="form-control border-success ir-reply" maxlength="500" value="${escapeHtml(x.reply||'')}"></td><td><select data-searchable-select data-search-placeholder="Tìm thao tác IR..." class="form-select border-success ir-action">${actionOptions(x.action)}</select><div class="ir-toggle-fallback">${toggleFallbackOptions(x.action,x.toggle_fallback)}</div></td><td><textarea class="form-control border-success font-monospace ir-code" rows="4">${escapeHtml(JSON.stringify(x.data))}</textarea></td><td class="text-nowrap"><button class="btn btn-sm btn-primary" onclick="sendRow(${i})"><i class="bi bi-send"></i> Gửi Lệnh</button> <button class="btn btn-sm btn-danger" onclick="deleteIr(${i})"><i class="bi bi-trash"></i> Xóa</button></td></tr>`).join('');irRefreshDirtyNotice();if(window.VBotSearchableSelect)window.VBotSearchableSelect.init(document.getElementById('irRows'));}
+document.getElementById('irRows').addEventListener('change',event=>{if(event.target.classList.contains('ir-action')){const row=event.target.closest('tr');row.querySelector('.ir-toggle-fallback').innerHTML=toggleFallbackOptions(event.target.value);irRefreshDirtyNotice();}});
+async function loadIr(){const r=await irPost({list:1});if(!r.success)return notice(r);irRevision=r.revision||'';savedIr=r.data.commands||[];if(r.actions&&typeof r.actions==='object'){irActions=Array.isArray(r.actions)?r.actions:Object.entries(r.actions);}irPlaylists=Array.isArray(r.playlists)?r.playlists:[];irRadios=Array.isArray(r.radios)?r.radios:[];const c=r.config;const states=[];states.push(`Phát TX: ${c.tx_active?'bật':'tắt'} (GPIO${c.tx_gpio})`);states.push(`Thu RX: ${c.rx_active?'bật':'tắt'} (GPIO${c.rx_gpio})`);states.push(`Điều khiển nền: ${c.rx_control_active?'bật':'tắt'}`);notice({success:true,message:states.join(' — ')});renderRows();irRowsBaseline=JSON.stringify(savedIr.map((_,i)=>readRow(i)));irRefreshDirtyNotice();}
 function openIrModal(manual){
   if(irOperation)return notice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});
   clearTimeout(irLearnTimer);
@@ -97,12 +101,13 @@ function openIrModal(manual){
   document.getElementById('irDataLabel').textContent=manual?'Mã IR có sẵn (JSON)':'Mã IR đã học';
   document.getElementById('irManualHelp').classList.toggle('d-none',!manual);
   document.getElementById('irLearnAgain').classList.toggle('d-none',manual);
-  const action=document.getElementById('irNewAction');action.innerHTML=actionOptions('none');action.value='none';
+  const action=document.getElementById('irNewAction');action.innerHTML=actionOptions('none');action.value='none';document.getElementById('irNewFallback').innerHTML='';
   const status=document.getElementById('irLearnStatus');status.className='alert alert-info text-center';
   status.textContent=manual?'Nhập tên lệnh và dán mã IR có sẵn, sau đó nhấn Lưu lệnh.':'Hãy hướng remote vào mắt thu và nhấn nút...';
   $('#internalIrLearnModal').modal('show');
   if(!manual)irLearnTimer=setTimeout(()=>{if(!irManualMode&&document.getElementById('internalIrLearnModal').classList.contains('show'))learnIr();},250);
 }
+document.getElementById('irNewAction').addEventListener('change',event=>{document.getElementById('irNewFallback').innerHTML=toggleFallbackOptions(event.target.value);});
 function openLearnModal(){openIrModal(false);}
 function openManualModal(){openIrModal(true);}
 function modalIrData(){
@@ -116,7 +121,7 @@ function modalIrData(){
 async function sendModalIr(){let data;try{data=modalIrData();}catch(error){return learnNotice({success:false,message:error.message});}await sendIr(data,true);}
 async function learnIr(){if(irManualMode)return;if(irOperation)return learnNotice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});irOperation=true;const el=document.getElementById('irLearnStatus');el.className='alert alert-warning text-center';el.innerHTML='<span class="spinner-border spinner-border-sm me-2" role="status"></span> Hãy hướng remote vào mắt thu và nhấn nút...';try{const r=await irPost({learn:1});learnNotice(r);if(r.success){currentData=r.data;document.getElementById('irData').value=JSON.stringify(r.data);}}finally{irOperation=false;}}
 async function sendIr(data,inModal=false){if(!data){const r={success:false,message:'Chưa có dữ liệu IR'};return inModal?learnNotice(r):notice(r);}if(irOperation){const r={success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'};return inModal?learnNotice(r):notice(r);}irOperation=true;try{const headers={'Content-Type':'application/json'};if(irApiKey)headers['VBot-API-Key']=irApiKey;let r;try{const response=await fetch(irSendApi,{method:'POST',headers,body:JSON.stringify({command:data})});const responseText=await response.text();let parsed=null;try{parsed=responseText?JSON.parse(responseText):null;}catch(_error){}if(!response.ok){r={success:false,message:(parsed&&parsed.message)||`VBot/API không hoạt động hoặc không phản hồi đúng (HTTP ${response.status})`};}else if(!parsed||typeof parsed!=='object'){r={success:false,message:'VBot/API không hoạt động hoặc trả về dữ liệu không hợp lệ'};}else{r=parsed;}}catch(error){r={success:false,message:'Không thể kết nối VBot/API. Hãy kiểm tra VBot đang chạy và API đã được bật.'};}if(inModal)learnNotice(r);else notice(r);}finally{irOperation=false;}}
-function readRow(i){const row=document.querySelector(`#irRows tr[data-index="${i}"]`);if(!row)throw new Error('Không tìm thấy dòng '+i);let data;try{data=JSON.parse(row.querySelector('.ir-code').value);}catch(e){throw new Error(`Mã IR ở dòng ${i+1} không hợp lệ: ${e.message}`);}return {active:row.querySelector('.ir-active').checked,name:row.querySelector('.ir-name').value.trim(),reply:row.querySelector('.ir-reply').value.trim(),action:row.querySelector('.ir-action').value,data,created_at:savedIr[i]?.created_at||''};}
+function readRow(i){const row=document.querySelector(`#irRows tr[data-index="${i}"]`);if(!row)throw new Error('Không tìm thấy dòng '+i);let data;try{data=JSON.parse(row.querySelector('.ir-code').value);}catch(e){throw new Error(`Mã IR ở dòng ${i+1} không hợp lệ: ${e.message}`);}return {active:row.querySelector('.ir-active').checked,name:row.querySelector('.ir-name').value.trim(),reply:row.querySelector('.ir-reply').value.trim(),action:row.querySelector('.ir-action').value,toggle_fallback:row.querySelector('.ir-toggle-fallback-value')?.value||'error',data,created_at:savedIr[i]?.created_at||''};}
 function sendRow(i){try{sendIr(readRow(i).data);}catch(e){notice({success:false,message:e.message});}}
 async function saveIr(){
   if(irOperation)return learnNotice({success:false,message:'Một thao tác IR khác đang chạy, vui lòng chờ.'});
@@ -127,9 +132,9 @@ async function saveIr(){
   irOperation=true;
   setIrRowsBusy(true);
   try{
-    const r=await irPost({save:1,name,reply:document.getElementById('irReply').value.trim(),action:document.getElementById('irNewAction').value||'none',data:JSON.stringify(data)});
+    const r=await irPost({save:1,name,reply:document.getElementById('irReply').value.trim(),action:document.getElementById('irNewAction').value||'none',toggle_fallback:document.querySelector('#irNewFallback .ir-toggle-fallback-value')?.value||'error',data:JSON.stringify(data)});
     if(!r.success)return learnNotice(r);
-    notice(r);currentData=null;document.getElementById('irData').value='';document.getElementById('irName').value='';document.getElementById('irReply').value='';document.getElementById('irNewAction').value='none';
+    notice(r);currentData=null;document.getElementById('irData').value='';document.getElementById('irName').value='';document.getElementById('irReply').value='';document.getElementById('irNewAction').value='none';document.getElementById('irNewFallback').innerHTML='';
     $('#internalIrLearnModal').modal('hide');await loadIr();
   }finally{irOperation=false;setIrRowsBusy(false);}
 }
@@ -231,4 +236,4 @@ async function uploadIrBackup(){
 }
 loadIr();
 loadIrBackups();
-</script><script src="assets/js/page-search-navigation.js?v=<?php echo $Cache_UI_Ver; ?>"></script></body></html>
+</script><link rel="stylesheet" href="assets/css/searchable-select.css?v=<?php echo $Cache_UI_Ver; ?>-search-menu-2"><script src="assets/js/searchable-select.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4"></script><script src="assets/js/page-search-navigation.js?v=<?php echo $Cache_UI_Ver; ?>"></script></body></html>

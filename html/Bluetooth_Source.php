@@ -68,7 +68,7 @@ $sourceCsrf=$_SESSION['vbot_csrf_token'];
         <div id="bt-key-modal-status" class="small mb-3" role="status"></div>
         <div class="d-flex justify-content-between align-items-center mb-3"><label class="mb-0">Kích hoạt nút</label><div class="form-check form-switch mb-0"><input type="checkbox" class="form-check-input border-success" id="bt-key-enabled" checked></div></div>
         <div class="mb-3"><label class="form-label" for="bt-key-name">Tên nút</label><input class="form-control border-success" id="bt-key-name" maxlength="80" required></div>
-        <div class="mb-3"><label class="form-label" for="bt-key-action">Chức năng</label><select class="form-select border-success" id="bt-key-action"></select></div>
+        <div class="mb-3"><label class="form-label" for="bt-key-action-trigger">Chức năng</label><select data-searchable-select data-search-container="#bt-key-modal" data-search-placeholder="Tìm chức năng hoặc thao tác..." class="form-select border-success" id="bt-key-action"></select><div id="bt-key-toggle-fallback-wrap" class="mt-2"></div></div>
         <div class="mb-3"><label class="form-label" for="bt-key-code">Mã nút</label><input class="form-control border-danger" id="bt-key-code" readonly placeholder="Đang chờ nhận mã nút"></div>
       </div>
       <div class="modal-footer d-flex flex-wrap justify-content-center align-items-center gap-2"><button type="button" class="btn btn-primary me-auto" id="bt-key-relearn"><i class="bi bi-arrow-repeat"></i> Học lại</button> <button class="btn btn-success" id="bt-key-save" type="submit" disabled>Lưu nút</button> <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button></div>
@@ -78,7 +78,9 @@ $sourceCsrf=$_SESSION['vbot_csrf_token'];
 </div>
 <?php include 'html_footer.php'; include 'html_js.php'; ?>
 <script>window.vbotSourceCsrf=<?= json_encode($sourceCsrf,JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT) ?>;</script>
+<link rel="stylesheet" href="assets/css/searchable-select.css?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4">
+<script src="assets/js/searchable-select.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4"></script>
 <script src="assets/js/bluetooth-source.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
-<script src="assets/js/bluetooth-keys.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+<script src="assets/js/bluetooth-keys.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-5"></script>
 <script src="assets/js/page-search-navigation.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

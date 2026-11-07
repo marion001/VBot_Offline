@@ -330,6 +330,7 @@
     },
     "home_assistant": {
         "active": false,
+        "auto_refresh_on_startup": true,
         "search_sources": {
             "friendly_name": true,
             "entity_id": false,
@@ -728,6 +729,24 @@
             }
         },
         "button": {
+            "respeaker": {
+                "active": true,
+                "gpio": 17,
+                "bounce_time": 80,
+                "short_press": {
+                    "action": "vbot_action:wakeup"
+                },
+                "long_press": {
+                    "active": true,
+                    "duration": 2,
+                    "action": "vbot_action:mic_toggle"
+                },
+                "double_press": {
+                    "active": true,
+                    "interval_ms": 250,
+                    "action": "vbot_action:volume_up"
+                }
+            },
             "down": {
                 "active": true,
                 "gpio": 25,
@@ -846,44 +865,6 @@
                         "tts": "stop_tts",
                         "recording": "cancel_wakeup"
                     }
-                }
-            },
-            "respeaker": {
-                "active": true,
-                "gpio": 17,
-                "bounce_time": 80,
-                "short_press": {
-                    "action": "vbot_action:wakeup"
-                },
-                "long_press": {
-                    "active": true,
-                    "duration": 2,
-                    "action": "vbot_action:mic_toggle",
-                    "actions_by_state": {
-                        "playlist": "media_stop",
-                        "idle": "conversation_toggle",
-                        "media": "media_stop",
-                        "media_paused": "media_play",
-                        "tts": "stop_tts",
-                        "recording": "cancel_wakeup"
-                    }
-                },
-                "double_press": {
-                    "active": true,
-                    "interval_ms": 250,
-                    "action": "vbot_action:volume_up",
-                    "actions_by_state": {
-                        "playlist": "wakeup",
-                        "idle": "conversation_toggle",
-                        "media": "media_stop",
-                        "media_paused": "media_play",
-                        "tts": "stop_tts",
-                        "recording": "cancel_wakeup"
-                    }
-                },
-                "accept_call": {
-                    "active": true,
-                    "press": "short"
                 }
             }
         },

@@ -926,6 +926,8 @@ include 'html_head.php';
           } else {
             $parameter = null;
           }
+          $toggleFallback = in_array(($schedule_option['toggle_fallback'] ?? 'error'), ['error','on','off'], true)
+            ? ($schedule_option['toggle_fallback'] ?? 'error') : 'error';
           $recurrence = isset($schedule_option['recurrence']) && is_array($schedule_option['recurrence']) ? $schedule_option['recurrence'] : [];
           $allowed_types = ['legacy', 'daily', 'daily_months', 'weekdays', 'weekends', 'once', 'monthly', 'days_of_month', 'interval_days'];
           $recurrence_type = in_array(($recurrence['type'] ?? 'legacy'), $allowed_types, true) ? $recurrence['type'] : 'legacy';
@@ -939,7 +941,8 @@ include 'html_head.php';
             'name' => is_string($schedule_option['name']??null) ? (preg_replace('/^(.{0,120}).*$/us','$1',trim($schedule_option['name']))??'') : '',
             'create_words' => ($schedule_option['create_words']??'')==='xiaozhi_mcp' ? 'xiaozhi_mcp' : '',
             'active' => isset($schedule_option['active']),
-            'slots' => [['time' => $slot_time, 'parameter' => $parameter]],
+            'slots' => [['time' => $slot_time, 'parameter' => $parameter, 'toggle_fallback' => $toggleFallback]],
+            'toggle_fallback' => $toggleFallback,
             'time' => [$slot_time], 'parameter' => $parameter,
             'date' => isset($schedule_option['date']) && is_array($schedule_option['date']) ? array_values(array_intersect($schedule_option['date'], array_keys($week_days))) : [],
             'recurrence' => ['type'=>$recurrence_type, 'start_date'=>trim($recurrence['start_date'] ?? ''), 'end_date'=>trim($recurrence['end_date'] ?? ''), 'date'=>trim($recurrence['date'] ?? ''), 'day'=>max(1,min(31,intval($recurrence['day'] ?? 1))), 'interval'=>max(1,min(365,intval($recurrence['interval'] ?? 1))), 'months'=>$months, 'days'=>$month_days],
@@ -1346,6 +1349,12 @@ include 'html_head.php';
           $vbotActionOptions = vbotSchedulerActionOptions($Config);
           foreach ($independentSystemSchedules as $savedSchedule) {
             $savedAction = (string)($savedSchedule['slots'][0]['parameter'] ?? $savedSchedule['parameter'] ?? '');
+            if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^toggle:(?:tuya|hass):[A-Za-z0-9_-]+(?::(?:on|off))?$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
+              $vbotActionOptions[$savedAction] = 'Thao tác đảo trạng thái đã lưu';
+            }
+            if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^(?:ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
+              $vbotActionOptions[$savedAction] = 'Thao tác thiết bị đã cấu hình không còn tồn tại';
+            }
             if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^routine:[A-Za-z0-9_-]{1,64}$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
               $vbotActionOptions[$savedAction] = 'Kịch bản không còn tồn tại: '.substr($savedAction, 8);
             }
@@ -1375,7 +1384,7 @@ include 'html_head.php';
                   $systemTaskSelectValue = $systemTask === 'vbot_action'
                     ? 'vbot_action:'.((string)($systemSlot['parameter'] ?? $systemSchedule['parameter'] ?? 'none'))
                     : (isset($legacyVbotActionMap[$systemTask]) ? 'vbot_action:'.$legacyVbotActionMap[$systemTask] : $systemTask); ?>
-                  <div class="card border-success mb-3 system-task-schedule-card">
+                  <div class="card border-success mb-3 system-task-schedule-card" data-toggle-fallback="<?= htmlspecialchars((string)($systemSlot['toggle_fallback'] ?? $systemSchedule['toggle_fallback'] ?? 'error')) ?>">
                     <div class="card-body">
                       <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][id]" value="<?= htmlspecialchars($systemSchedule['id'] ?? ('system_'.$systemScheduleIndex)) ?>">
                       <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][source_task]" value="<?= htmlspecialchars($systemTask) ?>">
@@ -1383,7 +1392,7 @@ include 'html_head.php';
                       <input type="hidden" name="system_task_schedules[<?= $systemScheduleIndex ?>][create_words]" value="<?= htmlspecialchars($systemSchedule['create_words']??'',ENT_QUOTES,'UTF-8') ?>">
                       <?php if (!empty($systemSchedule['name'])): ?><p class="fw-bold text-primary"><?= htmlspecialchars($systemSchedule['name'],ENT_QUOTES,'UTF-8') ?></p><?php endif; ?>
                       <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch tác vụ #<?= $systemScheduleIndex + 1 ?></b><button class="btn btn-danger btn-sm system-task-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
-                      <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[<?= $systemScheduleIndex ?>][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= htmlspecialchars($key) ?>" <?= $systemTaskSelectValue===$key?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[<?= $systemScheduleIndex ?>][time]" value="<?= htmlspecialchars($systemSlot['time'] ?? '') ?>"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[<?= $systemScheduleIndex ?>][parameter]" value="<?= htmlspecialchars((string)($systemSlot['parameter'] ?? '')) ?>"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[<?= $systemScheduleIndex ?>][active]" <?= !isset($systemSchedule['active']) || $systemSchedule['active']?'checked':'' ?>><label class="form-check-label">Bật</label></div></div></div>
+                      <div class="row g-2 mb-3"><div class="col-md-4"><select data-searchable-select data-search-placeholder="Tìm chức năng hoặc thao tác..." class="form-select border-primary system-task-kind" name="system_task_schedules[<?= $systemScheduleIndex ?>][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= htmlspecialchars($key) ?>" <?= $systemTaskSelectValue===$key?'selected':'' ?>><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select><div class="system-task-toggle-fallback-wrap"></div></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[<?= $systemScheduleIndex ?>][time]" value="<?= htmlspecialchars($systemSlot['time'] ?? '') ?>"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[<?= $systemScheduleIndex ?>][parameter]" value="<?= htmlspecialchars((string)($systemSlot['parameter'] ?? '')) ?>"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[<?= $systemScheduleIndex ?>][active]" <?= !isset($systemSchedule['active']) || $systemSchedule['active']?'checked':'' ?>><label class="form-check-label">Bật</label></div></div></div>
                       <?php render_system_scheduler_options('independent_'.$systemScheduleIndex, $systemSchedule, 'Tác vụ hệ thống', '', 'system_task_schedules['.$systemScheduleIndex.'][date]', 'system_task_schedules['.$systemScheduleIndex.']'); ?>
                     </div>
                   </div>
@@ -1397,7 +1406,7 @@ include 'html_head.php';
             <div class="card border-success mb-3 system-task-schedule-card"><div class="card-body">
               <input type="hidden" name="system_task_schedules[__INDEX__][id]" value="system___STAMP_____INDEX__">
               <div class="d-flex justify-content-between align-items-center mb-3"><b>Lịch tác vụ mới</b><button class="btn btn-danger btn-sm system-task-schedule-delete" type="button"><i class="bi bi-trash"></i> Xóa lịch</button></div>
-              <div class="row g-2 mb-3"><div class="col-md-4"><select class="form-select border-primary system-task-kind" name="system_task_schedules[__INDEX__][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= $key ?>"><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[__INDEX__][time]"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[__INDEX__][parameter]" value="50"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[__INDEX__][active]" checked><label class="form-check-label">Bật</label></div></div></div>
+              <div class="row g-2 mb-3"><div class="col-md-4"><select data-searchable-select data-search-placeholder="Tìm chức năng hoặc thao tác..." class="form-select border-primary system-task-kind" name="system_task_schedules[__INDEX__][task]"><?php foreach ($systemTaskLabels as $key=>$label): ?><option value="<?= $key ?>"><?= htmlspecialchars($label) ?></option><?php endforeach; ?></select><div class="system-task-toggle-fallback-wrap"></div></div><div class="col-md-3"><input class="form-control border-success scheduler-time-24h" type="time" step="60" required name="system_task_schedules[__INDEX__][time]"></div><div class="col-md-3 system-task-parameter-wrap"><input class="form-control border-warning system-task-parameter" name="system_task_schedules[__INDEX__][parameter]" value="50"></div><div class="col-md-2"><div class="form-check form-switch pt-2"><input class="form-check-input" type="checkbox" name="system_task_schedules[__INDEX__][active]" checked><label class="form-check-label">Bật</label></div></div></div>
               <?php render_system_scheduler_options('independent___INDEX__', ['date'=>array_keys($week_days)], 'Tác vụ hệ thống', '', 'system_task_schedules[__INDEX__][date]', 'system_task_schedules[__INDEX__]'); ?>
             </div></div>
           </template>
@@ -3065,6 +3074,7 @@ function updateSchedulerConditionFields(select) {
 const systemTaskSchedulesContainer = document.getElementById('system-task-schedules-container');
 const systemTaskScheduleTemplate = document.getElementById('system-task-schedule-template');
 let systemTaskScheduleIndex = <?= count($independentSystemSchedules) ?>;
+document.querySelectorAll(".system-task-schedule-card").forEach(card => { card.dataset.toggleFallback = card.dataset.toggleFallback || "error"; });
 
 function updateSystemTaskParameter(card) {
     const task = card.querySelector('.system-task-kind').value;
@@ -3072,6 +3082,7 @@ function updateSystemTaskParameter(card) {
     const oldField = wrap.querySelector('.system-task-parameter');
     const name = oldField ? oldField.name : '';
     const oldValue = oldField ? oldField.value : '';
+    const fallback = card.dataset.toggleFallback || 'error';
     if (task.startsWith('vbot_action:')) {
         const action = task.substring('vbot_action:'.length) || 'none';
         wrap.innerHTML = '<input type="hidden" class="system-task-parameter" name="' + name + '" value=""><div class="form-control bg-light text-muted">Không cần tham số</div>';
@@ -3084,6 +3095,13 @@ function updateSystemTaskParameter(card) {
         wrap.innerHTML = '<input type="number" min="0" max="100" class="form-control border-warning system-task-parameter" name="' + name + '" placeholder="' + label + '" value="' + (oldValue || '50') + '">';
     } else {
         wrap.innerHTML = '<input type="hidden" class="system-task-parameter" name="' + name + '" value=""><div class="form-control bg-light text-muted">Không cần tham số</div>';
+    }
+    const action = task.startsWith('vbot_action:') ? task.substring('vbot_action:'.length) : '';
+    const fallbackWrap = card.querySelector('.system-task-toggle-fallback-wrap');
+    if (fallbackWrap) {
+        fallbackWrap.innerHTML = /^toggle:(tuya|hass):/.test(action) ? '<label class="form-label mt-2">Nếu không đọc được trạng thái hiện tại</label><select class="form-select border-warning system-task-toggle-fallback" name="' + name.replace('[parameter]', '[toggle_fallback]') + '"><option value="error">Báo Lỗi Và Dừng</option><option value="on">Sẽ Bật</option><option value="off">Sẽ Tắt</option></select>' : '';
+        const select = fallbackWrap.querySelector('select');
+        if (select) select.value = fallback;
     }
 }
 
@@ -3101,6 +3119,7 @@ function bindSystemTaskScheduleCard(card) {
     const sourceTaskField = card.querySelector('input[name$="[source_task]"]');
     const sourceTask = sourceTaskField ? sourceTaskField.value : '';
     card.dataset.originalTask = taskSelect.value;
+    card.dataset.toggleFallback = card.dataset.toggleFallback || "error";
     card.querySelector('.system-task-schedule-delete').addEventListener('click', function () {
         markSystemTaskScheduleChanged(card.dataset.originalTask || taskSelect.value);
         if (sourceTask && sourceTask !== card.dataset.originalTask) markSystemTaskScheduleChanged(sourceTask);
@@ -3111,7 +3130,11 @@ function bindSystemTaskScheduleCard(card) {
         markSystemTaskScheduleChanged(card.dataset.originalTask);
         if (sourceTask && sourceTask !== card.dataset.originalTask) markSystemTaskScheduleChanged(sourceTask);
         card.dataset.originalTask = taskSelect.value;
+    card.dataset.toggleFallback = card.dataset.toggleFallback || "error";
         updateSystemTaskParameter(card);
+    });
+    card.addEventListener('change', event => {
+        if (event.target.classList.contains('system-task-toggle-fallback')) card.dataset.toggleFallback = event.target.value;
     });
     updateSystemTaskParameter(card);
     initializeSchedulerRecurrence(card);
@@ -3128,6 +3151,7 @@ function createSystemTaskSchedule(selectedTask = 'change_volume') {
     const card = holder.firstElementChild;
     systemTaskSchedulesContainer.appendChild(card);
     card.querySelector('.system-task-kind').value = selectedTask;
+    if (window.VBotSearchableSelect) window.VBotSearchableSelect.init(card);
     bindSystemTaskScheduleCard(card);
     document.getElementById('system-task-schedules-empty').classList.add('d-none');
     card.scrollIntoView({behavior: 'smooth', block: 'center'});
@@ -3451,6 +3475,8 @@ function validateFormVBot(event) {
       };
     })();
   </script>
+<link rel="stylesheet" href="assets/css/searchable-select.css?v=<?php echo $Cache_UI_Ver; ?>-search-menu-2">
+<script src="assets/js/searchable-select.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4" defer></script>
 </body>
 
 </html>

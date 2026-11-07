@@ -27,6 +27,7 @@
     {"id": "media_stop", "label": "Stop, Dừng media"},
     {"id": "media_next", "label": "Next, Bài tiếp theo"},
     {"id": "media_previous", "label": "PREV, Bài trước đó"},
+    {"id": "media_toggle", "label": "Đảo bật/tắt phát nhạc"},
     {"id": "repeat_toggle", "label": "Bật/Tắt lặp bài"},
     {"id": "shuffle_toggle", "label": "Bật/Tắt phát ngẫu nhiên"},
     {"id": "mute", "label": "Mute, Tắt tiếng loa"},

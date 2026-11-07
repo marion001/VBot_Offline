@@ -28,6 +28,9 @@ try {
             if (!is_string($name) || trim($name)==='' || strlen($name)>320 || !is_string($function) || strlen($function)>150) throw new InvalidArgumentException('Tên nút hoặc chức năng không hợp lệ');
             $command[]='--name='.$name;
             $command[]='--action='.$function;
+            $toggleFallback=$_POST['toggle_fallback']??'error';
+            if (!is_string($toggleFallback) || !in_array($toggleFallback,['error','on','off'],true)) throw new InvalidArgumentException('Lựa chọn dự phòng không hợp lệ');
+            $command[]='--toggle-fallback='.$toggleFallback;
             $enabled=$_POST['enabled']??'1';
             if (!is_string($enabled) || !in_array($enabled,['0','1'],true)) throw new InvalidArgumentException('Trạng thái kích hoạt nút không hợp lệ');
             $command[]='--enabled='.$enabled;
@@ -73,13 +76,8 @@ try {
     }
     if ($action==='key_list' && !empty($data['success'])) {
         require_once __DIR__.'/../ActionRegistry.php';
-        $data['actions']=vbotActionRegistryOptions($Config);
-        $routinePath=rtrim($VBot_Offline,'/\\').'/resource/voice_routines/voice_routines.json';
-        $routines=is_file($routinePath)?json_decode((string)file_get_contents($routinePath),true):[];
-        foreach (($routines['routines']??[]) as $routine) {
-            if (!empty($routine['enabled']) && is_string($routine['id']??null) && is_string($routine['name']??null))
-                $data['actions']['routine:'.$routine['id']]='Kịch bản: '.$routine['name'];
-        }
+        // Keep Bluetooth actions in sync with the complete canonical registry.
+        $data['actions']=vbotActionRegistryOptions($Config, true);
     }
     vbotApiJsonResponse($data,$data['success']?200:400);
 } catch (Throwable $error) {

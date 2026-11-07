@@ -1,11 +1,19 @@
 <?php
 // Schema validation is mirrored by Voice_Routines.validate at execution time.
+function vbotRoutineAllowedStaticActions(): array {
+    return ['wakeup','lan_call_toggle','lan_call_end','volume_up','volume_down','volume_max','volume_min',
+        'mic_toggle','mic_on_off','mic_on','mic_off','conversation_toggle','conversation_on','conversation_off',
+        'wakeup_reply_toggle','wakeup_reply_on','wakeup_reply_off','stop_tts','cancel_wakeup',
+        'media_play_pause','media_play','media_pause','media_stop','media_next','media_previous','media_toggle',
+        'repeat_toggle','shuffle_toggle','mute','unmute','play_all_local','speak_time','speak_date','speak_ip',
+        'speak_volume','check_update'];
+}
 function vbotRoutineActions(array $config): array {
     require_once __DIR__.'/ActionRegistry.php';
-    $allowed = array_flip(['media_play','media_pause','media_stop','media_next','media_previous',
-        'mute','unmute','play_all_local','mic_on','mic_off','repeat_toggle','shuffle_toggle']);
-    $actions = array_filter(vbotActionRegistryOptions($config), function ($key) use ($allowed) {
-        return isset($allowed[$key]) || preg_match('/^(playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12})$/D', $key);
+    $allowed = array_flip(vbotRoutineAllowedStaticActions());
+    $actions = array_filter(vbotActionRegistryOptions($config, true), static function ($key) use ($allowed) {
+        return isset($allowed[$key])
+            || preg_match('/^(?:playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|wol:[A-Za-z0-9_-]{1,64}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|toggle:tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|toggle:hass:[A-Za-z0-9_-]{1,220})$/D', $key);
     }, ARRAY_FILTER_USE_KEY);
     return $actions + ['play_local_file'=>'Phát một bài nhạc Local cụ thể',
         'play_url'=>'Phát từ URL / link trực tiếp / stream'];
@@ -50,9 +58,9 @@ function vbotRoutineMediaUrl($value): string {
     return $url;
 }
 function vbotRoutineHassActions(): array {
-    return ['light'=>['turn_on','turn_off','turn_setup'], 'fan'=>['turn_on','turn_off','turn_setup'],
-        'switch'=>['turn_on','turn_off'], 'input_boolean'=>['turn_on','turn_off'],
-        'climate'=>['turn_on','turn_off','turn_setup','turn_cool','turn_auto','turn_heat','turn_dry','turn_fan_only'],
+    return ['light'=>['turn_on','turn_off','toggle','turn_setup'], 'fan'=>['turn_on','turn_off','toggle','turn_setup'],
+        'switch'=>['turn_on','turn_off','toggle'], 'input_boolean'=>['turn_on','turn_off','toggle'],
+        'climate'=>['turn_on','turn_off','toggle','turn_setup','turn_cool','turn_auto','turn_heat','turn_dry','turn_fan_only'],
         'cover'=>['turn_open','turn_close','turn_stop','turn_setup'], 'script'=>['turn_on'], 'scene'=>['turn_on']];
 }
 function vbotRoutineNormalize($text): string {
@@ -202,9 +210,8 @@ function vbotRoutinesValidate($data): array {
     if (!is_array($data) || ($data['version']??null)!==1 || !vbotRoutineList($data['routines']??null) || count($data['routines'])>50)
         throw new InvalidArgumentException('Cấu hình phải có version=1 và tối đa 50 kịch bản');
     $ids=[]; $names=[]; $triggers=[]; $routes=[]; $hass=vbotRoutineHassActions();
-    $actions=['media_play','media_pause','media_stop','media_next','media_previous','mute','unmute',
-        'play_all_local','mic_on','mic_off','repeat_toggle','shuffle_toggle','play_local_file',
-        'play_url','play_youtube','play_zingmp3','play_nhaccuatui'];
+    $actions=array_merge(vbotRoutineAllowedStaticActions(),
+        ['play_local_file','play_url','play_youtube','play_zingmp3','play_nhaccuatui']);
     foreach ($data['routines'] as $item) {
         if (!is_array($item)) throw new InvalidArgumentException('Kịch bản không hợp lệ');
         $id=vbotRoutineText($item['id']??null,'ID',64);
@@ -243,8 +250,11 @@ function vbotRoutinesValidate($data): array {
                 case 'led_brightness': vbotRoutineNumber($step['value']??null,0,100,'Độ sáng LED'); break;
                 case 'speak': vbotRoutineText($step['text']??null,'Thông báo',500); break;
                 case 'action':
+                    if (isset($step['toggle_fallback']) && !in_array($step['toggle_fallback'],['error','on','off'],true)) throw new InvalidArgumentException('Invalid toggle fallback');
                     $action=vbotRoutineText($step['action']??null,'Thao tác',100);
-                    if ($action!==$step['action'] || (!in_array($action,$actions,true) && !preg_match('/^(playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12})$/D',$action)))
+                    if ($action!==$step['action'] || (!in_array($action,$actions,true)
+                        && !preg_match('/^(?:playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12})$/D',$action)
+                        && !preg_match('/^(?:wol:[A-Za-z0-9_-]{1,64}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|toggle:tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|toggle:hass:[A-Za-z0-9_-]{1,220})$/D',$action)))
                         throw new InvalidArgumentException('Thao tác loa không được hỗ trợ');
                     if (in_array($action,['play_url','play_youtube','play_zingmp3','play_nhaccuatui'],true)) vbotRoutineMediaUrl($step['url']??null);
                     if ($action==='play_local_file') {
@@ -259,6 +269,7 @@ function vbotRoutinesValidate($data): array {
                     }
                     break;
                 case 'home_assistant':
+                    if (isset($step['toggle_fallback']) && !in_array($step['toggle_fallback'],['error','on','off'],true)) throw new InvalidArgumentException('Invalid toggle fallback');
                     $entity=vbotRoutineText($step['entity_id']??null,'Entity ID',150);
                     $domain=explode('.',$entity)[0]; $action=$step['action']??'';
                     if ($entity!==$step['entity_id'] || !preg_match('/^[a-z_]+\.[a-z0-9_]+$/D',$entity) || !in_array($action,$hass[$domain]??[],true))
@@ -267,11 +278,12 @@ function vbotRoutinesValidate($data): array {
                     elseif (isset($step['value'])) throw new InvalidArgumentException('Chỉ bước đặt giá trị mới nhận giá trị thiết bị');
                     break;
                 case 'tuya_local':
+                    if (isset($step['toggle_fallback']) && !in_array($step['toggle_fallback'],['error','on','off'],true)) throw new InvalidArgumentException('Invalid toggle fallback');
                     $deviceId=vbotRoutineText($step['device_id']??null,'Device ID Tuya',128);
                     $entryKey=vbotRoutineText($step['entry_key']??null,'Entry Tuya',128);
                     if ($deviceId!==$step['device_id'] || !preg_match('/^[A-Za-z0-9_-]+$/D',$deviceId) ||
                         $entryKey!==$step['entry_key'] || !preg_match('/^[A-Za-z0-9_.:-]+$/D',$entryKey) ||
-                        !in_array($step['action']??null,['turn_on','turn_off'],true))
+                        !in_array($step['action']??null,['turn_on','turn_off','toggle'],true))
                         throw new InvalidArgumentException('Thiết bị, Entry hoặc thao tác Tuya Local không hợp lệ');
                     break;
                 default: throw new InvalidArgumentException('Loại bước không được hỗ trợ');

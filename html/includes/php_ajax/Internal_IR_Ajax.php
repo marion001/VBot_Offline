@@ -17,9 +17,30 @@ if (!is_dir(dirname($jsonPath))) @mkdir(dirname($jsonPath), 0777, true);
 // Learning does not touch the command file and must not hold this lock.
 $internalIrRequestLock = null;
 if (!isset($_POST['learn'])) {
-    $internalIrRequestLock = @fopen($jsonPath.'.lock', 'c');
-    if (!$internalIrRequestLock || !flock($internalIrRequestLock, LOCK_EX))
-        vbotApiJsonResponse(['success'=>false, 'message'=>'Không khóa được file lệnh IR'], 500);
+    $lockPath = $jsonPath.'.lock';
+    // Old lock files can be left owned by root/another PHP user. Repair their
+    // permissions before opening; for a new lock, make the parent writable.
+    if (is_file($lockPath) && function_exists('vbotSetFullPermissions')) {
+        vbotSetFullPermissions($lockPath, 'khóa file lệnh IR');
+    } elseif (!is_file($lockPath) && function_exists('vbotSetFullPermissions')) {
+        vbotSetFullPermissions(dirname($jsonPath), 'thư mục lệnh IR');
+    }
+    $internalIrRequestLock = @fopen($lockPath, 'c+');
+    if (!$internalIrRequestLock && function_exists('vbotSetFullPermissions')) {
+        vbotSetFullPermissions($lockPath, 'khóa file lệnh IR');
+        clearstatcache(true, $lockPath);
+        $internalIrRequestLock = @fopen($lockPath, 'c+');
+    }
+    if ($internalIrRequestLock) @chmod($lockPath, 0777);
+    if (!$internalIrRequestLock || !flock($internalIrRequestLock, LOCK_EX)) {
+        if (is_resource($internalIrRequestLock)) fclose($internalIrRequestLock);
+        $last = error_get_last();
+        $detail = is_array($last) ? (string)($last['message'] ?? '') : '';
+        vbotApiJsonResponse([
+            'success'=>false,
+            'message'=>'Không khóa được file lệnh IR: '.$lockPath.($detail !== '' ? ' ('.$detail.')' : '')
+        ], 500);
+    }
     register_shutdown_function(function () use ($internalIrRequestLock) {
         if (is_resource($internalIrRequestLock)) { flock($internalIrRequestLock, LOCK_UN); fclose($internalIrRequestLock); }
     });
@@ -89,7 +110,8 @@ function internalIrValidCommand($command) {
 function internalIrAction($value, array $config) {
     $action = trim((string)$value);
     if (strpos($action, 'vbot_action:') === 0) $action = substr($action, 12);
-    return array_key_exists($action, vbotActionRegistryOptions($config)) ? $action : null;
+    if (array_key_exists($action, internalIrActionOptions($config)) || array_key_exists($action, vbotActionRegistryOptions($config, true))) return $action;
+    return preg_match('/^(?:toggle:)?(?:(?:playlist|radio|routine|wol):[A-Za-z0-9_-]{1,80}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $action) ? $action : null;
 }
 function internalIrValidBackup($data, array $config) {
     if (!is_array($data) || !isset($data['commands']) || !is_array($data['commands']) || count($data['commands']) > 500) return false;
@@ -100,9 +122,10 @@ function internalIrValidBackup($data, array $config) {
         $name = trim($item['name']); $reply = $item['reply'] ?? '';
         if ($name === '' || mb_strlen($name) > 100 || mb_strlen($reply) > 500 || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $name.$reply)) return false;
         if (array_key_exists('active', $item) && !is_bool($item['active'])) return false;
+        if (isset($item['toggle_fallback']) && !in_array($item['toggle_fallback'], ['error','on','off'], true)) return false;
         // Saved playlist/radio references may outlive the corresponding source.
         $action = $item['action'] ?? 'none';
-        if (internalIrAction($action, $config) === null && !preg_match('/^(?:playlist|radio):[A-Za-z0-9_-]{1,80}$/', $action)) return false;
+        if (internalIrAction($action, $config) === null) return false;
         if (!internalIrValidCommand($item['data'] ?? null)) return false;
         $format = $item['data']['format'];
         if (!is_array($format) || ($format['coding'] ?? 'raw') !== 'raw') return false;
@@ -175,6 +198,22 @@ function internalIrRadios($config) {
     }
     return $result;
 }
+function internalIrActionOptions(array $config): array {
+    $options=vbotActionRegistryOptions($config, true);
+    $routinePath=dirname(__DIR__, 3).'/resource/voice_routines/voice_routines.json';
+    $routines=is_file($routinePath)?json_decode((string)@file_get_contents($routinePath),true):[];
+    foreach (is_array($routines['routines']??null)?$routines['routines']:[] as $routine) {
+        if (is_array($routine) && is_string($routine['id']??null) && preg_match('/^[A-Za-z0-9_-]{1,64}$/D',$routine['id']))
+            $options['routine:'.$routine['id']]='Chạy kịch bản: '.($routine['name']??$routine['id']);
+    }
+    $wolPath=dirname(__DIR__, 3).'/resource/wake_on_lan/devices.json';
+    $wol=is_file($wolPath)?json_decode((string)@file_get_contents($wolPath),true):[];
+    foreach (is_array($wol['devices']??null)?$wol['devices']:[] as $device) {
+        if (is_array($device) && is_string($device['id']??null) && preg_match('/^[A-Za-z0-9_-]{1,64}$/D',$device['id']))
+            $options['wol:'.$device['id']]='Bật máy tính (Wake-on-LAN): '.($device['name']??$device['id']);
+    }
+    return $options;
+}
 function internalIrRun($command, $VBot_Offline, $ssh_host, $ssh_port, $ssh_user, $ssh_password) {
     // Chạy trực tiếp trên VBot để loại bỏ thời gian kết nối/xác thực SSH.
     $localLines = [];
@@ -223,7 +262,7 @@ if (isset($_POST['backup_upload'])) {
     vbotApiJsonResponse($result, $result['success'] ? 200 : 400);
 }
 if (isset($_POST['list'])) {
-    vbotApiJsonResponse(['success'=>true,'data'=>internalIrRead($jsonPath),'revision'=>hash_file('sha256', $jsonPath),'playlists'=>internalIrPlaylists($VBot_Offline),'radios'=>internalIrRadios($Config),'config'=>[
+    vbotApiJsonResponse(['success'=>true,'data'=>internalIrRead($jsonPath),'revision'=>hash_file('sha256', $jsonPath),'playlists'=>internalIrPlaylists($VBot_Offline),'actions'=>internalIrActionOptions($Config),'radios'=>internalIrRadios($Config),'config'=>[
         'tx_active'=>(bool)($ir['tx_active'] ?? ($ir['active'] ?? false)),
         'rx_active'=>(bool)($ir['rx_active'] ?? ($ir['active'] ?? false)),
         'rx_control_active'=>(bool)($ir['rx_control_active'] ?? false),
@@ -250,7 +289,9 @@ if (isset($_POST['save'])) {
         vbotApiJsonResponse(['success'=>false,'message'=>'Danh sách IR đã đạt giới hạn 500 lệnh. Hãy xóa lệnh không dùng trước khi thêm.'], 400);
     foreach ($data['commands'] as $item) if (mb_strtolower($item['name'] ?? '', 'UTF-8')===mb_strtolower($name, 'UTF-8'))
         vbotApiJsonResponse(['success'=>false,'message'=>'Tên lệnh đã tồn tại'], 409);
-    $data['commands'][]=['active'=>true,'name'=>$name,'reply'=>$reply,'action'=>$action,'data'=>$command,'created_at'=>date('H:i:s d-m-Y')];
+    $fallback = in_array($_POST['toggle_fallback'] ?? 'error', ['error','on','off'], true) ? ($_POST['toggle_fallback'] ?? 'error') : null;
+    if ($fallback === null) vbotApiJsonResponse(['success'=>false,'message'=>'Lựa chọn dự phòng không hợp lệ'],400);
+    $data['commands'][]=['active'=>true,'name'=>$name,'reply'=>$reply,'action'=>$action,'toggle_fallback'=>$fallback,'data'=>$command,'created_at'=>date('H:i:s d-m-Y')];
     if (!internalIrWrite($jsonPath,$data)) vbotApiJsonResponse(['success'=>false,'message'=>'Không thể lưu file lệnh'],500);
     vbotApiJsonResponse(['success'=>true,'message'=>'Đã lưu lệnh IR']);
 }
@@ -285,6 +326,7 @@ if (isset($_POST['bulk_save'])) {
             'name'=>$name,
             'reply'=>$reply,
             'action'=>$action,
+            'toggle_fallback'=>in_array($item['toggle_fallback']??'error',['error','on','off'],true)?($item['toggle_fallback']??'error'):'error',
             'data'=>$command,
             'created_at'=>$createdAt,
             'updated_at'=>date('H:i:s d-m-Y')
@@ -312,6 +354,7 @@ if (isset($_POST['edit'])) {
     $commands[$index]['name']=$name;
     $commands[$index]['reply']=$reply;
     $commands[$index]['action']=$action;
+    $commands[$index]['toggle_fallback']=in_array($_POST['toggle_fallback']??'error',['error','on','off'],true)?($_POST['toggle_fallback']??'error'):'error';
     $commands[$index]['data']=$command;
     $commands[$index]['updated_at']=date('H:i:s d-m-Y');
     $stored['commands']=$commands;

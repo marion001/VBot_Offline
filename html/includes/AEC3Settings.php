@@ -38,6 +38,9 @@ function vbotAEC3Settings(array $post, array $old): array {
     foreach (['library','playback_device'] as $key) {
         $item=trim((string)($post['aec3_'.$key]??$value[$key]));
         if ($item==='' || strpos($item,"\0")!==false) throw new InvalidArgumentException('AEC3: '.$key.' không hợp lệ');
+        if ($key==='library' && preg_match('~(?:^|/)music_test/libvbot_aec3_music\.so$~i', $item)) {
+            $item='/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so';
+        }
         $value[$key]=$item;
     }
     foreach (['output'=>['normal','linear'],'noise_suppression'=>['off','low','moderate','high','very_high']] as $key=>$choices) {

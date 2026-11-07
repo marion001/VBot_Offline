@@ -105,6 +105,8 @@ document.getElementById('main').addEventListener('click',event=>{
     }
 },true);
 </script>
-<script src="assets/js/voice-routines.js?v=<?php echo $Cache_UI_Ver; ?>-tuya-local-1"></script>
+<link rel="stylesheet" href="assets/css/searchable-select.css?v=<?php echo $Cache_UI_Ver; ?>-search-menu-2">
+<script src="assets/js/searchable-select.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4"></script>
+<script src="assets/js/voice-routines.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-5"></script>
 <script src="assets/js/voice-routines-backup.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 </body></html>

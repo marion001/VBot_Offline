@@ -58,11 +58,28 @@
     const options = {...actions};
     if (binding.action && !options[binding.action]) options[binding.action] = `Chức năng đã lưu (không còn khả dụng): ${binding.action}`;
     for (const [value, label] of Object.entries(options)) select.add(new Option(label, value));
+    if (window.VBotSearchableSelect) window.VBotSearchableSelect.init(select.parentElement);
     select.value = binding.action || 'none';
+    select.dispatchEvent(new Event('change', {bubbles: true}));
+    const fallback = el('bt-key-toggle-fallback');
+    if (fallback) fallback.value = ['error', 'on', 'off'].includes(binding.toggle_fallback) ? binding.toggle_fallback : 'error';
     el('bt-key-save').disabled = !binding.code;
     el('bt-key-relearn').disabled = !device?.connected;
     modal().show();
   }
+  function updateToggleFallback(action, value = 'error') {
+    const wrap = el('bt-key-toggle-fallback-wrap');
+    if (!wrap) return;
+    if (!/^(?:toggle:tuya:|toggle:hass:)/.test(action || '')) {
+      wrap.replaceChildren();
+      return;
+    }
+    wrap.innerHTML = '<label class="form-label mb-1" for="bt-key-toggle-fallback">Nếu không đọc được trạng thái hiện tại</label><select class="form-select border-warning" id="bt-key-toggle-fallback"><option value="error">Báo Lỗi Và Dừng</option><option value="on">Sẽ Bật</option><option value="off">Sẽ Tắt</option></select>';
+    wrap.querySelector('select').value = ['error', 'on', 'off'].includes(value) ? value : 'error';
+  }
+  el('bt-key-action').addEventListener('change', event => {
+    updateToggleFallback(event.target.value, selected?.toggle_fallback || 'error');
+  });
   function render() {
     for (const host of document.querySelectorAll('.bt-device-keys')) {
       const mac = host.dataset.mac, device = devices.find(device => device.mac === mac);
@@ -151,7 +168,7 @@
     const mac = modalMac;
     if (!devices.some(device => device.mac === mac && device.connected)) return status('Hãy kết nối lại thiết bị trước khi học lại', true);
     const previous = selected ? {...selected} : null;
-    const draft = {name: el('bt-key-name').value, action: el('bt-key-action').value, enabled: el('bt-key-enabled').checked};
+    const draft = {name: el('bt-key-name').value, action: el('bt-key-action').value, toggle_fallback: el('bt-key-toggle-fallback')?.value || 'error', enabled: el('bt-key-enabled').checked};
     task(async () => {
       status('Hãy nhấn lại nút trên thiết bị trong 15 giây…');
       const result = await request('learn', {mac});
@@ -169,7 +186,7 @@
     event.preventDefault();
     if (!selected) return;
     task(async () => {
-      buttons = (await request('save', {...selected, name: el('bt-key-name').value, function: el('bt-key-action').value, enabled: el('bt-key-enabled').checked ? '1' : '0'})).buttons;
+      buttons = (await request('save', {...selected, name: el('bt-key-name').value, function: el('bt-key-action').value, toggle_fallback: el('bt-key-toggle-fallback')?.value || 'error', enabled: el('bt-key-enabled').checked ? '1' : '0'})).buttons;
       render(); selected = null; modal().hide();
       status('Đã lưu nút Bluetooth');
     });

@@ -52,7 +52,8 @@ def load():
                 or type(button.get('code')) is not int or not 1 <= button['code'] <= 767
                 or not isinstance(button.get('name'), str) or not 1 <= len(button['name']) <= 80
                 or type(button.get('enabled', True)) is not bool
-                or not isinstance(button.get('action'), str) or len(button['action']) > 150):
+                or not isinstance(button.get('action'), str) or len(button['action']) > 300
+                or button.get('toggle_fallback', 'error') not in {'error', 'on', 'off'}):
             raise ValueError('Thông tin nút Bluetooth không hợp lệ')
         key = (button['mac'], button['code'])
         if key in seen:
@@ -62,12 +63,14 @@ def load():
 
 
 def validate_action(action):
-    if not isinstance(action, str) or len(action) > 150:
+    if not isinstance(action, str) or len(action) > 300:
         raise ValueError('Chức năng không hợp lệ')
     registry = json.loads((ROOT / 'resource/action_registry.json').read_text(encoding='utf-8-sig'))
     if action in {item['id'] for item in registry['actions']}:
         return
     if re.fullmatch(r'playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}', action):
+        return
+    if re.fullmatch(r'(?:toggle:)?(?:ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|wol:[A-Za-z0-9_-]{1,64})', action):
         return
     if action.startswith('routine:'):
         routines = json.loads((ROOT / 'resource/voice_routines/voice_routines.json').read_text(encoding='utf-8-sig'))
@@ -165,7 +168,7 @@ def learn(mac):
                     pass
 
 
-def save(mac, code, name, action, remove=False, enabled=True, previous_code=0):
+def save(mac, code, name, action, remove=False, enabled=True, previous_code=0, toggle_fallback='error'):
     if not re.fullmatch(r'(?:[0-9A-F]{2}:){5}[0-9A-F]{2}', mac) or not 1 <= code <= 767:
         raise ValueError('Định danh nút không hợp lệ')
     data = load()
@@ -174,6 +177,8 @@ def save(mac, code, name, action, remove=False, enabled=True, previous_code=0):
         if not isinstance(name, str) or not 1 <= len(name.strip()) <= 80:
             raise ValueError('Tên nút phải có từ 1 đến 80 ký tự')
         validate_action(action)
+        if toggle_fallback not in {'error', 'on', 'off'}:
+            raise ValueError('Lựa chọn dự phòng không hợp lệ')
         if old is None:
             if not any(token.get('mac') == mac and token.get('code') == code for token in learned_tokens()):
                 raise ValueError('Hãy học nút trước khi lưu (kết quả học có hiệu lực 3 phút)')
@@ -183,7 +188,8 @@ def save(mac, code, name, action, remove=False, enabled=True, previous_code=0):
     if not remove:
         if len(buttons) >= 256:
             raise ValueError('Đã đạt giới hạn 256 nút')
-        buttons.append({'mac': mac, 'code': code, 'name': name.strip(), 'action': action, 'enabled': enabled})
+        buttons.append({'mac': mac, 'code': code, 'name': name.strip(), 'action': action,
+                        'toggle_fallback': toggle_fallback, 'enabled': enabled})
     if STATE.exists():
         atomic(STATE.with_suffix('.json.bak'), data)
     atomic(STATE, {'version': 1, 'buttons': buttons})
@@ -207,7 +213,9 @@ class Monitor:
             if self.stop_event.is_set():
                 return
             self.log('[Bluetooth Key] '+identity+' | Nút '+binding['name']+' → '+binding['action'])
-            if self.execute(binding['action']) is False:
+            fallback = binding.get('toggle_fallback', 'error')
+            result = self.execute(binding['action'], fallback) if fallback in {'on', 'off'} else self.execute(binding['action'])
+            if result is False:
                 self.log('[Bluetooth Key] '+identity+' | Không thực hiện được nút '+binding['name'])
         except Exception as error:
             self.log('[Bluetooth Key] '+identity+' | Nút '+binding['name']+': '+str(error))
@@ -294,6 +302,7 @@ def main():
     parser.add_argument('--action', default='none')
     parser.add_argument('--enabled', choices=['0', '1'], default='1')
     parser.add_argument('--previous-code', type=int, default=0)
+    parser.add_argument('--toggle-fallback', choices=['error', 'on', 'off'], default='error')
     args = parser.parse_args()
     try:
         if args.operation == 'list':
@@ -304,7 +313,7 @@ def main():
             import fcntl
             with open('/run/lock/vbot-bluetooth-key-save.lock', 'a') as lock:
                 fcntl.flock(lock, fcntl.LOCK_EX)
-                data = save(args.mac.upper(), args.code, args.name, args.action, args.operation == 'delete', args.enabled == '1', args.previous_code)
+                data = save(args.mac.upper(), args.code, args.name, args.action, args.operation == 'delete', args.enabled == '1', args.previous_code, args.toggle_fallback)
         print(json.dumps({'success': True, **data}, ensure_ascii=False))
     except Exception as error:
         print(json.dumps({'success': False, 'message': str(error)}, ensure_ascii=False))
