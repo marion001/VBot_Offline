@@ -70,6 +70,7 @@ window.addEventListener('DOMContentLoaded', function () {
 });
 
 function updateTime() {
+    if (document.hidden) return;
     var d = new Date();
     var hour = d.getHours();
     var min = d.getMinutes();

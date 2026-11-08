@@ -886,7 +886,7 @@ class WpaSupplicant:
                     if self.changePassword(known_network,pw):
                         self.connect(known_network)
                 else:
-                    Log.log(f'arrived with no password - nothing to change - connecting')
+                    Log.log('arrived with no password - nothing to change - connecting')
                     self.connect(known_network)
             else:
                 Log.log(f'ssid was scanned {ssid} - new network with password supplied')
@@ -942,7 +942,7 @@ class WpaSupplicant:
                 Log.log(f'removing new network {network.ssid} from wpa_cli current configuration: {out}')
             else: # any password change / change of psk should not be saved - best way is to reload wpa_supplicant.conf file
                   # which at this point matches wpa list anyway (any previous successful connection would have persisted changes to that file via save_config.)
-                out = subprocess.run(f"wpa_cli -i wlan0 reconfigure", 
+                out = subprocess.run("wpa_cli -i wlan0 reconfigure", 
                                     shell=True,capture_output=True,encoding='utf-8',text=True).stdout
                 Log.log(f'reloading supplicant conf file with wpa_cli: {out}')
             #attempt to reconnect to previously connected network - if there was one:
@@ -1062,7 +1062,7 @@ class WpaSupplicant:
         network_num=''
         try:
             #this returns the network number
-            network_num = subprocess.run(f"wpa_cli -i wlan0 add_network", 
+            network_num = subprocess.run("wpa_cli -i wlan0 add_network", 
                             shell=True,capture_output=True,encoding='utf-8',text=True).stdout.strip()
             Log.log(f'new network number = {network_num}')
             ssid_hex=''.join([x.encode('utf-8').hex() for x in ssid])
@@ -1145,7 +1145,7 @@ class WpaSupplicant:
         #at this point the network numbers may have changed.
         #best way is to reload wpa_supplicant.conf file
         # which at this point matches wpa list anyway (any previous successful connection would have persisted changes to that file via save_config.)
-        out = subprocess.run(f"wpa_cli -i wlan0 reconfigure", 
+        out = subprocess.run("wpa_cli -i wlan0 reconfigure", 
                              shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         #network numbers should now be in order - retreive them
         self.mgr.wpa.retrieve_network_numbers()

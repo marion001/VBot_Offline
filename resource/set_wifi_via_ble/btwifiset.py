@@ -1003,7 +1003,7 @@ class WpaSupplicant:
                     if self.changePassword(known_network,pw):
                         self.connect(known_network)
                 else:
-                    mLOG.log(f'arrived with no password - nothing to change - connecting')
+                    mLOG.log('arrived with no password - nothing to change - connecting')
                     self.connect(known_network)
             else:
                 mLOG.log(f'ssid was scanned {ssid} - new network with password supplied')
@@ -1059,7 +1059,7 @@ class WpaSupplicant:
                 mLOG.log(f'removing new network {network.ssid} from wpa_cli current configuration: {out}')
             else: # any password change / change of psk should not be saved - best way is to reload wpa_supplicant.conf file
                   # which at this point matches wpa list anyway (any previous successful connection would have persisted changes to that file via save_config.)
-                out = subprocess.run(f"wpa_cli -i wlan0 reconfigure", 
+                out = subprocess.run("wpa_cli -i wlan0 reconfigure", 
                                     shell=True,capture_output=True,encoding='utf-8',text=True).stdout
                 mLOG.log(f'reloading supplicant conf file with wpa_cli: {out}')
             #attempt to reconnect to previously connected network - if there was one:
@@ -1179,7 +1179,7 @@ class WpaSupplicant:
         network_num=''
         try:
             #this returns the network number
-            network_num = subprocess.run(f"wpa_cli -i wlan0 add_network", 
+            network_num = subprocess.run("wpa_cli -i wlan0 add_network", 
                             shell=True,capture_output=True,encoding='utf-8',text=True).stdout.strip()
             mLOG.log(f'new network number = {network_num}')
             ssid_hex=''.join([x.encode('utf-8').hex() for x in ssid])
@@ -1262,7 +1262,7 @@ class WpaSupplicant:
         #at this point the network numbers may have changed.
         #best way is to reload wpa_supplicant.conf file
         # which at this point matches wpa list anyway (any previous successful connection would have persisted changes to that file via save_config.)
-        out = subprocess.run(f"wpa_cli -i wlan0 reconfigure", 
+        out = subprocess.run("wpa_cli -i wlan0 reconfigure", 
                              shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         #network numbers should now be in order - retreive them
         self.mgr.wpa.retrieve_network_numbers()
@@ -1775,7 +1775,7 @@ class BTCrypto:
         try:
             nonce_bytes = cypher[0:12]
             message = AndroidAES.decrypt(cypher,self.hashed_pw) 
-            if not nonce_counter.useAES: mLOG.log(f'AES encryption detected') # only warn if changing encryption
+            if not nonce_counter.useAES: mLOG.log('AES encryption detected') # only warn if changing encryption
             nonce_counter.useAES = True
             if nonce_counter.checkLastReceived(nonce_bytes) :return message
             #if nonce was stale return a blank message which will be ignored
@@ -1795,7 +1795,7 @@ class BTCrypto:
         chacha = ChaCha20Poly1305(self.hashed_pw)
         try:
             message = chacha.decrypt(nonce_bytes, ct,None)
-            if nonce_counter.useAES : mLOG.log(f'ChaCha encryption detected') #only warn if changing encryption
+            if nonce_counter.useAES : mLOG.log('ChaCha encryption detected') #only warn if changing encryption
             nonce_counter.useAES = False
             #checkLastReceived updates the last receive dictionary if nonce is OK (ie not stale)
             if nonce_counter.checkLastReceived(nonce_bytes) : return message
@@ -2808,17 +2808,17 @@ class Application(dbus.service.Object):
             for service in self.services:
                 service.deinit()
         except Exception as exs:
-            mLOG.log(f"exception trying to deinit service")
+            mLOG.log("exception trying to deinit service")
             mLOG.log(exs)
         try:
             self.service_manager.UnregisterApplication(self.get_path())
         except Exception as exa:
-            mLOG.log(f"exception trying to unregister Application")
+            mLOG.log("exception trying to unregister Application")
             mLOG.log(exa)
         try:
             dbus.service.Object.remove_from_connection(self)
         except Exception as exrc:
-            mLOG.log(f"dbus exception trying to remove object from connection")
+            mLOG.log("dbus exception trying to remove object from connection")
             mLOG.log(exrc)
         
 
@@ -3520,7 +3520,7 @@ class WifiSetService(Service):
                         mLOG.log(f'adding {connected_ssid} to notifications')
                         self.notifications.setNotification(connected_ssid,"wifi")
                     else:
-                        mLOG.log(f'adding FAIL to notifications')
+                        mLOG.log('adding FAIL to notifications')
                         self.notifications.setNotification('FAIL',"wifi")
             except Exception as ex:
                 mLOG.log("EERROR - ",ex)
@@ -3627,7 +3627,7 @@ class WifiDataCharacteristic(Characteristic):
         return self.notifying
 
     def StartNotify(self):
-        mLOG.log(f'ios has started notifications for wifi info')
+        mLOG.log('ios has started notifications for wifi info')
         self.service.notifications.reset()
         if self.notifying:
             return
@@ -3636,7 +3636,7 @@ class WifiDataCharacteristic(Characteristic):
         self.add_timeout(NOTIFY_TIMEOUT, self.info_wifi_callback)
 
     def StopNotify(self):
-        mLOG.log(f'ios has stopped notifications for wifi info')
+        mLOG.log('ios has stopped notifications for wifi info')
         self.service.notifications.reset()
         self.notifying = False
 

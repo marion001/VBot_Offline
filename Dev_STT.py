@@ -101,7 +101,7 @@ async def dev_stt():
                     print("Đã dừng thu âm sau 2 giây không có âm thanh")
                     break
     try:
-        Lib.show_log(f"[DEV STT] Đang thu âm.....", color=Lib.Color.PURPLE)
+        Lib.show_log("[DEV STT] Đang thu âm.....", color=Lib.Color.PURPLE)
         config = speech.RecognitionConfig(
             encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
             sample_rate_hertz=RATE,

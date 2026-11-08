@@ -54,6 +54,16 @@ if ($filePath === false) {
     ], 400);
 }
 
+$forbiddenDeleteExtensions = ['py', 'php', 'sh', 'service', 'so', 'js', 'css', 'html'];
+$resolvedExt = strtolower(pathinfo($filePath, PATHINFO_EXTENSION));
+if (vbotApiIsSensitiveFilePath($filePath) || in_array($resolvedExt, $forbiddenDeleteExtensions, true)) {
+    vbotApiJsonResponse([
+        'success' => false,
+        'status' => 'error',
+        'message' => 'Không được phép xóa tệp hệ thống hoặc tệp cấu hình bảo mật.'
+    ], 403);
+}
+
 if (file_exists($filePath)) {
     $fileExtension = pathinfo($filePath, PATHINFO_EXTENSION);
     $fileName = vbotUtf8Basename($filePath);

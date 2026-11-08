@@ -423,17 +423,17 @@ class Application(dbus.service.Object):
             for service in self.services:
                 service.deinit()
         except Exception as exs:
-            Log.log(f"exception trying to deinit service")
+            Log.log("exception trying to deinit service")
             Log.log(exs)
         try:
             self.service_manager.UnregisterApplication(self.get_path())
         except Exception as exa:
-            Log.log(f"exception trying to unregister Application")
+            Log.log("exception trying to unregister Application")
             Log.log(exa)
         try:
             dbus.service.Object.remove_from_connection(self)
         except Exception as exrc:
-            Log.log(f"dbus exception trying to remove object from connection")
+            Log.log("dbus exception trying to remove object from connection")
             Log.log(exrc)
         
 
@@ -835,7 +835,7 @@ class WifiSetService(Service):
                         Log.log(f'adding {connected_ssid} to notifications')
                         self.notifications.setNotification(connected_ssid,"wifi")
                     else:
-                        Log.log(f'adding FAIL to notifications')
+                        Log.log('adding FAIL to notifications')
                         self.notifications.setNotification('FAIL',"wifi")
             except Exception as ex:
                 Log.log("EERROR - ",ex)
@@ -936,7 +936,7 @@ class WifiDataCharacteristic(Characteristic):
         return self.notifying
 
     def StartNotify(self):
-        Log.log(f'ios has started notifications for wifi info')
+        Log.log('ios has started notifications for wifi info')
         self.service.notifications.reset()
         if self.notifying:
             return
@@ -945,7 +945,7 @@ class WifiDataCharacteristic(Characteristic):
         self.add_timeout(NOTIFY_TIMEOUT, self.info_wifi_callback)
 
     def StopNotify(self):
-        Log.log(f'ios has stopped notifications for wifi info')
+        Log.log('ios has stopped notifications for wifi info')
         self.service.notifications.reset()
         self.notifying = False
 

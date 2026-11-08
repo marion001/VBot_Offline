@@ -403,9 +403,10 @@ if (isset($_GET['read_files_in_backup']) && isset($_GET['file_path']) && !empty(
     && strpos($file_name, "\0") === false
     && strpos($normalizedMemberName, '../') === false
     && substr($normalizedMemberName, 0, 1) !== '/'
-    && (!$fileAccessSecurity || !vbotApiIsSensitiveFilePath('/'.$normalizedMemberName))
+    && substr($normalizedMemberName, 0, 1) !== '-'
+    && !vbotApiIsSensitiveFilePath('/'.$normalizedMemberName)
   ) {
-    $command = "tar -O -xzf " . escapeshellarg($file_path) . " " . escapeshellarg($file_name);
+    $command = "tar -O -xzf " . escapeshellarg($file_path) . " -- " . escapeshellarg($file_name);
     $file_content = shell_exec($command);
     if ($file_content !== null) {
       if (substr($file_name, -5) === '.json') {

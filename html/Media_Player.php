@@ -397,8 +397,12 @@ include 'html_head.php';
           document.getElementById('message_error').textContent = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + error;
         });
     }
-    //Bắt đầu lấy dữ liệu mỗi giây
-    intervalId = setInterval(fetchData_Media_Player, <?php echo intval($Config['media_player']['media_sync_ui']['delay_time']); ?> * 1000);
+    //Bắt đầu lấy dữ liệu mỗi giây (tạm ngưng khi tab ẩn)
+    intervalId = setInterval(() => {
+      if (!document.hidden) {
+        fetchData_Media_Player();
+      }
+    }, <?php echo max(1, intval($Config['media_player']['media_sync_ui']['delay_time'])); ?> * 1000);
     //Ngừng cập nhật thanh trượt khi hover chuột vào
     document.getElementById('progress-bar').addEventListener('mouseover', () => {
       isHovering = true;

@@ -49,8 +49,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["save_syscmd"])) {
                     $data["voice_command_system_control"][$index]["command_when_speaking"] = $cmd;
                 }
             }
-            file_put_contents($FILE, json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            $alert_msg = alert("success", "<i class='bi bi-check2-circle'></i> <strong>Đã lưu dữ liệu thành công!</strong>");
+            $encodedJson = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+            $savedOk = function_exists('vbotAtomicWriteFile')
+                ? vbotAtomicWriteFile($FILE, $encodedJson, 'SYS_CMD.json')
+                : (file_put_contents($FILE, $encodedJson, LOCK_EX) !== false);
+            if ($savedOk) {
+                $alert_msg = alert("success", "<i class='bi bi-check2-circle'></i> <strong>Đã lưu dữ liệu thành công!</strong>");
+            } else {
+                $alert_msg = alert("danger", "<i class='bi bi-x-l'></i> Không thể lưu dữ liệu vào $FILE");
+            }
         }
     }
 }

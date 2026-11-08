@@ -388,7 +388,7 @@ class BTCrypto:
         try:
             nonce_bytes = cypher[0:12]
             message = AndroidAES.decrypt(cypher,self.hashed_pw) 
-            if not nonce_counter.useAES: Log.log(f'AES encryption detected') # only warn if changing encryption
+            if not nonce_counter.useAES: Log.log('AES encryption detected') # only warn if changing encryption
             nonce_counter.useAES = True
             if nonce_counter.checkLastReceived(nonce_bytes) :return message
             #if nonce was stale return a blank message which will be ignored
@@ -408,7 +408,7 @@ class BTCrypto:
         chacha = ChaCha20Poly1305(self.hashed_pw)
         try:
             message = chacha.decrypt(nonce_bytes, ct,None)
-            if nonce_counter.useAES : Log.log(f'ChaCha encryption detected') #only warn if changing encryption
+            if nonce_counter.useAES : Log.log('ChaCha encryption detected') #only warn if changing encryption
             nonce_counter.useAES = False
             #checkLastReceived updates the last receive dictionary if nonce is OK (ie not stale)
             if nonce_counter.checkLastReceived(nonce_bytes) : return message

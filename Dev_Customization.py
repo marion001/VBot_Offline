@@ -111,7 +111,7 @@ async def dev_skill(input_text):
     Sử dụng hiển thị show_log và màu Sắc
     color=Lib.Color.GREEN sẽ có các tham số màu: PURPLE, CYAN, DARKCYAN, BLUE, GREEN, YELLOW, RED, BOLD, UNDERLINE, END, WHITE
     """
-    Lib.show_log(f"[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
+    Lib.show_log("[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
 
     #Ví dụ sử dụng trợ lý ảo
     """
@@ -198,7 +198,7 @@ async def dev_skill(input_text):
     return False -> thì sẽ sử dụng tiếp Vbot để xử lý dữ liệu
     return True -> quay về trạng thái chời được đánh thức
     """
-    Lib.show_log(f"[DEV Customization] return False => Vbot sẽ xử lý tiếp dữ liệu", color=Lib.Color.GREEN)
+    Lib.show_log("[DEV Customization] return False => Vbot sẽ xử lý tiếp dữ liệu", color=Lib.Color.GREEN)
     return False
     #Dữ liệu trả lại về cho trương trình bắt buộc là return True hoặc False = None
     

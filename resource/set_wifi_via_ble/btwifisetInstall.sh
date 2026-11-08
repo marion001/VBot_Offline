@@ -109,7 +109,7 @@ function installviapip() {
     # Use --ignore-installed b/c we def want it to be installed!
     $sudo $vpip3 install --ignore-installed $pkg
     sts=$?
-    [ ! $sts ] && errexit "? Error returned from '$vpip3 install $pkg' ($sts)"
+    [ "$sts" -ne 0 ] && errexit "? Error returned from '$vpip3 install $pkg' ($sts)"
 }
 
 #
@@ -302,7 +302,7 @@ then
     echo "> Install required Python components: $pycomponents"
     $sudo apt install $pycomponents --yes --no-install-recommends
     sts=$?
-    [ ! $sts ] && errexit "? Error returned from apt install ($sts)"
+    [ "$sts" -ne 0 ] && errexit "? Error returned from apt install ($sts)"
 fi
 
 # Create the venv if installing cryptography or dbus with pip

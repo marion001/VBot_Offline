@@ -35,7 +35,7 @@ print(f"{YELLOW}Cài đặt các gói cần thiết...{RESET}")
 run_command("sudo apt install -y swig libatlas-base-dev liblapack-dev libblas-dev libopenblas-dev")
 
 print(f"{YELLOW}Tải và cài đặt scipy{RESET}")
-run_command(f"pip install scipy")
+run_command("pip install scipy")
 scipy_whl = f"{HOME_DIR}/scipy-1.13.1-cp39-cp39-linux_armv7l.whl"
 #run_command(f"wget -P {HOME_DIR} https://www.piwheels.org/simple/scipy/scipy-1.13.1-cp39-cp39-linux_armv7l.whl")
 #run_command(f"pip install {scipy_whl}")

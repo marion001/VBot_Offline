@@ -40,7 +40,8 @@ const PRECACHE_URLS = [
 
 //Phần mở rộng coi là tĩnh; mọi thứ khác (đặc biệt là .php) luôn lấy từ mạng
 const STATIC_EXTENSIONS =
-  /\.(css|js|mjs|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|otf|map)$/i;
+  /\.(css|js|mjs|png|jpg|jpeg|gif|svg|webp|ico|woff|woff2|ttf|eot|otf)$/i;
+const FONT_EXTENSIONS = /\.(woff|woff2|ttf|eot|otf)$/i;
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -97,9 +98,10 @@ self.addEventListener('fetch', (event) => {
   if (!isStaticAsset(url)) return;
 
   //Tài nguyên tĩnh: stale-while-revalidate
-  //ignoreSearch: khớp cả khi URL có tham số phiên bản (?v=..., ?hash font...)
+  //Chỉ dùng ignoreSearch cho font; CSS/JS có ?v=... phải tôn trọng query để cập nhật ngay khi nâng cấp
+  const matchOptions = FONT_EXTENSIONS.test(url.pathname) ? { ignoreSearch: true } : undefined;
   event.respondWith(
-    caches.match(request, { ignoreSearch: true }).then((cached) => {
+    caches.match(request, matchOptions).then((cached) => {
       const refresh = fetch(request).then((response) => {
         if (response && response.status === 200) {
           const clone = response.clone();

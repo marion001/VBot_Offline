@@ -190,8 +190,10 @@ if (isset($_POST['reset_limit_login'])) {
   $inputEmail = trim($_POST['email'] ?? '');
   if (strcasecmp($inputEmail, $Config['contact_info']['email']) === 0) {
     if (file_exists($filePath_Data)) {
-      $resetResult = vbotUpdateLoginData($filePath_Data, $loginClientKey, function (&$data) {
-        $data['attempts_by_client'] = [];
+      $resetResult = vbotUpdateLoginData($filePath_Data, $loginClientKey, function (&$data) use ($loginClientKey) {
+        if (isset($data['attempts_by_client'][$loginClientKey])) {
+          unset($data['attempts_by_client'][$loginClientKey]);
+        }
         return true;
       });
       $Login_Data = $resetResult['data'];

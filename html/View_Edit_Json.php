@@ -31,9 +31,9 @@ if (isset($_POST['file_path']) && isset($_POST['code'])) {
   $file_path = vbotApiResolveExistingPath($_POST['file_path'], $allowedJsonRoots, 'file');
   $json_code = $_POST['code'];
   // Nếu file_path trống thì bỏ qua xử lý
-  if ($file_path === false || strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) !== 'json') {
+  if ($file_path === false || strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) !== 'json' || vbotApiIsSensitiveFilePath($file_path)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Chỉ được sửa file JSON hiện có bên trong thư mục VBot.']);
+    echo json_encode(['success' => false, 'message' => 'Chỉ được sửa file JSON không nhạy cảm bên trong thư mục VBot.']);
     exit;
   }
   // Kiểm tra JSON có hợp lệ không
@@ -142,9 +142,6 @@ include 'html_head.php';
     }
     ?>
 </select>
-<div class="editor" id="editor"></div>
-<div class="editor" id="editor"></div>
-
           <div class="editor" id="editor"></div>
         </div>
       </div>

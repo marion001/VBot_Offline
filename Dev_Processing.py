@@ -289,7 +289,7 @@ async def _dev_processing_impl(text_input):
     """
     #Có thể xóa đoạn này nếu không sử dụng
     if Lib.developer_customization:
-        Lib.show_log(f"[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
+        Lib.show_log("[DEV Customization] Tùy chỉnh nhà phát triển đang xử lý dữ liệu...", color=Lib.Color.GREEN)
         response_dev_skill = await Dev_Customization.dev_skill(text_input_lower)
         #Nếu Dev Skill có dữ liệu trả về hoặc là true
         if response_dev_skill:
@@ -313,7 +313,7 @@ async def _dev_processing_impl(text_input):
 
             #Chạy tiếp code bên dưới để xử lý
             else:
-                Lib.show_log(f"[DEV Customization] Áp dụng DEV_Processing để xử lý dữ liệu, Chạy tiếp code bên dưới để xử lý", color=Lib.Color.GREEN)
+                Lib.show_log("[DEV Customization] Áp dụng DEV_Processing để xử lý dữ liệu, Chạy tiếp code bên dưới để xử lý", color=Lib.Color.GREEN)
     """
     #Kết Thúc Dev Skill, Custom Skill
     """
@@ -361,7 +361,7 @@ async def _dev_processing_impl(text_input):
     """
     #Hoặc Xử Lý Cuối Có Thể Dùng Trợ Lý Ảo Để Xử Lý Bên Dưới Đây
     """
-    Lib.show_log(f"[DEV Processing] Bắt đầu gọi trợ lý ảo để xử lý dữ liệu", color=Lib.Color.GREEN)
+    Lib.show_log("[DEV Processing] Bắt đầu gọi trợ lý ảo để xử lý dữ liệu", color=Lib.Color.GREEN)
     audio_data = None
 
     #Gọi trợ lý ảo đã xử lý sẵn cả text và dữ liệu âm thanh trả về 2 giá trị
@@ -375,14 +375,14 @@ async def _dev_processing_impl(text_input):
 
     #Kiểm tra nếu có dữ liệu âm thanh trả về từ trợ lý ảo
     elif Assistant_Audio:
-        #Gán dữ liệu âm thanh vào biến audio_data
-        audio_data = Assistant_Audio
         #Nếu có dữ liệu âm thanh trả về từ trợ lý ảo in ra logs
         Lib.show_log(f"[DEV Processing] Dữ liệu âm thanh trả về từ trợ lý ảo: {Assistant_Audio}", color=Lib.Color.GREEN)
 
     #Không có dữ liệu trả về từ trợ lý ảo
     else:
         Lib.show_log("[DEV Processing] Assistant văn bản và âm thanh đều không có dữ liệu phản hồi!", color=Lib.Color.RED)
+
+    audio_data = Assistant_Audio
 
     #Nếu có dữ liệu âm thanh từ trợ lý ảo trả về
     if audio_data:

@@ -223,8 +223,11 @@ def download_with_progress(url, destination, timeout):
         total = int(total_header) if total_header and total_header.isdigit() else 0
         downloaded = 0
         started = time.monotonic()
+        overall_deadline = started + 1200
         last_display = 0.0
         while True:
+            if time.monotonic() > overall_deadline:
+                raise TimeoutError("Tải gói cập nhật WebUI vượt quá thời gian tối đa (1200 giây)")
             chunk = response.read(64 * 1024)
             if not chunk:
                 break

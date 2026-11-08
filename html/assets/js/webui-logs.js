@@ -57,9 +57,17 @@
         }
         stopLogViewer();
 
+        var isFetchingLogs = false;
         function fetchLogs() {
+            if (document.hidden || isFetchingLogs) {
+                return;
+            }
+            isFetchingLogs = true;
             var xhr = vbotCreateXhr();
             xhr.timeout = 10000;
+            xhr.onloadend = function () {
+                isFetchingLogs = false;
+            };
             xhr.onerror = function () {
                 output.innerHTML = '<span style="color:red">Không thể kết nối đến API, vui lòng kiểm tra lại</span>';
             };

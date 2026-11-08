@@ -14,11 +14,10 @@ $providedApiKey = isset($_SERVER['HTTP_VBOT_API_KEY'])
 	? trim((string)$_SERVER['HTTP_VBOT_API_KEY'])
 	: '';
 $apiAuthEnabled = !empty($Config['api']['auth']['active']) || getenv('VBOT_API_KEY');
-$apiKeyAuthorized = !$apiAuthEnabled || (
-	$API_AUTH_KEY !== ''
+$apiKeyAuthorized = $apiAuthEnabled
+	&& $API_AUTH_KEY !== ''
 	&& $providedApiKey !== ''
-	&& hash_equals($API_AUTH_KEY, $providedApiKey)
-);
+	&& hash_equals($API_AUTH_KEY, $providedApiKey);
 
 if ($Config['contact_info']['user_login']['active'] && !$apiKeyAuthorized) {
 	session_start();
@@ -866,7 +865,7 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 			]);
 		}
 		exit();
-	} else if (strpos($URL, "tienphong.vn") !== false) {
+	} else if (($urlScheme === 'http' || $urlScheme === 'https') && ($urlHost === 'tienphong.vn' || substr($urlHost, -strlen('.tienphong.vn')) === '.tienphong.vn')) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $URL);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -903,7 +902,7 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 			]);
 		}
 		exit();
-	}else if (strpos($URL, "baomoi.com") !== false) {
+	} else if (($urlScheme === 'http' || $urlScheme === 'https') && ($urlHost === 'baomoi.com' || substr($urlHost, -strlen('.baomoi.com')) === '.baomoi.com')) {
 		if (strpos($URL, '#') !== false) {
 			$fragments = explode('#', $URL);
 			$last_fragment = end($fragments);
@@ -956,7 +955,7 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 		}
 		exit();
 	}
-	else if (strpos($URL, "24h.com.vn") !== false) {
+	else if (($urlScheme === 'http' || $urlScheme === 'https') && ($urlHost === '24h.com.vn' || substr($urlHost, -strlen('.24h.com.vn')) === '.24h.com.vn')) {
 		$html = @file_get_contents($URL);
 		if ($html) {
 			if (preg_match('/<source[^>]+src=["\']([^"\']+\.mp3)[^"\']*["\']/i', $html, $m)) {
@@ -996,8 +995,8 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 
 //Tìm kiếm podcast
 if (isset($_GET['podcast_Search'])) {
-	$podcast_Name = isset($_GET['PodCastName']) ? $_GET['PodCastName'] : '';
-	$podcast_Limit = isset($_GET['Limit']) ? $_GET['Limit'] : '1';
+	$podcast_Name = isset($_GET['PodCastName']) ? trim((string)$_GET['PodCastName']) : '';
+	$podcast_Limit = max(1, min(50, intval(isset($_GET['Limit']) ? $_GET['Limit'] : 1)));
 	if (empty($podcast_Name)) {
 		$response = array(
 			'success' => false,
@@ -1026,7 +1025,16 @@ if (isset($_GET['podcast_Search'])) {
 		CURLOPT_FOLLOWLOCATION => true,
 		CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
 		CURLOPT_CUSTOMREQUEST => 'POST',
-		CURLOPT_POSTFIELDS => '{"operationName":"Search","query":"query Search($keyword: String!, $category: [String]!, $offset: Int!, $limit: Int!) {\\n  search(\\n    q: $keyword\\n    offset: $offset\\n    limit: $limit\\n    filter: {media: {types: $category}}\\n  ) {\\n    __typename\\n    episode {\\n      __typename\\n      audio\\n      duration\\n      id\\n      is_gcs\\n      published_at\\n      title\\n      media {\\n        __typename\\n        audio\\n        cover\\n        created_at\\n        id\\n        slug\\n        title\\n        total_episode\\n        content_type {\\n          __typename\\n          description\\n          value\\n        }\\n      }\\n      authors\\n      description\\n    }\\n    media {\\n      __typename\\n      cover\\n      created_at\\n      is_list\\n      slug\\n      title\\n      total_episode\\n      type\\n      id\\n      content_type {\\n        __typename\\n        description\\n        value\\n      }\\n    }\\n  }\\n}","variables":{"category":[],"keyword":"' . $podcast_Name . '","limit":' . $podcast_Limit . ',"offset":0}}',
+		CURLOPT_POSTFIELDS => json_encode([
+			'operationName' => 'Search',
+			'query' => "query Search(\$keyword: String!, \$category: [String]!, \$offset: Int!, \$limit: Int!) {\n  search(\n    q: \$keyword\n    offset: \$offset\n    limit: \$limit\n    filter: {media: {types: \$category}}\n  ) {\n    __typename\n    episode {\n      __typename\n      audio\n      duration\n      id\n      is_gcs\n      published_at\n      title\n      media {\n        __typename\n        audio\n        cover\n        created_at\n        id\n        slug\n        title\n        total_episode\n        content_type {\n          __typename\n          description\n          value\n        }\n      }\n      authors\n      description\n    }\n    media {\n      __typename\n      cover\n      created_at\n      is_list\n      slug\n      title\n      total_episode\n      type\n      id\n      content_type {\n        __typename\n        description\n        value\n      }\n    }\n  }\n}",
+			'variables' => [
+				'category' => [],
+				'keyword' => $podcast_Name,
+				'limit' => $podcast_Limit,
+				'offset' => 0
+			]
+		], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
 		CURLOPT_HTTPHEADER => array(
 			'Host: core.ocs.iviet.com',
 			'content-type: application/json',
@@ -1530,10 +1538,14 @@ if (isset($_GET['newspaper'])) {
 		echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
-	$filePath = "../cache/" . $Config['media_player']['news_paper']['newspaper_file_name'];
+	$filePath = "../cache/" . basename((string)$Config['media_player']['news_paper']['newspaper_file_name']);
+	$parsedNewsUrl = @parse_url($News_Paper);
+	$newsScheme = isset($parsedNewsUrl['scheme']) ? strtolower($parsedNewsUrl['scheme']) : '';
+	$newsHost = isset($parsedNewsUrl['host']) ? strtolower($parsedNewsUrl['host']) : '';
+	$isValidHttpNews = ($newsScheme === 'http' || $newsScheme === 'https') && $newsHost !== '';
 
 	//Báo vnexpress
-	if (strpos($News_Paper, "vnexpress.net") !== false) {
+	if ($isValidHttpNews && ($newsHost === 'vnexpress.net' || substr($newsHost, -strlen('.vnexpress.net')) === '.vnexpress.net')) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $News_Paper);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1591,7 +1603,7 @@ if (isset($_GET['newspaper'])) {
 		$response['message'] = "Nguồn dữ liệu Báo Thanh Niên không còn được hỗ trợ";
 	}
 	//Báo tuổi Trẻ
-	else if (strpos($News_Paper, "podcast.tuoitre.vn") !== false) {
+	else if ($isValidHttpNews && $newsHost === 'podcast.tuoitre.vn') {
 		$html = file_get_contents($News_Paper);
 		if ($html === false) {
 			$response['message'] = "Không thể lấy dữ liệu từ Báo: $News_Paper";
@@ -1630,7 +1642,7 @@ if (isset($_GET['newspaper'])) {
 		exit();
 	}
 	//Báo Tiền Phong
-	else if (strpos($News_Paper, "tienphong.vn") !== false) {
+	else if ($isValidHttpNews && ($newsHost === 'tienphong.vn' || substr($newsHost, -strlen('.tienphong.vn')) === '.tienphong.vn')) {
 		$ch = curl_init();
 		curl_setopt($ch, CURLOPT_URL, $News_Paper);
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -1697,7 +1709,7 @@ if (isset($_GET['newspaper'])) {
 		exit();
 	}
 	//Báo Mới
-	else if (strpos($News_Paper, "baomoi.com/audio") !== false) {
+	else if ($isValidHttpNews && ($newsHost === 'baomoi.com' || substr($newsHost, -strlen('.baomoi.com')) === '.baomoi.com') && strpos($News_Paper, "baomoi.com/audio") !== false) {
 		$html = file_get_contents($News_Paper);
 		if ($html === FALSE) {
 			$response['message'] = "Không thể lấy dữ liệu từ báo: " . $News_Paper;
@@ -1753,7 +1765,7 @@ if (isset($_GET['newspaper'])) {
 		exit();
 	}
 	//Báo Việt Nam Nét
-	else if (strpos($News_Paper, "vietnamnet.vn/podcast") !== false) {
+	else if ($isValidHttpNews && ($newsHost === 'vietnamnet.vn' || substr($newsHost, -strlen('.vietnamnet.vn')) === '.vietnamnet.vn') && strpos($News_Paper, "vietnamnet.vn/podcast") !== false) {
 		$html = file_get_contents($News_Paper);
 		$printedTitles = [];
 		$pattern = '/<div\s+class=["\'][^"\']*horizontalPost__avt[^"\']*["\'].*?>.*?<\/div>/s';
@@ -1819,7 +1831,7 @@ if (isset($_GET['newspaper'])) {
 		exit();
 	}
 	//Báo 24h.com.vn
-	else if (strpos($News_Paper, "24h.com.vn") !== false) {
+	else if ($isValidHttpNews && ($newsHost === '24h.com.vn' || substr($newsHost, -strlen('.24h.com.vn')) === '.24h.com.vn')) {
 		$html = @file_get_contents($News_Paper);
 		if ($html === false) {
 			$response['message'] = "Không thể lấy dữ liệu từ báo: " . $News_Paper;

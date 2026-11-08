@@ -212,11 +212,11 @@ function vbotApiCanExposeFile($resolvedPath, $loginActive, array $anonymousRoots
     if ($resolvedPath === false) {
         return false;
     }
-    if (!$securityEnabled) {
-        return true;
-    }
     if (vbotApiIsSensitiveFilePath($resolvedPath)) {
         return false;
+    }
+    if (!$securityEnabled) {
+        return true;
     }
     return $loginActive || vbotApiAnonymousReadablePath($resolvedPath, $anonymousRoots, $vbotRoot);
 }

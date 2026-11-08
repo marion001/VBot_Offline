@@ -169,7 +169,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['ping_status'])) {
         $ip_input = implode(",", $ip_input);
     }
     $ip_input = escapeshellarg($ip_input);
-    $CMD = 'python3 '.$Config['web_interface']['path'].'/includes/php_ajax/Ping.py '.$ip_input;
+    $pingScript = escapeshellarg($Config['web_interface']['path'].'/includes/php_ajax/Ping.py');
+    $CMD = 'python3 '.$pingScript.' '.$ip_input;
     $result = [
         'success' => false,
         'message' => '',

@@ -107,10 +107,11 @@ def LED_LOADING():
                 pos2 = ((num_pixels // 2) + (j - t)) % num_pixels
                 #Giảm sáng dần
                 brightness = max(0, 255 - (t * fade_step))
+                scaled_color = Color(0, brightness, 0)
                 # LED nửa đầu
-                strip.setPixelColor(pos1, BASE_COLOR)
+                strip.setPixelColor(pos1, scaled_color)
                 # LED nửa sau
-                strip.setPixelColor(pos2, BASE_COLOR)
+                strip.setPixelColor(pos2, scaled_color)
             strip.show()
             #Tốc độ quay hiệu ứng
             time.sleep(0.08)
@@ -132,7 +133,9 @@ def LED_THINK(color_hex=Lib.config['smart_config']['led']['effect']['led_think']
         if Lib.current_led_effect != "THINK":
             break
         # Hiệu ứng sáng dần
-        for brightness in range(0, 256, 5):  
+        for brightness in range(0, 256, 5):
+            if not Lib.led_effect_active or Lib.current_led_effect != "THINK":
+                break
             strip.setBrightness(brightness)
             for i in range(num_pixels):
                 strip.setPixelColor(i, base_color)
@@ -140,13 +143,16 @@ def LED_THINK(color_hex=Lib.config['smart_config']['led']['effect']['led_think']
             #Điều chỉnh tốc sáng
             time.sleep(0.02)
         # Hiệu ứng mờ dần
-        for brightness in range(255, -1, -5):  
+        for brightness in range(255, -1, -5):
+            if not Lib.led_effect_active or Lib.current_led_effect != "THINK":
+                break
             strip.setBrightness(brightness)
             for i in range(num_pixels):
                 strip.setPixelColor(i, base_color)
             strip.show()
             #Điều chỉnh tốc sáng
-            time.sleep(0.02)  
+            time.sleep(0.02)
+        strip.setBrightness(Lib.led_brightness)
         if not Lib.led_effect_active:
             break
 #KẾT THÚC LED THINK
@@ -281,10 +287,11 @@ def LED_SPEAK():
                 pos2 = ((num_pixels // 2) + (j + t)) % num_pixels  
                 # Giảm sáng dần
                 brightness = max(0, 255 - (t * fade_step))
+                scaled_color = Color(0, brightness, 0)
                 # LED nửa đầu
-                strip.setPixelColor(pos1, BASE_COLOR)
+                strip.setPixelColor(pos1, scaled_color)
                 # LED nửa sau
-                strip.setPixelColor(pos2, BASE_COLOR)
+                strip.setPixelColor(pos2, scaled_color)
             strip.show()
             #Tốc độ quay hiệu ứng
             time.sleep(0.13)
@@ -321,7 +328,7 @@ def LED_STARTUP():
                 #Nửa Phải
                 strip.setPixelColor((num_pixels // 2) + i, color)
                 #Nửa Trái
-                strip.setPixelColor((num_pixels // 2) - i, color)
+                strip.setPixelColor((num_pixels // 2) - 1 - i, color)
                 strip.show()
                 time.sleep(0.09)
             time.sleep(0.1)
