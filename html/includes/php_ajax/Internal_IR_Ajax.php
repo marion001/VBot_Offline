@@ -111,7 +111,9 @@ function internalIrAction($value, array $config) {
     $action = trim((string)$value);
     if (strpos($action, 'vbot_action:') === 0) $action = substr($action, 12);
     if (array_key_exists($action, internalIrActionOptions($config)) || array_key_exists($action, vbotActionRegistryOptions($config, true))) return $action;
-    return preg_match('/^(?:toggle:)?(?:(?:playlist|radio|routine|wol):[A-Za-z0-9_-]{1,80}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $action) ? $action : null;
+    if (preg_match('/^(?:toggle:)?(?:(?:playlist|radio|routine|wol):[A-Za-z0-9_-]{1,80}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $action)
+        || preg_match('/^led_effect:[a-z][a-z0-9_]{0,63}$/D', $action)) return $action;
+    return null;
 }
 function internalIrValidBackup($data, array $config) {
     if (!is_array($data) || !isset($data['commands']) || !is_array($data['commands']) || count($data['commands']) > 500) return false;

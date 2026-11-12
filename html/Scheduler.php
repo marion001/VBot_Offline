@@ -1352,7 +1352,7 @@ include 'html_head.php';
             if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^toggle:(?:tuya|hass):[A-Za-z0-9_-]+(?::(?:on|off))?$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
               $vbotActionOptions[$savedAction] = 'Thao tác đảo trạng thái đã lưu';
             }
-            if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^(?:ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
+            if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^(?:ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|led_effect:[a-z][a-z0-9_]{0,63})$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {
               $vbotActionOptions[$savedAction] = 'Thao tác thiết bị đã cấu hình không còn tồn tại';
             }
             if (($savedSchedule['task'] ?? '') === 'vbot_action' && preg_match('/^routine:[A-Za-z0-9_-]{1,64}$/D', $savedAction) && !isset($vbotActionOptions[$savedAction])) {

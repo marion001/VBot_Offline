@@ -685,6 +685,109 @@ include 'html_head.php';
 			  
           </div>
           <!-- kết thúc chức năng chung -->
+
+<div class="card">
+    <div class="card-body">
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center border-bottom pb-3 mb-3">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-lightbulb text-warning me-1"></i>
+                Điều khiển hiệu ứng đèn LED
+                <i class="bi bi-question-circle-fill ms-1" role="button" tabindex="0" onclick="show_message('Có thể tự viết thêm hiệu ứng LED trong file Dev_Led_Effects.py.<br/>Mở hàm tổng tương ứng với loại LED đang dùng: ws281x, apa102, respeaker_mic_array hoặc custom. Viết hàm hiệu ứng con rồi thêm vào mục effects của hàm đó, gồm tên dùng trong API và tên hiển thị.<br/>Tham khảo ví dụ trong README.md, lưu file rồi khởi động lại VBot')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}" aria-label="Hướng dẫn thêm hiệu ứng LED"></i>
+            </h5>
+
+            <div class="d-flex align-items-center gap-2">
+                <label class="small text-muted mb-0"
+                       for="night-light-enabled">
+                    Kích hoạt
+                </label>
+
+                <div class="form-check form-switch mb-0 ps-0 d-flex align-items-center">
+                    <input class="form-check-input ms-0 mt-0 border-success"
+                           type="checkbox"
+                           id="night-light-enabled"
+                           disabled
+                           style="float:none;">
+                </div>
+            </div>
+        </div>
+
+        <!-- Status -->
+		<div class="alert alert-info">
+        <div id="night-light-status"
+             class="small text-muted bg-light rounded-2 px-3 py-2 mb-4"
+             role="status">
+            <i class="bi bi-info-circle me-1"></i>
+            Đang chờ dữ liệu LED từ VBot...
+        </div>
+        </div>
+
+        <!-- Color -->
+        <div class="mb-4">
+            <label class="form-label fw-semibold mb-2"
+                   for="night-light-color">
+                <i class="bi bi-palette me-1"></i> Màu sắc
+            </label>
+
+            <div class="d-flex align-items-center gap-3">
+                <input class="form-control form-control-color"
+                       type="color"
+                       id="night-light-color"
+                       value="#ffb464"
+                       title="Chọn màu LED"
+                       disabled>
+
+                <div class="flex-grow-1">
+                    <div id="night-light-color-label"
+                         class="font-monospace fw-semibold">
+                        #FFB464
+                    </div>
+                    <small class="text-muted">Màu LED hiện tại</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Brightness -->
+        <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <label class="form-label fw-semibold mb-0"
+                       for="night-light-brightness">
+                    <i class="bi bi-brightness-high me-1"></i> Độ sáng
+                </label>
+
+                <span id="night-light-brightness-label"
+                      class="badge bg-primary-subtle text-primary">
+                    100%
+                </span>
+            </div>
+
+            <input class="form-range mb-0"
+                   type="range"
+                   id="night-light-brightness"
+                   min="0"
+                   max="255"
+                   value="255"
+                   disabled>
+        </div>
+
+        <!-- Effect -->
+        <div class="mb-3">
+            <label class="form-label fw-semibold mb-2"
+                   for="night-light-effect">
+                <i class="bi bi-stars me-1"></i> Hiệu ứng
+            </label>
+
+            <select class="form-select"
+                    id="night-light-effect"
+                    disabled>
+                <option value="solid">Solid</option>
+            </select>
+        </div>
+
+    </div>
+</div>
+
           <!-- Chức Năng Khác -->
           <div class="card">
             <div class="card-body pb-0">
@@ -1936,6 +2039,102 @@ include 'html_head.php';
       brightnessPercentage.textContent = Math.round(percentage) + '%';
     }
 
+    function updateNightLightControls(light) {
+      if (!light || typeof light !== 'object') return;
+      const enabled = document.getElementById('night-light-enabled');
+      const color = document.getElementById('night-light-color');
+      const colorLabel = document.getElementById('night-light-color-label');
+      const brightness = document.getElementById('night-light-brightness');
+      const brightnessLabel = document.getElementById('night-light-brightness-label');
+      const effect = document.getElementById('night-light-effect');
+      const status = document.getElementById('night-light-status');
+      const supported = light.supported === true;
+      enabled.checked = light.on === true;
+      enabled.disabled = !supported;
+      color.disabled = !supported;
+      brightness.disabled = !supported;
+      effect.disabled = !supported;
+      if (!nightLightColorEditing && !nightLightColorPending && !nightLightColorSendTimer) {
+        if (Array.isArray(light.rgb_color) && light.rgb_color.length === 3) {
+          color.value = '#' + light.rgb_color.map(channel => Math.max(0, Math.min(255, Number(channel) || 0)).toString(16).padStart(2, '0')).join('');
+        }
+        color.dataset.lastSentColor = color.value;
+        colorLabel.textContent = color.value.toUpperCase();
+      }
+      const level = Math.max(0, Math.min(255, Number(light.brightness) || 0));
+      brightness.value = String(level);
+      brightnessLabel.textContent = Math.round(level * 100 / 255) + '%';
+      const effects = light.effects && typeof light.effects === 'object' ? light.effects : {solid: 'Solid'};
+      effect.replaceChildren();
+      Object.entries(effects).forEach(([value, label]) => effect.add(new Option(String(label), value)));
+      if (Object.prototype.hasOwnProperty.call(effects, light.effect)) effect.value = light.effect;
+      const activeColor = Array.isArray(light.rgb_color) && light.rgb_color.length === 3
+        ? '#' + light.rgb_color.map(channel => Math.max(0, Math.min(255, Number(channel) || 0)).toString(16).padStart(2, '0')).join('').toUpperCase()
+        : color.value.toUpperCase();
+      const activeEffectLabel = light.effect === 'solid'
+        ? 'Màu tĩnh ' + activeColor
+        : String(effects[light.effect] || light.effect || 'Solid');
+      status.textContent = supported
+        ? (light.on ? 'Hiệu ứng đèn LED đang bật · ' + activeEffectLabel : 'Hiệu ứng đèn LED đang tắt.')
+        : 'Kiểu LED hiện tại chưa hỗ trợ điều khiển màu/hiệu ứng.';
+      status.className = 'small text-muted';
+    }
+
+    function sendNightLightControl(action = 'set') {
+      const status = document.getElementById('night-light-status');
+      const rgb = document.getElementById('night-light-color').value;
+      const payload = {
+        type: 2,
+        data: 'led',
+        action: action === 'turn_on' || action === 'turn_off' ? action : 'control',
+        light_action: action,
+        on: document.getElementById('night-light-enabled').checked,
+        rgb_color: [parseInt(rgb.slice(1, 3), 16), parseInt(rgb.slice(3, 5), 16), parseInt(rgb.slice(5, 7), 16)],
+        brightness: Number(document.getElementById('night-light-brightness').value),
+        effect: document.getElementById('night-light-effect').value
+      };
+      status.textContent = 'Đang gửi lệnh tới VBot...';
+      vbotFetchWithTimeout("<?php echo $URL_API_VBOT ?>", {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      }).then(async response => {
+        const result = await response.json();
+        if (!response.ok || !result.success) throw new Error(result.message || ('HTTP ' + response.status));
+        if (action === 'set' && nightLightColorPending) {
+          nightLightColorPending = false;
+          clearTimeout(nightLightColorSendTimer);
+          nightLightColorSendTimer = null;
+        }
+        updateNightLightControls(result.light);
+      }).catch(error => {
+        if (action === 'set' && nightLightColorPending) {
+          nightLightColorPending = false;
+          clearTimeout(nightLightColorSendTimer);
+          nightLightColorSendTimer = null;
+        }
+        status.textContent = 'Không điều khiển được hiệu ứng đèn LED: ' + error.message;
+        status.className = 'small text-danger';
+      });
+    }
+
+    let nightLightColorSendTimer = null;
+    let nightLightColorEditing = false;
+    let nightLightColorPending = false;
+    function scheduleNightLightColorSend() {
+      nightLightColorPending = true;
+      clearTimeout(nightLightColorSendTimer);
+      nightLightColorSendTimer = setTimeout(function() {
+        nightLightColorSendTimer = null;
+        const effectSelect = document.getElementById('night-light-effect');
+        if (Array.from(effectSelect.options).some(option => option.value === 'solid')) {
+          effectSelect.value = 'solid';
+        }
+        document.getElementById('night-light-enabled').checked = true;
+        sendNightLightControl();
+      }, 500);
+    }
+
     //Cập nhật giá trị volume vào id="volume-slider" html
     function set_Volume_HTML(volume) {
       const volumeSlider = document.getElementById('volume-slider');
@@ -2440,6 +2639,7 @@ function renderBluetoothStatus(bluetooth) {
 
 function update_index_data(data){
           if (data.success) {
+            if (data.manual_light) updateNightLightControls(data.manual_light);
             if(data.equalizer) window.dispatchEvent(new CustomEvent('vbot-equalizer-state',{detail:data.equalizer}));
             if(data.bluetooth_output) window.dispatchEvent(new CustomEvent('vbot-bluetooth-output',{detail:data.bluetooth_output}));
             //console.log(data);
@@ -3024,6 +3224,60 @@ function update_index_data(data){
       setupVolumeControl();
       //Thay đổi và cập nhật độ sáng khi trượt thanh slide html, click chuột
       setupBrightnessControl();
+      const nightLightEnabled = document.getElementById('night-light-enabled');
+      const nightLightColor = document.getElementById('night-light-color');
+      const nightLightBrightness = document.getElementById('night-light-brightness');
+      const nightLightEffect = document.getElementById('night-light-effect');
+      nightLightEnabled.addEventListener('change', function() {
+        clearTimeout(nightLightColorSendTimer);
+        nightLightColorSendTimer = null;
+        nightLightColorPending = false;
+        sendNightLightControl(this.checked ? 'turn_on' : 'turn_off');
+      });
+      nightLightColor.addEventListener('input', function() {
+        nightLightColorEditing = true;
+        document.getElementById('night-light-color-label').textContent = this.value.toUpperCase();
+        const effectOptions = nightLightEffect.options;
+        if (Array.from(effectOptions).some(option => option.value === 'solid')) {
+          nightLightEffect.value = 'solid';
+        }
+        // Bộ chọn màu phát sự kiện input khi bảng màu vẫn đang mở; gửi sau 0,5 giây ngừng đổi màu.
+        scheduleNightLightColorSend();
+      });
+      nightLightColor.addEventListener('blur', function() {
+        if (!nightLightColorEditing) return;
+        nightLightColorEditing = false;
+        if (this.value !== this.dataset.lastSentColor && !nightLightColorSendTimer) {
+          const effectOptions = nightLightEffect.options;
+          if (Array.from(effectOptions).some(option => option.value === 'solid')) nightLightEffect.value = 'solid';
+          scheduleNightLightColorSend();
+        }
+      });
+      nightLightColor.addEventListener('change', function() {
+        nightLightColorEditing = false;
+        if (this.value === this.dataset.lastSentColor && !nightLightColorPending) return;
+        if (nightLightColorSendTimer) return;
+        const effectOptions = document.getElementById('night-light-effect').options;
+        if (Array.from(effectOptions).some(option => option.value === 'solid')) {
+          document.getElementById('night-light-effect').value = 'solid';
+        }
+        scheduleNightLightColorSend();
+      });
+      nightLightBrightness.addEventListener('input', function() {
+        document.getElementById('night-light-brightness-label').textContent =
+          Math.round(Number(this.value) * 100 / 255) + '%';
+      });
+      nightLightBrightness.addEventListener('change', function() {
+        nightLightEnabled.checked = true;
+        sendNightLightControl();
+      });
+      nightLightEffect.addEventListener('change', function() {
+        clearTimeout(nightLightColorSendTimer);
+        nightLightColorSendTimer = null;
+        nightLightColorPending = false;
+        nightLightEnabled.checked = true;
+        sendNightLightControl();
+      });
     });
   </script>
   <script>

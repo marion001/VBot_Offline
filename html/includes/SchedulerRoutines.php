@@ -30,6 +30,6 @@ function vbotSchedulerNormalizeAction(array $config, $action): string {
     $value = trim((string)$action);
     if (strpos($value, 'vbot_action:') === 0) $value = substr($value, 12);
     // Preserve a removed routine's ID so a save never silently replaces it.
-    if (preg_match('/^(?:(?:routine|wol):[A-Za-z0-9_-]{1,64}|playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $value)) return $value;
+    if (preg_match('/^(?:(?:routine|wol):[A-Za-z0-9_-]{1,64}|playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|led_effect:[a-z][a-z0-9_]{0,63})$/D', $value)) return $value;
     return vbotActionRegistryNormalize($config, $value);
 }

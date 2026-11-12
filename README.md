@@ -813,11 +813,35 @@ Các file mở rộng:
 | `Dev_STT.py` | Nguồn STT tùy chỉnh. |
 | `Dev_TTS.py` | Nguồn TTS tùy chỉnh. |
 | `Dev_Led.py` | Hiệu ứng LED tùy chỉnh. |
+| `Dev_Led_Effects.py` | Hiệu ứng màu LED thủ công có thể tùy chỉnh; file Python thuần, không build `.so`. |
 | `Dev_Music.py` | Nguồn media tùy chỉnh. |
 | `Dev_Processing.py` | Logic xử lý văn bản riêng. |
 | `Dev_Weather.py` | Nguồn thời tiết riêng. |
 | `Dev_Logs.py` | Định tuyến log riêng. |
 | `Dev_Picovoice.py` | Tùy chỉnh wake word/Picovoice. (Có thể sử dụng Picovoice không cần KEY)|
+
+### Thêm hiệu ứng màu LED
+
+`Dev_Led_Effects.py` chạy trực tiếp bằng Python và không được đưa vào danh sách build `.so`. Mỗi nhóm phần cứng gom các hàm hiệu ứng con và danh sách tên/nhãn vào một hàm tổng: `ws281x`, `apa102`, `respeaker_mic_array`, `custom`. Thêm hiệu ứng bằng cách viết hàm con trong đúng hàm tổng rồi thêm mục vào từ điển `effects` ở cuối hàm. API, MQTT và Home Assistant chỉ nhận hiệu ứng của loại LED đang cấu hình.
+
+Ví dụ thêm hiệu ứng nhịp chậm bên trong hàm tổng `ws281x()`:
+
+```python
+def night_pulse(state, now, led_count):
+    level = 0.15 + 0.85 * (0.5 + 0.5 * math.sin(now * 2 * math.pi / 8))
+    scale = state["brightness"] / 255 * level
+    color = tuple(round(channel * scale) for channel in state["rgb_color"])
+    for index in range(led_count):
+        set_pixel(index, color_factory(*color))
+    strip.show()
+
+
+effects["night_pulse"] = ("Night Pulse", night_pulse)
+```
+
+Các hàm con dùng trực tiếp driver của hàm tổng đang chứa chúng. `state` có `rgb_color` (ba kênh 0–255), `brightness` (0–255) và `effect`; `now` là thời gian đơn điệu tính bằng giây. Sau khi sửa file, khởi động lại VBot để nạp thay đổi. Không cần sửa `Led.py` hay build `.so` chỉ để thêm hiệu ứng màu.
+
+Với phần cứng `dev_custom_led`, có thể thêm `LED_MANUAL_RENDER(frames)` trong `Dev_Led.py`; VBot sẽ chuyển danh sách pixel RGB đã tạo ở trên cho hàm này. Nếu chưa có hàm đó, VBot tiếp tục dùng `LED_MANUAL(state)` như trước.
 
 ### MCP Plugins cho trợ lý XiaoZhi
 

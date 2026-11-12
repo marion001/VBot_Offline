@@ -1,0 +1,36 @@
+{
+  "apa102": {
+    "breathe": "Breathe",
+    "candle": "Candle",
+    "color_loop": "Color Loop",
+    "night_pulse": "Night Pulse",
+    "rainbow": "Rainbow",
+    "solid": "Solid",
+    "theater_chase": "Theater Chase"
+  },
+  "custom": {
+    "breathe": "Breathe",
+    "color_loop": "Color Loop",
+    "night_pulse": "Night Pulse",
+    "rainbow": "Rainbow",
+    "solid": "Solid"
+  },
+  "respeaker_mic_array": {
+    "breathe": "Breathe",
+    "candle": "Candle",
+    "color_loop": "Color Loop",
+    "night_pulse": "Night Pulse",
+    "rainbow": "Rainbow",
+    "solid": "Solid"
+  },
+  "ws281x": {
+    "breathe": "Breathe",
+    "candle": "Candle",
+    "color_loop": "Color Loop",
+    "color_wipe": "Color Wipe",
+    "night_pulse": "Night Pulse",
+    "rainbow": "Rainbow",
+    "solid": "Solid",
+    "theater_chase": "Theater Chase"
+  }
+}

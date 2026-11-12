@@ -31,6 +31,7 @@ function vbotActionRegistryOptions(array $Config, bool $includeDeviceActions=fal
   static $requestCache = [];
   $cacheKey = hash('sha256', serialize([
     $includeDeviceActions,
+    $Config['smart_config']['led']['led_type'] ?? '',
     $Config['media_player']['radio_data'] ?? [],
     $Config['wake_on_lan']['active'] ?? null,
     $Config['internal_ir']['json_file'] ?? 'resource/internal_ir/commands.json',
@@ -48,6 +49,21 @@ function vbotActionRegistryOptions(array $Config, bool $includeDeviceActions=fal
   foreach (($Config['media_player']['radio_data'] ?? []) as $radio) {
     $name = trim((string)($radio['name'] ?? '')); $link = trim((string)($radio['link'] ?? ''));
     if ($name !== '' && $link !== '') $options['radio:'.substr(sha1($name."\n".$link), 0, 12)] = 'Phát Radio: '.$name;
+  }
+  $ledType = strtolower(trim((string)($Config['smart_config']['led']['led_type'] ?? '')));
+  $ledTypeBackends = [
+    'ws281x'=>'ws281x', 'ws2811'=>'ws281x', 'ws2812'=>'ws281x', 'ws2815'=>'ws281x',
+    'apa102'=>'apa102', 'respeaker_2_mics_pi_hat_v1.0'=>'apa102',
+    'respeaker_mic_array_v2.0'=>'respeaker_mic_array', 'dev_custom_led'=>'custom',
+  ];
+  $ledBackend = $ledTypeBackends[$ledType] ?? '';
+  $ledEffectsPath = dirname(__DIR__, 2).'/resource/led_effects_registry.json';
+  $ledEffects = is_file($ledEffectsPath) && (@filesize($ledEffectsPath) ?: 0) <= 1048576
+    ? json_decode((string)@file_get_contents($ledEffectsPath), true) : [];
+  foreach (is_array($ledEffects[$ledBackend] ?? null) ? $ledEffects[$ledBackend] : [] as $id => $label) {
+    if (is_string($id) && preg_match('/^[a-z][a-z0-9_]{0,63}$/D', $id) && is_string($label) && $label !== '') {
+      $options['led_effect:'.$id] = 'LED Effects Control: '.$label;
+    }
   }
   if (!$includeDeviceActions) return $options;
   $root = dirname(__DIR__, 2);
@@ -132,7 +148,8 @@ function vbotActionRegistryNormalize(array $Config, $action): string
   if (strpos($action, 'vbot_action:') === 0) $action = substr($action, 12);
   if (array_key_exists($action, vbotActionRegistryOptions($Config, true))) return $action;
   if (array_key_exists($action, vbotActionRegistryOptions($Config))) return $action;
-  if (preg_match('/^(?:toggle:)?(?:(?:routine|wol):[A-Za-z0-9_-]{1,64}|playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $action)) return $action;
+  if (preg_match('/^(?:toggle:)?(?:(?:routine|wol):[A-Za-z0-9_-]{1,64}|playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220})$/D', $action)
+      || preg_match('/^led_effect:[a-z][a-z0-9_]{0,63}$/D', $action)) return $action;
   return 'none';
 }
 

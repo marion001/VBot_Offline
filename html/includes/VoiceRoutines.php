@@ -13,7 +13,7 @@ function vbotRoutineActions(array $config): array {
     $allowed = array_flip(vbotRoutineAllowedStaticActions());
     $actions = array_filter(vbotActionRegistryOptions($config, true), static function ($key) use ($allowed) {
         return isset($allowed[$key])
-            || preg_match('/^(?:playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|wol:[A-Za-z0-9_-]{1,64}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|toggle:tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|toggle:hass:[A-Za-z0-9_-]{1,220})$/D', $key);
+            || preg_match('/^(?:playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12}|wol:[A-Za-z0-9_-]{1,64}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|toggle:tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|toggle:hass:[A-Za-z0-9_-]{1,220}|led_effect:[a-z][a-z0-9_]{0,63})$/D', $key);
     }, ARRAY_FILTER_USE_KEY);
     return $actions + ['play_local_file'=>'Phát một bài nhạc Local cụ thể',
         'play_url'=>'Phát từ URL / link trực tiếp / stream'];
@@ -254,7 +254,7 @@ function vbotRoutinesValidate($data): array {
                     $action=vbotRoutineText($step['action']??null,'Thao tác',100);
                     if ($action!==$step['action'] || (!in_array($action,$actions,true)
                         && !preg_match('/^(?:playlist:[A-Za-z0-9_-]{1,64}|radio:[0-9a-f]{12})$/D',$action)
-                        && !preg_match('/^(?:wol:[A-Za-z0-9_-]{1,64}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|toggle:tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|toggle:hass:[A-Za-z0-9_-]{1,220})$/D',$action)))
+                        && !preg_match('/^(?:wol:[A-Za-z0-9_-]{1,64}|ir:[0-9a-f]{40}|tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|hass:[A-Za-z0-9_-]{1,220}|toggle:tuya:[A-Za-z0-9_-]{1,260}:(?:on|off)|toggle:hass:[A-Za-z0-9_-]{1,220}|led_effect:[a-z][a-z0-9_]{0,63})$/D',$action)))
                         throw new InvalidArgumentException('Thao tác loa không được hỗ trợ');
                     if (in_array($action,['play_url','play_youtube','play_zingmp3','play_nhaccuatui'],true)) vbotRoutineMediaUrl($step['url']??null);
                     if ($action==='play_local_file') {
@@ -283,7 +283,7 @@ function vbotRoutinesValidate($data): array {
                     $entryKey=vbotRoutineText($step['entry_key']??null,'Entry Tuya',128);
                     if ($deviceId!==$step['device_id'] || !preg_match('/^[A-Za-z0-9_-]+$/D',$deviceId) ||
                         $entryKey!==$step['entry_key'] || !preg_match('/^[A-Za-z0-9_.:-]+$/D',$entryKey) ||
-                        !in_array($step['action']??null,['turn_on','turn_off','toggle'],true))
+                        !in_array($step['action']??null,['turn_on','turn_off'],true))
                         throw new InvalidArgumentException('Thiết bị, Entry hoặc thao tác Tuya Local không hợp lệ');
                     break;
                 default: throw new InvalidArgumentException('Loại bước không được hỗ trợ');
