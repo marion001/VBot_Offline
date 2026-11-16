@@ -632,6 +632,9 @@
         },
         "equalizer": {
             "active": false
+        },
+        "dlna_renderer": {
+            "active": false
         }
     },
     "developer_customization": {
@@ -687,7 +690,8 @@
             "effect": {
                 "led_think": "0000FF",
                 "led_mute": "FF0000"
-            }
+            },
+            "music_mode": "default"
         },
         "button_active": {
             "active": true,

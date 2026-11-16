@@ -11,6 +11,8 @@ HƯỚNG DẪN SỬ DỤNG
 - VBot import file này làm bộ hiệu ứng WS281x; không chạy trực tiếp và không đổi tên các hàm ``LED_*``.
 - Chỉ sửa nội dung hiệu ứng. Vòng lặp dài phải kiểm tra ``Lib.led_effect_active`` và
   ``Lib.current_led_effect`` để hiệu ứng có thể dừng/chuyển trạng thái.
+- ``LED_MUSIC()`` là hiệu ứng tùy chỉnh cho chế độ ``Nháy Theo Nhạc``; hàm dùng mức PCM
+  được Led.py nhận từ Audio Bridge và vẽ lên ``strip`` hiện có.
 - Biến toàn cục: ``LED_COUNT`` số LED, ``LED_PIN`` GPIO, ``LED_FREQ_HZ`` tần số,
   ``LED_DMA`` kênh DMA, ``LED_INVERT`` đảo tín hiệu, ``LED_BRIGHTNESS`` độ sáng 0-255.
 - ``strip`` là đối tượng phần cứng dùng chung; không khởi tạo thêm trong từng hiệu ứng.
@@ -387,6 +389,28 @@ def LED_CALL_RINGING():
 def LED_CALL_ACTIVE():
     """Đang trong cuộc gọi: xanh lá sáng tối nhẹ liên tục."""
     _run_custom_call_effect("CALL_ACTIVE")
+
+
+def LED_MUSIC():
+    """Thanh LED đối xứng nhấp nháy theo mức âm thanh PCM của media player."""
+    import Led as _led_controller
+
+    Lib.led_effect_active = True
+    num_pixels = strip.numPixels()
+    smoothed = 0.0
+    strip.setBrightness(Lib.led_brightness)
+    while (Lib.led_effect_active
+           and Lib.current_led_effect == "MUSIC"
+           and _led_controller._music_audio_allowed()):
+        target = _led_controller._music_level_value()
+        smoothed = max(target, smoothed * 0.84)
+        frame = _led_controller._music_frame(smoothed, num_pixels, time.monotonic())
+        for index, (red, green, blue) in enumerate(frame):
+            strip.setPixelColor(index, Color(red, green, blue))
+        strip.show()
+        time.sleep(0.05)
+    if Lib.current_led_effect == "MUSIC":
+        Lib.led_effect_active = False
 
 
 def LED_VOLUME(volume_change):

@@ -270,17 +270,20 @@ if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
             if (xhr.status === 200) {
                 try {
                     var response = JSON.parse(xhr.responseText);
-                    document.getElementById('message_LoadConfigJson').textContent = response.message_LoadConfigJson;
+                    var messageElement = document.getElementById('message_LoadConfigJson');
+                    if (messageElement) messageElement.textContent = response.message || '';
                     var codeElement = document.getElementById('code_config');
                     if (response.success) {
                         if (typeof response.data === 'object') {
                             codeElement.textContent = JSON.stringify(response.data, null, 2);
+                            codeElement.className = 'language-json';
                             vbotHighlightElement(codeElement);
                         } else {
                             codeElement.textContent = response.data;
                             codeElement.className = 'language-txt';
                         }
                     } else {
+                        if (codeElement) codeElement.textContent = '';
                         show_message(response.message || 'Không có dữ liệu');
                     }
                 } catch (e) {

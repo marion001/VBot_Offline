@@ -27,6 +27,7 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - [Kiến trúc chương trình](#kiến-trúc-chương-trình)
 - [Luồng xử lý giọng nói](#luồng-xử-lý-giọng-nói)
 - [Audio, AirPlay và Bluetooth](#audio-airplay-và-bluetooth)
+- [DLNA Audio Renderer](#dlna-audio-renderer)
 - [Multiroom Audio](#multiroom-audio)
 - [Liên kết Apple HomeKit](#liên-kết-apple-homekit)
 - [WebSocket Streaming](#websocket-streaming)
@@ -69,6 +70,7 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - Zing MP3, NhacCuaTui, YouTube, radio, podcast và tin tức, tùy nguồn còn hoạt động và được bật.
 - AirPlay thông qua Shairport Sync.
 - Bluetooth Audio Sink.
+- DLNA Audio Renderer để nhận nhạc từ ứng dụng điều khiển DLNA/UPnP.
 - Tạm dừng, tiếp tục đúng vị trí và dừng media nội bộ.
 - Điều khiển âm lượng, mute/unmute và đồng bộ trạng thái lên WebUI/API.
 - Hiển thị nguồn đang phát qua `media_player_source`.
@@ -99,6 +101,7 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 
 - **Gọi điện LAN giữa loa VBot Python:** gọi, nhận/từ chối, kết thúc, microphone riêng cho cuộc gọi và PCM hai chiều nội bộ; có chế độ nhấn giữ để nói. Cấu hình tại `LAN_Calls.php`. Xem [hướng dẫn gọi điện LAN](resource/README_LAN_Calls.md).
 
+- **DLNA Audio Renderer:** nhận luồng nhạc UPnP/DLNA, đồng bộ trạng thái phát, metadata, thời lượng, vị trí và âm lượng với VBot qua D-Bus/MPRIS; điều khiển từ WebUI, REST API và MQTT.
 - **Multiroom Audio:** một VBot làm coordinator phát đồng bộ tới nhiều loa VBot trong LAN; hỗ trợ nhóm loa, metadata, volume tổng và volume từng luồng.
 - **Apple HomeKit:** đưa loa, Remote iOS, media, trợ lý, playlist, radio, hệ thống và Multiroom vào ứng dụng Nhà qua VBot HomeKit Bridge; trạng thái được đồng bộ bằng SSE và lệnh điều khiển gọi trực tiếp API VBot.
 - **Trạng thái media thống nhất:** Local Media, AirPlay, Bluetooth và Multiroom cùng đi qua state machine dùng chung để hạn chế LED, pause/resume và metadata bị lệch trạng thái.
@@ -203,7 +206,20 @@ VBot có nhiều nguồn cùng sử dụng loa. Trạng thái được xuất qu
 - `Local`: media player nội bộ từ các nguồn nhạc, giải trí tích hợp sẵn.
 - `AirPlay`: AirPlay2 (Tương thích với hệ sinh thái Apple) đang phát.
 - `Bluetooth`: thiết bị Bluetooth (Kết nối phát nhạc từ điện thoại ra loa VBot thông qua Bluetooth) đang phát.
+- `DLNA`: luồng nhạc đang được gửi tới renderer DLNA của VBot.
 - `N/A`: không có nguồn media xác định.
+
+### DLNA Audio Renderer
+
+VBot có thể hoạt động như một **UPnP/DLNA audio renderer** để nhận nhạc từ ứng dụng điều khiển trong cùng mạng. Renderer `gmediarender` phát âm thanh vào sink ALSA dùng chung của VBot, giúp luồng DLNA đi qua tuyến âm thanh hệ thống hiện có.
+
+- Tên thiết bị được quảng bá theo dạng `VBot {full_name}` lấy từ `contact_info.full_name` trong `Config.json`.
+- Trạng thái phát, tiêu đề, nghệ sĩ, album, ảnh bìa (nếu ứng dụng gửi), thời lượng, vị trí phát, âm lượng và địa chỉ ứng dụng gửi được đồng bộ qua D-Bus/MPRIS.
+- Có thể điều khiển phát, tạm dừng, tiếp tục, dừng, tua, âm lượng và mute qua WebUI, REST API hoặc MQTT. Next/Previous khả dụng tùy URI kế tiếp hoặc lịch sử mà ứng dụng gửi nhạc cung cấp.
+- Khi được bật, DLNA xuất hiện như một nguồn media của VBot; trạng thái media và âm thanh được phối hợp với các luồng phát khác.
+- Cài renderer trên Raspberry Pi OS/Debian bằng `sudo sh resource/dlna_renderer/install.sh`, bật **DLNA Audio Renderer** trong WebUI rồi khởi động lại VBot.
+
+Chi tiết cài đặt và các lệnh D-Bus xem tại [`resource/dlna_renderer/README.md`](resource/dlna_renderer/README.md).
 
 ### Media nội bộ
 

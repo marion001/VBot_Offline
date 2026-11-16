@@ -9,6 +9,8 @@ Mail: VBot.Assistant@gmail.com
 import os
 import signal
 import sys
+import threading
+import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
@@ -53,6 +55,24 @@ def main() -> int:
         import VBot
         shutdown_started = False
 
+        def force_exit_if_threads_keep_process_alive():
+            # Cleanup đã dừng dịch vụ đồng bộ. Một số worker nền bên thứ ba có
+            # thể vẫn giữ interpreter; chỉ ép thoát nếu chúng chưa tự kết thúc.
+            time.sleep(3.0)
+            _write_startup_log("[Shutdown] Cleanup đã xong; buộc kết thúc tiến trình còn bị giữ bởi luồng nền.")
+            try:
+                sys.stdout.flush()
+                sys.stderr.flush()
+            finally:
+                os._exit(0)
+
+        def arm_shutdown_guard():
+            threading.Thread(
+                target=force_exit_if_threads_keep_process_alive,
+                daemon=True,
+                name="vbot-shutdown-guard",
+            ).start()
+
         def handle_shutdown_signal(signum, _frame):
             nonlocal shutdown_started
             if shutdown_started:
@@ -60,7 +80,12 @@ def main() -> int:
             shutdown_started = True
             signal_name = signal.Signals(signum).name
             _write_startup_log(f"Nhận {signal_name}, đang dọn dẹp trước khi dừng VBot...")
+            request_shutdown = getattr(VBot, "request_shutdown_from_signal", None)
+            if callable(request_shutdown) and request_shutdown():
+                arm_shutdown_guard()
+                return
             VBot.cleanup()
+            arm_shutdown_guard()
             raise SystemExit(0)
 
         signal.signal(signal.SIGTERM, handle_shutdown_signal)

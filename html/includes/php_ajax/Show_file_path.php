@@ -33,36 +33,21 @@ if ($Config['contact_info']['user_login']['active']) {
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
   ) {
-	if (isset($_GET['file']) && !empty($_GET['file'])) {
-		$requested_file = $_GET['file'];
-		if ($requested_file === $VBot_Offline.'Version.json' || $requested_file === $VBot_Offline.'html/Version.json') {
-			$file_path = $requested_file;
-			$response = [
-				'success' => true,
-				'message' => 'Đọc file thành công',
-				'data' => file_get_contents($requested_file)
-			];
-			echo json_encode($response, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-			exit;
-		} else{
-		session_unset();
-		session_destroy();
-		echo json_encode([
-		  'success' => false,
-		  'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		exit;
-	  }
-	}
-	else{
-		session_unset();
-		session_destroy();
-		echo json_encode([
-		  'success' => false,
-		  'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
-		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-		exit;
-	  }
+    $requestedPath = is_string($_GET['file'] ?? null) ? $_GET['file'] : '';
+    $resolvedRequest = vbotApiResolveExistingPath($requestedPath, $allowedFileRoots, 'file');
+    $resolvedConfig = realpath($VBot_Offline.'Config.json');
+    $isConfigJsonViewerRequest = $resolvedRequest !== false
+      && $resolvedConfig !== false
+      && $resolvedRequest === $resolvedConfig
+      && (isset($_SESSION['user_login']) || !$fileAccessSecurity);
+    if (!$isConfigJsonViewerRequest) {
+      session_unset();
+      session_destroy();
+      vbotApiJsonResponse([
+        'success' => false,
+        'message' => 'Thao tác bị chặn, chỉ cho phép xem tệp khi đã đăng nhập WebUI hoặc tệp thuộc vùng được công khai.'
+      ], 401);
+    }
   }
 }
 
@@ -280,24 +265,41 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
     'data' => null
   ];
   $file_path = vbotApiResolveExistingPath($_GET['file'], $allowedFileRoots, 'file');
+  // Config.json is intentionally excluded from the generic sensitive-file
+  // helper. Still allow its in-WebUI viewer when the explicit file-access
+  // security switch is off; the download endpoint remains independently gated.
+  $configJsonPath = realpath($VBot_Offline.'Config.json');
+  $isConfigJsonViewerRequest = $file_path !== false
+    && $configJsonPath !== false
+    && $file_path === $configJsonPath
+    && (!$fileAccessSecurity || ($loginActive && session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['user_login'])));
   $isPublicReadableFile = $file_path !== false
     && in_array($file_path, $publicReadableFiles, true)
     && !vbotApiIsSensitiveFilePath($file_path);
   if (
-    ($isPublicReadableFile
+    ($isConfigJsonViewerRequest
+      || $isPublicReadableFile
       || vbotApiCanExposeFile($file_path, $loginActive, $anonymousReadableRoots, $VBot_Offline, $fileAccessSecurity))
     && is_readable($file_path)
   ) {
     $file_extension = pathinfo($file_path, PATHINFO_EXTENSION);
     if ($file_extension === 'json' || $file_extension === 'txt' || $file_extension === 'log' || $file_extension === 'logs') {
-      $content = file_get_contents($file_path);
-      $response['success'] = true;
-      $response['message'] = 'Tệp đã được đọc thành công.';
-      if ($file_extension === 'json') {
-        $response['data'] = json_decode($content, true);
-        header('Content-Type: application/json');
+      $content = @file_get_contents($file_path);
+      if ($content === false) {
+        $response['message'] = 'Không thể đọc nội dung tệp. Kiểm tra quyền đọc của tài khoản WebUI.';
+      } elseif ($file_extension === 'json') {
+        $decoded = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+          $response['message'] = 'Tệp JSON không hợp lệ: ' . json_last_error_msg();
+        } else {
+          $response['success'] = true;
+          $response['message'] = 'Tệp đã được đọc thành công.';
+          $response['data'] = $decoded;
+          header('Content-Type: application/json');
+        }
       } else {
-        $response['data'] = $content;
+        $response['success'] = true;
+        $response['message'] = 'Tệp đã được đọc thành công.';
         header('Content-Type: text/plain');
         if (in_array(strtolower($file_extension), ['log', 'logs'], true)) {
           require_once __DIR__ . '/../Log_Display.php';

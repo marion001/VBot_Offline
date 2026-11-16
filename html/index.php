@@ -348,6 +348,7 @@ include 'html_head.php';
                       <option value="bluetooth">Bluetooth</option>
                       <option value="airplay">AirPlay</option>
                       <option value="multiroom">Multiroom Audio</option>
+                      <option value="dlna" disabled>DLNA Renderer</option>
                     </select>
                   </div>
                   <div class="input-group my-2">
@@ -2426,7 +2427,7 @@ let mediaSourceChanging = false;
 async function selectMediaSource(source) {
     const select = document.getElementById('media_source_select');
     const match = /^bluetooth:((?:[0-9A-F]{2}:){5}[0-9A-F]{2})$/.exec(source);
-    if (mediaSourceChanging || (!match && !['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(source))) return;
+        if (mediaSourceChanging || (!match && !['local_media', 'bluetooth', 'airplay', 'multiroom', 'dlna'].includes(source))) return;
     mediaSourceChanging = true;
     select.disabled = true;
     try {
@@ -2692,18 +2693,36 @@ function update_index_data(data){
 			const media = data.media_player || {};
 			const audioOutput = data.audio_output || {};
 			const mediaSourceKind = media.source_kind || (
+				media.dlna_playing === true ? 'dlna' :
 				media.airplay_playing === true ? 'airplay' :
 				data.bluetooth?.playing === true ? 'bluetooth' :
 				(media.audio_playing === true || media.pause_media_flag === true) ? 'local_media' : 'idle'
 			);
 			const mediaPlaybackState = media.playback_state || (
 				media.pause_media_flag === true ? 'paused' :
-				(media.audio_playing === true || media.airplay_playing === true || data.bluetooth?.playing === true)
+				(media.audio_playing === true || media.dlna_playing === true || media.airplay_playing === true || data.bluetooth?.playing === true)
 					? 'playing' : 'idle'
 			);
 			const mediaIsPlaying = mediaPlaybackState === 'playing';
             const sourceSelect = document.getElementById('media_source_select');
             if (window.renderVbotMediaInputs) window.renderVbotMediaInputs(data, mediaSourceKind);
+			const dlnaTrackButtons = ['media_prev_Button', 'media_next_Button'];
+			dlnaTrackButtons.forEach((id) => {
+				const button = document.getElementById(id);
+				if (!button) return;
+				const dlnaActiveSession = mediaSourceKind === 'dlna' && media.dlna_session_active === true;
+				const isPrevious = id === 'media_prev_Button';
+				const dlnaCanChange = isPrevious ? media.dlna_can_previous === true : media.dlna_can_next === true;
+				if (dlnaActiveSession) {
+					button.disabled = !dlnaCanChange;
+					button.title = dlnaCanChange
+						? (isPrevious ? 'Chuyển về URI trước mà DLNA Renderer đã nhận' : 'Chuyển tới NextURI do ứng dụng gửi nhạc cung cấp')
+						: (isPrevious ? 'DLNA Renderer chưa có bài trước trong lịch sử' : 'Ứng dụng gửi nhạc chưa cung cấp NextURI');
+				} else {
+					button.disabled = false;
+					button.title = isPrevious ? 'Chuyển bài trước theo nguồn đang phát' : 'Chuyển bài kế tiếp theo nguồn đang phát';
+				}
+			});
 			const mediaIsPaused = mediaPlaybackState === 'paused';
 			const multiroomActive = media.multiroom_active === true || mediaSourceKind === 'multiroom';
 			updateMultiroomConnectionIndicators(multiroomActive);
@@ -2765,6 +2784,8 @@ function update_index_data(data){
 						: (
 							mediaSourceKind === 'airplay'
 								? 'AirPlay'
+							: (mediaSourceKind === 'dlna'
+								? ('DLNA Renderer' + ((media.dlna_sender_name || media.dlna_sender_address) ? ' - ' + playlistEscapeHtml(media.dlna_sender_name || media.dlna_sender_address) : ''))
 								: (
 									(mediaIsPlaying || mediaIsPaused)
 										? (
@@ -2775,6 +2796,7 @@ function update_index_data(data){
 										  )
 										: 'N/A'
 								)
+							)
 						)
 				) +
 				'</font>';
@@ -2798,6 +2820,8 @@ function update_index_data(data){
 					: (
 						mediaSourceKind === 'airplay'
 							? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
+							: (mediaSourceKind === 'dlna' && media.dlna_song_cover
+								? media.dlna_song_cover
 							: (
 								(mediaIsPlaying || mediaIsPaused)
 									? (
@@ -2809,6 +2833,7 @@ function update_index_data(data){
 											: (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png')
 									)
 									: 'assets/img/Error_Null_Media_Player.png'
+							)
 							)
 					)
 			);

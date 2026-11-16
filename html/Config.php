@@ -962,6 +962,8 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
 
   #cập nhật cấu hình đèn LED
   $Config['smart_config']['led']['active'] = isset($_POST['led_active_on_off']) ? true : false;
+  $ledMusicMode = (string)($_POST['led_music_mode'] ?? ($Config['smart_config']['led']['music_mode'] ?? 'default'));
+  $Config['smart_config']['led']['music_mode'] = in_array($ledMusicMode, ['default', 'music_reactive'], true) ? $ledMusicMode : 'default';
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
   $Config['smart_config']['led']['led_type'] = $_POST['led_type_select'];
   $Config['smart_config']['led']['led_gpio'] = intval($_POST['led_gpio']);
@@ -1016,6 +1018,7 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
     $Config['media_player']['equalizer']=['active'=>isset($_POST['speaker_eq_active'])];
   }
   $Config['media_player']['multiroom_audio']['active'] = isset($_POST['multiroom_audio_active']) ? true : false;
+  $Config['media_player']['dlna_renderer']['active'] = isset($_POST['dlna_renderer_active']);
   $Config['media_player']['multiroom_audio']['default_volume'] = max(0, min(100, intval($_POST['multiroom_audio_default_volume'] ?? 90)));
   $Config['media_player']['multiroom_audio']['default_muted'] = isset($_POST['multiroom_audio_default_muted']);
 
@@ -4001,6 +4004,13 @@ Nếu lỗi trong quá trình ghép đôi bằng mã QR, bạn cần kết nối
                     </div>
                   </div>
                   <h5 class="card-title">Hiệu Ứng, Màu Sắc:</h5>
+				  <?php
+                  echo select_field('led_music_mode', 'Chế độ LED khi phát nhạc', [
+                    'default' => 'Mặc Định LED_SPEAK',
+                    'music_reactive' => 'Nháy Theo Biên Độ Nhạc',
+                  ], $Config['smart_config']['led']['music_mode'] ?? 'default', [], 'Nháy LED theo mức âm thanh đang phát qua luồng media chung. Chỉ hoạt động khi LED được bật; chế độ mặc định giữ nguyên hiệu ứng LED hiện tại.');
+
+				  ?>
                   <div class="row mb-3">
                     <label for="led_think" class="col-sm-3 col-form-label" title="Màu LED Khi Lắng Nghe">LED Think <font color="red" size="6" title="Bắt Buộc Nhập">*</font> <i class="bi bi-question-circle-fill" onclick="show_message('Mã màu dạng Hex tương ứng với chế độ')"></i> :</label>
                     <div class="col-sm-9">
@@ -4638,7 +4648,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_media_player">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
-                  Media Player, Playlist, Multiroom Audio, Ưu Tiên Nguồn Phát : <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
+                  Media Player, Playlist, DLNA, Multiroom Audio, Ưu Tiên Nguồn Phát : <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
                  <div class="alert alert-success" role="alert"> <div class="card">
@@ -4663,6 +4673,23 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     </div>
                     </div>
                   </div>
+				  
+					<div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">DLNA (Digital Living Network Alliance) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để kích hoạt sử dụng DLNA (Digital Living Network Alliance) trong mạng lan')"></i> :</h5>
+                     <div class="alert alert-primary" role="alert"> 
+					                       <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label">DLNA Audio Renderer <i class="bi bi-question-circle-fill" onclick="show_message('Cho phép điện thoại hoặc ứng dụng DLNA gửi nhạc đến VBot. Chỉ nhận âm thanh và dùng chung bus ALSA vbot_aec_media với các nguồn ngoài. Cần cài renderer một lần trên Raspberry Pi; khởi động lại VBot sau khi đổi tùy chọn.')"></i>:</label>
+                        <div class="col-sm-9">
+                          <div class="form-switch">
+                            <input class="form-check-input border-success" type="checkbox" name="dlna_renderer_active" id="dlna_renderer_active" <?php echo !empty($Config['media_player']['dlna_renderer']['active']) ? 'checked' : ''; ?>>
+                          </div>
+                          <div class="form-text">Cài một lần bằng lệnh: <code>cd /home/pi/VBot_Offline && sudo sh resource/dlna_renderer/install.sh</code>. Renderer xuất âm thanh qua route chung của VBot.</div>
+                        </div>
+                      </div>
+                    </div>
+                    </div>
+                  </div>
 
 					                  <div class="card">
                     <div class="card-body">
@@ -4675,6 +4702,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                           </div>
                         </div>
                       </div>
+
                       <?php
                       $multiroom_audio_config = $Config['media_player']['multiroom_audio'] ?? [];
                       $multiroom_allowed_schemes = $multiroom_audio_config['allowed_url_schemes'] ?? ['http', 'https'];

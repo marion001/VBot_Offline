@@ -1,23 +1,23 @@
 {
-    "version": "1.4.2",
-    "projectName": "Program VBot Offline",
-	"description": "Đồng Bộ Các Tác Vụ Thao Tác Trong Hệ Thống Chương Trình Tương Tác Lẫn Nhau, Nâng Cấp Cơ Chế Học Lệnh Nút Nhấn Ở Loa Bluetooth Và Các Thiết Bị Bluetooth Khác, Sửa Các Lỗi Hệ Thống Chương Trình",
-    "releaseDate": "07/11/2026",
-    "changes": [
-        {
-            "type": "feature",
-            "description": "Cần Cài Bổ Sung Thư Viện Sau: 'pip install pydbus==0.6.0'"
-        },
-        {
-            "type": "fix",
-            "description": "Đã sửa tất cả các lỗi, và mang tới cho các bạn thêm vài lỗi nữa"
-        },
-        {
-            "type": "improvement",
-            "description": "Cải thiện độ ổn định, tiện tay vá luôn lỗ hổng ngoài không gian"
-        }
-    ],
-    "author": "Vũ Tuyển",
-    "status": "stable",
-    "previousVersion": "1.0.0"
+    "version":  "1.4.3",
+    "projectName":  "Program VBot Offline",
+    "description":  "Bổ sung DLNA Audio Renderer với đồng bộ trạng thái, metadata và âm lượng qua D-Bus/MPRIS; hoàn thiện đồng bộ nguồn phát và điều khiển media qua WebUI, API, MQTT; mở rộng điều khiển LED Effects Control và các tính năng Home Assistant, Multiroom.",
+    "releaseDate":  "16/11/2026",
+    "changes":  [
+                    {
+                        "type":  "feature",
+                        "description":  "Cần Cài Bổ Sung Thư Viện Sau: \u0027pip install pydbus==0.6.0\u0027"
+                    },
+                    {
+                        "type":  "fix",
+                        "description":  "Đã sửa tất cả các lỗi, và mang tới cho các bạn thêm vài lỗi nữa"
+                    },
+                    {
+                        "type":  "improvement",
+                        "description":  "Cải thiện độ ổn định, tiện tay vá luôn lỗ hổng ngoài không gian"
+                    }
+                ],
+    "author":  "Vũ Tuyển",
+    "status":  "stable",
+    "previousVersion":  "1.0.0"
 }

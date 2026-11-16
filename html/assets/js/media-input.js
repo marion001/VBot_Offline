@@ -6,8 +6,24 @@
   const validMac = value => typeof value === 'string' && /^(?:[0-9A-F]{2}:){5}[0-9A-F]{2}$/.test(value);
   window.renderVbotMediaInputs = (data, kind) => {
     last = [data, kind];
-    if (select.disabled || document.activeElement === select) return;
+    if (select.disabled) return;
     const bt = data.bluetooth || {}, media = data.media_player || {};
+    const dlnaSender = String(media.dlna_sender_name || media.dlna_sender_address || '').trim();
+    if (document.activeElement === select) {
+      let dlnaOption = Array.from(select.options).find(option => option.value === 'dlna');
+      if (!dlnaOption) {
+        dlnaOption = document.createElement('option');
+        dlnaOption.value = 'dlna';
+        select.append(dlnaOption);
+      }
+      dlnaOption.textContent = 'DLNA Renderer' + (dlnaSender ? ' - ' + dlnaSender : '');
+      dlnaOption.disabled = !media.dlna_active || !media.dlna_available || !media.dlna_session_active;
+      if (kind === 'dlna' && !select.value) {
+        select.dataset.currentSource = 'dlna';
+        select.value = 'dlna';
+      }
+      return;
+    }
     const snapshot = data.bluetooth_output;
     const known = Array.isArray(snapshot?.devices) ? snapshot.devices : [];
     const incoming = Object.values(bt.bluetooth_devices || {}).filter(d => d.connected && !known.some(k => k.mac === d.mac && !k.audio_source));
@@ -15,7 +31,7 @@
     const devices = [...new Map(rows.map(d => ({...d, mac: String(d.mac || '').toUpperCase()})).filter(d => validMac(d.mac)).map(d => [d.mac, d])).values()];
     devices.sort((a, b) => String(a.name || a.mac).localeCompare(String(b.name || b.mac)));
     const enabled = bt.active && snapshot?.roles?.sink !== false;
-    const next = JSON.stringify([devices.map(d => [d.mac, d.name]), Boolean(enabled), Boolean(media.multiroom_active), Boolean(media.airplay_active)]);
+    const next = JSON.stringify([devices.map(d => [d.mac, d.name]), Boolean(enabled), Boolean(media.multiroom_active), Boolean(media.airplay_active), Boolean(media.dlna_active), Boolean(media.dlna_available), Boolean(media.dlna_session_active), media.dlna_name, dlnaSender]);
     if (next !== signature) {
       signature = next;
       select.replaceChildren();
@@ -34,10 +50,11 @@
       if (!devices.length) add('bluetooth', 'Bluetooth — chưa có điện thoại kết nối', true);
       add('airplay', 'AirPlay', !media.airplay_active);
       add('multiroom', 'Multiroom Audio', !media.multiroom_active);
+      add('dlna', 'DLNA Renderer' + (dlnaSender ? ' - ' + dlnaSender : ''), !media.dlna_active || !media.dlna_available || !media.dlna_session_active);
     }
     const preferred = media.selected_source;
     if (preferred === 'bluetooth' && media.playback_state !== 'playing') kind = preferred;
-    let current = ['local_media', 'bluetooth', 'airplay', 'multiroom'].includes(kind) ? kind : '';
+    let current = ['local_media', 'bluetooth', 'airplay', 'multiroom', 'dlna'].includes(kind) ? kind : '';
     if (current === 'bluetooth') {
       const pathMac = String(bt.device_path || '').split('dev_')[1]?.split('/')[0].replace(/_/g, ':').toUpperCase();
       const mac = String(bt.selected_input_mac || snapshot?.input_selected || pathMac || '').toUpperCase();
