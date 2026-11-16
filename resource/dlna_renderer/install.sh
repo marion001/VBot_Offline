@@ -59,6 +59,8 @@ if command -v dbus-send >/dev/null 2>&1; then
     --dest=org.freedesktop.DBus / org.freedesktop.DBus.ReloadConfig >/dev/null || true
 fi
 
-python3 "$ROOT/Sync_System_Services.py" --root "$ROOT" --apply --install --only dlna_renderer
+# Import the module so this works when it is distributed as a Cython .so.
+python3 -c "import sys; sys.path.insert(0, sys.argv[sys.argv.index('--root')+1]); import Sync_System_Services as sync; sys.exit(sync.main())" \
+  --root "$ROOT" --apply --install --only dlna_renderer
 
 echo "gmrender-resurrect build and installation completed successfully."

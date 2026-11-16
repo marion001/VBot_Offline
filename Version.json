@@ -2,7 +2,7 @@
     "version":  "1.4.3",
     "projectName":  "Program VBot Offline",
     "description":  "Bổ sung DLNA Audio Renderer với đồng bộ trạng thái, metadata và âm lượng qua D-Bus/MPRIS; hoàn thiện đồng bộ nguồn phát và điều khiển media qua WebUI, API, MQTT; mở rộng điều khiển LED Effects Control và các tính năng Home Assistant, Multiroom.",
-    "releaseDate":  "16/11/2026",
+    "releaseDate":  "16/11/2026-1",
     "changes":  [
                     {
                         "type":  "feature",
