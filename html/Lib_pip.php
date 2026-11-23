@@ -224,13 +224,20 @@ include 'html_head.php';
             		<th style='text-align: center; vertical-align: middle;'>Hành Động</th>
             		</tr></thead><tbody>";
             foreach ($wrongVersionPackages as $name => $versions) {
-              $Command_pip = base64_encode('pip install ' . $name . '==' . $versions['mainVersion']);
+              if (strtolower($name) === 'pytubefix') {
+                $installCmd = "<span class='text-danger'>Vui lòng xem hướng dẫn cài đặt tại <a href='FAQ.php#accordion_fix_youtube_link' target='_blank' class='fw-bold text-decoration-underline'>FAQ.php</a> mục <b>Hướng dẫn Fix tìm kiếm và lấy Link YouTube</b></span>";
+                $actionBtn = "<a href='FAQ.php#accordion_fix_youtube_link' target='_blank' class='btn btn-warning rounded-pill'>Xem hướng dẫn</a>";
+              } else {
+                $Command_pip = base64_encode('pip install ' . $name . '==' . $versions['mainVersion']);
+                $installCmd = "<font color=blue>pip install $name=={$versions['mainVersion']}</font>";
+                $actionBtn = "<button type='button' class='btn btn-success rounded-pill' onclick='VBot_Command(" . json_encode($Command_pip) . ")'>Cài Đặt</button>";
+              }
               echo "<tr>
-            			<td style='text-align: center; vertical-align: middle;'>$name <a href='https://pypi.org/project/$name/' target='_bank' title='Kiểm tra $name'><i class='bi bi-box-arrow-up-right'></i></a></td>
+            			<td style='text-align: center; vertical-align: middle;'>$name <a href='https://pypi.org/project/$name/' target='_blank' title='Kiểm tra $name'><i class='bi bi-box-arrow-up-right'></i></a></td>
             			<td style='text-align: center; vertical-align: middle;'><font color=green>{$versions['mainVersion']}</font></td>
             			<td style='text-align: center; vertical-align: middle;'><font color=red>{$versions['userVersion']}</font></td>
-            			<td style='text-align: center; vertical-align: middle;'><font color=blue>pip install $name=={$versions['mainVersion']}</font></td>
-            			<td style='text-align: center; vertical-align: middle;'><button type='button' class='btn btn-success rounded-pill' onclick='VBot_Command(" . json_encode($Command_pip) . ")'>Cài Đặt</button></td>
+            			<td style='text-align: center; vertical-align: middle;'>{$installCmd}</td>
+            			<td style='text-align: center; vertical-align: middle;'>{$actionBtn}</td>
             			</tr>";
             }
             echo "</tbody></table>";
