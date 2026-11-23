@@ -2835,7 +2835,7 @@ org.bluez.Device1 Connect</code></pre></div></div></div>
                 <p class="mb-1"><b>File sẽ tự động thực hiện:</b></p>
 
                 <ul>
-                    <li>Cài đúng phiên bản <b>pytubefix 10.11.0</b>.</li>
+                    <li>Cài đúng phiên bản <b>pytubefix 11.2.2</b>.</li>
                     <li>Giữ nguyên phiên bản <b>aiohttp</b> đang có trên hệ thống.</li>
                     <li>Cài Node.js phù hợp với kiến trúc Raspberry Pi.</li>
                     <li>Tạo và kiểm tra <b>nodejs_wheel</b>.</li>
@@ -2851,7 +2851,7 @@ node --version</code></pre>
 
                 <p class="mb-1"><b>Kết quả mong đợi:</b></p>
 
-                <pre class="bg-light border rounded p-2"><code>10.11.0
+                <pre class="bg-light border rounded p-2"><code>11.2.2
 v22.22.3</code></pre>
 
                 <div class="alert alert-info mb-0">

@@ -164,22 +164,22 @@ Các thành phần chính:
 | `TTS_Processing.cpython-39-arm-linux-gnueabihf.so` | Chọn và gọi nguồn Text-to-Speech. |
 | `Media_Player.cpython-39-arm-linux-gnueabihf.so` | Media player nội bộ và vòng đời phát nhạc. |
 | `Api.cpython-39-arm-linux-gnueabihf.so` | REST API, SSE, MQTT, AirPlay DBus, diagnostics và watchdog. |
-| `Api_HTTP.py`, `Api_MQTT.py` | Các handler HTTP/MQTT được tách khỏi lớp điều phối API chính. |
+| `Api_HTTP.cpython-39-arm-linux-gnueabihf.so`, `Api_MQTT.cpython-39-arm-linux-gnueabihf.so` | Các handler HTTP/MQTT được tách khỏi lớp điều phối API chính. |
 | `Streaming.cpython-39-arm-linux-gnueabihf.so` | WebSocket server, session client và streaming STT. |
 | `Bluetooth.cpython-39-arm-linux-gnueabihf.so` | Theo dõi BlueZ, metadata và trạng thái Bluetooth. |
 | `Button.cpython-39-arm-linux-gnueabihf.so` | Nút nhấn và rotary encoder. |
 | `Led.cpython-39-arm-linux-gnueabihf.so` | Hiệu ứng LED và khôi phục trạng thái nghỉ. |
 | `Scheduler.cpython-39-arm-linux-gnueabihf.so` | Lịch thông báo và tác vụ định kỳ. |
-| `Update_Manager.py` | Điều phối cập nhật từ WebUI, REST API và MQTT; quản lý LED, âm báo, log và restart. |
-| `Manual_Update_Program.py` | Cập nhật/rollback chương trình qua SSH và bàn giao kết quả cho Update Manager. |
-| `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI. |
-| `VBot_Multiroom_*.py` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
+| `Update_Manager.cpython-39-arm-linux-gnueabihf.so`, `Update_Backup.cpython-39-arm-linux-gnueabihf.so`, `Update_Paths.cpython-39-arm-linux-gnueabihf.so` | Điều phối cập nhật từ WebUI, REST API và MQTT; quản lý sao lưu, đường dẫn, LED, âm báo, log và restart. |
+| `Manual_Update_Program.py` | Cập nhật/rollback chương trình qua SSH và bàn giao kết quả cho Update Manager (giữ dạng `.py`). |
+| `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI (giữ dạng `.py`). |
+| `VBot_Multiroom_*.cpython-39-arm-linux-gnueabihf.so` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
 | `resource/HomeKit/` | VBot HomeKit Bridge, registry phụ kiện, trình cài Node.js và systemd user service. |
-| `AI_Engine.py`, `AI_Skill_Registry.py`, `AI_Action_Dispatcher.py`, `AI_Knowledge_Base.py` | Bộ xử lý AI Function Calling (Groq/Gemini), Local Intent Cache, Telemetry, Kho Tri Thức AI Cục Bộ (Hybrid FTS5 + Vector RRF) và thực thi công cụ thông minh. |
+| `AI_Engine.cpython-39-arm-linux-gnueabihf.so`, `AI_Skill_Registry.cpython-39-arm-linux-gnueabihf.so`, `AI_Action_Dispatcher.cpython-39-arm-linux-gnueabihf.so`, `AI_Knowledge_Base.cpython-39-arm-linux-gnueabihf.so` | Bộ xử lý AI Function Calling (Groq/Gemini), Local Intent Cache, Telemetry, Kho Tri Thức AI Cục Bộ (Hybrid FTS5 + Vector RRF) và thực thi công cụ thông minh. |
 | `Dev_AI_Engine.py` | Điểm mở rộng AI tùy biến cho người dùng (giữ dạng `.py` không biên dịch `.so`). |
-| `Lib_System.py`, `Lib_Audio.py`, `Lib_AirPlay.py`, `Lib_Bluetooth.py`, `Lib_Multiroom.py`, `Lib_Picovoice_Utils.py`, `Lib_State_Audio.py`, `Lib_Device_Runtime.py` | Các lớp chức năng được tách khỏi facade `Lib.py` để tối ưu tốc độ build `.so` và bảo trì. |
-| `Data_Processing_HASS.py`, `Data_Processing_Media_Info.py`, `Def_Processing_HASS.py`, `Def_Processing_Media.py`, `Def_Processing_Weather.py` | Các module con được tách từ `Data_Processing.py` và `Def_Processing.py` theo mô hình Facade. |
-| `html/` | WebUI PHP, JavaScript, CSS và tài nguyên giao diện. |
+| `Lib_System.cpython-39-arm-linux-gnueabihf.so`, `Lib_Audio.cpython-39-arm-linux-gnueabihf.so`, `Lib_AirPlay.cpython-39-arm-linux-gnueabihf.so`, `Lib_Bluetooth.cpython-39-arm-linux-gnueabihf.so`, `Lib_Multiroom.cpython-39-arm-linux-gnueabihf.so`, `Lib_Picovoice_Utils.cpython-39-arm-linux-gnueabihf.so`, `Lib_State_Audio.cpython-39-arm-linux-gnueabihf.so`, `Lib_Device_Runtime.cpython-39-arm-linux-gnueabihf.so` | Các lớp chức năng được tách khỏi facade `Lib` để tối ưu tốc độ build `.so` và bảo trì. |
+| `Data_Processing_HASS.cpython-39-arm-linux-gnueabihf.so`, `Data_Processing_Media_Info.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_HASS.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_Media.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_Weather.cpython-39-arm-linux-gnueabihf.so` | Các module con được tách từ `Data_Processing` và `Def_Processing` theo mô hình Facade. |
+| `html/` | WebUI PHP, JavaScript, CSS, script trung gian `includes/php_ajax/AI_Knowledge_Indexer.py` và tài nguyên giao diện. |
 | `resource/` | Âm thanh, service, script cài đặt và dữ liệu tích hợp. |
 
 ### Nguyên tắc xử lý bất đồng bộ
@@ -193,26 +193,38 @@ Các thành phần chính:
 ## Luồng xử lý giọng nói
 
 ```text
-Chờ từ khóa đánh thức
+Chờ từ khóa đánh thức (Porcupine / Snowboy)
         │
         ▼
-Phát âm báo + cập nhật LED
+Phát âm báo + cập nhật LED + Face.php (listening)
         │
         ▼
 Thu âm ───── nhấn giữ nút ────► hủy thu âm, về trạng thái chờ
         │
         ▼
-STT → phân tích câu lệnh
+STT (nhận dạng giọng nói) → Face.php (thinking)
         │
-        ├── Home Assistant / MQTT / Broadlink
-        ├── Media / radio / podcast
-        ├── Trợ lý AI
-        └── Tác vụ hệ thống
+        ├── [Chế độ AI: processing_pipeline.mode = "ai"]
+        │       ├── 1. Lệnh HASS Custom & Lệnh hệ thống SYS_CMD (0 token)
+        │       ├── 2. Local Intent Cache - ai_intent_cache.json (0 token, < 50ms)
+        │       └── 3. AI Function Calling (Groq / Gemini / Dev_AI_Engine)
+        │               ├── Điều khiển Nhà thông minh (HASS đơn/hàng loạt theo phòng, Tuya, Alias)
+        │               ├── Kho Tri Thức AI (search_knowledge: Catalog + Hybrid FTS5 & Vector RRF
+        │               │     + Neighbor Window → tự chuyển web_search nếu tài liệu không có)
+        │               ├── Tìm kiếm Internet thời gian thực (web_search)
+        │               ├── Media, Bản tin, Nhật ký, Bộ nhớ dài hạn, Đếm ngược, Thông báo
+        │               └── Tự dự phòng sang VBot từ khóa nếu AI lỗi (fallback_to_vbot_on_error)
+        │
+        └── [Chế độ VBot từ khóa: processing_pipeline.mode = "vbot"]
+                ├── Kịch bản giọng nói (Voice Routines)
+                ├── Home Assistant / Local Tuya / MQTT / Broadlink
+                ├── Media / Radio / Podcast / Tin tức
+                ├── Trợ lý AI & Tác vụ hệ thống
         │
         ▼
-TTS / phản hồi / LED
+TTS (tổng hợp song song câu dài) + LED + Face.php (21 cảm xúc + phụ đề tự cuộn)
         │
-        └── tiếp tục nghe nếu bật chế độ hội thoại (conversation_mode)
+        └── tự mở mic tiếp nếu AI hỏi làm rõ (?) hoặc bật chế độ hội thoại (conversation_mode)
 ```
 
 ## Audio, AirPlay và Bluetooth

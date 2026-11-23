@@ -1,5 +1,5 @@
 #!/bin/bash
-# Auto install pytubefix 10.11.0 + Node.js system binary + nodejs_wheel shim
+# Auto install pytubefix 11.2.2 + Node.js system binary + nodejs_wheel shim
 # Không cài/upgrade aiohttp.
 #
 # Usage:
@@ -9,7 +9,7 @@
 set -euo pipefail
 
 PYTHON_BIN="${PYTHON_BIN:-python3}"
-PYTUBEFIX_VERSION="10.11.0"
+PYTUBEFIX_VERSION="11.2.2"
 NODE_VERSION="${NODE_VERSION:-22.22.3}"
 
 log() {
@@ -82,7 +82,7 @@ if ! "$PYTHON_BIN" -c "import aiohttp; print('aiohttp           : ' + aiohttp.__
     die "Không tìm thấy aiohttp. Script này không tự cài aiohttp."
 fi
 
-log "2/6 - Cài đúng pytubefix==10.11.0"
+log "2/6 - Cài đúng pytubefix==11.2.2"
 
 # --no-deps để không kéo nodejs-wheel-binaries và không đụng aiohttp.
 "$PYTHON_BIN" -m pip install \
@@ -185,7 +185,7 @@ if not os.path.isfile(node_path):
 if not os.access(node_path, os.X_OK):
     raise SystemExit("Node không có quyền execute: " + node_path)
 
-if getattr(pytubefix, "__version__", None) != "10.11.0":
+if getattr(pytubefix, "__version__", None) != "11.2.2":
     raise SystemExit(
         "Sai phiên bản pytubefix: "
         + str(getattr(pytubefix, "__version__", None))
@@ -198,6 +198,6 @@ echo
 echo "============================================================"
 echo "CÀI ĐẶT HOÀN TẤT"
 echo "============================================================"
-echo "pytubefix : 10.11.0"
+echo "pytubefix : 11.2.2"
 echo "Node.js   : $(/usr/local/bin/node --version)"
 echo "Shim      : ${SHIM_DIR}/executable.py"
