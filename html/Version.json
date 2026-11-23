@@ -1,25 +1,25 @@
 {
-    "version": "1.4.3",
+    "version": "1.4.6",
     "projectName": "WebUI VBot Offline",
-    "description": "Bổ sung DLNA Audio Renderer với đồng bộ trạng thái, metadata và âm lượng qua D-Bus/MPRIS; hoàn thiện đồng bộ nguồn phát và điều khiển media qua WebUI, API, MQTT; mở rộng điều khiển LED Effects Control và các tính năng Home Assistant, Multiroom.",
-    "releaseDate": "16/11/2026",
+    "description": "Ra mắt Hệ thống AI xử lý dữ liệu, trang quản lý Kho Tri Thức AI Cục Bộ (AI_Knowledge.php) với Knowledge Catalog, lập chỉ mục FTS5 & Vector từng tệp, xem trực tiếp bảng kb_chunks/kb_vectors, Search Playground kiểm thử truy vấn, nạp/cập nhật URL Website, AI tự phân loại & tóm tắt, sao lưu/khôi phục .tar.gz tự động xoay vòng 5 bản; nâng cấp Face.php cuộn phụ đề TTS dài mượt mà và nút điều khiển nguồn.",
+    "releaseDate": "23/11/2026",
     "changes": [
         {
             "type": "feature",
-            "description": "Cần Cài Bổ Sung Thư Viện Sau: 'pip install pydbus==0.6.0'"
+            "description": "Cần cài bổ sung thư viện sau: [python3 -m pip install --user pypdf xlrd openpyxl] và có Trang Kho Tri Thức AI (AI_Knowledge.php): Quản lý 27 định dạng & ảnh, nạp/cập nhật từ URL Website, nút lập chỉ mục riêng từng tệp (có hỏi xác nhận tránh tốn quota Gemini), Modal xem trực tiếp bảng chỉ mục FTS5 (kb_chunks) & bảng vector (kb_vectors), ô Kiểm Thử Truy Vấn (Search Playground) cuộn mượt, AI tự phân loại & gắn tags, cảnh báo file trùng SHA-256, đếm lượt tra cứu, và Sao lưu/Khôi phục .tar.gz tại html/Backup_Upgrade/Backup_AI_Knowledge (tối đa 5 bản tự xóa bản cũ nhất, chmod 0777)."
         },
         {
             "type": "fix",
-            "description": "Đã khắc phục sự cố bên ngoài rìa của vũ trụ"
+            "description": "Khắc phục lỗi PHP proc_close trả mã -1 trên Linux, lỗi escapeshellarg làm mất dấu tên tệp tiếng Việt khi locale=C bằng truyền tham số Base64 UTF-8, lỗi cắt tên tệp tiếng Việt dài theo byte; sửa lỗi phụ đề TTS dài bị tràn khung trên Face.php."
         },
         {
             "type": "improvement",
-            "description": "Nâng cao hiệu suất xử lý dữ liệu."
+            "description": "Bố cục AI_Knowledge.php rộng toàn màn hình với icon loading đồng bộ mọi thao tác; thêm công tắc Tìm kiếm ngữ nghĩa Hybrid Vector trong Config.php kèm ghi chú cấu hình Gemini Key; Face.php hỗ trợ tự cuộn phụ đề TTS dài kiểu teleprompter, menu nguồn (Start/Stop/Restart/Reboot) và khóa thanh cảnh báo mất kết nối ở đáy màn hình."
         }
     ],
     "author": "Vũ Tuyển",
     "code_by": "Vũ Tuyển",
     "designed_by": "BootstrapMade",
     "status": "stable",
-    "previousVersion": "1.0.0"
+    "previousVersion": "1.4.0"
 }

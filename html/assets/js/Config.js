@@ -495,7 +495,8 @@ function test_key_ChatGPT(text) {
 //Tets, kiểm tra Key Gemini
 function test_key_Gemini(text) {
     loading("show");
-    var apiKey = document.getElementById('google_gemini_key').value;
+    var rawGeminiKeys = document.getElementById('google_gemini_key').value || '';
+    var apiKey = rawGeminiKeys.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean)[0] || '';
     var gemini_models_name = document.getElementById('gemini_models_name').value;
     var apiVersion = document.getElementById('gemini_api_version').value;
     if (!apiKey || !gemini_models_name || !apiVersion) {
@@ -1106,7 +1107,7 @@ function get_model_gemini() {
         show_message("Không tìm thấy select ID: gemini_api_version");
         return;
     }
-    const geminiKey = keyInput.value.trim();
+    const geminiKey = keyInput.value.trim().split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean)[0] || '';
     const geminiVersion = versionSelect.value;
     if (!geminiKey) {
         show_message("Gemini API Key chưa được nhập hoặc không hợp lệ!");
@@ -1152,6 +1153,227 @@ function get_model_gemini() {
         show_message('Yêu cầu lấy danh sách Gemini Model đã quá thời gian 20 giây');
     };
     xhr.send('get_model_gemini=1&apikey=' + encodeURIComponent(geminiKey) + '&version_api=' + encodeURIComponent(geminiVersion));
+}
+
+function get_model_groq() {
+    const keyInput = document.getElementById("groq_ai_api_key");
+    if (!keyInput) {
+        show_message("Không tìm thấy ô nhập API Key Groq (ID: groq_ai_api_key)");
+        return;
+    }
+    const rawKeys = keyInput.value.trim();
+    const firstKey = rawKeys.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean)[0] || '';
+    if (!firstKey) {
+        show_message("Vui lòng nhập ít nhất 1 Groq API Key trước khi tải danh sách Model!");
+        return;
+    }
+    loading('show');
+    const xhr = vbotCreateXhr();
+    xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+    xhr.timeout = 20000;
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+            loading('hide');
+            try {
+                const response = JSON.parse(xhr.responseText);
+                if (response.success) {
+                    const selectEl = document.getElementById("groq_ai_model_name");
+                    if (selectEl && Array.isArray(response.models) && response.models.length > 0) {
+                        const currentValue = selectEl.value;
+                        selectEl.innerHTML = "";
+                        response.models.forEach(function (model) {
+                            const opt = document.createElement("option");
+                            opt.value = model;
+                            opt.textContent = model;
+                            if (model === currentValue) {
+                                opt.selected = true;
+                            }
+                            selectEl.appendChild(opt);
+                        });
+                        if (currentValue && !response.models.includes(currentValue)) {
+                            const keepOpt = document.createElement("option");
+                            keepOpt.value = currentValue;
+                            keepOpt.textContent = currentValue;
+                            keepOpt.selected = true;
+                            selectEl.insertBefore(keepOpt, selectEl.firstChild);
+                        }
+                    }
+                    showMessagePHP(response.message, 5);
+                } else {
+                    show_message(response.message || 'Không thể lấy danh sách Groq Model');
+                }
+            } catch (e) {
+                show_message(e);
+            }
+        } else if (xhr.readyState === 4) {
+            loading('hide');
+            try {
+                const errResp = JSON.parse(xhr.responseText);
+                show_message(errResp.message || ('Không thể lấy danh sách Groq Model, HTTP ' + xhr.status));
+            } catch (_) {
+                show_message('Không thể lấy danh sách Groq Model, HTTP ' + xhr.status);
+            }
+        }
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message('Không thể kết nối để lấy danh sách Groq Model');
+    };
+    xhr.ontimeout = function () {
+        loading('hide');
+        show_message('Yêu cầu lấy danh sách Groq Model đã quá thời gian 20 giây');
+    };
+    xhr.send('get_model_groq=1&apikey=' + encodeURIComponent(firstKey));
+}
+
+function check_groq_quota() {
+    const keyInput = document.getElementById("groq_ai_api_key");
+    const modelSelect = document.getElementById("groq_ai_model_name");
+    const urlInput = document.getElementById("groq_ai_url");
+    const resultBox = document.getElementById("groq_quota_result_box");
+    if (!keyInput) {
+        show_message("Không tìm thấy ô nhập API Key Groq (ID: groq_ai_api_key)");
+        return;
+    }
+    const rawKeys = keyInput.value.trim();
+    if (!rawKeys) {
+        show_message("Vui lòng nhập ít nhất 1 API Key Groq trước khi kiểm tra hạn mức!");
+        return;
+    }
+    const modelName = modelSelect ? modelSelect.value : 'openai/gpt-oss-20b';
+    const apiUrl = urlInput ? urlInput.value.trim() : 'https://api.groq.com/openai/v1/chat/completions';
+    loading('show');
+    const xhr = vbotCreateXhr();
+    xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+    xhr.timeout = 30000;
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        loading('hide');
+        if (xhr.status !== 200) {
+            try {
+                const errResp = JSON.parse(xhr.responseText);
+                show_message(errResp.message || ('Không thể kiểm tra hạn mức Groq, HTTP ' + xhr.status));
+            } catch (_) {
+                show_message('Không thể kiểm tra hạn mức Groq, HTTP ' + xhr.status);
+            }
+            return;
+        }
+        try {
+            const response = JSON.parse(xhr.responseText);
+            if (!response.success) {
+                show_message(response.message || 'Kiểm tra hạn mức Groq thất bại');
+                return;
+            }
+            if (resultBox) {
+                let html = '<div class="table-responsive mt-2"><table class="table table-sm table-bordered table-striped mb-0 bg-white">';
+                html += '<thead class="table-dark"><tr><th>#</th><th>API Key</th><th>Trạng Thái</th><th>Lượt còn / Ngày</th><th>Token còn / Phút</th><th>Reset sau</th></tr></thead><tbody>';
+                (response.results || []).forEach(function (row) {
+                    const badgeClass = row.ok ? 'bg-success' : (row.http_code === 429 ? 'bg-warning text-dark' : 'bg-danger');
+                    const reqText = (row.remaining_requests !== null && row.limit_requests !== null)
+                        ? (row.remaining_requests + ' / ' + row.limit_requests)
+                        : '-';
+                    const tokText = (row.remaining_tokens !== null && row.limit_tokens !== null)
+                        ? (row.remaining_tokens + ' / ' + row.limit_tokens)
+                        : '-';
+                    const resetText = row.reset_requests ? String(row.reset_requests) : '-';
+                    html += '<tr>'
+                        + '<td>' + row.index + '</td>'
+                        + '<td><code>' + String(row.key || '') + '</code></td>'
+                        + '<td><span class="badge ' + badgeClass + '">' + String(row.status || '') + '</span></td>'
+                        + '<td class="fw-semibold text-primary">' + reqText + '</td>'
+                        + '<td class="fw-semibold text-success">' + tokText + '</td>'
+                        + '<td>' + resetText + '</td>'
+                        + '</tr>';
+                });
+                html += '</tbody></table></div>';
+                resultBox.innerHTML = html;
+                resultBox.style.display = '';
+            }
+            showMessagePHP(response.message, 5);
+        } catch (e) {
+            show_message('Lỗi đọc dữ liệu phản hồi: ' + e.message);
+        }
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message('Không thể kết nối để kiểm tra hạn mức Groq');
+    };
+    xhr.ontimeout = function () {
+        loading('hide');
+        show_message('Yêu cầu kiểm tra hạn mức Groq đã quá thời gian 30 giây');
+    };
+    xhr.send(
+        'check_groq_quota=1'
+        + '&apikeys=' + encodeURIComponent(rawKeys)
+        + '&model_name=' + encodeURIComponent(modelName)
+        + '&api_url=' + encodeURIComponent(apiUrl)
+    );
+}
+
+function clear_ai_memory_file() {
+    if (!confirm('Bạn có chắc chắn muốn xóa sạch toàn bộ Trí Nhớ AI và Danh Sách Mua Sắm không?')) {
+        return;
+    }
+    loading('show');
+    const xhr = vbotCreateXhr();
+    xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+    xhr.timeout = 15000;
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        loading('hide');
+        try {
+            const resp = JSON.parse(xhr.responseText);
+            if (xhr.status === 200 && resp.success) {
+                showMessagePHP(resp.message, 5);
+            } else {
+                show_message(resp.message || ('Không thể xóa Trí Nhớ AI, HTTP ' + xhr.status));
+            }
+        } catch (_) {
+            show_message('Không thể xóa Trí Nhớ AI, HTTP ' + xhr.status);
+        }
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message('Lỗi kết nối khi xóa Trí Nhớ AI');
+    };
+    xhr.send('clear_ai_memory=1');
+}
+
+function clear_ai_intent_cache_file() {
+    if (!confirm('Bạn có chắc chắn muốn xóa sạch Bộ Đệm Lệnh AI Cục Bộ (ai_intent_cache.json) không?')) {
+        return;
+    }
+    loading('show');
+    const xhr = vbotCreateXhr();
+    xhr.open('POST', 'includes/php_ajax/Check_Connection.php', true);
+    xhr.timeout = 15000;
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded; charset=UTF-8');
+    xhr.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState !== 4) return;
+        loading('hide');
+        try {
+            const resp = JSON.parse(xhr.responseText);
+            if (xhr.status === 200 && resp.success) {
+                showMessagePHP(resp.message, 5);
+            } else {
+                show_message(resp.message || ('Không thể xóa Bộ Đệm Lệnh AI, HTTP ' + xhr.status));
+            }
+        } catch (_) {
+            show_message('Không thể xóa Bộ Đệm Lệnh AI, HTTP ' + xhr.status);
+        }
+    };
+    xhr.onerror = function () {
+        loading('hide');
+        show_message('Lỗi kết nối khi xóa Bộ Đệm Lệnh AI');
+    };
+    xhr.send('clear_ai_intent_cache=1');
 }
 
 //Load Gemini Model cập nhật vào thẻ select

@@ -1,23 +1,23 @@
 {
-    "version":  "1.4.3",
-    "projectName":  "Program VBot Offline",
-    "description":  "Bổ sung DLNA Audio Renderer với đồng bộ trạng thái, metadata và âm lượng qua D-Bus/MPRIS; hoàn thiện đồng bộ nguồn phát và điều khiển media qua WebUI, API, MQTT; mở rộng điều khiển LED Effects Control và các tính năng Home Assistant, Multiroom.",
-    "releaseDate":  "16/11/2026-1",
-    "changes":  [
-                    {
-                        "type":  "feature",
-                        "description":  "Cần Cài Bổ Sung Thư Viện Sau: \u0027pip install pydbus==0.6.0\u0027"
-                    },
-                    {
-                        "type":  "fix",
-                        "description":  "Đã sửa tất cả các lỗi, và mang tới cho các bạn thêm vài lỗi nữa"
-                    },
-                    {
-                        "type":  "improvement",
-                        "description":  "Cải thiện độ ổn định, tiện tay vá luôn lỗ hổng ngoài không gian"
-                    }
-                ],
-    "author":  "Vũ Tuyển",
-    "status":  "stable",
-    "previousVersion":  "1.0.0"
+    "version": "1.4.6",
+    "projectName": "Program VBot Offline",
+    "description": "Ra mắt Hệ thống AI xử lý dữ liệu, Kho Tri Thức AI Cục Bộ (VBot Knowledge v2) hỗ trợ 27 định dạng tài liệu/ảnh/PDF Scan/URL/Giọng nói, kết hợp Knowledge Catalog, SQLite FTS5 BM25 + Vector Semantic (kb_vectors) hợp nhất RRF, cắt đoạn theo đề mục, ghép đoạn liền kề, hỏi nối tiếp nhiều lượt và tự động chuyển Web Search khi không có trong tài liệu.",
+    "releaseDate": "23/11/2026",
+    "changes": [
+        {
+            "type": "feature",
+            "description": "Cần cài bổ sung thư viện sau: [python3 -m pip install --user pypdf xlrd openpyxl] và hỗ trợ VBot Knowledge v2 (AI_Knowledge_Base.py): Hỗ trợ 27 định dạng (PDF/PDF Scan, DOCX, ODT, XLS/XLSX, PPT/PPTX, EPUB, HTML, RTF, MD, TXT, CSV, JSON/XML/YAML, mã nguồn, ảnh JPG/PNG/WEBP qua Gemini Vision), nạp từ URL Website, lưu tri thức bằng giọng nói, công cụ đa năng search_knowledge (search/list/read/stats/add), Hybrid FTS5 + Vector 256-dim RRF, Heading-Aware Chunking, Neighbor Window, AI Auto-Tagging và khử trùng lặp SHA-256."
+        },
+        {
+            "type": "fix",
+            "description": "Khắc phục cắt nhầm đa lệnh từ khóa ở chế độ AI và câu tự nhiên chứa 'và'; chặn ngữ cảnh công cụ tra cứu ghi đè lượt sau; sửa lỗi AI chỉ đọc tên tệp thay vì nội dung tài liệu; tự động chuyển sang Web Search khi tài liệu không có thông tin; nâng giới hạn phụ đề TTS trên Face.php lên 2000 ký tự."
+        },
+        {
+            "type": "improvement",
+            "description": "Mở rộng kiến trúc lên 57 module, tự xoay vòng nhiều API Key Gemini/Groq, đồng bộ quyền 0777 toàn bộ thư mục & chỉ mục SQLite/Catalog"
+        }
+    ],
+    "author": "Vũ Tuyển",
+    "status": "stable",
+    "previousVersion": "1.0.36"
 }

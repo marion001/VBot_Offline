@@ -61,18 +61,29 @@ if ($isAnalysisPost) {
 <?php include 'html_head.php'; ?>
 <body>
 <?php include 'html_header_bar.php'; include 'html_sidebar.php'; ?>
+<?php
+$activeProcessingMode = (string)($Config['processing_pipeline']['mode'] ?? 'vbot');
+$activeAiProvider = (string)($Config['processing_pipeline']['ai_provider'] ?? 'gemini_ai');
+$isAiModeActive = ($activeProcessingMode === 'ai');
+?>
 <main id="main" class="main">
   <div class="pagetitle"><h1>Kiểm tra câu lệnh</h1><nav><ol class="breadcrumb"><li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li><li class="breadcrumb-item active">Kiểm tra lệnh</li></ol></nav></div>
   <section class="section">
     <div class="card"><div class="card-body">
-      <h5 class="card-title">Thử nhận diện lệnh</h5>
-      <p>Nhập câu bạn muốn nói với VBot để xem keyword, hành động, đích điều khiển dự kiến và lý do bị từ chối. Kết quả phân tích không xác nhận thiết bị đã thực hiện lệnh.</p>
+      <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <h5 class="card-title mb-0">Thử nhận diện lệnh</h5>
+        <span class="badge <?php echo $isAiModeActive ? 'bg-primary' : 'bg-secondary'; ?> fs-6">
+          <i class="bi <?php echo $isAiModeActive ? 'bi-cpu-fill' : 'bi-terminal-fill'; ?> me-1"></i>
+          <?php echo $isAiModeActive ? ('Chế độ hiện tại: AI (' . htmlspecialchars($activeAiProvider, ENT_QUOTES, 'UTF-8') . ')') : 'Chế độ hiện tại: VBot nội bộ (Từ khóa)'; ?>
+        </span>
+      </div>
+      <p class="mt-2">Nhập câu bạn muốn nói với VBot để kiểm tra nhận diện ở <strong>cả 2 chế độ (AI &amp; VBot nội bộ)</strong>: xem nhánh xử lý, Local Intent Cache, Tool AI dự kiến hoặc từ khóa/đích HASS. Kết quả phân tích không xác nhận thiết bị đã thực hiện lệnh.</p>
       <div id="mode-notice" class="alert alert-info">Chế độ thử không thực thi: không điều khiển thiết bị, khởi động lại hệ thống hoặc phát âm thanh.</div>
       <form id="command-test-form">
         <label for="command-text" class="form-label">Câu lệnh</label>
-        <textarea id="command-text" name="text" class="form-control border-success" rows="3" maxlength="2048" required placeholder="Ví dụ: bật đèn phòng khách"></textarea>
-        <div class="form-check my-3"><input class="form-check-input border-success" type="checkbox" id="lookup-devices"><label class="form-check-label" for="lookup-devices">Đọc danh sách thiết bị Home Assistant để tìm đích (không gửi lệnh điều khiển)</label></div>
-        <div class="form-check my-3"><input class="form-check-input border-success" type="checkbox" id="execute-command"><label class="form-check-label" for="execute-command">Cho phép thực hiện luôn lệnh qua VBot</label></div>
+        <textarea id="command-text" name="text" class="form-control border-success" rows="3" maxlength="2048" required placeholder="Ví dụ: bật đèn phòng khách, nóng quá, tắt cho tôi..."></textarea>
+        <div class="form-check my-3"><input class="form-check-input border-success" type="checkbox" id="lookup-devices"><label class="form-check-label" for="lookup-devices">Đọc danh sách thiết bị Home Assistant / Gọi AI xem trước tool dự kiến (không gửi lệnh điều khiển)</label></div>
+        <div class="form-check my-3"><input class="form-check-input border-success" type="checkbox" id="execute-command"><label class="form-check-label" for="execute-command">Cho phép thực hiện luôn lệnh qua VBot (chạy thật theo chế độ đang bật)</label></div>
         <button id="analyze-button" type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Phân tích lệnh</button>
       </form>
       <div id="analysis-error" class="alert alert-danger mt-3" role="alert" hidden></div>
@@ -210,24 +221,70 @@ if ($isAnalysisPost) {
       const report = payload.analysis;
       renderDialogue(report.dialogue, operation === 'reset_dialogue' ? 'Hủy ngữ cảnh' : data.get('text'), startNew);
       if (startNew) {tabId = createTabId(); document.getElementById('command-text').value = '';}
-      document.getElementById('analysis-summary').textContent = `Ngôn ngữ: ${report.locale} · ${report.commands.length} lệnh · ${report.executed ? 'Đã gửi vào luồng xử lý thật' : 'Chưa thực thi'} · Phân tích: ${report.elapsed_ms ?? '—'} ms`;
+      const modeLabel = (report.processing_mode === 'ai')
+        ? `AI (${report.ai_pipeline?.provider || 'ai'})`
+        : 'VBot nội bộ';
+      document.getElementById('analysis-summary').textContent = `Chế độ: ${modeLabel} · Ngôn ngữ: ${report.locale} · ${report.executed ? 'Đã gửi vào luồng xử lý thật' : 'Chưa thực thi'} · Phân tích: ${report.elapsed_ms ?? '—'} ms`;
       const warnings = document.getElementById('analysis-warnings'); warnings.replaceChildren();
       for (const warning of report.warnings || []) {const p = document.createElement('p'); p.className='text-warning'; p.textContent=warning; warnings.append(p);}
       const container = document.getElementById('analysis-commands'); container.replaceChildren();
       if (report.execution) {
-        addField(container, 'Kết quả xử lý thật', report.execution.text);
-        addField(container, 'Được xử lý (handled)', report.execution.handled);
-        addField(container, 'Ghi chú', report.execution.note);
-        addTable(container, 'Kiểm tra trạng thái trước/sau điều khiển', report.execution.verification_results);
+        const execCard = document.createElement('div'); execCard.className = 'border border-success rounded p-3 mb-3 bg-light';
+        const execTitle = document.createElement('h6'); execTitle.className = 'text-success fw-bold mb-2'; execTitle.textContent = 'Kết quả thực thi thật';
+        execCard.append(execTitle);
+        addField(execCard, 'Phản hồi của VBot', report.execution.text);
+        addField(execCard, 'Được xử lý (handled)', report.execution.handled);
+        addField(execCard, 'Ghi chú', report.execution.note);
+        addTable(execCard, 'Kiểm tra trạng thái trước/sau điều khiển', report.execution.verification_results);
+        container.append(execCard);
       }
-      addField(container, 'Cấu hình đang dùng', report.configuration);
+      if (report.ai_pipeline && report.ai_pipeline.active) {
+        const ai = report.ai_pipeline;
+        const aiStageLabels = {
+          custom_hass: 'Custom Home Assistant Command (0 token)',
+          system_command: 'Câu lệnh hệ thống SYSTEM (0 token)',
+          intent_cache: 'Local Intent Cache (0 token, < 50ms)',
+          ai_tool_preview: 'AI chọn gọi Công cụ (Xem trước — chưa thực thi)',
+          ai_text_preview: 'AI trả lời văn bản trực tiếp (Xem trước)',
+          ai_llm_pending: 'Sẽ gửi sang AI phân tích (chưa gọi API ở chế độ thử nhanh)',
+          ai_llm_preview: 'AI không phản hồi',
+          ai_error: 'Lỗi AI Pipeline'
+        };
+        const aiCard = document.createElement('div'); aiCard.className = 'border border-primary rounded p-3 mb-3';
+        const aiTitle = document.createElement('h6'); aiTitle.className = 'text-primary fw-bold mb-2'; aiTitle.textContent = 'Phân tích Pipeline AI';
+        aiCard.append(aiTitle);
+        addField(aiCard, 'Nhà cung cấp AI', ai.provider);
+        addField(aiCard, 'Nhánh xử lý dự kiến', aiStageLabels[ai.stage] || ai.stage);
+        addField(aiCard, 'Lý do / Chi tiết', ai.reason);
+        if (ai.matched_name) addField(aiCard, 'Lệnh Custom HASS khớp', `${ai.matched_name} (điểm: ${ai.score ?? '—'} / ${ai.threshold ?? '—'})`);
+        if (ai.value_key) addField(aiCard, 'Mã lệnh hệ thống', `${ai.value_key} (điểm: ${ai.score ?? '—'})`);
+        if (ai.cache_hits !== undefined) addField(aiCard, 'Số lượt khớp Cache trước đó', ai.cache_hits);
+        if (ai.calls && ai.calls.length) addField(aiCard, 'Công cụ (Tool) & Tham số dự kiến', ai.calls);
+        if (ai.reply_text) addField(aiCard, 'Câu trả lời AI dự kiến', ai.reply_text);
+        if (ai.emotion) addField(aiCard, 'Cảm xúc dự kiến', ai.emotion);
+        addField(aiCard, 'Local Intent Cache / Fallback VBot', `Cache: ${ai.intent_cache_active ? 'Bật' : 'Tắt'} · Fallback VBot khi lỗi AI: ${ai.fallback_to_vbot ? 'Bật' : 'Tắt'}`);
+        container.append(aiCard);
+      }
+      const vbotContainer = (report.ai_pipeline && report.ai_pipeline.active)
+        ? (() => {
+            const det = document.createElement('details'); det.className = 'mt-2 mb-3';
+            const sum = document.createElement('summary'); sum.className = 'fw-semibold text-secondary';
+            sum.textContent = `Phân tích từ khóa VBot nội bộ (${report.commands.length} lệnh — chỉ áp dụng khi tắt AI hoặc fallback)`;
+            det.append(sum);
+            const inner = document.createElement('div'); inner.className = 'mt-2';
+            det.append(inner);
+            container.append(det);
+            return inner;
+          })()
+        : container;
+      addField(vbotContainer, 'Cấu hình đang dùng', report.configuration);
       if (report.voice_routines) {
         const routines=report.voice_routines;
-        addField(container,'Voice Routines đang bật',routines.active);
-        addField(container,'Kịch bản khớp',routines.matched_name);
-        addField(container,'Ngưỡng khớp kịch bản',routines.threshold);
-        addField(container,'Điều kiện / lý do',routines.reason);
-        addTable(container,'Xếp hạng kịch bản (chỉ phân tích)',routines.candidates);
+        addField(vbotContainer,'Voice Routines đang bật',routines.active);
+        addField(vbotContainer,'Kịch bản khớp',routines.matched_name);
+        addField(vbotContainer,'Ngưỡng khớp kịch bản',routines.threshold);
+        addField(vbotContainer,'Điều kiện / lý do',routines.reason);
+        addTable(vbotContainer,'Xếp hạng kịch bản (chỉ phân tích)',routines.candidates);
       }
       for (const command of report.commands) {
         const block = document.createElement('div'); block.className='border rounded p-3 mb-3';
@@ -255,7 +312,7 @@ if ($isAnalysisPost) {
         addTable(block, 'Tất cả keyword nhận diện', command.keyword_matches);
         addTable(block, 'Xếp hạng đích (tối đa 10)', command.candidates);
         addTable(block, 'Các bước phân tích', command.trace);
-        container.append(block);
+        vbotContainer.append(block);
       }
       document.getElementById('analysis-json').textContent = JSON.stringify(report,null,2); results.hidden=false;
     } catch (exception) {error.textContent = exception.message + (executionRequested ? ' Chưa xác định được kết quả thực thi. Hãy kiểm tra thiết bị hoặc log trước khi gửi lại; lệnh có thể đã được xử lý.' : ''); error.hidden=false;}

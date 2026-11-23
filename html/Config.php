@@ -1072,11 +1072,33 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   $Config['media_player']['nhaccuatui']['active'] = isset($_POST['nhaccuatui_active']) ? true : false;
 
   #cẬP NHẬT GIÁ TRỊ Trợ Lý Ảo/Assistant:
-  $Config['virtual_assistant']['google_gemini']['api_key'] = $_POST['google_gemini_key'];
+  $apiKeys_GEMINI_AI = array_map('trim', explode("\n", (string)($_POST['google_gemini_key'] ?? '')));
+  $apiKeys_GEMINI_AI = array_values(array_filter(array_map(function ($k) {
+    return str_replace("\r", '', $k);
+  }, $apiKeys_GEMINI_AI), function ($k) {
+    return !empty($k);
+  }));
+  $Config['virtual_assistant']['google_gemini']['api_key'] = $apiKeys_GEMINI_AI;
   $Config['virtual_assistant']['google_gemini']['model_name'] = $_POST['gemini_models_name'];
   $Config['virtual_assistant']['google_gemini']['api_version'] = $_POST['gemini_api_version'];
   $Config['virtual_assistant']['google_gemini']['active'] = isset($_POST['google_gemini_active']) ? true : false;
   $Config['virtual_assistant']['google_gemini']['time_out'] = intval($_POST['google_gemini_time_out']);
+
+  #Cập nhật giá trị trợ lý ảo Groq AI (hỗ trợ nhiều API key, mỗi key 1 dòng)
+  if (!isset($Config['virtual_assistant']['groq_ai']) || !is_array($Config['virtual_assistant']['groq_ai'])) {
+    $Config['virtual_assistant']['groq_ai'] = [];
+  }
+  $Config['virtual_assistant']['groq_ai']['active'] = isset($_POST['groq_ai_active']) ? true : false;
+  $apiKeys_GROQ_AI = array_map('trim', explode("\n", (string)($_POST['groq_ai_api_key'] ?? '')));
+  $apiKeys_GROQ_AI = array_values(array_filter(array_map(function ($k) {
+    return str_replace("\r", '', $k);
+  }, $apiKeys_GROQ_AI), function ($k) {
+    return !empty($k);
+  }));
+  $Config['virtual_assistant']['groq_ai']['api_key'] = $apiKeys_GROQ_AI;
+  $Config['virtual_assistant']['groq_ai']['model_name'] = trim((string)($_POST['groq_ai_model_name'] ?? 'llama-3.3-70b-versatile')) ?: 'llama-3.3-70b-versatile';
+  $Config['virtual_assistant']['groq_ai']['api_url'] = trim((string)($_POST['groq_ai_url'] ?? 'https://api.groq.com/openai/v1/chat/completions')) ?: 'https://api.groq.com/openai/v1/chat/completions';
+  $Config['virtual_assistant']['groq_ai']['time_out'] = max(3, min(30, intval($_POST['groq_ai_time_out'] ?? 10)));
 
   #Cập nhật giá trị trợ lý ảo Default Assistant
   $Config['virtual_assistant']['default_assistant']['time_out'] = intval($_POST['default_assistant_time_out']);
@@ -1376,6 +1398,27 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   if ($speakerLocationError!==null) $messages[]='- '.$speakerLocationError;
   #Cập nhật chế độ chạy toàn bộ chương trình
   $Config['launch_source'] = !empty($_POST['launch_source']) ? $_POST['launch_source'] : 'VBot_Assistant';
+  #Cập nhật cấu hình processing_pipeline (Chế độ xử lý dữ liệu AI / VBot theo từ khóa)
+  if (!isset($Config['processing_pipeline']) || !is_array($Config['processing_pipeline'])) {
+    $Config['processing_pipeline'] = [];
+  }
+  $pipelineMode = isset($_POST['processing_pipeline_mode']) ? trim((string)$_POST['processing_pipeline_mode']) : 'vbot';
+  if (!in_array($pipelineMode, ['vbot', 'ai'], true)) {
+    $pipelineMode = 'vbot';
+  }
+  $pipelineAiProvider = isset($_POST['processing_pipeline_ai_provider']) ? trim((string)$_POST['processing_pipeline_ai_provider']) : 'gemini_ai';
+  if (!in_array($pipelineAiProvider, ['gemini_ai', 'groq_ai', 'dev_ai_engine'], true)) {
+    $pipelineAiProvider = 'gemini_ai';
+  }
+  $Config['processing_pipeline']['mode'] = $pipelineMode;
+  $Config['processing_pipeline']['ai_provider'] = $pipelineAiProvider;
+  $Config['processing_pipeline']['fallback_to_vbot_on_error'] = isset($_POST['processing_pipeline_fallback']);
+  $Config['processing_pipeline']['web_search_active'] = isset($_POST['processing_pipeline_web_search']);
+  $Config['processing_pipeline']['ai_memory_active'] = isset($_POST['processing_pipeline_ai_memory']);
+  $Config['processing_pipeline']['ai_knowledge_active'] = isset($_POST['processing_pipeline_ai_knowledge']);
+  $Config['processing_pipeline']['ai_knowledge_vector_active'] = isset($_POST['processing_pipeline_ai_knowledge_vector']);
+  $Config['processing_pipeline']['intent_cache_active'] = isset($_POST['processing_pipeline_intent_cache']);
+  $Config['processing_pipeline']['face_display_sse_active'] = isset($_POST['processing_pipeline_face_display_sse']);
   #Cập nhật locale keyword; dữ liệu chỉ được áp dụng sau khi restart VBot
   $keywordLocale = str_replace('_', '-', trim((string)($_POST['keyword_language_primary'] ?? 'vi-VN')));
   if (!preg_match('/^[A-Za-z]{2,3}(?:-[A-Za-z0-9]{2,8})?$/', $keywordLocale)) {
@@ -1980,17 +2023,158 @@ include 'html_head.php';
 		  <div id="config-search-empty" class="col-12 alert alert-warning"><i class="bi bi-search"></i> Không tìm thấy nhóm cấu hình phù hợp.</div>
           <div class="col-lg-12" id="config-sections">
 		<div class="alert alert-danger" role="alert">
-            <div class="row mb-3 align-items-center">
-              <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi<br/>- Người dùng tự code, xử lý dữ liệu, các bạn sẽ cần phải tự code xử lý ở file: <b>Dev_Processing.py</b>')"></i>:</label>
-              <div class="col-sm-9">
-                <select class="form-select border-success" name="launch_source" id="launch_source">
-                  <option value="VBot_Assistant" <?php if ($Config['launch_source'] === "VBot_Assistant") echo "selected"; ?>>Chạy VBot Assistant (Nên Dùng)</option>
-                  <option value="XiaoZhi_AI" <?php if ($Config['launch_source'] === "XiaoZhi_AI") echo "selected"; ?>>Chỉ Chạy XiaoZhi AI</option>
-                  <option value="DEV_Processing" <?php if ($Config['launch_source'] === "DEV_Processing") echo "selected"; ?>>Người Dùng Tự Code Xử Lý Dữ Liệu - Dev_Processing.py</option>
-                </select>
-              </div>
-            </div>
+           
+			
+		
+            <script>
+              (function() {
+                function syncVbotProcessingPipelineUI() {
+                  var launchSel = document.getElementById('launch_source');
+                  var modeSel = document.getElementById('processing_pipeline_mode');
+                  var pipelineWrap = document.getElementById('vbot_processing_pipeline_wrap');
+                  var providerWrap = document.getElementById('vbot_processing_ai_provider_wrap');
+                  if (!launchSel || !modeSel || !pipelineWrap || !providerWrap) return;
+                  var isVbot = (launchSel.value === 'VBot_Assistant');
+                  pipelineWrap.style.display = isVbot ? '' : 'none';
+                  providerWrap.style.display = (isVbot && modeSel.value === 'ai') ? '' : 'none';
+                }
+                document.addEventListener('DOMContentLoaded', function() {
+                  var launchSel = document.getElementById('launch_source');
+                  var modeSel = document.getElementById('processing_pipeline_mode');
+                  if (launchSel) launchSel.addEventListener('change', syncVbotProcessingPipelineUI);
+                  if (modeSel) modeSel.addEventListener('change', syncVbotProcessingPipelineUI);
+                  syncVbotProcessingPipelineUI();
+                });
+              })();
+            </script>
             <?php vbotSpeakerLocationFields($Config,false); ?>
+
+ <div class="alert alert-warning" role="alert">
+              <div class="row mb-3 align-items-center">
+                <label for="launch_source" class="col-sm-3 col-form-label fw-semibold text-danger">Chế Độ Khởi Chạy Toàn Bộ Chương Trình <i class="bi bi-question-circle-fill" onclick="show_message('- Chạy VBot Assistant có thể cấu hình sử dụng XiaoZhi AI làm trợ lý ảo ưu tiên<br/>- Chỉ Chạy XiaoZhi AI Xuyên Suốt toàn bộ chương trình sẽ chỉ chạy XiaoZhi, Mọi xử lý cũng đều do XiaoZhi<br/>- Người dùng tự code, xử lý dữ liệu, các bạn sẽ cần phải tự code xử lý ở file: <b>Dev_Processing.py</b>')"></i>:</label>
+                <div class="col-sm-9">
+                  <select class="form-select border-success" name="launch_source" id="launch_source">
+                    <option value="VBot_Assistant" <?php if ($Config['launch_source'] === "VBot_Assistant") echo "selected"; ?>>Chạy VBot Assistant (Nên Dùng)</option>
+                    <option value="XiaoZhi_AI" <?php if ($Config['launch_source'] === "XiaoZhi_AI") echo "selected"; ?>>Chỉ Chạy XiaoZhi AI</option>
+                    <option value="DEV_Processing" <?php if ($Config['launch_source'] === "DEV_Processing") echo "selected"; ?>>Người Dùng Tự Code Xử Lý Dữ Liệu - Dev_Processing.py</option>
+                  </select>
+                </div>
+              </div>
+              <?php
+                $vbotPipelineCfg = (isset($Config['processing_pipeline']) && is_array($Config['processing_pipeline'])) ? $Config['processing_pipeline'] : [];
+                $vbotPipelineMode = (string)($vbotPipelineCfg['mode'] ?? 'vbot');
+                if (!in_array($vbotPipelineMode, ['vbot', 'ai'], true)) $vbotPipelineMode = 'vbot';
+                $vbotPipelineProvider = (string)($vbotPipelineCfg['ai_provider'] ?? 'gemini_ai');
+                if (!in_array($vbotPipelineProvider, ['gemini_ai', 'groq_ai', 'dev_ai_engine'], true)) $vbotPipelineProvider = 'gemini_ai';
+                $vbotPipelineFallback = array_key_exists('fallback_to_vbot_on_error', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['fallback_to_vbot_on_error'] : true;
+                $vbotPipelineWebSearch = array_key_exists('web_search_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['web_search_active'] : false;
+                $vbotPipelineAiMemory = array_key_exists('ai_memory_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_memory_active'] : true;
+                $vbotPipelineAiKnowledge = array_key_exists('ai_knowledge_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_knowledge_active'] : true;
+                $vbotPipelineAiKnowledgeVector = array_key_exists('ai_knowledge_vector_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_knowledge_vector_active'] : true;
+                $vbotPipelineIntentCache = array_key_exists('intent_cache_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['intent_cache_active'] : true;
+                $vbotPipelineFaceSse = array_key_exists('face_display_sse_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['face_display_sse_active'] : false;
+                $showVbotPipelineWrap = ($Config['launch_source'] === 'VBot_Assistant');
+                $showVbotAiProviderWrap = ($showVbotPipelineWrap && $vbotPipelineMode === 'ai');
+              ?>
+              <div id="vbot_processing_pipeline_wrap" style="<?php echo $showVbotPipelineWrap ? '' : 'display:none;'; ?>">
+                <div class="row mb-3 align-items-center">
+                  <label class="col-sm-3 col-form-label fw-semibold text-primary">Chế Độ Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('- <b>Áp dụng AI để xử lý dữ liệu</b>: Toàn bộ câu nói STT sẽ được gửi sang AI (Function Calling) để phân tích ý định và gọi đúng công cụ đang bật trong VBot.<br/>- <b>Hệ thống VBot xử lý dữ liệu (theo từ khóa)</b>: Chạy theo bộ phân tích từ khóa/regex cục bộ truyền thống của VBot.')"></i>:</label>
+                  <div class="col-sm-9"><div class="form-floating mb-3">
+                    <select class="form-select border-primary" name="processing_pipeline_mode" id="processing_pipeline_mode">
+                      <option value="ai" <?php if ($vbotPipelineMode === 'ai') echo 'selected'; ?>>Áp dụng AI để xử lý dữ liệu</option>
+                      <option value="vbot" <?php if ($vbotPipelineMode === 'vbot') echo 'selected'; ?>>Hệ thống VBot xử lý dữ liệu (theo từ khóa)</option>
+                    </select>
+					<label for="processing_pipeline_mode">Sử dụng AI hoặc hệ thống VBot xử lý dữ liệu</label>
+                  </div>
+                  </div>
+                </div>
+                <div id="vbot_processing_ai_provider_wrap" style="<?php echo $showVbotAiProviderWrap ? '' : 'display:none;'; ?>">
+                  <div class="row mb-3 align-items-center">
+                    <label for="processing_pipeline_ai_provider" class="col-sm-3 col-form-label fw-semibold text-success">Chọn AI Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('Chọn mô hình AI thực hiện phân tích câu lệnh và gọi công cụ (Function Calling) của VBot. Cần cấu hình API Key tương ứng ở mục Trợ Lý Ảo.')"></i>:</label>
+                    <div class="col-sm-9">
+                      <select class="form-select border-success" name="processing_pipeline_ai_provider" id="processing_pipeline_ai_provider">
+                        <option value="gemini_ai" <?php if ($vbotPipelineProvider === 'gemini_ai') echo 'selected'; ?>>Gemini AI (Google)</option>
+                        <option value="groq_ai" <?php if ($vbotPipelineProvider === 'groq_ai') echo 'selected'; ?>>Groq AI (Khuyên dùng)</option>
+                        <option value="dev_ai_engine" <?php if ($vbotPipelineProvider === 'dev_ai_engine') echo 'selected'; ?>>Dev Custom AI - Dev_AI_Engine.py</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="row mb-3 align-items-center">
+                    <label class="col-sm-3 col-form-label fw-semibold">Xử Lý Dự Phòng Khi AI Lỗi:</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_fallback" id="processing_pipeline_fallback" value="1" <?php if ($vbotPipelineFallback) echo 'checked'; ?>>
+                        <label class="form-check-label">Tự động chuyển về Hệ thống VBot xử lý theo từ khóa nếu AI có lỗi, mất mạng hoặc quá tải</label>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3 align-items-center">
+                    <label class="col-sm-3 col-form-label fw-semibold text-info">AI Tìm Kiếm Internet (Web Search) <i class="bi bi-question-circle-fill" onclick="show_message('Kích hoạt tra cứu tin tức thời gian thực. Cho phép AI tự tìm kiếm thông tin thời gian thực ví dụ như (giá vàng, tỷ giá, tin tức hôm nay...)')"></i>:</label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_web_search" id="processing_pipeline_web_search" value="1" <?php if ($vbotPipelineWebSearch) echo 'checked'; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3 align-items-center">
+                    <label class="col-sm-3 col-form-label fw-semibold text-success">AI bộ nhớ nhớ dài hạn <i class="bi bi-question-circle-fill" onclick="show_message('Cho phép AI ghi nhớ thông tin cá nhân dài hạn (vị trí đồ vật, mật khẩu, sở thích...) và quản lý danh sách mua sắm bằng giọng nói. Dữ liệu lưu tại resource/ai_engine/ai_memory.json.')"></i>:</label>
+                    <div class="col-sm-9">
+                      <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="form-switch me-2">
+                          <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_ai_memory" id="processing_pipeline_ai_memory" value="1" <?php if ($vbotPipelineAiMemory) echo 'checked'; ?>>
+                        </div>
+                        <?php $vbotAiMemoryFilePath = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engine/ai_memory.json'; ?>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill" onclick="readJSON_file_path('<?php echo addslashes($vbotAiMemoryFilePath); ?>')" title="Xem nội dung file ai_memory.json"><i class="bi bi-eye"></i> Xem Dữ Liệu</button>
+                        <button type="button" class="btn btn-sm btn-danger rounded-pill" onclick="clear_ai_memory_file()" title="Xóa sạch toàn bộ Trí Nhớ AI và Danh Sách Mua Sắm"><i class="bi bi-trash"></i> Xóa Sạch Bộ Nhớ</button>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3 align-items-center">
+                    <label class="col-sm-3 col-form-label fw-semibold text-primary">AI Kho Tri Thức Knowledge (RAG Cục Bộ) <i class="bi bi-question-circle-fill" onclick="show_message('Bật/tắt khả năng AI tra cứu tài liệu riêng trong resource/ai_engine/knowledge/ qua công cụ search_knowledge (Catalog + FTS5 + Vector Semantic Hybrid). Quản lý, phân loại và tải tài liệu tại trang AI_Knowledge.php.')"></i>:</label>
+                    <div class="col-sm-9">
+                      <div class="d-flex flex-wrap align-items-center gap-3">
+                        <div class="form-switch">
+                          <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_ai_knowledge" id="processing_pipeline_ai_knowledge" value="1" <?php if ($vbotPipelineAiKnowledge) echo 'checked'; ?>>
+                        </div>
+                        <a href="AI_Knowledge.php" class="btn btn-sm btn-warning rounded-pill" title="Mở trang quản lý, phân loại, tải lên và lập chỉ mục tri thức"><i class="bi bi-journal-text"></i> Mở Trang Kho Tri Thức</a>
+                      </div>
+						<div class="form-switch">
+                          <input class="form-check-input border-info" type="checkbox" name="processing_pipeline_ai_knowledge_vector" id="processing_pipeline_ai_knowledge_vector" value="1" <?php if ($vbotPipelineAiKnowledgeVector) echo 'checked'; ?>>
+                          <label class="form-check-label" title="Kết hợp FTS5 BM25 + Vector Embedding (Gemini) hợp nhất RRF; tự dự phòng FTS5 khi mất mạng">Tìm kiếm ngữ nghĩa Hybrid Vector</label>
+                          <i class="bi bi-question-circle-fill text-info" onclick="show_message('Khi bật: hệ thống tạo bảng vector ngữ nghĩa (<b>kb_vectors</b>, 256 chiều float32) lưu trong SQLite để kết hợp với FTS5 BM25 bằng thuật toán RRF.<br/>- <b>Lưu ý:</b> Cần nhập <b>Google Gemini API Key</b> tại mục <b>Trợ Lý Ảo &rarr; Google Gemini</b> bên dưới để tạo bảng <code>kb_vectors</code> khi xử lý tài liệu tải lên (kể cả khi bạn chọn Groq AI làm bộ xử lý chính, vì Groq không cung cấp API Embedding). Nếu không có Gemini Key hoặc mất mạng, hệ thống tự động dự phòng về FTS5.')"></i>
+                        </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3 align-items-center">
+                    <label class="col-sm-3 col-form-label fw-semibold text-primary">AI Cache Bộ Đệm Lệnh Cục Bộ <i class="bi bi-question-circle-fill" onclick="show_message('Lưu lại các câu lệnh điều khiển quen thuộc đã được AI phân tích thành công vào resource/ai_engine/ai_intent_cache.json. Lần sau nói lại sẽ thực thi tức thì<br/>Tự động lưu & khớp nhanh câu lệnh lặp lại nhiều lần trong quá trình sử dụng')"></i>:</label>
+                    <div class="col-sm-9">
+                      <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="form-switch me-2">
+                          <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_intent_cache" id="processing_pipeline_intent_cache" value="1" <?php if ($vbotPipelineIntentCache) echo 'checked'; ?>>
+                        </div>
+                        <?php $vbotAiIntentCacheFilePath = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engine/ai_intent_cache.json'; ?>
+                        <button type="button" class="btn btn-sm btn-primary rounded-pill" onclick="readJSON_file_path('<?php echo addslashes($vbotAiIntentCacheFilePath); ?>')" title="Xem nội dung file ai_intent_cache.json"><i class="bi bi-eye"></i> Xem Cache</button>
+                        <button type="button" class="btn btn-sm btn-danger rounded-pill" onclick="clear_ai_intent_cache_file()" title="Xóa sạch Bộ Đệm Lệnh AI Cục Bộ"><i class="bi bi-trash"></i> Xóa Cache</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+              </div>
+<div class="alert alert-success" role="alert">
+                <div class="row mb-0 align-items-center">
+                  <label class="col-sm-3 col-form-label fw-semibold text-info">Màn Hình, Giao Diện Biểu Cảm <i class="bi bi-question-circle-fill" onclick="show_message('Mặc định TẮT (khi tắt Python sẽ không khởi tạo luồng SSE /ai-face/events). Khi bật, mở trang Face.php trên điện thoại, máy tính bảng hoặc màn hình Pi để hiển thị 21 biểu cảm hoạt họa chuẩn theo thời gian thực khi VBot hoạt động (hỗ trợ cả 2 chế độ AI và VBot theo từ khóa).')"></i>:</label>
+                  <div class="col-sm-9">
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                      <div class="form-switch me-2">
+                        <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_face_display_sse" id="processing_pipeline_face_display_sse" value="1" <?php if ($vbotPipelineFaceSse) echo 'checked'; ?>>
+                      </div>
+                      <a href="Face.php" class="btn btn-sm btn-info rounded-pill" title="Mở Màn Hình Biểu Cảm, Hoạt Họa ở tab mới"><i class="bi bi-display"></i> Đi tới trang màn hình</a>
+                    </div>
+                  </div>
+                </div>
+                </div>
 
 <div class="alert alert-primary" role="alert">
             <div class="row mb-3 align-items-center">
@@ -5119,6 +5303,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 						'default_assistant' => '<font color=green>Default</font>',
 						'olli'   => '<font color=green>Olli Maika</font>',
 						'google_gemini'   => '<font color=green>Gemini</font>',
+						'groq_ai'   => '<font color=green>Groq AI</font>',
 						'chat_gpt'   => '<font color=green>ChatGPT</font>',
 						'zalo_assistant'   => '<font color=green>Zalo AI</font>',
 						'dify_ai'   => '<font color=green>Dify AI</font>',
@@ -5154,6 +5339,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         "default_assistant" => "Default Assistant",
                         "olli" => "Olli Maika AI Assistant (Khuyến Nghị)",
                         "google_gemini" => "Google Gemini",
+                        "groq_ai" => "Groq AI (Khuyên dùng)",
                         "chat_gpt" => "Chat GPT",
                         "zalo_assistant" => "Zalo AI Assistant",
                         "dify_ai" => "Dify AI Assistant",
@@ -5312,7 +5498,30 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                           </div>
                         </div>
                         <?php
-                        echo input_field('google_gemini_key', 'Api Keys', htmlspecialchars($Config['virtual_assistant']['google_gemini']['api_key']), '', 'text', '', '', '', 'Lấy Key API Google Gemini: <a href="https://aistudio.google.com/api-keys" target="_blank">https://aistudio.google.com/api-keys</a>', 'border-success', 'Kiểm Tra', "test_key_Gemini('xin chào')", 'btn btn-success border-success', 'onclick', '_blank');
+                        $geminiRawKeys = $Config['virtual_assistant']['google_gemini']['api_key'] ?? [];
+                        if (is_string($geminiRawKeys)) {
+                          $geminiKeyList = array_values(array_filter(array_map('trim', explode("\n", $geminiRawKeys))));
+                        } elseif (is_array($geminiRawKeys)) {
+                          $geminiKeyList = array_values(array_filter(array_map('trim', $geminiRawKeys)));
+                        } else {
+                          $geminiKeyList = [];
+                        }
+                        $textareaContent_gemini = implode("\n", $geminiKeyList);
+                        ?>
+                        <div class="form-floating mb-3">
+                          <textarea class="form-control border-success" placeholder="Api Keys Gemini, mỗi tài khoản 1 key, mỗi key 1 dòng" name="google_gemini_key" id="google_gemini_key" style="height: 140px;"><?php echo htmlspecialchars($textareaContent_gemini); ?></textarea>
+                          <label for="google_gemini_key">Api Keys Gemini (Mỗi tài khoản = 1 key, 1 dòng - tự xoay vòng khi hết hạn mức ngày):</label>
+                        </div>
+                        <div class="form-floating mb-3">
+                          <textarea readonly class="form-control border-danger" name="gemini_backlist_content" id="gemini_backlist_content" style="height: 110px;"></textarea>
+                          <label for="gemini_backlist_content">Nội Dung Keys BackList Gemini | <?php echo htmlspecialchars($Config['smart_config']['backlist_file_name'] ?? 'BackList.json'); ?>:</label>
+                        </div>
+                        <center class="mb-3">
+                          <button type="button" class="btn btn-success rounded-pill" onclick="test_key_Gemini('xin chào')" title="Kiểm tra kết nối API Key đầu tiên"><i class="bi bi-check-circle"></i> Kiểm Tra Key</button>
+                          <button type="button" class="btn btn-warning rounded-pill" onclick="changeBacklistValue('backlist->gemini->backlist_limit', '[]')" title="Làm mới nội dung gemini trong BackList"><i class="bi bi-recycle"></i> Clear BackList</button>
+                          <button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->gemini', 'gemini_backlist_content')" title="Tải lại nội dung gemini trong BackList"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
+                        </center>
+                        <?php
                         $gemini_model_list_json_file = $HTML_VBot_Offline . '/includes/other_data/gemini_model_list.json';
                         $selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-2.0-flash';
                         $selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
@@ -5371,6 +5580,94 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                       </div>
                     </div>
                   </div>
+                  </div>
+
+                  <?php
+                    $groqAiCfg = (isset($Config['virtual_assistant']['groq_ai']) && is_array($Config['virtual_assistant']['groq_ai'])) ? $Config['virtual_assistant']['groq_ai'] : [];
+                    $groqAiActive = !empty($groqAiCfg['active']);
+                    $groqAiRawKeys = $groqAiCfg['api_key'] ?? [];
+                    if (is_string($groqAiRawKeys)) {
+                      $groqAiKeyList = array_values(array_filter(array_map('trim', explode("\n", $groqAiRawKeys))));
+                    } elseif (is_array($groqAiRawKeys)) {
+                      $groqAiKeyList = array_values(array_filter(array_map('trim', $groqAiRawKeys)));
+                    } else {
+                      $groqAiKeyList = [];
+                    }
+                    $textareaContent_groq_ai = implode("\n", $groqAiKeyList);
+                    $groqAiModel = (string)($groqAiCfg['model_name'] ?? 'llama-3.3-70b-versatile');
+                    $groqAiUrl = (string)($groqAiCfg['api_url'] ?? 'https://api.groq.com/openai/v1/chat/completions');
+                    $groqAiTimeout = intval($groqAiCfg['time_out'] ?? 10);
+                    $groq_model_list_json_file = $HTML_VBot_Offline . '/includes/other_data/groq_model_list.json';
+                    $groqModelList = [
+                      'llama-3.3-70b-versatile',
+                      'llama-3.1-8b-instant',
+                      'meta-llama/llama-4-scout-17b-16e-instruct',
+                      'qwen/qwen3-32b',
+                    ];
+                    if (file_exists($groq_model_list_json_file)) {
+                      $groqJsonData = json_decode(file_get_contents($groq_model_list_json_file), true);
+                      if (is_array($groqJsonData) && !empty($groqJsonData['groq_models']) && is_array($groqJsonData['groq_models'])) {
+                        $groqModelList = array_values(array_unique(array_filter(array_map('strval', $groqJsonData['groq_models']))));
+                      }
+                    }
+                    if ($groqAiModel !== '' && !in_array($groqAiModel, $groqModelList, true)) {
+                      array_unshift($groqModelList, $groqAiModel);
+                    }
+                  ?>
+                  <div class="card accordion" id="accordion_button_cfg_groq_assistant">
+                    <div class="card-body">
+                      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_groq_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_groq_assistant">
+                        Cấu Hình Trợ Lý => Groq AI <i class="bi bi-question-circle-fill" onclick="show_message('Lấy API Key miễn phí tại: <a href=\'https://console.groq.com/keys\' target=\'_blank\'>https://console.groq.com/keys</a><br/>Hỗ trợ nhập nhiều Key (mỗi Key 1 dòng); khi Key hết hạn mức sẽ tự lưu vào BackList.json và chuyển sang Key kế tiếp.')"></i>:
+                        <?php echo $groqAiActive ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
+                      <div id="collapse_button_cfg_groq_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_cfg_groq_assistant">
+                        <div class="alert alert-success" role="alert">
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Kích hoạt <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc tắt để kích hoạt sử dụng Groq AI')"></i> :</label>
+                            <div class="col-sm-9">
+                              <div class="form-switch">
+                                <input class="form-check-input border-success" type="checkbox" name="groq_ai_active" id="groq_ai_active" <?php echo $groqAiActive ? 'checked' : ''; ?>>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="form-floating mb-3">
+                            <textarea class="form-control border-success" placeholder="Api Keys Groq, mỗi Key tương ứng với 1 dòng" name="groq_ai_api_key" id="groq_ai_api_key" style="height: 150px;"><?php echo htmlspecialchars($textareaContent_groq_ai); ?></textarea>
+                            <label for="groq_ai_api_key">Api Keys Groq (Mỗi tài khoản = 1 key, 1 dòng - tự xoay vòng khi hết hạn mức ngày):</label>
+                          </div>
+                          <div class="form-floating mb-3">
+                            <textarea readonly class="form-control border-danger" name="groq_ai_backlist_content" id="groq_ai_backlist_content" style="height: 120px;"></textarea>
+                            <label for="groq_ai_backlist_content">Nội Dung Keys BackList Groq | <?php echo htmlspecialchars($Config['smart_config']['backlist_file_name'] ?? 'BackList.json'); ?>:</label>
+                          </div>
+                          <center class="mb-3">
+                            <button type="button" class="btn btn-success rounded-pill" onclick="check_groq_quota()" title="Kiểm tra trạng thái & lượng lượt/token còn lại của tất cả Key Groq"><i class="bi bi-speedometer2"></i> Kiểm Tra Token &amp; Key</button>
+                            <button type="button" class="btn btn-warning rounded-pill" onclick="changeBacklistValue('backlist->groq->backlist_limit', '[]')" title="Làm mới nội dung groq trong BackList"><i class="bi bi-recycle"></i> Clear BackList</button>
+                            <button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->groq', 'groq_ai_backlist_content')" title="Tải lại nội dung groq trong BackList"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
+                          </center>
+                          <div id="groq_quota_result_box" class="mb-3" style="display:none;"></div>
+                          <div class="row mb-3">
+                            <label for="groq_ai_model_name" class="col-sm-3 col-form-label">Mô Hình Groq AI:</label>
+                            <div class="col-sm-9">
+                              <div class="input-group">
+                                <select class="form-select border-success" name="groq_ai_model_name" id="groq_ai_model_name">
+                                  <?php
+                                    foreach ($groqModelList as $mVal) {
+                                      $sel = ($groqAiModel === $mVal) ? 'selected' : '';
+                                      echo '<option value="' . htmlspecialchars($mVal) . '" ' . $sel . '>' . htmlspecialchars($mVal) . '</option>';
+                                    }
+                                  ?>
+                                </select>
+                                <button class="btn btn-primary border-danger" type="button" id="btn_groq_ai_model_name" title="<?php echo htmlspecialchars($groq_model_list_json_file, ENT_QUOTES); ?>" onclick="readJSON_file_path('<?php echo addslashes($groq_model_list_json_file); ?>')"><i class="bi bi-eye"></i></button>
+                                <button class="btn btn-info border-danger" title="Cập nhật mới các Model của Groq AI đang có" type="button" id="model_groq_get" name="model_groq_get" onclick="get_model_groq()"><i class="bi bi-cloud-download"></i> <i class="bi bi-arrow-repeat"></i></button>
+                              </div>
+                            </div>
+                          </div>
+                          <?php
+                            echo input_field('groq_ai_url', 'URL API Groq', htmlspecialchars($groqAiUrl), 'required', 'text', '', '', '', 'Mặc định: https://api.groq.com/openai/v1/chat/completions', 'border-success', '', '', '', '', '');
+                            echo input_field('groq_ai_time_out', 'Thời gian chờ (giây)', htmlspecialchars($groqAiTimeout), 'required', 'number', '1', '3', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
+                            echo input_field('groq_models_path_file', 'Đường dẫn tệp mô hình (Path Model)', htmlspecialchars($groq_model_list_json_file), 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$groq_model_list_json_file')", 'btn btn-success border-danger', 'onclick', '');
+                          ?>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <div class="card accordion" id="accordion_button_cfg_chatgpt_assistant">
@@ -5862,8 +6159,7 @@ echo input_field('internal_ir_rx_gpio','GPIO thu IR (BCM)',($Config['internal_ir
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="refresh_page_ui_backup_upgrade" id="refresh_page_ui_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] ? 'checked' : ''; ?>>
-                      </div>
-                    </div>
+                                    </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
@@ -6998,6 +7294,7 @@ document.addEventListener('DOMContentLoaded', function () {
 <link rel="stylesheet" href="assets/css/searchable-select.css?v=<?php echo $Cache_UI_Ver; ?>-search-menu-2">
 <script src="assets/js/searchable-select.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4" defer></script>
 <script src="assets/js/config-button-actions.js?v=<?php echo $Cache_UI_Ver; ?>-search-menu-4" defer></script>
+
 </body>
 
 </html>

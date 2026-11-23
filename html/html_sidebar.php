@@ -335,6 +335,24 @@
       <span>Chẩn đoán Runtime</span>
     </a>
   </li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="AI_Stats.php">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      <span>Thống Kê AI</span>
+    </a>
+  </li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="AI_Knowledge.php">
+      <i class="bi bi-journal-bookmark-fill"></i>
+      <span>Kho Tri Thức AI</span>
+    </a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link collapsed" href="Face.php">
+      <i class="bi bi-emoji-smile-fill"></i>
+      <span>Màn Hình Biểu Cảm</span>
+    </a>
+  </li>
   <li class="nav-item">
     <a class="nav-link collapsed" href="VBot_Processing_Flow.php">
       <i class="bi bi-diagram-3"></i>

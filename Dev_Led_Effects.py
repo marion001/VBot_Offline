@@ -1,7 +1,7 @@
 """Hiệu ứng LED VBot, được gom riêng theo từng loại phần cứng.
 
-HƯỚNG DẪN
-=========
+HƯỚNG DẪN SỬ DỤNG
+=================
 File này chạy bằng Python thường, không đưa vào danh sách build .so. Sửa file
 rồi khởi động lại VBot để nạp thay đổi. Các hiệu ứng báo loa/micro trong Led.py
 không bị ảnh hưởng.

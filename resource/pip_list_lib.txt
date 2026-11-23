@@ -30,7 +30,7 @@ casttube                     0.2.1
 certifi                      2020.6.20
 cffi                         2.0.0
 chardet                      4.0.0
-charset-normalizer           2.0.12
+charset-normalizer           3.5.2
 click                        7.1.2
 colorama                     0.4.4
 colorzero                    1.1
@@ -117,6 +117,7 @@ mypy-extensions              0.4.3
 numpy                        1.19.5
 oauthlib                     3.1.0
 openai                       1.13.3
+openpyxl                     3.1.5
 opuslib                      3.0.1
 orjson                       3.11.5
 pafy                         0.5.5
@@ -155,7 +156,7 @@ pyasn1-modules               0.2.8
 PyAudio                      0.2.11
 pycairo                      1.16.2
 PyChromecast                 13.1.0
-pycparser                    2.21
+pycparser                    2.23
 pycryptodomex                3.18.0
 pycups                       2.0.1
 pydantic                     2.6.3
@@ -171,6 +172,7 @@ pylint                       2.7.2
 PyOpenGL                     3.1.5
 pyOpenSSL                    20.0.1
 pyparsing                    3.2.0
+pypdf                        6.21.4
 PyQt5                        5.15.2
 PyQt5-sip                    12.8.1
 pyserial                     3.5b0
@@ -248,6 +250,7 @@ Werkzeug                     1.0.1
 wheel                        0.34.2
 wikipedia                    1.4.0
 wrapt                        1.12.1
+xlrd                         2.0.2
 yarl                         1.22.0
 youtube-dl                   2021.12.17
 yt-dlp                       2025.10.14

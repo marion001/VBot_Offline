@@ -1,5 +1,16 @@
 {
     "launch_source": "VBot_Assistant",
+    "processing_pipeline": {
+        "mode": "vbot",
+        "ai_provider": "groq_ai",
+        "fallback_to_vbot_on_error": true,
+        "web_search_active": true,
+        "ai_memory_active": true,
+        "ai_knowledge_active": true,
+        "intent_cache_active": true,
+        "face_display_sse_active": true,
+        "ai_knowledge_vector_active": true
+    },
     "wake_on_lan": {
         "active": false
     },
@@ -99,7 +110,7 @@
                     "max_concurrent_stt": 2,
                     "thread_join_timeout": 10,
                     "source_stt": "stt_ggcloud",
-                    "select_wakeup": "snowboy",
+                    "select_wakeup": "porcupine",
                     "client_conversation_mode": true,
                     "data_client_name": "Data_VBot_Client.json"
                 }
@@ -480,6 +491,15 @@
             "model_name": "gemini-2.0-flash",
             "api_version": "v1beta"
         },
+        "groq_ai": {
+            "active": false,
+            "time_out": 10,
+            "api_key": [
+                "gsk_rJsZcyz33333gyjg4444444"
+            ],
+            "model_name": "openai/gpt-oss-20b",
+            "api_url": "https://api.groq.com/openai/v1/chat/completions"
+        },
         "chat_gpt": {
             "active": false,
             "url_api": "https://api.openai.com/v1/chat/completions",
@@ -676,6 +696,7 @@
         },
         "led": {
             "active": true,
+            "music_mode": "default",
             "led_gpio": 10,
             "led_type": "ws281x",
             "notes_led_type": "ReSpeaker_Mic_Array_v2.0, ws281x, apa102, dev_custom_led",
@@ -690,8 +711,7 @@
             "effect": {
                 "led_think": "0000FF",
                 "led_mute": "FF0000"
-            },
-            "music_mode": "default"
+            }
         },
         "button_active": {
             "active": true,

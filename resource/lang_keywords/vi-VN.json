@@ -539,7 +539,7 @@
       "clarify_device": "Bạn muốn chọn thiết bị nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
       "clarify_many_devices": "Có nhiều thiết bị phù hợp. Bạn hãy nói tên đầy đủ của thiết bị muốn điều khiển hoặc nói hủy.",
       "clarify_temperature_device": "Bạn muốn đặt {value} độ cho thiết bị nào: {names}? Hãy nói tên cụ thể hoặc hủy.",
-      "control_already_set": "{name} đã ở trạng thái yêu cầu; không cần gửi lại lệnh.",
+      "control_already_set": "{name} đã ở trạng thái yêu cầu",
       "control_delivery_unknown": "Chưa xác định Home Assistant đã nhận lệnh cho {name} hay chưa. Hãy kiểm tra thiết bị trước khi gửi lại; VBot không tự gửi lại lệnh.",
       "control_verified": "Đã xác nhận trạng thái của {name} theo yêu cầu.",
       "control_moving": "Đã gửi lệnh cho {name}; rèm đang di chuyển, chưa xác nhận tới vị trí yêu cầu.",

@@ -715,6 +715,16 @@ include 'html_head.php';
         $data['send_notify_upgrade_vbot_home_assistant']['active'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_active']) ? true : false;
         $data['send_notify_upgrade_vbot_home_assistant']['time'] = isset($_POST['send_notify_upgrade_vbot_home_assistant_time']) ? $_POST['send_notify_upgrade_vbot_home_assistant_time'] : '03:01';
 
+        #Lưu dữ liệu Tự Động Đọc Bản Tin Buổi Sáng (mặc định tắt)
+        $morningBriefingTime = trim((string)($_POST['auto_morning_briefing_time'] ?? '07:00'));
+        if (!preg_match('/^(?:[01][0-9]|2[0-3]):[0-5][0-9]$/', $morningBriefingTime)) {
+          $morningBriefingTime = '07:00';
+        }
+        $data['auto_morning_briefing'] = [
+          'active' => isset($_POST['auto_morning_briefing_active']) ? true : false,
+          'time' => $morningBriefingTime,
+        ];
+
         #Lưu dữ liệu Bật tắt màn hình
         $time_on_display_screen = isset($_POST['time_on_display_screen']) ? $_POST['time_on_display_screen'] : [];
         $time_off_display_screen = isset($_POST['time_off_display_screen']) ? $_POST['time_off_display_screen'] : [];
@@ -1456,6 +1466,49 @@ include 'html_head.php';
               </div>
             </div>
           </div>
+          </div>
+
+          <div class="card accordion" id="accordion_button_auto_morning_briefing">
+            <div class="card-body">
+              <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_auto_morning_briefing" aria-expanded="false" aria-controls="collapse_button_auto_morning_briefing">
+                <font color="DarkOrange">Tự Động Đọc Bản Tin Buổi Sáng (AI Briefing),</font>&nbsp; Trạng Thái: &nbsp;
+                <?php
+                $mbActive = !empty($data['auto_morning_briefing']['active']);
+                $mbTime = (string)($data['auto_morning_briefing']['time'] ?? '07:00');
+                echo $mbActive ? ' <font color=green> Bật</font>' : ' <font color=red> Tắt</font>';
+                ?>
+              </h5>
+              <div id="collapse_button_auto_morning_briefing" class="accordion-collapse collapse" aria-labelledby="headingMorningBriefing" data-bs-parent="#accordion_button_auto_morning_briefing">
+                <div class="alert alert-success" role="alert">
+                  <div class="row mb-3">
+                    <label class="col-sm-3 col-form-label">
+                      Kích Hoạt
+                      <i class="bi bi-question-circle-fill" onclick="show_message('Mặc định TẮT. Khi bật, đúng giờ đã chọn mỗi sáng VBot sẽ tự tổng hợp và đọc Bản Tin Buổi Sáng (Thời tiết hôm nay, lịch nhắc trong ngày, danh sách mua sắm, 2 tin nổi bật Google News VN) với 0 token AI.')"></i>:
+                    </label>
+                    <div class="col-sm-9">
+                      <div class="form-switch">
+                        <input
+                          type="checkbox"
+                          class="form-check-input border-success"
+                          id="auto_morning_briefing_active"
+                          name="auto_morning_briefing_active"
+                          <?php echo $mbActive ? 'checked' : ''; ?>>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="row mb-3">
+                    <label for="auto_morning_briefing_time" class="col-sm-3 col-form-label">
+                      Thời Gian Phát (HH:MM):
+                      <i class="bi bi-question-circle-fill" onclick="show_message('Định dạng 24 giờ (giờ:phút), ví dụ 07:00. Thay đổi có hiệu lực ngay mà không cần khởi động lại VBot.')"></i>:
+                    </label>
+                    <div class="col-sm-9">
+                      <input class="form-control border-warning" type="time" name="auto_morning_briefing_time" id="auto_morning_briefing_time"
+                        value="<?php echo htmlspecialchars($mbTime); ?>">
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div class="card accordion" id="accordion_button_volume_change">

@@ -810,6 +810,11 @@ include 'html_head.php';
                           Lệnh Tùy Chỉnh <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt để kích hoạt sử dụng lệnh tùy chỉnh (Custom Command) để điều khiển nhà thông minh')"></i>
                         </label>
                       </div>
+                      <div class="mt-2">
+                        <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" id="btn_sync_hass_json_index" onclick="syncHomeAssistantJsonFromIndex()" title="Làm mới danh sách thiết bị Home Assistant lưu trong resource/hass/Home_Assistant.json">
+                          <i class="bi bi-arrow-repeat"></i> Đồng bộ Home_Assistant.json
+                        </button>
+                      </div>
                     </div>
                   </li>
                   <li>
@@ -2187,6 +2192,56 @@ include 'html_head.php';
 	  })
 	  .catch(err => {
 		showMessagePHP("Lỗi Tua Media Player: " + err.message + ". Kiểm tra mạng, API hoặc Bot");
+	  });
+	}
+
+    //Đồng bộ làm mới file resource/hass/Home_Assistant.json ngay từ trang chủ
+	function syncHomeAssistantJsonFromIndex() {
+	  const btn = document.getElementById("btn_sync_hass_json_index");
+	  const hassUrl = <?php
+	    $hassSyncUrl = trim((string)($Config['home_assistant']['internal_url'] ?? ''));
+	    if ($hassSyncUrl === '') {
+	      $hassSyncUrl = trim((string)($Config['home_assistant']['external_url'] ?? ''));
+	    }
+	    echo json_encode($hassSyncUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+	  ?>;
+	  if (!hassUrl) {
+	    showMessagePHP("Chưa cấu hình URL Home Assistant trong Config.json", 5);
+	    return;
+	  }
+	  const origHtml = btn ? btn.innerHTML : "";
+	  if (btn) {
+	    btn.disabled = true;
+	    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Đang đồng bộ...';
+	  }
+	  const formData = new FormData();
+	  formData.append("get_hass_all", "1");
+	  formData.append("url_hass", hassUrl);
+	  if (window.VBOT_CSRF_TOKEN) {
+	    formData.append("csrf_token", window.VBOT_CSRF_TOKEN);
+	  }
+	  vbotFetchWithTimeout("includes/php_ajax/Check_Connection.php", {
+	    method: "POST",
+	    credentials: "same-origin",
+	    body: formData
+	  }, 35000)
+	  .then(res => res.json().then(data => ({ok: res.ok, data})))
+	  .then(({ok, data}) => {
+	    if (ok && data && data.success) {
+	      const count = Array.isArray(data.response) ? data.response.length : 0;
+	      showMessagePHP("Đồng bộ Home_Assistant.json thành công" + (count ? (" (" + count + " thực thể)") : "") + "!", 5);
+	    } else {
+	      showMessagePHP((data && data.message) ? data.message : "Đồng bộ Home_Assistant.json thất bại", 6);
+	    }
+	  })
+	  .catch(err => {
+	    showMessagePHP("Lỗi đồng bộ Home_Assistant.json: " + err.message, 6);
+	  })
+	  .finally(() => {
+	    if (btn) {
+	      btn.disabled = false;
+	      btn.innerHTML = origHtml;
+	    }
 	  });
 	}
 

@@ -1109,4 +1109,296 @@ if (isset($_POST['get_model_gemini'])) {
     ]);
 }
 
+if (isset($_POST['get_model_groq'])) {
+    vbotApiVerifyCsrf(true);
+    $rawKeyInput = trim((string)($_POST['apikey'] ?? ''));
+    $keyLines = array_values(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $rawKeyInput))));
+    $apiKey = $keyLines[0] ?? '';
+    if (empty($apiKey)) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Chưa nhập API Key Groq!"
+        ], 400);
+    }
+    $url = "https://api.groq.com/openai/v1/models";
+    $ch = curl_init();
+    curl_setopt_array($ch, [
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_CUSTOMREQUEST => "GET",
+        CURLOPT_HTTPHEADER => [
+            "Authorization: Bearer " . $apiKey,
+            "Content-Type: application/json"
+        ],
+        CURLOPT_CONNECTTIMEOUT => 5,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_SSL_VERIFYPEER => true,
+        CURLOPT_SSL_VERIFYHOST => 2,
+    ]);
+    $response  = curl_exec($ch);
+    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $error     = curl_error($ch);
+    curl_close($ch);
+    if ($response === false) {
+        error_log('Groq model request failed: ' . $error);
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => 'Không thể kết nối tới API Groq'
+        ], 502);
+    }
+    if ($http_code !== 200) {
+        error_log('Groq model API returned HTTP ' . $http_code . ': ' . substr(trim($response), 0, 2000));
+        $remoteError = json_decode($response, true);
+        $remoteMessage = isset($remoteError['error']['message'])
+            ? $remoteError['error']['message']
+            : 'API Groq trả về lỗi HTTP ' . $http_code;
+        vbotApiJsonResponse(['success' => false, 'message' => $remoteMessage], 502);
+    }
+    $json = json_decode($response, true);
+    if (!isset($json['data']) || !is_array($json['data'])) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Dữ liệu Groq trả về không hợp lệ"
+        ], 502);
+    }
+    $modelList = [];
+    foreach ($json['data'] as $model) {
+        if (empty($model['id']) || (isset($model['active']) && $model['active'] === false)) {
+            continue;
+        }
+        $id = trim((string)$model['id']);
+        $lower = strtolower($id);
+        // Loại bỏ model âm thanh (whisper/tts/orpheus) và kiểm duyệt (guard)
+        if (
+            strpos($lower, 'whisper') !== false ||
+            strpos($lower, 'tts') !== false ||
+            strpos($lower, 'guard') !== false ||
+            strpos($lower, 'orpheus') !== false ||
+            strpos($lower, 'distil-whisper') !== false
+        ) {
+            continue;
+        }
+        $modelList[] = $id;
+    }
+    $modelList = array_values(array_unique($modelList));
+    sort($modelList);
+    $outputFile = $directory_path . '/includes/other_data/groq_model_list.json';
+    $existingData = [];
+    if (file_exists($outputFile)) {
+        $existingData = json_decode(file_get_contents($outputFile), true);
+        if (!is_array($existingData)) {
+            $existingData = [];
+        }
+    }
+    $existingData['groq_models'] = $modelList;
+    $encodedModelList = json_encode($existingData, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if ($encodedModelList === false || !vbotAtomicWriteFile($outputFile, $encodedModelList, 'danh sách Groq Model')) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Không ghi được file JSON groq_model_list.json"
+        ], 500);
+    }
+    @chmod($outputFile, 0777);
+    vbotApiJsonResponse([
+        "success" => true,
+        "count" => count($modelList),
+        "models" => $modelList,
+        "message" => "Cập nhật thành công " . count($modelList) . " Model Groq AI"
+    ]);
+}
+
+if (isset($_POST['check_groq_quota'])) {
+    vbotApiVerifyCsrf(true);
+    $rawKeyInput = trim((string)($_POST['apikeys'] ?? ''));
+    $groqCfg = (isset($Config['virtual_assistant']['groq_ai']) && is_array($Config['virtual_assistant']['groq_ai'])) ? $Config['virtual_assistant']['groq_ai'] : [];
+    if ($rawKeyInput === '' && !empty($_POST['use_config_keys'])) {
+        $cfgKeys = $groqCfg['api_key'] ?? [];
+        if (is_array($cfgKeys)) {
+            $rawKeyInput = implode("\n", array_map('strval', $cfgKeys));
+        } else {
+            $rawKeyInput = trim((string)$cfgKeys);
+        }
+    }
+    $defaultModel = trim((string)($groqCfg['model_name'] ?? 'openai/gpt-oss-20b')) ?: 'openai/gpt-oss-20b';
+    $defaultUrl = trim((string)($groqCfg['api_url'] ?? 'https://api.groq.com/openai/v1/chat/completions')) ?: 'https://api.groq.com/openai/v1/chat/completions';
+    $modelName = trim((string)($_POST['model_name'] ?? '')) ?: $defaultModel;
+    $apiUrl = trim((string)($_POST['api_url'] ?? '')) ?: $defaultUrl;
+    $keys = array_values(array_unique(array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $rawKeyInput)))));
+    if (empty($keys)) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Chưa nhập API Key Groq nào để kiểm tra!"
+        ], 400);
+    }
+    $results = [];
+    $payload = json_encode([
+        "model" => $modelName,
+        "messages" => [["role" => "user", "content" => "hi"]],
+        "max_tokens" => 1,
+        "temperature" => 0
+    ]);
+    foreach ($keys as $idx => $apiKey) {
+        $masked = (strlen($apiKey) > 12) ? (substr($apiKey, 0, 6) . '...' . substr($apiKey, -4)) : '***';
+        $respHeaders = [];
+        $ch = curl_init();
+        curl_setopt_array($ch, [
+            CURLOPT_URL => $apiUrl,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POST => true,
+            CURLOPT_POSTFIELDS => $payload,
+            CURLOPT_HTTPHEADER => [
+                "Authorization: Bearer " . $apiKey,
+                "Content-Type: application/json"
+            ],
+            CURLOPT_HEADERFUNCTION => function ($curl, $headerLine) use (&$respHeaders) {
+                $len = strlen($headerLine);
+                $parts = explode(':', $headerLine, 2);
+                if (count($parts) === 2) {
+                    $respHeaders[strtolower(trim($parts[0]))] = trim($parts[1]);
+                }
+                return $len;
+            },
+            CURLOPT_CONNECTTIMEOUT => 5,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+        ]);
+        $body = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr = curl_error($ch);
+        curl_close($ch);
+
+        $remReq = $respHeaders['x-ratelimit-remaining-requests'] ?? null;
+        $limReq = $respHeaders['x-ratelimit-limit-requests'] ?? null;
+        $remTok = $respHeaders['x-ratelimit-remaining-tokens'] ?? null;
+        $limTok = $respHeaders['x-ratelimit-limit-tokens'] ?? null;
+        $resetReq = $respHeaders['x-ratelimit-reset-requests'] ?? ($respHeaders['retry-after'] ?? '');
+
+        $statusLabel = 'Lỗi HTTP ' . $httpCode;
+        $ok = false;
+        if ($body === false) {
+            $statusLabel = 'Lỗi kết nối: ' . $curlErr;
+        } elseif ($httpCode === 200) {
+            $ok = true;
+            $statusLabel = 'Hoạt động tốt';
+        } elseif ($httpCode === 429) {
+            $statusLabel = 'Hết hạn mức (429)';
+        } elseif ($httpCode === 401) {
+            $statusLabel = 'Key không hợp lệ (401)';
+        } elseif ($httpCode === 404) {
+            $statusLabel = 'Model không hỗ trợ (404)';
+        } else {
+            $dec = json_decode((string)$body, true);
+            if (!empty($dec['error']['message'])) {
+                $statusLabel = substr((string)$dec['error']['message'], 0, 120);
+            }
+        }
+
+        $results[] = [
+            "index" => $idx + 1,
+            "key" => $masked,
+            "ok" => $ok,
+            "http_code" => $httpCode,
+            "status" => $statusLabel,
+            "remaining_requests" => $remReq,
+            "limit_requests" => $limReq,
+            "remaining_tokens" => $remTok,
+            "limit_tokens" => $limTok,
+            "reset_requests" => $resetReq,
+        ];
+    }
+    vbotApiJsonResponse([
+        "success" => true,
+        "model" => $modelName,
+        "results" => $results,
+        "message" => "Đã kiểm tra xong " . count($results) . " API Key Groq"
+    ]);
+}
+
+if (isset($_POST['clear_ai_memory'])) {
+    vbotApiVerifyCsrf(true);
+    $aiEngineDir = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engine';
+    $aiMemoryFile = $aiEngineDir . '/ai_memory.json';
+    if (!is_dir($aiEngineDir)) {
+        @mkdir($aiEngineDir, 0777, true);
+        @chmod($aiEngineDir, 0777);
+    }
+    $emptyData = json_encode(["memories" => [], "shopping_list" => [], "device_aliases" => new stdClass()], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if ($emptyData === false || !vbotAtomicWriteFile($aiMemoryFile, $emptyData, 'AI Memory')) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Không thể xóa dữ liệu file resource/ai_engine/ai_memory.json"
+        ], 500);
+    }
+    @chmod($aiMemoryFile, 0777);
+    vbotApiJsonResponse([
+        "success" => true,
+        "message" => "Đã xóa sạch toàn bộ Trí Nhớ AI & Danh Sách Mua Sắm!"
+    ]);
+}
+
+if (isset($_POST['clear_ai_intent_cache'])) {
+    vbotApiVerifyCsrf(true);
+    $aiEngineDir = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engine';
+    $aiCacheFile = $aiEngineDir . '/ai_intent_cache.json';
+    if (!is_dir($aiEngineDir)) {
+        @mkdir($aiEngineDir, 0777, true);
+        @chmod($aiEngineDir, 0777);
+    }
+    if (!vbotAtomicWriteFile($aiCacheFile, "{}", 'AI Intent Cache')) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Không thể xóa dữ liệu file resource/ai_engine/ai_intent_cache.json"
+        ], 500);
+    }
+    @chmod($aiCacheFile, 0777);
+    vbotApiJsonResponse([
+        "success" => true,
+        "message" => "Đã xóa sạch Bộ Đệm Lệnh AI Cục Bộ (ai_intent_cache.json)!"
+    ]);
+}
+
+if (isset($_POST['clear_ai_telemetry'])) {
+    vbotApiVerifyCsrf(true);
+    $aiEngineDir = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engine';
+    $aiTelFile = $aiEngineDir . '/ai_telemetry.json';
+    if (!is_dir($aiEngineDir)) {
+        @mkdir($aiEngineDir, 0777, true);
+        @chmod($aiEngineDir, 0777);
+    }
+    if (!vbotAtomicWriteFile($aiTelFile, "{}", 'AI Telemetry')) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Không thể reset file resource/ai_engine/ai_telemetry.json"
+        ], 500);
+    }
+    @chmod($aiTelFile, 0777);
+    vbotApiJsonResponse([
+        "success" => true,
+        "message" => "Đã đặt lại toàn bộ Thống Kê Hiệu Năng AI!"
+    ]);
+}
+
+if (isset($_POST['clear_voice_journal'])) {
+    vbotApiVerifyCsrf(true);
+    $aiEngineDir = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engine';
+    $journalFile = $aiEngineDir . '/voice_journal.json';
+    if (!is_dir($aiEngineDir)) {
+        @mkdir($aiEngineDir, 0777, true);
+        @chmod($aiEngineDir, 0777);
+    }
+    $emptyJournal = json_encode(["entries" => []], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    if ($emptyJournal === false || !vbotAtomicWriteFile($journalFile, $emptyJournal, 'Voice Journal')) {
+        vbotApiJsonResponse([
+            "success" => false,
+            "message" => "Không thể xóa dữ liệu file resource/ai_engine/voice_journal.json"
+        ], 500);
+    }
+    @chmod($journalFile, 0777);
+    vbotApiJsonResponse([
+        "success" => true,
+        "message" => "Đã xóa sạch toàn bộ Nhật Ký Giọng Nói!"
+    ]);
+}
+
 ?>
