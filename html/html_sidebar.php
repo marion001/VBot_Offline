@@ -205,6 +205,20 @@
 
   <li class="nav-item" onclick="loading('show')"><a class="nav-link collapsed" href="Bluetooth_Source.php"><i class="bi bi-speaker"></i><span>Quản Lý Thiết Bị Bluetooth</span></a></li>
 
+<li class="nav-heading"><i class="bi bi-perplexity"></i> AI Assistant</li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="AI_Stats.php">
+      <i class="bi bi-bar-chart-line-fill"></i>
+      <span>Thống Kê Sử Dụng AI</span>
+    </a>
+  </li>
+  <li class="nav-item" onclick="loading('show')">
+    <a class="nav-link collapsed" href="AI_Knowledge.php">
+      <i class="bi bi-journal-bookmark-fill"></i>
+      <span>Kho Tri Thức AI Knowledge</span>
+    </a>
+  </li>
+
   <li class="nav-heading"><i class="bi bi-gear-wide-connected"></i> Cài Đặt Khác</li>
   <li class="nav-item">
     <a class="nav-link collapsed" data-bs-target="#icons-tbdv" data-bs-toggle="collapse" href="#">
@@ -335,18 +349,7 @@
       <span>Chẩn đoán Runtime</span>
     </a>
   </li>
-  <li class="nav-item" onclick="loading('show')">
-    <a class="nav-link collapsed" href="AI_Stats.php">
-      <i class="bi bi-bar-chart-line-fill"></i>
-      <span>Thống Kê AI</span>
-    </a>
-  </li>
-  <li class="nav-item" onclick="loading('show')">
-    <a class="nav-link collapsed" href="AI_Knowledge.php">
-      <i class="bi bi-journal-bookmark-fill"></i>
-      <span>Kho Tri Thức AI</span>
-    </a>
-  </li>
+
   <li class="nav-item">
     <a class="nav-link collapsed" href="Face.php">
       <i class="bi bi-emoji-smile-fill"></i>

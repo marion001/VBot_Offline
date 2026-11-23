@@ -39,13 +39,17 @@
         });
         drawGraph();
         const automatic=frequencyFields.reduce((sum,name)=>sum+Math.max(0,Number(get(name).value||0)),0);
-        byId('speaker-eq-headroom').textContent='Bù gain tự động: '+(automatic?'-'+automatic.toLocaleString('vi-VN'):'0')+' dB';
+        const headroomEl=byId('speaker-eq-headroom');
+        if(headroomEl)headroomEl.textContent='Bù gain tự động: '+(automatic?'-'+automatic.toLocaleString('vi-VN'):'0')+' dB';
         const label=byId('speaker-eq-active-label');
-        label.textContent=active?'Đang bật':'Đang tắt';label.className='badge '+(active?'bg-success':'bg-secondary');
+        if(label){label.textContent=active?'Đang bật':'Đang tắt';label.className='badge '+(active?'bg-success':'bg-secondary');}
         const saved=state.presets.find(p=>p.id===preset.value);
         const dirty=!saved||fields.some(field=>Number(saved.bands[field]??(field==='wet_percent'?100:0))!==Number(get(field).value||0));
-        byId('speaker-eq-draft').textContent=dirty?'Đã chỉnh · Chưa ghi vào mẫu':'Theo mẫu đã lưu';
-        byId('speaker-eq-draft').className='badge '+(dirty?'bg-warning text-dark':'bg-secondary');
+        const draftEl=byId('speaker-eq-draft');
+        if(draftEl){
+            draftEl.textContent=dirty?'Đã chỉnh · Chưa ghi vào mẫu':'Theo mẫu đã lưu';
+            draftEl.className='badge '+(dirty?'bg-warning text-dark':'bg-secondary');
+        }
     }
     function drawGraph(){
         const canvas=byId('speaker-eq-graph');
