@@ -492,50 +492,115 @@ function test_key_ChatGPT(text) {
     xhr.send(body);
 }
 
-//Tets, kiểm tra Key Gemini
+//Test, kiểm tra toàn bộ danh sách Key Gemini
 function test_key_Gemini(text) {
     loading("show");
-    var rawGeminiKeys = document.getElementById('google_gemini_key').value || '';
-    var apiKey = rawGeminiKeys.split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean)[0] || '';
-    var gemini_models_name = document.getElementById('gemini_models_name').value;
-    var apiVersion = document.getElementById('gemini_api_version').value;
-    if (!apiKey || !gemini_models_name || !apiVersion) {
+    var rawGeminiKeys = (document.getElementById('google_gemini_key') || {}).value || '';
+    var seenKeys = {};
+    var apiKeys = [];
+    rawGeminiKeys.split(/\r?\n/).forEach(function (s) {
+        var k = s.trim();
+        if (k && !seenKeys[k]) {
+            seenKeys[k] = true;
+            apiKeys.push(k);
+        }
+    });
+    var gemini_models_name = ((document.getElementById('gemini_models_name') || {}).value || '').trim();
+    var apiVersion = ((document.getElementById('gemini_api_version') || {}).value || '').trim();
+    if (!apiKeys.length || !gemini_models_name || !apiVersion) {
         loading("hide");
         show_message('<b class="text-danger">Thiếu tham số cấu hình để kiểm tra Gemini: API Key, Model name hoặc API version</b>');
         return;
     }
-    var url = 'https://generativelanguage.googleapis.com/' + apiVersion + '/models/' + gemini_models_name + ':generateContent?key=' + apiKey;
-    var payload = {
+
+    function escapeHtmlGem(str) {
+        return String(str || '').replace(/[&<>"']/g, function (c) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+    }
+
+    function maskKeyGem(k) {
+        if (k.length <= 12) return k;
+        return k.slice(0, 8) + '...' + k.slice(-4);
+    }
+
+    var payloadStr = JSON.stringify({
         contents: [{
             parts: [{
-                text: text
+                text: text || 'xin chào'
             }]
         }]
-    };
-    var xhr = vbotCreateXhr();
-    xhr.open('POST', url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json');
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
-            loading("hide");
-            if (xhr.status === 200) {
-                var response = JSON.parse(xhr.responseText);
-                var candidates = response.candidates;
-                if (candidates.length > 0) {
-                    var contentText = candidates[0].content.parts[0].text;
-                    show_message('<center class="text-success"><b>Kiểm Tra API KEY Thành Công</b></center><br/>- API Key: <b>' + apiKey + '</b><br/>- Mô Hình: <b>' + gemini_models_name + '</b><br/>- Phiên Bản API: <b>' + apiVersion + '</b><hr/>Phản hồi: <font color=green>' + contentText + '</font>');
+    });
+
+    function checkSingleKey(apiKey, idx) {
+        return new Promise(function (resolve) {
+            var url = 'https://generativelanguage.googleapis.com/' + encodeURIComponent(apiVersion)
+                + '/models/' + encodeURIComponent(gemini_models_name)
+                + ':generateContent?key=' + encodeURIComponent(apiKey);
+            var xhr = vbotCreateXhr();
+            xhr.open('POST', url, true);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.timeout = 15000;
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    var parsed = null;
+                    try { parsed = JSON.parse(xhr.responseText || '{}'); } catch (e) { parsed = null; }
+                    if (xhr.status === 200 && parsed && parsed.candidates && parsed.candidates.length > 0) {
+                        var parts = (parsed.candidates[0].content && parsed.candidates[0].content.parts) || [];
+                        var reply = parts.map(function (p) { return p.text || ''; }).join(' ').trim();
+                        resolve({
+                            index: idx + 1,
+                            key: apiKey,
+                            ok: true,
+                            status: 200,
+                            detail: reply.slice(0, 140) || 'OK'
+                        });
+                    } else {
+                        var errMsg = (parsed && parsed.error && parsed.error.message)
+                            ? parsed.error.message
+                            : ('HTTP ' + (xhr.status || 'Network Error'));
+                        resolve({
+                            index: idx + 1,
+                            key: apiKey,
+                            ok: false,
+                            status: xhr.status || 0,
+                            detail: errMsg
+                        });
+                    }
                 }
-            } else {
-                var response = JSON.parse(xhr.responseText);
-                if (response.error) {
-                    show_message('Lỗi xảy ra: <font color=red>' + response.error.message + '</font>');
-                } else {
-                    show_message('Có Lỗi Xảy Ra: ' + xhr.status);
-                }
-            }
-        }
-    };
-    xhr.send(JSON.stringify(payload));
+            };
+            xhr.ontimeout = function () {
+                resolve({ index: idx + 1, key: apiKey, ok: false, status: 0, detail: 'Hết thời gian chờ (Timeout 15s)' });
+            };
+            xhr.onerror = function () {
+                resolve({ index: idx + 1, key: apiKey, ok: false, status: 0, detail: 'Lỗi kết nối mạng tới Google API' });
+            };
+            xhr.send(payloadStr);
+        });
+    }
+
+    Promise.all(apiKeys.map(checkSingleKey)).then(function (results) {
+        loading("hide");
+        var okCount = results.filter(function (r) { return r.ok; }).length;
+        var summaryCls = okCount === results.length ? 'text-success' : (okCount > 0 ? 'text-warning' : 'text-danger');
+        var html = '<div class="text-center mb-2"><b class="' + summaryCls + '">Kết Quả Kiểm Tra Gemini API Keys: '
+            + okCount + ' / ' + results.length + ' Key Hoạt Động</b></div>'
+            + '<div class="small text-muted text-center mb-2">Mô hình: <b>' + escapeHtmlGem(gemini_models_name)
+            + '</b> • Phiên bản API: <b>' + escapeHtmlGem(apiVersion) + '</b></div>'
+            + '<div style="max-height:360px;overflow-y:auto;text-align:left;">';
+        results.forEach(function (r) {
+            var badge = r.ok
+                ? '<span class="badge bg-success">OK</span>'
+                : '<span class="badge bg-danger">Lỗi ' + (r.status ? '(' + r.status + ')' : '') + '</span>';
+            var detailCls = r.ok ? 'text-success' : 'text-danger';
+            html += '<div class="border rounded p-2 mb-2 small">'
+                + '<div><b>Key #' + r.index + ':</b> <code>' + escapeHtmlGem(maskKeyGem(r.key)) + '</code> ' + badge + '</div>'
+                + '<div class="' + detailCls + ' mt-1" style="word-break:break-word;">' + escapeHtmlGem(r.detail) + '</div>'
+                + '</div>';
+        });
+        html += '</div>';
+        show_message(html);
+    });
 }
 
 //tách lấy tên file và đuôi từ đường dẫn path

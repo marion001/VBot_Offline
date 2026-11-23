@@ -488,7 +488,7 @@
             "active": false,
             "time_out": 25,
             "api_key": "fc3ct43cr_8888888888888888",
-            "model_name": "gemini-2.0-flash",
+            "model_name": "gemini-3.5-flash-lite",
             "api_version": "v1beta"
         },
         "groq_ai": {

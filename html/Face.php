@@ -10,25 +10,23 @@ header("Expires: 0");
 
 include 'Configuration.php';
 
-if ($Config['contact_info']['user_login']['active']) {
-  if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-  }
+// Face.php cho phép xem trực tiếp không cần đăng nhập (phục vụ màn hình OLED / Kiosk / máy tính bảng).
+// Nếu bật user_login mà chưa đăng nhập, chỉ ẩn nút điều khiển nguồn (Start/Stop/Restart/Reboot).
+$userLoginActive = !empty($Config['contact_info']['user_login']['active']);
+$isLoggedIn = !$userLoginActive;
+if (session_status() === PHP_SESSION_NONE) {
+  @session_start();
+}
+if ($userLoginActive && session_status() === PHP_SESSION_ACTIVE) {
   if (
-    !isset($_SESSION['user_login']) ||
-    (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
+    isset($_SESSION['user_login']) &&
+    (!isset($_SESSION['user_login']['login_time']) || (time() - $_SESSION['user_login']['login_time'] <= 43200))
   ) {
-    session_unset();
-    session_destroy();
-    header('Location: Login.php');
-    exit;
+    $isLoggedIn = true;
   }
 }
 
 $VBot_Csrf_Token = '';
-if (session_status() === PHP_SESSION_NONE) {
-  @session_start();
-}
 if (session_status() === PHP_SESSION_ACTIVE) {
   if (
     !isset($_SESSION['vbot_csrf_token'])
@@ -889,6 +887,7 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
         <button type="button" class="hud-btn" onclick="toggleDemoDrawer()"><i class="bi bi-emoji-smile"></i> 21 Biểu Cảm</button>
         <button type="button" class="hud-btn" onclick="toggleFullscreen()"><i class="bi bi-arrows-fullscreen"></i> Toàn Màn Hình</button>
         <a href="index.php" class="hud-btn"><i class="bi bi-house-door"></i> WebUI</a>
+        <?php if ($isLoggedIn): ?>
         <div class="power-dropdown" id="powerDropdown" ondblclick="event.stopPropagation()">
           <button type="button" class="hud-btn power-btn" id="powerMenuBtn" onclick="togglePowerMenu(event)" aria-haspopup="true" aria-expanded="false" title="Lựa chọn hành động">
             <i class="bi bi-power"></i>
@@ -923,6 +922,7 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
             </li>
           </ul>
         </div>
+        <?php endif; ?>
       </div>
     </header>
 

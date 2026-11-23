@@ -1079,7 +1079,11 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
     return !empty($k);
   }));
   $Config['virtual_assistant']['google_gemini']['api_key'] = $apiKeys_GEMINI_AI;
-  $Config['virtual_assistant']['google_gemini']['model_name'] = $_POST['gemini_models_name'];
+  $submittedGeminiModel = trim((string)($_POST['gemini_models_name'] ?? ''));
+  if (strtolower($submittedGeminiModel) === 'gemini-2.5-flash-lite') {
+    $submittedGeminiModel = 'gemini-3.5-flash-lite';
+  }
+  $Config['virtual_assistant']['google_gemini']['model_name'] = $submittedGeminiModel;
   $Config['virtual_assistant']['google_gemini']['api_version'] = $_POST['gemini_api_version'];
   $Config['virtual_assistant']['google_gemini']['active'] = isset($_POST['google_gemini_active']) ? true : false;
   $Config['virtual_assistant']['google_gemini']['time_out'] = intval($_POST['google_gemini_time_out']);
@@ -5517,13 +5521,16 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                           <label for="gemini_backlist_content">Nội Dung Keys BackList Gemini | <?php echo htmlspecialchars($Config['smart_config']['backlist_file_name'] ?? 'BackList.json'); ?>:</label>
                         </div>
                         <center class="mb-3">
-                          <button type="button" class="btn btn-success rounded-pill" onclick="test_key_Gemini('xin chào')" title="Kiểm tra kết nối API Key đầu tiên"><i class="bi bi-check-circle"></i> Kiểm Tra Key</button>
+                          <button type="button" class="btn btn-success rounded-pill" onclick="test_key_Gemini('xin chào')" title="Kiểm tra toàn bộ danh sách API Key Gemini"><i class="bi bi-check-circle"></i> Kiểm Tra Tất Cả Key</button>
                           <button type="button" class="btn btn-warning rounded-pill" onclick="changeBacklistValue('backlist->gemini->backlist_limit', '[]')" title="Làm mới nội dung gemini trong BackList"><i class="bi bi-recycle"></i> Clear BackList</button>
                           <button type="button" class="btn btn-primary rounded-pill" onclick="getBacklistData('backlist->gemini', 'gemini_backlist_content')" title="Tải lại nội dung gemini trong BackList"><i class="bi bi-arrow-repeat"></i> Re-Load BackList</button>
                         </center>
                         <?php
                         $gemini_model_list_json_file = $HTML_VBot_Offline . '/includes/other_data/gemini_model_list.json';
-                        $selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-2.0-flash';
+                        $selected_model = $Config['virtual_assistant']['google_gemini']['model_name'] ?? 'gemini-3.5-flash-lite';
+                        if (strtolower(trim((string)$selected_model)) === 'gemini-2.5-flash-lite') {
+                          $selected_model = 'gemini-3.5-flash-lite';
+                        }
                         $selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
                         function renderSelectOrInput_Gemini($gemini_model_list_json_file, $id, $label, $data, $selectedValue, $placeholder = '', $withButton = false)
                         {

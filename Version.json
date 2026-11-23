@@ -2,7 +2,7 @@
     "version": "1.4.6",
     "projectName": "Program VBot Offline",
     "description": "Ra mắt Hệ thống AI xử lý dữ liệu, Kho Tri Thức AI Cục Bộ (VBot Knowledge v2) hỗ trợ 27 định dạng tài liệu/ảnh/PDF Scan/URL/Giọng nói, kết hợp Knowledge Catalog, SQLite FTS5 BM25 + Vector Semantic (kb_vectors) hợp nhất RRF, cắt đoạn theo đề mục, ghép đoạn liền kề, hỏi nối tiếp nhiều lượt và tự động chuyển Web Search khi không có trong tài liệu.",
-    "releaseDate": "23/11/2026",
+    "releaseDate": "23/11/2026-1",
     "changes": [
         {
             "type": "feature",
