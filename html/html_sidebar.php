@@ -290,6 +290,16 @@
           <i class="bi bi-circle"></i><span>DEV LED (Customize LED)</span>
         </a>
       </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự viết thêm hiệu ứng LED">
+        <a href="DEV_Led_Effects.php">
+          <i class="bi bi-circle"></i><span>DEV LED Effects (Hiệu Ứng LED)</span>
+        </a>
+      </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code AI Engine">
+        <a href="DEV_AI_Engine.php">
+          <i class="bi bi-circle"></i><span>DEV AI Engine (Customize AI)</span>
+        </a>
+      </li>
       <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Music">
         <a href="DEV_Music.php">
           <i class="bi bi-circle"></i><span>DEV Music (Customize Music)</span>

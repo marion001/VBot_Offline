@@ -260,6 +260,15 @@ $isAiModeActive = ($activeProcessingMode === 'ai');
         if (ai.value_key) addField(aiCard, 'Mã lệnh hệ thống', `${ai.value_key} (điểm: ${ai.score ?? '—'})`);
         if (ai.cache_hits !== undefined) addField(aiCard, 'Số lượt khớp Cache trước đó', ai.cache_hits);
         if (ai.calls && ai.calls.length) addField(aiCard, 'Công cụ (Tool) & Tham số dự kiến', ai.calls);
+        if (ai.execution_plan) {
+          const plan = ai.execution_plan;
+          const fmt = (arr) => (arr && arr.length) ? arr.join(', ') : '—';
+          addField(aiCard, 'Kế hoạch đa lệnh', `Tổng ${plan.total_calls} lệnh · ${plan.parallel_enabled ? 'Có chạy song song' : 'Chạy tuần tự'}`);
+          addField(aiCard, 'Bước 1 - Điều khiển / Tra cứu', fmt(plan.phase1_control_info));
+          addField(aiCard, 'Bước 2 - Phát nhạc / Kịch bản (sau khi đọc xác nhận)', fmt(plan.phase2_media_routine));
+          addField(aiCard, 'Bước 3 - Hẹn giờ tắt nhạc (sau khi phát)', fmt(plan.phase3_post_media));
+        }
+        if (ai.pending_text) addField(aiCard, 'AI hỏi lại thêm', ai.pending_text);
         if (ai.reply_text) addField(aiCard, 'Câu trả lời AI dự kiến', ai.reply_text);
         if (ai.emotion) addField(aiCard, 'Cảm xúc dự kiến', ai.emotion);
         addField(aiCard, 'Local Intent Cache / Fallback VBot', `Cache: ${ai.intent_cache_active ? 'Bật' : 'Tắt'} · Fallback VBot khi lỗi AI: ${ai.fallback_to_vbot ? 'Bật' : 'Tắt'}`);

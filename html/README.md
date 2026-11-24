@@ -58,11 +58,21 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 
 ### Trợ lý AI và xử lý lệnh
 
-- Trợ lý mặc định của VBot.
-- Google Gemini, ChatGPT, XiaoZhi và các nguồn trợ lý được bật trong `Config.json`.
+- Trợ lý mặc định của VBot (từ khóa nội bộ theo locale `resource/lang_keywords/<locale>.json`, mặc định `vi-VN.json`).
+- **Chế độ xử lý AI Function Calling (`processing_pipeline.mode = "ai"`):**
+  - Hỗ trợ **Groq AI**, **Google Gemini**, **OpenAI-Compatible (`openai_compat`: Ollama LAN / LM Studio / vLLM / OpenRouter / Cerebras)**, **ChatGPT**, **XiaoZhi** và `Dev_AI_Engine.py`.
+  - **Tự động xoay vòng nhiều API Key (Round-Robin) + Dự phòng chéo (`Groq ⇄ Gemini ⇄ Ollama LAN`):** phân biệt lỗi giới hạn theo phút (**TPM/RPM 429** — chỉ tạm nghỉ vài giây trong RAM, không khóa oan cả ngày) với hết hạn mức ngày (**TPD/RPD** hoặc **401** — đưa vào `BackList.json`).
+  - **Đa lệnh AI thông minh (Multi-Tool 3 pha):** thực thi song song các lệnh điều khiển/tra cứu độc lập (`Phase 1`), tự lan truyền động từ chung (*"Kiểm tra đèn phòng ngủ và đèn phòng khách"*), đọc xong xác nhận rồi mới mở nhạc (`Phase 2`) và đặt hẹn giờ tắt nhạc sau cùng (`Phase 3`); tự hỏi lại khi nhiều thiết bị đánh số trùng tiền tố (*Đèn Phòng Khách 1/2/3*).
+  - **VBot Vision (`AI_Vision.py` — Camera Home Assistant & USB/Pi Camera):** chụp và phân tích ảnh trực tiếp 100% trên RAM (**Zero-disk**, không ghi thẻ nhớ SD, tự nén ảnh 4K bằng Pillow/`ffmpeg`), hỗ trợ chọn **Mô hình Xử lý Ảnh (`vision_model_name`)** riêng cho từng trợ lý (Groq Llama 4 Scout / Google Gemini) và dự phòng chéo.
+  - **Kho Tri Thức AI Cục Bộ — VBot Knowledge v2 (`AI_Knowledge_Base.py`):** hỗ trợ 27 định dạng + OCR ảnh/PDF Scan + URL Website + ghi chú giọng nói, tìm kiếm **Hybrid (SQLite FTS5 BM25 + Vector 256 chiều RRF)**, tích hợp **Vector Cục Bộ 100% Offline (`local-subword-256`, `< 2ms` trên Pi Zero 2W)** tự dự phòng khi không có Gemini Key hoặc mất Internet.
+  - **Phát giọng nói theo từng câu (Chunked TTS Pipeline):** câu trả lời dài được phát ngay câu đầu trong khi tạo nền câu kế tiếp, giảm rõ rệt độ trễ chờ.
+- **Bộ Đệm Lệnh AI Cục Bộ (`Local Intent Cache`):** khớp lệnh lặp lại tức thì với **0 token (< 50ms)**, tự bỏ qua cache khi nhắc lại trong 45 giây và tự chặn lưu nhầm câu nói tắt phụ thuộc ngữ cảnh.
+- **Ngữ cảnh hội thoại thông minh:** nhớ thiết bị/camera vừa thao tác để hiểu câu nói tắt (*"Bật đèn ngủ"* → *"Tắt đi cho tôi"*), tự mở mic 1 lượt khi AI hỏi làm rõ (`?`).
+- **Màn hình Biểu cảm (`html/Face.php`) & Client Độc lập (`html/VBot_Face_Client.html`):**
+  - `Face.php`: 21 biểu cảm hoạt họa, đĩa xoay ảnh bìa bài hát + 4 nút điều khiển nhanh (`⏮ ⏯ ⏭ ■`), thời tiết OpenWeatherMap, đồng hồ đếm ngược / hẹn giờ tắt nhạc, phụ đề khớp cả micro & ChatBox, Wake Lock, Chế độ Ngủ Đêm (tự động `22:30–06:00`) và OLED Pixel Shift chống lưu ảnh.
+  - `VBot_Face_Client.html`: 1 file HTML/JS độc lập kết hợp giao diện Face + kết nối WebSocket Micro/Loa cho điện thoại cũ, máy tính bảng hoặc PC trong mạng LAN (mở trực tiếp hoặc tải xuống 1 chạm từ `Client_Testing.php`).
 - Home Assistant Assist và câu lệnh Home Assistant tùy chỉnh.
-- Các điểm mở rộng `Dev_*.py` dành cho logic cá nhân, (Người dùng, lập trình có thể tự code theo ý muốn).
-- Phân tích từ khóa theo locale qua `resource/lang_keywords/<locale>.json`; mặc định dùng `vi-VN.json`.
+- Các điểm mở rộng `Dev_*.py` dành cho logic cá nhân (người dùng/lập trình viên có thể tự tùy biến mà không cần build lại `.so`).
 
 ### Media và kết nối âm thanh
 
@@ -99,6 +109,18 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 
 ### Các tính năng mới nổi bật
 
+- **AI Engine & Bộ kỹ năng thông minh (`AI_Engine`, `AI_Skill_Registry`, `AI_Action_Dispatcher`):**
+  - Điều khiển Home Assistant đơn lẻ & hàng loạt theo phòng (`batch_on` / `batch_off` có lọc nhiễu camera và bảo vệ thiết bị quan trọng như router, tủ lạnh, server), đặt tên gọi tắt thiết bị (Device Alias), hỏi thiết bị đang bật.
+  - Bản tin buổi sáng / chúc ngủ ngon (`daily_briefing`, hỗ trợ hẹn giờ tự động mỗi sáng trong `Scheduler.php`), Nhật ký giọng nói (`voice_journal`), Nhiều bộ đếm ngược song song (`countdown_timer`), Phát thông báo loa (`announce`), Hẹn giờ tắt nhạc giảm âm lượng mượt (`Sleep Timer` 10s fade-out), Dừng sau bài hiện tại, Tìm kiếm web tóm tắt.
+  - **Local Intent Cache (0 token):** giảm tối đa chi phí/hạn mức API AI và phản hồi tức thì cho các lệnh quen thuộc.
+- **Kho Tri Thức AI Cục Bộ — VBot Knowledge v2 (`AI_Knowledge_Base.py` + `html/AI_Knowledge.php`):**
+  - Hỗ trợ **27 định dạng** (PDF, PDF Scan, DOCX, ODT, XLS/XLSX, PPT/PPTX, EPUB, HTML, RTF, MD, TXT, CSV, JSON/XML/YAML, mã nguồn, ảnh JPG/PNG/WEBP qua Gemini Vision), nạp & cập nhật từ **URL Website**, và lưu ghi chú tri thức bằng **giọng nói**.
+  - **Tìm kiếm Hybrid 3 lớp (0 Qdrant, 0 RAM nền):** Kết hợp Knowledge Catalog + SQLite FTS5 BM25 + Vector Semantic 256 chiều (`kb_vectors` trong SQLite) hợp nhất **RRF**, cắt đoạn theo đề mục (**Heading-Aware Chunking**), ghép đoạn liền kề (**Neighbor Window**), hỏi nối tiếp nhiều lượt, tự chuyển sang **Web Search** khi không có trong tài liệu, khử trùng lặp `SHA-256` và AI tự phân loại & gắn Tags.
+  - Trang WebUI `html/AI_Knowledge.php` hỗ trợ lập chỉ mục từng tệp, xem trực tiếp bảng `kb_chunks` & `kb_vectors`, **Search Playground** kiểm thử truy vấn và **Sao lưu / Khôi phục `.tar.gz`** tại `html/Backup_Upgrade/Backup_AI_Knowledge` (tối đa 5 bản tự xóa bản cũ nhất, đồng bộ quyền `0777`).
+- **Màn hình biểu cảm OLED (`html/Face.php`) & 21 cảm xúc chuẩn XiaoZhi:** giao diện mắt SVG chuyển động tự nhiên (tự liếc mắt + parallax theo trỏ chuột/chạm), 21 mã cảm xúc + trạng thái nghe/suy nghĩ/nói, hiệu ứng miệng khi nói, sóng nhạc 5 cột khi phát media, tự cuộn phụ đề TTS dài kiểu teleprompter, menu điều khiển nguồn (Start/Stop/Restart/Reboot) và cảnh báo mất kết nối tự động; đồng bộ thời gian thực qua SSE `/ai-face/events` cho cả chế độ AI và VBot từ khóa.
+- **Bảng thống kê AI (`html/AI_Stats.php`):** theo dõi lượt gọi AI, tỷ lệ khớp Local Intent Cache, token tiêu thụ (Hôm nay / Tổng), kiểm tra hạn mức trực tiếp từng API Key Groq và quản lý Nhật ký giọng nói.
+- **Đồng bộ & tăng tốc Home Assistant cho hệ thống nhiều thực thể:** tự đồng bộ `Home_Assistant.json` khi khởi chạy, nút đồng bộ nhanh ngay trên Dashboard `index.php` và trong Home Assistant Custom Component (`SYNC_HASS_JSON`, có khóa chống chạy chồng luồng); tra cứu `entity_id` trực tiếp từ RAM cache (< 5ms) kết hợp gộp `/api/states` 4 giây.
+- **Tối ưu hiệu năng & độ bền 24/7 trên Raspberry Pi:** tổng hợp TTS câu dài song song (`Edge TTS` / `Default TTS`), cache RAM theo `mtime_ns` cho `BackList.json` & `Home_Assistant.json`, gom ghi thẻ nhớ SD định kỳ cho telemetry/cache, làm nóng kết nối HTTPS nền khi khởi động, kiểm soát `timeout` toàn bộ tiến trình con và tách nhỏ module lõi để build `.so` nhanh hơn.
 - **Gọi điện LAN giữa loa VBot Python:** gọi, nhận/từ chối, kết thúc, microphone riêng cho cuộc gọi và PCM hai chiều nội bộ; có chế độ nhấn giữ để nói. Cấu hình tại `LAN_Calls.php`. Xem [hướng dẫn gọi điện LAN](resource/README_LAN_Calls.md).
 
 - **DLNA Audio Renderer:** nhận luồng nhạc UPnP/DLNA, đồng bộ trạng thái phát, metadata, thời lượng, vị trí và âm lượng với VBot qua D-Bus/MPRIS; điều khiển từ WebUI, REST API và MQTT.
@@ -151,19 +173,22 @@ Các thành phần chính:
 | `TTS_Processing.cpython-39-arm-linux-gnueabihf.so` | Chọn và gọi nguồn Text-to-Speech. |
 | `Media_Player.cpython-39-arm-linux-gnueabihf.so` | Media player nội bộ và vòng đời phát nhạc. |
 | `Api.cpython-39-arm-linux-gnueabihf.so` | REST API, SSE, MQTT, AirPlay DBus, diagnostics và watchdog. |
-| `Api_HTTP.py`, `Api_MQTT.py` | Các handler HTTP/MQTT được tách khỏi lớp điều phối API chính. |
+| `Api_HTTP.cpython-39-arm-linux-gnueabihf.so`, `Api_MQTT.cpython-39-arm-linux-gnueabihf.so` | Các handler HTTP/MQTT được tách khỏi lớp điều phối API chính. |
 | `Streaming.cpython-39-arm-linux-gnueabihf.so` | WebSocket server, session client và streaming STT. |
 | `Bluetooth.cpython-39-arm-linux-gnueabihf.so` | Theo dõi BlueZ, metadata và trạng thái Bluetooth. |
 | `Button.cpython-39-arm-linux-gnueabihf.so` | Nút nhấn và rotary encoder. |
 | `Led.cpython-39-arm-linux-gnueabihf.so` | Hiệu ứng LED và khôi phục trạng thái nghỉ. |
 | `Scheduler.cpython-39-arm-linux-gnueabihf.so` | Lịch thông báo và tác vụ định kỳ. |
-| `Update_Manager.py` | Điều phối cập nhật từ WebUI, REST API và MQTT; quản lý LED, âm báo, log và restart. |
-| `Manual_Update_Program.py` | Cập nhật/rollback chương trình qua SSH và bàn giao kết quả cho Update Manager. |
-| `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI. |
-| `VBot_Multiroom_*.py` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
+| `Update_Manager.cpython-39-arm-linux-gnueabihf.so`, `Update_Backup.cpython-39-arm-linux-gnueabihf.so`, `Update_Paths.cpython-39-arm-linux-gnueabihf.so` | Điều phối cập nhật từ WebUI, REST API và MQTT; quản lý sao lưu, đường dẫn, LED, âm báo, log và restart. |
+| `Manual_Update_Program.py` | Cập nhật/rollback chương trình qua SSH và bàn giao kết quả cho Update Manager (giữ dạng `.py`). |
+| `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI (giữ dạng `.py`). |
+| `VBot_Multiroom_*.cpython-39-arm-linux-gnueabihf.so` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
 | `resource/HomeKit/` | VBot HomeKit Bridge, registry phụ kiện, trình cài Node.js và systemd user service. |
-| `Lib_System.py`, `Lib_Audio.py`, `Lib_AirPlay.py`, `Lib_Bluetooth.py`, `Lib_Multiroom.py` | Các lớp chức năng được tách khỏi facade `Lib.py`. |
-| `html/` | WebUI PHP, JavaScript, CSS và tài nguyên giao diện. |
+| `AI_Engine.cpython-39-arm-linux-gnueabihf.so`, `AI_Skill_Registry.cpython-39-arm-linux-gnueabihf.so`, `AI_Action_Dispatcher.cpython-39-arm-linux-gnueabihf.so`, `AI_Knowledge_Base.cpython-39-arm-linux-gnueabihf.so` | Bộ xử lý AI Function Calling (Groq/Gemini), Local Intent Cache, Telemetry, Kho Tri Thức AI Cục Bộ (Hybrid FTS5 + Vector RRF) và thực thi công cụ thông minh. |
+| `Dev_AI_Engine.py` | Điểm mở rộng AI tùy biến cho người dùng (giữ dạng `.py` không biên dịch `.so`). |
+| `Lib_System.cpython-39-arm-linux-gnueabihf.so`, `Lib_Audio.cpython-39-arm-linux-gnueabihf.so`, `Lib_AirPlay.cpython-39-arm-linux-gnueabihf.so`, `Lib_Bluetooth.cpython-39-arm-linux-gnueabihf.so`, `Lib_Multiroom.cpython-39-arm-linux-gnueabihf.so`, `Lib_Picovoice_Utils.cpython-39-arm-linux-gnueabihf.so`, `Lib_State_Audio.cpython-39-arm-linux-gnueabihf.so`, `Lib_Device_Runtime.cpython-39-arm-linux-gnueabihf.so` | Các lớp chức năng được tách khỏi facade `Lib` để tối ưu tốc độ build `.so` và bảo trì. |
+| `Data_Processing_HASS.cpython-39-arm-linux-gnueabihf.so`, `Data_Processing_Media_Info.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_HASS.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_Media.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_Weather.cpython-39-arm-linux-gnueabihf.so` | Các module con được tách từ `Data_Processing` và `Def_Processing` theo mô hình Facade. |
+| `html/` | WebUI PHP, JavaScript, CSS, script trung gian `includes/php_ajax/AI_Knowledge_Indexer.py` và tài nguyên giao diện. |
 | `resource/` | Âm thanh, service, script cài đặt và dữ liệu tích hợp. |
 
 ### Nguyên tắc xử lý bất đồng bộ
@@ -177,26 +202,38 @@ Các thành phần chính:
 ## Luồng xử lý giọng nói
 
 ```text
-Chờ từ khóa đánh thức
+Chờ từ khóa đánh thức (Porcupine / Snowboy)
         │
         ▼
-Phát âm báo + cập nhật LED
+Phát âm báo + cập nhật LED + Face.php (listening)
         │
         ▼
 Thu âm ───── nhấn giữ nút ────► hủy thu âm, về trạng thái chờ
         │
         ▼
-STT → phân tích câu lệnh
+STT (nhận dạng giọng nói) → Face.php (thinking)
         │
-        ├── Home Assistant / MQTT / Broadlink
-        ├── Media / radio / podcast
-        ├── Trợ lý AI
-        └── Tác vụ hệ thống
+        ├── [Chế độ AI: processing_pipeline.mode = "ai"]
+        │       ├── 1. Lệnh HASS Custom & Lệnh hệ thống SYS_CMD (0 token)
+        │       ├── 2. Local Intent Cache - ai_intent_cache.json (0 token, < 50ms)
+        │       └── 3. AI Function Calling (Groq / Gemini / Dev_AI_Engine)
+        │               ├── Điều khiển Nhà thông minh (HASS đơn/hàng loạt theo phòng, Tuya, Alias)
+        │               ├── Kho Tri Thức AI (search_knowledge: Catalog + Hybrid FTS5 & Vector RRF
+        │               │     + Neighbor Window → tự chuyển web_search nếu tài liệu không có)
+        │               ├── Tìm kiếm Internet thời gian thực (web_search)
+        │               ├── Media, Bản tin, Nhật ký, Bộ nhớ dài hạn, Đếm ngược, Thông báo
+        │               └── Tự dự phòng sang VBot từ khóa nếu AI lỗi (fallback_to_vbot_on_error)
+        │
+        └── [Chế độ VBot từ khóa: processing_pipeline.mode = "vbot"]
+                ├── Kịch bản giọng nói (Voice Routines)
+                ├── Home Assistant / Local Tuya / MQTT / Broadlink
+                ├── Media / Radio / Podcast / Tin tức
+                ├── Trợ lý AI & Tác vụ hệ thống
         │
         ▼
-TTS / phản hồi / LED
+TTS (tổng hợp song song câu dài) + LED + Face.php (21 cảm xúc + phụ đề tự cuộn)
         │
-        └── tiếp tục nghe nếu bật chế độ hội thoại (conversation_mode)
+        └── tự mở mic tiếp nếu AI hỏi làm rõ (?) hoặc bật chế độ hội thoại (conversation_mode)
 ```
 
 ## Audio, AirPlay và Bluetooth
@@ -604,12 +641,12 @@ WebUI nằm trong thư mục `html/` và chạy qua Apache/PHP trên Raspberry P
 
 Các khu vực chính:
 
-- Dashboard.
+- Dashboard (`index.php`): điều khiển nhanh chế độ, media, âm lượng và nút **Đồng bộ `Home_Assistant.json`**.
 - Cấu hình `Config.json`.
 - Command/Terminal.
-- Kiểm tra câu lệnh (`Command_Test.php`): xem keyword, hành động, đích dự kiến,
-  điểm khớp/ngưỡng và lý do từ chối. Chế độ thử không chạy lệnh; có thể chọn
-  đọc danh sách thiết bị Home Assistant để kiểm tra việc chọn đích.
+- Kiểm tra câu lệnh (`Command_Test.php`): hỗ trợ **cả 2 chế độ (AI & VBot nội bộ)** — xem nhánh xử lý AI, Local Intent Cache (0 token), xem trước Tool/Câu trả lời AI dự kiến hoặc keyword/đích HASS, và tùy chọn thực thi thật.
+- Thống kê AI & Hạn mức (`AI_Stats.php`): theo dõi số lượt gọi, tỷ lệ khớp Cache, token tiêu thụ, kiểm tra hạn mức API Key Groq và Nhật ký giọng nói.
+- Màn hình cảm xúc OLED (`Face.php`): hiển thị khuôn mặt 21 cảm xúc chuẩn XiaoZhi, trạng thái nghe/nói và sóng nhạc theo thời gian thực.
 - REST API.
 - Scheduler.
 - Log VBot, TTS và API.
@@ -730,6 +767,8 @@ python -m unittest discover -s tests
 Chạy một nhóm test:
 
 ```powershell
+python -m unittest tests.test_core_regression
+python -m unittest tests.test_audio_concurrency_fixes tests.test_command_queue_backpressure
 python -m unittest tests.test_runtime_diagnostics
 python -m unittest tests.test_runtime_watchdog
 python -m unittest tests.test_airplay_metadata

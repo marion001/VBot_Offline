@@ -863,24 +863,111 @@
     "calendar": {
       "default_label": "today",
       "explicit_date_label": "the requested date",
-      "spoken_date_patterns": ["\\bday\\s+(\\d{1,2})\\s+month\\s+(\\d{1,2})(?:\\s+year\\s+(\\d{4}))?\\b"],
+      "spoken_date_patterns": [
+        "\\bday\\s+(\\d{1,2})\\s+month\\s+(\\d{1,2})(?:\\s+year\\s+(\\d{4}))?\\b"
+      ],
       "relative_days": [
-        {"label": "yesterday", "offset": -1, "phrases": ["yesterday"]},
-        {"label": "today", "offset": 0, "phrases": ["today"]},
-        {"label": "tomorrow", "offset": 1, "phrases": ["tomorrow"]},
-        {"label": "the day after tomorrow", "offset": 2, "phrases": ["the day after tomorrow"]},
-        {"label": "in three days", "offset": 3, "phrases": ["in three days", "three days from now"]}
+        {
+          "label": "yesterday",
+          "offset": -1,
+          "phrases": [
+            "yesterday"
+          ]
+        },
+        {
+          "label": "today",
+          "offset": 0,
+          "phrases": [
+            "today"
+          ]
+        },
+        {
+          "label": "tomorrow",
+          "offset": 1,
+          "phrases": [
+            "tomorrow"
+          ]
+        },
+        {
+          "label": "the day after tomorrow",
+          "offset": 2,
+          "phrases": [
+            "the day after tomorrow"
+          ]
+        },
+        {
+          "label": "in three days",
+          "offset": 3,
+          "phrases": [
+            "in three days",
+            "three days from now"
+          ]
+        }
       ]
     },
-    "voice_routines": {"prefixes": ["run routine", "run the routine", "activate routine", "activate the routine"], "negations": ["not", "never", "don't", "do not"]},
-    "hass_clarification": {"cancel": ["cancel", "never mind", "forget it"], "number_prefixes": ["number", "light", "device"]},
+    "voice_routines": {
+      "prefixes": [
+        "run routine",
+        "run the routine",
+        "activate routine",
+        "activate the routine"
+      ],
+      "negations": [
+        "not",
+        "never",
+        "don't",
+        "do not"
+      ]
+    },
+    "hass_clarification": {
+      "cancel": [
+        "cancel",
+        "never mind",
+        "forget it"
+      ],
+      "number_prefixes": [
+        "number",
+        "light",
+        "device"
+      ]
+    },
     "lan_calls": {
-      "speaker_prefixes": ["speaker"],
-      "call": ["call the speaker in", "call speaker in", "call the speaker", "call speaker", "make a call to", "phone the speaker", "call"],
-      "accept": ["accept call", "accept the call", "answer call", "answer the call"],
-      "reject": ["reject call", "reject the call", "decline call", "decline the call"],
-      "end": ["end call", "end the call", "hang up", "disconnect call"],
-      "cancel": ["cancel", "cancel call", "cancel the call", "don't call anymore"]
+      "speaker_prefixes": [
+        "speaker"
+      ],
+      "call": [
+        "call the speaker in",
+        "call speaker in",
+        "call the speaker",
+        "call speaker",
+        "make a call to",
+        "phone the speaker",
+        "call"
+      ],
+      "accept": [
+        "accept call",
+        "accept the call",
+        "answer call",
+        "answer the call"
+      ],
+      "reject": [
+        "reject call",
+        "reject the call",
+        "decline call",
+        "decline the call"
+      ],
+      "end": [
+        "end call",
+        "end the call",
+        "hang up",
+        "disconnect call"
+      ],
+      "cancel": [
+        "cancel",
+        "cancel call",
+        "cancel the call",
+        "don't call anymore"
+      ]
     },
     "cover_position_terms": [
       "position",
@@ -1387,6 +1474,432 @@
           "turn on fan mode"
         ]
       }
+    },
+    "ai_engine": {
+      "system_prompt": "You are VBot, a concise voice assistant. Reply naturally in English in under 2 sentences and tolerate minor STT typos. ALWAYS call a function when controlling/checking devices, setting volume, playing media, setting reminders, checking weather, time, or cameras; NEVER fabricate execution results in plain text. Multi-command: if a request has multiple independent actions, call all required functions (up to 6); do not split a single title containing 'and'. Elliptical follow-ups ('turn it off', 'turn it back on'): use the target from Recent Context. Prefer control_hass for smart home (use action='check' for state checks, not search_knowledge); use internal_ir_send only for IR remotes/TVs. Plain-text replies must always begin with one [emotion] tag from: neutral,happy,laughing,funny,sad,angry,crying,loving,embarrassed,surprised,shocked,thinking,winking,cool,relaxed,delicious,kissy,confident,sleepy,silly,confused.",
+      "compound_skip_prefixes": [
+        "remember that",
+        "save memory",
+        "voice journal",
+        "add journal",
+        "write journal",
+        "announce",
+        "broadcast",
+        "add knowledge",
+        "save knowledge",
+        "look up",
+        "search for",
+        "explain",
+        "tell me about"
+      ],
+      "compound_separators": [
+        "and then",
+        "after that",
+        "at the same time",
+        "as well as",
+        "then",
+        "and"
+      ],
+      "compound_polite_prefixes": [
+        "please",
+        "could you",
+        "can you",
+        "would you",
+        "help me",
+        "hey vbot",
+        "vbot"
+      ],
+      "compound_action_verbs": [
+        "turn on ",
+        "turn off ",
+        "switch on ",
+        "switch off ",
+        "open ",
+        "close ",
+        "set ",
+        "adjust ",
+        "increase ",
+        "decrease ",
+        "change ",
+        "restart ",
+        "check ",
+        "show ",
+        "read ",
+        "play ",
+        "listen ",
+        "pause",
+        "stop ",
+        "resume",
+        "schedule ",
+        "countdown",
+        "remind ",
+        "alarm",
+        "volume",
+        "louder",
+        "quieter",
+        "mute",
+        "run ",
+        "activate ",
+        "weather",
+        "calendar ",
+        "look ",
+        "capture ",
+        "what time",
+        "what day",
+        "good night",
+        "good morning"
+      ],
+      "compound_shared_verbs": [
+        "check ",
+        "turn on ",
+        "turn off ",
+        "switch on ",
+        "switch off ",
+        "open ",
+        "close "
+      ],
+      "compound_device_nouns": [
+        "light",
+        "lamp",
+        "fan",
+        "ac",
+        "air conditioner",
+        "tv",
+        "curtain",
+        "blind",
+        "switch",
+        "plug",
+        "outlet",
+        "heater",
+        "pump",
+        "gate",
+        "door",
+        "purifier",
+        "camera"
+      ],
+      "non_cacheable_exact": [
+        "turn it off",
+        "turn it on",
+        "turn off",
+        "turn on",
+        "open it",
+        "close it",
+        "turn everything off",
+        "turn everything on",
+        "louder",
+        "quieter",
+        "volume up",
+        "volume down",
+        "yes",
+        "no",
+        "ok",
+        "okay",
+        "cancel",
+        "stop",
+        "skip",
+        "it",
+        "that",
+        "this",
+        "that device",
+        "that one"
+      ],
+      "non_cacheable_substrings": [
+        "that one",
+        "this one",
+        "that device",
+        "turn it",
+        "minutes later",
+        "seconds later",
+        "hours later",
+        "in ",
+        "at "
+      ],
+      "cache_polite_prefixes": [
+        "hey vbot",
+        "vbot",
+        "please",
+        "could you",
+        "can you"
+      ],
+      "cache_polite_suffixes": [
+        "for me",
+        "please",
+        "thanks",
+        "thank you",
+        "now"
+      ],
+      "elliptical_filler_words": [
+        "turn",
+        "switch",
+        "open",
+        "close",
+        "stop",
+        "set",
+        "adjust",
+        "on",
+        "off",
+        "up",
+        "down",
+        "back",
+        "again",
+        "for",
+        "me",
+        "please",
+        "now",
+        "just",
+        "it",
+        "this",
+        "that",
+        "one",
+        "hey",
+        "vbot",
+        "bot",
+        "can",
+        "could",
+        "you",
+        "the"
+      ],
+      "hass_batch_protected_terms": [
+        "router",
+        "modem",
+        "wifi",
+        "wi-fi",
+        "camera",
+        "fridge",
+        "refrigerator",
+        "server",
+        "nas",
+        "aquarium",
+        "fish tank",
+        "gateway",
+        "hub"
+      ],
+      "hass_category_map": [
+        {
+          "keyword": "air conditioner",
+          "domain": "climate",
+          "match_terms": [
+            "air conditioner",
+            "ac",
+            "climate",
+            "hvac",
+            "thermostat"
+          ]
+        },
+        {
+          "keyword": "ac",
+          "domain": "climate",
+          "match_terms": [
+            "air conditioner",
+            "ac",
+            "climate",
+            "hvac",
+            "thermostat"
+          ]
+        },
+        {
+          "keyword": "light",
+          "domain": "light",
+          "match_terms": [
+            "light",
+            "lamp",
+            "bulb",
+            "led"
+          ]
+        },
+        {
+          "keyword": "lamp",
+          "domain": "light",
+          "match_terms": [
+            "light",
+            "lamp",
+            "bulb",
+            "led"
+          ]
+        },
+        {
+          "keyword": "fan",
+          "domain": "fan",
+          "match_terms": [
+            "fan"
+          ]
+        },
+        {
+          "keyword": "curtain",
+          "domain": "cover",
+          "match_terms": [
+            "curtain",
+            "blind",
+            "shade",
+            "cover",
+            "door",
+            "gate"
+          ]
+        },
+        {
+          "keyword": "plug",
+          "domain": "switch",
+          "match_terms": [
+            "plug",
+            "outlet",
+            "switch",
+            "socket"
+          ]
+        },
+        {
+          "keyword": "switch",
+          "domain": "switch",
+          "match_terms": [
+            "plug",
+            "outlet",
+            "switch",
+            "socket"
+          ]
+        }
+      ],
+      "vision_usb_hints": [
+        "usb",
+        "webcam",
+        "front",
+        "speaker camera",
+        "vbot camera",
+        "pi camera",
+        "local",
+        "built in"
+      ],
+      "kb_stopwords": [
+        "the",
+        "is",
+        "are",
+        "was",
+        "were",
+        "a",
+        "an",
+        "of",
+        "to",
+        "for",
+        "in",
+        "on",
+        "at",
+        "by",
+        "with",
+        "about",
+        "from",
+        "what",
+        "which",
+        "who",
+        "how",
+        "when",
+        "where",
+        "why",
+        "can",
+        "could",
+        "would",
+        "should",
+        "do",
+        "does",
+        "did",
+        "me",
+        "my",
+        "you",
+        "your",
+        "tell",
+        "show",
+        "find",
+        "search",
+        "read",
+        "check",
+        "please",
+        "vbot",
+        "bot",
+        "file",
+        "doc"
+      ],
+      "kb_local_synonym_groups": [
+        [
+          "air conditioner",
+          "ac",
+          "hvac",
+          "cooling"
+        ],
+        [
+          "password",
+          "passcode",
+          "pin",
+          "pass"
+        ],
+        [
+          "setup",
+          "config",
+          "configuration",
+          "install",
+          "settings"
+        ],
+        [
+          "guide",
+          "manual",
+          "instructions",
+          "how to",
+          "steps"
+        ],
+        [
+          "price",
+          "cost",
+          "fee",
+          "pricing",
+          "rate"
+        ],
+        [
+          "maintenance",
+          "repair",
+          "clean",
+          "service"
+        ],
+        [
+          "wifi",
+          "wi fi",
+          "network",
+          "internet"
+        ],
+        [
+          "schedule",
+          "timetable",
+          "calendar"
+        ],
+        [
+          "opening hours",
+          "working hours",
+          "business hours"
+        ],
+        [
+          "breaker",
+          "circuit breaker",
+          "main switch"
+        ],
+        [
+          "fridge",
+          "refrigerator",
+          "freezer"
+        ],
+        [
+          "water filter",
+          "purifier",
+          "cartridge"
+        ],
+        [
+          "light",
+          "lamp",
+          "bulb"
+        ],
+        [
+          "fan",
+          "ventilator"
+        ],
+        [
+          "door",
+          "gate"
+        ]
+      ]
     }
   },
   "weather": {

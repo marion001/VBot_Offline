@@ -844,16 +844,118 @@
   },
   "schema_version": 1,
   "values": {
-    "calendar": {"default_label": "hôm nay", "explicit_date_label": "ngày được hỏi", "spoken_date_patterns": ["\\bngay\\s+(\\d{1,2})\\s+thang\\s+(\\d{1,2})(?:\\s+nam\\s+(\\d{4}))?\\b"], "relative_days": [{"label": "hôm qua", "offset": -1, "phrases": ["ngày hôm qua", "hôm qua"]}, {"label": "hôm nay", "offset": 0, "phrases": ["ngày hôm nay", "hôm nay"]}, {"label": "ngày mai", "offset": 1, "phrases": ["ngày mai"], "standalone_phrases": ["mai"]}, {"label": "ngày kia", "offset": 2, "phrases": ["ngày kia"]}, {"label": "ngày kìa", "offset": 3, "phrases": ["ngày kìa"]}]},
-    "voice_routines": {"prefixes": ["chạy kịch bản", "kích hoạt kịch bản"], "negations": ["không", "đừng", "chớ"]},
-    "hass_clarification": {"cancel": ["hủy", "huỷ", "huy", "thôi", "thoi"], "number_prefixes": ["số", "so", "đèn số", "den so", "thiết bị", "thiet bi"]},
+    "calendar": {
+      "default_label": "hôm nay",
+      "explicit_date_label": "ngày được hỏi",
+      "spoken_date_patterns": [
+        "\\bngay\\s+(\\d{1,2})\\s+thang\\s+(\\d{1,2})(?:\\s+nam\\s+(\\d{4}))?\\b"
+      ],
+      "relative_days": [
+        {
+          "label": "hôm qua",
+          "offset": -1,
+          "phrases": [
+            "ngày hôm qua",
+            "hôm qua"
+          ]
+        },
+        {
+          "label": "hôm nay",
+          "offset": 0,
+          "phrases": [
+            "ngày hôm nay",
+            "hôm nay"
+          ]
+        },
+        {
+          "label": "ngày mai",
+          "offset": 1,
+          "phrases": [
+            "ngày mai"
+          ],
+          "standalone_phrases": [
+            "mai"
+          ]
+        },
+        {
+          "label": "ngày kia",
+          "offset": 2,
+          "phrases": [
+            "ngày kia"
+          ]
+        },
+        {
+          "label": "ngày kìa",
+          "offset": 3,
+          "phrases": [
+            "ngày kìa"
+          ]
+        }
+      ]
+    },
+    "voice_routines": {
+      "prefixes": [
+        "chạy kịch bản",
+        "kích hoạt kịch bản"
+      ],
+      "negations": [
+        "không",
+        "đừng",
+        "chớ"
+      ]
+    },
+    "hass_clarification": {
+      "cancel": [
+        "hủy",
+        "huỷ",
+        "huy",
+        "thôi",
+        "thoi"
+      ],
+      "number_prefixes": [
+        "số",
+        "so",
+        "đèn số",
+        "den so",
+        "thiết bị",
+        "thiet bi"
+      ]
+    },
     "lan_calls": {
-      "speaker_prefixes": ["loa"],
-      "call": ["gọi điện tới loa", "gọi điện đến loa", "gọi điện cho loa", "gọi tới loa", "gọi đến loa", "gọi cho loa", "gọi điện tới", "gọi điện đến", "gọi điện cho", "gọi loa", "gọi"],
-      "accept": ["nhận cuộc gọi", "trả lời cuộc gọi"],
-      "reject": ["từ chối cuộc gọi"],
-      "end": ["kết thúc cuộc gọi", "ngắt cuộc gọi", "cúp máy"],
-      "cancel": ["hủy", "huỷ", "hủy gọi", "không gọi nữa"]
+      "speaker_prefixes": [
+        "loa"
+      ],
+      "call": [
+        "gọi điện tới loa",
+        "gọi điện đến loa",
+        "gọi điện cho loa",
+        "gọi tới loa",
+        "gọi đến loa",
+        "gọi cho loa",
+        "gọi điện tới",
+        "gọi điện đến",
+        "gọi điện cho",
+        "gọi loa",
+        "gọi"
+      ],
+      "accept": [
+        "nhận cuộc gọi",
+        "trả lời cuộc gọi"
+      ],
+      "reject": [
+        "từ chối cuộc gọi"
+      ],
+      "end": [
+        "kết thúc cuộc gọi",
+        "ngắt cuộc gọi",
+        "cúp máy"
+      ],
+      "cancel": [
+        "hủy",
+        "huỷ",
+        "hủy gọi",
+        "không gọi nữa"
+      ]
     },
     "cover_position_terms": [
       "độ mở",
@@ -1181,39 +1283,179 @@
     },
     "hass_context": {
       "climate_mode_queries": {
-        "cool": ["chuyển sang chế độ làm lạnh", "chế độ làm lạnh", "bật chế độ làm lạnh"],
-        "heat": ["chuyển sang chế độ sưởi", "chế độ sưởi", "bật chế độ sưởi"],
-        "auto": ["chuyển sang chế độ tự động", "chế độ tự động", "bật chế độ tự động"],
-        "heat_cool": ["chuyển sang chế độ sưởi và làm lạnh tự động"],
-        "dry": ["chuyển sang chế độ hút ẩm", "chế độ hút ẩm", "bật chế độ hút ẩm"],
-        "fan_only": ["chuyển sang chế độ quạt", "chế độ quạt", "bật chế độ quạt"]
+        "cool": [
+          "chuyển sang chế độ làm lạnh",
+          "chế độ làm lạnh",
+          "bật chế độ làm lạnh"
+        ],
+        "heat": [
+          "chuyển sang chế độ sưởi",
+          "chế độ sưởi",
+          "bật chế độ sưởi"
+        ],
+        "auto": [
+          "chuyển sang chế độ tự động",
+          "chế độ tự động",
+          "bật chế độ tự động"
+        ],
+        "heat_cool": [
+          "chuyển sang chế độ sưởi và làm lạnh tự động"
+        ],
+        "dry": [
+          "chuyển sang chế độ hút ẩm",
+          "chế độ hút ẩm",
+          "bật chế độ hút ẩm"
+        ],
+        "fan_only": [
+          "chuyển sang chế độ quạt",
+          "chế độ quạt",
+          "bật chế độ quạt"
+        ]
       },
       "relative_queries": {
-        "temperature": {"increase": ["tăng thêm {value} độ", "tăng {value} độ", "tăng nhiệt độ thêm {value} độ"], "decrease": ["giảm {value} độ", "giảm thêm {value} độ", "giảm nhiệt độ {value} độ"]},
-        "brightness": {"increase": ["tăng độ sáng thêm {value}%", "tăng độ sáng {value}%"], "decrease": ["giảm độ sáng {value}%", "giảm độ sáng bớt {value}%"]},
-        "speed": {"increase": ["tăng tốc độ quạt {value}%", "tăng tốc độ {value}%"], "decrease": ["giảm tốc độ {value}%", "giảm tốc độ quạt {value}%"]},
-        "position": {"increase": ["mở thêm {value}%", "mở rèm thêm {value}%"], "decrease": ["đóng bớt {value}%", "đóng rèm bớt {value}%"]},
-        "percent": {"increase": ["tăng thêm {value}%", "tăng thêm {value} phần trăm"], "decrease": ["giảm {value}%", "giảm {value} phần trăm"]}
+        "temperature": {
+          "increase": [
+            "tăng thêm {value} độ",
+            "tăng {value} độ",
+            "tăng nhiệt độ thêm {value} độ"
+          ],
+          "decrease": [
+            "giảm {value} độ",
+            "giảm thêm {value} độ",
+            "giảm nhiệt độ {value} độ"
+          ]
+        },
+        "brightness": {
+          "increase": [
+            "tăng độ sáng thêm {value}%",
+            "tăng độ sáng {value}%"
+          ],
+          "decrease": [
+            "giảm độ sáng {value}%",
+            "giảm độ sáng bớt {value}%"
+          ]
+        },
+        "speed": {
+          "increase": [
+            "tăng tốc độ quạt {value}%",
+            "tăng tốc độ {value}%"
+          ],
+          "decrease": [
+            "giảm tốc độ {value}%",
+            "giảm tốc độ quạt {value}%"
+          ]
+        },
+        "position": {
+          "increase": [
+            "mở thêm {value}%",
+            "mở rèm thêm {value}%"
+          ],
+          "decrease": [
+            "đóng bớt {value}%",
+            "đóng rèm bớt {value}%"
+          ]
+        },
+        "percent": {
+          "increase": [
+            "tăng thêm {value}%",
+            "tăng thêm {value} phần trăm"
+          ],
+          "decrease": [
+            "giảm {value}%",
+            "giảm {value} phần trăm"
+          ]
+        }
       },
       "named_status_queries": {
-        "state": ["{target} đang bật hay tắt", "trạng thái của {target}", "{target} đang thế nào"],
-        "temperature": ["{target} đang đặt bao nhiêu độ", "nhiệt độ cài đặt của {target} bao nhiêu"],
-        "current_temperature": ["nhiệt độ hiện tại của {target} bao nhiêu"],
-        "brightness": ["độ sáng của {target} bao nhiêu", "{target} sáng bao nhiêu phần trăm"],
-        "speed": ["{target} đang chạy bao nhiêu phần trăm", "tốc độ của {target} bao nhiêu"],
-        "position": ["{target} mở bao nhiêu phần trăm", "{target} đang mở bao nhiêu phần trăm"]
+        "state": [
+          "{target} đang bật hay tắt",
+          "trạng thái của {target}",
+          "{target} đang thế nào"
+        ],
+        "temperature": [
+          "{target} đang đặt bao nhiêu độ",
+          "nhiệt độ cài đặt của {target} bao nhiêu"
+        ],
+        "current_temperature": [
+          "nhiệt độ hiện tại của {target} bao nhiêu"
+        ],
+        "brightness": [
+          "độ sáng của {target} bao nhiêu",
+          "{target} sáng bao nhiêu phần trăm"
+        ],
+        "speed": [
+          "{target} đang chạy bao nhiêu phần trăm",
+          "tốc độ của {target} bao nhiêu"
+        ],
+        "position": [
+          "{target} mở bao nhiêu phần trăm",
+          "{target} đang mở bao nhiêu phần trăm"
+        ]
       },
-      "status_subjects": {"light": ["đèn"], "fan": ["quạt"], "cover": ["rèm"], "climate": ["điều hòa"]},
+      "status_subjects": {
+        "light": [
+          "đèn"
+        ],
+        "fan": [
+          "quạt"
+        ],
+        "cover": [
+          "rèm"
+        ],
+        "climate": [
+          "điều hòa"
+        ]
+      },
       "temperature_unit_label": "độ",
       "status_queries": {
-        "state": ["đang bật hay tắt", "nó đang bật hay tắt", "đèn đang bật hay tắt", "trạng thái hiện tại", "thiết bị đang thế nào"],
-        "temperature": ["đang đặt bao nhiêu độ", "nó đang đặt bao nhiêu độ", "điều hòa đang đặt bao nhiêu độ", "nhiệt độ cài đặt bao nhiêu"],
-        "current_temperature": ["nhiệt độ hiện tại bao nhiêu", "nhiệt độ hiện tại là bao nhiêu"],
-        "brightness": ["độ sáng bao nhiêu", "độ sáng hiện tại bao nhiêu", "đèn sáng bao nhiêu phần trăm"],
-        "speed": ["tốc độ hiện tại bao nhiêu", "tốc độ quạt bao nhiêu", "quạt đang chạy bao nhiêu phần trăm"],
-        "position": ["đang mở bao nhiêu phần trăm", "rèm đang mở bao nhiêu phần trăm", "rèm mở bao nhiêu phần trăm"]
+        "state": [
+          "đang bật hay tắt",
+          "nó đang bật hay tắt",
+          "đèn đang bật hay tắt",
+          "trạng thái hiện tại",
+          "thiết bị đang thế nào"
+        ],
+        "temperature": [
+          "đang đặt bao nhiêu độ",
+          "nó đang đặt bao nhiêu độ",
+          "điều hòa đang đặt bao nhiêu độ",
+          "nhiệt độ cài đặt bao nhiêu"
+        ],
+        "current_temperature": [
+          "nhiệt độ hiện tại bao nhiêu",
+          "nhiệt độ hiện tại là bao nhiêu"
+        ],
+        "brightness": [
+          "độ sáng bao nhiêu",
+          "độ sáng hiện tại bao nhiêu",
+          "đèn sáng bao nhiêu phần trăm"
+        ],
+        "speed": [
+          "tốc độ hiện tại bao nhiêu",
+          "tốc độ quạt bao nhiêu",
+          "quạt đang chạy bao nhiêu phần trăm"
+        ],
+        "position": [
+          "đang mở bao nhiêu phần trăm",
+          "rèm đang mở bao nhiêu phần trăm",
+          "rèm mở bao nhiêu phần trăm"
+        ]
       },
-      "state_labels": {"on": "đang bật", "off": "đang tắt", "open": "đang mở", "closed": "đang đóng", "opening": "đang mở dần", "closing": "đang đóng dần", "cool": "ở chế độ làm lạnh", "heat": "ở chế độ sưởi", "auto": "ở chế độ tự động", "heat_cool": "ở chế độ sưởi/làm lạnh tự động", "dry": "ở chế độ hút ẩm", "fan_only": "ở chế độ quạt", "idle": "đang nghỉ"},
+      "state_labels": {
+        "on": "đang bật",
+        "off": "đang tắt",
+        "open": "đang mở",
+        "closed": "đang đóng",
+        "opening": "đang mở dần",
+        "closing": "đang đóng dần",
+        "cool": "ở chế độ làm lạnh",
+        "heat": "ở chế độ sưởi",
+        "auto": "ở chế độ tự động",
+        "heat_cool": "ở chế độ sưởi/làm lạnh tự động",
+        "dry": "ở chế độ hút ẩm",
+        "fan_only": "ở chế độ quạt",
+        "idle": "đang nghỉ"
+      },
       "fillers": [
         "nó",
         "thiết bị đó",
@@ -1227,6 +1469,517 @@
       "cancel": [
         "hủy hội thoại",
         "kết thúc hội thoại"
+      ]
+    },
+    "ai_engine": {
+      "system_prompt": "Bạn là trợ lý VBot. Trả lời tiếng Việt tự nhiên, ngắn gọn dưới 2 câu; tự hiểu lỗi chính tả STT ('tất'='tắt', 'bặt'='bật'). BẮT BUỘC gọi function khi điều khiển/kiểm tra thiết bị, chỉnh âm lượng, phát nhạc, đặt lịch, xem thời tiết, xem giờ, xem camera; KHÔNG tự bịa kết quả bằng text. Đa lệnh: nếu câu có nhiều hành động độc lập, gọi đủ các function (tối đa 6); không tách 1 cụm chủ đề có chữ 'và'. Nói tắt ('tắt đi', 'bật lại'): dùng đối tượng trong Ngữ cảnh vừa thao tác. Ưu tiên control_hass cho nhà thông minh (hỏi trạng thái dùng action='check', không dùng search_knowledge); chỉ dùng internal_ir_send cho remote IR/TV. Trả lời bằng text luôn mở đầu bằng 1 mã [emotion] trong: neutral,happy,laughing,funny,sad,angry,crying,loving,embarrassed,surprised,shocked,thinking,winking,cool,relaxed,delicious,kissy,confident,sleepy,silly,confused.",
+      "compound_skip_prefixes": [
+        "nhớ giúp",
+        "ghi nhớ",
+        "lưu nhớ",
+        "nhật ký",
+        "ghi nhật ký",
+        "viết nhật ký",
+        "thông báo",
+        "phát thông báo",
+        "loa thông báo",
+        "thêm kiến thức",
+        "lưu kiến thức",
+        "ghi kiến thức",
+        "tra cứu",
+        "tìm hiểu",
+        "giải thích",
+        "hỏi về",
+        "cho tôi biết về"
+      ],
+      "compound_separators": [
+        "xong rồi",
+        "sau đó",
+        "đồng thời",
+        "với lại",
+        "và",
+        "rồi"
+      ],
+      "compound_polite_prefixes": [
+        "hãy",
+        "vui lòng",
+        "làm ơn",
+        "giúp tôi",
+        "giúp mình",
+        "giúp anh",
+        "giúp chị",
+        "cho tôi",
+        "cho mình",
+        "em ơi",
+        "vbot ơi",
+        "vbot",
+        "ơi"
+      ],
+      "compound_action_verbs": [
+        "bật ",
+        "mở ",
+        "tắt ",
+        "đóng ",
+        "ngắt ",
+        "chỉnh ",
+        "đặt ",
+        "tăng ",
+        "giảm ",
+        "chuyển ",
+        "đổi ",
+        "khởi động ",
+        "kiểm tra ",
+        "xem ",
+        "đọc ",
+        "phát ",
+        "nghe ",
+        "tạm dừng",
+        "dừng ",
+        "tiếp tục",
+        "hẹn ",
+        "đếm ngược",
+        "nhắc ",
+        "báo thức",
+        "âm lượng",
+        "to lên",
+        "nhỏ đi",
+        "nhỏ xuống",
+        "tắt tiếng",
+        "chạy ",
+        "kích hoạt ",
+        "thời tiết",
+        "lịch ",
+        "nhìn ",
+        "chụp ",
+        "mấy giờ",
+        "hôm nay ngày",
+        "hôm nay là",
+        "chúc ngủ ngon",
+        "chào buổi sáng",
+        "tắt đèn",
+        "bật đèn",
+        "mở đèn",
+        "tắt quạt",
+        "bật quạt",
+        "tắt nhạc",
+        "mở nhạc"
+      ],
+      "compound_shared_verbs": [
+        "kiểm tra ",
+        "bật ",
+        "tắt ",
+        "mở ",
+        "đóng ",
+        "ngắt "
+      ],
+      "compound_device_nouns": [
+        "đèn",
+        "quạt",
+        "điều hòa",
+        "máy lạnh",
+        "tivi",
+        "rèm",
+        "công tắc",
+        "ổ cắm",
+        "bình nóng lạnh",
+        "máy bơm",
+        "cổng",
+        "cửa",
+        "máy lọc",
+        "camera"
+      ],
+      "non_cacheable_exact": [
+        "tắt đi",
+        "bật đi",
+        "bật lại",
+        "tắt lại",
+        "mở lại",
+        "đóng lại",
+        "tắt hết đi",
+        "bật hết đi",
+        "tăng lên",
+        "giảm xuống",
+        "to lên",
+        "nhỏ xuống",
+        "có",
+        "không",
+        "đúng rồi",
+        "ok",
+        "được",
+        "hủy",
+        "thôi",
+        "bỏ qua",
+        "nó",
+        "cái đó",
+        "cái này",
+        "thiết bị đó",
+        "cái kia"
+      ],
+      "non_cacheable_substrings": [
+        "cái đó",
+        "cái này",
+        "cái kia",
+        "thiết bị đó",
+        "nó đi",
+        "phút nữa",
+        "giây nữa",
+        "tiếng nữa",
+        "giờ nữa",
+        "lúc ",
+        "vào lúc"
+      ],
+      "cache_polite_prefixes": [
+        "vbot ơi",
+        "trợ lý ơi",
+        "hãy",
+        "làm ơn",
+        "vui lòng"
+      ],
+      "cache_polite_suffixes": [
+        "cho tôi",
+        "giúp tôi",
+        "hộ tôi",
+        "dùm tôi",
+        "cho mình",
+        "giúp mình",
+        "nhé",
+        "nha",
+        "nhỉ",
+        "nhá",
+        "với",
+        "ạ",
+        "đi"
+      ],
+      "elliptical_filler_words": [
+        "bật",
+        "tắt",
+        "mở",
+        "đóng",
+        "dừng",
+        "chỉnh",
+        "tăng",
+        "giảm",
+        "đi",
+        "lại",
+        "lên",
+        "xuống",
+        "cho",
+        "tôi",
+        "mình",
+        "anh",
+        "em",
+        "chị",
+        "bạn",
+        "giúp",
+        "hộ",
+        "nhé",
+        "nha",
+        "nhá",
+        "với",
+        "nhỉ",
+        "luôn",
+        "ngay",
+        "cái",
+        "nó",
+        "này",
+        "đó",
+        "kia",
+        "ấy",
+        "ơi",
+        "vbot",
+        "bot",
+        "làm",
+        "ơn",
+        "vui",
+        "lòng"
+      ],
+      "hass_batch_protected_terms": [
+        "router",
+        "modem",
+        "wifi",
+        "wi-fi",
+        "camera",
+        "tủ lạnh",
+        "tu lanh",
+        "fridge",
+        "server",
+        "nas",
+        "máy chủ",
+        "may chu",
+        "bể cá",
+        "be ca",
+        "gateway",
+        "hub"
+      ],
+      "hass_category_map": [
+        {
+          "keyword": "điều hòa",
+          "domain": "climate",
+          "match_terms": [
+            "điều hòa",
+            "dieu hoa",
+            "máy lạnh",
+            "may lanh",
+            "climate",
+            "ac"
+          ]
+        },
+        {
+          "keyword": "máy lạnh",
+          "domain": "climate",
+          "match_terms": [
+            "điều hòa",
+            "dieu hoa",
+            "máy lạnh",
+            "may lanh",
+            "climate",
+            "ac"
+          ]
+        },
+        {
+          "keyword": "đèn",
+          "domain": "light",
+          "match_terms": [
+            "đèn",
+            "den",
+            "bóng",
+            "bong",
+            "light",
+            "lamp"
+          ]
+        },
+        {
+          "keyword": "bóng đèn",
+          "domain": "light",
+          "match_terms": [
+            "đèn",
+            "den",
+            "bóng",
+            "bong",
+            "light",
+            "lamp"
+          ]
+        },
+        {
+          "keyword": "quạt",
+          "domain": "fan",
+          "match_terms": [
+            "quạt",
+            "quat",
+            "fan"
+          ]
+        },
+        {
+          "keyword": "rèm",
+          "domain": "cover",
+          "match_terms": [
+            "rèm",
+            "rem",
+            "cửa",
+            "cua",
+            "curtain",
+            "cover",
+            "blind"
+          ]
+        },
+        {
+          "keyword": "ổ cắm",
+          "domain": "switch",
+          "match_terms": [
+            "ổ cắm",
+            "o cam",
+            "công tắc",
+            "cong tac",
+            "switch",
+            "plug"
+          ]
+        },
+        {
+          "keyword": "công tắc",
+          "domain": "switch",
+          "match_terms": [
+            "ổ cắm",
+            "o cam",
+            "công tắc",
+            "cong tac",
+            "switch",
+            "plug"
+          ]
+        }
+      ],
+      "vision_usb_hints": [
+        "usb",
+        "webcam",
+        "truoc mat",
+        "camera loa",
+        "camera vbot",
+        "camera pi",
+        "pi camera",
+        "local",
+        "cuc bo"
+      ],
+      "kb_stopwords": [
+        "la",
+        "gi",
+        "nao",
+        "sao",
+        "the",
+        "nhu",
+        "cua",
+        "cho",
+        "toi",
+        "minh",
+        "ban",
+        "em",
+        "anh",
+        "chi",
+        "biet",
+        "hay",
+        "giup",
+        "voi",
+        "ve",
+        "nhung",
+        "cac",
+        "mot",
+        "nhieu",
+        "co",
+        "khong",
+        "duoc",
+        "thi",
+        "ma",
+        "va",
+        "hoac",
+        "trong",
+        "ngoai",
+        "tren",
+        "duoi",
+        "o",
+        "dau",
+        "khi",
+        "luc",
+        "nay",
+        "kia",
+        "do",
+        "day",
+        "roi",
+        "dang",
+        "se",
+        "da",
+        "bi",
+        "boi",
+        "tu",
+        "den",
+        "bao",
+        "may",
+        "hoi",
+        "tra",
+        "cuu",
+        "tim",
+        "kiem",
+        "thong",
+        "tin",
+        "tai",
+        "lieu",
+        "tri",
+        "thuc",
+        "noi",
+        "dung",
+        "xem",
+        "doc",
+        "ke",
+        "nhe",
+        "nha",
+        "a",
+        "ah",
+        "oi",
+        "di",
+        "vbot",
+        "bot",
+        "file",
+        "tep"
+      ],
+      "kb_local_synonym_groups": [
+        [
+          "dieu hoa",
+          "may lanh",
+          "ac"
+        ],
+        [
+          "mat khau",
+          "pass",
+          "password",
+          "ma khoa"
+        ],
+        [
+          "cai dat",
+          "cau hinh",
+          "thiet lap",
+          "setup"
+        ],
+        [
+          "huong dan",
+          "quy trinh",
+          "cach lam",
+          "cach dung",
+          "cac buoc"
+        ],
+        [
+          "gia tien",
+          "chi phi",
+          "bao nhieu tien",
+          "don gia",
+          "bang gia"
+        ],
+        [
+          "bao tri",
+          "sua chua",
+          "ve sinh",
+          "bao duong"
+        ],
+        [
+          "wifi",
+          "wi fi",
+          "mang",
+          "internet"
+        ],
+        [
+          "lich",
+          "thoi khoa bieu",
+          "gio hoc",
+          "lich hoc"
+        ],
+        [
+          "gio mo cua",
+          "gio lam viec",
+          "thoi gian mo cua"
+        ],
+        [
+          "cau dao",
+          "aptomat",
+          "cb tong",
+          "dien tong"
+        ],
+        [
+          "tu lanh",
+          "ngan mat",
+          "ngan da"
+        ],
+        [
+          "may loc nuoc",
+          "loi loc"
+        ],
+        [
+          "den",
+          "bong den"
+        ],
+        [
+          "quat",
+          "may quat"
+        ],
+        [
+          "cua",
+          "cong"
+        ]
       ]
     }
   },

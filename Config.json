@@ -9,7 +9,9 @@
         "ai_knowledge_active": true,
         "intent_cache_active": true,
         "face_display_sse_active": true,
-        "ai_knowledge_vector_active": true
+        "ai_knowledge_vector_active": true,
+        "ai_vision_active": false,
+        "ai_vision_usb_device": "/dev/video0"
     },
     "wake_on_lan": {
         "active": false
@@ -489,16 +491,26 @@
             "time_out": 25,
             "api_key": "fc3ct43cr_8888888888888888",
             "model_name": "gemini-3.5-flash-lite",
-            "api_version": "v1beta"
+            "api_version": "v1beta",
+            "vision_model_name": "gemini-3.5-flash-lite"
         },
         "groq_ai": {
             "active": false,
             "time_out": 10,
             "api_key": [
-                "gsk_rJsZcyz33333gyjg4444444"
+                "gsk_0000000000"
             ],
             "model_name": "openai/gpt-oss-20b",
-            "api_url": "https://api.groq.com/openai/v1/chat/completions"
+            "api_url": "https://api.groq.com/openai/v1/chat/completions",
+            "vision_model_name": "meta-llama/llama-4-scout-17b-16e-instruct"
+        },
+        "openai_compat": {
+            "active": false,
+            "time_out": 20,
+            "api_key": [],
+            "model_name": "qwen2.5:7b",
+            "vision_model_name": "",
+            "api_url": "http://192.168.1.10:11434/v1/chat/completions"
         },
         "chat_gpt": {
             "active": false,
@@ -506,7 +518,7 @@
             "time_out": 15,
             "model": "gpt-3.5-turbo",
             "role_system_content": "Bạn là một trợ lý thông minh",
-            "key_chat_gpt": "sk-proj-tc--gv4g-88-ChwixTZK-55-77-L89-66"
+            "key_chat_gpt": "sk-proj-00-000-000-000"
         },
         "customize_developer_assistant": {
             "active": false

@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#04060c">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>VBot Face Socket Client</title>
+  <style>
+    :root {
+      --bg: #04060c;
+      --accent: #38e8ff;
+      --accent-2: #0ea5e9;
+      --glow: rgba(56, 232, 255, 0.45);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --panel: rgba(15, 23, 42, 0.72);
+      --border: rgba(56, 232, 255, 0.25);
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 42%, rgba(14, 165, 233, 0.14), transparent 58%),
+        radial-gradient(circle at 50% 100%, rgba(56, 232, 255, 0.08), transparent 45%),
+        var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      user-select: none;
+    }
+
+    .stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: clamp(12px, 2.2vw, 24px);
+      transition: transform 1.2s ease;
+    }
+
+    /* TOP HUD */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      z-index: 20;
+    }
+
+    .clock-block {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(56, 232, 255, 0.12);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 3px 10px;
+    }
+
+    .emotion-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 999px;
+      padding: 2px 10px;
+    }
+
+    .clock-time {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      line-height: 1.08;
+      color: #f8fafc;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 22px rgba(56, 232, 255, 0.25);
+    }
+
+    .clock-date {
+      font-size: 12.5px;
+      color: var(--muted);
+    }
+
+    .hud-controls {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px;
+      transition: opacity 0.45s ease;
+    }
+    .hud-controls.dimmed { opacity: 0.18; }
+    .hud-controls:hover { opacity: 1 !important; }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      font-size: 12px;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #94a3b8;
+      box-shadow: 0 0 8px rgba(148, 163, 184, 0.6);
+    }
+    .status-dot.ok { background: #22c55e; box-shadow: 0 0 10px rgba(34, 197, 94, 0.85); }
+    .status-dot.warn { background: #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.85); }
+    .status-dot.err { background: #ef4444; box-shadow: 0 0 10px rgba(239, 68, 68, 0.85); }
+
+    .hud-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: var(--panel);
+      border: 1px solid rgba(148, 163, 184, 0.28);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      transition: background 0.2s ease, border-color 0.2s ease, transform 0.12s ease;
+    }
+    .hud-btn:hover { background: rgba(56, 232, 255, 0.16); border-color: var(--accent); }
+    .hud-btn:active { transform: scale(0.95); }
+    .hud-btn.active { background: rgba(79, 70, 229, 0.28); border-color: #818cf8; color: #c7d2fe; }
+
+    /* CENTER FACE STAGE */
+    .face-stage {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      position: relative;
+    }
+
+    .face-wrap {
+      width: min(74vw, 430px);
+      max-height: 44vh;
+      aspect-ratio: 400 / 230;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.25s ease;
+    }
+    .face-wrap:active { transform: scale(0.97); }
+    .face-wrap svg {
+      width: 100%;
+      height: 100%;
+      overflow: visible;
+      filter: drop-shadow(0 0 18px var(--glow));
+    }
+
+    .face-wrap.blinking #eyeGaze {
+      transform: scaleY(0.08);
+      transition: transform 0.08s ease;
+    }
+
+    #eyeGaze {
+      transform-origin: 200px 105px;
+      transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    .speaking-mouth-group {
+      display: none;
+      transform-origin: 200px 164px;
+    }
+    .face-wrap.is-speaking .speaking-mouth-group {
+      display: block;
+      animation: talkMouth 0.36s ease-in-out infinite;
+    }
+    .face-wrap.is-speaking .static-mouth { opacity: 0; }
+
+    @keyframes talkMouth {
+      0%, 100% { transform: scaleY(0.32) scaleX(0.92); }
+      35% { transform: scaleY(1.12) scaleX(1.05); }
+      70% { transform: scaleY(0.52) scaleX(0.96); }
+    }
+    @keyframes floatIdle {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes listenPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+    @keyframes thinkTilt {
+      0%, 100% { transform: rotate(-2deg); }
+      50% { transform: rotate(2.5deg); }
+    }
+    .anim-idle { animation: floatIdle 3.8s ease-in-out infinite; }
+    .anim-listen { animation: listenPulse 1.4s ease-in-out infinite; }
+    .anim-think { animation: thinkTilt 2.4s ease-in-out infinite; }
+
+    /* WAVEFORM */
+    .waveform {
+      margin-top: 10px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      opacity: 0;
+      transform: scaleY(0.4);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .waveform.active { opacity: 1; transform: scaleY(1); }
+    .waveform span {
+      width: 4px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--glow);
+      animation: waveBar 0.85s ease-in-out infinite;
+    }
+    .waveform span:nth-child(2) { animation-delay: 0.12s; }
+    .waveform span:nth-child(3) { animation-delay: 0.24s; }
+    .waveform span:nth-child(4) { animation-delay: 0.36s; }
+    .waveform span:nth-child(5) { animation-delay: 0.24s; }
+    .waveform span:nth-child(6) { animation-delay: 0.12s; }
+    .waveform span:nth-child(7) { animation-delay: 0.04s; }
+    @keyframes waveBar {
+      0%, 100% { height: 7px; opacity: 0.6; }
+      50% { height: 24px; opacity: 1; }
+    }
+
+    /* BOTTOM SUBTITLES + ACTION DOCK */
+    .bottom-stage {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      z-index: 20;
+    }
+
+    .subtitle-box {
+      width: min(92vw, 760px);
+      padding: 10px 18px;
+      border-radius: 16px;
+      background: rgba(15, 23, 42, 0.64);
+      border: 1px solid rgba(56, 232, 255, 0.22);
+      backdrop-filter: blur(12px);
+      text-align: center;
+      transition: opacity 0.35s ease;
+    }
+    .subtitle-box.empty { opacity: 0; pointer-events: none; }
+    .sub-human {
+      font-size: 13px;
+      color: #7dd3fc;
+      margin-bottom: 4px;
+      min-height: 16px;
+    }
+    .sub-bot {
+      font-size: clamp(14px, 2.2vw, 17px);
+      font-weight: 500;
+      color: #f8fafc;
+      line-height: 1.45;
+      max-height: 105px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .sub-bot::-webkit-scrollbar { display: none; }
+
+    .voice-dock {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .dock-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 232, 255, 0.35);
+      background: rgba(15, 23, 42, 0.78);
+      color: #e0f2fe;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      backdrop-filter: blur(12px);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35);
+      transition: all 0.2s ease;
+    }
+    .dock-btn:hover { background: rgba(56, 232, 255, 0.18); border-color: var(--accent); }
+    .dock-btn:active { transform: scale(0.95); }
+    .dock-btn:disabled { opacity: 0.42; cursor: not-allowed; }
+    .dock-btn.primary {
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.85), rgba(56, 232, 255, 0.72));
+      color: #03111d;
+      border-color: rgba(125, 211, 252, 0.85);
+      box-shadow: 0 0 22px rgba(56, 232, 255, 0.38);
+    }
+    .dock-btn.mic-on {
+      background: rgba(34, 197, 94, 0.24);
+      border-color: rgba(74, 222, 128, 0.75);
+      color: #bbf7d0;
+    }
+    .dock-btn.danger {
+      border-color: rgba(248, 113, 113, 0.45);
+      color: #fecaca;
+    }
+    .dock-btn.danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: #f87171;
+    }
+
+    /* SETTINGS DRAWER */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 6, 23, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 950;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+    .drawer-backdrop.open { opacity: 1; pointer-events: auto; }
+
+    .settings-drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: min(94vw, 420px);
+      height: 100%;
+      background: #0b1220;
+      border-left: 1px solid var(--border);
+      z-index: 960;
+      transform: translateX(102%);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+      display: flex;
+      flex-direction: column;
+      user-select: text;
+    }
+    .settings-drawer.open { transform: translateX(0); }
+
+    .drawer-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px;
+      border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+    }
+    .drawer-head h3 {
+      margin: 0;
+      font-size: 15px;
+      color: var(--accent);
+    }
+    .drawer-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      font-size: 13px;
+    }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label { color: #94a3b8; font-size: 12px; font-weight: 600; }
+    .field-input, .field-select {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(56, 232, 255, 0.3);
+      background: #060b16;
+      color: #f8fafc;
+      font-size: 13px;
+      outline: none;
+    }
+    .field-input:focus, .field-select:focus { border-color: var(--accent); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .switch-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 0;
+      color: #cbd5e1;
+    }
+    .switch-row input[type="checkbox"] {
+      width: 17px;
+      height: 17px;
+      accent-color: #38e8ff;
+      cursor: pointer;
+    }
+
+    .drawer-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .mini-btn {
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(56, 232, 255, 0.35);
+      background: rgba(14, 165, 233, 0.16);
+      color: #e0f2fe;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .mini-btn.warn { background: rgba(245, 158, 11, 0.18); border-color: rgba(245, 158, 11, 0.5); color: #fde68a; }
+    .mini-btn.danger { background: rgba(239, 68, 68, 0.18); border-color: rgba(248, 113, 113, 0.5); color: #fecaca; }
+
+    .metrics-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid rgba(148, 163, 184, 0.2);
+      border-radius: 10px;
+      padding: 8px 6px;
+    }
+    .metrics-bar small { display: block; color: #94a3b8; font-size: 11px; }
+    .metrics-bar strong { font-size: 12.5px; color: #f8fafc; }
+
+    .help-box {
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(14, 165, 233, 0.12);
+      border: 1px solid rgba(56, 232, 255, 0.25);
+      font-size: 11.5px;
+      color: #bae6fd;
+      line-height: 1.45;
+    }
+
+    .log-box {
+      background: #04070f;
+      border: 1px solid rgba(148, 163, 184, 0.22);
+      border-radius: 8px;
+      padding: 8px;
+      height: 185px;
+      overflow-y: auto;
+      font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+      font-size: 11.5px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .log-info { color: #a8ff9f; }
+    .log-ok { color: #7ee0a1; }
+    .log-warn { color: #ffd166; }
+    .log-error { color: #ff7f7f; }
+    .log-server { color: #8bd3ff; }
+
+    .night-dim-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 4, 10, 0.58);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: 900;
+    }
+    body.night-dim-active .night-dim-overlay { opacity: 1; }
+
+    @media (max-width: 640px) {
+      .dock-btn { padding: 9px 14px; font-size: 12.5px; }
+      .hud-btn span.hide-sm { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="mainStage">
+    <header class="top-bar">
+      <div class="clock-block">
+        <div class="brand-row">
+          <span class="brand-badge">VBot Socket Client</span>
+          <span class="emotion-pill" id="emotionPill">
+            <span id="emotionEmoji">😶</span>
+            <span id="emotionLabel">Chờ đánh thức</span>
+          </span>
+        </div>
+        <div class="clock-time" id="clockTime">--:--</div>
+        <div class="clock-date" id="clockDate">--</div>
+      </div>
+
+      <div class="hud-controls" id="hudControls">
+        <div class="status-pill" id="socketStatusPill" onclick="toggleSocketQuick()" title="Nhấn để Kết nối / Ngắt kết nối Socket">
+          <span class="status-dot" id="socketStatusDot"></span>
+          <span id="socketStateTop">Chưa kết nối</span>
+        </div>
+        <button type="button" class="hud-btn" id="nightModeBtn" onclick="cycleNightMode()" title="Chế độ ngủ đêm">
+          🌙 <span class="hide-sm" id="nightModeLabel">Đêm: Tự động</span>
+        </button>
+        <button type="button" class="hud-btn" onclick="toggleFullscreen()" title="Toàn màn hình">
+          ⛶ <span class="hide-sm">Toàn màn hình</span>
+        </button>
+        <button type="button" class="hud-btn" onclick="openSettingsDrawer()" title="Cấu hình kết nối Socket & Log">
+          ⚙ <span class="hide-sm">Cài đặt</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="face-stage">
+      <div class="face-wrap anim-idle" id="faceWrap" onclick="onFaceTap()" title="Nhấn vào khuôn mặt để Nói ngay (Wake UP) hoặc Dừng đọc">
+        <svg viewBox="0 0 400 230" xmlns="http://www.w3.org/2000/svg" aria-label="VBot Face">
+          <defs>
+            <linearGradient id="eyeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+              <stop offset="0%" stop-color="#7df9ff" id="gradTop"/>
+              <stop offset="100%" stop-color="#0ea5e9" id="gradBot"/>
+            </linearGradient>
+          </defs>
+          <g id="faceCanvas">
+            <g id="eyeGaze">
+              <rect id="eyeLeft" x="78" y="48" width="84" height="104" rx="40" fill="url(#eyeGrad)"/>
+              <rect id="eyeRight" x="238" y="48" width="84" height="104" rx="40" fill="url(#eyeGrad)"/>
+              <circle id="glintLeft" cx="105" cy="76" r="11" fill="#ffffff" opacity="0.72"/>
+              <circle id="glintRight" cx="265" cy="76" r="11" fill="#ffffff" opacity="0.72"/>
+            </g>
+            <path class="static-mouth" id="staticMouth" d="M 168 176 Q 200 192 232 176" stroke="url(#eyeGrad)" stroke-width="8" stroke-linecap="round" fill="none" opacity="0.75"/>
+          </g>
+          <g class="speaking-mouth-group" id="speakingMouthGroup">
+            <rect x="172" y="158" width="56" height="24" rx="12" fill="url(#eyeGrad)"/>
+            <rect x="184" y="165" width="32" height="10" rx="5" fill="#04060c" opacity="0.55"/>
+          </g>
+        </svg>
+      </div>
+
+      <div class="waveform" id="listeningWave" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </main>
+
+    <footer class="bottom-stage">
+      <div class="subtitle-box empty" id="subtitleBox">
+        <div class="sub-human" id="subHuman"></div>
+        <div class="sub-bot" id="subBot"></div>
+      </div>
+
+      <div class="voice-dock">
+        <button type="button" class="dock-btn primary" id="wakeUpBtn" onclick="startRecordingWakeUPSession()">
+          🎙 Nói ngay (Wake UP)
+        </button>
+        <button type="button" class="dock-btn" id="micToggleBtn" onclick="toggleMicQuick()">
+          🎤 <span id="micToggleText">Bật Mic</span>
+        </button>
+        <button type="button" class="dock-btn danger" id="stopAudioBtn" onclick="stopAllClientAudio()">
+          ⏹ Dừng loa
+        </button>
+        <button type="button" class="dock-btn" onclick="openSettingsDrawer()">
+          ⚙ Socket
+        </button>
+      </div>
+    </footer>
+  </div>
+
+  <div class="night-dim-overlay" aria-hidden="true"></div>
+  <div class="drawer-backdrop" id="drawerBackdrop" onclick="closeSettingsDrawer()"></div>
+
+  <aside class="settings-drawer" id="settingsDrawer" aria-label="Cấu hình Socket Client">
+    <div class="drawer-head">
+      <h3>⚙ Cấu Hình VBot Socket Client</h3>
+      <button type="button" class="hud-btn" onclick="closeSettingsDrawer()">✕</button>
+    </div>
+    <div class="drawer-body">
+      <div class="metrics-bar">
+        <div><small>Socket</small><strong id="socketState">Chưa kết nối</strong></div>
+        <div><small>Mic</small><strong id="micState">Tắt</strong></div>
+        <div><small>Frames</small><strong id="frameCount">0</strong></div>
+      </div>
+
+      <div class="field-group">
+        <label for="serverUrl">WebSocket Server URL (máy VBot trong LAN):</label>
+        <input id="serverUrl" class="field-input" placeholder="ws://192.168.1.50:5003" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="field-group">
+        <label for="sessionId">Session ID thiết bị này:</label>
+        <input id="sessionId" class="field-input" autocomplete="off" spellcheck="false">
+      </div>
+
+      <div class="field-group">
+        <label for="workingMode">Chế độ làm việc:</label>
+        <select id="workingMode" class="field-select">
+          <option value="main_processing" selected>Luồng xử lý chính VBot</option>
+          <option value="chatbot">Luồng xử lý Chatbot</option>
+          <option value="stt_to_tts">Chỉ chuyển đổi âm thanh sang văn bản</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field-group">
+          <label for="sampleRate">Sample rate</label>
+          <select id="sampleRate" class="field-select">
+            <option value="16000" selected>16000 Hz</option>
+            <option value="48000">48000 Hz</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label for="chunkSize">Frame samples</label>
+          <input id="chunkSize" class="field-input" value="512" inputmode="numeric">
+        </div>
+      </div>
+
+      <div>
+        <label class="switch-row"><span>Tự động phát Audio PCM RAW</span><input id="playPcmAudio" type="checkbox" checked></label>
+        <label class="switch-row"><span>Tự động phát TTS Audio</span><input id="playTtsAudio" type="checkbox" checked></label>
+        <label class="switch-row"><span>Tự động phát Status Audio</span><input id="playStatusAudio" type="checkbox" checked></label>
+        <label class="switch-row"><span>Chế độ hội thoại (Conversation)</span><input id="conversationMode" type="checkbox" checked></label>
+        <label class="switch-row"><span>Tự động kết nối lại khi mất mạng</span><input id="autoReconnect" type="checkbox" checked></label>
+      </div>
+
+      <div class="drawer-actions">
+        <button type="button" class="mini-btn" id="connectBtn" onclick="connectSocket()">🔗 Kết nối</button>
+        <button type="button" class="mini-btn warn" id="disconnectBtn" onclick="disconnectSocket()" disabled>🔌 Ngắt kết nối</button>
+        <button type="button" class="mini-btn" id="wakeBtn" onclick="startRecordingSession()" disabled>⏺ Gửi start_recording</button>
+        <button type="button" class="mini-btn danger" onclick="clearClientLog()">🗑 Xóa Log</button>
+      </div>
+
+      <div class="help-box">
+        <b>Hướng dẫn sử dụng nhanh (1 file độc lập):</b><br>
+        1. <b>Dùng trực tiếp trong LAN:</b> Mở <code>http://&lt;IP-VBot&gt;/VBot_Face_Client.html</code> từ điện thoại/tablet/PC.<br>
+        2. <b>Chạy độc lập trên thiết bị khác:</b> Tải hoặc sao chép riêng file <code>VBot_Face_Client.html</code> sang máy khác, mở bằng trình duyệt → nhập <code>ws://&lt;IP-VBot&gt;:5003</code> → bấm <b>Kết nối</b> (tự lưu cho lần sau).<br>
+        3. <b>Thao tác nhanh:</b> Chạm trực tiếp vào <b>khuôn mặt</b> để Nói ngay (<code>Skip_WakeUP</code>) hoặc dừng loa khi đang đọc.<br>
+        4. <b>Nếu trình duyệt chặn Micro trên HTTP LAN:</b> Mở Chrome →
+        <code>chrome://flags/#unsafely-treat-insecure-origin-as-secure</code> → Bật và thêm địa chỉ trang hiện tại rồi khởi động lại Chrome (hoặc chạy <code>python3 -m http.server 8080</code> rồi mở <code>http://localhost:8080/VBot_Face_Client.html</code>).
+        <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+          <a href="index.php" class="mini-btn" style="text-decoration:none; display:inline-block;">🏠 Về WebUI VBot</a>
+          <a href="Client_Testing.php" class="mini-btn" style="text-decoration:none; display:inline-block;">🧪 Client Testing</a>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label>Log kết nối Socket:</label>
+        <div id="log" class="log-box" aria-live="polite"></div>
+      </div>
+    </div>
+  </aside>
+
+  <script>
+    const STORAGE_KEY = "vbot_face_socket_client_cfg_v1";
+    const MAX_LOG_LINES = 600;
+
+    const els = {
+      serverUrl: document.getElementById("serverUrl"),
+      sessionId: document.getElementById("sessionId"),
+      workingMode: document.getElementById("workingMode"),
+      playPcmAudio: document.getElementById("playPcmAudio"),
+      playTtsAudio: document.getElementById("playTtsAudio"),
+      playStatusAudio: document.getElementById("playStatusAudio"),
+      conversationMode: document.getElementById("conversationMode"),
+      autoReconnect: document.getElementById("autoReconnect"),
+      sampleRate: document.getElementById("sampleRate"),
+      chunkSize: document.getElementById("chunkSize"),
+      connectBtn: document.getElementById("connectBtn"),
+      disconnectBtn: document.getElementById("disconnectBtn"),
+      wakeBtn: document.getElementById("wakeBtn"),
+      wakeUpBtn: document.getElementById("wakeUpBtn"),
+      micToggleBtn: document.getElementById("micToggleBtn"),
+      micToggleText: document.getElementById("micToggleText"),
+      socketState: document.getElementById("socketState"),
+      socketStateTop: document.getElementById("socketStateTop"),
+      socketStatusDot: document.getElementById("socketStatusDot"),
+      micState: document.getElementById("micState"),
+      frameCount: document.getElementById("frameCount"),
+      log: document.getElementById("log"),
+      faceWrap: document.getElementById("faceWrap"),
+      eyeLeft: document.getElementById("eyeLeft"),
+      eyeRight: document.getElementById("eyeRight"),
+      eyeGaze: document.getElementById("eyeGaze"),
+      staticMouth: document.getElementById("staticMouth"),
+      gradTop: document.getElementById("gradTop"),
+      gradBot: document.getElementById("gradBot"),
+      listeningWave: document.getElementById("listeningWave"),
+      emotionEmoji: document.getElementById("emotionEmoji"),
+      emotionLabel: document.getElementById("emotionLabel"),
+      subtitleBox: document.getElementById("subtitleBox"),
+      subHuman: document.getElementById("subHuman"),
+      subBot: document.getElementById("subBot"),
+      clockTime: document.getElementById("clockTime"),
+      clockDate: document.getElementById("clockDate"),
+      hudControls: document.getElementById("hudControls"),
+      drawer: document.getElementById("settingsDrawer"),
+      backdrop: document.getElementById("drawerBackdrop"),
+    };
+
+    let socket = null;
+    let manualDisconnect = false;
+    let reconnectTimer = null;
+    let audioContext = null;
+    let mediaStream = null;
+    let sourceNode = null;
+    let processorNode = null;
+    let isRecording = false;
+    let isStartingRecording = false;
+    let recordingRequestId = 0;
+    let frameCount = 0;
+    let pendingBinaryAudioMeta = null;
+    let pcmReceiving = false;
+    let pcmReceivingResetTimer = null;
+    const pcmSources = new Set();
+    let pendingContinueWakeUp = false;
+    let continueWakeUpTimer = null;
+    let playbackContext = null;
+    let nextPcmPlaybackTime = 0;
+    const urlAudioPlayers = new Set();
+    let currentMood = "neutral";
+    let subtitleHideTimer = null;
+    let hudDimTimer = null;
+    let wakeLockSentinel = null;
+
+    function makeSessionId() {
+      return "VBot_Face_Client_" + Date.now().toString(36) + "_" + Math.random().toString(36).slice(2, 7);
+    }
+
+    function defaultWsUrl() {
+      const host = (window.location && window.location.hostname && window.location.hostname !== "")
+        ? window.location.hostname
+        : "192.168.1.50";
+      const proto = (window.location && window.location.protocol === "https:") ? "wss:" : "ws:";
+      return proto + "//" + host + ":5003";
+    }
+
+    function loadSavedConfig() {
+      let saved = {};
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}") || {}; } catch (_) {}
+      els.serverUrl.value = saved.serverUrl || defaultWsUrl();
+      els.sessionId.value = saved.sessionId || makeSessionId();
+      els.workingMode.value = saved.workingMode || "main_processing";
+      els.sampleRate.value = String(saved.sampleRate || "16000");
+      els.chunkSize.value = String(saved.chunkSize || "512");
+      els.playPcmAudio.checked = saved.playPcmAudio !== undefined ? Boolean(saved.playPcmAudio) : true;
+      els.playTtsAudio.checked = saved.playTtsAudio !== undefined ? Boolean(saved.playTtsAudio) : true;
+      els.playStatusAudio.checked = saved.playStatusAudio !== undefined ? Boolean(saved.playStatusAudio) : true;
+      els.conversationMode.checked = saved.conversationMode !== undefined ? Boolean(saved.conversationMode) : true;
+      els.autoReconnect.checked = saved.autoReconnect !== undefined ? Boolean(saved.autoReconnect) : true;
+    }
+
+    function saveConfig() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          serverUrl: els.serverUrl.value.trim(),
+          sessionId: els.sessionId.value.trim(),
+          workingMode: els.workingMode.value,
+          sampleRate: els.sampleRate.value,
+          chunkSize: els.chunkSize.value,
+          playPcmAudio: els.playPcmAudio.checked,
+          playTtsAudio: els.playTtsAudio.checked,
+          playStatusAudio: els.playStatusAudio.checked,
+          conversationMode: els.conversationMode.checked,
+          autoReconnect: els.autoReconnect.checked,
+        }));
+      } catch (_) {}
+    }
+
+    function log(message, type = "info") {
+      const time = new Date().toLocaleTimeString();
+      const line = document.createElement("div");
+      line.className = "log-" + type;
+      line.textContent = `[${time}] ${message}`;
+      els.log.appendChild(line);
+      while (els.log.childElementCount > MAX_LOG_LINES) {
+        els.log.firstElementChild.remove();
+      }
+      els.log.scrollTop = els.log.scrollHeight;
+    }
+
+    function clearClientLog() {
+      els.log.textContent = "";
+      frameCount = 0;
+      els.frameCount.textContent = "0";
+    }
+
+    /* ================= FACE EXPRESSION ENGINE ================= */
+    const MOOD_PRESETS = {
+      neutral:   { emoji: "😶", label: "Chờ đánh thức", top: "#7df9ff", bot: "#0ea5e9", mouth: "M 172 178 Q 200 186 228 178", eyeH: 100, eyeY: 50, anim: "anim-idle" },
+      listening: { emoji: "👂", label: "Đang lắng nghe...", top: "#4ade80", bot: "#10b981", mouth: "M 176 178 Q 200 192 224 178", eyeH: 112, eyeY: 44, anim: "anim-listen" },
+      thinking:  { emoji: "🤔", label: "Đang suy nghĩ...", top: "#fbbf24", bot: "#f59e0b", mouth: "M 178 182 Q 200 176 222 182", eyeH: 82, eyeY: 60, anim: "anim-think" },
+      happy:     { emoji: "😊", label: "Vui vẻ", top: "#7df9ff", bot: "#22d3ee", mouth: "M 164 172 Q 200 202 236 172", eyeH: 92, eyeY: 52, anim: "anim-idle" },
+      relaxed:   { emoji: "😌", label: "Thư giãn", top: "#a5b4fc", bot: "#6366f1", mouth: "M 170 176 Q 200 194 230 176", eyeH: 72, eyeY: 66, anim: "anim-idle" },
+      confused:  { emoji: "😕", label: "Chưa rõ", top: "#fb923c", bot: "#f97316", mouth: "M 174 184 Q 200 172 226 184", eyeH: 90, eyeY: 54, anim: "anim-think" },
+      error:     { emoji: "😵", label: "Mất kết nối", top: "#f87171", bot: "#dc2626", mouth: "M 174 186 Q 200 172 226 186", eyeH: 76, eyeY: 62, anim: "anim-idle" },
+    };
+
+    function setFaceMood(mood) {
+      const m = MOOD_PRESETS[mood] ? mood : "neutral";
+      currentMood = m;
+      const p = MOOD_PRESETS[m];
+      els.emotionEmoji.textContent = p.emoji;
+      els.emotionLabel.textContent = p.label;
+      els.gradTop.setAttribute("stop-color", p.top);
+      els.gradBot.setAttribute("stop-color", p.bot);
+      els.staticMouth.setAttribute("d", p.mouth);
+      els.eyeLeft.setAttribute("height", String(p.eyeH));
+      els.eyeRight.setAttribute("height", String(p.eyeH));
+      els.eyeLeft.setAttribute("y", String(p.eyeY));
+      els.eyeRight.setAttribute("y", String(p.eyeY));
+      els.faceWrap.classList.remove("anim-idle", "anim-listen", "anim-think");
+      els.faceWrap.classList.add(p.anim);
+      els.listeningWave.classList.toggle("active", m === "listening");
+    }
+
+    function updateSpeakingVisual() {
+      const speaking = urlAudioPlayers.size > 0 || pcmSources.size > 0 || pcmReceiving;
+      els.faceWrap.classList.toggle("is-speaking", speaking);
+      if (speaking && currentMood === "thinking") {
+        setFaceMood("happy");
+      }
+    }
+
+    function showSubtitles(humanText, botText) {
+      if (humanText !== null && humanText !== undefined) {
+        els.subHuman.textContent = humanText ? ("“" + String(humanText).trim() + "”") : "";
+      }
+      if (botText !== null && botText !== undefined) {
+        els.subBot.textContent = String(botText).trim();
+        els.subBot.scrollTop = 0;
+      }
+      const hasAny = Boolean(els.subHuman.textContent || els.subBot.textContent);
+      els.subtitleBox.classList.toggle("empty", !hasAny);
+      if (subtitleHideTimer) clearTimeout(subtitleHideTimer);
+      if (hasAny) {
+        const delay = Math.max(12000, Math.min(45000, els.subBot.textContent.length * 80 + 6000));
+        subtitleHideTimer = setTimeout(() => {
+          if (currentMood !== "listening" && currentMood !== "thinking" && urlAudioPlayers.size === 0 && pcmSources.size === 0) {
+            els.subtitleBox.classList.add("empty");
+          }
+        }, delay);
+      }
+    }
+
+    /* ================= SOCKET & AUDIO PROTOCOL (100% COMPATIBLE WITH Client_Testing.php) ================= */
+    function setSocketUi(stateText, dotClass) {
+      els.socketState.textContent = stateText;
+      els.socketStateTop.textContent = stateText;
+      els.socketStatusDot.className = "status-dot " + (dotClass || "");
+    }
+
+    function setConnectedState(connected) {
+      els.connectBtn.disabled = connected;
+      els.disconnectBtn.disabled = !connected;
+      els.wakeBtn.disabled = !connected;
+      els.micToggleBtn.classList.toggle("mic-on", isRecording);
+      els.micToggleText.textContent = isRecording ? "Tắt Mic" : "Bật Mic";
+      els.micState.textContent = isRecording ? "Đang gửi" : "Tắt";
+      setSocketUi(connected ? "Đã kết nối" : "Chưa kết nối", connected ? "ok" : "err");
+      if (!connected) setFaceMood("error");
+      else if (currentMood === "error") setFaceMood("neutral");
+    }
+
+    function ensureSessionId() {
+      if (!els.sessionId.value.trim()) {
+        els.sessionId.value = makeSessionId();
+      }
+      return els.sessionId.value.trim();
+    }
+
+    function sendText(text) {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        log("Socket chưa sẵn sàng", "warn");
+        return false;
+      }
+      socket.send(text);
+      log("Client -> " + text, "info");
+      return true;
+    }
+
+    function sendClientConfig() {
+      saveConfig();
+      return sendText(JSON.stringify({
+        session_id: ensureSessionId(),
+        working_mode: els.workingMode.value
+      }));
+    }
+
+    async function playPcm16Audio(arrayBuffer, meta) {
+      const sampleRate = Number(meta.sample_rate) || 16000;
+      const channels = Number(meta.channels) || 1;
+      if (!playbackContext || playbackContext.state === "closed") {
+        playbackContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
+      }
+      if (playbackContext.state === "suspended") {
+        await playbackContext.resume();
+      }
+      const samples = new Int16Array(arrayBuffer);
+      const frames = Math.floor(samples.length / channels);
+      if (frames <= 0) return;
+      const audioBuffer = playbackContext.createBuffer(channels, frames, sampleRate);
+      for (let ch = 0; ch < channels; ch++) {
+        const output = audioBuffer.getChannelData(ch);
+        for (let i = 0; i < frames; i++) {
+          output[i] = samples[i * channels + ch] / 32768;
+        }
+      }
+      const source = playbackContext.createBufferSource();
+      source.buffer = audioBuffer;
+      source.connect(playbackContext.destination);
+      pcmSources.add(source);
+      updateSpeakingVisual();
+      source.addEventListener("ended", () => {
+        pcmSources.delete(source);
+        updateSpeakingVisual();
+      }, { once: true });
+      const startAt = Math.max(playbackContext.currentTime + 0.02, nextPcmPlaybackTime || 0);
+      source.start(startAt);
+      nextPcmPlaybackTime = startAt + audioBuffer.duration;
+    }
+
+    function scheduleSkipWakeUpIfNeeded() {
+      if (!els.conversationMode.checked) return;
+      pendingContinueWakeUp = true;
+      if (continueWakeUpTimer) return;
+      continueWakeUpTimer = setInterval(() => {
+        if (urlAudioPlayers.size === 0 && pcmSources.size === 0) {
+          if (socket && socket.readyState === WebSocket.OPEN) {
+            setFaceMood("listening");
+            sendText("Skip_WakeUP");
+          }
+          pendingContinueWakeUp = false;
+          clearInterval(continueWakeUpTimer);
+          continueWakeUpTimer = null;
+        }
+      }, 200);
+    }
+
+    function isPlayableAudioUrl(value) {
+      return typeof value === "string" && value.trim() && value !== "None" && value !== "null";
+    }
+
+    function playUrlAudio(label, url) {
+      const audio = new Audio(url);
+      urlAudioPlayers.add(audio);
+      updateSpeakingVisual();
+      const cleanup = () => {
+        urlAudioPlayers.delete(audio);
+        updateSpeakingVisual();
+      };
+      audio.addEventListener("ended", cleanup, { once: true });
+      audio.addEventListener("error", cleanup, { once: true });
+      audio.play()
+        .then(() => log(label + " play " + url, "ok"))
+        .catch(err => {
+          cleanup();
+          log("Không phát được " + label + ": " + err.message, "error");
+        });
+    }
+
+    function stopUrlAudio() {
+      for (const audio of Array.from(urlAudioPlayers)) {
+        try { audio.pause(); audio.currentTime = 0; } catch (_) {}
+        urlAudioPlayers.delete(audio);
+      }
+      updateSpeakingVisual();
+    }
+
+    function stopPcmAudio(closeContext = false) {
+      for (const source of Array.from(pcmSources)) {
+        try { source.stop(); } catch (_) {}
+        try { source.disconnect(); } catch (_) {}
+        pcmSources.delete(source);
+      }
+      nextPcmPlaybackTime = 0;
+      pendingBinaryAudioMeta = null;
+      pcmReceiving = false;
+      if (pcmReceivingResetTimer) {
+        clearTimeout(pcmReceivingResetTimer);
+        pcmReceivingResetTimer = null;
+      }
+      if (closeContext && playbackContext) {
+        const ctx = playbackContext;
+        playbackContext = null;
+        if (ctx.state !== "closed") ctx.close().catch(() => {});
+      }
+      updateSpeakingVisual();
+    }
+
+    function stopAllClientAudio() {
+      stopUrlAudio();
+      stopPcmAudio(false);
+      if (currentMood !== "error") setFaceMood("neutral");
+      log("Đã dừng phát âm thanh trên Client", "info");
+    }
+
+    function isValidWebSocketUrl(value) {
+      try {
+        const parsed = new URL(value);
+        return parsed.protocol === "ws:" || parsed.protocol === "wss:";
+      } catch (_) {
+        return false;
+      }
+    }
+
+    function handleServerJson(data) {
+      const proc = String(data.processing_process || "").toLowerCase();
+      const human = data.human_text || data.transcript_normed || data.transcript || data.stt_text || data.text_input || null;
+      const bot = data.assistant_text || data.response_text || data.bot_text || null;
+
+      if (human || bot) {
+        showSubtitles(human, bot);
+      }
+
+      if (proc === "pcm_raw_audio") {
+        pendingBinaryAudioMeta = data;
+        pcmReceiving = true;
+        updateSpeakingVisual();
+        if (pcmReceivingResetTimer) clearTimeout(pcmReceivingResetTimer);
+        pcmReceivingResetTimer = setTimeout(() => {
+          pcmReceiving = false;
+          pcmReceivingResetTimer = null;
+          updateSpeakingVisual();
+        }, 2500);
+        return;
+      }
+
+      log("Server -> " + JSON.stringify(data), "server");
+
+      if (proc.includes("wake") && proc !== "waiting_to_wake_up" && proc !== "continue_wake_up") {
+        setFaceMood("listening");
+      } else if (proc.includes("listen") || proc.includes("record")) {
+        setFaceMood("listening");
+      } else if (proc.includes("process") || proc.includes("think")) {
+        setFaceMood("thinking");
+      } else if (proc === "waiting_to_wake_up") {
+        setFaceMood("neutral");
+      } else if (bot) {
+        setFaceMood("happy");
+      }
+
+      const hasTtsAudio = isPlayableAudioUrl(data.tts_audio);
+      const hasStatusAudio = isPlayableAudioUrl(data.status_audio);
+      if (hasTtsAudio && els.playTtsAudio.checked) {
+        playUrlAudio("tts_audio", data.tts_audio);
+      } else if (hasStatusAudio && els.playStatusAudio.checked) {
+        playUrlAudio("status_audio", data.status_audio);
+      }
+
+      if (data.continue_wake_up || proc === "continue_wake_up") {
+        scheduleSkipWakeUpIfNeeded();
+      }
+    }
+
+    function connectSocket() {
+      if (socket && (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING)) return;
+      manualDisconnect = false;
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+
+      const url = els.serverUrl.value.trim();
+      if (!isValidWebSocketUrl(url)) {
+        log("WebSocket URL không hợp lệ (cần ws:// hoặc wss://)", "error");
+        setSocketUi("URL không hợp lệ", "err");
+        return;
+      }
+      saveConfig();
+      let currentSocket;
+      try {
+        currentSocket = new WebSocket(url);
+      } catch (err) {
+        log("Không thể tạo WebSocket: " + err.message, "error");
+        setConnectedState(false);
+        return;
+      }
+      socket = currentSocket;
+      currentSocket.binaryType = "arraybuffer";
+      els.connectBtn.disabled = true;
+      els.disconnectBtn.disabled = false;
+      setSocketUi("Đang kết nối...", "warn");
+
+      currentSocket.onopen = () => {
+        if (socket !== currentSocket) return;
+        setConnectedState(true);
+        log("Đã kết nối " + url, "ok");
+        sendClientConfig();
+      };
+
+      currentSocket.onmessage = (event) => {
+        if (socket !== currentSocket) return;
+        if (typeof event.data === "string") {
+          try {
+            handleServerJson(JSON.parse(event.data));
+          } catch (_) {
+            log("Server -> " + event.data, "server");
+          }
+        } else if (pendingBinaryAudioMeta) {
+          if (els.playPcmAudio.checked) {
+            playPcm16Audio(event.data, pendingBinaryAudioMeta).catch(err => {
+              log("Lỗi phát PCM: " + err.message, "error");
+            });
+          }
+          pendingBinaryAudioMeta = null;
+        }
+      };
+
+      currentSocket.onerror = () => {
+        if (socket !== currentSocket) return;
+        log("Lỗi kết nối WebSocket", "error");
+      };
+
+      currentSocket.onclose = () => {
+        if (socket !== currentSocket) return;
+        log("Socket đã đóng", "warn");
+        socket = null;
+        stopRecording(false);
+        stopUrlAudio();
+        stopPcmAudio(true);
+        if (continueWakeUpTimer) {
+          clearInterval(continueWakeUpTimer);
+          continueWakeUpTimer = null;
+          pendingContinueWakeUp = false;
+        }
+        setConnectedState(false);
+        if (!manualDisconnect && els.autoReconnect.checked) {
+          reconnectTimer = setTimeout(connectSocket, 4000);
+        }
+      };
+    }
+
+    function disconnectSocket() {
+      manualDisconnect = true;
+      if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null; }
+      stopRecording(true);
+      stopUrlAudio();
+      stopPcmAudio(true);
+      if (socket) socket.close();
+      else setConnectedState(false);
+    }
+
+    function toggleSocketQuick() {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        openSettingsDrawer();
+      } else {
+        connectSocket();
+      }
+    }
+
+    function waitForSocketOpen(timeoutMs = 5000) {
+      if (socket && socket.readyState === WebSocket.OPEN) return Promise.resolve(true);
+      return new Promise((resolve) => {
+        const started = Date.now();
+        const t = setInterval(() => {
+          if (socket && socket.readyState === WebSocket.OPEN) { clearInterval(t); resolve(true); }
+          else if (Date.now() - started >= timeoutMs) { clearInterval(t); resolve(false); }
+        }, 50);
+      });
+    }
+
+    async function ensureSocketConnected() {
+      if (!socket || socket.readyState === WebSocket.CLOSED || socket.readyState === WebSocket.CLOSING) {
+        connectSocket();
+      }
+      const ok = await waitForSocketOpen();
+      if (!ok) log("Không kết nối được tới máy chủ VBot", "error");
+      return ok;
+    }
+
+    function floatToInt16(v) {
+      const c = Math.max(-1, Math.min(1, v));
+      return c < 0 ? c * 32768 : c * 32767;
+    }
+
+    async function startRecording() {
+      if (isRecording || isStartingRecording) return;
+      isStartingRecording = true;
+      const reqId = ++recordingRequestId;
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        const ready = await ensureSocketConnected();
+        if (!ready) { isStartingRecording = false; return; }
+      }
+      const sampleRate = Number(els.sampleRate.value) || 16000;
+      const requested = Number(els.chunkSize.value) || 512;
+      const validSizes = [256, 512, 1024, 2048, 4096, 8192, 16384];
+      const chunkSize = validSizes.includes(requested) ? requested : 512;
+
+      try {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          log("Trình duyệt chặn Microphone trên HTTP local. Mở Cài đặt (⚙) xem hướng dẫn bật flag Chrome.", "error");
+          showSubtitles("", "Trình duyệt chặn Micro trên HTTP. Bấm ⚙ Cài đặt để xem hướng dẫn bật.");
+          setFaceMood("confused");
+          return;
+        }
+        const acquired = await navigator.mediaDevices.getUserMedia({
+          audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+        });
+        if (reqId !== recordingRequestId || !socket || socket.readyState !== WebSocket.OPEN) {
+          acquired.getTracks().forEach(t => t.stop());
+          return;
+        }
+        mediaStream = acquired;
+        audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate });
+        sourceNode = audioContext.createMediaStreamSource(mediaStream);
+        processorNode = audioContext.createScriptProcessor(chunkSize, 1, 1);
+        processorNode.onaudioprocess = (ev) => {
+          if (!isRecording || !socket || socket.readyState !== WebSocket.OPEN) return;
+          const input = ev.inputBuffer.getChannelData(0);
+          const pcm = new Int16Array(chunkSize);
+          for (let i = 0; i < chunkSize; i++) pcm[i] = floatToInt16(input[i] || 0);
+          socket.send(pcm.buffer);
+          frameCount += 1;
+          els.frameCount.textContent = String(frameCount);
+        };
+        sourceNode.connect(processorNode);
+        processorNode.connect(audioContext.destination);
+        isRecording = true;
+        setConnectedState(true);
+        log("Đã bật Mic (PCM Int16 " + sampleRate + "Hz, " + chunkSize + " samples)", "ok");
+      } catch (err) {
+        log("Không mở được Microphone: " + err.message, "error");
+        stopRecording(false);
+      } finally {
+        if (reqId === recordingRequestId) isStartingRecording = false;
+        setConnectedState(Boolean(socket && socket.readyState === WebSocket.OPEN));
+      }
+    }
+
+    function stopRecording(sendStopCmd = true) {
+      recordingRequestId += 1;
+      isStartingRecording = false;
+      if (!isRecording && !audioContext && !mediaStream) return;
+      isRecording = false;
+      if (processorNode) { processorNode.disconnect(); processorNode.onaudioprocess = null; processorNode = null; }
+      if (sourceNode) { sourceNode.disconnect(); sourceNode = null; }
+      if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+      if (audioContext) { audioContext.close().catch(() => {}); audioContext = null; }
+      if (sendStopCmd && socket && socket.readyState === WebSocket.OPEN) {
+        sendText("stop");
+      }
+      setConnectedState(Boolean(socket && socket.readyState === WebSocket.OPEN));
+      if (currentMood === "listening") setFaceMood("neutral");
+      log("Đã tắt Mic", "info");
+    }
+
+    async function toggleMicQuick() {
+      if (isRecording) stopRecording(true);
+      else await startRecording();
+    }
+
+    async function startRecordingSession() {
+      const ready = await ensureSocketConnected();
+      if (!ready) return;
+      if (!isRecording) await startRecording();
+      if (!isRecording) return;
+      setFaceMood("listening");
+      sendText("start_recording");
+    }
+
+    async function startRecordingWakeUPSession() {
+      els.wakeUpBtn.disabled = true;
+      try {
+        stopUrlAudio();
+        stopPcmAudio(false);
+        const ready = await ensureSocketConnected();
+        if (!ready) return;
+        if (!isRecording) await startRecording();
+        if (!isRecording) return;
+        setFaceMood("listening");
+        sendText("Skip_WakeUP");
+      } finally {
+        els.wakeUpBtn.disabled = false;
+      }
+    }
+
+    function onFaceTap() {
+      if (urlAudioPlayers.size > 0 || pcmSources.size > 0) {
+        stopAllClientAudio();
+        return;
+      }
+      startRecordingWakeUPSession();
+    }
+
+    /* ================= CLOCK, DRAWER, NIGHT MODE, WAKE LOCK, BLINK ================= */
+    function updateClock() {
+      const now = new Date();
+      const pad = n => n < 10 ? "0" + n : String(n);
+      els.clockTime.textContent = pad(now.getHours()) + ":" + pad(now.getMinutes());
+      const days = ["Chủ Nhật", "Thứ Hai", "Thứ Ba", "Thứ Tư", "Thứ Năm", "Thứ Sáu", "Thứ Bảy"];
+      els.clockDate.textContent = `${days[now.getDay()]}, ${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()}`;
+    }
+
+    function openSettingsDrawer() {
+      els.drawer.classList.add("open");
+      els.backdrop.classList.add("open");
+    }
+    function closeSettingsDrawer() {
+      saveConfig();
+      els.drawer.classList.remove("open");
+      els.backdrop.classList.remove("open");
+    }
+
+    function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+      } else {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    const NIGHT_MODES = ["auto", "on", "off"];
+    function getNightMode() {
+      try {
+        const v = localStorage.getItem("vbot_face_client_night");
+        if (NIGHT_MODES.includes(v)) return v;
+      } catch (_) {}
+      return "auto";
+    }
+    function applyNightMode() {
+      const m = getNightMode();
+      const now = new Date();
+      const mins = now.getHours() * 60 + now.getMinutes();
+      const isNight = mins >= 22 * 60 + 30 || mins < 6 * 60;
+      const dim = (m === "on") || (m === "auto" && isNight);
+      document.body.classList.toggle("night-dim-active", dim);
+      document.getElementById("nightModeBtn").classList.toggle("active", dim);
+      document.getElementById("nightModeLabel").textContent = m === "on" ? "Đêm: Bật" : (m === "off" ? "Đêm: Tắt" : "Đêm: Tự động");
+    }
+    function cycleNightMode() {
+      const cur = getNightMode();
+      const next = NIGHT_MODES[(NIGHT_MODES.indexOf(cur) + 1) % NIGHT_MODES.length];
+      try { localStorage.setItem("vbot_face_client_night", next); } catch (_) {}
+      applyNightMode();
+    }
+
+    async function requestWakeLock() {
+      try {
+        if ("wakeLock" in navigator && document.visibilityState === "visible") {
+          wakeLockSentinel = await navigator.wakeLock.request("screen");
+        }
+      } catch (_) {}
+    }
+
+    function resetHudDim() {
+      els.hudControls.classList.remove("dimmed");
+      if (hudDimTimer) clearTimeout(hudDimTimer);
+      hudDimTimer = setTimeout(() => {
+        if (!els.drawer.classList.contains("open")) {
+          els.hudControls.classList.add("dimmed");
+        }
+      }, 6000);
+    }
+
+    function scheduleBlink() {
+      setTimeout(() => {
+        if (currentMood === "neutral" || currentMood === "listening" || currentMood === "happy") {
+          els.faceWrap.classList.add("blinking");
+          setTimeout(() => els.faceWrap.classList.remove("blinking"), 130);
+        }
+        scheduleBlink();
+      }, 2800 + Math.random() * 3200);
+    }
+
+    let oledShiftIdx = 0;
+    function runOledShift() {
+      const pts = [[0,0],[3,2],[-3,2],[-2,-3],[3,-2]];
+      oledShiftIdx = (oledShiftIdx + 1) % pts.length;
+      document.getElementById("mainStage").style.transform = `translate(${pts[oledShiftIdx][0]}px, ${pts[oledShiftIdx][1]}px)`;
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadSavedConfig();
+      updateClock();
+      setInterval(updateClock, 1000);
+      applyNightMode();
+      setInterval(applyNightMode, 60000);
+      setInterval(runOledShift, 180000);
+      setFaceMood("neutral");
+      scheduleBlink();
+      requestWakeLock();
+      resetHudDim();
+
+      ["mousemove", "touchstart", "click"].forEach(evt => {
+        document.addEventListener(evt, resetHudDim, { passive: true });
+      });
+      document.addEventListener("mousemove", (e) => {
+        const dx = ((e.clientX / window.innerWidth) - 0.5) * 14;
+        const dy = ((e.clientY / window.innerHeight) - 0.5) * 10;
+        els.eyeGaze.style.transform = `translate(${dx.toFixed(1)}px, ${dy.toFixed(1)}px)`;
+      }, { passive: true });
+      document.addEventListener("visibilitychange", () => {
+        if (document.visibilityState === "visible") requestWakeLock();
+      });
+
+      // Tự động kết nối Socket ngay khi mở trang
+      connectSocket();
+    });
+
+    window.addEventListener("pagehide", () => {
+      manualDisconnect = true;
+      stopRecording(false);
+      stopUrlAudio();
+      stopPcmAudio(true);
+      if (socket) {
+        try { socket.close(1000, "Page closed"); } catch (_) {}
+        socket = null;
+      }
+    });
+  </script>
+</body>
+</html>

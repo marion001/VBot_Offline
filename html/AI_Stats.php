@@ -292,6 +292,7 @@ $statsPayloadJson = json_encode([
     var VBOT_PROVIDER_LABELS = {
       groq_ai: 'Groq AI',
       gemini_ai: 'Google Gemini AI',
+      openai_compat: 'OpenAI-Compatible (Ollama / OpenRouter)',
       dev_ai_engine: 'Dev Custom AI',
       intent_cache: 'Local Intent Cache (0 token)'
     };

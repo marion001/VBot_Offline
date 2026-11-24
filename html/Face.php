@@ -46,6 +46,8 @@ $apiKeyParam = ($apiAuthActive && !empty($Config['api']['auth']['api_key'])) ? (
 $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config['speaker_location']['room']))
   ? trim((string)$Config['speaker_location']['room'])
   : '';
+$weatherLat = trim((string)($Config['contact_info']['location']['latitude'] ?? ''));
+$weatherLon = trim((string)($Config['contact_info']['location']['longitude'] ?? ''));
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -403,22 +405,22 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
       font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     }
 
-    /* NOW PLAYING PILL + MUSIC EQUALIZER */
+    /* NOW PLAYING PILL + ALBUM COVER + MUSIC EQUALIZER */
     .media-pill {
       margin-top: 14px;
       display: inline-flex;
       align-items: center;
       gap: 12px;
-      padding: 8px 18px;
+      padding: 8px 18px 8px 10px;
       border-radius: 999px;
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.16), rgba(56, 232, 255, 0.08));
-      border: 1px solid rgba(56, 232, 255, 0.32);
-      box-shadow: 0 0 22px rgba(56, 232, 255, 0.16);
+      background: linear-gradient(135deg, rgba(14, 165, 233, 0.18), rgba(56, 232, 255, 0.08));
+      border: 1px solid rgba(56, 232, 255, 0.34);
+      box-shadow: 0 0 24px rgba(56, 232, 255, 0.18);
       backdrop-filter: blur(12px);
       font-size: 13px;
       font-weight: 500;
       color: #e0f2fe;
-      max-width: min(88vw, 560px);
+      max-width: min(90vw, 560px);
       opacity: 0;
       transform: translateY(10px) scale(0.95);
       pointer-events: none;
@@ -429,10 +431,211 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
       transform: translateY(0) scale(1);
       pointer-events: auto;
     }
+    .media-pill.no-cover {
+      padding-left: 16px;
+    }
+    .media-cover-wrap {
+      position: relative;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      padding: 2px;
+      background: linear-gradient(135deg, rgba(56, 232, 255, 0.75), rgba(14, 165, 233, 0.25));
+      box-shadow: 0 0 14px rgba(56, 232, 255, 0.35);
+      display: none;
+    }
+    .media-cover-wrap.has-cover {
+      display: block;
+    }
+    .media-cover {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      animation: mediaVinylSpin 14s linear infinite;
+    }
+    .media-cover-wrap::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #060a14;
+      border: 1.5px solid rgba(56, 232, 255, 0.7);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+    }
+    @keyframes mediaVinylSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .media-pill-info {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      gap: 2px;
+      text-align: left;
+    }
+    .media-pill-meta {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #7dd3fc;
+      font-weight: 700;
+    }
     .media-pill-title {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #f0f9ff;
+    }
+    @media (max-width: 600px) {
+      .media-cover-wrap { width: 38px; height: 38px; }
+      .media-pill-title { font-size: 12.5px; }
+    }
+    .media-pill.is-paused .media-cover,
+    .media-pill.is-paused .music-eq span {
+      animation-play-state: paused !important;
+    }
+    .media-controls {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      margin-left: 6px;
+      flex-shrink: 0;
+    }
+    .media-ctrl-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      border: 1px solid rgba(56, 232, 255, 0.28);
+      background: rgba(15, 23, 42, 0.55);
+      color: #e0f2fe;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      padding: 0;
+      transition: background 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+    }
+    .media-ctrl-btn:hover {
+      background: rgba(56, 232, 255, 0.22);
+      border-color: rgba(56, 232, 255, 0.65);
+    }
+    .media-ctrl-btn:active {
+      transform: scale(0.9);
+    }
+    .media-ctrl-btn.primary-ctrl {
+      width: 34px;
+      height: 34px;
+      background: rgba(56, 232, 255, 0.22);
+      border-color: rgba(56, 232, 255, 0.55);
+      font-size: 15px;
+    }
+    .media-ctrl-btn.stop-ctrl {
+      border-color: rgba(248, 113, 113, 0.38);
+      color: #fca5a5;
+    }
+    .media-ctrl-btn.stop-ctrl:hover {
+      background: rgba(239, 68, 68, 0.26);
+      border-color: rgba(248, 113, 113, 0.75);
+      color: #fee2e2;
+    }
+
+    /* WEATHER & ACTIVE TIMER BADGES UNDER CLOCK */
+    .clock-extras {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .weather-pill {
+      display: none;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 10px 3px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.55);
+      border: 1px solid rgba(56, 232, 255, 0.22);
+      backdrop-filter: blur(8px);
+      font-size: 12px;
+      color: #cbd5e1;
+      line-height: 1.2;
+    }
+    .weather-pill.visible {
+      display: inline-flex;
+    }
+    .weather-pill img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      margin: -3px 0;
+    }
+    .weather-temp {
+      font-weight: 700;
+      color: #f8fafc;
+    }
+    .weather-desc {
+      color: #94a3b8;
+      text-transform: capitalize;
+    }
+    .timer-badges {
+      display: inline-flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .timer-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(251, 191, 36, 0.42);
+      color: #fde68a;
+      font-size: 12px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      backdrop-filter: blur(8px);
+    }
+    .timer-badge.sleep-timer {
+      background: rgba(99, 102, 241, 0.18);
+      border-color: rgba(129, 140, 248, 0.45);
+      color: #c7d2fe;
+    }
+
+    /* NIGHT DIM OVERLAY + OLED PIXEL SHIFT */
+    .night-dim-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(2, 4, 10, 0.58);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      z-index: 9000;
+    }
+    body.night-dim-active .night-dim-overlay {
+      opacity: 1;
+    }
+    .hud-btn.night-active {
+      border-color: rgba(129, 140, 248, 0.65);
+      color: #c7d2fe;
+      background: rgba(79, 70, 229, 0.22);
+    }
+    .face-stage {
+      transition: transform 1.2s ease;
     }
     .music-eq {
       display: inline-flex;
@@ -878,12 +1081,21 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
         </div>
         <div class="clock-time" id="clockTime">--:--</div>
         <div class="clock-date" id="clockDate"><?php echo $speakerRoom ? htmlspecialchars($speakerRoom) . ' • ' : ''; ?><span id="clockDateText"></span></div>
+        <div class="clock-extras">
+          <div class="weather-pill" id="weatherPill" title="Thời tiết hiện tại (nhấn để làm mới)" onclick="loadFaceWeather()" style="cursor:pointer;">
+            <img id="faceWeatherIcon" src="" alt="" />
+            <span class="weather-temp" id="faceWeatherTemp">--°C</span>
+            <span class="weather-desc" id="faceWeatherDesc"></span>
+          </div>
+          <div class="timer-badges" id="timerBadges"></div>
+        </div>
       </div>
       <div class="hud-controls" id="hudControls">
         <div class="status-pill" id="sseStatusPill">
           <span class="status-dot <?php echo $faceSseActive ? 'warn' : 'off'; ?>" id="sseStatusDot"></span>
           <span id="sseStatusText"><?php echo $faceSseActive ? 'Đang kết nối SSE...' : 'SSE đang tắt'; ?></span>
         </div>
+        <button type="button" class="hud-btn" id="nightModeBtn" onclick="cycleNightMode()" title="Chế độ ngủ đêm giảm độ sáng (Tự động 22:30–06:00 / Bật / Tắt)"><i class="bi bi-moon-stars"></i> <span id="nightModeLabel">Đêm: Tự động</span></button>
         <button type="button" class="hud-btn" onclick="toggleDemoDrawer()"><i class="bi bi-emoji-smile"></i> 21 Biểu Cảm</button>
         <button type="button" class="hud-btn" onclick="toggleFullscreen()"><i class="bi bi-arrows-fullscreen"></i> Toàn Màn Hình</button>
         <a href="index.php" class="hud-btn"><i class="bi bi-house-door"></i> WebUI</a>
@@ -949,13 +1161,30 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
         <span></span><span></span><span></span><span></span><span></span><span></span><span></span>
       </div>
 
-      <div class="media-pill" id="mediaPill">
-        <div class="music-eq" aria-hidden="true">
-          <span></span><span></span><span></span><span></span><span></span>
+      <div class="media-pill no-cover" id="mediaPill">
+        <div class="media-cover-wrap" id="mediaCoverWrap" <?php if ($isLoggedIn): ?>onclick="faceTogglePlayPause()" style="cursor:pointer;" title="Nhấn để Tạm dừng / Tiếp tục"<?php endif; ?>>
+          <img class="media-cover" id="mediaCover" src="" alt="" referrerpolicy="no-referrer" />
         </div>
-        <span class="media-pill-title" id="mediaTitle"></span>
+        <div class="media-pill-info">
+          <div class="media-pill-meta">
+            <div class="music-eq" aria-hidden="true">
+              <span></span><span></span><span></span><span></span><span></span>
+            </div>
+            <span id="mediaStatusLabel">Đang phát</span>
+          </div>
+          <span class="media-pill-title" id="mediaTitle"></span>
+        </div>
+        <?php if ($isLoggedIn): ?>
+        <div class="media-controls" onclick="event.stopPropagation()">
+          <button type="button" class="media-ctrl-btn" onclick="faceControlMedia('previous')" title="Bài trước"><i class="bi bi-skip-start-fill"></i></button>
+          <button type="button" class="media-ctrl-btn primary-ctrl" id="mediaPlayPauseBtn" onclick="faceTogglePlayPause()" title="Tạm dừng / Phát tiếp"><i class="bi bi-pause-fill" id="mediaPlayPauseIcon"></i></button>
+          <button type="button" class="media-ctrl-btn" onclick="faceControlMedia('next')" title="Bài tiếp theo"><i class="bi bi-skip-end-fill"></i></button>
+          <button type="button" class="media-ctrl-btn stop-ctrl" onclick="faceControlMedia('stop')" title="Dừng phát nhạc"><i class="bi bi-stop-fill"></i></button>
+        </div>
+        <?php endif; ?>
       </div>
     </main>
+    <div class="night-dim-overlay" id="nightDimOverlay" aria-hidden="true"></div>
 
     <footer class="bottom-stage">
       <?php if (!$faceSseActive): ?>
@@ -982,7 +1211,7 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
 
   <div class="demo-drawer" id="demoDrawer">
     <div class="demo-header">
-      <span>Xem thử 21 mã cảm xúc XiaoZhi + trạng thái hệ thống</span>
+      <span>Xem thử 21 mã cảm xúc trạng thái hệ thống</span>
       <div style="display:flex;gap:6px;flex-wrap:wrap;">
         <button type="button" class="hud-btn" id="btnDemoSpeak" onclick="toggleDemoSpeaking()"><i class="bi bi-volume-up"></i> Thử Nói</button>
         <button type="button" class="hud-btn" id="btnDemoDisconnect" onclick="toggleDemoDisconnect()"><i class="bi bi-wifi-off"></i> Thử Mất Kết Nối</button>
@@ -1363,11 +1592,47 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
 
       var mediaPill = document.getElementById('mediaPill');
       var mediaTitle = document.getElementById('mediaTitle');
+      var mediaCoverWrap = document.getElementById('mediaCoverWrap');
+      var mediaCover = document.getElementById('mediaCover');
       if (data.media_playing && data.media_title) {
         mediaTitle.textContent = String(data.media_title);
+        var rawCover = String(data.media_cover || '').trim();
+        var isSafeCover = rawCover && (/^https?:\/\//i.test(rawCover) || rawCover.charAt(0) === '/');
+        if (isSafeCover && mediaCover && mediaCoverWrap) {
+          if (mediaCover.getAttribute('data-cover-src') !== rawCover) {
+            mediaCover.setAttribute('data-cover-src', rawCover);
+            mediaCover.onerror = function () {
+              mediaCoverWrap.classList.remove('has-cover');
+              mediaPill.classList.add('no-cover');
+            };
+            mediaCover.onload = function () {
+              mediaCoverWrap.classList.add('has-cover');
+              mediaPill.classList.remove('no-cover');
+            };
+            mediaCover.src = rawCover;
+          } else if (mediaCover.complete && mediaCover.naturalWidth > 0) {
+            mediaCoverWrap.classList.add('has-cover');
+            mediaPill.classList.remove('no-cover');
+          }
+        } else if (mediaCoverWrap) {
+          mediaCoverWrap.classList.remove('has-cover');
+          mediaPill.classList.add('no-cover');
+        }
         mediaPill.classList.add('visible');
+        faceMediaPaused = Boolean(data.media_paused);
+        mediaPill.classList.toggle('is-paused', faceMediaPaused);
+        var mStatusLbl = document.getElementById('mediaStatusLabel');
+        if (mStatusLbl) mStatusLbl.textContent = faceMediaPaused ? 'Tạm dừng' : 'Đang phát';
+        var mIcon = document.getElementById('mediaPlayPauseIcon');
+        if (mIcon) mIcon.className = faceMediaPaused ? 'bi bi-play-fill' : 'bi bi-pause-fill';
       } else {
+        faceMediaPaused = false;
         mediaPill.classList.remove('visible');
+        mediaPill.classList.remove('is-paused');
+      }
+
+      if (Array.isArray(data.timers)) {
+        syncFaceTimers(data.timers);
       }
     }
 
@@ -1644,9 +1909,172 @@ $speakerRoom = (!empty($Config['speaker_location']['active']) && !empty($Config[
       }, 5000);
     }
 
+    var faceMediaPaused = false;
+    var faceActiveTimers = [];
+    var FACE_WEATHER_LAT = <?php echo json_encode($weatherLat, JSON_UNESCAPED_UNICODE); ?>;
+    var FACE_WEATHER_LON = <?php echo json_encode($weatherLon, JSON_UNESCAPED_UNICODE); ?>;
+    var FACE_API_URL = <?php echo json_encode((string)($URL_API_VBOT ?? ''), JSON_UNESCAPED_UNICODE); ?>;
+    var FACE_API_KEY = <?php echo json_encode($apiKeyParam, JSON_UNESCAPED_UNICODE); ?>;
+
+    // 1. Thời tiết gọn bên dưới đồng hồ (dùng đúng cơ chế OpenWeatherMap giống index.php)
+    async function loadFaceWeather() {
+      if (!FACE_WEATHER_LAT || !FACE_WEATHER_LON) return;
+      try {
+        var weatherUrl = 'https://api.openweathermap.org/data/2.5/weather?lat=' + encodeURIComponent(FACE_WEATHER_LAT)
+          + '&lon=' + encodeURIComponent(FACE_WEATHER_LON)
+          + '&appid=8473858601dabd3d2cbb24fb50840686&units=metric&lang=vi';
+        var ctrl = new AbortController();
+        var tId = setTimeout(function () { ctrl.abort(); }, 15000);
+        var res = await fetch(weatherUrl, { signal: ctrl.signal });
+        clearTimeout(tId);
+        if (!res.ok) return;
+        var w = await res.json();
+        var pill = document.getElementById('weatherPill');
+        var elTemp = document.getElementById('faceWeatherTemp');
+        var elDesc = document.getElementById('faceWeatherDesc');
+        var elIcon = document.getElementById('faceWeatherIcon');
+        if (w && w.main && elTemp && pill) {
+          elTemp.textContent = Math.round(Number(w.main.temp)) + '°C';
+          if (elDesc && w.weather && w.weather[0]) {
+            elDesc.textContent = String(w.weather[0].description || '');
+          }
+          if (elIcon && w.weather && w.weather[0] && w.weather[0].icon) {
+            elIcon.src = 'https://openweathermap.org/img/w/' + encodeURIComponent(w.weather[0].icon) + '.png';
+          }
+          pill.classList.add('visible');
+        }
+      } catch (_) {}
+    }
+
+    // 2. Hiển thị bộ đếm ngược & hẹn giờ tắt nhạc trực tiếp
+    function syncFaceTimers(rawTimers) {
+      var nowMs = Date.now();
+      faceActiveTimers = (Array.isArray(rawTimers) ? rawTimers : [])
+        .filter(function (t) { return t && Number(t.remaining_sec) > 0; })
+        .map(function (t) {
+          return {
+            kind: String(t.kind || 'countdown'),
+            label: String(t.label || 'Hẹn giờ'),
+            endAtMs: nowMs + Number(t.remaining_sec) * 1000
+          };
+        });
+      renderFaceTimers();
+    }
+
+    function formatTimerDuration(totalSec) {
+      var s = Math.max(0, Math.floor(totalSec));
+      var h = Math.floor(s / 3600);
+      var m = Math.floor((s % 3600) / 60);
+      var sec = s % 60;
+      var pad = function (n) { return n < 10 ? '0' + n : String(n); };
+      return h > 0 ? (pad(h) + ':' + pad(m) + ':' + pad(sec)) : (pad(m) + ':' + pad(sec));
+    }
+
+    function renderFaceTimers() {
+      var box = document.getElementById('timerBadges');
+      if (!box) return;
+      var nowMs = Date.now();
+      faceActiveTimers = faceActiveTimers.filter(function (t) { return t.endAtMs > nowMs; });
+      if (!faceActiveTimers.length) {
+        if (box.childNodes.length) box.replaceChildren();
+        return;
+      }
+      box.replaceChildren();
+      faceActiveTimers.slice(0, 3).forEach(function (t) {
+        var span = document.createElement('span');
+        span.className = 'timer-badge' + (t.kind === 'sleep' ? ' sleep-timer' : '');
+        var icon = document.createElement('i');
+        icon.className = t.kind === 'sleep' ? 'bi bi-moon-fill' : 'bi bi-stopwatch';
+        var rem = Math.ceil((t.endAtMs - nowMs) / 1000);
+        span.appendChild(icon);
+        span.appendChild(document.createTextNode(' ' + t.label + ' ' + formatTimerDuration(rem)));
+        box.appendChild(span);
+      });
+    }
+
+    // 3. Điều khiển nhạc chạm nhanh trên .media-pill (tự thích ứng LAN IP, mDNS .local và Reverse Proxy)
+    function resolveFaceApiUrl() {
+      if (FACE_API_URL && FACE_API_URL.charAt(0) === '/') return FACE_API_URL;
+      var proto = (window.location.protocol === 'https:') ? 'https:' : 'http:';
+      return proto + '//' + window.location.hostname + ':' + VBOT_API_PORT + '/';
+    }
+
+    function faceControlMedia(action) {
+      var targetUrl = resolveFaceApiUrl();
+      if (!targetUrl) return;
+      var headers = { 'Content-Type': 'application/json' };
+      if (FACE_API_KEY) headers['VBot-API-Key'] = FACE_API_KEY;
+      fetch(targetUrl, {
+        method: 'POST',
+        headers: headers,
+        credentials: 'same-origin',
+        body: JSON.stringify({ type: 1, data: 'media_control', action: action })
+      }).catch(function () {});
+    }
+
+    function faceTogglePlayPause() {
+      var nextAction = faceMediaPaused ? 'resume' : 'pause';
+      faceMediaPaused = !faceMediaPaused;
+      var mediaPill = document.getElementById('mediaPill');
+      if (mediaPill) mediaPill.classList.toggle('is-paused', faceMediaPaused);
+      var mIcon = document.getElementById('mediaPlayPauseIcon');
+      if (mIcon) mIcon.className = faceMediaPaused ? 'bi bi-play-fill' : 'bi bi-pause-fill';
+      var mStatusLbl = document.getElementById('mediaStatusLabel');
+      if (mStatusLbl) mStatusLbl.textContent = faceMediaPaused ? 'Tạm dừng' : 'Đang phát';
+      faceControlMedia(nextAction);
+    }
+
+    // 4. Chế độ Ngủ Đêm (Tự động 22:30–06:00 / Bật / Tắt) + OLED Pixel Shift
+    var NIGHT_MODES = ['auto', 'on', 'off'];
+    function getSavedNightMode() {
+      try {
+        var m = localStorage.getItem('vbot_face_night_mode');
+        if (NIGHT_MODES.indexOf(m) !== -1) return m;
+      } catch (_) {}
+      return 'auto';
+    }
+
+    function applyNightModeState() {
+      var mode = getSavedNightMode();
+      var now = new Date();
+      var mins = now.getHours() * 60 + now.getMinutes();
+      var isNightHour = (mins >= 22 * 60 + 30) || (mins < 6 * 60);
+      var shouldDim = (mode === 'on') || (mode === 'auto' && isNightHour);
+      document.body.classList.toggle('night-dim-active', shouldDim);
+      var btn = document.getElementById('nightModeBtn');
+      var lbl = document.getElementById('nightModeLabel');
+      if (btn) btn.classList.toggle('night-active', shouldDim);
+      if (lbl) {
+        lbl.textContent = mode === 'on' ? 'Đêm: Bật' : (mode === 'off' ? 'Đêm: Tắt' : 'Đêm: Tự động');
+      }
+    }
+
+    function cycleNightMode() {
+      var cur = getSavedNightMode();
+      var next = NIGHT_MODES[(NIGHT_MODES.indexOf(cur) + 1) % NIGHT_MODES.length];
+      try { localStorage.setItem('vbot_face_night_mode', next); } catch (_) {}
+      applyNightModeState();
+    }
+
+    var oledShiftStep = 0;
+    function runOledPixelShift() {
+      var offsets = [[0, 0], [3, 2], [-3, 2], [-2, -3], [3, -2]];
+      oledShiftStep = (oledShiftStep + 1) % offsets.length;
+      var stage = document.querySelector('.face-stage');
+      if (stage) {
+        stage.style.transform = 'translate(' + offsets[oledShiftStep][0] + 'px, ' + offsets[oledShiftStep][1] + 'px)';
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       updateClock();
       setInterval(updateClock, 1000);
+      setInterval(renderFaceTimers, 1000);
+      loadFaceWeather();
+      setInterval(loadFaceWeather, 15 * 60 * 1000);
+      applyNightModeState();
+      setInterval(applyNightModeState, 60 * 1000);
+      setInterval(runOledPixelShift, 180 * 1000);
       initDemoDrawer();
       applyEmotion('neutral');
       scheduleBlink();

@@ -1625,7 +1625,7 @@ function update_webui_link(path_web_ui_html) {
 }
 
 //Hiển thị dữ liệu BackList.json
-function getBacklistData(dataPath, textareaId) {
+function getBacklistData(dataPath, textareaId, silent) {
     var url = "includes/php_ajax/Show_file_path.php?data_backlist";
     var xhr = vbotCreateXhr();
     xhr.addEventListener("readystatechange", function () {
@@ -1639,31 +1639,56 @@ function getBacklistData(dataPath, textareaId) {
                         var currentData = data;
                         for (var i = 0; i < pathParts.length; i++) {
                             var part = pathParts[i].trim();
-                            currentData = currentData[part];
+                            if (currentData && typeof currentData === 'object' && part in currentData) {
+                                currentData = currentData[part];
+                            } else {
+                                currentData = { backlist_limit: [] };
+                                break;
+                            }
                         }
                         var textarea = document.getElementById(textareaId);
                         if (textarea) {
-                            textarea.value = JSON.stringify(currentData, null, 4);
-                        } else {
+                            textarea.value = JSON.stringify(currentData !== undefined ? currentData : { backlist_limit: [] }, null, 4);
+                        } else if (!silent) {
                             show_message("Không tìm thấy thẻ textarea với ID: " + textareaId);
                         }
-                        showMessagePHP("Dữ liệu đã được tải thành công.", 3);
-                    } else {
+                        if (!silent) {
+                            showMessagePHP("Dữ liệu đã được tải thành công.", 3);
+                        }
+                    } else if (!silent) {
                         show_message("Có lỗi xảy ra: " + response.message);
                     }
                 } catch (e) {
-                    show_message("Có lỗi xảy ra khi xử lý phản hồi từ máy chủ: " + e);
+                    if (!silent) {
+                        show_message("Có lỗi xảy ra khi xử lý phản hồi từ máy chủ: " + e);
+                    }
                 }
-            } else {
+            } else if (!silent) {
                 show_message("Có lỗi xảy ra khi gửi yêu cầu. Mã lỗi: " + this.status);
             }
         }
     });
     xhr.onerror = function () {
-        show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
+        if (!silent) {
+            show_message("Lỗi mạng hoặc không thể kết nối với máy chủ.");
+        }
     };
     xhr.open("GET", url, true);
     xhr.send();
+}
+
+function _autoLoadAiBacklists() {
+    if (document.getElementById('groq_ai_backlist_content')) {
+        getBacklistData('backlist->groq', 'groq_ai_backlist_content', true);
+    }
+    if (document.getElementById('gemini_backlist_content')) {
+        getBacklistData('backlist->gemini', 'gemini_backlist_content', true);
+    }
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', _autoLoadAiBacklists);
+} else {
+    _autoLoadAiBacklists();
 }
 
 //Thay đổi giá trị value của BackList.json theo đường dẫn chỉ định 
@@ -1679,9 +1704,13 @@ function changeBacklistValue(path_json, value_type) {
                     if (response.success) {
                         showMessagePHP(response.message, 3);
                         if (path_json === "backlist->tts_zalo->backlist_limit") {
-                            getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content');
+                            getBacklistData('backlist->tts_zalo', 'tts_zalo_backlist_content', true);
                         } else if (path_json === "backlist->tts_viettel->backlist_limit") {
-                            getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content');
+                            getBacklistData('backlist->tts_viettel', 'tts_viettel_backlist_content', true);
+                        } else if (path_json === "backlist->groq->backlist_limit") {
+                            getBacklistData('backlist->groq', 'groq_ai_backlist_content', true);
+                        } else if (path_json === "backlist->gemini->backlist_limit") {
+                            getBacklistData('backlist->gemini', 'gemini_backlist_content', true);
                         }
                     } else {
                         ;

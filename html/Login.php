@@ -478,8 +478,8 @@ include 'html_head.php';
                         <div class="d-grid gap-2 mt-3">
                           <button onclick="loading('show')" class="btn btn-primary rounded-pill" type="submit">Đăng nhập</button>
                           <?php if (!empty($Config['processing_pipeline']['face_display_sse_active'])): ?>
-                            <a href="Face.php" onclick="loading('show')" class="btn btn-outline-info rounded-pill" title="Mở trực tiếp màn hình biểu cảm OLED không cần đăng nhập">
-                              <i class="bi bi-emoji-smile me-1"></i> Màn Hình Biểu Cảm (Face)
+                            <a href="Face.php" onclick="loading('show')" class="btn btn-info rounded-pill" title="Mở trực tiếp màn hình biểu cảm OLED không cần đăng nhập">
+                              <i class="bi bi-emoji-smile me-1"></i> Màn Hình Biểu Cảm
                             </a>
                           <?php endif; ?>
                         </div>

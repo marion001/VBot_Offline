@@ -59,9 +59,18 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 ### Trợ lý AI và xử lý lệnh
 
 - Trợ lý mặc định của VBot (từ khóa nội bộ theo locale `resource/lang_keywords/<locale>.json`, mặc định `vi-VN.json`).
-- **Chế độ xử lý AI Function Calling (`processing_pipeline.mode = "ai"`):** hỗ trợ **Groq AI**, **Google Gemini**, **ChatGPT**, **XiaoZhi** và file tùy biến `Dev_AI_Engine.py`, tự động xoay vòng nhiều API Key & quản lý `BackList.json`.
+- **Chế độ xử lý AI Function Calling (`processing_pipeline.mode = "ai"`):**
+  - Hỗ trợ **Groq AI**, **Google Gemini**, **OpenAI-Compatible (`openai_compat`: Ollama LAN / LM Studio / vLLM / OpenRouter / Cerebras)**, **ChatGPT**, **XiaoZhi** và `Dev_AI_Engine.py`.
+  - **Tự động xoay vòng nhiều API Key (Round-Robin) + Dự phòng chéo (`Groq ⇄ Gemini ⇄ Ollama LAN`):** phân biệt lỗi giới hạn theo phút (**TPM/RPM 429** — chỉ tạm nghỉ vài giây trong RAM, không khóa oan cả ngày) với hết hạn mức ngày (**TPD/RPD** hoặc **401** — đưa vào `BackList.json`).
+  - **Đa lệnh AI thông minh (Multi-Tool 3 pha):** thực thi song song các lệnh điều khiển/tra cứu độc lập (`Phase 1`), tự lan truyền động từ chung (*"Kiểm tra đèn phòng ngủ và đèn phòng khách"*), đọc xong xác nhận rồi mới mở nhạc (`Phase 2`) và đặt hẹn giờ tắt nhạc sau cùng (`Phase 3`); tự hỏi lại khi nhiều thiết bị đánh số trùng tiền tố (*Đèn Phòng Khách 1/2/3*).
+  - **VBot Vision (`AI_Vision.py` — Camera Home Assistant & USB/Pi Camera):** chụp và phân tích ảnh trực tiếp 100% trên RAM (**Zero-disk**, không ghi thẻ nhớ SD, tự nén ảnh 4K bằng Pillow/`ffmpeg`), hỗ trợ chọn **Mô hình Xử lý Ảnh (`vision_model_name`)** riêng cho từng trợ lý (Groq Llama 4 Scout / Google Gemini) và dự phòng chéo.
+  - **Kho Tri Thức AI Cục Bộ — VBot Knowledge v2 (`AI_Knowledge_Base.py`):** hỗ trợ 27 định dạng + OCR ảnh/PDF Scan + URL Website + ghi chú giọng nói, tìm kiếm **Hybrid (SQLite FTS5 BM25 + Vector 256 chiều RRF)**, tích hợp **Vector Cục Bộ 100% Offline (`local-subword-256`, `< 2ms` trên Pi Zero 2W)** tự dự phòng khi không có Gemini Key hoặc mất Internet.
+  - **Phát giọng nói theo từng câu (Chunked TTS Pipeline):** câu trả lời dài được phát ngay câu đầu trong khi tạo nền câu kế tiếp, giảm rõ rệt độ trễ chờ.
 - **Bộ Đệm Lệnh AI Cục Bộ (`Local Intent Cache`):** khớp lệnh lặp lại tức thì với **0 token (< 50ms)**, tự bỏ qua cache khi nhắc lại trong 45 giây và tự chặn lưu nhầm câu nói tắt phụ thuộc ngữ cảnh.
-- **Ngữ cảnh hội thoại thông minh:** nhớ thiết bị vừa thao tác (đồng bộ cả từ HASS cục bộ lẫn AI) để hiểu câu nói tắt (*"Bật đèn ngủ"* → *"Tắt đi cho tôi"*), tự mở mic 1 lượt khi AI hỏi làm rõ (`?`).
+- **Ngữ cảnh hội thoại thông minh:** nhớ thiết bị/camera vừa thao tác để hiểu câu nói tắt (*"Bật đèn ngủ"* → *"Tắt đi cho tôi"*), tự mở mic 1 lượt khi AI hỏi làm rõ (`?`).
+- **Màn hình Biểu cảm (`html/Face.php`) & Client Độc lập (`html/VBot_Face_Client.html`):**
+  - `Face.php`: 21 biểu cảm hoạt họa, đĩa xoay ảnh bìa bài hát + 4 nút điều khiển nhanh (`⏮ ⏯ ⏭ ■`), thời tiết OpenWeatherMap, đồng hồ đếm ngược / hẹn giờ tắt nhạc, phụ đề khớp cả micro & ChatBox, Wake Lock, Chế độ Ngủ Đêm (tự động `22:30–06:00`) và OLED Pixel Shift chống lưu ảnh.
+  - `VBot_Face_Client.html`: 1 file HTML/JS độc lập kết hợp giao diện Face + kết nối WebSocket Micro/Loa cho điện thoại cũ, máy tính bảng hoặc PC trong mạng LAN (mở trực tiếp hoặc tải xuống 1 chạm từ `Client_Testing.php`).
 - Home Assistant Assist và câu lệnh Home Assistant tùy chỉnh.
 - Các điểm mở rộng `Dev_*.py` dành cho logic cá nhân (người dùng/lập trình viên có thể tự tùy biến mà không cần build lại `.so`).
 

@@ -1,0 +1,398 @@
+{
+  "schema_version": 1,
+  "default_locale": "vi-VN",
+  "locales": {
+    "vi-VN": {
+      "skills": {
+        "set_volume": {
+          "label": "Âm lượng loa",
+          "description": "Chỉnh âm lượng loa (0-100).",
+          "parameters": {
+            "volume": "0-100"
+          }
+        },
+        "media_control": {
+          "label": "Điều khiển phát lại Media",
+          "description": "Điều khiển phát nhạc, hẹn tắt nhạc (sleep_timer), dừng sau bài hiện tại.",
+          "parameters": {
+            "action": "Lệnh media",
+            "minutes": "Số phút khi sleep_timer"
+          }
+        },
+        "play_media": {
+          "label": "Phát nhạc / Radio / Podcast / Báo",
+          "description": "Phát nhạc, radio, podcast hoặc tin tức.",
+          "parameters": {
+            "source": "Loại nội dung cần phát",
+            "query": "Tên bài hát, ca sĩ, kênh radio, podcast hoặc mục báo",
+            "provider": "Mặc định 'auto'; chỉ chọn youtube/zingmp3/local khi nêu rõ nguồn"
+          }
+        },
+        "control_hass": {
+          "label": "Nhà thông minh Home Assistant",
+          "description": "Điều khiển 1 hoặc nhiều thiết bị, kiểm tra trạng thái, thiết bị đang bật, chạy script/hẹn giờ HASS.",
+          "parameters": {
+            "device_name": "Giữ NGUYÊN tên thiết bị + phòng (KHÔNG rút gọn 'đèn phòng ngủ' thành 'đèn ngủ'); trống nếu batch toàn nhà/check_active",
+            "action": "on/off/toggle/setup (1 TB), batch_on/batch_off (hàng loạt), check/check_active, run_script",
+            "value": "Số khi setup (vd '26')",
+            "schedule_text": "Hẹn giờ nếu có (vd 'sau 15 phút')"
+          }
+        },
+        "run_hass_custom_command": {
+          "label": "Lệnh tùy chỉnh Home Assistant Custom",
+          "description": "Chạy lệnh tùy chỉnh HASS Custom.",
+          "parameters": {
+            "command_text": "Lệnh chuẩn hóa tiếng Việt"
+          }
+        },
+        "control_tuya": {
+          "label": "Thiết bị Local Tuya",
+          "description": "Bật/tắt thiết bị Tuya nội bộ.",
+          "parameters": {
+            "device_name": "Tên thiết bị Tuya",
+            "action": "on/off"
+          }
+        },
+        "internal_ir_send": {
+          "label": "Mắt phát hồng ngoại IR",
+          "description": "Phát lệnh hồng ngoại IR cho tivi/quạt/điều hòa.",
+          "parameters": {
+            "device": "Tên thiết bị IR",
+            "command": "Lệnh IR (bật/tắt/...)"
+          }
+        },
+        "lan_call": {
+          "label": "Cuộc gọi nội bộ LAN",
+          "description": "Gọi/nhận/kết thúc cuộc gọi LAN.",
+          "parameters": {
+            "action": "toggle/end"
+          }
+        },
+        "wake_on_lan": {
+          "label": "Bật máy tính Wake-on-LAN",
+          "description": "Bật máy tính qua Wake-on-LAN.",
+          "parameters": {
+            "device_name": "Tên máy tính"
+          }
+        },
+        "run_voice_routine": {
+          "label": "Kịch bản giọng nói (Voice Routines)",
+          "description": "Chạy kịch bản giọng nói đã cài sẵn.",
+          "parameters": {
+            "routine_name": "Tên kịch bản"
+          }
+        },
+        "set_reminder": {
+          "label": "Lời nhắc & Báo thức (Scheduler)",
+          "description": "Tạo/xem/xóa báo thức, lời nhắc trong lịch VBot.",
+          "parameters": {
+            "action": "create/list/delete",
+            "message": "Nội dung lời nhắc",
+            "delay_minutes": "Số phút nữa (vd 15)",
+            "time_hhmm": "Giờ 24h HH:MM",
+            "date_yyyymmdd": "Ngày YYYY-MM-DD (nếu có)",
+            "recurrence": "once/daily"
+          }
+        },
+        "get_weather": {
+          "label": "Dự báo thời tiết",
+          "description": "Xem dự báo thời tiết (luôn gọi kể cả không nêu địa điểm).",
+          "parameters": {
+            "query": "Câu hỏi thời tiết giữ nguyên địa điểm/thời gian"
+          }
+        },
+        "get_calendar": {
+          "label": "Lịch âm dương & Sự kiện / Ngày lễ / Kỷ niệm",
+          "description": "Tra cứu ngày âm lịch hoặc ngày dương lịch.",
+          "description_with_events": "Tra cứu lịch âm, lịch dương và sự kiện/ngày lễ/Tết/sinh nhật/kỷ niệm đã lưu.",
+          "parameters": {
+            "kind": "lunar (lịch âm), solar (lịch dương)",
+            "kind_with_events": "lunar (âm lịch), solar (dương lịch), event (sự kiện/ngày lễ/sinh nhật)",
+            "query": "Câu hỏi gốc của người dùng về ngày âm/dương lịch",
+            "query_with_events": "Câu hỏi gốc về ngày hoặc sự kiện"
+          }
+        },
+        "run_system_voice_command": {
+          "label": "Câu lệnh điều khiển hệ thống SYSTEM",
+          "description": "Chạy lệnh hệ thống (mic, hội thoại, bluetooth, LED, nhiệt độ CPU, cập nhật...).",
+          "parameters": {
+            "command_text": "Lệnh hệ thống tiếng Việt"
+          }
+        },
+        "web_search": {
+          "label": "Tìm kiếm Internet thời gian thực (Google News + DuckDuckGo)",
+          "description": "Tra cứu Internet thời gian thực (giá vàng, tỷ giá, tin nóng, bóng đá...).",
+          "parameters": {
+            "query": "Từ khóa tiếng Việt ngắn gọn"
+          }
+        },
+        "ai_memory": {
+          "label": "Trí nhớ dài hạn AI & Danh sách mua sắm",
+          "description": "Lưu/xem/xóa ghi nhớ cá nhân, danh sách mua sắm, hoặc tên gọi tắt (alias) thiết bị.",
+          "parameters": {
+            "category": "memory/shopping/alias",
+            "action": "save/get/delete/clear",
+            "content": "Nội dung; với alias dùng 'tên tắt = tên thật'"
+          }
+        },
+        "voice_journal": {
+          "label": "Nhật ký giọng nói & Tóm tắt tuần",
+          "description": "Ghi, đọc, tóm tắt hoặc xóa nhật ký giọng nói theo ngày/tuần/tháng.",
+          "parameters": {
+            "action": "add/summary/list/delete",
+            "content": "Nội dung khi add hoặc từ khóa khi delete",
+            "period": "Khoảng thời gian (mặc định week)"
+          }
+        },
+        "search_knowledge": {
+          "label": "Kho Tri Thức AI Cục Bộ (RAG + Catalog)",
+          "description": "Tra cứu, liệt kê, đọc, thống kê hoặc thêm ghi chú vào Kho Tri Thức tài liệu riêng.",
+          "parameters": {
+            "action": "search/list/read/stats/add",
+            "query": "Câu hỏi/từ khóa tra cứu hoặc lọc",
+            "content": "Nội dung cần lưu (action='add')",
+            "document_name": "Tên tệp/tiêu đề cần đọc (action='read')",
+            "source_file": "Tìm trong 1 tệp cụ thể (hỏi nối tiếp)",
+            "category": "Danh mục tài liệu",
+            "file_type": "Định dạng: pdf/docx/xlsx/txt/md/jpg"
+          }
+        },
+        "inspect_camera": {
+          "label": "VBot Vision (Camera HASS / USB)",
+          "description": "Chụp và phân tích hình ảnh trực tiếp từ Camera Home Assistant hoặc USB/Pi Camera.",
+          "parameters": {
+            "camera_name": "Tên camera/khu vực (cổng, phòng khách, usb). Để trống nếu không nêu.",
+            "question": "Câu hỏi cần kiểm tra trên ảnh camera",
+            "source": "auto (mặc định), hass, hoặc usb"
+          }
+        },
+        "daily_briefing": {
+          "label": "Bản tin Đầu Ngày & Cuối Ngày",
+          "description": "Bản tin chào buổi sáng hoặc kiểm tra trước khi đi ngủ.",
+          "parameters": {
+            "mode": "morning/night"
+          }
+        },
+        "countdown_timer": {
+          "label": "Bộ đếm ngược nhanh (Countdown Timer)",
+          "description": "Đếm ngược nhanh nấu ăn/sinh hoạt (chạy nhiều bộ đếm song song).",
+          "parameters": {
+            "action": "start/status/cancel",
+            "duration_seconds": "Tổng số giây khi start",
+            "label": "Tên gợi nhớ ngắn"
+          }
+        },
+        "announce": {
+          "label": "Phát thông báo nội bộ (Intercom)",
+          "description": "Phát chuông và đọc to thông báo cho cả nhà.",
+          "parameters": {
+            "message": "Nội dung thông báo"
+          }
+        },
+        "system_control": {
+          "label": "Thông tin & Lệnh hệ thống",
+          "description": "Xem giờ, thứ mấy/ngày tháng hôm nay, IP hoặc khởi động lại VBot/thiết bị.",
+          "parameters": {
+            "action": "Lệnh hệ thống"
+          }
+        }
+      }
+    },
+    "en-US": {
+      "skills": {
+        "set_volume": {
+          "label": "Speaker Volume",
+          "description": "Set speaker volume (0-100).",
+          "parameters": {
+            "volume": "0-100"
+          }
+        },
+        "media_control": {
+          "label": "Media Playback Control",
+          "description": "Control media playback, sleep timer, or stop after current track.",
+          "parameters": {
+            "action": "Media control action",
+            "minutes": "Minutes for sleep_timer"
+          }
+        },
+        "play_media": {
+          "label": "Play Music / Radio / Podcast / News",
+          "description": "Play music, radio, podcast, or news.",
+          "parameters": {
+            "source": "Media content type",
+            "query": "Song, artist, radio station, podcast, or news topic",
+            "provider": "Default 'auto'; pick youtube/zingmp3/local only if specified"
+          }
+        },
+        "control_hass": {
+          "label": "Home Assistant Smart Home",
+          "description": "Control single or batch devices, check state or active devices, run HASS scripts or timed control.",
+          "parameters": {
+            "device_name": "Keep exact device + room name (do not shorten); empty for whole-home batch/check_active",
+            "action": "on/off/toggle/setup (single), batch_on/batch_off (batch), check/check_active, run_script",
+            "value": "Numeric value for setup (e.g. '26')",
+            "schedule_text": "Schedule phrase if any (e.g. 'in 15 minutes')"
+          }
+        },
+        "run_hass_custom_command": {
+          "label": "Home Assistant Custom Commands",
+          "description": "Run a Home Assistant custom command.",
+          "parameters": {
+            "command_text": "Normalized custom command text"
+          }
+        },
+        "control_tuya": {
+          "label": "Local Tuya Devices",
+          "description": "Turn local Tuya devices on or off.",
+          "parameters": {
+            "device_name": "Tuya device name",
+            "action": "on/off"
+          }
+        },
+        "internal_ir_send": {
+          "label": "Internal IR Blaster",
+          "description": "Send infrared remote command for TV/fan/AC.",
+          "parameters": {
+            "device": "IR device name",
+            "command": "IR command (power/on/off/...)"
+          }
+        },
+        "lan_call": {
+          "label": "LAN Intercom Call",
+          "description": "Start, answer, or end a LAN intercom call.",
+          "parameters": {
+            "action": "toggle/end"
+          }
+        },
+        "wake_on_lan": {
+          "label": "Wake-on-LAN",
+          "description": "Wake a computer over Wake-on-LAN.",
+          "parameters": {
+            "device_name": "Computer name"
+          }
+        },
+        "run_voice_routine": {
+          "label": "Voice Routines",
+          "description": "Run a configured voice routine.",
+          "parameters": {
+            "routine_name": "Routine name"
+          }
+        },
+        "set_reminder": {
+          "label": "Reminders & Alarms (Scheduler)",
+          "description": "Create, list, or delete alarms and reminders.",
+          "parameters": {
+            "action": "create/list/delete",
+            "message": "Reminder message",
+            "delay_minutes": "Delay in minutes (e.g. 15)",
+            "time_hhmm": "24-hour time HH:MM",
+            "date_yyyymmdd": "Date YYYY-MM-DD (optional)",
+            "recurrence": "once/daily"
+          }
+        },
+        "get_weather": {
+          "label": "Weather Forecast",
+          "description": "Get weather forecast (always call even if no location is given).",
+          "parameters": {
+            "query": "Weather question preserving location/time"
+          }
+        },
+        "get_calendar": {
+          "label": "Calendar & Saved Events",
+          "description": "Look up lunar or solar calendar dates.",
+          "description_with_events": "Look up lunar/solar dates and saved events, holidays, or birthdays.",
+          "parameters": {
+            "kind": "lunar or solar",
+            "kind_with_events": "lunar, solar, or event (holidays/birthdays/saved events)",
+            "query": "Original calendar date question",
+            "query_with_events": "Original date or event question"
+          }
+        },
+        "run_system_voice_command": {
+          "label": "System Voice Commands",
+          "description": "Run system voice command (mic, conversation, bluetooth, LED, CPU temp, update...).",
+          "parameters": {
+            "command_text": "System command text"
+          }
+        },
+        "web_search": {
+          "label": "Real-time Web Search",
+          "description": "Search real-time web information (news, prices, exchange rates, sports...).",
+          "parameters": {
+            "query": "Concise search query"
+          }
+        },
+        "ai_memory": {
+          "label": "Long-term AI Memory & Shopping List",
+          "description": "Save, read, or delete personal memories, shopping list items, or device aliases.",
+          "parameters": {
+            "category": "memory/shopping/alias",
+            "action": "save/get/delete/clear",
+            "content": "Content; for alias use 'alias = real name'"
+          }
+        },
+        "voice_journal": {
+          "label": "Voice Journal & Summaries",
+          "description": "Add, read, summarize, or delete voice journal entries by day/week/month.",
+          "parameters": {
+            "action": "add/summary/list/delete",
+            "content": "Entry text for add or keyword for delete",
+            "period": "Time range (default week)"
+          }
+        },
+        "search_knowledge": {
+          "label": "Local Knowledge Base (RAG + Catalog)",
+          "description": "Search, list, read, inspect stats, or add notes to the local private Knowledge Base.",
+          "parameters": {
+            "action": "search/list/read/stats/add",
+            "query": "Search question or filter keywords",
+            "content": "Note content to save (action='add')",
+            "document_name": "Document name/title to read (action='read')",
+            "source_file": "Search within one specific file (follow-up)",
+            "category": "Document category",
+            "file_type": "File type: pdf/docx/xlsx/txt/md/jpg"
+          }
+        },
+        "inspect_camera": {
+          "label": "VBot Vision (HASS / USB Camera)",
+          "description": "Capture and analyze a live snapshot from Home Assistant or USB/Pi Camera.",
+          "parameters": {
+            "camera_name": "Camera/area name (gate, living room, usb). Empty if unspecified.",
+            "question": "Question to inspect on the camera image",
+            "source": "auto (default), hass, or usb"
+          }
+        },
+        "daily_briefing": {
+          "label": "Morning & Night Briefing",
+          "description": "Morning greeting briefing or bedtime check.",
+          "parameters": {
+            "mode": "morning/night"
+          }
+        },
+        "countdown_timer": {
+          "label": "Quick Countdown Timer",
+          "description": "Run quick parallel countdown timers for cooking or daily tasks.",
+          "parameters": {
+            "action": "start/status/cancel",
+            "duration_seconds": "Total seconds when starting",
+            "label": "Short label"
+          }
+        },
+        "announce": {
+          "label": "Intercom Announcement",
+          "description": "Play chime and announce a message aloud across the home.",
+          "parameters": {
+            "message": "Announcement text"
+          }
+        },
+        "system_control": {
+          "label": "System Info & Control",
+          "description": "Check current time, date/weekday, IP address, or restart VBot/device.",
+          "parameters": {
+            "action": "System action"
+          }
+        }
+      }
+    }
+  }
+}

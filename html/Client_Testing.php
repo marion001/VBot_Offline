@@ -68,6 +68,21 @@ include 'html_head.php';
         </ol>
       </nav>
     </div><!-- End Page Title -->
+    <div class="alert alert-primary d-flex flex-wrap align-items-center justify-content-between gap-2 py-2 px-3 mb-3" role="alert">
+      <div class="small">
+        <strong><i class="bi bi-display me-1"></i>VBot Face Socket Client độc lập (<code>VBot_Face_Client.html</code>):</strong>
+        Giao diện màn hình biểu cảm Face kết hợp Micro &amp; Loa qua Socket (1 file HTML/JS duy nhất, không cần PHP) — dùng cho điện thoại cũ, máy tính bảng hoặc PC trong mạng LAN.
+        <span class="text-muted">Mở trực tiếp hoặc tải file về chép sang thiết bị khác, sau đó bấm <b>⚙ Cài đặt</b> nhập <code>ws://<?php echo htmlspecialchars($serverIp . ':' . ((int)($Config['api']['streaming_server']['protocol']['socket']['port'] ?? 5003)), ENT_QUOTES, 'UTF-8'); ?></code>.</span>
+      </div>
+      <div class="d-flex flex-wrap gap-2">
+        <a href="VBot_Face_Client.html" target="_blank" class="btn btn-sm btn-primary rounded-pill">
+          <i class="bi bi-box-arrow-up-right me-1"></i>Mở Face Client
+        </a>
+        <a href="VBot_Face_Client.html" download="VBot_Face_Client.html" class="btn btn-sm btn-success rounded-pill">
+          <i class="bi bi-download me-1"></i>Tải Xuống HTML
+        </a>
+      </div>
+    </div>
     <div class="row g-3">
       <div class="col-lg-4 col-md-5">
         <section class="card p-3 h-100">

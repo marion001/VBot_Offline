@@ -1084,6 +1084,11 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
     $submittedGeminiModel = 'gemini-3.5-flash-lite';
   }
   $Config['virtual_assistant']['google_gemini']['model_name'] = $submittedGeminiModel;
+  $submittedGeminiVisionModel = trim((string)($_POST['gemini_vision_model_name'] ?? $submittedGeminiModel));
+  if ($submittedGeminiVisionModel === '' || strtolower($submittedGeminiVisionModel) === 'gemini-2.5-flash-lite') {
+    $submittedGeminiVisionModel = 'gemini-3.5-flash-lite';
+  }
+  $Config['virtual_assistant']['google_gemini']['vision_model_name'] = $submittedGeminiVisionModel;
   $Config['virtual_assistant']['google_gemini']['api_version'] = $_POST['gemini_api_version'];
   $Config['virtual_assistant']['google_gemini']['active'] = isset($_POST['google_gemini_active']) ? true : false;
   $Config['virtual_assistant']['google_gemini']['time_out'] = intval($_POST['google_gemini_time_out']);
@@ -1101,8 +1106,30 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   }));
   $Config['virtual_assistant']['groq_ai']['api_key'] = $apiKeys_GROQ_AI;
   $Config['virtual_assistant']['groq_ai']['model_name'] = trim((string)($_POST['groq_ai_model_name'] ?? 'llama-3.3-70b-versatile')) ?: 'llama-3.3-70b-versatile';
+  $Config['virtual_assistant']['groq_ai']['vision_model_name'] = trim((string)($_POST['groq_ai_vision_model_name'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct')) ?: 'meta-llama/llama-4-scout-17b-16e-instruct';
   $Config['virtual_assistant']['groq_ai']['api_url'] = trim((string)($_POST['groq_ai_url'] ?? 'https://api.groq.com/openai/v1/chat/completions')) ?: 'https://api.groq.com/openai/v1/chat/completions';
   $Config['virtual_assistant']['groq_ai']['time_out'] = max(3, min(30, intval($_POST['groq_ai_time_out'] ?? 10)));
+
+  #Cập nhật cấu hình AI chuẩn OpenAI tùy chọn (Ollama LAN / LM Studio / OpenRouter / Cerebras...)
+  if (!isset($Config['virtual_assistant']['openai_compat']) || !is_array($Config['virtual_assistant']['openai_compat'])) {
+    $Config['virtual_assistant']['openai_compat'] = [];
+  }
+  $Config['virtual_assistant']['openai_compat']['active'] = isset($_POST['openai_compat_active']) ? true : false;
+  $apiKeys_OAI_COMPAT = array_map('trim', explode("\n", (string)($_POST['openai_compat_api_key'] ?? '')));
+  $apiKeys_OAI_COMPAT = array_values(array_filter(array_map(function ($k) {
+    return str_replace("\r", '', $k);
+  }, $apiKeys_OAI_COMPAT), function ($k) {
+    return !empty($k);
+  }));
+  $Config['virtual_assistant']['openai_compat']['api_key'] = $apiKeys_OAI_COMPAT;
+  $Config['virtual_assistant']['openai_compat']['model_name'] = trim((string)($_POST['openai_compat_model_name'] ?? 'qwen2.5:7b')) ?: 'qwen2.5:7b';
+  $Config['virtual_assistant']['openai_compat']['vision_model_name'] = trim((string)($_POST['openai_compat_vision_model_name'] ?? ''));
+  $submittedOaiUrl = trim((string)($_POST['openai_compat_url'] ?? 'http://192.168.1.10:11434/v1/chat/completions'));
+  if ($submittedOaiUrl === '' || !preg_match('/^https?:\/\/\S+$/i', $submittedOaiUrl)) {
+    $submittedOaiUrl = 'http://192.168.1.10:11434/v1/chat/completions';
+  }
+  $Config['virtual_assistant']['openai_compat']['api_url'] = $submittedOaiUrl;
+  $Config['virtual_assistant']['openai_compat']['time_out'] = max(3, min(30, intval($_POST['openai_compat_time_out'] ?? 20)));
 
   #Cập nhật giá trị trợ lý ảo Default Assistant
   $Config['virtual_assistant']['default_assistant']['time_out'] = intval($_POST['default_assistant_time_out']);
@@ -1411,7 +1438,7 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
     $pipelineMode = 'vbot';
   }
   $pipelineAiProvider = isset($_POST['processing_pipeline_ai_provider']) ? trim((string)$_POST['processing_pipeline_ai_provider']) : 'gemini_ai';
-  if (!in_array($pipelineAiProvider, ['gemini_ai', 'groq_ai', 'dev_ai_engine'], true)) {
+  if (!in_array($pipelineAiProvider, ['gemini_ai', 'groq_ai', 'openai_compat', 'dev_ai_engine'], true)) {
     $pipelineAiProvider = 'gemini_ai';
   }
   $Config['processing_pipeline']['mode'] = $pipelineMode;
@@ -1421,6 +1448,12 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   $Config['processing_pipeline']['ai_memory_active'] = isset($_POST['processing_pipeline_ai_memory']);
   $Config['processing_pipeline']['ai_knowledge_active'] = isset($_POST['processing_pipeline_ai_knowledge']);
   $Config['processing_pipeline']['ai_knowledge_vector_active'] = isset($_POST['processing_pipeline_ai_knowledge_vector']);
+  $Config['processing_pipeline']['ai_vision_active'] = isset($_POST['processing_pipeline_ai_vision']);
+  $visionUsbDev = trim((string)($_POST['processing_pipeline_ai_vision_usb_device'] ?? '/dev/video0'));
+  if ($visionUsbDev === '' || !preg_match('/^\/dev\/[A-Za-z0-9._\/-]+$/', $visionUsbDev)) {
+    $visionUsbDev = '/dev/video0';
+  }
+  $Config['processing_pipeline']['ai_vision_usb_device'] = $visionUsbDev;
   $Config['processing_pipeline']['intent_cache_active'] = isset($_POST['processing_pipeline_intent_cache']);
   $Config['processing_pipeline']['face_display_sse_active'] = isset($_POST['processing_pipeline_face_display_sse']);
   #Cập nhật locale keyword; dữ liệu chỉ được áp dụng sau khi restart VBot
@@ -2069,12 +2102,15 @@ include 'html_head.php';
                 $vbotPipelineMode = (string)($vbotPipelineCfg['mode'] ?? 'vbot');
                 if (!in_array($vbotPipelineMode, ['vbot', 'ai'], true)) $vbotPipelineMode = 'vbot';
                 $vbotPipelineProvider = (string)($vbotPipelineCfg['ai_provider'] ?? 'gemini_ai');
-                if (!in_array($vbotPipelineProvider, ['gemini_ai', 'groq_ai', 'dev_ai_engine'], true)) $vbotPipelineProvider = 'gemini_ai';
+                if (!in_array($vbotPipelineProvider, ['gemini_ai', 'groq_ai', 'openai_compat', 'dev_ai_engine'], true)) $vbotPipelineProvider = 'gemini_ai';
                 $vbotPipelineFallback = array_key_exists('fallback_to_vbot_on_error', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['fallback_to_vbot_on_error'] : true;
                 $vbotPipelineWebSearch = array_key_exists('web_search_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['web_search_active'] : false;
                 $vbotPipelineAiMemory = array_key_exists('ai_memory_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_memory_active'] : true;
                 $vbotPipelineAiKnowledge = array_key_exists('ai_knowledge_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_knowledge_active'] : true;
                 $vbotPipelineAiKnowledgeVector = array_key_exists('ai_knowledge_vector_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_knowledge_vector_active'] : true;
+                $vbotPipelineAiVision = array_key_exists('ai_vision_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['ai_vision_active'] : false;
+                $vbotPipelineAiVisionUsbDevice = trim((string)($vbotPipelineCfg['ai_vision_usb_device'] ?? '/dev/video0'));
+                if ($vbotPipelineAiVisionUsbDevice === '') $vbotPipelineAiVisionUsbDevice = '/dev/video0';
                 $vbotPipelineIntentCache = array_key_exists('intent_cache_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['intent_cache_active'] : true;
                 $vbotPipelineFaceSse = array_key_exists('face_display_sse_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['face_display_sse_active'] : false;
                 $showVbotPipelineWrap = ($Config['launch_source'] === 'VBot_Assistant');
@@ -2093,12 +2129,15 @@ include 'html_head.php';
                   </div>
                 </div>
                 <div id="vbot_processing_ai_provider_wrap" style="<?php echo $showVbotAiProviderWrap ? '' : 'display:none;'; ?>">
+                  <div class="border border-primary rounded-3 p-3 mb-2 bg-white bg-opacity-75 shadow-sm">
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="bi bi-cpu-fill me-1"></i> Cấu Hình Sử Dụng AI:</h6>
                   <div class="row mb-3 align-items-center">
                     <label for="processing_pipeline_ai_provider" class="col-sm-3 col-form-label fw-semibold text-success">Chọn AI Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('Chọn mô hình AI thực hiện phân tích câu lệnh và gọi công cụ (Function Calling) của VBot. Cần cấu hình API Key tương ứng ở mục Trợ Lý Ảo.')"></i>:</label>
                     <div class="col-sm-9">
                       <select class="form-select border-success" name="processing_pipeline_ai_provider" id="processing_pipeline_ai_provider">
                         <option value="gemini_ai" <?php if ($vbotPipelineProvider === 'gemini_ai') echo 'selected'; ?>>Gemini AI (Google)</option>
                         <option value="groq_ai" <?php if ($vbotPipelineProvider === 'groq_ai') echo 'selected'; ?>>Groq AI (Khuyên dùng)</option>
+                        <option value="openai_compat" <?php if ($vbotPipelineProvider === 'openai_compat') echo 'selected'; ?>>OpenAI-Compatible (Ollama LAN / OpenRouter / vLLM)</option>
                         <option value="dev_ai_engine" <?php if ($vbotPipelineProvider === 'dev_ai_engine') echo 'selected'; ?>>Dev Custom AI - Dev_AI_Engine.py</option>
                       </select>
                     </div>
@@ -2161,6 +2200,46 @@ include 'html_head.php';
                         <button type="button" class="btn btn-sm btn-danger rounded-pill" onclick="clear_ai_intent_cache_file()" title="Xóa sạch Bộ Đệm Lệnh AI Cục Bộ"><i class="bi bi-trash"></i> Xóa Cache</button>
                       </div>
                     </div>
+                  </div>
+                  <div class="row mb-3 align-items-center">
+                    <label class="col-sm-3 col-form-label fw-semibold text-primary">AI VBot Camera/Vision <i class="bi bi-question-circle-fill" onclick="show_message('Cho phép hỏi AI kiểm tra hình ảnh trực tiếp từ Camera Home Assistant (camera.*) hoặc USB/Pi Camera gắn trên loa (vd: <i>Xem camera cổng có người không?</i>, <i>Ngoài sân có trời mưa không?</i>).<br/>- Xử lý ảnh 100% trên RAM (Zero-disk), không ghi thẻ nhớ SD, tự giải phóng ngay sau khi trả lời.<br/>- Chạy đúng theo trợ lý AI bạn đang chọn (<b>Groq Vision</b> Llama 4 Scout hoặc <b>Gemini Vision</b>) và tự động dự phòng chéo khi hết hạn mức.')"></i>:</label>
+                    <div class="col-sm-9">
+                      <div class="d-flex flex-wrap align-items-center gap-2">
+                        <div class="form-switch me-2">
+                          <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_ai_vision" id="processing_pipeline_ai_vision" value="1" <?php if ($vbotPipelineAiVision) echo 'checked'; ?>>
+                        </div>
+                        <div class="input-group input-group-sm" style="max-width: 280px;">
+                          <span class="input-group-text border-success" title="Đường dẫn thiết bị USB Camera cục bộ trên Linux/Pi"><i class="bi bi-camera-video"></i>&nbsp;USB</span>
+                          <input type="text" class="form-control border-success" name="processing_pipeline_ai_vision_usb_device" id="processing_pipeline_ai_vision_usb_device" value="<?php echo htmlspecialchars($vbotPipelineAiVisionUsbDevice, ENT_QUOTES, 'UTF-8'); ?>" placeholder="/dev/video0">
+                        </div>
+                        <?php
+                          //Kiểm tra nhanh công cụ chụp ảnh USB/Pi Camera có sẵn trên hệ thống (chỉ đọc, không mở camera)
+                          $visionToolStatus = [];
+                          $visionDisabledFns = array_map('trim', explode(',', (string)ini_get('disable_functions')));
+                          $visionCanShell = function_exists('shell_exec') && !in_array('shell_exec', $visionDisabledFns, true);
+                          foreach (['ffmpeg', 'fswebcam', 'rpicam-still', 'libcamera-still'] as $visionTool) {
+                            $visionFound = false;
+                            if ($visionCanShell) {
+                              $visionOut = @shell_exec('command -v ' . escapeshellarg($visionTool) . ' 2>/dev/null');
+                              $visionFound = is_string($visionOut) && trim($visionOut) !== '';
+                            }
+                            $visionToolStatus[$visionTool] = $visionFound;
+                          }
+                          $visionDevExists = @file_exists($vbotPipelineAiVisionUsbDevice);
+                          $visionAnyTool = in_array(true, $visionToolStatus, true);
+                        ?>
+                        <div class="w-100 small">
+                          <span class="badge <?php echo $visionDevExists ? 'bg-success' : 'bg-secondary'; ?>" title="Thiết bị camera USB"><?php echo htmlspecialchars($vbotPipelineAiVisionUsbDevice, ENT_QUOTES, 'UTF-8'); ?>: <?php echo $visionDevExists ? 'Có' : 'Không thấy'; ?></span>
+                          <?php foreach ($visionToolStatus as $vtName => $vtFound) { ?>
+                            <span class="badge <?php echo $vtFound ? 'bg-success' : 'bg-secondary'; ?>"><?php echo htmlspecialchars($vtName); ?>: <?php echo $vtFound ? 'Có' : 'Chưa cài'; ?></span>
+                          <?php } ?>
+                          <?php if (!$visionAnyTool) { ?>
+                            <div class="text-danger mt-1">Chưa có công cụ chụp ảnh cho USB/Pi Camera. Cài bằng lệnh: <code>sudo apt install -y ffmpeg</code> (Camera Home Assistant không cần cài).</div>
+                          <?php } ?>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                   </div>
                 </div>
 
@@ -5531,6 +5610,10 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         if (strtolower(trim((string)$selected_model)) === 'gemini-2.5-flash-lite') {
                           $selected_model = 'gemini-3.5-flash-lite';
                         }
+                        $selected_vision_model = $Config['virtual_assistant']['google_gemini']['vision_model_name'] ?? $selected_model;
+                        if (trim((string)$selected_vision_model) === '' || strtolower(trim((string)$selected_vision_model)) === 'gemini-2.5-flash-lite') {
+                          $selected_vision_model = 'gemini-3.5-flash-lite';
+                        }
                         $selected_version = $Config['virtual_assistant']['google_gemini']['api_version'] ?? 'v1beta';
                         function renderSelectOrInput_Gemini($gemini_model_list_json_file, $id, $label, $data, $selectedValue, $placeholder = '', $withButton = false)
                         {
@@ -5574,11 +5657,22 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         }
                         if (file_exists($gemini_model_list_json_file)) {
                           $data = json_decode(file_get_contents($gemini_model_list_json_file), true);
+                          $geminiModels = is_array($data['gemini_models'] ?? null) ? array_values($data['gemini_models']) : [];
+                          if ($selected_model !== '' && !in_array($selected_model, $geminiModels, true)) {
+                            array_unshift($geminiModels, $selected_model);
+                          }
+                          $geminiVisionModels = is_array($data['gemini_models'] ?? null) ? array_values($data['gemini_models']) : [];
+                          if ($selected_vision_model !== '' && !in_array($selected_vision_model, $geminiVisionModels, true)) {
+                            array_unshift($geminiVisionModels, $selected_vision_model);
+                          }
                           //Chỉ gemini_models_name mới có nút
-                          renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', $data['gemini_models'] ?? null, $selected_model, $selected_model, true);
+                          renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', $geminiModels, $selected_model, $selected_model, true);
+                          renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_vision_model_name', 'Mô Hình Xử Lý Ảnh (Vision)', $geminiVisionModels, $selected_vision_model, $selected_vision_model);
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_api_version', 'Phiên Bản API', $data['gemini_api_version'] ?? null, $selected_version, $selected_version);
                         } else {
+                          $geminiVisionModels = array_values(array_unique([$selected_vision_model, 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-2.5-flash']));
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_models_name', 'Mô Hình Gemini', null, $selected_model, $selected_model, true);
+                          renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_vision_model_name', 'Mô Hình Xử Lý Ảnh (Vision)', $geminiVisionModels, $selected_vision_model, $selected_vision_model);
                           renderSelectOrInput_Gemini($gemini_model_list_json_file, 'gemini_api_version', 'Phiên Bản API', null, $selected_version, $selected_version);
                         }
                         echo input_field('google_gemini_time_out', 'Thời gian chờ (giây)', htmlspecialchars($Config['virtual_assistant']['google_gemini']['time_out'] ?? 25), 'required', 'number', '1', '5', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
@@ -5602,6 +5696,8 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     }
                     $textareaContent_groq_ai = implode("\n", $groqAiKeyList);
                     $groqAiModel = (string)($groqAiCfg['model_name'] ?? 'llama-3.3-70b-versatile');
+                    $groqAiVisionModel = trim((string)($groqAiCfg['vision_model_name'] ?? 'meta-llama/llama-4-scout-17b-16e-instruct'));
+                    if ($groqAiVisionModel === '') $groqAiVisionModel = 'meta-llama/llama-4-scout-17b-16e-instruct';
                     $groqAiUrl = (string)($groqAiCfg['api_url'] ?? 'https://api.groq.com/openai/v1/chat/completions');
                     $groqAiTimeout = intval($groqAiCfg['time_out'] ?? 10);
                     $groq_model_list_json_file = $HTML_VBot_Offline . '/includes/other_data/groq_model_list.json';
@@ -5619,6 +5715,20 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     }
                     if ($groqAiModel !== '' && !in_array($groqAiModel, $groqModelList, true)) {
                       array_unshift($groqModelList, $groqAiModel);
+                    }
+                    $groqVisionModelList = [
+                      'meta-llama/llama-4-scout-17b-16e-instruct',
+                      'meta-llama/llama-4-maverick-17b-128e-instruct',
+                    ];
+                    foreach ($groqModelList as $gm) {
+                      if (stripos($gm, 'llama-4') !== false || stripos($gm, 'vision') !== false) {
+                        if (!in_array($gm, $groqVisionModelList, true)) {
+                          $groqVisionModelList[] = $gm;
+                        }
+                      }
+                    }
+                    if ($groqAiVisionModel !== '' && !in_array($groqAiVisionModel, $groqVisionModelList, true)) {
+                      array_unshift($groqVisionModelList, $groqAiVisionModel);
                     }
                   ?>
                   <div class="card accordion" id="accordion_button_cfg_groq_assistant">
@@ -5667,11 +5777,71 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                               </div>
                             </div>
                           </div>
+                          <div class="row mb-3">
+                            <label for="groq_ai_vision_model_name" class="col-sm-3 col-form-label">Mô Hình Xử Lý Ảnh (Vision) <i class="bi bi-question-circle-fill" onclick="show_message('Mô hình đa phương thức dùng cho VBot Vision (chụp và phân tích ảnh camera) khi đang chọn Groq AI. Mặc định: meta-llama/llama-4-scout-17b-16e-instruct.')"></i>:</label>
+                            <div class="col-sm-9">
+                              <select class="form-select border-success" name="groq_ai_vision_model_name" id="groq_ai_vision_model_name">
+                                <?php
+                                  foreach ($groqVisionModelList as $vmVal) {
+                                    $vSel = ($groqAiVisionModel === $vmVal) ? 'selected' : '';
+                                    echo '<option value="' . htmlspecialchars($vmVal) . '" ' . $vSel . '>' . htmlspecialchars($vmVal) . '</option>';
+                                  }
+                                ?>
+                              </select>
+                            </div>
+                          </div>
                           <?php
                             echo input_field('groq_ai_url', 'URL API Groq', htmlspecialchars($groqAiUrl), 'required', 'text', '', '', '', 'Mặc định: https://api.groq.com/openai/v1/chat/completions', 'border-success', '', '', '', '', '');
                             echo input_field('groq_ai_time_out', 'Thời gian chờ (giây)', htmlspecialchars($groqAiTimeout), 'required', 'number', '1', '3', '30', 'Thời gian chờ phản hồi tối đa (Giây)', 'border-success', '', '', '', '', '');
                             echo input_field('groq_models_path_file', 'Đường dẫn tệp mô hình (Path Model)', htmlspecialchars($groq_model_list_json_file), 'disabled', 'text', '', '', '', '', 'border-danger', '<i class="bi bi-eye"></i>', "readJSON_file_path('$groq_model_list_json_file')", 'btn btn-success border-danger', 'onclick', '');
                           ?>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <?php
+                    $oaiCompatCfg = (isset($Config['virtual_assistant']['openai_compat']) && is_array($Config['virtual_assistant']['openai_compat'])) ? $Config['virtual_assistant']['openai_compat'] : [];
+                    $oaiCompatActive = !empty($oaiCompatCfg['active']);
+                    $oaiCompatRawKeys = $oaiCompatCfg['api_key'] ?? [];
+                    if (is_string($oaiCompatRawKeys)) {
+                      $oaiCompatKeyList = array_values(array_filter(array_map('trim', explode("\n", $oaiCompatRawKeys))));
+                    } elseif (is_array($oaiCompatRawKeys)) {
+                      $oaiCompatKeyList = array_values(array_filter(array_map('trim', $oaiCompatRawKeys)));
+                    } else {
+                      $oaiCompatKeyList = [];
+                    }
+                    $textareaContent_oai_compat = implode("\n", $oaiCompatKeyList);
+                    $oaiCompatModel = trim((string)($oaiCompatCfg['model_name'] ?? '')) ?: 'qwen2.5:7b';
+                    $oaiCompatVisionModel = trim((string)($oaiCompatCfg['vision_model_name'] ?? ''));
+                    $oaiCompatUrl = trim((string)($oaiCompatCfg['api_url'] ?? '')) ?: 'http://192.168.1.10:11434/v1/chat/completions';
+                    $oaiCompatTimeout = max(3, min(30, intval($oaiCompatCfg['time_out'] ?? 20) ?: 20));
+                  ?>
+                  <div class="card accordion" id="accordion_button_cfg_openai_compat_assistant">
+                    <div class="card-body">
+                      <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_cfg_openai_compat_assistant" aria-expanded="false" aria-controls="collapse_button_cfg_openai_compat_assistant">
+                        Cấu Hình Trợ Lý => OpenAI-Compatible (Ollama LAN / OpenRouter) <i class="bi bi-question-circle-fill" onclick="show_message('Kết nối tới mọi máy chủ chuẩn OpenAI Chat Completions: <b>Ollama / LM Studio / vLLM</b> chạy nội bộ trên PC/NAS (để trống API Key, 100% offline không giới hạn token) hoặc <b>OpenRouter / Cerebras / DeepSeek</b> (nhập API Key).')"></i>:
+                        <?php echo $oaiCompatActive ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?></h5>
+                      <div id="collapse_button_cfg_openai_compat_assistant" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_cfg_openai_compat_assistant">
+                        <div class="alert alert-info" role="alert">
+                          <div class="row mb-3">
+                            <label class="col-sm-3 col-form-label">Kích hoạt:</label>
+                            <div class="col-sm-9">
+                              <div class="form-switch">
+                                <input class="form-check-input border-success" type="checkbox" name="openai_compat_active" id="openai_compat_active" <?php echo $oaiCompatActive ? 'checked' : ''; ?>>
+                              </div>
+                            </div>
+                          </div>
+                          <?php
+                            echo input_field('openai_compat_url', 'URL API (Chat Completions)', htmlspecialchars($oaiCompatUrl), '', 'text', '', '', '', 'Vd Ollama: http://192.168.1.10:11434/v1/chat/completions', 'border-success', '', '', '', '', '');
+                            echo input_field('openai_compat_model_name', 'Tên Mô Hình (Model)', htmlspecialchars($oaiCompatModel), '', 'text', '', '', '', 'Vd: qwen2.5:7b, llama3.2, deepseek-chat...', 'border-success', '', '', '', '', '');
+                            echo input_field('openai_compat_vision_model_name', 'Mô Hình Xử Lý Ảnh (tùy chọn)', htmlspecialchars($oaiCompatVisionModel), '', 'text', '', '', '', 'Để trống nếu dùng model chính hoặc dự phòng Groq/Gemini', 'border-info', '', '', '', '', '');
+                            echo input_field('openai_compat_time_out', 'Thời gian chờ (giây)', htmlspecialchars($oaiCompatTimeout), '', 'number', '1', '3', '30', 'Thời gian chờ tối đa (Giây)', 'border-success', '', '', '', '', '');
+                          ?>
+                          <div class="form-floating mb-2">
+                            <textarea class="form-control border-success" placeholder="Để trống nếu dùng Ollama / LM Studio nội bộ" name="openai_compat_api_key" id="openai_compat_api_key" style="height: 90px;"><?php echo htmlspecialchars($textareaContent_oai_compat); ?></textarea>
+                            <label for="openai_compat_api_key">API Key (để trống nếu dùng Ollama/LM Studio LAN; mỗi key 1 dòng nếu dùng OpenRouter/Cerebras):</label>
+                          </div>
                         </div>
                       </div>
                     </div>

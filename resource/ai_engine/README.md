@@ -8,6 +8,7 @@ Thư mục `resource/ai_engine/` lưu trữ toàn bộ dữ liệu trạng thái
 
 | File | Mục đích | Cơ chế tối ưu thẻ nhớ SD |
 | --- | --- | --- |
+| `ai_skills_descriptions.json` | **Mô tả công cụ AI (Tool Descriptions đa ngôn ngữ):** tách toàn bộ `label`, `description` và mô tả tham số (`parameters`) của 23 công cụ AI ra khỏi `AI_Skill_Registry.py`. Mặc định dùng locale `"vi-VN"` (tiếng Việt), có sẵn `"en-US"` và tự động dự phòng về `"vi-VN"` nếu locale khác chưa có bản dịch. | Nạp vào RAM theo `mtime` + `Lib.keyword_locale`; sửa trực tiếp file JSON không cần build lại `.so`. |
 | `ai_intent_cache.json` | **Bộ Đệm Lệnh AI Cục Bộ (Local Intent Cache):** lưu ánh xạ từ câu nói đã chuẩn hóa sang công cụ (`tool + args`) đã thực thi thành công để tái sử dụng với **0 token (< 50ms)**. | Nạp vào RAM theo `mtime`; chỉ ghi cập nhật bộ đếm `hits` sau mỗi **10 lượt khớp**. Tự chặn lưu các câu nói tắt phụ thuộc ngữ cảnh (*"tắt đi cho tôi"*...) và tự bỏ qua cache nếu người dùng lặp lại y hệt câu lệnh trong 45 giây. |
 | `ai_memory.json` | **Bộ nhớ dài hạn & Biệt danh thiết bị (`device_aliases`):** lưu thông tin cá nhân người dùng nhờ nhớ (*"nhớ giúp tôi..."*) và ánh xạ tên gọi tắt sang tên thiết bị Home Assistant thật (*"gọi đèn bàn là đèn học"*). | Cache RAM theo `mtime`; chỉ ghi khi người dùng thêm/sửa/xóa. |
 | `ai_telemetry.json` | **Thống kê hiệu năng AI:** lưu số lượt gọi AI, số lượt khớp Cache, token sử dụng (theo ngày và tổng tích lũy), thời gian phản hồi trung bình để hiển thị trên `html/AI_Stats.php`. | Đếm hoàn toàn trong RAM; gom ghi nền theo chu kỳ (mỗi **5 lượt** hoặc **30 giây**) dưới khóa chống xung đột luồng. |
@@ -31,6 +32,8 @@ Chế độ xử lý AI được cấu hình tại mục `processing_pipeline` (
   "ai_memory_active": true,
   "ai_knowledge_active": true,
   "ai_knowledge_vector_active": true,
+  "ai_vision_active": false,
+  "ai_vision_usb_device": "/dev/video0",
   "intent_cache_active": true,
   "face_display_sse_active": true
 }
@@ -38,12 +41,15 @@ Chế độ xử lý AI được cấu hình tại mục `processing_pipeline` (
 
 - `mode`: `"ai"` (dùng AI Function Calling) hoặc `"vbot"` (chế độ từ khóa truyền thống).
 - `ai_provider`:
-  - `"groq_ai"`: Groq AI (tốc độ cao, hỗ trợ nhiều API Key xoay vòng tự động & `BackList.json`).
-  - `"google_gemini"`: Google Gemini (tắt thinking budget trên Gemini 2.5 để giảm độ trễ).
-  - `"dev_ai_engine"`: Chạy mẫu tùy biến trong `Dev_AI_Engine.py` (giữ dạng `.py` thuần để người dùng tự chỉnh sang OpenAI, OpenRouter, DeepSeek, Ollama LAN...).
+  - `"groq_ai"`: Groq AI (tốc độ cao, xoay vòng nhiều API Key round-robin, tách cooldown TPM theo phút & `BackList.json` theo ngày).
+  - `"gemini_ai"`: Google Gemini (mặc định `gemini-3.5-flash-lite`, hỗ trợ chọn riêng `vision_model_name`).
+  - `"openai_compat"`: Kết nối mọi endpoint chuẩn OpenAI Chat Completions (**Ollama LAN / LM Studio / vLLM** chạy 100% offline không cần API Key, hoặc **OpenRouter / Cerebras / DeepSeek**).
+  - `"dev_ai_engine"`: Chạy mẫu tùy biến trong `Dev_AI_Engine.py`.
+- `ai_vision_active` / `ai_vision_usb_device`: bật/tắt **VBot Vision** (`inspect_camera`) chụp ảnh Zero-disk trên RAM từ Camera Home Assistant hoặc USB/Pi Camera.
+- `ai_knowledge_vector_active`: bật tìm kiếm Hybrid FTS5 + Vector 256-dim; ưu tiên Gemini Embedding và **tự động dự phòng sang Vector Cục Bộ 100% Offline (`local-subword-256`, `< 2ms` trên Pi Zero 2W)** khi không có Gemini Key hoặc mất mạng.
 - `fallback_to_vbot_on_error`: `true` sẽ tự động chuyển về bộ xử lý VBot nội bộ nếu AI gặp lỗi mạng, timeout hoặc hết hạn mức.
-- `ai_intent_cache_active`: bật/tắt Bộ Đệm Lệnh AI Cục Bộ (0 token).
-- `face_display_sse_active`: bật/tắt luồng SSE `/ai-face/events` phục vụ màn hình biểu cảm OLED `html/Face.php` (mặc định `false` để tiết kiệm tài nguyên khi không dùng màn hình mặt).
+- `intent_cache_active`: bật/tắt Bộ Đệm Lệnh AI Cục Bộ (0 token).
+- `face_display_sse_active`: bật/tắt luồng SSE `/ai-face/events` phục vụ màn hình biểu cảm `html/Face.php` (đĩa xoay ảnh bìa + 4 nút điều khiển nhạc, thời tiết, đồng hồ đếm ngược, chế độ ngủ đêm, OLED Pixel Shift).
 
 ---
 

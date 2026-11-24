@@ -2,11 +2,19 @@
     "backlist": {
         "tts_zalo": {
             "backlist_limit": [],
-            "last_run_date": "28/11/2024"
+            "last_run_date": "23/04/2026"
         },
         "tts_viettel": {
             "backlist_limit": [],
             "last_run_date": "03/11/2024"
+        },
+        "groq": {
+            "backlist_limit": [],
+            "last_run_date": "24/11/2026"
+        },
+        "gemini": {
+            "backlist_limit": [],
+            "last_run_date": "21/11/2026"
         }
     }
 }
