@@ -4,7 +4,7 @@ import time
 # ===== Cấu hình LED =====
 LED_COUNT = 24         # Số lượng LED
 LED_PIN = 10           # GPIO10 (SPI MOSI)
-LED_FREQ_HZ = 800000   # WS2812 yêu cầu 800kHz
+LED_FREQ_HZ = 1000000   # WS2812 yêu cầu 800kHz
 LED_DMA = 10
 LED_BRIGHTNESS = 250   # Độ sáng (0-255)
 LED_INVERT = False
