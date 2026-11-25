@@ -14,8 +14,8 @@ fi
 
 systemctl stop vbot-dlna-renderer.service 2>/dev/null || true
 
-apt-get update
-DEBIAN_FRONTEND=noninteractive apt-get install -y \
+apt-get -o DPkg::Lock::Timeout=60 update
+DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=60 install -y \
   autoconf automake libtool pkg-config make gcc git \
   libglib2.0-dev libupnp-dev libgstreamer1.0-dev \
   gstreamer1.0-alsa gstreamer1.0-plugins-base \

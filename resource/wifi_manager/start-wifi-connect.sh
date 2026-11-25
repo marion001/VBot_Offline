@@ -7,6 +7,7 @@ TIME_AP=60
 SSID="VBot_Assistant"
 FAILED_WIFI_UUID=
 FAILED_WIFI_UNTIL=0
+FAILED_WIFI_ENTRIES=
 APACHE_STOPPED=0
 WIFI_LOGGED=0
 
@@ -56,13 +57,50 @@ retry_saved_wifi() {
     try_saved_uuid "$uuid"
 }
 
+wifi_uuid_in_backoff() {
+    now_up=$(uptime_seconds)
+    if [ "$1" = "${FAILED_WIFI_UUID:-}" ] && [ "$now_up" -lt "${FAILED_WIFI_UNTIL:-0}" ]; then
+        return 0
+    fi
+    for entry in ${FAILED_WIFI_ENTRIES:-}; do
+        f_uuid=${entry%%:*}
+        f_until=${entry#*:}
+        if [ "$f_uuid" = "$1" ] && [ "$now_up" -lt "$f_until" ]; then
+            return 0
+        fi
+    done
+    return 1
+}
+
+record_failed_wifi() {
+    now_up=$(uptime_seconds)
+    next_entries=
+    for entry in ${FAILED_WIFI_ENTRIES:-}; do
+        f_uuid=${entry%%:*}
+        f_until=${entry#*:}
+        if [ "$f_uuid" != "$1" ] && [ "$now_up" -lt "$f_until" ]; then
+            next_entries="${next_entries:+$next_entries }$entry"
+        fi
+    done
+    if [ "${2:-0}" -gt 0 ]; then
+        until_up=$((now_up + $2))
+        FAILED_WIFI_UUID=$1
+        FAILED_WIFI_UNTIL=$until_up
+        next_entries="${next_entries:+$next_entries }$1:$until_up"
+    elif [ "${FAILED_WIFI_UUID:-}" = "$1" ]; then
+        FAILED_WIFI_UUID=
+        FAILED_WIFI_UNTIL=0
+    fi
+    FAILED_WIFI_ENTRIES=$next_entries
+}
+
 find_saved_wifi() {
     timeout 6 nmcli --wait 5 device wifi rescan ifname wlan0 >/dev/null 2>&1 || true
     available=$(nmcli_query -e no -t -f SSID device wifi list ifname wlan0 --rescan no) || return 1
     deadline=$(($(uptime_seconds) + 10))
     for uuid in $(nmcli_query -t -f UUID,TYPE connection show | awk -F: '$2=="wifi" || $2=="802-11-wireless" {print $1}'); do
         [ "$(uptime_seconds)" -lt "$deadline" ] || break
-        if [ "$uuid" = "$FAILED_WIFI_UUID" ] && [ "$(uptime_seconds)" -lt "$FAILED_WIFI_UNTIL" ]; then continue; fi
+        if wifi_uuid_in_backoff "$uuid"; then continue; fi
         auto=$(nmcli_query -g connection.autoconnect connection show uuid "$uuid")
         [ "$auto" = yes ] || continue
         mode=$(nmcli_query -g 802-11-wireless.mode connection show uuid "$uuid") || continue
@@ -80,11 +118,10 @@ try_saved_uuid() {
     [ -n "$1" ] || return 1
     printf 'Thử một hồ sơ Wi-Fi đã lưu (tối đa 12 giây): %s\n' "$1"
     if timeout 15 nmcli --wait 12 connection up uuid "$1" ifname wlan0 >/dev/null 2>&1 && wifi_station_connected; then
-        FAILED_WIFI_UUID=
+        record_failed_wifi "$1" 0
         return 0
     fi
-    FAILED_WIFI_UUID=$1
-    FAILED_WIFI_UNTIL=$(($(uptime_seconds) + 300))
+    record_failed_wifi "$1" 300
     return 1
 }
 
@@ -207,11 +244,12 @@ start_ap() {
 
 while true; do
     # Do not start a setup AP during a timed trial of a new IP/DNS config.
-    if python3 -c 'import glob,json,time,subprocess,pathlib; pending=False
+    if grep -Eq '"stage"[[:space:]]*:[[:space:]]*"(scheduled|applying|awaiting_confirm)"' /var/lib/vbot-network/*.json 2>/dev/null; then
+        if python3 -c 'import glob,json,time,subprocess,pathlib; pending=False
 boot=pathlib.Path("/proc/sys/kernel/random/boot_id").read_text().strip()
 for path in glob.glob("/var/lib/vbot-network/*.json"):
  try:
-  data=json.load(open(path))
+  with open(path,encoding="utf-8") as fh: data=json.load(fh)
   if data.get("stage") not in ("scheduled","applying","awaiting_confirm"): continue
   expired=time.time()>=data.get("deadline",0)+45 or data.get("boot_id")!=boot
   helper=data.get("helper","")
@@ -222,9 +260,10 @@ for path in glob.glob("/var/lib/vbot-network/*.json"):
  except subprocess.TimeoutExpired: print("Khôi phục thử cấu hình hết thời gian; cho phép AP dự phòng.")
  except (OSError,ValueError): pass
 raise SystemExit(0 if pending else 1)' ; then
-        printf 'Đang thử cấu hình Wi-Fi mới; chưa chuyển sang AP.\n'
-        sleep 10
-        continue
+            printf 'Đang thử cấu hình Wi-Fi mới; chưa chuyển sang AP.\n'
+            sleep 10
+            continue
+        fi
     fi
     retry_saved_wifi || true
     if wifi_station_connected; then
@@ -240,8 +279,8 @@ raise SystemExit(0 if pending else 1)' ; then
         if ! systemctl is-active --quiet apache2; then
             systemctl start apache2 || printf 'Không khởi động được Apache2; không reboot.\n'
         fi
-        systemctl start --no-block vbot-pan-policy.service >/dev/null 2>&1 || true
         if [ "$WIFI_LOGGED" = 0 ]; then
+            systemctl start --no-block vbot-pan-policy.service >/dev/null 2>&1 || true
             printf 'Wi-Fi router đang kết nối; kiểm tra mỗi 10 giây. Auto VBot sẽ ưu tiên Wi-Fi.\n'
             WIFI_LOGGED=1
         fi

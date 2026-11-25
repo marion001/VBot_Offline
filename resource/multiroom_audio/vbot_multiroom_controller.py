@@ -15,16 +15,22 @@ from datetime import datetime
 
 #Thư mục gốc VBot:
 #/home/pi/VBot_Offline
-VBOT_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+VBOT_ROOT_PATH = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", ".."))
 
 if VBOT_ROOT_PATH not in sys.path:
     sys.path.insert(0, VBOT_ROOT_PATH)
 
 LOG_FILE = f"{VBOT_ROOT_PATH}/resource/log/Vbot_error.log"
+MAX_LOG_BYTES = 5 * 1024 * 1024
 
 def write_error_log(error):
     try:
         os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+        try:
+            if os.path.getsize(LOG_FILE) >= MAX_LOG_BYTES:
+                os.replace(LOG_FILE, LOG_FILE + ".1")
+        except OSError:
+            pass
         current_time = datetime.now().strftime("%H:%M:%S %d-%m-%Y")
         with open(LOG_FILE, "a", encoding="utf-8") as log_file:
             log_file.write(

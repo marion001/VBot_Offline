@@ -15,11 +15,12 @@ def merge_tools(data):
     data = copy.deepcopy(data)
     if not isinstance(data, dict) or not isinstance(data.get('tools'), list):
         return data
+    catalog_doc = json.loads(CATALOG.read_text(encoding='utf-8-sig'))
     names = {t.get('name') for t in data['tools'] if isinstance(t, dict)}
-    for tool in json.loads(CATALOG.read_text(encoding='utf-8'))['tools']:
+    for tool in catalog_doc.get('tools', []):
         if tool['name'] not in names:
             data['tools'].append(tool)
-    extensions=json.loads(CATALOG.read_text(encoding='utf-8')).get('extensions',{})
+    extensions=catalog_doc.get('extensions',{})
     for tool in data['tools']:
         extension=extensions.get(tool.get('name')) if isinstance(tool,dict) else None
         if not extension:continue
@@ -64,7 +65,7 @@ def scheduler_control(args,lib,build_notification):
             if not data['active']:raise ValueError('Wake-on-LAN đang tắt')
             targets=data['devices'];prefix='wol:'
         if action=='targets':
-            return result(action,[{k:row[k] for k in ('id','name','enabled')} for row in targets],'Các mục đã cấu hình')
+            return result(action,[{'id':row.get('id'),'name':row.get('name'),'enabled':bool(row.get('enabled',True))} for row in targets if isinstance(row,dict)],'Các mục đã cấu hình')
         selected=target(targets,{'id':args.get('target_id'),'name':args.get('target_name')})
         if not selected.get('enabled'):raise ValueError('Mục được chọn đang tắt')
         if args.get('home_assistant_control') is not None or args.get('repeat',1)!=1:
@@ -100,7 +101,8 @@ def scheduler_control(args,lib,build_notification):
             rows.append(new);parent['active']=True;selected_schedule=new
         elif action in ('delete','set_active'):
             selected_schedule=target(scheduled_actions(data,kind),args)
-            index=next(i for i,row in enumerate(rows) if row['id']==selected_schedule['id'])
+            index=next((i for i,row in enumerate(rows) if isinstance(row,dict) and row.get('id')==selected_schedule['id']),None)
+            if index is None:raise ValueError('Không tìm thấy lịch tác vụ cần cập nhật')
             if action=='delete':rows.pop(index)
             else:
                 if type(args.get('active')) is not bool:raise ValueError('active cần true/false')
@@ -185,7 +187,7 @@ def calendar_change(args):
 
 
 async def execute(name, args, lib):
-    require_enabled(name,lib)
+    await asyncio.to_thread(require_enabled,name,lib)
     action = args.get('action')
     if name=='_VBot_HASS_Custom':
         if not getattr(lib,'home_assistant_active',False) or not getattr(lib,'hass_custom_commands_active',False):
@@ -224,7 +226,7 @@ async def execute(name, args, lib):
         if not routines.is_enabled():raise ValueError('Kịch bản nhiều bước đang tắt')
         if action=='list':
             data=await asyncio.to_thread(routines.load)
-            return result(action,[{k:row[k] for k in ('id','name','enabled')} for row in data['routines']])
+            return result(action,[{'id':row['id'],'name':row['name'],'enabled':bool(row.get('enabled',True))} for row in data['routines']])
         if action=='status':return result(action,routines.snapshot())
         if action=='cancel':return result(action,{'cancelled':routines.cancel()})
         if action!='run':raise ValueError('Thao tác kịch bản không hợp lệ')
@@ -235,8 +237,8 @@ async def execute(name, args, lib):
     if name=='_VBot_Wake_On_LAN':
         import Wake_On_LAN as wol
         data=await asyncio.to_thread(wol.load)
-        if not data['active']:raise ValueError('Wake-on-LAN đang tắt')
-        if action=='list':return result(action,[{k:row[k] for k in ('id','name','enabled')} for row in data['devices']])
+        if not data.get('active'):raise ValueError('Wake-on-LAN đang tắt')
+        if action=='list':return result(action,[{'id':row['id'],'name':row['name'],'enabled':bool(row.get('enabled',True))} for row in data['devices']])
         if action!='wake':raise ValueError('Thao tác Wake-on-LAN không hợp lệ')
         row=target(data['devices'],args)
         message=await asyncio.to_thread(wol.send,row['id'])

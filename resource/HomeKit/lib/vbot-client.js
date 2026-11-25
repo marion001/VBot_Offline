@@ -238,16 +238,32 @@ class VBotClient extends EventEmitter {
 
     const decoder = new TextDecoder();
     let buffer = "";
-    for await (const chunk of response.body) {
-      buffer += decoder.decode(chunk, { stream: true });
-      let boundary;
-      while ((boundary = buffer.search(/\r?\n\r?\n/)) !== -1) {
-        const frame = buffer.slice(0, boundary);
-        const separator = buffer.slice(boundary).match(/^\r?\n\r?\n/)[0];
-        buffer = buffer.slice(boundary + separator.length);
-        const payload = parseSseFrame(frame);
-        if (payload) this.publishState(payload);
+    const idleTimeoutMs = Math.max(45000, this.config.requestTimeoutMs * 6);
+    let idleTimer = null;
+    const resetIdleTimer = () => {
+      if (idleTimer) clearTimeout(idleTimer);
+      idleTimer = setTimeout(() => {
+        if (this.streamController) this.streamController.abort(new Error("VBot SSE không nhận dữ liệu trong thời gian dài"));
+      }, idleTimeoutMs);
+      if (typeof idleTimer.unref === "function") idleTimer.unref();
+    };
+    resetIdleTimer();
+    try {
+      for await (const chunk of response.body) {
+        resetIdleTimer();
+        buffer += decoder.decode(chunk, { stream: true });
+        if (buffer.length > 1024 * 1024) throw new Error("Bộ đệm VBot SSE vượt quá 1MB");
+        let boundary;
+        while ((boundary = buffer.search(/\r?\n\r?\n/)) !== -1) {
+          const frame = buffer.slice(0, boundary);
+          const separator = buffer.slice(boundary).match(/^\r?\n\r?\n/)[0];
+          buffer = buffer.slice(boundary + separator.length);
+          const payload = parseSseFrame(frame);
+          if (payload) this.publishState(payload);
+        }
       }
+    } finally {
+      if (idleTimer) clearTimeout(idleTimer);
     }
     if (this.running) throw new Error("Luồng VBot SSE đã đóng");
   }
@@ -263,12 +279,17 @@ class VBotClient extends EventEmitter {
     const now = Date.now();
     const current = this.commandCooldowns.get(key);
     if (current && current.until > now) return current.promise;
-    const promise = Promise.resolve().then(operation);
-    const entry = { promise, until: now + windowMs };
+    const entry = { promise: null, until: now + windowMs };
+    const promise = Promise.resolve().then(operation).catch(error => {
+      if (this.commandCooldowns.get(key) === entry) this.commandCooldowns.delete(key);
+      throw error;
+    });
+    entry.promise = promise;
     this.commandCooldowns.set(key, entry);
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (this.commandCooldowns.get(key) === entry) this.commandCooldowns.delete(key);
     }, windowMs);
+    if (typeof timer.unref === "function") timer.unref();
     return promise;
   }
 
@@ -414,21 +435,41 @@ class VBotClient extends EventEmitter {
     run();
     const runMultiroom = async () => {
       while (this.running) {
+        let idleTimer = null;
         try {
           this.multiroomStreamController = new AbortController();
-          const response = await this.fetch(
-            `${this.config.baseUrl}/multiroom/events?interval=${this.config.sseIntervalSeconds}`,
-            {
-            headers: { ...this.headers(), Accept: "text/event-stream" }, signal: this.multiroomStreamController.signal,
-            },
-          );
+          const connectTimeout = setTimeout(() => {
+            if (this.multiroomStreamController) this.multiroomStreamController.abort();
+          }, this.config.requestTimeoutMs);
+          let response;
+          try {
+            response = await this.fetch(
+              `${this.config.baseUrl}/multiroom/events?interval=${this.config.sseIntervalSeconds}`,
+              {
+              headers: { ...this.headers(), Accept: "text/event-stream" }, signal: this.multiroomStreamController.signal,
+              },
+            );
+          } finally {
+            clearTimeout(connectTimeout);
+          }
           if (!response.ok) throw await this.sseHttpError("Multiroom", response);
           if (!response.body) throw new Error("Multiroom SSE không có response body");
           this.markClientSuccess("multiroom-sse");
           const decoder = new TextDecoder();
           let buffer = "";
+          const idleTimeoutMs = Math.max(45000, this.config.requestTimeoutMs * 6);
+          const resetIdleTimer = () => {
+            if (idleTimer) clearTimeout(idleTimer);
+            idleTimer = setTimeout(() => {
+              if (this.multiroomStreamController) this.multiroomStreamController.abort(new Error("Multiroom SSE không nhận dữ liệu trong thời gian dài"));
+            }, idleTimeoutMs);
+            if (typeof idleTimer.unref === "function") idleTimer.unref();
+          };
+          resetIdleTimer();
           for await (const chunk of response.body) {
+            resetIdleTimer();
             buffer += decoder.decode(chunk, { stream: true });
+            if (buffer.length > 1024 * 1024) throw new Error("Bộ đệm Multiroom SSE vượt quá 1MB");
             let boundary;
             while ((boundary = buffer.search(/\r?\n\r?\n/)) !== -1) {
               const frame = buffer.slice(0, boundary);
@@ -438,11 +479,14 @@ class VBotClient extends EventEmitter {
               if (payload?.multiroom) this.emit("multiroomState", payload.multiroom);
             }
           }
+          if (this.running) throw new Error("Luồng Multiroom SSE đã đóng");
         } catch (error) {
           if (!this.running) break;
           this.reportClientError("multiroom-sse", error);
           if (this.multiroomStreamController) this.multiroomStreamController.abort();
           await new Promise(resolve => { this.multiroomRetryTimer = setTimeout(resolve, this.reconnectDelay("multiroom-sse", error)); });
+        } finally {
+          if (idleTimer) clearTimeout(idleTimer);
         }
       }
     };

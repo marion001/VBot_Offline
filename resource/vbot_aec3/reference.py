@@ -8,6 +8,17 @@ import threading
 import time
 
 HEADER = struct.Struct('!dIIIII')  # monotonic time, rate, delay, XRUNs, PID, sequence
+_SILENCE_1920 = bytes(1920)
+_SILENCE_1764 = bytes(1764)
+
+
+def _is_pcm_silence(pcm):
+    ln = len(pcm)
+    if ln == 1920:
+        return pcm == _SILENCE_1920
+    if ln == 1764:
+        return pcm == _SILENCE_1764
+    return pcm == bytes(ln)
 
 
 def socket_path():
@@ -22,22 +33,31 @@ def socket_path():
 class ReferenceSender:
     def __init__(self, rate, playback):
         self.rate, self.playback = rate, playback
+        self.path = socket_path()
+        self.pid = os.getpid()
         self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self.sock.setblocking(False)
-        self.path = socket_path()
         self.sequence = 0
 
     def send(self, pcm):
         # Split oversized ALSA writes into <=10 ms datagrams.
         size = self.rate // 100 * 4
-        for offset in range(0, len(pcm), size):
-            header = HEADER.pack(time.monotonic(), self.rate, self.playback.delay_ms,
-                                 self.playback.underruns, os.getpid(), self.sequence)
-            self.sequence = (self.sequence + 1) & 0xffffffff
-            try:
-                self.sock.sendto(header + pcm[offset:offset + size], self.path)
-            except OSError:
-                pass  # Wake consumer absent/full never stalls speaker playback.
+        has_sendmsg = hasattr(self.sock, 'sendmsg')
+        mv = memoryview(pcm)
+        try:
+            for offset in range(0, len(pcm), size):
+                header = HEADER.pack(time.monotonic(), self.rate, self.playback.delay_ms,
+                                     self.playback.underruns, self.pid, self.sequence)
+                self.sequence = (self.sequence + 1) & 0xffffffff
+                try:
+                    if has_sendmsg:
+                        self.sock.sendmsg([header, mv[offset:offset + size]], (), 0, self.path)
+                    else:
+                        self.sock.sendto(header + pcm[offset:offset + size], self.path)
+                except OSError:
+                    pass  # Wake consumer absent/full never stalls speaker playback.
+        finally:
+            mv.release()
 
     def close(self):
         self.sock.close()
@@ -47,8 +67,8 @@ class ReferenceListener:
     def __init__(self, callback, error, manual=False, max_batch_ms=100):
         self.callback, self.error = callback, error
         self.stopped = threading.Event()
-        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         self.path = socket_path()
+        self.sock = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         # Refuse a live owner; only remove a stale socket from a previous crash.
         probe = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
         try:
@@ -73,13 +93,17 @@ class ReferenceListener:
         self.last_drop = None
         self._last_diagnostic = 0
         self.stats = dict(received=0, stale=0, overflow=0, callback_busy=0, foreign_silence=0)
-        self.sock.bind(self.path)
-        self.sock.settimeout(.1)
-        self.thread = threading.Thread(target=self._run, name='aec-render-reference', daemon=True)
-        self.worker = None if manual else threading.Thread(target=self._deliver, name='aec-reference-dsp', daemon=True)
-        if self.worker is not None:
-            self.worker.start()
-        self.thread.start()
+        try:
+            self.sock.bind(self.path)
+            self.sock.settimeout(.1)
+            self.thread = threading.Thread(target=self._run, name='aec-render-reference', daemon=True)
+            self.worker = None if manual else threading.Thread(target=self._deliver, name='aec-reference-dsp', daemon=True)
+            if self.worker is not None:
+                self.worker.start()
+            self.thread.start()
+        except Exception:
+            self.sock.close()
+            raise
 
     def _run(self):
         # Never wait for the DSP/microphone lock on the socket reader.
@@ -91,26 +115,31 @@ class ReferenceListener:
                 if len(packet) <= HEADER.size:
                     continue
                 timestamp, rate, delay, xruns, pid, seq = HEADER.unpack_from(packet)
-                age = time.monotonic() - timestamp
-                pcm = packet[HEADER.size:]
-                if age < 0 or age > .15 or rate not in (44100, 48000) or len(pcm) % 4:
+                now = time.monotonic()
+                age = now - timestamp
+                pcm_len = len(packet) - HEADER.size
+                if age < 0 or age > .15 or rate not in (44100, 48000) or (pcm_len & 3):
                     self.stats['stale'] += 1
                     self.last_drop = dict(reason='socket_stale_or_invalid', age_ms=round(age*1000, 3), pid=pid, seq=seq, rate=rate)
                     continue
                 # A client can have both a silent local bridge and a playing
                 # Multiroom receiver. Foreign silence is not a source takeover.
-                now = time.monotonic()
-                if selected_pid is not None and pid != selected_pid and now - last_selected < .3 and not any(pcm):
-                    self.stats['foreign_silence'] = self.stats.get('foreign_silence', 0) + 1
-                    continue
+                if selected_pid is not None and pid != selected_pid and now - last_selected < .3:
+                    pcm_probe = packet[HEADER.size:]
+                    if _is_pcm_silence(pcm_probe):
+                        self.stats['foreign_silence'] = self.stats.get('foreign_silence', 0) + 1
+                        continue
+                else:
+                    pcm_probe = None
                 selected_pid, last_selected = pid, now
                 with self.condition:
                     self.stats['received'] += 1
                     if not getattr(self, 'capture_active', True):
                         self.stats['idle_discarded'] = self.stats.get('idle_discarded', 0) + 1
                         continue
+                    pcm = pcm_probe if pcm_probe is not None else packet[HEADER.size:]
                     if hasattr(self, 'receive_timing'):
-                        self.receive_timing.append((now, timestamp, len(pcm)/(rate*4)*1000, pid))
+                        self.receive_timing.append((now, timestamp, pcm_len/(rate*4)*1000, pid))
                     self.serial += 1
                     self.pending.append((self.serial, timestamp, rate, delay, xruns, pid, seq, pcm))
                     self._trim()
@@ -189,39 +218,45 @@ class ReferenceListener:
             pump_started=time.monotonic()
             pump_gap_ms=(pump_started-getattr(self,'_last_pump_started',pump_started))*1000
             self._last_pump_started=pump_started
-            batch = [self.pending[0]]
-            batch_ms=len(batch[0][7])/(batch[0][2]*4)*1000
-            for p in list(self.pending)[1:]:
+            it = iter(self.pending)
+            first_pkt = next(it)
+            batch = [first_pkt]
+            batch_ms = len(first_pkt[7]) / (first_pkt[2] * 4) * 1000
+            max_ms = getattr(self, 'max_batch_ms', 100) + .001
+            for p in it:
                 last = batch[-1]
                 if p[2] != last[2] or p[5] != last[5] or p[6] != ((last[6] + 1) & 0xffffffff):
                     break
-                duration_ms=len(p[7])/(p[2]*4)*1000
-                if batch_ms+duration_ms>getattr(self,'max_batch_ms',100)+.001:
+                duration_ms = len(p[7]) / (p[2] * 4) * 1000
+                if batch_ms + duration_ms > max_ms:
                     break
                 batch.append(p)
-                batch_ms+=duration_ms
+                batch_ms += duration_ms
             queued_packets = len(self.pending)
             generation = getattr(self, 'generation', 0)
+            prev_snapshot = self.previous
+            last_delivered_ts = getattr(self, '_last_delivered_timestamp', batch[0][1])
+            stats_snapshot = dict(self.stats)
             # Transfer ownership BEFORE DSP work. Counting an in-flight batch
             # against the pending limit makes the socket reader discard fresh
             # packets while that batch is already being consumed.
-            for _ in batch:
+            for _ in range(len(batch)):
                 self.pending.popleft()
         first, last = batch[0], batch[-1]
         age = max(0, time.monotonic() - last[1])
-        discontinuity = self.previous != (first[5], (first[6] - 1) & 0xffffffff, first[2])
+        discontinuity = prev_snapshot != (first[5], (first[6] - 1) & 0xffffffff, first[2])
         if discontinuity and hasattr(self, 'diagnostics'):
-            previous = self.previous
+            previous = prev_snapshot
             reason = ('initial_or_stale_history' if previous is None else
                       'sender_changed' if previous[0] != first[5] else
                       'rate_changed' if previous[2] != first[2] else 'sequence_gap')
             detail = dict(event='reference_gap', reason=reason, pid=first[5], seq=first[6], rate=first[2],
                           previous=previous, packet_age_ms=round(age*1000,3),
                           oldest_age_ms=round(max(0,time.monotonic()-first[1])*1000,3),
-                          delivery_gap_ms=round((first[1]-getattr(self,'_last_delivered_timestamp',first[1]))*1000,3),
+                          delivery_gap_ms=round((first[1]-last_delivered_ts)*1000,3),
                           queue_packets=queued_packets, batch_packets=len(batch),
                           batch_pcm_ms=round(batch_ms,3),pump_gap_ms=round(pump_gap_ms,3),
-                          last_drop=getattr(self,'last_drop',None), counters=dict(self.stats), at_mono=round(time.monotonic(),3))
+                          last_drop=getattr(self,'last_drop',None), counters=stats_snapshot, at_mono=round(time.monotonic(),3))
             self.last_discontinuity = detail
             if time.monotonic()-self._last_diagnostic >= 1:
                 self.diagnostics.append(detail)
@@ -229,14 +264,15 @@ class ReferenceListener:
         try:
             callback_started = time.monotonic()
             callback_cpu_started=time.thread_time()
-            accepted = self.callback(b''.join(p[7] for p in batch), first[2],
+            joined_pcm = batch[0][7] if len(batch) == 1 else b''.join(p[7] for p in batch)
+            accepted = self.callback(joined_pcm, first[2],
                 max(0, last[3] - round(age * 1000)), last[4], discontinuity)
             self.last_callback_ms = round((time.monotonic()-callback_started)*1000,3)
             if hasattr(self,'pump_timing'):
                 self.pump_timing.append((pump_gap_ms,batch_ms,self.last_callback_ms,(time.thread_time()-callback_cpu_started)*1000))
             if accepted is False:
-                self.stats['callback_busy'] += 1
                 with self.condition:
+                    self.stats['callback_busy'] += 1
                     if (getattr(self, 'capture_active', True) and not self.stopped.is_set()
                             and generation == getattr(self, 'generation', 0)):
                         self.pending.extendleft(reversed(batch))

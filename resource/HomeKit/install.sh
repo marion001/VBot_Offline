@@ -119,7 +119,7 @@ otp_serial="$(vcgencmd otp_dump | awk -F: '$1 == "28" {gsub(/[[:space:]]/, "", $
 [[ "$otp_serial" =~ ^[0-9A-F]+$ ]] || die "Không đọc được OTP hợp lệ tại hàng 28 từ vcgencmd otp_dump"
 export VBOT_HOMEKIT_OTP_SERIAL="28:${otp_serial}"
 export VBOT_HOMEKIT_CONFIG_PATH="$VBOT_CONFIG_PATH"
-/usr/local/bin/node -e 'const fs=require("node:fs");const p=process.env.VBOT_HOMEKIT_CONFIG_PATH;const c=JSON.parse(fs.readFileSync(p,"utf8").replace(/^\uFEFF/,""));if(!c.homekit||typeof c.homekit!=="object")throw new Error("Config.json thiếu mục homekit");c.homekit.serial_number=process.env.VBOT_HOMEKIT_OTP_SERIAL;const t=p+".homekit.tmp";fs.writeFileSync(t,JSON.stringify(c,null,4)+"\n",{mode:0o644});fs.renameSync(t,p);'
+/usr/local/bin/node -e 'const fs=require("node:fs");const p=process.env.VBOT_HOMEKIT_CONFIG_PATH;const st=fs.statSync(p);const c=JSON.parse(fs.readFileSync(p,"utf8").replace(/^\uFEFF/,""));if(!c.homekit||typeof c.homekit!=="object")throw new Error("Config.json thiếu mục homekit");c.homekit.serial_number=process.env.VBOT_HOMEKIT_OTP_SERIAL;const t=p+".homekit.tmp";fs.writeFileSync(t,JSON.stringify(c,null,4)+"\n",{mode:st.mode&0o777});try{fs.chmodSync(t,st.mode&0o777);}catch(_){}fs.renameSync(t,p);'
 unset VBOT_HOMEKIT_OTP_SERIAL VBOT_HOMEKIT_CONFIG_PATH
 echo "Serial Number HomeKit: 28:${otp_serial} (đã ghi vào Config.json)"
 install -m 644 "$SCRIPT_DIR/package.template.json" "${STATE_DIR}/package.json"

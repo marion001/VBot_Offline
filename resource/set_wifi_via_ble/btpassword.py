@@ -1,9 +1,12 @@
 #!/usr/bin/python3
 
 import argparse
+import os
+from pathlib import Path
+import tempfile
 
 class PW:
-    PWFILE = "crypto"
+    PWFILE = str(Path(__file__).resolve().parent / "crypto")
 
     def __init__(self):
         self.password = self.getPassword()
@@ -15,13 +18,24 @@ class PW:
             with open(PW.PWFILE, 'r', encoding="utf-8") as f:
                 pw = f.readline().rstrip()
                 return pw if len(pw) > 0 else None     
-        except:
+        except Exception:
             return None
     
     def savePassword(self,pw):
         if pw is not None:
-            with open(PW.PWFILE,'w+',encoding="utf-8") as f:
-                f.write(pw)
+            parent = os.path.dirname(os.path.abspath(PW.PWFILE))
+            os.makedirs(parent, exist_ok=True)
+            fd, tmp_path = tempfile.mkstemp(dir=parent, prefix=".crypto-")
+            try:
+                with os.fdopen(fd, 'w', encoding="utf-8") as f:
+                    f.write(pw)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.chmod(tmp_path, 0o600)
+                os.replace(tmp_path, PW.PWFILE)
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
 
     def userPassword(self):
         new_password = ""

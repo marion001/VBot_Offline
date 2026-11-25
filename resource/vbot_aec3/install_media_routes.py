@@ -116,9 +116,9 @@ def main():
         prepared = run(sys.executable, str(hardware), '--root', str(root), '--routes-lock-held')
         if 'AUDIO_HARDWARE_REPAIRED' in prepared.stdout:
             print(prepared.stdout.strip())
-    cfg = json.loads(config_path.read_text())
     if args.ensure or args.apply:
-        asound_text = Path('/etc/asound.conf').read_text() if Path('/etc/asound.conf').exists() else ''
+        cfg = json.loads(config_path.read_text(encoding='utf-8-sig'))
+        asound_text = Path('/etc/asound.conf').read_text(encoding='utf-8', errors='surrogateescape') if Path('/etc/asound.conf').exists() else ''
         smart = cfg.get('smart_config', {})
         aec = smart.get('audio_processing', {}).get('aec3', smart.get('aec3', {}))
         media = cfg.get('media_player', {}).get('multiroom_audio', {})
@@ -127,14 +127,14 @@ def main():
         complete = (BEGIN in asound_text and END in asound_text
                     and 'pcm.vbot_aec_media' in asound_text
                     and airplay.is_file()
-                    and re.search(r'output_device\s*=\s*"vbot_aec_media"', airplay.read_text())
-                    and override.is_file() and '--pcm=vbot_aec_media' in override.read_text())
+                    and re.search(r'output_device\s*=\s*"vbot_aec_media"', airplay.read_text(encoding='utf-8', errors='surrogateescape'))
+                    and override.is_file() and '--pcm=vbot_aec_media' in override.read_text(encoding='utf-8', errors='surrogateescape'))
         if complete:
             if (aec.get('external_sources') is not True
                     or media.get('vlc_loopback_output_device') != 'vbot_aec_media'
                     or media.get('vlc_loopback_capture_device') != 'plughw:Loopback,1,1'):
                 backup = Path('/home/pi/VBot_AEC3/routing_backups') / datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f_config')
-                backup.mkdir(parents=True)
+                backup.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(config_path, backup / 'Config.json')
                 if 'audio_processing' in smart:
                     smart['audio_processing'].setdefault('aec3', {})['external_sources'] = True
@@ -144,7 +144,7 @@ def main():
                 cfg.setdefault('media_player', {}).setdefault('multiroom_audio', {}).update(
                     vlc_loopback_output_device='vbot_aec_media',
                     vlc_loopback_capture_device='plughw:Loopback,1,1')
-                atomic_write(config_path, (json.dumps(cfg, ensure_ascii=False, indent=4) + '\n').encode())
+                atomic_write(config_path, (json.dumps(cfg, ensure_ascii=False, indent=4) + '\n').encode('utf-8'))
                 print('SHARED_MEDIA_CONFIG_REPAIRED BACKUP', backup)
             print('SHARED_MEDIA_ROUTES_READY - Đường âm thanh chung đã được cài đặt và bật cấu hình từ trước; không cần cài lại.')
             return
@@ -153,7 +153,7 @@ def main():
     parent = os.getpid()
     for _ in range(12):
         try:
-            parent = int(re.search(r'^PPid:\s+(\d+)', Path('/proc', str(parent), 'status').read_text(), re.M).group(1))
+            parent = int(re.search(r'^PPid:\s+(\d+)', Path('/proc', str(parent), 'status').read_text(encoding='utf-8', errors='replace'), re.M).group(1))
         except (OSError, AttributeError):
             break
         ancestors.add(parent)
@@ -166,26 +166,26 @@ def main():
             argv = (proc / 'cmdline').read_bytes().split(b'\0')
             if int(proc.name) == args.startup_pid:
                 continue
-            if any(Path(x.decode()).name in ('Start.py', 'VBot.py') for x in argv if x) and (proc / 'cwd').resolve() == root:
+            if any(Path(x.decode(errors='replace')).name in ('Start.py', 'VBot.py') for x in argv if x) and (proc / 'cwd').resolve() == root:
                 raise RuntimeError('Stop VBot before changing media routes')
         except (OSError, UnicodeError):
             continue
     if args.restore:
         restore(args.restore.resolve())
         return
-    if not any(p.read_text().strip() == 'Loopback' for p in Path('/proc/asound').glob('card*/id')):
+    if not any(p.read_text(encoding='utf-8', errors='replace').strip() == 'Loopback' for p in Path('/proc/asound').glob('card*/id')):
         raise RuntimeError('snd-aloop Loopback card is required')
     config_path = root / 'Config.json'
-    cfg = json.loads(config_path.read_text())
+    cfg = json.loads(config_path.read_text(encoding='utf-8-sig'))
     smart = cfg.setdefault('smart_config', {})
     aec = smart.get('audio_processing', {}).get('aec3', smart.get('aec3', {}))
     if aec.get('external_sources'):
         raise RuntimeError('Cấu hình đã bật đường âm thanh chung nhưng thiết lập hệ thống chưa đầy đủ. Cần kiểm tra hoặc khôi phục từ bản sao lưu trước khi cài lại.')
     prefix = Path('/home/pi/VBot_AEC3')
-    backup = prefix / 'routing_backups' / datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    bus = (Path(__file__).with_name('media_bus.conf')).read_text()
+    backup = prefix / 'routing_backups' / datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
+    bus = (Path(__file__).with_name('media_bus.conf')).read_text(encoding='utf-8')
     asound = Path('/etc/asound.conf')
-    original = asound.read_text() if asound.exists() else ''
+    original = asound.read_text(encoding='utf-8', errors='surrogateescape') if asound.exists() else ''
     if BEGIN in original or END in original:
         raise RuntimeError('Existing media bus block needs restoration first')
     shairport = Path('/etc/shairport-sync.conf')
@@ -196,19 +196,19 @@ def main():
         smart.setdefault('aec3', {})['external_sources'] = True
     cfg.setdefault('media_player', {}).setdefault('multiroom_audio', {}).update(
         vlc_loopback_output_device='vbot_aec_media', vlc_loopback_capture_device='plughw:Loopback,1,1')
-    changes = {asound: (original + '\n' + BEGIN + '\n' + bus + END + '\n').encode(),
-               shairport: configure_shairport(shairport.read_text()).encode(),
+    changes = {asound: (original + '\n' + BEGIN + '\n' + bus + END + '\n').encode('utf-8', errors='surrogateescape'),
+               shairport: configure_shairport(shairport.read_text(encoding='utf-8', errors='surrogateescape')).encode('utf-8', errors='surrogateescape'),
                override: b'[Service]\nExecStart=\nExecStart=/usr/bin/bluealsa-aplay -S --volume=software --pcm=vbot_aec_media --pcm-buffer-time=200000 --pcm-period-time=50000\n',
-               config_path: (json.dumps(cfg, ensure_ascii=False, indent=4) + '\n').encode()}
+               config_path: (json.dumps(cfg, ensure_ascii=False, indent=4) + '\n').encode('utf-8')}
     # The service executes a separate installed copy, not the project source.
     agent_source = root / 'resource/bluetooth/bluetooth_agent.py'
     installed_agent = Path('/usr/local/bin/bluetooth_agent.py')
     if not agent_source.is_file() or not installed_agent.is_file():
         raise RuntimeError('Install the VBot Bluetooth agent before shared media routing')
     compile(agent_source.read_text(encoding='utf-8-sig'), str(agent_source), 'exec')
-    changes[installed_agent] = agent_source.read_bytes()
+    changes[installed_agent] = agent_source.read_bytes().replace(b'\r\n', b'\n')
     manifest = dict(files=[], running=[], services=SERVICES)
-    backup.mkdir(parents=True)
+    backup.mkdir(parents=True, exist_ok=True)
     for service in SERVICES:
         if subprocess.run(['systemctl', 'is-active', '--quiet', service]).returncode == 0:
             manifest['running'].append(service)

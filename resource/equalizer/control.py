@@ -1,4 +1,5 @@
 """Cached metadata/control, shared by MQTT and existing SSE. No audio processing."""
+import copy
 import json
 from pathlib import Path
 import subprocess
@@ -26,7 +27,11 @@ def _signature():
 def _call(request):
     p=subprocess.run(['php',str(ROOT/'resource/equalizer/mqtt_control.php')],
                      input=json.dumps(request),text=True,encoding='utf-8',capture_output=True,timeout=5)
-    data=json.loads(p.stdout)
+    try:
+        data=json.loads(p.stdout)
+    except json.JSONDecodeError as exc:
+        detail=(p.stderr or p.stdout or 'PHP EQ CLI error').strip()[:240]
+        raise RuntimeError(detail) from exc
     if not data.get('success'):
         raise ValueError(data.get('message','Không cập nhật được EQ'))
     return data
@@ -41,28 +46,31 @@ def snapshot():
         if _snapshot is None or stamp!=_stamp:
             try:
                 _snapshot=_call({'action':'snapshot'});_stamp=stamp
+                _retry_at=0;_error=''
             except Exception as error:
                 _error=str(error);_retry_at=time.monotonic()+5
                 raise
-        return _snapshot
+        return copy.deepcopy(_snapshot)
 
 
 def select(preset):
-    global _stamp,_snapshot
+    global _stamp,_snapshot,_retry_at,_error
     if not isinstance(preset,str) or len(preset)>80 or preset=='custom':
         raise ValueError('Chế độ EQ không hợp lệ; Custom chỉ hiển thị trạng thái tùy chỉnh.')
     with _lock:
         _snapshot=_call({'action':'select','id':preset})
         _stamp=None  # Force a subsequent read: a WebUI write may race the CLI.
-        return _snapshot
+        _retry_at=0;_error=''
+        return copy.deepcopy(_snapshot)
 
 
 def apply(bands):
     """Apply a partial patch; the PHP file lock protects concurrent band edits."""
-    global _stamp, _snapshot
+    global _stamp, _snapshot, _retry_at, _error
     if not isinstance(bands, dict) or not bands or len(bands)>8:
         raise ValueError('Thông số EQ không hợp lệ')
     with _lock:
         _snapshot=_call({'action':'apply','bands':bands})
         _stamp=None
-        return _snapshot
+        _retry_at=0;_error=''
+        return copy.deepcopy(_snapshot)

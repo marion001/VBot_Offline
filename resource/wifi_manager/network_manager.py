@@ -164,11 +164,12 @@ def execute(action, uuid, data):
         store(uuid, previous)
         args = [sys.executable, str(Path(__file__).resolve())]
         try:
-            run('systemd-run', '--quiet', '--unit=vbot-wifi-rollback-' + token, '--on-active=120',
+            run('systemd-run', '--quiet', '--collect', '--unit=vbot-wifi-rollback-' + token, '--on-active=120',
                 *args, 'rollback', '--uuid=' + uuid, '--token=' + token)
-            run('systemd-run', '--quiet', '--unit=vbot-wifi-apply-' + token, '--on-active=3',
+            run('systemd-run', '--quiet', '--collect', '--unit=vbot-wifi-apply-' + token, '--on-active=3',
                 *args, 'apply-worker', '--uuid=' + uuid, '--token=' + token)
         except Exception:
+            run('systemctl', 'stop', 'vbot-wifi-rollback-' + token + '.timer', check=False)
             previous['stage'] = 'saved'
             store(uuid, previous)
             raise
@@ -183,8 +184,14 @@ def execute(action, uuid, data):
         if not pending:
             return {'message': 'Không cần khôi phục.'}
         modify(uuid, previous['baseline'])
-        apply_connection(uuid)
         previous['stage'] = 'rolled_back'
+        try:
+            apply_connection(uuid)
+            previous.pop('error', None)
+        except Exception as error:
+            previous['error'] = str(error)
+            store(uuid, previous)
+            raise
         store(uuid, previous)
         return {'message': 'Đã khôi phục cấu hình Wi-Fi trước khi áp dụng.'}
     if action == 'apply-worker':
@@ -198,7 +205,12 @@ def execute(action, uuid, data):
             previous['stage'] = 'awaiting_confirm'
         except Exception as error:
             modify(uuid, previous['baseline'])
-            apply_connection(uuid)
+            try:
+                apply_connection(uuid)
+            except Exception:
+                pass
+            if previous.get('token'):
+                run('systemctl', 'stop', 'vbot-wifi-rollback-' + previous['token'] + '.timer', check=False)
             previous.update(stage='rolled_back', error=str(error))
         store(uuid, previous)
         return {}

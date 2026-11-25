@@ -88,35 +88,42 @@ def connected():
             if p.get('Connected') and p.get('Address')]
 
 
-def inputs(devices):
-    """Use unique Bluetooth identity only; never attribute an ambiguous name to a MAC."""
-    result = {}
+def _bt_input_entries():
+    entries = []
     for path in Path('/sys/class/input').glob('event*'):
         try:
             device = path / 'device'
-            if (device / 'id/bustype').read_text().strip() != '0005':
+            if (device / 'id/bustype').read_text(encoding='utf-8', errors='replace').strip() != '0005':
                 continue
-            name = (device / 'name').read_text().strip()
-            uniq = (device / 'uniq').read_text().strip().upper()
-            matches = [d for d in devices if (uniq == d['mac'] if uniq else
-                       name in d['names'] or name.removesuffix(' (AVRCP)') in d['names'])]
-            if len(matches) == 1:
-                result[Path('/dev/input') / path.name] = matches[0]['mac']
+            name = (device / 'name').read_text(encoding='utf-8', errors='replace').strip()
+            uniq = (device / 'uniq').read_text(encoding='utf-8', errors='replace').strip().upper()
+            entries.append((path, name, uniq))
         except OSError:
             continue
+    return entries
+
+
+def inputs(devices, entries=None):
+    """Use unique Bluetooth identity only; never attribute an ambiguous name to a MAC."""
+    result = {}
+    for path, name, uniq in (_bt_input_entries() if entries is None else entries):
+        matches = [d for d in devices if (uniq == d['mac'] if uniq else
+                   name in d['names'] or name.removesuffix(' (AVRCP)') in d['names'])]
+        if len(matches) == 1:
+            result[Path('/dev/input') / path.name] = matches[0]['mac']
     return result
 
 
 def learning():
     try:
-        return json.loads(LEARNING.read_text())['until'] > time.monotonic()
+        return json.loads(LEARNING.read_text(encoding='utf-8'))['until'] > time.monotonic()
     except (OSError, ValueError, KeyError, TypeError):
         return False
 
 
 def learned_tokens():
     try:
-        data = json.loads(LEARNING.read_text())
+        data = json.loads(LEARNING.read_text(encoding='utf-8'))
         tokens = data.get('tokens', []) + ([data['learned']] if isinstance(data.get('learned'), dict) else [])
         return [token for token in tokens if isinstance(token, dict) and
                 isinstance(token.get('until'), (int, float)) and token['until'] > time.monotonic()][-256:]
@@ -224,28 +231,58 @@ class Monitor:
 
     def run(self):
         handles, mapping, last, refreshed, names, owners = {}, {}, {}, 0, {}, {}
+        bindings = []
+        state_sig = None
+        prev_topology = None
+        last_dbus_refresh = 0.0
         try:
             while not self.stop_event.is_set():
-                if time.monotonic()-refreshed > 2:
-                    refreshed = time.monotonic()
+                now_mono = time.monotonic()
+                if now_mono - refreshed > 2:
+                    refreshed = now_mono
                     try:
-                        bindings = load()['buttons']
+                        try:
+                            st = STATE.stat()
+                            cur_sig = (st.st_mtime_ns, st.st_size)
+                        except OSError:
+                            cur_sig = None
+                        if cur_sig != state_sig:
+                            bindings = load()['buttons'] if cur_sig is not None else []
+                            state_sig = cur_sig
                         wanted = {b['mac'] for b in bindings if b.get('enabled', True)}
-                        devices = connected() if wanted else []
-                        names = {device['mac']: device['name'] for device in devices}
-                        mapping = {p: mac for p, mac in inputs(devices).items() if mac in wanted}
+                        entries = _bt_input_entries() if wanted else []
+                        if not wanted or not entries:
+                            mapping = {}
+                            prev_topology = None
+                        else:
+                            topology = (tuple((p.name, n, u) for p, n, u in entries), frozenset(wanted))
+                            need_dbus = (
+                                topology != prev_topology
+                                or (now_mono - last_dbus_refresh >= 30.0)
+                                or any(p not in handles for p in mapping)
+                            )
+                            if need_dbus:
+                                devices = connected()
+                                names = {device['mac']: device['name'] for device in devices}
+                                mapping = {p: mac for p, mac in inputs(devices, entries).items() if mac in wanted}
+                                prev_topology = topology
+                                last_dbus_refresh = now_mono
                         for path in list(handles):
                             if path not in mapping or owners.get(path) != mapping[path]:
                                 handles.pop(path).close()
+                                owners.pop(path, None)
                         for path in mapping:
                             if path not in handles:
                                 handles[path] = open(path, 'rb', buffering=0)
                                 owners[path] = mapping[path]
                     except Exception as error:
                         bindings, mapping = [], {}
+                        state_sig = None
+                        prev_topology = None
                         for handle in handles.values():
                             handle.close()
                         handles.clear()
+                        owners.clear()
                         self.log('[Bluetooth Key] '+str(error))
                         self.stop_event.wait(5)
                 if not handles:
@@ -257,16 +294,23 @@ class Monitor:
                     for handle in handles.values():
                         handle.close()
                     handles.clear()
+                    owners.clear()
+                    prev_topology = None
                     continue
                 for handle in ready:
-                    path = next(p for p, stream in handles.items() if stream is handle)
+                    path = next((p for p, stream in handles.items() if stream is handle), None)
+                    if path is None:
+                        continue
                     try:
                         raw = handle.read(EVENT.size)
                         if len(raw) != EVENT.size:
                             raise OSError('Bluetooth input disconnected')
                         sec, usec, kind, code, value = EVENT.unpack(raw)
                     except OSError:
-                        handles.pop(path).close()
+                        handles.pop(path, None)
+                        owners.pop(path, None)
+                        prev_topology = None
+                        handle.close()
                         continue
                     key = (mapping.get(path), code)
                     now = time.monotonic()

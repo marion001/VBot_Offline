@@ -23,8 +23,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 VBOT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 VBOT_CONFIG="${VBOT_ROOT}/Config.json"
 [[ -f ${VBOT_CONFIG} ]] || fail "Không tìm thấy ${VBOT_CONFIG}"
-TX_GPIO="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1], encoding="utf-8"))["internal_ir"]["tx_gpio"]))' "$VBOT_CONFIG")"
-RX_GPIO="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1], encoding="utf-8"))["internal_ir"]["rx_gpio"]))' "$VBOT_CONFIG")"
+TX_GPIO="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1], encoding="utf-8-sig"))["internal_ir"]["tx_gpio"]))' "$VBOT_CONFIG")"
+RX_GPIO="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1], encoding="utf-8-sig"))["internal_ir"]["rx_gpio"]))' "$VBOT_CONFIG")"
 [[ ${TX_GPIO} =~ ^([0-9]|1[0-9]|2[0-7])$ ]] || fail "GPIO TX không hợp lệ: ${TX_GPIO}"
 [[ ${RX_GPIO} =~ ^([0-9]|1[0-9]|2[0-7])$ ]] || fail "GPIO RX không hợp lệ: ${RX_GPIO}"
 [[ ${TX_GPIO} != "${RX_GPIO}" ]] || fail "GPIO TX và RX không được trùng nhau"
@@ -33,15 +33,18 @@ RX_GPIO="$(python3 -c 'import json,sys; print(int(json.load(open(sys.argv[1], en
 
 add_overlay(){
   local line="$1"
-  grep -Fxq "$line" "$CONFIG_FILE" || printf '%s\n' "$line" >> "$CONFIG_FILE"
+  if ! grep -Fxq "$line" "$CONFIG_FILE"; then
+    [[ -z "$(tail -c 1 "$CONFIG_FILE" 2>/dev/null || true)" ]] || printf '\n' >> "$CONFIG_FILE"
+    printf '[all]\n%s\n' "$line" >> "$CONFIG_FILE"
+  fi
 }
 RX_LINE="dtoverlay=gpio-ir,gpio_pin=${RX_GPIO}"
 RX_LINE_COUNT="$(grep -Fxc "$RX_LINE" "$CONFIG_FILE" || true)"
-TX_LINE_COUNT="$(grep -Ec '^dtoverlay=gpio-ir-tx,gpio_pin=[0-9][0-9]*$' "$CONFIG_FILE" || true)"
+TX_LINE_COUNT="$(grep -Ec '^dtoverlay=gpio-ir-tx,gpio_pin=[0-9][0-9]*' "$CONFIG_FILE" || true)"
 BOOT_CONFIG_CHANGED=0
 if [[ ${RX_LINE_COUNT} != "1" || ${TX_LINE_COUNT} != "0" ]]; then BOOT_CONFIG_CHANGED=1; fi
-sed -i '/^dtoverlay=gpio-ir,gpio_pin=[0-9][0-9]*$/d' "$CONFIG_FILE"
-sed -i '/^dtoverlay=gpio-ir-tx,gpio_pin=[0-9][0-9]*$/d' "$CONFIG_FILE"
+sed -i '/^dtoverlay=gpio-ir\(,\|[[:space:]]*$\)/d' "$CONFIG_FILE"
+sed -i '/^dtoverlay=gpio-ir-tx\(,\|[[:space:]]*$\)/d' "$CONFIG_FILE"
 add_overlay "$RX_LINE"
 # TX is loaded/unloaded by VBot at runtime so GPIO17 can be handed to the
 # ReSpeaker button without editing config.txt for every configuration change.

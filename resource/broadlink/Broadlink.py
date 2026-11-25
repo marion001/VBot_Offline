@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 '''
 Code By: Vũ Tuyển
 GitHub VBot: https://github.com/marion001/VBot_Offline.git
@@ -5,7 +6,6 @@ Facebook Group: https://www.facebook.com/groups/1148385343358824
 Facebook: https://www.facebook.com/TWFyaW9uMDAx
 '''
 
-#!/usr/bin/env python3
 import argparse
 import json
 from pathlib import Path
@@ -15,7 +15,7 @@ DEFAULT_PORT = 80
 
 try:
     import Broadlink_VBot
-except ModuleNotFoundError as import_error:
+except ImportError as import_error:
     Broadlink_VBot = None
     BROADLINK_IMPORT_ERROR = import_error
 else:
@@ -66,21 +66,31 @@ def handle_scan(args):
 def handle_learn(args):
     broadlink_vbot = require_broadlink_module()
     rm = broadlink_vbot.create_device(args.ip, args.mac, args.devtype, args.port)
-    timeout = broadlink_vbot.normalize_timeout(args.timeout, 9 if args.wavetype == "ir" else 15)
-    if args.wavetype == "ir":
-        data = broadlink_vbot.learn_ir(rm, timeout=timeout)
-    else:
-        data = broadlink_vbot.learn_rf(rm, timeout=timeout)
-    if not data:
-        return make_result(False, "Hết thời gian chờ học lệnh")
-    return make_result(True, f"Học lệnh thành công ({args.wavetype.upper()})", data)
+    try:
+        timeout = broadlink_vbot.normalize_timeout(args.timeout, 9 if args.wavetype == "ir" else 15)
+        if args.wavetype == "ir":
+            data = broadlink_vbot.learn_ir(rm, timeout=timeout)
+        else:
+            data = broadlink_vbot.learn_rf(rm, timeout=timeout)
+        if not data:
+            return make_result(False, "Hết thời gian chờ học lệnh")
+        return make_result(True, f"Học lệnh thành công ({args.wavetype.upper()})", data)
+    finally:
+        close_fn = getattr(broadlink_vbot, "close_device_socket", None)
+        if callable(close_fn):
+            close_fn(rm)
 
 def handle_send(args):
     broadlink_vbot = require_broadlink_module()
     rm = broadlink_vbot.create_device(args.ip, args.mac, args.devtype, args.port)
-    if not broadlink_vbot.send_command(rm, args.code):
-        return make_result(False, "Gửi lệnh IR/RF thất bại")
-    return make_result(True, "Đã gửi lệnh IR/RF thành công")
+    try:
+        if not broadlink_vbot.send_command(rm, args.code):
+            return make_result(False, "Gửi lệnh IR/RF thất bại")
+        return make_result(True, "Đã gửi lệnh IR/RF thành công")
+    finally:
+        close_fn = getattr(broadlink_vbot, "close_device_socket", None)
+        if callable(close_fn):
+            close_fn(rm)
 
 def main(argv=None):
     parser = build_parser()

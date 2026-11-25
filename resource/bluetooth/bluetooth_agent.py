@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# VBot Bluetooth Agent revision: 11
+# VBot Bluetooth Agent revision: 12
 
 '''
 Code By: Vũ Tuyển
@@ -54,16 +54,28 @@ def preferred_input():
         return None
 
 
+_CONFIG_ROUTE_CACHE = {"path": "", "mtime_ns": -1, "size": -1, "route": []}
+_SINK_ROLE_CACHE = {"until": 0.0, "enabled": True}
+
+
 def sink_profile_enabled():
     global _profile_policy
     try:
+        cache = globals().get("_SINK_ROLE_CACHE")
+        now_m = time.monotonic()
+        if isinstance(cache, dict) and now_m < cache.get("until", 0.0) and _profile_policy is not None:
+            return cache["enabled"]
         if _profile_policy is None:
             import importlib.util
             path = Path(os.environ.get('VBOT_CONFIG_PATH', DEFAULT_CONFIG_PATH)).parent/'resource/bluetooth/profile_policy.py'
             spec = importlib.util.spec_from_file_location('vbot_agent_profile_policy', path)
             _profile_policy = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(_profile_policy)
-        return _profile_policy.read_roles(os.environ.get('VBOT_CONFIG_PATH', DEFAULT_CONFIG_PATH))['sink']
+        enabled = bool(_profile_policy.read_roles(os.environ.get('VBOT_CONFIG_PATH', DEFAULT_CONFIG_PATH))['sink'])
+        if isinstance(cache, dict):
+            cache["enabled"] = enabled
+            cache["until"] = now_m + 2.0
+        return enabled
     except (OSError, ImportError, AttributeError):
         return True
 
@@ -71,12 +83,27 @@ def bluetooth_playback_route(config_path=None):
     """Keep agent-created players on the installer-managed shared media PCM."""
     path = config_path or os.environ.get("VBOT_CONFIG_PATH", DEFAULT_CONFIG_PATH)
     try:
+        cache = globals().get("_CONFIG_ROUTE_CACHE")
+        st = os.stat(path) if hasattr(os, "stat") else None
+        if (
+            isinstance(cache, dict)
+            and st is not None
+            and cache.get("path") == path
+            and cache.get("mtime_ns") == st.st_mtime_ns
+            and cache.get("size") == st.st_size
+        ):
+            return list(cache["route"])
         with open(path, "r", encoding="utf-8-sig") as config_file:
             config = json.load(config_file)
         smart = config.get('smart_config', {})
         aec = smart.get('audio_processing', {}).get('aec3', smart.get('aec3', {}))
-        if aec.get('external_sources', False):
-            return ['--pcm=vbot_aec_media', '--pcm-buffer-time=200000', '--pcm-period-time=50000']
+        route = ['--pcm=vbot_aec_media', '--pcm-buffer-time=200000', '--pcm-period-time=50000'] if aec.get('external_sources', False) else []
+        if isinstance(cache, dict) and st is not None:
+            cache["path"] = path
+            cache["mtime_ns"] = st.st_mtime_ns
+            cache["size"] = st.st_size
+            cache["route"] = list(route)
+        return route
     except (OSError, ValueError, TypeError, AttributeError):
         pass
     return []
@@ -215,6 +242,29 @@ def device_path_to_mac(path):
     if not path or not str(path).startswith(adapter_prefix): return None
     return path.split("dev_", 1)[1].replace("_", ":").upper()
 
+DBUS_CALL_TIMEOUT = 2.0
+_MAC_COLON_RE = re.compile(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
+_KERNEL_ACL_TOOL_PREF = None
+_EXTERNAL_APLAY_NEG_UNTIL = 0.0
+_DEVICE_OUTPUT_ROLE_CACHE = {}  # MAC -> bool
+_CONNECT_INFLIGHT = set()
+_CONNECT_INFLIGHT_LOCK = threading.Lock()
+
+
+def _dbus_get_object(bus, service, path):
+    try:
+        return bus.get_object(service, path, introspect=False)
+    except TypeError:
+        return bus.get_object(service, path)
+
+
+def _dbus_call(fn, *args, timeout=DBUS_CALL_TIMEOUT):
+    try:
+        return fn(*args, timeout=timeout)
+    except TypeError:
+        return fn(*args)
+
+
 _system_bus = None
 def get_system_bus():
     global _system_bus
@@ -225,7 +275,7 @@ def adapter_path():
     return f"/org/bluez/{BLUETOOTH_ADAPTER}"
 
 def get_adapter_properties():
-    obj = get_system_bus().get_object(BUS_NAME, adapter_path())
+    obj = _dbus_get_object(get_system_bus(), BUS_NAME, adapter_path())
     return dbus.Interface(obj, "org.freedesktop.DBus.Properties")
 
 #Xác minh adapter cấu hình tồn tại, nếu không thì chuyển an toàn về hci0
@@ -234,9 +284,9 @@ def select_available_adapter(bus):
     configured = BLUETOOTH_ADAPTER
     for candidate in (configured, DEFAULT_BLUETOOTH_ADAPTER):
         try:
-            obj = bus.get_object(BUS_NAME, f"/org/bluez/{candidate}")
+            obj = _dbus_get_object(bus, BUS_NAME, f"/org/bluez/{candidate}")
             props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-            props.GetAll("org.bluez.Adapter1")
+            _dbus_call(props.GetAll, "org.bluez.Adapter1")
             BLUETOOTH_ADAPTER = candidate
             if candidate != configured:
                 log(f"Adapter '{configured}' không tồn tại, tự động dùng {candidate}")
@@ -248,17 +298,17 @@ def select_available_adapter(bus):
 
 #Chỉ để adapter đã cấu hình hoạt động, tránh phát hiện/ghép đôi nhầm controller
 def disable_unselected_adapters(bus):
-    manager = dbus.Interface(bus.get_object(BUS_NAME, "/"), "org.freedesktop.DBus.ObjectManager")
-    for path, interfaces in manager.GetManagedObjects().items():
+    manager = dbus.Interface(_dbus_get_object(bus, BUS_NAME, "/"), "org.freedesktop.DBus.ObjectManager")
+    for path, interfaces in _dbus_call(manager.GetManagedObjects, timeout=4.0).items():
         if "org.bluez.Adapter1" not in interfaces or str(path) == adapter_path():
             continue
         adapter_name = str(path).rsplit("/", 1)[-1]
         try:
-            props = dbus.Interface(bus.get_object(BUS_NAME, path), "org.freedesktop.DBus.Properties")
+            props = dbus.Interface(_dbus_get_object(bus, BUS_NAME, path), "org.freedesktop.DBus.Properties")
             #Ẩn adapter trước rồi mới tắt nguồn để không nhận thêm yêu cầu pairing trong lúc chuyển trạng thái.
-            props.Set("org.bluez.Adapter1", "Discoverable", dbus.Boolean(False))
-            props.Set("org.bluez.Adapter1", "Pairable", dbus.Boolean(False))
-            props.Set("org.bluez.Adapter1", "Powered", dbus.Boolean(False))
+            _dbus_call(props.Set, "org.bluez.Adapter1", "Discoverable", dbus.Boolean(False))
+            _dbus_call(props.Set, "org.bluez.Adapter1", "Pairable", dbus.Boolean(False))
+            _dbus_call(props.Set, "org.bluez.Adapter1", "Powered", dbus.Boolean(False))
             log(f"Đã tắt Bluetooth adapter không được chọn: {adapter_name}")
         except Exception as error:
             log(f"Không thể tắt Bluetooth adapter {adapter_name}: {error}")
@@ -266,9 +316,9 @@ def disable_unselected_adapters(bus):
 def is_actually_connected(mac):
     try:
         bus = get_system_bus()
-        obj = bus.get_object(BUS_NAME, f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_{mac.upper().replace(':', '_')}")
+        obj = _dbus_get_object(bus, BUS_NAME, f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_{mac.upper().replace(':', '_')}")
         props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-        return bool(props.Get("org.bluez.Device1", "Connected"))
+        return bool(_dbus_call(props.Get, "org.bluez.Device1", "Connected"))
     except Exception:
         return False
 
@@ -279,11 +329,17 @@ def get_kernel_connected_macs():
     Connected nhưng đang idle/chưa phát nhạc. Trả về None nếu hệ thống không có
     công cụ phù hợp; caller sẽ fallback về Device1.Connected.
     """
-    mac_re = re.compile(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
-    commands = [["hcitool", "-i", BLUETOOTH_ADAPTER, "con"]]
+    global _KERNEL_ACL_TOOL_PREF
+    mac_re = globals().get("_MAC_COLON_RE") or re.compile(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
+    commands = []
     match = re.fullmatch(r"hci(\d+)", BLUETOOTH_ADAPTER)
-    if match:
-        commands.append(["btmgmt", "--index", match.group(1), "con"])
+    btmgmt_cmd = ["btmgmt", "--index", match.group(1), "con"] if match else None
+    hcitool_cmd = ["hcitool", "-i", BLUETOOTH_ADAPTER, "con"]
+    pref = globals().get("_KERNEL_ACL_TOOL_PREF")
+    if pref == "btmgmt" and btmgmt_cmd:
+        commands = [btmgmt_cmd, hcitool_cmd]
+    else:
+        commands = [hcitool_cmd] + ([btmgmt_cmd] if btmgmt_cmd else [])
     for command in commands:
         try:
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, check=False, timeout=3)
@@ -291,6 +347,7 @@ def get_kernel_connected_macs():
             continue
         if result.returncode != 0:
             continue
+        _KERNEL_ACL_TOOL_PREF = command[0]
         return {m.upper() for m in mac_re.findall(result.stdout or "")}
     return None
 
@@ -318,20 +375,15 @@ def get_device_name(mac):
     if mac in device_names_cache and device_names_cache[mac]: return device_names_cache[mac]
     try:
         bus = get_system_bus()
-        om = bus.get_object(BUS_NAME, "/")
-        iface = dbus.Interface(om, "org.freedesktop.DBus.ObjectManager")
-        objects = iface.GetManagedObjects()
-        for path, interfaces in objects.items():
-            if not str(path).startswith(f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_"):
-                continue
-            if "org.bluez.Device1" in interfaces:
-                dev_mac = device_path_to_mac(path)
-                if dev_mac == mac:
-                    props = interfaces["org.bluez.Device1"]
-                    name = str(props.get("Alias", props.get("Name", "")))
-                    if name:
-                        device_names_cache[mac] = name
-                        return name
+        dev_path = f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_{mac.replace(':', '_')}"
+        obj = _dbus_get_object(bus, BUS_NAME, dev_path)
+        props_iface = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
+        dev_props = _dbus_call(props_iface.GetAll, "org.bluez.Device1")
+        if isinstance(dev_props, dict):
+            name = str(dev_props.get("Alias", dev_props.get("Name", "")) or "")
+            if name:
+                device_names_cache[mac] = name
+                return name
     except Exception:
         pass
     return mac
@@ -352,9 +404,9 @@ def get_softvolume_state(mac, pcm_path=None):
         return None
     path = pcm_path or bluealsa_pcm_path(mac)
     try:
-        obj = get_system_bus().get_object("org.bluealsa", path)
+        obj = _dbus_get_object(get_system_bus(), "org.bluealsa", path)
         props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-        return bool(props.Get("org.bluealsa.PCM1", "SoftVolume"))
+        return bool(_dbus_call(props.Get, "org.bluealsa.PCM1", "SoftVolume"))
     except Exception:
         return None
 
@@ -375,11 +427,11 @@ def apply_default_volume_once(mac, pcm_path=None, props=None):
     path = pcm_path or bluealsa_pcm_path(mac)
     try:
         if props is None:
-            obj = get_system_bus().get_object("org.bluealsa", path)
+            obj = _dbus_get_object(get_system_bus(), "org.bluealsa", path)
             props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
 
         # SoftVolume phải đang bật trước khi xử lý volume.
-        if not bool(props.Get("org.bluealsa.PCM1", "SoftVolume")):
+        if not bool(_dbus_call(props.Get, "org.bluealsa.PCM1", "SoftVolume")):
             return False
 
         # AUTO:
@@ -387,14 +439,14 @@ def apply_default_volume_once(mac, pcm_path=None, props=None):
         if DEFAULT_SOFTVOLUME_PERCENT is None:
             default_volume_applied.add(mac)
             return True
-        current = props.Get("org.bluealsa.PCM1", "Volume")
+        current = _dbus_call(props.Get, "org.bluealsa.PCM1", "Volume")
         channel_count = len(current)
         if channel_count <= 0:
             return False
         level = max(0, min(A2DP_VOLUME_MAX, round(A2DP_VOLUME_MAX * DEFAULT_SOFTVOLUME_PERCENT / 100.0)))
         volume = dbus.Array([dbus.Byte(level) for _ in range(channel_count)], signature="y")
-        props.Set("org.bluealsa.PCM1", "Volume", volume)
-        verify = props.Get("org.bluealsa.PCM1", "Volume")
+        _dbus_call(props.Set, "org.bluealsa.PCM1", "Volume", volume)
+        verify = _dbus_call(props.Get, "org.bluealsa.PCM1", "Volume")
         if len(verify) != channel_count:
             return False
         if not all((int(value) & 0x7F) == level and (int(value) & 0x80) == 0 for value in verify):
@@ -423,10 +475,10 @@ def set_softvolume_true(mac, attempt=1, pcm_path=None):
 
     path = pcm_path or bluealsa_pcm_path(mac)
     try:
-        obj = get_system_bus().get_object("org.bluealsa", path)
+        obj = _dbus_get_object(get_system_bus(), "org.bluealsa", path)
         props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-        props.Set("org.bluealsa.PCM1", "SoftVolume", dbus.Boolean(True))
-        enabled = bool(props.Get("org.bluealsa.PCM1", "SoftVolume"))
+        _dbus_call(props.Set, "org.bluealsa.PCM1", "SoftVolume", dbus.Boolean(True))
+        enabled = bool(_dbus_call(props.Get, "org.bluealsa.PCM1", "SoftVolume"))
         if enabled:
             first_enable = mac not in softvolume_enabled
             softvolume_enabled.add(mac)
@@ -500,9 +552,9 @@ def bluealsa_interfaces_removed(path, interfaces):
 def is_paired(mac):
     try:
         bus = get_system_bus()
-        obj = bus.get_object(BUS_NAME, f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_{mac.upper().replace(':', '_')}")
+        obj = _dbus_get_object(bus, BUS_NAME, f"/org/bluez/{BLUETOOTH_ADAPTER}/dev_{mac.upper().replace(':', '_')}")
         props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
-        return bool(props.Get("org.bluez.Device1", "Paired"))
+        return bool(_dbus_call(props.Get, "org.bluez.Device1", "Paired"))
     except Exception:
         pass
     return False
@@ -512,16 +564,16 @@ def trust(mac):
         return
     try:
         path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-        obj = get_system_bus().get_object(BUS_NAME, path)
+        obj = _dbus_get_object(get_system_bus(), BUS_NAME, path)
         props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
         # Tránh set/log Trusted=True lặp lại ở mỗi lần reconnect/profile authorize.
         try:
-            if bool(props.Get("org.bluez.Device1", "Trusted")):
+            if bool(_dbus_call(props.Get, "org.bluez.Device1", "Trusted")):
                 return
         except Exception:
             pass
         log(f"Đánh dấu trust tin cậy thiết bị: {device_info_str(mac)}")
-        props.Set("org.bluez.Device1", "Trusted", dbus.Boolean(True))
+        _dbus_call(props.Set, "org.bluez.Device1", "Trusted", dbus.Boolean(True))
     except Exception as error:
         log(f"Không thể trust {mac} trên {BLUETOOTH_ADAPTER}: {error}")
 
@@ -544,44 +596,86 @@ def find_other_bluealsa_aplay(mac=None):
     Nếu truyền MAC, chỉ dùng process chạy toàn cục (không khóa vào MAC nào) hoặc
     process đang phục vụ đúng MAC đó. Tránh nhận nhầm player riêng của thiết bị khác.
     """
+    global _EXTERNAL_APLAY_NEG_UNTIL
+    now_m = time.monotonic()
+    neg_until = globals().get("_EXTERNAL_APLAY_NEG_UNTIL", 0.0)
+    if mac is not None and now_m < neg_until:
+        return None
+
     tracked_pid = None
     target_mac = mac.upper() if mac else None
-    mac_pattern = re.compile(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
+    mac_pattern = globals().get("_MAC_COLON_RE") or re.compile(r"(?:[0-9A-Fa-f]{2}:){5}[0-9A-Fa-f]{2}")
     if active_playback_process is not None and is_running(active_playback_process):
         tracked_pid = active_playback_process.pid
+    my_pid = os.getpid()
+    found_any_aplay = False
     try:
-        for entry in os.listdir('/proc'):
-            if not entry.isdigit():
-                continue
-            pid = int(entry)
-            if pid in (os.getpid(), tracked_pid):
-                continue
-            try:
-                raw = Path(f'/proc/{pid}/cmdline').read_bytes()
-            except Exception:
-                continue
-            if not raw:
-                continue
-            args = [part.decode(errors='ignore') for part in raw.split(b'\0') if part]
-            if not any(os.path.basename(arg) == 'bluealsa-aplay' for arg in args):
-                continue
-            cmdline = ' '.join(args)
-            bound_macs = {m.upper() for m in mac_pattern.findall(cmdline)}
-            if target_mac and bound_macs and target_mac not in bound_macs:
-                continue
-            return pid, cmdline
+        with os.scandir('/proc') as proc_it:
+            for entry in proc_it:
+                name = entry.name
+                if not name.isdigit():
+                    continue
+                pid = int(name)
+                if pid == my_pid or pid == tracked_pid:
+                    continue
+                try:
+                    with open(f'/proc/{name}/cmdline', 'rb') as f:
+                        raw = f.read(4096)
+                except OSError:
+                    continue
+                if not raw or b'bluealsa-aplay' not in raw:
+                    continue
+                args = [part.decode(errors='ignore') for part in raw.split(b'\0') if part]
+                if not any(os.path.basename(arg) == 'bluealsa-aplay' for arg in args):
+                    continue
+                found_any_aplay = True
+                # Bỏ qua tiến trình zombie đã chết chưa được reap
+                try:
+                    with open(f'/proc/{name}/stat', 'r', encoding='ascii', errors='ignore') as sf:
+                        stat_txt = sf.read(256)
+                    rparen = stat_txt.rfind(')')
+                    if rparen != -1:
+                        state_ch = stat_txt[rparen + 2:rparen + 3]
+                        if state_ch in ('Z', 'X'):
+                            continue
+                except OSError:
+                    pass
+                cmdline = ' '.join(args)
+                bound_macs = {m.upper() for m in mac_pattern.findall(cmdline)}
+                if target_mac and bound_macs and target_mac not in bound_macs:
+                    continue
+                _EXTERNAL_APLAY_NEG_UNTIL = 0.0
+                return pid, cmdline
     except Exception:
         pass
+    if not found_any_aplay:
+        _EXTERNAL_APLAY_NEG_UNTIL = now_m + 10.0
     return None
 
 def is_pid_alive(pid):
     if not pid:
         return False
     try:
-        os.kill(int(pid), 0)
-        return True
+        pid_int = int(pid)
+        os.kill(pid_int, 0)
     except (OSError, ValueError, TypeError):
         return False
+    # Trên Linux: kiểm tra thêm /proc/<pid>/stat & cmdline để không nhận nhầm Zombie (Z) hoặc PID bị cấp lại
+    stat_path = f"/proc/{pid_int}/stat"
+    if os.path.exists("/proc"):
+        try:
+            with open(stat_path, "r", encoding="ascii", errors="ignore") as sf:
+                stat_txt = sf.read(256)
+            rparen = stat_txt.rfind(")")
+            if rparen != -1 and stat_txt[rparen + 2:rparen + 3] in ("Z", "X"):
+                return False
+            with open(f"/proc/{pid_int}/cmdline", "rb") as cf:
+                raw_cmd = cf.read(2048)
+            if raw_cmd and b"bluealsa-aplay" not in raw_cmd:
+                return False
+        except OSError:
+            return False
+    return True
 
 def get_bluealsa_pcm_listing():
     """Liệt kê PCM BlueALSA hiện có mà không mở/chiếm PCM."""
@@ -592,10 +686,29 @@ def get_bluealsa_pcm_listing():
         return ""
 
 def has_bluealsa_audio_pcm(mac, listing=None):
-    """Xác nhận BlueALSA thực sự đã tạo PCM cho MAC, tránh tin Connected=True stale của BlueZ."""
+    """Xác nhận BlueALSA thực sự đã tạo PCM cho MAC (ưu tiên D-Bus 0-fork < 0.5ms, tránh spawn bluealsa-aplay -L mỗi 5s)."""
     if not mac:
         return False
     if listing is None:
+        pcm_path = bluealsa_pcm_path(mac)
+        if pcm_path and callable(globals().get("get_system_bus")) and callable(globals().get("_dbus_get_object")):
+            try:
+                obj = _dbus_get_object(get_system_bus(), "org.bluealsa", pcm_path)
+                props = dbus.Interface(obj, "org.freedesktop.DBus.Properties")
+                _dbus_call(props.Get, "org.bluealsa.PCM1", "SoftVolume", timeout=1.5)
+                return True
+            except dbus.exceptions.DBusException as dbus_err:
+                err_name = str(dbus_err.get_dbus_name() or "")
+                if err_name in (
+                    "org.freedesktop.DBus.Error.UnknownObject",
+                    "org.freedesktop.DBus.Error.UnknownMethod",
+                    "org.freedesktop.DBus.Error.UnknownInterface",
+                    "org.freedesktop.DBus.Error.ServiceUnknown",
+                    "org.freedesktop.DBus.Error.NameHasNoOwner",
+                ):
+                    return False
+            except Exception:
+                pass
         listing = get_bluealsa_pcm_listing()
     if not listing:
         return False
@@ -947,10 +1060,14 @@ def set_visibility(visible):
         if not visible and visibility_timer is not None:
             return  # Allow the current pairing handshake its existing 15-second grace.
         props = get_adapter_properties()
-        current = props.GetAll("org.bluez.Adapter1")
+        call_fn = globals().get("_dbus_call")
+        current = call_fn(props.GetAll, "org.bluez.Adapter1") if callable(call_fn) else props.GetAll("org.bluez.Adapter1")
         for key in ('Pairable', 'Discoverable'):
             if bool(current.get(key)) != visible:
-                props.Set("org.bluez.Adapter1", key, dbus.Boolean(visible))
+                if callable(call_fn):
+                    call_fn(props.Set, "org.bluez.Adapter1", key, dbus.Boolean(visible))
+                else:
+                    props.Set("org.bluez.Adapter1", key, dbus.Boolean(visible))
     except Exception as error:
         log(f"Không thể đổi trạng thái hiển thị của {BLUETOOTH_ADAPTER}: {error}")
         return
@@ -963,6 +1080,7 @@ def set_visibility(visible):
             log(f"Trạng thái Bluetooth: Đã ẩn tên thiết bị (Điện thoại → VBot: {count}/{limit}; đã đủ giới hạn kết nối)")
 
 def clear_device_state(mac):
+    global suspended_playback_device
     if not mac: return
     disconnected_health_checks.pop(mac, None)
     cancel_pending_audio_start(mac)
@@ -984,6 +1102,11 @@ def clear_device_state(mac):
     connected_devices.pop(mac, None)
     last_connected_at.pop(mac, None)
     device_names_cache.pop(mac, None)
+    role_cache = globals().get("_DEVICE_OUTPUT_ROLE_CACHE")
+    if isinstance(role_cache, dict):
+        role_cache.pop(mac.upper(), None)
+    if globals().get("suspended_playback_device") == mac:
+        suspended_playback_device = None
 
 def cancel_pending_device_task(tasks, mac):
     source_id = tasks.pop(mac, None)
@@ -1084,10 +1207,10 @@ def remove_device(mac):
     if not mac: return
     log(f"Tiến hành dọn dẹp thiết bị kết nối lỗi: {device_info_str(mac)}")
     try:
-        adapter_obj = get_system_bus().get_object(BUS_NAME, adapter_path())
+        adapter_obj = _dbus_get_object(get_system_bus(), BUS_NAME, adapter_path())
         adapter_iface = dbus.Interface(adapter_obj, "org.bluez.Adapter1")
         device_path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-        adapter_iface.RemoveDevice(dbus.ObjectPath(device_path))
+        _dbus_call(adapter_iface.RemoveDevice, dbus.ObjectPath(device_path), timeout=4.0)
     except Exception as error:
         log(f"Không thể xóa {mac} khỏi {BLUETOOTH_ADAPTER}: {error}")
 
@@ -1138,12 +1261,42 @@ def reconnect_paired_device(mac):
     attempt = paired_reconnect_attempts.get(mac, 0) + 1
     paired_reconnect_attempts[mac] = attempt
     log(f"Kết nối lại profile Bluetooth sau pairing, lần {attempt}/{PAIRED_RECONNECT_MAX_ATTEMPTS}: {device_info_str(mac)}")
-    try:
-        path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-        obj = get_system_bus().get_object(BUS_NAME, path)
-        dbus.Interface(obj, "org.bluez.Device1").Connect()
-    except Exception as error:
-        log(f"Chưa thể kết nối lại {device_info_str(mac)}: {error}")
+    path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
+    inflight_lock = globals().get("_CONNECT_INFLIGHT_LOCK")
+    inflight_set = globals().get("_CONNECT_INFLIGHT")
+
+    # Chạy Device1.Connect() trên worker thread với private bus để KHÔNG khóa cứng GLib MainLoop 25s
+    def _connect_worker():
+        priv_bus = None
+        try:
+            try:
+                priv_bus = dbus.SystemBus(private=True)
+                obj = _dbus_get_object(priv_bus, BUS_NAME, path)
+            except TypeError:
+                obj = get_system_bus().get_object(BUS_NAME, path)
+            dbus.Interface(obj, "org.bluez.Device1").Connect()
+        except Exception as error:
+            log(f"Chưa thể kết nối lại {device_info_str(mac)}: {error}")
+        finally:
+            if priv_bus is not None:
+                try:
+                    priv_bus.close()
+                except Exception:
+                    pass
+            if inflight_lock is not None and isinstance(inflight_set, set):
+                with inflight_lock:
+                    inflight_set.discard(mac)
+
+    can_spawn = True
+    if inflight_lock is not None and isinstance(inflight_set, set):
+        with inflight_lock:
+            if mac in inflight_set:
+                can_spawn = False
+            else:
+                inflight_set.add(mac)
+    if can_spawn:
+        threading.Thread(target=_connect_worker, daemon=True, name=f"BTConnect-{mac[-5:]}").start()
+
     if connection_is_live(mac):
         paired_reconnect_attempts.pop(mac, None)
         if is_actually_connected(mac) and mac not in pairing_devices:
@@ -1203,17 +1356,27 @@ def remember_pairing_device(device):
     return mac
 
 def is_a2dp_output_device(mac):
+    if not mac:
+        return False
+    mac_up = mac.upper()
     try:
         state = json.loads(Path('/var/lib/vbot-bt-source/settings.json').read_text())
-        if state.get('selected') == mac.upper():
+        if state.get('selected') == mac_up:
             return True
     except (OSError, ValueError, TypeError):
         pass
+    role_cache = globals().get("_DEVICE_OUTPUT_ROLE_CACHE")
+    if isinstance(role_cache, dict) and mac_up in role_cache:
+        return role_cache[mac_up]
     try:
-        path = f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-        props = dbus.Interface(get_system_bus().get_object(BUS_NAME, path), 'org.freedesktop.DBus.Properties')
-        uuids = {str(v).lower() for v in props.Get('org.bluez.Device1', 'UUIDs')}
-        return '0000110b-0000-1000-8000-00805f9b34fb' in uuids and '0000110a-0000-1000-8000-00805f9b34fb' not in uuids
+        path = f"{adapter_path()}/dev_{mac_up.replace(':', '_')}"
+        props = dbus.Interface(_dbus_get_object(get_system_bus(), BUS_NAME, path), 'org.freedesktop.DBus.Properties')
+        raw_uuids = _dbus_call(props.Get, 'org.bluez.Device1', 'UUIDs')
+        uuids = {str(v).lower() for v in raw_uuids}
+        is_out = ('0000110b-0000-1000-8000-00805f9b34fb' in uuids and '0000110a-0000-1000-8000-00805f9b34fb' not in uuids)
+        if isinstance(role_cache, dict) and uuids:
+            role_cache[mac_up] = is_out
+        return is_out
     except Exception:
         return False
 
@@ -1246,8 +1409,8 @@ def activate_paired_connection(mac, path=None, now=None):
         log(f"Hệ thống đang giữ kết nối với thiết bị: {device_info_str(other_active[0])}, Từ chối kết nối mới tới thiết bị: {device_info_str(mac)}")
         try:
             device_path = path or f"{adapter_path()}/dev_{mac.upper().replace(':', '_')}"
-            dev_obj = get_system_bus().get_object(BUS_NAME, device_path)
-            dbus.Interface(dev_obj, "org.bluez.Device1").Disconnect()
+            dev_obj = _dbus_get_object(get_system_bus(), BUS_NAME, device_path)
+            _dbus_call(dbus.Interface(dev_obj, "org.bluez.Device1").Disconnect, timeout=3.0)
         except Exception as error:
             log(f"DBus disconnect thất bại trên {BLUETOOTH_ADAPTER}: {error}")
         return False
@@ -1291,9 +1454,16 @@ def validate_pairing_device(mac):
     return False
 
 def watchdog(interface, changed, invalidated, path):
-    global visibility_timer
+    global visibility_timer, suspended_playback_device
+    # Lọc bỏ ngay các gói tin nhiễu tần suất cao (RSSI, ManufacturerData, ServiceData...) để tránh bão đọc đĩa/D-Bus
+    if not changed or not any(k in changed for k in ("Connected", "Paired", "Alias", "Name", "UUIDs")):
+        return
     mac = device_path_to_mac(path)
     if not mac: return
+    if "UUIDs" in changed:
+        role_cache = globals().get("_DEVICE_OUTPUT_ROLE_CACHE")
+        if isinstance(role_cache, dict):
+            role_cache.pop(mac.upper(), None)
     if is_a2dp_output_device(mac):
         clear_post_pair_reconnect(mac)
         cancel_pending_device_task(pending_paired_reconnect, mac)
@@ -1321,6 +1491,8 @@ def watchdog(interface, changed, invalidated, path):
             # Thiết bị bị unpair: bỏ ngay mọi state/audio/reconnect cũ.
             clear_post_pair_reconnect(mac)
             cancel_pending_device_task(pending_connection_activation, mac)
+            if globals().get("suspended_playback_device") == mac:
+                suspended_playback_device = None
             if visibility_timer:
                 cancel_scheduled_source(visibility_timer)
                 visibility_timer = None
@@ -1360,6 +1532,8 @@ def watchdog(interface, changed, invalidated, path):
         else:
             cancel_pending_device_task(pending_connection_activation, mac)
             cancel_pending_device_task(pending_post_pair_stable, mac)
+            if globals().get("suspended_playback_device") == mac:
+                suspended_playback_device = None
             was_pre_pair = mac in pre_pair_connected
             pre_pair_connected.discard(mac)
 
@@ -1503,7 +1677,10 @@ class Agent(dbus.service.Object):
         pairing_devices.clear()
         pairing_started_at.clear()
         for mac in cancelled_devices:
+            pre_pair_connected.discard(mac)
             schedule_unpaired_cleanup(mac)
+        if not connected_devices:
+            set_visibility(True)
 
 def request_shutdown(signum=None, _frame=None):
     global shutdown_requested
@@ -1514,9 +1691,16 @@ def request_shutdown(signum=None, _frame=None):
         log(f"Nhận tín hiệu dừng {signum}, đang đóng Bluetooth Agent...")
     if main_loop is not None:
         try:
-            main_loop.quit()
+            idle_fn = getattr(globals().get("GLib"), "idle_add", None)
+            if callable(idle_fn):
+                idle_fn(main_loop.quit)
+            else:
+                main_loop.quit()
         except Exception:
-            pass
+            try:
+                main_loop.quit()
+            except Exception:
+                pass
 
 def cleanup_agent():
     global agent_registered, visibility_timer
@@ -1542,7 +1726,7 @@ def cleanup_agent():
     stop_bluealsa_playback()
     if agent_registered and agent_manager is not None:
         try:
-            agent_manager.UnregisterAgent(AGENT_PATH)
+            _dbus_call(agent_manager.UnregisterAgent, AGENT_PATH, timeout=2.0)
             log("Đã hủy đăng ký Bluetooth Agent khỏi BlueZ")
         except Exception as error:
             log(f"Không thể hủy đăng ký Bluetooth Agent: {error}")
@@ -1565,6 +1749,7 @@ def bluez_owner_changed(name, previous, current):
 if __name__ == "__main__":
     dbus.mainloop.glib.DBusGMainLoop(set_as_default=True)
     bus = get_system_bus()
+    main_loop = GLib.MainLoop()
     try:
         bus.add_signal_receiver(
             bluez_owner_changed, signal_name="NameOwnerChanged",
@@ -1577,28 +1762,31 @@ if __name__ == "__main__":
             Register_Agent = "KeyboardDisplay"
         else:
             Register_Agent = "NoInputNoOutput"
-        agent_manager = dbus.Interface(bus.get_object(BUS_NAME, "/org/bluez"), "org.bluez.AgentManager1")
+        agent_manager = dbus.Interface(_dbus_get_object(bus, BUS_NAME, "/org/bluez"), "org.bluez.AgentManager1")
         agent = Agent(bus, AGENT_PATH)
-        agent_manager.RegisterAgent(AGENT_PATH, Register_Agent)
+        _dbus_call(agent_manager.RegisterAgent, AGENT_PATH, Register_Agent)
         agent_registered = True
-        agent_manager.RequestDefaultAgent(AGENT_PATH)
+        _dbus_call(agent_manager.RequestDefaultAgent, AGENT_PATH)
 
         signal.signal(signal.SIGTERM, request_shutdown)
         signal.signal(signal.SIGINT, request_shutdown)
 
-        get_adapter_properties().Set("org.bluez.Adapter1", "Powered", dbus.Boolean(True))
-        om = dbus.Interface(bus.get_object(BUS_NAME, "/"), "org.freedesktop.DBus.ObjectManager")
+        _dbus_call(get_adapter_properties().Set, "org.bluez.Adapter1", "Powered", dbus.Boolean(True))
+        om = dbus.Interface(_dbus_get_object(bus, BUS_NAME, "/"), "org.freedesktop.DBus.ObjectManager")
 
         # Không dùng PCM A2DP để xác định Bluetooth còn kết nối: điện thoại có
         # thể Connected nhưng đang idle/chưa phát nhạc. Nếu có hcitool/btmgmt,
         # dùng ACL kernel để loại Device1.Connected stale; nếu không thì fallback D-Bus.
         startup_kernel_connections = get_kernel_connected_macs()
-        for path, interfaces in om.GetManagedObjects().items():
+        for path, interfaces in _dbus_call(om.GetManagedObjects, timeout=4.0).items():
             if "org.bluez.Device1" in interfaces and interfaces["org.bluez.Device1"].get("Connected"):
                 mac = device_path_to_mac(path)
                 if not mac:
                     continue
                 dev_props = interfaces["org.bluez.Device1"]
+                name_val = str(dev_props.get("Alias", dev_props.get("Name", "")) or "")
+                if name_val:
+                    device_names_cache[mac] = name_val
                 if is_a2dp_output_device(mac):
                     continue
                 if not bool(dev_props.get("Paired")):
@@ -1614,7 +1802,8 @@ if __name__ == "__main__":
 
         set_visibility(len(connected_devices) == 0)
         if connected_devices:
-            start_bluealsa_playback(next(iter(connected_devices)))
+            initial_mac = preferred_input() or next(iter(connected_devices))
+            start_bluealsa_playback(initial_mac)
 
         bus.add_signal_receiver(watchdog, dbus_interface="org.freedesktop.DBus.Properties", signal_name="PropertiesChanged", path_keyword="path", arg0="org.bluez.Device1")
         bus.add_signal_receiver(interfaces_added, dbus_interface="org.freedesktop.DBus.ObjectManager", signal_name="InterfacesAdded", bus_name=BUS_NAME)
@@ -1625,8 +1814,8 @@ if __name__ == "__main__":
         schedule_timeout_seconds(5, playback_health_check)
 
         log("VBot Bluetooth Agent: Khởi động thành công")
-        main_loop = GLib.MainLoop()
-        main_loop.run()
+        if not shutdown_requested:
+            main_loop.run()
     except Exception as e:
         log(f"Lỗi khởi động Agent: {e}")
     finally:

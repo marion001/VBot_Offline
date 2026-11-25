@@ -225,7 +225,7 @@ def install(fix_coexistence=True):
     target_agent = Path('/usr/local/bin/bluetooth_agent.py')
     target_service = Path('/etc/systemd/system/' + SERVICE)
     # Read every input and snapshot every target before changing the system.
-    agent_data = agent.read_bytes()
+    agent_data = agent.read_bytes().replace(b'\r\n', b'\n')
     targets = (override, target_agent, target_service)
     snapshots = {path: (path.read_bytes(), path.stat().st_mode & 0o777) if path.exists() else None for path in targets}
     states = {}
@@ -242,9 +242,13 @@ def install(fix_coexistence=True):
     atomic(backup / 'services.json', states)
     service = '[Unit]\nDescription=VBot Bluetooth A2DP output policy\nAfter=bluetooth.service bluealsa.service\nWants=bluealsa.service\n[Service]\nExecStart=/usr/bin/python3 "' + str(Path(__file__).resolve()) + '" watch\nRestart=on-failure\nRestartSec=5\n[Install]\nWantedBy=multi-user.target\n'
     try:
+        override.parent.mkdir(parents=True, exist_ok=True)
         override.write_text('[Service]\nExecStart=\nExecStart=' + command + '\n', encoding='utf-8')
+        override.chmod(0o644)
         target_agent.write_bytes(agent_data)
+        target_agent.chmod(0o755)
         target_service.write_text(service, encoding='utf-8')
+        target_service.chmod(0o644)
         subprocess.run(['systemctl', 'daemon-reload'], check=True, timeout=15)
         subprocess.run(['systemctl', 'restart', 'bluealsa.service', 'vbot-bluetooth-agent.service'], check=True, timeout=35)
         subprocess.run(['systemctl', 'enable', '--now', SERVICE], check=True, timeout=15)
@@ -533,18 +537,19 @@ def execute(action, mac='', auto=False, fix_coexistence=True, max_connections=No
     else:
         if not re.fullmatch(r'(?:[0-9A-F]{2}:){5}[0-9A-F]{2}', mac):
             raise ValueError('MAC Bluetooth không hợp lệ')
-        row = next((r for r in device_rows(objects) if r['mac'] == mac), None)
+        all_rows = device_rows(objects)
+        row = next((r for r in all_rows if r['mac'] == mac), None)
         if not row:
             raise ValueError('Không tìm thấy thiết bị; hãy quét lại')
         obj = bus.get_object('org.bluez', row['path'])
         device = dbus.Interface(obj, 'org.bluez.Device1')
         props = dbus.Interface(obj, 'org.freedesktop.DBus.Properties')
         if action == 'sink_connect' and row.get('audio_source') and not row.get('connected'):
-            current = sum(bool(item.get('connected') and item.get('audio_source')) for item in device_rows(objects))
+            current = sum(bool(item.get('connected') and item.get('audio_source')) for item in all_rows)
             if current >= input_connection_limit():
                 raise ValueError('Đã đạt giới hạn '+str(input_connection_limit())+' điện thoại kết nối. Hãy ngắt một điện thoại trước.')
         if (action in ('connect', 'select') or (action == 'pair' and not row['paired'])) and row['audio_sink'] and not row['connected']:
-            if len(output_connections(device_rows(objects))) >= connection_limit():
+            if len(output_connections(all_rows)) >= connection_limit():
                 raise ValueError('Đã đạt giới hạn '+str(connection_limit())+' loa/tai nghe kết nối. Ngắt một thiết bị trước khi kết nối thiết bị mới.')
         if action == 'pair':
             if not row['paired']:

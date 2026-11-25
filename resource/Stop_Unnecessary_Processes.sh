@@ -11,40 +11,32 @@
 echo "Đang tắt các .service không cần thiết..."
 
 # In ấn / Scanner (CUPS) - nếu không dùng
-systemctl disable cups.service cups-browsed.service cups.path saned.service saned@.service cups.socket
-systemctl stop cups.service cups-browsed.service cups.path saned.service saned@.service cups.socket
+systemctl disable --now cups.service cups-browsed.service cups.path saned.service saned@.service cups.socket 2>/dev/null || true
 
 # Bluetooth - nếu không dùng
-#systemctl disable bluetooth.service hciuart.service
-#systemctl stop bluetooth.service hciuart.service
+#systemctl disable --now bluetooth.service hciuart.service 2>/dev/null || true
 
 # Modem / 3G/4G - nếu không dùng USB modem
-systemctl disable ModemManager.service
-systemctl stop ModemManager.service
+systemctl disable --now ModemManager.service 2>/dev/null || true
 
 # VNC - nếu không dùng remote GUI
-systemctl disable vncserver-virtuald.service vncserver-x11-serviced.service
-systemctl stop vncserver-virtuald.service vncserver-x11-serviced.service
+systemctl disable --now vncserver-virtuald.service vncserver-x11-serviced.service 2>/dev/null || true
 
 # Test / Demo GPU - không cần thiết
-systemctl disable glamor-test.service gldriver-test.service
-systemctl stop glamor-test.service gldriver-test.service
+systemctl disable --now glamor-test.service gldriver-test.service 2>/dev/null || true
 
 # NFS / Network không cần thiết (trừ systemd-networkd)
-systemctl disable nfs-common.service rpcbind.service rpc-statd.service rpc-statd-notify.service nfs-client.target
-systemctl stop nfs-common.service rpcbind.service rpc-statd.service rpc-statd-notify.service nfs-client.target
+systemctl disable --now nfs-common.service rpcbind.service rpc-statd.service rpc-statd-notify.service nfs-client.target 2>/dev/null || true
 
 # Timer / Cleanup mặc định không cần
-systemctl disable man-db.timer
-systemctl stop man-db.timer
-# Lưu ý: giữ phpsessionclean.timer nếu dùng PHP
-
-# Tắt cron mặc định trên hệ thống
-#systemctl disable cron.service
-#systemctl stop cron.service
-sudo systemctl disable cron.service
-sudo systemctl stop cron.service
+systemctl disable --now man-db.timer 2>/dev/null || true
+# Lưu ý: giữ phpsessionclean.timer (PHP) và cron.service (fake-hwclock lưu giờ cho Raspberry Pi không có RTC)
+#systemctl disable --now cron.service 2>/dev/null || true
 
 echo "Đã tắt xong các service không cần thiết."
-echo "Pi sẽ khởi động lại ngay bây giờ..."
-sudo reboot
+if [ "${1:-}" = "--reboot" ]; then
+    echo "Pi sẽ khởi động lại ngay bây giờ..."
+    reboot
+else
+    echo "Chạy thêm tham số '--reboot' hoặc gõ 'sudo reboot' khi bạn sẵn sàng khởi động lại."
+fi

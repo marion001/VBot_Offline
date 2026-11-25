@@ -24,10 +24,12 @@ printf 'Đã sao lưu hồ sơ mạng tại: %s\n' "$backup"
 uuids=$(nmcli -t -f UUID,TYPE connection show | awk -F: '$2=="wifi" || $2=="802-11-wireless" {print $1}')
 for uuid in $uuids; do
     nmcli connection delete uuid "$uuid" || exit 1
+    rm -f "/var/lib/vbot-network/${uuid}.json"
 done
 
 echo "Đã xóa tất cả các kết nối Wi-Fi đã lưu."
 
+umask 022
 # Ghi đè nội dung vào file ip.txt
 echo "0.0.0.0" > /home/pi/ip.txt
 echo "Đã cập nhật /home/pi/ip.txt thành 0.0.0.0"
@@ -35,3 +37,6 @@ echo "Đã cập nhật /home/pi/ip.txt thành 0.0.0.0"
 # Ghi đè nội dung vào file wifi.txt
 echo "VBot_AP_Reset" > /home/pi/wifi.txt
 echo "Đã cập nhật /home/pi/wifi.txt thành VBot_AP_Reset"
+if id pi >/dev/null 2>&1; then
+    chown pi:pi /home/pi/ip.txt /home/pi/wifi.txt 2>/dev/null || true
+fi

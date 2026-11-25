@@ -7,6 +7,7 @@ from pathlib import Path
 import re
 import shutil
 import subprocess
+import sys
 import importlib.util
 import ipaddress
 import socket
@@ -68,15 +69,15 @@ def wifi_station_connected():
         uuid, _, interface = parts
         if field(uuid, '802-11-wireless.mode') == 'ap':
             continue
-        ipv4 = run('nmcli', '-g', 'IP4.ADDRESS', 'device', 'show', interface)
-        ipv6 = run('nmcli', '-g', 'IP6.ADDRESS', 'device', 'show', interface)
-        for address in (ipv4 + '\n' + ipv6).splitlines():
-            try:
-                ip = ipaddress.ip_interface(address).ip
-                if not ip.is_link_local and not ip.is_loopback and not ip.is_unspecified:
-                    return True
-            except ValueError:
-                pass
+        for key in ('IP4.ADDRESS', 'IP6.ADDRESS'):
+            raw = run('nmcli', '-g', key, 'device', 'show', interface)
+            for address in raw.splitlines():
+                try:
+                    ip = ipaddress.ip_interface(address).ip
+                    if not ip.is_link_local and not ip.is_loopback and not ip.is_unspecified:
+                        return True
+                except ValueError:
+                    pass
     return False
 
 
@@ -210,22 +211,34 @@ def dns_ipv4(interface, server):
         raise RuntimeError('DNS không trả lời hợp lệ qua PAN.')
     def skip_name(offset):
         for _ in range(128):
+            if offset >= len(packet):
+                raise RuntimeError('Gói DNS bị cắt ngắn.')
             size = packet[offset]
             if size & 192 == 192:
+                if offset + 2 > len(packet):
+                    raise RuntimeError('Gói DNS bị cắt ngắn.')
                 return offset + 2
             offset += 1
             if size == 0:
                 return offset
             offset += size
+            if offset > len(packet):
+                raise RuntimeError('Gói DNS bị cắt ngắn.')
         raise RuntimeError('Tên DNS quá dài.')
     offset = 12
     questions, answers = struct.unpack('!2H', packet[4:8])
     for _ in range(questions):
         offset = skip_name(offset) + 4
+        if offset > len(packet):
+            raise RuntimeError('Gói DNS bị cắt ngắn.')
     for _ in range(answers):
         offset = skip_name(offset)
+        if offset + 10 > len(packet):
+            raise RuntimeError('Gói DNS bị cắt ngắn.')
         kind, klass, _, length = struct.unpack('!HHIH', packet[offset:offset + 10])
         offset += 10
+        if offset + length > len(packet):
+            raise RuntimeError('Gói DNS bị cắt ngắn.')
         if kind == 1 and klass == 1 and length == 4:
             return str(ipaddress.IPv4Address(packet[offset:offset + 4]))
         offset += length
@@ -378,25 +391,51 @@ def field(uuid, key):
     return run('nmcli', '-e', 'no', '-g', key, 'connection', 'show', 'uuid', uuid)
 
 
+_ORIG_FIELD = field
+
+
 def profiles():
     result = []
+    use_batched = globals().get('field') is _ORIG_FIELD
     for line in run('nmcli', '-t', '-f', 'UUID,TYPE', 'connection', 'show').splitlines():
         uuid, _, kind = line.partition(':')
         if kind not in ('bluetooth', '802-15-1'):
             continue
-        if field(uuid, 'bluetooth.type') != 'panu':
-            continue
-        result.append({'uuid': uuid, 'mac': field(uuid, 'bluetooth.bdaddr').upper(),
-                       'name': field(uuid, 'connection.id'),
-                       'autoconnect': field(uuid, 'connection.autoconnect') == 'yes'})
+        if use_batched:
+            fields = {}
+            for row in run(
+                'nmcli', '-e', 'no', '-t', '-f',
+                'bluetooth.type,bluetooth.bdaddr,connection.id,connection.autoconnect',
+                'connection', 'show', 'uuid', uuid
+            ).splitlines():
+                k, _, v = row.partition(':')
+                fields[k] = v
+            if fields.get('bluetooth.type') != 'panu':
+                continue
+            result.append({
+                'uuid': uuid,
+                'mac': fields.get('bluetooth.bdaddr', '').upper(),
+                'name': fields.get('connection.id', ''),
+                'autoconnect': fields.get('connection.autoconnect') == 'yes',
+            })
+        else:
+            if field(uuid, 'bluetooth.type') != 'panu':
+                continue
+            result.append({'uuid': uuid, 'mac': field(uuid, 'bluetooth.bdaddr').upper(),
+                           'name': field(uuid, 'connection.id'),
+                           'autoconnect': field(uuid, 'connection.autoconnect') == 'yes'})
     return result
 
 
 def devices():
     import dbus
     bus = dbus.SystemBus()
-    objects = dbus.Interface(bus.get_object('org.bluez', '/'),
-                             'org.freedesktop.DBus.ObjectManager').GetManagedObjects()
+    manager = dbus.Interface(bus.get_object('org.bluez', '/'),
+                             'org.freedesktop.DBus.ObjectManager')
+    try:
+        objects = manager.GetManagedObjects(timeout=5)
+    except TypeError:
+        objects = manager.GetManagedObjects()
     aliases, phones = [], []
     for interfaces in objects.values():
         adapter = interfaces.get('org.bluez.Adapter1')
@@ -497,7 +536,6 @@ def execute(action, mac, enabled, mode=None):
         raise ValueError('Chưa có hồ sơ PAN; hãy kết nối lần đầu trước.')
     uuid = existing[0]['uuid']
     if action == 'connect':
-        ensure_wifi_guard()
         run('nmcli', 'connection', 'modify', 'uuid', uuid,
             'ipv4.route-metric', '1800', 'ipv6.route-metric', '1800',
             'connection.autoconnect-retries', '3')
@@ -538,9 +576,11 @@ def main():
                     raise RuntimeError('Một thao tác PAN khác đang chạy, hãy thử lại sau.')
                 data = execute(args.action, args.mac.upper(), args.enabled == '1', args.mode)
         print(json.dumps({'success': True, **data}, ensure_ascii=False))
+        return 0
     except Exception as error:
         print(json.dumps({'success': False, 'message': str(error)}, ensure_ascii=False))
+        return 1
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())

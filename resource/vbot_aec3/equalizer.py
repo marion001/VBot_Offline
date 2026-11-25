@@ -34,9 +34,41 @@ def effective_bands(document,boot_id):
         return default['bands']
     return document['current']
 
+_CACHED_BOOT_ID = None
+_EQ_LIB_CACHE = {}
+_EQ_LIB_LOCK = threading.Lock()
+
+
 def current_boot_id():
+    global _CACHED_BOOT_ID
+    if _CACHED_BOOT_ID is not None:
+        return _CACHED_BOOT_ID
     path=Path('/proc/sys/kernel/random/boot_id')
-    return path.read_text().strip() if path.is_file() else ''
+    _CACHED_BOOT_ID = path.read_text(encoding='utf-8').strip() if path.is_file() else ''
+    return _CACHED_BOOT_ID
+
+
+def _load_eq_cdll(library):
+    key = (C.CDLL, str(library))
+    with _EQ_LIB_LOCK:
+        cached = _EQ_LIB_CACHE.get(key)
+        if cached is not None:
+            return cached
+        lib = C.CDLL(str(library))
+        lib.vbot_eq_band_count.restype = C.c_int
+        if lib.vbot_eq_band_count() != 6:
+            raise RuntimeError('Build EQ 6-band library first')
+        lib.vbot_eq_create6.argtypes = [C.c_int] + [C.c_double] * 8
+        lib.vbot_eq_create6.restype = C.c_void_p
+        lib.vbot_eq_process.argtypes = [C.c_void_p, C.POINTER(C.c_int16), C.c_int]
+        lib.vbot_eq_process.restype = C.c_int
+        lib.vbot_eq_destroy.argtypes = [C.c_void_p]
+        lib.vbot_eq_destroy.restype = None
+        lib.vbot_eq_mix.argtypes = [C.POINTER(C.c_int16), C.POINTER(C.c_int16)] + [C.c_int] * 3
+        lib.vbot_eq_mix.restype = C.c_int
+        _EQ_LIB_CACHE[key] = lib
+        return lib
+
 
 def read_settings(config_path=None,data_path=None):
     path=Path(config_path) if config_path else Path(__file__).resolve().parents[2]/'Config.json'
@@ -54,17 +86,7 @@ def read_settings(config_path=None,data_path=None):
 class Equalizer:
     def __init__(self,value,rate,library=LIBRARY):
         self.handle=None
-        self.lib=C.CDLL(str(library))
-        self.lib.vbot_eq_band_count.restype=C.c_int
-        if self.lib.vbot_eq_band_count()!=6:raise RuntimeError('Build EQ 6-band library first')
-        self.lib.vbot_eq_create6.argtypes=[C.c_int]+[C.c_double]*8
-        self.lib.vbot_eq_create6.restype=C.c_void_p
-        self.lib.vbot_eq_process.argtypes=[C.c_void_p,C.POINTER(C.c_int16),C.c_int]
-        self.lib.vbot_eq_process.restype=C.c_int
-        self.lib.vbot_eq_destroy.argtypes=[C.c_void_p]
-        self.lib.vbot_eq_destroy.restype=None
-        self.lib.vbot_eq_mix.argtypes=[C.POINTER(C.c_int16),C.POINTER(C.c_int16)]+[C.c_int]*3
-        self.lib.vbot_eq_mix.restype=C.c_int
+        self.lib=_load_eq_cdll(library)
         self.handle=self.lib.vbot_eq_create6(rate,*(value.get(k,0) for k in GAIN_KEYS),value.get('wet_percent',100))
         if not self.handle:raise RuntimeError('EQ initialization failed')
 
@@ -104,7 +126,11 @@ class LiveEqualizer:
         self.worker.start()
 
     def _reload(self):
-        stat=self.path.stat();data_stat=self.data_path.stat() if self.data_path.exists() else None
+        stat=self.path.stat()
+        try:
+            data_stat=self.data_path.stat()
+        except FileNotFoundError:
+            data_stat=None
         stamp=(stat.st_mtime_ns,stat.st_size,data_stat.st_mtime_ns if data_stat else None,data_stat.st_size if data_stat else None)
         if stamp==self.stamp:return
         value=read_settings(self.path,self.data_path)

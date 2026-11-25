@@ -31,10 +31,10 @@ def main():
     unit=Path('/etc/systemd/system/vbot-multiroom-bridge.service')
     if not unit.exists():
         source=root/'resource/multiroom_audio/vbot-multiroom-bridge.service'
-        text=source.read_text().replace('/home/pi/VBot_Offline',str(root))
+        text=source.read_text(encoding='utf-8').replace('/home/pi/VBot_Offline',str(root))
         if any(c in str(root) for c in '\n\r\"%') or ' ' in str(root):
             raise RuntimeError('Unsupported service installation path')
-        unit.write_text(text);unit.chmod(0o644)
+        unit.write_text(text,encoding='utf-8');unit.chmod(0o644)
         run('systemctl','daemon-reload')
     run(sys.executable,str(root/'resource/vbot_aec3/install_media_routes.py'),'--root',str(root),'--ensure')
     # Idempotent: does not restart a running bridge or interrupt its audio.

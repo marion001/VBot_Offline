@@ -9,7 +9,9 @@ try {
     if (strlen($input)>4096 || !is_array($request)) throw new InvalidArgumentException('Dữ liệu EQ không hợp lệ');
     $action=$request['action']??'snapshot';
     if (!in_array($action,['snapshot','select','apply'],true)) throw new InvalidArgumentException('Thao tác EQ không hợp lệ');
-    $config=json_decode(file_get_contents($root.'/Config.json'),true);
+    $rawConfig=file_get_contents($root.'/Config.json');
+    if (is_string($rawConfig) && strncmp($rawConfig,"\xEF\xBB\xBF",3)===0) $rawConfig=substr($rawConfig,3);
+    $config=is_string($rawConfig)?json_decode($rawConfig,true):null;
     if (!is_array($config)) throw new RuntimeException('Không đọc được Config.json');
     if ($action!=='snapshot') {
         $lock=fopen($path.'.lock','c+');

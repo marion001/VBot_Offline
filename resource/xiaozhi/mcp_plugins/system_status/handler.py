@@ -21,10 +21,21 @@ def handle(arguments, context):
 
     now = lib.datetime.now().strftime("%H:%M:%S ngày %d/%m/%Y")
     uptime_seconds = lib.time.time() - lib.psutil.boot_time()
+    ssid_val = getattr(lib, "get_ssid_name", None)
+    ip_val = getattr(lib, "get_my_ip", None)
+    if detail in {"all", "network"} and callable(getattr(lib, "read_info_startup", None)):
+        try:
+            fresh_ssid, fresh_ip = lib.read_info_startup()
+            if fresh_ssid:
+                ssid_val = fresh_ssid
+            if fresh_ip:
+                ip_val = fresh_ip
+        except Exception:
+            pass
     data = {
         "time": now,
-        "ip_address": str(lib.get_my_ip or "không xác định"),
-        "wifi_name": str(lib.get_ssid_name or "không xác định"),
+        "ip_address": str(ip_val or "không xác định"),
+        "wifi_name": str(ssid_val or "không xác định"),
         "volume": int(lib.Volume),
         "uptime_seconds": int(uptime_seconds),
         "uptime_text": _format_uptime(uptime_seconds),

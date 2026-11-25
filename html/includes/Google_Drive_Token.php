@@ -4,6 +4,7 @@ function vbotGoogleDriveTokenLock($path)
 {
     $handle = @fopen($path . '.oauth.lock', 'c+');
     if ($handle === false) return false;
+    @chmod($path . '.oauth.lock', 0777);
     $deadline = microtime(true) + 10;
     do {
         if (@flock($handle, LOCK_EX | LOCK_NB)) return $handle;

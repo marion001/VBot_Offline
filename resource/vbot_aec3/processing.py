@@ -16,6 +16,7 @@ except ImportError:
 
 ROOT = Path(__file__).resolve().parent
 FRAME_BYTES = 320
+_PCM160 = C.c_int16 * 160
 
 
 def validate_aec(value):
@@ -147,44 +148,59 @@ class AEC3:
             if not self.handle:
                 raise RuntimeError('AEC3 đã đóng')
             self.render_pending.extend(pcm)
-            while len(self.render_pending) >= FRAME_BYTES:
-                frame = (C.c_int16 * 160).from_buffer_copy(self.render_pending[:FRAME_BYTES])
-                del self.render_pending[:FRAME_BYTES]
-                if self.lib.vbot_aec_render(self.handle, frame):
-                    raise RuntimeError('AEC3 lỗi xử lý tín hiệu phát')
-                self.render_blocks += 1
+            offset = 0
+            pending_len = len(self.render_pending)
+            try:
+                while pending_len - offset >= FRAME_BYTES:
+                    frame = _PCM160.from_buffer_copy(self.render_pending[offset:offset + FRAME_BYTES])
+                    offset += FRAME_BYTES
+                    if self.lib.vbot_aec_render(self.handle, frame):
+                        raise RuntimeError('AEC3 lỗi xử lý tín hiệu phát')
+                    self.render_blocks += 1
+            finally:
+                if offset:
+                    del self.render_pending[:offset]
 
     def process_capture(self, pcm, delay_ms):
         if len(pcm) % 2:
             raise ValueError('PCM phải là S16_LE')
         output = bytearray()
-        normal_output = bytearray()
+        want_linear = (self.output == 'linear')
+        normal_output = bytearray() if want_linear else None
+        clamped_delay = max(0, min(500, int(delay_ms)))
         with self.lock:
             if not self.handle:
                 raise RuntimeError('AEC3 đã đóng')
             self.capture_pending.extend(pcm)
-            while len(self.capture_pending) >= FRAME_BYTES:
-                frame = (C.c_int16 * 160).from_buffer_copy(self.capture_pending[:FRAME_BYTES])
-                del self.capture_pending[:FRAME_BYTES]
-                cleaned = (C.c_int16 * 160)()
-                start = time.perf_counter()
-                rc = self.lib.vbot_aec_capture(self.handle, frame, cleaned, max(0, min(500, int(delay_ms))))
-                if rc:
-                    raise RuntimeError(f'AEC3 lỗi xử lý microphone: {rc}')
-                normal_output.extend(bytes(cleaned))
-                if self.output == 'linear':
-                    rc = self.linear(self.handle, cleaned)
+            cleaned = _PCM160()
+            offset = 0
+            pending_len = len(self.capture_pending)
+            try:
+                while pending_len - offset >= FRAME_BYTES:
+                    frame = _PCM160.from_buffer_copy(self.capture_pending[offset:offset + FRAME_BYTES])
+                    offset += FRAME_BYTES
+                    start = time.perf_counter()
+                    rc = self.lib.vbot_aec_capture(self.handle, frame, cleaned, clamped_delay)
                     if rc:
-                        raise RuntimeError(f'AEC3 linear output failed: {rc}')
-                elapsed_ms = (time.perf_counter() - start) * 1000
-                self.capture_max_ms = max(self.capture_max_ms, elapsed_ms)
-                self.capture_times_ms.append(elapsed_ms)
-                if elapsed_ms > 10:
-                    self.capture_over_budget += 1
-                output.extend(bytes(cleaned))
-                self.capture_blocks += 1
-        self.normal_output = bytes(normal_output)
-        return bytes(output)
+                        raise RuntimeError(f'AEC3 lỗi xử lý microphone: {rc}')
+                    if want_linear:
+                        normal_output.extend(cleaned)
+                        rc = self.linear(self.handle, cleaned)
+                        if rc:
+                            raise RuntimeError(f'AEC3 linear output failed: {rc}')
+                    elapsed_ms = (time.perf_counter() - start) * 1000
+                    self.capture_max_ms = max(self.capture_max_ms, elapsed_ms)
+                    self.capture_times_ms.append(elapsed_ms)
+                    if elapsed_ms > 10:
+                        self.capture_over_budget += 1
+                    output.extend(cleaned)
+                    self.capture_blocks += 1
+            finally:
+                if offset:
+                    del self.capture_pending[:offset]
+            result = bytes(output)
+            self.normal_output = bytes(normal_output) if want_linear else result
+            return result
 
     def snapshot(self):
         with self.lock:

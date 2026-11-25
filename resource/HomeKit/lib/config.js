@@ -125,9 +125,17 @@ function loadHomeKitRegistry(vbotConfigPath) {
   const items = [...registry.controls];
   const groupPath = path.join(path.dirname(vbotConfigPath), "resource", "multiroom_audio", "multiroom_groups.json");
   const multiroom = fs.existsSync(groupPath) ? (readJson(groupPath) || {}) : {};
+  const groupIdsSeen = new Set(items.map(item => String(item.id || "").trim()));
   for (const [groupId, group] of Object.entries(multiroom.groups || {})) {
+    const slug = String(groupId).replace(/[^a-z0-9_]/gi, "_").toLowerCase().replace(/^_+|_+$/g, "") || "group";
+    let candidateId = `multiroom_group_${slug}`;
+    if (groupIdsSeen.has(candidateId)) {
+      const hash = crypto.createHash("sha1").update(String(groupId)).digest("hex").slice(0, 8);
+      candidateId = `multiroom_group_${slug}_${hash}`;
+    }
+    groupIdsSeen.add(candidateId);
     items.push({
-      id: `multiroom_group_${String(groupId).replace(/[^a-z0-9_]/gi, "_").toLowerCase()}`,
+      id: candidateId,
       name: `Phát Multiroom ${group.name || groupId}`,
       group: "multiroom", service: "button", api_method: "multiroom_group", group_id: groupId,
     });

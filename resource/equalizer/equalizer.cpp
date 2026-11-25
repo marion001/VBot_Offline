@@ -8,7 +8,9 @@ namespace {
 constexpr double pi=3.14159265358979323846;
 struct Filter {
     double b0=1,b1=0,b2=0,a1=0,a2=0,z1[2]={},z2[2]={};
+    bool active=false;
     double run(double x,int channel) {
+        if(!active)return x;
         double y=b0*x+z1[channel];
         z1[channel]=b1*x-a1*y+z2[channel];z2[channel]=b2*x-a2*y;
         // Avoid subnormal tails consuming CPU on ARM after audio goes silent.
@@ -21,6 +23,7 @@ struct EQ {Filter filters[6];double gain,preamp,wet;};
 Filter coefficients(int kind,double frequency,double db,int rate) {
     Filter f;
     if(db==0)return f;
+    f.active=true;
     const double A=std::pow(10.,db/40),w=2*pi*frequency/rate;
     const double c=std::cos(w),s=std::sin(w);
     double b0,b1,b2,a0,a1,a2;
@@ -58,7 +61,12 @@ void* vbot_eq_create6(int rate,double bass,double low_mid,double mid,double high
 int vbot_eq_process(void* handle,int16_t* pcm,int frames) {
     if(!handle||!pcm||frames<0)return -1;
     auto& eq=*static_cast<EQ*>(handle);
-    if(eq.wet==0 && eq.preamp==1)return 0;
+    if(eq.wet==0) {
+        if(eq.preamp==1)return 0;
+        const int total=frames*2;
+        for(int idx=0;idx<total;idx++)pcm[idx]=static_cast<int16_t>(std::lrint(std::max(-32768.,std::min(32767.,pcm[idx]*eq.preamp))));
+        return 0;
+    }
     for(int i=0;i<frames;i++)for(int ch=0;ch<2;ch++) {
         double dry=pcm[2*i+ch],x=dry*eq.gain;
         for(auto& filter:eq.filters)x=filter.run(x,ch);

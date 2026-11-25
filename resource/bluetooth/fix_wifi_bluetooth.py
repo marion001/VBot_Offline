@@ -29,10 +29,19 @@ def classify(model, logs):
 
 
 def detect():
-    model = MODEL.read_text().rstrip('\x00') if MODEL.exists() else ''
+    try:
+        model = MODEL.read_text(encoding='utf-8', errors='replace').rstrip('\x00') if MODEL.exists() else ''
+    except OSError:
+        model = ''
+    if 'Raspberry Pi Zero 2 W' not in model:
+        return {'model': model, 'supported': False, 'firmware': '',
+                'message': 'Bỏ qua: chưa xác định được đúng model/chip/firmware hỗ trợ; không sửa cấu hình.'}
     logs = ''
     for command in (['dmesg'], ['journalctl', '-k', '-b', '--no-pager']):
-        result = subprocess.run(command, capture_output=True, text=True, timeout=15)
+        try:
+            result = subprocess.run(command, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=15)
+        except (OSError, subprocess.SubprocessError):
+            continue
         if result.returncode == 0:
             logs += '\n' + result.stdout
         if classify(model, logs):
@@ -91,14 +100,15 @@ def apply():
     if target.parent != FIRMWARE.resolve() or target.name not in {name + '.txt' for name in NAMES.values()}:
         raise RuntimeError('Đường firmware không hợp lệ; không sửa')
     old = target.read_bytes()
-    if configured(old.decode()):
+    old_text = old.decode('utf-8', 'surrogateescape')
+    if configured(old_text):
         return dict(info, changed=False, message='Cấu hình Wi-Fi/Bluetooth đã phù hợp; không ghi lại firmware. Nếu vừa cài trước đó, reboot để nạp cấu hình.')
     backup = snapshot('coexistence')
     shutil.copy2(target, backup / 'firmware.txt')
     manifest = {'version': 1, 'target': target.name, 'model': info['model'], 'sha256': hashlib.sha256(old).hexdigest(), 'mode': target.stat().st_mode & 0o777}
     (backup / 'manifest.json').write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding='utf-8')
-    lines = [line for line in old.decode().splitlines() if not re.match(r'^\s*(btc_mode|btc_params8|btc_params1)\s*=', line)]
-    new = ('\n'.join(lines) + '\n\n# VBot Wi-Fi/Bluetooth coexistence\n' + ''.join(key + '=' + value + '\n' for key, value in VALUES.items())).encode()
+    lines = [line for line in old_text.splitlines() if not re.match(r'^\s*(btc_mode|btc_params8|btc_params1)\s*=', line)]
+    new = ('\n'.join(lines) + '\n\n# VBot Wi-Fi/Bluetooth coexistence\n' + ''.join(key + '=' + value + '\n' for key, value in VALUES.items())).encode('utf-8', 'surrogateescape')
     try:
         replace(target, new, manifest['mode'])
         if target.read_bytes() != new:
@@ -170,7 +180,7 @@ def main():
         if not (args.apply or args.restore or args.backup_bluetooth):
             result = detect()
             if result['supported']:
-                result['configured'] = configured(Path(result['firmware']).read_text())
+                result['configured'] = configured(Path(result['firmware']).read_text(encoding='utf-8', errors='surrogateescape'))
         else:
             if os.geteuid() != 0:
                 raise RuntimeError('Chạy bằng sudo để sao lưu và sửa firmware')

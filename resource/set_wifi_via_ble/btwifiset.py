@@ -185,7 +185,7 @@ class WifiUtil:
         hostname = None
         try:
             if os.path.exists(CONFIG_PATH):
-                with open(CONFIG_PATH, "r", encoding="utf-8") as f:
+                with open(CONFIG_PATH, "r", encoding="utf-8-sig") as f:
                     data = json.load(f)
                 config_name = data.get("contact_info", {}).get("full_name")
                 if isinstance(config_name, str):
@@ -195,7 +195,7 @@ class WifiUtil:
         except Exception as e:
             mLOG.log(f"Read Config.json VBot failed: {e}")
         try:
-            result = subprocess.run(["bluetoothctl", "show"], capture_output=True, text=True)
+            result = subprocess.run(["bluetoothctl", "show"], capture_output=True, text=True, timeout=5)
             for line in result.stdout.splitlines():
                 if "Alias:" in line:
                     current_alias = line.split("Alias:", 1)[1].strip()
@@ -203,9 +203,9 @@ class WifiUtil:
         except Exception as e:
             mLOG.log(f"Read Bluetooth Alias failed: {e}")
         try:
-            result = subprocess.run(["hostname"], capture_output=True, text=True)
+            result = subprocess.run(["hostname"], capture_output=True, text=True, timeout=5)
             hostname = result.stdout.strip()
-        except:
+        except Exception:
             hostname = None
         if config_name:
             final_name = f"{PREFIX}{config_name}"
@@ -217,7 +217,10 @@ class WifiUtil:
             final_name = "VBot-Assistant"
         try:
             if final_name and final_name != current_alias:
-                subprocess.run(["sudo", "bluetoothctl", "system-alias", final_name], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                alias_cmd = ["bluetoothctl", "system-alias", final_name]
+                if hasattr(os, "geteuid") and os.geteuid() != 0:
+                    alias_cmd.insert(0, "sudo")
+                subprocess.run(alias_cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=5)
                 mLOG.log(f"Bluetooth Alias updated → {final_name}")
         except Exception as e:
             mLOG.log(f"Set Bluetooth Alias failed: {e}", level=mLOG.CRITICAL)
@@ -834,10 +837,10 @@ class NetworkManager:
                     time.sleep(2)
                 except Exception as ee:
                     mLOG.log("General exception on trying to delete connection in network manager")
-                    mLOG.log(ee.output) 
+                    mLOG.log(str(getattr(ee, "output", ee)))
         except Exception as ex :
             mLOG.log("general exception trying to connect")
-            mLOG.log(f"connection error:{ex.output}")
+            mLOG.log(f"connection error:{getattr(ex, 'output', ex)}")
 
         if connection_attempt:        
             if is_new:
@@ -856,9 +859,8 @@ class NetworkManager:
         network_names = self.mgr.wpa.get_network_name(ssid)
         if network_names is not None:
             for network_name in network_names:
-                p = subprocess.Popen(["nmcli","connection","delete",f"{network_name}"])
-                p.wait()
-                p.terminate()
+                subprocess.run(["nmcli","connection","delete",f"{network_name}"],
+                               capture_output=True, text=True, timeout=15)
 
         #now add the network - first create it has open
         #warning - this will allow creation of the same network twice (hence the deletion attempt)
@@ -867,7 +869,7 @@ class NetworkManager:
                 #returns: Connection 'NFTest' (1cd11139-58cd-4057-8c25-67935bd60623) successfully added.
        
         p = subprocess.run(["nmcli","con","add","type","wifi","con-name",f"{ssid}","ifname","wlan0","ssid",f"{ssid}"],
-                           capture_output=True, text=True)
+                           capture_output=True, text=True, timeout=15)
         try:
             network_name = re.findall(r"'(.+?)'\s\(", p.stdout,re.M)[0]
         except:
@@ -878,22 +880,21 @@ class NetworkManager:
         
         #if it is a hidden network - modify to indicate:
         if hidden:
-            p = subprocess.Popen(["nmcli","con","modify",f"{network_name}","802-11-wireless.hidden", "yes"])
-            p.wait()
-            p.terminate()
+            subprocess.run(["nmcli","con","modify",f"{network_name}","802-11-wireless.hidden", "yes"],
+                           capture_output=True, text=True, timeout=15)
         #add password if one was passed in:
         if pw != "":
             try: 
                 #this adds wpa-psk and password
                 p = subprocess.check_output(["nmcli","con","modify",f"{network_name}","wifi-sec.key-mgmt","wpa-psk"],
-                                                stderr=subprocess.STDOUT, shell=False)
+                                                stderr=subprocess.STDOUT, shell=False, timeout=15)
                 p = subprocess.check_output(["nmcli","con","modify",f"{network_name}","wifi-sec.psk", f"{pw}"],
-                                                stderr=subprocess.STDOUT, shell=False)
+                                                stderr=subprocess.STDOUT, shell=False, timeout=15)
             except Exception as ex:
                 mLOG.log(f"creation error: {ex}")
                 try:
                      p = subprocess.check_output(["nmcli","con","del",f"{network_name}"],
-                                                stderr=subprocess.STDOUT, shell=False)
+                                                stderr=subprocess.STDOUT, shell=False, timeout=15)
                 except:
                     pass
                 return None
@@ -908,8 +909,8 @@ class NetworkManager:
         '''
         #check if network to remove is hidden:
 
-        out = subprocess.run(f'nmcli -f 802-11-wireless con show {known_network.network_name}', 
-                                shell=True,capture_output=True,encoding='utf-8',text=True).stdout
+        out = subprocess.run(["nmcli", "-f", "802-11-wireless", "con", "show", f"{known_network.network_name}"],
+                             capture_output=True, encoding='utf-8', text=True, timeout=10).stdout
         
         try:
             is_hidden = (re.findall(r"hidden:\s+([a-z]+)", out,re.M)[0] == "yes")
@@ -919,11 +920,10 @@ class NetworkManager:
         #this network is a hidden ssid - it will be removed (not added) from ap list as well
         mLOG.log(f'{known_network.ssid} to be removed is hidden?: {is_hidden}')
         #remove the network from Network Manager list of Connections on device
-        p = subprocess.Popen(["nmcli","connection","delete",f"{known_network.network_name}"])
-        p.wait()
-        p.terminate()
+        subprocess.run(["nmcli","connection","delete",f"{known_network.network_name}"],
+                       capture_output=True, text=True, timeout=15)
         #remove the network from the known network directory
-        del self.mgr.wpa.wpa_supplicant_ssids[known_network.network_name]
+        self.mgr.wpa.wpa_supplicant_ssids.pop(known_network.network_name, None)
         # change bit in list of AP - not necessary: done in get_list()
         #indexes = [i for i, x in enumerate(self.mgr.list_of_APs) if x.ssid == known_network.ssid] #get index for AP of that ssid  - should only be one
         #for i in indexes:
@@ -933,8 +933,8 @@ class NetworkManager:
     def disconnect(self):
         #CALLED from Service
         #NMCLI - MODIFIED
-        command_str = "nmcli dev disconnect wlan0"
-        out= subprocess.run(command_str, shell=True,capture_output=True,encoding='utf-8',text=True).stdout
+        out = subprocess.run(["nmcli", "dev", "disconnect", "wlan0"],
+                             capture_output=True, encoding='utf-8', text=True, timeout=15).stdout
         mLOG.log(f'disconnect" {out}')
 
 class WpaSupplicant:
@@ -1392,13 +1392,13 @@ class WifiManager:
         #this does not communicate back the result to ios app: app will display radio off/on even if command was denied.
         #automatic install uses all python files combined into one btwifiset.py and stored at /usr/local/btwifiset owned by root.
         #SAME
-        cmd = "/bin/ip link set wlan0 up" if up else "/bin/ip link set wlan0 down"
+        cmd = ["/bin/ip", "link", "set", "wlan0", "up" if up else "down"]
         msg = "Bring WiFi up" if up else "Bring WiFi down"
         mLOG.log(msg)
         try :
-            r = subprocess.run(cmd, shell=True, text=True, timeout=10)
+            r = subprocess.run(cmd, text=True, timeout=10)
         except Exception as e:
-            mLOG.log("error caught: " + e)
+            mLOG.log(f"error caught: {e}")
 
 
 FILEDIR = f"{pathlib.Path(__file__).parent.resolve()}/"
@@ -1434,7 +1434,7 @@ class PiInfo:
                 self.last_nonce = dict["last_nonce"]
             return True  
         except FileNotFoundError:
-            mLOG.log("file {PiInfo.INFOFILE} not created yet - using default values")
+            mLOG.log(f"file {PiInfo.INFOFILE} not created yet - using default values")
             return False
         except Exception as ex:
             mLOG.log(f"Error reading file {PiInfo.INFOFILE}: {ex}") 
@@ -1442,9 +1442,21 @@ class PiInfo:
 
     def saveInfo(self): 
         try:
-            dict = {"locked":self.locked, "last_nonce":self.last_nonce}
-            with open(PiInfo.INFOFILE, "w", encoding='utf8') as f:
-                json.dump(dict, f, ensure_ascii=False)
+            import tempfile
+            payload = {"locked": self.locked, "last_nonce": self.last_nonce}
+            parent = os.path.dirname(os.path.abspath(PiInfo.INFOFILE))
+            os.makedirs(parent, exist_ok=True)
+            fd, tmp_path = tempfile.mkstemp(dir=parent, prefix=".infopi-")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    json.dump(payload, f, ensure_ascii=False)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.chmod(tmp_path, 0o600)
+                os.replace(tmp_path, PiInfo.INFOFILE)
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
             return True
         except Exception as ex:
             mLOG.log(f"error writing to file {PiInfo.INFOFILE}: {ex}") 
@@ -1695,6 +1707,9 @@ class AndroidAES:
 
     @staticmethod
     def decrypt(ciphertext, key):
+        ciphertext = bytes(ciphertext)
+        if len(ciphertext) < 28 or (len(ciphertext) - 12) % 16 != 0:
+            raise ValueError("Invalid AES-CBC ciphertext length")
         # Extract the IV (first 12 bytes)
         iv = ciphertext[:12]
         iv += bytes.fromhex("00000000")  #cypher text arrives with 12 bytes nonce - pad it to 16
@@ -1774,7 +1789,8 @@ class BTCrypto:
     def decryptAES(self,cypher,nonce_counter):
         try:
             nonce_bytes = cypher[0:12]
-            message = AndroidAES.decrypt(cypher,self.hashed_pw) 
+            message = AndroidAES.decrypt(cypher,self.hashed_pw)
+            message.decode("utf-8")
             if not nonce_counter.useAES: mLOG.log('AES encryption detected') # only warn if changing encryption
             nonce_counter.useAES = True
             if nonce_counter.checkLastReceived(nonce_bytes) :return message
@@ -1903,6 +1919,8 @@ class BTCryptoManager:
             self.timer.cancel()
         try:
             self.timer = Timer(20.0,self.closeBTConnection)
+            self.timer.daemon = True
+            self.timer.start()
         except Exception as ex:
             mLOG.log(f"timer not started: {ex}")
 
@@ -3293,7 +3311,7 @@ class WifiSetService(Service):
     def getLockInfo(self):
         #returns either MACid or LOCKNonceMACId
         #Nonce must be exactly 12 bytes
-        self.cryptomgr.piInfo()
+        return self.cryptomgr.getinformation()
 
     def handle_vbot_request(self, payload):
         import threading
@@ -3330,7 +3348,7 @@ class WifiSetService(Service):
         currently - only implements sending the text as notification
         """
         mLOG.log(f"received from user app: {msg}")
-        msg_arr = [].append(msg)
+        msg_arr = [msg]
         self.notifications.setJsonNotification(msg_arr,"button")
 
     def startSendingButtons(self):
@@ -3487,11 +3505,11 @@ class WifiSetService(Service):
             else:
                 try:  #this fails with error if dict key does not exists (ie it is not a button click)
                     button_info_dict = json.loads(val[1])
-                    if "code" in button_info_dict and "data" in button_info_dict:
+                    if isinstance(button_info_dict, dict) and "code" in button_info_dict and "data" in button_info_dict and self.sender is not None:
                         self.sender.send_signal(val[1])
                     else:
                         mLOG.log(f'Invalid SSID string {val}')
-                except: #this catch error on decoding json
+                except Exception: #this catch error on decoding json
                     mLOG.log(f'Invalid SSID string {val}')
                 return
             
@@ -3523,7 +3541,7 @@ class WifiSetService(Service):
                         mLOG.log('adding FAIL to notifications')
                         self.notifications.setNotification('FAIL',"wifi")
             except Exception as ex:
-                mLOG.log("EERROR - ",ex)
+                mLOG.log(f"ERROR - {ex}")
                 
 
 
@@ -3679,8 +3697,12 @@ class WifiDataCharacteristic(Characteristic):
         value_d = self.service.cryptomgr.decrypt(value_python_bytes)
         bytes_arr = value_d.split(SEPARATOR_HEX)
         received = []
-        for bb in bytes_arr:
-            received.append(bb.decode("utf8"))
+        try:
+            for bb in bytes_arr:
+                received.append(bb.decode("utf8"))
+        except UnicodeDecodeError as ex:
+            mLOG.log(f"Invalid UTF-8 BLE payload ignored: {ex}")
+            return
         # for val in value_d:
         #     if val == SEPARATOR_HEX:
         #         index += 1

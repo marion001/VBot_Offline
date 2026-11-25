@@ -23,13 +23,16 @@ function runtimeTimestamp() {
   return new Date().toISOString();
 }
 
-function appendBoundedLog(filePath, line, callback = null) {
+function appendBoundedLog(filePath, line, callback = null, sync = false) {
   try {
     let size = homekitLogSizes.get(filePath);
     if (size == null) {
       try { size = fs.statSync(filePath).size; } catch (_) { size = 0; }
     }
     const lineBytes = Buffer.byteLength(line);
+    if (size + lineBytes > HOMEKIT_LOG_MAX_BYTES) {
+      try { size = fs.statSync(filePath).size; } catch (_) { size = 0; }
+    }
     if (size + lineBytes > HOMEKIT_LOG_MAX_BYTES) {
       const rotatedPath = `${filePath}.1`;
       try { fs.rmSync(rotatedPath, { force: true }); } catch (_) {}
@@ -39,14 +42,19 @@ function appendBoundedLog(filePath, line, callback = null) {
       size = 0;
     }
     homekitLogSizes.set(filePath, size + lineBytes);
-    fs.appendFile(filePath, line, "utf8", callback || (() => {}));
+    if (sync) {
+      fs.appendFileSync(filePath, line, "utf8");
+      if (callback) callback(null);
+    } else {
+      fs.appendFile(filePath, line, "utf8", callback || (() => {}));
+    }
   } catch (error) {
     if (callback) callback(error);
     else originalConsoleError("[VBot_HomeKit_Node] Không thể ghi log giới hạn: ", error);
   }
 }
 
-function appendVBotService(level, values) {
+function appendVBotService(level, values, sync = false) {
   try {
     fs.mkdirSync(path.dirname(VBOT_SERVICE_LOG), { recursive: true });
     const message = values.map(errorText).join(" ").replace(/^\[VBot_HomeKit_Node\]\s*/, "");
@@ -54,9 +62,20 @@ function appendVBotService(level, values) {
     // Không chặn event loop/HomeKit trong lúc ghi log chẩn đoán.
     appendBoundedLog(VBOT_SERVICE_LOG, line, error => {
       if (error) originalConsoleError("[VBot_HomeKit_Node] Không thể ghi service_log.log: ", error);
-    });
+    }, sync);
   } catch (logError) {
     originalConsoleError("[VBot_HomeKit_Node] Không thể chuẩn bị service_log.log: ", logError);
+  }
+}
+
+function appendVBotErrorSync(...values) {
+  try {
+    fs.mkdirSync(path.dirname(VBOT_ERROR_LOG), { recursive: true });
+    const timestamp = new Date().toLocaleString("vi-VN", { hour12: false, timeZone: "Asia/Ho_Chi_Minh" });
+    const message = values.map(errorText).join(" ").replace(/^\[VBot_HomeKit_Node\]\s*/, "");
+    appendBoundedLog(VBOT_ERROR_LOG, `[${timestamp}] [VBot_HomeKit_Node] ${message}\n`, null, true);
+  } catch (logError) {
+    originalConsoleError("[VBot_HomeKit_Node] Không thể ghi Vbot_error.log: ", logError);
   }
 }
 
@@ -87,7 +106,8 @@ console.error = (...values) => {
   originalConsoleError(...values);
 };
 process.on("uncaughtException", error => {
-  appendVBotError("uncaughtException:", error);
+  appendVBotService("ERROR", ["uncaughtException:", error], true);
+  appendVBotErrorSync("uncaughtException:", error);
   originalConsoleError("[VBot_HomeKit_Node] uncaughtException:", error);
   process.exit(1);
 });
@@ -409,7 +429,12 @@ for (const definition of config.registryControls) {
 
 const multiroomSpeakerControls = new Map();
 for (const definition of config.multiroomSpeakers) {
+  if (groups.multiroom.services.length + 4 > 99) {
+    console.warn(`[VBot_HomeKit_Node] Bỏ qua loa Multiroom '${definition.name}' do nhóm Multiroom đã đạt giới hạn dịch vụ HAP.`);
+    break;
+  }
   const subtype = crypto.createHash("sha1").update(definition.id).digest("hex").slice(0, 12);
+  const speakerSliderKey = `multiroom-speaker-${definition.id}`;
   const joined = setControlName(new Service.Switch(`${definition.name} trong nhóm`, `multiroom-joined-${subtype}`), `${definition.name} trong nhóm`);
   const muted = setControlName(new Service.Switch(`${definition.name} tắt tiếng`, `multiroom-muted-${subtype}`), `${definition.name} tắt tiếng`);
   const volume = setControlName(new Service.Lightbulb(`${definition.name} âm lượng`, `multiroom-volume-${subtype}`), `${definition.name} âm lượng`);
@@ -422,10 +447,16 @@ for (const definition of config.multiroomSpeakers) {
   muted.setCharacteristic(Characteristic.On, false).getCharacteristic(Characteristic.On)
     .onGet(() => Boolean(multiroomSpeakerControls.get(definition.id)?.state.muted))
     .onSet(value => dispatchControl(`Yêu cầu mute ${definition.name}`, () => client.setMultiroomSpeakerMute(definition.id, Boolean(value))));
-  volume.getCharacteristic(Characteristic.On).onGet(() => Number(multiroomSpeakerControls.get(definition.id)?.state.volume || 0) > 0);
+  volume.getCharacteristic(Characteristic.On)
+    .onGet(() => sliderDisplayValue(speakerSliderKey, multiroomSpeakerControls.get(definition.id)?.state.volume) > 0)
+    .onSet(value => {
+      if (value || Number(multiroomSpeakerControls.get(definition.id)?.state.volume || 0) === 0) return Promise.resolve();
+      return debounceSliderControl(speakerSliderKey, 0, finalValue =>
+        runControl(`Yêu cầu âm lượng ${definition.name} ${finalValue}%`, () => client.setMultiroomSpeakerVolume(definition.id, finalValue)));
+    });
   volume.getCharacteristic(Characteristic.Brightness)
-    .onGet(() => Number(multiroomSpeakerControls.get(definition.id)?.state.volume || 0))
-    .onSet(value => debounceSliderControl(`multiroom-speaker-${definition.id}`, value, finalValue =>
+    .onGet(() => sliderDisplayValue(speakerSliderKey, multiroomSpeakerControls.get(definition.id)?.state.volume))
+    .onSet(value => debounceSliderControl(speakerSliderKey, value, finalValue =>
       runControl(`Yêu cầu âm lượng ${definition.name} ${finalValue}%`, () => client.setMultiroomSpeakerVolume(definition.id, finalValue))));
   groups.multiroom.addService(joined);
   groups.multiroom.addService(muted);
@@ -489,10 +520,14 @@ const groupsWithPrimaryAction = new Set();
 for (const definition of config.actionControls) {
   // Đánh thức đã có control API riêng; không tạo thêm tile trùng tên.
   if (["wakeup", "repeat_toggle", "shuffle_toggle"].includes(definition.id)) continue;
+  const group = groupForAction(definition.id);
+  if (group.services.length >= 99) {
+    console.warn(`[VBot_HomeKit_Node] Bỏ qua '${definition.label}' do phụ kiện nhóm đã đạt giới hạn 100 dịch vụ HAP.`);
+    continue;
+  }
   const subtype = `vbot-action-${crypto.createHash("sha1").update(definition.id).digest("hex").slice(0, 12)}`;
   const control = setControlName(new Service.Switch(definition.label, subtype), definition.label);
   control.setCharacteristic(Characteristic.On, false);
-  const group = groupForAction(definition.id);
   if (!groupsWithPrimaryAction.has(group) && ![groups.media, groups.voice].includes(group)) {
     control.setPrimaryService();
     groupsWithPrimaryAction.add(group);

@@ -1,4 +1,5 @@
 """Move legacy EQ gains out of Config.json without replacing saved presets."""
+import copy
 import datetime
 import fcntl
 import json
@@ -36,7 +37,7 @@ def main():
             name='Cấu hình trước đây' if any(bands.values()) else 'Phẳng'
             state=dict(version=1,boot_id='',selected_preset='flat',default_preset='flat',current=bands,presets=[dict(id='flat',name=name,bands=bands)])
             write(data,state)
-        previous=json.loads(data.read_text(encoding='utf-8-sig'))
+        previous=copy.deepcopy(state)
         for bands in [state['current']]+[preset['bands'] for preset in state['presets']]:
             bands.setdefault('low_mid_db',0);bands.setdefault('high_mid_db',0);bands.setdefault('air_db',0);bands.setdefault('wet_percent',100)
             for key in ('bass_db','low_mid_db','mid_db','high_mid_db','treble_db','air_db','preamp_db','wet_percent'):
@@ -45,11 +46,11 @@ def main():
                 if type(value) not in (int,float) or not math.isfinite(value) or not minimum<=value<=maximum:raise ValueError('Invalid saved EQ '+key)
         if state!=previous:
             backup=Path('/home/pi/VBot_AEC3/eq_config_backups')/datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-            backup.mkdir(parents=True);shutil.copy2(data,backup/'settings.json');write(data,state)
+            backup.mkdir(parents=True,exist_ok=True);shutil.copy2(data,backup/'settings.json');write(data,state)
         minimal={'active':legacy.get('active',False)}
         if legacy!=minimal:
             backup=Path('/home/pi/VBot_AEC3/eq_config_backups')/datetime.datetime.now().strftime('%Y%m%d_%H%M%S_%f')
-            backup.mkdir(parents=True);shutil.copy2(config,backup/'Config.json')
+            backup.mkdir(parents=True,exist_ok=True);shutil.copy2(config,backup/'Config.json')
             c.setdefault('media_player',{})['equalizer']=minimal;write(config,c)
     print('EQ presets ready; Config.json contains only the EQ switch')
 

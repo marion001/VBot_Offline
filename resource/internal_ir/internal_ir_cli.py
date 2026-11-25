@@ -71,8 +71,10 @@ def _select_receive_device(argv):
     return "Không tìm thấy thiết bị LIRC hỗ trợ nhận raw IR. Đã kiểm tra: " + "; ".join(diagnostics)
 
 if __name__ == "__main__":
-    receive_error = _select_receive_device(sys.argv[1:])
+    cli_args = sys.argv[1:]
+    receive_error = _select_receive_device(cli_args)
     if receive_error:
         print(json.dumps({"success": False, "message": receive_error}, ensure_ascii=False))
         sys.exit(1)
+    sys.argv[1:] = cli_args
     sys.exit(Internal_IR.main())

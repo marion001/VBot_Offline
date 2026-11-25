@@ -1,4 +1,5 @@
 WIKIPEDIA_API_URL = "https://vi.wikipedia.org/w/api.php"
+_WIKI_HTTP_SESSION = None
 
 
 def _clean_text(value):
@@ -6,14 +7,15 @@ def _clean_text(value):
 
 
 def handle(arguments, context):
+    global _WIKI_HTTP_SESSION
     lib = context["Lib"]
     query = _clean_text(arguments.get("query"))
     if not query:
         raise ValueError("Thiếu từ khóa tìm kiếm")
 
     try:
-        response = lib.requests.get(
-            WIKIPEDIA_API_URL,
+        req_mod = lib.requests
+        req_kwargs = dict(
             params={
                 "action": "query",
                 "generator": "search",
@@ -34,8 +36,21 @@ def handle(arguments, context):
             },
             timeout=(3, 6),
         )
-        response.raise_for_status()
-        payload = response.json()
+        # Tái sử dụng kết nối TLS Keep-Alive nếu lib.requests hỗ trợ Session thật
+        if _WIKI_HTTP_SESSION is None and hasattr(req_mod, "Session") and callable(getattr(req_mod, "Session", None)):
+            try:
+                _WIKI_HTTP_SESSION = req_mod.Session()
+            except Exception:
+                _WIKI_HTTP_SESSION = None
+        getter = _WIKI_HTTP_SESSION.get if (_WIKI_HTTP_SESSION is not None and getattr(req_mod, "__name__", "") == "requests") else req_mod.get
+        response = getter(WIKIPEDIA_API_URL, **req_kwargs)
+        try:
+            response.raise_for_status()
+            payload = response.json()
+        finally:
+            close_fn = getattr(response, "close", None)
+            if callable(close_fn):
+                close_fn()
     except Exception as error:
         message = f"Không thể kết nối Wikipedia để tìm kiếm: {error}"
         context["log"](
@@ -51,7 +66,14 @@ def handle(arguments, context):
             },
             "isError": True,
         }
-    pages = payload.get("query", {}).get("pages", [])
+    query_obj = payload.get("query") if isinstance(payload, dict) else None
+    raw_pages = query_obj.get("pages") if isinstance(query_obj, dict) else []
+    if isinstance(raw_pages, dict):
+        pages = list(raw_pages.values())
+    elif isinstance(raw_pages, list):
+        pages = raw_pages
+    else:
+        pages = []
 
     results = []
     for page in pages:

@@ -47,7 +47,7 @@ class PiInfo:
                 self.last_nonce = dict["last_nonce"]
             return True  
         except FileNotFoundError:
-            Log.log("file {PiInfo.INFOFILE} not created yet - using default values")
+            Log.log(f"file {PiInfo.INFOFILE} not created yet - using default values")
             return False
         except Exception as ex:
             Log.log(f"Error reading file {PiInfo.INFOFILE}: {ex}") 
@@ -55,9 +55,21 @@ class PiInfo:
 
     def saveInfo(self): 
         try:
-            dict = {"locked":self.locked, "last_nonce":self.last_nonce}
-            with open(PiInfo.INFOFILE, "w", encoding='utf8') as f:
-                json.dump(dict, f, ensure_ascii=False)
+            import tempfile
+            payload = {"locked": self.locked, "last_nonce": self.last_nonce}
+            parent = os.path.dirname(os.path.abspath(PiInfo.INFOFILE))
+            os.makedirs(parent, exist_ok=True)
+            fd, tmp_path = tempfile.mkstemp(dir=parent, prefix=".infopi-")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    json.dump(payload, f, ensure_ascii=False)
+                    f.flush()
+                    os.fsync(f.fileno())
+                os.chmod(tmp_path, 0o600)
+                os.replace(tmp_path, PiInfo.INFOFILE)
+            finally:
+                if os.path.exists(tmp_path):
+                    os.unlink(tmp_path)
             return True
         except Exception as ex:
             Log.log(f"error writing to file {PiInfo.INFOFILE}: {ex}") 
@@ -308,6 +320,9 @@ class AndroidAES:
 
     @staticmethod
     def decrypt(ciphertext, key):
+        ciphertext = bytes(ciphertext)
+        if len(ciphertext) < 28 or (len(ciphertext) - 12) % 16 != 0:
+            raise ValueError("Invalid AES-CBC ciphertext length")
         # Extract the IV (first 12 bytes)
         iv = ciphertext[:12]
         iv += bytes.fromhex("00000000")  #cypher text arrives with 12 bytes nonce - pad it to 16
@@ -387,7 +402,8 @@ class BTCrypto:
     def decryptAES(self,cypher,nonce_counter):
         try:
             nonce_bytes = cypher[0:12]
-            message = AndroidAES.decrypt(cypher,self.hashed_pw) 
+            message = AndroidAES.decrypt(cypher,self.hashed_pw)
+            message.decode("utf-8")
             if not nonce_counter.useAES: Log.log('AES encryption detected') # only warn if changing encryption
             nonce_counter.useAES = True
             if nonce_counter.checkLastReceived(nonce_bytes) :return message
@@ -516,6 +532,8 @@ class BTCryptoManager:
             self.timer.cancel()
         try:
             self.timer = Timer(20.0,self.closeBTConnection)
+            self.timer.daemon = True
+            self.timer.start()
         except Exception as ex:
             Log.log(f"timer not started: {ex}")
 

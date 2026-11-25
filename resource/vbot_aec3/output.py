@@ -43,7 +43,11 @@ def main():
     _, _, Playback = _load_backend()
     from _vbot_media_aec3.reference import ReferenceSender
     playback = Playback(args.device, args.latency, threading.Event(), args.rate, args.channels, equalizer=True)
-    sender = ReferenceSender(args.rate, playback)
+    try:
+        sender = ReferenceSender(args.rate, playback)
+    except Exception:
+        playback.close()
+        raise
     pending = bytearray()
     status_path = Path(sender.path).parent / ('output-' + str(os.getpid()) + '.json')
     cleanup_stale_diagnostics(status_path.parent)
@@ -56,26 +60,31 @@ def main():
             read_max_ms = max(read_max_ms, (time.monotonic() - before_read) * 1000)
             if not pcm:
                 break
-            pending.extend(pcm)
-            size = len(pending) // 4 * 4
-            if size:
-                before_write = time.monotonic()
-                playback.write(bytes(pending[:size]), sender.send)
-                write_max_ms = max(write_max_ms, (time.monotonic() - before_write) * 1000)
+            if not pending and (len(pcm) & 3) == 0:
+                chunk = pcm
+            else:
+                pending.extend(pcm)
+                size = len(pending) & ~3
+                if not size:
+                    continue
+                chunk = bytes(pending[:size])
                 del pending[:size]
-                now = time.monotonic()
-                if now - last_report >= 5 and playback.route_enabled:
-                    try:
-                        temporary = status_path.with_suffix('.tmp')
-                        temporary.write_text(json.dumps(dict(at=now, pid=os.getpid(), device=playback.device,
-                            delay_ms=playback.delay_ms, underruns=playback.underruns,
-                            recoveries=playback.recoveries, fallbacks=playback.route_fallbacks,
-                            read_max_ms=round(read_max_ms, 2), write_max_ms=round(write_max_ms, 2))))
-                        temporary.replace(status_path)
-                    except OSError:
-                        pass
-                    last_report = now
-                    read_max_ms = write_max_ms = 0
+            before_write = time.monotonic()
+            playback.write(chunk, sender.send)
+            write_max_ms = max(write_max_ms, (time.monotonic() - before_write) * 1000)
+            now = time.monotonic()
+            if now - last_report >= 5 and playback.route_enabled:
+                try:
+                    temporary = status_path.with_suffix('.tmp')
+                    temporary.write_text(json.dumps(dict(at=now, pid=os.getpid(), device=playback.device,
+                        delay_ms=playback.delay_ms, underruns=playback.underruns,
+                        recoveries=playback.recoveries, fallbacks=playback.route_fallbacks,
+                        read_max_ms=round(read_max_ms, 2), write_max_ms=round(write_max_ms, 2))))
+                    temporary.replace(status_path)
+                except OSError:
+                    pass
+                last_report = now
+                read_max_ms = write_max_ms = 0
         playback.drain()
     finally:
         try:

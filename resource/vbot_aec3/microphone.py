@@ -2,7 +2,15 @@
 import array
 import ctypes as C
 from collections import deque
+import threading
 import time
+
+try:
+    import audioop as _audioop
+except ImportError:
+    _audioop = None
+
+_PCM160 = C.c_int16 * 160
 
 AUDIO_DEBUG_LOGS = False
 
@@ -33,6 +41,7 @@ class MicrophoneProcessor:
     """A bounded 10 ms FIFO preserves every input sample and caller frame size."""
     def __init__(self, value, library, log=print):
         self.value, self.log = value, log
+        self.lock = threading.Lock()
         self.input = bytearray()
         self.output = bytearray(320)  # constant 10 ms adaptation latency
         self.handle = None
@@ -63,49 +72,61 @@ class MicrophoneProcessor:
         log('[WebRTC MIC] NS=' + value['noise_suppression'] + ', digital AGC=' + str(agc['active']))
 
     def process_frame(self, frame, source=None):
-        now = time.monotonic()
-        # Do not leak a previous wakeword/command tail into another capture owner.
-        if source != self.source or now - self.last_frame > .3:
-            self.input.clear()
-            self.output = bytearray(320)
-        self.source, self.last_frame = source, now
-        size = len(frame) * 2
-        self.input.extend(array.array('h', frame).tobytes())
-        while len(self.input) >= 320:
-            block = (C.c_int16 * 160).from_buffer_copy(self.input[:320])
-            # APM 1.3 leaves dest untouched when every processing module is off.
-            # Seed it with input so disabling NS/AGC/HPF never produces silence.
-            result = (C.c_int16 * 160).from_buffer_copy(self.input[:320])
-            start = time.perf_counter()
-            cpu_start = time.thread_time()
-            rc = self.lib.vbot_aec_capture(self.handle, block, result, 0)
-            cpu_ms = (time.thread_time() - cpu_start) * 1000
-            elapsed = (time.perf_counter() - start) * 1000
-            if rc:
-                raise RuntimeError('WebRTC MIC ProcessStream error ' + str(rc))
-            del self.input[:320]
-            self.output.extend(bytes(result))
-            self.blocks += 1
-            self.max_ms = max(self.max_ms, elapsed)
-            self.times.append(elapsed)
-            self.cpu_times.append(cpu_ms)
-            self.cpu_max_ms = max(self.cpu_max_ms, cpu_ms)
-            off_cpu = max(0.0, elapsed - cpu_ms)
-            self.off_cpu_max_ms = max(self.off_cpu_max_ms, off_cpu)
-            self.off_cpu_over_10ms += int(off_cpu > 10)
-            self.over_10ms += int(elapsed > 10)
-            self.clipped += sum(abs(x) >= 32767 for x in result)
-        out = array.array('h')
-        out.frombytes(bytes(self.output[:size]))
-        del self.output[:size]
-        if len(out) != len(frame):
-            raise RuntimeError('WebRTC MIC frame size mismatch')
-        if AUDIO_DEBUG_LOGS and now - self.last_log >= 30:
-            self.log('[WebRTC MIC] ' + str(self.snapshot()))
-            self.last_log = now
-        return out
+        with self.lock:
+            if not self.handle:
+                raise RuntimeError('WebRTC microphone processor is closed')
+            now = time.monotonic()
+            # Do not leak a previous wakeword/command tail into another capture owner.
+            if source != self.source or now - self.last_frame > .3:
+                self.input.clear()
+                self.output = bytearray(320)
+            self.source, self.last_frame = source, now
+            size = len(frame) * 2
+            self.input.extend(frame if isinstance(frame, array.array) and frame.typecode == 'h' else array.array('h', frame))
+            offset = 0
+            input_len = len(self.input)
+            try:
+                while input_len - offset >= 320:
+                    chunk = self.input[offset:offset + 320]
+                    block = _PCM160.from_buffer_copy(chunk)
+                    # APM 1.3 leaves dest untouched when every processing module is off.
+                    # Seed it with input so disabling NS/AGC/HPF never produces silence.
+                    result = _PCM160.from_buffer_copy(chunk)
+                    start = time.perf_counter()
+                    cpu_start = time.thread_time()
+                    rc = self.lib.vbot_aec_capture(self.handle, block, result, 0)
+                    cpu_ms = (time.thread_time() - cpu_start) * 1000
+                    elapsed = (time.perf_counter() - start) * 1000
+                    if rc:
+                        raise RuntimeError('WebRTC MIC ProcessStream error ' + str(rc))
+                    offset += 320
+                    raw_block = bytes(result)
+                    self.output.extend(raw_block)
+                    self.blocks += 1
+                    self.max_ms = max(self.max_ms, elapsed)
+                    self.times.append(elapsed)
+                    self.cpu_times.append(cpu_ms)
+                    self.cpu_max_ms = max(self.cpu_max_ms, cpu_ms)
+                    off_cpu = max(0.0, elapsed - cpu_ms)
+                    self.off_cpu_max_ms = max(self.off_cpu_max_ms, off_cpu)
+                    self.off_cpu_over_10ms += int(off_cpu > 10)
+                    self.over_10ms += int(elapsed > 10)
+                    if _audioop is None or _audioop.max(raw_block, 2) >= 32767:
+                        self.clipped += sum(abs(x) >= 32767 for x in result)
+            finally:
+                if offset:
+                    del self.input[:offset]
+            out = array.array('h')
+            out.frombytes(bytes(self.output[:size]))
+            del self.output[:size]
+            if len(out) != len(frame):
+                raise RuntimeError('WebRTC MIC frame size mismatch')
+            if AUDIO_DEBUG_LOGS and now - self.last_log >= 30:
+                self.log('[WebRTC MIC] ' + str(self._snapshot_unlocked()))
+                self.last_log = now
+            return out
 
-    def snapshot(self):
+    def _snapshot_unlocked(self):
         recent = sorted(self.times)
         cpu = sorted(self.cpu_times)
         return dict(blocks=self.blocks, max_ms=round(self.max_ms, 3), over_10ms=self.over_10ms,
@@ -116,7 +137,12 @@ class MicrophoneProcessor:
                     clipped_samples=self.clipped, noise_suppression=self.value['noise_suppression'],
                     agc=self.value['agc'], latency_ms=10)
 
+    def snapshot(self):
+        with self.lock:
+            return self._snapshot_unlocked()
+
     def close(self):
-        if self.handle:
-            self.lib.vbot_aec_destroy(self.handle)
-            self.handle = None
+        with self.lock:
+            if self.handle:
+                self.lib.vbot_aec_destroy(self.handle)
+                self.handle = None

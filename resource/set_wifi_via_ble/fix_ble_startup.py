@@ -60,6 +60,8 @@ def write_atomic(path, data):
     try:
         with os.fdopen(fd, 'w', encoding='utf-8') as stream:
             stream.write(data)
+            stream.flush()
+            os.fsync(stream.fileno())
         os.chmod(temporary, previous.st_mode & 0o777 if previous else 0o644)
         if previous:
             os.chown(temporary, previous.st_uid, previous.st_gid)
@@ -102,7 +104,8 @@ def main():
     if os.geteuid() != 0:
         raise PermissionError('Run with sudo to repair the installed BLE service')
     backup = Path('/home/pi/VBot_AEC3/integration_backups') / ('ble_startup_' + time.strftime('%Y%m%d_%H%M%S') + '_' + uuid.uuid4().hex[:6])
-    backup.mkdir(parents=True)
+    backup.mkdir(parents=True, mode=0o700)
+    os.chmod(backup, 0o700)
     shutil.copy2(target, backup / 'btwifiset.py')
     for name in ('crypto', 'infopi.json'):
         path = args.installed_dir / name

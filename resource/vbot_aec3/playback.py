@@ -70,9 +70,10 @@ class ALSAPlayback:
 
     def _open_device(self, device):
         if self.handle:
-            self.lib.snd_pcm_drop(self.handle)
-            self.lib.snd_pcm_close(self.handle)
+            old_handle = self.handle
             self.handle = C.c_void_p()
+            self.lib.snd_pcm_drop(old_handle)
+            self.lib.snd_pcm_close(old_handle)
         try:
             self.check(self.lib.snd_pcm_open(C.byref(self.handle), device.encode(), 0, 0))
             # Wireless writes have independent scheduling/radio jitter. Do not
@@ -83,8 +84,9 @@ class ALSAPlayback:
                 self.check(self.lib.snd_pcm_set_params(self.handle, 2, 3, self.channels, self.rate, 1, self.latency_ms * 1000))
         except Exception:
             if self.handle:
-                self.lib.snd_pcm_close(self.handle)
+                failed_handle = self.handle
                 self.handle = C.c_void_p()
+                self.lib.snd_pcm_close(failed_handle)
             raise
         self.device = device
         self.delay_ms = 0
@@ -150,11 +152,17 @@ class ALSAPlayback:
             self._refresh_route()
             if self.equalizer is not None:
                 pcm = self.equalizer.process(pcm)
-            buffer = C.create_string_buffer(pcm)
+            buffer = None
             offset = 0
             retries = 0
             while offset < len(pcm) and not self.cancelled.is_set():
-                count = self.lib.snd_pcm_writei(self.handle, C.byref(buffer, offset), (len(pcm) - offset) // self.frame_bytes)
+                if offset == 0:
+                    ptr = pcm
+                else:
+                    if buffer is None:
+                        buffer = C.create_string_buffer(pcm)
+                    ptr = C.byref(buffer, offset)
+                count = self.lib.snd_pcm_writei(self.handle, ptr, (len(pcm) - offset) // self.frame_bytes)
                 if count < 0:
                     self.recoveries += 1
                     if count == -32:
@@ -169,6 +177,7 @@ class ALSAPlayback:
                         self.route_fallbacks += 1
                         self.route_failed_until = time.monotonic() + 15
                         self._refresh_route(force_local=True)
+                        retries = 0
                         continue
                     if retries > 3 or self.cancelled.is_set():
                         self.check(count)
@@ -182,11 +191,13 @@ class ALSAPlayback:
                     self.delay_ms = max(0, round(delay.value * 1000 / self.rate))
                 reference(pcm[offset:offset + accepted])
                 offset += accepted
+                retries = 0
 
     def interrupt(self):
         # A blocking ALSA write is released by drop; close waits for its lock.
-        if self.handle:
-            self.lib.snd_pcm_drop(self.handle)
+        handle = self.handle
+        if handle:
+            self.lib.snd_pcm_drop(handle)
 
     def reset(self):
         with self.lock:
@@ -206,8 +217,9 @@ class ALSAPlayback:
         self.interrupt()
         with self.lock:
             if self.handle:
-                self.lib.snd_pcm_close(self.handle)
+                old_handle = self.handle
                 self.handle = C.c_void_p()
+                self.lib.snd_pcm_close(old_handle)
             if getattr(self, 'equalizer', None) is not None:
                 self.equalizer.close()
                 self.equalizer = None

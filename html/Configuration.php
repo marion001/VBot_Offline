@@ -48,7 +48,9 @@ function vbotAtomicWriteFile($filePath, $content, $label = 'file', $alreadyLocke
         fflush($handle);
         if (function_exists('fsync')) @fsync($handle);
         fclose($handle);
+        @chmod($tempPath, 0777);
         if (!@rename($tempPath, $filePath)) throw new RuntimeException('Không thể thay thế file đích');
+        @chmod($filePath, 0777);
         $success = true;
     } catch (Throwable $error) {
         error_log('[PHP FILE ERROR] '.$label.': '.$error->getMessage());
@@ -593,11 +595,14 @@ if (!function_exists('vbotUpgradeTransactionalCopy')) {
             $processed[] = [$destPath, $backupPath, $existed];
             $manifest[] = ['relative' => $relative, 'existed' => $existed];
             $temporaryPath = @tempnam(dirname($destPath), '.vbot-update-');
+            if ($temporaryPath !== false) @chmod($temporaryPath, 0777);
             if ($temporaryPath === false || !copy($srcPath, $temporaryPath) || !@rename($temporaryPath, $destPath)) {
                 if (is_string($temporaryPath) && is_file($temporaryPath)) @unlink($temporaryPath);
                 $failure = 'Không thể thay tệp nguyên tử: ' . $relative;
                 break;
             }
+            @chmod($destPath, 0777);
+            @chmod(dirname($destPath), 0777);
             clearstatcache(true, $destPath);
             $sourceHash = @hash_file('sha256', $srcPath);
             $destinationHash = @hash_file('sha256', $destPath);

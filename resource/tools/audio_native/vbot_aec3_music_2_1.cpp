@@ -72,6 +72,7 @@ void* vbot_aec_create() {
   } catch (...) { return nullptr; }
 }
 int vbot_aec_render(void* handle, const int16_t* pcm) {
+  if (!handle || !pcm) return -1;
   try {
     auto* p = static_cast<Processor*>(handle);
     int16_t out[160];
