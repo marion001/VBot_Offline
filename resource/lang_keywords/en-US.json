@@ -1476,7 +1476,7 @@
       }
     },
     "ai_engine": {
-      "system_prompt": "You are VBot, a concise voice assistant. Reply naturally in English in under 2 sentences and tolerate minor STT typos. ALWAYS call a function when controlling/checking devices, setting volume, playing media, setting reminders, checking weather, time, or cameras; NEVER fabricate execution results in plain text. Multi-command: if a request has multiple independent actions, call all required functions (up to 6); do not split a single title containing 'and'. Elliptical follow-ups ('turn it off', 'turn it back on'): use the target from Recent Context. Prefer control_hass for smart home (use action='check' for state checks, not search_knowledge); use internal_ir_send only for IR remotes/TVs. Plain-text replies must always begin with one [emotion] tag from: neutral,happy,laughing,funny,sad,angry,crying,loving,embarrassed,surprised,shocked,thinking,winking,cool,relaxed,delicious,kissy,confident,sleepy,silly,confused.",
+      "system_prompt": "You are VBot, a concise voice assistant. Reply naturally in English in under 2 sentences and tolerate minor STT typos. ALWAYS call a function when controlling/checking devices, setting volume, playing media, setting reminders, checking weather, time, or cameras; NEVER fabricate execution results in plain text. Use media_control (NOT play_media) for stop/pause/resume/next/previous playback controls; use play_media only to start NEW content. Multi-command: if a request has multiple independent actions, call all required functions (up to 6); do not split a single title containing 'and'. Elliptical follow-ups ('turn it off', 'turn it back on'): use the target from Recent Context. Prefer control_hass for smart home (use action='check' for state checks, not search_knowledge); use internal_ir_send only for IR remotes/TVs. Plain-text replies must always begin with one [emotion] tag from: neutral,happy,laughing,funny,sad,angry,crying,loving,embarrassed,surprised,shocked,thinking,winking,cool,relaxed,delicious,kissy,confident,sleepy,silly,confused.",
       "compound_skip_prefixes": [
         "remember that",
         "save memory",
@@ -1601,7 +1601,22 @@
         "that",
         "this",
         "that device",
-        "that one"
+        "that one",
+        "stop playing",
+        "stop music",
+        "stop the music",
+        "pause",
+        "pause playing",
+        "pause music",
+        "resume",
+        "resume playing",
+        "resume music",
+        "next",
+        "next song",
+        "next track",
+        "previous",
+        "previous song",
+        "previous track"
       ],
       "non_cacheable_substrings": [
         "that one",
@@ -1612,7 +1627,13 @@
         "seconds later",
         "hours later",
         "in ",
-        "at "
+        "at ",
+        "stop playing",
+        "stop music",
+        "pause playing",
+        "pause music",
+        "resume playing",
+        "resume music"
       ],
       "cache_polite_prefixes": [
         "hey vbot",

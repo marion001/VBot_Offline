@@ -13,7 +13,7 @@
         },
         "media_control": {
           "label": "Điều khiển phát lại Media",
-          "description": "Điều khiển phát nhạc, hẹn tắt nhạc (sleep_timer), dừng sau bài hiện tại.",
+          "description": "Điều khiển phát nhạc: dừng (stop), tạm dừng (pause), tiếp tục (resume/play), bài tiếp (next), bài trước (previous), hẹn tắt nhạc (sleep_timer), dừng sau bài hiện tại. Dùng khi người dùng nói 'dừng phát', 'tắt nhạc', 'tạm dừng', 'tạm ngừng', 'dừng nhạc', 'ngừng phát', 'tiếp tục phát', 'phát tiếp', 'bài tiếp theo', 'bài trước'.",
           "parameters": {
             "action": "Lệnh media",
             "minutes": "Số phút khi sleep_timer"
@@ -21,7 +21,7 @@
         },
         "play_media": {
           "label": "Phát nhạc / Radio / Podcast / Báo",
-          "description": "Phát nhạc, radio, podcast hoặc tin tức.",
+          "description": "Phát nội dung MỚI: nhạc, radio, podcast hoặc tin tức. KHÔNG dùng để dừng/tạm dừng/tiếp tục/chuyển bài — hãy dùng media_control cho các lệnh đó.",
           "parameters": {
             "source": "Loại nội dung cần phát",
             "query": "Tên bài hát, ca sĩ, kênh radio, podcast hoặc mục báo",
@@ -209,7 +209,7 @@
         },
         "media_control": {
           "label": "Media Playback Control",
-          "description": "Control media playback, sleep timer, or stop after current track.",
+          "description": "Control media playback: stop, pause, resume/play, next, previous, sleep_timer, stop_after_current. Use when the user asks to stop/pause/resume playing or skip tracks.",
           "parameters": {
             "action": "Media control action",
             "minutes": "Minutes for sleep_timer"
@@ -217,7 +217,7 @@
         },
         "play_media": {
           "label": "Play Music / Radio / Podcast / News",
-          "description": "Play music, radio, podcast, or news.",
+          "description": "Play NEW music, radio, podcast, or news. Do NOT use to stop, pause, resume, or skip tracks — use media_control for those commands.",
           "parameters": {
             "source": "Media content type",
             "query": "Song, artist, radio station, podcast, or news topic",

@@ -557,7 +557,8 @@
         },
         "youtube": {
             "active": true,
-            "google_apis_key": "AIzaSyAuWeVnyM3ijao5XPD62zrMXuBj0JgLYAw"
+            "google_apis_key": "AIzaSyAuWeVnyM3ijao5XPD62zrMXuBj0JgLYAw",
+            "get_link_source": "system"
         },
         "zing_mp3": {
             "active": true,

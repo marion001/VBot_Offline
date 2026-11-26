@@ -635,7 +635,7 @@ def execute(action, mac='', auto=False, fix_coexistence=True, max_connections=No
                 atomic(STATE, config)
                 atomic(ROUTE, {'device': '', 'at': time.monotonic()})
             adapter = row['path'].split('/dev_', 1)[0]
-            dbus.Interface(bus.get_object('org.bluez', adapter), 'org.bluez.Adapter1').RemoveDevice(row['path'], timeout=10)
+            dbus.Interface(bus.get_object('org.bluez', adapter), 'org.bluez.Adapter1').RemoveDevice(dbus.ObjectPath(row['path']), timeout=10)
         elif action == 'autoconnect':
             if config['selected'] != mac:
                 raise ValueError('Chọn thiết bị làm đầu ra trước')

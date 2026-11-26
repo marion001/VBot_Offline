@@ -305,6 +305,11 @@
           <i class="bi bi-circle"></i><span>DEV Music (Customize Music)</span>
         </a>
       </li>
+      <li title="Tùy chỉnh nâng cao cho DEV tự code lấy Link Youtube">
+        <a href="DEV_Youtube_GetLink.php">
+          <i class="bi bi-circle"></i><span>DEV Youtube GetLink (Customize Youtube)</span>
+        </a>
+      </li>
       <li title="Tùy chỉnh nâng cao cho DEV tự code Customize Processing - Xử Lý Chính">
         <a href="DEV_Processing.php">
           <i class="bi bi-circle"></i><span>DEV Processing (Customize Xử Lý Chính)</span>

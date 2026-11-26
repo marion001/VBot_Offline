@@ -1064,6 +1064,9 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   #cẬP NHẬT GIÁ TRỊ youtube
   $Config['media_player']['youtube']['google_apis_key'] = $_POST['youtube_google_apis_key'];
   $Config['media_player']['youtube']['active'] = isset($_POST['youtube_active']) ? true : false;
+  $youtube_get_link_sources = ['system', 'dev_youtube_getlink'];
+  $youtube_get_link_source_post = isset($_POST['youtube_get_link_source']) ? trim((string)$_POST['youtube_get_link_source']) : 'system';
+  $Config['media_player']['youtube']['get_link_source'] = in_array($youtube_get_link_source_post, $youtube_get_link_sources, true) ? $youtube_get_link_source_post : 'system';
 
   #Cập nhật giá trị Zingmp3 xem có kích hoạt hay không
   $Config['media_player']['zing_mp3']['active'] = isset($_POST['zing_mp3_active']) ? true : false;
@@ -5107,7 +5110,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_media_player_source">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player_source" aria-expanded="false" aria-controls="collapse_button_media_player_source">
-                  Nguồn Phát: Nhạc, Radio, Kể Truyện, PodCast, Đọc Báo Tin tức:
+                  Nguồn Phát: Nhạc, Youtube, ZingMP3, NCT, Radio, Kể Truyện, PodCast, Báo, Tin tức:
                 </h5>
                 <div id="collapse_button_media_player_source" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_media_player_source">
                  <div class="alert alert-success" role="alert">  <div class="card">
@@ -5154,6 +5157,18 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                       </div>
                       <?php
                       echo input_field('youtube_google_apis_key', 'Youtube Google Apis Key', htmlspecialchars($Config['media_player']['youtube']['google_apis_key']), 'readonly', 'text', '', '', '', '', 'border-danger', '', '', '', '', '');
+                      $youtube_get_link_source = $Config['media_player']['youtube']['get_link_source'] ?? 'system';
+                      echo select_field(
+                        'youtube_get_link_source',
+                        'Nguồn xử lý Link Youtube',
+                        [
+                          'system' => 'Hệ Thống VBot Xử Lý',
+                          'dev_youtube_getlink' => 'Người Dùng Tự Code: Dev_Youtube_GetLink.py',
+                        ],
+                        $youtube_get_link_source,
+                        [],
+                        'Chọn bộ xử lý lấy Link/URL âm thanh Youtube: Hệ Thống VBot Xử Lý (mặc định) hoặc Dev_Youtube_GetLink.py Xử Lý (người dùng tự code tùy chỉnh).'
+                      );
                       ?>
                     </div>
                   </div>
@@ -6336,7 +6351,8 @@ echo input_field('internal_ir_rx_gpio','GPIO thu IR (BCM)',($Config['internal_ir
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="refresh_page_ui_backup_upgrade" id="refresh_page_ui_backup_upgrade" <?php echo $Config['backup_upgrade']['advanced_settings']['refresh_page_ui'] ? 'checked' : ''; ?>>
-                                    </div>
+                      </div>
+                    </div>
                   </div>
                   <div class="card">
                     <div class="card-body">
@@ -6940,7 +6956,6 @@ if (!empty($excludeFilesFolder_web_interface_upgrade)) {
               </div>
             </div>
           </div>
-        </div>
         </div>
       </section>
     </form>

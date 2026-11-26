@@ -1177,6 +1177,7 @@ class WpaSupplicant:
                 mLOG.log(f"Password has an illegal length: {len(pw)}")
                 return None
         network_num=''
+        out=''
         try:
             #this returns the network number
             network_num = subprocess.run("wpa_cli -i wlan0 add_network", 
@@ -1224,6 +1225,7 @@ class WpaSupplicant:
         p=subprocess.Popen(f"wpa_cli -i wlan0 select_network {num}", shell=True)
         p.wait()
         n=0
+        connected_ssid = ""
         time.sleep(5)
         while n<timeout:
             connected_ssid = subprocess.run(" iwgetid -r", shell=True,capture_output=True,encoding='utf-8',text=True).stdout.strip()
@@ -1236,7 +1238,7 @@ class WpaSupplicant:
             msg = f'Wait loop exited after {n+5} seconds with SSID: --{connected_ssid}--\n'
             mLOG.log(msg)
         except Exception as e:
-            mLOG.log('exception: {e}')
+            mLOG.log(f'exception: {e}')
         return len(connected_ssid) > 0
 
     def remove_known_network(self,known_network):
@@ -1612,6 +1614,7 @@ class RPiId:
     #don't use /etc/machine-id - it is generated on install - i.e if user re-istalls on a card it will change
     def getCpuId(self):
         #first look for a cpu serial 
+        cpu_id = []
         str = subprocess.run("cat /proc/cpuinfo | grep Serial", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         if len(str) > 0 :
             #this stirps the leading zeros if any

@@ -9,6 +9,8 @@ Mail: VBot.Assistant@gmail.com
 import os
 import signal
 import sys
+
+os.environ.setdefault("LIBASOUND_THREAD_SAFE", "1")
 import threading
 import time
 import traceback

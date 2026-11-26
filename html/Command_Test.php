@@ -243,6 +243,7 @@ $isAiModeActive = ($activeProcessingMode === 'ai');
         const aiStageLabels = {
           custom_hass: 'Custom Home Assistant Command (0 token)',
           system_command: 'Câu lệnh hệ thống SYSTEM (0 token)',
+          pre_ai_media_control: 'Điều khiển Media Pre-AI (0 token)',
           intent_cache: 'Local Intent Cache (0 token, < 50ms)',
           ai_tool_preview: 'AI chọn gọi Công cụ (Xem trước — chưa thực thi)',
           ai_text_preview: 'AI trả lời văn bản trực tiếp (Xem trước)',

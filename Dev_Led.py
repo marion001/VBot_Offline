@@ -229,11 +229,11 @@ def LED_PAUSE():
         t = v * (1.0 - s * (1.0 - f))
         i = i % 6
         if i == 0: r, g, b = v, t, p
-        if i == 1: r, g, b = q, v, p
-        if i == 2: r, g, b = p, v, t
-        if i == 3: r, g, b = p, q, v
-        if i == 4: r, g, b = t, p, v
-        if i == 5: r, g, b = v, p, q
+        elif i == 1: r, g, b = q, v, p
+        elif i == 2: r, g, b = p, v, t
+        elif i == 3: r, g, b = p, q, v
+        elif i == 4: r, g, b = t, p, v
+        else: r, g, b = v, p, q
         return int(r * 255), int(g * 255), int(b * 255)
     #Sử dụng vòng while để kiểm tra trạng thái LED cần sử dụng trong toàn bộ chương trình
     while Lib.led_effect_active:

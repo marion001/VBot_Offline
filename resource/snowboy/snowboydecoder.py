@@ -102,10 +102,12 @@ class HotwordDetector(object):
 
     def __init__(self, decoder_model,
                  resource=RESOURCE_FILE,
-                 sensitivity=[],
+                 sensitivity=None,
                  audio_gain=1,
                  apply_frontend=False):
 
+        if sensitivity is None:
+            sensitivity = []
         tm = type(decoder_model)
         ts = type(sensitivity)
         if tm is not list:
@@ -178,6 +180,8 @@ class HotwordDetector(object):
         logger.debug("detecting...")
 
         state = "PASSIVE"
+        silentCount = 0
+        recordingCount = 0
         while self._running is True:
             if interrupt_check():
                 logger.debug("detect voice break")

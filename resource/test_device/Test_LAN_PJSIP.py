@@ -85,6 +85,7 @@ def main():
     exec(compile(ast.Module(body=nodes,type_ignores=[]),'Lib.py','exec'),lib.__dict__)
     sys.modules['Lib']=lib
     manager=PJSIPCallManager(config['lan_calls'],notify=lambda event,state:log(json.dumps({'event':event,'state':state},ensure_ascii=False)))
+    reader=None
     try:
         recorder.start()
         reader=threading.Thread(target=hardware_reader,daemon=True);reader.start()
@@ -109,7 +110,7 @@ def main():
     finally:
         manager.stop()
         stopping.set()
-        if 'reader' in locals():reader.join(timeout=3)
+        if reader is not None:reader.join(timeout=3)
         lib.close_microphone_processing()
         recorder.stop();recorder.delete()
         log('PROBE STOPPED owner='+owner[0])

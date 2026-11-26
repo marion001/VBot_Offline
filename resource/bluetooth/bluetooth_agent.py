@@ -252,10 +252,7 @@ _CONNECT_INFLIGHT_LOCK = threading.Lock()
 
 
 def _dbus_get_object(bus, service, path):
-    try:
-        return bus.get_object(service, path, introspect=False)
-    except TypeError:
-        return bus.get_object(service, path)
+    return bus.get_object(service, path)
 
 
 def _dbus_call(fn, *args, timeout=DBUS_CALL_TIMEOUT):
@@ -1726,7 +1723,7 @@ def cleanup_agent():
     stop_bluealsa_playback()
     if agent_registered and agent_manager is not None:
         try:
-            _dbus_call(agent_manager.UnregisterAgent, AGENT_PATH, timeout=2.0)
+            _dbus_call(agent_manager.UnregisterAgent, dbus.ObjectPath(AGENT_PATH), timeout=2.0)
             log("Đã hủy đăng ký Bluetooth Agent khỏi BlueZ")
         except Exception as error:
             log(f"Không thể hủy đăng ký Bluetooth Agent: {error}")
@@ -1764,9 +1761,10 @@ if __name__ == "__main__":
             Register_Agent = "NoInputNoOutput"
         agent_manager = dbus.Interface(_dbus_get_object(bus, BUS_NAME, "/org/bluez"), "org.bluez.AgentManager1")
         agent = Agent(bus, AGENT_PATH)
-        _dbus_call(agent_manager.RegisterAgent, AGENT_PATH, Register_Agent)
+        agent_obj_path = dbus.ObjectPath(AGENT_PATH)
+        _dbus_call(agent_manager.RegisterAgent, agent_obj_path, Register_Agent)
         agent_registered = True
-        _dbus_call(agent_manager.RequestDefaultAgent, AGENT_PATH)
+        _dbus_call(agent_manager.RequestDefaultAgent, agent_obj_path)
 
         signal.signal(signal.SIGTERM, request_shutdown)
         signal.signal(signal.SIGINT, request_shutdown)
@@ -1817,6 +1815,7 @@ if __name__ == "__main__":
         if not shutdown_requested:
             main_loop.run()
     except Exception as e:
+        bluez_registration_lost = True
         log(f"Lỗi khởi động Agent: {e}")
     finally:
         request_shutdown()

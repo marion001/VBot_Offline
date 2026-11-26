@@ -225,6 +225,7 @@ class RPiId:
     #don't use /etc/machine-id - it is generated on install - i.e if user re-istalls on a card it will change
     def getCpuId(self):
         #first look for a cpu serial 
+        cpu_id = []
         str = subprocess.run("cat /proc/cpuinfo | grep Serial", shell=True,capture_output=True,encoding='utf-8',text=True).stdout
         if len(str) > 0 :
             #this stirps the leading zeros if any
