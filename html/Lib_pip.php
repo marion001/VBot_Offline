@@ -133,7 +133,11 @@ include 'html_head.php';
           $pathParts = explode('/', trim($urlParts['path'], '/'));
           $userName = $pathParts[0];
           $repoName = $pathParts[1];
-          $mainPackages_git = file_get_contents("https://raw.githubusercontent.com/$userName/$repoName/refs/heads/main/resource/pip_list_lib.txt");
+          $pipHttpCtx = stream_context_create([
+            'http' => ['timeout' => 5],
+            'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]
+          ]);
+          $mainPackages_git = @file_get_contents("https://raw.githubusercontent.com/$userName/$repoName/refs/heads/main/resource/pip_list_lib.txt", false, $pipHttpCtx);
           if ($mainPackages_git === FALSE) {
             $mainPackages = parsePipFile($VBot_Offline . 'resource/pip_list_lib.txt');
           } else {

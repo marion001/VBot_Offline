@@ -211,10 +211,13 @@ async def dev_handle_cache_tts(msg_text, finish_processing=True):
 async def dev_execute_value_key_sys(command_input: str):
     func = globals().get(command_input)
     if func:
-        if Lib.asyncio.iscoroutinefunction(func):
+        import inspect as _inspect
+        if Lib.asyncio.iscoroutinefunction(func) or _inspect.iscoroutinefunction(func):
             result = await func()
         else:
             result = await Lib.asyncio.to_thread(func)
+            if _inspect.isawaitable(result):
+                result = await result
         if result:
             return True
         else:

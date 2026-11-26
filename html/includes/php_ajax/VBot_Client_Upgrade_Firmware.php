@@ -9,12 +9,15 @@
 ob_start();
 require_once __DIR__.'/Api_Helpers.php';
 require_once dirname(__DIR__).'/Client_Data_Helpers.php';
-vbotApiInitialize(['POST']);
+if (!defined('VBOT_JSON_API')) {
+    define('VBOT_JSON_API', true);
+}
 include '../../Configuration.php';
 $startupOutput = ob_get_clean();
 if ($startupOutput !== '') {
     error_log('VBot_Client_Upgrade_Firmware startup output suppressed: '.substr(strip_tags($startupOutput), 0, 500));
 }
+vbotApiInitialize(['POST']);
 
 if ($Config['contact_info']['user_login']['active']) {
     session_start();
@@ -29,6 +32,7 @@ if ($Config['contact_info']['user_login']['active']) {
             'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
         ], 401);
     }
+    session_write_close();
 }
 
 function vbotUpgradeIsLanIp($ip)
@@ -183,7 +187,7 @@ elseif (isset($_POST['start_upgrade_littlefs'], $_POST['ip'], $_POST['url_little
     curl_close($ch);
     @unlink($temp_file);
     if ($response === false || $httpCode < 200 || $httpCode >= 300) {
-        error_log('LittleFS upload failed for '.$ip_address.': '.$error.' (HTTP '.$httpCode.')');
+        error_log('LittleFS upload failed for '.$ip.': '.$error.' (HTTP '.$httpCode.')');
         vbotApiJsonResponse([
             "success" => false,
             "message" => "Không thể tải LittleFS lên thiết bị"
@@ -220,11 +224,12 @@ elseif (isset($_POST['start_upgrade_firmware'], $_POST['ip'], $_POST['url_firmwa
     curl_setopt($ch, CURLOPT_MAXREDIRS, 3);
     curl_setopt($ch, CURLOPT_TIMEOUT, 120);
     $file_content = curl_exec($ch);
+    $httpCodeDownload = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     $error = curl_error($ch);
     curl_close($ch);
-    if ($file_content === false || strlen($file_content) > 16777216) {
+    if ($file_content === false || $httpCodeDownload < 200 || $httpCodeDownload >= 300 || strlen($file_content) > 16777216) {
         @unlink($temp_file);
-        error_log('Firmware download failed: '.$error);
+        error_log('Firmware download failed: '.($error ?: 'HTTP '.$httpCodeDownload));
         vbotApiJsonResponse(["success" => false, "message" => "Không thể tải xuống Firmware"], 502);
     }
     file_put_contents($temp_file, $file_content, LOCK_EX);
@@ -244,7 +249,7 @@ elseif (isset($_POST['start_upgrade_firmware'], $_POST['ip'], $_POST['url_firmwa
     curl_close($ch);
     @unlink($temp_file);
     if ($response === false || $httpCode < 200 || $httpCode >= 300) {
-        error_log('Firmware upload failed for '.$ip_address.': '.$error.' (HTTP '.$httpCode.')');
+        error_log('Firmware upload failed for '.$ip.': '.$error.' (HTTP '.$httpCode.')');
         vbotApiJsonResponse(["success" => false, "message" => "Không thể tải Firmware lên thiết bị"], 502);
     } else {
         vbotApiJsonResponse(["success" => true, "message" => "Nâng cấp Firmware thành công"]);

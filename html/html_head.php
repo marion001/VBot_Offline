@@ -9,6 +9,10 @@ if (session_status() === PHP_SESSION_ACTIVE) {
         $_SESSION['vbot_csrf_token'] = bin2hex(random_bytes(32));
     }
     $VBot_Csrf_Token = $_SESSION['vbot_csrf_token'];
+    $vbotHeadScriptName = basename(isset($_SERVER['SCRIPT_NAME']) ? $_SERVER['SCRIPT_NAME'] : '');
+    if ($vbotHeadScriptName !== 'Login.php' && $vbotHeadScriptName !== 'Users_Profile.php') {
+        session_write_close();
+    }
 }
 ?>
 <!--

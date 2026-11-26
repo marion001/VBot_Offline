@@ -23,6 +23,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
 }
 
 vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+if (session_status() === PHP_SESSION_ACTIVE) { session_write_close(); }
 
 $adapter = strtolower(trim(isset($_POST['adapter']) ? (string) $_POST['adapter'] : ''));
 if (!preg_match('/^hci\d+$/', $adapter)) {

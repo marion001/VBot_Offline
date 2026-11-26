@@ -311,6 +311,7 @@ include 'html_head.php';
     //lưu trữ toàn bộ thời gian bài nhạc
     let fullTime = 0;
     let intervalId;
+    let isFetchingMediaPlayer = false;
     //Định dạng thời gian thành HH:MM:SS
     function formatTime_Player(milliseconds) {
       let totalSeconds = Math.floor(milliseconds / 1000);
@@ -324,9 +325,10 @@ include 'html_head.php';
     //Cập nhật thông tin GET từ API
     function fetchData_Media_Player() {
       const syncCheckbox = document.getElementById('sync_checkbox');
-      if (!syncCheckbox.checked) {
+      if (!syncCheckbox.checked || isFetchingMediaPlayer) {
         return;
       }
+      isFetchingMediaPlayer = true;
       fetch("<?php echo $URL_API_VBOT ?>?type=1&data=media_player")
         .then(response => {
           if (!response.ok) {
@@ -395,6 +397,9 @@ include 'html_head.php';
           updateDisplay_SongNhac(false);
           document.getElementById('div_message_error').style.display = 'block';
           document.getElementById('message_error').textContent = 'Không thể kết nối đến API, Vui lòng kiểm tra lại API (Bật/Tắt) và VBot đã được chạy hay chưa, Mã Lỗi: ' + error;
+        })
+        .finally(() => {
+          isFetchingMediaPlayer = false;
         });
     }
     //Bắt đầu lấy dữ liệu mỗi giây (tạm ngưng khi tab ẩn)
@@ -464,14 +469,25 @@ include 'html_head.php';
     window.addEventListener("resize", resizeCanvas_SN);
     resizeCanvas_SN();
     let time_SongNhac = 0;
+    let waveRafId_SN = null;
+
+    function scheduleWaveFrame_SN() {
+      if (waveRafId_SN === null && currentStatus_SongNHAC && !isPaused_SongNHAC && !document.hidden) {
+        waveRafId_SN = requestAnimationFrame(drawWaves);
+      }
+    }
 
     function drawWaves() {
-      resizeCanvas_SN();
-      const width = canvas_SN.width;
-      const height = canvas_SN.height;
-      ctx.clearRect(0, 0, width, height);
+      waveRafId_SN = null;
+      const waveContainer = document.getElementById("waveContainer_song_nhac");
       if (currentStatus_SongNHAC) {
-        document.getElementById("waveContainer_song_nhac").style.display = "flex";
+        if (waveContainer.style.display !== "flex") {
+          waveContainer.style.display = "flex";
+          resizeCanvas_SN();
+        }
+        const width = canvas_SN.width;
+        const height = canvas_SN.height;
+        ctx.clearRect(0, 0, width, height);
         let bassPulse_SN = Math.sin(time_SongNhac * 0.5) * 20 + 20;
         //Sóng 1
         ctx.beginPath();
@@ -503,11 +519,12 @@ include 'html_head.php';
         ctx.stroke();
         if (!isPaused_SongNHAC) {
           time_SongNhac += 0.05;
+          scheduleWaveFrame_SN();
         }
       } else {
-        document.getElementById("waveContainer_song_nhac").style.display = "none";
+        ctx.clearRect(0, 0, canvas_SN.width, canvas_SN.height);
+        waveContainer.style.display = "none";
       }
-      requestAnimationFrame(drawWaves);
     }
 
     function updateDisplay_SongNhac(status_SN, paused_SN = false) {
@@ -521,7 +538,17 @@ include 'html_head.php';
       if (isPaused_SongNHAC && time_SongNhac === 0) {
         time_SongNhac = 1.25;
       }
+      if (waveRafId_SN !== null) {
+        cancelAnimationFrame(waveRafId_SN);
+        waveRafId_SN = null;
+      }
+      drawWaves();
     }
+    document.addEventListener("visibilitychange", () => {
+      if (!document.hidden) {
+        scheduleWaveFrame_SN();
+      }
+    });
     //Khởi động vòng vẽ sóng
     window.addEventListener("DOMContentLoaded", () => {
       drawWaves();

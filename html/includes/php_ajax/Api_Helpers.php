@@ -241,11 +241,17 @@ function vbotApiVerifyCsrf($required = true)
         || !is_string($requestToken)
         || !hash_equals($sessionToken, $requestToken)
     ) {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
         vbotApiJsonResponse([
             'success' => false,
             'status' => 'error',
             'message' => 'CSRF token không hợp lệ hoặc đã hết hạn.'
         ], 403);
+    }
+    if (session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
     }
     return true;
 }

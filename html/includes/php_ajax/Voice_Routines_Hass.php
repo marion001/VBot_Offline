@@ -6,7 +6,7 @@ include __DIR__.'/../../Configuration.php';
 if (!empty($Config['contact_info']['user_login']['active'])) {
     if (session_status()!==PHP_SESSION_ACTIVE) session_start();
     if (empty($_SESSION['user_login']) || (isset($_SESSION['user_login']['login_time']) && time()-$_SESSION['user_login']['login_time']>43200))
-        vbotApiJsonResponse(['success'=>false,'message'=>'B?n c?n dang nh?p WebUI'],401);
+        vbotApiJsonResponse(['success'=>false,'message'=>'Bạn cần đăng nhập WebUI'],401);
 }
 if ($_SERVER['REQUEST_METHOD']==='POST') vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
 if (session_status()===PHP_SESSION_ACTIVE) session_write_close();

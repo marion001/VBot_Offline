@@ -24,6 +24,7 @@ if ($Config['contact_info']['user_login']['active']) {
             'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
         ], 401);
     }
+    session_write_close();
 }
 
 function vbotWifiValidName($value)

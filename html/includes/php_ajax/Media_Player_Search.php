@@ -33,6 +33,7 @@ if ($Config['contact_info']['user_login']['active'] && !$apiKeyAuthorized) {
 		], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 		exit;
 	}
+	session_write_close();
 }
 
 if (isset($_GET['Media_Source_Health'])) {
@@ -956,7 +957,11 @@ if (isset($_GET['Get_Link_NewsPaper'])) {
 		exit();
 	}
 	else if (($urlScheme === 'http' || $urlScheme === 'https') && ($urlHost === '24h.com.vn' || substr($urlHost, -strlen('.24h.com.vn')) === '.24h.com.vn')) {
-		$html = @file_get_contents($URL);
+		$httpCtx24h = stream_context_create([
+			'http' => ['timeout' => 5, 'user_agent' => 'Mozilla/5.0'],
+			'ssl' => ['verify_peer' => true, 'verify_peer_name' => true]
+		]);
+		$html = @file_get_contents($URL, false, $httpCtx24h);
 		if ($html) {
 			if (preg_match('/<source[^>]+src=["\']([^"\']+\.mp3)[^"\']*["\']/i', $html, $m)) {
 				$audio_src = trim($m[1]);

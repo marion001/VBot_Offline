@@ -23,6 +23,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
             'message' => 'Thao tác bị chặn, vui lòng đăng nhập WebUI VBot.'
         ], 401);
     }
+    session_write_close();
 }
 
 $mb = 1024 * 1024;

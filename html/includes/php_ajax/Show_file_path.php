@@ -27,12 +27,15 @@ $publicReadableFiles = array_values(array_filter([
   realpath($VBot_Offline.'resource/VietNam_Localtion.json'),
 ]));
 
+$isLoggedInUser = false;
 if ($Config['contact_info']['user_login']['active']) {
   session_start();
+  $isLoggedInUser = isset($_SESSION['user_login']);
   if (
     !isset($_SESSION['user_login']) ||
     (isset($_SESSION['user_login']['login_time']) && (time() - $_SESSION['user_login']['login_time'] > 43200))
   ) {
+    $isLoggedInUser = false;
     $requestedPath = is_string($_GET['file'] ?? null) ? $_GET['file'] : '';
     $resolvedRequest = vbotApiResolveExistingPath($requestedPath, $allowedFileRoots, 'file');
     $resolvedConfig = realpath($VBot_Offline.'Config.json');
@@ -48,6 +51,9 @@ if ($Config['contact_info']['user_login']['active']) {
         'message' => 'Thao tác bị chặn, chỉ cho phép xem tệp khi đã đăng nhập WebUI hoặc tệp thuộc vùng được công khai.'
       ], 401);
     }
+  }
+  if (session_status() === PHP_SESSION_ACTIVE) {
+    session_write_close();
   }
 }
 
@@ -242,6 +248,7 @@ if (isset($_POST['delete_data_backlist']) && isset($_POST['path'])) {
 
 // hiển thị toàn bộ dữ liệu trong file backlist.json
 if (isset($_GET['data_backlist'])) {
+  $response = ['success' => false, 'message' => '', 'data' => null];
   if (file_exists($Backlist_File_Name)) {
     $fileContents = file_get_contents($Backlist_File_Name);
     if ($fileContents !== false) {
@@ -272,7 +279,7 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
   $isConfigJsonViewerRequest = $file_path !== false
     && $configJsonPath !== false
     && $file_path === $configJsonPath
-    && (!$fileAccessSecurity || ($loginActive && session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['user_login'])));
+    && (!$fileAccessSecurity || ($loginActive && $isLoggedInUser));
   $isPublicReadableFile = $file_path !== false
     && in_array($file_path, $publicReadableFiles, true)
     && !vbotApiIsSensitiveFilePath($file_path);
@@ -300,7 +307,7 @@ if (isset($_GET['read_file_path']) && isset($_GET['file']) && !empty($_GET['file
       } else {
         $response['success'] = true;
         $response['message'] = 'Tệp đã được đọc thành công.';
-        header('Content-Type: text/plain');
+        header('Content-Type: application/json; charset=utf-8');
         if (in_array(strtolower($file_extension), ['log', 'logs'], true)) {
           require_once __DIR__ . '/../Log_Display.php';
           $content = vbotFormatLogTimestamps($content);

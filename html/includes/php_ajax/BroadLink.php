@@ -26,6 +26,7 @@ if ($Config['contact_info']['user_login']['active']) {
 }
 
 vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+if (session_status() === PHP_SESSION_ACTIVE) { session_write_close(); }
 
 function vbotBroadlinkIsLanIp($ip)
 {

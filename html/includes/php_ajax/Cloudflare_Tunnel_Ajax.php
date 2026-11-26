@@ -14,6 +14,7 @@ if (!empty($Config['contact_info']['user_login']['active'])) {
     $_SESSION['user_login']['login_time'] = time();
 }
 vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+if (session_status() === PHP_SESSION_ACTIVE) { session_write_close(); }
 
 $storeDir = dirname(__DIR__, 3).'/resource/cloudflare_tunnel';
 $storeFile = $storeDir.'/profiles.json';

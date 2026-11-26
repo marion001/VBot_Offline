@@ -112,7 +112,10 @@ include 'html_head.php';
     }
   }
   // Gán event click cho button
-  document.getElementById('select_log_file_red').addEventListener('click', loadLogFile);
+  var selectLogBtn = document.getElementById('select_log_file_red');
+  if (selectLogBtn) {
+    selectLogBtn.addEventListener('click', loadLogFile);
+  }
   // Hàm xóa logs
   function delete_logs() {
     var selectElement = document.getElementById('logFileSelect');

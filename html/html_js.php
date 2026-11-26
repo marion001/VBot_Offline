@@ -17,7 +17,7 @@ $git_repository = $pathParts[1];
 <?php
 $webui_page_name = basename($_SERVER['PHP_SELF'] ?? '');
 $webui_datatable_pages = ['index.php', 'Log_TTS.php', 'Log_pycache.php'];
-$webui_media_pages = ['index.php'];
+$webui_media_pages = ['index.php', 'Media_Player.php'];
 $webui_backup_pages = ['Config.php', '_Program.php', '_Dashboard.php'];
 $webui_password_pages = ['Login.php', 'Users_Profile.php'];
 if (in_array($webui_page_name, $webui_datatable_pages, true)) {
@@ -2320,6 +2320,7 @@ function command_php(command_line, reload_page = null) {
         var xhr2 = vbotCreateXhr();
         xhr2.open('POST', 'includes/php_ajax/Media_Player_Search.php', true);
         xhr2.setRequestHeader('Content-Type', 'application/json');
+        xhr2.setRequestHeader('X-CSRF-Token', window.VBOT_CSRF_TOKEN || '');
         xhr2.onreadystatechange = function() {
             if (xhr2.readyState === 4) {
                 loading("hide");

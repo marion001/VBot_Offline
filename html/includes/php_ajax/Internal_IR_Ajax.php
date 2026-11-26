@@ -8,6 +8,7 @@ if ($Config['contact_info']['user_login']['active']) {
     if (empty($_SESSION['user_login'])) vbotApiJsonResponse(['success'=>false,'message'=>'Bạn chưa đăng nhập'], 401);
 }
 vbotApiVerifyCsrf(!empty($Config['contact_info']['user_login']['active']));
+if (session_status() === PHP_SESSION_ACTIVE) { session_write_close(); }
 
 $ir = $Config['internal_ir'] ?? [];
 $jsonPath = $VBot_Offline.($ir['json_file'] ?? 'resource/internal_ir/commands.json');

@@ -23,6 +23,7 @@ if ($Config['contact_info']['user_login']['active']) {
             'message' => 'Thao tác bị chặn, chỉ cho phép thực hiện thao tác khi được đăng nhập vào WebUI VBot'
         ], 401);
     }
+    session_write_close();
 }
 
 function vbotCheckIsPrivateLanIpv4($ipAddress)
@@ -55,7 +56,6 @@ function vbotCollectChmodPermissionIssues($dir, array $excludedItems, array &$is
     foreach ($items as $item) {
         if (vbotIsExcludedChmodItem($item, $excludedItems)) {continue;}
         $path = $dir . DIRECTORY_SEPARATOR . $item;
-        clearstatcache(true, $path);
         $filePermissions = @fileperms($path);
         $permissions = ($filePermissions === false) ? 'không xác định' : substr(sprintf('%o', $filePermissions), -3);
         if ($permissions !== '777') {

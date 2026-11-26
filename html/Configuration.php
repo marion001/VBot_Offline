@@ -118,7 +118,7 @@ $Config_filePath = $VBot_Offline . 'Config.json';
 $Github_Repo_Vbot = "https://github.com/marion001/VBot_Offline";
 
 //Danh sách các file, thư mục cần loại trừ không cần scan và chmod 777
-$excluded_items_chmod = ['.', '..', '__pycache__', 'Music_Local', 'TTS_Audio', 'robotx.txt', 'cpu_info', 'cpu_serial', '*.lock', '*.bak'];
+$excluded_items_chmod = ['.', '..', '__pycache__', '.git', 'venv', '.venv', 'node_modules', 'backup_so', 'Music_Local', 'TTS_Audio', 'robotx.txt', 'cpu_info', 'cpu_serial', '*.lock', '*.bak'];
 
 //Đọc và giải mã dữ liệu JSON
 $Config = null;
@@ -188,6 +188,9 @@ if ($csrfProtectedPost || $needsAnonymousCsrfSession) {
     ) {
         $_SESSION['vbot_csrf_token'] = bin2hex(random_bytes(32));
     }
+    if (!$csrfProtectedPost && defined('VBOT_JSON_API') && VBOT_JSON_API === true && session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
 }
 
 if ($csrfProtectedPost) {
@@ -232,9 +235,11 @@ if ($csrfProtectedPost) {
         }
         exit;
     }
-    //Khi login bật, các trang cũ sẽ tự mở lại session để kiểm tra đăng nhập.
-    //Khi login tắt, giữ session mở để html_head.php xuất token cho giao diện.
-    if ($loginActive) session_write_close();
+    //Khi login bật (hoặc là JSON API không render html_head.php), đóng khóa session ngay sau khi kiểm tra CSRF.
+    //Khi login tắt trên trang HTML, giữ session mở tới html_head.php để xuất token cho giao diện rồi đóng.
+    if (($loginActive || (defined('VBOT_JSON_API') && VBOT_JSON_API === true)) && session_status() === PHP_SESSION_ACTIVE) {
+        session_write_close();
+    }
 }
 
 if (defined('VBOT_JSON_API') && VBOT_JSON_API === true) {
