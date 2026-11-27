@@ -7,26 +7,26 @@ function vbotAudioBoardPreset(string $imageFile = '/os_image_created.txt'): ?arr
         'board'=>$i2s ? 'i2s' : 'wm8960',
         'label'=>$i2s ? 'VBot AIO I2S' : 'VBot AIO WM8960',
         'fields'=>[
-            'audio_noise_suppression'=>$i2s ? 'low' : 'moderate',
+            'audio_noise_suppression'=>'low',
             'audio_high_pass_filter'=>true,
             'audio_agc_active'=>true,
             'audio_agc_limiter'=>true,
             'audio_agc_target_level_dbfs'=>6,
             'audio_agc_compression_gain_db'=>9,
-            'aec3_output'=>'normal',
+            'aec3_output'=>'linear',
             'aec3_capture_gain'=>1,
             'aec3_wake_gain'=>1,
             'aec3_playback_latency_ms'=>100,
-            'aec3_capture_delay_ms'=>32,
-            'aec3_render_clock_ppm'=>$i2s ? 980 : 0,
+            'aec3_capture_delay_ms'=>$i2s ? -16 : 8,
+            'aec3_render_clock_ppm'=>0,
         ],
     ];
 }
 
 function vbotAEC3Defaults(): array {
-    return ['active'=>false, 'library'=>'/home/pi/VBot_AEC3/music_test/libvbot_aec3_music.so',
+    return ['active'=>false, 'library'=>'/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so',
         'output'=>'linear', 'playback_device'=>'default', 'playback_latency_ms'=>100,
-        'capture_delay_ms'=>32, 'render_clock_ppm'=>980, 'capture_gain'=>1.0,
+        'capture_delay_ms'=>0, 'render_clock_ppm'=>0, 'capture_gain'=>1.0,
         'wake_gain'=>1.0, 'noise_suppression'=>'off', 'bypass_legacy_filters'=>true,
         'external_sources'=>false];
 }
@@ -49,7 +49,7 @@ function vbotAEC3Settings(array $post, array $old): array {
         $value[$key]=$item;
     }
     foreach (['capture_gain'=>[0.1,8,false],'wake_gain'=>[0.1,8,false],
-        'playback_latency_ms'=>[20,200,true],'capture_delay_ms'=>[0,500,true],
+        'playback_latency_ms'=>[20,200,true],'capture_delay_ms'=>[-100,500,true],
         'render_clock_ppm'=>[-3000,3000,true]] as $key=>$limits) {
         $item=filter_var($post['aec3_'.$key]??$value[$key],FILTER_VALIDATE_FLOAT);
         if ($item===false || !is_finite($item) || $item<$limits[0] || $item>$limits[1] || ($limits[2] && floor($item)!=$item))

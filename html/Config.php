@@ -1019,6 +1019,14 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   }
   $Config['media_player']['multiroom_audio']['active'] = isset($_POST['multiroom_audio_active']) ? true : false;
   $Config['media_player']['dlna_renderer']['active'] = isset($_POST['dlna_renderer_active']);
+  $spotify_bitrate = intval($_POST['spotify_connect_bitrate'] ?? ($Config['media_player']['spotify_connect']['bitrate'] ?? 320));
+  $Config['media_player']['spotify_connect'] = array_merge($Config['media_player']['spotify_connect'] ?? [], [
+    'active' => isset($_POST['spotify_connect_active']),
+    'device_name' => substr(trim((string)($_POST['spotify_connect_device_name'] ?? '')), 0, 64),
+    'bitrate' => in_array($spotify_bitrate, [96, 160, 320], true) ? $spotify_bitrate : 320,
+    'initial_volume' => max(0, min(100, intval($_POST['spotify_connect_initial_volume'] ?? ($Config['media_player']['spotify_connect']['initial_volume'] ?? 80)))),
+    'api_port' => max(1024, min(65535, intval($_POST['spotify_connect_api_port'] ?? ($Config['media_player']['spotify_connect']['api_port'] ?? 3678)))),
+  ]);
   $Config['media_player']['multiroom_audio']['default_volume'] = max(0, min(100, intval($_POST['multiroom_audio_default_volume'] ?? 90)));
   $Config['media_player']['multiroom_audio']['default_muted'] = isset($_POST['multiroom_audio_default_muted']);
 
@@ -1718,12 +1726,12 @@ function vbotConfigFieldHelp($name, $help = '') {
   if ($help !== '') return $help;
   $descriptions = [
     'audio_processing_active'=>'Bật giảm nhiễu và tự cân bằng âm lượng mic cho wake word và STT. Cần cài WebRTC 2.1; nếu không nạp được thư viện, VBot ghi lỗi và tiếp tục dùng mic gốc.',
-    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc. Mạch VBot AIO I2S = Nhẹ (low). Mạch VBot AIO WM8960 = Trung bình (moderate)<br>Đây là các mức tham khảo theo lượt thử, cần kiểm tra lại khi thay mic hoặc môi trường sử dụng.',
+    'audio_noise_suppression'=>'Giảm tiếng quạt và nhiễu nền trong mic. Mức cao hơn có thể làm mất chi tiết giọng nói. Chọn Tắt để đối chiếu âm thanh gốc. Mạch VBot AIO I2S = Nhẹ (low). Mạch VBot AIO WM8960 = Nhẹ (low).',
     'audio_high_pass_filter'=>'Giảm tiếng ù và rung ở tần số thấp. Nên bật khi mic thu tiếng rung bàn hoặc tiếng gió trầm; không thay thế bộ khử vọng AEC3.',
     'audio_agc_active'=>'Tự điều chỉnh mức giọng thu được sau khử vọng và giảm nhiễu. Tăng gain quá cao có thể khuếch đại cả tiếng nền; không thay đổi âm lượng trong alsamixer.',
     'audio_agc_limiter'=>'Giới hạn đỉnh tín hiệu sau AGC để giảm vỡ tiếng khi nói lớn. Nên bật khi dùng AGC; không sửa được tín hiệu đã vỡ ngay từ microphone.',
     'aec3_active'=>'Dùng âm thanh đang phát làm tham chiếu để giảm nhạc lọt vào mic trước khi nhận wake word. Cần WebRTC 2.1 và đường âm thanh chung cho các nguồn bên ngoài. Công tắc này độc lập với tùy chọn cho phép wake khi phát nhạc.',
-    'aec3_output'=>'Normal giảm vọng dư mạnh hơn, nên dùng trước khi thử Linear. Linear giữ giọng tự nhiên hơn nhưng có thể còn nhạc dư khiến wake word nhận nhầm.',
+    'aec3_output'=>'Linear giữ nguyên dạng sóng giọng nói tự nhiên cho Porcupine bắt từ đánh thức chính xác nhất trên cả hai mạch I2S và WM8960. Normal nén phi tuyến mạnh hơn nhưng có thể làm giảm độ nhạy wake word.',
     'lan_active'=>'Khởi tạo dịch vụ gọi LAN cùng VBot để gọi và nhận cuộc gọi. Cần PJSIP và WebRTC 2.1; thiếu thư viện sẽ bỏ qua gọi LAN và ghi log, các chức năng khác vẫn chạy.',
     'lan_control_port'=>'Cổng TCP điều khiển cuộc gọi giữa các loa, cố định 5010. Khác với cổng SIP UDP và các cổng RTP truyền âm thanh.',
     'lan_output_device'=>'Thiết bị ALSA phát tiếng người gọi trên loa này. Mặc định default; chỉ thay khi đã kiểm tra tên thiết bị bằng aplay -L.',
@@ -1735,8 +1743,10 @@ function vbotConfigFieldHelp($name, $help = '') {
     'lan_end_button'=>'Chọn nút đã bật trong cấu hình Button để kết thúc cuộc gọi. Nếu dùng nút Mic đồng thời bật tắt mic, dùng nhấn giữ để kết thúc nhằm tránh trùng thao tác.',
     'lan_accept_button_active'=>'Cho phép bắt máy bằng nút vật lý khi có cuộc gọi đến. Khi tắt vẫn có thể nhận bằng WebUI hoặc tự nhận theo cấu hình từng loa.',
     'lan_accept_button'=>'Chọn nút đã cấu hình và bật để nhận cuộc gọi đến. Thao tác nhấn nhả, nhấn giữ hoặc nhấn đúp được chọn ở mục bên dưới.',
+    'lan_pjsip_runtime'=>'Thư mục cài đặt PJSUA2 runtime cho gọi nội bộ LAN (bắt đầu bằng /, mặc định /home/pi/VBot_AEC3/pjsip).',
     'lan_pjsip_sip_port'=>'Cổng UDP báo hiệu SIP, cố định 5060. Hai loa cần kết nối được tới cổng này để thiết lập cuộc gọi.',
     'lan_pjsip_rtp_port'=>'Cổng UDP bắt đầu cho luồng âm thanh RTP, mặc định 40000. PJSIP có thể sử dụng thêm các cổng kế tiếp cho RTP/RTCP; cần tránh trùng dịch vụ khác.',
+    'lan_pjsip_codec'=>'Codec mã hóa âm thanh cuộc gọi SIP/RTP giữa các loa. Khuyên dùng G.722/16000/1 (băng rộng 16 kHz, khớp trực tiếp tần số mẫu PvRecorder). Hai loa cần dùng chung codec.',
   ];
   return $descriptions[$name] ?? '';
 }
@@ -2637,7 +2647,10 @@ include 'html_head.php';
             <?php
 $lanSettings=$Config['lan_calls']??[];
 if (!empty($lanConfigError)) {
-    foreach ($_POST as $field=>$value) if (strpos($field,'lan_')===0 && is_string($value)) $lanSettings[substr($field,4)]=$value;
+    foreach ($_POST as $field=>$value) {
+        if (strpos($field,'lan_pjsip_')===0 && is_string($value)) $lanSettings['pjsip'][substr($field,10)]=$value;
+        elseif (strpos($field,'lan_')===0 && is_string($value)) $lanSettings[substr($field,4)]=$value;
+    }
     $lanSettings['active']=isset($_POST['lan_active']);
     $lanSettings['use_mdns_id']=isset($_POST['lan_use_mdns_id']);
 }
@@ -2684,14 +2697,37 @@ if (($Config['smart_config']['button_active']['button_type']??'')==='respeaker_2
 require __DIR__.'/includes/LANCallReceiveControls.php';
 ?>
 <div class="border border-success rounded p-3 mb-3">
-<h6 class="border-bottom pb-2">Kết nối PJSIP</h6>
+<h6 class="border-bottom pb-2">Kết nối PJSIP &amp; Xử lý âm thanh cuộc gọi (LAN / Trình duyệt)</h6>
+<input type="hidden" name="lan_pjsip_settings_present" value="1">
 <?php
+$lanPjsip=array_merge(vbotLANCallPjsipDefaults(),is_array($lanSettings['pjsip']??null)?$lanSettings['pjsip']:[]);
+echo input_field('lan_pjsip_runtime','Thư mục PJSIP Runtime',$lanPjsip['runtime'],'required','text','','','','','border-danger');
 foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
     echo input_field('lan_pjsip_'.$field,$field==='sip_port'?'SIP UDP (cố định)':'Cổng bắt đầu RTP UDP',
-        $field==='sip_port'?5060:($lanSettings['pjsip'][$field]??$default),$field==='sip_port'?'readonly':'','number','','1024',$field==='rtp_port'?'65526':'65535','','border-danger');
+        $field==='sip_port'?5060:($lanPjsip[$field]??$default),$field==='sip_port'?'readonly':'required','number','1','1024',$field==='rtp_port'?'65526':'65535','','border-danger');
 }
+echo select_field('lan_pjsip_codec','Codec âm thanh SIP/RTP',[
+    'G722/16000/1'=>'G.722 — Băng rộng 16 kHz (khuyên dùng)',
+    'PCMU/8000/1'=>'PCMU (G.711 μ-law) — 8 kHz',
+    'PCMA/8000/1'=>'PCMA (G.711 A-law) — 8 kHz',
+],(string)$lanPjsip['codec']);
+echo input_field('lan_pjsip_capture_gain','Gain mic cuộc gọi (sau AEC3)',$lanPjsip['capture_gain'],'required','number','0.05','0.05','64','Nhân sau khử vọng AEC3 và ngay trước bộ WebRTC NS + AGC dùng chung (từ 0.05 đến 64). Để 1 để bộ AGC tự cân bằng giọng nói mà không phóng đại tiếng vọng dư hay gây vỡ tiếng khi nói gần.<br><br><b>Mạch VBot AIO I2S:</b> 1<br><b>Mạch VBot AIO WM8960:</b> 1','border-success');
+echo input_field('lan_pjsip_output_gain','Hệ số âm lượng loa cuộc gọi',$lanPjsip['output_gain'],'required','number','0.01','0.01','1','Tỷ lệ biên độ âm thanh phát ra loa khi gọi (từ 0.01 đến 1.0). Để 0.5 giúp đàm thoại hai chiều rõ tiếng, tránh bão hòa loa gây dội ngược vào mic.<br><br><b>Mạch VBot AIO I2S:</b> 0.5<br><b>Mạch VBot AIO WM8960:</b> 0.5','border-success');
+echo input_field('lan_pjsip_playback_latency_ms','Buffer loa cuộc gọi (ms)',$lanPjsip['playback_latency_ms'],'required','number','1','20','200','Độ dài bộ đệm ALSA khi phát âm thanh cuộc gọi trực tiếp 16 kHz (20–200 ms). Mặc định 100 ms giúp chống hụt gói qua mạng LAN.<br><br><b>Mạch VBot AIO I2S:</b> 100 ms<br><b>Mạch VBot AIO WM8960:</b> 100 ms','border-success');
+echo input_field('lan_pjsip_capture_delay_ms','Độ trễ mic cuộc gọi bổ sung (ms)',$lanPjsip['capture_delay_ms'],'required','number','1','-100','500','Cộng thêm vào độ trễ ALSA khi gọi (khác với phát nhạc vì âm thanh cuộc gọi mở thẳng thiết bị ALSA 16 kHz, không qua Loopback; mạch WM8960 đi qua thêm tầng trộn mic dsnoop nên trễ hơn mạch I2S khoảng 24 ms).<br><br><b>Mạch VBot AIO I2S:</b> 0 ms<br><b>Mạch VBot AIO WM8960:</b> 24 ms','border-success');
+echo input_field('lan_pjsip_render_clock_ppm','Bù clock tham chiếu cuộc gọi (ppm)',$lanPjsip['render_clock_ppm'],'required','number','1','-3000','3000','Bù chênh lệch tốc độ xung nhịp giữa phát và thu trong cuộc gọi (-3000 đến 3000 ppm). Cả mạch I2S và WM8960 đều dùng chung thạch anh phần cứng cho loa và mic nên đặt chuẩn 0 ppm.<br><br><b>Mạch VBot AIO I2S:</b> 0 ppm<br><b>Mạch VBot AIO WM8960:</b> 0 ppm','border-success');
 ?>
-<p class="form-text">Mic dùng chung PvRecorder; AEC cuộc gọi và NS/AGC chung chỉ xử lý một lần. Cổng audio_port cũ không được sử dụng cho RTP PJSIP. Dừng bản calls_pjsip_test trước khi chạy VBot.</p>
+<p class="form-text">Áp dụng chung cho cả Gọi nội bộ LAN (PJSIP) và Gọi từ trình duyệt WebUI. Mic dùng chung PvRecorder; AEC cuộc gọi và NS/AGC chung chỉ xử lý một lần. Cổng audio_port cũ không còn dùng cho RTP PJSIP.</p>
+<?php $lanBoardPreset = vbotLANCallBoardPreset(); ?>
+<div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+  <button type="button" class="btn btn-primary" id="lan_calls_reset_defaults"
+    data-board-preset="<?= vbotLANEscape(json_encode($lanBoardPreset, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT)) ?>"
+    onclick="resetLANCallBoardDefaults(this)">
+    <i class="bi bi-arrow-counterclockwise"></i> Đặt lại mặc định các thông số
+  </button>
+  <span class="form-text m-0">Nhận diện mạch: <?= vbotLANEscape($lanBoardPreset['label']) ?></span>
+  <?= vbotConfigHelpIcon('Kiểm tra /os_image_created.txt trên thiết bị: nếu có chữ i2s sẽ đặt thông số chuẩn cho mạch VBot AIO I2S (capture_delay_ms = 0 ms, render_clock_ppm = 0, capture_gain = 1); nếu không có chữ i2s sẽ đặt thông số chuẩn cho mạch VBot AIO WM8960 (capture_delay_ms = 24 ms, render_clock_ppm = 0, capture_gain = 1). Đồng thời đặt lại thiết bị phát ALSA, chế độ gọi, thời gian chờ, cổng RTP, codec G.722, hệ số loa 0.5 và buffer 100 ms. Giữ nguyên công tắc bật/tắt, ID loa, khóa chung, nhạc chuông và nút nhấn. Nhấn Lưu Cài Đặt rồi khởi động lại VBot để áp dụng.') ?>
+</div>
 </div>
 </div>
 <script>document.getElementById('lanUseMdnsId').addEventListener('change',function(){document.getElementById('lan_id').readOnly=this.checked;});</script>
@@ -3027,13 +3063,13 @@ foreach (['sip_port'=>5060,'rtp_port'=>40000] as $field=>$default) {
                       <?php echo switch_field('aec3_active','Bật AEC3 cho wake word khi phát nhạc',$aec3['active']); ?>
                       <?php
                       echo input_field('aec3_library','Thư viện AEC3',htmlspecialchars($aec3['library']),'required','text','','','','Đường dẫn thư viện đã build trên thiết bị. Linear cần thư viện hỗ trợ export linear.','border-danger','','','','','');
-                      echo select_field('aec3_output','Tín hiệu cho wake word',['linear'=>'Tuyến tính — giữ giọng, còn âm dư','normal'=>'AEC thông thường — giảm vọng dư mạnh hơn'],$aec3['output'],[]);
+                      echo select_field('aec3_output','Tín hiệu cho wake word',['linear'=>'Tuyến tính — giữ giọng cho Porcupine (khuyên dùng cho I2S & WM8960)','normal'=>'AEC thông thường — giảm vọng dư mạnh hơn'],$aec3['output'],[]);
                       echo input_field('aec3_playback_device','Thiết bị loa ALSA',htmlspecialchars($aec3['playback_device']),'required','text','','','','Mặc định default. AEC3 giữ âm lượng phần mềm VLC, không chỉnh alsamixer.','border-danger','','','','','');
-                      echo input_field('aec3_capture_gain','Gain mic trước AEC3',$aec3['capture_gain'],'required','number','0.1','0.1','8','Không cộng gain wake word cũ. Gain phần mềm không sửa được tín hiệu đã clipping ngay tại ADC/mic.<br><br><b>Mạch VBot AIO I2S:</b> 1<br><b>Mạch VBot AIO WM8960:</b> 1','border-success','','','','','');
+                      echo input_field('aec3_capture_gain','Gain mic trước AEC3',$aec3['capture_gain'],'required','number','0.1','0.1','8','Không cộng gain wake word cũ. Gain phần mềm không sửa được tín hiệu đã clipping ngay tại ADC/softvol (I2S: để VBot_DAC_Microphone ~150; WM8960: Input Boost=2, Capture=35, ADC HPF=on).<br><br><b>Mạch VBot AIO I2S:</b> 1<br><b>Mạch VBot AIO WM8960:</b> 1','border-success','','','','','');
                       echo input_field('aec3_wake_gain','Gain wake word sau AEC3',$aec3['wake_gain'],'required','number','0.1','0.1','8','Tăng có thể tăng kích hoạt nhầm.<br><br><b>Mạch VBot AIO I2S:</b> 1<br><b>Mạch VBot AIO WM8960:</b> 1','border-success','','','','','');
                       echo input_field('aec3_playback_latency_ms','Buffer loa (ms)',$aec3['playback_latency_ms'],'required','number','1','20','200','Bộ đệm khi AEC3 trực tiếp phát ra ALSA. Giảm giúp giảm trễ nhưng dễ xẹt hoặc thiếu dữ liệu, tăng có thể ổn định hơn nhưng tăng trễ. Đường âm thanh chung dùng bộ đệm của bridge.<br><br><b>Mạch VBot AIO I2S:</b> 100 ms.<br><b>Mạch VBot AIO WM8960:</b> 100 ms','border-success','','','','','');
-                      echo input_field('aec3_capture_delay_ms','Độ trễ mic bổ sung (ms)',$aec3['capture_delay_ms'],'required','number','1','0','500','Cộng với độ trễ ALSA đo được, không phải tổng độ trễ âm thanh.<br><br><b>Mạch VBot AIO I2S:</b> 32 ms.<br><b>Mạch VBot AIO WM8960:</b> 32 ms','border-success','','','','','');
-                      echo input_field('aec3_render_clock_ppm','Bù clock tham chiếu (ppm)',$aec3['render_clock_ppm'],'required','number','1','-3000','3000','Bù sai lệch tốc độ giữa clock phát và thu, không phải bù độ trễ. Cần đo lại khi thay thiết bị hoặc đường âm thanh.<br><br><b>Mạch VBot AIO I2S:</b> 980 ppm, đã đo ở hai loa I2S thử trước đây.<br><b>Mạch VBot AIO WM8960:</b> 0 ppm','border-success','','','','','');
+                      echo input_field('aec3_capture_delay_ms','Độ trễ mic bổ sung (ms)',$aec3['capture_delay_ms'],'required','number','1','-100','500','Cộng với độ trễ ALSA đo được (hỗ trợ giá trị âm khi khối thu PvRecorder 32 ms sớm hơn độ trễ đỉnh hàng đợi ALSA).<br><br><b>Mạch VBot AIO I2S:</b> -16 ms.<br><b>Mạch VBot AIO WM8960:</b> 8 ms','border-success','','','','','');
+                      echo input_field('aec3_render_clock_ppm','Bù clock tham chiếu (ppm)',$aec3['render_clock_ppm'],'required','number','1','-3000','3000','Bù sai lệch tốc độ giữa clock phát và thu, không phải bù độ trễ. Cả hai mạch I2S và WM8960 dùng chung xung clock phần cứng giữa phát và thu nên đặt 0 ppm.<br><br><b>Mạch VBot AIO I2S:</b> 0 ppm.<br><b>Mạch VBot AIO WM8960:</b> 0 ppm','border-success','','','','','');
                       ?>
                       <p class="form-text">NS và AGC ở trên xử lý sau AEC3 cho cả linear và normal. Công tắc đánh thức khi phát nhạc chỉ điều khiển nhận wake word, không bật/tắt AEC3. Lưu và khởi động lại VBot để áp dụng; thư viện phải hỗ trợ vbot_mic_create.</p>
                       <?php $audioBoardPreset = vbotAudioBoardPreset(); ?>
@@ -4918,7 +4954,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
             <div class="card accordion" id="accordion_button_media_player">
               <div class="card-body">
                 <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_button_media_player" aria-expanded="false" aria-controls="collapse_button_media_player">
-                  Media Player, Playlist, DLNA, Multiroom Audio, Ưu Tiên Nguồn Phát : <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
+                  Media Player, Playlist, DLNA, Spotify Connect, Multiroom Audio, Ưu Tiên Nguồn Phát : <?php echo $Config['media_player']['active'] ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>
                 </h5>
                 <div id="collapse_button_media_player" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#accordion_button_media_player" style="">
                  <div class="alert alert-success" role="alert"> <div class="card">
@@ -4948,7 +4984,7 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                     <div class="card-body">
                       <h5 class="card-title">DLNA (Digital Living Network Alliance) <i class="bi bi-question-circle-fill" onclick="show_message('Bật hoặc Tắt Để kích hoạt sử dụng DLNA (Digital Living Network Alliance) trong mạng lan')"></i> :</h5>
                      <div class="alert alert-primary" role="alert"> 
-					                       <div class="row mb-3">
+                      <div class="row mb-3">
                         <label class="col-sm-3 col-form-label">DLNA Audio Renderer <i class="bi bi-question-circle-fill" onclick="show_message('Cho phép điện thoại hoặc ứng dụng DLNA gửi nhạc đến VBot. Chỉ nhận âm thanh và dùng chung bus ALSA vbot_aec_media với các nguồn ngoài. Cần cài renderer một lần trên Raspberry Pi; khởi động lại VBot sau khi đổi tùy chọn.')"></i>:</label>
                         <div class="col-sm-9">
                           <div class="form-switch">
@@ -4958,6 +4994,46 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         </div>
                       </div>
                     </div>
+                    </div>
+                  </div>
+
+                  <?php $spotify_connect_cfg = $Config['media_player']['spotify_connect'] ?? []; ?>
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Spotify Connect (go-librespot) <i class="bi bi-question-circle-fill" onclick="show_message('Biến loa VBot thành thiết bị Spotify Connect trong mạng LAN (Yêu cầu tài khoản Spotify Premium; tài khoản Free hãy phát qua AirPlay hoặc Bluetooth).<br/>Âm thanh đi qua bus chung vbot_aec_media nên tự động hỗ trợ đồng bộ Multiroom Audio, khử vọng AEC3, Equalizer và hiệu ứng LED theo nhạc.')"></i> :</h5>
+                      <div class="alert alert-primary" role="alert">
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label">Kích hoạt Spotify Connect:</label>
+                          <div class="col-sm-9">
+                            <div class="form-switch">
+                              <input class="form-check-input border-success" type="checkbox" name="spotify_connect_active" id="spotify_connect_active" <?php echo !empty($spotify_connect_cfg['active']) ? 'checked' : ''; ?>>
+                            </div>
+                            <div class="form-text"><span class="text-danger fw-semibold">Lưu ý: Yêu cầu tài khoản Spotify Premium</span> (tài khoản Spotify Free không hỗ trợ Spotify Connect, có thể phát qua AirPlay hoặc Bluetooth).<br/>Cài đặt một lần bằng lệnh: <code>cd /home/pi/VBot_Offline && sudo sh resource/spotify/install.sh</code>. Khởi động lại VBot sau khi bật/tắt hoặc đổi cấu hình.</div>
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label" for="spotify_connect_device_name">Tên hiển thị trên Spotify:</label>
+                          <div class="col-sm-9">
+                            <input class="form-control border-success" type="text" maxlength="64" name="spotify_connect_device_name" id="spotify_connect_device_name" placeholder="Để trống = VBot - Tên định danh loa" value="<?php echo htmlspecialchars((string)($spotify_connect_cfg['device_name'] ?? ''), ENT_QUOTES, 'UTF-8'); ?>">
+                          </div>
+                        </div>
+                        <div class="row mb-3">
+                          <label class="col-sm-3 col-form-label" for="spotify_connect_bitrate">Chất lượng âm thanh (Bitrate):</label>
+                          <div class="col-sm-3">
+                            <?php $spotify_cfg_bitrate = intval($spotify_connect_cfg['bitrate'] ?? 320); ?>
+                            <select class="form-select border-success" name="spotify_connect_bitrate" id="spotify_connect_bitrate">
+                              <option value="320" <?php echo $spotify_cfg_bitrate === 320 ? 'selected' : ''; ?>>320 kbps (Cao nhất)</option>
+                              <option value="160" <?php echo $spotify_cfg_bitrate === 160 ? 'selected' : ''; ?>>160 kbps (Tiêu chuẩn)</option>
+                              <option value="96" <?php echo $spotify_cfg_bitrate === 96 ? 'selected' : ''; ?>>96 kbps (Tiết kiệm mạng)</option>
+                            </select>
+                          </div>
+                          <label class="col-sm-3 col-form-label" for="spotify_connect_initial_volume">Âm lượng khởi tạo (%):</label>
+                          <div class="col-sm-3">
+                            <input class="form-control border-success" type="number" min="0" max="100" name="spotify_connect_initial_volume" id="spotify_connect_initial_volume" value="<?php echo intval($spotify_connect_cfg['initial_volume'] ?? 80); ?>">
+                            <input type="hidden" name="spotify_connect_api_port" value="<?php echo intval($spotify_connect_cfg['api_port'] ?? 3678); ?>">
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
 

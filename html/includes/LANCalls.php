@@ -7,6 +7,86 @@ class VBotLANFieldError extends InvalidArgumentException {
         parent::__construct($message);
     }
 }
+function vbotLANCallPjsipDefaults(): array {
+    return [
+        'runtime'=>'/home/pi/VBot_AEC3/pjsip',
+        'sip_port'=>5060,
+        'rtp_port'=>40000,
+        'codec'=>'G722/16000/1',
+        'capture_gain'=>1,
+        'output_gain'=>0.5,
+        'capture_delay_ms'=>0,
+        'render_clock_ppm'=>0,
+        'playback_latency_ms'=>100,
+    ];
+}
+
+function vbotLANCallBoardPreset(string $imageFile = '/os_image_created.txt'): array {
+    $image = @file_get_contents($imageFile, false, null, 0, 4096);
+    if ($image !== false && trim($image) !== '') {
+        $i2s = stripos($image, 'i2s') !== false;
+    } else {
+        $cards = $imageFile === '/os_image_created.txt'
+            ? (string)@file_get_contents('/proc/asound/cards', false, null, 0, 4096)
+            : '';
+        $i2s = $cards !== '' && stripos($cards, 'sndrpigooglevoi') !== false;
+    }
+    return [
+        'board'=>$i2s ? 'i2s' : 'wm8960',
+        'label'=>$i2s ? 'VBot AIO I2S' : 'VBot AIO WM8960',
+        'fields'=>[
+            'lan_output_device'=>'default',
+            'lan_mode'=>'full_duplex',
+            'lan_ring_timeout'=>30,
+            'lan_max_duration'=>3600,
+            'lan_auto_accept_delay'=>3,
+            'lan_pjsip_runtime'=>'/home/pi/VBot_AEC3/pjsip',
+            'lan_pjsip_rtp_port'=>40000,
+            'lan_pjsip_codec'=>'G722/16000/1',
+            'lan_pjsip_capture_gain'=>1,
+            'lan_pjsip_output_gain'=>0.5,
+            'lan_pjsip_playback_latency_ms'=>100,
+            'lan_pjsip_capture_delay_ms'=>$i2s ? 0 : 24,
+            'lan_pjsip_render_clock_ppm'=>0,
+        ],
+    ];
+}
+
+function vbotLANCallsPjsipSettings(array $post, array $oldPjsip, bool $strict): array {
+    $defaults=vbotLANCallPjsipDefaults();
+    $pjsip=array_merge($defaults,$oldPjsip,['sip_port'=>5060]);
+    $runtime=trim((string)($post['lan_pjsip_runtime']??$pjsip['runtime']));
+    if ($runtime==='' || $runtime[0]!=='/' || strlen($runtime)>250 || strpos($runtime,"\0")!==false) {
+        if ($strict) throw new VBotLANFieldError('lan_pjsip_runtime','Đường dẫn PJSIP runtime phải bắt đầu bằng /');
+    } else {
+        $pjsip['runtime']=$runtime;
+    }
+    $codec=(string)($post['lan_pjsip_codec']??$pjsip['codec']);
+    if (!in_array($codec,['G722/16000/1','PCMU/8000/1','PCMA/8000/1'],true)) {
+        if ($strict) throw new VBotLANFieldError('lan_pjsip_codec','Codec PJSIP không hợp lệ');
+    } else {
+        $pjsip['codec']=$codec;
+    }
+    foreach ([
+        'rtp_port'=>[1024,65526,true,'Cổng PJSIP không hợp lệ'],
+        'playback_latency_ms'=>[20,200,true,'Buffer loa cuộc gọi phải từ 20 đến 200 ms'],
+        'capture_delay_ms'=>[-100,500,true,'Độ trễ mic cuộc gọi phải từ -100 đến 500 ms'],
+        'render_clock_ppm'=>[-3000,3000,true,'Bù clock tham chiếu cuộc gọi phải từ -3000 đến 3000 ppm'],
+        'capture_gain'=>[0.05,64,false,'Gain mic cuộc gọi phải từ 0.05 đến 64'],
+        'output_gain'=>[0.01,1,false,'Hệ số âm lượng loa cuộc gọi phải từ 0.01 đến 1'],
+    ] as $field=>[$min,$max,$isInt,$errMsg]) {
+        $raw=$post['lan_pjsip_'.$field]??$pjsip[$field];
+        $val=filter_var($raw,FILTER_VALIDATE_FLOAT);
+        $valid=$val!==false && is_finite($val) && $val>=$min && $val<=$max && (!$isInt || floor($val)==$val);
+        if (!$valid) {
+            if ($strict) throw new VBotLANFieldError('lan_pjsip_'.$field,$errMsg);
+        } else {
+            $pjsip[$field]=$isInt?(int)$val:((float)$val==(int)$val?(int)$val:(float)$val);
+        }
+    }
+    return $pjsip;
+}
+
 function vbotLANCallsSettingsSubmitted(array $post): bool {
     if (!isset($post['lan_settings_present'])) return false;
     if (isset($post['lan_enabled_control_present'])) return true;
@@ -26,8 +106,25 @@ function vbotLANCallsSettings(array $post, array $old, array $buttons=[], $profi
         $settings['browser_call']=array_merge(is_array($old['browser_call']??null)?$old['browser_call']:[],
             ['active'=>isset($post['lan_browser_call_active'])]);
     }
-    // Disabled LAN calls do not block saving unrelated VBot configuration.
-    if (!$settings['active'] && !$validateDisabled) return $settings;
+    // Disabled LAN calls do not block saving unrelated VBot configuration,
+    // while still persisting valid edits/board resets submitted from Config.php.
+    if (!$settings['active'] && !$validateDisabled) {
+        if (isset($post['lan_pjsip_settings_present'])) {
+            $settings['pjsip']=vbotLANCallsPjsipSettings($post,$old['pjsip']??[],false);
+            $outDev=trim((string)($post['lan_output_device']??''));
+            if ($outDev!=='' && strlen($outDev)<=150 && !preg_match('/[\x00-\x1f\x7f]/',$outDev)) $settings['output_device']=$outDev;
+            $mode=trim((string)($post['lan_mode']??''));
+            if (in_array($mode,['full_duplex','push_to_talk'],true)) $settings['mode']=$mode;
+            foreach (['ring_timeout'=>[10,7200],'max_duration'=>[10,7200],'auto_accept_delay'=>[0,30]] as $k=>[$lo,$hi]) {
+                $r=(string)($post['lan_'.$k]??'');
+                if (ctype_digit($r) && (int)$r>=$lo && (int)$r<=$hi) $settings[$k]=(int)$r;
+            }
+            if (($settings['auto_accept_delay']??3)>=($settings['ring_timeout']??30)) {
+                $settings['auto_accept_delay']=$old['auto_accept_delay']??3;
+            }
+        }
+        return $settings;
+    }
     if (isset($post['lan_accept_controls_present'])) {
         $delay=(string)($post['lan_auto_accept_delay']??'3');
         if (!ctype_digit($delay) || (int)$delay>30) throw new InvalidArgumentException('Thời gian tự nhận phải từ 0 đến 30 giây');
@@ -46,14 +143,9 @@ function vbotLANCallsSettings(array $post, array $old, array $buttons=[], $profi
             if ($selected!=='encoder' && empty($buttons[$selected]['active'])) throw new InvalidArgumentException('Hãy bật nút nhận cuộc gọi trong cấu hình Button');
         }
     }
-    $pjsip=$settings['pjsip'];
-    foreach (['rtp_port'=>40000] as $field=>$default) {
-        $raw=(string)($post['lan_pjsip_'.$field]??($pjsip[$field]??$default));
-        if (!ctype_digit($raw) || (int)$raw<1024 || (int)$raw>($field==='rtp_port'?65526:65535)) throw new InvalidArgumentException('Cổng PJSIP không hợp lệ');
-        $pjsip[$field]=(int)$raw;
-    }
-    $pjsip['runtime']=$pjsip['runtime']??'/home/pi/VBot_AEC3/pjsip';
-    $settings['pjsip']=$pjsip;
+    $settings['pjsip']=isset($post['lan_pjsip_settings_present'])
+        ? vbotLANCallsPjsipSettings($post,$old['pjsip']??[],true)
+        : vbotLANCallsPjsipSettings($post,$settings['pjsip'],true);
     if (isset($post['lan_end_button_present'])) {
         $settings['end_button_active']=isset($post['lan_end_button_active']);
         $settings['end_button']=trim((string)($post['lan_end_button']??''));

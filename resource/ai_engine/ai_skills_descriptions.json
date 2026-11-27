@@ -103,13 +103,13 @@
         },
         "get_calendar": {
           "label": "Lịch âm dương & Sự kiện / Ngày lễ / Kỷ niệm",
-          "description": "Tra cứu ngày âm lịch hoặc ngày dương lịch.",
-          "description_with_events": "Tra cứu lịch âm, lịch dương và sự kiện/ngày lễ/Tết/sinh nhật/kỷ niệm đã lưu.",
+          "description": "Tra cứu thứ mấy, ngày dương lịch hoặc ngày âm lịch.",
+          "description_with_events": "Tra cứu thứ mấy, ngày/tháng dương lịch, âm lịch và sự kiện/ngày lễ/Tết/sinh nhật/kỷ niệm đã lưu.",
           "parameters": {
-            "kind": "lunar (lịch âm), solar (lịch dương)",
-            "kind_with_events": "lunar (âm lịch), solar (dương lịch), event (sự kiện/ngày lễ/sinh nhật)",
-            "query": "Câu hỏi gốc của người dùng về ngày âm/dương lịch",
-            "query_with_events": "Câu hỏi gốc về ngày hoặc sự kiện"
+            "kind": "solar (thứ mấy, lịch dương), lunar (lịch âm)",
+            "kind_with_events": "solar (hỏi thứ mấy, ngày/tháng dương lịch như 'ngày mai là thứ mấy', 'hôm nay ngày bao nhiêu'), lunar (âm lịch/mùng mấy/rằm), event (CHỈ dùng khi hỏi sự kiện, ngày lễ, Tết, sinh nhật, kỷ niệm)",
+            "query": "Câu hỏi gốc của người dùng về thứ, ngày âm/dương lịch",
+            "query_with_events": "Câu hỏi gốc về thứ, ngày tháng hoặc sự kiện"
           }
         },
         "run_system_voice_command": {
@@ -299,11 +299,11 @@
         },
         "get_calendar": {
           "label": "Calendar & Saved Events",
-          "description": "Look up lunar or solar calendar dates.",
-          "description_with_events": "Look up lunar/solar dates and saved events, holidays, or birthdays.",
+          "description": "Look up day of week, solar calendar dates, or lunar calendar dates.",
+          "description_with_events": "Look up day of week, solar/lunar dates, and saved events, holidays, or birthdays.",
           "parameters": {
-            "kind": "lunar or solar",
-            "kind_with_events": "lunar, solar, or event (holidays/birthdays/saved events)",
+            "kind": "solar (day of week / solar date) or lunar",
+            "kind_with_events": "solar (day of week / solar date, e.g. 'what day is tomorrow'), lunar (lunar date), or event (ONLY when asking about holidays/birthdays/saved events)",
             "query": "Original calendar date question",
             "query_with_events": "Original date or event question"
           }

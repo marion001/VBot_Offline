@@ -27,7 +27,7 @@ def validate_aec(value):
     level = result.setdefault('noise_suppression', 'off')
     if not isinstance(level, str) or level not in ('off', 'low', 'moderate', 'high', 'very_high'):
         raise ValueError('test_audio.aec.noise_suppression phải là off, low, moderate, high hoặc very_high')
-    for name, default, low, high in (('capture_delay_ms', 32, 0, 500),
+    for name, default, low, high in (('capture_delay_ms', 0, -100, 500),
                                    ('playback_latency_ms', 100, 20, 200),
                                    ('render_clock_ppm', 0, -3000, 3000)):
         item = result.setdefault(name, default)

@@ -9,6 +9,15 @@
     if (select.disabled) return;
     const bt = data.bluetooth || {}, media = data.media_player || {};
     const dlnaSender = String(media.dlna_sender_name || media.dlna_sender_address || '').trim();
+    const spotifySender = String(media.spotify_sender_name || '').trim();
+    const spotifyReady = Boolean(media.spotify_active && media.spotify_available && media.spotify_session_active);
+    const spotifyLabel = spotifyReady
+      ? ('Spotify Connect' + (spotifySender ? ' - ' + spotifySender : ''))
+      : (!media.spotify_active
+          ? 'Spotify Connect — đang tắt'
+          : (!media.spotify_available
+              ? 'Spotify Connect — chưa chạy dịch vụ'
+              : 'Spotify Connect — chưa có phiên kết nối'));
     if (document.activeElement === select) {
       let dlnaOption = Array.from(select.options).find(option => option.value === 'dlna');
       if (!dlnaOption) {
@@ -18,9 +27,17 @@
       }
       dlnaOption.textContent = 'DLNA Renderer' + (dlnaSender ? ' - ' + dlnaSender : '');
       dlnaOption.disabled = !media.dlna_active || !media.dlna_available || !media.dlna_session_active;
-      if (kind === 'dlna' && !select.value) {
-        select.dataset.currentSource = 'dlna';
-        select.value = 'dlna';
+      let spotifyOption = Array.from(select.options).find(option => option.value === 'spotify');
+      if (!spotifyOption) {
+        spotifyOption = document.createElement('option');
+        spotifyOption.value = 'spotify';
+        select.append(spotifyOption);
+      }
+      spotifyOption.textContent = spotifyLabel;
+      spotifyOption.disabled = !spotifyReady;
+      if ((kind === 'dlna' || kind === 'spotify') && !select.value) {
+        select.dataset.currentSource = kind;
+        select.value = kind;
       }
       return;
     }
@@ -31,7 +48,7 @@
     const devices = [...new Map(rows.map(d => ({...d, mac: String(d.mac || '').toUpperCase()})).filter(d => validMac(d.mac)).map(d => [d.mac, d])).values()];
     devices.sort((a, b) => String(a.name || a.mac).localeCompare(String(b.name || b.mac)));
     const enabled = bt.active && snapshot?.roles?.sink !== false;
-    const next = JSON.stringify([devices.map(d => [d.mac, d.name]), Boolean(enabled), Boolean(media.multiroom_active), Boolean(media.airplay_active), Boolean(media.dlna_active), Boolean(media.dlna_available), Boolean(media.dlna_session_active), media.dlna_name, dlnaSender]);
+    const next = JSON.stringify([devices.map(d => [d.mac, d.name]), Boolean(enabled), Boolean(media.multiroom_active), Boolean(media.airplay_active), Boolean(media.dlna_active), Boolean(media.dlna_available), Boolean(media.dlna_session_active), media.dlna_name, dlnaSender, Boolean(media.spotify_active), Boolean(media.spotify_available), Boolean(media.spotify_session_active), media.spotify_name, spotifySender, spotifyLabel]);
     if (next !== signature) {
       signature = next;
       select.replaceChildren();
@@ -51,10 +68,11 @@
       add('airplay', 'AirPlay', !media.airplay_active);
       add('multiroom', 'Multiroom Audio', !media.multiroom_active);
       add('dlna', 'DLNA Renderer' + (dlnaSender ? ' - ' + dlnaSender : ''), !media.dlna_active || !media.dlna_available || !media.dlna_session_active);
+      add('spotify', spotifyLabel, !spotifyReady);
     }
     const preferred = media.selected_source;
     if (preferred === 'bluetooth' && media.playback_state !== 'playing') kind = preferred;
-    let current = ['local_media', 'bluetooth', 'airplay', 'multiroom', 'dlna'].includes(kind) ? kind : '';
+    let current = ['local_media', 'bluetooth', 'airplay', 'multiroom', 'dlna', 'spotify'].includes(kind) ? kind : '';
     if (current === 'bluetooth') {
       const pathMac = String(bt.device_path || '').split('dev_')[1]?.split('/')[0].replace(/_/g, ':').toUpperCase();
       const mac = String(bt.selected_input_mac || snapshot?.input_selected || pathMac || '').toUpperCase();

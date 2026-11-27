@@ -11,7 +11,8 @@ session_write_close();
 try {
     $action=$_POST['action']??'';
     if (!in_array($action,['list','save','wake','backups','create','read','restore'],true)) throw new InvalidArgumentException('Thao tác không hợp lệ');
-    $command=['python3',rtrim($VBot_Offline,'/\\').'/Wake_On_LAN.py',$action];
+    $wolRoot=rtrim($VBot_Offline,'/\\');
+    $command=['python3','-c','import sys; sys.path.insert(0, sys.argv.pop(1)); import Wake_On_LAN as w; raise SystemExit(w.main())',$wolRoot,$action];
     $input='';
     if ($action==='save') {
         $input=$_POST['data']??'';

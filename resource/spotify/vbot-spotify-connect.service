@@ -1,0 +1,19 @@
+[Unit]
+Description=VBot Spotify Connect Audio Renderer (go-librespot)
+# @SPOTIFY_RUN_SHA256@
+After=network-online.target sound.target vbot-multiroom-bridge.service
+Wants=network-online.target sound.target vbot-multiroom-bridge.service
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=@VBOT_ROOT@
+ExecStart=/bin/sh @VBOT_ROOT@/resource/spotify/run.sh
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=8
+KillMode=control-group
+
+[Install]
+WantedBy=multi-user.target

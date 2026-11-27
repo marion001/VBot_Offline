@@ -349,6 +349,7 @@ include 'html_head.php';
                       <option value="airplay">AirPlay</option>
                       <option value="multiroom">Multiroom Audio</option>
                       <option value="dlna" disabled>DLNA Renderer</option>
+                      <option value="spotify" disabled>Spotify Connect</option>
                     </select>
                   </div>
                   <div class="input-group my-2">
@@ -359,7 +360,7 @@ include 'html_head.php';
                     <button type="button" class="btn btn-outline-primary border-success" id="media_output_refresh" title="Làm mới danh sách loa Bluetooth"><i class="bi bi-arrow-clockwise"></i></button>
                   </div>
                   <small class="text-muted d-block mb-2">Chọn loa VBot hoặc loa Bluetooth đã kết nối. <i class="bi bi-question-circle" role="button" onclick="show_message('Đầu ra áp dụng cho âm thanh qua đường phát chung. Ghép đôi và kết nối loa trong trang Bluetooth_Source.php. A2DP Source đang thử nghiệm, có thể còn mất đoạn. Cuộc gọi và âm thanh phát trực tiếp ngoài đường chung vẫn dùng đầu ra riêng.')"></i></small>
-                  <small class="text-primary d-block mb-2">VBot giữ phiên kết nối như AirPlay, Bluetooth, Multiroom, và nhường đầu ra khi chọn Chuyển nguồn phát tương ứng</small>
+                  <small class="text-primary d-block mb-2">VBot giữ phiên kết nối như AirPlay, Bluetooth, DLNA, Spotify Connect, Multiroom, và nhường đầu ra khi chọn Chuyển nguồn phát tương ứng</small>
 					</div>
                   <div class="d-flex flex-column align-items-center gap-2">
                     <div class="d-flex flex-row align-items-center justify-content-center gap-2" aria-label="Các nút điều khiển media">
@@ -1187,8 +1188,8 @@ include 'html_head.php';
   <?php
   include 'html_js.php';
   ?>
-  <script src="assets/js/media-output.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
-  <script src="assets/js/media-input.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
+  <script src="assets/js/media-output.js?v=<?php echo $Cache_UI_Ver . '.' . (int)@filemtime(__DIR__ . '/assets/js/media-output.js'); ?>"></script>
+  <script src="assets/js/media-input.js?v=<?php echo $Cache_UI_Ver . '.' . (int)@filemtime(__DIR__ . '/assets/js/media-input.js'); ?>"></script>
   <script>
     const multiroomApiUrl = <?php echo json_encode(rtrim($URL_API_VBOT, '/') . '/multiroom'); ?>;
     let multiroomSnapshot = {};
@@ -2482,7 +2483,7 @@ let mediaSourceChanging = false;
 async function selectMediaSource(source) {
     const select = document.getElementById('media_source_select');
     const match = /^bluetooth:((?:[0-9A-F]{2}:){5}[0-9A-F]{2})$/.exec(source);
-        if (mediaSourceChanging || (!match && !['local_media', 'bluetooth', 'airplay', 'multiroom', 'dlna'].includes(source))) return;
+        if (mediaSourceChanging || (!match && !['local_media', 'bluetooth', 'airplay', 'multiroom', 'dlna', 'spotify'].includes(source))) return;
     mediaSourceChanging = true;
     select.disabled = true;
     try {
@@ -2748,6 +2749,7 @@ function update_index_data(data){
 			const media = data.media_player || {};
 			const audioOutput = data.audio_output || {};
 			const mediaSourceKind = media.source_kind || (
+				media.spotify_playing === true ? 'spotify' :
 				media.dlna_playing === true ? 'dlna' :
 				media.airplay_playing === true ? 'airplay' :
 				data.bluetooth?.playing === true ? 'bluetooth' :
@@ -2755,7 +2757,7 @@ function update_index_data(data){
 			);
 			const mediaPlaybackState = media.playback_state || (
 				media.pause_media_flag === true ? 'paused' :
-				(media.audio_playing === true || media.dlna_playing === true || media.airplay_playing === true || data.bluetooth?.playing === true)
+				(media.audio_playing === true || media.spotify_playing === true || media.dlna_playing === true || media.airplay_playing === true || data.bluetooth?.playing === true)
 					? 'playing' : 'idle'
 			);
 			const mediaIsPlaying = mediaPlaybackState === 'playing';
@@ -2821,7 +2823,9 @@ function update_index_data(data){
 										(mediaIsPlaying || mediaIsPaused)
 											&& media.media_name &&
 											String(media.media_name).trim() !== 'N/A'
-											? media.media_name
+											? (mediaSourceKind === 'spotify' && media.media_artist
+												? (media.media_name + ' - ' + media.media_artist)
+												: media.media_name)
 											: 'N/A'
 									));
 							})()
@@ -2841,6 +2845,8 @@ function update_index_data(data){
 								? 'AirPlay'
 							: (mediaSourceKind === 'dlna'
 								? ('DLNA Renderer' + ((media.dlna_sender_name || media.dlna_sender_address) ? ' - ' + playlistEscapeHtml(media.dlna_sender_name || media.dlna_sender_address) : ''))
+							: (mediaSourceKind === 'spotify'
+								? ('Spotify Connect' + (media.spotify_sender_name ? ' - ' + playlistEscapeHtml(media.spotify_sender_name) : ''))
 								: (
 									(mediaIsPlaying || mediaIsPaused)
 										? (
@@ -2851,6 +2857,7 @@ function update_index_data(data){
 										  )
 										: 'N/A'
 								)
+							)
 							)
 						)
 				) +
@@ -2877,6 +2884,8 @@ function update_index_data(data){
 							? 'assets/img/AirPlay_Cover.jpg?t=' + Date.now()
 							: (mediaSourceKind === 'dlna' && media.dlna_song_cover
 								? media.dlna_song_cover
+							: (mediaSourceKind === 'spotify'
+								? (media.spotify_song_cover || media.media_cover || 'assets/img/spotify_icon.svg')
 							: (
 								(mediaIsPlaying || mediaIsPaused)
 									? (
@@ -2888,6 +2897,7 @@ function update_index_data(data){
 											: (data.media_player.media_cover || 'assets/img/Error_Null_Media_Player.png')
 									)
 									: 'assets/img/Error_Null_Media_Player.png'
+							)
 							)
 							)
 					)

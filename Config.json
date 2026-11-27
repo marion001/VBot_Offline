@@ -23,10 +23,10 @@
             "sip_port": 5060,
             "rtp_port": 40000,
             "codec": "G722/16000/1",
-            "capture_gain": 3,
+            "capture_gain": 1,
             "output_gain": 0.5,
-            "capture_delay_ms": 32,
-            "render_clock_ppm": 980,
+            "capture_delay_ms": 0,
+            "render_clock_ppm": 0,
             "playback_latency_ms": 100
         },
         "use_mdns_id": true,
@@ -668,6 +668,13 @@
         },
         "dlna_renderer": {
             "active": false
+        },
+        "spotify_connect": {
+            "active": false,
+            "device_name": "",
+            "bitrate": 320,
+            "initial_volume": 80,
+            "api_port": 3678
         }
     },
     "developer_customization": {
@@ -1144,13 +1151,13 @@
                 "limiter": true
             },
             "aec3": {
-                "active": true,
+                "active": false,
                 "library": "/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so",
                 "output": "linear",
                 "playback_device": "default",
                 "playback_latency_ms": 100,
-                "capture_delay_ms": 32,
-                "render_clock_ppm": 980,
+                "capture_delay_ms": 0,
+                "render_clock_ppm": 0,
                 "capture_gain": 1,
                 "wake_gain": 1,
                 "external_sources": false

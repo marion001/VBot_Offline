@@ -19,6 +19,22 @@ trong các lệnh bên dưới.
 Đây là gói thư viện WebRTC/PJSIP; vẫn cần các phụ thuộc và cấu hình phần cứng
 âm thanh của VBot như PvRecorder, VLC, python-vlc và ALSA.
 
+## Cách nhanh nhất (Khuyên dùng sau khi cập nhật VBot)
+
+Sau khi cập nhật mã nguồn VBot trên cả **OS Image I2S** (`...-i2s`) hoặc **OS Image WM8960**, chỉ cần chạy **một lệnh duy nhất** qua SSH để hệ thống tự động nhận diện mạch qua `/os_image_created.txt`, cài đặt/đối chiếu gói ZIP thư viện `.so`, đồng bộ `/etc/asound.conf`, dịch vụ âm thanh, đường âm thanh chung `vbot_aec_media`, căn chỉnh gain chống clipping ADC, cập nhật `Config.json` và kiểm tra đối chiếu toàn diện 23+ mục:
+
+```bash
+sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh
+```
+
+Nếu chỉ muốn kiểm tra trạng thái hiện tại xem có thừa, thiếu hay sai mục nào không (không sửa file):
+
+```bash
+bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh --check-only
+```
+
+Nếu muốn thực hiện thủ công từng bước riêng lẻ thì làm theo các mục từ 1 đến 6 bên dưới.
+
 ## 1. Kiểm tra ZIP và khả năng tương thích
 
 ```bash
@@ -115,13 +131,13 @@ sudo python3 resource/vbot_aec3/install_media_routes.py \
 Cài mã VBot cùng các phụ thuộc Python/phần cứng như quy trình VBot hiện tại.
 Trên WebUI thiết bị mới:
 
-1. Bật WebRTC MIC nếu cần, đường dẫn wrapper:
-   `/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so`; AEC output `normal`.
-2. Bật Call LAN, PJSIP runtime `/home/pi/VBot_AEC3/pjsip`.
-3. Giữ ID mDNS riêng của từng loa; nhập cùng khóa chung và khai báo danh sách
+1. Tại mục **Xử lý âm thanh MIC — WebRTC Audio Processing**: bật xử lý mic WebRTC và AEC3, đường dẫn wrapper `/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so`, nhấn nút **Đặt lại mặc định các thông số** để tự điền thông số chuẩn theo mạch (**I2S**: `output = linear`, `NS = low`, `AGC = 6/9`, `capture_delay_ms = -16`, `render_clock_ppm = 0`; **WM8960**: `output = linear`, `NS = low`, `AGC = 6/9`, `capture_delay_ms = 8`, `render_clock_ppm = 0`). Bật thêm **Đánh thức khi Media Player hoạt động** nếu muốn gọi wake word khi phát nhạc.
+2. Lưu ý gain phần cứng trong `alsamixer` để tránh vỡ tiếng clipping trước AEC3: mạch **I2S** đặt `VBot_DAC_Microphone` khoảng `150/255` (~59%); mạch **WM8960** đặt `Input Boost = 2` (+20 dB), `Capture = 35` (+9 dB), `ADC High Pass Filter = on`, `ALC Function = Off` (script tự động ở trên đã căn chỉnh sẵn).
+3. Tại mục **Gọi Điện Trong Mạng Nội Bộ, Call Local Lan**: bật Call LAN nếu dùng, PJSIP runtime `/home/pi/VBot_AEC3/pjsip`, nhấn nút **Đặt lại mặc định các thông số** để tự động điền thông số âm thanh cuộc gọi theo mạch (**I2S**: `capture_delay_ms = 0`, `render_clock_ppm = 0`, `capture_gain = 1`, `output_gain = 0.5`; **WM8960**: `capture_delay_ms = 24`, `render_clock_ppm = 0`, `capture_gain = 1`, `output_gain = 0.5`).
+4. Giữ ID mDNS riêng của từng loa; nhập cùng khóa chung và khai báo danh sách
    loa hai chiều. Không sao chép nguyên cấu hình/ID máy nguồn sang máy đích.
-4. TCP điều khiển 5010/SIP UDP 5060 cố định, RTP bắt đầu 40000 theo cấu hình.
-5. Chọn mic, thiết bị phát và các nút phù hợp; lưu rồi khởi động lại VBot.
+5. TCP điều khiển 5010/SIP UDP 5060 cố định, RTP bắt đầu 40000 theo cấu hình.
+6. Chọn mic, thiết bị phát và các nút phù hợp; lưu rồi khởi động lại VBot.
 
 ```bash
 cd /home/pi/VBot_Offline

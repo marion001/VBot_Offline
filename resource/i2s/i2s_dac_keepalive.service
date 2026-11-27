@@ -3,9 +3,11 @@ Description=VBot Assistant – Keep I2S DAC awake to prevent pop noise
 After=sound.target
 
 [Service]
-ExecStart=/usr/bin/aplay -r 44100 -f S16_LE -c 2 /dev/zero
+Type=simple
+ExecStart=/usr/bin/aplay -q -D dmixer -t raw -r 48000 -f S32_LE -c 2 --period-size=2048 --buffer-size=8192 /dev/zero
 Restart=always
-Nice=-19
+RestartSec=1
+Nice=0
 
 [Install]
 WantedBy=multi-user.target

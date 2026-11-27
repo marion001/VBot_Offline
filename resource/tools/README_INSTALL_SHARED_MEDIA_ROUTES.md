@@ -43,7 +43,7 @@ cd /home/pi/VBot_Offline
 sudo python3 resource/tools/fix_audio_alsa.py
 ```
 
-Công cụ đọc `/os_image_created.txt`: dòng image VBot có chữ `i2s` là image I2S; không có chữ này là image WM8960. Nó đối chiếu card thực tế trước khi sửa. WM8960 dùng tên cố định `wm8960soundcard`, thu phần cứng 2 kênh và mixer mặc định đúng card, tránh chọn nhầm Loopback khi thứ tự card thay đổi.
+Công cụ đọc `/os_image_created.txt`: dòng image VBot có chữ `i2s` là image I2S (`sndrpigooglevoi`, `dmixer` `48000 Hz S32_LE`); không có chữ này là image WM8960 (`wm8960soundcard`, `dmixed` & `array` `48000 Hz`, `channels 2`, `period_size 1024 / buffer_size 8192`). Nó đối chiếu card thực tế trước khi sửa, tránh chọn nhầm Loopback khi thứ tự card thay đổi và ngăn tràn bộ đệm tham chiếu AEC3. Ngoài ra có thể dùng công cụ tổng hợp `sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh` để tự sửa đồng bộ cả thư viện `.so`, ALSA, dịch vụ âm thanh và hậu kiểm toàn bộ cấu hình.
 
 Công cụ giữ cấu hình riêng nhận diện được, mức âm lượng mixer và khối đường phát chung `vbot_aec_media`. Với service WM8960 cũ, nó thêm cấu hình bảo vệ để service không xóa ALSA sau reboot. Các dịch vụ âm thanh đang chạy được nạp lại nên nhạc sẽ ngắt tạm thời; công cụ không khởi chạy VBot.
 

@@ -37,7 +37,16 @@ def render(kind,original,template,reset=False):
     if kind=='wm8960':
         def repair(match):
             value=match.group().replace('hw:0,0','hw:CARD=wm8960soundcard,DEV=0')
-            if match.group(1)=='array':value=re.sub(r'\bchannels\s+1\b','channels 2',value)
+            value=re.sub(r'\bchannels\s+1\b','channels 2',value)
+            if 'period_size' not in value and 'hw:CARD=wm8960soundcard,DEV=0' in value:
+                if match.group(1)=='dmixed':
+                    return ('pcm.dmixed {\n    type dmix\n    ipc_perm 0666\n    ipc_key 555555\n    slave {\n'
+                            '        pcm "hw:CARD=wm8960soundcard,DEV=0"\n        format S16_LE\n        rate 48000\n'
+                            '        channels 2\n        period_time 0\n        period_size 1024\n        buffer_size 8192\n    }\n}')
+                if match.group(1)=='array':
+                    return ('pcm.array {\n    type dsnoop\n    ipc_perm 0666\n    ipc_key 666666\n    slave {\n'
+                            '        pcm "hw:CARD=wm8960soundcard,DEV=0"\n        format S16_LE\n        rate 48000\n'
+                            '        channels 2\n        period_time 0\n        period_size 1024\n        buffer_size 8192\n    }\n}')
             return value
         base=re.sub(r'(?ms)^pcm\.(dmixed|array)\s*\{.*?^\}',repair,base)
         if 'wm8960soundcard' not in base or 'hw:0,0' in base:
@@ -48,6 +57,15 @@ def render(kind,original,template,reset=False):
             base=re.sub(r'(?ms)(^ctl\.!default\s*\{.*?\bcard\s+)(?:"0"|0)(?=\s)',r'\1"wm8960soundcard"',base)
     elif 'wm8960soundcard' in base:
         raise ValueError('Image I2S nhưng ALSA đang chọn WM8960; cần kiểm tra phần cứng')
+    else:
+        def repair_i2s(match):
+            blk=match.group()
+            if 'vbot_dac_i2s_speaker' in blk and 'rate 44100' in blk:
+                blk=blk.replace('rate 44100','rate 48000')
+                if 'format S32_LE' not in blk:
+                    blk=blk.replace('pcm "vbot_dac_i2s_speaker"','pcm "vbot_dac_i2s_speaker"\n        format S32_LE',1)
+            return blk
+        base=re.sub(r'(?ms)^pcm\.dmixer\s*\{.*?^\}',repair_i2s,base)
     return base.rstrip()+'\n'+(('\n'+bus+'\n') if bus else '')
 
 

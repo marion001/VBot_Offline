@@ -50,6 +50,7 @@ CORE_UPDATE_JSON = {
     "resource/SYS_CMD.json",
     "resource/VietNam_Localtion.json",
     "resource/API_VBot_OFFLINE.postman_collection.json",
+    "resource/ai_engine/ai_skills_descriptions.json",
 }
 
 for _stream in (sys.stdout, sys.stderr):

@@ -231,8 +231,8 @@ ghi Config.json. Trong WebUI, đặt:
 
 - `smart_config.audio_processing.aec3.library`:
   `/home/pi/VBot_AEC3/webrtc-2.1/libvbot_aec3_music_2_1.so`.
-- Bật xử lý WebRTC MIC nếu muốn dùng AEC/NS/AGC; chọn AEC output `normal`.
-- Bật Call LAN và đặt PJSIP runtime `/home/pi/VBot_AEC3/pjsip`.
+- Bật xử lý WebRTC MIC và AEC3, sau đó nhấn **Đặt lại mặc định các thông số** để tự điền chuẩn theo từng mạch (**I2S**: `output = linear`, `NS = low`, `capture_delay_ms = -16`, `render_clock_ppm = 0`; **WM8960**: `output = linear`, `NS = low`, `capture_delay_ms = 8`, `render_clock_ppm = 0`). Bật **Đánh thức khi Media Player hoạt động** nếu dùng wake word khi phát nhạc.
+- Tại mục **Gọi Điện Trong Mạng Nội Bộ, Call Local Lan**: bật Call LAN, PJSIP runtime `/home/pi/VBot_AEC3/pjsip`, và nhấn **Đặt lại mặc định các thông số** để tự điền chuẩn theo mạch (**I2S**: `capture_delay_ms = 0`, `render_clock_ppm = 0`, `capture_gain = 1`; **WM8960**: `capture_delay_ms = 24`, `render_clock_ppm = 0`, `capture_gain = 1`).
 - Khai báo danh sách loa hai chiều tại LAN_Calls.php, dùng cùng khóa chung;
   TCP 5010 và SIP UDP 5060 cố định, RTP bắt đầu UDP 40000 theo cấu hình.
 
