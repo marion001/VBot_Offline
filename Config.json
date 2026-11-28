@@ -621,19 +621,19 @@
         "radio_data": [
             {
                 "name": "vov2",
-                "link": "https://stream.vovmedia.vn/vov-2"
+                "link": "https://str.vov.gov.vn/vovlive/vov2.sdp_aac/playlist.m3u8"
             },
             {
                 "name": "vov giao thông hà nội",
-                "link": "https://stream.vovmedia.vn/vovgt-hn"
+                "link": "https://str.vov.gov.vn/vovlive/vovGTHN.sdp_aac/playlist.m3u8"
             },
             {
                 "name": "vov1",
-                "link": "https://stream.vovmedia.vn/vov-1"
+                "link": "https://str.vov.gov.vn/vovlive/vov1vov5Vietnamese.sdp_aac/playlist.m3u8"
             },
             {
                 "name": "vov3",
-                "link": "https://stream.vovmedia.vn/vov-3"
+                "link": "https://str.vov.gov.vn/vovlive/vov3.sdp_aac/playlist.m3u8"
             }
         ],
         "music_local": {
