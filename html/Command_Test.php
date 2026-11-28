@@ -223,7 +223,9 @@ $isAiModeActive = ($activeProcessingMode === 'ai');
       if (startNew) {tabId = createTabId(); document.getElementById('command-text').value = '';}
       const modeLabel = (report.processing_mode === 'ai')
         ? `AI (${report.ai_pipeline?.provider || 'ai'})`
-        : 'VBot nội bộ';
+        : (report.ai_pipeline?.virtual_assistant_ai
+            ? `VBot nội bộ + Trợ lý ảo AI (${report.ai_pipeline.virtual_assistant_ai})`
+            : 'VBot nội bộ');
       document.getElementById('analysis-summary').textContent = `Chế độ: ${modeLabel} · Ngôn ngữ: ${report.locale} · ${report.executed ? 'Đã gửi vào luồng xử lý thật' : 'Chưa thực thi'} · Phân tích: ${report.elapsed_ms ?? '—'} ms`;
       const warnings = document.getElementById('analysis-warnings'); warnings.replaceChildren();
       for (const warning of report.warnings || []) {const p = document.createElement('p'); p.className='text-warning'; p.textContent=warning; warnings.append(p);}
@@ -249,12 +251,17 @@ $isAiModeActive = ($activeProcessingMode === 'ai');
           ai_text_preview: 'AI trả lời văn bản trực tiếp (Xem trước)',
           ai_llm_pending: 'Sẽ gửi sang AI phân tích (chưa gọi API ở chế độ thử nhanh)',
           ai_llm_preview: 'AI không phản hồi',
+          vbot_with_ai_assistant_fallback: 'Trợ lý ảo AI sẵn sàng dự phòng khi VBot từ khóa không khớp',
+          vbot_matched_skip_ai: 'VBot từ khóa đã khớp trực tiếp (0 token — không cần gọi AI)',
           ai_error: 'Lỗi AI Pipeline'
         };
         const aiCard = document.createElement('div'); aiCard.className = 'border border-primary rounded p-3 mb-3';
-        const aiTitle = document.createElement('h6'); aiTitle.className = 'text-primary fw-bold mb-2'; aiTitle.textContent = 'Phân tích Pipeline AI';
+        const aiTitle = document.createElement('h6'); aiTitle.className = 'text-primary fw-bold mb-2';
+        aiTitle.textContent = (report.processing_mode === 'ai')
+          ? 'Phân tích Pipeline AI'
+          : 'Phân tích Trợ Lý Ảo AI Ưu Tiên (Dự phòng sau từ khóa VBot)';
         aiCard.append(aiTitle);
-        addField(aiCard, 'Nhà cung cấp AI', ai.provider);
+        addField(aiCard, 'Nhà cung cấp AI', ai.virtual_assistant_ai ? `${ai.provider} (Ưu tiên: ${ai.virtual_assistant_ai})` : ai.provider);
         addField(aiCard, 'Nhánh xử lý dự kiến', aiStageLabels[ai.stage] || ai.stage);
         addField(aiCard, 'Lý do / Chi tiết', ai.reason);
         if (ai.matched_name) addField(aiCard, 'Lệnh Custom HASS khớp', `${ai.matched_name} (điểm: ${ai.score ?? '—'} / ${ai.threshold ?? '—'})`);
@@ -272,10 +279,10 @@ $isAiModeActive = ($activeProcessingMode === 'ai');
         if (ai.pending_text) addField(aiCard, 'AI hỏi lại thêm', ai.pending_text);
         if (ai.reply_text) addField(aiCard, 'Câu trả lời AI dự kiến', ai.reply_text);
         if (ai.emotion) addField(aiCard, 'Cảm xúc dự kiến', ai.emotion);
-        addField(aiCard, 'Local Intent Cache / Fallback VBot', `Cache: ${ai.intent_cache_active ? 'Bật' : 'Tắt'} · Fallback VBot khi lỗi AI: ${ai.fallback_to_vbot ? 'Bật' : 'Tắt'}`);
+        addField(aiCard, 'Local Intent Cache / Dự phòng', `Cache: ${ai.intent_cache_active ? 'Bật' : 'Tắt'} · ${report.processing_mode === 'ai' ? ('Fallback VBot khi lỗi AI: ' + (ai.fallback_to_vbot ? 'Bật' : 'Tắt')) : 'Tự động lùi theo Top 1 -> Top 5 khi lỗi AI'}`);
         container.append(aiCard);
       }
-      const vbotContainer = (report.ai_pipeline && report.ai_pipeline.active)
+      const vbotContainer = (report.processing_mode === 'ai')
         ? (() => {
             const det = document.createElement('details'); det.className = 'mt-2 mb-3';
             const sum = document.createElement('summary'); sum.className = 'fw-semibold text-secondary';

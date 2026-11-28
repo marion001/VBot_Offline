@@ -21,7 +21,7 @@ trong các lệnh bên dưới.
 
 ## Cách nhanh nhất (Khuyên dùng sau khi cập nhật VBot)
 
-Sau khi cập nhật mã nguồn VBot trên cả **OS Image I2S** (`...-i2s`) hoặc **OS Image WM8960**, chỉ cần chạy **một lệnh duy nhất** qua SSH để hệ thống tự động nhận diện mạch qua `/os_image_created.txt`, cài đặt/đối chiếu gói ZIP thư viện `.so`, đồng bộ `/etc/asound.conf`, dịch vụ âm thanh, đường âm thanh chung `vbot_aec_media`, căn chỉnh gain chống clipping ADC, cập nhật `Config.json` và kiểm tra đối chiếu toàn diện 23+ mục:
+Sau khi cập nhật mã nguồn VBot trên cả **OS Image I2S** (`...-i2s`) hoặc **OS Image WM8960**, chỉ cần chạy **một lệnh duy nhất** qua SSH để hệ thống tự động nhận diện mạch qua `/os_image_created.txt`, cài đặt/đối chiếu gói ZIP thư viện `.so`, đồng bộ `/etc/asound.conf`, dịch vụ âm thanh, đường âm thanh chung `vbot_aec_media`, căn chỉnh gain chống clipping ADC, cập nhật `Config.json` và kiểm tra đối chiếu toàn diện 24 mục:
 
 ```bash
 sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh

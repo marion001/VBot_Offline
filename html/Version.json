@@ -1,8 +1,8 @@
 {
-    "version": "1.4.8",
+    "version": "1.4.9",
     "projectName": "WebUI VBot Offline",
     "description": "Ra mắt Hệ thống AI xử lý dữ liệu, trang quản lý Kho Tri Thức AI Cục Bộ (AI_Knowledge.php) với Knowledge Catalog, lập chỉ mục FTS5 & Vector từng tệp, xem trực tiếp bảng kb_chunks/kb_vectors, Search Playground kiểm thử truy vấn, nạp/cập nhật URL Website, AI tự phân loại & tóm tắt, sao lưu/khôi phục .tar.gz tự động xoay vòng 5 bản; nâng cấp Face.php cuộn phụ đề TTS dài mượt mà và nút điều khiển nguồn.",
-    "releaseDate": "27/11/2026",
+    "releaseDate": "28/11/2026",
     "changes": [
         {
             "type": "feature",

@@ -114,14 +114,24 @@ $knowledgeDirDisplay = rtrim((string)$VBot_Offline, '/\\') . '/resource/ai_engin
     </div>
 
     <section class="section dashboard mt-3">
-      <?php if (!$aiKnowledgeActive || $pipelineMode !== 'ai'): ?>
+      <?php
+      $priorityVaList = (isset($Config['virtual_assistant']['prioritize_virtual_assistants']) && is_array($Config['virtual_assistant']['prioritize_virtual_assistants']))
+        ? $Config['virtual_assistant']['prioritize_virtual_assistants'] : [];
+      $hasAiInPriorityVa = (
+        (in_array('groq_ai', $priorityVaList, true) && !empty($Config['virtual_assistant']['groq_ai']['active']))
+        || (in_array('google_gemini', $priorityVaList, true) && !empty($Config['virtual_assistant']['google_gemini']['active']))
+        || (in_array('openai_compat', $priorityVaList, true) && !empty($Config['virtual_assistant']['openai_compat']['active']))
+        || in_array('dev_ai_engine', $priorityVaList, true)
+      );
+      if (!$aiKnowledgeActive || ($pipelineMode !== 'ai' && !$hasAiInPriorityVa)):
+      ?>
         <div class="alert alert-warning d-flex flex-wrap justify-content-between align-items-center gap-2" role="alert">
           <div>
             <i class="bi bi-exclamation-triangle-fill me-1"></i>
-            <?php if ($pipelineMode !== 'ai'): ?>
-              Chế độ xử lý dữ liệu hiện tại đang là <b>VBot theo từ khóa</b>. Kho Tri Thức hoạt động khi bạn chọn <b>Áp dụng AI để xử lý dữ liệu</b> và bật <b>Kho Tri Thức AI</b> trong tab <code>Cấu hình Config</code>.
-            <?php else: ?>
+            <?php if (!$aiKnowledgeActive): ?>
               Tính năng <b>Kho Tri Thức AI (RAG Cục Bộ)</b> hiện đang <b>TẮT</b>. Hãy bật tại tab <code>Cấu hình Config</code> rồi khởi động lại VBot để AI sử dụng các tài liệu dưới đây.
+            <?php else: ?>
+              Chế độ xử lý hiện tại đang là <b>VBot theo từ khóa</b> nhưng chưa bật <b>Groq AI</b> hoặc <b>Google Gemini</b> trong danh sách <b>Ưu tiên trợ lý ảo</b>. Hãy bật ít nhất 1 trợ lý AI (hoặc chuyển sang chế độ <b>Áp dụng AI</b>) trong tab <code>Cấu hình Config</code>.
             <?php endif; ?>
           </div>
           <a href="Config.php" class="btn btn-sm btn-warning fw-semibold" onclick="loading('show')">Đi tới Cấu hình Config</a>

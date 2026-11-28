@@ -142,13 +142,53 @@ function confirmRestore(backup_file_name) {
 //Coppy dữ liệu trong thẻ input
 function coppy_value(id_input) {
     var input = document.getElementById(id_input);
-    input.select();
-    try {
-        document.execCommand("copy");
-        showMessagePHP("Đã Sao Chép!", 3);
-    } catch (err) {
-        show_message("Lỗi khi sao chép nội dung. Vui lòng thử lại.");
+    if (!input) {
+        show_message("Không tìm thấy trường dữ liệu để sao chép.");
+        return;
     }
+    var val = typeof input.value === "string" ? input.value : (input.textContent || "");
+    function fallbackInputCopy() {
+        var ok = false;
+        try {
+            if (!input.disabled && typeof input.select === "function") {
+                input.focus();
+                input.select();
+                if (typeof input.setSelectionRange === "function") {
+                    input.setSelectionRange(0, val.length);
+                }
+                ok = document.execCommand("copy");
+            }
+            if (!ok) {
+                var container = (input.closest && input.closest(".modal")) || document.body;
+                var ta = document.createElement("textarea");
+                ta.value = val;
+                ta.setAttribute("readonly", "");
+                ta.style.position = "fixed";
+                ta.style.opacity = "0";
+                ta.style.pointerEvents = "none";
+                container.appendChild(ta);
+                ta.focus();
+                ta.select();
+                ta.setSelectionRange(0, val.length);
+                ok = document.execCommand("copy");
+                container.removeChild(ta);
+            }
+        } catch (err) {
+            ok = false;
+        }
+        if (ok) {
+            showMessagePHP("Đã Sao Chép!", 3);
+        } else {
+            show_message("Lỗi khi sao chép nội dung. Vui lòng thử lại.");
+        }
+    }
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(val).then(function () {
+            showMessagePHP("Đã Sao Chép!", 3);
+        }).catch(fallbackInputCopy);
+        return;
+    }
+    fallbackInputCopy();
 }
 
 //Mở đường dẫn trong tab mới

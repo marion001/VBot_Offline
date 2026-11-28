@@ -172,6 +172,28 @@ include 'html_head.php';
 <hr/>Hướng Dẫn Cấu Hình Ban Đầu: <a href="https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M/edit" target="_blank">https://docs.google.com/document/d/1Dc0OvvrF0cLz5gsKXaaSCFvK7AUqY75M</a>
               </div>
 
+              <div class="card accordion mb-3 border-success" id="fix-verify-audio-webrtc">
+                <div class="card-body">
+                  <h5 class="card-title accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse_fix_verify_audio_webrtc" aria-expanded="false" aria-controls="collapse_fix_verify_audio_webrtc">
+                    Tự Động Cài Đặt, Sửa Lỗi &amp; Kiểm Tra Âm Thanh WebRTC 2.1, AEC3, PJSIP &amp; ALSA (I2S / WM8960)
+                  </h5>
+                  <div id="collapse_fix_verify_audio_webrtc" class="accordion-collapse collapse">
+                    <div class="alert alert-success mt-2">
+                      <b>Khuyên dùng sau khi Flash OS Image mới hoặc cập nhật chương trình VBot:</b> Công cụ tự động nhận diện loại mạch qua <code>/os_image_created.txt</code> (<b>VBot AIO I2S</b> hoặc <b>VBot AIO WM8960</b>), cài đặt gói thư viện native <code>/home/pi/VBot_AEC3</code>, đồng bộ <code>/etc/asound.conf</code>, đường âm thanh chung <code>vbot_aec_media</code> (AirPlay / Bluetooth / Multiroom), cân chỉnh mức Mixer chống vỡ tiếng clipping ADC, nâng cấp cấu hình WebRTC + AEC3 + PJSIP trong <code>Config.json</code> và kiểm tra đối chiếu toàn diện <b>24 hạng mục</b>.
+                    </div>
+                    <p class="mb-1"><b>1. Chạy tự động sửa lỗi, đồng bộ và kiểm tra toàn diện (SSH tài khoản <code>pi</code>):</b></p>
+                    <div class="input-group mb-3">
+                      <input type="text" class="form-control font-monospace bg-dark text-light code-block" id="faq_cmd_fix_audio_webrtc" value="sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh" readonly onclick="this.select()">
+                      <button class="btn btn-primary" type="button" onclick="(function(btn){var el=document.getElementById('faq_cmd_fix_audio_webrtc');if(!el)return;el.select();el.setSelectionRange(0,99999);var done=function(){var old=btn.innerHTML;btn.innerHTML='<i class=\'bi bi-check-lg\'></i> Đã chép';setTimeout(function(){btn.innerHTML=old;},1800);};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(el.value).then(done);}else{document.execCommand('copy');done();}})(this)"><i class="bi bi-clipboard"></i> Sao chép</button>
+                    </div>
+                    <p class="mb-1"><b>2. Chỉ kiểm tra đối chiếu 24 hạng mục (không sửa đổi bất kỳ file nào):</b></p>
+                    <pre class="bg-dark text-light p-3 rounded overflow-auto code-block"><code>bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh --check-only</code></pre>
+                    <p class="mb-1"><b>3. Chạy đồng bộ nhưng giữ nguyên mức Gain Mic hiện tại của người dùng:</b></p>
+                    <pre class="bg-dark text-light p-3 rounded overflow-auto code-block mb-0"><code>sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh --keep-mic-gain</code></pre>
+                  </div>
+                </div>
+              </div>
+
               <?php include __DIR__ . '/includes/FAQAudioNativeSection.php'; ?>
               <?php include __DIR__ . '/includes/FAQBluetoothPANSection.php'; ?>
 

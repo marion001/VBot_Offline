@@ -801,26 +801,49 @@ function updateCodeDisplay(index) {
     function copyToClipboard(elementId) {
         const content = document.getElementById(elementId);
         if (!content) {
-			show_message('Không tìm thấy nội dung để sao chép!');
+            show_message('Không tìm thấy nội dung để sao chép!');
             return;
         }
-        const text = content.innerText || content.textContent;
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard.writeText(text.trim())
-                .then(() => showMessagePHP('Đã sao chép vào clipboard!', 3))
-                .catch(err => show_message('Sao chép thất bại: ' + err));
-        } else {
+        const text = (content.innerText || content.textContent || '').trim();
+        if (!text) {
+            show_message('Không có dữ liệu để sao chép!');
+            return;
+        }
+        function fallbackCopy() {
+            const container = (content.closest && content.closest('.modal')) || document.body;
             const textarea = document.createElement('textarea');
-            textarea.value = text.trim();
-            document.body.appendChild(textarea);
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.opacity = '0';
+            textarea.style.pointerEvents = 'none';
+            container.appendChild(textarea);
+            let ok = false;
+            try { textarea.focus({ preventScroll: true }); } catch (e) { textarea.focus(); }
             textarea.select();
+            try { textarea.setSelectionRange(0, textarea.value.length); } catch (e) {}
             try {
-                document.execCommand('copy');
-                showMessagePHP('Đã sao chép vào clipboard!', 3);
+                ok = document.execCommand('copy');
             } catch (err) {
-                show_message('Sao chép thất bại: ' + err);
+                ok = false;
             }
-            document.body.removeChild(textarea);
+            container.removeChild(textarea);
+            if (ok) {
+                showMessagePHP('Đã sao chép vào clipboard!', 3);
+            } else {
+                show_message('Sao chép thất bại, vui lòng bôi đen nội dung để sao chép.');
+            }
+        }
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(text)
+                .then(() => showMessagePHP('Đã sao chép vào clipboard!', 3))
+                .catch(() => fallbackCopy());
+        } else {
+            fallbackCopy();
         }
     }
 

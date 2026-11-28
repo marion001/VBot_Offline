@@ -187,32 +187,87 @@
     function copyVbotErrorLog() {
         var output = document.getElementById('vbotErrorLogOutput');
         var content = output ? output.textContent : '';
-        if (!content) {
+        if (!content || !content.trim()) {
             show_message('Không có dữ liệu logs để sao chép');
             return;
         }
         function copied() {
+            var btn = document.getElementById('copyVbotErrorLogButton');
+            if (btn && !btn.dataset.copyBusy) {
+                var oldHtml = btn.innerHTML;
+                btn.dataset.copyBusy = '1';
+                btn.innerHTML = '<i class="bi bi-check-lg"></i> Đã copy';
+                window.setTimeout(function () {
+                    btn.innerHTML = oldHtml;
+                    delete btn.dataset.copyBusy;
+                }, 1800);
+            }
             showMessagePHP('Đã sao chép nội dung Vbot_error.log', 3);
         }
+        function fallbackCopy() {
+            // Gắn textarea bên trong .modal đang mở để FocusTrap của Bootstrap 5 không giật mất focus/selection trên HTTP LAN
+            var container = (output && output.closest && output.closest('.modal')) || document.body;
+            var textarea = document.createElement('textarea');
+            textarea.value = content;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'fixed';
+            textarea.style.top = '0';
+            textarea.style.left = '0';
+            textarea.style.width = '2em';
+            textarea.style.height = '2em';
+            textarea.style.padding = '0';
+            textarea.style.border = '0';
+            textarea.style.outline = 'none';
+            textarea.style.boxShadow = 'none';
+            textarea.style.background = 'transparent';
+            textarea.style.opacity = '0';
+            textarea.style.pointerEvents = 'none';
+            container.appendChild(textarea);
+            var ok = false;
+            try {
+                textarea.focus({ preventScroll: true });
+            } catch (e) {
+                textarea.focus();
+            }
+            textarea.select();
+            try {
+                textarea.setSelectionRange(0, textarea.value.length);
+            } catch (e) {}
+            try {
+                ok = document.execCommand('copy');
+            } catch (error) {
+                ok = false;
+            }
+            container.removeChild(textarea);
+
+            // Dự phòng lớp 2: chọn trực tiếp vùng <pre id="vbotErrorLogOutput"> nếu execCommand trên textarea bị chặn
+            if (!ok && output && window.getSelection && document.createRange) {
+                try {
+                    var selection = window.getSelection();
+                    var range = document.createRange();
+                    range.selectNodeContents(output);
+                    selection.removeAllRanges();
+                    selection.addRange(range);
+                    ok = document.execCommand('copy');
+                    selection.removeAllRanges();
+                } catch (e2) {
+                    ok = false;
+                }
+            }
+
+            if (ok) {
+                copied();
+            } else {
+                show_message('Không thể sao chép tự động trên trình duyệt này, vui lòng bôi đen nội dung để sao chép.');
+            }
+        }
         if (navigator.clipboard && window.isSecureContext) {
-            navigator.clipboard.writeText(content).then(copied).catch(function(error) {
-                show_message('Không thể sao chép logs: ' + error.message);
+            navigator.clipboard.writeText(content).then(copied).catch(function () {
+                fallbackCopy();
             });
             return;
         }
-        var textarea = document.createElement('textarea');
-        textarea.value = content;
-        textarea.style.position = 'fixed';
-        textarea.style.opacity = '0';
-        document.body.appendChild(textarea);
-        textarea.select();
-        try {
-            document.execCommand('copy');
-            copied();
-        } catch (error) {
-            show_message('Không thể sao chép logs: ' + error.message);
-        }
-        document.body.removeChild(textarea);
+        fallbackCopy();
     }
 
     function clearVbotErrorLog() {

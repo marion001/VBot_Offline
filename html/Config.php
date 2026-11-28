@@ -847,6 +847,7 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
 
   try {
     $Config['smart_config']['audio_processing']=vbotAudioProcessingSettings($_POST,$Config['smart_config']);
+    $Config['smart_config']['alsa_mixer']=vbotALSAMixerSettings($_POST,$Config['smart_config']);
     unset($Config['smart_config']['webrtcvad'],$Config['smart_config']['aec3']);
   } catch (Throwable $error) {
     $aec3ConfigError=$error->getMessage(); $messages[]='Chưa lưu cấu hình: '.$aec3ConfigError;
@@ -1206,15 +1207,32 @@ if (isset($_POST['all_config_save']) && $configGpioConflicts === []) {
   $Config['api']['streaming_server']['protocol']['socket']['data_client_name'] = $_POST['socket_server_data_client_name'];
   $Config['api']['streaming_server']['protocol']['socket']['client_conversation_mode'] = isset($_POST['socket_client_conversation_mode']) ? true : false;
 
-  #cẬP NHẬT Ưu tiên trợ lý ảo prioritize_virtual_assistants:
-  $virtual_assistant_priority_1 = isset($_POST['virtual_assistant_priority1']) ? $_POST['virtual_assistant_priority1'] : '';
-  $virtual_assistant_priority_2 = isset($_POST['virtual_assistant_priority2']) ? $_POST['virtual_assistant_priority2'] : '';
-  $virtual_assistant_priority_3 = isset($_POST['virtual_assistant_priority3']) ? $_POST['virtual_assistant_priority3'] : '';
-  $virtual_assistant_priority_4 = isset($_POST['virtual_assistant_priority4']) ? $_POST['virtual_assistant_priority4'] : '';
-  $virtual_assistant_priority_5 = isset($_POST['virtual_assistant_priority5']) ? $_POST['virtual_assistant_priority5'] : '';
-  $virtual_assistant_priority_6 = isset($_POST['virtual_assistant_priority6']) ? $_POST['virtual_assistant_priority6'] : '';
-  $virtual_assistant_priority_7 = isset($_POST['virtual_assistant_priority7']) ? $_POST['virtual_assistant_priority7'] : '';
-  $Config['virtual_assistant']['prioritize_virtual_assistants'] = [$virtual_assistant_priority_1, $virtual_assistant_priority_2, $virtual_assistant_priority_3, $virtual_assistant_priority_4, $virtual_assistant_priority_5, $virtual_assistant_priority_6, $virtual_assistant_priority_7];
+  #Cập nhật Ưu tiên trợ lý ảo prioritize_virtual_assistants (chuẩn hóa 5 vị trí Top 1..Top 5 & tự động khử trùng lặp):
+  $allowedPriorityAssistants = [
+    'default_assistant',
+    'olli',
+    'google_gemini',
+    'groq_ai',
+    'openai_compat',
+    'chat_gpt',
+    'zalo_assistant',
+    'dify_ai',
+    'xiaozhi',
+    'dev_ai_engine',
+    'customize_developer_assistant',
+  ];
+  $cleanPriorityAssistants = [];
+  $seenPriorityAssistants = [];
+  for ($vaIdx = 1; $vaIdx <= 5; $vaIdx++) {
+    $rawVa = isset($_POST['virtual_assistant_priority' . $vaIdx]) ? trim((string)$_POST['virtual_assistant_priority' . $vaIdx]) : '';
+    if ($rawVa !== '' && in_array($rawVa, $allowedPriorityAssistants, true) && !isset($seenPriorityAssistants[$rawVa])) {
+      $seenPriorityAssistants[$rawVa] = true;
+      $cleanPriorityAssistants[] = $rawVa;
+    } else {
+      $cleanPriorityAssistants[] = '';
+    }
+  }
+  $Config['virtual_assistant']['prioritize_virtual_assistants'] = $cleanPriorityAssistants;
 
   #Cache trợ lý ảo:
   $Config['virtual_assistant']['cache_active'] = isset($_POST['virtual_assistant_cache_active']) ? true : false;
@@ -2083,10 +2101,15 @@ include 'html_head.php';
                   var modeSel = document.getElementById('processing_pipeline_mode');
                   var pipelineWrap = document.getElementById('vbot_processing_pipeline_wrap');
                   var providerWrap = document.getElementById('vbot_processing_ai_provider_wrap');
+                  var aiOnlyRow = document.getElementById('vbot_ai_mode_only_provider_row');
+                  var vbotAssistHint = document.getElementById('vbot_keyword_ai_assistant_hint');
                   if (!launchSel || !modeSel || !pipelineWrap || !providerWrap) return;
                   var isVbot = (launchSel.value === 'VBot_Assistant');
+                  var isAiMode = (modeSel.value === 'ai');
                   pipelineWrap.style.display = isVbot ? '' : 'none';
-                  providerWrap.style.display = (isVbot && modeSel.value === 'ai') ? '' : 'none';
+                  providerWrap.style.display = isVbot ? '' : 'none';
+                  if (aiOnlyRow) aiOnlyRow.style.display = (isVbot && isAiMode) ? '' : 'none';
+                  if (vbotAssistHint) vbotAssistHint.style.display = (isVbot && !isAiMode) ? '' : 'none';
                 }
                 document.addEventListener('DOMContentLoaded', function() {
                   var launchSel = document.getElementById('launch_source');
@@ -2127,11 +2150,11 @@ include 'html_head.php';
                 $vbotPipelineIntentCache = array_key_exists('intent_cache_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['intent_cache_active'] : true;
                 $vbotPipelineFaceSse = array_key_exists('face_display_sse_active', $vbotPipelineCfg) ? (bool)$vbotPipelineCfg['face_display_sse_active'] : false;
                 $showVbotPipelineWrap = ($Config['launch_source'] === 'VBot_Assistant');
-                $showVbotAiProviderWrap = ($showVbotPipelineWrap && $vbotPipelineMode === 'ai');
+                $showVbotAiProviderWrap = $showVbotPipelineWrap;
               ?>
               <div id="vbot_processing_pipeline_wrap" style="<?php echo $showVbotPipelineWrap ? '' : 'display:none;'; ?>">
                 <div class="row mb-3 align-items-center">
-                  <label class="col-sm-3 col-form-label fw-semibold text-primary">Chế Độ Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('- <b>Áp dụng AI để xử lý dữ liệu</b>: Toàn bộ câu nói STT sẽ được gửi sang AI (Function Calling) để phân tích ý định và gọi đúng công cụ đang bật trong VBot.<br/>- <b>Hệ thống VBot xử lý dữ liệu (theo từ khóa)</b>: Chạy theo bộ phân tích từ khóa/regex cục bộ truyền thống của VBot.')"></i>:</label>
+                  <label class="col-sm-3 col-form-label fw-semibold text-primary">Chế Độ Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('- <b>Áp dụng AI để xử lý dữ liệu</b>: Toàn bộ câu nói STT sẽ được gửi sang AI (Function Calling) để phân tích ý định và gọi đúng công cụ đang bật trong VBot.<br/>- <b>Hệ thống VBot xử lý dữ liệu (theo từ khóa)</b>: Chạy bộ từ khóa/regex nội bộ trước; khi câu nói không khớp từ khóa sẽ chuyển sang danh sách <b>Ưu tiên trợ lý ảo</b> (Top 1 &rarr; Top 5). Nếu đến lượt <b>Groq AI</b> hoặc <b>Google Gemini</b>, trợ lý vẫn sử dụng đầy đủ <code>ai_skills_descriptions.json</code> và toàn bộ tính năng AI bên dưới.')"></i>:</label>
                   <div class="col-sm-9"><div class="form-floating mb-3">
                     <select class="form-select border-primary" name="processing_pipeline_mode" id="processing_pipeline_mode">
                       <option value="ai" <?php if ($vbotPipelineMode === 'ai') echo 'selected'; ?>>Áp dụng AI để xử lý dữ liệu</option>
@@ -2143,9 +2166,12 @@ include 'html_head.php';
                 </div>
                 <div id="vbot_processing_ai_provider_wrap" style="<?php echo $showVbotAiProviderWrap ? '' : 'display:none;'; ?>">
                   <div class="border border-primary rounded-3 p-3 mb-2 bg-white bg-opacity-75 shadow-sm">
-                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="bi bi-cpu-fill me-1"></i> Cấu Hình Sử Dụng AI:</h6>
-                  <div class="row mb-3 align-items-center">
-                    <label for="processing_pipeline_ai_provider" class="col-sm-3 col-form-label fw-semibold text-success">Chọn AI Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('Chọn mô hình AI thực hiện phân tích câu lệnh và gọi công cụ (Function Calling) của VBot. Cần cấu hình API Key tương ứng ở mục Trợ Lý Ảo.')"></i>:</label>
+                    <h6 class="fw-bold text-primary border-bottom pb-2 mb-3"><i class="bi bi-cpu-fill me-1"></i> Cấu Hình Sử Dụng AI (Dùng Cho Chế Độ AI &amp; Trợ Lý Ảo Groq / Gemini):</h6>
+                  <div id="vbot_keyword_ai_assistant_hint" class="alert alert-info py-2 px-3 small mb-3" style="<?php echo ($vbotPipelineMode !== 'ai') ? '' : 'display:none;'; ?>">
+                    <i class="bi bi-info-circle-fill me-1"></i> Đang dùng <b>VBot xử lý theo từ khóa</b>: Hệ thống khớp từ khóa nội bộ trước; khi không xử lý được sẽ gọi theo thứ tự <b>Ưu tiên trợ lý ảo (Top 1 &rarr; Top 5)</b>. Khi đến lượt <b>Groq AI</b>, <b>Google Gemini</b>, <b>OpenAI-Compatible (Ollama LAN / OpenRouter)</b> hoặc <b>Dev_AI_Engine.py</b>, trợ lý tự động nạp <code>ai_skills_descriptions.json</code> và dùng toàn bộ các tính năng AI bật bên dưới (tự động lùi sang Top kế tiếp nếu lỗi/mất mạng/quá tải).
+                  </div>
+                  <div id="vbot_ai_mode_only_provider_row" class="row mb-3 align-items-center" style="<?php echo ($vbotPipelineMode === 'ai') ? '' : 'display:none;'; ?>">
+                    <label for="processing_pipeline_ai_provider" class="col-sm-3 col-form-label fw-semibold text-success">Chọn AI Xử Lý Dữ Liệu <i class="bi bi-question-circle-fill" onclick="show_message('Chọn mô hình AI thực hiện phân tích câu lệnh và gọi công cụ (Function Calling) khi bật Chế độ Áp dụng AI để xử lý dữ liệu. (Ở chế độ VBot theo từ khóa, thứ tự AI tuân theo danh sách Ưu tiên trợ lý ảo Top 1..Top 5).')"></i>:</label>
                     <div class="col-sm-9">
                       <select class="form-select border-success" name="processing_pipeline_ai_provider" id="processing_pipeline_ai_provider">
                         <option value="gemini_ai" <?php if ($vbotPipelineProvider === 'gemini_ai') echo 'selected'; ?>>Gemini AI (Google)</option>
@@ -2160,7 +2186,7 @@ include 'html_head.php';
                     <div class="col-sm-9">
                       <div class="form-switch">
                         <input class="form-check-input border-success" type="checkbox" name="processing_pipeline_fallback" id="processing_pipeline_fallback" value="1" <?php if ($vbotPipelineFallback) echo 'checked'; ?>>
-                        <label class="form-check-label">Tự động chuyển về Hệ thống VBot xử lý theo từ khóa nếu AI có lỗi, mất mạng hoặc quá tải</label>
+                        <label class="form-check-label">Tự động chuyển về Hệ thống VBot xử lý theo từ khóa (hoặc lùi sang Trợ lý ảo Top 2 &rarr; Top 5) nếu AI có lỗi, mất mạng hoặc quá tải</label>
                       </div>
                     </div>
                   </div>
@@ -2954,6 +2980,17 @@ echo input_field('lan_pjsip_render_clock_ppm','Bù clock tham chiếu cuộc g�
                   Cấu Hình Luồng Âm Thanh, Volume, Mic, Bluetooth, V..v... <font color=red>(Lọc Nhiễu Mic: WebRTC: NS, AEC3, AGC: <?php echo ($Config['smart_config']['audio_processing']['active']??true) ? '<font color=green>&nbsp;Đang Bật</font>' : '<font color=red>&nbsp;Đang Tắt</font>'; ?>)</font>
                 </h5>
                 <div id="collapse_button_volume_setting" class="accordion-collapse collapse" aria-labelledby="headingThree" data-bs-parent="#collapse_button_volume_setting">
+                 <div class="alert alert-info border-primary mb-3" role="alert">
+                   <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+                     <strong><i class="bi bi-terminal-fill me-1"></i> Lệnh tự động cài đặt, sửa lỗi &amp; kiểm tra Âm thanh / WebRTC 2.1 / AEC3 / PJSIP / ALSA (I2S &amp; WM8960):</strong>
+                     <a href="FAQ.php#fix-verify-audio-webrtc" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Xem chi tiết tại FAQ</a>
+                   </div>
+                   <div class="small mb-2">Chạy lệnh dưới đây qua SSH (tài khoản <code>pi</code>) sau khi cập nhật VBot hoặc khi muốn tự động đồng bộ toàn bộ thư viện <code>.so</code>, <code>/etc/asound.conf</code>, <code>vbot_aec_media</code>, mức Mixer chống clipping và đối chiếu 24 mục:</div>
+                   <div class="input-group input-group-sm">
+                     <input type="text" class="form-control font-monospace bg-dark text-light border-secondary" id="vbot_fix_audio_webrtc_cmd" value="sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh" readonly onclick="this.select()">
+                     <button class="btn btn-primary" type="button" onclick="(function(btn){var el=document.getElementById('vbot_fix_audio_webrtc_cmd');if(!el)return;el.select();el.setSelectionRange(0,99999);var done=function(){var old=btn.innerHTML;btn.innerHTML='<i class=\'bi bi-check-lg\'></i> Đã chép';setTimeout(function(){btn.innerHTML=old;},1800);};if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(el.value).then(done);}else{document.execCommand('copy');done();}})(this)"><i class="bi bi-clipboard"></i> Sao chép</button>
+                   </div>
+                 </div>
                  <div class="alert alert-success" role="alert">
 
                     <div class="card">
@@ -3036,7 +3073,11 @@ echo input_field('lan_pjsip_render_clock_ppm','Bù clock tham chiếu cuộc g�
 					<div class="card">
                     <div class="card-body">
                       <h5 class="card-title">Xử lý âm thanh MIC — WebRTC Audio Processing</h5>
-                      <p><a href="FAQ.php#native-audio-prebuilt" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn cài đặt WebRTC 2.1 và PJSIP</a></p>
+                      <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                        <a href="FAQ.php#native-audio-prebuilt" class="btn btn-outline-primary btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-book"></i> Hướng dẫn cài đặt WebRTC 2.1 và PJSIP</a>
+                        <a href="FAQ.php#fix-verify-audio-webrtc" class="btn btn-outline-success btn-sm" target="_blank" rel="noopener noreferrer"><i class="bi bi-wrench-adjustable-circle"></i> Hướng dẫn chạy lệnh tự động sửa &amp; kiểm tra</a>
+                        <code class="px-2 py-1 rounded bg-dark text-light small user-select-all">sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh</code>
+                      </div>
                       <div class="alert alert-primary" role="alert">
                       <?php
                       $audio=vbotAudioProcessingSettings([], $Config['smart_config']);
@@ -3083,6 +3124,56 @@ echo input_field('lan_pjsip_render_clock_ppm','Bù clock tham chiếu cuộc g�
                         <?= vbotConfigHelpIcon('Đọc /os_image_created.txt trên loa: có chữ i2s là mạch VBot AIO I2S; không có là mạch VBot AIO WM8960. Nút điền lại NS, AGC, high-pass, chế độ đầu ra AEC và các thông số gain/buffer/delay/clock theo bộ tham khảo của mạch. Giữ nguyên công tắc bật WebRTC/AEC3, đường dẫn thư viện và thiết bị loa. Nhấn Lưu Cài Đặt rồi khởi động lại VBot để áp dụng. Nút không chỉnh mixer hoặc /etc/asound.conf.') ?>
                       </div>
                     </div>
+                    </div>
+                  </div>
+                  <div class="card">
+                    <div class="card-body">
+                      <h5 class="card-title">Tự Động Cân Chỉnh ALSA Mixer (Capture / Speaker / Playback) Theo Mạch I2S &amp; WM8960</h5>
+                      <div class="alert alert-primary" role="alert">
+                      <?php
+                      $alsaMixer=vbotALSAMixerSettings([], $Config['smart_config']);
+                      $alsaMixerPreset=vbotALSAMixerPreset();
+                      ?>
+                      <input type="hidden" name="alsa_mixer_present" value="1">
+                      <?php
+                      echo switch_field('alsa_mixer_active','Bật tự động đặt ALSA Mixer theo phiên bản OS Image (I2S / WM8960) khi khởi chạy VBot',$alsaMixer['active'],
+                          'Đọc /os_image_created.txt (hoặc card âm thanh): có chữ i2s sẽ áp dụng bộ thông số I2S; không có chữ i2s sẽ áp dụng bộ thông số WM8960. Khi tắt công tắc này, VBot sẽ không can thiệp vào mức Capture của alsamixer.');
+                      echo switch_field('alsa_mixer_persist_state','Lưu bền vững qua Reboot vào /var/lib/alsa/asound.state (và vbot-wm8960.state)',$alsaMixer['persist_state'],
+                          'Chỉ ghi xuống thẻ nhớ khi phát hiện giá trị alsamixer thay đổi so với lần trước, giúp giữ nguyên mức Capture/Speaker sau mỗi lần khởi động lại thiết bị.');
+                      ?>
+                      <div class="border border-success rounded p-3 mb-3">
+                        <h6 class="border-bottom pb-2">Mạch VBot AIO I2S (<code>sndrpigooglevoi</code> — INMP441 + MAX98357)</h6>
+                        <?php
+                        echo input_field('alsa_i2s_mic_capture','VBot_DAC_Microphone — Capture I2S (0–255)',$alsaMixer['i2s']['mic_capture'],'required','number','1','0','255','Mức âm lượng thu mic softvol I2S (0–255). Khuyên dùng 150 (~59%, +16.4 dB) để tránh vỡ tiếng clipping +30 dB ở mức 255 trước khi qua WebRTC AEC3.<br><br><b>Mặc định chuẩn I2S:</b> 150, 150 [59%]','border-success');
+                        echo input_field('alsa_i2s_speaker','VBot_DAC_Speaker — Loa I2S (0–255)',$alsaMixer['i2s']['speaker'],'required','number','1','0','255','Mức âm lượng đầu ra softvol loa I2S (0–255).<br><br><b>Mặc định chuẩn I2S:</b> 247, 247 [97%]','border-success');
+                        ?>
+                      </div>
+                      <div class="border border-success rounded p-3 mb-3">
+                        <h6 class="border-bottom pb-2">Mạch VBot AIO WM8960 (<code>wm8960soundcard</code>)</h6>
+                        <?php
+                        echo input_field('alsa_wm8960_capture','Capture — Âm lượng thu Mic WM8960 (0–63)',$alsaMixer['wm8960']['capture'],'required','number','1','0','63','Mức PGA Capture trên chip WM8960 (0–63, tự động bật [on]). Khuyên dùng trong khoảng 33–35 (35 = 56%, +9.00 dB) kết hợp Input Boost = 2 (+20 dB).<br><br><b>Mặc định chuẩn WM8960:</b> 35, 35 [56%] [+9.00 dB] [on]','border-success');
+                        echo select_field('alsa_wm8960_input_boost','Input Boost LINPUT1 / RINPUT1',[
+                            '0'=>'0 — Tắt Boost (Mute)',
+                            '1'=>'1 — +13 dB',
+                            '2'=>'2 — +20 dB (khuyên dùng)',
+                            '3'=>'3 — +29 dB (dễ gây clipping analog)',
+                        ],(string)$alsaMixer['wm8960']['input_boost'],[],'Mức khuếch đại analog đầu vào mic trước ADC trên WM8960. Khuyên dùng mức 2 (+20 dB) để không bão hòa ADC khi loa phát lớn.');
+                        echo switch_field('alsa_wm8960_adc_hpf','Bật lọc thông cao phần cứng ADC (ADC High Pass Filter = on)',$alsaMixer['wm8960']['adc_hpf'],'Khử thành phần một chiều DC và tiếng ù tần số cực thấp ngay trên chip WM8960.');
+                        echo switch_field('alsa_wm8960_alc_off','Tắt tự động cân bằng phần cứng (ALC Function = Off)',$alsaMixer['wm8960']['alc_off'],'Giữ độ lợi mic tuyến tính để bộ khử vọng WebRTC AEC3 và Digital AGC xử lý chính xác, không bị bơm nhiễu nền.');
+                        echo input_field('alsa_wm8960_speaker','Speaker — Công suất loa ngoài WM8960 (0–127)',$alsaMixer['wm8960']['speaker'],'required','number','1','0','127','Mức khuếch đại tầng công suất loa ngoài trên WM8960 (0–127).<br><br><b>Mặc định chuẩn WM8960:</b> 123, 123 [97%] [+2.00 dB]','border-success');
+                        echo input_field('alsa_wm8960_playback','Playback — Âm lượng DAC số WM8960 (0–255)',$alsaMixer['wm8960']['playback'],'required','number','1','0','255','Mức âm lượng giải mã DAC số trên WM8960 (0–255, 255 = 100% / 0.00 dB).<br><br><b>Mặc định chuẩn WM8960:</b> 255, 255 [100%]','border-success');
+                        ?>
+                      </div>
+                      <div class="d-flex flex-wrap align-items-center gap-2 mt-3">
+                        <button type="button" class="btn btn-primary" id="alsa_mixer_reset_defaults"
+                          data-board-preset="<?= htmlspecialchars(json_encode($alsaMixerPreset, JSON_UNESCAPED_UNICODE|JSON_HEX_TAG|JSON_HEX_AMP|JSON_HEX_APOS|JSON_HEX_QUOT), ENT_QUOTES, 'UTF-8') ?>"
+                          onclick="resetALSAMixerBoardDefaults(this)">
+                          <i class="bi bi-arrow-counterclockwise"></i> Đặt lại mặc định các thông số
+                        </button>
+                        <span class="form-text m-0">Nhận diện mạch hiện tại: <strong><?= htmlspecialchars($alsaMixerPreset['label'], ENT_QUOTES, 'UTF-8') ?></strong></span>
+                        <?= vbotConfigHelpIcon('Đặt lại các thông số ALSA Mixer về chuẩn thực nghiệm cho cả hai mạch (I2S: VBot_DAC_Microphone = 150, VBot_DAC_Speaker = 247; WM8960: Capture = 35 [on], Input Boost = 2, ADC HPF = on, ALC = Off, Speaker = 123, Playback = 255). Nhấn Lưu Cài Đặt rồi khởi động lại VBot để áp dụng và lưu vào /var/lib/alsa/asound.state.') ?>
+                      </div>
+                      </div>
                     </div>
                   </div>
 				 <div class="card">
@@ -5478,10 +5569,12 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
 						'olli'   => '<font color=green>Olli Maika</font>',
 						'google_gemini'   => '<font color=green>Gemini</font>',
 						'groq_ai'   => '<font color=green>Groq AI</font>',
+						'openai_compat' => '<font color=green>OpenAI-Compat</font>',
 						'chat_gpt'   => '<font color=green>ChatGPT</font>',
 						'zalo_assistant'   => '<font color=green>Zalo AI</font>',
 						'dify_ai'   => '<font color=green>Dify AI</font>',
 						'xiaozhi'   => '<font color=green>XiaoZhi</font>',
+						'dev_ai_engine' => '<font color=green>Dev AI Engine</font>',
 						'customize_developer_assistant'      => '<font color=green>Custom Assistant</font>'
 					];
 					$selected_assitant = $Config['virtual_assistant']['prioritize_virtual_assistants'][0] ?? null;
@@ -5514,10 +5607,12 @@ Ghi Chú: <br/> - Nhấn giữ bất kỳ nút nhấn nào trong khoảng 20 gi�
                         "olli" => "Olli Maika AI Assistant (Khuyến Nghị)",
                         "google_gemini" => "Google Gemini",
                         "groq_ai" => "Groq AI (Khuyên dùng)",
+                        "openai_compat" => "OpenAI-Compatible: Ollama LAN / OpenRouter / vLLM",
                         "chat_gpt" => "Chat GPT",
                         "zalo_assistant" => "Zalo AI Assistant",
                         "dify_ai" => "Dify AI Assistant",
                         "xiaozhi" => "XiaoZhi AI (Khuyến Nghị)",
+                        "dev_ai_engine" => "Dev Custom AI: Dev_AI_Engine.py (Người Dùng Tự Code AI + Tool)",
                         "customize_developer_assistant" => "DEV Custom Assistant: Dev_Assistant.py (Người Dùng Tự Code)"
                       ];
                       for ($i = 0; $i < 5; $i++) {

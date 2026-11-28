@@ -1,6 +1,6 @@
 # VBot Assistant 🇻🇳
 
-VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Raspberry Pi, được tối ưu cho Raspberry Pi Zero 2W. Dự án thuần Việt dùng để điều khiển nhà thông minh trong mạng nội bộ gia đình (Local), kết hợp nhận diện từ khóa đánh thức (Picovoice, Snowboy), xử lý âm thanh số WebRTC 2.1 (khử vọng AEC3 khi phát nhạc, giảm nhiễu NS, cân bằng âm lượng AGC), Speech-to-Text (STT), xử lý lệnh, trợ lý AI đa mô hình & thị giác máy tính (Vision), Kho Tri Thức AI Cục Bộ, Text-to-Speech (TTS), phát media (Local, Spotify Connect, AirPlay, Bluetooth, DLNA, Multiroom), gọi điện nội bộ LAN (PJSIP), Apple HomeKit, Home Assistant, Local Tuya, Wake-on-LAN, MQTT, WebSocket client và giao diện quản trị WebUI.
+VBot Assistant là hệ thống loa thông minh tiếng Việt chạy trên Raspberry Pi, được tối ưu cho Raspberry Pi Zero 2W. Dự án thuần Việt dùng để điều khiển nhà thông minh trong mạng nội bộ gia đình (Local), kết hợp nhận diện từ khóa đánh thức (Picovoice, Snowboy), Speech-to-Text (STT), xử lý lệnh, trợ lý AI, Text-to-Speech (TTS), phát media, Home Assistant, MQTT, AirPlay, Bluetooth, WebSocket client và giao diện quản trị WebUI.
 
 ### VBot HomeKit Bridge
 
@@ -26,10 +26,8 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - [Phần cứng và nền tảng](#phần-cứng-và-nền-tảng)
 - [Kiến trúc chương trình](#kiến-trúc-chương-trình)
 - [Luồng xử lý giọng nói](#luồng-xử-lý-giọng-nói)
-- [Audio, AirPlay, Bluetooth, DLNA và Spotify Connect](#audio-airplay-bluetooth-dlna-và-spotify-connect)
-- [Spotify Connect](#spotify-connect)
+- [Audio, AirPlay và Bluetooth](#audio-airplay-và-bluetooth)
 - [DLNA Audio Renderer](#dlna-audio-renderer)
-- [WebRTC 2.1, Khử vọng AEC3 và Gọi nội bộ LAN (PJSIP)](#webrtc-21-khử-vọng-aec3-và-gọi-nội-bộ-lan-pjsip)
 - [Multiroom Audio](#multiroom-audio)
 - [Liên kết Apple HomeKit](#liên-kết-apple-homekit)
 - [WebSocket Streaming](#websocket-streaming)
@@ -78,28 +76,24 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 
 ### Media và kết nối âm thanh
 
-- Nhạc cục bộ và trình quản lý đa Playlist.
+- Nhạc cục bộ.
 - Zing MP3, NhacCuaTui, YouTube, radio, podcast và tin tức, tùy nguồn còn hoạt động và được bật.
-- **Spotify Connect (`go-librespot`):** phát nhạc trực tiếp từ ứng dụng Spotify trên điện thoại/máy tính tới VBot, đồng bộ thời gian thực tên bài, nghệ sĩ, album, ảnh bìa, thời lượng, vị trí và âm lượng hai chiều; điều khiển Play/Pause/Next/Prev/Stop từ WebUI, nút vật lý, giọng nói, REST API, MQTT, HomeKit và Home Assistant.
 - AirPlay thông qua Shairport Sync.
-- Bluetooth Audio Sink (nhận nhạc từ điện thoại) và Bluetooth Audio Source (xuất âm thanh VBot ra loa/tai nghe Bluetooth ngoài).
+- Bluetooth Audio Sink.
 - DLNA Audio Renderer để nhận nhạc từ ứng dụng điều khiển DLNA/UPnP.
-- **Bộ cân bằng âm thanh 6 dải (Native Equalizer `libvbot_eq.so`):** chỉnh trực tiếp Bass, Low-Mid, Mid, High-Mid, Treble, Air, Preamp và các preset âm nhạc ngay trên `Audio_Equalizer.php`.
-- **Xử lý Microphone WebRTC 2.1 & Khử vọng AEC3:** đánh thức loa nhạy bằng từ khóa ngay cả khi loa đang phát nhạc lớn (Local, Multiroom, AirPlay, Bluetooth, Spotify Connect).
 - Tạm dừng, tiếp tục đúng vị trí và dừng media nội bộ.
 - Điều khiển âm lượng, mute/unmute và đồng bộ trạng thái lên WebUI/API.
-- Hiển thị nguồn đang phát qua `media_player_source` (`Local`, `Spotify`, `AirPlay`, `Bluetooth`, `DLNA`, `Multiroom`).
+- Hiển thị nguồn đang phát qua `media_player_source`.
 
 ### Nhà thông minh
 
 - Home Assistant REST/WebSocket tùy cấu hình.
 - MQTT command/state topic.
-- Broadlink IR/RF và hồng ngoại tích hợp trên mạch (`Internal_IR`).
+- Broadlink IR/RF.
 - Custom command cho thiết bị, script và automation.
 - **Local Tuya:** Liên kết thiết bị từ ứng dụng **Tuya Smart** và **Smart Life** với VBot; điều khiển trực tiếp trong mạng LAN nội bộ bằng Local Tuya, không cần gửi lệnh điều khiển qua đám mây. Cấu hình thiết bị, DPS và câu lệnh tại `html/Tuya_Local.php`.
-- **Wake-on-LAN (`Wake_On_LAN`):** bật máy tính PC, NAS hoặc TV hỗ trợ Magic Packet trong mạng nội bộ bằng giọng nói (AI / từ khóa), giao diện `html/Wake_On_LAN.php` hoặc API.
 - Tích hợp tham khảo:
-  - [VBot Offline Custom Component (v1.17.0+)](https://github.com/marion001/VBot_Offline_Custom_Component)
+  - [VBot Offline Custom Component](https://github.com/marion001/VBot_Offline_Custom_Component)
 
 ### Hệ thống và tiện ích
 
@@ -127,17 +121,12 @@ Xem [hướng dẫn HomeKit trong README này](#liên-kết-apple-homekit) hoặ
 - **Bảng thống kê AI (`html/AI_Stats.php`):** theo dõi lượt gọi AI, tỷ lệ khớp Local Intent Cache, token tiêu thụ (Hôm nay / Tổng), kiểm tra hạn mức trực tiếp từng API Key Groq và quản lý Nhật ký giọng nói.
 - **Đồng bộ & tăng tốc Home Assistant cho hệ thống nhiều thực thể:** tự đồng bộ `Home_Assistant.json` khi khởi chạy, nút đồng bộ nhanh ngay trên Dashboard `index.php` và trong Home Assistant Custom Component (`SYNC_HASS_JSON`, có khóa chống chạy chồng luồng); tra cứu `entity_id` trực tiếp từ RAM cache (< 5ms) kết hợp gộp `/api/states` 4 giây.
 - **Tối ưu hiệu năng & độ bền 24/7 trên Raspberry Pi:** tổng hợp TTS câu dài song song (`Edge TTS` / `Default TTS`), cache RAM theo `mtime_ns` cho `BackList.json` & `Home_Assistant.json`, gom ghi thẻ nhớ SD định kỳ cho telemetry/cache, làm nóng kết nối HTTPS nền khi khởi động, kiểm soát `timeout` toàn bộ tiến trình con và tách nhỏ module lõi để build `.so` nhanh hơn.
-- **Xử lý âm thanh số WebRTC 2.1 (AEC3 + NS + Digital AGC) & Tối ưu riêng cho mạch I2S / WM8960:**
-  - Khử vọng âm học tuyến tính (`linear` AEC3) giúp Porcupine bắt nhạy từ khóa đánh thức khi đang phát nhạc qua tuyến âm thanh chung `vbot_aec_media` (`48 kHz`), kết hợp lọc thông cao (HPF), giảm nhiễu nền (`NS`) và cân bằng giọng nói tự động (`Digital AGC + Limiter`).
-  - Nút **Đặt lại mặc định các thông số** trên `Config.php` tự nhận diện `/os_image_created.txt` (mạch **VBot AIO I2S** hoặc **VBot AIO WM8960**) để điền thông số chuẩn đã đo kiểm thực tế; đi kèm script tự động hóa 1 lệnh `resource/tools/fix_and_verify_audio_webrtc.sh` tự cấu hình ALSA, mixer, service và kiểm tra 24 hạng mục.
-- **Gọi điện nội bộ LAN (PJSIP `G.722 16 kHz`) & Gọi trực tiếp từ trình duyệt WebUI (`WebUI_Call`):**
-  - Đàm thoại hai chiều băng rộng giữa các loa VBot trong mạng LAN qua SIP/RTP (PJSUA2) hoặc gọi thẳng từ điện thoại/máy tính mở WebUI qua HTTPS tới loa; dùng chung một microphone `PvRecorder`, khử vọng AEC3 cuộc gọi và bộ lọc NS/AGC chung không xử lý chồng lặp; hỗ trợ tự nhận cuộc gọi, nhạc chuông tùy chỉnh và chế độ nhấn giữ để nói (PTT). Cấu hình tại `Config.php` và `LAN_Calls.php`. Xem [hướng dẫn gọi điện LAN](resource/README_LAN_Calls.md).
-- **Spotify Connect (`Spotify_Connect` + `go-librespot`):** biến VBot thành loa Spotify Connect trong mạng nội bộ, tự động đồng bộ ảnh bìa, thông tin bài hát, thanh tiến trình, hiệu ứng LED/Face và điều khiển xuyên suốt từ ứng dụng Spotify, WebUI Dashboard, nút cứng, giọng nói, MQTT, HomeKit và Home Assistant Custom Component.
-- **Wake-on-LAN & Bộ cân bằng âm thanh 6 dải (Equalizer):** đánh thức máy tính/NAS bằng giọng nói hoặc giao diện `Wake_On_LAN.php`; tinh chỉnh chất âm loa thời gian thực bằng thư viện C `libvbot_eq.so` tại `Audio_Equalizer.php`.
+- **Gọi điện LAN giữa loa VBot Python:** gọi, nhận/từ chối, kết thúc, microphone riêng cho cuộc gọi và PCM hai chiều nội bộ; có chế độ nhấn giữ để nói. Cấu hình tại `LAN_Calls.php`. Xem [hướng dẫn gọi điện LAN](resource/README_LAN_Calls.md).
+
 - **DLNA Audio Renderer:** nhận luồng nhạc UPnP/DLNA, đồng bộ trạng thái phát, metadata, thời lượng, vị trí và âm lượng với VBot qua D-Bus/MPRIS; điều khiển từ WebUI, REST API và MQTT.
 - **Multiroom Audio:** một VBot làm coordinator phát đồng bộ tới nhiều loa VBot trong LAN; hỗ trợ nhóm loa, metadata, volume tổng và volume từng luồng.
 - **Apple HomeKit:** đưa loa, Remote iOS, media, trợ lý, playlist, radio, hệ thống và Multiroom vào ứng dụng Nhà qua VBot HomeKit Bridge; trạng thái được đồng bộ bằng SSE và lệnh điều khiển gọi trực tiếp API VBot.
-- **Trạng thái media thống nhất & Trình điều khiển tích hợp trên Dashboard:** Local Media, Spotify Connect, AirPlay, Bluetooth, DLNA và Multiroom cùng đi qua state machine dùng chung và điều khiển trực tiếp ngay trên trang chủ `index.php`.
+- **Trạng thái media thống nhất:** Local Media, AirPlay, Bluetooth và Multiroom cùng đi qua state machine dùng chung để hạn chế LED, pause/resume và metadata bị lệch trạng thái.
 - **Playlist mở rộng:** quản lý nhiều playlist có ID/tên riêng, chế độ phát, next/previous, loop và xuất trạng thái qua API/MQTT.
 - **XiaoZhi MCP:** hỗ trợ công cụ điều khiển hệ thống, Home Assistant, playlist, lịch nhắc và plugin MCP do người dùng tự viết.
 - **Runtime Diagnostics:** quan sát thread, queue, audio source, client streaming, MQTT, SSE và lịch sử phục hồi watchdog ngay trên WebUI.
@@ -187,12 +176,6 @@ Các thành phần chính:
 | `Api_HTTP.cpython-39-arm-linux-gnueabihf.so`, `Api_MQTT.cpython-39-arm-linux-gnueabihf.so` | Các handler HTTP/MQTT được tách khỏi lớp điều phối API chính. |
 | `Streaming.cpython-39-arm-linux-gnueabihf.so` | WebSocket server, session client và streaming STT. |
 | `Bluetooth.cpython-39-arm-linux-gnueabihf.so` | Theo dõi BlueZ, metadata và trạng thái Bluetooth. |
-| `Spotify_Connect.cpython-39-arm-linux-gnueabihf.so` | Tích hợp `go-librespot` (WebSocket sự kiện + HTTP API điều khiển), đồng bộ metadata và âm lượng Spotify Connect. |
-| `DLNA_Renderer.cpython-39-arm-linux-gnueabihf.so` | Tích hợp UPnP/DLNA renderer `gmediarender` qua D-Bus/MPRIS. |
-| `Lib_AEC3.cpython-39-arm-linux-gnueabihf.so` | Quản lý khử vọng âm học WebRTC 2.1 AEC3, tham chiếu `vbot_aec_media` và xử lý tín hiệu microphone. |
-| `LAN_Calls.cpython-39-arm-linux-gnueabihf.so`, `WebUI_Call.cpython-39-arm-linux-gnueabihf.so` | Gọi điện nội bộ hai chiều giữa các loa VBot qua PJSIP (`G.722 16 kHz`) và gọi từ trình duyệt WebUI qua HTTPS. |
-| `Wake_On_LAN.cpython-39-arm-linux-gnueabihf.so`, `Local_Tuya.cpython-39-arm-linux-gnueabihf.so`, `Internal_IR.cpython-39-arm-linux-gnueabihf.so` | Đánh thức thiết bị qua Magic Packet LAN, điều khiển thiết bị Tuya cục bộ và phát/học hồng ngoại nội bộ. |
-| `Sync_System_Services.cpython-39-arm-linux-gnueabihf.so` | Tự động kiểm tra và đồng bộ cấu hình các systemd service phụ trợ (`shairport-sync`, `bluealsa-aplay`, `gmediarender`, `vbot-spotify-connect`, `vbot-multiroom-bridge`). |
 | `Button.cpython-39-arm-linux-gnueabihf.so` | Nút nhấn và rotary encoder. |
 | `Led.cpython-39-arm-linux-gnueabihf.so` | Hiệu ứng LED và khôi phục trạng thái nghỉ. |
 | `Scheduler.cpython-39-arm-linux-gnueabihf.so` | Lịch thông báo và tác vụ định kỳ. |
@@ -201,7 +184,7 @@ Các thành phần chính:
 | `Manual_Update_WebUI.py` | Cập nhật/rollback riêng cây giao diện WebUI (giữ dạng `.py`). |
 | `VBot_Multiroom_*.cpython-39-arm-linux-gnueabihf.so` | Bridge, receiver, coordinator, group và cấu hình Multiroom Audio. |
 | `resource/HomeKit/` | VBot HomeKit Bridge, registry phụ kiện, trình cài Node.js và systemd user service. |
-| `AI_Engine.cpython-39-arm-linux-gnueabihf.so`, `AI_Skill_Registry.cpython-39-arm-linux-gnueabihf.so`, `AI_Action_Dispatcher.cpython-39-arm-linux-gnueabihf.so`, `AI_Knowledge_Base.cpython-39-arm-linux-gnueabihf.so`, `AI_Vision.cpython-39-arm-linux-gnueabihf.so` | Bộ xử lý AI Function Calling (Groq/Gemini/OpenAI-Compat), Thị giác máy tính Zero-disk (`AI_Vision`), Local Intent Cache, Telemetry, Kho Tri Thức AI Cục Bộ (Hybrid FTS5 + Vector RRF) và thực thi công cụ thông minh. |
+| `AI_Engine.cpython-39-arm-linux-gnueabihf.so`, `AI_Skill_Registry.cpython-39-arm-linux-gnueabihf.so`, `AI_Action_Dispatcher.cpython-39-arm-linux-gnueabihf.so`, `AI_Knowledge_Base.cpython-39-arm-linux-gnueabihf.so` | Bộ xử lý AI Function Calling (Groq/Gemini), Local Intent Cache, Telemetry, Kho Tri Thức AI Cục Bộ (Hybrid FTS5 + Vector RRF) và thực thi công cụ thông minh. |
 | `Dev_AI_Engine.py` | Điểm mở rộng AI tùy biến cho người dùng (giữ dạng `.py` không biên dịch `.so`). |
 | `Lib_System.cpython-39-arm-linux-gnueabihf.so`, `Lib_Audio.cpython-39-arm-linux-gnueabihf.so`, `Lib_AirPlay.cpython-39-arm-linux-gnueabihf.so`, `Lib_Bluetooth.cpython-39-arm-linux-gnueabihf.so`, `Lib_Multiroom.cpython-39-arm-linux-gnueabihf.so`, `Lib_Picovoice_Utils.cpython-39-arm-linux-gnueabihf.so`, `Lib_State_Audio.cpython-39-arm-linux-gnueabihf.so`, `Lib_Device_Runtime.cpython-39-arm-linux-gnueabihf.so` | Các lớp chức năng được tách khỏi facade `Lib` để tối ưu tốc độ build `.so` và bảo trì. |
 | `Data_Processing_HASS.cpython-39-arm-linux-gnueabihf.so`, `Data_Processing_Media_Info.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_HASS.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_Media.cpython-39-arm-linux-gnueabihf.so`, `Def_Processing_Weather.cpython-39-arm-linux-gnueabihf.so` | Các module con được tách từ `Data_Processing` và `Def_Processing` theo mô hình Facade. |
@@ -253,34 +236,15 @@ TTS (tổng hợp song song câu dài) + LED + Face.php (21 cảm xúc + phụ �
         └── tự mở mic tiếp nếu AI hỏi làm rõ (?) hoặc bật chế độ hội thoại (conversation_mode)
 ```
 
-## Audio, AirPlay, Bluetooth, DLNA và Spotify Connect
+## Audio, AirPlay và Bluetooth
 
 VBot có nhiều nguồn cùng sử dụng loa. Trạng thái được xuất qua API để xác định nguồn hiện tại:
 
 - `Local`: media player nội bộ từ các nguồn nhạc, giải trí tích hợp sẵn.
-- `Spotify`: luồng nhạc đang phát từ ứng dụng Spotify qua Spotify Connect (`go-librespot`).
 - `AirPlay`: AirPlay2 (Tương thích với hệ sinh thái Apple) đang phát.
 - `Bluetooth`: thiết bị Bluetooth (Kết nối phát nhạc từ điện thoại ra loa VBot thông qua Bluetooth) đang phát.
 - `DLNA`: luồng nhạc đang được gửi tới renderer DLNA của VBot.
-- `Multiroom`: loa đang phát đồng bộ trong nhóm Multiroom Audio.
 - `N/A`: không có nguồn media xác định.
-
-### Spotify Connect
-
-VBot tích hợp **Spotify Connect** thông qua daemon nhẹ `go-librespot` (chạy nền bằng systemd `vbot-spotify-connect.service`), cho phép chọn phát nhạc trực tiếp lên loa VBot từ ứng dụng Spotify trên điện thoại, máy tính bảng hoặc PC trong cùng mạng.
-
-- Tên hiển thị mặc định lấy theo hồ sơ loa VBot (hoặc đặt riêng tại `media_player.spotify_connect.device_name`), hỗ trợ chọn chất lượng luồng `96` / `160` / `320 kbps` và âm lượng khởi tạo.
-- Đồng bộ thời gian thực qua WebSocket nội bộ (`127.0.0.1:3678/events`): trạng thái phát/tạm dừng, tên bài hát, nghệ sĩ, album, ảnh bìa, thời lượng, vị trí phát và thay đổi âm lượng hai chiều.
-- Hỗ trợ điều khiển Play, Pause, Resume, Stop, Next, Previous, Seek và Volume trực tiếp từ Dashboard WebUI, nút nhấn vật lý, câu lệnh giọng nói, REST API, MQTT, Apple HomeKit và Home Assistant Custom Component.
-- Tự động xuất âm thanh vào tuyến chung `vbot_aec_media` khi hệ thống bật khử vọng AEC3 / Multiroom Bridge (vẫn gọi được từ khóa đánh thức khi đang nghe nhạc Spotify).
-
-Cài đặt lần đầu trên Raspberry Pi:
-
-```bash
-sudo bash /home/pi/VBot_Offline/resource/spotify/install.sh
-```
-
-Sau khi cài đặt, vào **WebUI → Config.php → Nguồn Nhạc / Media Player → Spotify Connect**, bật kích hoạt, lưu cài đặt và khởi động lại VBot.
 
 ### DLNA Audio Renderer
 
@@ -352,33 +316,33 @@ Agent Bluetooth nằm tại:
 resource/bluetooth/bluetooth_agent.py
 ```
 
-## WebRTC 2.1, Khử vọng AEC3 và Gọi nội bộ LAN (PJSIP)
+## WebRTC 2.1 và PJSIP
 
-VBot hỗ trợ bộ xử lý âm thanh số gốc C++ **WebRTC Audio Processing 2.1** (khử vọng âm học `AEC3`, giảm nhiễu nền `NS`, lọc thông cao `HPF`, cân bằng giọng nói tự động `Digital AGC + Limiter`) kết hợp thư viện **PJSIP (PJSUA2)** cho đàm thoại nội bộ hai chiều băng rộng (`G.722 16 kHz`), được cài đặt độc lập tại `/home/pi/VBot_AEC3/`.
+Thư viện được cài riêng tại `/home/pi/VBot_AEC3/`, không nằm trong môi trường Python ảo. Chọn một trong hai hướng dẫn:
 
-### Cách 1 (Khuyên dùng): Thiết lập và kiểm tra tự động trọn gói bằng 1 lệnh
+- [Cài từ ZIP đã build](resource/tools/README_INSTALL_WEBRTC21_PJSIP_PREBUILT.md), dành cho thiết bị có kiến trúc, Python và hệ điều hành tương thích.
+- [Build thủ công từng bước](resource/tools/README_INSTALL_WEBRTC21_PJSIP_MANUAL.md).
 
-Trên hai bản OS Image chính thức của VBot (**VBot AIO I2S** và **VBot AIO WM8960**), sau khi cập nhật chương trình VBot lên bản mới nhất, chỉ cần chạy duy nhất một lệnh qua SSH:
+Trước khi kiểm tra ZIP, chuẩn bị thư mục tạm và quyền ghi cho tài khoản `pi`:
 
 ```bash
-sudo bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh
+sudo mkdir -p /home/pi/VBot_AEC3/tmp
+sudo chown -R pi:pi /home/pi/VBot_AEC3
+export TMPDIR=/home/pi/VBot_AEC3/tmp
 ```
 
-Script tự động thực hiện toàn bộ quy trình và kiểm tra đối chiếu 24 hạng mục:
-- Tự giải nén và cài gói runtime WebRTC 2.1 + PJSUA2 đã biên dịch sẵn (`vbot_audio_runtime_armhf_py39.zip`) vào `/home/pi/VBot_AEC3` nếu thiết bị chưa cài.
-- Nhận diện chính xác loại mạch từ `/os_image_created.txt`, chuẩn hóa `/etc/asound.conf` ở `48000 Hz` (`S32_LE` + `i2s_dac_keepalive` tối ưu CPU cho mạch **I2S**; `period_size = 1024` chống tràn hàng đợi tham chiếu + bảo vệ cấu hình khi khởi động cho mạch **WM8960**).
-- Cân chỉnh chuẩn mức gain phần cứng trong `alsamixer` để triệt tiêu hiện tượng vỡ tiếng (clipping) trước khi vào AEC3.
-- Thiết lập tuyến âm thanh chung `vbot_aec_media` (`snd-aloop`) cho VLC, Multiroom, AirPlay, Bluetooth và Spotify Connect.
-- Tự động điền bộ thông số tối ưu theo từng mạch vào `Config.json` cho cả **WebRTC MIC + AEC3** lẫn **Gọi nội bộ LAN (`lan_calls.pjsip`)**.
-- Chế độ chỉ kiểm tra (không ghi thay đổi): `bash /home/pi/VBot_Offline/resource/tools/fix_and_verify_audio_webrtc.sh --check-only`.
+Sau khi cài thư viện, chuẩn bị đường âm thanh chung cho AirPlay, Bluetooth và Multiroom trên mỗi loa:
 
-### Cách 2: Cài đặt thủ công hoặc tự biên dịch từ mã nguồn
+```bash
+systemctl --user stop VBot_Offline.service
+cd /home/pi/VBot_Offline
+sudo python3 resource/vbot_aec3/install_media_routes.py \
+  --root /home/pi/VBot_Offline --ensure
+```
 
-- [Cài từ ZIP đã build sẵn](resource/tools/README_INSTALL_WEBRTC21_PJSIP_PREBUILT.md), dành cho thiết bị ARMv7 (`armhf`), Python 3.9, Raspberry Pi OS Bullseye tương thích.
-- [Build thủ công từng bước từ mã nguồn](resource/tools/README_INSTALL_WEBRTC21_PJSIP_MANUAL.md), khi đổi phiên bản Python, kiến trúc CPU hoặc bản phân phối HĐH.
-- [Hướng dẫn cài đường âm thanh chung `vbot_aec_media`](resource/tools/README_INSTALL_SHARED_MEDIA_ROUTES.md).
+Nếu VBot đang chạy thủ công, dừng bằng `Ctrl+C` trước khi chạy lệnh cài. Thông báo `SHARED_MEDIA_ROUTES_READY` nghĩa là đường âm thanh đã đầy đủ, không cần cài lại. Công cụ có sao lưu khi thay đổi cấu hình; nếu báo thiết lập chưa đầy đủ, xem [hướng dẫn đường âm thanh chung](resource/tools/README_INSTALL_SHARED_MEDIA_ROUTES.md).
 
-Trên giao diện `Config.php`, cả hai khu vực **Xử lý âm thanh MIC — WebRTC Audio Processing** và **Gọi Điện Trong Mạng Nội Bộ (Call Local Lan)** đều có nút **Đặt lại mặc định các thông số** giúp tự động nhận diện mạch (**I2S** hoặc **WM8960**) để khôi phục ngay bộ thông số chuẩn bất kỳ lúc nào. Tài liệu chi tiết cũng được tích hợp sẵn trong WebUI tại `FAQ.php` → **Cài WebRTC 2.1 và PJSIP**.
+Bật WebRTC MIC và Gọi LAN theo nhu cầu trong `Config.php`, sau đó khởi động lại VBot. Tài liệu cũng có trong WebUI tại `FAQ.php`, mục **Cài WebRTC 2.1 và PJSIP**.
 
 ## Multiroom Audio
 
@@ -677,15 +641,12 @@ WebUI nằm trong thư mục `html/` và chạy qua Apache/PHP trên Raspberry P
 
 Các khu vực chính:
 
-- Dashboard (`index.php`): điều khiển nhanh chế độ, trình phát Media đa nguồn tích hợp trực tiếp (Local, Playlist, YouTube, ZingMP3, Podcast, Radio, Tin tức, Spotify Connect, AirPlay, Bluetooth, DLNA, Multiroom), âm lượng và nút **Đồng bộ `Home_Assistant.json`**.
-- Cấu hình `Config.json` (`Config.php`): bao gồm cấu hình AI/Vision, WebRTC Audio Processing & AEC3, Spotify Connect, Gọi nội bộ LAN/PJSIP (kèm nút tự nhận diện mạch đặt lại thông số chuẩn).
-- Kho Tri Thức AI Cục Bộ (`AI_Knowledge.php`): tải lên 27 định dạng tài liệu/ảnh/URL, quản lý chỉ mục Hybrid FTS5 + Vector, Search Playground và sao lưu/khôi phục.
-- Gọi điện nội bộ LAN & Gọi từ trình duyệt (`LAN_Calls.php`): quay số giữa các loa VBot, gọi thử trực tiếp từ trình duyệt WebUI qua HTTPS, quét thiết bị LAN và sao lưu danh bạ loa.
-- Kịch bản giọng nói (`Voice_Routines.php`), Local Tuya (`Tuya_Local.php`), Wake-on-LAN (`Wake_On_LAN.php`) và Bộ cân bằng âm thanh 6 dải (`Audio_Equalizer.php`).
+- Dashboard (`index.php`): điều khiển nhanh chế độ, media, âm lượng và nút **Đồng bộ `Home_Assistant.json`**.
+- Cấu hình `Config.json`.
 - Command/Terminal.
 - Kiểm tra câu lệnh (`Command_Test.php`): hỗ trợ **cả 2 chế độ (AI & VBot nội bộ)** — xem nhánh xử lý AI, Local Intent Cache (0 token), xem trước Tool/Câu trả lời AI dự kiến hoặc keyword/đích HASS, và tùy chọn thực thi thật.
 - Thống kê AI & Hạn mức (`AI_Stats.php`): theo dõi số lượt gọi, tỷ lệ khớp Cache, token tiêu thụ, kiểm tra hạn mức API Key Groq và Nhật ký giọng nói.
-- Màn hình cảm xúc OLED (`Face.php`) & Client độc lập (`VBot_Face_Client.html`): hiển thị khuôn mặt 21 cảm xúc chuẩn XiaoZhi, đĩa nhạc xoay, thời tiết, đồng hồ đếm ngược, trạng thái nghe/nói và sóng nhạc theo thời gian thực.
+- Màn hình cảm xúc OLED (`Face.php`): hiển thị khuôn mặt 21 cảm xúc chuẩn XiaoZhi, trạng thái nghe/nói và sóng nhạc theo thời gian thực.
 - REST API.
 - Scheduler.
 - Log VBot, TTS và API.
@@ -768,16 +729,13 @@ Nên chỉnh cấu hình qua WebUI để được kiểm tra dữ liệu và t�
 
 Các nhóm quan trọng:
 
-- `processing_pipeline`: chọn chế độ xử lý (`vbot` hoặc `ai`), nhà cung cấp AI chính, Vision Camera, Kho Tri Thức AI, bộ nhớ và Intent Cache.
 - `contact_info`: thông tin người dùng và đăng nhập WebUI.
-- `smart_config`: wake word, STT, TTS, microphone, xử lý âm thanh WebRTC 2.1 & AEC3 (`audio_processing`), LED, nút và loa.
-- `virtual_assistant`: các trợ lý AI (Groq, Gemini, OpenAI-Compatible/Ollama, ChatGPT, Dify, Olli, Zalo...).
-- `media_player`: nguồn nhạc nội bộ, Spotify Connect (`spotify_connect`), AirPlay, DLNA, Multiroom và hành vi phát media.
-- `lan_calls` & `wake_on_lan`: gọi nội bộ LAN qua PJSIP, gọi từ trình duyệt WebUI và đánh thức thiết bị qua mạng LAN.
-- `homekit` & `xiaozhi`: liên kết Apple HomeKit Bridge và giao thức/MCP XiaoZhi.
+- `smart_config`: wake word, STT, TTS, microphone, LED, nút và loa.
+- `virtual_assistant`: các trợ lý AI.
+- `media_player`: nguồn nhạc và hành vi phát media.
 - `api`: REST API, auth và streaming server.
 - `mqtt_broker`: broker, client name, QoS và retain.
-- `web_interface`: đường dẫn WebUI, bảo mật truy cập tệp và external access.
+- `web_interface`: đường dẫn WebUI và external access.
 - `backup_upgrade`: backup và nâng cấp.
 
 ### Dữ liệu nhạy cảm

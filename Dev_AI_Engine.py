@@ -8,9 +8,9 @@ Mail: VBot.Assistant@gmail.com
 
 """
 HƯỚNG DẪN SỬ DỤNG (Dev Custom AI - Dev_AI_Engine.py)
-- File này được VBot tự động gọi khi bạn chọn:
-  Chế Độ Xử Lý Dữ Liệu = "Áp dụng AI để xử lý dữ liệu"
-  và Chọn AI Xử Lý Dữ Liệu = "Dev Custom AI - Dev_AI_Engine.py" (dev_ai_engine).
+- File này được VBot tự động gọi ở cả 2 chế độ:
+  1) Chế Độ Xử Lý Dữ Liệu = "Áp dụng AI để xử lý dữ liệu" -> Chọn AI Xử Lý Dữ Liệu = "Dev Custom AI - Dev_AI_Engine.py" (dev_ai_engine).
+  2) Chế Độ Xử Lý Dữ Liệu = "Hệ thống VBot xử lý dữ liệu (theo từ khóa)" -> Ưu tiên trợ lý ảo (Top 1..Top 5) = "Dev Custom AI: Dev_AI_Engine.py" (dev_ai_engine).
 - Giữ nguyên tên hàm ``async def dev_ai_engine(text_input: str)`` và định dạng trả về:
   1) Gọi 1 hoặc nhiều Tool VBot:
      {
@@ -64,8 +64,12 @@ async def dev_ai_engine(text_input: str):
         _log_ai_error("[Dev AI Engine] Chưa cấu hình DEV_AI_API_KEY trong file Dev_AI_Engine.py!")
         return None
 
-    # Lấy system prompt kèm vị trí phòng loa (speaker_location) và ngữ cảnh thiết bị vừa thao tác
-    sys_text = _build_system_prompt()
+    # Lấy system prompt kèm vị trí phòng loa (speaker_location), ngữ cảnh thiết bị vừa thao tác & gợi ý KB (chạy trên worker thread tránh chặn event loop)
+    _aio_mod = getattr(Lib, "asyncio", None)
+    if _aio_mod is not None and hasattr(_aio_mod, "to_thread"):
+        sys_text = await _aio_mod.to_thread(_build_system_prompt, text_input)
+    else:
+        sys_text = _build_system_prompt(text_input)
 
     messages = [{"role": "system", "content": sys_text}]
     for item in _get_recent_history():

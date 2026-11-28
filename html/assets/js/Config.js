@@ -2603,6 +2603,29 @@ function resetLANCallBoardDefaults(button) {
     }
 }
 
+function resetALSAMixerBoardDefaults(button) {
+    try {
+        const preset = JSON.parse(button.dataset.boardPreset || 'null');
+        if (!preset || !preset.fields) {
+            throw new Error('Không đọc được thông số ALSA Mixer mặc định.');
+        }
+        const fields = Object.entries(preset.fields).map(([id, value]) => {
+            const element = document.getElementById(id);
+            if (!element) throw new Error('Không tìm thấy mục cấu hình: ' + id);
+            return {element, value};
+        });
+        fields.forEach(({element, value}) => {
+            if (element.type === 'checkbox') element.checked = value === true;
+            else element.value = String(value);
+            element.dispatchEvent(new Event('input', {bubbles: true}));
+            element.dispatchEvent(new Event('change', {bubbles: true}));
+        });
+        showMessagePHP('Đã điền thông số ALSA Mixer mặc định (' + preset.label + '). Nhấn Lưu Cài Đặt để lưu.', 6);
+    } catch (error) {
+        show_message('Không đặt lại được thông số ALSA Mixer: ' + error.message);
+    }
+}
+
 //Tạo Mac Giả
 function random_mac_address(inputId) {
 	const input = document.getElementById(inputId);

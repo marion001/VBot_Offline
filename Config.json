@@ -664,7 +664,7 @@
             "alsa_playback_command": "aplay"
         },
         "equalizer": {
-            "active": false
+            "active": true
         },
         "dlna_renderer": {
             "active": false
@@ -701,6 +701,22 @@
         "mic": {
             "id": 17,
             "scan_on_boot": false
+        },
+        "alsa_mixer": {
+            "active": true,
+            "persist_state": true,
+            "i2s": {
+                "mic_capture": 150,
+                "speaker": 247
+            },
+            "wm8960": {
+                "capture": 35,
+                "input_boost": 2,
+                "adc_hpf": true,
+                "alc_off": true,
+                "speaker": 123,
+                "playback": 255
+            }
         },
         "speaker": {
             "system": {

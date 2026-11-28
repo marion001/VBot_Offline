@@ -79,12 +79,16 @@ include 'html_head.php';
           <li class="breadcrumb-item active">Dev_AI_Engine.py</li>
           &nbsp;| Trạng Thái Kích Hoạt:
           <?php
-          $isDevAiActive = (
-            isset($Config['processing_pipeline']['mode']) && $Config['processing_pipeline']['mode'] === 'ai'
-            && isset($Config['processing_pipeline']['ai_provider']) && $Config['processing_pipeline']['ai_provider'] === 'dev_ai_engine'
-          );
-          if ($isDevAiActive) {
-            echo '<p class="text-success" title="Dev Custom AI Engine đang được kích hoạt">&nbsp;Đang Bật</p>';
+          $devAiMode = (string)($Config['processing_pipeline']['mode'] ?? 'vbot');
+          $devAiPriorityVa = (isset($Config['virtual_assistant']['prioritize_virtual_assistants']) && is_array($Config['virtual_assistant']['prioritize_virtual_assistants']))
+            ? $Config['virtual_assistant']['prioritize_virtual_assistants'] : [];
+          $isDevAiDirect = ($devAiMode === 'ai' && ($Config['processing_pipeline']['ai_provider'] ?? '') === 'dev_ai_engine');
+          $isDevAiPriority = ($devAiMode !== 'ai' && in_array('dev_ai_engine', $devAiPriorityVa, true));
+          $isDevAiActive = ($isDevAiDirect || $isDevAiPriority);
+          if ($isDevAiDirect) {
+            echo '<p class="text-success" title="Đang kích hoạt ở Chế độ AI xử lý dữ liệu">&nbsp;Đang Bật (Chế độ AI)</p>';
+          } elseif ($isDevAiPriority) {
+            echo '<p class="text-success" title="Đang kích hoạt trong danh sách Ưu tiên trợ lý ảo">&nbsp;Đang Bật (Ưu tiên trợ lý ảo)</p>';
           } else {
             echo '<p class="text-danger" title="Dev Custom AI Engine không được kích hoạt">&nbsp;Đang Tắt</p>';
           }
@@ -125,7 +129,9 @@ include 'html_head.php';
         <button type="submit" name="save_code" class="btn btn-primary rounded-pill" title="Lưu Code" onclick="loading('show')">Lưu Code</button>
       </center><br/>
       <div class="alert alert-primary" role="alert">
-        Để Bật Tắt Sử Dụng Chức Năng Này Hãy Đi Tới: <b>Cấu Hình Config</b> &rarr; <b>Chế Độ Xử Lý Dữ Liệu</b> &rarr; <b>Áp dụng AI để xử lý dữ liệu</b> &rarr; <b>Chọn AI Xử Lý Dữ Liệu</b> &rarr; <b>Dev Custom AI - Dev_AI_Engine.py</b>
+        Để Sử Dụng Chức Năng Này Tại <b>Cấu Hình Config</b> (hỗ trợ cả 2 chế độ):<br/>
+        &bull; <b>Cách 1 (Chế độ AI xử lý toàn bộ):</b> <b>Chế Độ Xử Lý Dữ Liệu</b> &rarr; <b>Áp dụng AI để xử lý dữ liệu</b> &rarr; <b>Chọn AI Xử Lý Dữ Liệu</b> &rarr; <b>Dev Custom AI - Dev_AI_Engine.py</b><br/>
+        &bull; <b>Cách 2 (Chế độ VBot theo từ khóa):</b> <b>Chế Độ Xử Lý Dữ Liệu</b> &rarr; <b>Hệ thống VBot xử lý dữ liệu (theo từ khóa)</b> &rarr; <b>Ưu tiên trợ lý ảo (Top 1..Top 5)</b> &rarr; <b>Dev Custom AI: Dev_AI_Engine.py</b>
       </div>
     </form>
   </main>

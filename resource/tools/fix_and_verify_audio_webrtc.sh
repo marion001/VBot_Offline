@@ -355,25 +355,26 @@ PY
 
   # 2.5. Can chinh gain Mixer phan cung/softvol theo tung loai mach (chong clipping ADC)
   if [[ "$BOARD_TYPE" == "i2s" ]]; then
-    info "[2.5] Kiem tra muc softvol VBot_DAC_Microphone tren I2S..."
+    info "[2.5] Kiem tra muc softvol VBot_DAC_Microphone & VBot_DAC_Speaker tren I2S..."
     if ! amixer -c "$EXPECTED_CARD" cget name='VBot_DAC_Microphone' >/dev/null 2>&1; then
       timeout 2 arecord -q -D default -f S16_LE -r 16000 -c 1 -d 1 /dev/null >/dev/null 2>&1 || true
     fi
+    if ! amixer -c "$EXPECTED_CARD" cget name='VBot_DAC_Speaker' >/dev/null 2>&1; then
+      timeout 2 aplay -q -D default -f S16_LE -r 16000 -c 1 -d 1 /dev/zero >/dev/null 2>&1 || true
+    fi
     CUR_MIC_VAL="$(amixer -c "$EXPECTED_CARD" cget name='VBot_DAC_Microphone' 2>/dev/null | awk -F= '/^[[:space:]]*: values=/{split($2,a,","); print a[1]}' || true)"
-    if [[ -n "$CUR_MIC_VAL" ]]; then
-      if [[ $KEEP_MIC_GAIN -eq 1 ]]; then
-        info "Giu nguyen VBot_DAC_Microphone=$CUR_MIC_VAL theo co --keep-mic-gain."
-      elif [[ "$CUR_MIC_VAL" -gt 170 || "$CUR_MIC_VAL" -lt 110 ]]; then
+    if [[ $KEEP_MIC_GAIN -eq 1 ]]; then
+      info "Giu nguyen VBot_DAC_Microphone=${CUR_MIC_VAL:-?} theo co --keep-mic-gain."
+    else
+      if [[ -n "$CUR_MIC_VAL" && ( "$CUR_MIC_VAL" -gt 170 || "$CUR_MIC_VAL" -lt 110 ) ]]; then
         info "Dieu chinh VBot_DAC_Microphone tu $CUR_MIC_VAL -> 150,150 (~59%, +16.4 dB, chong clipping +30dB)..."
-        amixer -c "$EXPECTED_CARD" cset name='VBot_DAC_Microphone' 150,150 >/dev/null
-        alsactl store
-      else
-        info "VBot_DAC_Microphone hien tai ($CUR_MIC_VAL) nam trong vung an toan (110..170), luu alsactl store..."
-        alsactl store
+        amixer -c "$EXPECTED_CARD" cset name='VBot_DAC_Microphone' 150,150 >/dev/null 2>&1 || true
       fi
+      amixer -c "$EXPECTED_CARD" sset 'VBot_DAC_Speaker' 247 >/dev/null 2>&1 || amixer -c "$EXPECTED_CARD" cset name='VBot_DAC_Speaker' 247 >/dev/null 2>&1 || true
+      alsactl store >/dev/null 2>&1 || true
     fi
   else
-    info "[2.5] Can chinh gain analog WM8960 (Input Boost=2 [+20dB], Capture=35 [+9dB], ADC HPF=on, ALC=Off, Speaker=121 [0dB])..."
+    info "[2.5] Can chinh gain analog WM8960 (Input Boost=2 [+20dB], Capture=35 [+9dB], ADC HPF=on, ALC=Off, Speaker=123 [97%], Playback=255 [100%])..."
     if [[ $KEEP_MIC_GAIN -eq 1 ]]; then
       info "Giu nguyen mixer WM8960 theo co --keep-mic-gain."
     else
@@ -384,11 +385,11 @@ PY
       CUR_WM_CAP="$(amixer -c "$EXPECTED_CARD" sget 'Capture' 2>/dev/null | awk '/Front Left: Capture/{print $4; exit}' || true)"
       if [[ -z "$CUR_WM_CAP" || "$CUR_WM_CAP" -gt 38 || "$CUR_WM_CAP" -lt 28 ]]; then
         amixer -c "$EXPECTED_CARD" sset 'Capture' 35,35 cap >/dev/null 2>&1 || true
+      else
+        amixer -c "$EXPECTED_CARD" sset 'Capture' "${CUR_WM_CAP},${CUR_WM_CAP}" cap >/dev/null 2>&1 || true
       fi
-      CUR_WM_SPK="$(amixer -c "$EXPECTED_CARD" sget 'Speaker' 2>/dev/null | awk '/Front Left: Playback/{print $4; exit}' || true)"
-      if [[ -n "$CUR_WM_SPK" && "$CUR_WM_SPK" -gt 121 ]]; then
-        amixer -c "$EXPECTED_CARD" sset 'Speaker' 121,121 >/dev/null 2>&1 || true
-      fi
+      amixer -c "$EXPECTED_CARD" sset 'Speaker' 123,123 >/dev/null 2>&1 || true
+      amixer -c "$EXPECTED_CARD" sset 'Playback' 255,255 >/dev/null 2>&1 || true
       mkdir -p /var/lib/alsa
       alsactl -f /var/lib/alsa/vbot-wm8960.state store "$EXPECTED_CARD" >/dev/null 2>&1 || true
       alsactl store >/dev/null 2>&1 || true
@@ -434,6 +435,20 @@ aec['render_clock_ppm'] = 0
 aec['capture_gain'] = 1
 aec['wake_gain'] = 1
 aec['external_sources'] = True
+
+alsa_mix = cfg.setdefault('smart_config', {}).setdefault('alsa_mixer', {})
+alsa_mix.setdefault('active', True)
+alsa_mix.setdefault('persist_state', True)
+alsa_i2s = alsa_mix.setdefault('i2s', {})
+alsa_i2s.setdefault('mic_capture', 150)
+alsa_i2s.setdefault('speaker', 247)
+alsa_wm = alsa_mix.setdefault('wm8960', {})
+alsa_wm.setdefault('capture', 35)
+alsa_wm.setdefault('input_boost', 2)
+alsa_wm.setdefault('adc_hpf', True)
+alsa_wm.setdefault('alc_off', True)
+alsa_wm.setdefault('speaker', 123)
+alsa_wm.setdefault('playback', 255)
 
 mp = cfg.setdefault('media_player', {})
 mp['wake_up_in_media_player'] = True

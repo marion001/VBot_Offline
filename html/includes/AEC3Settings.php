@@ -92,3 +92,87 @@ function vbotAudioProcessingSettings(array $post, array $smart): array {
     unset($value['aec3']['noise_suppression'],$value['aec3']['bypass_legacy_filters']);
     return $value;
 }
+
+function vbotALSAMixerDefaults(): array {
+    return [
+        'active'=>true,
+        'persist_state'=>true,
+        'i2s'=>['mic_capture'=>150, 'speaker'=>247],
+        'wm8960'=>[
+            'capture'=>35,
+            'input_boost'=>2,
+            'adc_hpf'=>true,
+            'alc_off'=>true,
+            'speaker'=>123,
+            'playback'=>255,
+        ],
+    ];
+}
+
+function vbotALSAMixerPreset(string $imageFile = '/os_image_created.txt'): array {
+    $image = @file_get_contents($imageFile, false, null, 0, 4096);
+    if ($image !== false && trim($image) !== '') {
+        $i2s = stripos($image, 'i2s') !== false;
+        $board = $i2s ? 'i2s' : 'wm8960';
+        $label = $i2s ? 'VBot AIO I2S' : 'VBot AIO WM8960';
+    } else {
+        $cards = $imageFile === '/os_image_created.txt'
+            ? (string)@file_get_contents('/proc/asound/cards', false, null, 0, 4096)
+            : '';
+        if ($cards !== '' && stripos($cards, 'sndrpigooglevoi') !== false) {
+            $board = 'i2s';
+            $label = 'VBot AIO I2S';
+        } elseif ($cards !== '' && stripos($cards, 'wm8960soundcard') !== false) {
+            $board = 'wm8960';
+            $label = 'VBot AIO WM8960';
+        } else {
+            $board = 'wm8960';
+            $label = 'VBot AIO I2S / WM8960';
+        }
+    }
+    return [
+        'board'=>$board,
+        'label'=>$label,
+        'fields'=>[
+            'alsa_mixer_persist_state'=>true,
+            'alsa_i2s_mic_capture'=>150,
+            'alsa_i2s_speaker'=>247,
+            'alsa_wm8960_capture'=>35,
+            'alsa_wm8960_input_boost'=>2,
+            'alsa_wm8960_adc_hpf'=>true,
+            'alsa_wm8960_alc_off'=>true,
+            'alsa_wm8960_speaker'=>123,
+            'alsa_wm8960_playback'=>255,
+        ],
+    ];
+}
+
+function vbotALSAMixerSettings(array $post, array $smart): array {
+    $defaults=vbotALSAMixerDefaults();
+    $old=is_array($smart['alsa_mixer']??null)?$smart['alsa_mixer']:[];
+    $value=[
+        'active'=>is_bool($old['active']??null)?$old['active']:$defaults['active'],
+        'persist_state'=>is_bool($old['persist_state']??null)?$old['persist_state']:$defaults['persist_state'],
+        'i2s'=>array_replace($defaults['i2s'],is_array($old['i2s']??null)?$old['i2s']:[]),
+        'wm8960'=>array_replace($defaults['wm8960'],is_array($old['wm8960']??null)?$old['wm8960']:[]),
+    ];
+    if (!isset($post['alsa_mixer_present'])) return $value;
+    $value['active']=isset($post['alsa_mixer_active']);
+    $value['persist_state']=isset($post['alsa_mixer_persist_state']);
+    foreach ([
+        ['i2s','mic_capture','alsa_i2s_mic_capture',0,255,'ALSA I2S VBot_DAC_Microphone phải từ 0 đến 255'],
+        ['i2s','speaker','alsa_i2s_speaker',0,255,'ALSA I2S VBot_DAC_Speaker phải từ 0 đến 255'],
+        ['wm8960','capture','alsa_wm8960_capture',0,63,'ALSA WM8960 Capture phải từ 0 đến 63'],
+        ['wm8960','input_boost','alsa_wm8960_input_boost',0,3,'ALSA WM8960 Input Boost phải từ 0 đến 3'],
+        ['wm8960','speaker','alsa_wm8960_speaker',0,127,'ALSA WM8960 Speaker phải từ 0 đến 127'],
+        ['wm8960','playback','alsa_wm8960_playback',0,255,'ALSA WM8960 Playback phải từ 0 đến 255'],
+    ] as [$group,$key,$postKey,$min,$max,$errMsg]) {
+        $raw=$post[$postKey]??$value[$group][$key];
+        $item=filter_var($raw,FILTER_VALIDATE_INT);
+        if ($item===false || $item<$min || $item>$max) throw new InvalidArgumentException($errMsg);
+        $value[$group][$key]=(int)$item;
+    }
+    $value['wm8960']['adc_hpf']=isset($post['alsa_wm8960_adc_hpf']);
+    $value['wm8960']['alc_off']=isset($post['alsa_wm8960_alc_off']);
+    return $value;
+}

@@ -30,7 +30,7 @@ if (in_array($webui_page_name, $webui_datatable_pages, true)) {
 <script src="assets/vendor/popper/popper.min.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script src="assets/vendor/hls/hls.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
 <script src="assets/js/main.js?v=<?php echo $Cache_UI_Ver; ?>"></script>
-<script src="assets/js/VBot.js?v=<?php echo $Cache_UI_Ver; ?>&loading=2"></script>
+<script src="assets/js/VBot.js?v=<?php echo $Cache_UI_Ver; ?>&m=<?php echo (int)@filemtime(__DIR__ . '/assets/js/VBot.js'); ?>"></script>
 <?php
 if (in_array($webui_page_name, ['_Program.php', '_Dashboard.php'], true)) {
     echo '<script src="assets/js/webui-gcloud.js?v='
@@ -2511,7 +2511,7 @@ function command_php(command_line, reload_page = null) {
         }
         window.webuiLogModulePromise = new Promise(function(resolve, reject) {
             var script = document.createElement('script');
-            script.src = 'assets/js/webui-logs.js?v=<?php echo rawurlencode((string)$Cache_UI_Ver); ?>';
+            script.src = 'assets/js/webui-logs.js?v=<?php echo rawurlencode((string)$Cache_UI_Ver); ?>&m=<?php echo (int)@filemtime(__DIR__ . "/assets/js/webui-logs.js"); ?>';
             script.onload = resolve;
             script.onerror = function() {
                 window.webuiLogModulePromise = null;
